@@ -52,8 +52,10 @@ from functools import partial
 
 import numpy as np
 
+from nova.biot.arcbandedcoupling import _arc_rule
 from nova.biot.greens import MU0
 from nova.jax.config import Precision, resolve_precision
+from nova.linalg.interpolant import Bernstein
 from nova.utilities.importmanager import skip_import
 
 with skip_import("jax"):
@@ -64,6 +66,7 @@ with skip_import("jax"):
 _TWO_PI = 2.0 * np.pi
 _16PI3 = 16.0 * np.pi**3
 _16PI2 = 16.0 * np.pi**2
+_BICUBIC_ARC_POINT, _BICUBIC_ARC_WEIGHT = _arc_rule(12)
 
 
 @dataclass(frozen=True)
@@ -271,108 +274,564 @@ def _surface_interpolation(rho, rho_samples, values, axis_value, edge_value):
     return jnp.where(inner, inner_value, interpolated)
 
 
-def _torax_surface_columns(
+def _tensor_bicubic_coefficients(values):
+    """Return C1 tensor-bicubic Bernstein coefficients for every grid cell."""
+    nz, nr = values.shape
+    row = jnp.clip(jnp.arange(nz - 1)[:, None] + jnp.arange(-1, 3)[None, :], 0, nz - 1)
+    column = jnp.clip(
+        jnp.arange(nr - 1)[:, None] + jnp.arange(-1, 3)[None, :], 0, nr - 1
+    )
+    stencil = values[row[:, None, :, None], column[None, :, None, :]]
+    transform = jnp.asarray(
+        (
+            (0.0, 1.0, 0.0, 0.0),
+            (-1.0 / 6.0, 1.0, 1.0 / 6.0, 0.0),
+            (0.0, 1.0 / 6.0, 1.0, -1.0 / 6.0),
+            (0.0, 0.0, 1.0, 0.0),
+        ),
+        dtype=values.dtype,
+    )
+    coefficient = jnp.einsum("ij,...jk,lk->...il", transform, stencil, transform)
+    return coefficient.reshape(-1, 4, 4)
+
+
+def _bernstein_matrix(coordinate, order):
+    """Evaluate Nova's traced Bernstein basis without changing leading shape."""
+    coordinate = jnp.asarray(coordinate)
+    return (
+        Bernstein(order=order)
+        .coefficent_matrix(coordinate.reshape(-1))
+        .reshape(coordinate.shape + (order + 1,))
+    )
+
+
+def _tensor_bernstein(coefficient, radial, vertical, radial_order, vertical_order):
+    """Evaluate a tensor Bernstein polynomial at paired coordinates."""
+    radial_basis = _bernstein_matrix(radial, radial_order)
+    vertical_basis = _bernstein_matrix(vertical, vertical_order)
+    return jnp.einsum("...i,...ij,...j->...", vertical_basis, coefficient, radial_basis)
+
+
+def _bicubic_derivatives(coefficient, radial, vertical):
+    """Evaluate a bicubic and its first and second local derivatives."""
+    radial_coefficient = 3.0 * jnp.diff(coefficient, axis=-1)
+    vertical_coefficient = 3.0 * jnp.diff(coefficient, axis=-2)
+    radial_second = 2.0 * jnp.diff(radial_coefficient, axis=-1)
+    vertical_second = 2.0 * jnp.diff(vertical_coefficient, axis=-2)
+    mixed = 3.0 * jnp.diff(vertical_coefficient, axis=-1)
+    return (
+        _tensor_bernstein(coefficient, radial, vertical, 3, 3),
+        _tensor_bernstein(radial_coefficient, radial, vertical, 2, 3),
+        _tensor_bernstein(vertical_coefficient, radial, vertical, 3, 2),
+        _tensor_bernstein(radial_second, radial, vertical, 1, 3),
+        _tensor_bernstein(mixed, radial, vertical, 2, 2),
+        _tensor_bernstein(vertical_second, radial, vertical, 3, 1),
+    )
+
+
+def _bicubic_edge_coordinates(edge, fraction):
+    """Map counter-clockwise unit-cell edge coordinates to the cell interior."""
+    radial = jnp.where(
+        edge == 0,
+        fraction,
+        jnp.where(edge == 1, 1.0, jnp.where(edge == 2, 1.0 - fraction, 0.0)),
+    )
+    vertical = jnp.where(
+        edge == 0,
+        0.0,
+        jnp.where(edge == 1, fraction, jnp.where(edge == 2, 1.0, 1.0 - fraction)),
+    )
+    return radial, vertical
+
+
+def _bicubic_edge_crossings(level, coefficient, corner_flux):
+    """Locate all sign-changing bicubic edge roots by fixed bisection."""
+    inside = corner_flux < level
+    crossing = inside != jnp.roll(inside, -1, axis=1)
+    edge = jnp.broadcast_to(jnp.arange(4), corner_flux.shape)
+    low = jnp.zeros_like(corner_flux)
+    high = jnp.ones_like(corner_flux)
+    low_value = corner_flux - level
+
+    def bisect(_, state):
+        lower, upper, lower_value = state
+        middle = 0.5 * (lower + upper)
+        radial, vertical = _bicubic_edge_coordinates(edge, middle)
+        value = (
+            _bicubic_derivatives(coefficient[:, None, :, :], radial, vertical)[0]
+            - level
+        )
+        same_side = jnp.signbit(value) == jnp.signbit(lower_value)
+        return (
+            jnp.where(same_side, middle, lower),
+            jnp.where(same_side, upper, middle),
+            jnp.where(same_side, value, lower_value),
+        )
+
+    low, high, _ = jax.lax.fori_loop(0, 18, bisect, (low, high, low_value))
+    fraction = 0.5 * (low + high)
+    radial, vertical = _bicubic_edge_coordinates(edge, fraction)
+    return jnp.stack((radial, vertical), axis=-1), crossing, inside
+
+
+def _solve_bicubic_ordinate(
+    coefficient, level, independent, initial, *, solve_vertical
+):
+    """Follow one bicubic level-set branch at fixed traced coordinates."""
+
+    def update(_, ordinate):
+        radial = jnp.where(solve_vertical, independent, ordinate)
+        vertical = jnp.where(solve_vertical, ordinate, independent)
+        value, radial_gradient, vertical_gradient, *_ = _bicubic_derivatives(
+            coefficient, radial, vertical
+        )
+        derivative = jnp.where(solve_vertical, vertical_gradient, radial_gradient)
+        safe_derivative = jnp.where(
+            jnp.abs(derivative) > 1e-12,
+            derivative,
+            jnp.where(derivative < 0.0, -1e-12, 1e-12),
+        )
+        step = jnp.clip((value - level) / safe_derivative, -0.2, 0.2)
+        return jnp.clip(ordinate - step, 0.0, 1.0)
+
+    return jax.lax.fori_loop(0, 10, update, initial)
+
+
+def _bicubic_arc_moment_correction(level, coefficient, corner_flux, dr, dz):
+    """Return Green-theorem chord-to-bicubic corrections and arc samples."""
+    crossing_points, crossing, inside = _bicubic_edge_crossings(
+        level, coefficient, corner_flux
+    )
+    following_inside = jnp.roll(inside, -1, axis=1)
+    leaving = crossing & inside & ~following_inside
+    entering = crossing & ~inside & following_inside
+    leaving_index = jnp.argmax(leaving, axis=1)
+    entering_index = jnp.argmax(entering, axis=1)
+    start = jnp.take_along_axis(crossing_points, leaving_index[:, None, None], axis=1)[
+        :, 0
+    ]
+    end = jnp.take_along_axis(crossing_points, entering_index[:, None, None], axis=1)[
+        :, 0
+    ]
+
+    point = jnp.asarray(_BICUBIC_ARC_POINT, dtype=corner_flux.dtype)
+    weight = jnp.asarray(_BICUBIC_ARC_WEIGHT, dtype=corner_flux.dtype)
+    radial_span = end[:, 0] - start[:, 0]
+    vertical_span = end[:, 1] - start[:, 1]
+    radial_parameter = start[:, 0, None] + radial_span[:, None] * point
+    vertical_seed = start[:, 1, None] + vertical_span[:, None] * point
+    vertical_arc = _solve_bicubic_ordinate(
+        coefficient[:, None],
+        level,
+        radial_parameter,
+        vertical_seed,
+        solve_vertical=True,
+    )
+    vertical_parameter = start[:, 1, None] + vertical_span[:, None] * point
+    radial_seed = start[:, 0, None] + radial_span[:, None] * point
+    radial_arc = _solve_bicubic_ordinate(
+        coefficient[:, None],
+        level,
+        vertical_parameter,
+        radial_seed,
+        solve_vertical=False,
+    )
+    use_radial = jnp.abs(radial_span) >= jnp.abs(vertical_span)
+    arc_radial = jnp.where(use_radial[:, None], radial_parameter, radial_arc)
+    arc_vertical = jnp.where(use_radial[:, None], vertical_arc, vertical_parameter)
+
+    local_radial = dr * (radial_parameter - 0.5)
+    arc_height = dz * (vertical_arc - 0.5)
+    line_height = dz * (vertical_seed - 0.5)
+    radial_measure = dr * radial_span[:, None] * weight
+    height_difference = arc_height - line_height
+    height_squared_difference = arc_height**2 - line_height**2
+    radial_correction = jnp.stack(
+        (
+            -jnp.sum(height_difference * radial_measure, axis=1),
+            -jnp.sum(local_radial * height_difference * radial_measure, axis=1),
+            -0.5 * jnp.sum(height_squared_difference * radial_measure, axis=1),
+            -0.5
+            * jnp.sum(
+                local_radial * height_squared_difference * radial_measure, axis=1
+            ),
+        ),
+        axis=1,
+    )
+
+    local_vertical = dz * (vertical_parameter - 0.5)
+    arc_radius = dr * (radial_arc - 0.5)
+    line_radius = dr * (radial_seed - 0.5)
+    vertical_measure = dz * vertical_span[:, None] * weight
+    radius_difference = arc_radius - line_radius
+    radius_squared_difference = arc_radius**2 - line_radius**2
+    vertical_correction = jnp.stack(
+        (
+            jnp.sum(radius_difference * vertical_measure, axis=1),
+            0.5 * jnp.sum(radius_squared_difference * vertical_measure, axis=1),
+            jnp.sum(local_vertical * radius_difference * vertical_measure, axis=1),
+            0.5
+            * jnp.sum(
+                local_vertical * radius_squared_difference * vertical_measure,
+                axis=1,
+            ),
+        ),
+        axis=1,
+    )
+    correction = jnp.where(use_radial[:, None], radial_correction, vertical_correction)
+    arc_value = _bicubic_derivatives(coefficient[:, None], arc_radial, arc_vertical)[0]
+    two_crossings = jnp.sum(crossing, axis=1) == 2
+    tolerance = 2.0e-8 * jnp.maximum(1.0, jnp.abs(level))
+    valid = (
+        two_crossings
+        & jnp.all(jnp.isfinite(correction), axis=1)
+        & (jnp.max(jnp.abs(arc_value - level), axis=1) < tolerance)
+    )
+    correction = jnp.where(valid[:, None], correction, 0.0)
+    return correction, crossing_points, crossing, arc_radial, arc_vertical, valid
+
+
+def _bicubic_stationary_point(coefficient, level, radial, vertical, *, radial_extremum):
+    """Refine a coordinate extremum constrained to a bicubic level set."""
+
+    def update(_, state):
+        current_radial, current_vertical = state
+        value, gradient_r, gradient_z, hessian_rr, hessian_rz, hessian_zz = (
+            _bicubic_derivatives(coefficient, current_radial, current_vertical)
+        )
+        constrained_gradient = jnp.where(radial_extremum, gradient_z, gradient_r)
+        second_r = jnp.where(radial_extremum, hessian_rz, hessian_rr)
+        second_z = jnp.where(radial_extremum, hessian_zz, hessian_rz)
+        determinant = gradient_r * second_z - gradient_z * second_r
+        safe_determinant = jnp.where(
+            jnp.abs(determinant) > 1e-14,
+            determinant,
+            jnp.where(determinant < 0.0, -1e-14, 1e-14),
+        )
+        residual = value - level
+        radial_step = (second_z * residual - gradient_z * constrained_gradient) / (
+            safe_determinant
+        )
+        vertical_step = (
+            -second_r * residual + gradient_r * constrained_gradient
+        ) / safe_determinant
+        return (
+            jnp.clip(current_radial - jnp.clip(radial_step, -0.2, 0.2), -0.1, 1.1),
+            jnp.clip(current_vertical - jnp.clip(vertical_step, -0.2, 0.2), -0.1, 1.1),
+        )
+
+    radial, vertical = jax.lax.fori_loop(0, 10, update, (radial, vertical))
+    value, gradient_r, gradient_z, *_ = _bicubic_derivatives(
+        coefficient, radial, vertical
+    )
+    constrained_gradient = jnp.where(radial_extremum, gradient_z, gradient_r)
+    valid = (
+        (radial >= 0.0)
+        & (radial <= 1.0)
+        & (vertical >= 0.0)
+        & (vertical <= 1.0)
+        & (jnp.abs(value - level) < 2.0e-8 * jnp.maximum(1.0, jnp.abs(level)))
+        & (jnp.abs(constrained_gradient) < 2.0e-7)
+    )
+    return radial, vertical, valid
+
+
+def _integrate_bilinear(supports, corner_values, dr, dz, correction):
+    """Integrate cellwise bilinear values over bicubic level-set clips."""
+    lower_left, lower_right, upper_right, upper_left = jnp.moveaxis(
+        corner_values, -1, 0
+    )
+    constant = 0.25 * (lower_left + lower_right + upper_right + upper_left)
+    radial = 0.5 * (-lower_left + lower_right + upper_right - upper_left)
+    vertical = 0.5 * (-lower_left - lower_right + upper_right + upper_left)
+    cross = lower_left - lower_right + upper_right - upper_left
+    area = supports.area + correction[:, 0]
+    radial_moment = supports.first_area_moment[:, 0] + correction[:, 1]
+    vertical_moment = supports.first_area_moment[:, 1] + correction[:, 2]
+    mixed_moment = supports.second_area_moment[:, 0, 1] + correction[:, 3]
+    return (
+        constant * area
+        + radial * radial_moment / dr
+        + vertical * vertical_moment / dz
+        + cross * mixed_moment / (dr * dz)
+    )
+
+
+def _clipped_surface_geometry(
     psi2d,
     psi_n_grid,
     core,
     radius,
     height,
-    mesh_radius,
     f_grid,
-    psi_n_surface,
-    bandwidth,
+    psi_n_min,
+    psi_n_max,
+    n_surface_bins,
 ):
-    """Return TORAX geometry columns from the same fixed coarea shells."""
+    """Return exact clipped-cell coarea bins and TORAX surface columns."""
+    from nova.equilibrium.separatrix_clip import _traced_clip
+
     dtype = psi2d.dtype
+    nz, nr = psi2d.shape
     dr = radius[1] - radius[0]
     dz = height[1] - height[0]
-    gradient_z, gradient_r = jnp.gradient(psi2d, height, radius)
-    gradient_flux = jnp.sqrt(gradient_r**2 + gradient_z**2)
+    node_index = jnp.arange(nz * nr).reshape(nz, nr)
+    cell_nodes = jnp.stack(
+        (
+            node_index[:-1, :-1],
+            node_index[:-1, 1:],
+            node_index[1:, 1:],
+            node_index[1:, :-1],
+        ),
+        axis=-1,
+    ).reshape(-1, 4)
+    mesh_radius, mesh_height = jnp.meshgrid(radius, height)
+    node_coordinates = jnp.stack((mesh_radius, mesh_height), axis=-1).reshape(-1, 2)
+    centroids = jnp.mean(node_coordinates[cell_nodes], axis=1)
+    cell_count = cell_nodes.shape[0]
+    vertex_count = jnp.full(cell_count, 4, dtype=jnp.int32)
+
+    psi_n_cells = psi_n_grid.reshape(-1)[cell_nodes]
+    normalised_coefficient = _tensor_bicubic_coefficients(psi_n_grid)
+    physical_coefficient = _tensor_bicubic_coefficients(psi2d)
+    corner_radial = jnp.asarray((0.0, 1.0, 1.0, 0.0), dtype=dtype)
+    corner_vertical = jnp.asarray((0.0, 0.0, 1.0, 1.0), dtype=dtype)
+    _, gradient_r, gradient_z, *_ = _bicubic_derivatives(
+        physical_coefficient[:, None], corner_radial, corner_vertical
+    )
+    gradient_flux = jnp.sqrt((gradient_r / dr) ** 2 + (gradient_z / dz) ** 2)
+    radius_cells = node_coordinates[cell_nodes, 0]
+    field_cells = f_grid.reshape(-1)[cell_nodes]
     gradient_psi = gradient_flux / _TWO_PI
-    inverse_radius_squared = 1.0 / mesh_radius**2
-    magnetic_field_squared = (
-        gradient_psi**2 * inverse_radius_squared + f_grid**2 * inverse_radius_squared
+    magnetic_field_squared = (gradient_psi**2 + field_cells**2) / radius_cells**2
+    volume_weighted_values = jnp.stack(
+        (
+            _TWO_PI * radius_cells,
+            _TWO_PI / radius_cells,
+            jnp.full_like(radius_cells, _TWO_PI),
+            _TWO_PI * gradient_flux**2 / radius_cells,
+            _TWO_PI * radius_cells * gradient_psi,
+            _TWO_PI * radius_cells * gradient_psi**2,
+            _TWO_PI * gradient_psi**2 / radius_cells,
+            _TWO_PI * radius_cells * magnetic_field_squared,
+            _TWO_PI * radius_cells / jnp.maximum(magnetic_field_squared, 1e-30),
+        ),
+        axis=0,
     )
-    volume_weight = core * (_TWO_PI * mesh_radius * dr * dz)
+    eligible = (core > 0.0) | (psi_n_grid >= 1.0)
+    flat_flux = psi_n_grid.reshape(-1)
+    flat_eligible = eligible.reshape(-1)
+    support_capacity = 8
 
-    spacing = jnp.mean(jnp.diff(psi_n_surface))
-    lower = psi_n_surface - 0.5 * spacing
-    upper = psi_n_surface + 0.5 * spacing
-    lower = lower.at[0].set(psi_n_surface[0] - 0.5 * spacing)
-    upper = upper.at[-1].set(psi_n_surface[-1] + 0.5 * spacing)
-    lower_z = (lower[:, None, None] - psi_n_grid[None, :, :]) / bandwidth
-    upper_z = (upper[:, None, None] - psi_n_grid[None, :, :]) / bandwidth
-    shell = (
-        volume_weight[None, :, :]
-        * 0.5
-        * (
-            jax.scipy.special.erf(upper_z / jnp.sqrt(2.0))
-            - jax.scipy.special.erf(lower_z / jnp.sqrt(2.0))
+    def signed_flux(level):
+        return jnp.where(flat_eligible, level - flat_flux, -1.0)
+
+    def required_vertex_count(level):
+        inside = signed_flux(level)[cell_nodes] > 0.0
+        crossing = inside != jnp.roll(inside, -1, axis=1)
+        return jnp.max(jnp.sum(inside, axis=1) + jnp.sum(crossing, axis=1))
+
+    def clip(level):
+        return _traced_clip(
+            node_coordinates,
+            cell_nodes,
+            vertex_count,
+            centroids,
+            support_capacity,
+            signed_flux(level),
         )
-    )
-    shell_sum = jnp.maximum(jnp.sum(shell, axis=(1, 2)), 1e-30)
 
-    def average(values):
-        return jnp.sum(shell * values[None, :, :], axis=(1, 2)) / shell_sum
-
-    grad_psi = average(gradient_psi)
-    grad_psi2 = average(gradient_psi**2)
-    grad_psi2_over_r2 = average(gradient_psi**2 * inverse_radius_squared)
-    b2 = average(magnetic_field_squared)
-    inverse_b2 = average(1.0 / jnp.maximum(magnetic_field_squared, 1e-30))
-
-    point_shell = (
-        jnp.exp(
-            -0.5
-            * ((psi_n_surface[:, None, None] - psi_n_grid[None, :, :]) / bandwidth) ** 2
+    def cumulative(level):
+        supports = clip(level)
+        correction, *_ = _bicubic_arc_moment_correction(
+            level, normalised_coefficient, psi_n_cells, dr, dz
         )
-        * core[None, :, :]
-    )
-    selected = point_shell >= 0.1 * jnp.max(point_shell, axis=(1, 2), keepdims=True)
-    radius_field = jnp.broadcast_to(mesh_radius, psi2d.shape)
-    height_field = jnp.broadcast_to(height[:, None], psi2d.shape)
-    r_in = jnp.min(jnp.where(selected, radius_field[None, :, :], jnp.inf), axis=(1, 2))
-    r_out = jnp.max(
-        jnp.where(selected, radius_field[None, :, :], -jnp.inf), axis=(1, 2)
-    )
-    z_lower = jnp.min(
-        jnp.where(selected, height_field[None, :, :], jnp.inf), axis=(1, 2)
-    )
-    z_upper = jnp.max(
-        jnp.where(selected, height_field[None, :, :], -jnp.inf), axis=(1, 2)
-    )
-    top = selected & (jnp.abs(height_field[None, :, :] - z_upper[:, None, None]) <= dz)
-    bottom = selected & (
-        jnp.abs(height_field[None, :, :] - z_lower[:, None, None]) <= dz
-    )
+        integrals = jax.vmap(
+            lambda values: jnp.sum(
+                _integrate_bilinear(supports, values, dr, dz, correction)
+            )
+        )(volume_weighted_values)
+        return (
+            integrals,
+            jnp.max(supports.vertex_count),
+            required_vertex_count(level),
+        )
 
-    def radial_mean(mask):
-        count = jnp.maximum(jnp.sum(mask, axis=(1, 2)), 1)
-        return jnp.sum(mask * radius_field[None, :, :], axis=(1, 2)) / count
+    levels = jnp.linspace(psi_n_min, psi_n_max, n_surface_bins + 1, dtype=dtype)
+    psi_n_surface = 0.5 * (levels[:-1] + levels[1:])
+    cumulative_values, cumulative_used, cumulative_required = jax.lax.map(
+        cumulative, levels
+    )
+    shell_values = jnp.diff(cumulative_values, axis=0)
+    shell_volume = jnp.maximum(shell_values[:, 0], 1e-30)
+    surface_values = shell_values[:, 1:] / shell_volume[:, None]
 
-    r_upper = radial_mean(top)
-    r_lower = radial_mean(bottom)
+    cell_origin = node_coordinates[cell_nodes[:, 0]]
+
+    def extrema(level):
+        supports = clip(level)
+        (
+            _,
+            crossing_points,
+            crossing,
+            arc_radial,
+            arc_vertical,
+            arc_valid,
+        ) = _bicubic_arc_moment_correction(
+            level, normalised_coefficient, psi_n_cells, dr, dz
+        )
+        samples = jnp.concatenate(
+            (crossing_points, jnp.stack((arc_radial, arc_vertical), axis=-1)),
+            axis=1,
+        )
+        sample_valid = jnp.concatenate(
+            (
+                crossing,
+                jnp.broadcast_to(arc_valid[:, None], arc_radial.shape),
+            ),
+            axis=1,
+        )
+
+        def initial(coordinate, largest):
+            fill = -jnp.inf if largest else jnp.inf
+            candidate = jnp.where(sample_valid, samples[..., coordinate], fill)
+            index = (
+                jnp.argmax(candidate, axis=1)
+                if largest
+                else jnp.argmin(candidate, axis=1)
+            )
+            return jnp.take_along_axis(samples, index[:, None, None], axis=1)[:, 0]
+
+        radial_low = initial(0, False)
+        radial_high = initial(0, True)
+        vertical_low = initial(1, False)
+        vertical_high = initial(1, True)
+        stationary = []
+        stationary_valid = []
+        for seed, radial_extremum in (
+            (radial_low, True),
+            (radial_high, True),
+            (vertical_low, False),
+            (vertical_high, False),
+        ):
+            point_r, point_z, point_valid = _bicubic_stationary_point(
+                normalised_coefficient,
+                level,
+                seed[:, 0],
+                seed[:, 1],
+                radial_extremum=radial_extremum,
+            )
+            stationary.append(jnp.stack((point_r, point_z), axis=-1))
+            stationary_valid.append(point_valid & arc_valid)
+        samples = jnp.concatenate((samples, jnp.stack(stationary, axis=1)), axis=1)
+        sample_valid = jnp.concatenate(
+            (sample_valid, jnp.stack(stationary_valid, axis=1)), axis=1
+        )
+        radial = cell_origin[:, None, 0] + dr * samples[..., 0]
+        vertical = cell_origin[:, None, 1] + dz * samples[..., 1]
+        flat_valid = sample_valid.reshape(-1)
+        flat_radial = radial.reshape(-1)
+        flat_vertical = vertical.reshape(-1)
+        r_in = jnp.min(jnp.where(flat_valid, flat_radial, jnp.inf))
+        r_out = jnp.max(jnp.where(flat_valid, flat_radial, -jnp.inf))
+        lower_slot = jnp.argmin(jnp.where(flat_valid, flat_vertical, jnp.inf))
+        upper_slot = jnp.argmax(jnp.where(flat_valid, flat_vertical, -jnp.inf))
+        return jnp.asarray(
+            (
+                r_in,
+                r_out,
+                flat_vertical[lower_slot],
+                flat_vertical[upper_slot],
+                flat_radial[lower_slot],
+                flat_radial[upper_slot],
+                jnp.max(supports.vertex_count),
+                required_vertex_count(level),
+            )
+        )
+
+    surface_extrema = jax.lax.map(extrema, psi_n_surface)
+    (
+        r_in,
+        r_out,
+        z_lower,
+        z_upper,
+        r_lower,
+        r_upper,
+        surface_used,
+        surface_required,
+    ) = surface_extrema.T
+    edge_extrema = extrema(jnp.asarray(1.0, dtype=dtype))
+    (
+        edge_r_in,
+        edge_r_out,
+        edge_z_lower,
+        edge_z_upper,
+        edge_r_lower,
+        edge_r_upper,
+        edge_used,
+        edge_required,
+    ) = edge_extrema
     local_major = 0.5 * (r_in + r_out)
     local_minor = jnp.maximum(0.5 * (r_out - r_in), 1e-12)
-    elongation = (z_upper - z_lower) / (2.0 * local_minor)
-    delta_upper = (local_major - r_upper) / local_minor
-    delta_lower = (local_major - r_lower) / local_minor
+    edge_major = 0.5 * (edge_r_in + edge_r_out)
+    edge_minor = jnp.maximum(0.5 * (edge_r_out - edge_r_in), 1e-12)
+    total_values, total_used, total_required = cumulative(jnp.asarray(1.0, dtype=dtype))
+    total_volume = total_values[0]
+    maximum_used = jnp.max(
+        jnp.concatenate(
+            (
+                cumulative_used,
+                surface_used,
+                jnp.atleast_1d(edge_used),
+                jnp.atleast_1d(total_used),
+            )
+        )
+    )
+    maximum_required = jnp.max(
+        jnp.concatenate(
+            (
+                cumulative_required,
+                surface_required,
+                jnp.atleast_1d(edge_required),
+                jnp.atleast_1d(total_required),
+            )
+        )
+    )
     axis_position = jnp.argmin(jnp.where(core > 0, psi_n_grid, jnp.inf))
-    axis_radius = radius_field.reshape(-1)[axis_position]
-
-    return {
-        "grad_psi_surface": grad_psi,
-        "grad_psi2_surface": grad_psi2,
-        "grad_psi2_over_r2_surface": grad_psi2_over_r2,
-        "b2_surface": b2,
-        "inv_b2_surface": inverse_b2,
-        "r_in_surface": r_in,
-        "r_out_surface": r_out,
-        "elongation_surface": elongation,
-        "delta_upper_surface": delta_upper,
-        "delta_lower_surface": delta_lower,
-        "axis_radius": jnp.asarray(axis_radius, dtype=dtype),
-    }
+    axis_radius = mesh_radius.reshape(-1)[axis_position]
+    dlevel = (psi_n_max - psi_n_min) / n_surface_bins
+    return (
+        {
+            "pn_s": psi_n_surface,
+            "dv_dpn": shell_values[:, 0] / dlevel,
+            "inv_r2": surface_values[:, 0],
+            "inv_r": surface_values[:, 1],
+            "grad2_r2": surface_values[:, 2],
+            "v_cum": 0.5 * (cumulative_values[:-1, 0] + cumulative_values[1:, 0]),
+            "v_total": total_volume,
+        },
+        {
+            "grad_psi_surface": surface_values[:, 3],
+            "grad_psi2_surface": surface_values[:, 4],
+            "grad_psi2_over_r2_surface": surface_values[:, 5],
+            "b2_surface": surface_values[:, 6],
+            "inv_b2_surface": surface_values[:, 7],
+            "r_in_surface": r_in,
+            "r_in_edge": edge_r_in,
+            "r_out_surface": r_out,
+            "r_out_edge": edge_r_out,
+            "elongation_surface": (z_upper - z_lower) / (2.0 * local_minor),
+            "elongation_edge": (edge_z_upper - edge_z_lower) / (2.0 * edge_minor),
+            "delta_upper_surface": (local_major - r_upper) / local_minor,
+            "delta_upper_edge": (edge_major - edge_r_upper) / edge_minor,
+            "delta_lower_surface": (local_major - r_lower) / local_minor,
+            "delta_lower_edge": (edge_major - edge_r_lower) / edge_minor,
+            "axis_radius": jnp.asarray(axis_radius, dtype=dtype),
+            "clipped_vertex_count_max": maximum_used,
+            "clipped_vertex_count_required": maximum_required,
+            "clipped_vertex_capacity": jnp.asarray(support_capacity),
+        },
+    )
 
 
 @partial(
@@ -398,11 +857,13 @@ def traced_assemble_flux_surface_geometry(
     ip_amperes,
     major_radius,
     boundary_toroidal_field,
+    field_function_psi_n=None,
+    field_function=None,
     n_pressure: int,
     n_diamagnetic: int,
     n_radial_cells: int = 24,
     nonnegative: bool = True,
-    bandwidth_factor=1.25,
+    torax_columns=None,
 ):
     """Assemble fixed-shape transport metrics from connectivity surface bins.
 
@@ -414,7 +875,9 @@ def traced_assemble_flux_surface_geometry(
     mid-levels and may be nonuniform. ``profile_coefficients`` and
     ``coefficient_scale`` are the pressure-gradient columns followed by the
     diamagnetic columns; their product has toroidal-current-density units
-    [A m-2].
+    [A m-2]. A reader may instead supply ``field_function`` on
+    ``field_function_psi_n``; that preserves the equilibrium's measured F and
+    poloidal-flux profiles while the coarea moments supply its current profile.
 
     The returned dictionary is a JAX PyTree. Face arrays have
     ``n_radial_cells + 1`` entries, cell arrays have ``n_radial_cells`` entries,
@@ -429,6 +892,10 @@ def traced_assemble_flux_surface_geometry(
     inside_limiter = jnp.asarray(inside_limiter, dtype=bool)
     profile_coefficients = jnp.asarray(profile_coefficients, dtype=dtype)
     coefficient_scale = jnp.asarray(coefficient_scale, dtype=dtype)
+    if (field_function is None) != (field_function_psi_n is None):
+        raise ValueError(
+            "field_function and field_function_psi_n must be supplied together"
+        )
 
     poloidal_flux_span = boundary_psi - axis_psi
     safe_span = jnp.where(
@@ -436,33 +903,32 @@ def traced_assemble_flux_surface_geometry(
     )
     psi_n_grid = (psi2d - axis_psi) / safe_span
     core = _connectivity_core(psi_n_grid, inside_limiter)
-    mesh_radius = jnp.broadcast_to(radius[jnp.newaxis, :], psi2d.shape)
-
     scaled_coefficients = profile_coefficients * coefficient_scale
-    pressure_shapes = _traced_profile_shapes(
-        psi_n_grid, n_pressure, nonnegative=nonnegative
-    )
-    diamagnetic_shapes = _traced_profile_shapes(
-        psi_n_grid, n_diamagnetic, nonnegative=nonnegative
-    )
-    pressure_drive = pressure_shapes @ scaled_coefficients[:n_pressure]
-    diamagnetic_drive = diamagnetic_shapes @ scaled_coefficients[n_pressure:]
-    current_density = (
-        mesh_radius / major_radius * pressure_drive
-        + major_radius / mesh_radius * diamagnetic_drive
-    )
-
     psi_n_profile = jnp.linspace(0.0, 1.0, 101, dtype=dtype)
-    diamagnetic_profile = (
-        _traced_profile_shapes(psi_n_profile, n_diamagnetic, nonnegative=nonnegative)
-        @ scaled_coefficients[n_pressure:]
-    )
-    f_profile, f_well_posed = _integrate_diamagnetic_drive(
-        psi_n_profile,
-        MU0 * major_radius * diamagnetic_profile,
-        boundary_f=major_radius * boundary_toroidal_field,
-        poloidal_flux_span=safe_span,
-    )
+    if field_function is None:
+        diamagnetic_profile = (
+            _traced_profile_shapes(
+                psi_n_profile, n_diamagnetic, nonnegative=nonnegative
+            )
+            @ scaled_coefficients[n_pressure:]
+        )
+        f_profile, f_well_posed = _integrate_diamagnetic_drive(
+            psi_n_profile,
+            MU0 * major_radius * diamagnetic_profile,
+            boundary_f=major_radius * boundary_toroidal_field,
+            poloidal_flux_span=safe_span,
+        )
+    else:
+        supplied_psi_n = jnp.asarray(field_function_psi_n, dtype=dtype)
+        supplied_field_function = jnp.asarray(field_function, dtype=dtype)
+        f_profile = jnp.interp(psi_n_profile, supplied_psi_n, supplied_field_function)
+        f_well_posed = (
+            (supplied_psi_n.ndim == 1)
+            & (supplied_field_function.shape == supplied_psi_n.shape)
+            & jnp.all(jnp.diff(supplied_psi_n) > 0.0)
+            & jnp.all(jnp.isfinite(supplied_field_function))
+            & jnp.all(jnp.abs(supplied_field_function) > 0.0)
+        )
 
     psi_n_surface = jnp.asarray(surface_bins["pn_s"], dtype=dtype)
     volume_derivative = jnp.asarray(surface_bins["dv_dpn"], dtype=dtype)
@@ -476,19 +942,18 @@ def traced_assemble_flux_surface_geometry(
 
     f_surface = jnp.interp(psi_n_surface, psi_n_profile, f_profile)
     f_grid = jnp.interp(psi_n_grid, psi_n_profile, f_profile)
-    surface_spacing = jnp.mean(jnp.diff(psi_n_surface))
-    bandwidth = jnp.maximum(bandwidth_factor * surface_spacing, 1e-6)
-    torax_columns = _torax_surface_columns(
-        psi2d,
-        psi_n_grid,
-        core,
-        radius,
-        height,
-        mesh_radius,
-        f_grid,
-        psi_n_surface,
-        bandwidth,
-    )
+    if torax_columns is None:
+        _, torax_columns = _clipped_surface_geometry(
+            psi2d,
+            psi_n_grid,
+            core,
+            radius,
+            height,
+            f_grid,
+            psi_n_surface[0] - 0.5 * (psi_n_surface[1] - psi_n_surface[0]),
+            psi_n_surface[-1] + 0.5 * (psi_n_surface[-1] - psi_n_surface[-2]),
+            psi_n_surface.size,
+        )
     volume_derivative_per_flux = volume_derivative / jnp.abs(safe_span)
     safety_factor = (
         jnp.abs(f_surface)
@@ -570,34 +1035,30 @@ def traced_assemble_flux_surface_geometry(
         (volume_derivative_per_flux_face**2 * gradient_squared_face).at[0].set(0.0)
     )
 
-    # The fitted profile ladder supplies the initial enclosed-current shape.
-    # Smooth cumulative weights preserve fixed shapes and accelerator batching;
-    # the edge is normalised to the measured total current.
-    dr = radius[1] - radius[0]
-    dz = height[1] - height[0]
-    normal_cdf = 0.5 * (
-        1.0
-        + jax.scipy.special.erf(
-            (psi_n_face[:, jnp.newaxis, jnp.newaxis] - psi_n_grid[jnp.newaxis, :, :])
-            / (jnp.sqrt(2.0) * bandwidth)
-        )
+    # Ampere's law supplies the enclosed current from the same coarea moments:
+    # I = <Bp^2> int(dl/Bp) / mu0.  This keeps the geometry record tied to the
+    # supplied equilibrium rather than to the profile ladder used by the solver.
+    enclosed_current_surface = (
+        gradient_squared_over_radius_squared
+        / (4.0 * jnp.pi**2)
+        * volume_derivative_per_flux
+        / MU0
     )
-    enclosed_current = jnp.sum(
-        normal_cdf
-        * core[jnp.newaxis, :, :]
-        * current_density[jnp.newaxis, :, :]
-        * dr
-        * dz,
-        axis=(1, 2),
+    enclosed_current = _surface_interpolation(
+        rho_face,
+        rho_surface,
+        enclosed_current_surface,
+        0.0,
+        enclosed_current_surface[-1],
     )
-    enclosed_current = enclosed_current - enclosed_current[0]
     current_edge = enclosed_current[-1]
-    enclosed_current = (
-        enclosed_current
-        * jnp.abs(ip_amperes)
-        / jnp.maximum(jnp.abs(current_edge), 1e-30)
-        * jnp.sign(current_edge)
-    )
+    if field_function is None:
+        enclosed_current = (
+            enclosed_current
+            * jnp.abs(ip_amperes)
+            / jnp.maximum(jnp.abs(current_edge), 1e-30)
+            * jnp.sign(current_edge)
+        )
     enclosed_current = enclosed_current.at[0].set(0.0)
 
     diffusion_face = jnp.zeros_like(rho_face)
@@ -635,23 +1096,29 @@ def traced_assemble_flux_surface_geometry(
         / jnp.maximum(jnp.abs(readback_edge_current), 1e-30)
         * jnp.sign(readback_edge_current)
     )
-    psi_face = axis_psi + jnp.concatenate(
-        [
-            jnp.zeros(1, dtype=dtype),
-            jnp.cumsum(
-                0.5
-                * (poloidal_flux_gradient[1:] + poloidal_flux_gradient[:-1])
-                * radial_spacing
-            ),
-        ]
-    )
+    if field_function is None:
+        psi_face = axis_psi + jnp.concatenate(
+            [
+                jnp.zeros(1, dtype=dtype),
+                jnp.cumsum(
+                    0.5
+                    * (poloidal_flux_gradient[1:] + poloidal_flux_gradient[:-1])
+                    * radial_spacing
+                ),
+            ]
+        )
+    else:
+        psi_face = axis_psi + safe_span * psi_n_face
 
     axis_radius = torax_columns["axis_radius"]
 
     def torax_face(name, axis_value):
         values = torax_columns[name]
+        edge_value = torax_columns.get(
+            name.removesuffix("_surface") + "_edge", values[-1]
+        )
         return _surface_interpolation(
-            rho_face, rho_surface, values, axis_value, values[-1]
+            rho_face, rho_surface, values, axis_value, edge_value
         )
 
     grad_psi_face = torax_face("grad_psi_surface", 0.0)
@@ -725,6 +1192,12 @@ def traced_assemble_flux_surface_geometry(
         "elongation_face": elongation_face,
         "delta_upper_face": delta_upper_face,
         "delta_lower_face": delta_lower_face,
+        "clipped_vertex_count_max": torax_columns["clipped_vertex_count_max"],
+        "clipped_vertex_count_required": torax_columns["clipped_vertex_count_required"],
+        "clipped_vertex_capacity": torax_columns["clipped_vertex_capacity"],
+        "gradient_moment_scale": jnp.asarray(
+            _TWO_PI if field_function is not None else 1.0, dtype=dtype
+        ),
         "flux_sign": flux_sign,
         "valid": valid,
     }
@@ -753,6 +1226,8 @@ def traced_flux_surface_geometry(
     ip_amperes,
     major_radius,
     boundary_toroidal_field,
+    field_function_psi_n=None,
+    field_function=None,
     n_pressure: int,
     n_diamagnetic: int,
     n_radial_cells: int = 24,
@@ -760,27 +1235,53 @@ def traced_flux_surface_geometry(
     psi_n_min=0.04,
     psi_n_max=0.985,
     nonnegative: bool = True,
-    bandwidth_factor=1.25,
 ):
     """Build fixed-shape flux-surface geometry directly from an equilibrium grid.
 
     This device entry point composes Nova's connectivity bins with
     :func:`traced_assemble_flux_surface_geometry`; it is safe under ``jit`` and
     ``vmap`` when slices share a machine grid and the static shape parameters.
+    EQDSK-like callers may pass the paired ``field_function`` inputs to preserve
+    the reader's measured F and poloidal-flux profiles.
     """
-    from nova.equilibrium.flux_surface_connectivity import traced_flux_surface_bins
-
-    surface_bins = traced_flux_surface_bins(
+    poloidal_flux_span = boundary_psi - axis_psi
+    safe_span = jnp.where(
+        jnp.abs(poloidal_flux_span) > 1e-12, poloidal_flux_span, 1e-12
+    )
+    psi_n_grid = (psi2d - axis_psi) / safe_span
+    core = _connectivity_core(psi_n_grid, inside_limiter)
+    psi_n_profile = jnp.linspace(0.0, 1.0, 101, dtype=psi2d.dtype)
+    if field_function is None:
+        scaled_coefficients = profile_coefficients * coefficient_scale
+        diamagnetic_profile = (
+            _traced_profile_shapes(
+                psi_n_profile, n_diamagnetic, nonnegative=nonnegative
+            )
+            @ scaled_coefficients[n_pressure:]
+        )
+        f_profile, _ = _integrate_diamagnetic_drive(
+            psi_n_profile,
+            MU0 * major_radius * diamagnetic_profile,
+            boundary_f=major_radius * boundary_toroidal_field,
+            poloidal_flux_span=safe_span,
+        )
+    else:
+        f_profile = jnp.interp(
+            psi_n_profile,
+            jnp.asarray(field_function_psi_n, dtype=psi2d.dtype),
+            jnp.asarray(field_function, dtype=psi2d.dtype),
+        )
+    f_grid = jnp.interp(psi_n_grid, psi_n_profile, f_profile)
+    surface_bins, torax_columns = _clipped_surface_geometry(
         psi2d,
+        psi_n_grid,
+        core,
         radius,
         height,
-        inside_limiter,
-        axis_psi,
-        boundary_psi,
+        f_grid,
         psi_n_min,
         psi_n_max,
         n_surface_bins,
-        bandwidth_factor,
     )
     return traced_assemble_flux_surface_geometry(
         surface_bins,
@@ -795,11 +1296,13 @@ def traced_flux_surface_geometry(
         ip_amperes=ip_amperes,
         major_radius=major_radius,
         boundary_toroidal_field=boundary_toroidal_field,
+        field_function_psi_n=field_function_psi_n,
+        field_function=field_function,
         n_pressure=n_pressure,
         n_diamagnetic=n_diamagnetic,
         n_radial_cells=n_radial_cells,
         nonnegative=nonnegative,
-        bandwidth_factor=bandwidth_factor,
+        torax_columns=torax_columns,
     )
 
 
@@ -820,7 +1323,6 @@ def flux_surface_geometry(
     psi_n_min: float = 0.04,
     psi_n_max: float = 0.985,
     nonnegative: bool = True,
-    bandwidth_factor: float = 1.25,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FluxSurfaceGeometry | None:
     """Return transport geometry for one equilibrium, or ``None`` if invalid.
@@ -875,7 +1377,6 @@ def flux_surface_geometry(
         psi_n_min=jnp.asarray(psi_n_min, dtype=jax_dtype),
         psi_n_max=jnp.asarray(psi_n_max, dtype=jax_dtype),
         nonnegative=bool(nonnegative),
-        bandwidth_factor=jnp.asarray(bandwidth_factor, dtype=jax_dtype),
     )
     if not bool(assembled["valid"]):
         return None

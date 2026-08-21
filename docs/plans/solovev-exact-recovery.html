@@ -23,11 +23,11 @@
   <title>Solov'ev Exact Recovery | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-20">
-<meta name="plan-version" content="7">
-<meta name="plan-commits" content="eed42e520d5f544f50cdb7485cffc74249f47037,0687526990e67eee5777310a71ad60588ca7736e,0e98afcb9960247313ea955822481983d63a7fd0,27fd5f364c4bb6fa89e5042ee0c190990f965be9,0e21b3997f841be1bf5a79c8b8772619f55c2fd2,5189b08e77dc994c13ebfbf40c4fcb5e29a03f2d">
+<meta name="plan-modified" content="2026-08-21">
+<meta name="plan-version" content="18">
+<meta name="plan-commits" content="eed42e520d5f544f50cdb7485cffc74249f47037,0687526990e67eee5777310a71ad60588ca7736e,0e98afcb9960247313ea955822481983d63a7fd0,27fd5f364c4bb6fa89e5042ee0c190990f965be9,0e21b3997f841be1bf5a79c8b8772619f55c2fd2,5189b08e77dc994c13ebfbf40c4fcb5e29a03f2d,10642e611aa44c805c9cc430048131826448bce8,fcee050f1cd6dd6417587997e599066abc0756e8,74635b0ae61547229228e64e74599f86c3e9c358,0bed363d0e179fed1d4d265c6dee1998c32aa77f,0c36bf9667a3408494c67e1337b559771ba70c23,50a1b0d868b04fd86a886bbd6138452ea3a0e498">
 <meta name="plan-artifacts" content="docs/evidence/archive/solovev-exact-recovery-landed.html,docs/figures/solovev-exact-recovery/map-forcing-decomposition.png,docs/figures/solovev-exact-recovery/forcing-residual-decomposition.png,scripts/map_forcing_attribution/results.json,scripts/forcing_residual_decomposition/results.json,scripts/build_cache_audit/results.json,scripts/build_cache_audit/measurements-coarse.json,scripts/build_cache_audit/measurements-fine.json">
-<meta name="plan-impl" content="0.55">
+<meta name="plan-impl" content="0.9">
 </head>
 <body>
   <main class="plan-doc">
@@ -88,30 +88,23 @@
       near-marginal position mode plausibly amplifies them into the observed rigid drift.</figcaption>
     </figure>
 
-    <h2 id="s2">§2 — Exact kernels by default: Urankar everywhere, hexagons are hexagons</h2>
-
-    <p><strong>Locked (kernel-default, section-fidelity).</strong> The Urankar/Part V exact
-    section kernel becomes the production default on every coupling path; the far-field filament
-    truncation is retired — its measured runtime advantage was never significant (production paid
-    ~1.07 primitive evaluations per pair only because it truncated; the exact section costs 4
-    against the quadrupole's ~5 and is more accurate). And a cell authored as a hexagon couples
-    through a hexagon section: <strong>no fallback to rectangle sections, ever</strong>. The
-    substitution is removed, not deprecated — construction of a coupling that would route an
-    authored polygon through a different section shape fails loudly.</p>
-
-    <p><em>Done-when:</em> (a) an audit enumerates every coupling construction site (plasma,
-    coil, passive, wall, sensor rows) with the kernel and section shape each actually uses, on
-    main; (b) the exact kernel is the default on all of them with the filament far-field branch
-    removed from reachable production code; (c) hexagon cells demonstrably couple through exact
-    hexagon sections — a red-then-green test constructs a hexagon-authored machine and asserts
-    the section moments used by the coupling equal the exact hexagon values (5/72 pitch²), with a
-    guard test proving a shape-mismatched construction raises; (d) uniform-current rows reproduce
-    the prior exact-kernel values bitwise where the kernel was already exact, and every changed
-    row is accounted to the retired truncation or substitution; (e) the complete suite is green
-    and the boundary-ring bank digits reproduce; (f) build-time impact is measured (§5 owns the
-    formal benchmark; this section records the raw before/after build cost so the change is never
-    credited or blamed unmeasured).</p>
-
+    <section id="s2" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-20</span>
+        <h2>§2 — Exact kernels by default: Urankar everywhere, hexagons are hexagons</h2>
+      </header>
+      <p class="landed-summary">
+        The exact Part V kernel is the production default on every coupling path; standoff,
+        banded and filament truncation branches are removed and Cylinder accepts only authored
+        axis-aligned rectangles. The new shape guard exposed 296 authored non-axis-aligned
+        conductor polygons routing through rectangle kernels — now exact polygon sections
+        (routes 321+361 → 25+657, 78 columns changed, plasma rows bitwise). Build +5.88%/+5.20%
+        one-time; conductor correction hygiene-scale (8.58e-5 Wb wall). Suite 2,852 green; ring
+        bank exact with leg zeros; L1 pins moved only at 1e-17. Full record:
+        <a href="/nova/evidence/archive/solovev-exact-recovery-landed#exact-kernel-defaults">§2 landed</a>
+        (commit <code>10642e61</code>).
+      </p>
+    </section>
     <h2 id="s3">§3 — The cell-moment wiring: convict, then correct</h2>
 
     <p><strong>Owner framing: we developed a highly accurate scheme and then failed at the last
@@ -276,8 +269,38 @@
 <div class="r-comment" data-section="s3" data-id="c-20260820T1810" data-who="reckon-ship" data-when="2026-08-20T18:10:00+00:00">
     <div class="r-comment-body">density-forcing-ladder landed - commit 5189b08e, merged 038d1196; gate PASSED. THE MECHANISM IS THE FIT, NOT THE FLUX: exact analytic flux at every one of the 672 density samples leaves the forcing flat (+0.183 percent, share 99.277), the thirteen-sample cubic likewise (+0.097), and one-signed bias fractions of 0.016/0.014 refute nonlinear rectification - so the h-independent carrier is the degree-nine weighted-QR density projection's MOMENT deviation from the exact functional: the fit optimizes pointwise agreement while the coupling consumes only the density moments. Production control reproduced the bank to 1.1e-13 Wb. Repair dispatched (density-moment-projection): constrain the projection to exact per-support zeroth and first moments of j(psi_interp), or take the coupling moments by direct fixed-rule quadrature - both measured, winner adopted, forcing collapse and root drift re-measured on both fixtures with the full gate set and no bound moved.</div>
 </div>
+<div class="r-comment" data-section="s3" data-id="c-20260820T1830" data-who="reckon-ship" data-when="2026-08-20T18:30:00+00:00">
+    <div class="r-comment-body">normalization-constant-discriminator landed - commit fcee050f, merged 4fc27118; gate PASSED. THE CONVICTION CLOSES ON ONE NUMBER: the two-by-two factorial (values x constants) shows exact psi-norm normalization constants collapse the forcing 1.2523 to 0.0595 Wb (99.18 to 0.58 percent share) and the projected axis drift 40.06 to 0.37 mm, while exact in-cell values alone change nothing. Measured offsets at the analytic state: axis flux -1.72e-3 Wb (negligible); BOUNDARY FLUX +0.410992 Wb - the production topology read's boundary constant sits at psi_norm 1.005081 in the exact coordinate, a coherent half-percent-of-span shift in every cell's normalization, two orders larger than and distinct from the banked 5.53e-5 saddle-clip offset. Production controls reproduced the banked forcing to 8.5e-14 Wb. The repair is surgical and routes to the topology read's boundary-flux derivation at the analytic state; it dispatches on the equilibrium scope as soon as the density-moment node frees it. The moment-repair merge hold stands: fixing the constant first likely collapses most of that node's 0.68 percent pin floor too, since its faithful moments integrate j biased by the same constant.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260820T1920" data-who="reckon-ship" data-when="2026-08-20T19:20:00+00:00">
+    <div class="r-comment-body">topology-boundary-constant-repair PROBE VERDICT (run blocked pending owner semantics; no code changed). THE TOPOLOGY READ IS EXONERATED: at the reference state it receives exactly one finite saddle candidate and selects it correctly; the selected saddle lies 3.44 mm from the banked Newton anchor and the subnull interpolation is accurate to 0.0045 Wb - production reports the separatrix of the field it is given. THE INCONSISTENCY IS THE FIXTURE: the reference case is the STORED DINA 135011/7 ITER entry, and its declared psi_boundary global (-5.1228 Wb after sign convention) disagrees with its own psirz map saddle level (-4.7163 Wb at the Newton anchor) by 0.411 Wb = 0.51 percent of span - the same internal-inconsistency class banked for the MAST efm archive (stored LCFS off its own map contour). Consequences: the DINA fingerprint match (41.2 mm / -1.12 percent) was the SAME case, not an independent reproduction; nova normalizes profiles to the map saddle while the reference tabulated its profiles against its declared constant; and the discriminator already measured that normalizing to the declared constant collapses the forcing to a 0.58 percent share and 0.37 mm projected axis. The repair is therefore a SEMANTIC OWNER DECISION on normalization authority, not a code-defect hunt; options and recommendation in the session brief. The probe run stays live for the continuation on the same member.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260821T0230" data-who="Simon McIntosh (relayed by reckon-ship)" data-when="2026-08-21T02:30:00+00:00">
+    <div class="r-comment-body">OWNER RULING 2026-08-21 on the held moment branch: measure then decide. The adjudication node compares fit versus faithful coupling moments against the exact adaptive oracle on the closed-form lane, on the case's own smooth profiles AND a steep pedestal-class functional on the same flux (representation fidelity needs no equilibrium self-consistency; the steep-edge case family is banked precedent). Pre-registered decision rule: the faithful route is adopted only if it beats the fit on steep-case current-weighted m0 fidelity by at least 3x at no more than 2x per-iteration moment cost; otherwise the fit is retained and the held worktree is discarded. The owner additionally directs that the round-off agreement on the closed-form oracle be maintained as a permanent test: the section-4 registered harness packages the forcing pin two-tier - a reduced closed-form fixture (seconds-class cold build) in the always-on default lane, and the full warm-cached fixtures in the slow lane.</div>
+</div>
 <div class="r-comment" data-section="s6" data-id="c-20260820T1652" data-who="reckon-ship" data-when="2026-08-20T16:52:00+00:00">
     <div class="r-comment-body">build-cache-audit landed - commits 06875269 + 0e98afcb, merged 540bdfbe; gate PASSED (scope-changed recorded for the activation extension). Coarse 1,246.88 s cold to 0.266 s warm (4,689x); fine 3,335.33 s cold to 0.818 s warm (4,079x); 31 arrays bitwise at both resolutions; semantic key, advisory-locked single miss builder, GPFS-safe in-place validated publication, one shared store across worktrees. The three standalone measurement programs request cached_machine; agent doctrine recorded for the machine-building guidance.</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260821T0155" data-who="reckon-ship" data-when="2026-08-21T01:55:00+00:00">
+    <div class="r-comment-body">machine-build-doctrine landed - commit 50a1b0d8, merged as main tip; gate PASSED (20/20 source-anchor assertions, mandatory naming and changelog checks clean). nova/equilibrium/AGENTS.md carries the forward-model doctrine: the two reference lanes separated by provenance (closed-form oracle vs stored DINA reproduction, never conflated), the cached_machine contract with measured build/load expectations, the four serialized root banks, gauge-local psi_norm anchors, the never-sync discipline and the CPU backend pin. nova/biot/AGENTS.md carries the exact Part V default, both authored-shape construction guards, Cylinder rectangle eligibility, aloc section authority and the columnar FrameSpace idiom. The root AGENTS.md gains exactly two pointer lines. With this, every executable node dispatched under this plan has landed; the remaining open items are the four owner rulings (section-4 bound lock, section-5 operating point, basin-work routing, held moment-branch adjudication on the oracle lane).</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260820T1750" data-who="reckon-ship" data-when="2026-08-20T17:50:00+00:00">
+    <div class="r-comment-body">exact-kernel-defaults landed - commit 10642e61, merged 40d30fb6; gate PASSED (scope-changed for the constructor extension). The section-fidelity guard proved itself at introduction: 296 of 321 Cylinder-routed conductor rows are deliberately authored non-axis-aligned polygons (first: TRI_SUPP, 0.173 m axis residual vs 1e-9), now coupled through exact Part V polygon sections; standoff, banded and filament truncation branches removed; routes 321+361 to 25+657 with 78 of 117 aggregated columns changed and plasma rows bitwise. Build +5.88 / +5.20 percent one-time under the fixture cache; conductor correction hygiene-scale (wall 8.58e-5 Wb both fixtures) beside the 1.598e-2-of-span forcing. Default suite 2,852 green under SLURM; ring bank exact including 17 leg zeros; the two L1 pins moved at 1e-17 round-off only. Immutable staged snapshots preserved at ~/.local/share/nova/benchmarks/exact_section/. Slow-test isolation (test_the_stored_boundary_encloses_the_stored_axis, 30 min) routed to the test-lane owner.</div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20260820T2000" data-who="Simon McIntosh (relayed by reckon-ship)" data-when="2026-08-20T20:00:00+00:00">
+    <div class="r-comment-body">OWNER RULING 2026-08-20 on the oracle provenance finding: proceed with the closed-form oracle and re-baseline the recovery chain (option 1). The oracle is a self-consistent closed-form analytic equilibrium - constants, field, profiles and exterior from one construction - and the DINA 135011/7 lane is reclassified as cross-code reference reproduction with its internal inconsistency banked as an archive finding. TWO STANDING CORRECTIONS: (1) verify the claim that production normalizes a flux map from its saddle read - nova has never been designed to normalize a flux map based on its saddle; check the actual anchor derivation in the production source path with file and line, because the fixture wiring may have injected that behaviour contrary to the design contract; (2) poloidal flux carries a gauge and nova's Biot-Savart solves SET it - flux-amplitude comparisons and normalization anchors must never mix nova's gauge with a stored reference's gauge; psi_norm is gauge-safe only when both anchors are read from the same field. The gauge discipline enters the section-4 gate design.</div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20260820T2010" data-who="reckon-ship" data-when="2026-08-20T20:10:00+00:00">
+    <div class="r-comment-body">Owner clarification 2026-08-20, resolving the anchor check without a node: psi itself is never re-gauged - the Biot-Savart composition sets the flux gauge and production never zeroes psi on the saddle. Only the normalized coordinate psi_norm anchors its boundary at the trial map's own separatrix read, which is gauge-invariant and correct free-boundary design. The drift mechanism stands as measured: DINA's profiles are tabulated against a declared boundary constant its own stored map does not honor, so a solve normalizing consistently to its own field cannot reproduce that reference without a prescribed-anchor mode. The gauge discipline (never mix nova-gauge amplitudes with reference-gauge constants) carries into the section-4 gate design and the future reproduction lane.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260820T2130" data-who="reckon-ship" data-when="2026-08-20T21:30:00+00:00">
+    <div class="r-comment-body">analytic-oracle-fixtures landed - commit 74635b0a, merged 0b0a9d0c; gate PASSED. THE TRUE ORACLE STANDS AND THE DISCRETE MAP IS EXACT ON IT: coarse 551-cell and fine 1076-cell fixtures built entirely from the closed-form case with the exterior supplied exactly at the boundary rows (import-audited: no stored map, no IMAS), carriers cached honestly (warm 0.15/0.22 s). Exact-state forcing 4.55e-15 / 3.66e-15 Wb (2.3e-15 / 2.6e-15 of span), tangent-inverse root responses 6e-12 / 2e-12 mm. NON-TAUTOLOGY PROVEN: a 1e-4 exterior-current perturbation restores a 5.05e-4 Wb forcing - eleven orders above base - with the independent prediction closing to 2e-15. Mechanism: with exact exterior rows the residual reduces to the coupling of the moment difference, and the production degree-nine density reproduces the closed-form source moments to 3.9e-9 A. READING: every h-independent deviation chased on the stored-reference lane was reference inconsistency, never nova composition error. Next node: the re-baseline - solved roots from independent seeds and the full gate set on this lane, setting the section-4 bounds at measured round-off floors with convergence clauses; the fit-vs-direct moment adjudication (the held branch) also re-runs here where oracle-closeness and truth-closeness finally coincide.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260821T0020" data-who="reckon-ship" data-when="2026-08-21T00:20:00+00:00">
+    <div class="r-comment-body">oracle-rebaseline landed - commit 0bed363d, merged b242dcf3; gate PASSED. The recovery gate harness is authored and green (four contract tests; zero mixed-gauge gates; zero foreign anchors), standing forcing controls hold at round-off (3.83e-15 / 4.44e-15 Wb), terminal states serialized, bounds PROPOSED and awaiting the owner lock. THE SECOND ROOT: the production current-centroid seed converges at machine precision on both fixtures to a LIMITED equilibrium (no X-point) 74.84/74.19 mm from the closed-form diverted root - Ip +5.0/+5.1 percent, flux sup 0.533 span, h-independent (excess ratio 1.00098) - a genuine alternate root of the same external field; continuation at 0.50/0.75 strength collapses to vacuum. Six proposed gates correctly reject it. SEPARATION: accuracy is settled (the closed-form root is a discrete fixed point to round-off; gates lock at round-off floors with the forcing sentry), and basin selection is a distinct solver property whose repair (basin-aware seeding or globalized root find; the measured continuation is not it) routes to the owner as new scoped work. Two owner items now pending: the section-4 bound lock on the measured floors, and the basin-work routing (new section here versus its own plan).</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260821T0125" data-who="reckon-ship" data-when="2026-08-21T01:25:00+00:00">
+    <div class="r-comment-body">accuracy-cost-ladder landed - commit 0c36bf96, merged ce482a73; gate PASSED (one environment incident en route: the worker synced the shared venv, stripping optional extras; the orchestrator restored all declared extras and the resumed run consumed the environment strictly read-only). MEASURED: cold oracle builds 294.2/778.0 s with exact polygon kernel+moment work at 97.2/99.0 percent - the device-kernel-build target confirmed; H200 converged solve 198.5 ms/state batch-1, 56.3 batch-4, 30.2 batch-16 (fine batch-1 257.4); phase medians map 1.12/1.38 ms, tangent 1.49/1.66 ms, one Newton step inclusive of its 30-GMRES Krylov loop 20.6/24.1 ms, launch 0.071 ms - the ten-step projection closes to 1.04/0.94 of the measured solves and StableHLO receipts confirm the 10/30 loop bounds independently. VERDICT AGAINST THE 1 MS TARGET: missed 198x/30x, and the attribution is unambiguous - the map is already at the target and the Krylov loop owns twenty of every twenty-one milliseconds, so the route is iteration economy (warm-seeded few-step Newton, the catalog adjacent-slice regime) times batch amortization, not faster physics. Centroid rung rejected non-finite. The section-5 operating-point lock joins the owner package beside the section-4 bound lock and the basin routing.</div>
 </div>
 </section>
 </main>

@@ -1,127 +1,35 @@
-"""Tests for the static DIII-D machine-description IDS export."""
+"""Tests for the native latest-DD DIII-D machine-description IDS export."""
 
+import json
 from pathlib import Path
 
 import imas
-import numpy as np
 
-from benchmarks.diiid_machine_ids_export import export_machine_ids
+from benchmarks.diiid_machine_ids_export import (
+    DEFAULT_OUTPUT,
+    SUPERSEDED_LEAF_COUNT,
+    SUPERSEDED_SHA256,
+    SUPERSEDED_SIZE_BYTES,
+    export_machine_ids,
+)
 from nova.imas.diiid_machine_ids import (
-    DD_VERSION,
     IDS_NAMES,
-    _author_magnetics,
-    _author_pf_active,
-    _author_wall,
-    machine_ids_snapshot,
+    latest_published_dd_version,
     round_trip_leaf_receipt,
 )
 
 
-def _source_ids() -> dict[str, object]:
-    factory = imas.IDSFactory(version=DD_VERSION)
-    wall = factory.new("wall")
-    wall.description_2d.resize(1)
-    wall.description_2d[0].type.index = 1
-    wall.description_2d[0].limiter.unit.resize(1)
-    limiter = wall.description_2d[0].limiter.unit[0]
-    limiter.name = "limiter"
-    limiter.outline.r = [1.0, 2.0, 2.0, 1.0]
-    limiter.outline.z = [-1.0, -1.0, 1.0, 1.0]
-
-    active = factory.new("pf_active")
-    active.coil.resize(1)
-    coil = active.coil[0]
-    coil.name = "coil"
-    coil.identifier = "coil"
-    coil.function.resize(1)
-    coil.function[0].index = 1
-    coil.element.resize(2)
-    rectangle = coil.element[0]
-    rectangle.name = "rectangle"
-    rectangle.turns_with_sign = 58.0
-    rectangle.geometry.geometry_type = 2
-    rectangle.geometry.rectangle.r = 1.25
-    rectangle.geometry.rectangle.z = 0.25
-    rectangle.geometry.rectangle.width = 0.2
-    rectangle.geometry.rectangle.height = 0.4
-    outline = coil.element[1]
-    outline.name = "outline"
-    outline.turns_with_sign = -3.0
-    outline.geometry.geometry_type = 1
-    outline.geometry.outline.r = [1.4, 1.5, 1.6, 1.5]
-    outline.geometry.outline.z = [0.0, 0.1, 0.1, 0.0]
-
-    magnetics = factory.new("magnetics")
-    magnetics.b_field_pol_probe.resize(1)
-    probe = magnetics.b_field_pol_probe[0]
-    probe.name = "probe"
-    probe.identifier = "probe"
-    probe.type.index = 1
-    probe.position.r = 1.8
-    probe.position.z = -0.2
-    probe.poloidal_angle = 0.3
-    probe.length = 0.04
-    magnetics.flux_loop.resize(1)
-    loop = magnetics.flux_loop[0]
-    loop.name = "loop"
-    loop.identifier = "loop"
-    loop.type.index = 1
-    loop.position.resize(1)
-    loop.position[0].r = 1.9
-    loop.position[0].z = 0.4
-    return {"wall": wall, "pf_active": active, "magnetics": magnetics}
+def test_latest_published_dd_version_is_resolved_semantically():
+    assert latest_published_dd_version(["3.42.2", "4.0.0", "4.1.1", "4.1.0"]) == "4.1.1"
+    assert latest_published_dd_version().split(".")[0] == "4"
 
 
-def test_authored_ids_expand_elements_and_keep_only_static_geometry(tmp_path: Path):
-    source = _source_ids()
-    factory = imas.IDSFactory(version=DD_VERSION)
-    ids = {
-        "wall": _author_wall(factory, source["wall"], tmp_path / "source.nc"),
-        "pf_active": _author_pf_active(
-            factory, source["pf_active"], tmp_path / "source.nc"
-        ),
-        "magnetics": _author_magnetics(
-            factory, source["magnetics"], tmp_path / "source.nc"
-        ),
+def test_leaf_receipt_requires_exact_geometry_and_reports_zero_differences():
+    snapshot = {
+        "wall": {"description_2d[0]/limiter/unit[0]/outline/r": [1.0, 2.0]},
+        "pf_active": {"coil[0]/element[0]/geometry/outline/r": [1.1, 1.2]},
+        "magnetics": {"b_field_pol_probe[0]/position/r": 1.8},
     }
-
-    assert tuple(ids) == IDS_NAMES
-    assert np.array_equal(
-        ids["pf_active"].coil[0].element[0].geometry.outline.r,
-        [1.15, 1.35, 1.35, 1.15],
-    )
-    assert np.allclose(
-        ids["pf_active"].coil[0].element[0].geometry.outline.z,
-        [0.05, 0.05, 0.45, 0.45],
-        rtol=0.0,
-        atol=1.0e-15,
-    )
-    assert float(ids["pf_active"].coil[0].element[0].turns_with_sign) == 58.0
-    assert len(ids["magnetics"].b_field_pol_probe) == 1
-    assert not ids["magnetics"].b_field_pol_probe[0].field.data.has_value
-    assert not ids["magnetics"].flux_loop[0].flux.data.has_value
-    assert len(ids["magnetics"].ip) == 0
-    assert all(
-        str(value.ids_properties.source) == str(tmp_path / "source.nc")
-        for value in ids.values()
-    )
-
-
-def test_leaf_receipt_requires_exact_geometry_and_reports_zero_differences(
-    tmp_path: Path,
-):
-    source = _source_ids()
-    factory = imas.IDSFactory(version=DD_VERSION)
-    ids = {
-        "wall": _author_wall(factory, source["wall"], tmp_path / "source.nc"),
-        "pf_active": _author_pf_active(
-            factory, source["pf_active"], tmp_path / "source.nc"
-        ),
-        "magnetics": _author_magnetics(
-            factory, source["magnetics"], tmp_path / "source.nc"
-        ),
-    }
-    snapshot = machine_ids_snapshot(ids)
 
     receipt = round_trip_leaf_receipt(snapshot, snapshot)
 
@@ -134,9 +42,17 @@ def test_leaf_receipt_requires_exact_geometry_and_reports_zero_differences(
     }
 
 
-def test_live_export_round_trip_has_exact_required_content(tmp_path: Path):
-    receipt = export_machine_ids(tmp_path / "diiid_machine_description.nc")
+def test_live_export_writes_exact_native_latest_dd(tmp_path: Path):
+    output = tmp_path / "diiid_machine_description.nc"
 
+    receipt = export_machine_ids(output)
+    written_dd = receipt["native_authoring"]["target_data_dictionary"]
+
+    assert written_dd == latest_published_dd_version()
+    assert written_dd.split(".")[0] == "4"
+    assert receipt["source"]["data_dictionary"] == "3.41.0"
+    assert receipt["source"]["autoconvert"] is False
+    assert receipt["native_authoring"]["cross_major_conversion_performed"] is False
     assert receipt["content"] == {
         "ids": ["wall", "pf_active", "magnetics"],
         "wall_limiter_vertices": 82,
@@ -150,13 +66,27 @@ def test_live_export_round_trip_has_exact_required_content(tmp_path: Path):
     assert receipt["round_trip"]["verdict"] == "exact"
     assert receipt["round_trip"]["wall_outline_maximum_absolute_difference"] == 0.0
     assert receipt["round_trip"]["element_vertex_maximum_absolute_difference"] == 0.0
+    major = receipt["round_trip"]["major_comparison"]
+    assert major["comparison_available"] is False
+    assert major["superseded_leaf_count"] == SUPERSEDED_LEAF_COUNT
+    assert major["published_leaf_count"] == receipt["round_trip"]["total_leaf_count"]
+    assert major["leaf_count_difference"] == (
+        major["published_leaf_count"] - SUPERSEDED_LEAF_COUNT
+    )
+    assert major["presence_differences"] == []
+    assert major["shape_differences"] == []
+    assert receipt["output"]["superseded"] == {
+        "data_dictionary": "3.41.0",
+        "size_bytes": SUPERSEDED_SIZE_BYTES,
+        "sha256": SUPERSEDED_SHA256,
+    }
     assert receipt["output"]["size_bytes"] > 0
     assert len(receipt["output"]["sha256"]) == 64
     assert all(
-        properties["data_dictionary"] == DD_VERSION
+        properties["data_dictionary"] == written_dd
         and properties["source"].endswith("DIII-D/200000.nc")
-        and properties["provenance"][0]["sources"]
-        == ["IMAS netCDF entry; Data Dictionary 3.41.0"]
+        and properties["provenance"][0]["sources"][0]
+        == "IMAS netCDF source; Data Dictionary 3.41.0"
         for properties in receipt["ids_properties"].values()
     )
     assert [item["quantity"] for item in receipt["declared_absent"]] == [
@@ -164,3 +94,35 @@ def test_live_export_round_trip_has_exact_required_content(tmp_path: Path):
         "tf static conductor geometry",
         "Thomson scattering line-of-sight endpoints",
     ]
+
+    with imas.DBEntry(output, "r", dd_version=written_dd) as database:
+        versions = {
+            name: str(
+                database.get(
+                    name, 0, autoconvert=False
+                ).ids_properties.version_put.data_dictionary
+            )
+            for name in IDS_NAMES
+        }
+        assert database.list_all_occurrences("pf_passive") == []
+        assert database.list_all_occurrences("tf") == []
+        assert database.list_all_occurrences("equilibrium") == []
+    assert versions == {name: written_dd for name in IDS_NAMES}
+
+
+def test_published_receipt_names_every_cross_major_schema_change():
+    receipt_path = DEFAULT_OUTPUT.with_suffix(".receipt.json")
+    receipt = json.loads(receipt_path.read_text())
+    major = receipt["round_trip"]["major_comparison"]
+
+    assert receipt["round_trip"]["total_leaf_count"] == 1549
+    assert major["comparison_available"] is True
+    assert major["superseded_leaf_count"] == SUPERSEDED_LEAF_COUNT
+    assert major["published_leaf_count"] == 1549
+    assert major["leaf_count_difference"] == -284
+    assert len(major["presence_differences"]) == 296
+    assert all(
+        {"ids", "path", "presence"} <= difference.keys()
+        for difference in major["presence_differences"]
+    )
+    assert major["shape_differences"] == []

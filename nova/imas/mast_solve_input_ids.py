@@ -36,7 +36,7 @@ from typing import Any, Mapping
 import imas
 import numpy as np
 
-from nova.imas.mast_artifact import (
+from nova.imas.machine_artifact import (
     VerifiedMachineArtifact,
     pinned_dd_version,
     resolve_machine_artifact,

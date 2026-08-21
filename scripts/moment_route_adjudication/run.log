@@ -1,0 +1,12 @@
+{
+  "branch_disposition": "merge held commits after a main merge-in and pin rebase",
+  "cost_ratio": 0.36521167788219194,
+  "cost_ratio_ceiling": 2.0,
+  "faithful_qualifies": true,
+  "fidelity_improvement_factor": 6.009052818952474,
+  "fidelity_threshold": 3.0,
+  "mechanical_application": true,
+  "rule": "faithful qualifies iff steep ring current-weighted m0 fidelity improves by at least 3x and CPU per-iteration moment cost is no more than 2x the fit"
+}
+{"boundary_clipped": 88, "interior": 402, "ring": 233}
+EXIT=0

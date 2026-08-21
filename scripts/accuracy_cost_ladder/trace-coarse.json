@@ -1,0 +1,52 @@
+{
+  "device": "NVIDIA H200 NVL",
+  "fixture": "coarse",
+  "krylov_total_trip_count_source": "compiled StableHLO receipt",
+  "traces": {
+    "krylov_inner_matvec": {
+      "directory": "scripts/accuracy_cost_ladder/trace-coarse-krylov",
+      "files": [
+        {
+          "bytes": 19931,
+          "path": "scripts/accuracy_cost_ladder/trace-coarse-krylov/plugins/profile/2026_08_21_01_10_25/98dci4-gpu-0003.iter.org.trace.json.gz"
+        },
+        {
+          "bytes": 17077,
+          "path": "scripts/accuracy_cost_ladder/trace-coarse-krylov/plugins/profile/2026_08_21_01_10_25/perfetto_trace.json.gz"
+        }
+      ],
+      "label": "krylov_inner_matvec",
+      "total_bytes": 37008
+    },
+    "map_evaluation": {
+      "directory": "scripts/accuracy_cost_ladder/trace-coarse-map",
+      "files": [
+        {
+          "bytes": 16718,
+          "path": "scripts/accuracy_cost_ladder/trace-coarse-map/plugins/profile/2026_08_21_01_10_21/98dci4-gpu-0003.iter.org.trace.json.gz"
+        },
+        {
+          "bytes": 14554,
+          "path": "scripts/accuracy_cost_ladder/trace-coarse-map/plugins/profile/2026_08_21_01_10_21/perfetto_trace.json.gz"
+        }
+      ],
+      "label": "map_evaluation",
+      "total_bytes": 31272
+    },
+    "tangent_action": {
+      "directory": "scripts/accuracy_cost_ladder/trace-coarse-tangent",
+      "files": [
+        {
+          "bytes": 20009,
+          "path": "scripts/accuracy_cost_ladder/trace-coarse-tangent/plugins/profile/2026_08_21_01_10_23/98dci4-gpu-0003.iter.org.trace.json.gz"
+        },
+        {
+          "bytes": 17049,
+          "path": "scripts/accuracy_cost_ladder/trace-coarse-tangent/plugins/profile/2026_08_21_01_10_23/perfetto_trace.json.gz"
+        }
+      ],
+      "label": "tangent_action",
+      "total_bytes": 37058
+    }
+  }
+}

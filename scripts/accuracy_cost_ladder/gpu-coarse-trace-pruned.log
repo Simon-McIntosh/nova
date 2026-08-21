@@ -1,0 +1,4 @@
+slurmstepd: error: Unable to create TMPDIR [/run/user/39486]: Permission denied
+slurmstepd: error: Setting TMPDIR to /tmp
+GPU_TRACE fixture=coarse total_bytes=105338
+EXIT_MARKER=0

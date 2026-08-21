@@ -11,7 +11,7 @@ from typing import Any
 
 import pytest
 
-from nova.imas.mast_artifact import (
+from nova.imas.machine_artifact import (
     ArtifactShotRange,
     MachineArtifactError,
     create_machine_artifact_manifest,
@@ -50,6 +50,7 @@ def _materialized_image(tmp_path: Path):
     payload.write_bytes(_hdf5_image())
     manifest = create_machine_artifact_manifest(
         source,
+        machine="mast",
         dd_version="4.1.1",
         registry_digest="a" * 64,
         physical_digest="b" * 16,

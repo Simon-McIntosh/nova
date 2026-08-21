@@ -1,0 +1,280 @@
+{
+  "analytic_oracle": {
+    "constants": {
+      "axis_flux_per_radian_wb": 0.21982714623250468,
+      "axis_temperature_j": 3.204353268e-16,
+      "boundary_field_function_tm": 3.4,
+      "boundary_temperature_j": 8.01088317e-18,
+      "field_coefficient": 0.21982714623250468,
+      "major_radius_m": 1.7,
+      "mean_particle_mass_kg": 3.3435837768e-27,
+      "pressure_coefficient": 0.1429119518229214,
+      "rotation_parameter_per_m2": 0.04238754325259515
+    },
+    "current_evaluation": "closed-form toroidal current density",
+    "external_data_used": false,
+    "family": "exact isothermal rotating Solovev equilibrium",
+    "field_evaluation": "closed form at every grid, wall, and direct-sample row",
+    "import_audit": {
+      "closed_form_flux_self_check_relative": 1.0569169360016558e-16,
+      "forbidden_imports": [],
+      "forbidden_path_literals": [],
+      "imports": [
+        "__future__",
+        "argparse",
+        "ast",
+        "contextlib",
+        "dataclasses",
+        "fcntl",
+        "functools",
+        "hashlib",
+        "jax",
+        "jax.numpy",
+        "json",
+        "math",
+        "matplotlib.pyplot",
+        "nova.biot.null",
+        "nova.biot.plasmagrid",
+        "nova.biot.polygonanalytic",
+        "nova.biot.target",
+        "nova.database.zarrstore",
+        "nova.equilibrium.domain",
+        "nova.equilibrium.forward_operator",
+        "nova.equilibrium.rotation",
+        "nova.equilibrium.source",
+        "nova.equilibrium.stencil_mesh",
+        "nova.equilibrium.topology",
+        "nova.frame.coilset",
+        "nova.jax.config",
+        "numpy",
+        "pathlib",
+        "scipy.spatial",
+        "shapely.geometry",
+        "tests.rotating_equilibrium_references",
+        "time",
+        "xarray"
+      ],
+      "passed": true
+    },
+    "name": "moderate-rotation-conventional",
+    "profile_evaluation": "closed-form rotating source primitives"
+  },
+  "artifacts": {
+    "figure": "scripts/analytic_oracle_fixtures/results-forcing.png",
+    "figure_bytes": 62529
+  },
+  "cache_policy": {
+    "existing_reference_store_touched": false,
+    "schema": "analytic-oracle-hex-machine",
+    "store_family": "analytic_oracle_hex_machine"
+  },
+  "fixtures": {
+    "coarse": {
+      "cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.15177380479872227,
+        "lock_wait_seconds": 2.1342188119888306e-05,
+        "semantic_key": "030667d40f96d904",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_500.zarr",
+        "store_seconds": 0.0
+      },
+      "closed_form_state": {
+        "axis_flux_wb": 1.3812146953272917,
+        "boundary_flux_wb": 0.0,
+        "boundary_read_absolute_error_wb": 8.673617379884035e-19,
+        "production_topology_axis_flux_wb": 1.3810216850087467,
+        "production_topology_boundary_flux_wb": -8.673617379884035e-19
+      },
+      "direct_sample_rows": 1581,
+      "forcing": {
+        "density_component_projection_share": 1.0,
+        "density_current_m0_l1_a": 3.881439059050251e-09,
+        "density_current_net_a": 7.190681383661968e-11,
+        "density_radial_first_moment_l1_a_m": 9.055387342749022e-11,
+        "density_vertical_first_moment_l1_a_m": 1.4658835253525734e-10,
+        "grid_sup_fraction_of_analytic_span": 2.3310255692363806e-15,
+        "rms_wb": 8.511842861192803e-16,
+        "sup_wb": 4.551914400963142e-15
+      },
+      "independent_state": {
+        "comparison": "g(x_a) - x_a",
+        "construction": "2*pi*case.flux(R,Z), evaluated directly and independently at every Nova grid, wall, and direct-sample target",
+        "coordinate_rows": 2253,
+        "coordinate_sha256_binary64": "231458b402aa8590ef6efe8b2781dcd5fdf71317cf099349ae6feea7283f6cbc",
+        "coupling_image_used_to_construct_state": false,
+        "state_sha256_binary64": "633a8fbe81dbb21d9f333079ccaf5b1e7dd8f0fe3c3adac9fd90a0c89ec5ac0e",
+        "symbol": "x_a"
+      },
+      "linear_response": {
+        "equation": "(I - Dg) delta = g(x_exact) - x_exact",
+        "interpretation": "response to the measured binary64 residual, with the exact-state production read subtracted from axis and current observables",
+        "projected_state": {
+          "axis_delta_m": [
+            -1.5543122344752192e-15,
+            -5.741661807562946e-15
+          ],
+          "axis_displacement_mm": 5.948324708240662e-12,
+          "flux_sup_fraction_of_span": 3.858249218046423e-15,
+          "plasma_current_a": 1625644.3349028153,
+          "plasma_current_fractional_deviation": -0.001420601275957667,
+          "plasma_current_fractional_response": -4.2906042696906194e-16,
+          "plasma_current_response_a": -6.984919309616089e-10,
+          "topology_axis_baseline_error_mm": 0.6565544884831187
+        },
+        "solve": {
+          "gmres_info": 0,
+          "residual_relative_sup": 3.576796407024054e-08,
+          "residual_sup_wb": 1.6281271074446015e-22
+        },
+        "tangent_finite_difference_absolute_sup": 5.356354371155447e-08,
+        "tangent_finite_difference_relative_sup": 8.37113157868904e-08,
+        "tangent_finite_difference_step_wb": 1.3812146953272917e-06
+      },
+      "prescribed_exterior": {
+        "coil_fit_used": false,
+        "definition": "closed-form total flux minus the exact analytic-density authored-section plasma image",
+        "grid_identity_sup_wb": 4.440892098500626e-16,
+        "wall_identity_sup_wb": 3.673276960380889e-16
+      },
+      "realised_cells": 551,
+      "requested_cells": -500,
+      "state_size": 2253,
+      "tautology_audit": {
+        "algebraic_closure_sup_wb": 2.220446049250313e-15,
+        "exterior_current_perturbation_fraction": 0.0001,
+        "map_identity": "g(x_a)-x_a = G*(m_production(x_a)-m_exact); the exact exterior cancels the exact analytic-density image, not the production density image",
+        "perturbation_amplification_over_base": 110953436737.62805,
+        "perturbation_closure_sup_wb": 2.0495215767579733e-15,
+        "perturbation_predicted_sup_wb": 0.0005050505465225716,
+        "perturbed_forcing_sup_wb": 0.000505050546522362,
+        "roundoff_mechanism": "the exact exterior removes the full-field and section-kernel terms, while the production degree-nine density projection reproduces the smooth uniform-Mach source moments on these supports to binary64 precision",
+        "verdict": "not-tautological-controlled-density-residual"
+      },
+      "wall_rows": 121
+    },
+    "fine": {
+      "cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.2169263008981943,
+        "lock_wait_seconds": 1.7879530787467957e-05,
+        "semantic_key": "7c94be9b777c55ba",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_1000.zarr",
+        "store_seconds": 0.0
+      },
+      "closed_form_state": {
+        "axis_flux_wb": 1.3812146953272917,
+        "boundary_flux_wb": 0.0,
+        "boundary_read_absolute_error_wb": 8.673617379884035e-19,
+        "production_topology_axis_flux_wb": 1.3811489277145976,
+        "production_topology_boundary_flux_wb": -8.673617379884035e-19
+      },
+      "direct_sample_rows": 2855,
+      "forcing": {
+        "density_component_projection_share": 1.0,
+        "density_current_m0_l1_a": 3.735571495145848e-09,
+        "density_current_net_a": 2.0095089893305829e-10,
+        "density_radial_first_moment_l1_a_m": 6.476710810730087e-11,
+        "density_vertical_first_moment_l1_a_m": 1.105318084527566e-10,
+        "grid_sup_fraction_of_analytic_span": 2.572166145364282e-15,
+        "rms_wb": 9.52973704150319e-16,
+        "sup_wb": 3.6637359812630166e-15
+      },
+      "independent_state": {
+        "comparison": "g(x_a) - x_a",
+        "construction": "2*pi*case.flux(R,Z), evaluated directly and independently at every Nova grid, wall, and direct-sample target",
+        "coordinate_rows": 4052,
+        "coordinate_sha256_binary64": "93a52868fbfd90556edc5de0a28a45b6209b90a8444cb1f72c432af5b182c299",
+        "coupling_image_used_to_construct_state": false,
+        "state_sha256_binary64": "61d614384c1e4415da2d6f1ea9eefd1354b51a1485ec9d15e0eda07cbc911300",
+        "symbol": "x_a"
+      },
+      "linear_response": {
+        "equation": "(I - Dg) delta = g(x_exact) - x_exact",
+        "interpretation": "response to the measured binary64 residual, with the exact-state production read subtracted from axis and current observables",
+        "projected_state": {
+          "axis_delta_m": [
+            1.5543122344752192e-15,
+            1.87042478253105e-15
+          ],
+          "axis_displacement_mm": 2.4319488870750704e-12,
+          "flux_sup_fraction_of_span": 3.1348274896627187e-15,
+          "plasma_current_a": 1626730.808378718,
+          "plasma_current_fractional_deviation": -0.0007532166537478346,
+          "plasma_current_fractional_response": -1.4302014232302066e-16,
+          "plasma_current_response_a": -2.3283064365386963e-10,
+          "topology_axis_baseline_error_mm": 0.34859217378957474
+        },
+        "solve": {
+          "gmres_info": 0,
+          "residual_relative_sup": 2.3400166652849788e-08,
+          "residual_sup_wb": 8.573203253359674e-23
+        },
+        "tangent_finite_difference_absolute_sup": 3.006504106783936e-08,
+        "tangent_finite_difference_relative_sup": 4.327462955610136e-08,
+        "tangent_finite_difference_step_wb": 1.3812146953272917e-06
+      },
+      "prescribed_exterior": {
+        "coil_fit_used": false,
+        "definition": "closed-form total flux minus the exact analytic-density authored-section plasma image",
+        "grid_identity_sup_wb": 4.440892098500626e-16,
+        "wall_identity_sup_wb": 4.440892098500626e-16
+      },
+      "realised_cells": 1076,
+      "requested_cells": -1000,
+      "state_size": 4052,
+      "tautology_audit": {
+        "algebraic_closure_sup_wb": 2.0539125955565396e-15,
+        "exterior_current_perturbation_fraction": 0.0001,
+        "map_identity": "g(x_a)-x_a = G*(m_production(x_a)-m_exact); the exact exterior cancels the exact analytic-density image, not the production density image",
+        "perturbation_amplification_over_base": 138910065755.83334,
+        "perturbation_closure_sup_wb": 2.187161042555008e-15,
+        "perturbation_predicted_sup_wb": 0.0005089298060694544,
+        "perturbed_forcing_sup_wb": 0.0005089298060692582,
+        "roundoff_mechanism": "the exact exterior removes the full-field and section-kernel terms, while the production degree-nine density projection reproduces the smooth uniform-Mach source moments on these supports to binary64 precision",
+        "verdict": "not-tautological-controlled-density-residual"
+      },
+      "wall_rows": 121
+    }
+  },
+  "non_tautology_verdict": {
+    "comparison": "g(x_a)-x_a",
+    "fixtures": {
+      "coarse": {
+        "perturbation_closure_sup_wb": 2.0495215767579733e-15,
+        "perturbed_forcing_sup_wb": 0.000505050546522362
+      },
+      "fine": {
+        "perturbation_closure_sup_wb": 2.187161042555008e-15,
+        "perturbed_forcing_sup_wb": 0.0005089298060692582
+      }
+    },
+    "independent_state_rule": "x_a is 2*pi*case.flux(R,Z) at Nova targets and never a Nova coupling image",
+    "one_variable_break": "increase the sole exterior-current amplitude by 1e-4 and compare the finite forcing with the prescribed-exterior prediction",
+    "verdict": "not-tautological"
+  },
+  "qualification": "The exterior is prescribed exactly for the analytic field and exact support moments; the reported map forcing is the production density-moment image on that fixed oracle, not a cross-code reference residual.",
+  "roundtrip_comparator": {
+    "composition_error_fraction_of_analytic_span": {
+      "23x35": 0.01320394289,
+      "37x57": 0.003819717157,
+      "51x79": 0.002005611454,
+      "67x103": 0.001176524998
+    },
+    "distinction": "that lane measures Green-to-delta-star-to-Green composition; this lane prescribes the exact exterior and measures only the production-minus-exact support-density moment image",
+    "operator_pair": "rectangular-section Green image, discrete delta-star recovery, then a second rectangular-section Green image",
+    "source": "benchmarks/efit_analytic_roundtrip_floor.py"
+  },
+  "schema": "nova.analytic-oracle-forcing-baseline",
+  "topology_boundary_pin": {
+    "analytic_case": "moderate-rotation-conventional",
+    "axis_position_error_m": 0.00025753914148607393,
+    "closed_form_boundary_flux_wb": 0.0,
+    "localisation_tolerance_wb": 7.851296546319257e-14,
+    "production_boundary_flux_wb": -3.3881317890172014e-20,
+    "spatial_resolution_m": 0.0437037037037038,
+    "topology_class": "limited",
+    "wall_refinement_delta_wb": 4.54009659728305e-19
+  }
+}

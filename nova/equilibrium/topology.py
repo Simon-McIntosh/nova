@@ -1,6 +1,8 @@
 """Extract plasma topology from flux map."""
 
+from collections.abc import Sequence
 from dataclasses import dataclass
+from enum import StrEnum
 from functools import partial
 from typing import NamedTuple
 
@@ -30,6 +32,106 @@ class TopologyState(NamedTuple):
     def flux_span(self) -> jax.Array:
         """Return the total poloidal flux [Wb] from the axis to the boundary."""
         return self.boundary_flux - self.axis_flux
+
+
+class BoundaryMode(StrEnum):
+    """Physical obstruction that terminates the closed plasma boundary."""
+
+    LIMITED = "limited"
+    DIVERTED = "diverted"
+
+
+@dataclass(frozen=True)
+class TopologySolveReceipt:
+    """Host-visible topology history for one forward solve.
+
+    The nonlinear map keeps boolean topology on device.  This receipt is the
+    explicit host boundary: it gives every completed solve a named final class,
+    retains the class seen at each recorded iterate, and counts topology
+    changes only as successfully traversed when the solve itself succeeded.
+    A limited solve additionally publishes the wall-contact point that bound
+    its last closed surface; a diverted solve leaves that field unset because
+    its boundary is the X-point separatrix.
+    """
+
+    topology_class: BoundaryMode
+    boundary_point_m: tuple[float, float]
+    wall_contact_point_m: tuple[float, float] | None
+    topology_history: tuple[BoundaryMode, ...]
+    transition_count: int
+    transitions_without_solver_failure: int
+    solver_succeeded: bool
+
+    def as_dict(self) -> dict[str, object]:
+        """Return the strict-JSON representation of this receipt."""
+
+        return {
+            "topology_class": self.topology_class.value,
+            "boundary_point_m": list(self.boundary_point_m),
+            "wall_contact_point_m": (
+                None
+                if self.wall_contact_point_m is None
+                else list(self.wall_contact_point_m)
+            ),
+            "topology_history": [mode.value for mode in self.topology_history],
+            "transition_count": self.transition_count,
+            "transitions_without_solver_failure": (
+                self.transitions_without_solver_failure
+            ),
+            "solver_succeeded": self.solver_succeeded,
+        }
+
+
+def _host_point(point: jax.Array) -> tuple[float, float]:
+    """Convert one device point to an immutable two-coordinate host value."""
+
+    coordinates = jax.device_get(point)
+    if coordinates.shape != (2,):
+        raise ValueError("topology receipt points must have shape (2,)")
+    return float(coordinates[0]), float(coordinates[1])
+
+
+def boundary_mode(state: TopologyState) -> BoundaryMode:
+    """Return the named boundary mode of one completed topology read."""
+
+    return (
+        BoundaryMode.DIVERTED
+        if bool(jax.device_get(state.diverted))
+        else BoundaryMode.LIMITED
+    )
+
+
+def topology_solve_receipt(
+    states: Sequence[TopologyState], *, solver_succeeded: bool
+) -> TopologySolveReceipt:
+    """Summarise a non-empty topology history for one forward solve.
+
+    ``states`` is ordered in solve-evaluation order and may contain repeated
+    classes.  Only changes between adjacent recorded states are transitions.
+    If the solve failed, the observed changes remain visible in
+    ``transition_count`` but none are reported as traversed without failure.
+    """
+
+    if not states:
+        raise ValueError("a topology solve receipt requires at least one state")
+    history = tuple(boundary_mode(state) for state in states)
+    transitions = sum(left is not right for left, right in zip(history, history[1:]))
+    final_state = states[-1]
+    final_mode = history[-1]
+    wall_contact = (
+        _host_point(final_state.wall_point)
+        if final_mode is BoundaryMode.LIMITED
+        else None
+    )
+    return TopologySolveReceipt(
+        topology_class=final_mode,
+        boundary_point_m=_host_point(final_state.boundary),
+        wall_contact_point_m=wall_contact,
+        topology_history=history,
+        transition_count=transitions,
+        transitions_without_solver_failure=transitions if solver_succeeded else 0,
+        solver_succeeded=solver_succeeded,
+    )
 
 
 @dataclass

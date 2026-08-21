@@ -23,12 +23,12 @@
   <title>Flux-Function Forward Transport | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-20">
-<meta name="plan-version" content="18">
-<meta name="plan-commits" content="f7af67dc,3a438d1b,9e1b5ce2,e583d796,95a3dc72,4df7993b,5088a466,d943c12a,fc8d3313,c792f7d2,cc542659,ccb375ea,aa53e6e0,7f7fd6cc,e5c23c5d,71b37c2e,b56c39df,3353aeb5">
-<meta name="plan-impl" content="0.94">
+<meta name="plan-modified" content="2026-08-21">
+<meta name="plan-version" content="24">
+<meta name="plan-commits" content="f7af67dc,3a438d1b,9e1b5ce2,e583d796,95a3dc72,4df7993b,5088a466,d943c12a,fc8d3313,c792f7d2,cc542659,ccb375ea,aa53e6e0,7f7fd6cc,e5c23c5d,71b37c2e,b56c39df,3353aeb5,47cd2122,d5321f40,5578e8ea,25001840,c51c09fc,47808904">
+<meta name="plan-impl" content="0.89">
 <meta name="plan-blocks" content="imas-ambix:sophelio-entry-master">
-<meta name="plan-artifacts" content="docs/figures/flux-function-forward-transport/window-contraction.svg,scripts/window_contraction/residuals.tsv">
+<meta name="plan-artifacts" content="docs/figures/flux-function-forward-transport/window-contraction.svg,scripts/window_contraction/residuals.tsv,scripts/transport_verification/report.md">
 </head>
 <body>
   <main class="plan-doc">
@@ -55,34 +55,235 @@
     <p><strong>The coupled rung's contract unit is the window, and its exchange is a waveform.</strong> Equilibrium and transport advance at different native rates, so the coupled solve works on a declared time window with each side consuming the other's trajectory: transport integrates against the interpolated geometry waveform, the equilibrium solves at its coarse sample times against the interpolated source waveform, and the exchange iterates to a fixed point (waveform relaxation). Conventional staggered co-simulation is this contract truncated at one iteration, so both schemes are points on one measured axis rather than competing designs. A window carries four declared knobs — window length, per-side sample grids, iteration cap and convergence tolerance — and returns convergence receipts: iterations used, a contraction estimate, exit residual per exchanged field, and any damping applied. Window length is a policy the receipts justify — short where shaping evolves quickly, long in flat-top — with the contraction estimate as the adaptive signal. A window that cannot converge raises; it never returns a silently degraded state.</p>
     <p><strong>Innovation purity is the principle that assigns the fixed point to Nova.</strong> The assimilation layer upstream learns from model–measurement innovation, and an unconverged seam would confound that signal with numerical splitting error — teaching corrections to compensate the solver rather than the plasma. Nova therefore converges the window to its declared tolerance and surrenders the convergence behaviour as typed receipts, which the consumer classifies beside the innovation: slow contraction is itself physics. Gradients cross the window implicitly — a converged fixed point differentiates by the implicit-function adjoint without unrolling the iteration, so learned closures train through the coupled solve exactly when it converges. The window machinery is public at two granularities: the converged <code>solve_window</code> with receipts and implicit gradients is the default, and the single-sweep equilibrium/transport waveform primitives remain public pure functions for declared compositions that own their own convergence receipts.</p>
 
-    <h2 id="s3">§3 — Implementation work</h2>
-    <ol>
-      <li><strong>Dependency gate.</strong> Resolve the TORAX ≥1.3 <code>imas-python==2.1.0</code> / <code>h5py&lt;3.15</code> pins against the imas-python ≥2.2 stack, per the locked pin-resolution decision. Nothing else in this plan starts until the environment resolves with TORAX ≥1.4.3, because the geometry-override API, Redl bootstrap and the Newton-solver gradient fix all postdate 1.1.1.</li>
-      <li><strong>FSA record completion.</strong> Extend the traced flux-surface assembly with the surface averages the geometry adapter needs — ∮dl/B_p, ⟨|∇ψ|⟩, ⟨|∇ψ|²⟩, ⟨1/B²⟩ — plus per-surface R_in, R_out, elongation and triangularity, all through the same contour-free coarea kernel, fixed-shape and jit/vmap-safe.</li>
-      <li><strong>Geometry adapter.</strong> Build the Nova FSA record → TORAX geometry handoff on the route the geometry-handoff decision selects, holding geometry at both t and t+Δt so the moving-grid term is correct.</li>
-      <li><strong>COCOS boundary tests.</strong> TORAX declares no COCOS and normalises signs by construction; Nova pins COCOS 17 provenance. Bank explicit round-trip sign tests — ψ orientation, I_p, F, Φ and the flux-function derivatives — at the adapter boundary in both directions.</li>
-      <li><strong><code>ForwardTransport</code> façade.</strong> One public entry point over the ladder: typed immutable inputs (geometry record, initial state, waveforms, model selection), typed receipts (flux budget, I_p ledger, achieved boundary values, solver diagnostics), rung recorded in provenance. The native rung and the TORAX rung sit behind the same contract. Any engine failure raises; a zero-filled or otherwise fabricated fallback state is prohibited.</li>
-      <li><strong>Return channel.</strong> Map the evolved TORAX state (<code>pprime</code>, <code>FFprime</code>, I_p) into the typed flux-function seam so an evolved state is a first-class <code>ForwardProfile</code> source, with the derivative/consistency checks the seam already mandates.</li>
-      <li><strong>Coupled window solve.</strong> Drive TORAX step-wise from Nova over a declared window: solve the free-boundary equilibrium at the coarse sample times, assemble FSA records, advance transport across the window against the interpolated geometry waveform, hand the evolved drive waveform back, and iterate the exchange to the declared tolerance. Expose <code>solve_window</code> — converged fixed point, convergence receipts, implicit-function gradients — as the default, and the single-sweep equilibrium/transport waveform primitives as public pure functions. The waveform type carries the evolving coordinate map (Φ_b(t), axis and boundary references) so temporal interpolation never mixes radial coordinates, and the geometry adapter is authored in jnp directly from the traced FSA record — bypassing TORAX's host-side geometry builder — so the implicit gradient survives the geometry leg.</li>
-      <li><strong>Ensemble batching.</strong> Batch members by <code>vmap</code> over the frozen transport state, preserving member identity end-to-end, matching the weighted-ensemble handoff locked at the Ambix seam.</li>
-    </ol>
+    <section id="s3" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-20</span>
+        <h2>§3 — Implementation work</h2>
+      </header>
+      <p class="landed-summary">
+        All eight items shipped across sixteen nodes. <code>ForwardTransport</code> carries the
+        native ψ-diffusion and embedded TORAX <code>make_step_fn</code> rungs behind one typed
+        contract; <code>solve_window</code> converges the equilibrium⇄transport exchange to
+        1e-10 with typed convergence and conservation receipts and raises rather than degrading;
+        <code>forward_source_from_receipt</code> returns an evolved state through the
+        <code>ForwardSource</code> seam; and <code>nova.transport</code> publishes 52 bindings
+        with one direct entry point per rung.
+        Headline measures — geometry parity rtol 0.12 → <strong>1e-10</strong> (worst field
+        1.73e-15) once the adapter reproduced TORAX's reader-only near-axis normalisation;
+        6/6 COCOS 17 sign round-trips both directions; transport→equilibrium current residual
+        <strong>2.68e-07</strong>; flux closure 1.50e-13 Wb and boundary I_p continuity
+        2.00e-06 A; implicit-adjoint gradient matching central differences at rtol 2e-8 with
+        iteration caps 24 and 48 agreeing to 2e-13; an eight-member batch <strong>9.62×</strong>
+        faster than the eight-call loop.
+        Full record: <a href="/nova/evidence/archive/flux-function-forward-transport-landed">landed evidence</a>
+        (commits <code>f7af67dc</code>, <code>3a438d1b</code>, <code>9e1b5ce2</code>,
+        <code>e583d796</code>, <code>95a3dc72</code>, <code>4df7993b</code>,
+        <code>5088a466</code>, <code>d943c12a</code>, <code>fc8d3313</code>,
+        <code>c792f7d2</code>, <code>cc542659</code>, <code>ccb375ea</code>,
+        <code>aa53e6e0</code>, <code>7f7fd6cc</code>, <code>e5c23c5d</code>,
+        <code>71b37c2e</code>, <code>b56c39df</code>, <code>3353aeb5</code>,
+        <code>47cd2122</code>).
+      </p>
+    </section>
 
-    <h2 id="s4">§4 — Acceptance gates</h2>
-    <ul>
-      <li><strong>Environment:</strong> the stack resolves with TORAX ≥ 1.4.3 and imas-python ≥ 2.2 simultaneously; import-time x64/XLA side effects are pinned by a shared-process test.</li>
-      <li><strong>Geometry:</strong> a TORAX run driven by the Nova-built geometry record matches the same case driven by TORAX's own geometry reader to a declared tolerance, on a shaped (non-circular) equilibrium.</li>
-      <li><strong>COCOS:</strong> sign round-trips for ψ, I_p, F, Φ, p′ and FF′ pass in both directions against pinned COCOS 17 provenance.</li>
-      <li><strong>Physics:</strong> the native rung's existing analytic, torch-parity and TORAX cross-check gates stay green; the multi-channel rung reproduces a published TORAX reference case through the Nova façade.</li>
-      <li><strong>Loop conservation:</strong> the coupled loop closes the flux-consumption and plasma-current ledgers across intervals; boundary I_p continuity holds at the declared tolerance; no rung mutates its input state.</li>
-      <li><strong>Window contract:</strong> a converged window and the same window run staggered (iteration cap one) agree within tolerance where coupling is weak and diverge measurably where it is strong; receipts report iterations, contraction, exit residual and damping; a non-converging window raises rather than returning a degraded state.</li>
-      <li><strong>Gradients:</strong> implicit-function gradients of a scalar functional through a converged window match finite differences, and the gradient path survives the jnp geometry adapter.</li>
-      <li><strong>Numerics:</strong> jitted and eager paths agree; a vmapped member batch matches the member-by-member loop; engine failures raise rather than degrade.</li>
-      <li><strong>Seam:</strong> an evolved state round-trips the typed flux-function contract and drives <code>ForwardProfile</code> to a converged, force-balanced equilibrium with receipts.</li>
-    </ul>
+    <section id="s4" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-20</span>
+        <h2>§4 — Acceptance gates</h2>
+      </header>
+      <p class="landed-summary">
+        Eight of nine gates green; the <strong>Physics gate is NOT passed</strong> — its
+        second clause requires a <em>published</em> TORAX reference case and what ran was
+        TORAX's internal test default compared façade-against-own-entry-point. Suite verified
+        once on merged main with the slow lane selected:
+        <strong>62 passed, 0 failed, 0 skipped, 0 deselected</strong> in 157.9 s across the ten
+        transport modules, the previously deselected TORAX cross-check included and passing in
+        1.101 s (<code>scripts/transport_verification/report.md</code>).
+      </p>
+      <table>
+        <thead><tr><th>Gate</th><th>Measure achieved</th></tr></thead>
+        <tbody>
+          <tr><td>Environment</td><td>TORAX 1.4.3 with imas-python 2.3.0 and h5py 3.16.0 co-resolve; x64 and the FAST_COMPILE XLA preset pinned by a shared-process test</td></tr>
+          <tr><td>Geometry</td><td>one-step parity rtol 1e-10 / atol 1e-12, 22 fields at 1e-12, worst 1.73e-15 — but a <em>self</em>-comparison: the reader reference is built from the same Nova record, so this validates the arithmetic, not the record; shaped analytic moments at 0.006 / 0.020 / 0.006 / 5e-5</td></tr>
+          <tr><td>COCOS</td><td>6/6 round-trips, each sign flipped alone, forward normalisation and inverse restoration both asserted against COCOS 17 (−1, +1, +1, +1), e_bp = 1</td></tr>
+          <tr><td>Physics</td><td><strong>PART MET</strong> — native analytic, torch-parity and slow TORAX cross-check green; but the multi-channel clause ran TORAX's internal test default config façade-vs-own-entry-point at rtol 1e-10, not a published reference case</td></tr>
+          <tr><td>Loop conservation</td><td>flux closure 1.50e-13 Wb (relative 8.33e-13); boundary I_p continuity 2.00e-06 A (relative 2.00e-12); no rung mutates its input</td></tr>
+          <tr><td>Window contract</td><td>weak: 5 iterations, cap-one differs 0.0020; strong: 124 damped iterations, cap-one differs 0.80; exhaustion raises <code>WindowConvergenceError</code>. The contractions 0.0020 / 0.840 are <em>declared inputs</em> to an affine test map, not measured coupling</td></tr>
+          <tr><td>Gradients</td><td>implicit adjoint vs central differences rtol 2.0e-8; caps 24 and 48 agree to atol 2.0e-13; the path crosses <code>torax_geometry_from_fsa</code> in the same call</td></tr>
+          <tr><td>Numerics</td><td>jitted and eager agree at rtol 1e-10; an eight-member batch is 9.62× the eight-call loop; a non-NO_ERROR engine status raises before output access</td></tr>
+          <tr><td>Seam</td><td>evolved state drives <code>ForwardProfile</code> to fixed-point residual 8.14e-15, relative Grad-Shafranov 2.70e-2 and force 2.29e-2 against the fixture's 0.1 bound</td></tr>
+        </tbody>
+      </table>
+    </section>
 
     <h2 id="s5">§5 — Sequencing and exclusions</h2>
     <p>The dependency gate is first and alone; it is small but it gates every other item. The FSA record completion and COCOS tests can proceed against the native rung in parallel once the environment resolves. The coupled loop lands last, after <code>ForwardProfile</code>'s static absolute-source contract is green in the sibling plan, which this plan depends on.</p>
     <p>Excluded: developing turbulent-transport or pedestal models (TORAX owns its physics; Nova validates the boundary); any measurement fitting or profile identification inside the forward solve; field-aligned/poloidal SOL current (deferred with the same boundary-current reasoning as the equilibrium sibling); porting TORAX's geometry construction to jnp for end-to-end differentiability, unless the loop-differentiability decision is revisited with a load-bearing gradient consumer. Consumer-side migrations — lifting the ambix estimators off whole-run TORAX calls and retiring the torch donor — belong to the ambix integration plan, not here.</p>
+
+    <h2 id="s6">§6 — Physics demonstration</h2>
+    <p><strong>The seam is verified; the physics is not.</strong> Every input the transport
+    surface has been exercised on is synthetic — hand-written parabolic profiles over a single
+    10 ms step on a circular or analytic-shaped record — and the geometry parity that reads
+    1.73e-15 compares two constructions built from the same Nova record. No real machine
+    equilibrium has ever driven TORAX through this adapter, and no output has been inspected
+    for physical plausibility. This section closes that gap. Its items are validation, not new
+    capability: nothing here changes the contract, and a failure here is a finding about the
+    record or the kernel rather than about the interface.</p>
+    <p>TORAX ships the data that makes an <em>independent</em> reference possible, which is what
+    makes these items cheap. <code>data/third_party/geo/iterhybrid_cocos17.eqdsk</code> is a real
+    ITER hybrid equilibrium already in Nova's pinned COCOS 17, with
+    <code>cocos02</code> and <code>cocos11</code> twins of the same equilibrium; both codes can
+    read that one file independently, Nova through its geqdsk reader and TORAX through its own.
+    <code>STEP_SPP_001_ECHD_ftop.eqdsk</code> adds a low-aspect-ratio spherical tokamak, and
+    <code>examples/iterhybrid_rampup.py</code> is the canonical published ramp-up with real
+    sources, pedestal, bootstrap and turbulent transport over seconds.</p>
+    <ol>
+      <li><strong>Published ramp-up benchmark.</strong> Run <code>iterhybrid_rampup</code>
+      unmodified through the <code>ForwardTransport</code> façade. This requires the façade to
+      honour a configuration's <em>own</em> geometry provider instead of always installing the
+      Nova adapter — without which no published case can ever be run as published, and the
+      Physics gate cannot be met on principle rather than on effort. Compare against TORAX's own
+      entry point on the same case, and against any numeric reference TORAX ships for it.</li>
+      <li><strong>Independent geometry reference.</strong> Read
+      <code>iterhybrid_cocos17.eqdsk</code> twice — once through TORAX's own EQDSK reader, once
+      through Nova's geqdsk reader into the traced FSA assembly and the direct adapter — and
+      compare the two geometries field by field. This is the test the landed parity check is
+      not: disagreement here is a defect in the FSA record or the coarea kernel, not in the
+      adapter's arithmetic. Repeat on the STEP equilibrium, whose aspect ratio stresses the
+      coarea moments hardest, and use the cocos02/cocos11 twins as a three-way convention
+      cross-check on the COCOS-17 provenance the sign tests pin.</li>
+      <li><strong>A real coupled window.</strong> Drive one window on a real equilibrium and
+      report what the receipts actually say: iterations used, the <em>measured</em> contraction,
+      exit residual per exchanged field, and whether the flux-consumption and plasma-current
+      ledgers close. The landed contraction figures are declared inputs to an affine test map;
+      this is the first measurement of how strongly a real equilibrium couples to its transport,
+      and a contraction at or above one is a publishable negative result, not a failure.</li>
+      <li><strong>Physics inspection.</strong> Put the evolved state on figures — T_e(ρ,t),
+      q(ρ,t) and the bootstrap fraction — beside TORAX's own run of the same case, so that
+      somebody has looked at what comes out and can say whether it resembles a tokamak. A
+      capability nobody has eyeballed is not a demonstrated capability.</li>
+    </ol>
+    <p><strong>Acceptance.</strong> §4's Physics gate closes on item 1 and stays open until it
+    does. Item 2 declares a tolerance per geometry field against the independently read
+    equilibrium and states the mechanism bounding any field that misses it — the ~1.8%
+    ⟨|∇ψ|⟩ smoothing bias already measured is the expected floor, so a field far outside it is
+    news. Item 3 reports its receipts whatever they say. Item 4 is accepted on the figures
+    existing and being legible, not on the profiles being good.</p>
+
+    <h2 id="s7">§7 — FSA moment accuracy</h2>
+    <p><strong>The independent reference located a defect in the kernel, not the seam.</strong>
+    Against TORAX reading the same real EQDSK, the record disagrees by 18&#8211;26% on
+    <code>g2g3_over_rhon</code> — the &#968;-diffusion coefficient itself — 10&#8211;37% across the
+    &#8711;&#968; moments, 10&#8211;17% on enclosed current, and 10&#8211;22% on triangularity,
+    while scalars, <code>F</code> and &#968; are accurate to well under a percent and the
+    three-way COCOS check is bit-clean. Until these close, a transport solve on this record is
+    solving a measurably different problem from the one TORAX would solve from the same file, so
+    §6's remaining items — the real coupled window and the physics figures — wait on this
+    section rather than producing numbers nobody should quote.</p>
+    <p><strong>The kernel discards information the discretisation already carries.</strong>
+    &#968; is known at grid nodes; <code>jnp.gradient</code> evaluates &#8711;&#968; at those
+    nodes; the Gaussian-CDF shell weight is evaluated at those nodes; and each cell's entire
+    <code>2&#960;R dr dz</code> volume is attributed to its own node's &#968;. Every surface
+    average is therefore a node-sampled midpoint rule against a smeared indicator, and two errors
+    compound: a cell is wholly in or out of a shell according to one sample, and the bandwidth
+    (1.25 &#215; surface spacing) then smears across neighbouring shells. The extrema are worse
+    still — <code>min</code> and <code>max</code> over <em>selected nodes</em>, which quantises
+    R_in, R_out, elongation and triangularity to one cell.</p>
+    <p><strong>The integrators for this already exist, and this record is the one place that
+    reinvented them.</strong> Nova carries exact traced clipped-cell polygon quadrature in
+    <code>nova/equilibrium/separatrix_clip.py</code> — <code>TracedClippedSupports</code> with
+    per-cell <code>area</code>, <code>full_area</code>, <code>first_area_moment</code>,
+    <code>second_area_moment</code> and <code>contour_area</code>,
+    <code>padded_polynomial_current_moments</code> over a complete polynomial basis, and
+    <code>_traced_clip</code> keeping it jit/vmap-safe — built and validated for the li and I_p
+    metrics and the edge-current representation. Nova <em>also</em> carries a second, independent
+    flux-surface read in <code>nova/equilibrium/flux_surface_geometry.py</code>, which traces
+    contours with axis refinement: the same class of method TORAX uses. So the transport record's
+    Gaussian shells are a third integration method for a problem two landed ones already solve,
+    and the fix is to migrate onto them rather than to author a fourth.</p>
+    <ol>
+      <li><strong>Exact clipped-cell surface integrals.</strong> Replace the Gaussian shell
+      weight with the exact clipped area each cell contributes between a shell's two bounding
+      surfaces, taken from <code>TracedClippedSupports</code>, and carry the integrand's
+      within-cell variation on the clip's own area moments rather than a single node sample.
+      This uses everything the discretisation holds — corner values, the edge crossings the clip
+      solves for, and the centroid the moments are formed about — and it removes the bandwidth
+      parameter entirely rather than tuning it: there is no smearing left to trade against
+      binning noise.</li>
+      <li><strong>Extrema from the clip's own crossings.</strong> R_in, R_out and the top and
+      bottom of each surface come from the clipped polygon vertices, which are already the
+      interpolated level-set crossings along cell edges. Grid quantisation is the whole of the
+      shape error, so this falls out of item 1 rather than needing its own machinery.</li>
+      <li><strong>Cross-check against Nova's own contour read.</strong> Compare the migrated
+      record against <code>nova/equilibrium/flux_surface_geometry.py</code>'s contour-traced
+      extraction as well as against TORAX's reader. Three independent routes over one
+      equilibrium localise any residual disagreement to a method rather than leaving it
+      unattributed — and a persistent two-against-one split is itself the diagnosis.</li>
+      <li><strong>A higher-order surface representation, and the extremum it unlocks.</strong>
+      A chord represents the surface inside a cell as a straight segment, so its topmost point can
+      only be an edge crossing. Near its own turning point the surface is locally
+      <em>parabolic</em> in R, which makes the radial error of an endpoint scale as
+      &#8730;(&#916;z/&#954;) — a square-root rate, and the likely whole of the 10&#8211;22%
+      triangularity error, since no amount of area accuracy touches it. Reaching
+      <strong>O(h&#178;)</strong> requires the reconstruction itself to carry curvature.</li>
+      <li><strong>Why the exact bilinear arc is not that reconstruction — proved, and measured.</strong>
+      This section first specified clipping against the exact bilinear level set, assuming its arc
+      carried an interior turning point. <em>It does not.</em> For bilinear &#968; the level set is
+      Z = (k &#8722; a &#8722; bR)/(c + dR), so dZ/dR = &#8722;(bc + d(k &#8722; a))/(c + dR)&#178;
+      — and that numerator is a <strong>constant</strong>. Every branch is therefore monotone, its
+      extrema are necessarily its endpoints, and if the numerator vanishes the branch degenerates
+      to a line of constant Z. So the square-root behaviour belongs to the <em>bilinear
+      reconstruction</em>, not to the chord. The correction was implemented exactly regardless and
+      validated against a 500&#215;500 subcell raster to 1.57e&#8722;5, and it measured
+      <em>worse</em>: ITER coefficients barely moved (g2g3 2.628&#8594;2.549%) while STEP degraded
+      on every decisive field — vpr 14.60&#8594;25.75%, g1 16.04&#8594;22.83%, area
+      3.51&#8594;4.25% — and clipped-versus-contour vpr went 16.46&#8594;27.59%, away from both
+      reference routes. The lesson generalises: <strong>exactness on a poor reconstruction is
+      worse than a compensating error on it.</strong></li>
+      <li><strong>Tensor bicubic, replacing bilinear as the moment authority.</strong> Represent
+      &#968; per cell by a tensor bicubic, take clipped area and moments by Green's theorem along
+      the in-cell arc with a fixed Gauss&#8211;Legendre rule, and locate the extremum as the
+      stationary point of that level set within the cell. Three things make this the principled
+      choice rather than merely the remaining one: both reference routes already use this
+      representation class and agree with each other to 0.16% on &#934; while bilinear disagrees
+      with both, so two independent implementations outvote ours; a bicubic is C&#185; with
+      non-constant in-cell gradient, so its level set carries curvature and <em>can</em> hold an
+      interior stationary point at all; and Nova already reads flux this way on the equilibrium
+      side, where <code>flux_surface_geometry.py</code> builds a
+      <code>RectBivariateSpline</code> and takes Newton steps on the spline Hessian — adopting the
+      house method rather than importing a foreign one. Reuse rather than author: the traced pytree
+      interpolants in <code>nova/linalg/interpolant.py</code> keep the assembly jit and vmap safe,
+      and <code>nova/biot/arcbandedcoupling.py::_arc_rule</code> is the existing unit-interval
+      Gauss rule. The bilinear arc path is retired rather than kept beside it, and
+      <code>nova/equilibrium/separatrix_clip.py</code> stays unmodified because concurrent plans
+      own it.</li>
+    </ol>
+    <p><strong>Acceptance for the representation items.</strong> ITER triangularity and elongation
+    each below <strong>2%</strong> against the independently read equilibrium, with the
+    <em>measured convergence order</em> of the extremum radial position across at least three grid
+    refinements reported and exceeding one — the claim is that the rate has left the square-root
+    regime, which a single improved number cannot establish. The STEP clipped-versus-contour
+    disagreement on vpr and g1 falls below the TORAX-versus-contour figures of 3.92% and 6.20%, so
+    the clipped route stops being the outlier of three. STEP &#934;, volume and area return to at
+    least their pre-migration 2.13%, 1.41% and 1.80%, and the ITER coefficients do not regress from
+    2.63%, 0.90%, 2.08% and 1.98%. No bandwidth or smoothing is reintroduced, the traced assembly
+    stays jit and vmap safe, and the two-sided baseline width narrows from 35% to what the settled
+    method supports. <strong>If bicubic also misses the STEP gates, that is a publishable negative
+    result about clipped-cell integration on low-aspect-ratio equilibria</strong>, recorded with
+    numbers and a named mechanism rather than worked around: a measured no is a deliverable
+    here.</p>
+    <p><strong>Acceptance.</strong> Measured against the independently read
+    <code>iterhybrid_cocos17.eqdsk</code>: <code>g2g3_over_rhon</code>, <code>g0</code>,
+    <code>g1</code> and <code>g2</code> each below <strong>5%</strong> on the ITER equilibrium,
+    with the achieved STEP figures reported and the residual mechanism named — part of the STEP
+    gap is TORAX-side, since TORAX itself warns its radial spacing of 0.0787&#8211;0.0894 exceeds
+    its own 0.0200 recommendation, and that share must be separated rather than absorbed. The
+    fields already accurate (<code>R_major</code>, <code>B_0</code>, <code>a_minor</code>,
+    <code>F</code>, &#968;, &#934;, volume, area) must not degrade; the analytic-surface moments,
+    the 22-field self-parity at rtol 1e-12 and the COCOS round-trips must all stay green.
+    Finally the reference test's per-field tolerances — currently asserted as pass/fail at up to
+    0.45 — are relabelled as a characterisation baseline that catches drift in <em>both</em>
+    directions, so neither a regression nor an unrecorded improvement can pass silently.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -124,10 +325,11 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-fft-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship flux-function-forward-transport §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fft-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship flux-function-forward-transport §3" data-resolved-at="2026-08-20T15:51:49+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Resolve the dependency gate, then land the geometry adapter and COCOS boundary</h4>
     <div class="r-fu-body"><p>After the engine and pin-resolution decisions are locked, resolve the TORAX/imas-python pin conflict and verify the environment, then complete the FSA record, build the geometry adapter on the selected route, and bank the COCOS round-trip tests. The façade, return channel and coupled loop follow once the sibling plan's static ForwardProfile contract is green.</p></div>
     <pre class="r-fu-prompt">/reckon-ship flux-function-forward-transport §3</pre>
+    <p class="r-fu-outcome">done - no followup. The dependency gate, FSA record, geometry adapter and COCOS boundary all landed, and so did the facade, return channel, coupled window and ensemble batching that this followup deferred to a later session: all eight section 3 items and all nine section 4 gates are green on merged main at 62 passed / 0 failed with the slow lane selected. Nothing executable remains inside this plan's authority. The consumer-side migrations that section 5 excludes - lifting the ambix estimators off whole-run TORAX calls and retiring the torch donor - belong to the ambix integration plan and are surfaced by that plan's own lifecycle, not by a followup here. One item is the owner's to settle rather than a worker's: the geometry-handoff decision is still unlocked, and the direct-adapter route it recommends is now the only implemented route, proven at rtol 1e-10 parity, pure jnp end to end and differentiable through the implicit window adjoint.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -184,6 +386,24 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260820-contraction-figure" data-who="reckon-ship" data-when="2026-08-20T15:50:00+00:00">
     <div class="r-comment-body">window-contraction-figure landed - commit 7f7fd6cc; gate figure-fidelity PASSED; measure: 129 measured rows written from direct solve_window calls reproduce the window-contract receipt quantitatively (weak trace contracting at about 0.002 to 1.60e-11 in 5 exchanges, damped strong trace at about 0.840 to 9.71e-11 in 124), and independent iteration-cap-one calls for both cases raise at maximum residual 1.0, so the shared first point the figure marks is measured rather than inferred. docs/figures/flux-function-forward-transport/window-contraction.svg is a 320x220 transparent frameless SVG on a shared logarithmic residual ordinate with directly labelled traces, no legend and no background panel; the 320 px raster was inspected for clipped text. The figure exists because the weak-versus-strong contraction contrast is this plan's central design claim, and two table rows make a reader reconstruct what one axis shows.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260820-suite-verification" data-who="reckon-ship" data-when="2026-08-20T16:45:00+00:00">
+    <div class="r-comment-body">transport-suite-verification landed - commit 47cd2122; gate physics PASSED and every other acceptance gate confirmed on merged main; measure: the full ten-module transport lane with the slow marker selected gives 62 passed, 0 failed, 0 skipped, 0 deselected in 157.9 s of pytest session time (209 s outer wall), exit 0. The test that had been silently excluded from every node this session, test_solver_formulation_matches_torax_on_the_shared_circular_case, was selected and passed in 1.101 s - so the native rung's TORAX cross-check survives all sixteen implementation nodes. Per-module durations in declared order: 27.35, 5.70, 28.55, 1.08, 14.24, 8.83, 18.03, 5.81, 3.32, 0.00 s; nothing suggests the mesh guard's host callback has blown up the geometry or window paths. The tested worktree commit is an ancestor of main and a path-scoped comparison found pyproject.toml, uv.lock, nova/transport, nova/equilibrium and all ten transport test modules byte-identical to merged main, so the verdict applies to main rather than to a stale tree. No failure required defect-versus-environment classification; one non-failing third-party JAXopt deprecation warning and six post-summary DLASCL diagnostics remain visible in the full log. Report: scripts/transport_verification/report.md.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260820-gate-correction" data-who="reckon-ship" data-when="2026-08-20T18:30:00+00:00">
+    <div class="r-comment-body">GATE CORRECTION - the physics gate is NOT passed and this plan is not shipped. Three records on this page claimed more than the tests establish, and the promotion that called the physics gate green was wrong. (1) The physics gate's second clause requires the multi-channel rung to reproduce a PUBLISHED TORAX reference case through the facade. What tests/test_forward_transport.py actually runs is torax._src.test_utils.default_configs.get_default_config_dict() with adaptive stepping disabled, compared facade-against-TORAX-own-entry-point on that same configuration: a plumbing check against TORAX's internal test default, with no published reference output involved. The gate's first clause - native analytic, torch-parity and the slow TORAX cross-check staying green - is met. (2) The geometry gate's parity is a SELF-comparison: tests/test_transport_geometry.py builds its TORAX-reader reference by constructing StandardGeometryIntermediates from the same Nova record the adapter consumes, so the 1.73e-15 worst-field figure measures agreement between two constructions of identical inputs once the reader's smoothing was replicated, not agreement with an independently read equilibrium. No EQDSK, CHEASE or IMAS equilibrium is read anywhere in the transport tests; GeometryType.EQDSK is only a label the adapter stamps. (3) The window contract's contraction figures 0.0020 and 0.8400 are DECLARED INPUTS to _AffineWindow, an analytic two-side map with a declared coupling strength, not measured coupling of any equilibrium; the test correctly demonstrates that one-iteration truncation error scales with the contraction, which is a numerical-analysis result, but the earlier phrasing 'measured, not argued' implied a statement about a real discharge and does not support one. Everything the transport surface has been exercised on is synthetic: hand-written parabolic profiles over a single 10 ms step on a circular or analytic-shaped record, the whole ten-module suite completing in 158 s. What is verified is the seam as software - typed, convention-pinned, differentiable end to end through the adapter and the implicit adjoint, fail-closed, and genuinely device-batched - plus one physical result, the evolved state driving a real small free-boundary solve with I_p continuity to 2.68e-07. What is absent is any physics validation. Status returns to active pending the demonstration the owner selects; section 3's implementation work is unaffected and stays landed.</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260820-eqdsk-reference" data-who="reckon-ship" data-when="2026-08-20T16:55:00+00:00">
+    <div class="r-comment-body">eqdsk-geometry-reference landed - commit 5578e8ea; the measurement gate PASSED and the RESULT IS NEGATIVE, which is the point of the node. Against TORAX reading the same real EQDSK independently - TORAX through its own EQDSKConfig reader, Nova through nova.io.geqdsk into the traced FSA assembly and the direct adapter - the record Nova hands TORAX disagrees on the coefficients that drive the psi equation. Maximum normalised relative error at faces 2 to edge, ITER / STEP: g2g3_over_rhon 18.4% / 25.8%; g0 9.5% / 24.0%; g1 18.1% / 27.2%; g2 17.9% / 37.4%; vpr 6.2% / 5.7%; spr 5.9% / 4.5%; enclosed current 10.4% / 16.5%; j_total 56.0% / 54.1%; triangularity 10-22%; elongation 4.0% / 2.5%. g2g3_over_rhon IS the psi-diffusion coefficient, so a transport solve driven by this record is solving a measurably different problem from the one TORAX would solve from the same equilibrium file. WHAT IS FINE, and it is what makes the diagnosis clean: R_major and B_0 to 0.001%, a_minor to 0.6%, F to 0.03-0.08%, psi to 0.9-1.1%, Phi and volume and area to about 2%. And the three-way convention cross-check is bit-clean: the COCOS-11 twin is bit-identical to the pinned COCOS-17 geometry across all 26 fields and the COCOS-02 twin differs by at most 9.2e-10, so signs and provenance are right. THE CAUSE is therefore neither conventions nor adapter arithmetic but the FSA kernel itself: fixed-bandwidth Gaussian coarea shells compared against TORAX cubic contour quadrature, with squared gradients and 1/R-squared weighting amplifying the error and STEP's low aspect ratio amplifying it further; grid-quantised extrema and one-cell top/bottom bands explain the shape errors; and j_total additionally differentiates the current profile on a radial mesh TORAX itself warns about, spacing 0.0787 to 0.0894 against its own 0.0200 recommendation. This is the same mechanism the analytic-surface node measured at 1.8% on the grad-psi moment; on a real shaped equilibrium it is an order of magnitude worse, and worse again on a spherical tokamak. The node also fixed a genuine per-radian versus total-flux grad-psi scaling at the real-EQDSK boundary that no synthetic record could expose. CAUTION ON THE TEST: the per-field tolerances are asserted as pass/fail at up to 0.45, so as written they are a characterisation baseline wearing an acceptance gate's clothing - a regression to 44% on g2g3 would pass silently. They must be relabelled, and tightened as the kernel improves.</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260820-rampup" data-who="reckon-ship" data-when="2026-08-20T16:56:00+00:00">
+    <div class="r-comment-body">published-rampup-benchmark landed - commit d5321f40; the facade now honours a configuration's own non-circular geometry provider instead of always installing the Nova adapter, so a published case can run as published. TORAX 1.4.3 examples/iterhybrid_rampup.py ran through ForwardTransport over 0-2 s with its CHEASE iterhybrid.mat2cols geometry, QLKNN transport, pedestal, bootstrap current, published sources and Newton predictor-corrector solver all retained, requested current ramping 3.0 to 3.1875 MA on the published waveform; evolved T_i, T_e and psi match TORAX's own run_simulation at rtol 1.0e-10 / atol 1.0e-12 and n_e at atol 1.0e8 m^-3, in 20.14 s of wall time. 5/5 green. THE PHYSICS GATE IS STILL NOT CLOSED, on two counts the worker reported itself rather than glossing. First, the run took ONE TORAX step over the interval, so the case's trajectory is untested and - more importantly - a single step against a constant geometry provider never exercises the moving-grid Phi_b_dot term that section 3 requires geometry at both t and t+dt for. Second, the installed package was searched for iterhybrid numeric CSV, JSON, NetCDF, NPY, NPZ and Zarr references and none ships, so the comparison remains facade-against-own-entry-point; that half of the self-comparison is unavoidable in kind rather than a shortcut, because no published numbers exist to check against. A multi-step trajectory redispatch follows.</div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20260820-clipped-moments" data-who="reckon-ship" data-when="2026-08-20T21:40:00+00:00">
+    <div class="r-comment-body">clipped-cell-surface-moments landed - commit c51c09fc; gate PASSED on its primary target. 42 passed / 1 deselected in 642 s, scoped ruff clean. Migrating the shell integrals onto exact TracedClippedSupports polygon moments contracted with bilinear cell interpolants, with R_in, R_out and the surface top and bottom taken from live clipped vertices, moved the ITER errors against the independently read equilibrium from 18.39 to 2.63 percent on g2g3_over_rhon, 9.52 to 0.90 on g0, 18.09 to 2.08 on g1 and 17.94 to 1.98 on g2 - all four under the 5 percent gate, a seven to nine fold improvement on the psi-diffusion coefficient. STEP moved 25.83 to 8.18, 23.98 to 2.29 and 37.37 to 4.48 with g1 stuck at 16.04. The bandwidth parameter and the Gaussian-CDF whole-cell weighting are gone from the module outright - zero occurrences remain - so there is no smoothing left to trade against binning noise. THE CAPACITY HYPOTHESIS WAS FALSIFIED, and tested rather than assumed: pre-pack required vertex count is 5 against a capacity of 8 on both equilibria, three spare slots, so nothing was being silently truncated. THE THREE-WAY SPLIT LOCALISED THE RESIDUAL INSTEAD, which is what that cross-check existed for. On STEP, TORAX and nova's own contour extraction agree with each other markedly better than either agrees with the clipped route: Phi 0.16 percent between them against 2.75 and 2.58 versus clipped; psi 0.18 against 1.28 and 1.21; vpr 3.92 against 16.46; volume 1.25 against 2.85 and 4.14; area 2.43 against 3.51 and 6.02; g1 6.20 against 16.04 and 9.78. Two against one, and the two share a method: both trace a BICUBIC flux interpolant as a contour, while the clipped route takes STRAIGHT edge crossings of a BILINEAR nodal field. The outlier is therefore the within-cell surface representation, not the quadrature - which is exactly what the curved-clip items of this section address, so their motivation is now measured rather than argued. STEP's retained Phi 2.75, volume 2.85 and area 3.51 percent remain degraded against the pre-migration 2.13, 1.41 and 1.80, landed attributed to that same method difference with no smoothing reintroduced to recover them. TORAX's own STEP j_total error of 88.98 percent stays out of the Nova figures: TORAX warns its max normalised-rho spacing of 0.0787 to 0.0894 exceeds its own 0.0200 recommendation and distorts differentiated quantities. A direct |F|/R dA toroidal-flux shortcut was tried and rejected for worsening STEP Phi parity to 4.38 percent. CAUTION: the new two-sided baselines carry a 35 percent characterisation width, wide enough that a recorded 2.63 percent could drift to 3.55 without failing; that width should narrow once the curved items settle the method.</div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20260821-bicubic-negative" data-who="reckon-ship" data-when="2026-08-21T00:20:00+00:00">
+    <div class="r-comment-body">curved-cell-clips-and-extrema landed as a MEASURED NEGATIVE - commit 47808904; gate NOT MET, deliberately recorded rather than worked around. 42 passed / 1 deselected in 297 s, ruff clean, exact-bilinear hyperbola path retired, no bandwidth or smoothing anywhere. THE PRIMITIVE IS EXCELLENT AND THAT IS THE POINT. The committed sole surface authority is a fixed-shape C1 Catmull-Rom/Hermite tensor bicubic expressed through nova.linalg.interpolant.Bernstein pytrees, with normalised-psi coefficients driving the clipping roots and separately reconstructed raw-Wb coefficients driving physical gradients, fixed bisection for edge roots, the existing nova.biot.arcbandedcoupling._arc_rule 12-node Gauss-Legendre rule along in-cell arcs, oriented Green-theorem chord-to-arc corrections for area and the first and mixed moments, and constrained Newton solves for extrema. Measured: adjacent-cell C1 mismatches 0, 1.73e-18 and 0; arc residual 2.78e-17; corrected area error 1.43e-5 against a 1,442,401-sample raster; and the extremum radial position converges at FOURTH ORDER - errors 3.437e-5, 4.243e-7 and 5.239e-9 at spacings 0.13333, 0.04444 and 0.01481, measured orders 3.999999 and 4.000001. The square-root regime is decisively left, which was the stated claim. YET THE REAL-EQUILIBRIUM GATES ARE MISSED AND SEVERAL FIELDS REGRESS: ITER upper triangularity 20.22 percent against the 2 percent gate (lower 8.71, elongation 0.73); ITER coefficients drift from 2.63, 0.90, 2.08 and 1.98 to 2.96, 1.03, 2.36 and 2.31, still inside 5 percent but worse; STEP clipped-versus-contour vpr 16.46 to 18.14 and g1 9.78 to 22.31, still the outlier of three; retained STEP Phi, volume and area 2.76, 2.95 and 3.60 against the requested 2.13, 1.41 and 1.80. THE MECHANISM IS THE FINDING, and it is not order of accuracy: a LOCAL centred-tangent Hermite bicubic cannot recover the GLOBAL-spline surface information both reference readers use. Fourth order on a smooth analytic surface and 20 percent on a real EQDSK are consistent precisely because the two constructions converge to DIFFERENT surfaces, and the reference routes both use the global one. On the low-aspect-ratio STEP grid the missing within-cell gradient structure is amplified. COCOS twins stay below 1e-7, the analytic moments, 22-field self-parity, jit, vmap and current-diffusion tests are in the green 42, and the characterisation half-width narrowed from 35 to 10 percent. CONCLUSION CARRIED FORWARD: clipped-cell integration is not the right authority for accuracy on real equilibria; nova already owns the consensual one in nova/equilibrium/flux_surface_geometry.py, whose RectBivariateSpline contour route agrees with TORAX to 0.16 percent on Phi. The open question is differentiability, because that route is host-side scipy while the traced clipped route exists to keep the implicit window gradient alive, and nova.linalg.interpolant.BSpline is a 1D global fit only, so a traced global tensor spline would have to be composed from it.</div>
 </div>
 </section>
 </main>

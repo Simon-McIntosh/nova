@@ -576,6 +576,348 @@
     self-declared highest-risk physics. With no readable source anywhere, §4 needs a different answer —
     inferring the vessel from the 120-frame transient residual bank rather than sourcing its geometry —
     and that is a plan-level decision rather than an implementation detail.</p>
+
+    <h2 id="root-existence">§5 the missing root is the boundary field, not the solver — 2026-08-20</h2>
+    <p>Commit <code>0b54d0bf</code>. <strong>Verdict: vacuum-field-dominated on all five frames and
+    pooled, with no frame admitting a nearby root — 0 of 5</strong> — against a criterion written to disk
+    before scoring. One detached run completed every frame without restart, its log recording
+    <code>STARTED 5/5</code>, <code>EVALUATED 1/5</code>…<code>5/5</code> in order and
+    <code>EXIT_MARKER=0</code>, replacing an earlier stale receipt entirely.</p>
+    <p>This measurement exists because the question was reframed rather than answered: a forward solve
+    that cannot find a root implicates its <em>inputs</em>, and the labelled map is a known solution
+    whose residual can be evaluated <em>linearly</em>, with no root find at all. The alternative on the
+    table had been another node spent choosing a step-control method.</p>
+    <table>
+      <caption>Residual at the known solution, each arm cross-checking a previously landed number.
+      Nothing fitted, no coefficient adjusted, no current tuned.</caption>
+      <thead><tr><th>Arm</th><th>Median fractional RMS</th><th>Cross-check</th></tr></thead>
+      <tbody>
+        <tr><td>Direct operator, fixed boundary</td><td><strong>2.311880148e-8</strong></td><td>matches the landed 2.29e-8 control — the discrete operator is exact</td></tr>
+        <tr><td>Extracted profiles, fixed boundary</td><td>0.04058126344</td><td>matches the 0.0429 strict-GS label representability ceiling — the flux functions are as good as the labels permit</td></tr>
+        <tr><td>Free boundary</td><td><strong>0.2156505171</strong></td><td>five times worse than either</td></tr>
+        <tr><td>Free minus fixed</td><td>0.2297100316</td><td>the isolated boundary-field contribution</td></tr>
+      </tbody>
+    </table>
+    <p>The pooled split is a <strong>vacuum share of 0.8499 against a fixed share of 0.1501</strong> —
+    <strong>85 % of the free-boundary residual is the boundary field</strong>. Gauged
+    boundary-discrepancy fractional RMS runs 0.2905 / 0.3516 / 0.6391 across min, median and max, and
+    every residual's interior, boundary-band and exterior squared fractions sum to one within 1e-15.</p>
+    <p><strong>And the omitted conductors account for it.</strong> The five coils absent from the shipped
+    current channels — ECOILB, E567UP, E567DN, E89UP, E89DN — give an envelope of <strong>0.3332 Wb/rad
+    RMS</strong> against a measured discrepancy of <strong>0.4077 Wb/rad</strong>, a ratio of
+    <strong>0.817</strong>: within one order of magnitude. That is an order-of-magnitude comparison and
+    <em>not</em> a fit, and it carries its own caveats — it uses an independent pulse and inherits the
+    unresolved producer-scale question.</p>
+    <p><strong>Three consequences.</strong> The paused globalization repair was paused correctly, and for
+    a better reason than the one first recorded: not that a method choice was unclear, but that
+    <em>no root existed to be found</em>, so no step control could have succeeded — which explains why
+    all five solver policies failed in the same two ways. The §5 production gate therefore cannot be met
+    by solver work alone; it needs the boundary field completed, and the challenge dataset structurally
+    cannot supply those five currents. And this is competitive intelligence: an entrant driving a
+    free-boundary solve from the shipped coil currents alone is solving a problem whose root is displaced
+    from the label, and the 85 % attribution says by how much.</p>
+
+    <h2 id="published-artifact">§7 the reusable state, digest-pinned — 2026-08-20</h2>
+    <p>Commits <code>1df19c16</code> (layer generalisation), <code>b14ec670</code> (DDv4 IDS set),
+    <code>5686eb1b</code> (manifest and recipe). The onboarding's output is now an object rather than a
+    procedure.</p>
+    <table>
+      <caption>The published machine description and its identity.</caption>
+      <thead><tr><th>Property</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>File</td><td><code>diiid_machine_description.nc</code>, 213,703 bytes</td></tr>
+        <tr><td>Payload SHA-256</td><td><code>1e560b2ad2f2f224…</code></td></tr>
+        <tr><td>Data Dictionary</td><td><strong>4.1.1</strong> on wall, pf_active and magnetics</td></tr>
+        <tr><td>Content</td><td>82 limiter vertices · 24 coils · 140 elements · 76 B-pol + 44 flux-loop positions</td></tr>
+        <tr><td>Physical digest</td><td><code>0eaa06b66b8a2726…</code></td></tr>
+        <tr><td>Manifest digest</td><td><code>sha256:f0bc384f17ccc8ad…</code></td></tr>
+        <tr><td>OCI tag</td><td><code>dd-4.1.1-physical-0eaa06b6…</code></td></tr>
+        <tr><td>Schema</td><td><code>nova-diii-d-machine-artifact</code></td></tr>
+      </tbody>
+    </table>
+    <p><strong>The DDv4 requirement is enforced, not merely documented.</strong> The publication version
+    is resolved at runtime, so the floor stays true when 4.1.2 appears, and the refusal was proven
+    <em>in the publication script's own path</em> by a real netCDF probe declaring DD 3.42.2 that raised
+    <code>MachineArtifactError</code>, with the message retained in the receipt. The DD version
+    participates in the tag, so the DDv4 artifact takes a distinct tag rather than colliding with the
+    DDv3 one it replaced.</p>
+    <p><strong>Round-trip and identity.</strong> All 1549 authored leaves reopen at exact equality,
+    maximum absolute difference 0.0; materialising into the content-addressed cache and independently
+    resolving it returned the same manifest digest. The leaf count is 1549 against the superseded DD3
+    set's 1833 — a delta of exactly <strong>−284</strong>, which equals the identifier leaves DDv4
+    removes for 24 coils plus 140 elements plus 76 probes plus 44 loops. That arithmetic independently
+    confirms a removal the data dictionary revealed and an empirical factory probe had
+    <em>missed</em>, which is the case for asking the dictionary rather than probing an object.</p>
+    <p><strong>Publication is an operator action and nothing was sent.</strong> <code>PUBLISH.md</code>
+    carries login, push, pull and digest-verification commands with account and token placeholders,
+    states that no CI workflow exists in this repository, and was validated against a <em>local</em> OCI
+    layout with push, pull and digest all exiting 0. The receipt records
+    <code>network_publication_attempted=false</code>. The layer generalisation replaced the
+    machine-specific module in place — git records a 92 % rename and no version-suffixed pair survives —
+    with existing behaviour preserved bit-for-bit by a before-and-after manifest compare, and netCDF
+    digest stability proven across two independent writes of identical content, which was that node's one
+    real unknown.</p>
+
+    <h2 id="limiter-topology">§3 the limiting boundary mode is now something a receipt says — 2026-08-20</h2>
+    <p>Commit <code>c3092ace</code>. A solve no longer leaves its boundary mode to be inferred from the
+    flux map: <code>TopologySolveReceipt</code> is the host-visible boundary over the device booleans,
+    and every completed solve emits its topology class, its boundary point, any wall-contact point, the
+    class history, the transition count, how many transitions survived without solver failure, and
+    whether the solver succeeded.</p>
+    <table>
+      <caption>The three things §3 asked for, each measured against a bar written down before scoring.</caption>
+      <thead><tr><th>Claim</th><th>Measured</th><th>Bar</th></tr></thead>
+      <tbody>
+        <tr><td>Synthetic limited round-trip recovers the prescribed wall contact</td><td><strong>5.53e-14 grid cells</strong> (8.98e-16 m on a 0.01625 m cell)</td><td>1.0 grid cell</td></tr>
+        <tr><td>Mid-solve topology churn traversed without solver failure</td><td><strong>3 of 3</strong></td><td>no solver failure</td></tr>
+        <tr><td>Classifier agreement on in-house MAST limited frames</td><td><strong>6 of 6 — 1.0</strong></td><td>reported with its frame count</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The MAST arm is qualified rather than oversold.</strong> Its six frames are analytic
+    in-house limited-equilibrium fixtures on the repository's own MAST limiter with prescribed limited
+    truth and <code>efit_inputs_used = false</code>. That makes it evidence about the
+    <em>classifier</em> and not about experimental reconstruction fidelity, and the receipt says so in
+    its own provenance block rather than leaving a reader to assume the stronger claim.</p>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/limiter-topology/limiter_topology_modes.png"
+           alt="Two panels: the synthetic limited round-trip showing prescribed and recovered wall-contact points on the limiter, and the MAST limited-frame bank with each frame's classified boundary"
+           style="max-width:100%">
+      <figcaption>Left, the synthetic round-trip with prescribed and recovered contact at
+      (1.35, 0.0) m — the two markers are separated by less than a femtometre and are drawn on top of
+      each other. Right, the six MAST limited-frame fixtures with their classified boundaries.</figcaption>
+    </figure>
+    <p>One honest note on how the number was obtained: the first benchmark run selected the shared login
+    GPU and stopped before scoring with <code>CUDA_ERROR_OUT_OF_MEMORY</code>. The single corrective run
+    was pinned to CPU and completed. Nothing was retried until it passed — the failure was capacity, the
+    rerun changed the device and not the measurement.</p>
+
+    <h2 id="throughput-budget">§6 the compute envelope is measured, and it is not the assumed one — 2026-08-20</h2>
+    <p>Commit <code>2d6f9b37</code>. The assumed compute envelope is replaced by a measured budget table
+    from a real H200 run — SLURM job 1252481, exit 0:0, 37 s against a 45-minute ceiling — on
+    NVIDIA H200 NVL with JAX 0.11.0 in float64.</p>
+    <table>
+      <caption>Measured batched forward-solve budget. Convergence policy fixed at two relaxed warmups
+      plus one Newton step at four GMRES iterations, with no residual early exit, so every row solves
+      the same amount of problem.</caption>
+      <thead><tr><th>Batch</th><th>Timed slices</th><th>Elapsed (s)</th><th>Slices / s</th><th>Per-member speed-up</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>100</td><td>0.7856</td><td>127.288</td><td>1.00×</td></tr>
+        <tr><td>4</td><td>400</td><td>1.1764</td><td>340.032</td><td>2.67×</td></tr>
+        <tr><td>8</td><td>800</td><td>1.7001</td><td><strong>470.561</strong></td><td><strong>3.70×</strong></td></tr>
+      </tbody>
+    </table>
+    <p><strong>Branch continuity held and is pinned by a test.</strong> All 1,300 solves retained
+    <code>limited_plasma</code> with <strong>zero accepted branch switches</strong>, and the test fails a
+    batch that silently changes branch rather than reporting the throughput anyway.</p>
+    <p><strong>Two qualifications the number must be read with, both from the run's own receipts.</strong>
+    The maximum fixed-budget relative residual is <strong>0.268</strong>, so this is a
+    <em>compute-throughput</em> receipt and not convergence evidence — it measures how fast the machine
+    executes a fixed policy, not how well that policy solves. And every one of the 1,300
+    conditioning receipts reports a <em>negative</em> stability margin, spanning −0.6393 to −0.6304, so
+    <strong>0 of 1,300</strong> sit inside the open (0, 1.5) decay-index window. The workload is nova's
+    bootstrapped free-boundary production route rather than a labelled DIII-D discharge, which keeps this
+    section clear of the boundary-field qualification §5 carries — at the cost of saying plainly that the
+    conditioning receipt is wired and exercised here, not yet exercised on DIII-D frames.</p>
+
+    <h2 id="cocos-ip-sign">§7 the current sign settled from the definitions, and the guide is wrong — 2026-08-20</h2>
+    <p>Commit <code>213cc9a4</code>. Two authorities disagreed on whether plasma current flips from
+    COCOS 11 to COCOS 17. Neither was believed: the factors were re-derived from the published sign
+    tuple, which is the only authority that cannot be a generator bug.</p>
+    <table>
+      <caption>The 11→17 transform, derived from Sauter–Medvedev Table I independently of both
+      disputed implementations. COCOS 11 is (σ<sub>Bp</sub>=+1, e<sub>Bp</sub>=1, σ<sub>RφZ</sub>=+1,
+      σ<sub>ρθφ</sub>=+1); COCOS 17 differs in σ<sub>Bp</sub> alone.</caption>
+      <thead><tr><th>Quantity class</th><th>Definition-derived factor</th><th>nova's engine</th><th>DD migration guide</th></tr></thead>
+      <tbody>
+        <tr><td><code>psi_like</code></td><td>−1</td><td>−1 ✓</td><td>—</td></tr>
+        <tr><td><code>ip_like</code></td><td><strong>+1</strong></td><td><strong>+1 ✓</strong></td><td><strong>−1 ✗</strong></td></tr>
+        <tr><td><code>b0_like</code></td><td>+1</td><td>+1 ✓</td><td>—</td></tr>
+        <tr><td><code>q_like</code></td><td>+1</td><td>+1 ✓</td><td>—</td></tr>
+        <tr><td><code>dodpsi_like</code></td><td>−1</td><td>−1 ✓</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Verdict: nova's convention engine is right and the migration guide's displayed factor is
+    wrong.</strong> Only σ<sub>Bp</sub> changes between the two indices, so ψ and dO/dψ flip while
+    toroidal current and field do not. The guide's own defining equation agrees:
+    σ<sub>Ip,eff</sub> = σ<sub>RφZ,target</sub> × σ<sub>RφZ,source</sub> = (+1)(+1) = +1, and the data
+    dictionary's developer guide separately labels <code>pf_active/coil/current</code> as
+    <code>ip_like</code> with expression <code>sigma_ip_eff</code> — contradicting the −1 the generated
+    display shows for that same path. A current-bearing value of −123456.75 A round-tripped
+    11→17→11 at exact equality.</p>
+    <p><strong>Why it was worth settling while still inert.</strong> The published machine description
+    writes geometry only and its firewall verified zero current arrays, so nothing shipped depends on
+    this today. It becomes load-bearing the moment an artifact carries <code>coil/current</code> — and
+    this campaign has already lost 8.5 points of exterior R² to a sign applied twice, which is the whole
+    argument for resolving a sign before it is needed rather than during. Correcting the generated guide
+    upstream is outside this repository.</p>
+
+    <h2 id="producer-currents">§2 one scalar does not rescue the producer's currents — 2026-08-20</h2>
+    <p>Commit <code>04cc6df2</code>. The located netCDF entry declares every one of its 24 coil currents
+    in amperes, yet the ohmic family peaks at 55,483.70 A while no shaping coil exceeds 93.17 A. The
+    obvious hypothesis — one family is recorded in different units, so one scalar reconciles them — was
+    tested and <strong>refuted</strong>.</p>
+    <table>
+      <caption>Recomputed from the entry over all 480,256 common samples. Nothing per-coil was allowed to
+      float; a single positive through-origin scalar is the whole model being tested.</caption>
+      <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Raw family extrema ratio</td><td>595.4875</td></tr>
+        <tr><td>Ratio after declared turns</td><td>513.6002</td></tr>
+        <tr><td>Best single reconciling scalar</td><td>164.6886</td></tr>
+        <tr><td>Its relative L2 residual</td><td><strong>0.6776</strong></td></tr>
+        <tr><td>Its explained energy</td><td>0.5409</td></tr>
+        <tr><td>Residual at the tidy guess of 1000</td><td>3.7913</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The independent check runs the other way too.</strong> Across all 340 recorded
+    separatrices, the internal coil-only vacuum diagnostic has a median gauge-free misclosure of
+    <strong>0.0225</strong> axis-to-boundary spans at the declared scale and <strong>1.2903</strong> at
+    the fitted scale — a <strong>57.4-fold degradation</strong>. Applying the best scalar makes the
+    machine's own reconstructed boundaries harder to close, not easier. That diagnostic omits plasma and
+    passive contributions and is therefore explicitly non-calibrating; it is used here only to rule a
+    candidate out, which is the one thing a non-calibrating diagnostic can honestly do.</p>
+    <p><strong>Verdict: the netCDF currents may not drive a solve, as stored or benchmark-scaled.</strong>
+    This closes the question the followup was raised to answer before anything depended on it. Acquiring
+    solve authority would need a producer-backed corrected description with independent validation, which
+    is outside this repository.</p>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/producer-currents/producer_current_scaling.png"
+           alt="Ohmic and shaping current family envelopes over the common time base, with the all-slice vacuum misclosure diagnostic at declared and fitted scale"
+           style="max-width:100%">
+      <figcaption>The two family envelopes on one time base, and the all-slice misclosure diagnostic at
+      declared against fitted scale — the separation is not a constant factor, which is the refutation
+      in one picture.</figcaption>
+    </figure>
+
+    <h2 id="forward-gs-illustration">§5 the forward solve against the labels, shown rather than scored — 2026-08-20</h2>
+    <p>Commit <code>ddb152e3</code>. The standing directive was that the match be <em>demonstrated</em>,
+    not merely scored: predicted and labelled maps side by side with their difference field, on named
+    shots and frames. That is delivered here — with the route it is delivered on stated plainly, because
+    the route is the finding.</p>
+    <table>
+      <caption>Three named frames, all converged at relaxed fractional update ≤ 1e-8, nothing fitted
+      (<code>coefficients_fitted = 0</code>).</caption>
+      <thead><tr><th>Shot</th><th>Frame</th><th>Time</th><th>Fractional RMS</th><th>Interior R²</th><th>Iterations</th></tr></thead>
+      <tbody>
+        <tr><td><code>d3d_shot_00000a10ac</code></td><td>29</td><td>920 ms</td><td>0.04658</td><td>0.9406</td><td>1401</td></tr>
+        <tr><td><code>d3d_shot_00000c4a7b</code></td><td>179</td><td>3740 ms</td><td>0.04835</td><td>0.9299</td><td>501</td></tr>
+        <tr><td><code>d3d_shot_0003ff34e7</code></td><td>44</td><td>1080 ms</td><td><strong>0.02921</strong></td><td>0.9769</td><td>1301</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Read against the ceiling, not against zero.</strong> The 0.0429 bar is the measured
+    strict-GS label representability ceiling — 99.68 % of that residual is irreducible non-GS label
+    content, so it is the best any exact solver could do against these labels. Two of the three frames
+    sit just above it and one comfortably below. That is the extraction premise working, and it is the
+    honest shape of the result: at the ceiling, not through it.</p>
+    <p><strong>The route is <code>fixed_boundary_relaxed_picard</code> with the labelled Dirichlet
+    border, and that is not a convenience.</strong> The released conductor channels do not admit the
+    labelled free-boundary root — the boundary-field share is <strong>0.8499</strong>, read and verified
+    from the corrected five-frame root-existence receipt rather than reasserted. So the figure, the
+    receipt and the caption all state <code>production_gate_passed = false</code> in words. A
+    demonstration that let itself be mistaken for a passed kill gate would be the one way to get this
+    section wrong.</p>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/forward-gs/forward_gs_fixed_boundary_illustration.png"
+           alt="Three rows, one per named shot and frame, each showing the predicted map, the labelled map and their difference on physical R-Z axes"
+           style="max-width:100%">
+      <figcaption>Three named frames, one per row: predicted, labelled, and the difference field, on
+      physical R–Z axes. The difference panels carry the residual structure the fractional RMS summarises
+      — this is the picture the score cannot show.</figcaption>
+    </figure>
+
+    <h2 id="negative-tail">§2 the negative tail is a sign, on exactly two shots — 2026-08-21</h2>
+    <p>Commits <code>99e148ad</code> (harness) and <code>4bb375b7</code> (authoritative run, SLURM job
+    1252494, COMPLETED in 11 m 44 s, exit 0:0). The passed differencing gate reported pooled whole-grid
+    R² 0.6392 against per-frame quartiles 0.99325 / 0.99908 / 0.99967. That gap was a retained,
+    unfiltered negative tail concentrated in two shots, and it was not noise, not geometry, and not
+    timing.</p>
+    <table>
+      <caption>Exclusive attribution of the frame-R² deficit. Controls were selected without using R²,
+      so the cohort cannot be chosen to flatter the answer.</caption>
+      <thead><tr><th>Cause</th><th><code>d3d_shot_009875548f</code></th><th><code>d3d_shot_001bc5a4ae</code></th><th>Combined</th></tr></thead>
+      <tbody>
+        <tr><td>Geometry</td><td>0.0</td><td>0.0</td><td><strong>0.0</strong></td></tr>
+        <tr><td>Coil-current timing (−100…+100 ms)</td><td>0.0173</td><td>0.0099</td><td>0.0136</td></tr>
+        <tr><td>Polarity / data quality</td><td>0.9821</td><td>0.9899</td><td><strong>0.9860</strong></td></tr>
+        <tr><td>Unexplained</td><td>0.00057</td><td>0.00021</td><td>0.00039</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The discriminator is the centred shape slope, and it is unambiguous.</strong> The
+    eight-shot, 48-frame matched quiescent control cohort has median R² 0.99946 at slope
+    <strong>+1.0114</strong>. Both tail shots sit at slope <strong>−0.9966</strong> and
+    <strong>−1.0243</strong> — the predicted field has the right shape with the wrong sign. Correcting
+    the polarity alone recovers median R² from <strong>−3.0144 to 0.99821</strong> and from
+    <strong>−2.9035 to 0.99912</strong>, putting both shots inside the control distribution.</p>
+    <p><strong>What this does and does not license.</strong> It does <em>not</em> repair the gate: the
+    authoritative bank and its preregistration were verified byte-identical before and after at SHA-256
+    <code>5b53ffc3…</code> and <code>7e60861d…</code>, and the study was run as a separate measurement
+    that may qualify the median rather than alter a passed result. Frame reproduction agreed with the
+    bank to 2.10e-9 against a 1e-6 guard, geometry carried one digest at 0.0 maximum numeric difference,
+    and every tail label was fully finite. What it does license is a narrower reading of the 0.99908
+    median: it holds where the recorded current polarity is right, and two shots in this corpus record it
+    inverted.</p>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/negative-tail/counterfactual_scores.png"
+           alt="Per-frame scores for both tail shots under the baseline, timing-swept and polarity-corrected counterfactuals, against the matched control cohort band"
+           style="max-width:100%">
+      <figcaption>Baseline, timing-swept and polarity-corrected scores for both tail shots against the
+      matched control band. Only the polarity counterfactual moves them, and it moves them all the way
+      in.</figcaption>
+    </figure>
+    <p>The finding hands on one question rather than closing quietly: <strong>which boundary inverts the
+    recorded polarity for exactly these two shots</strong> — the corpus producer or our loader — must be
+    audited before the current channels are treated as universally signed. This campaign has now met a
+    sign fault three times: a global sign applied twice in the vacuum composition, a migration guide
+    displaying the wrong current factor, and now two shots recording an inverted polarity.</p>
+
+    <h2 id="current-polarity">§8 the polarity fault is 603 shots, and it is not ours — 2026-08-21</h2>
+    <p>Commits <code>b69a0831</code> (boundary audit), <code>92b68e9d</code> (persisted exact response),
+    <code>a9d771d6</code> (corpus census). SLURM job 1252527, 36 CPUs, exit 0:0 in <strong>5 m 01 s</strong>,
+    one <code>EXIT_MARKER=0</code> after <code>CENSUS 7000/7041</code>. The two-shot tail the §2
+    attribution found was the visible corner of a corpus-wide fault.</p>
+    <table>
+      <caption>Census over every shot in the corpus. Nothing sampled, nothing extrapolated.</caption>
+      <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Shots classified</td><td>7,041 / 7,041</td></tr>
+        <tr><td><strong>Affected shots</strong></td><td><strong>603 — 8.5641 %</strong></td></tr>
+        <tr><td>Quiescent shots</td><td>6,550</td></tr>
+        <tr><td>Orientation cosine (min / median / max)</td><td>−0.98299 / 0.95536 / 0.98689</td></tr>
+        <tr><td>Named tail-frame cosines</td><td>−0.95469 and −0.94712 — both classify affected</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The boundary is named, and it is outside our code:</strong>
+    <code>nova_read_path_inverts_current = false</code>. On both named tail shots all 19 of 19 poloidal
+    channels were compared with <strong>38 of 38 compressed-page SHA receipts</strong>, 38 of 38 positive
+    registry scales, every array bitwise equal, and <strong>zero</strong> raw-to-read and
+    <strong>zero</strong> read-to-registry sign mismatches. The inversion is therefore in the corpus
+    producer or in storage before nova reads — established by elimination against fail-closed checks
+    rather than by inspecting the producer, which we cannot do.</p>
+    <p><strong>The discriminator was kept, not swapped.</strong> Two earlier attempts ran out of fence,
+    and the second reported that replacing the exact analytic polygon response with a filament-centre
+    proxy would change the scientific discriminator. It was refused: a polarity census whose
+    discriminator differs from the attribution that motivated it cannot corroborate that attribution.
+    Instead the exact <code>polygon_greens</code> response was built once at shape 19×256, persisted,
+    validated on reload against conductor order, physical geometry digest
+    <code>782e9e08…</code>, grid, boundary indices, matrix shape, finite values and artifact hash — with
+    <code>filament_centre_proxy_used = false</code> recorded in the receipt — and the whole census then
+    ran in five minutes. The two lost attempts cost time and bought the right number.</p>
+    <p><strong>The gate is untouched, checked three times.</strong> The authoritative bank and its
+    preregistration were verified byte-identical <em>before, inside and after</em> the run at SHA-256
+    <code>5b53ffc3…</code> and <code>7e60861d…</code>.</p>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/current-polarity/current_polarity_census.png"
+           alt="Distribution of the orientation cosine across all 7,041 corpus shots, with the affected negative-cosine population marked, beside a panel locating the two named tail shots within it"
+           style="max-width:100%">
+      <figcaption>Orientation cosine across all 7,041 shots. The distribution is bimodal, not a tail:
+      the 603 affected shots sit as a distinct negative-cosine population, and the two shots the §2
+      attribution named fall inside it rather than at its edge.</figcaption>
+    </figure>
+    <p><strong>What this changes for anyone using the corpus.</strong> The differencing gate's per-frame
+    median R² of 0.99908 was measured on a 20-shot cohort; roughly one shot in twelve corpus-wide records
+    its coil-current polarity inverted, so any consumer driving forwards from these channels must screen
+    for it rather than assume a uniform sign. The orientation cosine is a cheap screen — it separates the
+    two populations without a solve.</p>
   </main>
 </body>
 </html>

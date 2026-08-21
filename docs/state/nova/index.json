@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T22:16:23",
+  "updated": "2026-08-20T18:06:53",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -526,7 +526,7 @@
       },
       {
         "id": "S9",
-        "status": "planned",
+        "status": "active",
         "theme": "Transport forward model",
         "items": [
           {
@@ -593,7 +593,7 @@
         "description": "Nova is a physics solver; producing and packaging machine description is not its job. Once the map-driven producer in imas-ambix serves MAST descriptions, remove the three surfaces that grew here only because nothing else carried the geometry: the nova-machine-geometry-registry schema with its physical and registry digests, the content-addressed artifact caches and the OCI reference helper nothing publishes through, and the machine-specific solve-input IDS builder. The geometry itself is kept and migrates into the MAST map. The digest scheme goes because it answers 'is this the same machine' as a single global question, which a machine whose geometry changes across and within campaigns cannot satisfy \u2014 which is why it needed a coordinated cutover every time the description moved."
       }
     ],
-    "active_sprint_id": "S7",
+    "active_sprint_id": "S9",
     "timeline": [
       {
         "when": "2026-07-29",
@@ -736,6 +736,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 43
+    "_version": 45
   }
 }

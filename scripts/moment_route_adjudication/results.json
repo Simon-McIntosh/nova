@@ -1,0 +1,498 @@
+{
+  "artifacts": [
+    "moment-fidelity.png",
+    "moment-cost.png"
+  ],
+  "bounds_moved_or_applied": false,
+  "cost": {
+    "degree_nine_fit": {
+      "backend": "cpu",
+      "compile_and_first_evaluation_seconds": 4.795703324023634,
+      "device": "cpu:0",
+      "functional_receipts": {
+        "smooth": {
+          "backend": "cpu",
+          "compile_and_first_evaluation_seconds": 4.795703324023634,
+          "device": "cpu:0",
+          "host_transfer_included": false,
+          "repetitions": 15,
+          "scope": "support moments only; separatrix tracing excluded equally",
+          "steady_maximum_seconds": 0.038824234856292605,
+          "steady_median_seconds": 0.019946370040997863,
+          "steady_minimum_seconds": 0.018870986066758633
+        },
+        "steep_pedestal": {
+          "backend": "cpu",
+          "compile_and_first_evaluation_seconds": 4.665387424873188,
+          "device": "cpu:0",
+          "host_transfer_included": false,
+          "repetitions": 15,
+          "scope": "support moments only; separatrix tracing excluded equally",
+          "steady_maximum_seconds": 0.03299354296177626,
+          "steady_median_seconds": 0.020454687997698784,
+          "steady_minimum_seconds": 0.018308518920093775
+        }
+      },
+      "host_transfer_included": false,
+      "repetitions": 15,
+      "scope": "support moments only; separatrix tracing excluded equally",
+      "steady_maximum_seconds": 0.038824234856292605,
+      "steady_median_seconds": 0.020200529019348323,
+      "steady_minimum_seconds": 0.018870986066758633
+    },
+    "faithful_duffy": {
+      "backend": "cpu",
+      "compile_and_first_evaluation_seconds": 0.18742083385586739,
+      "device": "cpu:0",
+      "functional_receipts": {
+        "smooth": {
+          "backend": "cpu",
+          "compile_and_first_evaluation_seconds": 0.18742083385586739,
+          "device": "cpu:0",
+          "host_transfer_included": false,
+          "repetitions": 15,
+          "scope": "support moments only; separatrix tracing excluded equally",
+          "steady_maximum_seconds": 0.042368324007838964,
+          "steady_median_seconds": 0.007225819164887071,
+          "steady_minimum_seconds": 0.006777097936719656
+        },
+        "steep_pedestal": {
+          "backend": "cpu",
+          "compile_and_first_evaluation_seconds": 0.15560144488699734,
+          "device": "cpu:0",
+          "host_transfer_included": false,
+          "repetitions": 15,
+          "scope": "support moments only; separatrix tracing excluded equally",
+          "steady_maximum_seconds": 0.03181936894543469,
+          "steady_median_seconds": 0.007529119029641151,
+          "steady_minimum_seconds": 0.00703294319100678
+        }
+      },
+      "host_transfer_included": false,
+      "repetitions": 15,
+      "scope": "support moments only; separatrix tracing excluded equally",
+      "steady_maximum_seconds": 0.042368324007838964,
+      "steady_median_seconds": 0.007377469097264111,
+      "steady_minimum_seconds": 0.006777097936719656
+    }
+  },
+  "decision": {
+    "branch_disposition": "merge held commits after a main merge-in and pin rebase",
+    "cost_ratio": 0.36521167788219194,
+    "cost_ratio_ceiling": 2.0,
+    "faithful_qualifies": true,
+    "fidelity_improvement_factor": 6.009052818952474,
+    "fidelity_threshold": 3.0,
+    "mechanical_application": true,
+    "rule": "faithful qualifies iff steep ring current-weighted m0 fidelity improves by at least 3x and CPU per-iteration moment cost is no more than 2x the fit"
+  },
+  "functional_parameters": {
+    "smooth": "closed-form moderate-rotation-conventional profile",
+    "steep_pedestal": {
+      "amplitude_a_per_m2": 979138.2749690677,
+      "centre_psi_norm": 0.9,
+      "edge_fraction": 0.05,
+      "family": "finite-edge pedestal precedent with a narrow tanh shoulder",
+      "width_psi_norm": 0.025
+    }
+  },
+  "functionals": {
+    "smooth": {
+      "definition": "moderate-rotation closed-form source profile",
+      "errors": {
+        "degree_nine_fit": {
+          "boundary_clipped": {
+            "cell_count": 88,
+            "m0": {
+              "absolute_l1": 4.352636029381074e-10,
+              "current_weighted_l1": 2.801117569262152e-15,
+              "per_cell_relative_maximum": 2.4236403128539038e-14,
+              "per_cell_relative_median": 2.38194672592625e-15,
+              "per_cell_relative_p95": 1.3799435708432395e-14
+            },
+            "mR": {
+              "absolute_l1": 7.111096433920494e-12,
+              "current_weighted_l1": 7.942278173887961e-16,
+              "per_cell_relative_maximum": 5.734218241160476e-15,
+              "per_cell_relative_median": 8.099538637664307e-16,
+              "per_cell_relative_p95": 5.3106124661611915e-15
+            },
+            "mZ": {
+              "absolute_l1": 1.4745140431093073e-11,
+              "current_weighted_l1": 1.646862872765435e-15,
+              "per_cell_relative_maximum": 9.546170503684944e-15,
+              "per_cell_relative_median": 1.3451830457555262e-15,
+              "per_cell_relative_p95": 5.730434345929891e-15
+            }
+          },
+          "interior": {
+            "cell_count": 402,
+            "m0": {
+              "absolute_l1": 3.432433004491031e-09,
+              "current_weighted_l1": 2.334583350183436e-15,
+              "per_cell_relative_maximum": 8.859911421759303e-15,
+              "per_cell_relative_median": 1.891527625904192e-15,
+              "per_cell_relative_p95": 5.846332781345335e-15
+            },
+            "mR": {
+              "absolute_l1": 8.828385245074344e-11,
+              "current_weighted_l1": 9.733272766193304e-16,
+              "per_cell_relative_maximum": 3.8417664286151176e-15,
+              "per_cell_relative_median": 8.0347148529494015e-16,
+              "per_cell_relative_p95": 2.359128396076448e-15
+            },
+            "mZ": {
+              "absolute_l1": 1.3601518527261765e-10,
+              "current_weighted_l1": 1.4995640333449873e-15,
+              "per_cell_relative_maximum": 5.883093305464897e-15,
+              "per_cell_relative_median": 1.275279223156676e-15,
+              "per_cell_relative_p95": 3.866631201994067e-15
+            }
+          },
+          "ring": {
+            "cell_count": 233,
+            "m0": {
+              "absolute_l1": 1.7258365847538926e-09,
+              "current_weighted_l1": 2.5021982648847626e-15,
+              "per_cell_relative_maximum": 2.4236403128539038e-14,
+              "per_cell_relative_median": 1.932615407811804e-15,
+              "per_cell_relative_p95": 7.77846534336939e-15
+            },
+            "mR": {
+              "absolute_l1": 3.86296342136383e-11,
+              "current_weighted_l1": 9.222450402898465e-16,
+              "per_cell_relative_maximum": 5.734218241160476e-15,
+              "per_cell_relative_median": 8.010234114661552e-16,
+              "per_cell_relative_p95": 3.1707606453016487e-15
+            },
+            "mZ": {
+              "absolute_l1": 6.25663715626634e-11,
+              "current_weighted_l1": 1.493711422258985e-15,
+              "per_cell_relative_maximum": 9.546170503684944e-15,
+              "per_cell_relative_median": 1.2775263882303968e-15,
+              "per_cell_relative_p95": 4.247219781985788e-15
+            }
+          }
+        },
+        "faithful_duffy": {
+          "boundary_clipped": {
+            "cell_count": 88,
+            "m0": {
+              "absolute_l1": 5.7888027704677825e-11,
+              "current_weighted_l1": 3.7253556318276503e-16,
+              "per_cell_relative_maximum": 8.472897967212387e-16,
+              "per_cell_relative_median": 3.7229611954606514e-16,
+              "per_cell_relative_p95": 6.087658455270712e-16
+            },
+            "mR": {
+              "absolute_l1": 5.352256832180657e-12,
+              "current_weighted_l1": 5.977856300260437e-16,
+              "per_cell_relative_maximum": 1.1616022790494228e-14,
+              "per_cell_relative_median": 4.633735605198931e-16,
+              "per_cell_relative_p95": 1.4306542688839021e-15
+            },
+            "mZ": {
+              "absolute_l1": 2.28282746438796e-12,
+              "current_weighted_l1": 2.5496561484773144e-16,
+              "per_cell_relative_maximum": 9.516699672177288e-16,
+              "per_cell_relative_median": 2.665085257375319e-16,
+              "per_cell_relative_p95": 6.096792806677612e-16
+            }
+          },
+          "interior": {
+            "cell_count": 402,
+            "m0": {
+              "absolute_l1": 5.961737770121545e-10,
+              "current_weighted_l1": 4.054900333983154e-16,
+              "per_cell_relative_maximum": 6.62339682975983e-16,
+              "per_cell_relative_median": 4.175951986675233e-16,
+              "per_cell_relative_p95": 5.782256226815115e-16
+            },
+            "mR": {
+              "absolute_l1": 7.218003972297993e-11,
+              "current_weighted_l1": 7.957831419855706e-16,
+              "per_cell_relative_maximum": 1.2075190633436243e-15,
+              "per_cell_relative_median": 9.302246728709345e-16,
+              "per_cell_relative_p95": 9.541495790931687e-16
+            },
+            "mZ": {
+              "absolute_l1": 2.2477686378863382e-11,
+              "current_weighted_l1": 2.4781593304448367e-16,
+              "per_cell_relative_maximum": 7.888961597285286e-16,
+              "per_cell_relative_median": 2.509089286982795e-16,
+              "per_cell_relative_p95": 3.023608472840298e-16
+            }
+          },
+          "ring": {
+            "cell_count": 233,
+            "m0": {
+              "absolute_l1": 2.7571200877929414e-10,
+              "current_weighted_l1": 3.9974011216932296e-16,
+              "per_cell_relative_maximum": 8.472897967212387e-16,
+              "per_cell_relative_median": 4.059484725880116e-16,
+              "per_cell_relative_p95": 5.949196254655914e-16
+            },
+            "mR": {
+              "absolute_l1": 3.1562513019833816e-11,
+              "current_weighted_l1": 7.535243779592572e-16,
+              "per_cell_relative_maximum": 1.1616022790494228e-14,
+              "per_cell_relative_median": 7.385988244681208e-16,
+              "per_cell_relative_p95": 1.0728239699365934e-15
+            },
+            "mZ": {
+              "absolute_l1": 1.024168326101832e-11,
+              "current_weighted_l1": 2.4451025188219314e-16,
+              "per_cell_relative_maximum": 9.516699672177288e-16,
+              "per_cell_relative_median": 2.4687053905450475e-16,
+              "per_cell_relative_p95": 5.619454627052159e-16
+            }
+          }
+        }
+      },
+      "truth": {
+        "absolute_scaled_moment_tolerance_a": 2e-08,
+        "active_cells": 490,
+        "converged_cells": 490,
+        "maximum_final_scaled_delta_a": 5.199396468924533e-12,
+        "maximum_selected_order": 18,
+        "method": "per-cell tensor-Duffy order refinement",
+        "orders": [
+          12,
+          18,
+          27,
+          40,
+          60
+        ],
+        "relative_tolerance": 2e-12,
+        "selected_order_counts": {
+          "12": 0,
+          "18": 490,
+          "27": 0,
+          "40": 0,
+          "60": 0
+        },
+        "unconverged_cells": []
+      }
+    },
+    "steep_pedestal": {
+      "definition": "finite-edge tanh pedestal in psi_norm",
+      "errors": {
+        "degree_nine_fit": {
+          "boundary_clipped": {
+            "cell_count": 88,
+            "m0": {
+              "absolute_l1": 34.079193810905316,
+              "current_weighted_l1": 0.0008437862500377499,
+              "per_cell_relative_maximum": 0.15308978675732782,
+              "per_cell_relative_median": 4.1612342320203035e-05,
+              "per_cell_relative_p95": 0.013335863023668359
+            },
+            "mR": {
+              "absolute_l1": 0.4908556811996093,
+              "current_weighted_l1": 0.00020739416025100004,
+              "per_cell_relative_maximum": 0.023063713921363835,
+              "per_cell_relative_median": 8.459680735623895e-06,
+              "per_cell_relative_p95": 0.006577398721054684
+            },
+            "mZ": {
+              "absolute_l1": 0.2662650801043914,
+              "current_weighted_l1": 0.00011250113792603583,
+              "per_cell_relative_maximum": 0.012973749873244195,
+              "per_cell_relative_median": 6.264937056003523e-06,
+              "per_cell_relative_p95": 0.002675361322757851
+            }
+          },
+          "interior": {
+            "cell_count": 402,
+            "m0": {
+              "absolute_l1": 2.9936175695352176,
+              "current_weighted_l1": 2.061838667335033e-06,
+              "per_cell_relative_maximum": 0.0008988134213549635,
+              "per_cell_relative_median": 3.3483209263028193e-15,
+              "per_cell_relative_p95": 2.715572901941661e-07
+            },
+            "mR": {
+              "absolute_l1": 0.010725102973708898,
+              "current_weighted_l1": 1.1965871070542522e-07,
+              "per_cell_relative_maximum": 9.745580733667697e-05,
+              "per_cell_relative_median": 1.4531399941715373e-15,
+              "per_cell_relative_p95": 3.354513457711612e-07
+            },
+            "mZ": {
+              "absolute_l1": 0.006354412981858737,
+              "current_weighted_l1": 7.089543723383842e-08,
+              "per_cell_relative_maximum": 5.2642505707653937e-05,
+              "per_cell_relative_median": 2.1108437351154706e-15,
+              "per_cell_relative_p95": 1.8958819273724437e-07
+            }
+          },
+          "ring": {
+            "cell_count": 233,
+            "m0": {
+              "absolute_l1": 36.15726876831676,
+              "current_weighted_l1": 6.760025375152773e-05,
+              "per_cell_relative_maximum": 0.15308978675732782,
+              "per_cell_relative_median": 1.2347314546978523e-07,
+              "per_cell_relative_p95": 0.0023713272306267823
+            },
+            "mR": {
+              "absolute_l1": 0.5000865282731746,
+              "current_weighted_l1": 1.5209957548254102e-05,
+              "per_cell_relative_maximum": 0.023063713921363835,
+              "per_cell_relative_median": 1.2678882455282593e-07,
+              "per_cell_relative_p95": 0.0008648112561199109
+            },
+            "mZ": {
+              "absolute_l1": 0.271356568812326,
+              "current_weighted_l1": 8.253215511178104e-06,
+              "per_cell_relative_maximum": 0.012973749873244195,
+              "per_cell_relative_median": 3.9371937623192864e-08,
+              "per_cell_relative_p95": 0.00037537967686283386
+            }
+          }
+        },
+        "faithful_duffy": {
+          "boundary_clipped": {
+            "cell_count": 88,
+            "m0": {
+              "absolute_l1": 3.0744981434610263,
+              "current_weighted_l1": 7.612325789200022e-05,
+              "per_cell_relative_maximum": 0.00024966860373316566,
+              "per_cell_relative_median": 9.742527083892964e-10,
+              "per_cell_relative_p95": 0.000191860394662863
+            },
+            "mR": {
+              "absolute_l1": 0.03582506895024031,
+              "current_weighted_l1": 1.5136648867364028e-05,
+              "per_cell_relative_maximum": 6.333635340600564e-05,
+              "per_cell_relative_median": 8.867026205488575e-10,
+              "per_cell_relative_p95": 3.3986041527001763e-05
+            },
+            "mZ": {
+              "absolute_l1": 0.04069082178928171,
+              "current_weighted_l1": 1.7192505125512423e-05,
+              "per_cell_relative_maximum": 8.246356611641197e-05,
+              "per_cell_relative_median": 5.727086422893452e-10,
+              "per_cell_relative_p95": 4.641419315171842e-05
+            }
+          },
+          "interior": {
+            "cell_count": 402,
+            "m0": {
+              "absolute_l1": 3.207763242620331,
+              "current_weighted_l1": 2.209330395638166e-06,
+              "per_cell_relative_maximum": 0.00026019391724516934,
+              "per_cell_relative_median": 4.870284983712847e-16,
+              "per_cell_relative_p95": 6.704558913414246e-06
+            },
+            "mR": {
+              "absolute_l1": 0.06715604408987486,
+              "current_weighted_l1": 7.492520744621081e-07,
+              "per_cell_relative_maximum": 0.0001001011513785329,
+              "per_cell_relative_median": 9.298773600807229e-16,
+              "per_cell_relative_p95": 1.958408741598506e-06
+            },
+            "mZ": {
+              "absolute_l1": 0.03945647263506061,
+              "current_weighted_l1": 4.40211218117801e-07,
+              "per_cell_relative_maximum": 9.3504364552375e-05,
+              "per_cell_relative_median": 2.7530530536551376e-16,
+              "per_cell_relative_p95": 1.6664958711929816e-06
+            }
+          },
+          "ring": {
+            "cell_count": 233,
+            "m0": {
+              "absolute_l1": 6.017132792422329,
+              "current_weighted_l1": 1.1249735322398467e-05,
+              "per_cell_relative_maximum": 0.00026019391724516934,
+              "per_cell_relative_median": 7.218649486820208e-11,
+              "per_cell_relative_p95": 8.570878197881567e-05
+            },
+            "mR": {
+              "absolute_l1": 0.09917780940080859,
+              "current_weighted_l1": 3.016458523535982e-06,
+              "per_cell_relative_maximum": 0.0001001011513785329,
+              "per_cell_relative_median": 6.978713738046873e-11,
+              "per_cell_relative_p95": 2.4310187770411557e-05
+            },
+            "mZ": {
+              "absolute_l1": 0.07387643104131128,
+              "current_weighted_l1": 2.246925914671037e-06,
+              "per_cell_relative_maximum": 8.246356611641197e-05,
+              "per_cell_relative_median": 2.4945055168417876e-11,
+              "per_cell_relative_p95": 2.0079539650550204e-05
+            }
+          }
+        }
+      },
+      "truth": {
+        "absolute_scaled_moment_tolerance_a": 2e-08,
+        "active_cells": 490,
+        "converged_cells": 490,
+        "maximum_final_scaled_delta_a": 2.066872184514068e-08,
+        "maximum_selected_order": 60,
+        "method": "per-cell tensor-Duffy order refinement",
+        "orders": [
+          12,
+          18,
+          27,
+          40,
+          60
+        ],
+        "relative_tolerance": 2e-12,
+        "selected_order_counts": {
+          "12": 0,
+          "18": 401,
+          "27": 36,
+          "40": 37,
+          "60": 16
+        },
+        "unconverged_cells": []
+      }
+    }
+  },
+  "gpu_estimate": {
+    "banked_coarse_map_seconds": 0.0011198455467820168,
+    "faithful_seconds": 0.0002995730828669729,
+    "fit_seconds": 0.0008202724639150438,
+    "method": "scale the banked map phase by each CPU moment-route share",
+    "qualification": "throughput projection only; the banked phase did not isolate moment integration from the complete map",
+    "status": "estimate from banked H200 phase profile; no device run here"
+  },
+  "oracle": {
+    "active_support_count": 490,
+    "boundary_flux_wb": -8.673617379884035e-19,
+    "cache": {
+      "build_seconds": 0.0,
+      "hit": true,
+      "load_seconds": 0.18809707812033594,
+      "lock_wait_seconds": 1.946697011590004e-05,
+      "semantic_key": "030667d40f96d904",
+      "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_500.zarr",
+      "store_seconds": 0.0
+    },
+    "case": "moderate-rotation-conventional",
+    "cell_count": 551,
+    "fixture": "warm coarse closed-form carrier",
+    "flux_interpolant": "production own-node quadratic",
+    "held_worktree_dependency": false,
+    "support_geometry": "production traced atomic-edge clip"
+  },
+  "population_definitions": {
+    "boundary_clipped": "active support with fill fraction strictly between zero and one",
+    "counts": {
+      "boundary_clipped": 88,
+      "interior": 402,
+      "ring": 233
+    },
+    "interior": "active support with area equal to its authored full cell",
+    "ring": "boundary-clipped cells plus their centre-first stencil neighbours"
+  },
+  "routes": {
+    "adaptive_truth": "per-cell order-refined tensor-Duffy integral of the identical j(psi_interp) functional",
+    "degree_nine_fit": "production weighted-QR pointwise density fit followed by exact polynomial support moments",
+    "faithful_duffy": "degree-fifteen fixed Duffy quadrature of j(psi_interp) on the same traced supports"
+  },
+  "schema": "moment-route-adjudication"
+}

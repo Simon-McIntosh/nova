@@ -1,0 +1,80 @@
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/imas-ambix/.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "caption": "Converged fixed-boundary Nova GS re-solves from label-extracted p-prime and FF-prime. This is a demonstration, not a passed production gate: the released coil channels leave 0.8499 of the free-boundary residual attributable to the boundary field.",
+  "comparison": {
+    "coefficients_fitted": 0,
+    "label_representability_fractional_rms_ceiling": 0.0429,
+    "metric": "interior RMS divided by the full labelled flux range"
+  },
+  "figure": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_fixed_boundary_illustration.png",
+  "frames": [
+    {
+      "converged": true,
+      "convergence_criterion": "relaxed fractional update <= 1.0e-08 within 2000 iterations",
+      "final_fixed_point_relative_update": 0.0007703125856378247,
+      "final_relative_update": 9.403229805149228e-09,
+      "final_relaxation": 1.220703125e-05,
+      "fractional_rms_to_ceiling_ratio": 1.0857884830778977,
+      "frame": 29,
+      "interior_fractional_rms": 0.04658032592404181,
+      "interior_r_squared": 0.94060988133962,
+      "iterations": 1401,
+      "reliable_extraction_surfaces": 19,
+      "representability_ceiling": 0.0429,
+      "route": "fixed_boundary_relaxed_picard",
+      "shot": "d3d_shot_00000a10ac.parquet",
+      "time_ms": 920.0
+    },
+    {
+      "converged": true,
+      "convergence_criterion": "relaxed fractional update <= 1.0e-08 within 2000 iterations",
+      "final_fixed_point_relative_update": 1.2932605164607538e-06,
+      "final_relative_update": 8.082878227879712e-09,
+      "final_relaxation": 0.00625,
+      "fractional_rms_to_ceiling_ratio": 1.1269618547149287,
+      "frame": 179,
+      "interior_fractional_rms": 0.048346663567270444,
+      "interior_r_squared": 0.9298632723932593,
+      "iterations": 501,
+      "reliable_extraction_surfaces": 19,
+      "representability_ceiling": 0.0429,
+      "route": "fixed_boundary_relaxed_picard",
+      "shot": "d3d_shot_00000c4a7b.parquet",
+      "time_ms": 3740.0
+    },
+    {
+      "converged": true,
+      "convergence_criterion": "relaxed fractional update <= 1.0e-08 within 2000 iterations",
+      "final_fixed_point_relative_update": 0.00033838770409780984,
+      "final_relative_update": 8.261418557075436e-09,
+      "final_relaxation": 2.44140625e-05,
+      "fractional_rms_to_ceiling_ratio": 0.6809157768752454,
+      "frame": 44,
+      "interior_fractional_rms": 0.02921128682794803,
+      "interior_r_squared": 0.9768776981958819,
+      "iterations": 1301,
+      "reliable_extraction_surfaces": 19,
+      "representability_ceiling": 0.0429,
+      "route": "fixed_boundary_relaxed_picard",
+      "shot": "d3d_shot_0003ff34e7.parquet",
+      "time_ms": 1080.0
+    }
+  ],
+  "free_boundary_context": {
+    "boundary_field_share": 0.8498610048171014,
+    "displayed_share": 0.8499,
+    "production_gate_passed": false,
+    "reason": "released conductor channels do not supply a nearby labelled free-boundary root",
+    "source": "docs/figures/diiid-forward-onboarding/root-existence/root_existence_receipt.json"
+  },
+  "measurement": "DIII-D converged fixed-boundary forward GS illustration",
+  "named_shot_frame_pairs": 3,
+  "route": {
+    "all_frames_converged": true,
+    "boundary_condition": "labelled Dirichlet border",
+    "convergence_criterion": "relaxed fractional update <= 1.0e-08",
+    "maximum_iterations": 2000,
+    "name": "fixed_boundary_relaxed_picard"
+  }
+}
+EXIT_MARKER=0

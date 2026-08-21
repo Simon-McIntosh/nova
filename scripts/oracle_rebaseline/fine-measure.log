@@ -1,0 +1,10 @@
+slurmstepd: error: Unable to create TMPDIR [/run/user/39486]: Permission denied
+slurmstepd: error: Setting TMPDIR to /tmp
+CACHE_REQUEST fixture=fine requested_cells=-1000
+CACHE_RESULT fixture=fine cells=1076 hit=True key=7c94be9b777c55ba
+SEED fixture=fine core=466 centroid=[1.6602192201158459, 0.0] radius=0.44080270189573861 oracle_flux_fraction=1.2788974660710344
+DIRECT fixture=fine residual=2.1720128948495349e-15 oracle_flux_fraction=0.53383725249884928 seconds=70.5965864
+CONTINUATION fixture=fine strength=0.500 accepted=False residual=0.0 core=0
+CONTINUATION fixture=fine strength=0.750 accepted=False residual=0.0 core=0
+CONTINUATION fixture=fine strength=1.000 accepted=True residual=2.172012894849535e-15 core=882
+BANKED fixture=fine residual=2.1720128948495349e-15 flux_fraction=0.53383725249884928

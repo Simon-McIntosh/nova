@@ -104,6 +104,32 @@
     analytic-state forcing and their projected root responses beside the observed drift.</figcaption>
   </figure>
 
+  <h2 id="exact-kernel-defaults">§2 — exact kernels everywhere: 296 authored polygons rerouted, truncation branches removed, +5–6% one-time build cost</h2>
+
+  <p>Commit <code>10642e61</code> (merged <code>40d30fb6</code>). The Urankar/Part V exact
+  section kernel is the production default on every coupling path: the reachable standoff,
+  banded and far-field filament truncation branches are removed (grep-proven outside the
+  dedicated comparator), and <code>Cylinder</code> accepts only authored axis-aligned rectangles
+  — a build-time shape guard, which immediately exposed that <strong>296 of the fixture's 321
+  Cylinder-routed conductor rows are deliberately authored non-axis-aligned polygons</strong>
+  (first: TRI_SUPP, seven vertices, 0.173 m axis residual vs a 1e-9 m criterion). Those now
+  couple through exact polygon sections; route counts move 321+361 → 25+657, changing 78 of 117
+  aggregated source columns with all plasma matrices bitwise unchanged.</p>
+
+  <p><strong>Costs and corrections, measured with immutable staged snapshots</strong> (shared
+  fixture hashes, before/after receipts; artifacts preserved at
+  <code>~/.local/share/nova/benchmarks/exact_section/</code>): design-matrix build
+  1,146.8 → 1,214.2 s coarse (+5.88%) and 2,805.5 → 2,951.5 s fine (+5.20%) — one-time under
+  the fixture cache. The conductor field correction is hygiene-scale: wall flux 8.575e-5 Wb on
+  both fixtures, B components ≤5.4e-6 T — beside the banked 1.598e-2-of-span map forcing,
+  confirming the independent 99.18% source-density attribution. Verification: default
+  equilibrium/Biot suite 2,852 passed under SLURM; ring bank remeasured with support current
+  exact to the stored digit, 17 leg zeros exact, zero leakage; the two L1 pins shift only at
+  1e-17/1e-18 (round-off, suite green — stored digits to refresh opportunistically). The
+  all-lanes sweep ran 91% green before the debug ceiling inside one slow test
+  (<code>test_the_stored_boundary_encloses_the_stored_axis</code> — routed to the test-lane
+  owner for isolation). Full record: <code>tests/exact_section_route_results.json</code>.</p>
+
   <h2 id="density-forcing-ladder">§3 (mechanism) — the fit, not the flux: exact samples leave the forcing flat, so the projection's moment deviation is the carrier</h2>
 
   <p>Commit <code>5189b08e</code> (warm coarse carrier, three arms, production control
@@ -132,6 +158,172 @@
   and dispatched as the production-repair node. Full record:
   <code>scripts/density_forcing_ladder/results.json</code> and
   <code>docs/figures/solovev-exact-recovery/density-forcing-ladder.png</code>.</p>
+
+  <h2 id="normalization-constant-discriminator">§3 (conviction closed) — one number carries the drift: the boundary-flux constant sits 0.41 Wb off the exact separatrix</h2>
+
+  <p>Commit <code>fcee050f</code> (CPU, warm coarse carrier; production controls reproduce the
+  banked forcing to 8.5e-14 Wb). The two-by-two factorial — in-cell flux values × ψ_N
+  normalization constants, everything else production:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>values</th><th>constants</th><th>forcing sup</th><th>density share</th><th>projected axis</th></tr></thead>
+    <tbody>
+      <tr><td>production</td><td>production</td><td>1.2523 Wb</td><td>99.176%</td><td>+40.065 mm</td></tr>
+      <tr><td>exact</td><td>production</td><td>1.2546 Wb</td><td>99.277%</td><td>+40.121 mm</td></tr>
+      <tr><td>production</td><td><strong>exact</strong></td><td><strong>0.0595 Wb</strong></td><td><strong>0.577%</strong></td><td><strong>+0.374 mm</strong></td></tr>
+      <tr><td>exact</td><td><strong>exact</strong></td><td>0.0637 Wb</td><td>0.859%</td><td>+0.545 mm</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>Verdict: the normalization constants carry 98.6 of the 99.2 points.</strong> The
+  measured offsets at the analytic state: axis flux −1.72e-3 Wb (−2.1e-5 ψ_N, negligible);
+  <strong>boundary flux +0.410992 Wb — the production topology read's boundary constant sits at
+  ψ_N = 1.005081 in the exact coordinate</strong>, a coherent half-percent shift in every cell's
+  ψ_N that the profile slopes turn into a one-signed density bias and the soft position mode
+  amplifies into the 42 mm / 6.6% / 1.1% drift. This is two orders larger than — and distinct
+  from — the banked 5.53e-5 saddle-clip offset. The residual 0.58–0.86% forcing under exact
+  constants (~0.4–0.5 mm axis) is the next-order floor. The repair is surgical: find and fix why
+  the analytic-state topology read returns the boundary flux 0.411 Wb high, then re-score forcing,
+  roots and gates with no bound moved. Full record:
+  <code>scripts/normalization_discriminator/results.json</code>.</p>
+
+  <figure>
+    <img src="/nova/figures/solovev-exact-recovery/normalization-factorial.png"
+         alt="Four-arm factorial of flux values against normalization constants, with forcing and projected root responses"
+         style="max-width:100%">
+    <figcaption>The normalization factorial (commit <code>fcee050f</code>): exact constants
+    collapse the forcing two orders of magnitude; exact values alone change nothing.</figcaption>
+  </figure>
+
+  <h2 id="analytic-oracle-fixtures">§4 (the true oracle) — on a self-consistent reference, the discrete map is exact at the analytic state</h2>
+
+  <p>Commit <code>74635b0a</code>. The closed-form oracle lane stands: coarse 551-cell and fine
+  1,076-cell fixtures built entirely from the moderate-rotation closed-form case — constants,
+  field, profiles and current from one construction, the exterior supplied as exact analytic
+  flux at the boundary rows, no stored map or IMAS read anywhere (import-audited by test), the
+  closed-form separatrix constant 0 Wb read by production topology at −3.4e-20 Wb. Carriers
+  cache under honest names (<code>analytic_oracle_hex_machine_500/1000</code>, warm 0.15/0.22 s);
+  the stored-reference cache is untouched.</p>
+
+  <p><strong>The exact-state forcing is round-off, and the non-tautology is proven.</strong>
+  x_a is the closed form evaluated independently at every target (state digests banked; no
+  coupling image). g(x_a) − x_a reads <strong>4.55e-15 Wb coarse / 3.66e-15 Wb fine</strong>
+  (2.3e-15 / 2.6e-15 of span); tangent-inverse root responses are 6e-12 / 2e-12 mm. Perturbing
+  the sole exterior current by 1e-4 restores a finite 5.05e-4 / 5.09e-4 Wb forcing — eleven
+  orders above the base — with the independent prescribed-exterior prediction closing to
+  2.0e-15 Wb, so the zero is earned, not circular. The mechanism: with exact exterior rows the
+  residual reduces to the coupling of the moment difference, and <strong>the production
+  degree-nine density reproduces the closed-form source moments to 3.9e-9 A (m0 L1)</strong> —
+  binary64 scale. The sibling roundtrip lane's 1e-3-class figures measured a different
+  composition (Green image → discrete Δ* → Green image on rectangular sections) and are not in
+  tension.</p>
+
+  <p><strong>Reading:</strong> every h-independent deviation this programme chased on the
+  stored-reference lane was reference inconsistency, never nova composition error — on a
+  self-consistent oracle the representation, kernels, moments, clip, participation and
+  normalization compose to machine precision at the analytic state. The re-baseline (solved
+  roots and the full gate set on this lane) sets the §4 bounds at round-off floors with
+  convergence clauses. Full record: <code>scripts/analytic_oracle_fixtures/results.json</code>.</p>
+
+  <figure>
+    <img src="/nova/figures/solovev-exact-recovery/analytic-oracle-forcing.png"
+         alt="True-oracle forcing and tangent responses on both fixtures beside the perturbation check"
+         style="max-width:100%">
+    <figcaption>The true-oracle forcing (commit <code>74635b0a</code>): round-off at the exact
+    state on both fixtures, with the exterior-perturbation arm proving the zero is earned.</figcaption>
+  </figure>
+
+  <h2 id="oracle-rebaseline">§4 (re-baseline) — the recovery gates land with their floors, and the map's second root surfaces</h2>
+
+  <p>Commit <code>0bed363d</code>. The Solov'ev-recovery gate harness is authored and green
+  (four contract tests, red-then-green; gauge validation finds zero mixed-gauge gates and zero
+  foreign anchors), the standing forcing controls hold at round-off
+  (3.83e-15 / 4.44e-15 Wb), and both terminal states are serialized. Bounds remain
+  <em>proposed</em>, awaiting the owner lock.</p>
+
+  <p><strong>The independent-seed measurement found a second solution branch.</strong> The
+  production current-centroid uniform-disc seed (no closed-form flux samples; 230/466 starting
+  core cells) converges undamped at the banked 10×30 budget to machine precision on both
+  fixtures (2.49e-15 / 2.17e-15) — to a <strong>limited equilibrium with no X-point</strong>,
+  not the closed-form diverted root: axis 74.84/74.19 mm away, flux sup 0.533 of span, plasma
+  current +5.01/+5.09%, field integral +11.7% — h-independent (flux-excess fine/coarse ratio
+  1.00098), i.e., a genuine alternate root of the same external field, not discretization.
+  Source-strength continuation at 0.50/0.75 collapses to the vacuum branch and returns to the
+  same alternate root at full strength. Six proposed gates correctly reject that root on both
+  grids.</p>
+
+  <p><strong>Separation of concerns, cleanly:</strong> accuracy is settled — the closed-form
+  root is a fixed point of the discrete map to round-off, so the recovery gates can lock at
+  round-off floors with the one-map-evaluation forcing gate standing sentry. Basin selection is
+  a distinct solver property: production seeding on this diverted case lands in the limited
+  basin, and the repair (basin-aware seeding or a globalized root find retaining nonempty-core
+  topology qualification — the measured continuation is not it) is its own scoped work. Full
+  record: <code>scripts/oracle_rebaseline/results.json</code>, trajectories in
+  <code>attempts-coarse.json</code>/<code>attempts-fine.json</code>.</p>
+
+  <figure>
+    <img src="/nova/figures/solovev-exact-recovery/oracle-recovery-floors.png"
+         alt="Recovery gate floors and the alternate limited root beside the closed-form diverted root on both fixtures"
+         style="max-width:100%">
+    <figcaption>Recovery floors and the alternate root (commit <code>0bed363d</code>): the
+    proposed gates, their measured floors, and the limited branch the production seed selects.</figcaption>
+  </figure>
+
+  <h2 id="accuracy-cost-ladder">§5 — the ladder: builds are 97–99% portable kernel work; the solve is 199 ms at batch one, 30 ms at batch sixteen, and the Krylov loop owns it</h2>
+
+  <p>Commit <code>0c36bf96</code> (H200 NVL under the reservation, JAX 0.11.0; the restored
+  shared environment consumed strictly read-only). <strong>Build</strong>: cold CPU totals
+  294.2 s coarse / 778.0 s fine on the oracle fixtures, with the exact polygon kernel + moment
+  stages carrying <strong>97.2% / 99.0%</strong> — the device-kernel-build plan's target
+  confirmed by measurement (conservative contraction estimate 0.12–0.15 ms per full moment
+  block on device; estimate only, no port attempted).</p>
+
+  <p><strong>Solve, the genuine timing case</strong> (moment-seeded 10×30 undamped to
+  machine-precision residual; StableHLO receipts independently confirm the 10/30 loop bounds):</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>measure</th><th>coarse 551</th><th>fine 1076</th></tr></thead>
+    <tbody>
+      <tr><td>converged solve, batch 1</td><td><strong>198.5 ms/state</strong></td><td>257.4 ms/state</td></tr>
+      <tr><td>batch 4 / batch 16 (coarse)</td><td colspan="2">56.3 / <strong>30.2 ms/state</strong></td></tr>
+      <tr><td>map evaluation median</td><td>1.120 ms</td><td>1.383 ms</td></tr>
+      <tr><td>tangent median</td><td>1.492 ms</td><td>1.660 ms</td></tr>
+      <tr><td>one Newton step inclusive (30-GMRES Krylov)</td><td>20.60 ms</td><td>24.15 ms</td></tr>
+      <tr><td>launch / H2D / D2H</td><td>0.071 / 0.187 / 0.292 ms</td><td>0.071 / 0.135 / 0.178 ms</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>The attribution is unambiguous: the map costs one millisecond and the Krylov loop
+  costs twenty.</strong> Ten Newton steps project to 1.04× / 0.94× of the measured full solves —
+  the accounting closes. Against the ≈1 ms converged-solve target the miss is 198× at batch one
+  and 30× at batch sixteen, so the target is reached not by faster physics (the map is already
+  at the target) but by <em>iteration economy and batch amortization</em>: warm-seeded few-step
+  Newton (the catalog's adjacent-slice regime) at large batch is the measured route. The
+  three-rung accuracy side: the cheap centroid rung is rejected outright (non-finite terminal
+  values, 3.36-span flux error); the production first-moment rungs converge at 2.6e-15/1.9e-15
+  with round-off standing forcing (independent seeds still enter the limited alternate basin —
+  the standing hold). Full record: <code>scripts/accuracy_cost_ladder/results.json</code>,
+  Perfetto traces and StableHLO receipts beside it.</p>
+
+  <figure>
+    <img src="/nova/figures/solovev-exact-recovery/h200-phase-profile.png"
+         alt="H200 phase profile: map, tangent, Krylov and full-solve medians on both fixtures"
+         style="max-width:100%">
+    <figcaption>The H200 phase profile (commit <code>0c36bf96</code>): the map at ~1 ms, the
+    Newton-step Krylov loop at ~21 ms — iteration economy, not kernel speed, is the lever.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="/nova/figures/solovev-exact-recovery/accuracy-cost-ladder.png"
+         alt="Three-rung accuracy versus cost comparison on the oracle fixtures"
+         style="max-width:100%">
+    <figcaption>The accuracy–cost rungs: the centroid rung fails outright; the production
+    representation carries round-off accuracy at the measured costs above.</figcaption>
+  </figure>
 
   <h2 id="build-cache-activation">§6 — cached machine builds: warm loads at a quarter-second against fifty-minute cold builds, bitwise</h2>
 

@@ -71,7 +71,8 @@ uv run --no-sync git commit -m 'type: description'
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `nova.imas`     | IMAS data model interface (IDS access, database connections)                                                                                                                                                                   |
 | `nova.assembly` | ITER TF coil assembly analysis (Monte Carlo, fiducials, deformations). See [nova/assembly/README.md](nova/assembly/README.md) for detailed documentation on coordinate systems, gap calculations, and installed sector layout. |
-| `nova.biot`     | Biot-Savart integral calculations                                                                                                                                                                                              |
+| `nova.biot`     | Biot-Savart integral calculations. Section routes and FrameSpace access: [`nova/biot/AGENTS.md`](nova/biot/AGENTS.md).                                                                                                         |
+| `nova.equilibrium` | Forward equilibrium construction and solves. Reference-lane, cache, gauge, and CPU-measurement guidance: [`nova/equilibrium/AGENTS.md`](nova/equilibrium/AGENTS.md).                                                         |
 | `nova.frame`    | FrameSpace types for electromagnetic components                                                                                                                                                                                |
 | `nova.database` | netCDF storage, filepath management                                                                                                                                                                                            |
 
@@ -81,6 +82,17 @@ Nova caches expensive calculations as netCDF files. Key classes:
 
 - `nova.database.netcdf.netCDF`: xarray dataset storage with groups
 - `nova.database.filepath.FilePath`: Cross-platform path management with fsspec/appdirs
+
+## Coupled Repositories
+
+Prior-art scouts (reckon-ship §1b) search these repos in both directions
+before authoring new machinery here, and their sessions search nova likewise:
+
+- **imas-ambix** (`~/Code/imas-ambix`) — the flux-function seam, challenge
+  corpus and COCOS conventions; ambix consumes Nova's forwards and conditions
+  their inputs.
+- **reckon** (`~/Code/reckon`) — plan/crew infrastructure this repo's
+  docs/state tooling is built on.
 
 ## Agent Workflows
 

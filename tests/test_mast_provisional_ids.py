@@ -15,7 +15,7 @@ import pytest
 
 from nova.catalog.mast_geometry import MachineGeometryRegistry, physical_digest
 from nova.imas.machine_evidence import FieldEvidence
-from nova.imas.mast_artifact import (
+from nova.imas.machine_artifact import (
     IncompleteMachineArtifactError,
     resolve_machine_artifact,
 )

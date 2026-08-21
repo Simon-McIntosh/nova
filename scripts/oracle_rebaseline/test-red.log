@@ -1,0 +1,30 @@
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+23:36:35 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+
+==================================== ERRORS ====================================
+____________ ERROR collecting tests/test_solovev_recovery_gates.py _____________
+ImportError while importing test module '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/oracle-rebaseline/tests/test_solovev_recovery_gates.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../../../../.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_solovev_recovery_gates.py:5: in <module>
+    from scripts.oracle_rebaseline.gates import (
+E   ModuleNotFoundError: No module named 'scripts.oracle_rebaseline.gates'
+____________ ERROR collecting tests/test_solovev_recovery_gates.py _____________
+ImportError while importing test module '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/oracle-rebaseline/tests/test_solovev_recovery_gates.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../../../../.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_solovev_recovery_gates.py:5: in <module>
+    from scripts.oracle_rebaseline.gates import (
+E   ModuleNotFoundError: No module named 'scripts.oracle_rebaseline.gates'
+=========================== short test summary info ============================
+ERROR tests/test_solovev_recovery_gates.py
+ERROR tests/test_solovev_recovery_gates.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+2 errors in 25.59s
+EXIT=2

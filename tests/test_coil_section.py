@@ -97,6 +97,14 @@ def test_an_undivided_rectangle_takes_the_corner_rule():
     assert np.array_equal(np.unique(pair(-1).subframe.segment), ["cylinder"])
 
 
+def test_an_undivided_skewed_polygon_takes_the_polygon_kernel():
+    """A polygon without axis-aligned edges retains its authored section."""
+    vertices = np.array([[6.8, -3.2], [7.1, -3.0], [7.16, -3.08], [6.86, -3.28]])
+    coilset = CoilSet(dcoil=-1)
+    coilset.coil.insert(vertices, nturn=1.0, name="skewed", part="passive")
+    assert np.array_equal(np.unique(coilset.subframe.segment), ["polysection"])
+
+
 def test_the_corner_rule_and_the_polygon_kernel_are_one_quantity():
     """Both integrate the same current over the same box, so they cannot disagree.
 

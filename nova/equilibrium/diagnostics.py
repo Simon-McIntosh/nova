@@ -12,12 +12,33 @@ canonical axisymmetric kernels in :mod:`nova.biot.greens`.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import numpy as np
 
 from nova.biot.greens import MU0
 
 #: Open stability interval for rigid vertical and radial displacements.
 DECAY_INDEX_WINDOW: tuple[float, float] = (0.0, 1.5)
+
+
+@dataclass(frozen=True)
+class VerticalConditioningReceipt:
+    r"""Conditioning of the axisymmetric vertical displacement mode.
+
+    ``stability_margin`` is the signed distance to the nearest edge of the
+    open vacuum decay-index interval.  Positive values lie inside the
+    interval; zero and negative values are marginal or outside it.  The
+    receipt reports conditioning only and never constrains a solve.
+    """
+
+    evaluation_radius_m: float
+    vertical_field_t: float
+    decay_index: float
+    lower_stability_margin: float
+    upper_stability_margin: float
+    stability_margin: float
+    stable: bool
 
 
 def shafranov_vertical_field(
@@ -132,9 +153,58 @@ def decay_index(radius: np.ndarray, vertical_field: np.ndarray) -> np.ndarray:
     return np.asarray(index, dtype=np.float64)
 
 
+def vertical_conditioning_receipt(
+    radius: np.ndarray,
+    vertical_field: np.ndarray,
+    evaluation_radius: float,
+) -> VerticalConditioningReceipt:
+    r"""Return the local rigid-mode conditioning receipt at one radius.
+
+    The decay index is evaluated on the supplied radial field sample and
+    linearly interpolated at ``evaluation_radius``.  The radius must lie
+    within the sampled interval.  A field null or non-finite local stencil
+    produces NaN margins and a failing receipt instead of inventing a finite
+    conditioning claim.
+    """
+
+    radial_coordinate = np.asarray(radius, dtype=np.float64)
+    field = np.asarray(vertical_field, dtype=np.float64)
+    index = decay_index(radial_coordinate, field)
+    selected_radius = float(evaluation_radius)
+    if not np.isfinite(selected_radius):
+        raise ValueError("evaluation_radius must be finite")
+    lower_radius = float(np.min(radial_coordinate))
+    upper_radius = float(np.max(radial_coordinate))
+    if not lower_radius <= selected_radius <= upper_radius:
+        raise ValueError("evaluation_radius must lie within the radial sample")
+
+    if radial_coordinate[0] > radial_coordinate[-1]:
+        radial_coordinate = radial_coordinate[::-1]
+        field = field[::-1]
+        index = index[::-1]
+    selected_field = float(np.interp(selected_radius, radial_coordinate, field))
+    selected_index = float(np.interp(selected_radius, radial_coordinate, index))
+    lower_bound, upper_bound = DECAY_INDEX_WINDOW
+    lower_margin = selected_index - lower_bound
+    upper_margin = upper_bound - selected_index
+    margin = min(lower_margin, upper_margin)
+    stable = bool(np.isfinite(margin) and margin > 0.0)
+    return VerticalConditioningReceipt(
+        evaluation_radius_m=selected_radius,
+        vertical_field_t=selected_field,
+        decay_index=selected_index,
+        lower_stability_margin=float(lower_margin),
+        upper_stability_margin=float(upper_margin),
+        stability_margin=float(margin),
+        stable=stable,
+    )
+
+
 __all__ = [
     "DECAY_INDEX_WINDOW",
+    "VerticalConditioningReceipt",
     "decay_index",
     "shafranov_vertical_field",
     "shafranov_vertical_field_elongated",
+    "vertical_conditioning_receipt",
 ]

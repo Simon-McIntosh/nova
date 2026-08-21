@@ -1,0 +1,30 @@
+{
+  "additive_closure_fraction": 1.8986206095895483e-08,
+  "additive_closure_seconds": 5.58607280254364e-06,
+  "arrays_verified": 18,
+  "cache_used_for_timed_build": false,
+  "cold_direct_build": true,
+  "fixture": "coarse",
+  "kernel_target_family_seconds": {
+    "grid": 76.67684297636151,
+    "sample": 163.33236978016794,
+    "wall": 46.01420504786074
+  },
+  "production_cache_identity_verified": true,
+  "realised_cells": 551,
+  "requested_cells": -500,
+  "stage_definitions": {
+    "assembly": "triangulation, stencils, sampling layout and carrier packing",
+    "kernel_family": "exact authored-polygon zeroth and first flux blocks",
+    "moment_order": "fixed atomic support and first-moment geometry",
+    "section_shape": "authored wall, hex tiling, polygons and areas"
+  },
+  "stage_seconds": {
+    "assembly_seconds": 0.026978187263011932,
+    "kernel_family_seconds": 286.02342617698014,
+    "moment_order_seconds": 0.764723913744092,
+    "section_shape_seconds": 7.402298219501972
+  },
+  "stage_sum_seconds": 294.2174264974892,
+  "total_seconds": 294.217432083562
+}

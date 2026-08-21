@@ -1,48 +1,10 @@
-"""Biot-Savart coupling for toroidal conductors of polygonal cross-section.
+"""Exact Biot-Savart coupling for toroidal polygonal cross-sections.
 
-A point-filament ring is log-singular at its own location, so any target that
-approaches a conductor — a neighbouring plasma cell, or the cell itself on the
-diagonal of the plasma-plasma matrix — inherits a spurious near-field spike.
-Spreading the current uniformly over the true cross-section removes the
-singularity: the flux and field stay finite and smooth through the conductor.
-:func:`nova.biot.polygon.polygon_greens` does that for an arbitrary polygon,
-which is what a hexagonal (or wall-clipped) plasma cell needs.
-
-Near and far
-------------
-The exact polygon kernel integrates over the section boundary at every target,
-so it costs roughly four orders of magnitude more per target-source pair than
-the point-filament form. Beyond a few section sizes it also buys nothing: the
-finite-area correction there is the constant second-moment term, a few tenths of
-a percent in flux and far below any measurement it is compared against. This
-element therefore evaluates the exact kernel only inside a standoff band of
-``standoff`` section radii and the point-filament form outside it — the same
-near/far contract :func:`nova.biot.greens.hybrid_greens` already applies to
-rectangular sections, generalised to a polygon. On a plasma grid the band holds
-a few percent of the target-source pairs, which is what makes the exact
-treatment affordable where it is physically real.
-
-Three bands
------------
-The two-way near/far split above is a study knob, not the shipped default,
-because a bare point filament does not converge to a finite section for a full
-ring at any standoff. The measured alternative is the three-band scheme in
-:mod:`nova.biot.bandedcoupling` — converged rule, reduced rule, moment-corrected
-filament, binned by distance to the section contour — which holds every component
-to one part in a million of its peak. It is available here through ``banded`` and
-is off by default: exact everywhere remains the shipped lane and the reference
-the banded one is measured against.
-
-Two exact kernels
------------------
-Independently of how pairs are binned, the *exact* treatment itself comes two
-ways. :func:`nova.biot.polygon.polygon_greens` reduces the section integral to a
-contour sum and does the remaining angular integral by quadrature;
-:func:`nova.biot.polygonanalytic.polygon_analytic_greens` does that integral in
-closed form as well, leaving only two smooth ``arsinh`` residuals per corner.
-``closed_form`` selects the second, and it composes with either binning — exact
-everywhere becomes closed-form everywhere, and the three-band scheme's near band
-takes the closed form where the quadrature's own singularity is.
+Every production pair is integrated over the authored section. The closed-form
+Part V reduction is the default; the boundary-quadrature implementation remains
+an exact reference and compiled-device route. Approximate distance-banded and
+point-filament comparators live in their dedicated study modules and cannot be
+selected through this production element.
 
 Quantities are per ampere of total conductor current, in raw SI: total poloidal
 flux :math:`\\Phi = 2 \\pi R A_\\phi` [Wb] and field components [T].
@@ -59,8 +21,7 @@ from typing import ClassVar, Literal
 import numpy as np
 from shapely.geometry import MultiPolygon, Polygon
 
-from nova.biot.bandedcoupling import banded_greens
-from nova.biot.greens import greens_bz_br, greens_psi, section_centroid
+from nova.biot.greens import section_centroid
 from nova.biot.matrix import Matrix
 from nova.biot.polygon import _N_NODES, _N_PANELS, polygon_greens
 from nova.biot.polygonanalytic import (
@@ -73,22 +34,16 @@ from nova.biot.sectionaverage import section_triangles
 
 @dataclass(frozen=True)
 class PolySectionPolicy:
-    """Immutable routing policy for one polygon-section kernel instance."""
+    """Immutable exact-kernel policy for one polygon-section instance."""
 
-    arrangement: Literal["exact", "standoff", "banded", "filament"] = "exact"
     exact_kernel: Literal["closed_form", "quadrature"] = "closed_form"
     backend: Literal["numpy", "jax"] = "numpy"
     precision: Literal["float64"] = "float64"
     device_eligibility: Literal["host", "axisymmetric_ring"] = "host"
-    standoff: float | None = None
     quadrature: tuple[int, int] | None = None
 
     def __post_init__(self):
         """Validate and resolve every setting that changes kernel values."""
-        if self.arrangement not in {"exact", "standoff", "banded", "filament"}:
-            raise ValueError(
-                f"unknown polygon-section arrangement {self.arrangement!r}"
-            )
         if self.exact_kernel not in {"closed_form", "quadrature"}:
             raise ValueError(f"unknown polygon-section kernel {self.exact_kernel!r}")
         if self.backend not in {"numpy", "jax"}:
@@ -103,39 +58,13 @@ class PolySectionPolicy:
                 f"the {self.backend!r} backend requires {expected_device!r} "
                 "device eligibility"
             )
-        if self.backend == "jax" and self.arrangement != "exact":
-            raise ValueError("the tiled ring backend evaluates only exact routing")
         if self.backend == "jax" and self.exact_kernel != "quadrature":
             raise ValueError(
                 "the tiled ring backend requires the compiled quadrature kernel"
             )
-        if self.arrangement == "filament" and self.exact_kernel != "closed_form":
-            raise ValueError("filament routing does not accept an exact kernel")
-
-        if self.arrangement == "standoff":
-            if isinstance(self.standoff, bool | np.bool_) or not isinstance(
-                self.standoff, int | float | np.integer | np.floating
-            ):
-                raise ValueError("standoff routing requires a finite distance")
-            standoff = float(self.standoff)
-            if not np.isfinite(standoff):
-                raise ValueError("standoff routing requires a finite distance")
-            if standoff <= 0:
-                raise ValueError("standoff distance must be positive")
-            object.__setattr__(self, "standoff", standoff)
-        elif self.standoff is not None:
-            raise ValueError(
-                f"standoff has no meaning for {self.arrangement!r} routing"
-            )
-
         if self.exact_kernel == "closed_form" and self.quadrature is not None:
             raise ValueError("closed-form routing does not accept a quadrature rule")
-        if self.arrangement == "banded" and self.quadrature is not None:
-            raise ValueError("banded routing owns its fixed near and middle rules")
-        if self.exact_kernel == "quadrature" and self.arrangement in {
-            "exact",
-            "standoff",
-        }:
+        if self.exact_kernel == "quadrature":
             rule = (_N_PANELS, _N_NODES) if self.quadrature is None else self.quadrature
             if len(rule) != 2 or any(
                 isinstance(value, bool | np.bool_)
@@ -195,79 +124,17 @@ class PolySection(Matrix):
         super().__post_init__()
 
     @staticmethod
-    def section_radius(vertices: np.ndarray) -> float:
-        """Return the section's bounding radius about its area centroid [m]."""
-        vertices = np.asarray(vertices, dtype=np.float64)
-        centre = section_centroid(vertices)
-        return float(np.max(np.hypot(*(vertices - centre).T)))
-
-    @staticmethod
-    def near_band(
-        target_r: np.ndarray,
-        target_z: np.ndarray,
-        vertices: np.ndarray,
-        policy: PolySectionPolicy | Mapping | str | None = None,
-    ) -> np.ndarray:
-        """Return the mask of targets inside the section's standoff band.
-
-        Every target is inside the band when the standoff is ``None`` or
-        infinite, which is how *exact everywhere* is expressed.
-        """
-        target_r = np.asarray(target_r, dtype=np.float64)
-        policy = PolySectionPolicy.resolve(policy)
-        if policy.arrangement == "filament":
-            return np.zeros(target_r.shape, dtype=bool)
-        if policy.arrangement != "standoff":
-            return np.ones(target_r.shape, dtype=bool)
-        vertices = np.asarray(vertices, dtype=np.float64)
-        centre = section_centroid(vertices)
-        distance = np.hypot(
-            target_r - centre[0],
-            np.asarray(target_z, dtype=np.float64) - centre[1],
-        )
-        return distance < policy.standoff * PolySection.section_radius(vertices)
-
-    @staticmethod
     def section_greens(
         target_r: np.ndarray,
         target_z: np.ndarray,
         vertices: np.ndarray,
         policy: PolySectionPolicy | Mapping | str | None = None,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Return ``(psi, Br, Bz)`` per ampere: exact near the section, point far.
-
-        The returned arrays are shaped like ``target_r``. With ``banded`` set, the
-        three-band scheme handles every pair instead and ``standoff`` does not
-        apply — the bands carry their own measured rules. ``closed_form`` selects
-        which exact kernel serves either arrangement, and ``quadrature`` applies
-        only to the boundary-quadrature one.
-        """
+        """Return exact ``(psi, Br, Bz)`` per ampere over the authored section."""
         policy = PolySectionPolicy.resolve(policy)
         target_r = np.asarray(target_r, dtype=np.float64)
         target_z = np.asarray(target_z, dtype=np.float64)
-        if policy.arrangement == "banded":
-            return banded_greens(
-                target_r,
-                target_z,
-                vertices,
-                closed_form=policy.exact_kernel == "closed_form",
-            )
-        psi = np.empty(target_r.shape)
-        br = np.empty(target_r.shape)
-        bz = np.empty(target_r.shape)
-        near = PolySection.near_band(target_r, target_z, vertices, policy)
-        if near.any():
-            psi[near], br[near], bz[near] = PolySection.exact_greens(
-                target_r[near], target_z[near], vertices, policy
-            )
-        far = ~near
-        if far.any():
-            centre = section_centroid(vertices)
-            psi[far] = greens_psi(target_r[far], target_z[far], centre[0], centre[1])
-            bz[far], br[far] = greens_bz_br(
-                target_r[far], target_z[far], centre[0], centre[1]
-            )
-        return psi, br, bz
+        return PolySection.exact_greens(target_r, target_z, vertices, policy)
 
     @staticmethod
     def exact_greens(
@@ -278,9 +145,8 @@ class PolySection(Matrix):
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Return ``(psi, Br, Bz)`` from the configured exact kernel.
 
-        The one place the two evaluations are chosen between, so the standoff
-        band, the banded scheme's near band and a direct call cannot disagree
-        about which one is in force.
+        This is the single production selection point for the two exact
+        implementations.
         """
         policy = PolySectionPolicy.resolve(policy)
         if policy.exact_kernel == "closed_form":
@@ -341,18 +207,6 @@ class PolySection(Matrix):
         br = np.empty(target_r.shape)
         bz = np.empty(target_r.shape)
         for column, components in enumerate(self._section_components):
-            if self.policy.arrangement == "filament":
-                centre = sum(
-                    weight * section_centroid(vertices)
-                    for vertices, weight in components
-                )
-                psi[:, column] = greens_psi(
-                    target_r[:, column], target_z[:, column], centre[0], centre[1]
-                )
-                bz[:, column], br[:, column] = greens_bz_br(
-                    target_r[:, column], target_z[:, column], centre[0], centre[1]
-                )
-                continue
             psi[:, column] = 0.0
             br[:, column] = 0.0
             bz[:, column] = 0.0

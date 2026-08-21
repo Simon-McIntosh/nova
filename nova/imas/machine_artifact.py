@@ -1,4 +1,4 @@
-"""Create and verify content-addressed MAST machine artifacts."""
+"""Create and verify content-addressed machine-description artifacts."""
 
 from __future__ import annotations
 
@@ -15,6 +15,8 @@ from pathlib import Path, PurePosixPath
 from stat import S_ISDIR, S_ISLNK, S_ISREG
 from typing import Any, Iterable, Mapping
 
+from imas_data_dictionaries import dd_xml_versions, parse_dd_version
+
 from nova.imas.machine_drive import ChannelDrive, DriveMap
 from nova.imas.machine_evidence import (
     EvidenceLedger,
@@ -29,13 +31,14 @@ from nova.imas.machine_evidence import (
 )
 
 MANIFEST_FILENAME = "manifest.json"
-MANIFEST_SCHEMA = "nova-mast-machine-artifact"
-OCI_ARTIFACT_TYPE = "application/vnd.iter.nova.mast-machine-description.v1"
 OCI_MANIFEST_MEDIA_TYPE = "application/vnd.oci.image.manifest.v1+json"
-OCI_FILE_MEDIA_TYPE = "application/vnd.iter.nova.mast-machine-description.ids.v1"
 
 _DD_VERSION_PATTERN = re.compile(r"[0-9]+\.[0-9]+\.[0-9]+")
 _HEX_PATTERN = re.compile(r"[0-9a-f]+")
+_MACHINE_PATTERN = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
+_MANIFEST_SCHEMA_PATTERN = re.compile(
+    r"nova-(?P<machine>[a-z0-9]+(?:-[a-z0-9]+)*)-machine-artifact"
+)
 _OCI_REPOSITORY_PATTERN = re.compile(
     r"[a-z0-9]+(?:[.-][a-z0-9]+)*(?:/[a-z0-9]+(?:[._-][a-z0-9]+)*)+"
 )
@@ -49,6 +52,7 @@ _HDF5_CONSISTENCY_FIELDS = {
     2: (11, 1),
     3: (11, 1),
 }
+_PUBLICATION_DD_MAJOR = 4
 _WINDOWS_DEVICE_NAMES = frozenset(
     {"CON", "PRN", "AUX", "NUL"}
     | {f"COM{index}" for index in range(1, 10)}
@@ -64,6 +68,78 @@ class MachineArtifactError(MachineDescriptionError):
 
 class IncompleteMachineArtifactError(MachineArtifactError):
     """Raised when operator-ready semantics are requested from incomplete data."""
+
+
+def machine_name(machine: str) -> str:
+    """Return the canonical registry-safe spelling of a machine name."""
+
+    if not isinstance(machine, str):
+        raise MachineArtifactError("machine name must be a string")
+    canonical = machine.casefold()
+    if _MACHINE_PATTERN.fullmatch(canonical) is None:
+        raise MachineArtifactError(
+            "machine name must contain lowercase letters, digits, and single hyphens"
+        )
+    return canonical
+
+
+def manifest_schema(machine: str) -> str:
+    """Return the manifest schema identifier for one machine."""
+
+    return f"nova-{machine_name(machine)}-machine-artifact"
+
+
+def oci_artifact_type(machine: str) -> str:
+    """Return the OCI artifact media type for one machine description."""
+
+    return f"application/vnd.iter.nova.{machine_name(machine)}-machine-description.v1"
+
+
+def oci_file_media_type(machine: str) -> str:
+    """Return the OCI payload media type for one machine IDS set."""
+
+    return (
+        f"application/vnd.iter.nova.{machine_name(machine)}-machine-description.ids.v1"
+    )
+
+
+def _machine_from_schema(schema: str) -> str:
+    if not isinstance(schema, str):
+        raise MachineArtifactError("manifest schema must be a string")
+    match = _MANIFEST_SCHEMA_PATTERN.fullmatch(schema)
+    if match is None:
+        raise MachineArtifactError(f"unsupported manifest schema {schema!r}")
+    return match.group("machine")
+
+
+def latest_publication_dd_version() -> str:
+    """Return the newest available data dictionary in the publication major."""
+
+    candidates = tuple(
+        version
+        for version in dd_xml_versions()
+        if parse_dd_version(version).major == _PUBLICATION_DD_MAJOR
+    )
+    if not candidates:
+        raise MachineArtifactError(
+            "no data dictionary is available for machine-artifact publication"
+        )
+    return str(max(candidates, key=parse_dd_version))
+
+
+def publication_dd_version(dd_version: str | None = None) -> str:
+    """Resolve the runtime default and refuse publication from another major."""
+
+    latest = latest_publication_dd_version()
+    selected = latest if dd_version is None else dd_version
+    if not isinstance(selected, str) or _DD_VERSION_PATTERN.fullmatch(selected) is None:
+        raise MachineArtifactError(f"malformed data dictionary version {selected!r}")
+    if parse_dd_version(selected).major != parse_dd_version(latest).major:
+        raise MachineArtifactError(
+            f"machine-artifact publication requires data dictionary major "
+            f"{parse_dd_version(latest).major}, got {selected!r}"
+        )
+    return selected
 
 
 def _sha256_bytes(data: bytes) -> str:
@@ -358,18 +434,23 @@ class OciArtifactConvention:
     file_media_type: str
     tag: str
 
-    def validate(self, dd_version: str, physical_digest: str) -> None:
+    def validate(
+        self,
+        machine: str,
+        dd_version: str,
+        physical_digest: str,
+    ) -> None:
         """Reject convention drift or a tag that disagrees with the identity."""
 
         expected = oci_artifact_tag(dd_version, physical_digest)
         values = (
-            (self.artifact_type, OCI_ARTIFACT_TYPE, "artifact type"),
+            (self.artifact_type, oci_artifact_type(machine), "artifact type"),
             (
                 self.manifest_media_type,
                 OCI_MANIFEST_MEDIA_TYPE,
                 "manifest media type",
             ),
-            (self.file_media_type, OCI_FILE_MEDIA_TYPE, "file media type"),
+            (self.file_media_type, oci_file_media_type(machine), "file media type"),
             (self.tag, expected, "artifact tag"),
         )
         for actual, required, context in values:
@@ -389,13 +470,18 @@ class OciArtifactConvention:
         }
 
     @classmethod
-    def create(cls, dd_version: str, physical_digest: str) -> OciArtifactConvention:
+    def create(
+        cls,
+        machine: str,
+        dd_version: str,
+        physical_digest: str,
+    ) -> OciArtifactConvention:
         """Return the fixed conventions for a machine artifact identity."""
 
         return cls(
-            artifact_type=OCI_ARTIFACT_TYPE,
+            artifact_type=oci_artifact_type(machine),
             manifest_media_type=OCI_MANIFEST_MEDIA_TYPE,
-            file_media_type=OCI_FILE_MEDIA_TYPE,
+            file_media_type=oci_file_media_type(machine),
             tag=oci_artifact_tag(dd_version, physical_digest),
         )
 
@@ -437,6 +523,12 @@ class MachineArtifactManifest:
     channel_drive: tuple[ChannelDrive, ...] = ()
 
     @property
+    def machine(self) -> str:
+        """Return the machine identity encoded by the manifest schema."""
+
+        return _machine_from_schema(self.schema)
+
+    @property
     def evidence(self) -> EvidenceLedger:
         """Return the field-level provenance carried by this artifact."""
 
@@ -461,7 +553,8 @@ class MachineArtifactManifest:
     def validate(self) -> None:
         """Reject ambiguous, incomplete, or non-canonical manifest state."""
 
-        if self.schema != MANIFEST_SCHEMA:
+        machine = self.machine
+        if self.schema != manifest_schema(machine):
             raise MachineArtifactError(f"unsupported manifest schema {self.schema!r}")
         if (
             not isinstance(self.dd_version, str)
@@ -520,7 +613,7 @@ class MachineArtifactManifest:
             )
         self._validate_field_evidence()
         self._validate_channel_drive()
-        self.oci.validate(self.dd_version, self.physical_digest)
+        self.oci.validate(machine, self.dd_version, self.physical_digest)
 
     def _validate_field_evidence(self) -> None:
         """Require field provenance consistent with the artifact's shot extent."""
@@ -859,7 +952,8 @@ def _inventory_files(
 def create_machine_artifact_manifest(
     source_directory: Path | str,
     *,
-    dd_version: str,
+    machine: str,
+    dd_version: str | None = None,
     registry_digest: str,
     physical_digest: str,
     shot_ranges: Iterable[ArtifactShotRange],
@@ -870,6 +964,7 @@ def create_machine_artifact_manifest(
 ) -> MachineArtifactManifest:
     """Hash an authored IDS directory into a canonical manifest."""
 
+    dd_version = publication_dd_version(dd_version)
     source = Path(source_directory)
     inventory = _inventory_files(source, allow_manifest=False)
     files = tuple(
@@ -880,7 +975,7 @@ def create_machine_artifact_manifest(
         )
     )
     manifest = MachineArtifactManifest(
-        schema=MANIFEST_SCHEMA,
+        schema=manifest_schema(machine),
         dd_version=dd_version,
         registry_digest=registry_digest,
         physical_digest=physical_digest,
@@ -888,7 +983,7 @@ def create_machine_artifact_manifest(
         complete=complete,
         unresolved_gaps=tuple(sorted(unresolved_gaps)),
         files=files,
-        oci=OciArtifactConvention.create(dd_version, physical_digest),
+        oci=OciArtifactConvention.create(machine, dd_version, physical_digest),
         field_evidence=EvidenceLedger.create(field_evidence).records,
         channel_drive=DriveMap.create(channel_drive).drives,
     )

@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="device-kernel-build">
+  <meta name="plan-title"     content="Device Kernel Build — exact Green matrices in minutes, differentiable by design">
+  <meta name="plan-summary"   content="Port the exact Part V section-kernel evaluation to single-source JAX so design matrices build on the H200 in the minutes class from one code path, with compute-provenance cache keys, tolerance-based cross-device verification, and a measured route to geometry gradients for the inversion consumer">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="mid">
+  <meta name="plan-effort-hours" content="6.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <title>Device Kernel Build | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The measured basis, and what the cache already solved</h2>
+
+    <p><strong>Owner commission 2026-08-20.</strong> A cold design-matrix build costs
+    1,214 s on the coarse 566-cell fixture and 2,952 s on the fine 1,069-cell fixture on CPU
+    under the exact-kernel defaults (+5.9%/+5.2% over the retired hybrid — the one-time price of
+    Urankar-exact-everywhere). The semantic fixture cache already removed this cost from routine
+    work: warm loads read 0.27 s and 0.82 s, bitwise. So this plan is <em>not</em> about routine
+    solves — it is about the consumers that generate <strong>new configurations</strong>, where
+    every configuration pays a cold build.</p>
+
+    <p>The arithmetic is device-shaped. The heavy stages evaluate elementwise fp64 special
+    functions — Bulirsch <code>cel</code> with bounded iteration counts, the graded arsinh
+    residual chains, and the shared ninth-order harmonic channel — over roughly 10⁷ source–target
+    pairs across nine kernel blocks with moment companions. That is embarrassingly parallel work
+    with no data-dependent shapes once <code>cel</code> runs at a fixed iteration count. On
+    H200-class fp64 throughput the kernel stages should compress from tens of minutes to the
+    seconds-to-tens-of-seconds class; the host residue (clip topology, carrier assembly) is
+    small. The production kernels are today deliberately host NumPy — the forward-AD route
+    through the flux antiderivatives was measured out at 12.2 GiB per target and every JAX
+    import was removed from that API — but that measurement convicted <em>differentiation
+    through the antiderivative composition</em>, not plain evaluation; plain evaluation is the
+    port target and gradients are a separately gated follow-on (§5).</p>
+
+    <p>Hardware and access are already established: the H200 node (98dci4-gpu-0003, partition
+    <code>betelgeuse</code>) requires <code>--reservation=gpu_0003_grpA</code>, which reserves
+    host CPUs 15–29 and 47–61 and makes all eight GPUs requestable. Running the existing CPU
+    build on those host cores buys only modest parallelism and spends the reservation's scarce
+    resource; the value is in the device port, not the node's CPUs.</p>
+
+    <h2 id="s2">§2 — Consumers, ranked, and the worthiness case</h2>
+
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>consumer</th><th>build pattern</th><th>what the port buys</th></tr></thead>
+      <tbody>
+        <tr><td>accuracy–cost ladder and h-refinement scans</td><td>many one-off configurations (the banked crossing estimates alone want ~1,700-cell fixtures)</td><td>each rung stops costing 20–60 min of cold build; scans become interactive</td></tr>
+        <tr><td>machine onboarding (DIII-D now, the MAST catalog next)</td><td>one cold build per machine and discretisation</td><td>minutes instead of an hour per machine; amortised thereafter by the cache</td></tr>
+        <tr><td><strong>coil-geometry inversion</strong></td><td><strong>rebuild per gradient step — no cache can amortise it</strong></td><td>the enabling technology: that plan already verified Green-kernel geometry gradients (jacfwd against finite differences at 1e-6) on the kernels it could differentiate; a differentiable device build extends that to the exact section stack</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p>The stage-level truth about where build time actually goes arrives for free: the
+    solovev-exact-recovery §5 ladder carries the owner's profiling mandate (every slow benchmark
+    ships with its attribution, build stages decomposed by kernel family, section shape, moment
+    order and assembly). This plan consumes that profile as its first input, so the port targets
+    the measured dominant stages rather than assumed ones.</p>
+
+    <h2 id="s3">§3 — Design constraints</h2>
+
+    <ul>
+      <li><strong>One code path, two devices.</strong> The port is a single-source JAX
+      implementation of the kernel evaluation that runs on CPU and GPU by runtime placement —
+      never a parallel device kernel family beside the NumPy one, per the standing
+      no-wrappers/no-parallel-modules discipline. The NumPy implementation is replaced where it
+      lives once the port passes its gates; until then it is the verification reference.</li>
+      <li><strong>fp64 everywhere, fixed shapes, fixed iteration counts.</strong>
+      <code>cel</code> and the residual chains run at pre-measured bounded iteration counts so
+      the evaluation traces once; no data-dependent control flow reaches the device.</li>
+      <li><strong>Compute provenance in cache identity.</strong> A device build is not a bitwise
+      CPU build — the banked cross-environment lesson (a login-node GPU versus a CPU compute node
+      is two code generators) is binding. The semantic cache key gains a compute-provenance
+      field, verification pins compare per provenance, and no cross-device artifact ever
+      masquerades as its sibling.</li>
+      <li><strong>Tolerance-based cross-device verification.</strong> Device blocks verify
+      against host blocks at a stated tolerance derived from the Richardson pins (the flux and
+      field blocks carry 4.2e-12 to 3.9e-9 worst-relative pins today); each device re-runs the
+      pin set. Bitwise identity is asserted only within a provenance, never across.</li>
+      <li><strong>Memory by construction.</strong> Whole-pair-array evaluation of ~10⁷ pairs ×
+      nine blocks in fp64 sits comfortably inside the H200's HBM; if a configuration outgrows it,
+      the evaluation chunks at fixed shape rather than falling back.</li>
+    </ul>
+
+    <h2 id="s4">§4 — Work items</h2>
+
+    <ol>
+      <li><strong>Consume the build profile.</strong> Take the stage decomposition from the
+      recovery ladder's profiled build benchmark and rank the port targets by measured share;
+      no porting starts against unprofiled stages.</li>
+      <li><strong>One-block prototype on the H200.</strong> Port the flux G₀ block alone:
+      correctness against the host block at the stated tolerance on the coarse fixture, and
+      measured device throughput. This is the go/no-go gate — the projected full-build time and
+      the CPU-lane check decide whether the full port proceeds (decision
+      <code>port-go-threshold</code> below).</li>
+      <li><strong>Full nine-block port with companions</strong>, replacing the NumPy evaluation
+      in place, with the fixed-iteration <code>cel</code> and residual chains pinned per device
+      and the complete suite green on the CPU lane.</li>
+      <li><strong>Cache provenance integration</strong>: the compute-provenance key field, per-
+      provenance verification, and a cold H200 build of both recovery fixtures published to the
+      shared store beside their CPU siblings.</li>
+      <li><strong>Geometry-gradient feasibility, re-measured.</strong> jacfwd through the ported
+      evaluation (plain kernels, batched targets) with peak memory per target measured against
+      the banked 12.2 GiB AD failure — a measurement node, not a commitment; its number decides
+      whether the inversion consumer gets its differentiable build, and that adoption belongs to
+      the coil-geometry-inversion plan.</li>
+    </ol>
+
+    <h2 id="s5">§5 — Acceptance gates</h2>
+
+    <ul>
+      <li>Device blocks reproduce host blocks within the stated tolerance on both recovery
+      fixtures, and the Richardson pin set passes per device.</li>
+      <li>Cold device build wall time measured on the H200 for both fixtures, with the profiled
+      stage decomposition attached — the target class is minutes, and the measured number is the
+      deliverable, not a pass/fail line invented in advance.</li>
+      <li>The CPU lane does not regress beyond a pre-registered bound when the single-source
+      implementation replaces NumPy — measured on the same staged-snapshot protocol the
+      exact-kernel benchmark banked.</li>
+      <li>Cache provenance proves no cross-device contamination: a CPU consumer never warm-loads
+      a device artifact or vice versa, pinned by test.</li>
+      <li>The gradient feasibility number (peak memory and wall time per target for jacfwd
+      through one block) is banked with its verdict stated in mechanism terms.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="execution-substrate" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Which substrate carries the device kernel evaluation? Recommendation:
+        single-source JAX replacing the NumPy evaluation in place — one code path serving CPU and
+        GPU by runtime placement — because a CuPy or hand-CUDA fork would create the parallel
+        kernel family the no-wrappers discipline forbids, and JAX is already the solve-side
+        substrate so the build inherits jit/vmap and the future gradient path for free.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="jax-single-source">jax-single-source</button>
+          <button class="r-opt" data-value="cupy-device-only">cupy-device-only</button>
+          <button class="r-opt" data-value="keep-numpy-host">keep-numpy-host (decline the port)</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="port-go-threshold" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">What prototype result authorises the full port? Recommendation: the
+        one-block H200 prototype must project a full nine-block fine-fixture build under two
+        minutes AND the single-source CPU evaluation of that block must hold within 1.5× of the
+        NumPy stage time — otherwise the port is declined on measurement and the plan closes with
+        the prototype banked, because the cache already covers every consumer except
+        per-gradient-step rebuilds.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="two-minutes-and-cpu-parity">two-minutes-and-cpu-parity</button>
+          <button class="r-opt" data-value="any-order-of-magnitude">any order-of-magnitude speedup</button>
+          <button class="r-opt" data-value="owner-adjudicates-prototype">owner adjudicates on the prototype numbers</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="gradient-scope" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Does this plan deliver geometry gradients, or only measure their
+        feasibility? Recommendation: measure only — bank the jacfwd memory and time per target on
+        the ported blocks and hand the adoption decision to coil-geometry-inversion, which owns
+        the consumer — because the banked 12.2 GiB failure was measured on a different
+        composition and the port changes the arithmetic enough that commitment before
+        measurement would repeat the original mistake in reverse.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="measure-only">measure-only</button>
+          <button class="r-opt" data-value="deliver-gradients">deliver gradients in this plan</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-dkb-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-20" data-recommends-skill="/reckon-ship device-kernel-build" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">Profile first, prototype second, and let the go-threshold decide</h4>
+        <div class="r-fu-body"><p>Deliberately backlog until the solovev-exact-recovery §5 ladder
+        lands its profiled build decomposition — item 1 consumes it, and the three framing
+        decisions above lock against the prototype's measured numbers rather than in advance.
+        The plan starts at the one-block H200 prototype once the profile names the dominant
+        stages.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship device-kernel-build</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

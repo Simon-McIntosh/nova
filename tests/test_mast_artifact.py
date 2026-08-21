@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-import nova.imas.mast_artifact as mast_artifact_module
+import nova.imas.machine_artifact as machine_artifact_module
 from nova.imas.machine_drive import SINGLE_ELEMENT, ChannelDrive
 from nova.imas.machine_evidence import (
     EvidenceError,
@@ -18,10 +18,8 @@ from nova.imas.machine_evidence import (
     FieldEvidence,
     SourceReference,
 )
-from nova.imas.mast_artifact import (
+from nova.imas.machine_artifact import (
     MANIFEST_FILENAME,
-    OCI_ARTIFACT_TYPE,
-    OCI_FILE_MEDIA_TYPE,
     OCI_MANIFEST_MEDIA_TYPE,
     ArtifactFile,
     ArtifactShotRange,
@@ -30,7 +28,9 @@ from nova.imas.mast_artifact import (
     MachineArtifactManifest,
     create_machine_artifact_manifest,
     materialize_machine_artifact,
+    oci_artifact_type,
     oci_artifact_reference,
+    oci_file_media_type,
     oci_artifact_tag,
     pinned_dd_version,
     resolve_machine_artifact,
@@ -101,6 +101,7 @@ def _manifest(
     gaps = () if complete else ("toroidal probe orientation is unresolved",)
     return create_machine_artifact_manifest(
         source,
+        machine="mast",
         dd_version="4.1.1",
         registry_digest=REGISTRY_DIGEST,
         physical_digest=PHYSICAL_DIGEST,
@@ -298,7 +299,7 @@ def test_object_root_path_swap_cannot_redirect_materialization(
     pinned_root = cache / "pinned-object-root"
     outside = tmp_path / "outside"
     outside.mkdir()
-    create_private_directory = mast_artifact_module._create_private_directory
+    create_private_directory = machine_artifact_module._create_private_directory
 
     def swap_visible_root(descriptor: int, digest_hex: str):
         visible_root.rename(pinned_root)
@@ -306,7 +307,7 @@ def test_object_root_path_swap_cannot_redirect_materialization(
         return create_private_directory(descriptor, digest_hex)
 
     monkeypatch.setattr(
-        mast_artifact_module,
+        machine_artifact_module,
         "_create_private_directory",
         swap_visible_root,
     )
@@ -447,6 +448,7 @@ def test_source_inventory_rejects_casefold_collisions(tmp_path: Path) -> None:
     with pytest.raises(MachineArtifactError, match="case-insensitive"):
         create_machine_artifact_manifest(
             source,
+            machine="mast",
             dd_version="4.1.1",
             registry_digest=REGISTRY_DIGEST,
             physical_digest=PHYSICAL_DIGEST,
@@ -573,9 +575,9 @@ def test_oci_reference_and_media_types_are_explicit(tmp_path: Path) -> None:
     _write_bundle(source)
     manifest = _manifest(source)
 
-    assert manifest.oci.artifact_type == OCI_ARTIFACT_TYPE
+    assert manifest.oci.artifact_type == oci_artifact_type("mast")
     assert manifest.oci.manifest_media_type == OCI_MANIFEST_MEDIA_TYPE
-    assert manifest.oci.file_media_type == OCI_FILE_MEDIA_TYPE
+    assert manifest.oci.file_media_type == oci_file_media_type("mast")
     assert manifest.oci.tag == f"dd-4.1.1-physical-{PHYSICAL_DIGEST}"
     assert oci_artifact_tag("4.1.1", PHYSICAL_DIGEST) == manifest.oci.tag
     assert (
@@ -606,6 +608,7 @@ def test_malformed_hashes_and_unsafe_source_entries_are_rejected(
     with pytest.raises(MachineArtifactError, match="symlink"):
         create_machine_artifact_manifest(
             source,
+            machine="mast",
             dd_version="4.1.1",
             registry_digest=REGISTRY_DIGEST,
             physical_digest=PHYSICAL_DIGEST,
@@ -745,7 +748,7 @@ def test_filesystem_without_atomic_publication_is_named(
         return -1
 
     monkeypatch.setattr(
-        mast_artifact_module,
+        machine_artifact_module,
         "_linux_rename_no_replace",
         lambda: reject_rename,
     )

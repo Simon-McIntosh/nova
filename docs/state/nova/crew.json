@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T16:59:45",
+  "updated": "2026-08-21T17:03:24",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -16548,9 +16548,136 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T144913943134-vacuum-forward-against-exact-tare",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a710",
+        "node": "vacuum-forward-against-exact-tare",
+        "role": "implement",
+        "member": "diiid-vacuum",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T14:49:18Z",
+        "completed_at": "2026-08-21T15:00:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 690,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 690,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "2e8babd085af9c7809f7c0e9c9bff26de46ab6db",
+        "commits": [
+          "81ddc0e40ed4a231f57fd91e741d45858dc3f0d1",
+          "4f2297d65c11856103c0691f4a3fac6a444d5dfc"
+        ],
+        "changed_lines": {
+          "added": 4735,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "WITH a per-frame gauge the vacuum forward reaches R-squared 0.9974 and fractional RMS 5.1 percent against the exact tared map; WITHOUT it R-squared goes NEGATIVE at -0.6547 and fractional RMS 1.286, so the 0.0613 Wb/rad gauge is load-bearing rather than cosmetic. 62.25 percent of post-gauge residual energy is smooth first-order R/Z",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T144913943134-vacuum-forward-against-exact-tare/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01090-c119-7413-b062-4589e1bc160f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8264192,
+            "cached_input_tokens_cumulative": 145189248,
+            "input_tokens": 8487235,
+            "input_tokens_cumulative": 148702518,
+            "output_tokens": 20744,
+            "output_tokens_cumulative": 369911,
+            "reasoning_output_tokens": 2968,
+            "reasoning_output_tokens_cumulative": 104303
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T145315538163-diverted-separatrix-audit",
+        "plan": "dual-basin-solve",
+        "section": "\u00a72",
+        "node": "diverted-separatrix-audit",
+        "role": "implement",
+        "member": "basin-fixtures",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T14:53:19Z",
+        "completed_at": "2026-08-21T15:01:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 517,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 517,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "2e8babd085af9c7809f7c0e9c9bff26de46ab6db",
+        "commits": [
+          "a86857ac"
+        ],
+        "changed_lines": {
+          "added": 673,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T145315538163-diverted-separatrix-audit/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0247c-7f4b-7b73-b6bf-0e31f531946b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4886144,
+            "cached_input_tokens_cumulative": 17865600,
+            "input_tokens": 5077198,
+            "input_tokens_cumulative": 18441148,
+            "output_tokens": 20521,
+            "output_tokens_cumulative": 87627,
+            "reasoning_output_tokens": 6349,
+            "reasoning_output_tokens_cumulative": 24728
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 425
+    "_version": 427
   }
 }

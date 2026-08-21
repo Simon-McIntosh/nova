@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 <meta name="plan-commits" content="489197aa,9229dc53,25aede7d,d0b14cbf,bedf6c67,eae4c863,3e32f08c,2173eb46">
 <meta name="plan-artifacts" content="scripts/device_kernel_reuse/reuse-report.md,scripts/device_kernel_port/receipt.json,scripts/device_kernel_port/receipt.md,scripts/device_kernel_port/reduction-diagnosis.json,scripts/device_kernel_port/arbitrary-precision-oracle.json,docs/evidence/archive/device-kernel-build-landed.html">
 <meta name="plan-impl" content="0.6">
@@ -189,6 +189,14 @@
       </p>
     <p class="r-dec-rat">Owner ruling 2026-08-21: this plan measures jacfwd memory and time per target on the ported blocks and hands adoption to coil-geometry-inversion, which owns the consumer; commitment before measurement would repeat the original AD mistake in reverse.</p>
     </div>
+<div class="r-dec" data-key="far-field-section-fidelity" data-choice="exact-finite-section-everywhere" data-by="Simon McIntosh" data-when="2026-08-21T15:25:00+00:00">
+    <p class="r-dec-q">May the kernel evaluation substitute a filament or uniform-section limit for vanishing-area sections in the far field?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="exact-finite-section-everywhere">exact finite-section Urankar integrals everywhere, far field included</button>
+      <button class="r-opt" data-value="conditioned-filament-far-field">centroid-filament limit for vanishing-area far-field sections</button>
+      </p>
+    <p class="r-dec-rat">Owner ruling 2026-08-21: no filament solutions in default workflows. The locked default is finite-section exact Urankar integrals everywhere, including the far field - the one-time cost is small and amortizes. The cancellation repair for the sliver source must recondition the exact closed form (algebraic reformulation or compensated fp64 evaluation of the per-edge antiderivatives), never swap the physics model; the merged centroid-filament conditioned rule is replaced in place by the exact-section reconditioning.</p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -221,6 +229,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260821T1655-conditioned-rule" data-who="reckon-ship" data-when="2026-08-21T16:55:00+00:00">
     <div class="r-comment-body">conditioned-sliver-rule landed - commits 3e32f08c/2173eb46, merged b633f215; gate PASSED (node done-when met in full); PLAN-LEVEL GO/NO-GO NOW OWNER-OWNED. One _conditioned_uniform_section rule after both production NumPy and packed traced contour assembly (centroid-filament limit only below 1e-4 coordinate-scale sections at targets beyond 256 section radii; near-field/self retain the exact contour; both branches trace, no namespace-specific stabilization). MEASURED: ULP p50 2,536 / p90 13,410 / p99 455,335 / p99.9 6.468e6 (banked 1.875e12 - a ~290,000x tail reduction) / max 8.131e10; byte-identical 1.550% vs banked 1.434%; column-184 production deviation from the 1024-rung oracle 8.038e-5 max relative (banked 4.629e-3), 1.324e-10 from the retained finite-section self value. Performance holds: H200 1.051M pairs/s, 12.445 s projected nine-block fine build vs the 120 s bar; CPU traced 24.87 s vs NumPy 55.43 s (0.449x). Suites: biot 119/119, traced-parity and oracle-agreement tests 2/2, ruff clean. The receipt retains the numerical HOLD: 1.55% byte-identity is not close-to-byte-identical, and per the locked port-go-threshold the owner reviews the measured distribution at go/no-go. Receipt: scripts/device_kernel_port/receipt.json.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260821T1710-filament-ruling" data-who="reckon-ship" data-when="2026-08-21T17:10:00+00:00">
+    <div class="r-comment-body">OWNER RULING 2026-08-21 (live): no filament solutions in default workflows - the merged _conditioned_uniform_section rule violates the locked exact-Urankar-everywhere default by substituting a centroid-filament limit for vanishing-area far-field sections. Decision far-field-section-fidelity locked; corrective node dispatched to replace the rule in place with an exact-finite-section reconditioning (algebraic reformulation / compensated fp64 of the per-edge antiderivatives), re-verified against the 1024-rung oracle and the unchanged cross-device receipt.</div>
 </div>
 </section>
 </main>

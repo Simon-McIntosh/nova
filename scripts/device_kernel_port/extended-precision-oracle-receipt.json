@@ -1,0 +1,63 @@
+{
+  "arithmetic": {
+    "epsilon": 1.0842021724855044e-19,
+    "mantissa_bits": 63,
+    "name": "numpy.longdouble per-edge closed-form antiderivatives"
+  },
+  "deviation_at_128_nodes": {
+    "production_numpy": {
+      "max_absolute": 3.3282548374987324e-09,
+      "max_relative": 0.0046289025927482375,
+      "median_absolute": 5.352280546475229e-10
+    },
+    "single_source_cpu": {
+      "max_absolute": 3.918635062393307e-09,
+      "max_relative": 0.005804874764821211,
+      "median_absolute": 4.872023421194218e-10
+    },
+    "single_source_gpu": {
+      "max_absolute": 3.45953252842654e-09,
+      "max_relative": 0.004026245782554605,
+      "median_absolute": 5.132691233620471e-10
+    }
+  },
+  "raw_value_artifacts": {
+    "1024_nodes": "extended-precision-oracle-1024.json",
+    "128_nodes": "extended-precision-oracle.json",
+    "256_nodes": "extended-precision-oracle-256.json",
+    "512_nodes": "extended-precision-oracle-512.json",
+    "64_nodes": "extended-precision-oracle-64.json"
+  },
+  "richardson_ladder": [
+    {
+      "from_nodes": 64,
+      "max_absolute_change": 1.9462044204755584e-08,
+      "max_relative_change": 0.007151942294784061,
+      "to_nodes": 128
+    },
+    {
+      "from_nodes": 128,
+      "max_absolute_change": 2.7006589274856973e-09,
+      "max_relative_change": 0.00015052022817110168,
+      "to_nodes": 256
+    },
+    {
+      "from_nodes": 256,
+      "max_absolute_change": 1.6402258094892962e-09,
+      "max_relative_change": 9.142573777998886e-05,
+      "to_nodes": 512
+    },
+    {
+      "from_nodes": 512,
+      "max_absolute_change": 1.2890981332328817e-09,
+      "max_relative_change": 7.184881456699587e-05,
+      "to_nodes": 1024
+    }
+  ],
+  "source_column": 184,
+  "verdict": {
+    "correctness_decision": "INCONCLUSIVE",
+    "reason": "The extended arithmetic moves the fp64 production value materially, but its residual-node ladder is not converged at the clipped cell self target. The 63-bit mantissa supplies only 11 bits beyond fp64 and cannot serve as the requested well-above-fp64 oracle.",
+    "runtime_change_authorised": false
+  }
+}

@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="coil-circuit-discovery">
+  <meta name="plan-title" content="Coil Circuit Discovery">
+  <meta name="plan-summary" content="Recover the unshipped conductor currents from the plasma- and coil-tared flux residual by least squares across the corpus, adjudicate them against the independently measured ohmic circuit, and promote only the relations that survive into static constraints that predict unknown currents from shipped channels — everything else stays an explicit free parameter">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="10.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-context" content="extended">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint" content="S8">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-blocks" content="current-constrained-forward-solve,diiid-forward-onboarding">
+  <title>Coil Circuit Discovery | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-21">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The premise, and why it is practical now</h2>
+    <p>A forward solve cannot find the right plasma if it is given the wrong vacuum field. Five DIII-D
+    ohmic conductors — ECOILB, E567UP, E567DN, E89UP, E89DN — carry real current in every discharge, exist
+    in the independent netCDF machine description, and have <em>no current channel</em> in the competition
+    dataset. Everything downstream inherits that hole.</p>
+    <p>Every piece needed to fill it by measurement rather than assumption is already landed:</p>
+    <table>
+      <caption>Existing capability this plan composes. Nothing here needs to be built first.</caption>
+      <thead><tr><th>Piece</th><th>State</th></tr></thead>
+      <tbody>
+        <tr><td>Exact clipped-cell plasma tare</td><td>interior Δ* residual <strong>0.484 %</strong>, unit exact to rtol 2e-12</td></tr>
+        <tr><td>Δ* current density from a given map</td><td>round-trips at <strong>2.29e-8</strong></td></tr>
+        <tr><td>Registry polygon coil response, 24 conductors</td><td>landed; the five unshipped geometries read from netCDF</td></tr>
+        <tr><td>Five-column recovery by linear projection</td><td>demonstrated at design condition number <strong>10.83</strong></td></tr>
+        <tr><td>Ohmic circuit relation, measured independently</td><td>all five scales within <strong>2 %</strong> of ECOILA; 2 of 5 deterministic at a 1 % bound</td></tr>
+        <tr><td>Corpus polarity screen</td><td><strong>603 of 7,041</strong> shots inverted; screen is an orientation cosine</td></tr>
+      </tbody>
+    </table>
+    <p>The pipeline is therefore assembly rather than invention: remove the plasma exactly, remove every
+    coil whose current is shipped, and whatever flux remains must be producible by the five conductors that
+    are absent — otherwise the residual is not what we think it is. That last clause is the whole
+    scientific content of this plan.</p>
+
+    <h2 id="s2">§2 — The adjudication that must come first</h2>
+    <p><strong>Two independent estimates of the same five currents disagree by more than either's error
+    budget, and no discovery run should proceed before that is resolved.</strong></p>
+    <table>
+      <caption>The same five conductors, two routes, on DIII-D.</caption>
+      <thead><tr><th>Route</th><th>Spread across the five</th><th>Basis</th></tr></thead>
+      <tbody>
+        <tr><td>Recovered from label flux</td><td><strong>2.20×</strong> (30,468 → 66,907 A)</td><td>five-column projection, 200 frames</td></tr>
+        <tr><td>Ohmic circuit relation</td><td><strong>≈1.04×</strong> (scales 0.9806 → 1.0172 of ECOILA)</td><td>480,256-sample netCDF traces</td></tr>
+      </tbody>
+    </table>
+    <p>The recovery's own conditioning cannot reconcile them. At condition number 10.83 and a 0.484 % tare
+    floor, the coefficient-error budget is about <strong>5 %</strong> — nowhere near a factor of 2.2. So the
+    recovered coefficients are <em>fitting the data well while not being the physical currents</em>: the
+    five-column subspace is absorbing something else. The candidates are passive-structure current, the
+    labels' own 4.3 % non-GS content, and the Δ* boundary-stencil artefacts already located at the grid
+    edges — all of which are smooth or edge-concentrated over a grid the five conductors sit largely
+    outside, and therefore all of which are partially degenerate with the five columns.</p>
+    <p><strong>Done-when:</strong> the residual remaining <em>after</em> five-column recovery is measured
+    against the 0.484 % tare floor. If the five columns explain the residual down to that floor, the
+    recovery is trustworthy and the circuit measurement needs re-examination. If structure survives, the
+    recovered values are not currents and the discovery must be reformulated to include the competing
+    terms explicitly. Either outcome is decisive; the plan does not proceed to §3 on an unresolved
+    disagreement.</p>
+
+    <h2 id="s3">§3 — Corpus-scale circuit discovery</h2>
+    <p>With the adjudication settled, recover the five currents per frame across the corpus — polarity-screened,
+    stratified by recorded plasma current since 29 of 60 diverted frames were measured below 50 kA and are
+    ill-conditioned for current normalisation — and record every per-frame design condition number and
+    post-recovery residual alongside the coefficients, so a later reader can filter on recovery quality
+    rather than trusting the whole set.</p>
+    <p>Then look for <strong>static</strong> structure: does each recovered current stand in a fixed
+    relation to one or more shipped channels, stable across shots, campaigns and current level? A relation
+    that holds to a tight residual over thousands of frames is a discovered circuit constraint with error
+    bars. A relation that drifts with campaign or amplitude is not a circuit and must not be promoted.</p>
+    <p>Cost is measured before it is spent: the landed tare extrapolation is 0.145 s/frame and 52.7 GB for
+    all 1,559,340 frames, so a full-corpus pass is an authorisation, not an assumption. A stratified
+    sample sufficient to bound the relations is the default.</p>
+    <p><strong>Done-when:</strong> per-conductor relation coefficients are reported with their residual
+    spread, their stability across shot blocks and current level, and the count of frames each was fitted
+    over; the acquisition-scale and polarity faults already banked for this corpus are screened for
+    explicitly, because both have previously manufactured phantom campaign structure.</p>
+
+    <h2 id="s4">§4 — Known, knowable, unknown: the discipline that makes the model honest</h2>
+    <p>The point of discovery is to shrink the prescribed set to what is defensible and to make the rest
+    visible rather than assumed. Three tiers, and a quantity may only be promoted upward on evidence:</p>
+    <ul>
+      <li><strong>Known.</strong> A shipped channel, or a prescribed input of the same class — conductor
+      currents, and total plasma current, which is in the competition input set and can also come from a
+      partner transport solve. Prescribed directly.</li>
+      <li><strong>Knowable.</strong> A quantity predicted from known channels by a discovered static
+      relation that survived §3's stability tests. Prescribed <em>through</em> the relation, with the
+      relation's residual carried as a stated uncertainty rather than discarded.</li>
+      <li><strong>Unknown.</strong> Everything else. These become <strong>explicit free parameters solved
+      alongside the equilibrium unknowns</strong> — not silently defaulted to zero, and not quietly filled
+      with a label-recovered value as the current DIII-D route does.</li>
+    </ul>
+    <p>The third tier is the substantive change. Today the five unshipped currents are prescribed from
+    label-recovered values that §2 shows are probably not currents — which is worse than admitting they
+    are unknown, because it hides the uncertainty inside an input that looks prescribed.</p>
+    <p><strong>Done-when:</strong> the forward seam accepts a per-conductor tier declaration; unknown-tier
+    currents enter the solve as free parameters with their prior and their recovered posterior both
+    reported; and a receipt states, for any given run, which currents were prescribed, which were predicted
+    through a relation, and which were solved for.</p>
+
+    <h2 id="s5">§5 — Boundaries and admissibility</h2>
+    <p><strong>The fit-once versus fit-per-frame distinction is load-bearing and is a decision below, not
+    an implementation detail.</strong> Static circuit constants fitted once over a training corpus and then
+    applied deterministically are <em>calibration</em>, in the same class as the turn counts this campaign
+    already reads from a description. Currents fitted per frame against a label are <em>fitting</em>, and
+    are not reproducible at inference. A relation discovered here is only useful if it is the former.</p>
+    <ul>
+      <li><strong>This plan does not own the constrained map.</strong> Prescribing total plasma current by
+      amplitude elimination belongs to <code>current-constrained-forward-solve</code>; this plan supplies
+      the conductor currents that solve consumes.</li>
+      <li><strong>It does not own basin entry or topology pinning</strong> — <code>dual-basin-solve</code>
+      does. The §10 overlay evidence showed a current constraint selects the branch class while leaving the
+      X point 45 cm displaced, so both mechanisms are needed and neither substitutes.</li>
+      <li><strong>Passive structure remains out of scope as a fitted model.</strong> The DIII-D onboarding
+      measured that no passive signal rises above the label noise in that dataset. Passive current may
+      appear here only as a <em>competing term</em> in §2's adjudication, never as a vessel model fitted
+      against a solve that does not close.</li>
+      <li><strong>Corpus reading conventions stay where they are pinned.</strong> This plan consumes the
+      landed COCOS pin and the polarity screen; it does not re-derive them.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="relation-fit-scope" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Are discovered circuit relations fitted once over a training corpus and applied deterministically, or re-fitted per shot or per frame?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="fit-once-static">fitted once, applied deterministically</button>
+      <button class="r-opt" data-value="fit-per-shot">re-fitted per shot</button>
+      <button class="r-opt" data-value="fit-per-frame">re-fitted per frame</button>
+      </p>
+    <p class="r-dec-rat">Open, and it decides admissibility rather than accuracy. A once-fitted static
+        constant is calibration of the same class as a turn count and reproduces at inference. A per-frame
+        re-fit against label flux does not reproduce at inference and would repeat the mistake the DIII-D
+        plan already made once. Per-shot sits between and needs a stated justification for what physically
+        changes shot to shot.</p>
+    </div>
+<div class="r-dec" data-key="knowable-promotion-test" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What test promotes a recovered current from unknown to knowable?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="held-out-prediction">held-out predictive accuracy from shipped channels</button>
+      <button class="r-opt" data-value="residual-closure">post-recovery residual reaching the tare floor</button>
+      <button class="r-opt" data-value="both-required">both, jointly required</button>
+      </p>
+    <p class="r-dec-rat">Open. Held-out prediction alone is insufficient and this campaign has the
+        counter-example: the five currents were predictable from shipped channels at held-out R-squared
+        0.974 to 0.998 and still failed to close the boundary, because a well-fitted coefficient need not be
+        a physical current. Residual closure tests whether the subspace is the right one at all. Requiring
+        both is the conservative reading and is probably correct, at the cost of promoting fewer
+        quantities.</p>
+    </div>
+<div class="r-dec" data-key="unknown-parameter-entry" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">How do unknown-tier currents enter the solve as free parameters?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="augmented-unknowns">augmented unknowns in the same Newton system</button>
+      <button class="r-opt" data-value="outer-loop">an outer loop around a converged inner equilibrium</button>
+      </p>
+    <p class="r-dec-rat">Open. Augmenting the Newton system keeps one solve and one convergence
+        criterion but changes the Jacobian structure and its conditioning, which matters on a map already
+        measured at Picard spectral radius 1.15 to 1.40. An outer loop preserves the inner solve exactly as
+        landed and is easier to reason about, at the cost of nested convergence and more map evaluations.
+        The measured 470.561 slices per second batched throughput is the budget either choice spends.</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-ccd-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship coil-circuit-discovery §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Adjudicate the 2.20x versus 1.04x current disagreement before any discovery run (§2)</h4>
+    <div class="r-fu-body"><p><strong>This is the gate on the whole plan and it must run first.</strong> Two independent estimates of the same five conductor currents disagree by far more than either's error budget: label-flux recovery gives a <strong>2.20×</strong> spread across the five (30,468 → 66,907 A) while the netCDF ohmic circuit measurement puts every one of them within <strong>2 %</strong> of ECOILA, a <strong>~1.04×</strong> spread. At design condition number 10.83 and a 0.484 % tare floor the recovery's coefficient-error budget is about 5 %, so conditioning cannot reconcile a factor of 2.2.</p><p><strong>The decisive measurement:</strong> take the residual remaining <em>after</em> five-column recovery and compare it against the 0.484 % exact-tare floor. If the five columns explain the residual down to that floor, the recovered values are trustworthy and the circuit measurement needs re-examination. If structure survives, the recovered coefficients are absorbing something other than these five currents — the candidates being passive-structure current, the labels' own 4.3 % non-GS content, and the Δ* boundary-stencil artefacts already localised at the grid edges, all of which are smooth or edge-concentrated over a grid the five conductors sit largely outside and therefore partially degenerate with the five columns.</p><p><strong>Report:</strong> post-recovery residual against the tare floor per frame; the spatial structure of what survives, since edge-concentrated and smooth residuals implicate different competing terms; and an explicit verdict naming which of the two estimates is to be believed. A live diagnostic already dispatched under <code>current-constrained-forward-solve</code> §5 tests the circuit-derived currents against the tared vacuum map directly and should be read alongside this rather than duplicated.</p><p>Do not proceed to §3's corpus discovery on an unresolved disagreement — a corpus-scale least squares over a subspace that is absorbing the wrong physics would produce stable, precise, wrong circuit constants, which is the most expensive possible outcome.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship coil-circuit-discovery §2</pre>
+    </article>
+</section>
+  </main>
+</body>
+</html>

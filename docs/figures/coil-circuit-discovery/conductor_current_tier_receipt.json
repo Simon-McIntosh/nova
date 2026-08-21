@@ -1,0 +1,441 @@
+{
+  "banked_source": "docs/figures/diiid-forward-onboarding/boundary-recovery/boundary_current_recovery_receipt.json",
+  "converged": false,
+  "current_receipt": {
+    "conductors": [
+      {
+        "disposition": "prescribed",
+        "name": "F1A",
+        "posterior_standard_deviation_a": 0.0,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "same-frame shipped magnetics_F1A channel",
+        "tier": "known",
+        "transfer_caveat": null,
+        "value_a": -31202.316167381516
+      },
+      {
+        "disposition": "prescribed",
+        "name": "F2A",
+        "posterior_standard_deviation_a": 0.0,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "same-frame shipped magnetics_F2A channel",
+        "tier": "known",
+        "transfer_caveat": null,
+        "value_a": -31164.563826603597
+      },
+      {
+        "disposition": "prescribed",
+        "name": "F3A",
+        "posterior_standard_deviation_a": 0.0,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "same-frame shipped magnetics_F3A channel",
+        "tier": "known",
+        "transfer_caveat": null,
+        "value_a": -26691.05282692121
+      },
+      {
+        "disposition": "prescribed",
+        "name": "F4A",
+        "posterior_standard_deviation_a": 0.0,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "same-frame shipped magnetics_F4A channel",
+        "tier": "known",
+        "transfer_caveat": null,
+        "value_a": 25422.868112057993
+      },
+      {
+        "disposition": "prescribed",
+        "name": "F5A",
+        "posterior_standard_deviation_a": 0.0,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "same-frame shipped magnetics_F5A channel",
+        "tier": "known",
+        "transfer_caveat": null,
+        "value_a": 19318.045563255604
+      },
+      {
+        "disposition": "prescribed",
+        "name": "F6A",
+        "posterior_standard_deviation_a": 0.0,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "same-frame shipped magnetics_F6A channel",
+        "tier": "known",
+        "transfer_caveat": null,
+        "value_a": -79682.47428896879
+      },
+      {
+        "disposition": "prescribed",
+        "name": "F7A",
+        "posterior_standard_deviation_a": 0.0,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "same-frame shipped magnetics_F7A channel",
+        "tier": "known",
+        "transfer_caveat": null,
+        "value_a": -84665.03536641598
+      },
+      {
+        "disposition": "prescribed",
+        "name": "F8A",
+        "posterior_standard_deviation_a": 0.0,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "same-frame shipped magnetics_F8A channel",
+        "tier": "known",
+        "transfer_caveat": null,
+        "value_a": 27029.884714962227
+      },
+      {
+        "disposition": "prescribed",
+        "name": "F9A",
+        "posterior_standard_deviation_a": 0.0,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "same-frame shipped magnetics_F9A channel",
+        "tier": "known",
+        "transfer_caveat": null,
+        "value_a": 19315.027839546947
+      },
+      {
+        "disposition": "prescribed",
+        "name": "F1B",
+        "posterior_standard_deviation_a": 0.0,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "same-frame shipped magnetics_F1B channel",
+        "tier": "known",
+        "transfer_caveat": null,
+        "value_a": -34101.886092227134
+      },
+      {
+        "disposition": "prescribed",
+        "name": "F2B",
+        "posterior_standard_deviation_a": 0.0,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "same-frame shipped magnetics_F2B channel",
+        "tier": "known",
+        "transfer_caveat": null,
+        "value_a": -33522.79544179127
+      },
+      {
+        "disposition": "prescribed",
+        "name": "F3B",
+        "posterior_standard_deviation_a": 0.0,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "same-frame shipped magnetics_F3B channel",
+        "tier": "known",
+        "transfer_caveat": null,
+        "value_a": 11669.473371933618
+      },
+      {
+        "disposition": "prescribed",
+        "name": "F4B",
+        "posterior_standard_deviation_a": 0.0,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "same-frame shipped magnetics_F4B channel",
+        "tier": "known",
+        "transfer_caveat": null,
+        "value_a": 10288.993356745284
+      },
+      {
+        "disposition": "prescribed",
+        "name": "F5B",
+        "posterior_standard_deviation_a": 0.0,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "same-frame shipped magnetics_F5B channel",
+        "tier": "known",
+        "transfer_caveat": null,
+        "value_a": 20672.47595733643
+      },
+      {
+        "disposition": "prescribed",
+        "name": "F6B",
+        "posterior_standard_deviation_a": 0.0,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "same-frame shipped magnetics_F6B channel",
+        "tier": "known",
+        "transfer_caveat": null,
+        "value_a": -72948.53212806741
+      },
+      {
+        "disposition": "prescribed",
+        "name": "F7B",
+        "posterior_standard_deviation_a": 0.0,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "same-frame shipped magnetics_F7B channel",
+        "tier": "known",
+        "transfer_caveat": null,
+        "value_a": -68184.38667157764
+      },
+      {
+        "disposition": "prescribed",
+        "name": "F8B",
+        "posterior_standard_deviation_a": 0.0,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "same-frame shipped magnetics_F8B channel",
+        "tier": "known",
+        "transfer_caveat": null,
+        "value_a": 23819.4435457562
+      },
+      {
+        "disposition": "prescribed",
+        "name": "F9B",
+        "posterior_standard_deviation_a": 0.0,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "same-frame shipped magnetics_F9B channel",
+        "tier": "known",
+        "transfer_caveat": null,
+        "value_a": -5239.91568012294
+      },
+      {
+        "disposition": "prescribed",
+        "name": "ECOILA",
+        "posterior_standard_deviation_a": 0.0,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "same-frame shipped magnetics_ECOILA channel",
+        "tier": "known",
+        "transfer_caveat": null,
+        "value_a": 34790.36310841489
+      },
+      {
+        "disposition": "solved",
+        "name": "ECOILB",
+        "posterior_standard_deviation_a": 3479.036310841489,
+        "posterior_status": "prior-dominated",
+        "prior_mean_a": 34790.36310841489,
+        "prior_standard_deviation_a": 3479.036310841489,
+        "provenance": "demonstration prior centred on same-frame shipped ECOILA; no production prior authority or rejected diagnostic scale used",
+        "tier": "unknown",
+        "transfer_caveat": null,
+        "value_a": 34790.36310841489
+      },
+      {
+        "disposition": "predicted",
+        "name": "E567UP",
+        "posterior_standard_deviation_a": 196.89710372296733,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "fit once over 480256 independent samples from the measured ohmic trace",
+        "tier": "knowable",
+        "transfer_caveat": "calibration and inference use different pulses; the measured relation residual is transferred without a same-pulse refit",
+        "value_a": 34543.35153034514
+      },
+      {
+        "disposition": "solved",
+        "name": "E567DN",
+        "posterior_standard_deviation_a": 3479.036310841489,
+        "posterior_status": "prior-dominated",
+        "prior_mean_a": 34790.36310841489,
+        "prior_standard_deviation_a": 3479.036310841489,
+        "provenance": "demonstration prior centred on same-frame shipped ECOILA; no production prior authority or rejected diagnostic scale used",
+        "tier": "unknown",
+        "transfer_caveat": null,
+        "value_a": 34790.36310841489
+      },
+      {
+        "disposition": "solved",
+        "name": "E89UP",
+        "posterior_standard_deviation_a": 3479.036310841489,
+        "posterior_status": "prior-dominated",
+        "prior_mean_a": 34790.36310841489,
+        "prior_standard_deviation_a": 3479.036310841489,
+        "provenance": "demonstration prior centred on same-frame shipped ECOILA; no production prior authority or rejected diagnostic scale used",
+        "tier": "unknown",
+        "transfer_caveat": null,
+        "value_a": 34790.36310841489
+      },
+      {
+        "disposition": "predicted",
+        "name": "E89DN",
+        "posterior_standard_deviation_a": 249.67269294390834,
+        "posterior_status": "prescribed",
+        "prior_mean_a": null,
+        "prior_standard_deviation_a": null,
+        "provenance": "fit once over 480256 independent samples from the measured ohmic trace",
+        "tier": "knowable",
+        "transfer_caveat": "calibration and inference use different pulses; the measured relation residual is transferred without a same-pulse refit",
+        "value_a": 35364.40409970373
+      }
+    ],
+    "inner_solve_evaluations": 1,
+    "likelihood": null,
+    "likelihood_provenance": null,
+    "likelihood_rank": 0,
+    "optimizer_success": true,
+    "posterior_status": "prior-dominated",
+    "response": {
+      "complete_count": 24,
+      "grid": {
+        "coils": [
+          {
+            "coil": "ECOILB",
+            "elements": 48,
+            "signed_turn_sum": 48.0
+          },
+          {
+            "coil": "E567UP",
+            "elements": 6,
+            "signed_turn_sum": 6.0
+          },
+          {
+            "coil": "E567DN",
+            "elements": 6,
+            "signed_turn_sum": 6.0
+          },
+          {
+            "coil": "E89UP",
+            "elements": 7,
+            "signed_turn_sum": 7.0
+          },
+          {
+            "coil": "E89DN",
+            "elements": 7,
+            "signed_turn_sum": 7.0
+          }
+        ],
+        "dd_version": "3.41.0",
+        "entry": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+        "flux_unit": "Wb per A",
+        "kernel": "nova.biot.polygon.polygon_greens",
+        "target_points": 1089,
+        "target_shape": [
+          1089
+        ]
+      },
+      "response_order": [
+        "F1A",
+        "F2A",
+        "F3A",
+        "F4A",
+        "F5A",
+        "F6A",
+        "F7A",
+        "F8A",
+        "F9A",
+        "F1B",
+        "F2B",
+        "F3B",
+        "F4B",
+        "F5B",
+        "F6B",
+        "F7B",
+        "F8B",
+        "F9B",
+        "ECOILA",
+        "ECOILB",
+        "E567UP",
+        "E567DN",
+        "E89UP",
+        "E89DN"
+      ],
+      "shipped_count": 19,
+      "wall": {
+        "coils": [
+          {
+            "coil": "ECOILB",
+            "elements": 48,
+            "signed_turn_sum": 48.0
+          },
+          {
+            "coil": "E567UP",
+            "elements": 6,
+            "signed_turn_sum": 6.0
+          },
+          {
+            "coil": "E567DN",
+            "elements": 6,
+            "signed_turn_sum": 6.0
+          },
+          {
+            "coil": "E89UP",
+            "elements": 7,
+            "signed_turn_sum": 7.0
+          },
+          {
+            "coil": "E89DN",
+            "elements": 7,
+            "signed_turn_sum": 7.0
+          }
+        ],
+        "dd_version": "3.41.0",
+        "entry": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+        "flux_unit": "Wb per A",
+        "kernel": "nova.biot.polygon.polygon_greens",
+        "target_points": 132,
+        "target_shape": [
+          132
+        ]
+      }
+    },
+    "response_order": [
+      "F1A",
+      "F2A",
+      "F3A",
+      "F4A",
+      "F5A",
+      "F6A",
+      "F7A",
+      "F8A",
+      "F9A",
+      "F1B",
+      "F2B",
+      "F3B",
+      "F4B",
+      "F5B",
+      "F6B",
+      "F7B",
+      "F8B",
+      "F9B",
+      "ECOILA",
+      "ECOILB",
+      "E567UP",
+      "E567DN",
+      "E89UP",
+      "E89DN"
+    ],
+    "unknown_parameter_count": 3
+  },
+  "diverted": true,
+  "finite": true,
+  "fixed_point_relative_residual": 0.0828521527630311,
+  "frame": 0,
+  "measurement": "complete-current outer-loop demonstration on a banked diverted frame",
+  "qualification": "No admissible conductor-current likelihood is landed; the three unknown-current posteriors are prior-dominated and are not claimed as recovered.",
+  "shot": "d3d_shot_00000c4a7b.parquet",
+  "time_ms": 160.0
+}

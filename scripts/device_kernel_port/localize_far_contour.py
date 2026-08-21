@@ -333,6 +333,19 @@ def _assemble_receipt(
     contour = abs(
         _mp_scalar(expected["contour"][0]) + _mp_scalar(expected["contour"][1])
     )
+    gross_endpoints = sum(
+        abs(
+            _mp_scalar(edge["endpoints"][endpoint][0])
+            + _mp_scalar(edge["endpoints"][endpoint][1])
+        )
+        for edge in expected["edges"]
+        for endpoint in ("lower", "upper")
+    )
+    endpoint_low_parts = sum(
+        abs(_mp_scalar(edge["endpoints"][endpoint][1]))
+        for edge in actual["edges"]
+        for endpoint in ("lower", "upper")
+    )
     normalized = _deviation(actual["normalized"], expected["normalized"], digits)
     receipt = {
         "arithmetic": {
@@ -347,7 +360,13 @@ def _assemble_receipt(
             "banked_column_max_absolute_deviation": "1.4944969930161633e-9",
             "banked_column_max_relative_deviation": "0.0019760683526076146",
             "exact_contour_condition_number": mp.nstr(gross / contour, digits),
+            "exact_endpoint_condition_number": mp.nstr(
+                gross_endpoints / contour, digits
+            ),
             "gross_edge_difference_scale": mp.nstr(gross, digits),
+            "gross_endpoint_antiderivative_scale": mp.nstr(
+                gross_endpoints, digits
+            ),
         },
         "inverse_area_normalization": normalized,
         "oracle_cross_check": {
@@ -364,24 +383,84 @@ def _assemble_receipt(
         "inverse_area_norm_fp64": repr(norm),
     }
     receipt["first_gate_breach"] = _first_breach(receipt)
+    flux_inputs = []
+    flux_outputs = []
+    for edge in edges:
+        for endpoint in ("lower", "upper"):
+            for primitive in edge["primitives"][endpoint]:
+                if not primitive["label"].startswith("flux"):
+                    continue
+                flux_outputs.append(
+                    {
+                        "edge": edge["index"],
+                        "endpoint": endpoint,
+                        "label": primitive["label"],
+                        **primitive["output"],
+                    }
+                )
+                for coefficient in primitive.get("input_range", []):
+                    flux_inputs.append(
+                        {
+                            "edge": edge["index"],
+                            "endpoint": endpoint,
+                            "label": primitive["label"],
+                            **coefficient,
+                        }
+                    )
+    dominant_input = max(
+        flux_inputs, key=lambda row: mp.mpf(row["absolute_deviation"])
+    )
+    dominant_output = max(
+        flux_outputs, key=lambda row: mp.mpf(row["absolute_deviation"])
+    )
+    receipt["localization"] = {
+        "discarded_low_parts_stage": (
+            "scalar leaf coefficients feeding paired range-function assembly; "
+            "their existing low components do not contain the mpmath difference"
+        ),
+        "dominant_flux_primitive_output": dominant_output,
+        "dominant_flux_range_input": dominant_input,
+        "interpretation": (
+            "the range and primitive deviations remain below the relative gate "
+            "individually, but the three exact edge differences close to a contour "
+            "more than twelve orders smaller than the endpoint antiderivatives"
+        ),
+    }
     expected_normalized = _mp_scalar(expected["normalized"][0]) + _mp_scalar(
         expected["normalized"][1]
     )
     normalization = abs(expected_normalized / contour)
+    observed = mp.mpf(normalized["absolute_deviation"])
+    analytic_roundoff = (
+        normalization
+        * gross_endpoints
+        * mp.mpf(str(np.finfo(np.float64).eps))
+    )
+    available_low_parts = normalization * endpoint_low_parts
     receipt["route_estimates"] = {
-        "analytic_closed_loop_roundoff_floor": mp.nstr(
+        "analytic_closed_loop_roundoff_estimate": mp.nstr(
+            analytic_roundoff, digits
+        ),
+        "analytic_estimate_to_observed_ratio": mp.nstr(
+            analytic_roundoff / observed, digits
+        ),
+        "paired_edge_difference_roundoff_floor": mp.nstr(
             normalization * gross * mp.mpf(str(np.finfo(np.float64).eps)), digits
         ),
-        "pairing_extension_recoverable_scale": normalized["absolute_deviation"],
+        "pairing_extension_available_low_part_fraction": mp.nstr(
+            available_low_parts / observed, digits
+        ),
+        "pairing_extension_available_low_part_scale": mp.nstr(
+            available_low_parts, digits
+        ),
+        "pairing_extension_required_recovery_scale": normalized[
+            "absolute_deviation"
+        ],
         "verdict": (
-            "recoverable by carrying paired values into the named first-breach stage"
-            if receipt["first_gate_breach"]
-            and receipt["first_gate_breach"]["assembly_stage"]
-            in {"range_function_terms", "primitive_contraction"}
-            else (
-                "the paired graph remains accurate until closed-loop assembly; "
-                "analytic reformulation is required"
-            )
+            "the first gate breach occurs only in the closed contour; existing "
+            "paired endpoint lows carry too little of the missing value, while "
+            "the endpoint-scale fp64 roundoff estimate matches the observed miss, "
+            "so analytic closed-loop reformulation is required"
         ),
     }
     return receipt

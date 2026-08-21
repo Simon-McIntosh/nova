@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T21:47:32",
+  "updated": "2026-08-21T23:05:53",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -558,6 +558,21 @@
                 "verification": "strict"
               }
             }
+          },
+          {
+            "slug": "coil-circuit-discovery",
+            "why_now": "The five unshipped DIII-D ohmic conductor currents leave a hole every forward solve inherits; all machinery to fill it by measurement is landed, and the 2.20x versus 1.04x current disagreement must be adjudicated before any corpus discovery spends compute.",
+            "done_when": "The adjudication names which current estimate stands; relations are promoted only on the locked admissibility tests; the forward seam accepts known/knowable/unknown tier declarations with unknown-tier currents as reported free parameters.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "context": "extended",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
           }
         ],
         "starts": "2026-09-01",
@@ -791,6 +806,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 51
+    "_version": 52
   }
 }

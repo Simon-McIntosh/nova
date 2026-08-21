@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T11:11:53",
+  "updated": "2026-08-21T11:27:58",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -180,11 +180,25 @@
         "created": "2026-08-16"
       },
       {
+        "id": "geometry-scout",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
+      },
+      {
         "id": "geometry-solve",
         "harness": "codex",
         "role": "implement",
         "session_id": "019ff708-e876-7112-bdf2-12db5e55652a",
         "created": "2026-08-12"
+      },
+      {
+        "id": "geometry-spline",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
       },
       {
         "id": "harmonics",
@@ -13599,6 +13613,6 @@
       }
     ],
     "holds": [],
-    "_version": 355
+    "_version": 357
   }
 }

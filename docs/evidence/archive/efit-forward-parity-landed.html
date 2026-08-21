@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-evidence-for" content="efit-forward-parity">
+  <meta name="plan-verifies" content="efit-forward-parity#s6">
+  <title>EFIT Forward Parity — landed evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>EFIT Forward Parity — cumulative execution evidence</h1>
+
+  <h2 id="s6-dual-route">§6 — the DINA reference's flux functions by two routes: reliable extraction, and a quantified disagreement neither route may absorb</h2>
+
+  <p><strong>Landed 2026-08-21, commit <code>71c1ec36</code> (merge <code>dabbb783</code>); gate
+  PASSED.</strong> Owner directive executed: DINA 135011/7 slice index 353 (t = 338.9276 s) read
+  with imas-python (<code>imas.DBEntry</code>) at the written DD 3.39.0 — the native-DD read is
+  bit-identical to the stored reader — and the flux functions derived by both routes on the warm
+  banked carriers (coarse <code>746fbe15…</code> 0.332 s, fine <code>f0f96aa2…</code> 0.540 s,
+  bytes verified, no cold build).</p>
+
+  <p><strong>Extraction is reliable everywhere it was asked.</strong> The affine per-surface
+  projection (<code>map_extraction.extract_flux_functions</code>) qualified 19/19 shells on
+  2,415 prescribed-support map nodes. Conversion: COCOS 11 → Nova COCOS 17 total-flux gauge,
+  Φ = −ψ<sub>IDS</sub>; the prescribed IDS anchors define support and reproduction normalization,
+  the banked map/topology anchors define only the extraction coordinate, and every figure states
+  both provenances.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>quantity</th><th>declared route</th><th>map-extracted route</th><th>disagreement (map − declared)</th></tr></thead>
+    <tbody>
+      <tr><td>p′ against ψ_N</td><td>profiles_1d/dpressure_dpsi</td><td>affine projection</td><td>RMS 381.246 Pa/Wb · sup 1,189.351 Pa/Wb</td></tr>
+      <tr><td>FF′ against ψ_N</td><td>profiles_1d/f_df_dpsi</td><td>affine projection</td><td>RMS 0.019910 T²m²/Wb · sup 0.064284 T²m²/Wb</td></tr>
+      <tr><td>pressure integral vs stored primitive</td><td>RMS 77,057.06 Pa</td><td>RMS 72,578.54 Pa</td><td>comparable — neither route reproduces the stored primitive</td></tr>
+      <tr><td>F integral vs stored primitive</td><td>RMS 0.259348 T·m</td><td>RMS 0.263059 T·m</td><td>comparable</td></tr>
+      <tr><td>core forcing, coarse / fine</td><td>1.294207 / 1.279362 Wb</td><td>2.748872 / 2.793386 Wb</td><td>route-image difference 1.750606 / 1.804776 Wb</td></tr>
+      <tr><td>boundary anchor</td><td>−5.122763 Wb (declared)</td><td>−4.711771 Wb (map saddle)</td><td>0.410992 Wb = 0.508064% of declared span</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>Reading.</strong> The banked declared-boundary-vs-map-saddle inconsistency now has
+  its profile-domain expression: the profiles the dataset declares and the profiles its own map
+  implies disagree at the tenth-of-a-percent-of-scale level, the declared route drives a smaller
+  reproduction forcing than the map route (1.29 against 2.75 Wb), and the disagreement was
+  neither shifted, rescaled, blended nor used as a correction — it is the finding, reported
+  unbounded per the locked <code>dina-flux-function-source</code> decision. Both source vectors
+  are now available to reproduction runs with stated uncertainty and provenance.</p>
+
+  <p>Artifacts: <code>scripts/dina_profile_routes/receipt.json</code> (serialized receipt),
+  <code>scripts/dina_profile_routes/report.html</code>, <code>measure.py</code>/<code>verify.py</code>
+  (re-runnable, <code>reliable=19/19</code>, <code>boundary_offset_wb=0.410991883238</code>),
+  and five figures under <code>docs/figures/dina-profile-routes/</code>. Reuse map:
+  <code>scripts/dina_profile_routes/reuse-report.md</code> (commit <code>c1e180d5</code>).
+  Caveat recorded: the current cache-helper identity omits two no-op exact-route policy fields
+  and would select a newer key; the receipt opened the two banked groups directly through the
+  validated carrier deserializer with no cold-build fallback.</p>
+
+  <figure>
+    <img src="/nova/figures/dina-profile-routes/route_deviation.png" alt="Map-extracted minus declared p-prime and FF-prime deviation profiles against normalised flux" style="max-width:100%">
+    <figcaption>Route deviation profiles on the common ψ_N base; extraction uncertainty and
+    reliability masks in the receipt. Full panel set: profile_routes, primitive_integrals,
+    anchor_offsets, forcing_routes.</figcaption>
+  </figure>
+
+</main>
+</body>
+</html>

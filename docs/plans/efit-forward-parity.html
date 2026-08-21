@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="8">
-<meta name="plan-commits" content="c1e180d5">
-<meta name="plan-artifacts" content="scripts/dina_profile_routes/reuse-report.md">
-<meta name="plan-impl" content="0.1">
+<meta name="plan-version" content="10">
+<meta name="plan-commits" content="c1e180d5,71c1ec36">
+<meta name="plan-artifacts" content="scripts/dina_profile_routes/reuse-report.md,scripts/dina_profile_routes/receipt.json,scripts/dina_profile_routes/report.html,docs/evidence/archive/efit-forward-parity-landed.html">
+<meta name="plan-impl" content="0.5">
 </head>
 <body>
   <main class="plan-doc">
@@ -192,33 +192,23 @@
     capability with real value — it is simply Ambix's side of the seam in the intended architecture, and
     <code>ReconstructProfile</code> remains nova's implementation of it for callers who want it.</p>
 
-    <h2 id="s6">§6 — The DINA reference's flux functions, by two routes</h2>
-
-    <p><strong>Owner directive 2026-08-21.</strong> The stored DINA reproduction lane derives its flux
-    functions two ways and consumes both. Route one is extraction from the stored flux map through the
-    existing affine projection — <code>nova/equilibrium/map_extraction.extract_flux_functions</code>
-    reads Δ*Φ into R·j<sub>φ</sub> and projects it onto (μ₀R², 1) per normalised-flux shell, with the
-    extraction receipt qualifying every surface (projection residual, design condition, uncertainty
-    inflation near the axis and near |∇ψ_N| → 0). Route two is the profiles the dataset itself declares:
-    <code>equilibrium/time_slice/profiles_1d/dpressure_dpsi</code> [Pa/Wb] and
-    <code>profiles_1d/f_df_dpsi</code> [T²·m²/Wb] on <code>profiles_1d/psi</code> [Wb], read with
-    imas-python (<code>imas.DBEntry</code>) at the entry's written DD version 3.39.0 — never h5py —
-    with the declared anchors <code>global_quantities/psi_axis</code> and <code>psi_boundary</code>
-    read beside them.</p>
-
-    <p><strong>The comparison is the point, not a redundancy.</strong> The declared profiles are
-    tabulated against the reference's declared boundary constant while the map extraction normalises to
-    the stored field itself, so a declared-versus-extracted deviation localises the banked
-    declared-boundary-vs-map-saddle inconsistency (0.411 Wb, 0.51% of span) in the profile domain —
-    the input qualification the normalization-anchors ruling requires before any reproduction deviation
-    is attributed. Where the two routes agree, the reproduction gains a source vector with stated
-    uncertainty; where they disagree, the disagreement is the finding and is reported unbounded.</p>
-
-    <p><em>Done-when:</em> a banked dual-route receipt for 135011/7 slice 353 reports both profile sets
-    on a common ψ_N base with extraction uncertainty and reliability masks, their deviation profiles,
-    integral cross-checks against <code>profiles_1d/pressure</code> and <code>profiles_1d/f</code>, and
-    the reproduction-lane forcing under each route on the cached stored-reference fixtures, with gauge
-    and anchor provenance stated in every figure.</p>
+    <section id="s6" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-21</span>
+        <h2>§6 — The DINA reference's flux functions, by two routes</h2>
+      </header>
+      <p class="landed-summary">
+        Owner directive executed: the affine map extraction (19/19 shells reliable, 2,415 nodes)
+        banked beside the declared <code>profiles_1d</code> read with imas-python at DD 3.39.0,
+        unreconciled — p′ disagrees at RMS 381.25 Pa/Wb (sup 1,189.35), FF′ at RMS 0.0199 T²m²/Wb;
+        core forcing 1.29 Wb declared vs 2.75 Wb map-extracted on the warm banked carriers; the
+        0.410992 Wb anchor offset restated with dual provenance. Reproduction runs now hold both
+        source vectors: the prescribed-anchor mode drives the declared route, the extracted route
+        is the internal-consistency control. Full record:
+        <a href="/nova/evidence/archive/efit-forward-parity-landed#s6-dual-route">§6 landed</a>
+        (commits <code>c1e180d5</code>, <code>71c1ec36</code>).
+      </p>
+    </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -280,6 +270,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260821T1042" data-who="reckon-ship" data-when="2026-08-21T10:42:00+00:00">
     <div class="r-comment-body">reuse-map-dina-profile-routes landed - commit c1e180d5, merged 3b94ce73; gate PASSED; worker 492 s. The scout performed the live native-DD imas-python read (135011/7 slice index 353, t=338.9276 s): five 50-point declared profile arrays (dpressure_dpsi, f_df_dpsi, psi, pressure, f) plus the 65x129 map, all finite; declared anchors -86.01645 / -5.12276 Wb in Nova convention, span 80.89369 Wb; the banked map-vs-declared boundary offset reproduced at 0.41099 Wb = 0.50806% of declared span. REUSE VERDICT: nine live extract_flux_functions call sites, the stored-reference reader, forward solver and convention helpers are all reusable through a thin two-coordinate adapter; nova.imas.equilibrium.Profile1D alone is UNFIT for the receipt (omits pressure, f, convention and anchor provenance); imas-ambix owns the downstream typed FluxFunctionState contract but not IDS reading, affine extraction, anchor qualification or the DINA receipt - no duplication either side of the seam. The implementation node composes: dual-route adapter, serialized receipt, deviation plus integral figures, and the two forcing arms. Reuse map: scripts/dina_profile_routes/reuse-report.md.</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260821T1125" data-who="reckon-ship" data-when="2026-08-21T11:25:00+00:00">
+    <div class="r-comment-body">dina-dual-route-receipt landed - commit 71c1ec36, merged dabbb783; gate PASSED; worker 768 s. SECTION 6 CLOSES: the owner directive is executed and the disagreement is the finding. Native imas.DBEntry read at DD 3.39.0 bit-identical to the stored reader; affine extraction reliable on 19/19 shells over 2,415 prescribed-support nodes; map-minus-declared p-prime RMS 381.246 Pa/Wb (sup 1,189.351), FF-prime RMS 0.019910 T2m2/Wb (sup 0.064284); integral cross-checks against the stored primitives comparable for both routes (pressure RMS 77.06 vs 72.58 kPa; F RMS 0.2593 vs 0.2631 T m); core forcing on the warm banked carriers 1.294/1.279 Wb (declared, coarse/fine) vs 2.749/2.793 Wb (map-extracted), route-image difference 1.751/1.805 Wb; the 0.410992 Wb = 0.508064% anchor offset restated with dual provenance in every figure. Nothing shifted, rescaled, blended or reconciled. CONSEQUENCE for section 2-4 entry: reproduction runs now hold both source vectors with stated uncertainty - the prescribed-anchor mode drives the declared route; the extracted route is the internal-consistency control. CAVEAT for the cache owner: the current cache-helper identity omits two no-op exact-route policy fields and would select a newer key; the receipt opened the banked groups directly through the validated deserializer. Record: /nova/evidence/archive/efit-forward-parity-landed#s6-dual-route.</div>
 </div>
 </section>
 </main>

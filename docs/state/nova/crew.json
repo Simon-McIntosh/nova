@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T23:34:54",
+  "updated": "2026-08-21T23:52:58",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -48,6 +48,13 @@
       },
       {
         "id": "circuit-adjudicator",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a0262f-830e-7402-92b6-cffc3106b047",
+        "created": "2026-08-21"
+      },
+      {
+        "id": "circuit-reviewer",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -19046,9 +19053,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T211154067239-callback-deadlock-repair",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a78",
+        "node": "callback-deadlock-repair",
+        "role": "implement",
+        "member": "transport-env",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T21:11:56Z",
+        "completed_at": "2026-08-21T21:52:09Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2413,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2413,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "8d73c48f235119bad80335ea59d9582cf6181643",
+        "commits": [
+          "aa6941ec5655fed24c5f716beb14d8574dce7434"
+        ],
+        "changed_lines": {
+          "added": 36,
+          "removed": 6,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "the guard callback is host-pure: numpy.asarray immediately, all comparisons in numpy, plain ndarray returned, zero JAX primitives inside pure_callback; refusal semantics and the identity JVP unchanged (33-eps perturbation still raises under jit). Statistical gate met: three consecutive fresh-process greens (8/8 x3) on the file that hung four times, then geometry 4/4 and COCOS 6/6, strictly serialized. The race installed with the uniform-mesh guard is dead",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T211154067239-callback-deadlock-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 23779072,
+            "cached_input_tokens_cumulative": 270665216,
+            "input_tokens": 23975206,
+            "input_tokens_cumulative": 275739929,
+            "output_tokens": 21684,
+            "output_tokens_cumulative": 521240,
+            "reasoning_output_tokens": 3793,
+            "reasoning_output_tokens_cumulative": 168451
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T184120201359-real-window-demonstration",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a76",
+        "node": "real-window-demonstration",
+        "role": "implement",
+        "member": "transport-window",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T18:41:28Z",
+        "completed_at": "2026-08-21T18:59:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1079,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1079,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "bc8a5ac493d591d1fb0cce998316655b2c68bfa7",
+        "commits": [
+          "08265b6d6a48986a80220eebf54484cf5f496eae"
+        ],
+        "changed_lines": {
+          "added": 797,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "superseded by redispatch: this run delivered the driver and the NEEDS-HELP receipt that surfaced the missing exact-evaluation seam (126 vs 200 core cells), which has since been built, merged and de-deadlocked; the demonstration reruns as a fresh node on the same member at a tree that contains everything it lacked",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T184120201359-real-window-demonstration/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f8b-c81b-70c3-a5d8-007c4d512626",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9646080,
+            "cached_input_tokens_cumulative": 36533760,
+            "input_tokens": 10085932,
+            "input_tokens_cumulative": 37513501,
+            "output_tokens": 32171,
+            "output_tokens_cumulative": 129318,
+            "reasoning_output_tokens": 9461,
+            "reasoning_output_tokens_cumulative": 51488
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 469
+    "_version": 473
   }
 }

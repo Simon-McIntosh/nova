@@ -184,6 +184,7 @@ def test_flux_pairs_share_unfilled_line_levels_and_current_masks_are_transparent
     assert all(
         kwargs["cmap"]._rgba_bad[-1] == 0.0 for _values, kwargs in density_meshes
     )
+    assert all(kwargs["norm"].linthresh == 2.0e4 for _values, kwargs in density_meshes)
     assert receipt["rendering"]["contourf_used"] is False
     assert receipt["rendering"]["tared_pairs_use_shared_levels"] is True
     assert receipt["rendering"]["current_colormap_bad_alpha"] == 0.0

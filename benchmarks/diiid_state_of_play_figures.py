@@ -27,7 +27,7 @@ import jax
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.axes import Axes
-from matplotlib.colors import Colormap
+from matplotlib.colors import Colormap, SymLogNorm
 from matplotlib.patches import Polygon as PolygonPatch
 from matplotlib.patches import Rectangle
 from scipy.interpolate import RegularGridInterpolator
@@ -721,6 +721,7 @@ def _topology_figure(
         rows.append(
             [
                 frame.spec.name,
+                "diverted" if topology.extracted_diverted else "limited",
                 f"{topology.separations_m['magnetic_axis']:.5f}",
                 f"{topology.separations_m['x_point']:.5f}",
                 f"{topology.separations_m['lcfs_symmetric_mean']:.5f}",
@@ -732,6 +733,7 @@ def _topology_figure(
         cellText=rows,
         colLabels=(
             "named frame",
+            "extracted mode",
             "axis separation [m]",
             "X separation [m]",
             "LCFS symmetric mean [m]",
@@ -838,19 +840,26 @@ def _current_density_figure(
             threshold,
             float(np.quantile(np.abs(surviving_values), 0.99)),
         )
+        normalization = SymLogNorm(
+            linthresh=threshold,
+            linscale=1.0,
+            vmin=-limit,
+            vmax=limit,
+            base=10.0,
+        )
         frame_counts = {}
         for column, (density, mask, title, key) in enumerate(
             (
                 (
                     frame.given_current_density_rz,
                     masks[0],
-                    "Given Δ* toroidal current density",
+                    "Given jφ from Δ*",
                     "given",
                 ),
                 (
                     frame.tared_current_density_rz,
                     masks[1],
-                    "Tared Δ* toroidal current density",
+                    "Tared jφ from Δ*",
                     "tared",
                 ),
             )
@@ -866,8 +875,7 @@ def _current_density_figure(
                 masked,
                 shading="auto",
                 cmap=colormap,
-                vmin=-limit,
-                vmax=limit,
+                norm=normalization,
             )
             _draw_wall(axis, geometry)
             _format_axis(axis, f"{frame.spec.name} — {title}")
@@ -962,6 +970,10 @@ def write_figures(
             "tared_pairs_use_shared_levels": True,
             "current_subthreshold_representation": (
                 "NumPy masked cells with colormap bad alpha equal to zero"
+            ),
+            "current_scaling": (
+                "symmetric logarithmic normalization with the linear threshold "
+                "equal to the printed absolute mask threshold"
             ),
             "current_colormap_bad_alpha": 0.0,
             "style_source": "/home/ITER/mcintos/Code/imas-ink/imas_ink/style.py",

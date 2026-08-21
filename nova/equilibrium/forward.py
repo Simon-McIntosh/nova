@@ -130,8 +130,10 @@ __all__ = [
     "ForwardColdSeedPortfolio",
     "ForwardColdSeedReceipt",
     "ForwardEquilibrium",
+    "ForwardPerturbedSeedReceipt",
     "ForwardPortfolio",
     "ForwardProfile",
+    "PerturbedSeedPolicy",
     "SaddleSeedGeometry",
 ]
 
@@ -257,6 +259,47 @@ class ForwardColdSeedPortfolio(NamedTuple):
     """Limited and diverted cold-seed receipts on one fixed branch axis."""
 
     branches: ForwardColdSeedReceipt
+
+
+@dataclass(frozen=True)
+class PerturbedSeedPolicy:
+    """Declared near-basin amplitudes and bounded pinned-solve budget."""
+
+    relative_amplitudes: tuple[float, ...] = (1.0e-3, 1.0e-2, 5.0e-2)
+    newton_steps: int = 10
+    gmres_iterations: int = 30
+    tolerance: float = 1.0e-10
+
+    def __post_init__(self) -> None:
+        """Require a finite increasing ladder and positive solve controls."""
+        amplitudes = np.asarray(self.relative_amplitudes, dtype=np.float64)
+        if amplitudes.ndim != 1 or amplitudes.size < 1:
+            raise ValueError("perturbation amplitudes need at least one rung")
+        if not np.all(np.isfinite(amplitudes)) or np.any(amplitudes <= 0.0):
+            raise ValueError("perturbation amplitudes must be positive and finite")
+        if np.any(np.diff(amplitudes) <= 0.0):
+            raise ValueError("perturbation amplitudes must increase strictly")
+        if self.newton_steps < 1 or self.gmres_iterations < 1:
+            raise ValueError("perturbed-seed iteration budgets must be positive")
+        if not np.isfinite(self.tolerance) or self.tolerance <= 0.0:
+            raise ValueError("perturbed-seed tolerance must be positive and finite")
+        object.__setattr__(
+            self,
+            "relative_amplitudes",
+            tuple(float(value) for value in amplitudes),
+        )
+
+
+class ForwardPerturbedSeedReceipt(NamedTuple):
+    """Declared near-basin seeds and their pinned diverted solve outcomes."""
+
+    relative_amplitude: jax.Array
+    reference_flux_span: jax.Array
+    seed_flux: jax.Array
+    rungs: ForwardBranchReceipt
+    root_relative_error: jax.Array
+    passed: jax.Array
+    largest_passing_amplitude: jax.Array
 
 
 @dataclass
@@ -871,6 +914,65 @@ class ForwardProfile:
             tolerance=tolerance,
             iterations=self._iteration_count(route, options),
             **options,
+        )
+
+    def solve_diverted_perturbations(
+        self,
+        reference_flux,
+        perturbation_direction,
+        policy: PerturbedSeedPolicy = PerturbedSeedPolicy(),
+        *,
+        current=None,
+    ) -> ForwardPerturbedSeedReceipt:
+        """Recover declared near-basin seeds through the pinned diverted branch.
+
+        Amplitudes scale the production-read axis-to-saddle flux span. The
+        supplied direction fixes the perturbation shape; normalising it only
+        sets the largest pointwise displacement to the declared amplitude.
+        Every rung is solved by the same pinned branch path used by portfolios.
+        """
+        reference = jnp.asarray(reference_flux)
+        direction = jnp.asarray(perturbation_direction)
+        if reference.shape != direction.shape:
+            raise ValueError("reference flux and perturbation direction must align")
+        requested = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
+        _masks, topology = self.operator.read(reference, requested)
+        flux_span = jnp.abs(topology.flux_span)
+        direction_scale = jnp.max(jnp.abs(direction))
+        amplitudes = jnp.asarray(policy.relative_amplitudes, dtype=jnp.float64)
+        normalized = direction / direction_scale
+        seeds = reference + amplitudes[:, None] * flux_span * normalized
+        iterations = policy.newton_steps
+        rungs = jax.vmap(
+            lambda seed: self._branch_receipt(
+                seed,
+                requested,
+                current,
+                route="newton_krylov",
+                tolerance=policy.tolerance,
+                iterations=iterations,
+                warmup=0,
+                newton_steps=policy.newton_steps,
+                gmres_iterations=policy.gmres_iterations,
+            )
+        )(seeds)
+        scale = jnp.maximum(
+            jnp.max(jnp.abs(reference)), jnp.finfo(reference.dtype).tiny
+        )
+        root_error = (
+            jnp.max(jnp.abs(rungs.equilibrium.flux - reference), axis=1) / scale
+        )
+        passed = rungs.converged & (root_error <= policy.tolerance)
+        largest = jnp.max(jnp.where(passed, amplitudes, -jnp.inf))
+        largest = jnp.where(jnp.any(passed), largest, jnp.nan)
+        return ForwardPerturbedSeedReceipt(
+            relative_amplitude=amplitudes,
+            reference_flux_span=flux_span,
+            seed_flux=seeds,
+            rungs=rungs,
+            root_relative_error=root_error,
+            passed=passed,
+            largest_passing_amplitude=largest,
         )
 
     def solve_portfolio(

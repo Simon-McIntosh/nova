@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T17:17:05",
+  "updated": "2026-08-21T17:30:37",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -16795,9 +16795,129 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T150548109298-exact-section-reconditioning",
+        "plan": "device-kernel-build",
+        "section": "\u00a74",
+        "node": "exact-section-reconditioning",
+        "role": "implement",
+        "member": "kernel-prototype",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T15:05:51Z",
+        "completed_at": "2026-08-21T15:27:52Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1321,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1321,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "8da2c0244f5dd24b0689c1b53a5b67edc9a6437f",
+        "commits": [
+          "3067dc08"
+        ],
+        "changed_lines": {
+          "added": 49,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "failed",
+        "outcome": "No qualifying exact-section implementation exists at this reconditioning level: the cancellation is upstream of endpoint subtraction, inside the primitive root/arcsinh/arctangent contractions, so error-free transforms move but cannot remove it (exact contour 57.6x above the 8.04e-5 oracle bound). The localization receipt is banked and the continuation is double-double primitive evaluation inside the exact finite-section form under one shared rule, dispatched with the budget this fence could not offer; the symbolic paired-antiderivative derivation is the fallback design node.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T150548109298-exact-section-reconditioning/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0247d-26e8-7de2-96ad-893a24e6c3ff",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11176448,
+            "cached_input_tokens_cumulative": 51316480,
+            "input_tokens": 11429008,
+            "input_tokens_cumulative": 52839188,
+            "output_tokens": 46040,
+            "output_tokens_cumulative": 197975,
+            "reasoning_output_tokens": 17208,
+            "reasoning_output_tokens_cumulative": 69104
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T151721940468-basin-entry-rebuilt-fixture",
+        "plan": "dual-basin-solve",
+        "section": "\u00a72",
+        "node": "basin-entry-rebuilt-fixture",
+        "role": "implement",
+        "member": "basin-branches",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T15:17:27Z",
+        "completed_at": "2026-08-21T15:29:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 701,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 701,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "7399833c9a8e9f15a052d3232bad02aa8d2a1ce2",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "failed",
+        "outcome": "The decisive negative is banked: even against the rebuilt well-separated fixture, both bounded composed-map schedules (21 rungs, then 41 rungs with 5 Newton steps and 30 GMRES iterations per rung) terminate on the SAME limited production root - converged, residual 0, honest receipts, fixture parity error 5.055e-2 - with pin contradictions clustered over fractions 0.475-1.0. A scalar homotopy does not select a coexisting basin; the limited root dominates cold dynamics. This measured result, with the locked dual-basin-strategy rationale (selection is a recorded policy over converged receipts, not a property of the seed; basin-aware-seed-only and globalized-single-solve were rejected), restates the section-2 acceptance to near-basin per-branch recovery plus honest cold-portfolio receipts. Prototype salvaged as a patch; the basin-branches session retains full context.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T151721940468-basin-entry-rebuilt-fixture/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0247c-dbe2-78c0-95b0-14590b75d1dd",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4919552,
+            "cached_input_tokens_cumulative": 41954816,
+            "input_tokens": 5073761,
+            "input_tokens_cumulative": 43419989,
+            "output_tokens": 13788,
+            "output_tokens_cumulative": 149136,
+            "reasoning_output_tokens": 3253,
+            "reasoning_output_tokens_cumulative": 55812
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 429
+    "_version": 431
   }
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T19:32:47",
+  "updated": "2026-08-21T19:54:48",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -18107,9 +18107,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T170021256593-paired-path-receipt-rerun",
+        "plan": "device-kernel-build",
+        "section": "\u00a74",
+        "node": "paired-path-receipt-rerun",
+        "role": "implement",
+        "member": "kernel-prototype",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T17:00:25Z",
+        "completed_at": "2026-08-21T17:53:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3203,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3203,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "e5f67c254d87539fd318593c9a71dd9928530b3c",
+        "commits": [
+          "00161db3"
+        ],
+        "changed_lines": {
+          "added": 22,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "failed",
+        "outcome": "No cross-device distribution exists: the exact-paired CPU compile was OOM-killed at 100.4 GB under 96 GiB after 32m25s and the H200 compile passed 33m44s before the stop fence. The compile-cost floors are banked; the continuation is one properly sized attempt (at least 160 GiB CPU memory, full 60-minute debug limits both lanes) per the worker leaning, after which the measured distribution or the cost wall itself goes to the owner at go/no-go.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T170021256593-paired-path-receipt-rerun/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0247d-26e8-7de2-96ad-893a24e6c3ff",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9431552,
+            "cached_input_tokens_cumulative": 111852032,
+            "input_tokens": 9609112,
+            "input_tokens_cumulative": 114786581,
+            "output_tokens": 18703,
+            "output_tokens_cumulative": 379825,
+            "reasoning_output_tokens": 4767,
+            "reasoning_output_tokens_cumulative": 129431
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 450
+    "_version": 451
   }
 }

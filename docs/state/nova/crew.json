@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T16:38:55",
+  "updated": "2026-08-21T16:47:38",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -204,7 +204,7 @@
         "id": "forward-slice",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a024c1-c68c-70e3-8edf-4bf5cd7f1e5c",
         "created": "2026-08-21"
       },
       {
@@ -16359,9 +16359,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T143749503176-parity-slice-rerun",
+        "plan": "efit-forward-parity",
+        "section": "\u00a72",
+        "node": "parity-slice-rerun",
+        "role": "implement",
+        "member": "forward-slice",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T14:37:53Z",
+        "completed_at": "2026-08-21T14:46:16Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 503,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 503,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "5065604e3b1b37f934d8f5b7912c7545180aba8c",
+        "commits": [
+          "c3f9f83a"
+        ],
+        "changed_lines": {
+          "added": 1320,
+          "removed": 16,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T143749503176-parity-slice-rerun/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a024c1-c68c-70e3-8edf-4bf5cd7f1e5c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3489280,
+            "cached_input_tokens_cumulative": 3489280,
+            "input_tokens": 3627470,
+            "input_tokens_cumulative": 3627470,
+            "output_tokens": 19254,
+            "output_tokens_cumulative": 19254,
+            "reasoning_output_tokens": 7374,
+            "reasoning_output_tokens_cumulative": 7374
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 421
+    "_version": 423
   }
 }

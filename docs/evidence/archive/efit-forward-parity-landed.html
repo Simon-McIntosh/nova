@@ -19,6 +19,22 @@
 
   <h1>EFIT Forward Parity — cumulative execution evidence</h1>
 
+  <h2 id="s2-pinned-slice">§2 — the pinned parity slice: the topology pin cannot separate two diverted-class roots</h2>
+
+  <p><strong>Landed 2026-08-21, commit <code>c3f9f83a</code> (merge <code>c44c2cc6</code>); gate
+  PASSED — the two-arm receipt is the measure; parity remains negative, now sharpened.</strong>
+  The unchanged prescribed-anchor control reproduces the banked vacuum-root baseline exactly
+  (flux sup/RMS 0.6479/0.2766 of the 1.8234 Wb span, solved I<sub>p</sub> 0). The pinned
+  diverted branch through the landed <code>ForwardPortfolio</code> converges with residual 0 in
+  12 iterations, requested and achieved class diverted, topology-consistent — on the vacuum
+  root: I<sub>p</sub> 0 vs 934,383.875 A, β<sub>p</sub> 0 vs 0.4365, l<sub>i</sub> 0 vs 0.9248.
+  <strong>Finding:</strong> the MAST external field itself carries a diverted-class topology, so
+  a class pin cannot discriminate the vacuum root from the plasma root on this reference — the
+  earlier "escape" is basin attraction between two same-class roots, and the missing mechanism
+  is basin <em>entry</em>, under construction as dual-basin-solve's terminal-qualified
+  continuation ladder. Path audit: zero sensor reads, whitening matrices, least-squares updates.
+  Receipt: <code>docs/figures/efit-forward-parity/pinned-parity-slice.json</code>.</p>
+
   <h2 id="s6-dual-route">§6 — the DINA reference's flux functions by two routes: reliable extraction, and a quantified disagreement neither route may absorb</h2>
 
   <p><strong>Landed 2026-08-21, commit <code>71c1ec36</code> (merge <code>dabbb783</code>); gate

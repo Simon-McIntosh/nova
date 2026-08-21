@@ -16,7 +16,12 @@ from scipy.constants import electron_volt
 from nova.equilibrium.topology import topology_solve_receipt
 from nova.jax.config import configure_dtypes
 from nova.transport import coupled_window
-from nova.transport.coupled_window import Waveform, transport_sweep
+from nova.transport.coupled_window import (
+    ConvergedNonConfinedError,
+    Waveform,
+    equilibrium_sweep,
+    transport_sweep,
+)
 from nova.transport.evolved_state import forward_source_from_receipt
 from nova.transport.forward import TransportState
 from scripts.window_demonstration import run_window as demonstration
@@ -158,19 +163,51 @@ def _exact_core_count(equilibrium, lattice, sources) -> int:
     )
 
 
+def _source_waveform(source) -> Waveform:
+    """Carry one already-sampled source through the equilibrium-sweep seam."""
+    radial_grid = np.linspace(0.0, 1.0, 101)
+    p_prime = np.asarray(source.core.p_prime(radial_grid))
+    ff_prime = np.asarray(source.core.ff_prime(radial_grid))
+    return Waveform(
+        time=np.asarray((0.0, 1.0)),
+        radial_grid=np.stack((radial_grid, radial_grid)),
+        phi_boundary=np.ones(2),
+        axis_reference=np.zeros(2),
+        boundary_reference=np.ones(2),
+        values={
+            "p_prime": np.stack((p_prime, p_prime)),
+            "ff_prime": np.stack((ff_prime, ff_prime)),
+        },
+    )
+
+
 def _solve(
-    profile, seed_equilibrium, source, extraction_lattice, fixture_sources
-) -> tuple[object, dict[str, object]]:
+    profile,
+    seed_equilibrium,
+    source,
+    extraction_lattice,
+    fixture_sources,
+    selection_history,
+) -> tuple[object, dict[str, object], object]:
     """Solve one exchanged source and publish its topology qualification."""
     sampled_operator = dataclasses.replace(profile.operator, source=source)
-    sampled_profile = dataclasses.replace(profile, operator=sampled_operator)
     entry_topology = sampled_operator.read(seed_equilibrium.flux)[1]
     started = time.perf_counter()
-    equilibrium = sampled_profile.solve(
+    sweep = equilibrium_sweep(
+        profile,
         seed_equilibrium.flux,
+        _source_waveform(source),
+        (0.0,),
+        lambda _sample: source,
         route="anderson",
-        evaluations=demonstration.EVALUATIONS,
+        solve_options={
+            "evaluations": demonstration.EVALUATIONS,
+            "tolerance": SOLVE_TOLERANCE,
+        },
+        selection_history=selection_history,
     )
+    equilibrium = sweep.equilibria[0]
+    branch = sweep.branch_receipts[0]
     elapsed = time.perf_counter() - started
     residual = float(equilibrium.fixed_point.residual)
     finite = bool(equilibrium.finite.passed)
@@ -188,11 +225,16 @@ def _solve(
         "plasma_current_a": float(equilibrium.moments.plasma_current),
         "solve_seconds": elapsed,
         "topology_receipt": receipt.as_dict(),
+        "branch_selection": branch.selection.as_dict(),
+        "branch_core_cells": {
+            "limited": branch.core_cell_counts[0],
+            "diverted": branch.core_cell_counts[1],
+        },
     }
-    return equilibrium, measurement
+    return equilibrium, measurement, branch.selection.next_history
 
 
-def _trace_to_collapse(
+def _trace_exchanges(
     profile,
     baseline_equilibrium,
     baseline_geometry,
@@ -201,13 +243,15 @@ def _trace_to_collapse(
     initial_state,
     plasma_current,
     model,
-):
-    """Follow ordinary geometry exchanges until the exact core disappears."""
+) -> tuple[Waveform, list[dict[str, object]], ConvergedNonConfinedError | None]:
+    """Receipt every declared geometry exchange through branch continuity."""
     geometry_waveform = Waveform.from_geometries(
         demonstration.EQUILIBRIUM_TIMES,
         (baseline_geometry, baseline_geometry),
     )
     trace = []
+    selection_history = None
+    seed_equilibrium = baseline_equilibrium
     for iteration in range(1, demonstration.ITERATION_CAP + 1):
         started = time.perf_counter()
         transport, mapped_source, sampled_source = _advance(
@@ -217,13 +261,47 @@ def _trace_to_collapse(
             plasma_current,
             model,
         )
-        equilibrium, solve = _solve(
-            profile,
-            baseline_equilibrium,
-            sampled_source,
-            extraction_lattice,
-            fixture_sources,
-        )
+        try:
+            equilibrium, solve, selection_history = _solve(
+                profile,
+                seed_equilibrium,
+                sampled_source,
+                extraction_lattice,
+                fixture_sources,
+                selection_history,
+            )
+        except ConvergedNonConfinedError as error:
+            qualified = error.at_exchange(iteration)
+            branch = qualified.branch_receipt
+            trace.append(
+                {
+                    "iteration": iteration,
+                    "exchange_seconds": time.perf_counter() - started,
+                    "transport_engine_status": transport.diagnostics.engine_status,
+                    "transport_steps": transport.diagnostics.steps,
+                    "boundary_pressure_pa": float(sampled_source.boundary_pressure),
+                    "boundary_field_function_tm": float(
+                        sampled_source.boundary_field_function
+                    ),
+                    "mapped_drives": _drive_measurements(profile.source, mapped_source),
+                    "sampled_drives": _drive_measurements(
+                        profile.source, sampled_source
+                    ),
+                    "solve": {
+                        "outcome_type": type(qualified).__name__,
+                        "outcome": str(qualified),
+                        "exchange_index": qualified.exchange_index,
+                        "sample_index": branch.sample_index,
+                        "sample_time": branch.sample_time,
+                        "branch_core_cells": {
+                            "limited": branch.core_cell_counts[0],
+                            "diverted": branch.core_cell_counts[1],
+                        },
+                        "branch_selection": branch.selection.as_dict(),
+                    },
+                }
+            )
+            return geometry_waveform, trace, qualified
         trace.append(
             {
                 "iteration": iteration,
@@ -239,8 +317,6 @@ def _trace_to_collapse(
                 "solve": solve,
             }
         )
-        if solve["exact_core_cells"] == 0:
-            return geometry_waveform, trace
         evolved_geometry, _extraction = demonstration._geometry_from_equilibrium(
             equilibrium,
             sampled_source,
@@ -254,7 +330,8 @@ def _trace_to_collapse(
         geometry_waveform = coupled_window._blend_waveform(
             geometry_waveform, candidate, demonstration.DAMPING
         )
-    raise RuntimeError("the declared iteration budget did not reproduce the collapse")
+        seed_equilibrium = equilibrium
+    return geometry_waveform, trace, None
 
 
 def main() -> int:
@@ -296,7 +373,7 @@ def main() -> int:
     )
     model = demonstration._torax_model()
 
-    collapse_geometry_waveform, ordinary_trace = _trace_to_collapse(
+    final_geometry_waveform, ordinary_trace, branch_outcome = _trace_exchanges(
         profile,
         baseline_equilibrium,
         geometry,
@@ -307,22 +384,38 @@ def main() -> int:
         model,
     )
 
-    matched_start = time.perf_counter()
-    matched_transport, matched_source, matched_sampled_source = _advance(
-        collapse_geometry_waveform,
-        profile.source,
-        pressure_matched_state,
-        plasma_current,
-        model,
-    )
-    _matched_equilibrium, matched_solve = _solve(
-        profile,
-        baseline_equilibrium,
-        matched_sampled_source,
-        extraction_lattice,
-        fixture_sources,
-    )
-    matched_seconds = time.perf_counter() - matched_start
+    pressure_matched = None
+    if branch_outcome is None:
+        matched_start = time.perf_counter()
+        matched_transport, matched_source, matched_sampled_source = _advance(
+            final_geometry_waveform,
+            profile.source,
+            pressure_matched_state,
+            plasma_current,
+            model,
+        )
+        _matched_equilibrium, matched_solve, _matched_history = _solve(
+            profile,
+            baseline_equilibrium,
+            matched_sampled_source,
+            extraction_lattice,
+            fixture_sources,
+            None,
+        )
+        pressure_matched = {
+            "exchange_seconds": time.perf_counter() - matched_start,
+            "transport_engine_status": matched_transport.diagnostics.engine_status,
+            "transport_steps": matched_transport.diagnostics.steps,
+            "boundary_pressure_pa": float(matched_sampled_source.boundary_pressure),
+            "boundary_field_function_tm": float(
+                matched_sampled_source.boundary_field_function
+            ),
+            "mapped_drives": _drive_measurements(profile.source, matched_source),
+            "sampled_drives": _drive_measurements(
+                profile.source, matched_sampled_source
+            ),
+            "solve": matched_solve,
+        }
 
     summary = {
         "baseline": {
@@ -338,20 +431,8 @@ def main() -> int:
         },
         "pressure_match": pressure_match,
         "ordinary_trace": ordinary_trace,
-        "pressure_matched": {
-            "exchange_seconds": matched_seconds,
-            "transport_engine_status": matched_transport.diagnostics.engine_status,
-            "transport_steps": matched_transport.diagnostics.steps,
-            "boundary_pressure_pa": float(matched_sampled_source.boundary_pressure),
-            "boundary_field_function_tm": float(
-                matched_sampled_source.boundary_field_function
-            ),
-            "mapped_drives": _drive_measurements(profile.source, matched_source),
-            "sampled_drives": _drive_measurements(
-                profile.source, matched_sampled_source
-            ),
-            "solve": matched_solve,
-        },
+        "branch_outcome": None if branch_outcome is None else str(branch_outcome),
+        "pressure_matched": pressure_matched,
         "total_seconds": time.perf_counter() - overall_start,
     }
     print(json.dumps(summary, indent=2, allow_nan=True))

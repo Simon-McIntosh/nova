@@ -1,0 +1,345 @@
+{
+  "analytic_stationary_point_analysis": {
+    "coordinate_axis_stationary_point": {
+      "coordinate_m": [
+        0.0,
+        0.0
+      ],
+      "flux_per_radian_wb": -0.35333907456929015,
+      "flux_total_wb": -2.220094881786196,
+      "hessian_determinant_per_radian_squared": -0.3418052136926678,
+      "hessian_eigenvalues_per_radian_wb_per_m2": [
+        0.7774408655861604,
+        -0.43965429246500937
+      ],
+      "hessian_eigenvalues_total_flux_wb_per_m2": [
+        4.884805023851943,
+        -2.7624293906545834
+      ],
+      "kind": "saddle",
+      "physical_x_point": false,
+      "reason": "the cylindrical coordinate axis is excluded from the R>0 plasma domain and lies outside every banked grid and wall"
+    },
+    "derivation": "dpsi/dZ=-2*k_z*Z and dpsi/dR=-2*R*G'(R^2-R0^2); for R>0, G' vanishes only at R=R0",
+    "physical_domain": "R > 0",
+    "physical_stationary_points": [
+      {
+        "coordinate_m": [
+          1.7,
+          0.0
+        ],
+        "hessian_eigenvalues_per_radian_wb_per_m2": [
+          -1.6520621630729713,
+          -0.43965429246500937
+        ],
+        "hessian_eigenvalues_total_flux_wb_per_m2": [
+          -10.380212709567418,
+          -2.7624293906545834
+        ],
+        "kind": "maximum_magnetic_axis"
+      }
+    ],
+    "physical_topology": "limited",
+    "physical_x_point_count": 0
+  },
+  "artifacts": {
+    "classification": "scripts/dual_basin_fixtures/topology-classification.md",
+    "figure": "scripts/dual_basin_fixtures/topology-classification.png"
+  },
+  "classification": {
+    "acceptance_implication": "the bank can test two distinct fixed points and same-class branch handling, but cannot demonstrate limited/diverted recovery; relabeling either stored receipt would not supply the missing saddle evidence",
+    "alternate_fixed_point": "limited",
+    "claim_reconciliation": {
+      "banked_receipts": "both coarse and fine receipts label both roots limited",
+      "independent_measurement": "all four stored-precision reads are limited, wall-bound, and contain zero finite in-domain X-points",
+      "stated_assumption": "the closed-form root supplies the diverted member of a limited/diverted pair",
+      "verdict": "assumption contradicted by analytic and stored evidence"
+    },
+    "closed_form_analytic": "limited",
+    "diverted_fixture_action": "construct and independently bank a state with a finite in-domain X-point whose flux, rather than wall contact, binds the separatrix",
+    "genuinely_diverted_fixture_in_bank": false,
+    "two_class_acceptance_ready": false
+  },
+  "fixtures": {
+    "coarse": {
+      "alternate_terminal_residual": 2.494170604898324e-15,
+      "axis_separation_m": 0.07483887226620761,
+      "cache_semantic_key": "030667d40f96d904",
+      "cache_warm_hit": true,
+      "coordinate_axis_saddle_nearest_grid_node_distance_m": 0.99887632063917,
+      "coordinate_axis_saddle_nearest_wall_vertex_distance_m": 0.9786292614350556,
+      "grid_node_bounds_m": {
+        "maximum": [
+          2.129589927544261,
+          1.0468000317965114
+        ],
+        "minimum": [
+          0.9987405393587556,
+          -1.0478430853524492
+        ]
+      },
+      "realised_cells": 551,
+      "requested_cells": -500,
+      "roots": {
+        "alternate_fixed_point": {
+          "array": "root_state",
+          "identity": {
+            "dtype": "<f8",
+            "sha256": "143a520cec654968ffa4588604fa106203b0a5e4f03cd6989eab7c14616be6bb",
+            "shape": [
+              2253
+            ]
+          },
+          "topology": {
+            "axis_flux_wb": 1.0241986753014278,
+            "axis_m": [
+              1.6245046337882392,
+              -9.51941465443805e-05
+            ],
+            "boundary_flux_wb": -0.24590656947069361,
+            "boundary_point_m": [
+              0.9783517036373888,
+              -0.00012103541959234807
+            ],
+            "boundary_wall_flux_difference_wb": 0.0,
+            "boundary_wall_point_distance_m": 0.0,
+            "class": "limited",
+            "diverted": false,
+            "finite_o_point_count": 1,
+            "finite_o_points": [
+              [
+                1.6245046337882392,
+                -9.51941465443805e-05,
+                1.0241986753014278,
+                1.0
+              ]
+            ],
+            "finite_x_point_count": 0,
+            "finite_x_points": [],
+            "null_fit_precision": "<class 'jax.numpy.float64'>",
+            "selected_x_point_flux_wb": null,
+            "selected_x_point_m": null,
+            "state_precision": "float64",
+            "wall_contact_flux_wb": -0.24590656947069361,
+            "wall_contact_nearest_vertex_distance_m": 0.02318508666756281,
+            "wall_contact_point_m": [
+              0.9783517036373888,
+              -0.00012103541959234807
+            ],
+            "wall_state_precision": "float64"
+          }
+        },
+        "closed_form_analytic": {
+          "array": "oracle_state",
+          "identity": {
+            "dtype": "<f8",
+            "sha256": "633a8fbe81dbb21d9f333079ccaf5b1e7dd8f0fe3c3adac9fd90a0c89ec5ac0e",
+            "shape": [
+              2253
+            ]
+          },
+          "topology": {
+            "axis_flux_wb": 1.3810216850087467,
+            "axis_m": [
+              1.6993434455115168,
+              9.17089886430993e-16
+            ],
+            "boundary_flux_wb": -8.673617379884035e-19,
+            "boundary_point_m": [
+              2.15,
+              1.1485921470357568e-16
+            ],
+            "boundary_wall_flux_difference_wb": 0.0,
+            "boundary_wall_point_distance_m": 0.0,
+            "class": "limited",
+            "diverted": false,
+            "finite_o_point_count": 1,
+            "finite_o_points": [
+              [
+                1.6993434455115168,
+                9.17089886430993e-16,
+                1.3810216850087467,
+                1.0
+              ]
+            ],
+            "finite_x_point_count": 0,
+            "finite_x_points": [],
+            "null_fit_precision": "<class 'jax.numpy.float64'>",
+            "selected_x_point_flux_wb": null,
+            "selected_x_point_m": null,
+            "state_precision": "float64",
+            "wall_contact_flux_wb": -8.673617379884035e-19,
+            "wall_contact_nearest_vertex_distance_m": 1.1485921470357568e-16,
+            "wall_contact_point_m": [
+              2.15,
+              1.1485921470357568e-16
+            ],
+            "wall_state_precision": "float64"
+          }
+        }
+      },
+      "source_bank": "scripts/oracle_rebaseline/root-coarse.npz",
+      "source_receipt": "scripts/oracle_rebaseline/receipt-coarse.json",
+      "source_receipt_topology_labels": {
+        "alternate_fixed_point": "limited",
+        "closed_form_analytic": "limited"
+      },
+      "wall_vertex_bounds_m": {
+        "maximum": [
+          2.15,
+          1.0508343948802852
+        ],
+        "minimum": [
+          0.9783517036373888,
+          -1.0508343948802852
+        ]
+      }
+    },
+    "fine": {
+      "alternate_terminal_residual": 2.172012894849535e-15,
+      "axis_separation_m": 0.074188856410115,
+      "cache_semantic_key": "7c94be9b777c55ba",
+      "cache_warm_hit": true,
+      "coordinate_axis_saddle_nearest_grid_node_distance_m": 0.9795222030900336,
+      "coordinate_axis_saddle_nearest_wall_vertex_distance_m": 0.9786292614350556,
+      "grid_node_bounds_m": {
+        "maximum": [
+          2.1488104679752857,
+          1.0472302327213918
+        ],
+        "minimum": [
+          0.9794519407753348,
+          -1.0469786060034565
+        ]
+      },
+      "realised_cells": 1076,
+      "requested_cells": -1000,
+      "roots": {
+        "alternate_fixed_point": {
+          "array": "root_state",
+          "identity": {
+            "dtype": "<f8",
+            "sha256": "fa725b56be8302ab230b87775dd4ca2ced410d8efa54035122b9e36a3086e738",
+            "shape": [
+              4052
+            ]
+          },
+          "topology": {
+            "axis_flux_wb": 1.022745146811864,
+            "axis_m": [
+              1.6254626823425138,
+              -0.00013937914251811818
+            ],
+            "boundary_flux_wb": -0.246971140126956,
+            "boundary_point_m": [
+              0.9783517036373888,
+              -0.0007319415012626677
+            ],
+            "boundary_wall_flux_difference_wb": 0.0,
+            "boundary_wall_point_distance_m": 0.0,
+            "class": "limited",
+            "diverted": false,
+            "finite_o_point_count": 1,
+            "finite_o_points": [
+              [
+                1.6254626823425138,
+                -0.00013937914251811818,
+                1.022745146811864,
+                1.0
+              ]
+            ],
+            "finite_x_point_count": 0,
+            "finite_x_points": [],
+            "null_fit_precision": "<class 'jax.numpy.float64'>",
+            "selected_x_point_flux_wb": null,
+            "selected_x_point_m": null,
+            "state_precision": "float64",
+            "wall_contact_flux_wb": -0.246971140126956,
+            "wall_contact_nearest_vertex_distance_m": 0.022574180585892493,
+            "wall_contact_point_m": [
+              0.9783517036373888,
+              -0.0007319415012626677
+            ],
+            "wall_state_precision": "float64"
+          }
+        },
+        "closed_form_analytic": {
+          "array": "oracle_state",
+          "identity": {
+            "dtype": "<f8",
+            "sha256": "61d614384c1e4415da2d6f1ea9eefd1354b51a1485ec9d15e0eda07cbc911300",
+            "shape": [
+              4052
+            ]
+          },
+          "topology": {
+            "axis_flux_wb": 1.3811489277145976,
+            "axis_m": [
+              1.6996514078262104,
+              5.913459967054991e-16
+            ],
+            "boundary_flux_wb": -8.673617379884035e-19,
+            "boundary_point_m": [
+              2.15,
+              1.1485921470357568e-16
+            ],
+            "boundary_wall_flux_difference_wb": 0.0,
+            "boundary_wall_point_distance_m": 0.0,
+            "class": "limited",
+            "diverted": false,
+            "finite_o_point_count": 1,
+            "finite_o_points": [
+              [
+                1.6996514078262104,
+                5.913459967054991e-16,
+                1.3811489277145976,
+                1.0
+              ]
+            ],
+            "finite_x_point_count": 0,
+            "finite_x_points": [],
+            "null_fit_precision": "<class 'jax.numpy.float64'>",
+            "selected_x_point_flux_wb": null,
+            "selected_x_point_m": null,
+            "state_precision": "float64",
+            "wall_contact_flux_wb": -8.673617379884035e-19,
+            "wall_contact_nearest_vertex_distance_m": 1.1485921470357568e-16,
+            "wall_contact_point_m": [
+              2.15,
+              1.1485921470357568e-16
+            ],
+            "wall_state_precision": "float64"
+          }
+        }
+      },
+      "source_bank": "scripts/oracle_rebaseline/root-fine.npz",
+      "source_receipt": "scripts/oracle_rebaseline/receipt-fine.json",
+      "source_receipt_topology_labels": {
+        "alternate_fixed_point": "limited",
+        "closed_form_analytic": "limited"
+      },
+      "wall_vertex_bounds_m": {
+        "maximum": [
+          2.15,
+          1.0508343948802852
+        ],
+        "minimum": [
+          0.9783517036373888,
+          -1.0508343948802852
+        ]
+      }
+    }
+  },
+  "measurement": {
+    "flux_gauge": "each serialized field retains its banked exact-exterior gauge; axis, wall and boundary flux are read from that same field",
+    "jax_backend": "cpu",
+    "jax_x64_enabled": true,
+    "operation": "read-only classification of serialized root arrays",
+    "receipt_labels_used_as_input": false,
+    "solver_executed": false,
+    "state_precision": "binary64",
+    "topology_locator_precision": "float64"
+  },
+  "schema": "nova.oracle-topology-classification",
+  "schema_version": 1
+}

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="coil-circuit-discovery-landed">
+  <meta name="plan-title" content="Coil Circuit Discovery — landed record">
+  <meta name="plan-summary" content="Cumulative execution evidence for the coil circuit discovery plan: the reuse map binding all seven composed capabilities, the three-stage residual adjudication instrument with its verified receipt, and the review finding that interior Delta-star cannot adjudicate external coil currents — the authority verdict is held for a flux-space reformulation">
+  <meta name="plan-evidence-for" content="coil-circuit-discovery">
+  <meta name="plan-verifies" content="coil-circuit-discovery#s2">
+  <title>Coil Circuit Discovery — landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="reuse-map">§1 prior-art reuse map — all seven capabilities already landed — 2026-08-21</h2>
+    <p>The pre-flight scout mapped every capability the plan composes onto landed machinery across
+    Nova <code>8757af96</code> and imas-ambix <code>2f3dcd0c</code>: the exact clipped-cell tare
+    (<code>benchmarks/diiid_exact_clipped_tare.py</code>, floor 0.4841505 %), the Δ* operator
+    (<code>nova/equilibrium/map_extraction.py::apply_delta_star</code>, round-trip 2.29e-8), the
+    registry-plus-netCDF five-column polygon response, the gauge-free recovery solver
+    (<code>benchmarks/diiid_boundary_current_recovery.py::recover_currents</code>, condition number
+    10.828), the ohmic circuit retest (<code>benchmarks/diiid_ohmic_circuit_retest.py</code>), the
+    603-shot polarity screen, and Ambix-owned corpus access. 7/7 entries carry module, entry symbol,
+    driving test, evidence anchor, artifacts, and a fitness verdict. No new machinery was authorised.
+    Map: <code>~/.config/reckon/crew/runs/…/prior-art-reuse-map</code> report
+    (<code>reuse-map.md</code>).</p>
+
+    <h2 id="residual-adjudication">§2 three-stage residual adjudication — instrument sound, verdict held by review — 2026-08-21</h2>
+    <p>Commits <code>d9b9f8de</code> (study, receipt, test) and <code>5855f2ba</code> (figures),
+    merged at <code>31e10c89</code>. The plan's §2 posed a decisive measurement: does the interior
+    Δ* residual left after five-column recovery reach the 0.4841505 % exact-tare floor? The study
+    ran it exactly as posed, on all 60 banked diverted polarity-screened frames (20 shots, 29 frames
+    qualified below 50 kA), with rank 5 and condition number 10.828176489 on every frame.</p>
+    <table>
+      <caption>Interior Δ* signed-current residual as a fraction of extracted plasma current,
+      median over 60 frames. 504 incomplete-stencil edge cells are excluded from every stage by the
+      operator's validity mask and reported separately.</caption>
+      <thead><tr><th>Stage</th><th>Median residual</th></tr></thead>
+      <tbody>
+        <tr><td>After exact plasma tare</td><td>0.484150485 %</td></tr>
+        <tr><td>+ released 19-conductor removal</td><td>0.483984935 %</td></tr>
+        <tr><td>+ five-column recovery removal</td><td><strong>0.483977838 %</strong> (−7.1e-6 pp)</td></tr>
+      </tbody>
+    </table>
+    <p>30/60 frames stay above the floor at every stage, with membership <em>identical</em> before
+    and after recovery (per-frame correlation 0.999999588). Surviving structure classifies as
+    50 edge-concentrated, 3 smooth, 7 conductor-like. Recovered per-frame absolute-current spread
+    across the five conductors is min/median/max 1.95×/2.32×/31.6×, against the independently
+    measured ohmic pattern of ≈1.04×.</p>
+    <figure>
+      <img src="/nova/figures/coil-circuit-discovery/residual_stage_comparison.png"
+           alt="Per-frame interior residual traces for the three stages overlaying exactly, beside a scatter of post-recovery against post-tare residual lying on the identity line"
+           style="max-width:100%">
+      <figcaption>The three stage traces overlay exactly and the post-recovery residual sits on the
+      identity line against the post-tare residual: the interior metric does not see the five
+      conductors.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/coil-circuit-discovery/residual_spatial_classification.png"
+           alt="Three-panel residual current density maps showing edge-concentrated bands and corner blobs surviving each removal stage"
+           style="max-width:100%">
+      <figcaption>Representative surviving residual: edge-concentrated bands at the grid border,
+      not conductor-shaped interior structure.</figcaption>
+    </figure>
+    <p><strong>Independent review FAILED the adjudication while confirming the instrument.</strong>
+    Every requested number reproduces to nine decimal places from the committed receipt, the edge
+    exclusion is enforced in code across all 180 frame-stage records, and the study composes the
+    reuse-mapped machinery. But the verdict does not follow from this measurement: the five
+    conductors sit outside the grid, so their contribution inside it is a vacuum field that Δ*
+    annihilates by construction — <em>any</em> five-column amplitude leaves the interior residual
+    unchanged, which is exactly what the −7.1e-6 pp shift shows. The measurement the plan named
+    cannot decide between the 2.20× label-flux recovery and the 1.04× ohmic relation.
+    <strong>The current-authority verdict is therefore HELD</strong>, and §3's corpus discovery
+    stays closed.</p>
+    <p>What the run did establish: the interior residual above the tare floor is entirely
+    non-conductor content (edge-stencil artefacts and the labels' own non-GS component), confirming
+    the exact-tare accounting from the opposite direction; and the recovery solver duplicates the
+    omitted-coil full-grid assembly, which the reformulation refactors into one reusable builder.
+    The terminal circuit-driven diagnostic banked under
+    <code>current-constrained-forward-solve</code> corroborates the frame: circuit-derived currents
+    are inference-admissible (five-current spread 1.037× per frame from shipped ECOILA) but do not
+    reproduce the tared vacuum field (median RMS 10.6× the label-recovered control), while
+    label-recovered currents fit flux best precisely because they consume the labelled
+    equilibrium.</p>
+    <p><em>Next:</em> a preregistered rerun with a vacuum-amplitude-sensitive flux-space metric and
+    per-frame thresholds independent of the cohort median, scoring the label-recovered and
+    circuit-derived arms on the same 60-frame cohort.</p>
+
+  </main>
+</body>
+</html>

@@ -1,4 +1,4 @@
-"""Direct JAX geometry handoff from Nova transport records to TORAX."""
+"""Direct JAX handoff from equilibrium-owned FSA records to TORAX."""
 
 from __future__ import annotations
 

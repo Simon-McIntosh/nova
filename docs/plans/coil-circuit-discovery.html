@@ -24,8 +24,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-version" content="14">
-<meta name="plan-impl" content="0.65">
+<meta name="plan-version" content="15">
+<meta name="plan-impl" content="0.7">
 <meta name="plan-commits" content="5855f2ba,31e10c89,d5a7c0dc,bdf58a45">
 <meta name="plan-artifacts" content="docs/figures/coil-circuit-discovery/five_column_residual_adjudication_receipt.json,docs/figures/coil-circuit-discovery/flux_space_adjudication_preregistration.json,docs/figures/coil-circuit-discovery/flux_space_adjudication_receipt.json,docs/evidence/archive/coil-circuit-discovery-landed.html">
 </head>
@@ -198,6 +198,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260822T0930" data-who="reckon-ship" data-when="2026-08-22T09:30:00Z">
     <div class="r-comment-body">OWNER CLARIFICATION reopens §3 — the shipped closure misread the method. The intended instrument is a full-grid regression G·Ic = ψ_residual, with ψ_residual = label flux − plasma field from exact separatrix-clipped hex-cell current moments − known-conductor field, and Ic the ampere-turns of each unshipped coil solved per frame by Tikhonov-regularised least squares. Per-frame use of the labelled shots is intentional calibration-stage regression, not an inference claim; post-fit residuals are plotted as line contours in the evidence record over frames from multiple shots; circuits are discovered by assessing the fitted currents en-ensemble — not by the per-frame flux-closure and shape thresholds the adjudication rounds scored, so the 0/60 discriminators refute per-frame criteria, not this method. Plan back to active, impl reset to 8 completed of ~12 nodes. The GS-operator findings stand as measurements; they are one view, not the fit target.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260822T0605" data-who="reckon-ship" data-when="2026-08-22T06:05:00Z">
+    <div class="r-comment-body">grid-residual-current-regression landed with gate FAILED — run r-20260822T052838952014, commit 749f28f6 merged at 9e61d5b7, 5 tests added. Measure: full-grid Tikhonov over 60 frames/20 shots at 4,225 points/frame; median gauge-centred RMS 0.0413459 → 0.00637060 Wb (84.0 % reduction); condition number 18.028 every frame; GCV λ median 4.64e-7 with 0/60 boundary selections and decade-stable coefficients; six pre/post line-contour pairs banked. grid-regression-review (run r-20260822T054924870688, gate passed) reproduced all 60 rows independently but FAILED the current interpretation: COCOS 5→7 maps currents with factor +1, so the uniformly negative fitted medians (e.g. ECOILB −530,281 At) against positive independent ohmic traces indicate a sign inversion between target composition and the response seam — the earlier boundary-path recovery fitted positive currents, so the paths disagree. Corrective sign-control node dispatched; no ensemble assessment until the sign is settled. Evidence anchor to follow with the corrected receipt.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

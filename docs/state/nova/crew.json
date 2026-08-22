@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T08:09:45",
+  "updated": "2026-08-22T08:15:50",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -20291,9 +20291,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T060501043823-pint-options-assessment",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a710",
+        "node": "pint-options-assessment",
+        "role": "implement",
+        "member": "transport-pint",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T06:05:05Z",
+        "completed_at": "2026-08-22T06:15:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 627,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 627,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "741d8d900046d5705f4b7f7c08205b3b7c73a25c",
+        "commits": [
+          "0e7b10b9e969ec646fb2706b0e27f03c29390000"
+        ],
+        "changed_lines": {
+          "added": 227,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "audit-clean research doc recommending two-level Parareal outside fully converged solve_window calls with a frozen-geometry fixed-step TORAX coarse advance; honest ceiling arithmetic from landed receipts caps the payoff at 3.99x ideal / about 2x realistic, shows PinT-inside-the-TORAX-leg attacks 0.14 percent of wall time, and thereby fixes the sequencing: PinT is a post-section-10 multiplier for long-pulse reanalysis, not an alternative to the lane and kernel work; coordinate maps resample before correction and topology history passes causally, never blended; first-experiment gate pre-registered at 2x end-to-end within 2 corrections",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T060501043823-pint-options-assessment/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02812-a571-78f0-a88e-6362e04af172",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4452096,
+            "cached_input_tokens_cumulative": 4452096,
+            "input_tokens": 4631596,
+            "input_tokens_cumulative": 4631596,
+            "output_tokens": 24829,
+            "output_tokens_cumulative": 24829,
+            "reasoning_output_tokens": 9643,
+            "reasoning_output_tokens_cumulative": 9643
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 495
+    "_version": 496
   }
 }

@@ -1,0 +1,158 @@
+{
+  "receipt": {
+    "kind": "boundary_enclosed_volume_reconciliation",
+    "shot": 22086,
+    "slice_index": 43,
+    "source_receipts": [
+      "docs/figures/efit-forward-parity/converged-root-geometry-attribution.json",
+      "docs/figures/efit-forward-parity/moment-definition-rescore.json"
+    ],
+    "source_receipt_sha256": {
+      "docs/figures/efit-forward-parity/converged-root-geometry-attribution.json": "67cc1b1578e8aac066e248f10d6deaca4ccb80628934e6ed21c2984c0d4d455a",
+      "docs/figures/efit-forward-parity/moment-definition-rescore.json": "09a36f45a53aa533a7442eb32ba6eadf062a6b5747fc466943b726b115e8aa76"
+    }
+  },
+  "execution_contract": {
+    "nonlinear_solve_calls": 0,
+    "new_solved_equilibria": 0,
+    "equilibrium_observations_from_serialised_state": 1,
+    "contour_quadrature": "same closed-polygon shoelace, centroid and segment revolution formulas for both contours"
+  },
+  "contour_comparison_table": [
+    {
+      "contour": "solved_closed_axis_enclosing_branch",
+      "point_count": 75,
+      "poloidal_area_m2": 1.7718309749521555,
+      "area_centroid_major_radius_m": 0.7651775528698174,
+      "area_first_moment_m3": 1.355765289512833,
+      "exact_solid_of_revolution_m3": 8.518524547051108,
+      "first_moment_approximation_m3": 8.51852454705111,
+      "quadrature_relative_difference": 2.220446049250313e-16,
+      "arclength_m": 5.394335403671512
+    },
+    {
+      "contour": "stored_lcfs",
+      "point_count": 151,
+      "poloidal_area_m2": 1.837030238598465,
+      "area_centroid_major_radius_m": 0.7617411409846181,
+      "area_first_moment_m3": 1.3993415099732398,
+      "exact_solid_of_revolution_m3": 8.792322015190356,
+      "first_moment_approximation_m3": 8.792322015190356,
+      "quadrature_relative_difference": 0.0,
+      "arclength_m": 5.527656200206822
+    }
+  ],
+  "published_volume_comparison": {
+    "solved_m3": 3.5188798289237955,
+    "reference_m3": 8.79159164428711,
+    "solved_over_reference": 0.40025514961337055,
+    "solved_published_over_own_boundary_enclosed": 0.4130856006210536,
+    "reference_published_over_own_boundary_enclosed": 0.9999169308287407,
+    "disagreeing_published_volume": "solved_confined_core_volume",
+    "disagreement_factor_boundary_over_published": 2.4208057567161623
+  },
+  "controlled_ratios": {
+    "solved_over_stored_poloidal_area": 0.9645083340075815,
+    "solved_over_stored_area_centroid_major_radius": 1.0045112594033683,
+    "solved_over_stored_boundary_enclosed_toroidal_volume": 0.9688594812990001
+  },
+  "clipping": {
+    "cell_count": 1089,
+    "confined_core_cell_count": 95,
+    "confined_core_poloidal_area_m2": 0.7199218754976755,
+    "confined_core_toroidal_volume_m3": 3.5188798289237955,
+    "reconstructed_axis_m": [
+      0.9015370805669821,
+      0.025314003916717117
+    ],
+    "reconstructed_axis_flux_wb": 0.34160791047499844,
+    "reconstructed_boundary_flux_wb": -0.1225467439770028,
+    "confined_core_area_fraction_of_solved_boundary": 0.40631521046589414,
+    "confined_core_volume_fraction_of_solved_boundary": 0.4130856006210536,
+    "confined_core_current_a": 416958.2541259555,
+    "pinned_all_domain_current_a": 933034.875,
+    "confined_core_current_fraction": 0.4468838896573459,
+    "area_fraction_minus_current_fraction": -0.04056867919145174
+  },
+  "candidate_discrimination": {
+    "confined_core_clipping": {
+      "verdict": "SUPPORTED",
+      "deciding_figures": {
+        "published_solved_over_own_boundary_volume": 0.4130856006210536,
+        "confined_core_volume_over_own_boundary_volume": 0.4130856006210536,
+        "confined_core_area_fraction": 0.40631521046589414,
+        "confined_core_current_fraction": 0.4468838896573459
+      },
+      "reading": "The published solved volume is the reconstructed confined-core cell volume, not the volume enclosed by the solved boundary."
+    },
+    "genuinely_different_curves": {
+      "verdict": "EXCLUDED",
+      "deciding_figures": {
+        "published_volume_ratio": 0.40025514961337055,
+        "enclosed_poloidal_area_ratio": 0.9645083340075815,
+        "enclosed_toroidal_volume_ratio": 0.9688594812990001
+      },
+      "reading": "The boundary-enclosed areas and volumes are comparable rather than differing by the published factor."
+    },
+    "revolution_or_jacobian_convention": {
+      "verdict": "EXCLUDED",
+      "deciding_figures": {
+        "published_volume_ratio": 0.40025514961337055,
+        "area_centroid_major_radius_ratio": 1.0045112594033683,
+        "absolute_ratio_difference": 0.6042561097899977,
+        "one_percent_match_required": 0.01
+      },
+      "reading": "The published volume ratio does not match the centroid-radius ratio, while the exact and first-moment revolution formulas agree."
+    }
+  },
+  "boundary_support_moment_rescore": {
+    "method": "Apply each side's banked mean integrand to the toroidal volume enclosed by its own reported boundary; no field integral or solve is rerun.",
+    "qualification": "This isolates the support-volume consequence while preserving the banked mean integrands; it is not a new spatial quadrature of pressure or poloidal field.",
+    "volumes": {
+      "solved": {
+        "published_m3": 3.5188798289237955,
+        "boundary_enclosed_m3": 8.518524547051108
+      },
+      "reference": {
+        "published_m3": 8.79159164428711,
+        "boundary_enclosed_m3": 8.792322015190356
+      }
+    },
+    "metrics": {
+      "poloidal_beta": {
+        "banked_solved_integral": 23057.440903852024,
+        "banked_reference_integral": 52744.237106936955,
+        "banked_solved_mean_integrand": 6552.494550774088,
+        "banked_reference_mean_integrand": 5999.395700005111,
+        "boundary_adjusted_solved_integral": 55817.585675187685,
+        "boundary_adjusted_reference_integral": 52748.6188909933,
+        "signed_relative_deviation": 0.05818098840723218,
+        "original_signed_relative_deviation": -0.5628443566810165,
+        "deficit_eliminated": true
+      },
+      "internal_inductance": {
+        "banked_solved_integral": 0.13193017891301845,
+        "banked_reference_integral": 0.496621310710907,
+        "banked_solved_mean_integrand": 0.03749209558922835,
+        "banked_reference_mean_integrand": 0.05648821405776029,
+        "boundary_adjusted_solved_integral": 0.3193773365972283,
+        "boundary_adjusted_reference_integral": 0.4966625680588312,
+        "signed_relative_deviation": -0.35695307611867966,
+        "original_signed_relative_deviation": -0.7343445074393564,
+        "deficit_eliminated": false
+      }
+    },
+    "parity_consequence": {
+      "poloidal_beta_volume_deficit": "ELIMINATED",
+      "internal_inductance_volume_deficit": "SURVIVES"
+    }
+  },
+  "protected_banked_artifacts": {
+    "declared_count": 23,
+    "verified_digest_count": 23,
+    "all_digests_match": true,
+    "source_and_output_receipts_are_outside_protected_set": true
+  },
+  "figure": "docs/figures/efit-forward-parity/boundary-enclosed-volume-reconciliation.png",
+  "verdict": "SOLVED_PUBLISHED_VOLUME_IS_CONFINED_CORE_NOT_BOUNDARY_ENCLOSED"
+}

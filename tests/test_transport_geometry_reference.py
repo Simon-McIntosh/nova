@@ -587,7 +587,8 @@ def test_mast_efm_geometry_matches_host_contour_route():
         "MAST_PROFILE\tface\tservice_rho\tcontour_rho\tservice_psi_n\t"
         "contour_psi_n\tservice_Phi\tcontour_Phi\tservice_elongation\t"
         "contour_elongation\tservice_delta_upper\tcontour_delta_upper\t"
-        "service_delta_lower\tcontour_delta_lower"
+        "service_delta_lower\tcontour_delta_lower\taxis_expansion\t"
+        "limiting_half_boundary_cells"
     )
     for face in range(rho_face.size):
         print(
@@ -602,7 +603,9 @@ def test_mast_efm_geometry_matches_host_contour_route():
             f"{service_fields['delta_upper_face'][face]:.17e}\t"
             f"{shape['delta_upper_face'][face]:.17e}\t"
             f"{service_fields['delta_lower_face'][face]:.17e}\t"
-            f"{shape['delta_lower_face'][face]:.17e}"
+            f"{shape['delta_lower_face'][face]:.17e}\t"
+            f"{int(record['shape_axis_expansion_face'][face])}\t"
+            f"{int(record['shape_boundary_cell_count_face'][face])}"
         )
 
     psi_n_grid = (data["flux"] - data["axis_psi"]) / (
@@ -644,6 +647,18 @@ def test_mast_efm_geometry_matches_host_contour_route():
         rtol=2.0e-2,
         atol=0.0,
     )
+
+    assert bool(record["shape_axis_expansion_face"][3])
+    assert int(record["shape_boundary_cell_count_face"][3]) == 8
+    assert not bool(record["shape_axis_expansion_face"][4])
+    np.testing.assert_allclose(
+        service_fields["delta_lower_face"][3],
+        shape["delta_lower_face"][3],
+        rtol=1.5e-1,
+        atol=0.0,
+    )
+    assert errors["delta_lower_face"] < 0.10
+    assert errors["delta_upper_face"] <= 4.6204e-2
 
     # TORAX has no EFM reader, so MAST is intentionally a two-way comparison:
     # the traced grid-in service against Nova's independent host contour route.

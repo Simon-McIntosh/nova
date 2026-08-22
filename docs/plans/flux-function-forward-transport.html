@@ -436,6 +436,24 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="window-stop-gate" data-choice="shape-excluded-from-gate" data-by="Simon McIntosh" data-when="2026-08-22T15:10:00+00:00">
+    <p class="r-dec-q">Which fields form the coupled window's stopping norm, given the measured 14-versus-9-iteration gap when triangularity gates convergence?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="shape-excluded-from-gate">shape-excluded-from-gate</button>
+      <button class="r-opt" data-value="shape-down-weighted">shape-down-weighted</button>
+      <button class="r-opt" data-value="all-field-norm">all-field-norm</button>
+      </p>
+    <p class="r-dec-rat">Converged means the physically coupled fields - flux, drives, vpr, the g-moments and boundary pressure - meet the declared tolerance; shape fields stay exchanged and receipted with their own residuals but do not block. Measured basis: every gentle-window iteration was gated by triangularity, the field TORAX consumes most weakly, costing five of fourteen iterations; the receipt carries both the gating norm and the all-field norm so nothing is hidden.</p>
+    </div>
+<div class="r-dec" data-key="window-damping-default" data-choice="adaptive-backoff" data-by="Simon McIntosh" data-when="2026-08-22T15:10:00+00:00">
+    <p class="r-dec-q">Should the window damping default change, given damping 1.0 converged in 6 iterations against 14 at the 0.5 default?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="adaptive-backoff">adaptive-backoff</button>
+      <button class="r-opt" data-value="fixed-1.0-after-replication">fixed-1.0-after-replication</button>
+      <button class="r-opt" data-value="keep-0.5">keep-0.5</button>
+      </p>
+    <p class="r-dec-rat">Start undamped and halve the damping when an iteration's measured contraction reaches the threshold, continuing until the floor and then raising the unchanged typed exhaustion - fast on gentle problems, self-protecting on strong ones, with every backoff event recorded in the receipt. Measured basis: 6 iterations and 108 s at damping 1.0 versus 14 and 233 s at 0.5 on the same tree.</p>
+    </div>
 <div class="r-dec" data-key="fsa-extraction-seam" data-choice="equilibrium-service-grid-in" data-by="Simon McIntosh" data-when="2026-08-21T09:30:00+00:00">
     <p class="r-dec-q">Where does FSA extraction live and what is its public contract?</p>
     <p class="r-dec-opts">

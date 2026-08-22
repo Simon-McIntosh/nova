@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-impl" content="0.7">
 <meta name="plan-commits" content="5855f2ba,31e10c89,d5a7c0dc,bdf58a45">
 <meta name="plan-artifacts" content="docs/figures/coil-circuit-discovery/five_column_residual_adjudication_receipt.json,docs/figures/coil-circuit-discovery/flux_space_adjudication_preregistration.json,docs/figures/coil-circuit-discovery/flux_space_adjudication_receipt.json,docs/evidence/archive/coil-circuit-discovery-landed.html">
@@ -201,6 +201,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260822T0605" data-who="reckon-ship" data-when="2026-08-22T06:05:00Z">
     <div class="r-comment-body">grid-residual-current-regression landed with gate FAILED — run r-20260822T052838952014, commit 749f28f6 merged at 9e61d5b7, 5 tests added. Measure: full-grid Tikhonov over 60 frames/20 shots at 4,225 points/frame; median gauge-centred RMS 0.0413459 → 0.00637060 Wb (84.0 % reduction); condition number 18.028 every frame; GCV λ median 4.64e-7 with 0/60 boundary selections and decade-stable coefficients; six pre/post line-contour pairs banked. grid-regression-review (run r-20260822T054924870688, gate passed) reproduced all 60 rows independently but FAILED the current interpretation: COCOS 5→7 maps currents with factor +1, so the uniformly negative fitted medians (e.g. ECOILB −530,281 At) against positive independent ohmic traces indicate a sign inversion between target composition and the response seam — the earlier boundary-path recovery fitted positive currents, so the paths disagree. Corrective sign-control node dispatched; no ensemble assessment until the sign is settled. Evidence anchor to follow with the corrected receipt.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260822T0655" data-who="reckon-ship" data-when="2026-08-22T06:55:00Z">
+    <div class="r-comment-body">regression-sign-control landed with gate FAILED and was NOT merged — run r-20260822T055758960115, commits 426fd7ae+fb0bf775 held in the worktree. The repair made all five medians positive (ECOILB +530,281 At / +11.0 kA … E89DN +51,864 At / +7.41 kA, RMS invariant to 7e-17 Wb) but sign-control-review (run r-20260822T063631831631, gate passed) refuted it: the fix is an exact global target negation whose oracle bypasses the production compose_omitted_flux_target, the composition test bakes in the disputed minus sign, and the corrected target contradicts the plan-stated residual equation (label − plasma − shipped). The review contributed the decisive missing comparison: independently recovered same-frame ECOILA median 46,895.411 A; fitted-to-ECOILA ratios 0.0659–0.2239 with absolute gaps 32,207–37,083 A — the amplitude anomaly versus the published series-circuit prior is real regardless of sign, and is now the central physical question. Corrective node: end-to-end polarity oracle through the production compose path, the plan-stated equation implemented with every convention sign derived and asserted, per-frame ECOILA ratios banked, cohort polarity reported as a measured finding.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

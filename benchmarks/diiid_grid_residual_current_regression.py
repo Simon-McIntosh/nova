@@ -28,6 +28,12 @@ from benchmarks import diiid_exact_clipped_tare as tare
 from benchmarks import diiid_five_column_residual_adjudication as prior
 from benchmarks import diiid_flux_space_adjudication as flux_study
 from benchmarks import diiid_negative_tail_attribution as attribution
+from benchmarks.diiid_corpus_conventions import (
+    IP_TO_NOVA,
+    PSI_TO_NOVA,
+    corpus_flux_to_nova_total,
+    nova_total_flux_to_corpus,
+)
 from nova.imas.diiid_description import (
     DiiidDescriptionRegistry,
     active_coil_response_from_imas,
@@ -39,6 +45,7 @@ from nova.jax.config import configure_dtypes
 DEFAULT_DATA = prior.DEFAULT_DATA
 DEFAULT_OUTPUT = prior.DEFAULT_OUTPUT
 RECEIPT_NAME = "grid_residual_current_regression_receipt.json"
+ORACLE_NAME = "grid_residual_composition_oracle.parquet"
 CONTOUR_PREFIX = "grid_residual_contours"
 REUSE_MAP = prior.REUSE_MAP
 TIER_SEAM_MAP = Path(
@@ -91,6 +98,193 @@ def turn_counts(response_receipt: dict[str, Any]) -> np.ndarray:
     if np.any(~np.isfinite(counts)) or np.any(counts <= 0.0):
         raise ValueError("omitted-conductor turn counts must be finite and positive")
     return counts
+
+
+def compose_omitted_flux_target(
+    label_flux_wb_per_radian: np.ndarray,
+    exact_plasma_flux_wb: np.ndarray,
+    shipped_conductor_flux_wb: np.ndarray,
+) -> np.ndarray:
+    """Transform the corpus label, then subtract plasma and shipped fields."""
+
+    label_total = corpus_flux_to_nova_total(label_flux_wb_per_radian)
+    label, plasma, shipped = np.broadcast_arrays(
+        np.asarray(label_total, dtype=float),
+        np.asarray(exact_plasma_flux_wb, dtype=float),
+        np.asarray(shipped_conductor_flux_wb, dtype=float),
+    )
+    if not np.all(np.isfinite(label + plasma + shipped)):
+        raise ValueError("target-composition fields must be finite")
+    return label - plasma - shipped
+
+
+def corpus_time_coordinate_invariant(
+    row: dict[str, Any], frame_times_ms: np.ndarray, source_row: str
+) -> dict[str, Any]:
+    """Prove selected frame times lie strictly inside the magnetics trace."""
+
+    trace = np.asarray(row["magnetics_time"], dtype=float)
+    frames = np.asarray(frame_times_ms, dtype=float)
+    trace = trace[np.isfinite(trace)]
+    frames = frames[np.isfinite(frames)]
+    if trace.size < 2 or frames.size == 0:
+        raise ValueError(
+            "time-coordinate comparison needs finite trace and frame times"
+        )
+    trace_min = float(np.min(trace))
+    trace_max = float(np.max(trace))
+    if not np.all((frames > trace_min) & (frames < trace_max)):
+        raise RuntimeError("selected frame times are not inside the magnetics trace")
+    lower_margin = float(np.min(frames - trace_min))
+    upper_margin = float(np.min(trace_max - frames))
+    return {
+        "source_row": source_row,
+        "coordinate_unit": "ms",
+        "magnetics_trace_span_ms": [trace_min, trace_max],
+        "selected_frame_span_ms": [float(np.min(frames)), float(np.max(frames))],
+        "selected_frame_count": int(frames.size),
+        "minimum_strict_interior_margin_ms": min(lower_margin, upper_margin),
+        "all_selected_frames_strictly_inside_trace": True,
+    }
+
+
+def shipped_currents_at_frame(
+    row: dict[str, Any], description: Any, names: tuple[str, ...], time_ms: float
+) -> np.ndarray:
+    """Sample shipped currents directly on the shared millisecond coordinate."""
+
+    corpus_time_coordinate_invariant(row, np.asarray([time_ms]), "runtime row")
+    return attribution._current_vector(row, description, names, float(time_ms))
+
+
+def response_orientation_invariant(
+    radius: np.ndarray,
+    height: np.ndarray,
+    omitted_response_wb_per_ampere: np.ndarray,
+) -> dict[str, Any]:
+    """Assert full-grid columns have the landed boundary-path polarity."""
+
+    boundary_design, boundary_receipt = recovery.omitted_response(radius, height)
+    boundary_mask = recovery.polarity._boundary_mask(radius, height)
+    full_grid_boundary = nova_total_flux_to_corpus(
+        omitted_response_wb_per_ampere[:, boundary_mask].T
+    )
+    checks = {}
+    for index, name in enumerate(recovery.OMITTED_COILS):
+        landed = boundary_design[:, index] - np.mean(boundary_design[:, index])
+        full_grid = full_grid_boundary[:, index] - np.mean(full_grid_boundary[:, index])
+        checks[name] = float(
+            landed @ full_grid / (np.linalg.norm(landed) * np.linalg.norm(full_grid))
+        )
+    minimum = min(checks.values())
+    if minimum <= 0.999999999999:
+        raise RuntimeError("full-grid response polarity differs from boundary path")
+    return {
+        "boundary_builder": boundary_receipt,
+        "per_coil_centered_orientation_cosine": checks,
+        "minimum_centered_orientation_cosine": minimum,
+        "passes": True,
+    }
+
+
+def production_read_path_oracle(
+    oracle_path: Path,
+    exact_plasma_flux_wb: np.ndarray,
+    declared_plasma_current_a: float,
+    shipped_response_wb_per_ampere_turn: np.ndarray,
+    declared_shipped_currents_a: np.ndarray,
+    omitted_response_wb_per_ampere: np.ndarray,
+    counts: np.ndarray,
+) -> dict[str, Any]:
+    """Write and read a raw corpus label before production composition and fit."""
+
+    try:
+        import pyarrow as pa
+        import pyarrow.parquet as parquet
+    except ImportError as error:
+        raise RuntimeError("the composition oracle requires pyarrow") from error
+    if not np.isclose(PSI_TO_NOVA, -2.0 * np.pi, rtol=0.0, atol=1.0e-15):
+        raise RuntimeError("the pinned corpus flux transform changed")
+    if not np.isclose(IP_TO_NOVA, 1.0, rtol=0.0, atol=0.0):
+        raise RuntimeError("the pinned corpus current transform changed")
+    if not np.isfinite(declared_plasma_current_a) or declared_plasma_current_a == 0.0:
+        raise RuntimeError("the oracle requires a finite nonzero plasma current")
+
+    declared_coil_currents_a = np.asarray(
+        [12_500.0, 13_000.0, 13_500.0, 14_000.0, 14_500.0]
+    )
+    declared_ampere_turns = declared_coil_currents_a * counts
+    shipped_flux = np.einsum(
+        "c,czr->zr",
+        np.asarray(declared_shipped_currents_a, dtype=float),
+        np.asarray(shipped_response_wb_per_ampere_turn, dtype=float),
+        optimize=True,
+    )
+    omitted_flux = np.einsum(
+        "c,czr->zr",
+        declared_coil_currents_a,
+        np.asarray(omitted_response_wb_per_ampere, dtype=float),
+        optimize=True,
+    )
+    gauge_wb = 0.03125
+    synthetic_label_total = (
+        np.asarray(exact_plasma_flux_wb, dtype=float)
+        + shipped_flux
+        + omitted_flux
+        + gauge_wb
+    )
+    synthetic_label_corpus = nova_total_flux_to_corpus(synthetic_label_total)
+    oracle_path.parent.mkdir(parents=True, exist_ok=True)
+    table = pa.table({"efit_psirz": [[synthetic_label_corpus.tolist()]]})
+    parquet.write_table(table, oracle_path)
+    read_row = tare._read(oracle_path, ("efit_psirz",))
+    read_label_corpus = np.asarray(read_row["efit_psirz"][0], dtype=float)
+    target = compose_omitted_flux_target(
+        read_label_corpus, exact_plasma_flux_wb, shipped_flux
+    )
+    design = (
+        (omitted_response_wb_per_ampere / counts[:, None, None])
+        .reshape(len(counts), -1)
+        .T
+    )
+    strengths = tuple(float(value) for value in np.logspace(-14.0, -8.0, 19))
+    solved = tikhonov_regression(design, target.reshape(-1), strengths)
+    recovered = np.asarray(solved["ampere_turns"], dtype=float)
+    relative_error = np.abs((recovered - declared_ampere_turns) / declared_ampere_turns)
+    maximum_error = float(np.max(relative_error))
+    passes = bool(np.all(recovered > 0.0) and maximum_error <= 1.0e-6)
+    if not passes:
+        raise RuntimeError("the production read-path polarity oracle failed")
+    return {
+        "path": (
+            "declared fields -> Nova total label -> corpus Wb/rad -> Parquet write "
+            "-> exact-tare reader -> corpus-to-Nova transform -> target composition "
+            "-> Tikhonov regression"
+        ),
+        "raw_corpus_artifact": str(oracle_path),
+        "raw_corpus_artifact_sha256": _sha256(oracle_path),
+        "reader": "benchmarks.diiid_exact_clipped_tare._read",
+        "convention_entry": "corpus_flux_to_nova_total",
+        "corpus_flux_to_nova_factor": float(PSI_TO_NOVA),
+        "corpus_current_to_nova_factor": float(IP_TO_NOVA),
+        "target_identity": "label_total - exact_plasma - shipped_conductors",
+        "declared_plasma_current_a": float(declared_plasma_current_a),
+        "declared_coil_currents_a": dict(
+            zip(recovery.OMITTED_COILS, declared_coil_currents_a.tolist(), strict=True)
+        ),
+        "declared_ampere_turns": dict(
+            zip(recovery.OMITTED_COILS, declared_ampere_turns.tolist(), strict=True)
+        ),
+        "recovered_ampere_turns": dict(
+            zip(recovery.OMITTED_COILS, recovered.tolist(), strict=True)
+        ),
+        "maximum_relative_amplitude_error": maximum_error,
+        "required_relative_tolerance": 1.0e-6,
+        "all_recovered_signs_positive": bool(np.all(recovered > 0.0)),
+        "declared_additive_gauge_wb": gauge_wb,
+        "recovered_additive_gauge_wb": float(solved["gauge_wb"]),
+        "passes": passes,
+    }
 
 
 def tikhonov_regression(
@@ -294,6 +488,9 @@ def _ensemble_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
             [record["fractional_l2_reduction"] for record in records]
         ),
         "gauge_wb": _distribution([record["gauge_wb"] for record in records]),
+        "same_frame_ecoila_current_a": _distribution(
+            [record["same_frame_ecoila_current_a"] for record in records]
+        ),
         "selected_lambda": _distribution(
             [record["regularization"]["selected_lambda"] for record in records]
         ),
@@ -321,6 +518,23 @@ def _ensemble_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
                 "equivalent_coil_current_a": _distribution(
                     [record["equivalent_coil_currents_a"][name] for record in records]
                 ),
+                "fitted_to_same_frame_ecoila_ratio": _distribution(
+                    [
+                        record["fitted_to_same_frame_ecoila_ratio"][name]
+                        for record in records
+                    ]
+                ),
+                "absolute_amplitude_gap_a": _distribution(
+                    [record["absolute_amplitude_gap_a"][name] for record in records]
+                ),
+                "negative_frames": sum(
+                    record["equivalent_coil_currents_a"][name] < 0.0
+                    for record in records
+                ),
+                "positive_frames": sum(
+                    record["equivalent_coil_currents_a"][name] > 0.0
+                    for record in records
+                ),
             }
             for name in recovery.OMITTED_COILS
         },
@@ -345,6 +559,14 @@ def run(
         name: tare._read(data / name, prior.READ_COLUMNS)
         for name in sorted({item.path.name for item in cohort})
     }
+    time_coordinate_checks = []
+    for name, row in rows.items():
+        selected_times = np.asarray(
+            [item.time_ms for item in cohort if item.path.name == name], dtype=float
+        )
+        time_coordinate_checks.append(
+            corpus_time_coordinate_invariant(row, selected_times, name)
+        )
     first = rows[cohort[0].path.name]
     radius, height = tare.canonical_axes(first)
     if radius.size != 65 or height.size != 65:
@@ -379,9 +601,13 @@ def run(
     counts = turn_counts(response_receipt)
     response_per_ampere_turn = omitted_response / counts[:, None, None]
     design = response_per_ampere_turn.reshape(len(counts), -1).T
+    response_invariant = response_orientation_invariant(
+        radius, height, omitted_response
+    )
 
     records: list[dict[str, Any]] = []
     residual_maps: list[tuple[np.ndarray, np.ndarray]] = []
+    composition_oracle: dict[str, Any] | None = None
     for number, (prepared_frame, banked) in enumerate(
         zip(prepared, cohort, strict=True), start=1
     ):
@@ -398,13 +624,28 @@ def run(
         described = registry.ingest(row, source_row=banked.path.name)
         if described.physical_digest != description.physical_digest:
             raise RuntimeError("the cohort contains multiple released geometries")
-        released_currents = attribution._current_vector(
+        released_currents = shipped_currents_at_frame(
             row, described, released_names, banked.time_ms
         )
         released_flux = np.einsum(
             "c,czr->zr", released_currents, released_response, optimize=True
         )
-        target = prepared_frame.label_total_zr - exact_plasma - released_flux
+        label_corpus = np.asarray(row["efit_psirz"][banked.frame], dtype=float)
+        transformed_label = corpus_flux_to_nova_total(label_corpus)
+        np.testing.assert_allclose(
+            transformed_label, prepared_frame.label_total_zr, rtol=0.0, atol=0.0
+        )
+        target = compose_omitted_flux_target(label_corpus, exact_plasma, released_flux)
+        if composition_oracle is None:
+            composition_oracle = production_read_path_oracle(
+                output / ORACLE_NAME,
+                exact_plasma,
+                prepared_frame.plasma_current_a,
+                released_response,
+                released_currents,
+                omitted_response,
+                counts,
+            )
         solved = tikhonov_regression(design, target.reshape(-1))
         fitted = np.asarray(solved["ampere_turns"], dtype=float)
         pre_map = np.asarray(solved["pre_residual"]).reshape(target.shape)
@@ -431,6 +672,16 @@ def run(
                 recovery.OMITTED_COILS, fitted, counts, strict=True
             )
         }
+        ecoila_current_a = float(released_currents[released_names.index("ECOILA")])
+        if abs(ecoila_current_a) <= np.finfo(float).tiny:
+            raise RuntimeError("same-frame ECOILA current must be nonzero")
+        fitted_ratio = {
+            name: float(value / ecoila_current_a) for name, value in equivalent.items()
+        }
+        absolute_gap = {
+            name: float(abs(abs(value) - abs(ecoila_current_a)))
+            for name, value in equivalent.items()
+        }
         record = {
             "shot": banked.path.name,
             "frame": banked.frame,
@@ -444,6 +695,9 @@ def run(
             },
             "fitted_ampere_turns": fitted_by_name,
             "equivalent_coil_currents_a": equivalent,
+            "same_frame_ecoila_current_a": ecoila_current_a,
+            "fitted_to_same_frame_ecoila_ratio": fitted_ratio,
+            "absolute_amplitude_gap_a": absolute_gap,
             "pre_fit_gauge_wb": float(solved["pre_fit_gauge_wb"]),
             "gauge_wb": float(solved["gauge_wb"]),
             "pre_fit": pre_metrics,
@@ -480,6 +734,11 @@ def run(
             "time_ms": record["time_ms"],
             "fitted_ampere_turns": record["fitted_ampere_turns"],
             "equivalent_coil_currents_a": record["equivalent_coil_currents_a"],
+            "same_frame_ecoila_current_a": record["same_frame_ecoila_current_a"],
+            "fitted_to_same_frame_ecoila_ratio": record[
+                "fitted_to_same_frame_ecoila_ratio"
+            ],
+            "absolute_amplitude_gap_a": record["absolute_amplitude_gap_a"],
             "selected_lambda": record["regularization"]["selected_lambda"],
         }
         for record in records
@@ -510,6 +769,19 @@ def run(
             "all_frames_absent_from_polarity_population": True,
             "landed_polarity_population_count": len(affected),
             "source_exact_tare_selection": source["selection"],
+            "time_coordinate_invariant": {
+                "coordinate_unit": "ms",
+                "shipped_current_sampling": (
+                    "direct interpolation of frame time_ms on magnetics_time; "
+                    "no unit conversion"
+                ),
+                "shots_checked": len(time_coordinate_checks),
+                "all_selected_frames_strictly_inside_trace": all(
+                    item["all_selected_frames_strictly_inside_trace"]
+                    for item in time_coordinate_checks
+                ),
+                "per_shot": time_coordinate_checks,
+            },
         },
         "regression": {
             "equation": (
@@ -524,6 +796,11 @@ def run(
             "turn_counts": {
                 name: float(value)
                 for name, value in zip(recovery.OMITTED_COILS, counts, strict=True)
+            },
+            "polarity": {
+                "read_path_composition_oracle": composition_oracle,
+                "response_orientation_invariant": response_invariant,
+                "cohort_sign_is_measured_not_selected": True,
             },
             "gauge": (
                 "unpenalized per-frame scalar eliminated by centering and "
@@ -542,6 +819,7 @@ def run(
         "records": records,
         "artifacts": {
             "receipt": str(output / RECEIPT_NAME),
+            "raw_corpus_oracle": str(output / ORACLE_NAME),
             "line_contour_figures": contour_paths,
         },
     }

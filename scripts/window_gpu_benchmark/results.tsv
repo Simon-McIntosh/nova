@@ -1,0 +1,35 @@
+category	iteration	side	field	value	unit	cpu_baseline	absolute_deviation	tolerance	status
+job			slurm_job_id	1253074	identifier				RECORDED
+job			node	98dci4-gpu-0003	text				RECORDED
+job			partition	betelgeuse	text				RECORDED
+job			reservation	gpu_0003_grpA	text				RECORDED
+job			requested_accelerator	gres/gpu:h200:1	text				RECORDED
+job			cpu_count	7	count				RECORDED
+job			memory	64	GiB				RECORDED
+job			tmpdir	/tmp	path				RECORDED
+job			jax_platforms	cuda	text				RECORDED
+job			state	FAILED	text				NEEDS-HELP
+job			exit_code	1:0	text				NEEDS-HELP
+timing			time_to_refusal	97	s				MEASURED_NOT_WINDOW_TIME
+configuration			window_length	0.0025	s				DECLARED
+configuration			auxiliary_source_multiplier	0.5	fraction				DECLARED
+configuration			iteration_cap	10	count				DECLARED
+configuration			convergence_tolerance	0.005	relative				DECLARED
+configuration			damping	0.5	fraction				DECLARED
+timing			window_wall_time	unavailable	s	423.03271608706564			BLOCKED
+timing			equilibrium_plus_fsa_wall_time	unavailable	s	422.45456840028055			BLOCKED
+timing			torax_wall_time	unavailable	s	0.578147686785087			BLOCKED
+timing	1	equilibrium_plus_fsa	wall_time	unavailable	s				BLOCKED
+timing	1	torax	wall_time	unavailable	s				BLOCKED
+timing			cold_compile_cost	unavailable	s				BLOCKED
+timing			cold_compile_amortised_over_ten_iterations	unavailable	s_per_iteration				BLOCKED
+receipt			contraction_estimate	unavailable	relative	0.53710396334179378		0.005	BLOCKED
+receipt			maximum_exit_residual	unavailable	relative	0.0049860186161842365		0.005	BLOCKED
+receipt			flux_consumption_ledger_closure	unavailable	relative	0		0.005	BLOCKED
+receipt			plasma_current_ledger_closure	unavailable	relative	0		0.005	BLOCKED
+device_placement			slurm_allocation	NVIDIA H200	text				PASS
+device_placement			equilibrium_solve_arrays	unavailable	device				BLOCKED
+solver_identity			equilibrium_sweep	coupled_window.equilibrium_sweep -> ForwardProfile.solve_portfolio	source_call_path				PASS
+solver_identity			cold_portfolio_current	observed.moments.plasma_current	source_call_path				PASS
+refusal			operation	torax_geometry._require_uniform_normalized_grid -> jax.pure_callback	call_path				NEEDS-HELP
+refusal			message	jax.pure_callback failed to find a local CPU device with JAX_PLATFORMS=cuda	text				NEEDS-HELP

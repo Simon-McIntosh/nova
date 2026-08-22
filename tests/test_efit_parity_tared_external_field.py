@@ -10,13 +10,14 @@ from benchmarks.efit_parity_tared_external_field import (
     GAUGE_CONSTANT_WB,
     OUTPUT_FIGURE,
     REFERENCE_HALO_CURRENT_A,
-    measure_tares,
+    REPRESENTATIVE_SHOT,
+    run_control,
 )
 
 
 @pytest.fixture(scope="module")
 def result():
-    return measure_tares()
+    return run_control()
 
 
 def test_tare_closes_all_six_references_at_roundoff(result):
@@ -84,3 +85,57 @@ def test_external_field_figure_compares_tared_and_passive_inclusive_maps(result)
     figure = Path(comparison["figure"])
     assert figure == OUTPUT_FIGURE
     assert figure.read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
+
+
+def test_all_six_current_constrained_solves_are_reported(result):
+    receipt, _runtime = result
+    assert len(receipt["per_shot"]) == 6
+    assert len(receipt["six_reference_score_table"]) == 6
+    aggregate = receipt["aggregate"]
+    assert aggregate["banked_converged_plasma_roots"] == 1
+    assert aggregate["registered_fixed_point_criterion"] == 1.0e-8
+    assert aggregate["all_target_currents_exact"] is True
+    assert aggregate["parity_claim"] is False
+
+
+def test_raw_and_instrument_controlled_rows_are_banked_side_by_side(result):
+    receipt, _runtime = result
+    for row in receipt["per_shot"]:
+        raw = row["raw_registered_rows"]["metrics"]
+        controlled = row["instrument_controlled_rows"]
+        assert np.isfinite(raw["lcfs"]["symmetric_mean_distance_m"])
+        closed = controlled["lcfs_closed_branch"]
+        assert closed["longest_polyline_fallback_used"] is False
+        if closed["status"] == "scoreable":
+            assert closed["closed_branch_point_count"] >= 4
+            assert np.isfinite(closed["distance"]["symmetric_mean_distance_m"])
+        else:
+            assert closed["status"] == "unscoreable_no_closed_axis_branch"
+            assert closed["closed_branch_point_count"] is None
+            assert closed["distance"] is None
+        matched = controlled["matched_stored_boundary_support"]
+        assert matched["cell_count"] > 0
+        assert np.isfinite(matched["poloidal_beta_signed_relative_deviation"])
+        field = controlled["poloidal_field_energy_instrument_control"]
+        assert field["multiplicative_closure_residual"] == pytest.approx(
+            0.0, abs=2.0e-16
+        )
+        assert np.isfinite(field["instrument_controlled_signed_relative_deviation"])
+
+
+def test_representative_field_instrument_ratio_reproduces_the_bank(result):
+    receipt, _runtime = result
+    row = next(
+        item
+        for item in receipt["per_shot"]
+        if item["reference"]["shot"] == REPRESENTATIVE_SHOT
+    )
+    field = row["instrument_controlled_rows"][
+        "poloidal_field_energy_instrument_control"
+    ]
+    assert field["nova_on_reference_over_reference_published"] == pytest.approx(
+        field["banked_representative_instrument_ratio"], rel=2.0e-15
+    )
+    assert field["banked_representative_instrument_ratio"] == pytest.approx(
+        0.6020235565543425, rel=2.0e-15
+    )

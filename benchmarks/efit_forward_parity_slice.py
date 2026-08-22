@@ -75,6 +75,9 @@ DECOMPOSITION_BANK = Path(
     "docs/figures/efit-flux-decomposition/native-grid-decomposition.json"
 )
 DEFAULT_OUTPUT = Path("docs/figures/efit-forward-parity")
+CURRENT_CONSTRAINED_OUTPUT = Path(
+    "docs/figures/current-constrained-forward-solve/mast-constrained"
+)
 ROUTE_SURVEY_RECEIPT = DEFAULT_OUTPUT / "pinned-route-survey.json"
 LONG_BUDGET_RECEIPT = DEFAULT_OUTPUT / "long-budget-plasma-route.json"
 COMPOSITION_RECEIPT = DEFAULT_OUTPUT / "mast-dina-composition-diff.json"
@@ -82,6 +85,7 @@ PASSIVE_INCLUSIVE_RECEIPT = DEFAULT_OUTPUT / "passive-inclusive-parity-slice.jso
 EXTENDED_PASSIVE_RECEIPT_NAME = "passive-inclusive-convergence.json"
 PASSIVE_POLISH_RECEIPT_NAME = "passive-inclusive-stationary-polish.json"
 FROZEN_SCORECARD_RECEIPT_NAME = "passive-inclusive-frozen-six-scorecard.json"
+CURRENT_CONSTRAINED_RECEIPT_NAME = "current-constrained-frozen-six-scorecard.json"
 FIGURE_NAME = "reference-seeded-forward-slice.png"
 DIAGNOSIS_FIGURE_NAME = "vacuum-branch-diagnosis.png"
 LONG_BUDGET_FIGURE_NAME = "long-budget-residual-trajectories.png"
@@ -92,6 +96,7 @@ PASSIVE_INCLUSIVE_FIGURE_NAME = "passive-inclusive-parity-slice.png"
 EXTENDED_PASSIVE_FIGURE_NAME = "passive-inclusive-convergence.png"
 PASSIVE_POLISH_FIGURE_NAME = "passive-inclusive-stationary-polish.png"
 FROZEN_SCORECARD_FIGURE_NAME = "passive-inclusive-frozen-six-trajectories.png"
+CURRENT_CONSTRAINED_FIGURE_NAME = "current-constrained-frozen-six-trajectories.png"
 PRESCRIBED_RESPONSE_INPUT_ARRAYS = (
     "gridr",
     "gridz",
@@ -136,9 +141,9 @@ class DeclaredAnchorOperator(ForwardFluxOperator):
     declared_boundary_flux: float = 1.0
     declared_support: np.ndarray | None = None
 
-    def __post_init__(self):
+    def __post_init__(self, prescribed_current_field):
         """Validate the fixed source-coordinate declaration."""
-        super().__post_init__()
+        super().__post_init__(prescribed_current_field)
         if self.declared_axis_flux == self.declared_boundary_flux:
             raise ValueError("declared reference anchors have zero span")
         if self.declared_support is None:
@@ -3305,12 +3310,14 @@ def _passive_inclusive_solve(
     profile: ForwardProfile,
     *,
     newton_budget: int = NEWTON_STEPS,
+    target_current: float | None = None,
 ) -> tuple[dict[str, Any], np.ndarray, Any]:
     """Run the reference-seeded diverted branch and retain its full outcome."""
     branch = profile.solve_branch(
         jnp.asarray(case["state"]),
         TopologyClass.DIVERTED,
         route="newton_krylov",
+        target_current=target_current,
         tolerance=FIXED_POINT_CRITERION,
         newton_steps=newton_budget,
         gmres_iterations=GMRES_ITERATIONS,
@@ -3349,6 +3356,7 @@ def _passive_inclusive_solve(
         "registered_fixed_point_criterion": FIXED_POINT_CRITERION,
         "newton_budget": newton_budget,
         "gmres_iterations_per_promotion": GMRES_ITERATIONS,
+        "target_current_a": target_current,
         "forward_branch_receipt": {
             "requested_class": "diverted" if requested else "limited",
             "requested_class_code": requested,
@@ -3366,6 +3374,10 @@ def _passive_inclusive_solve(
             "signed_relative_current_deviation": current / reference_current - 1.0,
             "nonzero_current": nonzero_current,
             "finite_receipt": bool(equilibrium.finite.passed),
+            "normalisation_policy": equilibrium.normalisation.policy_name,
+            "normalisation_amplitude": _strict_scalar(
+                equilibrium.normalisation.amplitude
+            ),
             "axis_position_m": [
                 float(value) for value in np.asarray(equilibrium.topology.axis)
             ],
@@ -3597,11 +3609,14 @@ def _passive_polish_figure(
 
 
 def _closest_passive_state(
-    case: dict[str, Any], context: dict[str, Any], profile: ForwardProfile
+    case: dict[str, Any],
+    context: dict[str, Any],
+    profile: ForwardProfile,
+    target_current: float | None = None,
 ) -> dict[str, Any]:
     """Replay bounded Newton promotions and score the minimum-residual state."""
     requested = int(TopologyClass.DIVERTED)
-    mapped = profile.flux_map(requested_class=requested)
+    mapped = profile.flux_map(requested_class=requested, target_current=target_current)
     state = jnp.asarray(case["state"])
     histories = []
     accepted_residuals = []
@@ -3623,7 +3638,12 @@ def _closest_passive_state(
 
     closest_index = int(np.argmin(np.asarray(accepted_residuals)))
     closest_history = histories[closest_index]
-    equilibrium = profile._receipt(closest_history.state, closest_history, requested)
+    equilibrium = profile._receipt(
+        closest_history.state,
+        closest_history,
+        requested,
+        target_current,
+    )
     metrics = _pinned_metrics(
         context["group"],
         context["row"],
@@ -3669,6 +3689,303 @@ def _frozen_scorecard_figure(rows: list[dict[str, Any]], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=180)
     plt.close(figure)
+
+
+def _artifact_digests(directory: Path) -> dict[str, str]:
+    """Return content digests for every banked file below one directory."""
+    return {
+        str(path.relative_to(directory)): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in sorted(directory.rglob("*"))
+        if path.is_file()
+    }
+
+
+def _constrained_scorecard_figure(
+    rows: list[dict[str, Any]], baseline: dict[str, dict[str, Any]], path: Path
+) -> None:
+    """Compare constrained and banked residual reads on every frozen shot."""
+    figure, axes = plt.subplots(2, 3, figsize=(11.2, 6.8), constrained_layout=True)
+    for axis, row in zip(axes.ravel(), rows, strict=True):
+        shot = str(row["shot"])
+        constrained = np.asarray(row["accepted_residual_trajectory"], dtype=float)
+        banked = np.asarray(
+            [
+                value
+                for value in baseline[shot]["residual_trajectory"]
+                if value is not None
+            ],
+            dtype=float,
+        )
+        axis.semilogy(
+            np.arange(1, banked.size + 1),
+            np.maximum(banked, FIXED_POINT_CRITERION / 10.0),
+            color="0.55",
+            lw=1.0,
+            label="banked unpinned",
+        )
+        axis.semilogy(
+            np.arange(1, constrained.size + 1),
+            np.maximum(constrained, FIXED_POINT_CRITERION / 10.0),
+            color="C0",
+            marker="o",
+            ms=2.5,
+            lw=1.0,
+            label="current constrained",
+        )
+        axis.axhline(FIXED_POINT_CRITERION, color="black", ls="--", lw=0.8)
+        axis.set_title(
+            f"{shot} / row {row['slice_index']}\n"
+            f"{row['outcome_class'].replace('_', ' ')}",
+            fontsize=10,
+        )
+        axis.set_xlabel("Mapped evaluation")
+        axis.set_ylabel("Fixed-point residual")
+        axis.grid(True, which="both", alpha=0.2)
+    axes[0, 0].legend(fontsize=8)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+
+
+def _baseline_by_shot(receipt: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    """Index and validate the immutable frozen-six baseline receipt."""
+    rows = {str(row["reference"]["shot"]): row for row in receipt["per_shot"]}
+    if len(rows) != 6:
+        raise RuntimeError("the banked baseline does not contain six unique shots")
+    converged_plasma = sum(
+        row["solve_outcome"]["converged"]
+        and row["solve_outcome"]["terminal_plasma_current_a"] != 0.0
+        for row in rows.values()
+    )
+    if converged_plasma != 0:
+        raise RuntimeError("the banked baseline no longer records zero plasma roots")
+    return rows
+
+
+def run_current_constrained(
+    store: Path,
+    bank: Path,
+    output: Path = CURRENT_CONSTRAINED_OUTPUT,
+    baseline_directory: Path = DEFAULT_OUTPUT,
+) -> dict[str, Any]:
+    """Score the frozen-six MAST lane through the declared-current public seam."""
+    configure_dtypes()
+    if output.resolve().is_relative_to(baseline_directory.resolve()):
+        raise ValueError("the constrained output must be outside the banked directory")
+    baseline_digests = _artifact_digests(baseline_directory)
+    baseline_receipt_path = baseline_directory / FROZEN_SCORECARD_RECEIPT_NAME
+    baseline_receipt_digest = hashlib.sha256(
+        baseline_receipt_path.read_bytes()
+    ).hexdigest()
+    baseline = _baseline_by_shot(json.loads(baseline_receipt_path.read_text()))
+    selected = select_slices_by_shot(bank)
+    response_cache = None
+    shot_records = []
+    figure_rows = []
+    for selected_row, qualification in selected:
+        mast_case, context = _mast_case_from_selection(
+            store, selected_row, qualification
+        )
+        passive_case, profile, policy = _passive_inclusive_case(
+            mast_case, context, response_cache
+        )
+        if response_cache is None:
+            prescribed = profile.operator.prescribed_current_field
+            response_cache = {
+                "response": np.asarray(prescribed.response, dtype=np.float64),
+                "input_digests": policy["response_input_digests"],
+                "audit": {
+                    name: policy[name]
+                    for name in (
+                        "stored_circuit_count",
+                        "active_circuit_count",
+                        "passive_or_vessel_circuit_count",
+                        "section_kernel_evaluations",
+                        "passive_registry_minimum_overlap_fraction",
+                        "passive_registry_maximum_separation_m",
+                    )
+                },
+            }
+
+        reference = mast_case["reference"]
+        target_current = abs(float(reference["plasma_current_a"]))
+        solve, _official_trace, branch = _passive_inclusive_solve(
+            passive_case,
+            context,
+            profile,
+            newton_budget=NEWTON_STEPS,
+            target_current=target_current,
+        )
+        terminal_metrics = _pinned_metrics(
+            context["group"],
+            context["row"],
+            profile,
+            context["reference_flux"],
+            branch.equilibrium,
+        )
+        branch_receipt = solve["forward_branch_receipt"]
+        terminal = solve["terminal_state"]
+        if branch_receipt["converged"] and terminal["nonzero_current"]:
+            outcome_class = "converged_plasma_root"
+        elif not terminal["nonzero_current"]:
+            outcome_class = "vacuum_collapse"
+        else:
+            outcome_class = "bounded_non_convergence"
+        shot_key = str(reference["shot"])
+        banked = baseline[shot_key]
+        if int(banked["reference"]["slice_index"]) != int(reference["slice_index"]):
+            raise RuntimeError("the constrained selection differs from the banked row")
+        target_error = terminal["plasma_current_a"] / target_current - 1.0
+        record = {
+            "qualification_before_solve": qualification,
+            "reference": reference,
+            "target_current": {
+                "source": "abs(efm/plasma_current_c) on the selected row",
+                "value_a": target_current,
+                "signed_terminal_relative_error": target_error,
+            },
+            "banked_unpinned_baseline": {
+                "outcome_class": banked["solve_outcome"]["outcome_class"],
+                "converged": banked["solve_outcome"]["converged"],
+                "terminal_residual": banked["solve_outcome"]["terminal_residual"],
+                "terminal_plasma_current_a": banked["solve_outcome"][
+                    "terminal_plasma_current_a"
+                ],
+                "converged_plasma_root": False,
+            },
+            "constrained_solve": {
+                "outcome_class": outcome_class,
+                "registered_fixed_point_criterion": FIXED_POINT_CRITERION,
+                "converged": branch_receipt["converged"],
+                "reaches_nonzero_plasma_root": bool(
+                    branch_receipt["converged"] and terminal["nonzero_current"]
+                ),
+                "iterations": branch_receipt["iterations"],
+                "terminal_residual": branch_receipt["residual"],
+                "terminal_plasma_current_a": terminal["plasma_current_a"],
+                "normalisation_policy": terminal["normalisation_policy"],
+                "recovered_amplitude": terminal["normalisation_amplitude"],
+                "metrics": terminal_metrics,
+                "per_metric_qualification": _metric_qualification(
+                    terminal_metrics, branch_receipt["residual"]
+                ),
+            },
+            "residual_trajectory": solve["residual_trajectory"],
+            "prescribed_current_policy": policy,
+        }
+        shot_records.append(record)
+        figure_rows.append(
+            {
+                "shot": reference["shot"],
+                "slice_index": reference["slice_index"],
+                "outcome_class": outcome_class,
+                "accepted_residual_trajectory": [
+                    value for value in solve["residual_trajectory"] if value is not None
+                ],
+            }
+        )
+
+    baseline_after = _artifact_digests(baseline_directory)
+    if baseline_after != baseline_digests:
+        raise RuntimeError("the current-constrained run changed a banked artifact")
+    plasma_roots = sum(
+        row["constrained_solve"]["reaches_nonzero_plasma_root"] for row in shot_records
+    )
+    registered_passes = sum(
+        row["constrained_solve"]["per_metric_qualification"][
+            "all_carried_tolerances_pass"
+        ]
+        for row in shot_records
+    )
+    table = [
+        {
+            "shot": row["reference"]["shot"],
+            "slice_index": row["reference"]["slice_index"],
+            "banked_outcome": row["banked_unpinned_baseline"]["outcome_class"],
+            "constrained_outcome": row["constrained_solve"]["outcome_class"],
+            "reaches_nonzero_plasma_root": row["constrained_solve"][
+                "reaches_nonzero_plasma_root"
+            ],
+            "fixed_point_residual": row["constrained_solve"]["terminal_residual"],
+            "flux_rms_fraction_of_span": row["constrained_solve"]["metrics"][
+                "flux_map"
+            ]["rms_fraction_of_reference_span"],
+            "magnetic_axis_distance_m": row["constrained_solve"]["metrics"][
+                "magnetic_axis"
+            ]["distance_m"],
+            "lcfs_distance_m": row["constrained_solve"]["metrics"]["lcfs"][
+                "symmetric_mean_distance_m"
+            ],
+            "x_point_distance_m": row["constrained_solve"]["metrics"]["x_point"][
+                "distance_m"
+            ],
+            "topology_agreement": row["constrained_solve"]["metrics"]["topology"][
+                "agreement"
+            ],
+            "plasma_current_signed_relative_deviation": row["constrained_solve"][
+                "metrics"
+            ]["plasma_current"]["signed_relative_deviation"],
+            "poloidal_beta_signed_relative_deviation": row["constrained_solve"][
+                "metrics"
+            ]["poloidal_beta"]["signed_relative_deviation"],
+            "internal_inductance_signed_relative_deviation": row["constrained_solve"][
+                "metrics"
+            ]["internal_inductance"]["signed_relative_deviation"],
+            "all_registered_tolerances_pass": row["constrained_solve"][
+                "per_metric_qualification"
+            ]["all_carried_tolerances_pass"],
+        }
+        for row in shot_records
+    ]
+    output.mkdir(parents=True, exist_ok=True)
+    figure_path = output / CURRENT_CONSTRAINED_FIGURE_NAME
+    _constrained_scorecard_figure(figure_rows, baseline, figure_path)
+    receipt = {
+        "receipt": "MAST current-constrained frozen-six forward scorecard",
+        "backend": "JAX_PLATFORMS=cpu required by invocation",
+        "execution_contract": {
+            "selection": "identical frozen-six rows selected by the banked scorecard",
+            "target_current": "abs(efm/plasma_current_c) on each selected row",
+            "public_entry_point": "ForwardProfile.solve_branch(target_current=...)",
+            "route": "newton_krylov",
+            "registered_fixed_point_criterion": FIXED_POINT_CRITERION,
+            "newton_promotions": NEWTON_STEPS,
+        },
+        "banked_artifact_integrity": {
+            "directory": str(baseline_directory),
+            "file_count": len(baseline_digests),
+            "scorecard_sha256": baseline_receipt_digest,
+            "before_equals_after": True,
+            "digests": baseline_digests,
+        },
+        "per_shot": shot_records,
+        "per_shot_table": table,
+        "aggregate": {
+            "shot_count": len(shot_records),
+            "banked_converged_plasma_roots": 0,
+            "constrained_converged_plasma_roots": plasma_roots,
+            "registered_tolerance_pass_count": registered_passes,
+            "all_targets_exact_at_terminal": bool(
+                all(
+                    abs(row["target_current"]["signed_terminal_relative_error"])
+                    <= 1.0e-12
+                    for row in shot_records
+                )
+            ),
+            "verdict": (
+                "PASS_CURRENT_CONSTRAINT_RECOVERS_PLASMA_ROOTS"
+                if plasma_roots
+                else "FAIL_CURRENT_CONSTRAINT_RECOVERS_NO_PLASMA_ROOTS"
+            ),
+        },
+        "figure_src": (
+            "/nova/figures/current-constrained-forward-solve/mast-constrained/"
+            + CURRENT_CONSTRAINED_FIGURE_NAME
+        ),
+    }
+    receipt_path = output / CURRENT_CONSTRAINED_RECEIPT_NAME
+    receipt_path.write_text(json.dumps(receipt, indent=2, allow_nan=False) + "\n")
+    return receipt
 
 
 def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
@@ -3911,9 +4228,23 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--store", type=Path, default=SHOT_STORE)
     parser.add_argument("--bank", type=Path, default=DECOMPOSITION_BANK)
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--output", type=Path)
+    parser.add_argument("--current-constrained", action="store_true")
     arguments = parser.parse_args()
-    receipt = run(arguments.store, arguments.bank, arguments.output)
+    if arguments.current_constrained:
+        output = arguments.output or CURRENT_CONSTRAINED_OUTPUT
+        receipt = run_current_constrained(arguments.store, arguments.bank, output)
+        aggregate = receipt["aggregate"]
+        print(
+            "CURRENT_CONSTRAINED_FROZEN_SIX "
+            f"shots={aggregate['shot_count']} "
+            f"plasma_roots={aggregate['constrained_converged_plasma_roots']} "
+            f"registered_passes={aggregate['registered_tolerance_pass_count']} "
+            f"verdict={aggregate['verdict']}"
+        )
+        return
+    output = arguments.output or DEFAULT_OUTPUT
+    receipt = run(arguments.store, arguments.bank, output)
     aggregate = receipt["aggregate"]
     print(
         "PASSIVE_INCLUSIVE_FROZEN_SIX "

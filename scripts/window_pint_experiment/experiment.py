@@ -908,6 +908,101 @@ def _report(
     return "\n".join(lines)
 
 
+def _nonconfined_report(
+    tree_sha: str,
+    fixture: PreparedFixture,
+    serial_results: Sequence[FineResult],
+    failed_window: int,
+    failed_wall: float,
+    error: Any,
+) -> str:
+    branch = error.branch_receipt
+    selection = branch.selection
+    completed_wall = sum(result.wall_seconds for result in serial_results)
+    total_wall = completed_wall + failed_wall
+    lines = [
+        "# Eight-window Parareal experiment",
+        "",
+        (
+            f"Tree: `{tree_sha}`. Backend: `{jax.default_backend()}`. "
+            "Verdict: **QUALIFIED NEGATIVE**."
+        ),
+        "",
+        "## Outcome",
+        "",
+        (
+            f"The serial fine baseline stopped at zero-based window "
+            f"`{failed_window}` (the fifth contiguous window), exchange "
+            f"`{error.exchange_index}`, sample `{branch.sample_index}` with the "
+            "public typed `ConvergedNonConfinedError`. The limited/diverted core "
+            f"counts were `{branch.core_cell_counts[0]}` / "
+            f"`{branch.core_cell_counts[1]}`; the selector reason was "
+            f"`{selection.reason.value}` and availability was "
+            f"`{selection.availability.limited}` / "
+            f"`{selection.availability.diverted}`."
+        ),
+        (
+            "Mechanism: accumulated transport evolution removed the selectable "
+            "confined limited branch. The limited portfolio converged to a "
+            "zero-core state while the 157-cell diverted candidate was not a "
+            "topology-consistent available alternative, so causal branch "
+            "selection refused the horizon exactly as designed."
+        ),
+        "",
+        "| measure | result | gate |",
+        "|---|---:|---|",
+        f"| converged serial windows | `{len(serial_results)} / 8` | 8 / 8 |",
+        f"| serial wall through refusal | `{_format(total_wall)}` s | baseline |",
+        "| Parareal corrections used | `0` | <= 2 |",
+        "| outer residual | `not available` | <= 0.005 |",
+        "| speedup | `not measurable` | >= 2x |",
+        "| branch equivalence | `not evaluable beyond refusal` | identical |",
+        "",
+        (
+            "The pre-registered experiment therefore ends before the coarse "
+            "prediction: an eight-window serial physical baseline does not exist "
+            "on this tree, so neither an end-to-end speedup denominator nor a "
+            "valid Parareal correction trajectory can be formed. No tolerance, "
+            "physics, branch policy, source multiplier, device count or surrogate "
+            "was changed to manufacture a pass."
+        ),
+        "",
+        "## Completed per-window receipts",
+        "",
+        (
+            "| window | wall (s) | iterations | exit gate | flux closure | "
+            "current closure | branch |"
+        ),
+        "|---:|---:|---:|---:|---:|---:|---|",
+    ]
+    for window, result in enumerate(serial_results):
+        receipt = result.receipt
+        lines.append(
+            f"| {window} | `{_format(result.wall_seconds)}` | "
+            f"{receipt.convergence.iterations_used} | "
+            f"`{_format(receipt.convergence.gating_norm)}` | "
+            f"`{_format(receipt.conservation.flux_closure_residual)}` | "
+            f"`{_format(receipt.conservation.current_continuity_residual)}` | "
+            f"`{result.boundary.history.selected_class.name.lower()}` |"
+        )
+    lines.extend(
+        [
+            "",
+            (
+                f"One-time fixture preparation was "
+                f"`{_format(fixture.preparation_seconds)}` s. Every completed "
+                "window retained its full residual trace, exit fields, valid "
+                "extraction count, branch receipt, boundary hashes and "
+                "conservation closures in `results.tsv`; the refusal row carries "
+                "the exact exchange, sample, core counts, selector reason, "
+                "availability and converged residual pair."
+            ),
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
 def run() -> int:
     tree_sha = _tree_sha()
     rows: list[dict[str, str]] = []
@@ -919,7 +1014,63 @@ def run() -> int:
     serial_results: list[FineResult] = []
     for window in range(WINDOW_COUNT):
         print(f"serial window {window + 1}/{WINDOW_COUNT}", flush=True)
-        result = _fine_propagate(fixture, serial_states[-1])
+        started = time.perf_counter()
+        try:
+            result = _fine_propagate(fixture, serial_states[-1])
+        except demonstration.ConvergedNonConfinedError as error:
+            failed_wall = time.perf_counter() - started
+            branch = error.branch_receipt
+            selection = branch.selection
+            for field, value, unit in (
+                ("outcome_type", type(error).__name__, "text"),
+                ("exchange", error.exchange_index, "count"),
+                ("sample", branch.sample_index, "count"),
+                ("wall_time", failed_wall, "s"),
+                ("limited_core_cells", branch.core_cell_counts[0], "count"),
+                ("diverted_core_cells", branch.core_cell_counts[1], "count"),
+                ("selection_reason", selection.reason.value, "text"),
+                ("limited_available", selection.availability.limited, "boolean"),
+                ("diverted_available", selection.availability.diverted, "boolean"),
+                ("limited_residual", selection.residuals[0], "relative"),
+                ("diverted_residual", selection.residuals[1], "relative"),
+            ):
+                _append(
+                    rows,
+                    tree_sha,
+                    "serial",
+                    "typed_nonconfined",
+                    field,
+                    value,
+                    unit,
+                    window=window,
+                    status="qualified_negative",
+                )
+            _append(
+                rows,
+                tree_sha,
+                "summary",
+                "verdict",
+                "corrections_used",
+                0,
+                "count",
+                status="qualified_negative",
+            )
+            _write_results(rows)
+            REPORT_PATH.write_text(
+                _nonconfined_report(
+                    tree_sha,
+                    fixture,
+                    serial_results,
+                    window,
+                    failed_wall,
+                    error,
+                ),
+                encoding="utf-8",
+            )
+            print(f"typed non-confined outcome at serial window {window}", flush=True)
+            print(f"report={REPORT_PATH}", flush=True)
+            print(f"results={RESULTS_PATH}", flush=True)
+            return 0
         serial_results.append(result)
         serial_states.append(result.boundary)
         _record_fine(rows, tree_sha, "serial", "", window, result)

@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 
 from benchmarks import diiid_current_pinned_forward as pinned
-from nova.equilibrium.stencil_mesh import CellCurrentMoments
+from nova.equilibrium.topology import TopologyClass
 from nova.imas.diiid_description import POLOIDAL_CONDUCTORS
 
 
@@ -100,37 +100,59 @@ def test_description_driven_arm_uses_the_fixed_circuit_without_free_currents(
     assert receipt["response"]["current_authority"] == "pf_active circuit"
 
 
-def test_lambda_elimination_enforces_current_exactly() -> None:
+def test_constrained_arm_drives_the_public_target_current_seam() -> None:
+    captured = {}
     target = 720_000.0
-    unscaled = 600_000.0
-    amplitude = pinned._lambda_value(target, unscaled)
 
-    assert amplitude == pytest.approx(1.2)
-    assert amplitude * unscaled == pytest.approx(target)
+    class Operator:
+        @staticmethod
+        def normalised_current_moments(state, target_current, requested_class=None):
+            captured["normalised_target"] = target_current
+            captured["normalised_class"] = requested_class
+            return SimpleNamespace(cell_current=np.asarray([target_current])), 1.2
 
+        @staticmethod
+        def read(state):
+            return None, SimpleNamespace(
+                diverted=True,
+                x_point=np.asarray([1.4, -1.1]),
+            )
 
-def test_lambda_guard_fails_loudly_without_clipping() -> None:
-    with pytest.raises(pinned.LambdaOutOfBand, match="outside"):
-        pinned._lambda_value(1.0, 1.0e-9)
+    class Profile:
+        operator = Operator()
 
+        @staticmethod
+        def flux_map(current, requested_class=None, target_current=None):
+            captured["current"] = np.asarray(current)
+            captured["target"] = target_current
+            captured["requested_class"] = requested_class
+            return lambda state: state
 
-@pytest.mark.parametrize("unscaled", [0.0, -1.0, np.nan])
-def test_lambda_guard_checks_admissibility_before_division(unscaled: float) -> None:
-    with pytest.raises(pinned.LambdaOutOfBand, match="outside"):
-        pinned._lambda_value(1.0, unscaled)
-
-
-def test_common_amplitude_scales_every_current_moment() -> None:
-    moments = CellCurrentMoments(
-        np.asarray([1.0, 2.0]),
-        np.asarray([3.0, 4.0]),
-        np.asarray([5.0, 6.0]),
+    result = pinned.solve_constrained(
+        Profile(),
+        np.ones(2),
+        np.asarray([3.0]),
+        target,
     )
-    scaled = pinned._scaled_moments(moments, 2.5)
 
-    np.testing.assert_allclose(scaled.cell_current, [2.5, 5.0])
-    np.testing.assert_allclose(scaled.radial_moment, [7.5, 10.0])
-    np.testing.assert_allclose(scaled.vertical_moment, [12.5, 15.0])
+    assert captured["target"] == target
+    assert captured["normalised_target"] == target
+    assert captured["requested_class"] == TopologyClass.DIVERTED
+    assert captured["normalised_class"] == TopologyClass.DIVERTED
+    assert result["relative_residual"] == 0.0
+    assert result["current_relative_error"] == 0.0
+    assert result["amplitude"] == pytest.approx(1.2)
+    assert result["topology"] == "diverted"
+
+
+def test_benchmark_has_no_local_amplitude_elimination_copy() -> None:
+    source = Path(pinned.__file__).read_text()
+
+    assert "def eliminated_map" not in source
+    assert "def _lambda_value" not in source
+    assert "def _scaled_moments" not in source
+    assert "safe_unscaled" not in source
+    assert "target_current=target_current_a" in source
 
 
 def test_power_iteration_receipt_is_strict_json_serializable() -> None:

@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="efit-forward-parity">
   <meta name="plan-title" content="EFIT Forward Parity — the fixed-point free-boundary solve against a reference equilibrium">
   <meta name="plan-summary" content="Demonstrate that nova&#x27;s free-boundary Grad-Shafranov fixed point reproduces a reference EFIT equilibrium when given that reference&#x27;s own flux functions and conductor currents — a forward solve with no measurements, no whitening and no fitted coefficients">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="6.0">
   <meta name="plan-capability-version" content="1.0">
@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-version" content="40">
-<meta name="plan-commits" content="c1e180d5,71c1ec36,457caddd,252bdd77,d026b0dc,57a1bfb9,c3f9f83a,6700b088,783229ac,325f6a85,56b1518b,e4dc6155,d7bf1035,c7ea1772,19e0d865,9641608b,f771f90d,d2e27d60,c3828a88,c9152535,ed601260,c308025d,ede61ac7,a031c210,f8feb25f,aad1a445,8c39bf42,10ef9053,67d584c7,76d86fb1,f5598fee,71758d98,db136e54,67bf18e7">
-<meta name="plan-artifacts" content="scripts/dina_profile_routes/reuse-report.md,scripts/dina_profile_routes/receipt.json,scripts/dina_profile_routes/addendum.json,scripts/constrained_parity_reuse/reuse-report.md,benchmarks/efit_forward_parity_slice.py,benchmarks/efit_parity_root_geometry.py,benchmarks/efit_parity_warm_neighbour.py,benchmarks/efit_parity_moment_definitions.py,benchmarks/efit_parity_boundary_volume.py,benchmarks/efit_parity_inductance_partition.py,benchmarks/efit_parity_field_instrument.py,docs/figures/efit-forward-parity/passive-inclusive-frozen-six-scorecard.json,docs/figures/efit-forward-parity/passive-inclusive-frozen-six-trajectories.png,docs/figures/efit-forward-parity/converged-root-geometry-attribution.json,docs/figures/efit-forward-parity/converged-root-geometry-attribution.png,docs/figures/efit-forward-parity/warm-neighbour-stall-lift.json,docs/figures/efit-forward-parity/warm-neighbour-stall-lift.png,docs/figures/efit-forward-parity/moment-definition-rescore.json,docs/figures/efit-forward-parity/boundary-enclosed-volume-reconciliation.json,docs/figures/efit-forward-parity/boundary-enclosed-volume-reconciliation.png,docs/figures/efit-forward-parity/inductance-deficit-partition.json,docs/figures/efit-forward-parity/inductance-deficit-partition.png,docs/figures/efit-forward-parity/field-energy-instrument-control.json,docs/figures/efit-forward-parity/field-energy-instrument-control.png,docs/evidence/archive/efit-forward-parity-landed.html">
-<meta name="plan-impl" content="0.96">
+<meta name="plan-version" content="42">
+<meta name="plan-commits" content="c1e180d5,71c1ec36,457caddd,252bdd77,d026b0dc,57a1bfb9,c3f9f83a,6700b088,783229ac,325f6a85,56b1518b,e4dc6155,d7bf1035,c7ea1772,19e0d865,9641608b,f771f90d,d2e27d60,c3828a88,c9152535,ed601260,c308025d,ede61ac7,a031c210,f8feb25f,aad1a445,8c39bf42,10ef9053,67d584c7,76d86fb1,f5598fee,71758d98,db136e54,67bf18e7,2af4037c,d7add809">
+<meta name="plan-artifacts" content="scripts/dina_profile_routes/reuse-report.md,scripts/constrained_parity_reuse/reuse-report.md,benchmarks/efit_forward_parity_slice.py,benchmarks/efit_parity_root_geometry.py,benchmarks/efit_parity_warm_neighbour.py,benchmarks/efit_parity_moment_definitions.py,benchmarks/efit_parity_boundary_volume.py,benchmarks/efit_parity_inductance_partition.py,benchmarks/efit_parity_field_instrument.py,benchmarks/efit_parity_tared_external_field.py,docs/figures/efit-forward-parity/passive-inclusive-frozen-six-scorecard.json,docs/figures/efit-forward-parity/converged-root-geometry-attribution.json,docs/figures/efit-forward-parity/warm-neighbour-stall-lift.json,docs/figures/efit-forward-parity/moment-definition-rescore.json,docs/figures/efit-forward-parity/boundary-enclosed-volume-reconciliation.json,docs/figures/efit-forward-parity/inductance-deficit-partition.json,docs/figures/efit-forward-parity/field-energy-instrument-control.json,docs/figures/efit-forward-parity/tared-external-field-solve.json,docs/figures/efit-forward-parity/tared-plasma-support-solve.json,docs/figures/efit-forward-parity/tared-plasma-support-solve.png,docs/evidence/archive/efit-forward-parity-landed.html">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -180,62 +180,29 @@
       <p class="landed-summary"><strong>INSTRUMENT_DIFFERENCE — row RETRACTED.</strong> One operator, one 243-centroid stored-LCFS region, two fields: nova's ∫B<sub>p</sub>²dV on the <em>reference's own</em> map returns 0.29897773 T²m³ against its published 0.49662131 — instrument ratio <strong>0.60202</strong>. On nova's own map it returns 0.29880628, so the physics ratio is <strong>0.99943</strong>: the two equilibria agree in poloidal field energy to 0.06 %. The −39.83 % published-scale deficit is 99.913 % instrument, 0.087 % physics. Support cannot explain it — rebaselining moved nova's value +3.22 %, the supports differ by 3.85 % of area, and the quadrature reproduces the exact contour to +0.24 %. Leaves a real defect for another plan: nova disagrees with published EFIT field energy by 40 % <em>on the same field</em> (f-efp-004). Full record: <a href="/nova/evidence/archive/efit-forward-parity-landed#s10-instrument">§10 landed</a> (commit <code>67d584c7</code>).</p>
     </section>
 
-    <h2 id="s11">&sect;11 &mdash; Taring the reference's own map, to weigh the GS solve alone</h2>
-
-    <p><strong>Owner directive 2026-08-22.</strong> Every deviation this plan has measured is a sum of
-    two things it has never been able to separate: error in the external-field boundary condition, and
-    error in the Grad&ndash;Shafranov fixed point itself. The plan's &sect;2 said so from the start
-    &mdash; <em>if our conductor model does not reproduce the reference's external flux, the fixed
-    point is being asked to close against the wrong boundary and a deviation cannot be attributed to
-    the solve.</em> The passive repair took the wall imbalance from 3.441 to 0.407&nbsp;percent of span
-    and the one-application diagnosis put the reference 0.135&nbsp;percent from being a fixed point,
-    but 0.407 is not zero and the attribution stayed joint.</p>
-
-    <p><strong>The tare removes the boundary as a variable by construction.</strong> Apply the GS
-    operator to the reference's own stored map to recover the toroidal current that map implies;
-    compose the flux that current produces through nova's own kernels; and subtract. What is left,
-    <code>&psi;<sub>ext</sub> = &psi;<sub>ref</sub> &minus; &psi;<sub>plasma</sub></code>, is the
-    reference's own implied external field &mdash; every coil and every passive structure, at zero
-    conductor-model error, because it was never modelled. Hand that back to the forward solve as a
-    static background and the only thing left under test is the GS fixed point.</p>
-
-    <p><strong>&Delta;*'s known blindness is what makes this work.</strong> The banked finding that
-    interior &Delta;* annihilates the field of conductors outside the grid is usually a limitation;
-    here it is the mechanism. &Delta; * applied on the interior returns the interior current
-    <em>cleanly</em>, with no external contamination to strip &mdash; and the external field is then
-    obtained by subtraction rather than by asking &Delta;* for something it cannot see.</p>
-
-    <p><strong>This is a control, and it must never be cited as parity.</strong> The tared field is
-    derived from the reference's own map, so the solve is handed information no production run would
-    have. The result bounds the GS solve's own fidelity and attributes the residual; it does not
-    upgrade the parity claim, and the receipt must say so in those words.</p>
-
-    <div style="overflow-x:auto">
-    <table>
-      <thead><tr><th>Outcome</th><th>What it would establish</th></tr></thead>
-      <tbody>
-        <tr><td>convergence improves markedly on the six</td>
-            <td>the residual was external-field error; the GS solve is sound and the remaining work is
-            the conductor and passive model</td></tr>
-        <tr><td>convergence stays near 1 in 6</td>
-            <td>the external field is exonerated and the obstacle is the GS fixed point or its
-            discretisation &mdash; which moves the catalog hold off the boundary condition entirely</td></tr>
-      </tbody>
-    </table>
-    </div>
-
-    <p><em>Done-when:</em> the tare closes &mdash; recomposing
-    <code>&psi;<sub>plasma</sub> + &psi;<sub>ext</sub></code> reproduces
-    <code>&psi;<sub>ref</sub></code> to round-off, reported as a sup in Wb beside the banked
-    2.22e-15&nbsp;Wb stored-field closure, with the free additive gauge constant fixed by a declared
-    rule and its value stated; the &Delta;*-implied current integral is reported against
-    <code>efm/plasma_current_c</code> on the declared support, and separately outside it so the
-    reference's own halo is quantified; the current-constrained forward solve runs on all six frozen
-    references into that tared background through the existing prescribed-field seam; and the
-    converged-plasma-root count is stated against the banked 1 of 6, with the full metric set scored
-    on this session's instrument-controlled basis &mdash; closed-branch LCFS, matched boundary support
-    for the moments, field-energy instrument ratio divided out &mdash; and the raw registered rows
-    reported beside it so nothing is concealed.</p>
+    <section id="s11" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">&#10003; landed 2026-08-22</span>
+        <h2>&sect;11 &mdash; Taring the reference's own map, to weigh the GS solve alone</h2>
+      </header>
+      <p class="landed-summary">
+        <strong>EXTERNAL_FIELD_EXONERATED_FIXED_POINT_OR_DISCRETISATION.</strong> The owner's tare
+        separated the two error sources the campaign could never split. First attempt was VOID &mdash;
+        composing the plasma image from every valid cell classified in-grid conductor current as
+        plasma (all-cell total &minus;957,109&nbsp;A against a reference &plus;801,493&nbsp;A, opposite
+        sign) and subtracted the conductors out of the background, which is why it lost the converged
+        root. The Solov'ev analytic null caught it: &Delta;* <em>inversion</em> recovered the analytic
+        current density to 1.21e-4 while the <em>split</em> missed the analytic external field by
+        56.41&nbsp;percent of span. Corrected to compose only the declared plasma-support current, the
+        split recovers that field to <strong>0.026&nbsp;percent of span</strong> &mdash; a 2,166&times;
+        improvement, 38&times; inside the gate. Into that ground-truth-validated background convergence
+        stays at <strong>1 of 6</strong>, so the external field is exonerated and the obstacle is the
+        GS fixed point or its discretisation. Instrument-divided field energy agrees within
+        &minus;0.68 to &plus;1.87&nbsp;percent across all six. A control, never a parity claim. Full
+        record: <a href="/nova/evidence/archive/efit-forward-parity-landed#s11-tare">&sect;11 landed</a>
+        (commits <code>67bf18e7</code>, <code>d7add809</code>).
+      </p>
+    </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -348,6 +315,9 @@ CONSEQUENCE FOR THE SECTION-4 VERDICT, stated now rather than deferred: of the s
 <div class="r-comment" data-section="s4" data-id="c-20260822T1900-drain-ledger" data-who="reckon-ship" data-when="2026-08-22T19:00:00Z">
     <div class="r-comment-body">DRAIN LEDGER at plan closure. Rows and dispositions: [1] f-efp-003, the Ip-pinned frozen-six re-run: folded to the currency audit and resolved on the shipped constrained arm's own evidence, which had already executed the demand on the passive-inclusive 101-circuit boundary. [2] f-efp-constrained-arm-parity question one, why the converged root's geometry misses the tolerance set: folded to nodes constrained-parity-reuse-map, converged-root-geometry-attribution, moment-definition-rescore, boundary-enclosed-volume-reconciliation, inductance-deficit-partition and field-energy-instrument-control; resolved. [3] f-efp-constrained-arm-parity question two, whether warm-neighbour seeding lifts the five stalls: folded to node warm-neighbour-stall-lift; answered NO, 0 of 5; resolved. [4] scout follow-on, the LCFS metric internals needing per-point rather than aggregate distances: folded to node converged-root-geometry-attribution. [5] geometry follow-on, serialize the typed moment receipt in the producing constrained-arm run: foreign-owner, current-constrained-forward-solve, that benchmark and its 23 banked artifacts are that shipped plan's and were deliberately left byte-identical. [6] moment follow-on, the volume discrepancy: folded as section 8 and node boundary-enclosed-volume-reconciliation. [7] volume follow-on, whether the surviving inductance deficit is the same clipping: folded as section 9 and node inductance-deficit-partition. [8] partition follow-on, the boundary-enclosed field deficit needing a mechanism beyond the core mask: folded as section 10 and node field-energy-instrument-control. [9] instrument follow-on, nova's field-energy integration disagreeing with the published EFIT value by 40 percent on the same field: foreign-owner, equilibrium-metric-parity, registered as f-efp-004. [10] convergence reliability at 1 of 6 blocking the GPU catalog: foreign-owner, dual-basin-solve, registered as f-efp-005. [11] a newton-branch replay of the warm ladder, unmeasured because the coupling ruling imported the host-Krylov seam: foreign-owner, dual-basin-solve, carried inside f-efp-005. [12] f-ccfs-handoff on current-constrained-forward-solve, the pointer into this plan: its named work has landed here, so it resolves on that plan. Rows 12, foldable-remaining 0. Plan shipped at impl 24/24: seventeen nodes landed before this session and seven within it (reuse map, converged-root geometry attribution across three measurements, warm-neighbour stall lift, moment-definition rescore, boundary-enclosed volume reconciliation, inductance-deficit partition, field-energy instrument control). SESSION NOTE ON ROUTING: the first two workers were dispatched to the claude backend because codex was reporting a usage limit, and both ended their turns waiting on background tasks and were reaped with no manifest at a combined 5.81 dollars; on the owner's direction every node was redispatched to codex, where all seven landed. Two codex workers stopped NEEDS-HELP and both stops were correct - one caught the reuse map overstating two helpers as machine-agnostic, the other caught this orchestrator's own brief naming two different supports as one. Both were answered by ruling rather than redispatch.</div>
 </div>
+<div class="r-comment" data-section="s4" data-id="c-20260822T2310-hold-reason-final" data-who="reckon-ship" data-when="2026-08-22T23:10:00Z">
+    <div class="r-comment-body">THE CATALOG HOLD'S REASON IS NOW FULLY ATTRIBUTED, which sharpens f-efp-005 materially and changes what the owning plan should build. Earlier today the hold moved from parity fidelity to convergence reliability at 1 of 6, with the cause unknown - the external-field boundary condition was still a live suspect, since the passive-inclusive repair had left 0.407 percent of span in the wall imbalance and the one-application diagnosis put the reference 0.135 percent from being a fixed point. The section-11 tare has now closed that question. Into a background validated against INDEPENDENT GROUND TRUTH to 0.026 percent of analytic span - the Solov'ev null, 38.4x inside its gate - the converged count is still 1 of 6. A better boundary condition does not buy convergence. So the external field is EXONERATED and the residual obstacle is the Grad-Shafranov fixed point or its discretisation. CONSEQUENCE FOR f-efp-005 AND FOR dual-basin-solve: a basin-entry or continuation driver is now justified on measured grounds rather than by elimination, because the alternative explanation has been tested and excluded rather than merely doubted. Two measured constraints should shape that driver. First, the reference sits 0.135 percent of span from being a fixed point with interior and exterior contributions balanced, so a root exists nearby and the obstacle is reaching it. Second, and this is the design-relevant one, only two of six terminals carry a closed axis-enclosing LCFS branch at all - on the other four a driver would be CONSTRUCTING confinement rather than refining it, which favours a moment-seeded cold start that builds a confined topology from prior information over any mechanism that continues an existing trajectory. THE HOLD'S EXIT CONDITION IS UNCHANGED and remains falsifiable: a convergence rate materially above 1 in 6 on the frozen six under a declared route, measured with the same receipt schema. What has changed is that the boundary condition can no longer be offered as the explanation for failing it.</div>
+</div>
 <div class="r-comment" data-section="s2" data-id="c-20260820T1140" data-who="reckon-ship" data-when="2026-08-20T11:40:00+00:00">
     <div class="r-comment-body">Owner ruling 2026-08-20 adds a hard prerequisite: all further forward-model progress gates on agreement with the Solov'ev oracle. solovev-exact-recovery owns that gate set (pre-registered agreement gates with convergence clauses, Urankar-exact kernel defaults, hexagon-section enforcement, the cell-moment wiring conviction, and the accuracy-cost ladder with the ~1 ms GPU fixed-point target). This plan's entry now waits on that plan in the DAG. Calibration note this plan already carries: the DINA demonstration's axis 41.2 mm / Ip -1.12% deviations match the Solov'ev root drift (42 mm / -1.15%) - the same composition systematic - so the recovery work directly sharpens what a forward-parity deviation here will mean.</div>
 </div>
@@ -419,6 +389,9 @@ CONSEQUENCE FOR THE SECTION-4 VERDICT, stated now rather than deferred: of the s
 </div>
 <div class="r-comment" data-section="s11" data-id="c-20260822T2230-tare-void" data-who="reckon-ship" data-when="2026-08-22T22:30:00Z">
     <div class="r-comment-body">TARE CONTROL VOID, AND THE CAUSE IS NAMED - run r-20260822T192210062115, gate PASSED (the adjudication is the measure), commits 76d86fb1, f5598fee, 71758d98, db136e54, 67bf18e7, merged; 13 tests; 23/23 protected digests unchanged; no solve rerun during adjudication. VERDICT MAST_TARED_SOLVE_VOID_ANALYTIC_NULL_FAILED. THE ANALYTIC NULL SPLITS THE MACHINERY CLEANLY, which is exactly what a ground-truth test is for. Delta-star INVERSION WORKS: on the Solov'ev analytic case the recovered current density matches to relative sup error 2.38318e-4 coarse and 1.21278e-4 fine. But the SPLIT FAILS: the analytic external field is missed by 1.13616 Wb coarse and 0.77915 Wb fine, which is 82.2578 and 56.4105 percent of analytic span. Refinement helps and does not rescue it. So the tare's arithmetic closure at 2.78e-17 Wb was, as the worker warned before measuring, a statement about arithmetic and not about attribution - psi_ext = psi_ref - psi_plasma recomposes by construction whatever the split does. THE CONDUCTOR LOCALISATION NAMES THE DEFECT PRECISELY. Across all six MAST rows, 99.0228 percent or more of the absolute exterior Delta-star current lies within ONE GRID DIAGONAL of the 938 fcoil filaments, and the per-circuit pattern correlates at Pearson 0.976075 to 0.986525 across the 101 circuits - so the multi-megaampere exterior current IS the conductors, spatially, confirming the leading hypothesis. Amplitudes are another matter: per-circuit L1 relative error 0.831079 to 0.854737, so the current localises on conductors WITHOUT reproducing their amplitudes, and it cannot be promoted as a conductor-model validation. ROOT CAUSE: the tare composed psi_plasma from ALL valid-cell Delta-star current, so in-grid fitted-conductor current was classified as PLASMA - and psi_ext, being the remainder, therefore had the conductor field SUBTRACTED OUT of it. The solve was handed a background missing its own conductors. That fully explains the 1-of-6 to 0-of-6 regression, which is evidence against the split rather than evidence about the Grad-Shafranov fixed point, and it means the 0/6 carries NO attribution: the external field is neither exonerated nor convicted by this run. THE FIX IS NAMED AND NARROW: compose only the plasma-SUPPORT current into psi_plasma - already measured good to 0.4060 to 0.5961 percent of efm/plasma_current_c - and leave in-grid conductor current where it belongs, in psi_ext. That sidesteps the amplitude problem entirely, because a corrected tare never needs to reproduce circuit amplitudes, only to stop subtracting them. The analytic null is now the gate and must pass before any MAST solve. Also landed: the impossible test floor was corrected from a hand-typed 2.0e-16 absolute, which is 0.9007 ULP of 1.0, to 4*numpy.finfo(float).eps, with the reason in the assertion. Receipt: docs/figures/efit-forward-parity/tared-external-field-solve.json (banked solve payload digest 01f02d86, all six raw and controlled rows retained, five LCFS rows explicitly unscoreable with no longest-polyline fallback); figure: tared-external-field-solve.png.</div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-20260822T2300-tare-exonerated" data-who="reckon-ship" data-when="2026-08-22T23:00:00Z">
+    <div class="r-comment-body">CORRECTED TARE LANDED - VERDICT EXTERNAL_FIELD_EXONERATED_FIXED_POINT_OR_DISCRETISATION. Run r-20260822T202422623972, gate PASSED, commits 2af4037c + d7add809, 10 tests, 23/23 protected digests verified after solving, the void control's receipt untouched at sha256 e5ad919b. THE OWNER'S DIAGNOSIS WAS THE FIX: compose psi_plasma from the current INSIDE THE LCFS only - the reference declared plasma support, 248 to 257 cells integrating 0.4060 to 0.5961 percent below abs(efm/plasma_current_c) - and leave every other valid cell, in-grid fitted-conductor cells included, in psi_ext by subtraction. THE GATE PASSED BY A WIDE MARGIN AND THAT IS THE HEADLINE. Analytic external-field recovery under the corrected support: coarse 0.00067988 Wb = 0.049223 percent of analytic span against the banked uncorrected failure of 1.1361564 Wb = 82.25777 percent; fine 0.00035978 Wb = 0.026048 percent against 0.7791504 Wb = 56.41052 percent. That is a 2,166x improvement on the fine mesh and 38.4x inside the 1 percent hard gate. Analytic current-density recovery is unchanged at 2.383183e-4 coarse and 1.212784e-4 fine, so the correction touched only the attribution and not the inversion - which is exactly the intended surgical change. Closure sup 2.220446e-16 Wb; gauge rule unchanged, additive constant 0.0 Wb. THE ATTRIBUTION IS NOW AVAILABLE, which no prior run could say. Into a background validated against independent ground truth to 0.026 percent of span, the converged-plasma-root count at the registered 1e-8 is 1 OF 6 - equal to the banked modelled-background 1 of 6 and above the void tare's 0 of 6. A better background does not buy convergence. THE EXTERNAL FIELD IS EXONERATED AND THE OBSTACLE IS THE GRAD-SHAFRANOV FIXED POINT OR ITS DISCRETISATION. A DETAIL WORTH KEEPING: the converged reference CHANGED identity - the modelled-background arm converged 22086/43 while the tared arm converges 21986/46 at residual 3.270855e-16. Same count, different member, which says the identity of the convergent case is not robust to a boundary-condition change even when the count is. The other five remain bounded at 0.010050 to 0.017715, higher than the modelled-background stalls at 2.006e-4 to 1.076e-2. CORROBORATION OF THE INSTRUMENT FINDING ACROSS THE WHOLE SET, not just one reference: instrument-divided field-energy deviations run -0.678435 to +1.867236 percent on all six, against the single-reference 0.06 percent measured earlier. Matched-support beta deviations run -102.08865 to -0.293959 percent, the extreme being a collapsed case. Closed axis-enclosing LCFS branches exist for only 21983/35 at 0.1422026 m and 21985/51 at 0.2204575 m; the other four rows are explicitly unscoreable_no_closed_axis_branch with no longest-polyline fallback - reinforcing that most stalled terminals carry no closed flux surface at all. THE STANDING CAVEAT HOLDS: a control, never a parity claim, because the field derives from each reference's own map and supplies information unavailable in production. Receipt: docs/figures/efit-forward-parity/tared-plasma-support-solve.json. Plan ships at impl 25/25.</div>
 </div>
 </section>
 </main>

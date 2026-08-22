@@ -402,6 +402,69 @@
   stated reason changed from parity fidelity to <strong>convergence reliability at 1 of 6</strong>,
   carried to <code>dual-basin-solve</code> as <code>f-efp-005</code>.</p>
 
+
+  <h2 id="s11-tare">&sect;11 &mdash; taring the reference's own map: the external field exonerated, and one void attempt that earned its place</h2>
+
+  <p><strong>Landed 2026-08-22; commits <code>76d86fb1</code> through <code>d7add809</code>; final verdict
+  EXTERNAL_FIELD_EXONERATED_FIXED_POINT_OR_DISCRETISATION.</strong> Every deviation this plan measured was
+  a sum of external-field error and Grad&ndash;Shafranov fixed-point error, and nothing had separated them.
+  The owner directed the separation: apply the GS operator to the reference's own stored map, compose the
+  flux the implied current produces, subtract, and hand the remainder back as a static background carrying
+  every coil and passive structure at zero conductor-model error.</p>
+
+  <p><strong>The first attempt was void, and the reason is worth keeping.</strong> It composed the plasma
+  image from <em>every</em> valid-stencil cell rather than from the cells inside the LCFS &mdash; an
+  all-cell total of &minus;957,109&nbsp;A against a reference &plus;801,493&nbsp;A, <em>opposite in
+  sign</em> &mdash; so in-grid fitted-conductor current was classified as plasma and the background had
+  its own conductors subtracted out. Convergence fell from 1 of 6 to 0 of 6, which is what a background
+  missing its conductors should do. The arithmetic closure of 2.78e-17&nbsp;Wb said nothing about this,
+  because <code>&psi;<sub>ext</sub> = &psi;<sub>ref</sub> &minus; &psi;<sub>plasma</sub></code> recomposes
+  by construction whatever the split does.</p>
+
+  <p><strong>The Solov'ev analytic null is what caught it, and it separated inversion from attribution.</strong>
+  &Delta;* <em>inversion</em> recovered the analytic current density to relative sup error 1.21e-4; the
+  <em>split</em> missed the analytic external field by 56.41&nbsp;percent of span on the fine mesh.
+  Independently, 99.02&nbsp;percent or more of the exterior &Delta;*-current was shown to lie within one
+  grid diagonal of the 938 <code>fcoil</code> filaments, with per-circuit pattern correlation
+  0.976&ndash;0.987 &mdash; the exterior current <em>is</em> the conductors &mdash; while per-circuit
+  amplitudes missed by L1 relative error 0.83&ndash;0.85, so it could not be promoted as a conductor-model
+  validation either.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Analytic external-field recovery</th><th>all-cell support (void)</th><th>plasma support (corrected)</th></tr></thead>
+    <tbody>
+      <tr><td>coarse mesh</td><td>1.1361564 Wb = 82.25777 % of span</td><td>0.00067988 Wb = 0.049223 %</td></tr>
+      <tr><td>fine mesh</td><td>0.7791504 Wb = 56.41052 %</td><td><strong>0.00035978 Wb = 0.026048 %</strong></td></tr>
+      <tr><td>&Delta;* current density, fine</td><td>1.212784e-4</td><td>1.212784e-4 (unchanged)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>The correction &mdash; compose <code>&psi;<sub>plasma</sub></code> from the declared plasma-support
+  current only, 248 to 257 cells integrating 0.406 to 0.596&nbsp;percent below
+  <code>abs(efm/plasma_current_c)</code>, and leave in-grid conductor current in
+  <code>&psi;<sub>ext</sub></code> &mdash; improves the fine-mesh split by <strong>2,166&times;</strong> and
+  passes the 1&nbsp;percent gate with 38.4&times; margin, while leaving the inversion untouched. It never
+  needs the circuit amplitudes it could not reproduce; it needs only to stop subtracting them.</p>
+
+  <p><strong>The attribution, which no earlier run could offer.</strong> Into a background validated
+  against independent ground truth to 0.026&nbsp;percent of span, the converged-plasma-root count is
+  <strong>1 of 6</strong> &mdash; equal to the modelled background, above the void tare's 0 of 6. A better
+  boundary condition does not buy convergence. The external field is exonerated; the obstacle is the GS
+  fixed point or its discretisation. The convergent reference <em>changed identity</em> (modelled
+  <code>22086/43</code>, tared <code>21986/46</code> at residual 3.270855e-16), so the count is robust to
+  a boundary change while the member is not. Instrument-divided field energy agrees within &minus;0.68 to
+  &plus;1.87&nbsp;percent across all six, corroborating on the full set the 0.06&nbsp;percent measured on
+  one. Closed axis-enclosing LCFS branches exist for only two of six rows; four are explicitly
+  unscoreable with no longest-polyline fallback.</p>
+
+  <p><strong>Standing caveat.</strong> This is a control and never a parity claim: the tared field derives
+  from each reference's own map and supplies the solve information no production run would have. It bounds
+  the GS solve's own fidelity and attributes the residual. Receipts:
+  <code>tared-external-field-solve.json</code> (the void control, retained) and
+  <code>tared-plasma-support-solve.json</code>.</p>
+
 </main>
 </body>
 </html>

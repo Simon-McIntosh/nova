@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T21:40:43",
+  "updated": "2026-08-22T22:49:15",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -558,10 +558,17 @@
         "created": "2026-08-16"
       },
       {
-        "id": "tared-field",
+        "id": "support-tare",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
+        "created": "2026-08-22"
+      },
+      {
+        "id": "tared-field",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a02aec-6ef4-7772-8fe6-cda728b3e8f3",
         "created": "2026-08-22"
       },
       {
@@ -23606,9 +23613,137 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T192210062115-tared-external-field-solve",
+        "plan": "efit-forward-parity",
+        "section": "\u00a711",
+        "node": "tared-external-field-solve",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "tared-field",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T19:22:12Z",
+        "completed_at": "2026-08-22T20:22:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3605,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3605,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "81fe27f013177d2d85142786cd3ead42f2e8480c",
+        "commits": [
+          "67bf18e77460e5d96b5f6f2d2af6b27ff53078a8"
+        ],
+        "changed_lines": {
+          "added": 12140,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 13,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T192210062115-tared-external-field-solve/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02aec-6ef4-7772-8fe6-cda728b3e8f3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 30192640,
+            "cached_input_tokens_cumulative": 30192640,
+            "input_tokens": 30876102,
+            "input_tokens_cumulative": 30876102,
+            "output_tokens": 83629,
+            "output_tokens_cumulative": 83629,
+            "reasoning_output_tokens": 24094,
+            "reasoning_output_tokens_cumulative": 24094
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T202422623972-plasma-support-tare-solve",
+        "plan": "efit-forward-parity",
+        "section": "\u00a711",
+        "node": "plasma-support-tare-solve",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "support-tare",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T20:24:24Z",
+        "completed_at": "2026-08-22T20:48:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1456,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1456,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "9b132d31221f610e19203aeacbe8da10ee094f77",
+        "commits": [
+          "d7add809eb0ab8da094e7c920f1902d8703c1f89"
+        ],
+        "changed_lines": {
+          "added": 3095,
+          "removed": 71,
+          "files": 4
+        },
+        "tests_added": 10,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T202422623972-plasma-support-tare-solve/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02b25-61c8-7893-a9b1-232891b5a773",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 14046464,
+            "cached_input_tokens_cumulative": 14046464,
+            "input_tokens": 14275791,
+            "input_tokens_cumulative": 14275791,
+            "output_tokens": 27905,
+            "output_tokens_cumulative": 27905,
+            "reasoning_output_tokens": 7520,
+            "reasoning_output_tokens_cumulative": 7520
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 571
+    "_version": 575
   }
 }

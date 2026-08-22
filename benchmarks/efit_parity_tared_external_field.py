@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 from dataclasses import replace
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 from typing import Any
 
 import jax.numpy as jnp
@@ -19,6 +21,7 @@ from matplotlib import pyplot as plt  # noqa: E402
 from matplotlib.path import Path as MplPath  # noqa: E402
 from scipy.spatial import cKDTree  # noqa: E402
 
+import benchmarks.efit_forward_parity_slice as parity_slice  # noqa: E402
 from benchmarks.efit_forward_parity_slice import (  # noqa: E402
     DECOMPOSITION_BANK,
     FIXED_POINT_CRITERION,
@@ -78,6 +81,9 @@ OUTPUT_RECEIPT = OUTPUT_DIRECTORY / "tared-plasma-support-solve.json"
 OUTPUT_FIGURE = OUTPUT_DIRECTORY / "tared-plasma-support-solve.png"
 BANKED_VOID_RECEIPT = OUTPUT_DIRECTORY / "tared-external-field-solve.json"
 PROTECTED_SOURCE = OUTPUT_DIRECTORY / "converged-root-geometry-attribution.json"
+MESH_SENSITIVITY_DIRECTORY = Path("docs/figures/moment-conditioned-basin-entry")
+MESH_SENSITIVITY_RECEIPT = MESH_SENSITIVITY_DIRECTORY / "stall-mesh-sensitivity.json"
+MESH_SENSITIVITY_FIGURE = MESH_SENSITIVITY_DIRECTORY / "stall-mesh-sensitivity.png"
 BANKED_STORED_FIELD_CLOSURE_WB = 2.22e-15
 REFERENCE_HALO_CURRENT_A = 786.396
 GAUGE_CONSTANT_WB = 0.0
@@ -92,6 +98,9 @@ ANALYTIC_EXTERNAL_SPAN_TOLERANCE = 1.0e-2
 CONDUCTOR_LOCALISATION_SHARE_TOLERANCE = 0.9
 CONDUCTOR_PATTERN_CORRELATION_TOLERANCE = 0.9
 CONDUCTOR_CURRENT_L1_ERROR_TOLERANCE = 0.5
+MESH_STRIDES = {"coarse": 2, "fine": 1}
+MINIMUM_MESH_SCALING_ORDER = 0.5
+MAXIMUM_MESH_INVARIANT_ORDER_MAGNITUDE = 0.25
 CONTROL_CAVEAT = (
     "This is a control and not a parity claim, because the tared field is "
     "derived from the reference own map and hands the solve information no "
@@ -102,6 +111,96 @@ CONTROL_CAVEAT = (
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _source_stamp(checkout: Path = Path(".")) -> dict[str, str]:
+    """Return the clean commit and tree identities used for a measurement."""
+    status = subprocess.run(
+        ["git", "-C", str(checkout), "status", "--porcelain"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+    if status:
+        raise RuntimeError("mesh sensitivity measurement requires a clean checkout")
+
+    def revision(name: str) -> str:
+        return subprocess.run(
+            ["git", "-C", str(checkout), "rev-parse", name],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+
+    return {"commit": revision("HEAD"), "tree": revision("HEAD^{tree}")}
+
+
+@contextmanager
+def _profile_grid_stride(stride: int):
+    """Select one stored-grid stride while reusing the landed profile builder."""
+    original = parity_slice.GRID_STRIDE
+    parity_slice.GRID_STRIDE = stride
+    try:
+        yield
+    finally:
+        parity_slice.GRID_STRIDE = original
+
+
+def _mast_case_at_grid_stride(
+    store: Path,
+    selected: dict[str, Any],
+    qualification: dict[str, Any],
+    stride: int,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Build one MAST case on a declared stride of its stored 65-point axes."""
+    if stride not in MESH_STRIDES.values():
+        raise ValueError(f"unsupported stored-grid stride {stride}")
+    with _profile_grid_stride(stride):
+        case, context = parity_slice._mast_case_from_selection(
+            store, selected, qualification
+        )
+    profile = context["profile"]
+    case["mesh"] = {
+        **case["mesh"],
+        "kind": (
+            f"{len(profile.lattice.radius)} by {len(profile.lattice.height)} "
+            "rectangular benchmark lattice"
+        ),
+        "stored_axis_stride": stride,
+        "realised_cells": profile.lattice.node_count,
+        "radial_step_m": float(profile.lattice.radial_step),
+        "vertical_step_m": float(profile.lattice.vertical_step),
+    }
+    return case, context
+
+
+def _classify_mesh_floor(
+    coarse_residual: float,
+    fine_residual: float,
+    coarse_spacing: float,
+    fine_spacing: float,
+) -> dict[str, Any]:
+    """Classify one budget-terminal floor from its observed mesh order."""
+    if min(coarse_residual, fine_residual, coarse_spacing, fine_spacing) <= 0.0:
+        raise ValueError("residuals and mesh spacings must be positive")
+    spacing_ratio = coarse_spacing / fine_spacing
+    if spacing_ratio <= 1.0:
+        raise ValueError("the fine mesh spacing must be smaller than coarse")
+    residual_ratio = fine_residual / coarse_residual
+    observed_order = float(
+        np.log(coarse_residual / fine_residual) / np.log(spacing_ratio)
+    )
+    if observed_order >= MINIMUM_MESH_SCALING_ORDER:
+        verdict = "floor-scales-with-mesh"
+    elif abs(observed_order) <= MAXIMUM_MESH_INVARIANT_ORDER_MAGNITUDE:
+        verdict = "mesh-invariant"
+    else:
+        verdict = "ambiguous"
+    return {
+        "fine_over_coarse_terminal_residual": residual_ratio,
+        "observed_mesh_order": observed_order,
+        "verdict": verdict,
+    }
 
 
 def _implied_current(profile, reference_grid: np.ndarray) -> dict[str, Any]:
@@ -1225,6 +1324,359 @@ def run_control(
     return receipt, runtime
 
 
+def _mesh_terminal_row(runtime: dict[str, Any]) -> dict[str, Any]:
+    """Run one banked-budget terminal measurement without parity rescoring."""
+    case = runtime["case"]
+    context = runtime["context"]
+    profile = runtime["tare"]["profile"]
+    target_current = abs(float(case["reference"]["plasma_current_a"]))
+    solve, _trace, branch = _passive_inclusive_solve(
+        case,
+        context,
+        profile,
+        newton_budget=parity_slice.NEWTON_STEPS,
+        target_current=target_current,
+    )
+    equilibrium = branch.equilibrium
+    terminal_current = float(np.sum(np.asarray(equilibrium.cell_current)))
+    branch_receipt = solve["forward_branch_receipt"]
+    return {
+        "mesh": case["mesh"],
+        "tare_closure": runtime["tare"]["closure"],
+        "solve": {
+            "entry_point": "ForwardProfile.solve_branch(target_current=...)",
+            "route": "newton_krylov",
+            "registered_fixed_point_criterion": FIXED_POINT_CRITERION,
+            "newton_promotion_budget": parity_slice.NEWTON_STEPS,
+            "gmres_iterations_per_promotion": parity_slice.GMRES_ITERATIONS,
+            "warmup_sweeps": parity_slice.WARMUP_SWEEPS,
+            "relaxation": parity_slice.RELAXATION,
+            "step_cap": parity_slice.STEP_CAP,
+            "converged": bool(branch.converged),
+            "terminal_residual": branch_receipt["residual"],
+            "iterations": branch_receipt["iterations"],
+            "residual_trajectory": solve["residual_trajectory"],
+            "target_current_a": target_current,
+            "terminal_current_a": terminal_current,
+            "signed_terminal_current_relative_error": (
+                terminal_current / target_current - 1.0
+            ),
+        },
+    }
+
+
+def _split_verdict(rows: list[dict[str, Any]]) -> str:
+    """Return a unanimous per-reference verdict without pooling residuals."""
+    verdicts = {row["verdict"] for row in rows}
+    return verdicts.pop() if len(verdicts) == 1 else "ambiguous"
+
+
+def _plot_mesh_sensitivity(rows: list[dict[str, Any]], path: Path) -> None:
+    """Plot each residual floor directly, separated by topology stratum."""
+    figure, axes = plt.subplots(
+        1, 2, figsize=(9.4, 4.2), sharey=True, constrained_layout=True
+    )
+    strata = (
+        ("closed-axis", "Closed axis-enclosing branch (2/2 stalled)"),
+        (
+            "confinement-construction",
+            "Confinement construction (3/4 stalled; 1 root excluded)",
+        ),
+    )
+    colours = plt.get_cmap("tab10")
+    for axis, (stratum, title) in zip(axes, strata, strict=True):
+        selected = [row for row in rows if row["stratum"] == stratum]
+        for index, row in enumerate(selected):
+            values = [
+                row["mesh_levels"]["coarse"]["terminal_residual"],
+                row["mesh_levels"]["fine"]["terminal_residual"],
+            ]
+            colour = colours(index)
+            axis.plot([0, 1], values, marker="o", lw=1.5, color=colour)
+            label = f"{row['shot']}/{row['slice_index']}  {row['verdict']}"
+            axis.annotate(
+                label,
+                (1, values[1]),
+                xytext=(5, 0),
+                textcoords="offset points",
+                va="center",
+                fontsize=7.5,
+                color=colour,
+            )
+        axis.axhline(
+            FIXED_POINT_CRITERION,
+            color="black",
+            lw=0.8,
+            ls="--",
+        )
+        axis.set_xticks([0, 1], ["33×33", "65×65"])
+        axis.set_xlim(-0.12, 1.8)
+        axis.set_yscale("log")
+        axis.set_title(title)
+        axis.set_xlabel("Stored-grid resolution")
+        axis.grid(axis="y", which="both", alpha=0.18)
+    axes[0].set_ylabel("Budget-terminal fixed-point residual")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+
+
+def run_mesh_sensitivity(
+    store: Path = SHOT_STORE,
+    bank: Path = DECOMPOSITION_BANK,
+    banked_control: Path = OUTPUT_RECEIPT,
+    output_path: Path = MESH_SENSITIVITY_RECEIPT,
+    figure_path: Path = MESH_SENSITIVITY_FIGURE,
+) -> dict[str, Any]:
+    """Measure the five banked tared stalls on the stored fine grid."""
+    configure_dtypes()
+    source_stamp = _source_stamp()
+    protected_source = json.loads(PROTECTED_SOURCE.read_text())
+    protected_before = _verify_protected_artifacts(protected_source)
+    banked = json.loads(banked_control.read_text())
+    analytic = solovev_null_test()
+    if not analytic["passes"]:
+        raise RuntimeError("the analytic external-field null no longer passes")
+    if banked["aggregate"]["registered_fixed_point_criterion"] != 1.0e-8:
+        raise RuntimeError("the banked fixed-point criterion changed")
+    if not banked["protected_banked_artifacts"]["all_digests_match"]:
+        raise RuntimeError("the banked control did not verify protected artifacts")
+
+    banked_rows = {
+        (int(row["reference"]["shot"]), int(row["reference"]["slice_index"])): row
+        for row in banked["per_shot"]
+    }
+    stalled = {
+        key: row
+        for key, row in banked_rows.items()
+        if not row["solve"]["converged_plasma_root"]
+    }
+    converged = [
+        key for key, row in banked_rows.items() if row["solve"]["converged_plasma_root"]
+    ]
+    if len(banked_rows) != 6 or len(stalled) != 5 or len(converged) != 1:
+        raise RuntimeError("the banked tared-control cohort changed")
+    if any(
+        row["solve"]["iterations"] != parity_slice.NEWTON_STEPS
+        for row in stalled.values()
+    ):
+        raise RuntimeError("a banked stall did not consume the registered budget")
+
+    selection = {
+        (int(selected["shot"]), int(selected["slice_index"])): (
+            selected,
+            qualification,
+        )
+        for selected, qualification in select_slices_by_shot(bank)
+    }
+    if set(selection) != set(banked_rows):
+        raise RuntimeError("the frozen selection and banked tared cohort differ")
+
+    rows = []
+    for key, coarse in stalled.items():
+        selected, qualification = selection[key]
+        if not qualification["passes"]:
+            raise RuntimeError(f"reference {key} lost its input qualification")
+        case, context = _mast_case_at_grid_stride(
+            store, selected, qualification, MESH_STRIDES["fine"]
+        )
+        tare = build_tare(
+            profile=context["profile"],
+            reference_state=case["state"],
+            reference_grid=context["reference_flux"],
+        )
+        fine = _mesh_terminal_row({"case": case, "context": context, "tare": tare})
+        fine_spacing = max(
+            fine["mesh"]["radial_step_m"], fine["mesh"]["vertical_step_m"]
+        )
+        coarse_spacing = MESH_STRIDES["coarse"] * fine_spacing
+        classification = _classify_mesh_floor(
+            float(coarse["solve"]["terminal_residual"]),
+            float(fine["solve"]["terminal_residual"]),
+            coarse_spacing,
+            fine_spacing,
+        )
+        status = coarse["instrument_controlled_rows"]["lcfs_closed_branch"]["status"]
+        stratum = "closed-axis" if status == "scoreable" else "confinement-construction"
+        rows.append(
+            {
+                "shot": key[0],
+                "slice_index": key[1],
+                "stratum": stratum,
+                "registered_split_denominator": (2 if stratum == "closed-axis" else 4),
+                "mesh_levels": {
+                    "coarse": {
+                        "source": str(banked_control),
+                        "stored_axis_stride": MESH_STRIDES["coarse"],
+                        "realised_cells": 33 * 33,
+                        "mesh_spacing_m": coarse_spacing,
+                        "registered_fixed_point_criterion": (
+                            coarse["solve"]["registered_fixed_point_criterion"]
+                        ),
+                        "newton_promotion_budget": coarse["solve"]["iterations"],
+                        "gmres_iterations_per_promotion": (
+                            parity_slice.GMRES_ITERATIONS
+                        ),
+                        "iterations": coarse["solve"]["iterations"],
+                        "terminal_residual": coarse["solve"]["terminal_residual"],
+                        "residual_trajectory": coarse["solve"]["residual_trajectory"],
+                        "reused_without_rerun": True,
+                    },
+                    "fine": {
+                        **fine["solve"],
+                        **fine["mesh"],
+                        "mesh_spacing_m": fine_spacing,
+                        "closure_sup_difference_wb": fine["tare_closure"][
+                            "sup_difference_wb"
+                        ],
+                        "closure_at_roundoff": fine["tare_closure"]["at_roundoff"],
+                        "measured_this_run": True,
+                    },
+                },
+                **classification,
+            }
+        )
+
+    rows.sort(key=lambda row: (row["stratum"], row["shot"], row["slice_index"]))
+    split_rows = {
+        stratum: [row for row in rows if row["stratum"] == stratum]
+        for stratum in ("closed-axis", "confinement-construction")
+    }
+    split_verdicts = {
+        stratum: _split_verdict(items) for stratum, items in split_rows.items()
+    }
+    if set(split_verdicts.values()) == {"floor-scales-with-mesh"}:
+        branch_verdict = "discretisation-limited"
+        branch_statement = (
+            "Every topology stratum shows a unanimous residual floor that scales "
+            "down with refinement; operator discretisation owns the frontier."
+        )
+    elif set(split_verdicts.values()) == {"mesh-invariant"}:
+        branch_verdict = "map/basin property"
+        branch_statement = (
+            "Every topology stratum shows a unanimous mesh-invariant floor; the "
+            "constraint-by-construction path regains its premise."
+        )
+    else:
+        branch_verdict = "ambiguous"
+        branch_statement = (
+            "The per-reference mesh verdicts are not unanimous in both topology "
+            "strata; the held long-budget classifier is required."
+        )
+
+    _plot_mesh_sensitivity(rows, figure_path)
+    protected_after = _verify_protected_artifacts(
+        json.loads(PROTECTED_SOURCE.read_text())
+    )
+    receipt = {
+        "receipt": {
+            "kind": "tared_stall_mesh_sensitivity",
+            "status": "complete",
+            "source": source_stamp,
+            "banked_control": str(banked_control),
+            "banked_control_sha256": _sha256(banked_control),
+        },
+        "control_basis": {
+            "ground_truth_validation": analytic,
+            "control_caveat": CONTROL_CAVEAT,
+            "registered_fixed_point_criterion": FIXED_POINT_CRITERION,
+            "banked_solver_budget": {
+                "newton_promotions": parity_slice.NEWTON_STEPS,
+                "gmres_iterations_per_promotion": parity_slice.GMRES_ITERATIONS,
+                "warmup_sweeps": parity_slice.WARMUP_SWEEPS,
+                "relaxation": parity_slice.RELAXATION,
+                "step_cap": parity_slice.STEP_CAP,
+            },
+            "mesh_ladder": {
+                "coarse": {"stored_axis_stride": MESH_STRIDES["coarse"]},
+                "fine": {"stored_axis_stride": MESH_STRIDES["fine"]},
+            },
+            "per_reference_classifier": {
+                "observed_order": (
+                    "log(coarse residual / fine residual) / "
+                    "log(coarse spacing / fine spacing)"
+                ),
+                "floor_scales_with_mesh": (
+                    f"observed order >= {MINIMUM_MESH_SCALING_ORDER}"
+                ),
+                "mesh_invariant": (
+                    "absolute observed order <= "
+                    f"{MAXIMUM_MESH_INVARIANT_ORDER_MAGNITUDE}"
+                ),
+                "ambiguous": "every other finite result, including worsening",
+            },
+        },
+        "cohort": {
+            "banked_reference_count": 6,
+            "stalled_reference_count": 5,
+            "converged_reference_excluded": {
+                "shot": converged[0][0],
+                "slice_index": converged[0][1],
+            },
+            "preregistered_split": {
+                "closed-axis": {
+                    "banked_reference_count": 2,
+                    "stalled_reference_count": len(split_rows["closed-axis"]),
+                },
+                "confinement-construction": {
+                    "banked_reference_count": 4,
+                    "stalled_reference_count": len(
+                        split_rows["confinement-construction"]
+                    ),
+                },
+            },
+            "residuals_pooled": False,
+        },
+        "per_reference": rows,
+        "strata": {
+            stratum: {
+                "per_reference_verdicts": [
+                    {
+                        "shot": row["shot"],
+                        "slice_index": row["slice_index"],
+                        "verdict": row["verdict"],
+                    }
+                    for row in items
+                ],
+                "unanimous_verdict": split_verdicts[stratum],
+            }
+            for stratum, items in split_rows.items()
+        },
+        "aggregate": {
+            "method": "branch only when both non-pooled topology strata are unanimous",
+            "branch_verdict": branch_verdict,
+            "statement": branch_statement,
+            "per_reference_counts": {
+                verdict: sum(row["verdict"] == verdict for row in rows)
+                for verdict in (
+                    "floor-scales-with-mesh",
+                    "mesh-invariant",
+                    "ambiguous",
+                )
+            },
+        },
+        "figure": {
+            "path": str(figure_path),
+            "src": (
+                "/nova/figures/moment-conditioned-basin-entry/"
+                "stall-mesh-sensitivity.png"
+            ),
+            "sha256": _sha256(figure_path),
+        },
+        "protected_banked_artifacts": {
+            "before": protected_before,
+            "after": protected_after,
+            "all_digests_unchanged": bool(
+                protected_before["all_digests_match"]
+                and protected_after["all_digests_match"]
+            ),
+        },
+    }
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(receipt, indent=2, allow_nan=False) + "\n")
+    return receipt
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--store", type=Path, default=SHOT_STORE)
@@ -1232,7 +1684,34 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=OUTPUT_RECEIPT)
     parser.add_argument("--figure", type=Path, default=OUTPUT_FIGURE)
     parser.add_argument("--analytic-gate-only", action="store_true")
+    parser.add_argument("--mesh-sensitivity", action="store_true")
     arguments = parser.parse_args()
+    if arguments.mesh_sensitivity:
+        mesh_output = (
+            MESH_SENSITIVITY_RECEIPT
+            if arguments.output == OUTPUT_RECEIPT
+            else arguments.output
+        )
+        mesh_figure = (
+            MESH_SENSITIVITY_FIGURE
+            if arguments.figure == OUTPUT_FIGURE
+            else arguments.figure
+        )
+        receipt = run_mesh_sensitivity(
+            arguments.store,
+            arguments.bank,
+            output_path=mesh_output,
+            figure_path=mesh_figure,
+        )
+        counts = receipt["aggregate"]["per_reference_counts"]
+        print(
+            "TARED_STALL_MESH_SENSITIVITY "
+            f"scaling={counts['floor-scales-with-mesh']} "
+            f"invariant={counts['mesh-invariant']} "
+            f"ambiguous={counts['ambiguous']} "
+            f"verdict={receipt['aggregate']['branch_verdict']}"
+        )
+        return
     if arguments.analytic_gate_only:
         receipt = run_analytic_gate(arguments.output)
         analytic = receipt["analytic_null_gate"]

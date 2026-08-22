@@ -1,4 +1,142 @@
-# CPU--H200 single-sweep sensitivity isolation
+# Same-tree gentle-window contraction
+
+## Outcome
+
+The CPU and H200 runs used the identical product tree at
+`08f371e139437820d0ca729de384903475ac87d8` and the identical committed gentle
+configuration: window `0.0025 s`, auxiliary-source multiplier `0.5`, iteration
+cap `10`, convergence tolerance `0.005`, and damping `0.5`. The runs were
+strictly serialized, CPU first.
+
+**Both backends exhausted cap 10.** CPU returned `WindowConvergenceError` after
+10 iterations with measured contraction `0.64062864104278661` and maximum
+residual `0.027837318712361499`. H200 returned the same typed exhaustion after
+10 iterations with contraction `0.64062864560956367` and maximum residual
+`0.027837318751897697`. The same-tree contraction gap is
+`4.5667770676161012e-09` (relative gap `7.1285871018543689e-09`), and the final
+residual gap is `3.9536197232736825e-11`. The backend trajectories are therefore
+the same for the cap question: the iteration-10 residual is still 5.567 times
+the declared tolerance on both.
+
+| backend | typed outcome | iterations | contraction | maximum residual | residual / tolerance |
+|---|---|---:|---:|---:|---:|
+| CPU | `WindowConvergenceError` | 10 | `0.64062864104278661` | `0.027837318712361499` | `5.5674637424723` |
+| H200 | `WindowConvergenceError` | 10 | `0.64062864560956367` | `0.027837318751897697` | `5.5674637503795` |
+
+This is a post-band, same-revision comparison. The earlier H200 diagnostic's
+`cpu_baseline` column referred to the pre-band CPU receipt; it is not used in
+the comparison above.
+
+## Per-iteration residual trace
+
+The trace below is the maximum exchanged-field residual at each iteration. The
+companion TSV carries these values as separate backend rows.
+
+| iteration | CPU | H200 | H200 − CPU |
+|---:|---:|---:|---:|
+| 1 | `1.7437508268752859` | `1.7437508267699973` | `-1.0528866667414150e-10` |
+| 2 | `0.91786089149618` | `0.91786089146460281` | `-3.1577185310993627e-11` |
+| 3 | `0.56534643086755976` | `0.56534643078722402` | `-8.0335738061876327e-11` |
+| 4 | `0.36610522239768434` | `0.36610522239943527` | `1.7509327321363344e-12` |
+| 5 | `0.24067272606521295` | `0.24067272598052197` | `-8.4690976454027123e-11` |
+| 6 | `0.15833945163103733` | `0.1583394518032242` | `1.7218687586861847e-10` |
+| 7 | `0.10364417448533883` | `0.10364417458088616` | `9.5547333933687639e-11` |
+| 8 | `0.067359458975216988` | `0.067359458937496688` | `-3.7720299106425159e-11` |
+| 9 | `0.04345312858171492` | `0.043453128333670203` | `-2.4804471671080464e-10` |
+| 10 | `0.027837318712361499` | `0.027837318751897697` | `3.9536197232736825e-11` |
+
+The trace contracts monotonically on both backends, but it does not reach
+`0.005` within the declared ten exchanges. No extra iteration was attempted.
+
+## Sweep timings
+
+The first exchange includes compilation and initialization work and is shown
+separately. Exchanges 2–10 are the warm measurements required for the backend
+comparison.
+
+| iteration | CPU transport (s) | CPU equilibrium + FSA (s) | CPU combined (s) | H200 transport (s) | H200 equilibrium + FSA (s) | H200 combined (s) |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1, first | `6.1526582690421492` | `21.091670485911891` | `27.24432875495404` | `8.8806349746882915` | `14.517610331997275` | `23.398245306685567` |
+| 2, warm | `0.066379386000335217` | `16.613455896964297` | `16.679835282964632` | `0.12869583163410425` | `2.8992416020482779` | `3.0279374336823821` |
+| 3, warm | `0.058593232883140445` | `16.336691282922402` | `16.395284515805542` | `0.133500668220222` | `2.8378217192366719` | `2.9713223874568939` |
+| 4, warm | `0.049338741926476359` | `16.148263353854418` | `16.197602095780894` | `0.1383110024034977` | `2.884596417658031` | `3.0229074200615287` |
+| 5, warm | `0.04941782308742404` | `16.047595913987607` | `16.097013737075031` | `0.13964456971734762` | `2.9028181172907352` | `3.0424626870080829` |
+| 6, warm | `0.046675649005919695` | `15.796611705096439` | `15.843287354102358` | `0.14067873265594244` | `2.8945591514930129` | `3.0352378841489553` |
+| 7, warm | `0.055848311865702271` | `15.713433308061212` | `15.769281619926915` | `0.1324942372739315` | `2.8758839014917612` | `3.0083781387656927` |
+| 8, warm | `0.049676530063152313` | `15.652617630083114` | `15.702294160146266` | `0.13453178852796555` | `2.8514566570520401` | `2.9859884455800056` |
+| 9, warm | `0.055980568053200841` | `15.824666362954304` | `15.880646931007504` | `0.13288355059921741` | `2.8553649671375751` | `2.9882485177367926` |
+| 10, warm | `0.049355150898918509` | `15.658103142865002` | `15.707458293763921` | `0.13153958506882191` | `3.066060789860785` | `3.1976003749296069` |
+
+Across the nine warm exchanges, the combined-sweep median is
+`15.880646931007504 s` on CPU and `3.0229074200615287 s` on H200, a `5.2534×`
+H200 speedup. The equilibrium-plus-FSA median is `15.824666362954304 s` on CPU
+and `2.884596417658031 s` on H200, a `5.4859×` speedup. Warm transport alone is
+small in the wall budget and is slower on H200 here: `0.133500668220222 s`
+median versus `0.049676530063152313 s` on CPU. The instrumented side timings
+sum to `171.5170327455271 s` on CPU and `50.678328596055508 s` on H200; the H200
+driver's full window wall time is `142.68372930213809 s` because it additionally
+serializes placement and failure diagnostics. The CPU run did not wrap the
+whole window in a comparable outer timer, so no cross-backend full-wall ratio
+is claimed.
+
+## Ledger closures
+
+Both failure receipts retain the latest transport ledger. The flux-consumption
+ledger is bit-identical across backends: boundary `0.0031403700691894354 Wb` =
+resistive `0.00043151827341825211 Wb` + internal
+`0.0027088517957711833 Wb`, with zero absolute and relative closure error.
+
+| backend | flux closure absolute / relative | current continuity absolute / relative |
+|---|---:|---:|
+| CPU | `0 Wb` / `0` | `1.1641532182693481e-10 A` / `2.0883354249038394e-16` |
+| H200 | `0 Wb` / `0` | `0 A` / `0` |
+
+The CPU current difference is one floating-point-scale decrement between the
+requested `557455.09288717515 A` and achieved `557455.09288717504 A`; it is a
+closed ledger, not a physical backend separation.
+
+## Owner decision exposed by the measurement
+
+The post-band trajectory requires more than cap 10 on both backends, and the
+same-tree numbers do not support backend-specific cap policy. The owner decision
+is therefore exactly among these three choices; this benchmark does not select
+one:
+
+1. Raise the demonstration cap above 10, accepting more exchanges for a
+   contraction near `0.64062864`.
+2. Make the cap contraction-aware, using the measured contraction and residual
+   trajectory to allocate the bounded iteration budget.
+3. Keep cap 10 and accept the typed `WindowConvergenceError` as correct
+   fail-closed behavior for this demonstration configuration.
+
+The quantitative inputs to that decision are: 10 iterations on both backends,
+contraction gap `4.5667770676161012e-09`, final residual gap
+`3.9536197232736825e-11`, and residual `0.0278373187` against tolerance `0.005`
+on each backend.
+
+## Provenance
+
+- CPU ran first on login node `98dci4-srv-1006.iter.org`, JAX CPU backend,
+  48 visible host CPUs reported by the node, Intel Xeon Gold 6442Y.
+- H200 ran second as SLURM job `1253093` on `betelgeuse` under reservation
+  `gpu_0003_grpA`, one NVIDIA H200 NVL, seven CPUs, 64 GiB requested memory,
+  `TMPDIR=/tmp`, and a 50-minute limit. The allocation completed in 4 minutes
+  33 seconds with exit code zero. The auxiliary telemetry subprocesses were
+  cancelled only at allocation teardown; the benchmark subprocess completed.
+- The H200 driver confirmed float64 throughout its solve arrays. No precision
+  rung, convergence knob, model choice, or product file changed between lanes.
+- CPU used candidate 1 from `scripts/window_demonstration/run_window.py`
+  directly. H200 used `scripts/window_gpu_benchmark/run_gpu_window.py`, which
+  imports the same candidate and `_run_regime` implementation. The batch
+  launcher is `scripts/window_gpu_benchmark/bench.sbatch`.
+- Full raw CPU and H200 receipts remain in the durable crew-run directory as
+  `cpu-results.tsv`, `gpu-results.tsv`, and `gpu-report.md`; the companion
+  `results.tsv` preserves the earlier sensitivity rows and appends the paired
+  same-tree record.
+
+---
+
+# Retained CPU--H200 single-sweep sensitivity isolation
 
 SLURM job `1253092` replayed one host-serialized iteration-1 input (`sha256:fee1c18196eec3e018404480d4083cc3bcfad2222629a0d49c3a5f30e90b1d57`) through one equilibrium sweep and exact dense-lattice extraction on CPU and NVIDIA H200 in float64.
 

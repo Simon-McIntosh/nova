@@ -405,3 +405,64 @@ phi_integrand_level	1	0.95124999999999993			field_function_surface	4.99996837541
 phi_integrand_level	1	0.95124999999999993			phi_integrand	1.198766358812539	1.1987663588125361	2.886579864025407e-15	2.4079586841966134e-15		DIFF
 residual_provenance					same_tree_geometry_phi_boundary	0.024544392673843753	0.024544392673827374	1.6379259060173013e-14			BACKEND_ACQUITTED
 residual_provenance					pre_band_cpu_to_current_cpu	0.024887102508608275	0.024544392673843753	0.00034270983476452245			REVISION_CONFOUND
+same_tree_metadata					source_revision	08f371e139437820d0ca729de384903475ac87d8	08f371e139437820d0ca729de384903475ac87d8				IDENTICAL_TREE
+same_tree_metadata					execution_order	first	second				SERIALIZED_CPU_FIRST
+same_tree_metadata					run_id	login-20260822	1253093				RECORDED
+same_tree_knob					window_length	0.0025000000000000001	0.0025000000000000001				FIXED_IDENTICAL
+same_tree_knob					auxiliary_source_multiplier	0.5	0.5				FIXED_IDENTICAL
+same_tree_knob					iteration_cap	10	10				FIXED_IDENTICAL
+same_tree_knob					tolerance	0.0050000000000000001	0.0050000000000000001				FIXED_IDENTICAL
+same_tree_knob					damping	0.5	0.5				FIXED_IDENTICAL
+same_tree_metadata					preparation_wall_time_seconds	42.326753851026297	59.758106530644				RECORDED
+same_tree_outcome					typed_outcome	WindowConvergenceError	WindowConvergenceError				CAP_EXHAUSTED
+same_tree_outcome					iterations_used	10	10	0	0		CAP_EXHAUSTED
+same_tree_outcome					contraction_estimate	0.64062864104278661	0.64062864560956367	4.5667770676161012e-09	7.1285871018543689e-09		MEASURED
+same_tree_outcome					maximum_exit_residual	0.027837318712361499	0.027837318751897697	3.9536197232736825e-11			ABOVE_TOLERANCE
+same_tree_residual	1			combined	maximum_residual	1.7437508268752859	1.7437508267699973	1.0528866667414150e-10			EXHAUSTED_TRACE
+same_tree_residual	2			combined	maximum_residual	0.91786089149618	0.91786089146460281	3.1577185310993627e-11			EXHAUSTED_TRACE
+same_tree_residual	3			combined	maximum_residual	0.56534643086755976	0.56534643078722402	8.0335738061876327e-11			EXHAUSTED_TRACE
+same_tree_residual	4			combined	maximum_residual	0.36610522239768434	0.36610522239943527	1.7509327321363344e-12			EXHAUSTED_TRACE
+same_tree_residual	5			combined	maximum_residual	0.24067272606521295	0.24067272598052197	8.4690976454027123e-11			EXHAUSTED_TRACE
+same_tree_residual	6			combined	maximum_residual	0.15833945163103733	0.1583394518032242	1.7218687586861847e-10			EXHAUSTED_TRACE
+same_tree_residual	7			combined	maximum_residual	0.10364417448533883	0.10364417458088616	9.5547333933687639e-11			EXHAUSTED_TRACE
+same_tree_residual	8			combined	maximum_residual	0.067359458975216988	0.067359458937496688	3.7720299106425159e-11			EXHAUSTED_TRACE
+same_tree_residual	9			combined	maximum_residual	0.04345312858171492	0.043453128333670203	2.4804471671080464e-10			EXHAUSTED_TRACE
+same_tree_residual	10			combined	maximum_residual	0.027837318712361499	0.027837318751897697	3.9536197232736825e-11			EXHAUSTED_TRACE
+same_tree_first_sweep	1			transport	wall_time_seconds	6.1526582690421492	8.8806349746882915				FIRST_SWEEP
+same_tree_first_sweep	1			equilibrium_plus_fsa	wall_time_seconds	21.091670485911891	14.517610331997275				FIRST_SWEEP
+same_tree_first_sweep	1			combined	wall_time_seconds	27.24432875495404	23.398245306685567				FIRST_SWEEP
+same_tree_warm_sweep	2			transport	wall_time_seconds	0.066379386000335217	0.12869583163410425				WARM
+same_tree_warm_sweep	2			equilibrium_plus_fsa	wall_time_seconds	16.613455896964297	2.8992416020482779				WARM
+same_tree_warm_sweep	2			combined	wall_time_seconds	16.679835282964632	3.0279374336823821				WARM
+same_tree_warm_sweep	3			transport	wall_time_seconds	0.058593232883140445	0.133500668220222				WARM
+same_tree_warm_sweep	3			equilibrium_plus_fsa	wall_time_seconds	16.336691282922402	2.8378217192366719				WARM
+same_tree_warm_sweep	3			combined	wall_time_seconds	16.395284515805542	2.9713223874568939				WARM
+same_tree_warm_sweep	4			transport	wall_time_seconds	0.049338741926476359	0.1383110024034977				WARM
+same_tree_warm_sweep	4			equilibrium_plus_fsa	wall_time_seconds	16.148263353854418	2.884596417658031				WARM
+same_tree_warm_sweep	4			combined	wall_time_seconds	16.197602095780894	3.0229074200615287				WARM
+same_tree_warm_sweep	5			transport	wall_time_seconds	0.04941782308742404	0.13964456971734762				WARM
+same_tree_warm_sweep	5			equilibrium_plus_fsa	wall_time_seconds	16.047595913987607	2.9028181172907352				WARM
+same_tree_warm_sweep	5			combined	wall_time_seconds	16.097013737075031	3.0424626870080829				WARM
+same_tree_warm_sweep	6			transport	wall_time_seconds	0.046675649005919695	0.14067873265594244				WARM
+same_tree_warm_sweep	6			equilibrium_plus_fsa	wall_time_seconds	15.796611705096439	2.8945591514930129				WARM
+same_tree_warm_sweep	6			combined	wall_time_seconds	15.843287354102358	3.0352378841489553				WARM
+same_tree_warm_sweep	7			transport	wall_time_seconds	0.055848311865702271	0.1324942372739315				WARM
+same_tree_warm_sweep	7			equilibrium_plus_fsa	wall_time_seconds	15.713433308061212	2.8758839014917612				WARM
+same_tree_warm_sweep	7			combined	wall_time_seconds	15.769281619926915	3.0083781387656927				WARM
+same_tree_warm_sweep	8			transport	wall_time_seconds	0.049676530063152313	0.13453178852796555				WARM
+same_tree_warm_sweep	8			equilibrium_plus_fsa	wall_time_seconds	15.652617630083114	2.8514566570520401				WARM
+same_tree_warm_sweep	8			combined	wall_time_seconds	15.702294160146266	2.9859884455800056				WARM
+same_tree_warm_sweep	9			transport	wall_time_seconds	0.055980568053200841	0.13288355059921741				WARM
+same_tree_warm_sweep	9			equilibrium_plus_fsa	wall_time_seconds	15.824666362954304	2.8553649671375751				WARM
+same_tree_warm_sweep	9			combined	wall_time_seconds	15.880646931007504	2.9882485177367926				WARM
+same_tree_warm_sweep	10			transport	wall_time_seconds	0.049355150898918509	0.13153958506882191				WARM
+same_tree_warm_sweep	10			equilibrium_plus_fsa	wall_time_seconds	15.658103142865002	3.066060789860785				WARM
+same_tree_warm_sweep	10			combined	wall_time_seconds	15.707458293763921	3.1976003749296069				WARM
+same_tree_warm_summary	2-10			transport	median_wall_time_seconds	0.049676530063152313	0.133500668220222				MEDIAN_N9
+same_tree_warm_summary	2-10			equilibrium_plus_fsa	median_wall_time_seconds	15.824666362954304	2.884596417658031				MEDIAN_N9
+same_tree_warm_summary	2-10			combined	median_wall_time_seconds	15.880646931007504	3.0229074200615287				MEDIAN_N9
+same_tree_ledger	10			transport	flux_closure_error	0	0				CLOSED
+same_tree_ledger	10			transport	flux_closure_residual	0	0				CLOSED
+same_tree_ledger	10			transport	current_continuity_error	1.1641532182693481e-10	0				CLOSED
+same_tree_ledger	10			transport	current_continuity_residual	2.0883354249038394e-16	0				CLOSED
+same_tree_decision					cap_policy	raise cap | contraction-aware cap | accept exhaustion	raise cap | contraction-aware cap | accept exhaustion				OWNER_DECISION

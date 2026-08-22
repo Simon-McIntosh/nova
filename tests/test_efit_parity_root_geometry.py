@@ -79,3 +79,38 @@ def test_banked_receipt_attributes_open_longest_component() -> None:
     )
     assert receipt["banked_artifact_integrity"]["verified_digest_count"] == 23
     assert receipt["constrained_root"]["terminal_state"]["value_count"] == 1126
+
+
+def test_banked_receipt_applies_constrained_map_once_at_reference() -> None:
+    receipt = json.loads(
+        Path(
+            "docs/figures/efit-forward-parity/converged-root-geometry-attribution.json"
+        ).read_text()
+    )
+    record = receipt["constrained_map_at_reference_flux"]
+    execution = record["execution_contract"]
+    comparators = record["banked_comparators"]
+
+    assert execution == {
+        "nonlinear_solve_calls": 0,
+        "constrained_map_primal_applications": 1,
+        "tangent_applications": 0,
+        "method": (
+            "jax.linearize primal at the stored reference state, matching "
+            "_composition_case_receipt with target_current supplied"
+        ),
+    }
+    assert record["constraint"] == {
+        "target_current_a": 933034.875,
+        "prescribed_circuit_count": 101,
+    }
+    assert comparators["banked_mast_active_only_update"] == {
+        "sup_fraction_of_span": 0.04075378153386053,
+        "rms_fraction_of_span": 0.016584418612654646,
+    }
+    assert comparators["banked_wall_boundary_imbalance"] == {
+        "before_passive_repair_fraction_of_span": 0.03440945100896484,
+        "after_passive_repair_fraction_of_span": 0.004067584380328243,
+    }
+    assert record["decomposition_closure"]["sup_wb"] <= 5.0e-15
+    assert receipt["banked_artifact_integrity"]["verified_digest_count"] == 23

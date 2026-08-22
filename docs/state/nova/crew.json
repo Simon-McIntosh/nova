@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T10:59:39",
+  "updated": "2026-08-22T11:07:55",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -21069,9 +21069,66 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T085939894186-ecoila-unit-premise",
+        "plan": "coil-circuit-discovery",
+        "section": "\u00a73",
+        "node": "ecoila-unit-premise",
+        "role": "implement",
+        "member": "circuit-scout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T08:59:44Z",
+        "completed_at": "2026-08-22T09:05:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 367,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 367,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "63bd8d15fc15a4db94f849e37a3ae1c062419614",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T085939894186-ecoila-unit-premise/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02627-434c-7813-854b-811643929182",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2211840,
+            "cached_input_tokens_cumulative": 15267072,
+            "input_tokens": 2302925,
+            "input_tokens_cumulative": 16254406,
+            "output_tokens": 13957,
+            "output_tokens_cumulative": 63259,
+            "reasoning_output_tokens": 5283,
+            "reasoning_output_tokens_cumulative": 17273
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 510
+    "_version": 511
   }
 }

@@ -40,9 +40,10 @@ THINCURR_EFFECTIVE_THICKNESS_RANGE_M = (0.010, 0.025)
 NOMINAL_STRUCTURAL_THICKNESS_M = math.sqrt(
     STRUCTURAL_THICKNESS_RANGE_M[0] * STRUCTURAL_THICKNESS_RANGE_M[1]
 )
-LOOP_COUNT = 48
+LOOP_COUNT = 47
 MINIMUM_SLENDERNESS = 5.0
 AREA_RELATIVE_TOLERANCE = 1.0e-4
+ARC_MEASUREMENT_TOLERANCE_M = 1.0e-12
 
 THINCURR_SOURCE = "https://arxiv.org/abs/2309.15336"
 VESSEL_DESIGN_SOURCE = (
@@ -122,6 +123,57 @@ class DiiidPassiveDescription:
             raise DiiidPassiveError(f"the description must contain {LOOP_COUNT} loops")
         for loop in self.loops:
             loop.validate()
+        physical, _ = _physical_wall(self.limiter_contour_rz_m)
+        from shapely.geometry import LineString
+
+        outer_wall = LineString(physical.exterior.coords)
+        structural_lower, structural_upper = STRUCTURAL_THICKNESS_RANGE_M
+        effective_lower, effective_upper = THINCURR_EFFECTIVE_THICKNESS_RANGE_M
+        for loop in self.loops:
+            measured_length = _measured_wall_arc(loop.outline_rz_m, outer_wall)
+            if not math.isclose(
+                loop.poloidal_length_m,
+                measured_length,
+                rel_tol=0.0,
+                abs_tol=5.0e-10,
+            ):
+                raise DiiidPassiveError(
+                    f"{loop.name} length is not derived from its wall arc"
+                )
+            measured_aspect = measured_length / loop.through_thickness_m
+            if not math.isclose(
+                loop.aspect_ratio, measured_aspect, rel_tol=0.0, abs_tol=2.0e-8
+            ):
+                raise DiiidPassiveError(
+                    f"{loop.name} aspect ratio is not geometry-derived"
+                )
+            expected_resistances = (
+                _resistance(
+                    loop.centroid_rz_m[0],
+                    measured_length,
+                    NOMINAL_STRUCTURAL_THICKNESS_M,
+                ),
+                _resistance(loop.centroid_rz_m[0], measured_length, structural_upper),
+                _resistance(loop.centroid_rz_m[0], measured_length, structural_lower),
+                _resistance(loop.centroid_rz_m[0], measured_length, effective_upper),
+                _resistance(loop.centroid_rz_m[0], measured_length, effective_lower),
+            )
+            observed_resistances = (
+                loop.resistance_ohm,
+                loop.resistance_lower_ohm,
+                loop.resistance_upper_ohm,
+                loop.thincurr_resistance_lower_ohm,
+                loop.thincurr_resistance_upper_ohm,
+            )
+            if not np.allclose(
+                observed_resistances,
+                expected_resistances,
+                rtol=1.0e-12,
+                atol=0.0,
+            ):
+                raise DiiidPassiveError(
+                    f"{loop.name} resistance is not geometry-derived"
+                )
         operator = np.asarray(self.self_inductance_operator_wb_per_a, dtype=float)
         if operator.shape != (LOOP_COUNT, LOOP_COUNT):
             raise DiiidPassiveError("the interaction operator has the wrong shape")
@@ -160,53 +212,107 @@ def _resistance(radius_m: float, length_m: float, thickness_m: float) -> float:
     )
 
 
-def _wall_polygons() -> tuple[tuple[PassiveLoop, ...], np.ndarray, float, float, float]:
-    """Partition the physical limiter wall band by equal-arclength generators."""
+def _physical_wall(limiter: np.ndarray) -> tuple[Any, float]:
+    """Return the physical repaired limiter component and excluded residue area."""
 
-    from shapely import make_valid, voronoi_polygons
-    from shapely.geometry import MultiPoint, Polygon
+    from shapely import make_valid
+    from shapely.geometry import Polygon
 
-    with np.load(SOURCE_OPERATOR, allow_pickle=False) as bank:
-        limiter = np.asarray(bank["limiter_contour_rz_m"], dtype=float).copy()
     repaired = make_valid(Polygon(limiter[:-1]))
     parts = sorted(
         repaired.geoms if hasattr(repaired, "geoms") else (repaired,),
         key=lambda polygon: polygon.area,
         reverse=True,
     )
-    physical = parts[0]
-    excluded_area = float(sum(polygon.area for polygon in parts[1:]))
+    return parts[0], float(sum(polygon.area for polygon in parts[1:]))
+
+
+def _forward_arc_coordinates(line: Any, start: float, end: float) -> np.ndarray:
+    """Return coordinates along a closed line over an unwrapped distance span."""
+
+    from shapely.ops import substring
+
+    length = float(line.length)
+    start_wrapped = start % length
+    stop_unwrapped = start_wrapped + (end - start)
+    if stop_unwrapped <= length:
+        return np.asarray(
+            substring(line, start_wrapped, stop_unwrapped).coords, dtype=float
+        )
+    first = np.asarray(substring(line, start_wrapped, length).coords, dtype=float)
+    second = np.asarray(
+        substring(line, 0.0, stop_unwrapped - length).coords, dtype=float
+    )
+    return np.vstack((first, second[1:]))
+
+
+def _measured_wall_arc(outline: np.ndarray, outer_wall: Any) -> float:
+    """Measure the exterior wall arc owned by a final polygon outline."""
+
+    from shapely.geometry import Polygon
+
+    polygon = Polygon(np.asarray(outline, dtype=float))
+    return float(
+        outer_wall.intersection(polygon.buffer(ARC_MEASUREMENT_TOLERANCE_M)).length
+    )
+
+
+def _wall_polygons() -> tuple[tuple[PassiveLoop, ...], np.ndarray, float, float, float]:
+    """Partition the wall band with cuts at exact exterior arclength intervals."""
+
+    from shapely.geometry import LineString, Polygon
+
+    with np.load(SOURCE_OPERATOR, allow_pickle=False) as bank:
+        limiter = np.asarray(bank["limiter_contour_rz_m"], dtype=float).copy()
+    physical, excluded_area = _physical_wall(limiter)
     inner = physical.buffer(-NOMINAL_STRUCTURAL_THICKNESS_M, join_style="mitre")
     band = physical.difference(inner)
-    perimeter = float(physical.exterior.length)
-    segment_length = perimeter / LOOP_COUNT
-    if segment_length / NOMINAL_STRUCTURAL_THICKNESS_M < MINIMUM_SLENDERNESS:
+    outer_wall = LineString(physical.exterior.coords)
+    inner_wall = LineString(inner.exterior.coords)
+    segment_span = float(outer_wall.length) / LOOP_COUNT
+    if segment_span / NOMINAL_STRUCTURAL_THICKNESS_M < MINIMUM_SLENDERNESS:
         raise DiiidPassiveError("the segmentation rule violates slenderness")
 
-    generators = [
-        physical.exterior.interpolate((index + 0.5) * segment_length)
-        for index in range(LOOP_COUNT)
+    outer_cut_points = [
+        outer_wall.interpolate(index * segment_span) for index in range(LOOP_COUNT)
     ]
-    regions = voronoi_polygons(
-        MultiPoint(generators), extend_to=physical.envelope, ordered=True
+    inner_cut_positions = [
+        float(inner_wall.project(point)) for point in outer_cut_points
+    ]
+    unwrapped_inner_positions = [inner_cut_positions[0]]
+    for position in inner_cut_positions[1:]:
+        while position <= unwrapped_inner_positions[-1] + 1.0e-12:
+            position += float(inner_wall.length)
+        unwrapped_inner_positions.append(position)
+    unwrapped_inner_positions.append(
+        unwrapped_inner_positions[0] + float(inner_wall.length)
     )
+    if not np.all(np.diff(unwrapped_inner_positions) > 0.0):
+        raise DiiidPassiveError("inner wall cut mapping is not one-to-one")
+
     loops: list[PassiveLoop] = []
     meshed_area = 0.0
-    for index, region in enumerate(regions.geoms):
-        intersection = region.intersection(band)
-        polygons = (
-            list(intersection.geoms)
-            if hasattr(intersection, "geoms")
-            else [intersection]
+    for index in range(LOOP_COUNT):
+        outer_arc = _forward_arc_coordinates(
+            outer_wall, index * segment_span, (index + 1) * segment_span
         )
-        polygons = [
-            polygon
-            for polygon in polygons
-            if polygon.geom_type == "Polygon" and polygon.area > 1.0e-12
-        ]
-        polygon = max(polygons, key=lambda candidate: candidate.area)
+        inner_arc = _forward_arc_coordinates(
+            inner_wall,
+            unwrapped_inner_positions[index],
+            unwrapped_inner_positions[index + 1],
+        )
+        candidate = Polygon(np.vstack((outer_arc, inner_arc[::-1])))
+        polygon = candidate.intersection(band)
+        if polygon.geom_type != "Polygon" or polygon.is_empty:
+            raise DiiidPassiveError(f"wall cut {index} did not produce one polygon")
         outline = np.asarray(polygon.exterior.coords, dtype=float)[:-1, :2]
         radius = float(polygon.centroid.x)
+        measured_length = _measured_wall_arc(outline, outer_wall)
+        aspect_ratio = measured_length / NOMINAL_STRUCTURAL_THICKNESS_M
+        if aspect_ratio < MINIMUM_SLENDERNESS:
+            raise DiiidPassiveError(
+                f"wall cut {index} measured aspect ratio {aspect_ratio}"
+            )
         structural_lower, structural_upper = STRUCTURAL_THICKNESS_RANGE_M
         effective_lower, effective_upper = THINCURR_EFFECTIVE_THICKNESS_RANGE_M
         loops.append(
@@ -215,23 +321,23 @@ def _wall_polygons() -> tuple[tuple[PassiveLoop, ...], np.ndarray, float, float,
                 outline_rz_m=outline,
                 area_m2=float(polygon.area),
                 centroid_rz_m=(radius, float(polygon.centroid.y)),
-                poloidal_length_m=segment_length,
+                poloidal_length_m=measured_length,
                 through_thickness_m=NOMINAL_STRUCTURAL_THICKNESS_M,
-                aspect_ratio=segment_length / NOMINAL_STRUCTURAL_THICKNESS_M,
+                aspect_ratio=aspect_ratio,
                 resistance_ohm=_resistance(
-                    radius, segment_length, NOMINAL_STRUCTURAL_THICKNESS_M
+                    radius, measured_length, NOMINAL_STRUCTURAL_THICKNESS_M
                 ),
                 resistance_lower_ohm=_resistance(
-                    radius, segment_length, structural_upper
+                    radius, measured_length, structural_upper
                 ),
                 resistance_upper_ohm=_resistance(
-                    radius, segment_length, structural_lower
+                    radius, measured_length, structural_lower
                 ),
                 thincurr_resistance_lower_ohm=_resistance(
-                    radius, segment_length, effective_upper
+                    radius, measured_length, effective_upper
                 ),
                 thincurr_resistance_upper_ohm=_resistance(
-                    radius, segment_length, effective_lower
+                    radius, measured_length, effective_lower
                 ),
             )
         )
@@ -263,7 +369,7 @@ def _author_ids(loops: tuple[PassiveLoop, ...]) -> Any:
         target.element.resize(1)
         element = target.element[0]
         element.name = f"{source.name}_section"
-        element.description = "wall-band polygon from equal-arclength segmentation"
+        element.description = "wall-band polygon bounded by true-arclength cuts"
         element.area = source.area_m2
         element.turns_with_sign = 1.0
         element.geometry.geometry_type = 1
@@ -418,12 +524,13 @@ def build_receipt(description: DiiidPassiveDescription) -> dict[str, Any]:
             "loop_count": len(description.loops),
             "limiter_vertex_count": len(description.limiter_contour_rz_m),
             "segmentation_rule": (
-                "the nominal structural wall band is assigned to 48 nearest "
-                "equal-arclength exterior generators"
+                "cut the nominal structural wall band at 47 exact exterior-wall "
+                "arclength intervals and connect each cut to the nearest point on "
+                "the inward offset"
             ),
             "segmentation_justification": (
-                "48 segments retain wall-following resolution while keeping every "
-                "poloidal length at least five times the through-thickness width"
+                "47 is the highest one-to-one cut count used here whose measured "
+                "polygon wall arcs all remain above five times the thickness"
             ),
             "wall_band_reference_area_m2": description.wall_band_area_m2,
             "polygon_area_sum_m2": float(
@@ -434,6 +541,9 @@ def build_receipt(description: DiiidPassiveDescription) -> dict[str, Any]:
             "minimum_slenderness": MINIMUM_SLENDERNESS,
             "aspect_ratio": _distribution(
                 [loop.aspect_ratio for loop in description.loops]
+            ),
+            "measured_wall_arc_m": _distribution(
+                [loop.poloidal_length_m for loop in description.loops]
             ),
             "per_loop_geometry_banked": [
                 "outline",
@@ -479,6 +589,11 @@ def build_receipt(description: DiiidPassiveDescription) -> dict[str, Any]:
             "hex_operator_comparison": {
                 "condition_number_2": 372.65522630279304,
                 "diagonal_dominance_ratio": 0.029841680213628683,
+            },
+            "generator_voronoi_operator_comparison": {
+                "loop_count": 48,
+                "condition_number_2": 94.08069604267371,
+                "diagonal_dominance_ratio": 0.1007365404107977,
             },
             "eigenmode_reduction_caveat": (
                 "operator conditioning and off-diagonal coupling prohibit treating "

@@ -91,7 +91,9 @@ from nova.equilibrium.conservation import (
 from nova.equilibrium.domain import DomainMasks
 from nova.equilibrium.forward_operator import ForwardFluxOperator
 from nova.equilibrium.moment import (
+    CurrentIntegralSupport,
     CurrentCells,
+    MomentSeed,
     MomentConfig,
     MomentOrder,
     ReconstructMoment,
@@ -548,6 +550,77 @@ class ForwardProfile:
                 declared_boundary=declared_boundary,
                 stored_flux_samples_used=jnp.zeros(branch_count, dtype=bool),
             )
+        )
+
+    def moment_seed(
+        self,
+        boundary,
+        plasma_current: float,
+        *,
+        current=None,
+        radius_fraction: float | None = None,
+    ) -> MomentSeed:
+        """Predict amplitude/centroid and construct a constrained initial state.
+
+        The flux-functions-only prediction is evaluated on the supplied
+        boundary hypothesis by :class:`ReconstructMoment`. The compact seed
+        then uses that class's disc support with a degree-one cell-centering
+        correction, carrying the predicted net current and centroid exactly.
+        Its radius remains a limiter-derived construction scale rather than a
+        claimed width prediction.
+        """
+
+        coordinate = np.asarray(self.operator.grid.coordinate, dtype=np.float64)
+        candidate = np.asarray(self.operator.inside_material, dtype=np.float64)
+        reconstruction = ReconstructMoment(
+            CurrentCells(
+                coordinate[:, 0],
+                coordinate[:, 1],
+                candidate=candidate,
+            ),
+            major_radius=float(np.mean(coordinate[:, 0])),
+            config=MomentConfig(order=MomentOrder.CENTROID),
+        )
+        prediction = reconstruction.predict_profile_moments(
+            self.source.core,
+            np.asarray(boundary, dtype=np.float64),
+            float(plasma_current),
+            cell_area=np.asarray(self.lattice.cell_area, dtype=np.float64),
+        )
+        centre = np.asarray(prediction.centroid, dtype=np.float64)
+        wall = np.asarray(self.operator.wall.coordinate, dtype=np.float64)
+        inboard, outboard = limiter_radial_extent(wall[:, 0], wall[:, 1], centre[1])
+        supported_distance = min(centre[0] - inboard, outboard - centre[0])
+        if supported_distance <= 0.0:
+            raise ValueError("the predicted current centroid lies outside the limiter")
+        fraction = (
+            reconstruction.config.seed_radius_fraction
+            if radius_fraction is None
+            else float(radius_fraction)
+        )
+        if not 0.0 < fraction <= 1.0:
+            raise ValueError("radius_fraction must lie in (0, 1]")
+        radius = fraction * supported_distance
+        cell_current = reconstruction.centroid_disc(
+            prediction.centroid_r,
+            prediction.centroid_z,
+            radius,
+            prediction.plasma_current,
+        )
+        uniform = jnp.asarray(cell_current, dtype=jnp.float64)
+        zero = jnp.zeros_like(uniform)
+        physical = CellCurrentMoments(uniform, zero, zero)
+        coefficients = self.operator.coupling_current_moments(physical)
+        flux = self.operator.external(current) + self.operator.current_moment_image(
+            coefficients
+        )
+        return MomentSeed(
+            flux=flux,
+            cell_current=uniform,
+            moments=prediction,
+            radius=float(radius),
+            support=CurrentIntegralSupport.COMPACT_CENTROID_DISC,
+            supported_cells=int(np.count_nonzero(cell_current)),
         )
 
     def _saddle_geometry_seed(

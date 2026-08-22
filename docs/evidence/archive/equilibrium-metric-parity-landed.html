@@ -189,5 +189,28 @@
   Each shot uses its own <code>+1</code> four-way-agreeing sign receipt from the current-sign census rather
   than a single assumption.</p>
 
+
+  <h3 id="li-radius-restore">Legacy internal-inductance radius restored on the pulse-design path</h3>
+
+  <p><strong>Commit <code>88effd71</code> (merged <code>aba2ede0</code>); gate passed.</strong> The legacy
+  <code>Plasma.li_3</code> property in <code>nova/biot/plasma.py</code> normalised by a literal
+  6.2&nbsp;m — ITER's major radius — with the geometric-radius expression commented out beside it, so any
+  non-ITER machine on the pulse-design path misstated internal inductance by the ratio of 6.2 to its true
+  geometric radius (7.48&times; on MAST). The property now reads
+  <code>self.lcfs.geometric_radius</code>.</p>
+
+  <p>Both pulse-design consumers were audited read-only <em>before</em> the input changed and carry no
+  baked-in compensation: <code>nova/imas/pulsedesign.py</code> copies <code>li_3</code> unchanged into the
+  waveform and the equilibrium global quantities, and <code>nova/imas/pulseschedule.py</code> reads
+  <code>flux_control.li_3.reference.data</code> unchanged. The direct regression
+  (<code>tests/test_plasma_internal_inductance.py</code>) pins the legacy property against the forward
+  moment observation's internal inductance on shared three-cell state at geometric radius 0.83&nbsp;m,
+  agreeing at rtol 1e-12 (1/1 passed, 7.46&nbsp;s); the deliberate non-ITER radius means reinstating the
+  literal fails the comparison by the 0.83/6.2 ratio.</p>
+
+  <p>This defect was found by the moment-infrastructure survey and is explicitly <em>excluded</em> as the
+  cause of the 0.602 field-energy instrument ratio (wrong magnitude; that measurement never routed through
+  this property).</p>
+
 </main></body>
 </html>

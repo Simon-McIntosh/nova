@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T22:49:15",
+  "updated": "2026-08-22T23:10:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -302,7 +302,7 @@
         "id": "inductance-support",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02b48-c5f2-7eb1-964c-2088fa60f26e",
         "created": "2026-08-22"
       },
       {
@@ -23741,9 +23741,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T210301447926-li-geometric-radius-restore",
+        "plan": "equilibrium-metric-parity",
+        "section": "\u00a73",
+        "node": "li-geometric-radius-restore",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "inductance-support",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T21:03:04Z",
+        "completed_at": "2026-08-22T21:08:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 349,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 349,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "1583381cb1747ca9242af423b97e28cf9396af63",
+        "commits": [
+          "88effd71b3fe0f93b7fea32c2829eacf7c8dfcf1"
+        ],
+        "changed_lines": {
+          "added": 46,
+          "removed": 1,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T210301447926-li-geometric-radius-restore/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02b48-c5f2-7eb1-964c-2088fa60f26e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1916416,
+            "cached_input_tokens_cumulative": 1916416,
+            "input_tokens": 2018413,
+            "input_tokens_cumulative": 2018413,
+            "output_tokens": 13246,
+            "output_tokens_cumulative": 13246,
+            "reasoning_output_tokens": 4897,
+            "reasoning_output_tokens_cumulative": 4897
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 575
+    "_version": 577
   }
 }

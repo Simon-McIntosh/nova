@@ -1,8 +1,8 @@
 """Measure whether an exact plasma-current constraint changes the forward map.
 
 The experiment keeps Nova's absolute-source production policy untouched and
-wraps the existing free-boundary map in closed-form elimination of one common
-profile amplitude.  The recorded plasma current is a prescribed input of the
+drives the public free-boundary target-current map, which eliminates one common
+profile amplitude. The recorded plasma current is a prescribed input of the
 same class as the coil currents; it is neither fitted nor inferred inside the
 equilibrium solve.
 """
@@ -10,7 +10,6 @@ equilibrium solve.
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
 import hashlib
 import json
 from pathlib import Path
@@ -46,7 +45,10 @@ from benchmarks.diiid_forward_gs_match import (
 )
 from nova.equilibrium import fixed_point
 from nova.equilibrium.forward import ForwardProfile
-from nova.equilibrium.stencil_mesh import CellCurrentMoments
+from nova.equilibrium.source import (
+    CurrentNormalisationError,
+    SCALAR_CURRENT_AMPLITUDE_BAND,
+)
 from nova.equilibrium.topology import TopologyClass
 from nova.imas.diiid_current import (
     complete_profile_current_adapter,
@@ -72,7 +74,6 @@ DIAGNOSTIC_FRAME_102 = {
     "eliminated_iterations": 4,
     "eliminated_topology": "diverted",
 }
-LAMBDA_BAND = (1.0e-6, 1.0e6)
 RELATIVE_RESIDUAL_CRITERION = 1.0e-6
 CURRENT_CONSTRAINT_CRITERION = 1.0e-10
 UNPINNED_PLATEAU_CONTROL = 3.491124178554655e-2
@@ -140,32 +141,12 @@ REPRESENTATIVE_COHORT = (
 )
 
 
-class LambdaOutOfBand(RuntimeError):
-    """Report a profile amplitude outside the declared admissible band."""
-
-    def __init__(self, value: float):
-        self.value = float(value)
-        super().__init__(
-            f"profile amplitude {self.value:.12g} is outside {LAMBDA_BAND}"
-        )
-
-
 class _CriterionReached(Exception):
     """Stop a host root immediately after both declared criteria are met."""
 
     def __init__(self, state: np.ndarray):
         self.state = np.asarray(state, dtype=float)
         super().__init__("declared residual criteria reached")
-
-
-@dataclass(frozen=True)
-class MapEvaluation:
-    """One constrained image and its current-amplitude diagnostics."""
-
-    image: np.ndarray
-    amplitude: float
-    unscaled_current_a: float
-    achieved_current_a: float
 
 
 def preregistration() -> dict[str, Any]:
@@ -261,7 +242,7 @@ def preregistration() -> dict[str, Any]:
             "maximum_inner_iterations": HOST_INNER_ITERATIONS,
         },
         "lambda_guard": {
-            "inclusive_band": list(LAMBDA_BAND),
+            "inclusive_band": list(SCALAR_CURRENT_AMPLITUDE_BAND),
             "policy": (
                 "no clipping: evaluation raises LambdaOutOfBand and the arm records "
                 "a loud guard termination"
@@ -355,78 +336,6 @@ def _target_current(row: dict[str, Any], time_ms: float) -> float:
     if not np.isfinite(target) or abs(target) <= np.finfo(float).tiny:
         raise RuntimeError(f"target plasma current {target} A is not qualified")
     return target
-
-
-def _scaled_moments(
-    moments: CellCurrentMoments, amplitude: jax.Array
-) -> CellCurrentMoments:
-    """Scale the common p-prime and FF-prime amplitude at current-image level."""
-
-    return CellCurrentMoments(*(amplitude * value for value in moments))
-
-
-def _lambda_value(target_current_a: float, unscaled_current_a: float) -> float:
-    """Return the eliminated amplitude or raise on the declared guard."""
-
-    if not np.isfinite(target_current_a) or not np.isfinite(unscaled_current_a):
-        raise LambdaOutOfBand(float("nan"))
-    if unscaled_current_a == 0.0:
-        raise LambdaOutOfBand(float("inf"))
-    amplitude = float(target_current_a / unscaled_current_a)
-    if not np.isfinite(amplitude) or not (
-        LAMBDA_BAND[0] <= amplitude <= LAMBDA_BAND[1]
-    ):
-        raise LambdaOutOfBand(amplitude)
-    return amplitude
-
-
-def eliminated_map(
-    profile: ForwardProfile, current: np.ndarray, target_current_a: float
-) -> tuple[Callable[[jax.Array], jax.Array], Callable[[np.ndarray], MapEvaluation]]:
-    """Return the exact-amplitude map and a guarded host evaluation wrapper."""
-
-    operator = profile.operator
-    external = operator.external(jnp.asarray(current))
-
-    def traced_moments(state: jax.Array):
-        moments = operator.cell_current_moments(state, TopologyClass.DIVERTED)
-        unscaled = jnp.sum(moments.cell_current)
-        return moments, unscaled
-
-    def traced_image(moments: CellCurrentMoments, amplitude: jax.Array):
-        return external + operator.current_moment_image(
-            _scaled_moments(moments, amplitude)
-        )
-
-    compiled_moments = jax.jit(traced_moments)
-    compiled_image = jax.jit(traced_image)
-
-    def mapped(state: jax.Array) -> jax.Array:
-        moments, unscaled = traced_moments(state)
-        target = jnp.asarray(target_current_a, dtype=unscaled.dtype)
-        magnitude = jnp.abs(unscaled)
-        admissible = (
-            jnp.isfinite(unscaled)
-            & (target * unscaled > 0.0)
-            & (jnp.abs(target) >= LAMBDA_BAND[0] * magnitude)
-            & (jnp.abs(target) <= LAMBDA_BAND[1] * magnitude)
-        )
-        safe_unscaled = jnp.where(admissible, unscaled, jnp.sign(target))
-        amplitude = target / safe_unscaled
-        return traced_image(moments, amplitude)
-
-    def evaluated(state: np.ndarray) -> MapEvaluation:
-        moments, unscaled = compiled_moments(jnp.asarray(state))
-        amplitude_value = _lambda_value(target_current_a, float(unscaled))
-        image = compiled_image(moments, jnp.asarray(amplitude_value))
-        return MapEvaluation(
-            image=np.asarray(image, dtype=float),
-            amplitude=amplitude_value,
-            unscaled_current_a=float(unscaled),
-            achieved_current_a=amplitude_value * float(unscaled),
-        )
-
-    return mapped, evaluated
 
 
 def description_driven_currents(
@@ -575,45 +484,65 @@ def _topology(profile: ForwardProfile, state: np.ndarray) -> tuple[str, np.ndarr
     return name, np.asarray(topology.x_point, dtype=float)
 
 
-def solve_eliminated(
+def solve_constrained(
     profile: ForwardProfile,
     seed: np.ndarray,
     current: np.ndarray,
     target_current_a: float,
 ) -> dict[str, Any]:
-    """Solve the square eliminated system and retain every accepted residual."""
+    """Drive the public declared-current map and retain accepted residuals."""
 
-    mapped, evaluate = eliminated_map(profile, current, target_current_a)
+    current_array = jnp.asarray(current)
+    mapped = profile.flux_map(
+        current_array,
+        requested_class=TopologyClass.DIVERTED,
+        target_current=target_current_a,
+    )
+
+    def evaluate(state: np.ndarray) -> tuple[np.ndarray, float, float]:
+        state_array = jnp.asarray(state)
+        moments, amplitude = profile.operator.normalised_current_moments(
+            state_array,
+            target_current_a,
+            requested_class=TopologyClass.DIVERTED,
+        )
+        image = mapped(state_array)
+        return (
+            np.asarray(image, dtype=float),
+            float(amplitude),
+            float(jnp.sum(moments.cell_current)),
+        )
+
     history: list[float] = []
     amplitude_history: list[float] = []
     maximum_current_error = 0.0
     evaluations = 0
     rejected_trial_evaluations = 0
     initial = np.asarray(seed, dtype=float)
-    initial_item = evaluate(initial)
-    rejection_scale = 1.0e6 * max(float(np.max(np.abs(initial_item.image))), 1.0)
+    initial_image, _initial_amplitude, _initial_current = evaluate(initial)
+    rejection_scale = 1.0e6 * max(float(np.max(np.abs(initial_image))), 1.0)
 
     def residual(state: np.ndarray) -> np.ndarray:
         nonlocal evaluations, maximum_current_error, rejected_trial_evaluations
         evaluations += 1
         try:
-            item = evaluate(state)
-        except LambdaOutOfBand:
+            image, _amplitude, achieved_current = evaluate(state)
+        except CurrentNormalisationError:
             rejected_trial_evaluations += 1
             return np.full_like(np.asarray(state, dtype=float), rejection_scale)
-        error = abs(item.achieved_current_a - target_current_a) / abs(target_current_a)
+        error = abs(achieved_current - target_current_a) / abs(target_current_a)
         maximum_current_error = max(maximum_current_error, error)
-        return item.image - state
+        return image - state
 
     terminal = initial
     termination = "outer iteration ceiling exhausted"
     guard_value: float | None = None
 
     def record(state: np.ndarray, value: np.ndarray) -> None:
-        item = evaluate(state)
-        relative = _relative_sup(item.image, state)
+        image, amplitude, _achieved_current = evaluate(state)
+        relative = _relative_sup(image, state)
         history.append(relative)
-        amplitude_history.append(item.amplitude)
+        amplitude_history.append(amplitude)
         if relative <= RELATIVE_RESIDUAL_CRITERION:
             raise _CriterionReached(state)
 
@@ -634,21 +563,18 @@ def solve_eliminated(
         termination = "declared flux criterion reached"
     except scipy.optimize.NoConvergence as error:
         terminal = np.asarray(error.args[0], dtype=float)
-    except LambdaOutOfBand as error:
-        guard_value = error.value
+    except CurrentNormalisationError as error:
+        guard_value = error.amplitude
         termination = str(error)
 
     try:
-        final = evaluate(terminal)
-        achieved = _relative_sup(final.image, terminal)
-        amplitude = final.amplitude
-        current_error = abs(final.achieved_current_a - target_current_a) / abs(
-            target_current_a
-        )
-    except LambdaOutOfBand as error:
-        guard_value = error.value
+        final_image, amplitude, achieved_current = evaluate(terminal)
+        achieved = _relative_sup(final_image, terminal)
+        current_error = abs(achieved_current - target_current_a) / abs(target_current_a)
+    except CurrentNormalisationError as error:
+        guard_value = error.amplitude
         achieved = float("inf")
-        amplitude = error.value
+        amplitude = error.amplitude
         current_error = float("inf")
     topology, x_point = _topology(profile, terminal)
     return {
@@ -864,7 +790,9 @@ def solve_frame(
     seed_unscaled = float(
         np.sum(np.asarray(profile.operator.cell_current(seed, TopologyClass.DIVERTED)))
     )
-    seed_amplitude = _lambda_value(target, seed_unscaled)
+    seed_amplitude = float(
+        profile.operator.current_normalisation_amplitude(target, seed_unscaled)
+    )
     measured = (time_ms, target, seed_unscaled, seed_amplitude)
     registered = (
         float(declared["time_ms"]),
@@ -886,11 +814,11 @@ def solve_frame(
         raise RuntimeError("representative-current qualification failed before scoring")
     shipped_unpinned = solve_unpinned(profile, seed, shipped_current, target)
     unpinned = solve_unpinned(profile, seed, current, target)
-    eliminated = solve_eliminated(profile, seed, current, target)
+    eliminated = solve_constrained(profile, seed, current, target)
     diagnostic_unpinned = solve_unpinned(
         diagnostic_profile, seed, diagnostic_current, target
     )
-    diagnostic_eliminated = solve_eliminated(
+    diagnostic_eliminated = solve_constrained(
         diagnostic_profile, seed, diagnostic_current, target
     )
 
@@ -1003,7 +931,7 @@ def solve_low_current_control(
             "absolute_recorded_plasma_current_a": abs(target),
             "unscaled_seed_plasma_current_a": unscaled,
             "attempted_seed_lambda": attempted_amplitude,
-            "positive_lambda_guard_retained": list(LAMBDA_BAND),
+            "positive_lambda_guard_retained": list(SCALAR_CURRENT_AMPLITUDE_BAND),
             "constrained_arms_scored": False,
             "constrained_arm_refusal": (
                 "negative lambda would reverse both extracted source terms and is not "

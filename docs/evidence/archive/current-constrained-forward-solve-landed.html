@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="current-constrained-forward-solve-landed">
+  <meta name="plan-title" content="Current-Constrained Forward Solve — landed record">
+  <meta name="plan-summary" content="Cumulative execution evidence for the current-constrained forward solve: the solenoid inclusion ladder that shifted the binding obstacle from conductor completeness to convergence, the circuit-driven vacuum comparison that exposed gauge-free flux RMS as the wrong instrument for out-of-grid conductors, and the constrained-route promotion work as it lands">
+  <meta name="plan-evidence-for" content="current-constrained-forward-solve">
+  <meta name="plan-verifies" content="current-constrained-forward-solve#s7">
+  <title>Current-Constrained Forward Solve — landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="inclusion-ladder">Solenoid inclusion ladder — five frames, convergence is the binding obstacle — 2026-08-21</h2>
+    <p>Commits <code>73f48ca0</code> and <code>2ad4520637736e29898e23a961bada5d11595add</code>; run
+    <code>r-20260821T210422276295-solenoid-half-inclusion-ladder</code>, gate <strong>passed</strong>;
+    SLURM job 1253036, exit 0 in 00:02:01 over 5 distinct-shot frames × 4 rungs = 20 solves; 6/6 plus
+    10/11 focused tests; ruff clean over four paths.</p>
+    <p><strong>The measurement.</strong> The competition dataset ships <code>ECOILA</code> and no channel
+    for <code>ECOILB</code> — the two halves of the same central solenoid, 48 turns each. At the measured
+    scale 1.0172 the missing half carries 48.83 ampere-turn units against the present half's 48.0, so the
+    released data supplies roughly 49 % of the actual CS drive. ECOILB is 65.4 % of all missing
+    ampere-turns; the E567 and E89 pairs (6 and 7 turns) are 16.0 % and 18.7 %. The ladder restores the
+    missing conductors incrementally at cumulative missing ampere-turn fractions 0, 0.6540, 0.8170, 1.0,
+    every added current derived from the same-frame shipped <code>ECOILA</code> channel times fixed
+    per-coil scales — no rung reads a label-recovered value, so the whole ladder is inference-admissible.
+    The diagnostic question: does the X point migrate monotonically toward the labelled divertor leg as
+    ampere-turns are restored?</p>
+    <p><strong>Headline: only 11 of 20 terminal states are qualified converged-diverted, and only 2 of 5
+    frames have all four rungs qualified</strong> — three of five trajectories cannot support an
+    equilibrium verdict at any rung. The dominant obstacle on this cohort is convergence, not conductor
+    completeness. The locked reject-step policy worked as intended: 15 inadmissible Armijo trial
+    evaluations were rejected before division while accepted iterates retain loud
+    <code>LambdaOutOfBand</code> validation.</p>
+    <p><strong>Non-monotonicity pools 2/2 on the qualified frames, but the pattern does not.</strong> On
+    <code>c4a7b</code> f102, ECOILB is best in X separation (0.453059 → 0.157382 m; +E567 and complete
+    return it to 0.451980 and 0.450970 m). On <code>1554e054</code> f41 the opposite: shipped-only is
+    already at 0.023024 m, ECOILB worsens it to 0.048572 m, and +E567 is best in both metrics
+    (X 0.011826 m, RMS 0.075863). One reading does pool and supports the additive-gauge interpretation:
+    ECOILB is the worst fractional-RMS rung on both qualified frames (0.701138 vs the 0.416221
+    shipped-only baseline on c4a7b; 0.403394 vs 0.212501 on 1554e054) — a conductor whose grid-wide
+    contribution is nearly the additive gauge can only be penalised by a gauge-free metric.</p>
+    <p><strong>Receipt-reading trap:</strong> two entries show fractional RMS exactly 0.000000
+    (<code>3ff34e7</code> f89 complete at residual 1.7035e-01; <code>1cbcc9e6</code> f252 +ECOILB at
+    7.5996e-01). Both are unconverged no-residual states — those zeros are not-computed sentinels, never
+    agreement.</p>
+    <p><strong>Where this redirects the work:</strong> more conductors is not the next lever on this
+    cohort. Until three-of-five frames produce a qualified equilibrium at some rung, terminal distances of
+    unqualified trajectories cannot be read as equilibria. That is basin-entry and convergence work — the
+    machinery belongs to <code>dual-basin-solve</code> and is consumed here as the cold-start lift.</p>
+    <figure>
+      <img src="/nova/figures/current-constrained-forward-solve/inclusion-ladder/solenoid_inclusion_ladder.png"
+           alt="Solenoid inclusion ladder: per-frame residuals, X-point separation and fractional RMS across the four rungs">
+      <figcaption>Per-frame ladder trajectories across the four rungs. Receipt:
+      <code>docs/figures/current-constrained-forward-solve/inclusion-ladder/solenoid_inclusion_receipt.json</code>;
+      preregistration alongside.</figcaption>
+    </figure>
+
+    <h2 id="circuit-vacuum">Circuit-driven vacuum field — negative on flux, and flux is the wrong instrument — 2026-08-21</h2>
+    <p>Commit <code>a2fbfa13</code>; run <code>r-20260821T204446383949-ohmic-circuit-driven-vacuum-field</code>,
+    gate <strong>passed</strong>; 6/6 tests; five diverted frames from five distinct shots, all
+    polarity-screened; zero fitted coefficients.</p>
+    <p><strong>Vacuum agreement against the exact clipped-cell tared map</strong>, gauge-free fractional
+    RMS medians: label-recovered 0.007085, shipped-only 0.042101, circuit-derived 0.075017 — the circuit
+    route reads 1.781855× worse than omitting the missing coils entirely and 10.587909× worse than label
+    recovery. Convergence-qualified topology: 2 of 5 circuit solves reach 1e-6, end diverted, and move the
+    X point toward the label (best single frame <code>1554e054</code>:41 at 0.018016 m).</p>
+    <p><strong>Why the flux verdict is not taken at face value:</strong> the five missing conductors sit
+    largely outside the 65×65 grid (ECOILB inboard of its inner edge, the E89 pair beyond its vertical
+    extent), so their field across the grid is smooth and nearly constant — precisely the component an
+    additive gauge absorbs. The circuit arm consumed +0.0724144 Wb/rad on the named frame against a landed
+    median of 0.0613 Wb/rad. A gauge-free metric removes almost exactly what these conductors contribute:
+    it cannot reward including them and can only penalise their shape error. X-point and topology metrics
+    are the right instruments for out-of-grid conductors.</p>
+    <p><strong>The label-recovered control is not a physical circuit either:</strong> its five-current
+    spread runs 2.205080× to 4.643081× per frame (median 2.232101×) against the circuit arm's constant
+    1.037324× by construction. A real circuit does not vary four-fold shot to shot — label recovery
+    reproduces the tared vacuum field best precisely because it is free to absorb whatever else is
+    present. This sharpened, and fed, the coil-circuit-discovery adjudication that subsequently landed the
+    fixed-wiring ohmic circuit.</p>
+    <figure>
+      <img src="/nova/figures/current-constrained-forward-solve/circuit-vacuum/circuit_driven_vacuum.png"
+           alt="Circuit-driven vacuum comparison: gauge-free fractional RMS per frame for label-recovered, shipped-only and circuit-derived arms">
+      <figcaption>Per-frame gauge-free vacuum comparison across the three current provenances. Receipt:
+      <code>docs/figures/current-constrained-forward-solve/circuit-vacuum/circuit_driven_vacuum_receipt.json</code>.</figcaption>
+    </figure>
+
+  </main>
+</body>
+</html>

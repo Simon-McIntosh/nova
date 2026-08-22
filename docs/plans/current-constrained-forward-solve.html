@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="current-constrained-forward-solve">
   <meta name="plan-title" content="Current-Constrained Forward Solve">
   <meta name="plan-summary" content="Make prescribed total plasma current a first-class constraint of the free-boundary solve by exact profile-amplitude elimination, so the vacuum root leaves the map&#x27;s range and Newton selects the plasma branch by construction rather than by seeding luck">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="6.0">
   <meta name="plan-capability-version" content="1.0">
@@ -24,7 +24,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="10">
+<meta name="plan-commits" content="a2fbfa13,73f48ca0f672f8cd118bae4fd7e53520a03d998f,2ad4520637736e29898e23a961bada5d11595add">
+<meta name="plan-artifacts" content="docs/figures/current-constrained-forward-solve/circuit-vacuum,docs/figures/current-constrained-forward-solve/inclusion-ladder">
+<meta name="plan-impl" content="0.25">
 </head>
 <body>
   <main class="plan-doc">
@@ -83,8 +86,10 @@
     during an Armijo line search the solver visited a state with <code>unscaled_current_a</code> exactly
     0.0, and <code>_lambda_value</code> performed the division <em>before</em> reaching its finite-positive
     band check, raising <code>ZeroDivisionError</code>.</p>
-    <p>The repair is to map a zero unscaled current onto the existing loud <code>LambdaOutOfBand</code>
-    path instead of dividing first. Everything else is already committed and must not move: the five-frame
+    <p><strong>The guard repair is landed</strong> (commit <code>2ad45206</code>): <code>_lambda_value</code>
+    now tests zero and non-finite unscaled current before dividing, raising <code>LambdaOutOfBand</code>, and
+    the residual wrapper implements the locked reject-step policy, counting rejected trial evaluations. What
+    remains of this section is the scoring run itself. Everything preregistered must not move: the five-frame
     cohort, the positive λ band, the 1e-6 criterion, the 2e-6 cross-codegen tolerance, and the separately
     reported low-current control fixture.</p>
     <p><strong>Done-when:</strong> all five preregistered frames score, each reporting whether the
@@ -141,28 +146,22 @@
       below so the design question does not have to be re-derived.</li>
     </ul>
 
-    <h2 id="s7">§7 — The missing solenoid half, and the inclusion ladder</h2>
-    <p>The competition dataset ships <code>ECOILA</code> and no channel for <code>ECOILB</code>. Those are
-    the two halves of the same central solenoid, 48 turns each. At the measured scale of 1.0172, the
-    missing half carries <strong>48.83</strong> ampere-turn units against the present half's
-    <strong>48.0</strong> — so <strong>the released data supplies roughly 49 % of the actual CS drive and
-    presents it as the whole thing</strong>. ECOILB is 65.4 % of all missing ampere-turns; the E567 and E89
-    pairs, at 6 and 7 turns, are 16.0 % and 18.7 % between them.</p>
-    <p>This section measures the forward solve as those conductors are added <em>incrementally</em>, every
-    added current derived from the shipped <code>ECOILA</code> channel times its measured per-coil scale —
-    so no rung consumes a label-recovered value and the whole ladder is inference-admissible. The
-    diagnostic question is whether the X point migrates monotonically toward the labelled divertor leg as
-    ampere-turns are restored. A conductor set that spans the deficit should improve monotonically and its
-    metrics should agree; one that does not, does not.</p>
-    <p><strong>First-frame result, held at n=1:</strong> ECOILB alone cuts the X-point error 65 %, from
-    0.4531 m to 0.1574 m — and then the E567 pair pushes it straight back to 0.4520 m. The metrics also
-    disagree about which rung is best: fractional RMS is <em>worst</em> at the ECOILB rung (0.7011, above
-    the shipped-only 0.4162) and best two rungs later (0.1639). Either the per-coil scales do not transfer
-    from the netCDF pulse they were measured on, or the five conductors do not span the missing field.</p>
-    <p><strong>Done-when:</strong> the preregistered five-frame ladder scores complete with the zero-current
-    Armijo policy now locked, and the receipt states whether the non-monotonicity pools across frames or
-    was a property of the first one. <em>The single-frame result is not generalised until then — this
-    campaign has already been misled once by a single unrepresentative frame.</em></p>
+    <section id="s7-landed" class="section-landed">
+    <header><span class="badge badge-shipped">✓ landed 2026-08-21</span>
+    <h2 id="s7">§7 — The missing solenoid half, and the inclusion ladder</h2></header>
+    <p class="landed-summary">Preregistered four-rung ladder scored on all five frames (commits
+    <code>73f48ca0</code>, <code>2ad45206</code>; SLURM 1253036, 20 rung solves; 6/6 + 10/11 tests): only
+    11/20 terminal states qualify converged-diverted and only 2/5 frames qualify at every rung — convergence,
+    not conductor completeness, is the binding obstacle on this cohort. Non-monotonicity pools 2/2 on the
+    qualified frames but the pattern does not (ECOILB cuts X-point error 0.4531→0.1574 m on c4a7b f102 yet
+    worsens 0.0230→0.0486 m on 1554e054 f41), and ECOILB is the worst fractional-RMS rung on both — the
+    additive-gauge reading for out-of-grid conductors. The companion circuit-driven vacuum run (commit
+    <code>a2fbfa13</code>) scored circuit-derived currents 1.78× worse than shipped-only on gauge-free
+    flux RMS, an instrument that cannot reward out-of-grid conductors. Full record:
+    <a href="/nova/evidence/archive/current-constrained-forward-solve-landed#inclusion-ladder">inclusion
+    ladder</a> · <a href="/nova/evidence/archive/current-constrained-forward-solve-landed#circuit-vacuum">circuit
+    vacuum</a>.</p>
+    </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -191,16 +190,13 @@
       </p>
     <p class="r-dec-rat">Locked 2026-08-21 because two nodes have now stalled on it and a worker correctly refused to guess. A line search LEGITIMATELY probes inadmissible states - that is what a trial step is - so aborting the whole solve because a trial point has zero or sign-reversed unscaled current is the wrong failure boundary. Reject the trial, shrink the step, continue. The guard keeps its full meaning where it matters: an ACCEPTED iterate outside the finite positive band still raises LambdaOutOfBand loudly, and a converged state that required a rejected-forever direction fails rather than returning something that does not satisfy the constraint. Clipping to a band edge stays refused as originally recorded - it would silently return a state violating the constraint. Sign reversal likewise stays refused, since a negative common amplitude reverses both the pressure gradient and FF-prime and is a different physical source rather than a current normalisation. Implementation note carried from the two stalls: the division must not be reached before the admissibility test, which is the ordering defect itself.</p>
     </div>
-<div class="r-dec" data-key="target-current-provenance" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="target-current-provenance" data-choice="optional-unconstrained" data-by="reckon-ship" data-when="2026-08-22T12:41:11+00:00">
     <p class="r-dec-q">Which target current does a production solve consume, and what does it do when none is supplied?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="required-explicit">required explicit argument, no default</button>
-      <button class="r-opt" data-value="optional-unconstrained">optional, absent means today&#x27;s unconstrained solve</button>
+      <button class="r-opt chosen" data-value="optional-unconstrained">optional, absent means today&#x27;s unconstrained solve</button>
       </p>
-    <p class="r-dec-rat">Open. The optional form preserves every existing caller unchanged and is the
-        lower-risk promotion, but it makes the constrained route opt-in and therefore easy to forget where
-        it matters most. The explicit form forces every caller to state its provenance — dataset channel,
-        partner transport solve, or none — which is the more honest contract and the more disruptive one.</p>
+    <p class="r-dec-rat">Locked by deduction from the plan&#x27;s own §4 done-when, which requires that an absent target reproduce today&#x27;s unconstrained behaviour bit-for-bit — a contract only the optional form can satisfy. The forgetting risk that motivated the explicit form is carried instead by the receipt: every constrained solve reports lambda and its movement, so an unconstrained production solve on a dataset that supplies a plasma-current channel is a visible validator finding rather than a silent default. Callers that must state provenance (efit-forward-parity, diiid-forward-onboarding) do so at their own seams.</p>
     </div>
 </section>
 
@@ -234,6 +230,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260822T1210" data-who="reckon-ship" data-when="2026-08-22T12:10:00Z">
     <div class="r-comment-body">Context from the shipped coil-circuit-discovery plan (evidence: /nova/evidence/archive/coil-circuit-discovery-landed). The DIII-D ohmic circuit landed as machine-description fixed wiring: pf_active records in nova/imas/diiid_current.py + nova/imas/diiid_description.py reconstruct all 24 conductor currents from the shipped competition channels alone (ECOILB exactly 2× the ECOILA ampere-turn channel — the A/B co-location; E567UP/E567DN exactly 1; E89UP/E89DN integer 1 plus a named +4.57% end-loop normalisation systematic; corpus coil channels are ampere-turns under the blanket kA.turn contract, settled by investigation). This plan's eliminated route is the validated winner: host newton_krylov with exact current elimination converged 2/5 on score-blind out-of-cohort frames where bare newton_krylov converged 0/5 (vacuum-root basin) and Anderson 1/5, and the best recovery reached 1.437% fractional flux RMS with 5.92 mm X-point separation against the EFIT label — inside the 4.29% representability ceiling — from description-driven currents with zero label reads. The owner directs NK-on-eliminated as the production route; Anderson drops from the lane. The remaining obstacle this plan owns is cold-start robustness: three of five frames stall at residual 1e-2 to 1e-1 in BOTH arms (currents are not the cause), with no homotopy, warm-start-along-shot, or basin-entry seeding yet in the lane. The per-route failure table and per-frame terminations are banked in docs/figures/coil-circuit-discovery/circuit-driven-forward-validation/circuit_driven_forward_validation_receipt.json.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260822T1240-currency-audit" data-who="reckon-ship" data-when="2026-08-22T12:40:00Z">
+    <div class="r-comment-body">CURRENCY AUDIT AT SESSION START — the plan text trails the code in three places. (1) The §3/f-ccf-001 guard-ordering repair is ALREADY LANDED: in benchmarks/diiid_current_pinned_forward.py, _lambda_value tests zero and non-finite unscaled current BEFORE dividing (raising LambdaOutOfBand), and the residual wrapper implements the locked reject-step policy, counting rejected_trial_evaluations — commit 2ad45206. What remains of §3 is the five-frame cohort scoring run itself; no cohort receipt exists under docs/figures/current-constrained-forward-solve/. (2) f-ccfs-tier-consume item 1 is therefore already fixed, and item 3's 'complete, unpromoted run' is stale: r-20260821T204446383949 (a2fbfa13) and r-20260821T210422276295 (73f48ca0, 2ad45206) are BOTH promoted with gates passed in the crew ledger. Item 2 is real remaining work: the benchmark still imports label-recovered currents from benchmarks/diiid_diverted_root_full_currents and does not consume resolve_diiid_currents from nova/imas/diiid_current.py. (3) No constrained-map surface exists in nova/equilibrium — no public seam takes a target-current argument — so §4 is genuinely open. Status draft→active on the owner's /reckon-ship invocation; target-current-provenance locked to optional-unconstrained by deduction from §4's own done-when. Executable DAG this session: prior-art scout, fixed-wiring rewire, five-frame cohort scoring, §4 seam promotion, §5 MAST validation, cold-start lift — with the two landed nodes the denominator is 8, impl 2/8.</div>
 </div>
 </section>
 </main>

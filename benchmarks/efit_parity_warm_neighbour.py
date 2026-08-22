@@ -56,7 +56,10 @@ from benchmarks.efit_forward_parity_slice import (
     _pinned_metrics,
     select_slices_by_shot,
 )
+from nova.equilibrium.forward import _lattice_cells
+from nova.equilibrium.stencil_mesh import MomentGeometry, StencilMesh
 from nova.equilibrium.topology import TopologyClass
+from nova.geometry.hexstencil import hex_stencil
 from nova.imas.mast_solve_inputs import SHOT_STORE
 from nova.jax.config import configure_dtypes
 
@@ -1474,6 +1477,22 @@ def _measure_moment_seed_reference(
     """Run one frozen MAST row from its flux-functions-only moment seed."""
 
     frame, mast_case, context = _prepare_frame(store, shot, row, cache_box)
+    if frame.profile.operator.moment_geometry is None:
+        lattice = frame.profile.lattice
+        mesh = StencilMesh(
+            coordinate=lattice.coordinate,
+            stencil=hex_stencil(lattice.shape),
+            area=lattice.cell_area,
+        )
+        operator = replace(
+            frame.profile.operator,
+            moment_geometry=MomentGeometry.from_cells(
+                mesh,
+                _lattice_cells(lattice),
+            ),
+            prescribed_current_field=frame.profile.operator.prescribed_field,
+        )
+        frame = replace(frame, profile=replace(frame.profile, operator=operator))
     seed = frame.profile.moment_seed(
         mast_case["boundary"],
         frame.selected.recorded_plasma_current_a,

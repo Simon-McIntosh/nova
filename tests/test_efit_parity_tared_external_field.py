@@ -117,9 +117,9 @@ def test_raw_and_instrument_controlled_rows_are_banked_side_by_side(result):
         assert matched["cell_count"] > 0
         assert np.isfinite(matched["poloidal_beta_signed_relative_deviation"])
         field = controlled["poloidal_field_energy_instrument_control"]
-        assert field["multiplicative_closure_residual"] == pytest.approx(
-            0.0, abs=2.0e-16
-        )
+        assert (
+            abs(field["multiplicative_closure_residual"]) <= 4.0 * np.finfo(float).eps
+        ), "multiplicative closure is resolved only to binary64 precision"
         assert np.isfinite(field["instrument_controlled_signed_relative_deviation"])
 
 

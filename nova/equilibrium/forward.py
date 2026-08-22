@@ -110,10 +110,10 @@ from nova.equilibrium.observation import (
 )
 from nova.equilibrium.source import (
     ContinuationLedger,
+    CurrentNormalisationError,
     ForwardSource,
     NormalisationRecord,
     RotationRecord,
-    absolute_normalisation_record,
 )
 from nova.equilibrium.stencil_mesh import (
     CellCurrentMoments,
@@ -426,10 +426,10 @@ class ForwardProfile:
         return self.operator.source
 
     def flux_map(
-        self, current=None, requested_class=None
+        self, current=None, requested_class=None, target_current=None
     ) -> Callable[[jax.Array], jax.Array]:
-        """Return the traced map at one conductor state and optional class pin."""
-        return self.operator.flux_map(current, requested_class)
+        """Return the traced map at one conductor state and optional constraints."""
+        return self.operator.flux_map(current, requested_class, target_current)
 
     def cold_seed_portfolio(
         self,
@@ -588,36 +588,51 @@ class ForwardProfile:
         saddle_flux = neutral[saddle_index]
         return jnp.asarray(saddle_flux + polarity * flux_span * normalized)
 
-    def observe(self, flux, current=None) -> ForwardEquilibrium:
+    def observe(self, flux, current=None, target_current=None) -> ForwardEquilibrium:
         """Return the full receipt of one flux map without iterating it.
 
         ``fixed_point`` reports the residual of the supplied map alone, so a
         caller can qualify an externally produced flux map through the same
         contract a solve returns.
         """
-        residual = jnp.max(jnp.abs(self.operator.residual(flux, current)))
+        residual = jnp.max(
+            jnp.abs(
+                self.operator.residual(flux, current, target_current=target_current)
+            )
+        )
         scale = jnp.maximum(jnp.max(jnp.abs(flux)), 1.0e-30)
         history = fixed_point.FixedPointResult(
             state=jnp.asarray(flux),
             residual=residual / scale,
             trace=jnp.atleast_1d(residual / scale),
         )
-        return self._receipt(jnp.asarray(flux), history)
+        return self._receipt(jnp.asarray(flux), history, target_current=target_current)
 
-    def integral_observation(self, flux) -> IntegralObservation:
+    def integral_observation(self, flux, target_current=None) -> IntegralObservation:
         """Return the integral observations of one flux map.
 
         This is the differentiable moment map: it reads the topology, applies
         the declared source and integrates, with no conservation differencing
         in the way, so ``jacfwd`` through it costs one observation.
         """
-        _current, support_integrals, _masks, topology = self._integral_state(flux)
+        _current, support_integrals, _masks, topology, _amplitude = (
+            self._integral_state(flux, target_current=target_current)
+        )
         return observe_moments(support_integrals, topology.flux_span)
 
-    def _integral_state(self, flux, requested_class=None):
+    def _integral_state(self, flux, requested_class=None, target_current=None):
         """Return current and integral state for this construction's geometry."""
         if self.operator.use_linear_moments:
-            return self.operator.current_moments_and_observation(flux, requested_class)
+            if target_current is None:
+                return (
+                    *self.operator.current_moments_and_observation(
+                        flux, requested_class
+                    ),
+                    None,
+                )
+            return self.operator.normalised_current_moments_and_observation(
+                flux, target_current, requested_class
+            )
         masks, topology = self.operator.read(flux, requested_class)
         current_moments = self.operator.cell_current_moments(flux, requested_class)
         cell_current = current_moments.cell_current
@@ -641,17 +656,27 @@ class ForwardProfile:
             field_volume=(radial**2 + vertical**2) * volume,
             masks=masks,
         )
-        return current_moments, support_integrals, masks, topology
+        amplitude = None
+        if target_current is not None:
+            amplitude = self.operator.current_normalisation_amplitude(
+                target_current, jnp.sum(current_moments.cell_current)
+            )
+            current_moments = self.operator.scaled_current_moments(
+                current_moments, amplitude
+            )
+            support_integrals = support_integrals.with_current_amplitude(amplitude)
+        return current_moments, support_integrals, masks, topology, amplitude
 
     def _receipt(
         self,
         flux: jax.Array,
         history: fixed_point.FixedPointResult,
         requested_class=None,
+        target_current=None,
     ) -> ForwardEquilibrium:
         """Return the typed result of one converged or supplied flux map."""
-        current_moments, support_integrals, masks, topology = self._integral_state(
-            flux, requested_class
+        current_moments, support_integrals, masks, topology, amplitude = (
+            self._integral_state(flux, requested_class, target_current)
         )
         cell_current = current_moments.cell_current
         grid_flux = flux[: self.lattice.node_count]
@@ -673,7 +698,9 @@ class ForwardProfile:
             moments=moments,
             ledger=current_ledger(cell_current, support_integrals.masks),
             conservation=conservation,
-            normalisation=absolute_normalisation_record(flux.dtype),
+            normalisation=self.source.normalisation_record(
+                flux.dtype, amplitude=amplitude
+            ),
             rotation=self.operator.source.rotation_record(radius, masks),
             continuation=self.operator.source.continuation_ledger(flux.dtype),
             finite=FiniteCheck(
@@ -684,9 +711,11 @@ class ForwardProfile:
             ),
         )
 
-    def _host_history(self, trace, flux, current) -> fixed_point.FixedPointResult:
+    def _host_history(
+        self, trace, flux, current, target_current=None
+    ) -> fixed_point.FixedPointResult:
         """Return the shared fixed-point result of a host solve."""
-        mapped = self.operator(flux, current)
+        mapped = self.operator(flux, current, target_current=target_current)
         scale = jnp.maximum(jnp.max(jnp.abs(mapped)), 1.0e-30)
         return fixed_point.FixedPointResult(
             state=flux,
@@ -702,6 +731,7 @@ class ForwardProfile:
         evaluations: int | None = None,
         relaxation: float | None = None,
         tolerance: float = 1.0e-10,
+        target_current=None,
         **options,
     ) -> ForwardEquilibrium:
         """Drive the map with a host relaxed fixed-point iteration.
@@ -721,7 +751,7 @@ class ForwardProfile:
             )
         budget = self.evaluations if evaluations is None else int(evaluations)
         step = self.relaxation if relaxation is None else float(relaxation)
-        mapped = self.flux_map(current)
+        mapped = self.flux_map(current, target_current=target_current)
         trace = np.full(budget, np.nan)
         state = np.asarray(initial_flux, dtype=np.float64)
         for index in range(budget):
@@ -734,10 +764,14 @@ class ForwardProfile:
             if residual < tolerance:
                 break
         flux = jnp.asarray(state)
-        return self._receipt(flux, self._host_history(trace, flux, current))
+        return self._receipt(
+            flux,
+            self._host_history(trace, flux, current, target_current),
+            target_current=target_current,
+        )
 
     def _solve_host_krylov(
-        self, initial_flux, current, **options
+        self, initial_flux, current, target_current=None, **options
     ) -> ForwardEquilibrium:
         """Drive the map with a host Jacobian-free Newton-Krylov root find.
 
@@ -745,13 +779,19 @@ class ForwardProfile:
         moves freely between the branches of the free-boundary map and needs
         a seed already on the intended one.
         """
-        mapped = self.flux_map(current)
+        mapped = self.flux_map(current, target_current=target_current)
         trace = np.full(self.evaluations, np.nan)
         recorded = 0
+        initial = np.asarray(initial_flux, dtype=np.float64)
+        initial_image = np.asarray(mapped(jnp.asarray(initial)))
+        rejection_scale = 1.0e6 * max(float(np.max(np.abs(initial_image))), 1.0)
 
         def residual(psi):
             """Return the host free-boundary residual of a trial flux."""
-            return np.asarray(mapped(jnp.asarray(psi))) - psi
+            try:
+                return np.asarray(mapped(jnp.asarray(psi))) - psi
+            except CurrentNormalisationError:
+                return np.full_like(np.asarray(psi, dtype=np.float64), rejection_scale)
 
         def record(psi, value):
             """Record the relative residual of one accepted host step."""
@@ -763,18 +803,28 @@ class ForwardProfile:
 
         solution = scipy.optimize.newton_krylov(
             residual,
-            np.asarray(initial_flux, dtype=np.float64),
+            initial,
             callback=record,
             **options,
         )
         flux = jnp.asarray(solution)
-        return self._receipt(flux, self._host_history(trace, flux, current))
+        return self._receipt(
+            flux,
+            self._host_history(trace, flux, current, target_current),
+            target_current=target_current,
+        )
 
     def _solve_accelerated(
-        self, route: str, initial_flux, current, requested_class=None, **options
+        self,
+        route: str,
+        initial_flux,
+        current,
+        requested_class=None,
+        target_current=None,
+        **options,
     ) -> ForwardEquilibrium:
         """Drive the map with the shared fixed-point ladder."""
-        mapped = self.flux_map(current, requested_class)
+        mapped = self.flux_map(current, requested_class, target_current)
         if route == "newton_krylov":
             history = fixed_point.newton_krylov(
                 mapped,
@@ -792,7 +842,7 @@ class ForwardProfile:
                     **options,
                 },
             )
-        return self._receipt(history.state, history, requested_class)
+        return self._receipt(history.state, history, requested_class, target_current)
 
     def solve(
         self,
@@ -800,6 +850,7 @@ class ForwardProfile:
         *,
         route: SolveRoute = "newton_krylov",
         current=None,
+        target_current=None,
         enforce: Sequence[str] = (),
         **options,
     ) -> ForwardEquilibrium:
@@ -824,18 +875,33 @@ class ForwardProfile:
         the solve. The declared source has to carry one scalar degree of
         freedom per enforced moment; an absolute source carries none, so any
         request fails here, before a single profile value is read.
+
+        ``target_current`` is a declared plasma current [A]. When present, one
+        common source amplitude is eliminated from the exact clipped current
+        moments inside every map evaluation and published in the result's
+        normalisation record. Omitting it retains the absolute map.
         """
         reject_unsupported_enforcement(enforce, self.source.closure_degrees)
         if route == "host":
-            return self._solve_host(initial_flux, current, **options)
+            return self._solve_host(
+                initial_flux, current, target_current=target_current, **options
+            )
         if route == "host_krylov":
-            return self._solve_host_krylov(initial_flux, current, **options)
+            return self._solve_host_krylov(
+                initial_flux, current, target_current=target_current, **options
+            )
         if route not in _ACCELERATED:
             raise ValueError(
                 f"unknown solve route {route!r}; available: "
                 f"{', '.join((*_HOST, *_ACCELERATED))}"
             )
-        return self._solve_accelerated(route, initial_flux, current, **options)
+        return self._solve_accelerated(
+            route,
+            initial_flux,
+            current,
+            target_current=target_current,
+            **options,
+        )
 
     def _iteration_count(self, route: str, options: dict[str, object]) -> int:
         """Return the fixed number of nonlinear state updates a route performs."""
@@ -851,6 +917,7 @@ class ForwardProfile:
         initial_flux,
         requested_class,
         current,
+        target_current=None,
         *,
         route: str,
         tolerance: float,
@@ -864,6 +931,7 @@ class ForwardProfile:
             initial_flux,
             current,
             requested_class=requested_class,
+            target_current=target_current,
             **options,
         )
         _masks, achieved = self.operator.read(equilibrium.flux)
@@ -894,6 +962,7 @@ class ForwardProfile:
         *,
         route: SolveRoute = "newton_krylov",
         current=None,
+        target_current=None,
         enforce: Sequence[str] = (),
         tolerance: float = 1.0e-10,
         **options,
@@ -910,6 +979,7 @@ class ForwardProfile:
             initial_flux,
             requested_class,
             current,
+            target_current,
             route=route,
             tolerance=tolerance,
             iterations=self._iteration_count(route, options),
@@ -923,6 +993,7 @@ class ForwardProfile:
         policy: PerturbedSeedPolicy = PerturbedSeedPolicy(),
         *,
         current=None,
+        target_current=None,
     ) -> ForwardPerturbedSeedReceipt:
         """Recover declared near-basin seeds through the pinned diverted branch.
 
@@ -948,6 +1019,7 @@ class ForwardProfile:
                 seed,
                 requested,
                 current,
+                target_current,
                 route="newton_krylov",
                 tolerance=policy.tolerance,
                 iterations=iterations,
@@ -981,6 +1053,7 @@ class ForwardProfile:
         *,
         route: SolveRoute = "newton_krylov",
         current=None,
+        target_current=None,
         enforce: Sequence[str] = (),
         tolerance: float = 1.0e-10,
         **options,
@@ -1010,19 +1083,23 @@ class ForwardProfile:
             dtype=jnp.int8,
         )
         current_axis = None if current is None or jnp.ndim(current) == 1 else 0
+        target_axis = (
+            None if target_current is None or jnp.ndim(target_current) == 0 else 0
+        )
         iterations = self._iteration_count(route, options)
         branches = jax.vmap(
-            lambda flux, branch_class, conductor: self._branch_receipt(
+            lambda flux, branch_class, conductor, target: self._branch_receipt(
                 flux,
                 branch_class,
                 conductor,
+                target,
                 route=route,
                 tolerance=tolerance,
                 iterations=iterations,
                 **options,
             ),
-            in_axes=(0, 0, current_axis),
-        )(initial_flux, requested, current)
+            in_axes=(0, 0, current_axis, target_axis),
+        )(initial_flux, requested, current, target_current)
         return ForwardPortfolio(branches=branches)
 
     def solve_batch(
@@ -1031,6 +1108,7 @@ class ForwardProfile:
         *,
         route: SolveRoute = "newton_krylov",
         current=None,
+        target_current=None,
         enforce: Sequence[str] = (),
         **options,
     ) -> ForwardEquilibrium:
@@ -1047,12 +1125,15 @@ class ForwardProfile:
                 f"available: {', '.join(_ACCELERATED)}"
             )
         current_axis = None if current is None or jnp.ndim(current) == 1 else 0
+        target_axis = (
+            None if target_current is None or jnp.ndim(target_current) == 0 else 0
+        )
         return jax.vmap(
-            lambda flux, conductor: self._solve_accelerated(
-                route, flux, conductor, **options
+            lambda flux, conductor, target: self._solve_accelerated(
+                route, flux, conductor, target_current=target, **options
             ),
-            in_axes=(0, current_axis),
-        )(initial_flux, current)
+            in_axes=(0, current_axis, target_axis),
+        )(initial_flux, current, target_current)
 
     def moment_residual(self, flux, targets: MomentTargets) -> jax.Array:
         """Return the scale-normalised integral-observation residuals."""

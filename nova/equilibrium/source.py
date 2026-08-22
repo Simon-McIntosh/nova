@@ -12,9 +12,10 @@ Normalisation is declared, never inferred. Under
 :attr:`NormalisationPolicy.ABSOLUTE` the supplied gradients reach the source
 evaluation unchanged, the cell-current image is never rescaled to hit a net
 current, and :class:`NormalisationRecord` reports a unit scale so the receipt
-is explicit rather than empty. The alternative policy is present as a typed
-seam for one declared scalar amplitude closed by a target plasma current; it
-is not part of the shipped closure and constructing it fails loudly.
+is explicit rather than empty. A forward caller may instead supply a scalar
+plasma-current target; the map records
+:attr:`NormalisationPolicy.DECLARED_SCALAR_CURRENT` and the eliminated common
+amplitude without changing these immutable profile functions.
 
 Source support is domain qualified. A closure declared on
 :class:`~nova.equilibrium.domain.PlasmaDomain.CORE` drives current on the
@@ -65,6 +66,8 @@ __all__ = [
     "ForwardSource",
     "NormalisationPolicy",
     "NormalisationRecord",
+    "CurrentNormalisationError",
+    "SCALAR_CURRENT_AMPLITUDE_BAND",
     "RotationClosure",
     "RotationRecord",
     "SeparatrixContinuity",
@@ -84,6 +87,21 @@ class NormalisationPolicy(IntEnum):
 
     ABSOLUTE = 0
     DECLARED_SCALAR_CURRENT = 1
+
+
+#: Inclusive amplitude range admitted by declared-current normalisation.
+SCALAR_CURRENT_AMPLITUDE_BAND = (1.0e-6, 1.0e6)
+
+
+class CurrentNormalisationError(RuntimeError):
+    """Report an inadmissible declared-current source amplitude."""
+
+    def __init__(self, amplitude: float):
+        self.amplitude = float(amplitude)
+        super().__init__(
+            f"source amplitude {self.amplitude:.12g} is outside "
+            f"{SCALAR_CURRENT_AMPLITUDE_BAND}"
+        )
 
 
 class RotationClosure(IntEnum):
@@ -378,6 +396,20 @@ def absolute_normalisation_record(dtype=jnp.float64) -> NormalisationRecord:
     )
 
 
+def declared_scalar_current_record(
+    amplitude: jax.Array, dtype=jnp.float64
+) -> NormalisationRecord:
+    """Return the receipt of an exact declared-current amplitude elimination."""
+    value = jnp.asarray(amplitude, dtype=dtype)
+    return NormalisationRecord(
+        policy=jnp.asarray(
+            int(NormalisationPolicy.DECLARED_SCALAR_CURRENT), dtype=jnp.int8
+        ),
+        amplitude=value,
+        rescaled=jnp.not_equal(value, jnp.asarray(1.0, dtype=dtype)),
+    )
+
+
 class RotationRecord(NamedTuple):
     """The rotation closure a solve ran under and what it cost the solution.
 
@@ -487,6 +519,14 @@ class ForwardSource:
     def closure_degrees(self) -> int:
         """Return the number of scalar unknowns the closure may solve for."""
         return 0
+
+    def normalisation_record(
+        self, dtype=jnp.float64, *, amplitude: jax.Array | None = None
+    ) -> NormalisationRecord:
+        """Return the absolute or declared-current action taken on this source."""
+        if amplitude is None:
+            return absolute_normalisation_record(dtype)
+        return declared_scalar_current_record(amplitude, dtype)
 
     @property
     def open_profiles(self) -> tuple[tuple[PlasmaDomain, DomainProfile], ...]:

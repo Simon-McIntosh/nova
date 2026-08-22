@@ -30,11 +30,16 @@ import jax.numpy as jnp
 
 from benchmarks.diiid_constrained_cold_start import (
     CURRENT_RELATIVE_ERROR_TOLERANCE,
+    MOMENT_SEEDED_CRITERION,
+    MOMENT_SEEDED_OUTPUT,
     NEIGHBOUR_FRAME_OFFSETS,
     RELATIVE_RESIDUAL_TOLERANCE,
     _neighbour_candidates,
     _solve_public_seam,
+    _source_stamp,
+    run_moment_seed as run_diiid_moment_seed,
 )
+from benchmarks.diiid_forward_gs_match import DEFAULT_DATA as DIIID_DATA
 from benchmarks.efit_forward_parity_slice import (
     CURRENT_CONSTRAINED_OUTPUT,
     CURRENT_CONSTRAINED_RECEIPT_NAME,
@@ -62,11 +67,15 @@ FIGURE_NAME = "warm-neighbour-stall-lift.png"
 NEWTON_REPLAY_RECEIPT_NAME = "newton-warm-ladder-replay.json"
 NEWTON_REPLAY_FIGURE_NAME = "newton-warm-ladder-replay.png"
 NEWTON_REPLAY_ATTEMPT_PREFIX = "newton-warm-ladder"
+MOMENT_SEEDED_AGGREGATE_NAME = "moment-seeded-cold-start.json"
+MOMENT_SEEDED_FIGURE_NAME = "moment-seeded-cold-start.png"
+MOMENT_SEEDED_ATTEMPT_PREFIX = "mast-moment-seeded-attempt"
 BANKED_CONSTRAINED_RECEIPT = (
     CURRENT_CONSTRAINED_OUTPUT / CURRENT_CONSTRAINED_RECEIPT_NAME
 )
 BANKED_WARM_RECEIPT = DEFAULT_OUTPUT / RECEIPT_NAME
 TARED_TOPOLOGY_RECEIPT = DEFAULT_OUTPUT / "tared-plasma-support-solve.json"
+BALANCED_REFERENCE_RECEIPT = DEFAULT_OUTPUT / "converged-root-geometry-attribution.json"
 CURRENT_MATCH_TOLERANCE = 1.0e-9
 TARGET_CURRENT_EXACT_TOLERANCE = 1.0e-9
 DECLARED_NEIGHBOUR_FRAME_OFFSETS = (
@@ -249,7 +258,11 @@ def _candidate_rows(frame: _MastFrame) -> list[int]:
     return _neighbour_candidates(frame)
 
 
-def _classify_outcome(frame: _MastFrame, outcome: Any) -> dict[str, Any]:
+def _classify_outcome(
+    frame: _MastFrame,
+    outcome: Any,
+    residual_tolerance: float = RELATIVE_RESIDUAL_TOLERANCE,
+) -> dict[str, Any]:
     """Qualify a constrained terminal without consulting its EFIT metrics."""
     state = np.asarray(outcome.state, dtype=np.float64)
     target_current = frame.selected.recorded_plasma_current_a
@@ -261,7 +274,7 @@ def _classify_outcome(frame: _MastFrame, outcome: Any) -> dict[str, Any]:
         np.all(np.isfinite(state))
         and topology_consistent
         and np.isfinite(outcome.residual)
-        and outcome.residual <= RELATIVE_RESIDUAL_TOLERANCE
+        and outcome.residual <= residual_tolerance
         and np.isfinite(current_error)
         and current_error <= CURRENT_RELATIVE_ERROR_TOLERANCE
     )
@@ -285,11 +298,12 @@ def _record_outcome(
     frame: _MastFrame,
     context: dict[str, Any],
     outcome: Any,
+    residual_tolerance: float = RELATIVE_RESIDUAL_TOLERANCE,
 ) -> tuple[dict[str, Any], Any]:
     """Classify and score one imported-seam terminal without label selection."""
     state = np.asarray(outcome.state, dtype=np.float64)
     target_current = frame.selected.recorded_plasma_current_a
-    classification = _classify_outcome(frame, outcome)
+    classification = _classify_outcome(frame, outcome, residual_tolerance)
     equilibrium = frame.profile.observe(
         jnp.asarray(state),
         current=jnp.asarray(frame.current),
@@ -411,9 +425,10 @@ def _newton_arm_record(
     frame: _MastFrame,
     context: dict[str, Any],
     outcome: Any,
+    residual_tolerance: float = RELATIVE_RESIDUAL_TOLERANCE,
 ) -> dict[str, Any]:
     """Serialize one Newton terminal in the registered MAST metric shape."""
-    record, _equilibrium = _record_outcome(frame, context, outcome)
+    record, _equilibrium = _record_outcome(frame, context, outcome, residual_tolerance)
     residual = record["forward_branch_receipt"]["residual"]
     metrics = record["registered_parity_metrics"]
     return {
@@ -1175,8 +1190,7 @@ def _newton_replay_split(
                 reference["reported_terminal"]["converged"] for reference in measured
             ),
             "cold_converged_count": sum(
-                reference["cold_newton_control"]["converged"]
-                for reference in measured
+                reference["cold_newton_control"]["converged"] for reference in measured
             ),
             "warm_attempted_count": sum(
                 reference["warm_newton_solve"] is not None for reference in measured
@@ -1424,6 +1438,357 @@ def run_newton_replay(
     return receipt
 
 
+def _balanced_reference() -> dict[str, Any]:
+    """Load the independently banked near-fixed-point reference identity."""
+
+    receipt = json.loads(BALANCED_REFERENCE_RECEIPT.read_text())
+    reference = receipt["reference"]
+    residual = receipt["constrained_map_at_reference_flux"]["residual"]
+    defect = residual["all_physical_nodes"]["rms_fraction_of_span"]
+    if not np.isclose(defect, 0.001350589126280159, rtol=0.0, atol=1.0e-15):
+        raise RuntimeError("the banked balanced fixed-point proximity changed")
+    return {
+        "shot": int(reference["shot"]),
+        "slice_index": int(reference["slice_index"]),
+        "reference_map_defect_fraction_of_span": float(defect),
+        "reference_map_defect_percent_of_span": 100.0 * float(defect),
+        "interior_rms_fraction_of_span": residual["interior_grid_inside_stored_lcfs"][
+            "rms_fraction_of_span"
+        ],
+        "exterior_rms_fraction_of_span": residual["exterior_grid_and_limiter_wall"][
+            "rms_fraction_of_span"
+        ],
+        "source": str(BALANCED_REFERENCE_RECEIPT),
+        "source_sha256": _sha256(BALANCED_REFERENCE_RECEIPT),
+    }
+
+
+def _measure_moment_seed_reference(
+    store: Path,
+    shot: int,
+    row: int,
+    cache_box: list[Any],
+    scoreability: dict[str, Any],
+    balanced_reference: dict[str, Any],
+) -> dict[str, Any]:
+    """Run one frozen MAST row from its flux-functions-only moment seed."""
+
+    frame, mast_case, context = _prepare_frame(store, shot, row, cache_box)
+    seed = frame.profile.moment_seed(
+        mast_case["boundary"],
+        frame.selected.recorded_plasma_current_a,
+        current=frame.current,
+    )
+    newton_frame = replace(
+        frame,
+        profile=_NewtonBranchProfileAdapter(frame.profile),
+        seed=np.asarray(seed.flux, dtype=np.float64),
+    )
+    outcome = _solve_public_seam(
+        newton_frame,
+        newton_frame.seed,
+        relative_tolerance=MOMENT_SEEDED_CRITERION,
+    )
+    terminal = _newton_arm_record(
+        newton_frame,
+        context,
+        outcome,
+        MOMENT_SEEDED_CRITERION,
+    )
+    is_balanced_reference = (shot, row) == (
+        balanced_reference["shot"],
+        balanced_reference["slice_index"],
+    )
+    return {
+        "machine": "MAST",
+        "reference": {
+            "shot": shot,
+            "slice_index": row,
+            "time_s": mast_case["reference"]["time_s"],
+            "target_current_a": frame.selected.recorded_plasma_current_a,
+        },
+        "selection": (
+            "member of the frozen-six receipt; no solve or EFIT score changes "
+            "cohort membership"
+        ),
+        "preregistered_scoreability": scoreability,
+        "seed": {
+            "constructor": "ForwardProfile.moment_seed",
+            "boundary_hypothesis": "target reference own LCFS",
+            "predicted_current_a": seed.moments.plasma_current,
+            "predicted_centroid_r_m": seed.moments.centroid_r,
+            "predicted_centroid_z_m": seed.moments.centroid_z,
+            "prediction_current_support": seed.moments.current_support.value,
+            "prediction_centroid_support": seed.moments.centroid_support.value,
+            "representation_support": seed.support.value,
+            "representation_supported_cells": seed.supported_cells,
+            "representation_radius_m": seed.radius,
+        },
+        "terminal": terminal,
+        "balanced_fixed_point_reference": {
+            "applies_to_this_row": is_balanced_reference,
+            "source": balanced_reference["source"],
+            "reference_map_defect_percent_of_span": balanced_reference[
+                "reference_map_defect_percent_of_span"
+            ],
+            "interior_rms_fraction_of_span": balanced_reference[
+                "interior_rms_fraction_of_span"
+            ],
+            "exterior_rms_fraction_of_span": balanced_reference[
+                "exterior_rms_fraction_of_span"
+            ],
+            "moment_seed_converges": terminal["converged"]
+            if is_balanced_reference
+            else None,
+            "discretisation_escape_hatch_condition": (
+                "NOT_APPLICABLE"
+                if not is_balanced_reference
+                else ("NOT_MET" if terminal["converged"] else "MET")
+            ),
+        },
+    }
+
+
+def _moment_seed_split(references: list[dict[str, Any]]) -> dict[str, Any]:
+    """Report the registered MAST strata separately, never as a pooled rate."""
+
+    strata = {
+        "closed_axis_branch": "scoreable",
+        "no_closed_axis_branch": "unscoreable_no_closed_axis_branch",
+    }
+    result = {}
+    for name, status in strata.items():
+        rows = [
+            reference
+            for reference in references
+            if reference["preregistered_scoreability"]["status"] == status
+        ]
+        result[name] = {
+            "status": status,
+            "converged": sum(row["terminal"]["converged"] for row in rows),
+            "attempted": len(rows),
+            "baseline": (
+                {"cold": "0/2", "host_warm": "0/2", "newton_warm": "0/2"}
+                if name == "closed_axis_branch"
+                else {
+                    "cold": "1/4",
+                    "host_warm": "0/3 among cold stalls",
+                    "newton_warm": "0/3 among cold stalls",
+                }
+            ),
+            "rows": [
+                {
+                    "shot": row["reference"]["shot"],
+                    "slice_index": row["reference"]["slice_index"],
+                    "converged": row["terminal"]["converged"],
+                    "terminal_residual": row["terminal"][
+                        "terminal_fixed_point_residual"
+                    ],
+                }
+                for row in rows
+            ],
+        }
+    if (
+        len(result["closed_axis_branch"]["rows"]) != 2
+        or len(result["no_closed_axis_branch"]["rows"]) != 4
+    ):
+        raise RuntimeError("the preregistered MAST two/four split changed")
+    return result
+
+
+def _render_moment_seed_figure(
+    mast: list[dict[str, Any]],
+    diiid: list[dict[str, Any]],
+    path: Path,
+) -> None:
+    """Plot per-attempt residuals and convergence counts against baselines."""
+
+    figure, (residual_axis, count_axis) = plt.subplots(
+        2, 1, figsize=(10.5, 7.2), constrained_layout=True
+    )
+    labels = [
+        f"M {row['reference']['shot']}\n{row['reference']['slice_index']}"
+        for row in mast
+    ] + [f"D {Path(row['shot']).stem}\n{row['frame']}" for row in diiid]
+    residuals = [row["terminal"]["terminal_fixed_point_residual"] for row in mast] + [
+        row["route"]["fixed_point_relative_residual"] for row in diiid
+    ]
+    converged = [row["terminal"]["converged"] for row in mast] + [
+        row["route"]["converged"] for row in diiid
+    ]
+    colours = ["#2a9d8f" if passed else "#e76f51" for passed in converged]
+    x = np.arange(len(labels))
+    residual_axis.bar(x, np.maximum(residuals, 1.0e-16), color=colours)
+    residual_axis.axhline(
+        MOMENT_SEEDED_CRITERION,
+        color="black",
+        linestyle="--",
+        linewidth=1.0,
+        label="registered 1e-8 criterion",
+    )
+    residual_axis.set_yscale("log")
+    residual_axis.set_ylabel("terminal relative residual")
+    residual_axis.set_xticks(x, labels, fontsize=7)
+    residual_axis.legend(fontsize=8)
+
+    names = ["MAST closed", "MAST construct", "DIII-D"]
+    moment_counts = [
+        sum(
+            row["terminal"]["converged"]
+            for row in mast
+            if row["preregistered_scoreability"]["status"] == "scoreable"
+        ),
+        sum(
+            row["terminal"]["converged"]
+            for row in mast
+            if row["preregistered_scoreability"]["status"]
+            == "unscoreable_no_closed_axis_branch"
+        ),
+        sum(row["route"]["converged"] for row in diiid),
+    ]
+    totals = [2, 4, 5]
+    baseline_cold = [0, 1, 2]
+    baseline_warm = [0, 1, 4]
+    positions = np.arange(3)
+    width = 0.24
+    count_axis.bar(positions - width, baseline_cold, width, label="cold baseline")
+    count_axis.bar(positions, baseline_warm, width, label="best warm baseline")
+    count_axis.bar(positions + width, moment_counts, width, label="moment seed")
+    count_axis.set_xticks(
+        positions, [f"{name}\n(n={total})" for name, total in zip(names, totals)]
+    )
+    count_axis.set_ylabel("converged frames")
+    count_axis.set_ylim(0, 5.5)
+    count_axis.legend(fontsize=8)
+    figure.suptitle("Moment-seeded constrained cold starts on frozen cohorts")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+
+
+def run_moment_seed_driver(
+    store: Path = SHOT_STORE,
+    diiid_data: Path = DIIID_DATA,
+    output: Path = MOMENT_SEEDED_OUTPUT,
+) -> dict[str, Any]:
+    """Measure the public moment seed on both frozen machine cohorts."""
+
+    configure_dtypes()
+    output.mkdir(parents=True, exist_ok=True)
+    source = _source_stamp()
+    scoreability, topology_digest = _preregistered_scoreability()
+    balanced = _balanced_reference()
+    selected = [
+        (int(row["shot"]), int(row["slice_index"]))
+        for row, _qualification in select_slices_by_shot(DECOMPOSITION_BANK)
+    ]
+    if set(selected) != set(scoreability) or len(selected) != 6:
+        raise RuntimeError("the selected MAST cohort differs from the frozen six")
+
+    cache_box: list[Any] = [None]
+    mast = []
+    attempt_paths = []
+    for shot, row in selected:
+        reference = _measure_moment_seed_reference(
+            store,
+            shot,
+            row,
+            cache_box,
+            scoreability[(shot, row)],
+            balanced,
+        )
+        attempt_path = output / f"{MOMENT_SEEDED_ATTEMPT_PREFIX}-{shot}-{row}.json"
+        attempt = {
+            "receipt": "MAST moment-seeded constrained cold-start attempt",
+            "source": source,
+            "solver": {
+                "entry_point": "ForwardProfile.solve_branch",
+                "route": "newton_krylov",
+                "relative_residual_criterion": MOMENT_SEEDED_CRITERION,
+                "newton_promotions": NEWTON_STEPS,
+                "gmres_iterations_per_promotion": GMRES_ITERATIONS,
+                "warmup_sweeps": WARMUP_SWEEPS,
+                "relaxation": RELAXATION,
+                "step_cap": STEP_CAP,
+            },
+            "attempt": reference,
+        }
+        attempt_path.write_text(
+            json.dumps(attempt, indent=2, sort_keys=True, allow_nan=False) + "\n"
+        )
+        reference["receipt_path"] = str(attempt_path)
+        attempt_paths.append(str(attempt_path))
+        mast.append(reference)
+
+    diiid = run_diiid_moment_seed(diiid_data, output)
+    attempt_paths.extend(row["receipt_path"] for row in diiid["attempts"])
+    split = _moment_seed_split(mast)
+    balanced_row = next(
+        row
+        for row in mast
+        if row["balanced_fixed_point_reference"]["applies_to_this_row"]
+    )
+    escape_hatch = balanced_row["balanced_fixed_point_reference"][
+        "discretisation_escape_hatch_condition"
+    ]
+    figure_path = output / MOMENT_SEEDED_FIGURE_NAME
+    _render_moment_seed_figure(mast, diiid["attempts"], figure_path)
+    receipt = {
+        "receipt": "moment-seeded constrained cold-start aggregate",
+        "source": source,
+        "measurement_rule": (
+            "fixed frozen cohorts; no selection keys on a known-good frame identity; "
+            "MAST is reported only as the preregistered two/four split"
+        ),
+        "solver": {
+            "seed_constructor": "ForwardProfile.moment_seed",
+            "constrained_entry_points": [
+                "ForwardProfile.solve_branch",
+                "ForwardProfile.solve",
+            ],
+            "registered_relative_residual_criterion": MOMENT_SEEDED_CRITERION,
+            "current_relative_error_tolerance": CURRENT_RELATIVE_ERROR_TOLERANCE,
+        },
+        "mast": {
+            "split_results": split,
+            "baseline_statement": (
+                "cold 1/6 and both warm arms 0/5 are contextual controls only; "
+                "the moment-seed result is never pooled and is stated as 2/4"
+            ),
+            "references": mast,
+        },
+        "diiid": diiid,
+        "balanced_fixed_point_reference": {
+            **balanced,
+            "moment_seed_converges": balanced_row["terminal"]["converged"],
+            "terminal_residual": balanced_row["terminal"][
+                "terminal_fixed_point_residual"
+            ],
+            "discretisation_escape_hatch_condition": escape_hatch,
+            "orchestrator_fact": (
+                "discretisation escape hatch condition MET"
+                if escape_hatch == "MET"
+                else "discretisation escape hatch condition NOT MET"
+            ),
+        },
+        "inputs": {
+            "scoreability_receipt": str(TARED_TOPOLOGY_RECEIPT),
+            "scoreability_receipt_sha256": topology_digest,
+            "balanced_reference_receipt": str(BALANCED_REFERENCE_RECEIPT),
+            "balanced_reference_receipt_sha256": balanced["source_sha256"],
+        },
+        "artifacts": {
+            "attempt_receipts": attempt_paths,
+            "aggregate": str(output / MOMENT_SEEDED_AGGREGATE_NAME),
+            "figure": str(figure_path),
+        },
+    }
+    (output / MOMENT_SEEDED_AGGREGATE_NAME).write_text(
+        json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    )
+    return receipt
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--store", type=Path, default=SHOT_STORE)
@@ -1432,9 +1797,23 @@ def main() -> None:
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--newton-replay", action="store_true")
     parser.add_argument("--newton-output", type=Path, default=NEWTON_REPLAY_OUTPUT)
+    parser.add_argument("--moment-seeded-driver", action="store_true")
+    parser.add_argument("--diiid-data", type=Path, default=DIIID_DATA)
+    parser.add_argument("--moment-output", type=Path, default=MOMENT_SEEDED_OUTPUT)
     arguments = parser.parse_args()
     selected_shots = None if arguments.shots is None else tuple(arguments.shots)
-    if arguments.newton_replay:
+    if arguments.moment_seeded_driver:
+        receipt = run_moment_seed_driver(
+            arguments.store,
+            arguments.diiid_data,
+            arguments.moment_output,
+        )
+        summary = {
+            "mast": receipt["mast"]["split_results"],
+            "diiid": receipt["diiid"]["moment_seeded"],
+            "balanced_fixed_point_reference": receipt["balanced_fixed_point_reference"],
+        }
+    elif arguments.newton_replay:
         receipt = run_newton_replay(
             arguments.store,
             arguments.newton_output,

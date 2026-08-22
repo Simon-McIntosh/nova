@@ -217,6 +217,45 @@
     <a href="https://fusion.gat.com/pubs-ext/MISCONF07/A25808.pdf">GA-A25808</a>;
     <a href="https://fusion.gat.com/THEORY/attachments/Lao_FST_2005_A24687.pdf">Lao, GA-A24687</a>.</p>
 
+    <h2 id="series-circuit-recovered">§3 the series circuit recovered from label flux — 2026-08-22</h2>
+    <p>Commit <code>e3460384</code>, merged at <code>d30a5148</code>, closing a four-round convention
+    proof in which three rejected repairs each pinned one leg of the chain: the solver preserves
+    polarity (recovery 5.5e-12), the full-grid response columns match the independent boundary path
+    (cosine ≈ 1.0), the corpus time coordinate is millisecond (proven on 20/20 parquets, minimum frame
+    margin 4116.7 ms — a claimed ms/s defect and a global sign negation were both refuted by review),
+    and finally the label transform itself: a synthetic corpus-level label written to parquet and read
+    back through the production reader, convention transform, composition and regression recovers five
+    declared currents in sign and amplitude at <strong>1.988e-12</strong>
+    (<code>grid_residual_composition_oracle.parquet</code>).</p>
+    <p><strong>Under the proven chain, the per-frame Tikhonov fit recovers the published series
+    circuit.</strong> Same-frame ECOILA has median <strong>−6,924.26 A</strong> over the mixed-polarity
+    cohort (35 negative / 25 positive frames — the polarity-switched OH supply, exactly as the
+    power-supply literature describes), and the fitted conductors track it:</p>
+    <table>
+      <caption>Fitted current against same-frame ECOILA over 60 frames / 20 shots. Slopes are
+      through-origin; the independent netCDF trace relation (different pulse) gave 0.98–1.02.</caption>
+      <thead><tr><th>Conductor</th><th>Median ratio</th><th>Slope</th><th>Correlation</th><th>Sign agreement</th></tr></thead>
+      <tbody>
+        <tr><td>E567UP</td><td>1.0535</td><td rowspan="4">1.0017–1.0457</td><td rowspan="4">0.9822–0.9974</td><td rowspan="4">58–59 / 60</td></tr>
+        <tr><td>E567DN</td><td>0.9689</td></tr>
+        <tr><td>E89UP</td><td>1.0707</td></tr>
+        <tr><td>E89DN</td><td>1.0413</td></tr>
+        <tr><td><strong>ECOILB</strong></td><td><strong>2.0203</strong></td><td><strong>2.00092</strong></td><td>—</td><td>36/60 negative</td></tr>
+      </tbody>
+    </table>
+    <p>The earlier apparent contradictions dissolve into located artefacts: the founding 2.20× spread
+    compared absolute values across conductors including ECOILB's factor-two; the "6.6–22.4 % of
+    ECOILA" amplitude gap and the +46,895 A reference were exactly reproduced by the retired /1000
+    time sampling. <strong>ECOILB's factor two is coherent (slope 2.00092) and unresolved</strong> — a
+    normalisation or conductor-definition question (parallel-winding split, turn accounting, or the
+    solenoid A/B partition), not scatter — and blocks an unqualified five-conductor promotion.</p>
+    <p><strong>Reconciliation with the flux-space adjudication.</strong> The two results coexist: the
+    relation discovery says the fitted coefficients follow the circuit; the undecidable closure verdict
+    says even the best five-coil fit leaves flux residual far above the per-frame
+    plasma-representation thresholds (the labels' non-conductor content — non-GS structure and edge
+    artefacts — survives any current assignment). Discovery is a relation claim, not a closure claim,
+    which is exactly the plan's fit-once admissibility framing.</p>
+
   </main>
 </body>
 </html>

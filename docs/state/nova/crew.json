@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T08:42:36",
+  "updated": "2026-08-22T08:52:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -20468,9 +20468,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T061107965634-validation-time-traces",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a76",
+        "node": "validation-time-traces",
+        "role": "documentation",
+        "member": "transport-figures",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T06:11:12Z",
+        "completed_at": "2026-08-22T06:51:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2415,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2415,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "2067c3e78b4c3eb145c99c0ebcc094d68d1a2666",
+        "commits": [
+          "277b39e1"
+        ],
+        "changed_lines": {
+          "added": 1348,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "both owner-demanded time-trace figures delivered: the ramp-up overlay shows facade-versus-TORAX separation exactly (0,0,0,0) at all ten evolved steps across central T_i, T_e, n_e and axis psi on physically nontrivial trajectories (T_e peaking 29.9 keV), and the window figure shows the monotone residual decay 1.724 to 0.00499 with the 0.537 terminal slope annotated beside the exchanged state physical traces; reproduction requalified the landed contraction to 2.17e-11 agreement; theme-safe, 320 px proven, render-only regeneration from committed tsv",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T061107965634-validation-time-traces/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02818-4218-79f1-a2ea-bd784ce3a104",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 22441088,
+            "cached_input_tokens_cumulative": 22441088,
+            "input_tokens": 22705843,
+            "input_tokens_cumulative": 22705843,
+            "output_tokens": 37439,
+            "output_tokens_cumulative": 37439,
+            "reasoning_output_tokens": 9992,
+            "reasoning_output_tokens_cumulative": 9992
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 498
+    "_version": 499
   }
 }

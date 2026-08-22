@@ -935,6 +935,29 @@
     themselves are pinned in a regression by their coordinates, so the assumption cannot
     silently return. Focused gate 1/1, reference file 6/6, extraction file 9/9, sequential
     fresh processes, all records valid with zero invalid arcs.</p>
+    <h2 id="time-traces">Time traces for the validation cases &#8212; the routes on one page</h2>
+    <figure>
+      <img src="/nova/figures/flux-function-forward-transport/rampup-time-traces.svg"
+           alt="Central ion and electron temperature, central density and axis flux against time for the published ITER ramp-up: the Nova facade route and TORAX's own run_simulation route overlay exactly at all eleven saved states">
+      <figcaption>The published 20 s moving-grid ramp-up through both routes. Per-step
+      fa&#231;ade-versus-TORAX separation is <strong>exactly (0, 0, 0, 0)</strong> at every
+      evolved step for all four quantities, on physically nontrivial trajectories &#8212; T_i
+      5.88&#8594;3.20 keV through a 2.63 keV minimum, T_e 5.88&#8594;16.94 keV with a 29.95 keV
+      excursion, n_e falling a third, axis &#968; growing ninefold. This is route identity for
+      the published configuration; it remains fa&#231;ade-versus-own-entry-point evidence, since
+      TORAX ships no independent numeric golden.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/flux-function-forward-transport/window-time-traces.svg"
+           alt="Per-iteration maximum exchange residual of the gentle coupled window on a log axis, converging monotonically to below tolerance at iteration ten with fitted slope 0.537, beside the central ion temperature and edge plasma current of the exchanged state per iteration">
+      <figcaption>The gentle window's convergence, as a trace rather than a scalar: residual
+      1.724 &#8594; 0.00499 monotonically over ten iterations, first under the 0.005 tolerance
+      at iteration 10, terminal fitted slope &#215;0.537/iteration &#8212; the measured
+      contraction. The companion traces show the physical state behind the scalar: exchanged
+      central T_i approaching 4.7299 keV and edge plasma current approaching 555,470 A.
+      Reproduction across independent runs agrees with the landed receipt to 2.2e&#8722;11 in
+      contraction.</figcaption>
+    </figure>
   </main>
 </body>
 </html>

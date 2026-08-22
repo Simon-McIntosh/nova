@@ -512,6 +512,109 @@ def test_window_receipt_closes_flux_and_boundary_current_ledgers():
     assert current.achieved_initial == current.achieved_final
 
 
+def test_shape_residual_stays_visible_without_blocking_convergence():
+    """Shape is exchanged and receipted without entering the stopping gate."""
+    config = WindowConfig(
+        length=1.0,
+        equilibrium_grid=np.array([0.0, 0.5, 1.0]),
+        transport_grid=np.array([0.0, 0.25, 0.75, 1.0]),
+        iteration_cap=2,
+        tolerance=WINDOW_CONVERGENCE_TOLERANCE,
+    )
+    shape_fields = (
+        "delta_lower_face",
+        "delta_upper_face",
+        "elongation_face",
+        "r_in_face",
+        "r_out_face",
+        "shape_axis_expansion_face",
+        "shape_boundary_cell_count_face",
+    )
+    geometry_template = _exchange_waveform(
+        config.equilibrium_grid, 5, shape_fields[0], 0.0
+    )
+    initial_geometry = dataclasses.replace(
+        geometry_template,
+        values={
+            field: np.zeros_like(geometry_template.radial_grid)
+            for field in shape_fields
+        },
+    )
+    candidate_geometry = dataclasses.replace(
+        geometry_template,
+        values={
+            field: np.ones_like(geometry_template.radial_grid) for field in shape_fields
+        },
+    )
+    source = _exchange_waveform(config.transport_grid, 7, "source", 0.0)
+
+    def transport_update(_geometry, sample_grid):
+        return ExchangeSweepResult(
+            waveform=source,
+            receipt=_transport_window_receipt(sample_grid),
+        )
+
+    def equilibrium_update(_source, _sample_grid):
+        return ExchangeSweepResult(
+            waveform=candidate_geometry,
+            receipt={"finite_conservation_receipts": True},
+        )
+
+    result = solve_window(
+        initial_geometry,
+        source,
+        config,
+        equilibrium_update,
+        transport_update,
+    )
+
+    convergence = result.convergence
+    assert convergence.iterations_used == 1
+    assert convergence.gating_norm == 0.0
+    assert convergence.all_field_norm == 1.0
+    assert convergence.maximum_residual == convergence.gating_norm
+    assert convergence.gating_norm_trace == (0.0,)
+    assert convergence.all_field_norm_trace == (1.0,)
+    for field in shape_fields:
+        assert convergence.exit_residual[f"geometry.{field}"] == 1.0
+        np.testing.assert_array_equal(
+            result.geometry_waveform.values[field],
+            candidate_geometry.values[field],
+        )
+
+
+def test_noncontracting_iteration_halves_damping_before_converging():
+    """One measured non-contraction is recovered by a receipted backoff."""
+    config = WindowConfig(
+        length=1.0,
+        equilibrium_grid=np.array([0.0, 0.5, 1.0]),
+        transport_grid=np.array([0.0, 0.25, 0.75, 1.0]),
+        iteration_cap=10,
+        tolerance=WINDOW_CONVERGENCE_TOLERANCE,
+        contraction_threshold=0.9,
+        hard_iteration_ceiling=20,
+        damping_floor=0.5,
+    )
+    exchange = _AffineWindow(config, coupling=-1.0)
+
+    result = solve_window(
+        exchange.geometry_template,
+        exchange.source_template,
+        config,
+        exchange.equilibrium,
+        exchange.transport,
+    )
+
+    assert result.convergence.iterations_used == 3
+    assert result.convergence.damping_applied == 0.5
+    assert len(result.convergence.damping_backoffs) == 1
+    backoff = result.convergence.damping_backoffs[0]
+    assert backoff.iteration == 2
+    assert backoff.trigger_contraction >= config.contraction_threshold
+    assert backoff.damping_before == 1.0
+    assert backoff.damping_after == config.damping_floor
+
+
 def test_contracting_window_finishes_past_its_ordinary_cap():
     """Measured contraction licenses only the iterations needed to converge."""
     config = WindowConfig(
@@ -616,17 +719,18 @@ def test_coreless_branch_outcome_names_its_sample_and_window_exchange(
 def test_nonconverging_window_serializes_its_exhaustion_receipt_before_raising(
     tmp_path,
 ):
-    """A divergent exchange cannot escape as a degraded window result."""
+    """A stall at the damping floor cannot escape as a degraded result."""
     config = WindowConfig(
         length=1.0,
         equilibrium_grid=np.array([0.0, 0.5, 1.0]),
         transport_grid=np.array([0.0, 0.25, 0.75, 1.0]),
-        iteration_cap=4,
+        iteration_cap=10,
         tolerance=WINDOW_CONVERGENCE_TOLERANCE,
-        contraction_threshold=0.99,
-        hard_iteration_ceiling=10,
+        contraction_threshold=0.1,
+        hard_iteration_ceiling=20,
+        damping_floor=0.5,
     )
-    exchange = _AffineWindow(config, coupling=-1.0)
+    exchange = _AffineWindow(config, coupling=-2.0)
     serialized = tmp_path / "exhausted-window.tsv"
 
     def serialize_failure(error):
@@ -649,12 +753,20 @@ def test_nonconverging_window_serializes_its_exhaustion_receipt_before_raising(
         )
 
     assert serialized.is_file()
-    assert serialized.read_text(encoding="utf-8").splitlines()[1].split("\t")[0] == "4"
-    assert raised.value.convergence.iterations_used == config.iteration_cap
-    assert raised.value.convergence.iterations_used < config.hard_iteration_ceiling
+    serialized_iteration = int(
+        serialized.read_text(encoding="utf-8").splitlines()[1].split("\t")[0]
+    )
+    assert serialized_iteration == raised.value.convergence.iterations_used
+    assert raised.value.convergence.iterations_used < config.iteration_cap
     assert raised.value.convergence.iterations_past_cap == 0
     assert raised.value.convergence.continuation_contractions == ()
-    assert len(raised.value.convergence.residual_trace) == config.iteration_cap
+    assert len(raised.value.convergence.residual_trace) == serialized_iteration
     assert raised.value.convergence.maximum_residual > config.tolerance
     assert raised.value.convergence.contraction_estimate is not None
     assert np.isfinite(raised.value.convergence.contraction_estimate)
+    assert raised.value.convergence.contraction_estimate >= config.contraction_threshold
+    assert raised.value.convergence.damping_applied == config.damping_floor
+    assert len(raised.value.convergence.damping_backoffs) == 1
+    assert raised.value.convergence.damping_backoffs[0].damping_after == (
+        config.damping_floor
+    )

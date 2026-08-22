@@ -73,6 +73,19 @@ __all__ = [
 ]
 
 
+_NON_GATING_WINDOW_FIELDS = frozenset(
+    {
+        "geometry.delta_lower_face",
+        "geometry.delta_upper_face",
+        "geometry.elongation_face",
+        "geometry.r_in_face",
+        "geometry.r_out_face",
+        "geometry.shape_axis_expansion_face",
+        "geometry.shape_boundary_cell_count_face",
+    }
+)
+
+
 def implicit_window_state(
     fixed_point_map: Callable[[jax.Array, Any], jax.Array],
     initial_state,
@@ -495,9 +508,10 @@ class WindowConfig:
     ``tolerance`` control the fixed-point solve without changing either side's
     native temporal resolution.  A caller may declare a larger hard iteration
     ceiling; iterations beyond the ordinary cap are then licensed one at a
-    time only while the measured contraction remains below
-    ``contraction_threshold``.  Omitting the hard ceiling preserves the
-    ordinary cap exactly.
+    time while the measured gating norm remains finite.  A contraction at or
+    above ``contraction_threshold`` halves the current damping until
+    ``damping_floor`` is reached.  A further stall at the floor raises.
+    Omitting the hard ceiling preserves the ordinary cap exactly.
     """
 
     length: float
@@ -507,6 +521,7 @@ class WindowConfig:
     tolerance: float
     contraction_threshold: float = 0.9
     hard_iteration_ceiling: int | None = None
+    damping_floor: float = 0.125
 
     def __post_init__(self) -> None:
         equilibrium_grid = _readonly(self.equilibrium_grid, dtype=np.float64)
@@ -531,6 +546,8 @@ class WindowConfig:
             raise ValueError(
                 "window hard iteration ceiling cannot be below the ordinary cap"
             )
+        if not np.isfinite(self.damping_floor) or not 0.0 < self.damping_floor <= 1.0:
+            raise ValueError("window damping floor must be finite and lie in (0, 1]")
         for name, grid in (
             ("equilibrium", equilibrium_grid),
             ("transport", transport_grid),
@@ -564,6 +581,16 @@ class ExchangeSweepResult:
 
 
 @dataclass(frozen=True)
+class WindowDampingBackoffReceipt:
+    """One adaptive damping reduction and the contraction that triggered it."""
+
+    iteration: int
+    trigger_contraction: float
+    damping_before: float
+    damping_after: float
+
+
+@dataclass(frozen=True)
 class WindowConvergenceReceipt:
     """Measured behaviour of a converged or exhausted waveform iteration."""
 
@@ -572,8 +599,11 @@ class WindowConvergenceReceipt:
     exit_residual: Mapping[str, float]
     damping_applied: float
     residual_trace: tuple[Mapping[str, float], ...]
+    gating_norm_trace: tuple[float, ...]
+    all_field_norm_trace: tuple[float, ...]
     iterations_past_cap: int = 0
     continuation_contractions: tuple[float, ...] = ()
+    damping_backoffs: tuple[WindowDampingBackoffReceipt, ...] = ()
 
     def __post_init__(self) -> None:
         exit_residual = MappingProxyType(
@@ -587,6 +617,16 @@ class WindowConvergenceReceipt:
         object.__setattr__(self, "residual_trace", trace)
         object.__setattr__(
             self,
+            "gating_norm_trace",
+            tuple(float(value) for value in self.gating_norm_trace),
+        )
+        object.__setattr__(
+            self,
+            "all_field_norm_trace",
+            tuple(float(value) for value in self.all_field_norm_trace),
+        )
+        object.__setattr__(
+            self,
             "continuation_contractions",
             tuple(float(value) for value in self.continuation_contractions),
         )
@@ -596,11 +636,25 @@ class WindowConvergenceReceipt:
             raise ValueError(
                 "each iteration past the cap needs one licensing contraction"
             )
+        if len(self.gating_norm_trace) != len(trace):
+            raise ValueError("the gating-norm trace must match the residual trace")
+        if len(self.all_field_norm_trace) != len(trace):
+            raise ValueError("the all-field-norm trace must match the residual trace")
+
+    @property
+    def gating_norm(self) -> float:
+        """Return the final residual norm used by the stopping gate."""
+        return self.gating_norm_trace[-1] if self.gating_norm_trace else 0.0
+
+    @property
+    def all_field_norm(self) -> float:
+        """Return the final residual norm over every exchanged field."""
+        return self.all_field_norm_trace[-1] if self.all_field_norm_trace else 0.0
 
     @property
     def maximum_residual(self) -> float:
-        """Return the largest final exchanged-field residual."""
-        return max(self.exit_residual.values(), default=0.0)
+        """Return the final stopping-gate norm."""
+        return self.gating_norm
 
 
 @dataclass(frozen=True)
@@ -640,7 +694,8 @@ class WindowConvergenceError(RuntimeError):
     ) -> None:
         super().__init__(
             "window exchange did not converge: "
-            f"residual {convergence.maximum_residual:.6g} after "
+            f"gating residual {convergence.gating_norm:.6g} "
+            f"(all fields {convergence.all_field_norm:.6g}) after "
             f"{convergence.iterations_used} iterations"
         )
         self.convergence = convergence
@@ -756,12 +811,24 @@ def _blend_waveform(
     )
 
 
-def _contraction_estimate(trace: Sequence[Mapping[str, float]]) -> float | None:
-    """Estimate the final observed sup-residual contraction."""
+def _residual_norm(residual: Mapping[str, float], *, include_shape: bool) -> float:
+    """Return the all-field or physically coupled stopping norm."""
+    return max(
+        (
+            value
+            for field, value in residual.items()
+            if include_shape or field not in _NON_GATING_WINDOW_FIELDS
+        ),
+        default=0.0,
+    )
+
+
+def _contraction_estimate(trace: Sequence[float]) -> float | None:
+    """Estimate the final observed gating-norm contraction."""
     if len(trace) < 2:
         return None
-    previous = max(trace[-2].values(), default=0.0)
-    current = max(trace[-1].values(), default=0.0)
+    previous = trace[-2]
+    current = trace[-1]
     if previous == 0.0:
         return 0.0 if current == 0.0 else None
     return current / previous
@@ -856,24 +923,30 @@ def solve_window(
     The transport side first consumes the current geometry trajectory and
     emits a source trajectory.  The equilibrium side consumes that source and
     emits the next geometry trajectory.  Residuals are measured on every
-    exchanged profile and coordinate-map field before relaxation.  Beyond the
-    ordinary cap, each further iteration requires a measured contraction below
-    the declared threshold and cannot pass the hard ceiling.  Exhausting the
-    licensed iterations raises :class:`WindowConvergenceError`; the exception
-    retains the final candidate and convergence receipt for diagnosis, but no
-    degraded :class:`WindowReceipt` is returned.  A ``failure_serializer`` may
-    persist that typed exception immediately before it is raised.  This keeps
-    storage policy outside the pure iteration while ensuring an exhausted
-    trajectory cannot be lost to a caller that terminates on the exception.
+    exchanged profile and coordinate-map field before relaxation.  A measured
+    contraction at or above the declared threshold halves the damping down to
+    its floor.  The iteration cannot pass the hard ceiling, and a further stall
+    at the floor raises :class:`WindowConvergenceError`; the exception retains
+    the final candidate and convergence receipt for diagnosis, but no degraded
+    :class:`WindowReceipt` is returned.  A ``failure_serializer`` may persist
+    that typed exception immediately before it is raised.  This keeps storage
+    policy outside the pure iteration while ensuring an exhausted trajectory
+    cannot be lost to a caller that terminates on the exception.
     """
     if not np.isfinite(damping) or not 0.0 < damping <= 1.0:
         raise ValueError("window damping must lie in (0, 1]")
+    if damping < config.damping_floor:
+        raise ValueError("initial window damping cannot be below its declared floor")
     _require_waveform_grid(initial_geometry, config.equilibrium_grid, "geometry")
     _require_waveform_grid(initial_source, config.transport_grid, "source")
     geometry = initial_geometry
     source = initial_source
     residual_trace: list[Mapping[str, float]] = []
+    gating_norm_trace: list[float] = []
+    all_field_norm_trace: list[float] = []
     continuation_contractions: list[float] = []
+    damping_backoffs: list[WindowDampingBackoffReceipt] = []
+    current_damping = float(damping)
 
     for iteration in range(1, config.effective_hard_iteration_ceiling + 1):
         transported = transport_update(geometry, config.transport_grid)
@@ -900,16 +973,21 @@ def solve_window(
             **_waveform_residual("source", source, source_candidate),
         }
         residual_trace.append(residual)
+        gating_norm_trace.append(_residual_norm(residual, include_shape=False))
+        all_field_norm_trace.append(_residual_norm(residual, include_shape=True))
         convergence = WindowConvergenceReceipt(
             iterations_used=iteration,
-            contraction_estimate=_contraction_estimate(residual_trace),
+            contraction_estimate=_contraction_estimate(gating_norm_trace),
             exit_residual=residual,
-            damping_applied=float(damping),
+            damping_applied=current_damping,
             residual_trace=tuple(residual_trace),
+            gating_norm_trace=tuple(gating_norm_trace),
+            all_field_norm_trace=tuple(all_field_norm_trace),
             iterations_past_cap=max(0, iteration - config.iteration_cap),
             continuation_contractions=tuple(continuation_contractions),
+            damping_backoffs=tuple(damping_backoffs),
         )
-        if convergence.maximum_residual <= config.tolerance:
+        if convergence.gating_norm <= config.tolerance:
             conservation = _window_conservation(transported.receipt)
             if (
                 conservation.flux_closure_residual > config.tolerance
@@ -926,12 +1004,24 @@ def solve_window(
             )
         contraction = convergence.contraction_estimate
         hard_ceiling_reached = iteration == config.effective_hard_iteration_ceiling
-        stalled_at_or_beyond_cap = iteration >= config.iteration_cap and (
-            contraction is None
-            or not np.isfinite(contraction)
-            or contraction >= config.contraction_threshold
+        contraction_unavailable = iteration > 1 and (
+            contraction is None or not np.isfinite(contraction)
         )
-        if hard_ceiling_reached or stalled_at_or_beyond_cap:
+        stalled_at_floor = (
+            contraction is not None
+            and np.isfinite(contraction)
+            and contraction >= config.contraction_threshold
+            and current_damping <= config.damping_floor
+        )
+        cap_needs_measurement = (
+            iteration >= config.iteration_cap and contraction is None
+        )
+        if (
+            hard_ceiling_reached
+            or contraction_unavailable
+            or stalled_at_floor
+            or cap_needs_measurement
+        ):
             error = WindowConvergenceError(
                 convergence,
                 geometry_candidate,
@@ -942,12 +1032,23 @@ def solve_window(
             if failure_serializer is not None:
                 failure_serializer(error)
             raise error
+        if contraction is not None and contraction >= config.contraction_threshold:
+            damping_before = current_damping
+            current_damping = max(config.damping_floor, 0.5 * current_damping)
+            damping_backoffs.append(
+                WindowDampingBackoffReceipt(
+                    iteration=iteration,
+                    trigger_contraction=float(contraction),
+                    damping_before=damping_before,
+                    damping_after=current_damping,
+                )
+            )
         if iteration >= config.iteration_cap:
             if contraction is None:
                 raise AssertionError("a continuation needs a measured contraction")
             continuation_contractions.append(float(contraction))
-        geometry = _blend_waveform(geometry, geometry_candidate, damping)
-        source = _blend_waveform(source, source_candidate, damping)
+        geometry = _blend_waveform(geometry, geometry_candidate, current_damping)
+        source = _blend_waveform(source, source_candidate, current_damping)
 
     raise AssertionError("unreachable window iteration state")
 

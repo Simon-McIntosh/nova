@@ -61,7 +61,8 @@ ITERATION_CAP = 10
 CONTRACTION_THRESHOLD = 0.8
 HARD_ITERATION_CEILING = 20
 CONVERGENCE_TOLERANCE = 5.0e-3
-DAMPING = 0.5
+DAMPING = 1.0
+DAMPING_FLOOR = 0.125
 EQUILIBRIUM_SOLVE_TOLERANCE = 1.0e-6
 RADIAL_CELLS = 8
 SURFACE_BINS = 14
@@ -605,6 +606,7 @@ def _run_regime(
         tolerance=CONVERGENCE_TOLERANCE,
         contraction_threshold=CONTRACTION_THRESHOLD,
         hard_iteration_ceiling=HARD_ITERATION_CEILING,
+        damping_floor=DAMPING_FLOOR,
     )
     result = RegimeResult(
         config=config,
@@ -746,6 +748,82 @@ def _terminal_core(result: RegimeResult) -> str:
     return f"{branch['limited_core_cells']}/{branch['diverted_core_cells']}"
 
 
+def _convergence_report_lines(convergence) -> list[str]:
+    """Render every convergence signal without hiding non-gating fields."""
+    lines = [
+        f"- Iterations used: `{convergence.iterations_used}`",
+        f"- Iterations past ordinary cap: `{convergence.iterations_past_cap}`",
+        (
+            "- Measured gating-norm contraction estimate: "
+            f"`{_format(convergence.contraction_estimate)}`"
+        ),
+        f"- Exit gating norm: `{_format(convergence.gating_norm)}`",
+        f"- Exit all-field norm: `{_format(convergence.all_field_norm)}`",
+        f"- Final damping applied: `{_format(convergence.damping_applied)}`",
+        "",
+        "| iteration | gating norm | all-field norm |",
+        "|---:|---:|---:|",
+    ]
+    lines.extend(
+        f"| {iteration} | `{_format(gating)}` | `{_format(all_field)}` |"
+        for iteration, (gating, all_field) in enumerate(
+            zip(
+                convergence.gating_norm_trace,
+                convergence.all_field_norm_trace,
+                strict=True,
+            ),
+            start=1,
+        )
+    )
+    lines.extend(["", "Damping backoffs:", ""])
+    if convergence.damping_backoffs:
+        lines.extend(
+            [
+                "| iteration | trigger contraction | before | after |",
+                "|---:|---:|---:|---:|",
+            ]
+        )
+        lines.extend(
+            (
+                f"| {backoff.iteration} | "
+                f"`{_format(backoff.trigger_contraction)}` | "
+                f"`{_format(backoff.damping_before)}` | "
+                f"`{_format(backoff.damping_after)}` |"
+            )
+            for backoff in convergence.damping_backoffs
+        )
+    else:
+        lines.append("None.")
+    lines.extend(["", "Post-cap continuation licenses:", ""])
+    if convergence.continuation_contractions:
+        lines.extend(
+            [
+                "| licensed iteration | licensing contraction |",
+                "|---:|---:|",
+            ]
+        )
+        lines.extend(
+            (f"| {ITERATION_CAP + offset} | `{_format(contraction)}` |")
+            for offset, contraction in enumerate(
+                convergence.continuation_contractions, start=1
+            )
+        )
+    else:
+        lines.append("None.")
+    lines.extend(
+        [
+            "",
+            "| exchanged field | exit relative residual |",
+            "|---|---:|",
+        ]
+    )
+    lines.extend(
+        f"| `{field}` | `{_format(value)}` |"
+        for field, value in convergence.exit_residual.items()
+    )
+    return lines
+
+
 def _two_regime_report(
     strong: RegimeResult,
     gentle_attempts: Sequence[RegimeResult],
@@ -782,8 +860,9 @@ def _two_regime_report(
             f"Common knobs: iteration cap `{ITERATION_CAP}`, contraction "
             f"threshold `{_format(CONTRACTION_THRESHOLD)}`, hard iteration "
             f"ceiling `{HARD_ITERATION_CEILING}`, convergence and conservation "
-            f"tolerance `{_format(CONVERGENCE_TOLERANCE)}`, damping "
-            f"`{_format(DAMPING)}`, equilibrium portfolio tolerance "
+            f"tolerance `{_format(CONVERGENCE_TOLERANCE)}`, initial damping "
+            f"`{_format(DAMPING)}`, damping floor "
+            f"`{_format(DAMPING_FLOOR)}`, equilibrium portfolio tolerance "
             f"`{_format(EQUILIBRIUM_SOLVE_TOLERANCE)}`. One-time fixture "
             f"preparation: `{_format(preparation_seconds)}` s."
         ),
@@ -811,10 +890,17 @@ def _two_regime_report(
     lines.extend(
         [
             "",
-            "## Strong regime: typed boundary outcome",
+            "## Strong regime",
             "",
-            f"`{strong.outcome}`",
+            f"Typed outcome: `{strong.outcome_type}` — `{strong.outcome}`",
             "",
+        ]
+    )
+    if strong.convergence is not None:
+        lines.extend(_convergence_report_lines(strong.convergence))
+        lines.append("")
+    lines.extend(
+        [
             "The selector receipts are reproduced for every completed coarse sample:",
             "",
             (
@@ -879,39 +965,9 @@ def _two_regime_report(
                     f"`{_format(gentle.config.auxiliary_source_multiplier)}`."
                 ),
                 "",
-                f"- Iterations used: `{convergence.iterations_used}`",
-                (
-                    "- Iterations past ordinary cap: "
-                    f"`{convergence.iterations_past_cap}`"
-                ),
-                (
-                    "- Measured contraction estimate: "
-                    f"`{_format(convergence.contraction_estimate)}`"
-                ),
-                f"- Maximum exit residual: `{_format(convergence.maximum_residual)}`",
-                f"- Damping applied: `{_format(convergence.damping_applied)}`",
-                "",
-                "| licensed iteration | licensing contraction |",
-                "|---:|---:|",
             ]
         )
-        lines.extend(
-            (f"| {ITERATION_CAP + offset} | `{_format(contraction)}` |")
-            for offset, contraction in enumerate(
-                convergence.continuation_contractions, start=1
-            )
-        )
-        lines.extend(
-            [
-                "",
-                "| exchanged field | exit relative residual |",
-                "|---|---:|",
-            ]
-        )
-        lines.extend(
-            f"| `{field}` | `{_format(value)}` |"
-            for field, value in convergence.exit_residual.items()
-        )
+        lines.extend(_convergence_report_lines(convergence))
         lines.extend(
             [
                 "",
@@ -1008,7 +1064,8 @@ def _result_rows(
         ("contraction_threshold", CONTRACTION_THRESHOLD, "ratio"),
         ("hard_iteration_ceiling", HARD_ITERATION_CEILING, "count"),
         ("tolerance", CONVERGENCE_TOLERANCE, "relative"),
-        ("damping", DAMPING, "fraction"),
+        ("damping_initial", DAMPING, "fraction"),
+        ("damping_floor", DAMPING_FLOOR, "fraction"),
         ("equilibrium_solve_tolerance", EQUILIBRIUM_SOLVE_TOLERANCE, "relative"),
         ("radial_cells", RADIAL_CELLS, "count"),
         ("surface_bins", SURFACE_BINS, "count"),
@@ -1024,12 +1081,43 @@ def _result_rows(
             ("iterations_used", convergence.iterations_used, "count"),
             ("iterations_past_cap", convergence.iterations_past_cap, "count"),
             ("contraction_estimate", convergence.contraction_estimate, "ratio"),
+            ("gating_norm", convergence.gating_norm, "relative"),
+            ("all_field_norm", convergence.all_field_norm, "relative"),
             ("maximum_residual", convergence.maximum_residual, "relative"),
             ("damping_applied", convergence.damping_applied, "fraction"),
         ):
             append("convergence", field, value, unit)
         for field, value in convergence.exit_residual.items():
             append("exit_residual", field, value, "relative")
+        for iteration, (gating, all_field) in enumerate(
+            zip(
+                convergence.gating_norm_trace,
+                convergence.all_field_norm_trace,
+                strict=True,
+            ),
+            start=1,
+        ):
+            append("norm_trace", "gating_norm", gating, "relative", iteration=iteration)
+            append(
+                "norm_trace",
+                "all_field_norm",
+                all_field,
+                "relative",
+                iteration=iteration,
+            )
+        for backoff in convergence.damping_backoffs:
+            for field, value, unit in (
+                ("trigger_contraction", backoff.trigger_contraction, "ratio"),
+                ("damping_before", backoff.damping_before, "fraction"),
+                ("damping_after", backoff.damping_after, "fraction"),
+            ):
+                append(
+                    "damping_backoff",
+                    field,
+                    value,
+                    unit,
+                    iteration=backoff.iteration,
+                )
         for licensed_iteration, contraction in enumerate(
             convergence.continuation_contractions,
             start=ITERATION_CAP + 1,

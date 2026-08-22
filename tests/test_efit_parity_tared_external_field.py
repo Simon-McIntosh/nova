@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from pathlib import Path
 
 import numpy as np
@@ -8,16 +10,26 @@ import pytest
 from benchmarks.efit_parity_tared_external_field import (
     BANKED_STORED_FIELD_CLOSURE_WB,
     GAUGE_CONSTANT_WB,
+    MESH_SENSITIVITY_FIGURE,
+    MESH_SENSITIVITY_RECEIPT,
     OUTPUT_FIGURE,
+    OUTPUT_RECEIPT,
     REFERENCE_HALO_CURRENT_A,
     REPRESENTATIVE_SHOT,
+    _classify_mesh_floor,
     run_control,
 )
 
 
 @pytest.fixture(scope="module")
-def result():
-    return run_control()
+def result(tmp_path_factory):
+    output = tmp_path_factory.mktemp("tared-control") / OUTPUT_RECEIPT.name
+    return run_control(output_path=output)
+
+
+@pytest.fixture(scope="module")
+def mesh_receipt():
+    return json.loads(MESH_SENSITIVITY_RECEIPT.read_text())
 
 
 def test_tare_closes_all_six_references_at_roundoff(result):
@@ -202,4 +214,107 @@ def test_analytic_null_reports_absolute_and_span_errors_against_bank(result):
     )
     assert banked["fine"]["sup_error_fraction_of_analytic_span"] == pytest.approx(
         0.5641052269387783
+    )
+
+
+def test_mesh_floor_classifier_uses_preregistered_order_bands():
+    scaling = _classify_mesh_floor(1.0, 0.5, 2.0, 1.0)
+    invariant = _classify_mesh_floor(1.0, 1.0, 2.0, 1.0)
+    ambiguous = _classify_mesh_floor(1.0, 0.75, 2.0, 1.0)
+    worsening = _classify_mesh_floor(1.0, 2.0, 2.0, 1.0)
+
+    assert scaling["observed_mesh_order"] == pytest.approx(1.0)
+    assert scaling["verdict"] == "floor-scales-with-mesh"
+    assert invariant["observed_mesh_order"] == pytest.approx(0.0)
+    assert invariant["verdict"] == "mesh-invariant"
+    assert ambiguous["verdict"] == "ambiguous"
+    assert worsening["verdict"] == "ambiguous"
+
+
+def test_mesh_receipt_preserves_the_split_and_never_pools_residuals(mesh_receipt):
+    cohort = mesh_receipt["cohort"]
+    assert cohort["banked_reference_count"] == 6
+    assert cohort["stalled_reference_count"] == 5
+    assert cohort["converged_reference_excluded"] == {
+        "shot": 21986,
+        "slice_index": 46,
+    }
+    assert cohort["preregistered_split"] == {
+        "closed-axis": {
+            "banked_reference_count": 2,
+            "stalled_reference_count": 2,
+        },
+        "confinement-construction": {
+            "banked_reference_count": 4,
+            "stalled_reference_count": 3,
+        },
+    }
+    assert cohort["residuals_pooled"] is False
+    assert len(mesh_receipt["per_reference"]) == 5
+
+
+def test_all_five_tared_floors_scale_down_on_the_fine_grid(mesh_receipt):
+    expected_fine = {
+        (21978, 35): 0.005299693489256675,
+        (21983, 35): 0.0015446543055689578,
+        (21985, 51): 0.0013073838879026022,
+        (21989, 55): 0.001693384614199005,
+        (22086, 43): 0.0035417937581059262,
+    }
+    for row in mesh_receipt["per_reference"]:
+        key = (row["shot"], row["slice_index"])
+        coarse = row["mesh_levels"]["coarse"]
+        fine = row["mesh_levels"]["fine"]
+        assert fine["terminal_residual"] == pytest.approx(expected_fine[key])
+        assert coarse["realised_cells"] == 33 * 33
+        assert fine["realised_cells"] == 65 * 65
+        assert coarse["registered_fixed_point_criterion"] == 1.0e-8
+        assert fine["registered_fixed_point_criterion"] == 1.0e-8
+        assert coarse["newton_promotion_budget"] == 12
+        assert fine["newton_promotion_budget"] == 12
+        assert coarse["gmres_iterations_per_promotion"] == 12
+        assert fine["gmres_iterations_per_promotion"] == 12
+        assert coarse["reused_without_rerun"] is True
+        assert fine["measured_this_run"] is True
+        assert fine["closure_at_roundoff"] is True
+        assert abs(fine["signed_terminal_current_relative_error"]) <= 1.0e-12
+        assert row["fine_over_coarse_terminal_residual"] < 1.0
+        assert row["observed_mesh_order"] >= 0.5
+        assert row["verdict"] == "floor-scales-with-mesh"
+
+    assert mesh_receipt["aggregate"]["per_reference_counts"] == {
+        "floor-scales-with-mesh": 5,
+        "mesh-invariant": 0,
+        "ambiguous": 0,
+    }
+    assert mesh_receipt["aggregate"]["branch_verdict"] == "discretisation-limited"
+    assert all(
+        row["unanimous_verdict"] == "floor-scales-with-mesh"
+        for row in mesh_receipt["strata"].values()
+    )
+
+
+def test_mesh_receipt_is_tree_stamped_and_protected_digests_remain_green(
+    mesh_receipt,
+):
+    source = mesh_receipt["receipt"]["source"]
+    assert len(source["commit"]) == 40
+    assert len(source["tree"]) == 40
+    assert mesh_receipt["receipt"]["banked_control"] == str(OUTPUT_RECEIPT)
+    assert (
+        mesh_receipt["receipt"]["banked_control_sha256"]
+        == hashlib.sha256(OUTPUT_RECEIPT.read_bytes()).hexdigest()
+    )
+
+    protected = mesh_receipt["protected_banked_artifacts"]
+    assert protected["all_digests_unchanged"] is True
+    for position in ("before", "after"):
+        assert protected[position]["declared_count"] == 23
+        assert protected[position]["verified_digest_count"] == 23
+        assert protected[position]["all_digests_match"] is True
+
+    assert MESH_SENSITIVITY_FIGURE.read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
+    assert (
+        mesh_receipt["figure"]["sha256"]
+        == hashlib.sha256(MESH_SENSITIVITY_FIGURE.read_bytes()).hexdigest()
     )

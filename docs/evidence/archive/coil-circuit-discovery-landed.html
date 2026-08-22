@@ -167,6 +167,56 @@
     plan's open question: an inference-available label-free observation operator with demonstrated
     sensitivity to these conductors, a covariance, and a production prior authority.</p>
 
+    <h2 id="published-circuit">Published DIII-D circuits and passive-structure models — the external record — 2026-08-22</h2>
+    <p><strong>The E-coil circuit is published, and it is one circuit.</strong> Luxon's design
+    retrospective (Nucl. Fusion <strong>42</strong> (2002) 614), quoted as the machine reference by
+    Johnson (arXiv:0911.0191 §3): the ohmic heating system "consists of a central solenoid connected in
+    series (ie with the same current) to outer loops designed to exclude the magnetic field from the
+    confinement region". The GA repair report (OSTI 766800) gives the winding structure: the solenoid is
+    <strong>two parallel water-cooled windings of 48 turns</strong>, four parallel conductors each —
+    matching the netCDF description's 48-turn ECOILA/ECOILB pair. The power-supply paper (IAEA INIS
+    26061882) closes the topology: <strong>one</strong> line-commutated ohmic supply (600 V / 300 kA
+    class, polarity-switched) drives the OH coil, while the 18 shaping F-coils are separately
+    chopper-driven. The published circuit is therefore: one OH circuit, two parallel 48-turn branches
+    (A/B), series-connected end loops (the E567/E89 bundles) at the same current — which is exactly the
+    independently measured trace pattern (all five scales within 2 % of ECOILA), with parallel-branch
+    current sharing as the only free physical parameter. <em>The ensemble assessment inherits this as
+    its published prior: the expected relation is I<sub>seg</sub> ≈ I<sub>ECOILA</sub> for all five.</em></p>
+    <p><strong>DIII-D is an air-core machine, by convergent external evidence.</strong> No published
+    DIII-D machine description contains an iron core: the OH bore holds a wound copper solenoid (OSTI
+    766800); the ThinCurr model, defeatured from the complete engineering CAD expressly to retain every
+    conducting structure that matters, contains vessel and structural conductors only (NF 64 016010);
+    Johnson's field model of the DIII-D-referenced OH system is pure vacuum magnetostatics; EFIT
+    represents all DIII-D external flux by linear filament Green's functions (Lao, GA-A24687) — a
+    representation four decades of DIII-D reconstruction validates and which ferromagnetic material
+    would break; and the start-up literature manages the solenoid's <em>stray field</em> with actively
+    produced nulls, the signature of an air-core transformer (an iron core confines the return flux).
+    This underwrites the discovery method itself: G·I<sub>c</sub> superposition with vacuum Green
+    functions is exact on an air-core machine.</p>
+    <p><strong>Published passive-structure models exist and name the expected physics.</strong> The
+    vessel is a single Inconel 625 weldment, 25–38 mm sandwich-construction walls (vessel design record;
+    ThinCurr), thicker (2.5 cm) at the low-field-side midplane — where our pre-fit residual contours
+    concentrate. ThinCurr (NF 64 016010) is the modern 3D thin-wall eddy-current model of DIII-D, built
+    from defeatured CAD for start-up and disruption vessel currents; TokSys (GA-A25808) carries the
+    control-grade axisymmetric vessel model (induced currents uniform across each conductor,
+    growth-rate validation within ~20 %). Vessel dynamics are ms-scale (vessel L/R sets the n=0 control
+    window in the vertical-stability literature). At our banked frames — 160 ms into the ohmic ramp,
+    with the OH swing of order 100 kA/s — <strong>induced vessel current is expected physics, Lenz-opposed
+    to the OH swing</strong>. A pipeline-clean negative fitted E-coil-like current is therefore not
+    noise: it is the signature a passive drive would leave when projected onto the five-coil basis. The
+    discriminating augmentation is already in reach: the landed 99-cell vessel mesh and its
+    self-interaction operator (diagonal dominance 0.0298 — eigenmode-reduced recovery only) supply
+    vessel eigenmode columns for a passive-augmented regression, with ThinCurr/TokSys as the published
+    anchors for that basis.</p>
+    <p>Sources:
+    <a href="https://arxiv.org/pdf/0911.0191">Johnson, arXiv:0911.0191</a> (quoting
+    <a href="https://iopscience.iop.org/article/10.1088/0029-5515/42/5/313">Luxon, NF 42 614</a>);
+    <a href="https://www.osti.gov/biblio/766800">OSTI 766800</a>;
+    <a href="https://www.iaea.org/inis/collection/NCLCollectionStore/_Public/26/061/26061882.pdf">IAEA INIS 26061882</a>;
+    <a href="https://arxiv.org/pdf/2309.15336">ThinCurr, arXiv:2309.15336 / NF 64 016010</a>;
+    <a href="https://fusion.gat.com/pubs-ext/MISCONF07/A25808.pdf">GA-A25808</a>;
+    <a href="https://fusion.gat.com/THEORY/attachments/Lao_FST_2005_A24687.pdf">Lao, GA-A24687</a>.</p>
+
   </main>
 </body>
 </html>

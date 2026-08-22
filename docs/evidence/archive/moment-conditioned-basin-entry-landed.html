@@ -112,6 +112,38 @@
   centroid (1e-12&nbsp;m) exactly. Width class is deliberately omitted on the measured 21.015% ladder
   sensitivity; every quantity declares its support; production code carries no frame identities.</p>
 
+
+  <h3 id="s3-driver">§3 verdict — the moment-seeded driver is a measured negative, and the escape hatch fires</h3>
+
+  <p><strong>Commits <code>05bbadf3</code>…<code>f5a93cfc</code> (merged <code>87e17016</code>); gate
+  passed</strong> (11/11 attempts, 15/15 focused tests, independent validation of cohort, split, support,
+  receipt, figure and escape-hatch assertions). Every attempt seeds via
+  <code>ForwardProfile.moment_seed</code> with the reference's own boundary, declares prediction support
+  <code>boundary_hypothesis_all_domain</code> and representation support
+  <code>compact_centroid_disc</code>, and solves through the public constrained seam at 1e-8 with the
+  banked budgets.</p>
+
+  <p><strong>Result, on the preregistered strata and never pooled:</strong> MAST 0/2 closed-axis
+  (vs cold 0/2 and both warm arms 0/2) and 0/4 confinement-construction (vs cold 1/4, warm 0/3 on the
+  cold stalls); whole-cohort baselines remain cold 1/6, warm 0/5 twice over. DIII-D 2/5 moment-seeded,
+  equal to cold 2/5 (warm 4/5). <strong>The decisive row:</strong> 22086/43 — independently measured
+  0.13506% of span from the balanced constrained-map fixed point — <em>fails</em> the moment-seeded arm
+  at terminal residual 1.0418. That is verbatim the pre-registered condition of the stalls-persist lock:
+  <strong>the discretisation escape hatch condition is MET</strong>, and the investigation re-scopes to
+  the GS operator/discretisation (plan §5) rather than the seed.</p>
+
+  <figure>
+    <img src="/nova/figures/moment-conditioned-basin-entry/moment-seeded-cold-start.png"
+         alt="Residuals and convergence of the moment-seeded cold start against the banked baselines" style="max-width:100%">
+    <figcaption>Moment-seeded cold-start residuals and convergence against the cold and warm baselines,
+    per stratum; no attempt reaches the 1e-8 criterion beyond the cold baseline set.</figcaption>
+  </figure>
+
+  <p>With this, every basin-entry mechanism the campaign proposed is now a measured quantity: external
+  field exonerated (tared control), branch selection closed by construction, warm continuation negative
+  twice over, moment seeding negative — the residual suspect set is exactly the operator and its
+  discretisation.</p>
+
 </main>
 </body>
 </html>

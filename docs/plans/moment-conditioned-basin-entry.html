@@ -23,8 +23,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-23">
-<meta name="plan-impl" content="0.5">
-<meta name="plan-version" content="9">
+<meta name="plan-impl" content="0.57">
+<meta name="plan-version" content="12">
 </head>
 <body>
   <main class="plan-doc">
@@ -67,17 +67,19 @@
     (commit <code>a3119b61</code>, merged <code>b3713905</code>).</p>
     </section>
 
-    <h2 id="s3">§3 — Moment-conditioned seeding through the constrained seam</h2>
-
-    <p>Initialize the plasma-current representation carrying the predicted moments — amplitude,
-    centroid, and width class — instead of the current per-class cold seeds, and hand it to the
-    Newton-Krylov solve through the public constrained seam (<code>cf812416</code>), never a
-    benchmark-local map. Measured against the pre-registered bar: cold-start convergence count on
-    the frozen six MAST references (baseline 1/6) and the DIII-D score-blind frames (baseline 2/5
-    cold, 4/5 warm), same tolerances, same budgets, receipts per attempt. The warm-neighbour
-    reuse boundary measured by the parity side carries over: <code>NEIGHBOUR_FRAME_OFFSETS</code>,
-    <code>_neighbour_candidates</code> and <code>_solve_public_seam</code> reuse unchanged behind
-    a duck-typed frame adapter; <code>_find_warm_source</code> does not reuse.</p>
+    <section id="s3" class="section-landed">
+    <header><span class="badge badge-shipped">✓ landed 2026-08-22</span>
+    <h2>§3 — Moment-conditioned seeding through the constrained seam</h2></header>
+    <p class="landed-summary">Three nodes landed. The Newton warm-ladder replay measured the last
+    untried warm arm negative (0/5 lifts, stated on the 2/4 split; merged <code>3186a97e</code>).
+    <code>ForwardProfile.moment_seed</code> is a public capability pinned to the banked §2 rows at 2e-12
+    (merged <code>2aa76309</code>). The moment-seeded cold start is a <strong>measured negative</strong>:
+    MAST 0/2 closed-axis and 0/4 confinement-construction, DIII-D 2/5 equal to cold — and 22086/43,
+    sitting 0.135% of span from a balanced fixed point, fails at terminal residual 1.04, so the
+    <strong>discretisation escape hatch fired</strong> and the investigation re-scopes to the operator
+    (§5), per the locked stalls-persist rationale (merged <code>87e17016</code>). Full record:
+    <a href="/nova/evidence/archive/moment-conditioned-basin-entry-landed#s3-driver">§3 landed</a>.</p>
+    </section>
 
     <h2 id="s4">§4 — Moment constraints in the solve, and the portfolio revisited</h2>
 
@@ -91,6 +93,27 @@
     the machines where both roots share a class, and restate its role accordingly. The locked
     dual-basin-strategy decision is honoured: any change here is a measured restatement recorded
     on that plan, not a silent redesign.</p>
+
+    <h2 id="s5">§5 — The operator under suspicion: mesh-refinement sensitivity of the stall plateau</h2>
+
+    <p><strong>Entered under the fired discretisation escape hatch.</strong> External field (tared
+    control), branch selection (amplitude elimination), warm continuation (both arms), and moment
+    seeding are all measured exonerations or negatives; the near-balanced reference 22086/43 —
+    0.135% of span from a balanced fixed point — fails the seeded arm, which the stalls-persist lock
+    pre-registered as the condition that makes the GS operator or its discretisation the lead suspect.
+    The one measurement that separates the remaining branches: <em>does the stall plateau scale with
+    mesh resolution?</em> If the terminal residual floor moves with the mesh, the stalls are
+    discretisation-limited and no seeding or continuation mechanism rescues them — the work becomes
+    operator refinement. If the floor is mesh-invariant, it is a map or basin property and §4's
+    constraint-by-construction path regains its premise. The coarse/fine machinery already exists in
+    <code>benchmarks/efit_parity_tared_external_field.py</code>, which ran both meshes for the Solov'ev
+    null; results state per-reference floors on the preregistered 2/4 split, never pooled.</p>
+
+    <p><strong>Held complementary arm:</strong> the long-budget plateau/orbit classification
+    (machinery banked in <code>docs/figures/efit-forward-parity/long-budget-plasma-route.json</code>)
+    has never run on the tared background, and every tared stall terminal is a budget-limited
+    12-iteration observation. It dispatches only if the mesh verdict is ambiguous — flat-or-positive
+    periodic tails read as orbit behaviour, monotone stalls at a floor as discretisation.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -139,11 +162,17 @@
 <div class="r-comment" data-section="s4" data-id="c-20260822T2129-constraint-support-decision" data-who="reckon-ship" data-when="2026-08-22T21:29:00+00:00">
     <div class="r-comment-body">DECISION REQUIRED BEFORE ANY CONSTRAINT FOLDS (from the §2 worker's fenced-out follow_ons, folded here): each promoted moment must declare a numerical tolerance and either keep the constraint on the all-domain support or supply a topology-qualified confined-core support mapping — IntegralObservation.plasma_current integrates the confined core while the target-current path integrates all domains (audited ratio 0.446884), so an unmapped constraint is wrong by ~0.447 before any physics. The §4 node contract carries this as a required decision step, resolved on measured grounds or escalated to the owner if it proves a convention choice.</div>
 </div>
+<div class="r-comment" data-section="s4" data-id="c-20260822T2322-s4-premise-held" data-who="reckon-ship" data-when="2026-08-22T23:22:00+00:00">
+    <div class="r-comment-body">§4 IS HELD ON ITS OWN STATED CONDITION: constraint folding escalates only with measured wins, and §3 measured none (moment-seeded 0/6 MAST strata gains, DIII-D equal to cold). With the discretisation escape hatch fired, folding centroid constraints cannot rescue an operator-limited stall, so §4 waits on §5's mesh verdict: if the plateau proves mesh-invariant (a map/basin property after all), §4's constraint-by-construction path regains its premise and the constraint-support-mapping decision (comment above) becomes live; if the plateau scales with mesh, the operator work owns the frontier and §4's portfolio-revisit clause is re-planned on the owner's direction. Nothing in §4 dispatches until that verdict lands.</div>
+</div>
 <div class="r-comment" data-section="s3" data-id="c-20260822T2202-newton-replay-baseline" data-who="reckon-ship" data-when="2026-08-22T22:02:00+00:00">
     <div class="r-comment-body">newton-warm-ladder-replay landed — commits f2035bed/d6b7f95a (merged 3186a97e); gate passed (12/12 warm-neighbour suite, cold arms exactly reproduce banked Newton residuals, max target-current relative error 2.22e-16). THE CHEAPEST UNTRIED ARM IS MEASURED AND NEGATIVE: on the pinned Newton branch through the public constrained seam, the same-shot warm ladder lifts 0/2 in the scoreable closed-LCFS stratum (21983/35 terminal 1.294e-3; 21985/51 terminal 2.869e-3) and 0/3 in the unscoreable stratum (21978/35 1.081e-2; 21986/46 3.943e-2; 21989/55 2.010e-3); 22086/43 keeps its cold root at 2.912e-16 and never triggers a warm arm. All five stalled references found legal earlier-first sources (selection by own convergence only, never EFIT score, honouring the no-identity-keying rule). NEIGHBOUR_FRAME_OFFSETS, _neighbour_candidates and _solve_public_seam reused unchanged behind a duck-typed adapter; _find_warm_source not reused. §3's baseline set is complete: warm-neighbour (host-Krylov) lifts 0/5, newton x warm lifts 0/5, cold 1/6 with the converged root in the unscoreable stratum — the moment-seeded driver is the remaining candidate and its bar is now fully pre-registered. Record: /nova/evidence/archive/moment-conditioned-basin-entry-landed#s3-newton-replay</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260822T2225-seed-capability" data-who="reckon-ship" data-when="2026-08-22T22:25:00+00:00">
     <div class="r-comment-body">moment-seed-capability landed — commit 032bd2ad (merged 2aa76309); gate passed (31/31 regression incl. equilibrium moment + constrained forward lanes; focused 3/3 pinning all six banked own-boundary rows at 2e-12; compact-seed current 1e-9 A, centroid 1e-12 m). nova/equilibrium/moment.py publishes CurrentIntegralSupport, PredictedCurrentMoments and MomentSeed on the existing ReconstructMoment authority; ForwardProfile.moment_seed is the production constructor; MomentSeed.solve hands flux as initial_flux and predicted current as target_current through the public seam. WIDTH CLASS DELIBERATELY OMITTED on the measured 21.015% ladder sensitivity — the disc radius is a limiter-derived construction scale, not a width prediction. Supports declared everywhere (predictions boundary_hypothesis_all_domain; the seed representation compact_centroid_disc); no frame identities in production code. Remaining §3 node: the driver measurement through the existing benchmark adapters.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260822T2320-driver-verdict" data-who="reckon-ship" data-when="2026-08-22T23:20:00+00:00">
+    <div class="r-comment-body">moment-seeded-driver-measurement landed — commits 05bbadf3..f5a93cfc (merged 87e17016); gate passed (11/11 attempts executed, 15/15 focused tests, independent artifact validation of cohort, split, support, receipt, figure and escape-hatch assertions). THE DRIVER IS A MEASURED NEGATIVE AND THE ESCAPE HATCH FIRES. MAST on the preregistered split: 0/2 closed-axis (vs cold 0/2, both warm arms 0/2) and 0/4 confinement-construction (vs cold 1/4, warm 0/3 among the cold stalls) — whole-cohort baselines remain cold 1/6, both warm arms 0/5. DIII-D: 2/5 moment-seeded, equal to cold 2/5 (warm 4/5). DECISIVE ROW: 22086/43, independently measured 0.13506 percent of span from the balanced constrained-map fixed point, FAILS the moment-seeded arm at terminal residual 1.0418 — the exact pre-registered condition in the stalls-persist lock rationale. DISCRETISATION ESCAPE HATCH CONDITION: MET. Per the locked decision, the investigation re-scopes to the GS operator/discretisation (§5), not the seed. Every attempt declared supports and used ForwardProfile.moment_seed through the public seam; no identity keying. Record: /nova/evidence/archive/moment-conditioned-basin-entry-landed#s3-driver</div>
 </div>
 </section>
 

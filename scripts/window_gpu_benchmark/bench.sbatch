@@ -24,6 +24,6 @@ export UV_PROJECT_ENVIRONMENT="${ENVIRONMENT}"
 export JAX_ENABLE_COMPILATION_CACHE=0
 
 srun --ntasks=1 --cpus-per-task=7 --cpu-bind=cores \
-  env JAX_PLATFORMS=cuda UV_PROJECT_ENVIRONMENT="${ENVIRONMENT}" \
+  env JAX_PLATFORMS=cuda,cpu UV_PROJECT_ENVIRONMENT="${ENVIRONMENT}" \
   PYTHONPATH="${ROOT}" uv run --no-sync python "${DRIVER}" \
   --report "${REPORT}" --results "${RESULTS}"

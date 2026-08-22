@@ -1,65 +1,44 @@
-NEEDS-HELP: the TORAX uniform-grid guard requires a CPU pure_callback inside the CUDA-only H200 window
+NEEDS-HELP: the H200 gentle window exhausts the declared iteration cap at residual 0.0277048 instead of converging at 0.005
 
-tried: Submitted exactly one SLURM job with the landed gentle configuration to `betelgeuse` under reservation `gpu_0003_grpA`, requesting one H200 and exporting `TMPDIR=/tmp` and `JAX_PLATFORMS=cuda`. Job `1253074` reached the TORAX geometry adapter, then failed after 97 s because `_require_uniform_normalized_grid` could not place its `jax.pure_callback` on a local CPU device. I did not add the CPU platform, retry, or report the aborted attempt as a completed benchmark.
+tried: Ran the same landed gentle configuration in exactly two H200 jobs. Job `1253074` correctly refused the original CUDA-only launch at the host grid-validation callback. Under the amended `JAX_PLATFORMS=cuda,cpu` contract, job `1253082` cleared that seam, executed all ten declared exchanges with the equilibrium solve leaves and returned TORAX state channels guarded as CUDA-only, then returned `WindowConvergenceError`: residual `0.0277048` after cap `10`. The landed CPU run converged at maximum residual `0.0049860186`. No tolerance, damping, source, window, or iteration knob was changed.
 
-options: (1) make the uniform-normalised-grid guard trace-safe and device-native, or validate this static mesh invariant before the CUDA-traced adapter call; (2) deliberately permit a CPU callback and reclassify the measurement as hybrid GPU/host execution; (3) give the geometry adapter a validated mesh type whose construction proves the invariant once, outside the transport solve.
+options: (1) add a product diagnostic that banks the non-converged GPU residual trace, branch receipts, per-field exchanged values, callback timings, and CPU/GPU precision provenance before raising, then compare it with the landed CPU trajectory; (2) isolate the first CPU/GPU exchange whose residual or branch selection diverges in a focused equivalence test; (3) integrate the post-cut boundary-band implementation and rerun both hardware lanes as a separately versioned comparison rather than mixing it with this pre-band baseline.
 
-leaning: Option 1, with a static preflight where the grid is concrete and a device-native traced assertion where it is not. Adding `cpu` to `JAX_PLATFORMS` would conceal the exact host dependency this benchmark is required to expose.
+leaning: Option 1 followed by option 2, preserving cap `10`, tolerance `0.005`, and damping `0.5`. The observed residual is 5.54 times the convergence limit, so weakening the gate would turn a hardware-dependent trajectory change into a false pass.
 
-cost-if-wrong: If the callback is semantically required during every traced adapter call, the product needs an explicit host-orchestration contract and the end-to-end GPU claim and timing decomposition must be rewritten; after any product repair, this single job must be rerun to obtain all unavailable H200 timings and receipts.
+cost-if-wrong: If the discrepancy is caused only by benchmark synchronization or unbanked precision configuration, the product diagnostic can be removed after attribution and this exact job rerun; if the equilibrium branch or TORAX state genuinely differs on CUDA, the affected solver seam needs repair and both timing and receipt evidence must be regenerated.
 
-# Gentle coupled-window H200 attempt
+# Gentle coupled-window H200 outcome
 
-The requested end-to-end measurement is blocked. The only H200 attempt stopped before the first TORAX interval completed, so no converged window receipt, per-iteration decomposition, cold-compile amortisation, or device placement for the equilibrium exchange solves exists to report. The 97 s allocation duration is a measured **time to refusal**, not a window wall time.
+The amended execution contract successfully passed the host callback boundary, but the physics convergence contract did not pass. Job `1253082` ran for 249 s allocation wall time on one H200 and exhausted all ten exchanges at residual `0.0277048`; it did not return a `WindowReceipt`. The result is therefore a measured non-convergence, not an end-to-end timing or receipt success.
 
 ## Allocation and declared knobs
 
 | item | value |
 |---|---:|
-| SLURM job | `1253074` |
+| amended SLURM job | `1253082` |
 | node | `98dci4-gpu-0003` |
 | partition | `betelgeuse` |
 | reservation | `gpu_0003_grpA` |
 | requested accelerator | `gres/gpu:h200:1` |
 | CPUs / memory | `7` / `64 GiB` |
 | TMPDIR | `/tmp` |
-| JAX platform selection | `cuda` only |
+| JAX platforms | `cuda,cpu` |
 | job state / exit | `FAILED` / `1:0` |
-| elapsed to refusal | `97 s` |
+| allocation wall time | `249 s` |
 | window length | `0.0025 s` |
 | auxiliary source multiplier | `0.5` |
 | iteration cap | `10` |
 | convergence tolerance | `0.005` |
 | damping | `0.5` |
 
-The SLURM allocation itself proves that one H200 was assigned. It does not prove that the equilibrium exchange solve arrays stayed on that H200: the driver was instrumented to record their JAX devices, but the initial transport leg refused before the first equilibrium update returned. That required evidence remains explicitly blocked rather than inferred from the allocation.
+The first job, `1253074`, ran for 97 s and established the callback refusal that motivated the amended platform contract. It remains provenance, not a timing sample.
 
-## Refusing operation
+## Device and solver assertions
 
-The observed call path was:
+The amended driver requires JAX backend `gpu` and a separately registered CPU callback device. During each exchange it walks every JAX leaf in the returned `ForwardEquilibrium` and each of the five returned TORAX state channels—rho, psi, ion temperature, electron temperature, and electron density—and raises immediately if any device platform is not GPU. Job `1253082` reached the convergence gate only after ten transport and ten equilibrium updates without a device-placement exception: 20 coarse-sample equilibrium receipts and 10 returned TORAX states traversed those CUDA assertions.
 
-```text
-solve_window
-  -> transport_sweep
-  -> ForwardTransport.solve
-  -> _solve_torax
-  -> _prepare_torax_config
-  -> torax_geometry_from_fsa
-  -> _require_uniform_normalized_grid
-  -> jax.pure_callback
-```
-
-JAX reported:
-
-```text
-RuntimeError: jax.pure_callback failed to find a local CPU device to place the inputs on. Make sure "cpu" is listed in --jax_platforms or the JAX_PLATFORMS environment variable.
-```
-
-The failing product operation is the uniform normalised radial-grid validation in `nova.transport.torax_geometry._require_uniform_normalized_grid`. It forces CPU placement from inside the CUDA-only adapter path. The product source is outside this node's write fence, and enabling the CPU backend would be the prohibited host-round-trip workaround.
-
-## Solver identity audit
-
-The source-level owner identity is intact:
+The source-level owner path is also intact:
 
 ```text
 nova.transport.coupled_window.equilibrium_sweep
@@ -69,20 +48,30 @@ nova.transport.coupled_window.equilibrium_sweep
   -> nova.equilibrium.forward.ForwardProfile.solve_portfolio
 ```
 
-The relevant definitions and calls are at `nova/transport/coupled_window.py:948`, `nova/transport/coupled_window.py:1015`, `nova/transport/coupled_window.py:1039`, and `nova/equilibrium/forward.py:978`. This discharges the architectural solver-identity assertion: the window equilibrium leg owns a plasma-current-bearing cold portfolio and routes through `ForwardProfile.solve_portfolio`. It does not substitute for the blocked runtime device assertion.
+The relevant definitions and calls are at `nova/transport/coupled_window.py:948`, `nova/transport/coupled_window.py:1015`, `nova/transport/coupled_window.py:1039`, and `nova/equilibrium/forward.py:978`.
 
-## CPU baseline and unavailable H200 comparison
+## Guard callback measurement
 
-| measurement | landed CPU | H200 job | finding |
+The driver synchronously wraps `_validated_grid_callback`, blocks its returned array, and records dispatch, CUDA-to-host grid transfer, CPU validation, and returned-array handoff once per adapter construction. Those ten in-memory measurements were not serialized because the driver correctly stopped before its success-only artifact writer after receiving `WindowConvergenceError`. Their numerical cost is therefore **unavailable**, not reconstructed from the 249 s allocation time. A diagnostic rerun would be required to bank them, but the worker contract requires stopping after the same batch command has failed twice following different fixes.
+
+This unavailable number means no evidence-based recommendation can yet be made about a provenance-gated guard bypass. The guard stays as-is until its measured cost is durable.
+
+## Pre-band CPU baseline and post-cut sparsification
+
+| measurement | landed CPU, pre-band | H200 amended job | finding |
 |---|---:|---:|---|
-| end-to-end window wall time | `423.032716 s` | unavailable | job refused before one window completed |
-| equilibrium plus FSA wall time | `422.454568 s` | unavailable | no completed iteration |
-| TORAX wall time | `0.578148 s` | unavailable | first interval did not complete |
-| measured contraction | `0.5371039633` | unavailable | no convergence receipt |
-| maximum exit residual | `0.0049860186` | unavailable | no convergence receipt |
-| flux-consumption ledger closure | `0` | unavailable | no terminal transport receipt |
-| plasma-current ledger closure | `0` | unavailable | no terminal transport receipt |
-| cold-compile cost | not separately recorded | unavailable | compilation cannot be separated from a failed trace |
-| ten-iteration compile amortisation | not applicable | unavailable | zero completed iterations |
+| complete window wall time | `423.032716 s` | unavailable | no converged `WindowReceipt` |
+| equilibrium plus FSA | `422.454568 s` | unavailable | per-iteration values were not serialized on error |
+| TORAX | `0.578148 s` | unavailable | per-iteration values were not serialized on error |
+| iterations used | `10` | `10` | both reached the declared cap |
+| maximum exit residual | `0.0049860186` | `0.0277048` | H200 is `0.0227188` higher and 5.54 times the tolerance |
+| measured contraction | `0.5371039633` | unavailable | non-converged receipt was not serialized |
+| flux-consumption ledger closure | `0` | unavailable | terminal ledger was not serialized |
+| plasma-current ledger closure | `0` | unavailable | terminal ledger was not serialized |
+| cold-compile cost | not separately banked | unavailable | first-versus-warm timing rows were not serialized |
 
-No H200 deviation from the landed CPU receipt can be calculated, and none is claimed. The full traceback is retained in the named SLURM log; the companion TSV records the same blocked cells as explicit `unavailable` values.
+The `423.032716 s` figure is the landed pre-band CPU window and remains the only directly comparable CPU measurement. Boundary-band sparsification landed on main after this worktree was cut in commit `32942ac3`; warm ITER CPU assembly is now `24.6 s`. The complete CPU window has not been remeasured after that change, so this report does not infer a post-band CPU window time or speedup. The H200 job also executed the pre-band worktree, keeping the failed receipt comparison on the same code lineage.
+
+## Quantitative verdict
+
+The declared success threshold was `0.005`; the observed H200 exit residual was `0.0277048`, an excess of `0.0227048` over the limit and a ratio of `5.54096`. The H200 result therefore fails convergence. End-to-end wall time, per-iteration sweep times, guard callback cost, cold-compile amortisation, contraction, exchanged-field residuals, and the two ledger closures remain unavailable because the driver never promoted the non-converged trajectory to a success artifact.

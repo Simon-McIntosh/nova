@@ -1,5 +1,5 @@
 category	iteration	side	field	value	unit	cpu_baseline	absolute_deviation	tolerance	status
-job			slurm_job_id	1253074	identifier				RECORDED
+job			slurm_job_id	1253082	identifier				RECORDED
 job			node	98dci4-gpu-0003	text				RECORDED
 job			partition	betelgeuse	text				RECORDED
 job			reservation	gpu_0003_grpA	text				RECORDED
@@ -7,29 +7,35 @@ job			requested_accelerator	gres/gpu:h200:1	text				RECORDED
 job			cpu_count	7	count				RECORDED
 job			memory	64	GiB				RECORDED
 job			tmpdir	/tmp	path				RECORDED
-job			jax_platforms	cuda	text				RECORDED
+job			jax_platforms	cuda,cpu	text				RECORDED
 job			state	FAILED	text				NEEDS-HELP
 job			exit_code	1:0	text				NEEDS-HELP
-timing			time_to_refusal	97	s				MEASURED_NOT_WINDOW_TIME
+timing			allocation_wall_time	249	s				MEASURED_NOT_WINDOW_TIME
 configuration			window_length	0.0025	s				DECLARED
 configuration			auxiliary_source_multiplier	0.5	fraction				DECLARED
 configuration			iteration_cap	10	count				DECLARED
 configuration			convergence_tolerance	0.005	relative				DECLARED
 configuration			damping	0.5	fraction				DECLARED
-timing			window_wall_time	unavailable	s	423.03271608706564			BLOCKED
-timing			equilibrium_plus_fsa_wall_time	unavailable	s	422.45456840028055			BLOCKED
-timing			torax_wall_time	unavailable	s	0.578147686785087			BLOCKED
-timing	1	equilibrium_plus_fsa	wall_time	unavailable	s				BLOCKED
-timing	1	torax	wall_time	unavailable	s				BLOCKED
-timing			cold_compile_cost	unavailable	s				BLOCKED
-timing			cold_compile_amortised_over_ten_iterations	unavailable	s_per_iteration				BLOCKED
-receipt			contraction_estimate	unavailable	relative	0.53710396334179378		0.005	BLOCKED
-receipt			maximum_exit_residual	unavailable	relative	0.0049860186161842365		0.005	BLOCKED
-receipt			flux_consumption_ledger_closure	unavailable	relative	0		0.005	BLOCKED
-receipt			plasma_current_ledger_closure	unavailable	relative	0		0.005	BLOCKED
-device_placement			slurm_allocation	NVIDIA H200	text				PASS
-device_placement			equilibrium_solve_arrays	unavailable	device				BLOCKED
+lineage			cpu_baseline	pre-band	text				RECORDED
+lineage			boundary_band_commit	32942ac3	git_commit				RECORDED
+lineage			post_band_warm_iter_cpu_assembly	24.6	s				RECORDED_NOT_WINDOW_TIME
+device_placement			equilibrium_sample_receipts_guarded	20	receipt_count				PASS_CUDA_ONLY
+device_placement			transport_states_guarded	10	state_count				PASS_CUDA_ONLY
+device_placement			transport_state_channels_per_receipt	5	array_count				PASS_CUDA_ONLY
 solver_identity			equilibrium_sweep	coupled_window.equilibrium_sweep -> ForwardProfile.solve_portfolio	source_call_path				PASS
 solver_identity			cold_portfolio_current	observed.moments.plasma_current	source_call_path				PASS
-refusal			operation	torax_geometry._require_uniform_normalized_grid -> jax.pure_callback	call_path				NEEDS-HELP
-refusal			message	jax.pure_callback failed to find a local CPU device with JAX_PLATFORMS=cuda	text				NEEDS-HELP
+convergence			iterations_used	10	count	10	0	0	CAP_EXHAUSTED
+convergence			maximum_exit_residual	0.0277048	relative	0.0049860186161842365	0.022718781383815764	0.005	FAIL
+convergence			residual_over_tolerance	5.54096	ratio			1	FAIL
+timing			window_wall_time	unavailable	s	423.03271608706564			BLOCKED_NONCONVERGED
+timing			equilibrium_plus_fsa_wall_time	unavailable	s	422.45456840028055			BLOCKED_NOT_SERIALIZED
+timing			torax_wall_time	unavailable	s	0.578147686785087			BLOCKED_NOT_SERIALIZED
+timing			cold_compile_cost	unavailable	s				BLOCKED_NOT_SERIALIZED
+timing			cold_compile_amortised_over_ten_iterations	unavailable	s_per_iteration				BLOCKED_NOT_SERIALIZED
+guard_callback			call_count	10	count				INFERRED_FROM_COMPLETED_EXCHANGES
+guard_callback			roundtrip_wall_time	unavailable	s				BLOCKED_NOT_SERIALIZED
+receipt			contraction_estimate	unavailable	relative	0.53710396334179378		0.005	BLOCKED_NOT_SERIALIZED
+receipt			flux_consumption_ledger_closure	unavailable	relative	0		0.005	BLOCKED_NOT_SERIALIZED
+receipt			plasma_current_ledger_closure	unavailable	relative	0		0.005	BLOCKED_NOT_SERIALIZED
+prior_job			slurm_job_id	1253074	identifier				CALLBACK_REFUSAL_PROVENANCE
+prior_job			allocation_wall_time	97	s				CALLBACK_REFUSAL_PROVENANCE

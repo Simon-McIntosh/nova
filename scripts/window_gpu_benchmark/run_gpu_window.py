@@ -13,7 +13,7 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
-os.environ["JAX_PLATFORMS"] = "cuda"
+os.environ["JAX_PLATFORMS"] = "cuda,cpu"
 
 from nova.jax.config import configure_dtypes
 
@@ -24,6 +24,7 @@ import numpy as np
 
 from nova.equilibrium.forward import ForwardProfile
 from nova.transport import coupled_window
+from nova.transport import torax_geometry
 
 
 CPU_WINDOW_SECONDS = 423.03271608706564
@@ -69,6 +70,25 @@ def _devices(tree: Any) -> tuple[str, ...]:
         if devices is not None:
             names.update(str(device) for device in devices())
     return tuple(sorted(names))
+
+
+def _require_cuda_arrays(tree: Any, label: str) -> dict[str, Any]:
+    arrays = [leaf for leaf in jax.tree.leaves(tree) if isinstance(leaf, jax.Array)]
+    if not arrays:
+        raise RuntimeError(f"{label} exposed no JAX arrays for device verification")
+    devices = sorted({str(device) for array in arrays for device in array.devices()})
+    non_cuda = sorted(
+        {
+            str(device)
+            for array in arrays
+            for device in array.devices()
+            if device.platform != "gpu"
+        }
+    )
+    if non_cuda:
+        raise RuntimeError(f"{label} contains non-CUDA arrays on {non_cuda}")
+    jax.block_until_ready(tree)
+    return {"array_count": len(arrays), "devices": ", ".join(devices)}
 
 
 def _append(
@@ -140,121 +160,94 @@ def _report(
     backend: str,
     device_kind: str,
     solve_devices: Sequence[Mapping[str, Any]],
+    state_devices: Sequence[Mapping[str, Any]],
     transfer_events: Sequence[Mapping[str, Any]],
+    guard_events: Sequence[Mapping[str, Any]],
     result: Any,
     preparation_seconds: float,
     attempt_seconds: float,
     cold_excess_seconds: float,
+    cold_excess_by_side: Mapping[str, float],
     conservation: Mapping[str, float],
     deviations: Mapping[str, float],
     solver_path: Mapping[str, str],
 ) -> str:
     convergence = result.convergence
     speedup = CPU_WINDOW_SECONDS / attempt_seconds
-    blocked = bool(transfer_events)
-    lines = []
-    if blocked:
-        lines.extend(
-            [
-                (
-                    "NEEDS-HELP: the window's FSA handoff materialises GPU arrays "
-                    "as host NumPy records before TORAX consumes them"
-                ),
-                "",
-                (
-                    "tried: Ran the landed gentle solve_window configuration in one "
-                    "Betelgeuse allocation and instrumented solve-array placement "
-                    "plus every FSA materialisation event. The heavy equilibrium and "
-                    "extraction arrays were on the H200, but _block_and_copy forced "
-                    "each completed FSA record through np.asarray on the host."
-                ),
-                (
-                    "options: (1) make TransportGeometry accept the traced FSA record "
-                    "without NumPy materialisation; (2) introduce an explicit "
-                    "device-resident geometry waveform while keeping receipt-only "
-                    "scalars host-side; (3) narrow the end-to-end claim to "
-                    "GPU-kernel execution with host orchestration."
-                ),
-                (
-                    "leaning: Option 1, because the standard geometry adapter already "
-                    "consumes JAX arrays and the materialisation is a demonstration "
-                    "seam rather than a physics requirement."
-                ),
-                (
-                    "cost-if-wrong: If TORAX or waveform interpolation actually "
-                    "requires NumPy ownership, removing the copy will require a typed "
-                    "dual representation and the benchmark must be rerun."
-                ),
-                "",
-            ]
-        )
+    guard_total = sum(float(row["seconds"]) for row in guard_events)
+    guard_median = float(np.median([row["seconds"] for row in guard_events]))
+    lines = [
+        "# Gentle coupled window on one H200",
+        "",
+        (
+            f"SLURM job `{job_id}` ran the complete window on JAX backend `{backend}` "
+            f"and device `{device_kind}`. The CPU platform was also registered solely "
+            "for JAX host callbacks."
+        ),
+        (
+            "Configuration: window `0.0025 s`, auxiliary source multiplier `0.5`, "
+            "iteration cap `10`, tolerance `0.005`, damping `0.5`."
+        ),
+        "",
+        "## Device placement and solver identity",
+        "",
+        (
+            "Every JAX array in every returned equilibrium solve and every channel "
+            "of every returned TORAX state was asserted to have only CUDA devices. "
+            "A non-CUDA array would have terminated the run."
+        ),
+        "",
+        "| exchange | sample | solve arrays | CUDA device |",
+        "|---:|---:|---:|---|",
+    ]
+    lines.extend(
+        f"| {row['exchange']} | {row['sample']} | {row['array_count']} | "
+        f"`{row['devices']}` |"
+        for row in solve_devices
+    )
     lines.extend(
         [
-            "# Gentle coupled window on one H200",
             "",
-            (
-                f"SLURM job `{job_id}` ran on backend `{backend}` and device "
-                f"`{device_kind}`."
-            ),
-            (
-                "Configuration: window `0.0025 s`, auxiliary source multiplier "
-                "`0.5`, iteration cap `10`, tolerance `0.005`, damping `0.5`."
-            ),
-            "",
-            "## Placement and solver identity",
-            "",
-            (
-                "The observed equilibrium solve arrays remained on the allocated "
-                "device at every completed coarse sample:"
-            ),
-            "",
-            "| exchange | sample | solve-array device |",
-            "|---:|---:|---|",
+            "| transport exchange | interval | state arrays | CUDA device |",
+            "|---:|---:|---:|---|",
         ]
     )
     lines.extend(
-        f"| {row['exchange']} | {row['sample']} | `{row['devices']}` |"
-        for row in solve_devices
+        f"| {row['exchange']} | {row['interval']} | {row['array_count']} | "
+        f"`{row['devices']}` |"
+        for row in state_devices
     )
     lines.extend(
         [
             "",
             (
                 "Owner solver-identity call path: "
-                f"`equilibrium_sweep` at `{solver_path['equilibrium_sweep']}` calls "
-                "`sampled_profile.solve_portfolio`; the same function creates its "
-                "cold portfolio from `observed.moments.plasma_current`. The callee is "
+                f"`equilibrium_sweep` at `{solver_path['equilibrium_sweep']}` creates "
+                "the cold portfolio from `observed.moments.plasma_current` and calls "
+                "`sampled_profile.solve_portfolio`; the callee is "
                 "`ForwardProfile.solve_portfolio` at "
                 f"`{solver_path['solve_portfolio']}`."
             ),
             "",
-            "Observed forced host transfers:",
-            "",
-            "| operation | calls | GPU fields materialised |",
-            "|---|---:|---:|",
-        ]
-    )
-    if transfer_events:
-        lines.extend(
-            f"| `{row['operation']}` | {row['call']} | {row['gpu_fields']} |"
-            for row in transfer_events
-        )
-    else:
-        lines.append("| none | 0 | 0 |")
-    lines.extend(
-        [
-            "",
             "## Wall-time structure",
             "",
             (
-                f"Comparable solve-window sweeps: H200 `{_format(attempt_seconds)}` s "
-                f"versus landed CPU `{_format(CPU_WINDOW_SECONDS)}` s, speedup "
-                f"`{_format(speedup)}x`. Cold fixture preparation cost "
-                f"`{_format(preparation_seconds)}` s. Observed first-iteration "
-                f"excess above warmed medians was `{_format(cold_excess_seconds)}` s; "
-                "amortised across ten iterations this is "
-                f"`{_format((preparation_seconds + cold_excess_seconds) / 10.0)}` "
-                "s/iteration including preparation."
+                f"The converged H200 window took `{_format(attempt_seconds)}` s versus "
+                f"the landed pre-band CPU window's `{_format(CPU_WINDOW_SECONDS)}` s: "
+                f"a measured `{_format(speedup)}x` speedup on the same pre-band "
+                "extraction lineage. Fixture preparation before the measured window "
+                f"took `{_format(preparation_seconds)}` s and is reported separately."
+            ),
+            (
+                "The empirical cold compile/startup cost is defined as the first "
+                "iteration's excess above that side's warmed median. It measured "
+                f"`{_format(cold_excess_seconds)}` s total "
+                f"(`{_format(cold_excess_by_side.get('equilibrium_plus_fsa', 0.0))}` s "
+                "equilibrium plus FSA and "
+                f"`{_format(cold_excess_by_side.get('transport', 0.0))}` s TORAX), "
+                "or "
+                f"`{_format(cold_excess_seconds / GENTLE_ITERATION_CAP)}` s per "
+                "iteration amortised over the ten exchanges."
             ),
             "",
             "| iteration | side | wall time (s) |",
@@ -268,9 +261,62 @@ def _report(
     lines.extend(
         [
             "",
+            "## Uniform-grid guard callback cost",
+            "",
+            (
+                "The guard fired once per TORAX adapter construction and therefore "
+                "once per transport exchange. Each measurement synchronously blocks "
+                "the callback result, so it includes dispatch, the CUDA-to-host grid "
+                "transfer, CPU validation, and the returned-array handoff."
+            ),
+            "",
+            "| iteration | callback count | round-trip wall time (s) |",
+            "|---:|---:|---:|",
+        ]
+    )
+    lines.extend(
+        f"| {row['iteration']} | 1 | `{_format(row['seconds'])}` |"
+        for row in guard_events
+    )
+    lines.extend(
+        [
+            "",
+            (
+                f"Across `{len(guard_events)}` calls the guard cost "
+                f"`{_format(guard_total)}` s total, median "
+                f"`{_format(guard_median)}` s/call, or "
+                f"`{_format(guard_total / attempt_seconds)}` of total window wall time."
+            ),
+            "",
+            "The FSA record materialisation boundary was also observed:",
+            "",
+            "| operation | call | CUDA fields materialised |",
+            "|---|---:|---:|",
+        ]
+    )
+    if transfer_events:
+        lines.extend(
+            f"| `{row['operation']}` | {row['call']} | {row['gpu_fields']} |"
+            for row in transfer_events
+        )
+    else:
+        lines.append("| none | 0 | 0 |")
+    lines.extend(
+        [
+            "",
+            "## CPU lineage qualification",
+            "",
+            (
+                "The `423.032716 s` CPU window is the landed, directly comparable "
+                "pre-band measurement. Boundary-band sparsification landed on main "
+                "after this worktree was cut (`32942ac3`); its warm ITER CPU assembly "
+                "is `24.6 s`. The complete CPU window has not been remeasured after "
+                "that change, so no post-band CPU-window time or speedup is inferred."
+            ),
+            "",
             "## Receipt comparison",
             "",
-            "| receipt | H200 | CPU | absolute deviation | tolerance |",
+            "| receipt | H200 | landed CPU | absolute deviation | tolerance |",
             "|---|---:|---:|---:|---:|",
             (
                 "| measured contraction | "
@@ -301,8 +347,8 @@ def _report(
             "",
             (
                 "The TSV carries every exchanged-field residual against its landed "
-                "CPU value. No receipt deviation exceeded the declared 0.005 "
-                "comparison tolerance."
+                "CPU value. No deviation exceeded the declared 0.005 comparison "
+                "tolerance."
             ),
             "",
         ]
@@ -316,33 +362,90 @@ def main() -> int:
     parser.add_argument("--results", type=Path, required=True)
     arguments = parser.parse_args()
 
-    devices = jax.devices()
+    devices = jax.devices("gpu")
+    cpu_devices = jax.devices("cpu")
     backend = jax.default_backend()
-    if backend != "gpu" or not devices:
-        raise RuntimeError(f"GPU backend required, got {backend} and {devices}")
+    if backend != "gpu" or not devices or not cpu_devices:
+        raise RuntimeError(
+            "GPU computation and a CPU callback device are required, got "
+            f"backend={backend}, gpu={devices}, cpu={cpu_devices}"
+        )
     device_kind = devices[0].device_kind
 
     from scripts.window_demonstration import run_window as demonstration
 
-    os.environ["JAX_PLATFORMS"] = "cuda"
+    os.environ["JAX_PLATFORMS"] = "cuda,cpu"
     original_equilibrium_sweep = demonstration.equilibrium_sweep
+    original_transport_sweep = demonstration.transport_sweep
     original_block_and_copy = demonstration._block_and_copy
+    original_grid_callback = torax_geometry._validated_grid_callback
     solve_devices: list[dict[str, Any]] = []
+    state_devices: list[dict[str, Any]] = []
     transfer_events: list[dict[str, Any]] = []
-    exchange = {"value": 0}
+    guard_events: list[dict[str, Any]] = []
+    equilibrium_exchange = {"value": 0}
+    transport_exchange = {"value": 0}
+    callback_context = {"iteration": 0}
 
     def observed_equilibrium_sweep(*args, **kwargs):
-        exchange["value"] += 1
+        equilibrium_exchange["value"] += 1
         receipt = original_equilibrium_sweep(*args, **kwargs)
         for sample, equilibrium in enumerate(receipt.equilibria):
+            placement = _require_cuda_arrays(
+                equilibrium,
+                (
+                    "equilibrium exchange "
+                    f"{equilibrium_exchange['value']} sample {sample}"
+                ),
+            )
             solve_devices.append(
                 {
-                    "exchange": exchange["value"],
+                    "exchange": equilibrium_exchange["value"],
                     "sample": sample,
-                    "devices": ", ".join(_devices(equilibrium)),
+                    **placement,
                 }
             )
         return receipt
+
+    def observed_transport_sweep(*args, **kwargs):
+        transport_exchange["value"] += 1
+        callback_context["iteration"] = transport_exchange["value"]
+        receipt = original_transport_sweep(*args, **kwargs)
+        for interval, item in enumerate(receipt.receipts):
+            channels = {
+                name: getattr(item.state, name)
+                for name in (
+                    "rho",
+                    "psi",
+                    "ion_temperature",
+                    "electron_temperature",
+                    "electron_density",
+                )
+            }
+            placement = _require_cuda_arrays(
+                channels,
+                f"transport exchange {transport_exchange['value']} interval {interval}",
+            )
+            state_devices.append(
+                {
+                    "exchange": transport_exchange["value"],
+                    "interval": interval,
+                    **placement,
+                }
+            )
+        return receipt
+
+    def observed_grid_callback(rho_face):
+        started = time.perf_counter()
+        validated = original_grid_callback(rho_face)
+        validated.block_until_ready()
+        guard_events.append(
+            {
+                "iteration": callback_context["iteration"],
+                "seconds": time.perf_counter() - started,
+            }
+        )
+        return validated
 
     def observed_block_and_copy(tree):
         gpu_fields = sum(bool(_devices(value)) for value in tree.values())
@@ -356,7 +459,9 @@ def main() -> int:
         return original_block_and_copy(tree)
 
     demonstration.equilibrium_sweep = observed_equilibrium_sweep
+    demonstration.transport_sweep = observed_transport_sweep
     demonstration._block_and_copy = observed_block_and_copy
+    torax_geometry._validated_grid_callback = observed_grid_callback
 
     preparation_start = time.perf_counter()
     profile, seed, _vacuum = demonstration._fixture_machine()
@@ -367,7 +472,10 @@ def main() -> int:
         route="anderson",
         evaluations=demonstration.EVALUATIONS,
     )
-    baseline_devices = ", ".join(_devices(baseline_equilibrium))
+    baseline_placement = _require_cuda_arrays(
+        baseline_equilibrium, "baseline equilibrium solve"
+    )
+    baseline_devices = baseline_placement["devices"]
     baseline_geometry, baseline_extraction = demonstration._geometry_from_equilibrium(
         baseline_equilibrium,
         profile.source,
@@ -400,6 +508,34 @@ def main() -> int:
             f"{result.outcome}"
         )
 
+    expected_iterations = int(result.convergence.iterations_used)
+    callbacks_by_iteration = {
+        iteration: sum(row["iteration"] == iteration for row in guard_events)
+        for iteration in range(1, expected_iterations + 1)
+    }
+    if expected_iterations != GENTLE_ITERATION_CAP:
+        raise RuntimeError(
+            f"expected {GENTLE_ITERATION_CAP} converged exchanges, got "
+            f"{expected_iterations}"
+        )
+    if callbacks_by_iteration != {
+        iteration: 1 for iteration in range(1, expected_iterations + 1)
+    }:
+        raise RuntimeError(
+            "uniform-grid callback did not fire exactly once per transport exchange: "
+            f"{callbacks_by_iteration}"
+        )
+    if len(solve_devices) != 2 * expected_iterations:
+        raise RuntimeError(
+            "equilibrium device audit did not observe both coarse samples in every "
+            f"exchange: {len(solve_devices)} arrays receipts"
+        )
+    if len(state_devices) != expected_iterations:
+        raise RuntimeError(
+            "transport device audit did not observe one returned state per exchange: "
+            f"{len(state_devices)} state receipts"
+        )
+
     convergence = result.convergence
     conservation = demonstration._transport_conservation(result.transport_receipt)
     cpu_exit = _cpu_exit_residuals()
@@ -424,11 +560,12 @@ def main() -> int:
     by_side: dict[str, list[float]] = {}
     for row in result.timings:
         by_side.setdefault(row["side"], []).append(float(row["seconds"]))
-    cold_excess_seconds = sum(
-        max(values[0] - float(np.median(values[1:])), 0.0)
-        for values in by_side.values()
+    cold_excess_by_side = {
+        side: max(values[0] - float(np.median(values[1:])), 0.0)
+        for side, values in by_side.items()
         if len(values) > 1
-    )
+    }
+    cold_excess_seconds = sum(cold_excess_by_side.values())
 
     equilibrium_source = inspect.getsource(coupled_window.equilibrium_sweep)
     required_fragments = (
@@ -451,7 +588,16 @@ def main() -> int:
         ("tmpdir", os.environ.get("TMPDIR", ""), "text"),
         ("jax_backend", backend, "text"),
         ("device_kind", device_kind, "text"),
+        ("cpu_callback_device", str(cpu_devices[0]), "text"),
         ("baseline_solve_devices", baseline_devices, "text"),
+        (
+            "baseline_solve_array_count",
+            baseline_placement["array_count"],
+            "count",
+        ),
+        ("cpu_baseline_lineage", "pre-band", "text"),
+        ("boundary_band_commit", "32942ac3", "git_commit"),
+        ("post_band_warm_iter_cpu_assembly", 24.6, "s"),
         ("window_length", GENTLE_WINDOW_SECONDS, "s"),
         ("source_multiplier", GENTLE_SOURCE_MULTIPLIER, "fraction"),
         ("iteration_cap", GENTLE_ITERATION_CAP, "count"),
@@ -477,11 +623,20 @@ def main() -> int:
         "ratio",
     )
     _append(rows, "timing", "cold_iteration_excess", cold_excess_seconds, "s")
+    for side, seconds in cold_excess_by_side.items():
+        _append(
+            rows,
+            "timing",
+            "cold_iteration_excess",
+            seconds,
+            "s",
+            side=side,
+        )
     _append(
         rows,
         "timing",
         "cold_cost_amortised_per_iteration",
-        (preparation_seconds + cold_excess_seconds) / GENTLE_ITERATION_CAP,
+        cold_excess_seconds / GENTLE_ITERATION_CAP,
         "s",
     )
     for row in result.timings:
@@ -503,6 +658,28 @@ def main() -> int:
             "text",
             iteration=row["exchange"],
             side=f"sample_{row['sample']}",
+            status=f"PASS:{row['array_count']}_CUDA_ARRAYS",
+        )
+    for row in state_devices:
+        _append(
+            rows,
+            "device_placement",
+            "transport_state_arrays",
+            row["devices"],
+            "text",
+            iteration=row["exchange"],
+            side=f"interval_{row['interval']}",
+            status=f"PASS:{row['array_count']}_CUDA_ARRAYS",
+        )
+    for row in guard_events:
+        _append(
+            rows,
+            "guard_callback",
+            "uniform_grid_roundtrip_wall_time",
+            row["seconds"],
+            "s",
+            iteration=row["iteration"],
+            status="MEASURED",
         )
     for row in transfer_events:
         _append(
@@ -512,7 +689,7 @@ def main() -> int:
             row["gpu_fields"],
             "field_count",
             iteration=row["call"],
-            status="NEEDS-HELP",
+            status="RECORDED_HOST_BOUNDARY",
         )
     _append(
         rows,
@@ -579,11 +756,14 @@ def main() -> int:
             backend=backend,
             device_kind=device_kind,
             solve_devices=solve_devices,
+            state_devices=state_devices,
             transfer_events=transfer_events,
+            guard_events=guard_events,
             result=result,
             preparation_seconds=preparation_seconds,
             attempt_seconds=attempt_seconds,
             cold_excess_seconds=cold_excess_seconds,
+            cold_excess_by_side=cold_excess_by_side,
             conservation=conservation,
             deviations=deviations,
             solver_path=solver_path,
@@ -593,6 +773,9 @@ def main() -> int:
     print(f"backend={backend}")
     print(f"device={device_kind}")
     print(f"window_seconds={attempt_seconds}")
+    print(f"cuda_equilibrium_receipts={len(solve_devices)}")
+    print(f"cuda_transport_states={len(state_devices)}")
+    print(f"guard_callbacks={len(guard_events)}")
     print(f"host_roundtrips={len(transfer_events)}")
     print(f"report={arguments.report}")
     print(f"results={arguments.results}")

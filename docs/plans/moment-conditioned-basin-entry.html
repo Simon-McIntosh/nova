@@ -22,9 +22,9 @@
   <title>Moment-Conditioned Basin Entry | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-22">
-<meta name="plan-impl" content="0.4">
-<meta name="plan-version" content="8">
+<meta name="plan-modified" content="2026-08-23">
+<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="9">
 </head>
 <body>
   <main class="plan-doc">
@@ -141,6 +141,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260822T2202-newton-replay-baseline" data-who="reckon-ship" data-when="2026-08-22T22:02:00+00:00">
     <div class="r-comment-body">newton-warm-ladder-replay landed — commits f2035bed/d6b7f95a (merged 3186a97e); gate passed (12/12 warm-neighbour suite, cold arms exactly reproduce banked Newton residuals, max target-current relative error 2.22e-16). THE CHEAPEST UNTRIED ARM IS MEASURED AND NEGATIVE: on the pinned Newton branch through the public constrained seam, the same-shot warm ladder lifts 0/2 in the scoreable closed-LCFS stratum (21983/35 terminal 1.294e-3; 21985/51 terminal 2.869e-3) and 0/3 in the unscoreable stratum (21978/35 1.081e-2; 21986/46 3.943e-2; 21989/55 2.010e-3); 22086/43 keeps its cold root at 2.912e-16 and never triggers a warm arm. All five stalled references found legal earlier-first sources (selection by own convergence only, never EFIT score, honouring the no-identity-keying rule). NEIGHBOUR_FRAME_OFFSETS, _neighbour_candidates and _solve_public_seam reused unchanged behind a duck-typed adapter; _find_warm_source not reused. §3's baseline set is complete: warm-neighbour (host-Krylov) lifts 0/5, newton x warm lifts 0/5, cold 1/6 with the converged root in the unscoreable stratum — the moment-seeded driver is the remaining candidate and its bar is now fully pre-registered. Record: /nova/evidence/archive/moment-conditioned-basin-entry-landed#s3-newton-replay</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260822T2225-seed-capability" data-who="reckon-ship" data-when="2026-08-22T22:25:00+00:00">
+    <div class="r-comment-body">moment-seed-capability landed — commit 032bd2ad (merged 2aa76309); gate passed (31/31 regression incl. equilibrium moment + constrained forward lanes; focused 3/3 pinning all six banked own-boundary rows at 2e-12; compact-seed current 1e-9 A, centroid 1e-12 m). nova/equilibrium/moment.py publishes CurrentIntegralSupport, PredictedCurrentMoments and MomentSeed on the existing ReconstructMoment authority; ForwardProfile.moment_seed is the production constructor; MomentSeed.solve hands flux as initial_flux and predicted current as target_current through the public seam. WIDTH CLASS DELIBERATELY OMITTED on the measured 21.015% ladder sensitivity — the disc radius is a limiter-derived construction scale, not a width prediction. Supports declared everywhere (predictions boundary_hypothesis_all_domain; the seed representation compact_centroid_disc); no frame identities in production code. Remaining §3 node: the driver measurement through the existing benchmark adapters.</div>
 </div>
 </section>
 

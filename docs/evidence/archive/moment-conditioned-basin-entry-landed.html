@@ -98,6 +98,20 @@
   converged root sits in the <em>unscoreable</em> stratum), warm 0/5 twice over — and the moment-seeded
   cold start is the remaining candidate mechanism.</p>
 
+
+  <h3 id="s3-seed-capability">§3 — the moment-seed capability is public</h3>
+
+  <p><strong>Commit <code>032bd2ad</code> (merged <code>2aa76309</code>); gate passed (31/31 regression,
+  focused 3/3).</strong> <code>nova/equilibrium/moment.py</code> publishes
+  <code>CurrentIntegralSupport</code>, <code>PredictedCurrentMoments</code> and <code>MomentSeed</code> on
+  the existing <code>ReconstructMoment</code> authority; <code>ForwardProfile.moment_seed</code> is the
+  production constructor, and <code>MomentSeed.solve</code> hands its flux as <code>initial_flux</code>
+  and its predicted current as <code>target_current</code> through the public constrained seam. The
+  production predictor is algorithmically identical to the §2 study and is pinned against all six banked
+  own-boundary rows at 2e-12; the compact seed integrates to its predicted current (1e-9&nbsp;A) and
+  centroid (1e-12&nbsp;m) exactly. Width class is deliberately omitted on the measured 21.015% ladder
+  sensitivity; every quantity declares its support; production code carries no frame identities.</p>
+
 </main>
 </body>
 </html>

@@ -27,7 +27,9 @@ from nova.equilibrium.flux_surface_extraction import _axis_connected_core
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.jax.config import configure_dtypes
 from nova.transport.coupled_window import (
+    ConvergedNonConfinedError,
     ExchangeSweepResult,
+    EquilibriumBranchReceipt,
     TransportSweepReceipt,
     Waveform,
     WindowConfig,
@@ -58,6 +60,7 @@ TRANSPORT_TIMES = np.array([0.0, WINDOW_LENGTH_SECONDS])
 ITERATION_CAP = 10
 CONVERGENCE_TOLERANCE = 5.0e-3
 DAMPING = 0.5
+EQUILIBRIUM_SOLVE_TOLERANCE = 1.0e-6
 RADIAL_CELLS = 8
 SURFACE_BINS = 14
 SOURCE_SAMPLES = 25
@@ -68,7 +71,62 @@ MINIMUM_TEMPERATURE_KEV = 0.2
 OUTPUT_DIRECTORY = Path(__file__).resolve().parent
 REPORT_PATH = OUTPUT_DIRECTORY / "report.md"
 RECEIPTS_PATH = OUTPUT_DIRECTORY / "receipts.tsv"
-TSV_FIELDS = ("kind", "iteration", "side", "field", "value", "unit")
+TSV_FIELDS = (
+    "regime",
+    "candidate",
+    "kind",
+    "iteration",
+    "sample",
+    "side",
+    "field",
+    "value",
+    "unit",
+)
+
+
+@dataclasses.dataclass(frozen=True)
+class RegimeConfig:
+    """One declared physical window and returned-source drive scale."""
+
+    name: str
+    window_length: float
+    auxiliary_source_multiplier: float
+    candidate: int | None = None
+
+    @property
+    def time_grid(self) -> np.ndarray:
+        return np.asarray((0.0, self.window_length), dtype=np.float64)
+
+
+@dataclasses.dataclass
+class RegimeResult:
+    """All receipts and measurements surrendered by one window attempt."""
+
+    config: RegimeConfig
+    outcome_type: str
+    outcome: str
+    convergence: Any = None
+    conservation_receipt: Any = None
+    transport_receipt: TransportSweepReceipt | None = None
+    timings: list[dict[str, Any]] = dataclasses.field(default_factory=list)
+    extractions: list[dict[str, Any]] = dataclasses.field(default_factory=list)
+    branches: list[dict[str, Any]] = dataclasses.field(default_factory=list)
+    terminal_branch: dict[str, Any] | None = None
+
+    @property
+    def converged(self) -> bool:
+        return self.outcome_type == "WindowReceipt"
+
+
+STRONG = RegimeConfig("strong", WINDOW_LENGTH_SECONDS, 1.0)
+GENTLE_CANDIDATES = (
+    RegimeConfig("gentle", 0.0025, 0.5, 1),
+    RegimeConfig("gentle", 0.001, 0.5, 2),
+    RegimeConfig("gentle", 0.0005, 0.5, 3),
+    RegimeConfig("gentle", 0.001, 0.25, 4),
+    RegimeConfig("gentle", 0.0005, 0.25, 5),
+    RegimeConfig("gentle", 0.0005, 0.0, 6),
+)
 
 
 def _format(value: Any) -> str:
@@ -314,15 +372,15 @@ def _initial_state(
     )
 
 
-def _torax_model() -> TransportModel:
+def _torax_model(window_length: float = WINDOW_LENGTH_SECONDS) -> TransportModel:
     """Return the ordinary fixed-step TORAX multi-channel configuration."""
     from torax._src.test_utils.default_configs import get_default_config_dict
 
     config = get_default_config_dict()
     config["numerics"].update(
         {
-            "fixed_dt": WINDOW_LENGTH_SECONDS,
-            "max_dt": WINDOW_LENGTH_SECONDS,
+            "fixed_dt": window_length,
+            "max_dt": window_length,
             "min_dt": 1.0e-8,
             "adaptive_dt": False,
         }
@@ -332,6 +390,85 @@ def _torax_model() -> TransportModel:
         TransportRung.TORAX_MULTI_CHANNEL,
         torax_config=config,
     )
+
+
+def _scaled_source_waveform(
+    geometry_waveform: Waveform,
+    time_grid: np.ndarray,
+    baseline_source: ForwardSource,
+    evolved_sources: Sequence[ForwardSource],
+    multiplier: float,
+) -> Waveform:
+    """Scale the transport-returned source change about the fixture source."""
+    if not 0.0 <= multiplier <= 1.0:
+        raise ValueError("auxiliary source multiplier must lie in [0, 1]")
+    psi_n = np.linspace(0.0, 1.0, SOURCE_SAMPLES)
+    baseline_p = np.asarray(baseline_source.core.p_prime(psi_n))
+    baseline_ff = np.asarray(baseline_source.core.ff_prime(psi_n))
+    p_prime = []
+    ff_prime = []
+    boundary_pressure = []
+    boundary_field_function = []
+    coordinates = []
+    for sample_time, evolved in zip(time_grid, evolved_sources, strict=True):
+        evolved_p = np.asarray(evolved.core.p_prime(psi_n))
+        evolved_ff = np.asarray(evolved.core.ff_prime(psi_n))
+        p_prime.append(baseline_p + multiplier * (evolved_p - baseline_p))
+        ff_prime.append(baseline_ff + multiplier * (evolved_ff - baseline_ff))
+        boundary_pressure.append(
+            baseline_source.boundary_pressure
+            + multiplier
+            * (evolved.boundary_pressure - baseline_source.boundary_pressure)
+        )
+        boundary_field_function.append(
+            baseline_source.boundary_field_function
+            + multiplier
+            * (
+                evolved.boundary_field_function
+                - baseline_source.boundary_field_function
+            )
+        )
+        coordinates.append(geometry_waveform.sample(float(sample_time)))
+    radial_grid = np.broadcast_to(psi_n, (time_grid.size, psi_n.size))
+    return Waveform(
+        time=time_grid,
+        radial_grid=radial_grid,
+        phi_boundary=np.asarray([sample.phi_boundary for sample in coordinates]),
+        axis_reference=np.asarray([sample.axis_reference for sample in coordinates]),
+        boundary_reference=np.asarray(
+            [sample.boundary_reference for sample in coordinates]
+        ),
+        values={
+            "p_prime": np.stack(p_prime),
+            "ff_prime": np.stack(ff_prime),
+            "boundary_pressure": np.asarray(boundary_pressure),
+            "boundary_field_function": np.asarray(boundary_field_function),
+        },
+    )
+
+
+def _branch_measurement(
+    branch: EquilibriumBranchReceipt, exchange: int
+) -> dict[str, Any]:
+    """Flatten one typed branch-selection receipt without interpreting it."""
+    selection = branch.selection.as_dict()
+    return {
+        "exchange": exchange,
+        "sample": branch.sample_index,
+        "sample_time": branch.sample_time,
+        "limited_core_cells": branch.core_cell_counts[0],
+        "diverted_core_cells": branch.core_cell_counts[1],
+        "selected_class": selection["selected_class"],
+        "previous_class": selection["previous_class"],
+        "switched": selection["switched"],
+        "reason": selection["reason"],
+        "limited_available": selection["availability"]["limited"],
+        "diverted_available": selection["availability"]["diverted"],
+        "limited_admissible": selection["admissibility"]["limited"],
+        "diverted_admissible": selection["admissibility"]["diverted"],
+        "limited_residual": selection["residuals"]["limited"],
+        "diverted_residual": selection["residuals"]["diverted"],
+    }
 
 
 def _transport_conservation(receipt: TransportSweepReceipt) -> dict[str, float]:
@@ -405,18 +542,24 @@ def _write_tsv(
 
 def _append_row(
     rows: list[dict[str, Any]],
+    regime: str,
     kind: str,
     field: str,
     value: Any,
     unit: str,
     *,
+    candidate: int | str = "",
     iteration: int | str = "",
+    sample: int | str = "",
     side: str = "",
 ) -> None:
     rows.append(
         {
+            "regime": regime,
+            "candidate": candidate,
             "kind": kind,
             "iteration": iteration,
+            "sample": sample,
             "side": side,
             "field": field,
             "value": _format(value),
@@ -425,234 +568,51 @@ def _append_row(
     )
 
 
-def _report(
+def _run_regime(
+    config: RegimeConfig,
     *,
-    outcome: str,
-    convergence,
-    conservation: Mapping[str, float],
-    timings: Sequence[dict[str, Any]],
-    preparation_seconds: float,
-    transport_receipt: TransportSweepReceipt,
-    extractions: Sequence[dict[str, Any]],
-) -> str:
-    """Render the human-facing record without interpreting the receipts away."""
-    contraction = (
-        "none" if convergence is None else _format(convergence.contraction_estimate)
-    )
-    iterations = (
-        "unavailable" if convergence is None else str(convergence.iterations_used)
-    )
-    maximum = (
-        "unavailable" if convergence is None else _format(convergence.maximum_residual)
-    )
-    damping_applied = (
-        "unavailable" if convergence is None else _format(convergence.damping_applied)
-    )
-    lines = [
-        "# Real coupled-window demonstration",
-        "",
-        (
-            f"Outcome: **{outcome}**. The window was attempted exactly once; "
-            "no retry or tolerance adjustment was made."
-        ),
-        "",
-        "## Run contract",
-        "",
-        (
-            "- Equilibrium: the repository's existing 25 x 25 free-boundary "
-            "machine fixture, solved with its declared Anderson budget and "
-            f"evaluated exactly on a {EXTRACTION_POINTS} x "
-            f"{EXTRACTION_POINTS} extraction lattice."
-        ),
-        (
-            "- Geometry: `evaluate_forward_equilibrium` followed by "
-            "`extract_flux_surface_geometry` at both equilibrium sample times, "
-            "with 8 transport cells and 14 surface bins."
-        ),
-        (
-            "- Transport: TORAX multi-channel, one fixed 10 ms step, with all "
-            "four channels evolved."
-        ),
-        f"- Backend: `{jax.default_backend()}` (explicitly pinned before JAX import).",
-        (
-            f"- Window length: `{_format(WINDOW_LENGTH_SECONDS)}` s; "
-            f"equilibrium grid `{EQUILIBRIUM_TIMES.tolist()}` s; transport grid "
-            f"`{TRANSPORT_TIMES.tolist()}` s."
-        ),
-        (
-            f"- Iteration cap: `{ITERATION_CAP}`; convergence and conservation "
-            f"tolerance: `{_format(CONVERGENCE_TOLERANCE)}`; damping: "
-            f"`{_format(DAMPING)}`."
-        ),
-        (
-            "- One-time fixture solve plus first service assembly: "
-            f"`{_format(preparation_seconds)}` s."
-        ),
-        "",
-        "## Window receipt",
-        "",
-        f"- Iterations used: `{iterations}`",
-        f"- Measured contraction estimate: `{contraction}`",
-        f"- Maximum exit residual: `{maximum}`",
-        f"- Damping applied: `{damping_applied}`",
-        "",
-        "Exit residuals are reproduced at full stored precision:",
-        "",
-        "| exchanged field | relative residual |",
-        "|---|---:|",
-    ]
-    if convergence is None:
-        lines.append("| unavailable from raised receipt | unavailable |")
-    else:
-        lines.extend(
-            f"| `{field}` | `{_format(value)}` |"
-            for field, value in convergence.exit_residual.items()
-        )
-    lines.extend(
-        [
-            "",
-            "## Conservation ledgers",
-            "",
-            (
-                "- Flux consumption: boundary "
-                f"`{_format(conservation['flux_boundary'])}` Wb; resistive "
-                f"`{_format(conservation['flux_resistive'])}` Wb; internal "
-                f"`{_format(conservation['flux_internal'])}` Wb."
-            ),
-            (
-                "- Flux closure: absolute "
-                f"`{_format(conservation['flux_closure_error'])}` Wb; relative "
-                f"`{_format(conservation['flux_closure_residual'])}`."
-            ),
-            (
-                "- Plasma current: requested "
-                f"`{_format(conservation['current_requested_initial'])}` -> "
-                f"`{_format(conservation['current_requested_final'])}` A; achieved "
-                f"`{_format(conservation['current_achieved_initial'])}` -> "
-                f"`{_format(conservation['current_achieved_final'])}` A."
-            ),
-            (
-                "- Boundary current continuity: absolute "
-                f"`{_format(conservation['current_continuity_error'])}` A; relative "
-                f"`{_format(conservation['current_continuity_residual'])}`."
-            ),
-            "",
-            (
-                "These closure figures are direct aggregations of the returned "
-                "per-interval ledgers. They use the same absolute and "
-                "scale-normalised definitions as the window receipt, including "
-                "endpoint requested-versus-achieved current continuity."
-            ),
-            "",
-            "## Exchange cost",
-            "",
-            "| iteration | side | wall time (s) |",
-            "|---:|---|---:|",
-        ]
-    )
-    lines.extend(
-        f"| {row['iteration']} | {row['side']} | `{_format(row['seconds'])}` |"
-        for row in timings
-    )
-    lines.extend(
-        [
-            "",
-            "## Exact extraction diagnostics",
-            "",
-            (
-                "Every equilibrium sample was evaluated afresh from its Green "
-                "source representation. No solved-grid interpolation enters these "
-                "records."
-            ),
-            "",
-            (
-                "| iteration | sample | lattice | axis-connected core cells | "
-                "record valid | arcs valid | invalid arcs | exact evaluation (s) |"
-            ),
-            "|---:|---:|---:|---:|---|---|---:|---:|",
-        ]
-    )
-    lines.extend(
-        (
-            f"| {row['iteration']} | {row['sample']} | "
-            f"{row['map_height']} x {row['map_radius']} | "
-            f"{row['core_count']} | `{_format(row['record_valid'])}` | "
-            f"`{_format(row['surface_arc_valid'])}` | "
-            f"{row['surface_arc_invalid_count']} | "
-            f"`{_format(row['exact_evaluation_seconds'])}` |"
-        )
-        for row in extractions
-    )
-    lines.extend(
-        [
-            "",
-            (
-                "The final transport sweep contains "
-                f"`{len(transport_receipt.receipts)}` interval receipt(s). The TSV "
-                "is the full machine-readable record, including every residual, "
-                "timing, configuration value and ledger field."
-            ),
-            "",
-        ]
-    )
-    return "\n".join(lines)
-
-
-def main() -> int:
-    """Run one fixed window attempt and write both evidence artifacts."""
-    configure_dtypes()
-    preparation_start = time.perf_counter()
-    profile, seed, _vacuum = _fixture_machine()
-    extraction_lattice = _extraction_lattice(profile)
-    fixture_sources = _fixture_sources(profile)
-    baseline_equilibrium = profile.solve(
-        seed,
-        route="anderson",
-        evaluations=EVALUATIONS,
-    )
+    profile,
+    baseline_equilibrium,
+    baseline_geometry: TransportGeometry,
+    baseline_extraction: Mapping[str, Any],
+    extraction_lattice: FluxLattice,
+    fixture_sources: GreenSourceRepresentation,
+) -> RegimeResult:
+    """Execute exactly one declared window and retain every available receipt."""
+    time_grid = config.time_grid
     baseline_source = profile.source
-    baseline_geometry, baseline_extraction = _geometry_from_equilibrium(
-        baseline_equilibrium,
-        baseline_source,
-        extraction_lattice,
-        fixture_sources,
-    )
-    baseline_extraction.update(iteration=0, sample=0)
-    extractions = [baseline_extraction]
-    preparation_seconds = time.perf_counter() - preparation_start
-
     initial_geometry = Waveform.from_geometries(
-        EQUILIBRIUM_TIMES,
-        (baseline_geometry, baseline_geometry),
+        time_grid, (baseline_geometry, baseline_geometry)
     )
-    baseline_coordinates = tuple(
-        initial_geometry.sample(float(sample_time)) for sample_time in TRANSPORT_TIMES
+    coordinates = tuple(
+        initial_geometry.sample(float(sample_time)) for sample_time in time_grid
     )
     initial_source = _source_waveform(
-        TRANSPORT_TIMES,
-        (baseline_source, baseline_source),
-        baseline_coordinates,
+        time_grid, (baseline_source, baseline_source), coordinates
     )
     initial_transport_state = _initial_state(baseline_geometry, baseline_source)
     plasma_current = np.full(
-        TRANSPORT_TIMES.shape,
-        float(baseline_equilibrium.moments.plasma_current),
+        time_grid.shape, float(baseline_equilibrium.moments.plasma_current)
     )
-    model = _torax_model()
-    config = WindowConfig(
-        length=WINDOW_LENGTH_SECONDS,
-        equilibrium_grid=EQUILIBRIUM_TIMES,
-        transport_grid=TRANSPORT_TIMES,
+    model = _torax_model(config.window_length)
+    window = WindowConfig(
+        length=config.window_length,
+        equilibrium_grid=time_grid,
+        transport_grid=time_grid,
         iteration_cap=ITERATION_CAP,
         tolerance=CONVERGENCE_TOLERANCE,
     )
-
-    timings: list[dict[str, Any]] = []
-    iteration_count = {"transport": 0, "equilibrium": 0}
+    result = RegimeResult(
+        config=config,
+        outcome_type="unknown",
+        outcome="unknown",
+        extractions=[dict(baseline_extraction)],
+    )
+    counters = {"transport": 0, "equilibrium": 0}
     latest: dict[str, Any] = {}
 
     def transport_update(geometry_waveform, sample_grid):
-        iteration_count["transport"] += 1
+        counters["transport"] += 1
         started = time.perf_counter()
         receipt = transport_sweep(
             geometry_waveform,
@@ -661,23 +621,26 @@ def main() -> int:
             plasma_current,
             model,
         )
-        coordinates = [geometry_waveform.sample(float(sample_grid[0]))]
-        sources = [baseline_source]
+        evolved_sources = [baseline_source]
         for interval, item in enumerate(receipt.receipts):
             geometry_time = float(receipt.geometry_time[interval])
-            geometry = geometry_waveform.sample(geometry_time).geometry()
-            sources.append(
+            evolved_sources.append(
                 forward_source_from_receipt(
                     item,
-                    geometry,
+                    geometry_waveform.sample(geometry_time).geometry(),
                     ion_density_per_electron=ION_DENSITY_PER_ELECTRON,
                 )
             )
-            coordinates.append(geometry_waveform.sample(geometry_time))
-        waveform = _source_waveform(sample_grid, sources, coordinates)
-        timings.append(
+        waveform = _scaled_source_waveform(
+            geometry_waveform,
+            sample_grid,
+            baseline_source,
+            evolved_sources,
+            config.auxiliary_source_multiplier,
+        )
+        result.timings.append(
             {
-                "iteration": iteration_count["transport"],
+                "iteration": counters["transport"],
                 "side": "transport",
                 "seconds": time.perf_counter() - started,
             }
@@ -686,17 +649,32 @@ def main() -> int:
         return ExchangeSweepResult(waveform=waveform, receipt=receipt)
 
     def equilibrium_update(source_waveform, sample_grid):
-        iteration_count["equilibrium"] += 1
+        counters["equilibrium"] += 1
         started = time.perf_counter()
-        receipt = equilibrium_sweep(
-            profile,
-            baseline_equilibrium.flux,
-            source_waveform,
-            sample_grid,
-            _source_from_sample,
-            route="anderson",
-            solve_options={"evaluations": EVALUATIONS},
-        )
+        try:
+            receipt = equilibrium_sweep(
+                profile,
+                baseline_equilibrium.flux,
+                source_waveform,
+                sample_grid,
+                _source_from_sample,
+                route="anderson",
+                solve_options={
+                    "evaluations": EVALUATIONS,
+                    "tolerance": EQUILIBRIUM_SOLVE_TOLERANCE,
+                },
+            )
+        except ConvergedNonConfinedError:
+            result.timings.append(
+                {
+                    "iteration": counters["equilibrium"],
+                    "side": "equilibrium",
+                    "seconds": time.perf_counter() - started,
+                }
+            )
+            raise
+        for branch in receipt.branch_receipts:
+            result.branches.append(_branch_measurement(branch, counters["equilibrium"]))
         geometries = []
         for sample_index, (sample, equilibrium) in enumerate(
             zip(receipt.source_samples, receipt.equilibria, strict=True)
@@ -707,15 +685,13 @@ def main() -> int:
                 extraction_lattice,
                 fixture_sources,
             )
-            extraction.update(
-                iteration=iteration_count["equilibrium"], sample=sample_index
-            )
-            extractions.append(extraction)
+            extraction.update(iteration=counters["equilibrium"], sample=sample_index)
+            result.extractions.append(extraction)
             geometries.append(geometry)
         waveform = Waveform.from_geometries(sample_grid, geometries)
-        timings.append(
+        result.timings.append(
             {
-                "iteration": iteration_count["equilibrium"],
+                "iteration": counters["equilibrium"],
                 "side": "equilibrium_plus_fsa",
                 "seconds": time.perf_counter() - started,
             }
@@ -723,94 +699,356 @@ def main() -> int:
         latest["equilibrium"] = receipt
         return ExchangeSweepResult(waveform=waveform, receipt=receipt)
 
-    convergence = None
-    conservation_receipt = None
-    outcome = "unknown"
     try:
         receipt = solve_window(
             initial_geometry,
             initial_source,
-            config,
+            window,
             equilibrium_update,
             transport_update,
             damping=DAMPING,
         )
-        convergence = receipt.convergence
-        conservation_receipt = receipt.conservation
-        transport_receipt = receipt.transport_receipt
-        outcome = "converged"
+        result.outcome_type = type(receipt).__name__
+        result.outcome = "converged"
+        result.convergence = receipt.convergence
+        result.conservation_receipt = receipt.conservation
+        result.transport_receipt = receipt.transport_receipt
+    except ConvergedNonConfinedError as error:
+        result.outcome_type = type(error).__name__
+        result.outcome = str(error)
+        result.terminal_branch = _branch_measurement(
+            error.branch_receipt, int(error.exchange_index or counters["equilibrium"])
+        )
+        result.branches.append(result.terminal_branch)
+        result.transport_receipt = latest.get("transport")
     except WindowConvergenceError as error:
-        convergence = error.convergence
-        transport_receipt = error.transport_receipt
-        outcome = "iteration cap exhausted without convergence"
+        result.outcome_type = type(error).__name__
+        result.outcome = str(error)
+        result.convergence = error.convergence
+        result.transport_receipt = error.transport_receipt
     except WindowConservationError as error:
-        conservation_receipt = error.conservation
-        transport_receipt = latest["transport"]
-        outcome = "exchange converged but conservation tolerance was not met"
+        result.outcome_type = type(error).__name__
+        result.outcome = str(error)
+        result.conservation_receipt = error.conservation
+        result.transport_receipt = latest.get("transport")
+    return result
 
-    conservation = _transport_conservation(transport_receipt)
-    if conservation_receipt is not None:
-        expected = {
-            "flux_closure_error": conservation_receipt.flux_closure_error,
-            "flux_closure_residual": conservation_receipt.flux_closure_residual,
-            "current_continuity_error": conservation_receipt.current_continuity_error,
-            "current_continuity_residual": (
-                conservation_receipt.current_continuity_residual
+
+def _terminal_core(result: RegimeResult) -> str:
+    """Return the final limited/diverted core pair from one attempt."""
+    if not result.branches:
+        return "unavailable"
+    branch = result.branches[-1]
+    return f"{branch['limited_core_cells']}/{branch['diverted_core_cells']}"
+
+
+def _two_regime_report(
+    strong: RegimeResult,
+    gentle_attempts: Sequence[RegimeResult],
+    preparation_seconds: float,
+) -> str:
+    """Render both regimes, preserving typed outcomes and numeric receipts."""
+    gentle = next((result for result in gentle_attempts if result.converged), None)
+    lines = [
+        "# Coupled-window receipts across two regimes",
+        "",
+        (
+            "This is one locked strong-window run and a bounded gentle search. "
+            "Every row is from `solve_window`; typed refusals are reported and "
+            "were not retried with altered tolerances."
+        ),
+        "",
+        "## Experiment contract",
+        "",
+        (
+            "The equilibrium is the repository's 25 x 25 free-boundary fixture. "
+            f"Every accepted sample was evaluated exactly on a {EXTRACTION_POINTS} "
+            f"x {EXTRACTION_POINTS} lattice and extracted into {RADIAL_CELLS} "
+            f"TORAX radial cells with {SURFACE_BINS} surface bins. TORAX advances "
+            "all four transport channels in one fixed step per window."
+        ),
+        f"Fixture-scale execution backend: `{jax.default_backend()}`.",
+        (
+            "The auxiliary source multiplier scales the transport-returned "
+            "equilibrium-source change about the fixture source: 0 keeps the "
+            "fixture source and 1 applies the full returned source. Coordinate "
+            "maps still come from the evolving geometry waveform."
+        ),
+        (
+            f"Common knobs: iteration cap `{ITERATION_CAP}`, convergence and "
+            f"conservation tolerance `{_format(CONVERGENCE_TOLERANCE)}`, damping "
+            f"`{_format(DAMPING)}`, equilibrium portfolio tolerance "
+            f"`{_format(EQUILIBRIUM_SOLVE_TOLERANCE)}`. One-time fixture "
+            f"preparation: `{_format(preparation_seconds)}` s."
+        ),
+        "",
+        (
+            "| regime | candidate | window (s) | auxiliary multiplier | "
+            "outcome type | terminal limited/diverted core |"
+        ),
+        "|---|---:|---:|---:|---|---:|",
+        (
+            f"| strong | - | `{_format(strong.config.window_length)}` | "
+            f"`{_format(strong.config.auxiliary_source_multiplier)}` | "
+            f"`{strong.outcome_type}` | `{_terminal_core(strong)}` |"
+        ),
+    ]
+    lines.extend(
+        (
+            f"| gentle | {result.config.candidate} | "
+            f"`{_format(result.config.window_length)}` | "
+            f"`{_format(result.config.auxiliary_source_multiplier)}` | "
+            f"`{result.outcome_type}` | `{_terminal_core(result)}` |"
+        )
+        for result in gentle_attempts
+    )
+    lines.extend(
+        [
+            "",
+            "## Strong regime: typed boundary outcome",
+            "",
+            f"`{strong.outcome}`",
+            "",
+            "The selector receipts are reproduced for every completed coarse sample:",
+            "",
+            (
+                "| exchange | sample | limited core | diverted core | selected | "
+                "verdict | limited/diverted available | limited/diverted residual |"
             ),
-        }
-        for field, value in expected.items():
-            np.testing.assert_allclose(conservation[field], value, rtol=0.0, atol=0.0)
+            "|---:|---:|---:|---:|---|---|---|---|",
+        ]
+    )
+    lines.extend(
+        (
+            f"| {row['exchange']} | {row['sample']} | "
+            f"{row['limited_core_cells']} | {row['diverted_core_cells']} | "
+            f"`{row['selected_class']}` | `{row['reason']}` | "
+            f"`{_format(row['limited_available'])}/"
+            f"{_format(row['diverted_available'])}` | "
+            f"`{_format(row['limited_residual'])}/"
+            f"{_format(row['diverted_residual'])}` |"
+        )
+        for row in strong.branches
+    )
+    lines.extend(
+        [
+            "",
+            "Exact dense-lattice core counts for the strong trajectory:",
+            "",
+            (
+                "| exchange | sample | core cells | extraction valid | "
+                "exact evaluation (s) |"
+            ),
+            "|---:|---:|---:|---|---:|",
+        ]
+    )
+    lines.extend(
+        (
+            f"| {row['iteration']} | {row['sample']} | {row['core_count']} | "
+            f"`{_format(row['record_valid'])}` | "
+            f"`{_format(row['exact_evaluation_seconds'])}` |"
+        )
+        for row in strong.extractions
+    )
+    lines.extend(["", "## Gentle regime", ""])
+    if gentle is None:
+        lines.append(
+            "None of the bounded candidates returned a converged window receipt. "
+            "Their typed terminal outcomes and core counts are the result; no "
+            "seventh candidate was attempted."
+        )
+        for result in gentle_attempts:
+            lines.extend(
+                ["", f"Candidate {result.config.candidate}: `{result.outcome}`"]
+            )
+    else:
+        convergence = gentle.convergence
+        conservation = _transport_conservation(gentle.transport_receipt)
+        lines.extend(
+            [
+                (
+                    f"Candidate {gentle.config.candidate} is the first converging "
+                    f"candidate: window `{_format(gentle.config.window_length)}` s, "
+                    "auxiliary multiplier "
+                    f"`{_format(gentle.config.auxiliary_source_multiplier)}`."
+                ),
+                "",
+                f"- Iterations used: `{convergence.iterations_used}`",
+                (
+                    "- Measured contraction estimate: "
+                    f"`{_format(convergence.contraction_estimate)}`"
+                ),
+                f"- Maximum exit residual: `{_format(convergence.maximum_residual)}`",
+                f"- Damping applied: `{_format(convergence.damping_applied)}`",
+                "",
+                "| exchanged field | exit relative residual |",
+                "|---|---:|",
+            ]
+        )
+        lines.extend(
+            f"| `{field}` | `{_format(value)}` |"
+            for field, value in convergence.exit_residual.items()
+        )
+        lines.extend(
+            [
+                "",
+                "### Conservation ledgers",
+                "",
+                (
+                    "- Flux consumption boundary/resistive/internal: "
+                    f"`{_format(conservation['flux_boundary'])}` / "
+                    f"`{_format(conservation['flux_resistive'])}` / "
+                    f"`{_format(conservation['flux_internal'])}` Wb."
+                ),
+                (
+                    "- Flux closure absolute/relative: "
+                    f"`{_format(conservation['flux_closure_error'])}` Wb / "
+                    f"`{_format(conservation['flux_closure_residual'])}`."
+                ),
+                (
+                    "- Plasma current requested initial/final: "
+                    f"`{_format(conservation['current_requested_initial'])}` / "
+                    f"`{_format(conservation['current_requested_final'])}` A; "
+                    "achieved initial/final: "
+                    f"`{_format(conservation['current_achieved_initial'])}` / "
+                    f"`{_format(conservation['current_achieved_final'])}` A."
+                ),
+                (
+                    "- Boundary current continuity absolute/relative: "
+                    f"`{_format(conservation['current_continuity_error'])}` A / "
+                    f"`{_format(conservation['current_continuity_residual'])}`."
+                ),
+            ]
+        )
+    lines.extend(
+        [
+            "",
+            "## Wall time per exchange sweep",
+            "",
+            "| regime | candidate | exchange | side | wall time (s) |",
+            "|---|---:|---:|---|---:|",
+        ]
+    )
+    for result in (strong, *gentle_attempts):
+        candidate = "-" if result.config.candidate is None else result.config.candidate
+        lines.extend(
+            (
+                f"| {result.config.name} | {candidate} | {row['iteration']} | "
+                f"{row['side']} | `{_format(row['seconds'])}` |"
+            )
+            for row in result.timings
+        )
+    lines.extend(
+        [
+            "",
+            (
+                "The TSV is the machine-readable record of every declared knob, "
+                "attempt, selector receipt, exit residual, timing, exact extraction "
+                "diagnostic and available transport ledger."
+            ),
+            "",
+        ]
+    )
+    return "\n".join(lines)
 
+
+def _result_rows(
+    result: RegimeResult, preparation_seconds: float
+) -> list[dict[str, Any]]:
+    """Flatten one result into the stable tabular evidence schema."""
     rows: list[dict[str, Any]] = []
+    regime = result.config.name
+    candidate = result.config.candidate or ""
+
+    def append(kind, field, value, unit, *, iteration="", sample="", side=""):
+        _append_row(
+            rows,
+            regime,
+            kind,
+            field,
+            value,
+            unit,
+            candidate=candidate,
+            iteration=iteration,
+            sample=sample,
+            side=side,
+        )
+
     for field, value, unit in (
-        ("window_length", WINDOW_LENGTH_SECONDS, "s"),
+        ("window_length", result.config.window_length, "s"),
+        (
+            "auxiliary_source_multiplier",
+            result.config.auxiliary_source_multiplier,
+            "fraction",
+        ),
         ("iteration_cap", ITERATION_CAP, "count"),
         ("tolerance", CONVERGENCE_TOLERANCE, "relative"),
         ("damping", DAMPING, "fraction"),
+        ("equilibrium_solve_tolerance", EQUILIBRIUM_SOLVE_TOLERANCE, "relative"),
         ("radial_cells", RADIAL_CELLS, "count"),
         ("surface_bins", SURFACE_BINS, "count"),
         ("extraction_points_per_axis", EXTRACTION_POINTS, "count"),
         ("preparation_wall_time", preparation_seconds, "s"),
-        ("outcome", outcome, "text"),
+        ("outcome_type", result.outcome_type, "text"),
+        ("outcome", result.outcome, "text"),
     ):
-        _append_row(rows, "configuration", field, value, unit)
-    if convergence is not None:
-        _append_row(
-            rows,
-            "convergence",
-            "iterations_used",
-            convergence.iterations_used,
-            "count",
-        )
-        _append_row(
-            rows,
-            "convergence",
-            "contraction_estimate",
-            convergence.contraction_estimate,
-            "ratio",
-        )
-        _append_row(
-            rows,
-            "convergence",
-            "damping_applied",
-            convergence.damping_applied,
-            "fraction",
-        )
+        append("configuration", field, value, unit)
+    if result.convergence is not None:
+        convergence = result.convergence
+        for field, value, unit in (
+            ("iterations_used", convergence.iterations_used, "count"),
+            ("contraction_estimate", convergence.contraction_estimate, "ratio"),
+            ("maximum_residual", convergence.maximum_residual, "relative"),
+            ("damping_applied", convergence.damping_applied, "fraction"),
+        ):
+            append("convergence", field, value, unit)
         for field, value in convergence.exit_residual.items():
-            _append_row(rows, "exit_residual", field, value, "relative")
+            append("exit_residual", field, value, "relative")
         for iteration, residuals in enumerate(convergence.residual_trace, start=1):
             for field, value in residuals.items():
-                _append_row(
-                    rows,
+                append(
                     "residual_trace",
                     field,
                     value,
                     "relative",
                     iteration=iteration,
                 )
-    for row in timings:
-        _append_row(
-            rows,
+    for row in result.branches:
+        for field in (
+            "sample_time",
+            "limited_core_cells",
+            "diverted_core_cells",
+            "selected_class",
+            "previous_class",
+            "switched",
+            "reason",
+            "limited_available",
+            "diverted_available",
+            "limited_admissible",
+            "diverted_admissible",
+            "limited_residual",
+            "diverted_residual",
+        ):
+            unit = "text"
+            if field.endswith("core_cells"):
+                unit = "count"
+            elif field.endswith("residual"):
+                unit = "relative"
+            elif field.endswith("available") or field.endswith("admissible"):
+                unit = "boolean"
+            elif field == "sample_time":
+                unit = "s"
+            append(
+                "branch_selection",
+                field,
+                row[field],
+                unit,
+                iteration=row["exchange"],
+                sample=row["sample"],
+                side="equilibrium",
+            )
+    for row in result.timings:
+        append(
             "exchange_timing",
             "wall_time",
             row["seconds"],
@@ -818,7 +1056,7 @@ def main() -> int:
             iteration=row["iteration"],
             side=row["side"],
         )
-    for row in extractions:
+    for row in result.extractions:
         for field, unit in (
             ("map_height", "count"),
             ("map_radius", "count"),
@@ -830,64 +1068,125 @@ def main() -> int:
             ("surface_arc_first_invalid_level", "normalized_flux"),
             ("exact_evaluation_seconds", "s"),
         ):
-            _append_row(
-                rows,
+            append(
                 "extraction_diagnostic",
                 field,
                 row[field],
                 unit,
                 iteration=row["iteration"],
-                side=f"equilibrium_sample_{row['sample']}",
+                sample=row["sample"],
+                side="equilibrium",
             )
-    for field, value in conservation.items():
-        unit = "Wb" if "flux_" in field and "residual" not in field else "A"
-        if field.endswith("residual"):
-            unit = "relative"
-        _append_row(rows, "conservation", field, value, unit)
-    for interval, item in enumerate(transport_receipt.receipts, start=1):
-        for field, value in zip(
-            dataclasses.fields(item.flux_consumption),
-            dataclasses.astuple(item.flux_consumption),
-            strict=True,
-        ):
-            _append_row(
-                rows,
-                "interval_flux_ledger",
-                field.name,
-                value,
-                "Wb" if "voltage" not in field.name else "V",
-                iteration=interval,
-                side="transport",
-            )
-        for field, value in zip(
-            dataclasses.fields(item.plasma_current),
-            dataclasses.astuple(item.plasma_current),
-            strict=True,
-        ):
-            _append_row(
-                rows,
-                "interval_current_ledger",
-                field.name,
-                value,
-                "A",
-                iteration=interval,
-                side="transport",
-            )
+    transport = result.transport_receipt
+    if transport is not None:
+        conservation = _transport_conservation(transport)
+        if result.conservation_receipt is not None:
+            receipt = result.conservation_receipt
+            expected = {
+                "flux_closure_error": receipt.flux_closure_error,
+                "flux_closure_residual": receipt.flux_closure_residual,
+                "current_continuity_error": receipt.current_continuity_error,
+                "current_continuity_residual": receipt.current_continuity_residual,
+            }
+            for field, value in expected.items():
+                np.testing.assert_allclose(
+                    conservation[field], value, rtol=0.0, atol=0.0
+                )
+        for field, value in conservation.items():
+            unit = "A"
+            if field.startswith("flux_") and not field.endswith("residual"):
+                unit = "Wb"
+            if field.endswith("residual"):
+                unit = "relative"
+            append("conservation", field, value, unit)
+        for interval, item in enumerate(transport.receipts, start=1):
+            for field, value in zip(
+                dataclasses.fields(item.flux_consumption),
+                dataclasses.astuple(item.flux_consumption),
+                strict=True,
+            ):
+                append(
+                    "interval_flux_ledger",
+                    field.name,
+                    value,
+                    "V" if "voltage" in field.name else "Wb",
+                    iteration=interval,
+                    side="transport",
+                )
+            for field, value in zip(
+                dataclasses.fields(item.plasma_current),
+                dataclasses.astuple(item.plasma_current),
+                strict=True,
+            ):
+                append(
+                    "interval_current_ledger",
+                    field.name,
+                    value,
+                    "A",
+                    iteration=interval,
+                    side="transport",
+                )
+    return rows
 
+
+def main() -> int:
+    """Run the strong window and the bounded gentle candidate sequence."""
+    configure_dtypes()
+    preparation_start = time.perf_counter()
+    profile, seed, _vacuum = _fixture_machine()
+    extraction_lattice = _extraction_lattice(profile)
+    fixture_sources = _fixture_sources(profile)
+    baseline_equilibrium = profile.solve(
+        seed,
+        route="anderson",
+        evaluations=EVALUATIONS,
+    )
+    baseline_geometry, baseline_extraction = _geometry_from_equilibrium(
+        baseline_equilibrium,
+        profile.source,
+        extraction_lattice,
+        fixture_sources,
+    )
+    baseline_extraction.update(iteration=0, sample=0)
+    preparation_seconds = time.perf_counter() - preparation_start
+    shared = {
+        "profile": profile,
+        "baseline_equilibrium": baseline_equilibrium,
+        "baseline_geometry": baseline_geometry,
+        "baseline_extraction": baseline_extraction,
+        "extraction_lattice": extraction_lattice,
+        "fixture_sources": fixture_sources,
+    }
+
+    print("running strong regime", flush=True)
+    strong = _run_regime(STRONG, **shared)
+    print(f"strong outcome={strong.outcome_type}", flush=True)
+    gentle_attempts = []
+    for candidate_config in GENTLE_CANDIDATES:
+        print(
+            f"running gentle candidate {candidate_config.candidate}: "
+            f"length={candidate_config.window_length}, "
+            f"multiplier={candidate_config.auxiliary_source_multiplier}",
+            flush=True,
+        )
+        result = _run_regime(candidate_config, **shared)
+        gentle_attempts.append(result)
+        print(
+            f"gentle candidate {candidate_config.candidate} "
+            f"outcome={result.outcome_type}",
+            flush=True,
+        )
+        if result.converged:
+            break
+
+    rows = []
+    for result in (strong, *gentle_attempts):
+        rows.extend(_result_rows(result, preparation_seconds))
     _write_tsv(rows)
     REPORT_PATH.write_text(
-        _report(
-            outcome=outcome,
-            convergence=convergence,
-            conservation=conservation,
-            timings=timings,
-            preparation_seconds=preparation_seconds,
-            transport_receipt=transport_receipt,
-            extractions=extractions,
-        ),
+        _two_regime_report(strong, gentle_attempts, preparation_seconds),
         encoding="utf-8",
     )
-    print(f"outcome={outcome}")
     print(f"report={REPORT_PATH}")
     print(f"receipts={RECEIPTS_PATH}")
     return 0

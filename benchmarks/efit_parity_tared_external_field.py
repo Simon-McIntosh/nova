@@ -17,6 +17,7 @@ from scipy.constants import mu_0
 matplotlib.use("Agg")
 from matplotlib import pyplot as plt  # noqa: E402
 from matplotlib.path import Path as MplPath  # noqa: E402
+from scipy.spatial import cKDTree  # noqa: E402
 
 from benchmarks.efit_forward_parity_slice import (  # noqa: E402
     DECOMPOSITION_BANK,
@@ -85,6 +86,9 @@ BANKED_BOUNDED_RESIDUAL_MINIMUM = 2.006e-4
 BANKED_BOUNDED_RESIDUAL_MAXIMUM = 1.076e-2
 ANALYTIC_SOURCE_RELATIVE_TOLERANCE = 1.0e-3
 ANALYTIC_EXTERNAL_SPAN_TOLERANCE = 1.0e-2
+CONDUCTOR_LOCALISATION_SHARE_TOLERANCE = 0.9
+CONDUCTOR_PATTERN_CORRELATION_TOLERANCE = 0.9
+CONDUCTOR_CURRENT_L1_ERROR_TOLERANCE = 0.5
 
 
 def _sha256(path: Path) -> str:
@@ -334,6 +338,177 @@ def solovev_null_test() -> dict[str, Any]:
     }
 
 
+def _conductor_localisation_row(
+    selected_row: dict[str, Any], qualification: dict[str, Any], store: Path
+) -> dict[str, Any]:
+    """Integrate one exterior Delta-star image around the stored filaments."""
+    case, context = _mast_case_from_selection(store, selected_row, qualification)
+    profile = context["profile"]
+    implied = _implied_current(profile, context["reference_flux"])
+    exterior = implied["valid"] & ~implied["declared"]
+    exterior_current = implied["cell_current"][exterior]
+    coordinates = np.asarray(profile.lattice.coordinate)[exterior]
+    group = context["group"]
+    row = context["row"]
+    filament_radius = np.asarray(group["fcoil_r"], dtype=np.float64)
+    filament_height = np.asarray(group["fcoil_z"], dtype=np.float64)
+    filament_circuit = np.asarray(group["fcoil_circ"], dtype=int)
+    filament_turns = np.asarray(group["fcoil_turns"], dtype=np.float64)
+    filament_multiplier = np.asarray(group["fcoil_xmult"], dtype=np.float64)
+    stored_current = np.asarray(group["fcoil_c"][row], dtype=np.float64)
+    stored_index = np.asarray(group["fcoil_n"], dtype=int)
+    if not np.array_equal(stored_index, np.arange(len(stored_current))):
+        raise RuntimeError("fcoil_n does not provide zero-based circuit order")
+    if filament_circuit.min() != 1 or filament_circuit.max() != len(stored_current):
+        raise RuntimeError("the filament table does not span every stored circuit")
+
+    distance, nearest_filament = cKDTree(np.c_[filament_radius, filament_height]).query(
+        coordinates
+    )
+    capture_radius = float(
+        np.hypot(profile.lattice.radial_step, profile.lattice.vertical_step)
+    )
+    captured = distance <= capture_radius
+    nearest_circuit = filament_circuit[nearest_filament] - 1
+    recovered = np.zeros(len(stored_current), dtype=np.float64)
+    assigned_count = np.zeros(len(stored_current), dtype=int)
+    np.add.at(recovered, nearest_circuit[captured], exterior_current[captured])
+    np.add.at(assigned_count, nearest_circuit[captured], 1)
+
+    turn_scale = np.zeros(len(stored_current), dtype=np.float64)
+    circuit_rows = []
+    for circuit in range(1, len(stored_current) + 1):
+        selected = filament_circuit == circuit
+        scale = float(np.sum(filament_turns[selected] * filament_multiplier[selected]))
+        turn_scale[circuit - 1] = scale
+        weight = np.abs(filament_turns[selected] * filament_multiplier[selected])
+        if not np.any(weight > 0.0):
+            weight = np.ones(np.count_nonzero(selected))
+        centre_radius = float(weight @ filament_radius[selected] / weight.sum())
+        centre_height = float(weight @ filament_height[selected] / weight.sum())
+        expected = float(stored_current[circuit - 1] * scale)
+        error = float(recovered[circuit - 1] - expected)
+        circuit_rows.append(
+            {
+                "stored_circuit": circuit,
+                "filament_count": int(np.count_nonzero(selected)),
+                "filament_weighted_centre_r_m": centre_radius,
+                "filament_weighted_centre_z_m": centre_height,
+                "stored_fcoil_c_a": float(stored_current[circuit - 1]),
+                "filament_turn_multiplier_sum": scale,
+                "stored_effective_current_a_turn": expected,
+                "recovered_delta_star_current_a": float(recovered[circuit - 1]),
+                "signed_error_a": error,
+                "signed_relative_error": (
+                    error / expected if abs(expected) > np.finfo(float).eps else None
+                ),
+                "assigned_grid_cell_count": int(assigned_count[circuit - 1]),
+            }
+        )
+    expected = stored_current * turn_scale
+    live = np.abs(expected) > 1.0e-6 * np.max(np.abs(expected))
+    correlation = float(np.corrcoef(recovered[live], expected[live])[0, 1])
+    expected_l1 = float(np.sum(np.abs(expected[live])))
+    current_l1_error = float(
+        np.sum(np.abs(recovered[live] - expected[live])) / expected_l1
+    )
+    outside_absolute = float(np.sum(np.abs(exterior_current)))
+    captured_absolute = float(np.sum(np.abs(exterior_current[captured])))
+    localisation_share = captured_absolute / outside_absolute
+    spatial_passes = bool(
+        localisation_share >= CONDUCTOR_LOCALISATION_SHARE_TOLERANCE
+        and correlation >= CONDUCTOR_PATTERN_CORRELATION_TOLERANCE
+    )
+    amplitude_passes = bool(current_l1_error <= CONDUCTOR_CURRENT_L1_ERROR_TOLERANCE)
+    return {
+        "shot": int(case["reference"]["shot"]),
+        "slice_index": int(case["reference"]["slice_index"]),
+        "grid_spacing_m": {
+            "radial": float(profile.lattice.radial_step),
+            "vertical": float(profile.lattice.vertical_step),
+            "capture_radius_one_grid_diagonal": capture_radius,
+        },
+        "filament_count": len(filament_radius),
+        "stored_circuit_count": len(stored_current),
+        "outside_declared_support_cell_count": int(np.count_nonzero(exterior)),
+        "outside_declared_support_signed_current_a": float(np.sum(exterior_current)),
+        "outside_declared_support_absolute_current_a": outside_absolute,
+        "captured_cell_count": int(np.count_nonzero(captured)),
+        "captured_signed_current_a": float(np.sum(exterior_current[captured])),
+        "captured_absolute_current_a": captured_absolute,
+        "captured_absolute_current_share": localisation_share,
+        "stored_effective_current_signed_sum_a_turn": float(np.sum(expected)),
+        "recovered_circuit_current_signed_sum_a": float(np.sum(recovered)),
+        "live_circuit_count_for_comparison": int(np.count_nonzero(live)),
+        "recovered_vs_stored_effective_current_pearson": correlation,
+        "recovered_vs_stored_effective_current_l1_relative_error": (current_l1_error),
+        "spatial_localisation_passes": spatial_passes,
+        "stored_current_amplitude_reproduction_passes": amplitude_passes,
+        "circuits": circuit_rows,
+    }
+
+
+def mast_conductor_localisation(
+    store: Path = SHOT_STORE, bank: Path = DECOMPOSITION_BANK
+) -> dict[str, Any]:
+    """Compare all six exterior Delta-star images with fitted circuit geometry."""
+    configure_dtypes()
+    rows = [
+        _conductor_localisation_row(selected, qualification, store)
+        for selected, qualification in select_slices_by_shot(bank)
+    ]
+    spatial_passes = all(row["spatial_localisation_passes"] for row in rows)
+    amplitude_passes = all(
+        row["stored_current_amplitude_reproduction_passes"] for row in rows
+    )
+    correlations = [
+        row["recovered_vs_stored_effective_current_pearson"] for row in rows
+    ]
+    amplitude_errors = [
+        row["recovered_vs_stored_effective_current_l1_relative_error"] for row in rows
+    ]
+    return {
+        "method": (
+            "assign every valid exterior grid-cell current to its nearest "
+            "efm/fcoil_r,fcoil_z filament when the separation is no more than "
+            "one benchmark-grid diagonal; aggregate by efm/fcoil_circ and compare "
+            "with efm/fcoil_c times the stored turn multiplier"
+        ),
+        "criteria": {
+            "minimum_captured_absolute_current_share": (
+                CONDUCTOR_LOCALISATION_SHARE_TOLERANCE
+            ),
+            "minimum_live_circuit_pattern_pearson": (
+                CONDUCTOR_PATTERN_CORRELATION_TOLERANCE
+            ),
+            "maximum_live_circuit_l1_relative_error": (
+                CONDUCTOR_CURRENT_L1_ERROR_TOLERANCE
+            ),
+        },
+        "rows": rows,
+        "all_six_spatially_localise": spatial_passes,
+        "all_six_reproduce_stored_current_amplitudes": amplitude_passes,
+        "minimum_captured_absolute_current_share": min(
+            row["captured_absolute_current_share"] for row in rows
+        ),
+        "pattern_pearson_range": [min(correlations), max(correlations)],
+        "circuit_l1_relative_error_range": [
+            min(amplitude_errors),
+            max(amplitude_errors),
+        ],
+        "finding": (
+            "The exterior Delta-star current spatially localises on the fitted "
+            "conductors and follows their signed circuit pattern, demonstrating "
+            "that the tare classified in-grid conductor current as plasma current. "
+            "The coarse mesh does not reproduce the stored circuit amplitudes, so "
+            "this is localisation evidence rather than an independent conductor-"
+            "model validation."
+            if spatial_passes and not amplitude_passes
+            else "The exterior-current localisation result is stated by the gates."
+        ),
+    }
+
+
 def _banked_solve_digest(receipt: dict[str, Any]) -> str:
     payload = {
         "per_shot": receipt["per_shot"],
@@ -345,11 +520,14 @@ def _banked_solve_digest(receipt: dict[str, Any]) -> str:
 
 def adjudicate_banked_receipt(
     output_path: Path = OUTPUT_RECEIPT,
+    store: Path = SHOT_STORE,
+    bank: Path = DECOMPOSITION_BANK,
 ) -> dict[str, Any]:
     """Adjudicate the existing six solves without evaluating a solve again."""
     receipt = json.loads(output_path.read_text())
     solve_digest = _banked_solve_digest(receipt)
     analytic = solovev_null_test()
+    conductors = mast_conductor_localisation(store, bank)
     if analytic["passes"]:
         adjudicated = "MAST_EXTERIOR_CURRENT_REQUIRES_CONDUCTOR_LOCALISATION"
         finding = (
@@ -370,13 +548,7 @@ def adjudicate_banked_receipt(
         "banked_solve_payload_sha256": solve_digest,
         "verdict": adjudicated,
         "finding": finding,
-        "conductor_localisation": {
-            "status": "not_reached_after_decisive_null_failure",
-            "reason": (
-                "The analytic external field was not recovered, so spatial "
-                "attribution of the MAST exterior current cannot rescue this tare."
-            ),
-        },
+        "conductor_localisation": conductors,
     }
     receipt["aggregate"].update(
         {

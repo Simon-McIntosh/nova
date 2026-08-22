@@ -160,6 +160,15 @@ def test_solovev_null_rejects_the_external_split_without_rerunning_mast():
     assert receipt["aggregate"]["banked_converged_plasma_roots"] == 1
     assert receipt["aggregate"]["tared_converged_plasma_roots"] == 0
     assert receipt["aggregate"]["mast_root_result_valid_for_gs_attribution"] is False
+    conductors = adjudication["conductor_localisation"]
+    assert len(conductors["rows"]) == 6
+    assert conductors["all_six_spatially_localise"] is True
+    assert conductors["minimum_captured_absolute_current_share"] > 0.9
+    assert conductors["pattern_pearson_range"][0] > 0.9
+    assert conductors["all_six_reproduce_stored_current_amplitudes"] is False
+    assert conductors["circuit_l1_relative_error_range"][0] > 0.5
+    assert all(row["filament_count"] == 938 for row in conductors["rows"])
+    assert all(row["stored_circuit_count"] == 101 for row in conductors["rows"])
     assert (
         receipt["protected_banked_artifacts"]["verified_after_adjudication"][
             "verified_digest_count"

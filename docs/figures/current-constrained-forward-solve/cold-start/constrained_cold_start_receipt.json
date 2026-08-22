@@ -1,0 +1,4976 @@
+{
+  "aggregate": {
+    "convergence_qualified_frames": 4,
+    "frame_count": 5,
+    "routes": {
+      "cold_start": {
+        "attempted_frames": 5,
+        "converged_frames": 2,
+        "failed_frames": 3,
+        "maximum_terminal_residual": 0.4782394255888326,
+        "minimum_terminal_residual": 1.1855872107574405e-07
+      },
+      "warm_neighbour": {
+        "attempted_frames": 3,
+        "converged_frames": 2,
+        "failed_frames": 1,
+        "maximum_terminal_residual": 0.07680420718495966,
+        "minimum_terminal_residual": 8.541113793981015e-08
+      }
+    },
+    "selected_terminal_per_frame": [
+      {
+        "achieved_class": "limited",
+        "converged": false,
+        "fractional_flux_rms": 2.107419618498293,
+        "frame": 54,
+        "seeding_route": "warm_neighbour",
+        "shot": "d3d_shot_00f40d3919.parquet",
+        "terminal_residual": 0.07680420718495966,
+        "topology_consistent": false,
+        "x_point_separation_m": 0.7366326223654464
+      },
+      {
+        "achieved_class": "diverted",
+        "converged": true,
+        "fractional_flux_rms": 0.15882358305973146,
+        "frame": 96,
+        "seeding_route": "cold_start",
+        "shot": "d3d_shot_0112bdc95d.parquet",
+        "terminal_residual": 1.1855872107574405e-07,
+        "topology_consistent": true,
+        "x_point_separation_m": 0.45645657944568135
+      },
+      {
+        "achieved_class": "diverted",
+        "converged": true,
+        "fractional_flux_rms": 1.2071381468100615,
+        "frame": 169,
+        "seeding_route": "warm_neighbour",
+        "shot": "d3d_shot_0112d94419.parquet",
+        "terminal_residual": 8.541113793981015e-08,
+        "topology_consistent": true,
+        "x_point_separation_m": 2.563208456645843
+      },
+      {
+        "achieved_class": "diverted",
+        "converged": true,
+        "fractional_flux_rms": 0.01437323656278686,
+        "frame": 144,
+        "seeding_route": "cold_start",
+        "shot": "d3d_shot_01177bc9fa.parquet",
+        "terminal_residual": 5.545310448828357e-07,
+        "topology_consistent": true,
+        "x_point_separation_m": 0.005915070427994245
+      },
+      {
+        "achieved_class": "diverted",
+        "converged": true,
+        "fractional_flux_rms": 1.79660893037076,
+        "frame": 125,
+        "seeding_route": "warm_neighbour",
+        "shot": "d3d_shot_012c431151.parquet",
+        "terminal_residual": 1.7928230618909495e-07,
+        "topology_consistent": true,
+        "x_point_separation_m": 2.71988823473612
+      }
+    ],
+    "shot_count": 5
+  },
+  "arms": {
+    "cold_start": "same-frame labelled branch seed through the public seam",
+    "shared": "fixed-wiring 24-current circuit, target-frame prescribed source functions, declared plasma current and host Newton-Krylov route",
+    "warm_neighbour": "first convergence-qualified frame on the declared same-shot time-offset ladder, evaluated only when the cold target stalls"
+  },
+  "artifacts": {
+    "receipt": "docs/figures/current-constrained-forward-solve/cold-start/constrained_cold_start_receipt.json",
+    "summary_figure": "docs/figures/current-constrained-forward-solve/cold-start/constrained_cold_start_summary.png"
+  },
+  "comparison": {
+    "flux_gauge": "one additive constant over the labelled LCFS interior",
+    "label_representability_ceiling_fractional_rms": 0.0429,
+    "receipt_shape": "circuit-driven validation frame, route, terminal_state and metrics",
+    "terminal_x_point_scope": "reported for every finite terminal; non-converged values are trajectory diagnostics, not equilibrium scores"
+  },
+  "current_path_audit": {
+    "fixed_wiring_current_count": 24,
+    "label_derived_current_reads": 0,
+    "per_frame_current_fits": 0,
+    "plasma_current_channel": "magnetics_plasma_current",
+    "unknown_current_parameters": 0
+  },
+  "frames": [
+    {
+      "circuit_driven": {
+        "best_converged_route": null,
+        "current_receipt": {
+          "all_finite": true,
+          "complete_count": 24,
+          "conductors": [
+            {
+              "authority": "same-frame shipped magnetics_F1A channel",
+              "name": "F1A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -105611.67781834875
+            },
+            {
+              "authority": "same-frame shipped magnetics_F2A channel",
+              "name": "F2A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -130144.096527913
+            },
+            {
+              "authority": "same-frame shipped magnetics_F3A channel",
+              "name": "F3A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -83815.47555224982
+            },
+            {
+              "authority": "same-frame shipped magnetics_F4A channel",
+              "name": "F4A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 174848.345005245
+            },
+            {
+              "authority": "same-frame shipped magnetics_F5A channel",
+              "name": "F5A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 144298.14722140902
+            },
+            {
+              "authority": "same-frame shipped magnetics_F6A channel",
+              "name": "F6A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -208832.67722353313
+            },
+            {
+              "authority": "same-frame shipped magnetics_F7A channel",
+              "name": "F7A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -267082.4395164677
+            },
+            {
+              "authority": "same-frame shipped magnetics_F8A channel",
+              "name": "F8A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -18037.453915797378
+            },
+            {
+              "authority": "same-frame shipped magnetics_F9A channel",
+              "name": "F9A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 54270.52701137931
+            },
+            {
+              "authority": "same-frame shipped magnetics_F1B channel",
+              "name": "F1B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -132723.566537428
+            },
+            {
+              "authority": "same-frame shipped magnetics_F2B channel",
+              "name": "F2B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -218376.51992836123
+            },
+            {
+              "authority": "same-frame shipped magnetics_F3B channel",
+              "name": "F3B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -174029.76097200456
+            },
+            {
+              "authority": "same-frame shipped magnetics_F4B channel",
+              "name": "F4B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -35469.54543385679
+            },
+            {
+              "authority": "same-frame shipped magnetics_F5B channel",
+              "name": "F5B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 180508.1442698217
+            },
+            {
+              "authority": "same-frame shipped magnetics_F6B channel",
+              "name": "F6B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -132685.7290571877
+            },
+            {
+              "authority": "same-frame shipped magnetics_F7B channel",
+              "name": "F7B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -385758.9572100865
+            },
+            {
+              "authority": "same-frame shipped magnetics_F8B channel",
+              "name": "F8B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 249925.4551724922
+            },
+            {
+              "authority": "same-frame shipped magnetics_F9B channel",
+              "name": "F9B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 70100.74717122361
+            },
+            {
+              "authority": "same-frame shipped magnetics_ECOILA channel",
+              "name": "ECOILA",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 904.8421601075679
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "ECOILB",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.993348; residual RMS 3886.882865 A.turn and sample standard deviation 3906.767893 A.turn",
+              "relation_scale": 2.0,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 140.22415012796824,
+              "value_a_turn": 1809.6843202151358
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "E567UP",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.955668; residual RMS 5329.089678 A.turn and sample standard deviation 4471.399221 A.turn",
+              "relation_scale": 1.0,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 184.59511128041075,
+              "value_a_turn": 904.8421601075679
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "E567DN",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.942042; residual RMS 6032.300819 A.turn and sample standard deviation 4912.733988 A.turn",
+              "relation_scale": 1.0,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 211.9523731411631,
+              "value_a_turn": 904.8421601075679
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "E89UP",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.987748; residual RMS 2793.614102 A.turn and sample standard deviation 1882.332219 A.turn",
+              "relation_scale": 1.0456947569496173,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 100.56064557466522,
+              "value_a_turn": 946.18870269145
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "E89DN",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.985116; residual RMS 3067.567972 A.turn and sample standard deviation 1959.995000 A.turn",
+              "relation_scale": 1.0456240764323717,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 110.29387015913936,
+              "value_a_turn": 946.1247479795478
+            }
+          ],
+          "response": {
+            "complete_count": 24,
+            "current_authority": "pf_active circuit",
+            "grid": {
+              "coils": [
+                {
+                  "coil": "ECOILB",
+                  "elements": 48,
+                  "signed_turn_sum": 48.0
+                },
+                {
+                  "coil": "E567UP",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E567DN",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E89UP",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                },
+                {
+                  "coil": "E89DN",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                }
+              ],
+              "dd_version": "3.41.0",
+              "entry": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+              "flux_unit": "Wb per A",
+              "kernel": "nova.biot.polygon.polygon_greens",
+              "target_points": 1089,
+              "target_shape": [
+                1089
+              ]
+            },
+            "pf_active": {
+              "circuit": {
+                "caveats": [
+                  "ECOILB and the shipped ECOILA response are nearly degenerate; exact factor-two wiring means the co-located response carries both branches",
+                  "the fitted targets use EFIT label flux during calibration and are not an inference-time label read",
+                  "post-fit flux closure passes 1 of 60 frames against the 54 of 60 rule; the circuit does not explain all labelled flux",
+                  "competition fusion-coil channels are kA.turn; multiply by 1000 once to obtain the A.turn values consumed by the response operator"
+                ],
+                "component_order": [
+                  "diiid_ohmic_supply",
+                  "ECOILA",
+                  "ECOILB",
+                  "E567UP",
+                  "E567DN",
+                  "E89UP",
+                  "E89DN"
+                ],
+                "connections": [
+                  [
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1
+                  ],
+                  [
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0
+                  ]
+                ],
+                "current_unit": "A.turn",
+                "drives": [
+                  {
+                    "conductor": "ECOILB",
+                    "effective_gain": 2.0,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 1567.41255627204,
+                      "leave_one_shot_out_r_squared": 0.9933483532119266,
+                      "leave_one_shot_out_rmse_a_turn": 4026.405742311334,
+                      "residual_rms_a_turn": 3886.882865339553,
+                      "residual_rms_fraction": 0.07748542028108989,
+                      "residual_sample_standard_deviation_a_turn": 3906.7678929572608
+                    },
+                    "wiring": {
+                      "classification": "snapped-exact",
+                      "cluster_robust_standard_error": 0.028551398014115485,
+                      "confidence_interval": [
+                        1.9411593142619163,
+                        2.060676839922975
+                      ],
+                      "fitted_deviation": 0.0009180770924457349,
+                      "fitted_slope": 2.0009180770924457,
+                      "systematic": null,
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 2.0
+                    }
+                  },
+                  {
+                    "conductor": "E567UP",
+                    "effective_gain": 1.0,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 2924.3729372139474,
+                      "leave_one_shot_out_r_squared": 0.9556677196797801,
+                      "leave_one_shot_out_rmse_a_turn": 5491.813833823248,
+                      "residual_rms_a_turn": 5329.089678101602,
+                      "residual_rms_fraction": 0.20400807944058003,
+                      "residual_sample_standard_deviation_a_turn": 4471.399220840082
+                    },
+                    "wiring": {
+                      "classification": "snapped-exact",
+                      "cluster_robust_standard_error": 0.036427631398339336,
+                      "confidence_interval": [
+                        0.946884677537184,
+                        1.0993724950608712
+                      ],
+                      "fitted_deviation": 0.023128586299027587,
+                      "fitted_slope": 1.0231285862990276,
+                      "systematic": null,
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 1.0
+                    }
+                  },
+                  {
+                    "conductor": "E567DN",
+                    "effective_gain": 1.0,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 3896.911882108876,
+                      "leave_one_shot_out_r_squared": 0.9420419098721444,
+                      "leave_one_shot_out_rmse_a_turn": 6197.232415115648,
+                      "residual_rms_a_turn": 6032.300818544522,
+                      "residual_rms_fraction": 0.23424237119539848,
+                      "residual_sample_standard_deviation_a_turn": 4912.7339875007765
+                    },
+                    "wiring": {
+                      "classification": "snapped-exact",
+                      "cluster_robust_standard_error": 0.039088807917220636,
+                      "confidence_interval": [
+                        0.9198430092460994,
+                        1.083470639703877
+                      ],
+                      "fitted_deviation": 0.001656824474988161,
+                      "fitted_slope": 1.0016568244749882,
+                      "systematic": null,
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 1.0
+                    }
+                  },
+                  {
+                    "conductor": "E89UP",
+                    "effective_gain": 1.0456947569496173,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 2093.257434373751,
+                      "leave_one_shot_out_r_squared": 0.9877483760442158,
+                      "leave_one_shot_out_rmse_a_turn": 2817.419073607406,
+                      "residual_rms_a_turn": 2793.614101796187,
+                      "residual_rms_fraction": 0.10627969377421093,
+                      "residual_sample_standard_deviation_a_turn": 1882.3322191385087
+                    },
+                    "wiring": {
+                      "classification": "integer-plus-systematic",
+                      "cluster_robust_standard_error": 0.010163742188341523,
+                      "confidence_interval": [
+                        1.0244218000666139,
+                        1.0669677138326208
+                      ],
+                      "fitted_deviation": 0.04569475694961733,
+                      "fitted_slope": 1.0456947569496173,
+                      "systematic": {
+                        "measured_deviation": 0.04569475694961733,
+                        "mutual_agreement": "E89UP and E89DN fitted deviations agree within 7.06805172457e-05",
+                        "name": "end_loop_bundle_normalisation",
+                        "suspect_mechanism": "turn-count or normalisation of the paired 6-turn and 7-turn end-loop bundles"
+                      },
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 1.0
+                    }
+                  },
+                  {
+                    "conductor": "E89DN",
+                    "effective_gain": 1.0456240764323717,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 2543.855213386234,
+                      "leave_one_shot_out_r_squared": 0.9851155287064202,
+                      "leave_one_shot_out_rmse_a_turn": 3099.582545883437,
+                      "residual_rms_a_turn": 3067.5679718120577,
+                      "residual_rms_fraction": 0.11657434222566553,
+                      "residual_sample_standard_deviation_a_turn": 1959.9950004145705
+                    },
+                    "wiring": {
+                      "classification": "integer-plus-systematic",
+                      "cluster_robust_standard_error": 0.012211304685183416,
+                      "confidence_interval": [
+                        1.0200655219905739,
+                        1.0711826308741694
+                      ],
+                      "fitted_deviation": 0.04562407643237165,
+                      "fitted_slope": 1.0456240764323717,
+                      "systematic": {
+                        "measured_deviation": 0.04562407643237165,
+                        "mutual_agreement": "E89UP and E89DN fitted deviations agree within 7.06805172457e-05",
+                        "name": "end_loop_bundle_normalisation",
+                        "suspect_mechanism": "turn-count or normalisation of the paired 6-turn and 7-turn end-loop bundles"
+                      },
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 1.0
+                    }
+                  }
+                ],
+                "identifier": "diiid_effective_ohmic_circuit",
+                "name": "DIII-D effective ohmic circuit",
+                "provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference",
+                "source_conductor": "ECOILA",
+                "supply_identifier": "diiid_ohmic_supply"
+              },
+              "supply": {
+                "identifier": "diiid_ohmic_supply",
+                "input_column": "magnetics_ECOILA",
+                "input_unit": "kA.turn",
+                "name": "DIII-D ohmic-heating supply",
+                "output_unit": "A.turn",
+                "scale_to_output": 1000.0,
+                "statement": "logical description supply: the competition channel already carries total ampere-turns and is converted from kiloampere-turns exactly once"
+              }
+            },
+            "response_order": [
+              "F1A",
+              "F2A",
+              "F3A",
+              "F4A",
+              "F5A",
+              "F6A",
+              "F7A",
+              "F8A",
+              "F9A",
+              "F1B",
+              "F2B",
+              "F3B",
+              "F4B",
+              "F5B",
+              "F6B",
+              "F7B",
+              "F8B",
+              "F9B",
+              "ECOILA",
+              "ECOILB",
+              "E567UP",
+              "E567DN",
+              "E89UP",
+              "E89DN"
+            ],
+            "shipped_count": 19,
+            "wall": {
+              "coils": [
+                {
+                  "coil": "ECOILB",
+                  "elements": 48,
+                  "signed_turn_sum": 48.0
+                },
+                {
+                  "coil": "E567UP",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E567DN",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E89UP",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                },
+                {
+                  "coil": "E89DN",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                }
+              ],
+              "dd_version": "3.41.0",
+              "entry": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+              "flux_unit": "Wb per A",
+              "kernel": "nova.biot.polygon.polygon_greens",
+              "target_points": 132,
+              "target_shape": [
+                132
+              ]
+            }
+          },
+          "response_order": [
+            "F1A",
+            "F2A",
+            "F3A",
+            "F4A",
+            "F5A",
+            "F6A",
+            "F7A",
+            "F8A",
+            "F9A",
+            "F1B",
+            "F2B",
+            "F3B",
+            "F4B",
+            "F5B",
+            "F6B",
+            "F7B",
+            "F8B",
+            "F9B",
+            "ECOILA",
+            "ECOILB",
+            "E567UP",
+            "E567DN",
+            "E89UP",
+            "E89DN"
+          ],
+          "unknown_parameter_count": 0
+        },
+        "routes": {
+          "cold_start": {
+            "achieved_class": "limited",
+            "attempted": true,
+            "converged": false,
+            "current_tolerance": 1e-10,
+            "entry_point": "nova.equilibrium.forward.ForwardProfile.solve",
+            "fixed_point_relative_residual": 0.16706673173533756,
+            "iterations": 100,
+            "metrics": {
+              "additive_gauge_wb": 2.4025153705042706,
+              "boundary_maximum_separation_m": null,
+              "boundary_mean_separation_m": null,
+              "fractional_flux_rms": 1.9891649029396898,
+              "interior_r_squared": -2.9567770110870666,
+              "within_label_representability_ceiling": false,
+              "x_point_separation_m": null
+            },
+            "options": {
+              "inner_iterations": 40,
+              "line_search": "armijo",
+              "outer_iterations": 100
+            },
+            "requested_class": "diverted",
+            "residual_tolerance": 1e-06,
+            "residual_trajectory": [],
+            "route": "host_krylov_with_declared_scalar_current",
+            "route_id": "cold_start",
+            "seed": {
+              "route": "same-frame EFIT label map in Nova convention",
+              "source_frame": 54,
+              "source_time_ms": 1540.0
+            },
+            "terminal_state": {
+              "achieved_plasma_current_a": 1283728.2760441306,
+              "axis_rz_m": [
+                2.433959676978101,
+                1.057845034763823
+              ],
+              "current_relative_error": 1.8137065919537764e-16,
+              "diverted": false,
+              "finite": true,
+              "label_x_point_rz_m": [
+                1.4573438167572021,
+                -1.176513671875
+              ],
+              "profile_amplitude": 113.41308925016823,
+              "target_plasma_current_a": 1283728.2760441303,
+              "unscaled_profile_plasma_current_a": 528229.8563027238,
+              "x_point_rz_m": [
+                2.473555964800434,
+                0.9594791832011713
+              ],
+              "x_point_separation_m": 2.365407492751956
+            },
+            "termination": "public host Krylov outer iteration ceiling exhausted",
+            "topology_consistent": false
+          },
+          "warm_neighbour": {
+            "achieved_class": "limited",
+            "attempted": true,
+            "converged": false,
+            "current_tolerance": 1e-10,
+            "entry_point": "nova.equilibrium.forward.ForwardProfile.solve",
+            "fixed_point_relative_residual": 0.07680420718495966,
+            "iterations": 100,
+            "metrics": {
+              "additive_gauge_wb": 2.315461016370157,
+              "boundary_maximum_separation_m": null,
+              "boundary_mean_separation_m": null,
+              "fractional_flux_rms": 2.107419618498293,
+              "interior_r_squared": -3.441217448431492,
+              "within_label_representability_ceiling": false,
+              "x_point_separation_m": null
+            },
+            "options": {
+              "inner_iterations": 40,
+              "line_search": "armijo",
+              "outer_iterations": 100
+            },
+            "requested_class": "diverted",
+            "residual_tolerance": 1e-06,
+            "residual_trajectory": [],
+            "route": "host_krylov_with_declared_scalar_current",
+            "route_id": "warm_neighbour",
+            "seed": {
+              "route": "converged same-shot time-sequence frame",
+              "source_frame": 86,
+              "source_residual": 2.6900050721785323e-10,
+              "source_time_ms": 2200.0,
+              "time_offset_ms": 660.0
+            },
+            "terminal_state": {
+              "achieved_plasma_current_a": 1283728.2760441303,
+              "axis_rz_m": [
+                1.6979522478581108,
+                1.536951120994861
+              ],
+              "current_relative_error": 0.0,
+              "diverted": false,
+              "finite": true,
+              "label_x_point_rz_m": [
+                1.4573438167572021,
+                -1.176513671875
+              ],
+              "profile_amplitude": 31.615920919192664,
+              "target_plasma_current_a": 1283728.2760441303,
+              "unscaled_profile_plasma_current_a": 978677.4250914506,
+              "x_point_rz_m": [
+                1.2088423303752494,
+                -0.4830624251395467
+              ],
+              "x_point_separation_m": 0.7366326223654464
+            },
+            "termination": "public host Krylov outer iteration ceiling exhausted",
+            "topology_consistent": false
+          }
+        },
+        "selected_terminal_route": "warm_neighbour"
+      },
+      "frame": 54,
+      "geometry_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
+      "qualification": {
+        "calibration_frame_member": false,
+        "calibration_shot_member": false,
+        "finite_diverted_label": true,
+        "polarity_screened": true,
+        "reliable_flux_function_surfaces": 19
+      },
+      "shot": "d3d_shot_00f40d3919.parquet",
+      "source_and_seed": {
+        "cold_branch_seed": "target-frame EFIT label map in Nova convention",
+        "profile_functions": "extracted from the target-frame EFIT label",
+        "pseudo_wall": "rectangular enclosing control surface derived from efit_grid extent; pseudo-wall standing in for the absent machine wall",
+        "pseudo_wall_expansion": 0.02,
+        "warm_branch_seed": "converged same-shot ladder frame when available"
+      },
+      "source_parquet": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00f40d3919.parquet",
+      "source_parquet_sha256": "578facf18c83d0f26e77627c7ec27c2c02dea05547ce6f58dced86a075d3dabf",
+      "target_plasma_current": {
+        "authority": "same-frame shipped magnetics_plasma_current channel",
+        "role": "declared current-elimination target, never a label fit",
+        "value_a": 1283728.2760441303
+      },
+      "time_ms": 1540.0,
+      "warm_neighbour_search": {
+        "candidate_offsets": [
+          -1,
+          1,
+          -2,
+          2,
+          -4,
+          4,
+          -8,
+          8,
+          -16,
+          16,
+          -32,
+          32
+        ],
+        "checks": [
+          {
+            "achieved_class": "limited",
+            "converged": false,
+            "frame": 53,
+            "residual": 0.07713594965655518,
+            "time_ms": 1520.0,
+            "time_offset_ms": -20.0,
+            "topology_consistent": false
+          },
+          {
+            "achieved_class": "limited",
+            "converged": false,
+            "frame": 55,
+            "residual": 8.246475937904978e-12,
+            "time_ms": 1560.0,
+            "time_offset_ms": 20.0,
+            "topology_consistent": false
+          },
+          {
+            "achieved_class": "limited",
+            "converged": false,
+            "frame": 52,
+            "residual": 0.07903904308405245,
+            "time_ms": 1500.0,
+            "time_offset_ms": -40.0,
+            "topology_consistent": false
+          },
+          {
+            "achieved_class": "diverted",
+            "converged": false,
+            "frame": 56,
+            "residual": 0.13061506176807225,
+            "time_ms": 1580.0,
+            "time_offset_ms": 40.0,
+            "topology_consistent": true
+          },
+          {
+            "achieved_class": "limited",
+            "converged": false,
+            "frame": 50,
+            "residual": 0.0646994573971023,
+            "time_ms": 1460.0,
+            "time_offset_ms": -80.0,
+            "topology_consistent": false
+          },
+          {
+            "achieved_class": "limited",
+            "converged": false,
+            "frame": 58,
+            "residual": 0.029830320536465497,
+            "time_ms": 1620.0,
+            "time_offset_ms": 80.0,
+            "topology_consistent": false
+          },
+          {
+            "achieved_class": "limited",
+            "converged": false,
+            "frame": 46,
+            "residual": 0.09065251740649947,
+            "time_ms": 1380.0,
+            "time_offset_ms": -160.0,
+            "topology_consistent": false
+          },
+          {
+            "achieved_class": "limited",
+            "converged": false,
+            "frame": 62,
+            "residual": 0.033445279403992986,
+            "time_ms": 1700.0,
+            "time_offset_ms": 160.0,
+            "topology_consistent": false
+          },
+          {
+            "achieved_class": "limited",
+            "converged": false,
+            "frame": 38,
+            "residual": 0.07158806384678619,
+            "time_ms": 1220.0,
+            "time_offset_ms": -320.0,
+            "topology_consistent": false
+          },
+          {
+            "achieved_class": "limited",
+            "converged": false,
+            "frame": 70,
+            "residual": 0.02645780635551822,
+            "time_ms": 1860.0,
+            "time_offset_ms": 320.0,
+            "topology_consistent": false
+          },
+          {
+            "achieved_class": "diverted",
+            "converged": false,
+            "frame": 22,
+            "residual": 0.24219564268330177,
+            "time_ms": 900.0,
+            "time_offset_ms": -640.0,
+            "topology_consistent": true
+          },
+          {
+            "achieved_class": "diverted",
+            "converged": true,
+            "frame": 86,
+            "residual": 2.6900050721785323e-10,
+            "time_ms": 2200.0,
+            "time_offset_ms": 660.0,
+            "topology_consistent": true
+          }
+        ],
+        "qualified_source_found": true,
+        "selection_rule": "symmetric geometric time-offset ladder, earlier before later; first convergence-qualified candidate, without label-score ranking",
+        "triggered": true
+      }
+    },
+    {
+      "circuit_driven": {
+        "best_converged_route": "cold_start",
+        "current_receipt": {
+          "all_finite": true,
+          "complete_count": 24,
+          "conductors": [
+            {
+              "authority": "same-frame shipped magnetics_F1A channel",
+              "name": "F1A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -255948.57307931097
+            },
+            {
+              "authority": "same-frame shipped magnetics_F2A channel",
+              "name": "F2A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -160333.51394596067
+            },
+            {
+              "authority": "same-frame shipped magnetics_F3A channel",
+              "name": "F3A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -15312.827307773057
+            },
+            {
+              "authority": "same-frame shipped magnetics_F4A channel",
+              "name": "F4A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 195197.37553335016
+            },
+            {
+              "authority": "same-frame shipped magnetics_F5A channel",
+              "name": "F5A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 173694.73148600187
+            },
+            {
+              "authority": "same-frame shipped magnetics_F6A channel",
+              "name": "F6A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -162471.2215417609
+            },
+            {
+              "authority": "same-frame shipped magnetics_F7A channel",
+              "name": "F7A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -271997.67038592696
+            },
+            {
+              "authority": "same-frame shipped magnetics_F8A channel",
+              "name": "F8A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 83754.09501284041
+            },
+            {
+              "authority": "same-frame shipped magnetics_F9A channel",
+              "name": "F9A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 31483.9790333189
+            },
+            {
+              "authority": "same-frame shipped magnetics_F1B channel",
+              "name": "F1B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -271119.8662814474
+            },
+            {
+              "authority": "same-frame shipped magnetics_F2B channel",
+              "name": "F2B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -88199.81765005627
+            },
+            {
+              "authority": "same-frame shipped magnetics_F3B channel",
+              "name": "F3B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 2973.4920216877945
+            },
+            {
+              "authority": "same-frame shipped magnetics_F4B channel",
+              "name": "F4B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 60691.35221951362
+            },
+            {
+              "authority": "same-frame shipped magnetics_F5B channel",
+              "name": "F5B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 102343.9886562233
+            },
+            {
+              "authority": "same-frame shipped magnetics_F6B channel",
+              "name": "F6B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -197704.1902939696
+            },
+            {
+              "authority": "same-frame shipped magnetics_F7B channel",
+              "name": "F7B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -167163.24320320477
+            },
+            {
+              "authority": "same-frame shipped magnetics_F8B channel",
+              "name": "F8B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 138866.69446462346
+            },
+            {
+              "authority": "same-frame shipped magnetics_F9B channel",
+              "name": "F9B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -96100.08701378596
+            },
+            {
+              "authority": "same-frame shipped magnetics_ECOILA channel",
+              "name": "ECOILA",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -22710.009741951246
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "ECOILB",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.993348; residual RMS 3886.882865 A.turn and sample standard deviation 3906.767893 A.turn",
+              "relation_scale": 2.0,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 3519.389298885476,
+              "value_a_turn": -45420.01948390249
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "E567UP",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.955668; residual RMS 5329.089678 A.turn and sample standard deviation 4471.399221 A.turn",
+              "relation_scale": 1.0,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 4633.025471532336,
+              "value_a_turn": -22710.009741951246
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "E567DN",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.942042; residual RMS 6032.300819 A.turn and sample standard deviation 4912.733988 A.turn",
+              "relation_scale": 1.0,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 5319.646531825259,
+              "value_a_turn": -22710.009741951246
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "E89UP",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.987748; residual RMS 2793.614102 A.turn and sample standard deviation 1882.332219 A.turn",
+              "relation_scale": 1.0456947569496173,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 2523.902334950951,
+              "value_a_turn": -23747.73811743315
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "E89DN",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.985116; residual RMS 3067.567972 A.turn and sample standard deviation 1959.995000 A.turn",
+              "relation_scale": 1.0456240764323717,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 2768.1898304714186,
+              "value_a_turn": -23746.132962197935
+            }
+          ],
+          "response": {
+            "complete_count": 24,
+            "current_authority": "pf_active circuit",
+            "grid": {
+              "coils": [
+                {
+                  "coil": "ECOILB",
+                  "elements": 48,
+                  "signed_turn_sum": 48.0
+                },
+                {
+                  "coil": "E567UP",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E567DN",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E89UP",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                },
+                {
+                  "coil": "E89DN",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                }
+              ],
+              "dd_version": "3.41.0",
+              "entry": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+              "flux_unit": "Wb per A",
+              "kernel": "nova.biot.polygon.polygon_greens",
+              "target_points": 1089,
+              "target_shape": [
+                1089
+              ]
+            },
+            "pf_active": {
+              "circuit": {
+                "caveats": [
+                  "ECOILB and the shipped ECOILA response are nearly degenerate; exact factor-two wiring means the co-located response carries both branches",
+                  "the fitted targets use EFIT label flux during calibration and are not an inference-time label read",
+                  "post-fit flux closure passes 1 of 60 frames against the 54 of 60 rule; the circuit does not explain all labelled flux",
+                  "competition fusion-coil channels are kA.turn; multiply by 1000 once to obtain the A.turn values consumed by the response operator"
+                ],
+                "component_order": [
+                  "diiid_ohmic_supply",
+                  "ECOILA",
+                  "ECOILB",
+                  "E567UP",
+                  "E567DN",
+                  "E89UP",
+                  "E89DN"
+                ],
+                "connections": [
+                  [
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1
+                  ],
+                  [
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0
+                  ]
+                ],
+                "current_unit": "A.turn",
+                "drives": [
+                  {
+                    "conductor": "ECOILB",
+                    "effective_gain": 2.0,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 1567.41255627204,
+                      "leave_one_shot_out_r_squared": 0.9933483532119266,
+                      "leave_one_shot_out_rmse_a_turn": 4026.405742311334,
+                      "residual_rms_a_turn": 3886.882865339553,
+                      "residual_rms_fraction": 0.07748542028108989,
+                      "residual_sample_standard_deviation_a_turn": 3906.7678929572608
+                    },
+                    "wiring": {
+                      "classification": "snapped-exact",
+                      "cluster_robust_standard_error": 0.028551398014115485,
+                      "confidence_interval": [
+                        1.9411593142619163,
+                        2.060676839922975
+                      ],
+                      "fitted_deviation": 0.0009180770924457349,
+                      "fitted_slope": 2.0009180770924457,
+                      "systematic": null,
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 2.0
+                    }
+                  },
+                  {
+                    "conductor": "E567UP",
+                    "effective_gain": 1.0,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 2924.3729372139474,
+                      "leave_one_shot_out_r_squared": 0.9556677196797801,
+                      "leave_one_shot_out_rmse_a_turn": 5491.813833823248,
+                      "residual_rms_a_turn": 5329.089678101602,
+                      "residual_rms_fraction": 0.20400807944058003,
+                      "residual_sample_standard_deviation_a_turn": 4471.399220840082
+                    },
+                    "wiring": {
+                      "classification": "snapped-exact",
+                      "cluster_robust_standard_error": 0.036427631398339336,
+                      "confidence_interval": [
+                        0.946884677537184,
+                        1.0993724950608712
+                      ],
+                      "fitted_deviation": 0.023128586299027587,
+                      "fitted_slope": 1.0231285862990276,
+                      "systematic": null,
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 1.0
+                    }
+                  },
+                  {
+                    "conductor": "E567DN",
+                    "effective_gain": 1.0,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 3896.911882108876,
+                      "leave_one_shot_out_r_squared": 0.9420419098721444,
+                      "leave_one_shot_out_rmse_a_turn": 6197.232415115648,
+                      "residual_rms_a_turn": 6032.300818544522,
+                      "residual_rms_fraction": 0.23424237119539848,
+                      "residual_sample_standard_deviation_a_turn": 4912.7339875007765
+                    },
+                    "wiring": {
+                      "classification": "snapped-exact",
+                      "cluster_robust_standard_error": 0.039088807917220636,
+                      "confidence_interval": [
+                        0.9198430092460994,
+                        1.083470639703877
+                      ],
+                      "fitted_deviation": 0.001656824474988161,
+                      "fitted_slope": 1.0016568244749882,
+                      "systematic": null,
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 1.0
+                    }
+                  },
+                  {
+                    "conductor": "E89UP",
+                    "effective_gain": 1.0456947569496173,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 2093.257434373751,
+                      "leave_one_shot_out_r_squared": 0.9877483760442158,
+                      "leave_one_shot_out_rmse_a_turn": 2817.419073607406,
+                      "residual_rms_a_turn": 2793.614101796187,
+                      "residual_rms_fraction": 0.10627969377421093,
+                      "residual_sample_standard_deviation_a_turn": 1882.3322191385087
+                    },
+                    "wiring": {
+                      "classification": "integer-plus-systematic",
+                      "cluster_robust_standard_error": 0.010163742188341523,
+                      "confidence_interval": [
+                        1.0244218000666139,
+                        1.0669677138326208
+                      ],
+                      "fitted_deviation": 0.04569475694961733,
+                      "fitted_slope": 1.0456947569496173,
+                      "systematic": {
+                        "measured_deviation": 0.04569475694961733,
+                        "mutual_agreement": "E89UP and E89DN fitted deviations agree within 7.06805172457e-05",
+                        "name": "end_loop_bundle_normalisation",
+                        "suspect_mechanism": "turn-count or normalisation of the paired 6-turn and 7-turn end-loop bundles"
+                      },
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 1.0
+                    }
+                  },
+                  {
+                    "conductor": "E89DN",
+                    "effective_gain": 1.0456240764323717,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 2543.855213386234,
+                      "leave_one_shot_out_r_squared": 0.9851155287064202,
+                      "leave_one_shot_out_rmse_a_turn": 3099.582545883437,
+                      "residual_rms_a_turn": 3067.5679718120577,
+                      "residual_rms_fraction": 0.11657434222566553,
+                      "residual_sample_standard_deviation_a_turn": 1959.9950004145705
+                    },
+                    "wiring": {
+                      "classification": "integer-plus-systematic",
+                      "cluster_robust_standard_error": 0.012211304685183416,
+                      "confidence_interval": [
+                        1.0200655219905739,
+                        1.0711826308741694
+                      ],
+                      "fitted_deviation": 0.04562407643237165,
+                      "fitted_slope": 1.0456240764323717,
+                      "systematic": {
+                        "measured_deviation": 0.04562407643237165,
+                        "mutual_agreement": "E89UP and E89DN fitted deviations agree within 7.06805172457e-05",
+                        "name": "end_loop_bundle_normalisation",
+                        "suspect_mechanism": "turn-count or normalisation of the paired 6-turn and 7-turn end-loop bundles"
+                      },
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 1.0
+                    }
+                  }
+                ],
+                "identifier": "diiid_effective_ohmic_circuit",
+                "name": "DIII-D effective ohmic circuit",
+                "provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference",
+                "source_conductor": "ECOILA",
+                "supply_identifier": "diiid_ohmic_supply"
+              },
+              "supply": {
+                "identifier": "diiid_ohmic_supply",
+                "input_column": "magnetics_ECOILA",
+                "input_unit": "kA.turn",
+                "name": "DIII-D ohmic-heating supply",
+                "output_unit": "A.turn",
+                "scale_to_output": 1000.0,
+                "statement": "logical description supply: the competition channel already carries total ampere-turns and is converted from kiloampere-turns exactly once"
+              }
+            },
+            "response_order": [
+              "F1A",
+              "F2A",
+              "F3A",
+              "F4A",
+              "F5A",
+              "F6A",
+              "F7A",
+              "F8A",
+              "F9A",
+              "F1B",
+              "F2B",
+              "F3B",
+              "F4B",
+              "F5B",
+              "F6B",
+              "F7B",
+              "F8B",
+              "F9B",
+              "ECOILA",
+              "ECOILB",
+              "E567UP",
+              "E567DN",
+              "E89UP",
+              "E89DN"
+            ],
+            "shipped_count": 19,
+            "wall": {
+              "coils": [
+                {
+                  "coil": "ECOILB",
+                  "elements": 48,
+                  "signed_turn_sum": 48.0
+                },
+                {
+                  "coil": "E567UP",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E567DN",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E89UP",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                },
+                {
+                  "coil": "E89DN",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                }
+              ],
+              "dd_version": "3.41.0",
+              "entry": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+              "flux_unit": "Wb per A",
+              "kernel": "nova.biot.polygon.polygon_greens",
+              "target_points": 132,
+              "target_shape": [
+                132
+              ]
+            }
+          },
+          "response_order": [
+            "F1A",
+            "F2A",
+            "F3A",
+            "F4A",
+            "F5A",
+            "F6A",
+            "F7A",
+            "F8A",
+            "F9A",
+            "F1B",
+            "F2B",
+            "F3B",
+            "F4B",
+            "F5B",
+            "F6B",
+            "F7B",
+            "F8B",
+            "F9B",
+            "ECOILA",
+            "ECOILB",
+            "E567UP",
+            "E567DN",
+            "E89UP",
+            "E89DN"
+          ],
+          "unknown_parameter_count": 0
+        },
+        "routes": {
+          "cold_start": {
+            "achieved_class": "diverted",
+            "attempted": true,
+            "converged": true,
+            "current_tolerance": 1e-10,
+            "entry_point": "nova.equilibrium.forward.ForwardProfile.solve",
+            "fixed_point_relative_residual": 1.1855872107574405e-07,
+            "iterations": 5,
+            "metrics": {
+              "additive_gauge_wb": -0.0070403829501891465,
+              "boundary_maximum_separation_m": 0.3032291709499126,
+              "boundary_mean_separation_m": 0.06985693935340365,
+              "fractional_flux_rms": 0.15882358305973146,
+              "interior_r_squared": 0.9747750694640686,
+              "within_label_representability_ceiling": false,
+              "x_point_separation_m": 0.45645657944568135
+            },
+            "options": {
+              "inner_iterations": 40,
+              "line_search": "armijo",
+              "outer_iterations": 100
+            },
+            "requested_class": "diverted",
+            "residual_tolerance": 1e-06,
+            "residual_trajectory": [
+              0.0063517179898132685,
+              0.0031967483058385425,
+              0.0018059852863672391,
+              4.939854370113356e-05,
+              1.1855872107574405e-07
+            ],
+            "route": "host_krylov_with_declared_scalar_current",
+            "route_id": "cold_start",
+            "seed": {
+              "route": "same-frame EFIT label map in Nova convention",
+              "source_frame": 96,
+              "source_time_ms": 2080.0
+            },
+            "terminal_state": {
+              "achieved_plasma_current_a": 1252508.2535743716,
+              "axis_rz_m": [
+                1.7627255897418528,
+                -0.02425853564382081
+              ],
+              "current_relative_error": 1.8589150449861258e-16,
+              "diverted": true,
+              "finite": true,
+              "label_x_point_rz_m": [
+                1.307051181793213,
+                1.0761576890945435
+              ],
+              "profile_amplitude": 1.1403199066149374,
+              "target_plasma_current_a": 1252508.2535743713,
+              "unscaled_profile_plasma_current_a": 1098383.2223822766,
+              "x_point_rz_m": [
+                0.9062733212313687,
+                1.2946290039226522
+              ],
+              "x_point_separation_m": 0.45645657944568135
+            },
+            "termination": "public host Krylov solver returned",
+            "topology_consistent": true
+          }
+        },
+        "selected_terminal_route": "cold_start"
+      },
+      "frame": 96,
+      "geometry_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
+      "qualification": {
+        "calibration_frame_member": false,
+        "calibration_shot_member": false,
+        "finite_diverted_label": true,
+        "polarity_screened": true,
+        "reliable_flux_function_surfaces": 19
+      },
+      "shot": "d3d_shot_0112bdc95d.parquet",
+      "source_and_seed": {
+        "cold_branch_seed": "target-frame EFIT label map in Nova convention",
+        "profile_functions": "extracted from the target-frame EFIT label",
+        "pseudo_wall": "rectangular enclosing control surface derived from efit_grid extent; pseudo-wall standing in for the absent machine wall",
+        "pseudo_wall_expansion": 0.02,
+        "warm_branch_seed": "converged same-shot ladder frame when available"
+      },
+      "source_parquet": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_0112bdc95d.parquet",
+      "source_parquet_sha256": "c090d75b19e4a9cf5367423d36e47e4fa60be03426a52667e1faa442fea678bd",
+      "target_plasma_current": {
+        "authority": "same-frame shipped magnetics_plasma_current channel",
+        "role": "declared current-elimination target, never a label fit",
+        "value_a": 1252508.2535743713
+      },
+      "time_ms": 2080.0,
+      "warm_neighbour_search": {
+        "candidate_offsets": [
+          -1,
+          1
+        ],
+        "checks": [],
+        "qualified_source_found": false,
+        "selection_rule": "immediately preceding frame, then immediately following frame; first convergence-qualified candidate, without label-score ranking",
+        "triggered": false
+      }
+    },
+    {
+      "circuit_driven": {
+        "best_converged_route": "warm_neighbour",
+        "current_receipt": {
+          "all_finite": true,
+          "complete_count": 24,
+          "conductors": [
+            {
+              "authority": "same-frame shipped magnetics_F1A channel",
+              "name": "F1A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -85760.04151712976
+            },
+            {
+              "authority": "same-frame shipped magnetics_F2A channel",
+              "name": "F2A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -90444.43750654778
+            },
+            {
+              "authority": "same-frame shipped magnetics_F3A channel",
+              "name": "F3A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -37577.69602476388
+            },
+            {
+              "authority": "same-frame shipped magnetics_F4A channel",
+              "name": "F4A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 97005.7512119049
+            },
+            {
+              "authority": "same-frame shipped magnetics_F5A channel",
+              "name": "F5A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 90926.61052102578
+            },
+            {
+              "authority": "same-frame shipped magnetics_F6A channel",
+              "name": "F6A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -198943.63076086453
+            },
+            {
+              "authority": "same-frame shipped magnetics_F7A channel",
+              "name": "F7A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -80644.12088871002
+            },
+            {
+              "authority": "same-frame shipped magnetics_F8A channel",
+              "name": "F8A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 30138.794889450077
+            },
+            {
+              "authority": "same-frame shipped magnetics_F9A channel",
+              "name": "F9A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -59488.057188319
+            },
+            {
+              "authority": "same-frame shipped magnetics_F1B channel",
+              "name": "F1B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -122789.10249178584
+            },
+            {
+              "authority": "same-frame shipped magnetics_F2B channel",
+              "name": "F2B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -92014.08767232664
+            },
+            {
+              "authority": "same-frame shipped magnetics_F3B channel",
+              "name": "F3B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -108400.29055523872
+            },
+            {
+              "authority": "same-frame shipped magnetics_F4B channel",
+              "name": "F4B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 124352.56477367006
+            },
+            {
+              "authority": "same-frame shipped magnetics_F5B channel",
+              "name": "F5B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 97839.82443777527
+            },
+            {
+              "authority": "same-frame shipped magnetics_F6B channel",
+              "name": "F6B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -205011.54172722885
+            },
+            {
+              "authority": "same-frame shipped magnetics_F7B channel",
+              "name": "F7B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -188992.54608322936
+            },
+            {
+              "authority": "same-frame shipped magnetics_F8B channel",
+              "name": "F8B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 73864.59437140024
+            },
+            {
+              "authority": "same-frame shipped magnetics_F9B channel",
+              "name": "F9B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 82539.76332697927
+            },
+            {
+              "authority": "same-frame shipped magnetics_ECOILA channel",
+              "name": "ECOILA",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -19397.09993292646
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "ECOILB",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.993348; residual RMS 3886.882865 A.turn and sample standard deviation 3906.767893 A.turn",
+              "relation_scale": 2.0,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 3005.984881074214,
+              "value_a_turn": -38794.19986585292
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "E567UP",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.955668; residual RMS 5329.089678 A.turn and sample standard deviation 4471.399221 A.turn",
+              "relation_scale": 1.0,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 3957.165104033331,
+              "value_a_turn": -19397.09993292646
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "E567DN",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.942042; residual RMS 6032.300819 A.turn and sample standard deviation 4912.733988 A.turn",
+              "relation_scale": 1.0,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 4543.622682602799,
+              "value_a_turn": -19397.09993292646
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "E89UP",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.987748; residual RMS 2793.614102 A.turn and sample standard deviation 1882.332219 A.turn",
+              "relation_scale": 1.0456947569496173,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 2155.7183976700353,
+              "value_a_turn": -20283.445699888973
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "E89DN",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.985116; residual RMS 3067.567972 A.turn and sample standard deviation 1959.995000 A.turn",
+              "relation_scale": 1.0456240764323717,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 2364.3695174545264,
+              "value_a_turn": -20282.074702832648
+            }
+          ],
+          "response": {
+            "complete_count": 24,
+            "current_authority": "pf_active circuit",
+            "grid": {
+              "coils": [
+                {
+                  "coil": "ECOILB",
+                  "elements": 48,
+                  "signed_turn_sum": 48.0
+                },
+                {
+                  "coil": "E567UP",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E567DN",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E89UP",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                },
+                {
+                  "coil": "E89DN",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                }
+              ],
+              "dd_version": "3.41.0",
+              "entry": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+              "flux_unit": "Wb per A",
+              "kernel": "nova.biot.polygon.polygon_greens",
+              "target_points": 1089,
+              "target_shape": [
+                1089
+              ]
+            },
+            "pf_active": {
+              "circuit": {
+                "caveats": [
+                  "ECOILB and the shipped ECOILA response are nearly degenerate; exact factor-two wiring means the co-located response carries both branches",
+                  "the fitted targets use EFIT label flux during calibration and are not an inference-time label read",
+                  "post-fit flux closure passes 1 of 60 frames against the 54 of 60 rule; the circuit does not explain all labelled flux",
+                  "competition fusion-coil channels are kA.turn; multiply by 1000 once to obtain the A.turn values consumed by the response operator"
+                ],
+                "component_order": [
+                  "diiid_ohmic_supply",
+                  "ECOILA",
+                  "ECOILB",
+                  "E567UP",
+                  "E567DN",
+                  "E89UP",
+                  "E89DN"
+                ],
+                "connections": [
+                  [
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1
+                  ],
+                  [
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0
+                  ]
+                ],
+                "current_unit": "A.turn",
+                "drives": [
+                  {
+                    "conductor": "ECOILB",
+                    "effective_gain": 2.0,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 1567.41255627204,
+                      "leave_one_shot_out_r_squared": 0.9933483532119266,
+                      "leave_one_shot_out_rmse_a_turn": 4026.405742311334,
+                      "residual_rms_a_turn": 3886.882865339553,
+                      "residual_rms_fraction": 0.07748542028108989,
+                      "residual_sample_standard_deviation_a_turn": 3906.7678929572608
+                    },
+                    "wiring": {
+                      "classification": "snapped-exact",
+                      "cluster_robust_standard_error": 0.028551398014115485,
+                      "confidence_interval": [
+                        1.9411593142619163,
+                        2.060676839922975
+                      ],
+                      "fitted_deviation": 0.0009180770924457349,
+                      "fitted_slope": 2.0009180770924457,
+                      "systematic": null,
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 2.0
+                    }
+                  },
+                  {
+                    "conductor": "E567UP",
+                    "effective_gain": 1.0,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 2924.3729372139474,
+                      "leave_one_shot_out_r_squared": 0.9556677196797801,
+                      "leave_one_shot_out_rmse_a_turn": 5491.813833823248,
+                      "residual_rms_a_turn": 5329.089678101602,
+                      "residual_rms_fraction": 0.20400807944058003,
+                      "residual_sample_standard_deviation_a_turn": 4471.399220840082
+                    },
+                    "wiring": {
+                      "classification": "snapped-exact",
+                      "cluster_robust_standard_error": 0.036427631398339336,
+                      "confidence_interval": [
+                        0.946884677537184,
+                        1.0993724950608712
+                      ],
+                      "fitted_deviation": 0.023128586299027587,
+                      "fitted_slope": 1.0231285862990276,
+                      "systematic": null,
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 1.0
+                    }
+                  },
+                  {
+                    "conductor": "E567DN",
+                    "effective_gain": 1.0,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 3896.911882108876,
+                      "leave_one_shot_out_r_squared": 0.9420419098721444,
+                      "leave_one_shot_out_rmse_a_turn": 6197.232415115648,
+                      "residual_rms_a_turn": 6032.300818544522,
+                      "residual_rms_fraction": 0.23424237119539848,
+                      "residual_sample_standard_deviation_a_turn": 4912.7339875007765
+                    },
+                    "wiring": {
+                      "classification": "snapped-exact",
+                      "cluster_robust_standard_error": 0.039088807917220636,
+                      "confidence_interval": [
+                        0.9198430092460994,
+                        1.083470639703877
+                      ],
+                      "fitted_deviation": 0.001656824474988161,
+                      "fitted_slope": 1.0016568244749882,
+                      "systematic": null,
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 1.0
+                    }
+                  },
+                  {
+                    "conductor": "E89UP",
+                    "effective_gain": 1.0456947569496173,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 2093.257434373751,
+                      "leave_one_shot_out_r_squared": 0.9877483760442158,
+                      "leave_one_shot_out_rmse_a_turn": 2817.419073607406,
+                      "residual_rms_a_turn": 2793.614101796187,
+                      "residual_rms_fraction": 0.10627969377421093,
+                      "residual_sample_standard_deviation_a_turn": 1882.3322191385087
+                    },
+                    "wiring": {
+                      "classification": "integer-plus-systematic",
+                      "cluster_robust_standard_error": 0.010163742188341523,
+                      "confidence_interval": [
+                        1.0244218000666139,
+                        1.0669677138326208
+                      ],
+                      "fitted_deviation": 0.04569475694961733,
+                      "fitted_slope": 1.0456947569496173,
+                      "systematic": {
+                        "measured_deviation": 0.04569475694961733,
+                        "mutual_agreement": "E89UP and E89DN fitted deviations agree within 7.06805172457e-05",
+                        "name": "end_loop_bundle_normalisation",
+                        "suspect_mechanism": "turn-count or normalisation of the paired 6-turn and 7-turn end-loop bundles"
+                      },
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 1.0
+                    }
+                  },
+                  {
+                    "conductor": "E89DN",
+                    "effective_gain": 1.0456240764323717,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 2543.855213386234,
+                      "leave_one_shot_out_r_squared": 0.9851155287064202,
+                      "leave_one_shot_out_rmse_a_turn": 3099.582545883437,
+                      "residual_rms_a_turn": 3067.5679718120577,
+                      "residual_rms_fraction": 0.11657434222566553,
+                      "residual_sample_standard_deviation_a_turn": 1959.9950004145705
+                    },
+                    "wiring": {
+                      "classification": "integer-plus-systematic",
+                      "cluster_robust_standard_error": 0.012211304685183416,
+                      "confidence_interval": [
+                        1.0200655219905739,
+                        1.0711826308741694
+                      ],
+                      "fitted_deviation": 0.04562407643237165,
+                      "fitted_slope": 1.0456240764323717,
+                      "systematic": {
+                        "measured_deviation": 0.04562407643237165,
+                        "mutual_agreement": "E89UP and E89DN fitted deviations agree within 7.06805172457e-05",
+                        "name": "end_loop_bundle_normalisation",
+                        "suspect_mechanism": "turn-count or normalisation of the paired 6-turn and 7-turn end-loop bundles"
+                      },
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 1.0
+                    }
+                  }
+                ],
+                "identifier": "diiid_effective_ohmic_circuit",
+                "name": "DIII-D effective ohmic circuit",
+                "provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference",
+                "source_conductor": "ECOILA",
+                "supply_identifier": "diiid_ohmic_supply"
+              },
+              "supply": {
+                "identifier": "diiid_ohmic_supply",
+                "input_column": "magnetics_ECOILA",
+                "input_unit": "kA.turn",
+                "name": "DIII-D ohmic-heating supply",
+                "output_unit": "A.turn",
+                "scale_to_output": 1000.0,
+                "statement": "logical description supply: the competition channel already carries total ampere-turns and is converted from kiloampere-turns exactly once"
+              }
+            },
+            "response_order": [
+              "F1A",
+              "F2A",
+              "F3A",
+              "F4A",
+              "F5A",
+              "F6A",
+              "F7A",
+              "F8A",
+              "F9A",
+              "F1B",
+              "F2B",
+              "F3B",
+              "F4B",
+              "F5B",
+              "F6B",
+              "F7B",
+              "F8B",
+              "F9B",
+              "ECOILA",
+              "ECOILB",
+              "E567UP",
+              "E567DN",
+              "E89UP",
+              "E89DN"
+            ],
+            "shipped_count": 19,
+            "wall": {
+              "coils": [
+                {
+                  "coil": "ECOILB",
+                  "elements": 48,
+                  "signed_turn_sum": 48.0
+                },
+                {
+                  "coil": "E567UP",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E567DN",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E89UP",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                },
+                {
+                  "coil": "E89DN",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                }
+              ],
+              "dd_version": "3.41.0",
+              "entry": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+              "flux_unit": "Wb per A",
+              "kernel": "nova.biot.polygon.polygon_greens",
+              "target_points": 132,
+              "target_shape": [
+                132
+              ]
+            }
+          },
+          "response_order": [
+            "F1A",
+            "F2A",
+            "F3A",
+            "F4A",
+            "F5A",
+            "F6A",
+            "F7A",
+            "F8A",
+            "F9A",
+            "F1B",
+            "F2B",
+            "F3B",
+            "F4B",
+            "F5B",
+            "F6B",
+            "F7B",
+            "F8B",
+            "F9B",
+            "ECOILA",
+            "ECOILB",
+            "E567UP",
+            "E567DN",
+            "E89UP",
+            "E89DN"
+          ],
+          "unknown_parameter_count": 0
+        },
+        "routes": {
+          "cold_start": {
+            "achieved_class": "diverted",
+            "attempted": true,
+            "converged": false,
+            "current_tolerance": 1e-10,
+            "entry_point": "nova.equilibrium.forward.ForwardProfile.solve",
+            "fixed_point_relative_residual": 0.43716509982663987,
+            "iterations": 0,
+            "metrics": {
+              "additive_gauge_wb": 0.0,
+              "boundary_maximum_separation_m": null,
+              "boundary_mean_separation_m": null,
+              "fractional_flux_rms": 0.0,
+              "interior_r_squared": 1.0,
+              "within_label_representability_ceiling": false,
+              "x_point_separation_m": null
+            },
+            "options": {
+              "inner_iterations": 40,
+              "line_search": "armijo",
+              "outer_iterations": 100
+            },
+            "requested_class": "diverted",
+            "residual_tolerance": 1e-06,
+            "residual_trajectory": [],
+            "route": "host_krylov_with_declared_scalar_current",
+            "route_id": "cold_start",
+            "seed": {
+              "route": "same-frame EFIT label map in Nova convention",
+              "source_frame": 169,
+              "source_time_ms": 3680.0
+            },
+            "terminal_state": {
+              "achieved_plasma_current_a": 685050.7490634918,
+              "axis_rz_m": [
+                1.7692192828543871,
+                0.005202441148728628
+              ],
+              "current_relative_error": 0.0,
+              "diverted": true,
+              "finite": true,
+              "label_x_point_rz_m": [
+                1.4207217693328857,
+                -1.1680928468704224
+              ],
+              "profile_amplitude": 0.785010189235838,
+              "target_plasma_current_a": 685050.7490634918,
+              "unscaled_profile_plasma_current_a": 872664.7863390781,
+              "x_point_rz_m": [
+                1.0766989834968443,
+                -1.5454782294786906
+              ],
+              "x_point_separation_m": 0.510657815156862
+            },
+            "termination": "public host Krylov rejected its initial Jacobian: Jacobian inversion yielded zero vector. This indicates a bug in the Jacobian approximation.",
+            "topology_consistent": true
+          },
+          "warm_neighbour": {
+            "achieved_class": "diverted",
+            "attempted": true,
+            "converged": true,
+            "current_tolerance": 1e-10,
+            "entry_point": "nova.equilibrium.forward.ForwardProfile.solve",
+            "fixed_point_relative_residual": 8.541113793981015e-08,
+            "iterations": 8,
+            "metrics": {
+              "additive_gauge_wb": 1.0480096663509741,
+              "boundary_maximum_separation_m": 0.5339819626560325,
+              "boundary_mean_separation_m": 0.25905566248318734,
+              "fractional_flux_rms": 1.2071381468100615,
+              "interior_r_squared": -0.45718250548402883,
+              "within_label_representability_ceiling": false,
+              "x_point_separation_m": 2.563208456645843
+            },
+            "options": {
+              "inner_iterations": 40,
+              "line_search": "armijo",
+              "outer_iterations": 100
+            },
+            "requested_class": "diverted",
+            "residual_tolerance": 1e-06,
+            "residual_trajectory": [
+              0.0031377001662330696,
+              0.0022389538972463403,
+              0.0016309124800093935,
+              0.0015654197454477684,
+              0.0015073209202401483,
+              0.0010745482219126012,
+              1.4774770396720235e-05,
+              8.541113793981015e-08
+            ],
+            "route": "host_krylov_with_declared_scalar_current",
+            "route_id": "warm_neighbour",
+            "seed": {
+              "route": "converged same-shot time-sequence frame",
+              "source_frame": 171,
+              "source_residual": 2.7509374035642685e-08,
+              "source_time_ms": 3720.0,
+              "time_offset_ms": 40.0
+            },
+            "terminal_state": {
+              "achieved_plasma_current_a": 685050.7490634918,
+              "axis_rz_m": [
+                1.5178932686666116,
+                -0.011445465980945552
+              ],
+              "current_relative_error": 0.0,
+              "diverted": true,
+              "finite": true,
+              "label_x_point_rz_m": [
+                1.4207217693328857,
+                -1.1680928468704224
+              ],
+              "profile_amplitude": 1.5331262543272133,
+              "target_plasma_current_a": 685050.7490634918,
+              "unscaled_profile_plasma_current_a": 446832.5730708426,
+              "x_point_rz_m": [
+                0.9086738963706972,
+                1.343449421938857
+              ],
+              "x_point_separation_m": 2.563208456645843
+            },
+            "termination": "public host Krylov solver returned",
+            "topology_consistent": true
+          }
+        },
+        "selected_terminal_route": "warm_neighbour"
+      },
+      "frame": 169,
+      "geometry_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
+      "qualification": {
+        "calibration_frame_member": false,
+        "calibration_shot_member": false,
+        "finite_diverted_label": true,
+        "polarity_screened": true,
+        "reliable_flux_function_surfaces": 19
+      },
+      "shot": "d3d_shot_0112d94419.parquet",
+      "source_and_seed": {
+        "cold_branch_seed": "target-frame EFIT label map in Nova convention",
+        "profile_functions": "extracted from the target-frame EFIT label",
+        "pseudo_wall": "rectangular enclosing control surface derived from efit_grid extent; pseudo-wall standing in for the absent machine wall",
+        "pseudo_wall_expansion": 0.02,
+        "warm_branch_seed": "converged same-shot ladder frame when available"
+      },
+      "source_parquet": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_0112d94419.parquet",
+      "source_parquet_sha256": "078dcaf5552f3946355bd2c42af1127f78c3b6ca5b7ac8e556965625ce626c27",
+      "target_plasma_current": {
+        "authority": "same-frame shipped magnetics_plasma_current channel",
+        "role": "declared current-elimination target, never a label fit",
+        "value_a": 685050.7490634918
+      },
+      "time_ms": 3680.0,
+      "warm_neighbour_search": {
+        "candidate_offsets": [
+          -1,
+          1,
+          -2,
+          2,
+          -4,
+          4,
+          -8,
+          8,
+          -16,
+          16,
+          -32,
+          32
+        ],
+        "checks": [
+          {
+            "achieved_class": "limited",
+            "converged": false,
+            "frame": 168,
+            "residual": 0.01654772956971368,
+            "time_ms": 3660.0,
+            "time_offset_ms": -20.0,
+            "topology_consistent": false
+          },
+          {
+            "achieved_class": "diverted",
+            "converged": false,
+            "frame": 170,
+            "residual": 0.4373684392632329,
+            "time_ms": 3700.0,
+            "time_offset_ms": 20.0,
+            "topology_consistent": true
+          },
+          {
+            "achieved_class": "diverted",
+            "converged": false,
+            "frame": 167,
+            "residual": 0.004189345836182583,
+            "time_ms": 3640.0,
+            "time_offset_ms": -40.0,
+            "topology_consistent": true
+          },
+          {
+            "achieved_class": "diverted",
+            "converged": true,
+            "frame": 171,
+            "residual": 2.7509374035642685e-08,
+            "time_ms": 3720.0,
+            "time_offset_ms": 40.0,
+            "topology_consistent": true
+          }
+        ],
+        "qualified_source_found": true,
+        "selection_rule": "symmetric geometric time-offset ladder, earlier before later; first convergence-qualified candidate, without label-score ranking",
+        "triggered": true
+      }
+    },
+    {
+      "circuit_driven": {
+        "best_converged_route": "cold_start",
+        "current_receipt": {
+          "all_finite": true,
+          "complete_count": 24,
+          "conductors": [
+            {
+              "authority": "same-frame shipped magnetics_F1A channel",
+              "name": "F1A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -58064.22545791359
+            },
+            {
+              "authority": "same-frame shipped magnetics_F2A channel",
+              "name": "F2A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -56980.2248891755
+            },
+            {
+              "authority": "same-frame shipped magnetics_F3A channel",
+              "name": "F3A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -44986.13907096838
+            },
+            {
+              "authority": "same-frame shipped magnetics_F4A channel",
+              "name": "F4A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 6490.311376863567
+            },
+            {
+              "authority": "same-frame shipped magnetics_F5A channel",
+              "name": "F5A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 136317.66044738365
+            },
+            {
+              "authority": "same-frame shipped magnetics_F6A channel",
+              "name": "F6A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -219888.6799891501
+            },
+            {
+              "authority": "same-frame shipped magnetics_F7A channel",
+              "name": "F7A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -141465.1568344963
+            },
+            {
+              "authority": "same-frame shipped magnetics_F8A channel",
+              "name": "F8A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 208815.31858563423
+            },
+            {
+              "authority": "same-frame shipped magnetics_F9A channel",
+              "name": "F9A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -174661.24542838777
+            },
+            {
+              "authority": "same-frame shipped magnetics_F1B channel",
+              "name": "F1B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -60748.72604256613
+            },
+            {
+              "authority": "same-frame shipped magnetics_F2B channel",
+              "name": "F2B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -53862.0256959261
+            },
+            {
+              "authority": "same-frame shipped magnetics_F3B channel",
+              "name": "F3B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -56290.500817410706
+            },
+            {
+              "authority": "same-frame shipped magnetics_F4B channel",
+              "name": "F4B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 5137.191051299452
+            },
+            {
+              "authority": "same-frame shipped magnetics_F5B channel",
+              "name": "F5B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 126096.44953924115
+            },
+            {
+              "authority": "same-frame shipped magnetics_F6B channel",
+              "name": "F6B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -220233.89227460473
+            },
+            {
+              "authority": "same-frame shipped magnetics_F7B channel",
+              "name": "F7B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -150619.27312105458
+            },
+            {
+              "authority": "same-frame shipped magnetics_F8B channel",
+              "name": "F8B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 221635.8309593406
+            },
+            {
+              "authority": "same-frame shipped magnetics_F9B channel",
+              "name": "F9B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -174472.93674244778
+            },
+            {
+              "authority": "same-frame shipped magnetics_ECOILA channel",
+              "name": "ECOILA",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -1318.3312896711286
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "ECOILB",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.993348; residual RMS 3886.882865 A.turn and sample standard deviation 3906.767893 A.turn",
+              "relation_scale": 2.0,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 204.3029080997573,
+              "value_a_turn": -2636.6625793422572
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "E567UP",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.955668; residual RMS 5329.089678 A.turn and sample standard deviation 4471.399221 A.turn",
+              "relation_scale": 1.0,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 268.9502344722299,
+              "value_a_turn": -1318.3312896711286
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "E567DN",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.942042; residual RMS 6032.300819 A.turn and sample standard deviation 4912.733988 A.turn",
+              "relation_scale": 1.0,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 308.8090473136529,
+              "value_a_turn": -1318.3312896711286
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "E89UP",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.987748; residual RMS 2793.614102 A.turn and sample standard deviation 1882.332219 A.turn",
+              "relation_scale": 1.0456947569496173,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 146.5142224969374,
+              "value_a_turn": -1378.5721175317265
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "E89DN",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.985116; residual RMS 3067.567972 A.turn and sample standard deviation 1959.995000 A.turn",
+              "relation_scale": 1.0456240764323717,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 160.6952753753567,
+              "value_a_turn": -1378.4789371942713
+            }
+          ],
+          "response": {
+            "complete_count": 24,
+            "current_authority": "pf_active circuit",
+            "grid": {
+              "coils": [
+                {
+                  "coil": "ECOILB",
+                  "elements": 48,
+                  "signed_turn_sum": 48.0
+                },
+                {
+                  "coil": "E567UP",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E567DN",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E89UP",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                },
+                {
+                  "coil": "E89DN",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                }
+              ],
+              "dd_version": "3.41.0",
+              "entry": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+              "flux_unit": "Wb per A",
+              "kernel": "nova.biot.polygon.polygon_greens",
+              "target_points": 1089,
+              "target_shape": [
+                1089
+              ]
+            },
+            "pf_active": {
+              "circuit": {
+                "caveats": [
+                  "ECOILB and the shipped ECOILA response are nearly degenerate; exact factor-two wiring means the co-located response carries both branches",
+                  "the fitted targets use EFIT label flux during calibration and are not an inference-time label read",
+                  "post-fit flux closure passes 1 of 60 frames against the 54 of 60 rule; the circuit does not explain all labelled flux",
+                  "competition fusion-coil channels are kA.turn; multiply by 1000 once to obtain the A.turn values consumed by the response operator"
+                ],
+                "component_order": [
+                  "diiid_ohmic_supply",
+                  "ECOILA",
+                  "ECOILB",
+                  "E567UP",
+                  "E567DN",
+                  "E89UP",
+                  "E89DN"
+                ],
+                "connections": [
+                  [
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1
+                  ],
+                  [
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0
+                  ]
+                ],
+                "current_unit": "A.turn",
+                "drives": [
+                  {
+                    "conductor": "ECOILB",
+                    "effective_gain": 2.0,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 1567.41255627204,
+                      "leave_one_shot_out_r_squared": 0.9933483532119266,
+                      "leave_one_shot_out_rmse_a_turn": 4026.405742311334,
+                      "residual_rms_a_turn": 3886.882865339553,
+                      "residual_rms_fraction": 0.07748542028108989,
+                      "residual_sample_standard_deviation_a_turn": 3906.7678929572608
+                    },
+                    "wiring": {
+                      "classification": "snapped-exact",
+                      "cluster_robust_standard_error": 0.028551398014115485,
+                      "confidence_interval": [
+                        1.9411593142619163,
+                        2.060676839922975
+                      ],
+                      "fitted_deviation": 0.0009180770924457349,
+                      "fitted_slope": 2.0009180770924457,
+                      "systematic": null,
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 2.0
+                    }
+                  },
+                  {
+                    "conductor": "E567UP",
+                    "effective_gain": 1.0,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 2924.3729372139474,
+                      "leave_one_shot_out_r_squared": 0.9556677196797801,
+                      "leave_one_shot_out_rmse_a_turn": 5491.813833823248,
+                      "residual_rms_a_turn": 5329.089678101602,
+                      "residual_rms_fraction": 0.20400807944058003,
+                      "residual_sample_standard_deviation_a_turn": 4471.399220840082
+                    },
+                    "wiring": {
+                      "classification": "snapped-exact",
+                      "cluster_robust_standard_error": 0.036427631398339336,
+                      "confidence_interval": [
+                        0.946884677537184,
+                        1.0993724950608712
+                      ],
+                      "fitted_deviation": 0.023128586299027587,
+                      "fitted_slope": 1.0231285862990276,
+                      "systematic": null,
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 1.0
+                    }
+                  },
+                  {
+                    "conductor": "E567DN",
+                    "effective_gain": 1.0,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 3896.911882108876,
+                      "leave_one_shot_out_r_squared": 0.9420419098721444,
+                      "leave_one_shot_out_rmse_a_turn": 6197.232415115648,
+                      "residual_rms_a_turn": 6032.300818544522,
+                      "residual_rms_fraction": 0.23424237119539848,
+                      "residual_sample_standard_deviation_a_turn": 4912.7339875007765
+                    },
+                    "wiring": {
+                      "classification": "snapped-exact",
+                      "cluster_robust_standard_error": 0.039088807917220636,
+                      "confidence_interval": [
+                        0.9198430092460994,
+                        1.083470639703877
+                      ],
+                      "fitted_deviation": 0.001656824474988161,
+                      "fitted_slope": 1.0016568244749882,
+                      "systematic": null,
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 1.0
+                    }
+                  },
+                  {
+                    "conductor": "E89UP",
+                    "effective_gain": 1.0456947569496173,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 2093.257434373751,
+                      "leave_one_shot_out_r_squared": 0.9877483760442158,
+                      "leave_one_shot_out_rmse_a_turn": 2817.419073607406,
+                      "residual_rms_a_turn": 2793.614101796187,
+                      "residual_rms_fraction": 0.10627969377421093,
+                      "residual_sample_standard_deviation_a_turn": 1882.3322191385087
+                    },
+                    "wiring": {
+                      "classification": "integer-plus-systematic",
+                      "cluster_robust_standard_error": 0.010163742188341523,
+                      "confidence_interval": [
+                        1.0244218000666139,
+                        1.0669677138326208
+                      ],
+                      "fitted_deviation": 0.04569475694961733,
+                      "fitted_slope": 1.0456947569496173,
+                      "systematic": {
+                        "measured_deviation": 0.04569475694961733,
+                        "mutual_agreement": "E89UP and E89DN fitted deviations agree within 7.06805172457e-05",
+                        "name": "end_loop_bundle_normalisation",
+                        "suspect_mechanism": "turn-count or normalisation of the paired 6-turn and 7-turn end-loop bundles"
+                      },
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 1.0
+                    }
+                  },
+                  {
+                    "conductor": "E89DN",
+                    "effective_gain": 1.0456240764323717,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 2543.855213386234,
+                      "leave_one_shot_out_r_squared": 0.9851155287064202,
+                      "leave_one_shot_out_rmse_a_turn": 3099.582545883437,
+                      "residual_rms_a_turn": 3067.5679718120577,
+                      "residual_rms_fraction": 0.11657434222566553,
+                      "residual_sample_standard_deviation_a_turn": 1959.9950004145705
+                    },
+                    "wiring": {
+                      "classification": "integer-plus-systematic",
+                      "cluster_robust_standard_error": 0.012211304685183416,
+                      "confidence_interval": [
+                        1.0200655219905739,
+                        1.0711826308741694
+                      ],
+                      "fitted_deviation": 0.04562407643237165,
+                      "fitted_slope": 1.0456240764323717,
+                      "systematic": {
+                        "measured_deviation": 0.04562407643237165,
+                        "mutual_agreement": "E89UP and E89DN fitted deviations agree within 7.06805172457e-05",
+                        "name": "end_loop_bundle_normalisation",
+                        "suspect_mechanism": "turn-count or normalisation of the paired 6-turn and 7-turn end-loop bundles"
+                      },
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 1.0
+                    }
+                  }
+                ],
+                "identifier": "diiid_effective_ohmic_circuit",
+                "name": "DIII-D effective ohmic circuit",
+                "provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference",
+                "source_conductor": "ECOILA",
+                "supply_identifier": "diiid_ohmic_supply"
+              },
+              "supply": {
+                "identifier": "diiid_ohmic_supply",
+                "input_column": "magnetics_ECOILA",
+                "input_unit": "kA.turn",
+                "name": "DIII-D ohmic-heating supply",
+                "output_unit": "A.turn",
+                "scale_to_output": 1000.0,
+                "statement": "logical description supply: the competition channel already carries total ampere-turns and is converted from kiloampere-turns exactly once"
+              }
+            },
+            "response_order": [
+              "F1A",
+              "F2A",
+              "F3A",
+              "F4A",
+              "F5A",
+              "F6A",
+              "F7A",
+              "F8A",
+              "F9A",
+              "F1B",
+              "F2B",
+              "F3B",
+              "F4B",
+              "F5B",
+              "F6B",
+              "F7B",
+              "F8B",
+              "F9B",
+              "ECOILA",
+              "ECOILB",
+              "E567UP",
+              "E567DN",
+              "E89UP",
+              "E89DN"
+            ],
+            "shipped_count": 19,
+            "wall": {
+              "coils": [
+                {
+                  "coil": "ECOILB",
+                  "elements": 48,
+                  "signed_turn_sum": 48.0
+                },
+                {
+                  "coil": "E567UP",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E567DN",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E89UP",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                },
+                {
+                  "coil": "E89DN",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                }
+              ],
+              "dd_version": "3.41.0",
+              "entry": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+              "flux_unit": "Wb per A",
+              "kernel": "nova.biot.polygon.polygon_greens",
+              "target_points": 132,
+              "target_shape": [
+                132
+              ]
+            }
+          },
+          "response_order": [
+            "F1A",
+            "F2A",
+            "F3A",
+            "F4A",
+            "F5A",
+            "F6A",
+            "F7A",
+            "F8A",
+            "F9A",
+            "F1B",
+            "F2B",
+            "F3B",
+            "F4B",
+            "F5B",
+            "F6B",
+            "F7B",
+            "F8B",
+            "F9B",
+            "ECOILA",
+            "ECOILB",
+            "E567UP",
+            "E567DN",
+            "E89UP",
+            "E89DN"
+          ],
+          "unknown_parameter_count": 0
+        },
+        "routes": {
+          "cold_start": {
+            "achieved_class": "diverted",
+            "attempted": true,
+            "converged": true,
+            "current_tolerance": 1e-10,
+            "entry_point": "nova.equilibrium.forward.ForwardProfile.solve",
+            "fixed_point_relative_residual": 5.545310448828357e-07,
+            "iterations": 2,
+            "metrics": {
+              "additive_gauge_wb": -0.008594705607826603,
+              "boundary_maximum_separation_m": 0.5652469522443726,
+              "boundary_mean_separation_m": 0.04282515430005583,
+              "fractional_flux_rms": 0.01437323656278686,
+              "interior_r_squared": 0.9997934100707102,
+              "within_label_representability_ceiling": true,
+              "x_point_separation_m": 0.005915070427994245
+            },
+            "options": {
+              "inner_iterations": 40,
+              "line_search": "armijo",
+              "outer_iterations": 100
+            },
+            "requested_class": "diverted",
+            "residual_tolerance": 1e-06,
+            "residual_trajectory": [
+              0.000646061323095722,
+              5.545310448828357e-07
+            ],
+            "route": "host_krylov_with_declared_scalar_current",
+            "route_id": "cold_start",
+            "seed": {
+              "route": "same-frame EFIT label map in Nova convention",
+              "source_frame": 144,
+              "source_time_ms": 3180.0
+            },
+            "terminal_state": {
+              "achieved_plasma_current_a": 979762.2680664062,
+              "axis_rz_m": [
+                1.8380852871534572,
+                -0.01301203103195361
+              ],
+              "current_relative_error": 0.0,
+              "diverted": true,
+              "finite": true,
+              "label_x_point_rz_m": [
+                1.2706537246704102,
+                -1.131562352180481
+              ],
+              "profile_amplitude": 1.0048025244699375,
+              "target_plasma_current_a": 979762.2680664062,
+              "unscaled_profile_plasma_current_a": 975079.4252664315,
+              "x_point_rz_m": [
+                1.2726547437554026,
+                -1.125996026571102
+              ],
+              "x_point_separation_m": 0.005915070427994245
+            },
+            "termination": "public host Krylov solver returned",
+            "topology_consistent": true
+          }
+        },
+        "selected_terminal_route": "cold_start"
+      },
+      "frame": 144,
+      "geometry_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
+      "qualification": {
+        "calibration_frame_member": false,
+        "calibration_shot_member": false,
+        "finite_diverted_label": true,
+        "polarity_screened": true,
+        "reliable_flux_function_surfaces": 19
+      },
+      "shot": "d3d_shot_01177bc9fa.parquet",
+      "source_and_seed": {
+        "cold_branch_seed": "target-frame EFIT label map in Nova convention",
+        "profile_functions": "extracted from the target-frame EFIT label",
+        "pseudo_wall": "rectangular enclosing control surface derived from efit_grid extent; pseudo-wall standing in for the absent machine wall",
+        "pseudo_wall_expansion": 0.02,
+        "warm_branch_seed": "converged same-shot ladder frame when available"
+      },
+      "source_parquet": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_01177bc9fa.parquet",
+      "source_parquet_sha256": "3332165a675eb656a5001b098d9b19864358b80de07aa9b7becf2232e2a7b287",
+      "target_plasma_current": {
+        "authority": "same-frame shipped magnetics_plasma_current channel",
+        "role": "declared current-elimination target, never a label fit",
+        "value_a": 979762.2680664062
+      },
+      "time_ms": 3180.0,
+      "warm_neighbour_search": {
+        "candidate_offsets": [
+          -1,
+          1
+        ],
+        "checks": [],
+        "qualified_source_found": false,
+        "selection_rule": "immediately preceding frame, then immediately following frame; first convergence-qualified candidate, without label-score ranking",
+        "triggered": false
+      }
+    },
+    {
+      "circuit_driven": {
+        "best_converged_route": "warm_neighbour",
+        "current_receipt": {
+          "all_finite": true,
+          "complete_count": 24,
+          "conductors": [
+            {
+              "authority": "same-frame shipped magnetics_F1A channel",
+              "name": "F1A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -53460.17114131044
+            },
+            {
+              "authority": "same-frame shipped magnetics_F2A channel",
+              "name": "F2A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -64051.29769190347
+            },
+            {
+              "authority": "same-frame shipped magnetics_F3A channel",
+              "name": "F3A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -2636.3949914618233
+            },
+            {
+              "authority": "same-frame shipped magnetics_F4A channel",
+              "name": "F4A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 55047.69943734204
+            },
+            {
+              "authority": "same-frame shipped magnetics_F5A channel",
+              "name": "F5A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 36733.431352999156
+            },
+            {
+              "authority": "same-frame shipped magnetics_F6A channel",
+              "name": "F6A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -133574.19491311398
+            },
+            {
+              "authority": "same-frame shipped magnetics_F7A channel",
+              "name": "F7A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -106802.68490795682
+            },
+            {
+              "authority": "same-frame shipped magnetics_F8A channel",
+              "name": "F8A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 68942.49330961704
+            },
+            {
+              "authority": "same-frame shipped magnetics_F9A channel",
+              "name": "F9A",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -13399.482128191285
+            },
+            {
+              "authority": "same-frame shipped magnetics_F1B channel",
+              "name": "F1B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -41666.568881087194
+            },
+            {
+              "authority": "same-frame shipped magnetics_F2B channel",
+              "name": "F2B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -80895.52508314645
+            },
+            {
+              "authority": "same-frame shipped magnetics_F3B channel",
+              "name": "F3B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -52482.86593973637
+            },
+            {
+              "authority": "same-frame shipped magnetics_F4B channel",
+              "name": "F4B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 48590.46399064762
+            },
+            {
+              "authority": "same-frame shipped magnetics_F5B channel",
+              "name": "F5B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 67424.12057972536
+            },
+            {
+              "authority": "same-frame shipped magnetics_F6B channel",
+              "name": "F6B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -122519.76485821532
+            },
+            {
+              "authority": "same-frame shipped magnetics_F7B channel",
+              "name": "F7B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -103054.80503806254
+            },
+            {
+              "authority": "same-frame shipped magnetics_F8B channel",
+              "name": "F8B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 72018.54442894168
+            },
+            {
+              "authority": "same-frame shipped magnetics_F9B channel",
+              "name": "F9B",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": -50613.62369209528
+            },
+            {
+              "authority": "same-frame shipped magnetics_ECOILA channel",
+              "name": "ECOILA",
+              "relation_provenance": null,
+              "relation_scale": null,
+              "relation_source": null,
+              "tier": "known",
+              "uncertainty_a_turn": 0.0,
+              "value_a_turn": 13037.449365476283
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "ECOILB",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.993348; residual RMS 3886.882865 A.turn and sample standard deviation 3906.767893 A.turn",
+              "relation_scale": 2.0,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 2020.424486954717,
+              "value_a_turn": 26074.898730952566
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "E567UP",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.955668; residual RMS 5329.089678 A.turn and sample standard deviation 4471.399221 A.turn",
+              "relation_scale": 1.0,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 2659.745005854625,
+              "value_a_turn": 13037.449365476283
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "E567DN",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.942042; residual RMS 6032.300819 A.turn and sample standard deviation 4912.733988 A.turn",
+              "relation_scale": 1.0,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 3053.923053709108,
+              "value_a_turn": 13037.449365476283
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "E89UP",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.987748; residual RMS 2793.614102 A.turn and sample standard deviation 1882.332219 A.turn",
+              "relation_scale": 1.0456947569496173,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 1448.9315182699331,
+              "value_a_turn": 13633.192445474664
+            },
+            {
+              "authority": "fit-once machine-description circuit drive",
+              "name": "E89DN",
+              "relation_provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference; leave-one-shot-out R-squared 0.985116; residual RMS 3067.567972 A.turn and sample standard deviation 1959.995000 A.turn",
+              "relation_scale": 1.0456240764323717,
+              "relation_source": "ECOILA",
+              "tier": "knowable",
+              "uncertainty_a_turn": 1589.1730192492919,
+              "value_a_turn": 13632.270951809947
+            }
+          ],
+          "response": {
+            "complete_count": 24,
+            "current_authority": "pf_active circuit",
+            "grid": {
+              "coils": [
+                {
+                  "coil": "ECOILB",
+                  "elements": 48,
+                  "signed_turn_sum": 48.0
+                },
+                {
+                  "coil": "E567UP",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E567DN",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E89UP",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                },
+                {
+                  "coil": "E89DN",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                }
+              ],
+              "dd_version": "3.41.0",
+              "entry": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+              "flux_unit": "Wb per A",
+              "kernel": "nova.biot.polygon.polygon_greens",
+              "target_points": 1089,
+              "target_shape": [
+                1089
+              ]
+            },
+            "pf_active": {
+              "circuit": {
+                "caveats": [
+                  "ECOILB and the shipped ECOILA response are nearly degenerate; exact factor-two wiring means the co-located response carries both branches",
+                  "the fitted targets use EFIT label flux during calibration and are not an inference-time label read",
+                  "post-fit flux closure passes 1 of 60 frames against the 54 of 60 rule; the circuit does not explain all labelled flux",
+                  "competition fusion-coil channels are kA.turn; multiply by 1000 once to obtain the A.turn values consumed by the response operator"
+                ],
+                "component_order": [
+                  "diiid_ohmic_supply",
+                  "ECOILA",
+                  "ECOILB",
+                  "E567UP",
+                  "E567DN",
+                  "E89UP",
+                  "E89DN"
+                ],
+                "connections": [
+                  [
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1
+                  ],
+                  [
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0
+                  ]
+                ],
+                "current_unit": "A.turn",
+                "drives": [
+                  {
+                    "conductor": "ECOILB",
+                    "effective_gain": 2.0,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 1567.41255627204,
+                      "leave_one_shot_out_r_squared": 0.9933483532119266,
+                      "leave_one_shot_out_rmse_a_turn": 4026.405742311334,
+                      "residual_rms_a_turn": 3886.882865339553,
+                      "residual_rms_fraction": 0.07748542028108989,
+                      "residual_sample_standard_deviation_a_turn": 3906.7678929572608
+                    },
+                    "wiring": {
+                      "classification": "snapped-exact",
+                      "cluster_robust_standard_error": 0.028551398014115485,
+                      "confidence_interval": [
+                        1.9411593142619163,
+                        2.060676839922975
+                      ],
+                      "fitted_deviation": 0.0009180770924457349,
+                      "fitted_slope": 2.0009180770924457,
+                      "systematic": null,
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 2.0
+                    }
+                  },
+                  {
+                    "conductor": "E567UP",
+                    "effective_gain": 1.0,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 2924.3729372139474,
+                      "leave_one_shot_out_r_squared": 0.9556677196797801,
+                      "leave_one_shot_out_rmse_a_turn": 5491.813833823248,
+                      "residual_rms_a_turn": 5329.089678101602,
+                      "residual_rms_fraction": 0.20400807944058003,
+                      "residual_sample_standard_deviation_a_turn": 4471.399220840082
+                    },
+                    "wiring": {
+                      "classification": "snapped-exact",
+                      "cluster_robust_standard_error": 0.036427631398339336,
+                      "confidence_interval": [
+                        0.946884677537184,
+                        1.0993724950608712
+                      ],
+                      "fitted_deviation": 0.023128586299027587,
+                      "fitted_slope": 1.0231285862990276,
+                      "systematic": null,
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 1.0
+                    }
+                  },
+                  {
+                    "conductor": "E567DN",
+                    "effective_gain": 1.0,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 3896.911882108876,
+                      "leave_one_shot_out_r_squared": 0.9420419098721444,
+                      "leave_one_shot_out_rmse_a_turn": 6197.232415115648,
+                      "residual_rms_a_turn": 6032.300818544522,
+                      "residual_rms_fraction": 0.23424237119539848,
+                      "residual_sample_standard_deviation_a_turn": 4912.7339875007765
+                    },
+                    "wiring": {
+                      "classification": "snapped-exact",
+                      "cluster_robust_standard_error": 0.039088807917220636,
+                      "confidence_interval": [
+                        0.9198430092460994,
+                        1.083470639703877
+                      ],
+                      "fitted_deviation": 0.001656824474988161,
+                      "fitted_slope": 1.0016568244749882,
+                      "systematic": null,
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 1.0
+                    }
+                  },
+                  {
+                    "conductor": "E89UP",
+                    "effective_gain": 1.0456947569496173,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 2093.257434373751,
+                      "leave_one_shot_out_r_squared": 0.9877483760442158,
+                      "leave_one_shot_out_rmse_a_turn": 2817.419073607406,
+                      "residual_rms_a_turn": 2793.614101796187,
+                      "residual_rms_fraction": 0.10627969377421093,
+                      "residual_sample_standard_deviation_a_turn": 1882.3322191385087
+                    },
+                    "wiring": {
+                      "classification": "integer-plus-systematic",
+                      "cluster_robust_standard_error": 0.010163742188341523,
+                      "confidence_interval": [
+                        1.0244218000666139,
+                        1.0669677138326208
+                      ],
+                      "fitted_deviation": 0.04569475694961733,
+                      "fitted_slope": 1.0456947569496173,
+                      "systematic": {
+                        "measured_deviation": 0.04569475694961733,
+                        "mutual_agreement": "E89UP and E89DN fitted deviations agree within 7.06805172457e-05",
+                        "name": "end_loop_bundle_normalisation",
+                        "suspect_mechanism": "turn-count or normalisation of the paired 6-turn and 7-turn end-loop bundles"
+                      },
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 1.0
+                    }
+                  },
+                  {
+                    "conductor": "E89DN",
+                    "effective_gain": 1.0456240764323717,
+                    "uncertainty": {
+                      "leave_one_shot_out_median_absolute_error_a_turn": 2543.855213386234,
+                      "leave_one_shot_out_r_squared": 0.9851155287064202,
+                      "leave_one_shot_out_rmse_a_turn": 3099.582545883437,
+                      "residual_rms_a_turn": 3067.5679718120577,
+                      "residual_rms_fraction": 0.11657434222566553,
+                      "residual_sample_standard_deviation_a_turn": 1959.9950004145705
+                    },
+                    "wiring": {
+                      "classification": "integer-plus-systematic",
+                      "cluster_robust_standard_error": 0.012211304685183416,
+                      "confidence_interval": [
+                        1.0200655219905739,
+                        1.0711826308741694
+                      ],
+                      "fitted_deviation": 0.04562407643237165,
+                      "fitted_slope": 1.0456240764323717,
+                      "systematic": {
+                        "measured_deviation": 0.04562407643237165,
+                        "mutual_agreement": "E89UP and E89DN fitted deviations agree within 7.06805172457e-05",
+                        "name": "end_loop_bundle_normalisation",
+                        "suspect_mechanism": "turn-count or normalisation of the paired 6-turn and 7-turn end-loop bundles"
+                      },
+                      "tested_ratios": [
+                        0.125,
+                        0.14583333333333334,
+                        0.8571428571428571,
+                        1.0,
+                        1.1666666666666667,
+                        2.0,
+                        6.857142857142857,
+                        8.0
+                      ],
+                      "wiring_ratio": 1.0
+                    }
+                  }
+                ],
+                "identifier": "diiid_effective_ohmic_circuit",
+                "name": "DIII-D effective ohmic circuit",
+                "provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference",
+                "source_conductor": "ECOILA",
+                "supply_identifier": "diiid_ohmic_supply"
+              },
+              "supply": {
+                "identifier": "diiid_ohmic_supply",
+                "input_column": "magnetics_ECOILA",
+                "input_unit": "kA.turn",
+                "name": "DIII-D ohmic-heating supply",
+                "output_unit": "A.turn",
+                "scale_to_output": 1000.0,
+                "statement": "logical description supply: the competition channel already carries total ampere-turns and is converted from kiloampere-turns exactly once"
+              }
+            },
+            "response_order": [
+              "F1A",
+              "F2A",
+              "F3A",
+              "F4A",
+              "F5A",
+              "F6A",
+              "F7A",
+              "F8A",
+              "F9A",
+              "F1B",
+              "F2B",
+              "F3B",
+              "F4B",
+              "F5B",
+              "F6B",
+              "F7B",
+              "F8B",
+              "F9B",
+              "ECOILA",
+              "ECOILB",
+              "E567UP",
+              "E567DN",
+              "E89UP",
+              "E89DN"
+            ],
+            "shipped_count": 19,
+            "wall": {
+              "coils": [
+                {
+                  "coil": "ECOILB",
+                  "elements": 48,
+                  "signed_turn_sum": 48.0
+                },
+                {
+                  "coil": "E567UP",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E567DN",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E89UP",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                },
+                {
+                  "coil": "E89DN",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                }
+              ],
+              "dd_version": "3.41.0",
+              "entry": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+              "flux_unit": "Wb per A",
+              "kernel": "nova.biot.polygon.polygon_greens",
+              "target_points": 132,
+              "target_shape": [
+                132
+              ]
+            }
+          },
+          "response_order": [
+            "F1A",
+            "F2A",
+            "F3A",
+            "F4A",
+            "F5A",
+            "F6A",
+            "F7A",
+            "F8A",
+            "F9A",
+            "F1B",
+            "F2B",
+            "F3B",
+            "F4B",
+            "F5B",
+            "F6B",
+            "F7B",
+            "F8B",
+            "F9B",
+            "ECOILA",
+            "ECOILB",
+            "E567UP",
+            "E567DN",
+            "E89UP",
+            "E89DN"
+          ],
+          "unknown_parameter_count": 0
+        },
+        "routes": {
+          "cold_start": {
+            "achieved_class": "diverted",
+            "attempted": true,
+            "converged": false,
+            "current_tolerance": 1e-10,
+            "entry_point": "nova.equilibrium.forward.ForwardProfile.solve",
+            "fixed_point_relative_residual": 0.4782394255888326,
+            "iterations": 100,
+            "metrics": {
+              "additive_gauge_wb": 1.2731427737581305,
+              "boundary_maximum_separation_m": null,
+              "boundary_mean_separation_m": null,
+              "fractional_flux_rms": 1.9797224366893633,
+              "interior_r_squared": -2.91930092633127,
+              "within_label_representability_ceiling": false,
+              "x_point_separation_m": null
+            },
+            "options": {
+              "inner_iterations": 40,
+              "line_search": "armijo",
+              "outer_iterations": 100
+            },
+            "requested_class": "diverted",
+            "residual_tolerance": 1e-06,
+            "residual_trajectory": [],
+            "route": "host_krylov_with_declared_scalar_current",
+            "route_id": "cold_start",
+            "seed": {
+              "route": "same-frame EFIT label map in Nova convention",
+              "source_frame": 125,
+              "source_time_ms": 3460.0
+            },
+            "terminal_state": {
+              "achieved_plasma_current_a": 267807.6736629009,
+              "axis_rz_m": [
+                0.9976012106219773,
+                1.5304705924347275
+              ],
+              "current_relative_error": 0.0,
+              "diverted": true,
+              "finite": true,
+              "label_x_point_rz_m": [
+                1.290911078453064,
+                -1.1653355360031128
+              ],
+              "profile_amplitude": 1.753926647934426,
+              "target_plasma_current_a": 267807.6736629009,
+              "unscaled_profile_plasma_current_a": 152690.34995180333,
+              "x_point_rz_m": [
+                0.9071722459521788,
+                -0.34949697587253736
+              ],
+              "x_point_separation_m": 0.9015808603586662
+            },
+            "termination": "public host Krylov outer iteration ceiling exhausted",
+            "topology_consistent": true
+          },
+          "warm_neighbour": {
+            "achieved_class": "diverted",
+            "attempted": true,
+            "converged": true,
+            "current_tolerance": 1e-10,
+            "entry_point": "nova.equilibrium.forward.ForwardProfile.solve",
+            "fixed_point_relative_residual": 1.7928230618909495e-07,
+            "iterations": 7,
+            "metrics": {
+              "additive_gauge_wb": 0.8279572003690433,
+              "boundary_maximum_separation_m": 0.8404250121900624,
+              "boundary_mean_separation_m": 0.5237252913301206,
+              "fractional_flux_rms": 1.79660893037076,
+              "interior_r_squared": -2.2278036486879653,
+              "within_label_representability_ceiling": false,
+              "x_point_separation_m": 2.71988823473612
+            },
+            "options": {
+              "inner_iterations": 40,
+              "line_search": "armijo",
+              "outer_iterations": 100
+            },
+            "requested_class": "diverted",
+            "residual_tolerance": 1e-06,
+            "residual_trajectory": [
+              0.041689168518205824,
+              0.018720954948537337,
+              0.0226864346847611,
+              0.016813046969993715,
+              0.0038149806919581075,
+              0.00015776434586013804,
+              1.7928230618909495e-07
+            ],
+            "route": "host_krylov_with_declared_scalar_current",
+            "route_id": "warm_neighbour",
+            "seed": {
+              "route": "converged same-shot time-sequence frame",
+              "source_frame": 129,
+              "source_residual": 9.030946164999304e-09,
+              "source_time_ms": 3640.0,
+              "time_offset_ms": 180.0
+            },
+            "terminal_state": {
+              "achieved_plasma_current_a": 267807.6736629009,
+              "axis_rz_m": [
+                1.468690780984961,
+                -0.15875607275432246
+              ],
+              "current_relative_error": 0.0,
+              "diverted": true,
+              "finite": true,
+              "label_x_point_rz_m": [
+                1.290911078453064,
+                -1.1653355360031128
+              ],
+              "profile_amplitude": 6.334212763791504,
+              "target_plasma_current_a": 267807.6736629009,
+              "unscaled_profile_plasma_current_a": 42279.55132700624,
+              "x_point_rz_m": [
+                1.0311126214183424,
+                1.5421165450462166
+              ],
+              "x_point_separation_m": 2.71988823473612
+            },
+            "termination": "public host Krylov solver returned",
+            "topology_consistent": true
+          }
+        },
+        "selected_terminal_route": "warm_neighbour"
+      },
+      "frame": 125,
+      "geometry_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
+      "qualification": {
+        "calibration_frame_member": false,
+        "calibration_shot_member": false,
+        "finite_diverted_label": true,
+        "polarity_screened": true,
+        "reliable_flux_function_surfaces": 19
+      },
+      "shot": "d3d_shot_012c431151.parquet",
+      "source_and_seed": {
+        "cold_branch_seed": "target-frame EFIT label map in Nova convention",
+        "profile_functions": "extracted from the target-frame EFIT label",
+        "pseudo_wall": "rectangular enclosing control surface derived from efit_grid extent; pseudo-wall standing in for the absent machine wall",
+        "pseudo_wall_expansion": 0.02,
+        "warm_branch_seed": "converged same-shot ladder frame when available"
+      },
+      "source_parquet": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_012c431151.parquet",
+      "source_parquet_sha256": "c9432e0c47742edf437b58a439482e6696f95e53123410a2fd88a18768e412b5",
+      "target_plasma_current": {
+        "authority": "same-frame shipped magnetics_plasma_current channel",
+        "role": "declared current-elimination target, never a label fit",
+        "value_a": 267807.6736629009
+      },
+      "time_ms": 3460.0,
+      "warm_neighbour_search": {
+        "candidate_offsets": [
+          -1,
+          1,
+          -2,
+          2,
+          -4,
+          4,
+          -8,
+          8,
+          -16,
+          16,
+          -32,
+          32
+        ],
+        "checks": [
+          {
+            "achieved_class": "diverted",
+            "converged": false,
+            "frame": 124,
+            "residual": 0.4998587625831613,
+            "time_ms": 3360.0,
+            "time_offset_ms": -100.0,
+            "topology_consistent": true
+          },
+          {
+            "achieved_class": "diverted",
+            "converged": false,
+            "frame": 126,
+            "residual": 0.9139087634467722,
+            "time_ms": 3560.0,
+            "time_offset_ms": 100.0,
+            "topology_consistent": true
+          },
+          {
+            "achieved_class": "diverted",
+            "converged": false,
+            "frame": 123,
+            "residual": 0.5409914243559891,
+            "time_ms": 3340.0,
+            "time_offset_ms": -120.0,
+            "topology_consistent": true
+          },
+          {
+            "achieved_class": "limited",
+            "converged": false,
+            "frame": 127,
+            "residual": 0.1928208794160378,
+            "time_ms": 3580.0,
+            "time_offset_ms": 120.0,
+            "topology_consistent": false
+          },
+          {
+            "achieved_class": "diverted",
+            "converged": false,
+            "frame": 121,
+            "residual": 0.7875156560622908,
+            "time_ms": 3280.0,
+            "time_offset_ms": -180.0,
+            "topology_consistent": true
+          },
+          {
+            "achieved_class": "diverted",
+            "converged": true,
+            "frame": 129,
+            "residual": 9.030946164999304e-09,
+            "time_ms": 3640.0,
+            "time_offset_ms": 180.0,
+            "topology_consistent": true
+          }
+        ],
+        "qualified_source_found": true,
+        "selection_rule": "symmetric geometric time-offset ladder, earlier before later; first convergence-qualified candidate, without label-score ranking",
+        "triggered": true
+      }
+    }
+  ],
+  "measurement": "cold-start and same-shot warm recovery through the public current-constrained DIII-D forward seam",
+  "measurement_update": {
+    "cold_rows_preserved": 5,
+    "route": "resume only the unmeasured declared warm-neighbour candidates"
+  },
+  "pf_active_circuit": {
+    "caveats": [
+      "ECOILB and the shipped ECOILA response are nearly degenerate; exact factor-two wiring means the co-located response carries both branches",
+      "the fitted targets use EFIT label flux during calibration and are not an inference-time label read",
+      "post-fit flux closure passes 1 of 60 frames against the 54 of 60 rule; the circuit does not explain all labelled flux",
+      "competition fusion-coil channels are kA.turn; multiply by 1000 once to obtain the A.turn values consumed by the response operator"
+    ],
+    "component_order": [
+      "diiid_ohmic_supply",
+      "ECOILA",
+      "ECOILB",
+      "E567UP",
+      "E567DN",
+      "E89UP",
+      "E89DN"
+    ],
+    "connections": [
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0
+      ]
+    ],
+    "current_unit": "A.turn",
+    "drives": [
+      {
+        "conductor": "ECOILB",
+        "effective_gain": 2.0,
+        "uncertainty": {
+          "leave_one_shot_out_median_absolute_error_a_turn": 1567.41255627204,
+          "leave_one_shot_out_r_squared": 0.9933483532119266,
+          "leave_one_shot_out_rmse_a_turn": 4026.405742311334,
+          "residual_rms_a_turn": 3886.882865339553,
+          "residual_rms_fraction": 0.07748542028108989,
+          "residual_sample_standard_deviation_a_turn": 3906.7678929572608
+        },
+        "wiring": {
+          "classification": "snapped-exact",
+          "cluster_robust_standard_error": 0.028551398014115485,
+          "confidence_interval": [
+            1.9411593142619163,
+            2.060676839922975
+          ],
+          "fitted_deviation": 0.0009180770924457349,
+          "fitted_slope": 2.0009180770924457,
+          "systematic": null,
+          "tested_ratios": [
+            0.125,
+            0.14583333333333334,
+            0.8571428571428571,
+            1.0,
+            1.1666666666666667,
+            2.0,
+            6.857142857142857,
+            8.0
+          ],
+          "wiring_ratio": 2.0
+        }
+      },
+      {
+        "conductor": "E567UP",
+        "effective_gain": 1.0,
+        "uncertainty": {
+          "leave_one_shot_out_median_absolute_error_a_turn": 2924.3729372139474,
+          "leave_one_shot_out_r_squared": 0.9556677196797801,
+          "leave_one_shot_out_rmse_a_turn": 5491.813833823248,
+          "residual_rms_a_turn": 5329.089678101602,
+          "residual_rms_fraction": 0.20400807944058003,
+          "residual_sample_standard_deviation_a_turn": 4471.399220840082
+        },
+        "wiring": {
+          "classification": "snapped-exact",
+          "cluster_robust_standard_error": 0.036427631398339336,
+          "confidence_interval": [
+            0.946884677537184,
+            1.0993724950608712
+          ],
+          "fitted_deviation": 0.023128586299027587,
+          "fitted_slope": 1.0231285862990276,
+          "systematic": null,
+          "tested_ratios": [
+            0.125,
+            0.14583333333333334,
+            0.8571428571428571,
+            1.0,
+            1.1666666666666667,
+            2.0,
+            6.857142857142857,
+            8.0
+          ],
+          "wiring_ratio": 1.0
+        }
+      },
+      {
+        "conductor": "E567DN",
+        "effective_gain": 1.0,
+        "uncertainty": {
+          "leave_one_shot_out_median_absolute_error_a_turn": 3896.911882108876,
+          "leave_one_shot_out_r_squared": 0.9420419098721444,
+          "leave_one_shot_out_rmse_a_turn": 6197.232415115648,
+          "residual_rms_a_turn": 6032.300818544522,
+          "residual_rms_fraction": 0.23424237119539848,
+          "residual_sample_standard_deviation_a_turn": 4912.7339875007765
+        },
+        "wiring": {
+          "classification": "snapped-exact",
+          "cluster_robust_standard_error": 0.039088807917220636,
+          "confidence_interval": [
+            0.9198430092460994,
+            1.083470639703877
+          ],
+          "fitted_deviation": 0.001656824474988161,
+          "fitted_slope": 1.0016568244749882,
+          "systematic": null,
+          "tested_ratios": [
+            0.125,
+            0.14583333333333334,
+            0.8571428571428571,
+            1.0,
+            1.1666666666666667,
+            2.0,
+            6.857142857142857,
+            8.0
+          ],
+          "wiring_ratio": 1.0
+        }
+      },
+      {
+        "conductor": "E89UP",
+        "effective_gain": 1.0456947569496173,
+        "uncertainty": {
+          "leave_one_shot_out_median_absolute_error_a_turn": 2093.257434373751,
+          "leave_one_shot_out_r_squared": 0.9877483760442158,
+          "leave_one_shot_out_rmse_a_turn": 2817.419073607406,
+          "residual_rms_a_turn": 2793.614101796187,
+          "residual_rms_fraction": 0.10627969377421093,
+          "residual_sample_standard_deviation_a_turn": 1882.3322191385087
+        },
+        "wiring": {
+          "classification": "integer-plus-systematic",
+          "cluster_robust_standard_error": 0.010163742188341523,
+          "confidence_interval": [
+            1.0244218000666139,
+            1.0669677138326208
+          ],
+          "fitted_deviation": 0.04569475694961733,
+          "fitted_slope": 1.0456947569496173,
+          "systematic": {
+            "measured_deviation": 0.04569475694961733,
+            "mutual_agreement": "E89UP and E89DN fitted deviations agree within 7.06805172457e-05",
+            "name": "end_loop_bundle_normalisation",
+            "suspect_mechanism": "turn-count or normalisation of the paired 6-turn and 7-turn end-loop bundles"
+          },
+          "tested_ratios": [
+            0.125,
+            0.14583333333333334,
+            0.8571428571428571,
+            1.0,
+            1.1666666666666667,
+            2.0,
+            6.857142857142857,
+            8.0
+          ],
+          "wiring_ratio": 1.0
+        }
+      },
+      {
+        "conductor": "E89DN",
+        "effective_gain": 1.0456240764323717,
+        "uncertainty": {
+          "leave_one_shot_out_median_absolute_error_a_turn": 2543.855213386234,
+          "leave_one_shot_out_r_squared": 0.9851155287064202,
+          "leave_one_shot_out_rmse_a_turn": 3099.582545883437,
+          "residual_rms_a_turn": 3067.5679718120577,
+          "residual_rms_fraction": 0.11657434222566553,
+          "residual_sample_standard_deviation_a_turn": 1959.9950004145705
+        },
+        "wiring": {
+          "classification": "integer-plus-systematic",
+          "cluster_robust_standard_error": 0.012211304685183416,
+          "confidence_interval": [
+            1.0200655219905739,
+            1.0711826308741694
+          ],
+          "fitted_deviation": 0.04562407643237165,
+          "fitted_slope": 1.0456240764323717,
+          "systematic": {
+            "measured_deviation": 0.04562407643237165,
+            "mutual_agreement": "E89UP and E89DN fitted deviations agree within 7.06805172457e-05",
+            "name": "end_loop_bundle_normalisation",
+            "suspect_mechanism": "turn-count or normalisation of the paired 6-turn and 7-turn end-loop bundles"
+          },
+          "tested_ratios": [
+            0.125,
+            0.14583333333333334,
+            0.8571428571428571,
+            1.0,
+            1.1666666666666667,
+            2.0,
+            6.857142857142857,
+            8.0
+          ],
+          "wiring_ratio": 1.0
+        }
+      }
+    ],
+    "identifier": "diiid_effective_ohmic_circuit",
+    "name": "DIII-D effective ohmic circuit",
+    "provenance": "fit once from full-grid Tikhonov label-flux regressions over 60 frames and 20 shots; applied deterministically at inference",
+    "source_conductor": "ECOILA",
+    "supply_identifier": "diiid_ohmic_supply"
+  },
+  "selection": {
+    "calibration_bank": {
+      "exact_selected_pair_intersection": [],
+      "frame_count": 60,
+      "selection_receipt_frames": 60,
+      "shot_count": 20
+    },
+    "polarity_affected_shot_count": 603,
+    "polarity_selected_intersection": [],
+    "rule": "the exact five score-blind circuit-driven validation frames; no solve score changes the cohort",
+    "selected_frame_count": 5,
+    "selected_frames": [
+      {
+        "frame": 54,
+        "recorded_plasma_current_a": 1283728.2760441303,
+        "shot": "d3d_shot_00f40d3919.parquet",
+        "time_ms": 1540.0
+      },
+      {
+        "frame": 96,
+        "recorded_plasma_current_a": 1252508.2535743713,
+        "shot": "d3d_shot_0112bdc95d.parquet",
+        "time_ms": 2080.0
+      },
+      {
+        "frame": 169,
+        "recorded_plasma_current_a": 685050.7490634918,
+        "shot": "d3d_shot_0112d94419.parquet",
+        "time_ms": 3680.0
+      },
+      {
+        "frame": 144,
+        "recorded_plasma_current_a": 979762.2680664062,
+        "shot": "d3d_shot_01177bc9fa.parquet",
+        "time_ms": 3180.0
+      },
+      {
+        "frame": 125,
+        "recorded_plasma_current_a": 267807.6736629009,
+        "shot": "d3d_shot_012c431151.parquet",
+        "time_ms": 3460.0
+      }
+    ],
+    "selected_shot_count": 5
+  },
+  "solver": {
+    "anderson_present": false,
+    "current_relative_error_tolerance": 1e-10,
+    "entry_point": "nova.equilibrium.forward.ForwardProfile.solve",
+    "neighbour_candidate_offsets": [
+      -1,
+      1,
+      -2,
+      2,
+      -4,
+      4,
+      -8,
+      8,
+      -16,
+      16,
+      -32,
+      32
+    ],
+    "relative_residual_tolerance": 1e-06,
+    "required_topology": "diverted",
+    "route": "host_krylov",
+    "target_current_supplied": true
+  },
+  "verdict": {
+    "convergence_qualified_frames": 4,
+    "recovery_demonstrated": true,
+    "statement": "Recovery is demonstrated if and only if at least three of the fixed five frames terminate finite, diverted, current-consistent and at or below 1e-6 relative residual.",
+    "three_frame_convergence_floor_reached": true
+  }
+}

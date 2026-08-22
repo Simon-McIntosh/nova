@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T20:04:41",
+  "updated": "2026-08-22T21:24:09",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -383,6 +383,13 @@
         "created": "2026-08-22"
       },
       {
+        "id": "moment-infra",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-22"
+      },
+      {
         "id": "packaging",
         "harness": "claude",
         "role": "implement",
@@ -502,6 +509,13 @@
         "created": "2026-08-21"
       },
       {
+        "id": "seam-scout",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-22"
+      },
+      {
         "id": "sol-closure",
         "harness": "codex",
         "role": "implement",
@@ -542,6 +556,13 @@
         "role": "implement",
         "session_id": "01a00a54-6e81-7761-85eb-33e193da78cc",
         "created": "2026-08-16"
+      },
+      {
+        "id": "tared-field",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-22"
       },
       {
         "id": "throughput-budget",
@@ -23460,6 +23481,6 @@
       }
     ],
     "holds": [],
-    "_version": 564
+    "_version": 567
   }
 }

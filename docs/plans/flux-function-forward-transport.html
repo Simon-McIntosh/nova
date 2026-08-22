@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-version" content="54">
+<meta name="plan-version" content="55">
 <meta name="plan-commits" content="f7af67dc,3a438d1b,9e1b5ce2,e583d796,95a3dc72,4df7993b,5088a466,d943c12a,fc8d3313,c792f7d2,cc542659,ccb375ea,aa53e6e0,7f7fd6cc,e5c23c5d,71b37c2e,b56c39df,3353aeb5,47cd2122,d5321f40,5578e8ea,25001840,c51c09fc,47808904,959252e1,75e33479,7fc36372,bf6fd7da,78e266de,babd55f2,23d98097,5ce7dbe5,2a80b890,bbd2ea54,094d69fa,984fcef4,521399b2">
 <meta name="plan-impl" content="1.0">
 <meta name="plan-blocks" content="imas-ambix:sophelio-entry-master">
@@ -533,6 +533,11 @@
     <div class="r-fu-body"><p>After the engine and pin-resolution decisions are locked, resolve the TORAX/imas-python pin conflict and verify the environment, then complete the FSA record, build the geometry adapter on the selected route, and bank the COCOS round-trip tests. The façade, return channel and coupled loop follow once the sibling plan's static ForwardProfile contract is green.</p></div>
     <pre class="r-fu-prompt">/reckon-ship flux-function-forward-transport §3</pre>
     <p class="r-fu-outcome">done - no followup. The dependency gate, FSA record, geometry adapter and COCOS boundary all landed, and so did the facade, return channel, coupled window and ensemble batching that this followup deferred to a later session: all eight section 3 items and all nine section 4 gates are green on merged main at 62 passed / 0 failed with the slow lane selected. Nothing executable remains inside this plan's authority. The consumer-side migrations that section 5 excludes - lifting the ambix estimators off whole-run TORAX calls and retiring the torch donor - belong to the ambix integration plan and are surfaced by that plan's own lifecycle, not by a followup here. One item is the owner's to settle rather than a worker's: the geometry-handoff decision is still unlocked, and the direct-adapter route it recommends is now the only implemented route, proven at rtol 1e-10 parity, pure jnp end to end and differentiable through the implicit window adjoint.</p>
+    </article>
+<article class="r-fu" data-id="f-ffft-h200-window" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship flux-function-forward-transport" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Measure the current-tree window on the H200 to retire the ~12 s projection</h4>
+    <div class="r-fu-body"><p>The evidence record's H200 window figure is a PROJECTION composed across two trees: the 4-iteration count was measured on the post-gate tree (CPU only, gating contraction 0.236) while the 3.02 s/iteration-pair H200 median was measured on the pre-gate tree <code>08f371e1</code> at damping 0.5 — exactly the cross-tree composition class that earlier produced the phantom backend divergence. One sbatch of the CURRENT tree on betelgeuse (reservation gpu_0003_grpA, JAX_PLATFORMS=cuda,cpu, TMPDIR=/tmp) running the gentle demonstration window end-to-end converts the projection into a measurement: record iterations, per-iteration-pair walls (n=9 warm medians), total window wall, gating and all-field exit norms, ledger closures, and the tree SHA on every row, beside the same-tree CPU reference. Extend scripts/window_gpu_benchmark/ rather than authoring a parallel harness.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship flux-function-forward-transport</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

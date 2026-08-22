@@ -1,0 +1,163 @@
+case	quantity	route	iteration	time_s	value	unit
+rampup	central_ion_temperature	facade	0	0	5.8819999999999997	keV
+rampup	central_ion_temperature	facade	1	2	4.1249404907609213	keV
+rampup	central_ion_temperature	facade	2	4	3.0549429463837243	keV
+rampup	central_ion_temperature	facade	3	6	2.6970739729945392	keV
+rampup	central_ion_temperature	facade	4	8	2.6317442422031636	keV
+rampup	central_ion_temperature	facade	5	10	2.6429372982516957	keV
+rampup	central_ion_temperature	facade	6	12	2.6909311891905459	keV
+rampup	central_ion_temperature	facade	7	14	2.8219933830255828	keV
+rampup	central_ion_temperature	facade	8	16	2.9658440008560931	keV
+rampup	central_ion_temperature	facade	9	18	3.0908391105837651	keV
+rampup	central_ion_temperature	facade	10	20	3.1999119089694794	keV
+rampup	central_ion_temperature	torax-run-simulation	0	0	5.8819999999999997	keV
+rampup	central_ion_temperature	torax-run-simulation	1	2	4.1249404907609213	keV
+rampup	central_ion_temperature	torax-run-simulation	2	4	3.0549429463837243	keV
+rampup	central_ion_temperature	torax-run-simulation	3	6	2.6970739729945392	keV
+rampup	central_ion_temperature	torax-run-simulation	4	8	2.6317442422031636	keV
+rampup	central_ion_temperature	torax-run-simulation	5	10	2.6429372982516957	keV
+rampup	central_ion_temperature	torax-run-simulation	6	12	2.6909311891905459	keV
+rampup	central_ion_temperature	torax-run-simulation	7	14	2.8219933830255828	keV
+rampup	central_ion_temperature	torax-run-simulation	8	16	2.9658440008560931	keV
+rampup	central_ion_temperature	torax-run-simulation	9	18	3.0908391105837651	keV
+rampup	central_ion_temperature	torax-run-simulation	10	20	3.1999119089694794	keV
+rampup	central_ion_temperature	absolute-separation	0	0	0	keV
+rampup	central_ion_temperature	absolute-separation	1	2	0	keV
+rampup	central_ion_temperature	absolute-separation	2	4	0	keV
+rampup	central_ion_temperature	absolute-separation	3	6	0	keV
+rampup	central_ion_temperature	absolute-separation	4	8	0	keV
+rampup	central_ion_temperature	absolute-separation	5	10	0	keV
+rampup	central_ion_temperature	absolute-separation	6	12	0	keV
+rampup	central_ion_temperature	absolute-separation	7	14	0	keV
+rampup	central_ion_temperature	absolute-separation	8	16	0	keV
+rampup	central_ion_temperature	absolute-separation	9	18	0	keV
+rampup	central_ion_temperature	absolute-separation	10	20	0	keV
+rampup	central_electron_temperature	facade	0	0	5.8819999999999997	keV
+rampup	central_electron_temperature	facade	1	2	19.956511325596583	keV
+rampup	central_electron_temperature	facade	2	4	28.556417625792434	keV
+rampup	central_electron_temperature	facade	3	6	29.948619734492905	keV
+rampup	central_electron_temperature	facade	4	8	28.209859713722967	keV
+rampup	central_electron_temperature	facade	5	10	25.655905412306375	keV
+rampup	central_electron_temperature	facade	6	12	23.067168608930384	keV
+rampup	central_electron_temperature	facade	7	14	20.930625093160792	keV
+rampup	central_electron_temperature	facade	8	16	19.332843722932569	keV
+rampup	central_electron_temperature	facade	9	18	18.048252150996181	keV
+rampup	central_electron_temperature	facade	10	20	16.939490521899433	keV
+rampup	central_electron_temperature	torax-run-simulation	0	0	5.8819999999999997	keV
+rampup	central_electron_temperature	torax-run-simulation	1	2	19.956511325596583	keV
+rampup	central_electron_temperature	torax-run-simulation	2	4	28.556417625792434	keV
+rampup	central_electron_temperature	torax-run-simulation	3	6	29.948619734492905	keV
+rampup	central_electron_temperature	torax-run-simulation	4	8	28.209859713722967	keV
+rampup	central_electron_temperature	torax-run-simulation	5	10	25.655905412306375	keV
+rampup	central_electron_temperature	torax-run-simulation	6	12	23.067168608930384	keV
+rampup	central_electron_temperature	torax-run-simulation	7	14	20.930625093160792	keV
+rampup	central_electron_temperature	torax-run-simulation	8	16	19.332843722932569	keV
+rampup	central_electron_temperature	torax-run-simulation	9	18	18.048252150996181	keV
+rampup	central_electron_temperature	torax-run-simulation	10	20	16.939490521899433	keV
+rampup	central_electron_temperature	absolute-separation	0	0	0	keV
+rampup	central_electron_temperature	absolute-separation	1	2	0	keV
+rampup	central_electron_temperature	absolute-separation	2	4	0	keV
+rampup	central_electron_temperature	absolute-separation	3	6	0	keV
+rampup	central_electron_temperature	absolute-separation	4	8	0	keV
+rampup	central_electron_temperature	absolute-separation	5	10	0	keV
+rampup	central_electron_temperature	absolute-separation	6	12	0	keV
+rampup	central_electron_temperature	absolute-separation	7	14	0	keV
+rampup	central_electron_temperature	absolute-separation	8	16	0	keV
+rampup	central_electron_temperature	absolute-separation	9	18	0	keV
+rampup	central_electron_temperature	absolute-separation	10	20	0	keV
+rampup	central_electron_density	facade	0	0	0.35571129781038607	1e20 m^-3
+rampup	central_electron_density	facade	1	2	0.19448471779159079	1e20 m^-3
+rampup	central_electron_density	facade	2	4	0.13715906583108259	1e20 m^-3
+rampup	central_electron_density	facade	3	6	0.12546817533308605	1e20 m^-3
+rampup	central_electron_density	facade	4	8	0.12976945590240135	1e20 m^-3
+rampup	central_electron_density	facade	5	10	0.14073775158129584	1e20 m^-3
+rampup	central_electron_density	facade	6	12	0.1555080653790101	1e20 m^-3
+rampup	central_electron_density	facade	7	14	0.17174169927669242	1e20 m^-3
+rampup	central_electron_density	facade	8	16	0.18754489967048077	1e20 m^-3
+rampup	central_electron_density	facade	9	18	0.20288922739486706	1e20 m^-3
+rampup	central_electron_density	facade	10	20	0.21848855403181686	1e20 m^-3
+rampup	central_electron_density	torax-run-simulation	0	0	0.35571129781038607	1e20 m^-3
+rampup	central_electron_density	torax-run-simulation	1	2	0.19448471779159079	1e20 m^-3
+rampup	central_electron_density	torax-run-simulation	2	4	0.13715906583108259	1e20 m^-3
+rampup	central_electron_density	torax-run-simulation	3	6	0.12546817533308605	1e20 m^-3
+rampup	central_electron_density	torax-run-simulation	4	8	0.12976945590240135	1e20 m^-3
+rampup	central_electron_density	torax-run-simulation	5	10	0.14073775158129584	1e20 m^-3
+rampup	central_electron_density	torax-run-simulation	6	12	0.1555080653790101	1e20 m^-3
+rampup	central_electron_density	torax-run-simulation	7	14	0.17174169927669242	1e20 m^-3
+rampup	central_electron_density	torax-run-simulation	8	16	0.18754489967048077	1e20 m^-3
+rampup	central_electron_density	torax-run-simulation	9	18	0.20288922739486706	1e20 m^-3
+rampup	central_electron_density	torax-run-simulation	10	20	0.21848855403181686	1e20 m^-3
+rampup	central_electron_density	absolute-separation	0	0	0	1e20 m^-3
+rampup	central_electron_density	absolute-separation	1	2	0	1e20 m^-3
+rampup	central_electron_density	absolute-separation	2	4	0	1e20 m^-3
+rampup	central_electron_density	absolute-separation	3	6	0	1e20 m^-3
+rampup	central_electron_density	absolute-separation	4	8	0	1e20 m^-3
+rampup	central_electron_density	absolute-separation	5	10	0	1e20 m^-3
+rampup	central_electron_density	absolute-separation	6	12	0	1e20 m^-3
+rampup	central_electron_density	absolute-separation	7	14	0	1e20 m^-3
+rampup	central_electron_density	absolute-separation	8	16	0	1e20 m^-3
+rampup	central_electron_density	absolute-separation	9	18	0	1e20 m^-3
+rampup	central_electron_density	absolute-separation	10	20	0	1e20 m^-3
+rampup	axis_psi	facade	0	0	0.0071338535426481442	Wb
+rampup	axis_psi	facade	1	2	0.012631673150751737	Wb
+rampup	axis_psi	facade	2	4	0.016250966206523675	Wb
+rampup	axis_psi	facade	3	6	0.02006419932092882	Wb
+rampup	axis_psi	facade	4	8	0.024372687825051729	Wb
+rampup	axis_psi	facade	5	10	0.029320334187205043	Wb
+rampup	axis_psi	facade	6	12	0.035019837712753653	Wb
+rampup	axis_psi	facade	7	14	0.041448377671042175	Wb
+rampup	axis_psi	facade	8	16	0.048478788076851555	Wb
+rampup	axis_psi	facade	9	18	0.056042619884223134	Wb
+rampup	axis_psi	facade	10	20	0.064131376544495564	Wb
+rampup	axis_psi	torax-run-simulation	0	0	0.0071338535426481442	Wb
+rampup	axis_psi	torax-run-simulation	1	2	0.012631673150751737	Wb
+rampup	axis_psi	torax-run-simulation	2	4	0.016250966206523675	Wb
+rampup	axis_psi	torax-run-simulation	3	6	0.02006419932092882	Wb
+rampup	axis_psi	torax-run-simulation	4	8	0.024372687825051729	Wb
+rampup	axis_psi	torax-run-simulation	5	10	0.029320334187205043	Wb
+rampup	axis_psi	torax-run-simulation	6	12	0.035019837712753653	Wb
+rampup	axis_psi	torax-run-simulation	7	14	0.041448377671042175	Wb
+rampup	axis_psi	torax-run-simulation	8	16	0.048478788076851555	Wb
+rampup	axis_psi	torax-run-simulation	9	18	0.056042619884223134	Wb
+rampup	axis_psi	torax-run-simulation	10	20	0.064131376544495564	Wb
+rampup	axis_psi	absolute-separation	0	0	0	Wb
+rampup	axis_psi	absolute-separation	1	2	0	Wb
+rampup	axis_psi	absolute-separation	2	4	0	Wb
+rampup	axis_psi	absolute-separation	3	6	0	Wb
+rampup	axis_psi	absolute-separation	4	8	0	Wb
+rampup	axis_psi	absolute-separation	5	10	0	Wb
+rampup	axis_psi	absolute-separation	6	12	0	Wb
+rampup	axis_psi	absolute-separation	7	14	0	Wb
+rampup	axis_psi	absolute-separation	8	16	0	Wb
+rampup	axis_psi	absolute-separation	9	18	0	Wb
+rampup	axis_psi	absolute-separation	10	20	0	Wb
+window	maximum_exit_residual	exchanged-state	1		1.7244181062254271	relative
+window	maximum_exit_residual	exchanged-state	2		0.88526428252961609	relative
+window	maximum_exit_residual	exchanged-state	3		0.45500915267640979	relative
+window	maximum_exit_residual	exchanged-state	4		0.23452428075429713	relative
+window	maximum_exit_residual	exchanged-state	5		0.12137886616650476	relative
+window	maximum_exit_residual	exchanged-state	6		0.063153381130222036	relative
+window	maximum_exit_residual	exchanged-state	7		0.033069976727730176	relative
+window	maximum_exit_residual	exchanged-state	8		0.017446998651793721	relative
+window	maximum_exit_residual	exchanged-state	9		0.0092831536476151218	relative
+window	maximum_exit_residual	exchanged-state	10		0.0049860186162435085	relative
+window	central_ion_temperature	exchanged-state	1		4.7139083175156049	keV
+window	central_ion_temperature	exchanged-state	2		4.7202230255736941	keV
+window	central_ion_temperature	exchanged-state	3		4.7240484926492794	keV
+window	central_ion_temperature	exchanged-state	4		4.7263774137525365	keV
+window	central_ion_temperature	exchanged-state	5		4.7278005838709225	keV
+window	central_ion_temperature	exchanged-state	6		4.7286728365778083	keV
+window	central_ion_temperature	exchanged-state	7		4.7292087050694764	keV
+window	central_ion_temperature	exchanged-state	8		4.7295385530884584	keV
+window	central_ion_temperature	exchanged-state	9		4.7297419085627155	keV
+window	central_ion_temperature	exchanged-state	10		4.7298674405638916	keV
+window	edge_plasma_current	exchanged-state	1		555878.91674268746	A
+window	edge_plasma_current	exchanged-state	2		555721.43414396921	A
+window	edge_plasma_current	exchanged-state	3		555623.51084363519	A
+window	edge_plasma_current	exchanged-state	4		555562.74653650424	A
+window	edge_plasma_current	exchanged-state	5		555525.20277016971	A
+window	edge_plasma_current	exchanged-state	6		555502.06130661687	A
+window	edge_plasma_current	exchanged-state	7		555487.80596633302	A
+window	edge_plasma_current	exchanged-state	8		555479.0219636471	A
+window	edge_plasma_current	exchanged-state	9		555473.60549969354	A
+window	edge_plasma_current	exchanged-state	10		555470.26252441597	A

@@ -58,19 +58,20 @@ MAST's efm reader exposes a per-shot walkable time sequence.
 
 | module:symbol | machine-scope | verdict | reason |
 | --- | --- | --- | --- |
-| `benchmarks/diiid_constrained_cold_start.py:NEIGHBOUR_FRAME_OFFSETS` (L67), `_neighbour_candidates` (L376) | machine-agnostic | REUSE DIRECTLY | A symmetric geometric offset ladder `(-1,1,-2,2,-4,4,-8,8,-16,16,-32,32)` applied to an integer frame index bounded by `[0, count)` — no DIII-D-specific data touched. |
-| `benchmarks/diiid_constrained_cold_start.py:_find_warm_source` (L385) | machine-agnostic | REUSE DIRECTLY | Walks `_neighbour_candidates`, calling `_solve_public_seam` on each candidate frame until one converges, returning the first qualified warm source — generic over any object shaped like `PreparedFrame`. |
-| `benchmarks/diiid_constrained_cold_start.py:_solve_public_seam` (L222), `solve_frame` (L444), `ROUTE_NAMES` (L70) | machine-agnostic | REUSE DIRECTLY | Drives `ForwardProfile.solve_branch` (the same public seam named in area 4) with a declared target current and a warm-start state; nothing here reads a DIII-D column name. |
+| `benchmarks/diiid_constrained_cold_start.py:NEIGHBOUR_FRAME_OFFSETS` (L69) | machine-agnostic | REUSE DIRECTLY | Declares only the symmetric geometric offset ladder `(-1,1,-2,2,-4,4,-8,8,-16,16,-32,32)`; no frame or corpus data are read. |
+| `benchmarks/diiid_constrained_cold_start.py:_neighbour_candidates` (L376) | duck-typed frame adapter | REUSE DIRECTLY VIA ADAPTER | Reads only `frame.selected.frame` and `len(frame.row["efit_times"])`, so a MAST adapter exposing those two attributes supplies the shot row count and target row without copying the ladder logic. |
+| `benchmarks/diiid_constrained_cold_start.py:_solve_public_seam` (L222) | duck-typed frame adapter | REUSE DIRECTLY VIA ADAPTER | Reads only `frame.current`, `frame.profile.flux_map`, `frame.profile.observe`, `frame.profile.solve`, and `frame.selected.recorded_plasma_current_a`. The map and solve are current-constrained through `target_current=target`; a MAST adapter can carry the passive-inclusive profile and prescribed current vector without changing the helper. |
+| `benchmarks/diiid_constrained_cold_start.py:_find_warm_source` (L385) | DIII-D module-coupled | UNFIT | Hard-calls the module globals `prepare_frame(frame.selected.path, candidate_frame)` and `_route_record`, which read and score the DIII-D corpus. MAST needs a local earlier-first walk around the reusable candidate and solve helpers. |
 | `benchmarks/diiid_constrained_cold_start.py:PreparedFrame`, `prepare_frame` (L75-166), `_fixed_wiring_adapter` (L167) | DIII-D-corpus-specific | UNFIT for direct reuse, EXTEND IN PLACE as a pattern | Reads DIII-D-only columns (`_CURRENT_COLUMNS`, `_GEOMETRY_COLUMNS`, `_LABEL_COLUMNS` from `benchmarks.diiid_forward_gs_match`) and DIII-D circuit/geometry description (`nova.imas.diiid_current`, `nova.imas.diiid_description`). A MAST equivalent needs its own `PreparedFrame`-shaped builder, not this one. |
-| `benchmarks/efit_forward_parity_slice.py:_mast_case_from_selection` (L2438) | MAST-specific reader | REUSE DIRECTLY as the MAST analogue of `prepare_frame` | Opens `zarr.open_group(store / f"{shot}.zarr")["efm"]` and indexes `group["time"][row]`, `group["magnetic_axis_r"/"z"][row]`, `group["plasma_current_c"][row]` by an integer `row` — **this confirms the MAST efm reader already exposes a per-shot, per-row-indexable time sequence** structurally equivalent to DIII-D's frame index, so the offset-ladder walk in `_neighbour_candidates`/`_find_warm_source` is directly portable once a `PreparedFrame`-shaped wrapper around this zarr group exists. |
+| `benchmarks/efit_forward_parity_slice.py:_mast_case_from_selection` (L2438) | MAST-specific reader | REUSE DIRECTLY as the MAST analogue of `prepare_frame` | Opens `zarr.open_group(store / f"{shot}.zarr")["efm"]` and indexes `group["time"][row]`, `group["magnetic_axis_r"/"z"][row]`, `group["plasma_current_c"][row]` by an integer `row` — **this confirms the MAST efm reader already exposes a per-shot, per-row-indexable time sequence** structurally equivalent to DIII-D's frame index, so the shared candidate enumerator and constrained solve can run through a MAST frame while the local walk supplies each row. |
 
-**Verdict:** the ladder mechanism itself (offsets, candidate walk, public-seam
-solve) is fully machine-agnostic and reusable without modification. Only the
-per-machine frame-preparation layer (`PreparedFrame`/`prepare_frame` for
-DIII-D) is corpus-specific, and MAST already has the structural equivalent
-(`group["time"][row]`-indexable zarr groups) needed to write a MAST
-`prepare_frame`. No blocker exists to applying the ladder to the five stalled
-frozen-six references.
+**Verdict:** the offset tuple is machine-agnostic, while candidate enumeration
+and the constrained public solve are reusable unchanged through a duck-typed
+MAST frame exposing their exact attribute surfaces. The shared warm-source walk
+is not portable because it resolves DIII-D preparation and scoring through
+module globals; MAST therefore owns only its frame adapter and the local
+earlier-first walk. The row-indexable zarr groups already provide the required
+per-shot sequence, so no peer-module change is needed.
 
 ## (4) The frozen-six selection, qualification and passive-inclusive current policy (`benchmarks/efit_forward_parity_slice.py`)
 

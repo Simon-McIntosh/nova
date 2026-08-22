@@ -20,7 +20,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -40,21 +40,33 @@ from benchmarks.efit_forward_parity_slice import (
     CURRENT_CONSTRAINED_RECEIPT_NAME,
     DECOMPOSITION_BANK,
     FIXED_POINT_CRITERION,
+    GMRES_ITERATIONS,
+    NEWTON_STEPS,
+    RELAXATION,
+    STEP_CAP,
+    WARMUP_SWEEPS,
     _mast_case_from_selection,
     _metric_qualification,
     _passive_inclusive_case,
     _pinned_metrics,
     select_slices_by_shot,
 )
+from nova.equilibrium.topology import TopologyClass
 from nova.imas.mast_solve_inputs import SHOT_STORE
 from nova.jax.config import configure_dtypes
 
 DEFAULT_OUTPUT = Path("docs/figures/efit-forward-parity")
+NEWTON_REPLAY_OUTPUT = Path("docs/figures/dual-basin-solve")
 RECEIPT_NAME = "warm-neighbour-stall-lift.json"
 FIGURE_NAME = "warm-neighbour-stall-lift.png"
+NEWTON_REPLAY_RECEIPT_NAME = "newton-warm-ladder-replay.json"
+NEWTON_REPLAY_FIGURE_NAME = "newton-warm-ladder-replay.png"
+NEWTON_REPLAY_ATTEMPT_PREFIX = "newton-warm-ladder"
 BANKED_CONSTRAINED_RECEIPT = (
     CURRENT_CONSTRAINED_OUTPUT / CURRENT_CONSTRAINED_RECEIPT_NAME
 )
+BANKED_WARM_RECEIPT = DEFAULT_OUTPUT / RECEIPT_NAME
+TARED_TOPOLOGY_RECEIPT = DEFAULT_OUTPUT / "tared-plasma-support-solve.json"
 CURRENT_MATCH_TOLERANCE = 1.0e-9
 TARGET_CURRENT_EXACT_TOLERANCE = 1.0e-9
 DECLARED_NEIGHBOUR_FRAME_OFFSETS = (
@@ -91,6 +103,84 @@ class _MastFrame:
     profile: Any
     current: np.ndarray
     seed: np.ndarray
+
+
+@dataclass(frozen=True)
+class _NewtonBranchProfileAdapter:
+    """Route the imported public-seam helper through the pinned Newton branch.
+
+    The imported helper owns the constrained map preflight, solve invocation,
+    failure handling, and terminal observation. This adapter changes only the
+    public solve method selected by that invocation: its host-shaped call is
+    translated to the banked fixed-shape diverted-branch contract.
+    """
+
+    wrapped: Any
+
+    @property
+    def operator(self) -> Any:
+        return self.wrapped.operator
+
+    @property
+    def lattice(self) -> Any:
+        return self.wrapped.lattice
+
+    def flux_map(
+        self,
+        current: Any = None,
+        requested_class: Any = None,
+        target_current: Any = None,
+    ) -> Any:
+        return self.wrapped.flux_map(
+            current,
+            requested_class=requested_class,
+            target_current=target_current,
+        )
+
+    def observe(
+        self,
+        flux: Any,
+        current: Any = None,
+        target_current: Any = None,
+    ) -> Any:
+        return self.wrapped.observe(
+            flux,
+            current=current,
+            target_current=target_current,
+        )
+
+    def solve(
+        self,
+        initial_flux: Any,
+        *,
+        route: str,
+        current: Any = None,
+        target_current: Any = None,
+        **host_options: Any,
+    ) -> Any:
+        expected_host_options = {
+            "method",
+            "inner_maxiter",
+            "maxiter",
+            "f_tol",
+            "line_search",
+        }
+        if route != "host_krylov" or set(host_options) != expected_host_options:
+            raise RuntimeError("the imported constrained helper call shape changed")
+        branch = self.wrapped.solve_branch(
+            initial_flux,
+            TopologyClass.DIVERTED,
+            route="newton_krylov",
+            current=current,
+            target_current=target_current,
+            tolerance=FIXED_POINT_CRITERION,
+            newton_steps=NEWTON_STEPS,
+            gmres_iterations=GMRES_ITERATIONS,
+            warmup=WARMUP_SWEEPS,
+            relaxation=RELAXATION,
+            step_cap=STEP_CAP,
+        )
+        return branch.equilibrium
 
 
 def _prepare_frame(
@@ -142,17 +232,25 @@ def _prepare_frame(
     return frame, mast_case, context
 
 
+def _prepare_newton_frame(
+    store: Path, shot: int, row: int, cache_box: list[Any]
+) -> tuple[_MastFrame, dict[str, Any], dict[str, Any]]:
+    """Wrap a MAST row so the imported seam selects the pinned Newton solve."""
+    frame, mast_case, context = _prepare_frame(store, shot, row, cache_box)
+    return (
+        replace(frame, profile=_NewtonBranchProfileAdapter(frame.profile)),
+        mast_case,
+        context,
+    )
+
+
 def _candidate_rows(frame: _MastFrame) -> list[int]:
     """Apply the imported declared ladder to the MAST frame adapter."""
     return _neighbour_candidates(frame)
 
 
-def _record_outcome(
-    frame: _MastFrame,
-    context: dict[str, Any],
-    outcome: Any,
-) -> tuple[dict[str, Any], Any]:
-    """Classify and score one imported-seam terminal without label selection."""
+def _classify_outcome(frame: _MastFrame, outcome: Any) -> dict[str, Any]:
+    """Qualify a constrained terminal without consulting its EFIT metrics."""
     state = np.asarray(outcome.state, dtype=np.float64)
     target_current = frame.selected.recorded_plasma_current_a
     current_error = abs(outcome.achieved_current_a / target_current - 1.0)
@@ -173,6 +271,25 @@ def _record_outcome(
         outcome_class = "vacuum_collapse"
     else:
         outcome_class = "bounded_non_convergence"
+    return {
+        "outcome_class": outcome_class,
+        "converged": converged,
+        "achieved_class": "diverted" if topology_consistent else "limited",
+        "topology_consistent": topology_consistent,
+        "nonzero_current": nonzero_current,
+        "target_current_relative_error": current_error,
+    }
+
+
+def _record_outcome(
+    frame: _MastFrame,
+    context: dict[str, Any],
+    outcome: Any,
+) -> tuple[dict[str, Any], Any]:
+    """Classify and score one imported-seam terminal without label selection."""
+    state = np.asarray(outcome.state, dtype=np.float64)
+    target_current = frame.selected.recorded_plasma_current_a
+    classification = _classify_outcome(frame, outcome)
     equilibrium = frame.profile.observe(
         jnp.asarray(state),
         current=jnp.asarray(frame.current),
@@ -191,22 +308,24 @@ def _record_outcome(
     return (
         {
             "forward_branch_receipt": {
-                "converged": converged,
+                "converged": classification["converged"],
                 "residual": float(outcome.residual),
-                "achieved_class": "diverted" if topology_consistent else "limited",
-                "topology_consistent": topology_consistent,
+                "achieved_class": classification["achieved_class"],
+                "topology_consistent": classification["topology_consistent"],
             },
             "terminal_state": {
                 "plasma_current_a": float(outcome.achieved_current_a),
-                "nonzero_current": nonzero_current,
+                "nonzero_current": classification["nonzero_current"],
                 "profile_amplitude": float(outcome.amplitude),
             },
             "registered_parity_metrics": metrics,
             "residual_trajectory": trajectory,
             "iterations": int(outcome.iterations),
             "termination": outcome.termination,
-            "outcome_class": outcome_class,
-            "target_current_relative_error": current_error,
+            "outcome_class": classification["outcome_class"],
+            "target_current_relative_error": classification[
+                "target_current_relative_error"
+            ],
         },
         equilibrium,
     )
@@ -252,6 +371,150 @@ def _find_mast_warm_source(
         if outcome_class == "converged_plasma_root":
             return checks, (candidate_row, candidate, record, outcome)
     return checks, None
+
+
+def _find_mast_newton_warm_source(
+    store: Path,
+    shot: int,
+    target_frame: _MastFrame,
+    cache_box: list[Any],
+) -> tuple[list[dict[str, Any]], tuple[int, _MastFrame, Any] | None]:
+    """Return the first own-converged Newton source on the imported ladder."""
+    checks: list[dict[str, Any]] = []
+    for candidate_row in _candidate_rows(target_frame):
+        candidate, mast_case, _context = _prepare_newton_frame(
+            store, shot, candidate_row, cache_box
+        )
+        outcome = _solve_public_seam(candidate, candidate.seed)
+        classification = _classify_outcome(candidate, outcome)
+        checks.append(
+            {
+                "row": candidate_row,
+                "time_s": mast_case["reference"]["time_s"],
+                "outcome_class": classification["outcome_class"],
+                "converged": classification["converged"],
+                "fixed_point_residual": float(outcome.residual),
+                "achieved_class": classification["achieved_class"],
+                "topology_consistent": classification["topology_consistent"],
+                "terminal_plasma_current_a": float(outcome.achieved_current_a),
+                "target_current_relative_error": classification[
+                    "target_current_relative_error"
+                ],
+            }
+        )
+        if classification["outcome_class"] == "converged_plasma_root":
+            return checks, (candidate_row, candidate, outcome)
+    return checks, None
+
+
+def _newton_arm_record(
+    frame: _MastFrame,
+    context: dict[str, Any],
+    outcome: Any,
+) -> dict[str, Any]:
+    """Serialize one Newton terminal in the registered MAST metric shape."""
+    record, _equilibrium = _record_outcome(frame, context, outcome)
+    residual = record["forward_branch_receipt"]["residual"]
+    metrics = record["registered_parity_metrics"]
+    return {
+        "outcome_class": record["outcome_class"],
+        "converged": record["outcome_class"] == "converged_plasma_root",
+        "terminal_fixed_point_residual": residual,
+        "terminal_plasma_current_a": record["terminal_state"]["plasma_current_a"],
+        "target_current_relative_error": record["target_current_relative_error"],
+        "registered_parity_metrics": metrics,
+        "per_metric_qualification": _metric_qualification(metrics, residual),
+        "iterations": record["iterations"],
+        "termination": record["termination"],
+        "residual_trajectory": record["residual_trajectory"],
+    }
+
+
+def measure_newton_reference(
+    store: Path,
+    shot: int,
+    row: int,
+    cache_box: list[Any],
+    banked_control: dict[str, Any],
+    scoreability: dict[str, Any],
+) -> dict[str, Any]:
+    """Replay one frozen reference through cold and eligible warm Newton arms."""
+    frame, mast_case, context = _prepare_newton_frame(store, shot, row, cache_box)
+    cold_outcome = _solve_public_seam(frame, frame.seed)
+    cold = _newton_arm_record(frame, context, cold_outcome)
+    cold["banked_terminal_fixed_point_residual"] = banked_control[
+        "fixed_point_residual"
+    ]
+    cold["reproduces_banked_newton_control"] = bool(
+        abs(
+            cold["terminal_fixed_point_residual"]
+            - banked_control["fixed_point_residual"]
+        )
+        <= CURRENT_MATCH_TOLERANCE
+        * max(abs(banked_control["fixed_point_residual"]), 1.0)
+    )
+
+    warm: dict[str, Any] | None = None
+    if cold["converged"]:
+        search = {
+            "triggered": False,
+            "reason": "cold Newton entry already reaches a converged plasma root",
+            "candidate_offsets": list(NEIGHBOUR_FRAME_OFFSETS),
+            "checks": [],
+            "qualified_source_found": False,
+        }
+    else:
+        checks, source = _find_mast_newton_warm_source(store, shot, frame, cache_box)
+        search = {
+            "triggered": True,
+            "candidate_offsets": list(NEIGHBOUR_FRAME_OFFSETS),
+            "selection_rule": (
+                "declared symmetric row-offset ladder, earlier before later; "
+                "the first same-shot candidate whose own Newton solve converges "
+                "wins, without consulting any EFIT score"
+            ),
+            "checks": checks,
+            "qualified_source_found": source is not None,
+        }
+        if source is not None:
+            source_row, _source_frame, source_outcome = source
+            source_check = next(item for item in checks if item["row"] == source_row)
+            search["selected_source"] = {
+                "row": source_row,
+                "time_s": source_check["time_s"],
+                "time_offset_s": (
+                    source_check["time_s"] - mast_case["reference"]["time_s"]
+                ),
+                "own_cold_fixed_point_residual": source_check["fixed_point_residual"],
+            }
+            warm_outcome = _solve_public_seam(
+                frame, np.asarray(source_outcome.state, dtype=np.float64)
+            )
+            warm = _newton_arm_record(frame, context, warm_outcome)
+            warm["lifted_to_converged_plasma_root"] = bool(warm["converged"])
+
+    terminal = warm if warm is not None else cold
+    return {
+        "reference": {
+            "shot": shot,
+            "slice_index": row,
+            "time_s": mast_case["reference"]["time_s"],
+            "target_current_a": frame.selected.recorded_plasma_current_a,
+            "target_current_source": "abs(efm/plasma_current_c) on the selected row",
+        },
+        "preregistered_scoreability": scoreability,
+        "cold_newton_control": cold,
+        "warm_neighbour_search": search,
+        "warm_newton_solve": warm,
+        "reported_terminal_arm": "warm_newton" if warm is not None else "cold_newton",
+        "reported_terminal": {
+            "converged": terminal["converged"],
+            "outcome_class": terminal["outcome_class"],
+            "terminal_fixed_point_residual": terminal["terminal_fixed_point_residual"],
+            "terminal_plasma_current_a": terminal["terminal_plasma_current_a"],
+            "target_current_relative_error": terminal["target_current_relative_error"],
+        },
+    }
 
 
 def measure_reference(
@@ -431,6 +694,53 @@ def render_figure(references: list[dict[str, Any]], path: Path) -> None:
     plt.close(figure)
 
 
+def render_newton_figure(references: list[dict[str, Any]], path: Path) -> None:
+    """Plot the cold and eligible warm Newton trajectories by scoreability."""
+    figure, axes = plt.subplots(
+        1,
+        len(references),
+        figsize=(max(4.5, 3.2 * len(references)), 3.6),
+        constrained_layout=True,
+    )
+    if len(references) == 1:
+        axes = [axes]
+    for axis, reference in zip(axes, references, strict=True):
+        cold = reference["cold_newton_control"]["residual_trajectory"]
+        warm_record = reference["warm_newton_solve"]
+        warm = [] if warm_record is None else warm_record["residual_trajectory"]
+        axis.semilogy(
+            np.arange(len(cold)),
+            np.maximum(cold, np.finfo(float).tiny),
+            marker="o",
+            ms=3,
+            lw=1.0,
+            label="cold Newton",
+        )
+        if warm:
+            axis.semilogy(
+                np.arange(len(warm)),
+                np.maximum(warm, np.finfo(float).tiny),
+                marker="s",
+                ms=3,
+                lw=1.0,
+                label="warm Newton",
+            )
+        axis.axhline(FIXED_POINT_CRITERION, color="black", ls="--", lw=0.8)
+        shot = reference["reference"]["shot"]
+        row = reference["reference"]["slice_index"]
+        score_status = reference["preregistered_scoreability"]["status"]
+        status = "closed LCFS" if score_status == "scoreable" else "no closed LCFS"
+        axis.set_title(f"{shot}/{row}\n{status}")
+        axis.set_xlabel("Residual evaluation")
+        axis.grid(True, which="both", alpha=0.25)
+        axis.legend(fontsize=7)
+    axes[0].set_ylabel("Fixed-point residual")
+    figure.suptitle("Same-shot warm-neighbour replay on the pinned Newton branch")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+
+
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -442,6 +752,54 @@ def _banked_artifact_digests(output: Path) -> dict[str, str]:
         for path in sorted(output.iterdir())
         if path.is_file() and path.name not in excluded
     }
+
+
+def _protected_dual_basin_digests(output: Path) -> dict[str, str]:
+    """Digest the landed dual-basin artifacts outside this replay's namespace."""
+    return {
+        path.name: _sha256(path)
+        for path in sorted(output.iterdir())
+        if path.is_file() and not path.name.startswith(NEWTON_REPLAY_ATTEMPT_PREFIX)
+    }
+
+
+def _preregistered_scoreability() -> tuple[dict[tuple[int, int], dict[str, Any]], str]:
+    """Load and validate the declared two/four closed-LCFS split."""
+    receipt = json.loads(TARED_TOPOLOGY_RECEIPT.read_text())
+    by_reference = {
+        (int(row["reference"]["shot"]), int(row["reference"]["slice_index"])): row[
+            "instrument_controlled_rows"
+        ]["lcfs_closed_branch"]
+        for row in receipt["per_shot"]
+    }
+    scoreable = {
+        key for key, value in by_reference.items() if value["status"] == "scoreable"
+    }
+    unscoreable = {
+        key
+        for key, value in by_reference.items()
+        if value["status"] == "unscoreable_no_closed_axis_branch"
+    }
+    if scoreable != {(21983, 35), (21985, 51)}:
+        raise RuntimeError("the preregistered closed-axis scoreable pair changed")
+    if unscoreable != {
+        (21978, 35),
+        (21986, 46),
+        (21989, 55),
+        (22086, 43),
+    }:
+        raise RuntimeError("the preregistered no-closed-axis quartet changed")
+    return by_reference, _sha256(TARED_TOPOLOGY_RECEIPT)
+
+
+def _existing_newton_replay(output: Path, resume: bool) -> list[dict[str, Any]]:
+    """Load prior replay attempts when a later foreground segment resumes it."""
+    receipt_path = output / NEWTON_REPLAY_RECEIPT_NAME
+    if not resume:
+        return []
+    if not receipt_path.is_file():
+        raise FileNotFoundError("Newton replay resume requested without a receipt")
+    return list(json.loads(receipt_path.read_text())["references"])
 
 
 def _existing_measurement(
@@ -750,20 +1108,353 @@ def run(
     return receipt
 
 
+def _newton_solver_contract() -> dict[str, Any]:
+    return {
+        "public_entry_point": "ForwardProfile.solve_branch(target_current=...)",
+        "route": "newton_krylov",
+        "requested_class": "diverted",
+        "registered_fixed_point_criterion": FIXED_POINT_CRITERION,
+        "newton_promotions": NEWTON_STEPS,
+        "gmres_iterations_per_promotion": GMRES_ITERATIONS,
+        "warmup_sweeps": WARMUP_SWEEPS,
+        "relaxation": RELAXATION,
+        "step_cap": STEP_CAP,
+        "target_current_policy": "abs(efm/plasma_current_c) on the row being solved",
+        "prescribed_current_policy": (
+            "all 101 fitted EFIT circuits through the passive-inclusive "
+            "prescribed-current response policy"
+        ),
+        "shared_call_path": (
+            "imported benchmarks.diiid_constrained_cold_start._solve_public_seam "
+            "calling a duck-typed profile adapter whose solve delegates to the "
+            "public pinned Newton branch"
+        ),
+    }
+
+
+def _newton_replay_split(
+    references: list[dict[str, Any]],
+    expected_keys: set[tuple[int, int]],
+) -> dict[str, Any]:
+    """Summarize convergence only inside the declared topology strata."""
+    measured_by_key = {
+        (
+            int(reference["reference"]["shot"]),
+            int(reference["reference"]["slice_index"]),
+        ): reference
+        for reference in references
+    }
+    strata = {
+        "closed_axis_branch": {
+            "status": "scoreable",
+            "expected_references": [(21983, 35), (21985, 51)],
+        },
+        "no_closed_axis_branch": {
+            "status": "unscoreable_no_closed_axis_branch",
+            "expected_references": [
+                (21978, 35),
+                (21986, 46),
+                (21989, 55),
+                (22086, 43),
+            ],
+        },
+    }
+    result: dict[str, Any] = {}
+    for name, stratum in strata.items():
+        keys = set(stratum["expected_references"])
+        measured = [measured_by_key[key] for key in keys if key in measured_by_key]
+        result[name] = {
+            "score_status": stratum["status"],
+            "expected_reference_count": len(keys),
+            "measured_reference_count": len(measured),
+            "unmeasured_references": [
+                {"shot": shot, "slice_index": row}
+                for shot, row in sorted(keys - measured_by_key.keys())
+            ],
+            "terminal_converged_count": sum(
+                reference["reported_terminal"]["converged"] for reference in measured
+            ),
+            "cold_converged_count": sum(
+                reference["cold_newton_control"]["converged"]
+                for reference in measured
+            ),
+            "warm_attempted_count": sum(
+                reference["warm_newton_solve"] is not None for reference in measured
+            ),
+            "warm_source_found_count": sum(
+                reference["warm_neighbour_search"]["qualified_source_found"]
+                for reference in measured
+            ),
+            "warm_lifted_count": sum(
+                reference["warm_newton_solve"] is not None
+                and reference["warm_newton_solve"]["converged"]
+                for reference in measured
+            ),
+            "per_reference": [
+                {
+                    "shot": reference["reference"]["shot"],
+                    "slice_index": reference["reference"]["slice_index"],
+                    "terminal_arm": reference["reported_terminal_arm"],
+                    "converged": reference["reported_terminal"]["converged"],
+                    "terminal_fixed_point_residual": reference["reported_terminal"][
+                        "terminal_fixed_point_residual"
+                    ],
+                    "terminal_plasma_current_a": reference["reported_terminal"][
+                        "terminal_plasma_current_a"
+                    ],
+                }
+                for reference in sorted(
+                    measured,
+                    key=lambda item: (
+                        item["reference"]["shot"],
+                        item["reference"]["slice_index"],
+                    ),
+                )
+            ],
+            "verdict": (
+                "PARTIAL"
+                if len(measured) != len(keys)
+                else (
+                    "WARM_LIFTS_AT_LEAST_ONE"
+                    if any(
+                        reference["warm_newton_solve"] is not None
+                        and reference["warm_newton_solve"]["converged"]
+                        for reference in measured
+                    )
+                    else "WARM_LIFTS_NONE"
+                )
+            ),
+        }
+    if set(measured_by_key) - expected_keys:
+        raise RuntimeError("the replay contains a reference outside the frozen six")
+    return result
+
+
+def _write_newton_attempt(
+    output: Path,
+    reference: dict[str, Any],
+    topology_receipt_digest: str,
+) -> Path:
+    shot = reference["reference"]["shot"]
+    row = reference["reference"]["slice_index"]
+    path = output / f"{NEWTON_REPLAY_ATTEMPT_PREFIX}-{shot}-{row}.json"
+    attempt = {
+        "receipt": "MAST same-shot warm-neighbour Newton replay attempt",
+        "reference": reference,
+        "solver": _newton_solver_contract(),
+        "offset_ladder": {
+            "offsets": list(NEIGHBOUR_FRAME_OFFSETS),
+            "repr": repr(NEIGHBOUR_FRAME_OFFSETS),
+            "source": (
+                "benchmarks.diiid_constrained_cold_start.NEIGHBOUR_FRAME_OFFSETS"
+            ),
+            "selection_rule": (
+                "earlier offsets first; the first candidate whose own constrained "
+                "Newton solve converges supplies the seed; no EFIT score enters "
+                "source selection"
+            ),
+        },
+        "preregistered_scoreability_source": {
+            "path": str(TARED_TOPOLOGY_RECEIPT),
+            "sha256": topology_receipt_digest,
+        },
+    }
+    path.write_text(
+        json.dumps(attempt, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    )
+    return path
+
+
+def run_newton_replay(
+    store: Path = SHOT_STORE,
+    output: Path = NEWTON_REPLAY_OUTPUT,
+    shots: tuple[int, ...] | None = None,
+    resume: bool = False,
+) -> dict[str, Any]:
+    """Replay the same-shot ladder through the public constrained Newton branch."""
+    configure_dtypes()
+    if NEIGHBOUR_FRAME_OFFSETS != DECLARED_NEIGHBOUR_FRAME_OFFSETS:
+        raise RuntimeError("the imported warm-neighbour offset ladder changed")
+    if RELATIVE_RESIDUAL_TOLERANCE != FIXED_POINT_CRITERION:
+        raise RuntimeError("the imported and banked convergence criteria differ")
+    output.mkdir(parents=True, exist_ok=True)
+    protected_before = _protected_dual_basin_digests(output)
+    existing = _existing_newton_replay(output, resume)
+    banked_control_receipt = json.loads(BANKED_CONSTRAINED_RECEIPT.read_text())
+    banked_by_key = {
+        (int(row["shot"]), int(row["slice_index"])): row
+        for row in banked_control_receipt["per_shot_table"]
+    }
+    scoreability, topology_receipt_digest = _preregistered_scoreability()
+    expected_keys = set(banked_by_key)
+    if expected_keys != set(scoreability):
+        raise RuntimeError("the frozen-six controls and scoreability split disagree")
+    requested_shots = (
+        {shot for shot, _row in expected_keys} if shots is None else set(shots)
+    )
+    unknown = requested_shots - {shot for shot, _row in expected_keys}
+    if unknown:
+        raise ValueError(
+            f"requested shots are not frozen-six references: {sorted(unknown)}"
+        )
+    existing_keys = {
+        (
+            int(reference["reference"]["shot"]),
+            int(reference["reference"]["slice_index"]),
+        )
+        for reference in existing
+    }
+    overlap = requested_shots & {shot for shot, _row in existing_keys}
+    if overlap:
+        raise ValueError(
+            f"requested shots already exist in the replay: {sorted(overlap)}"
+        )
+
+    cache_box: list[Any] = [None]
+    references = list(existing)
+    newly_measured: list[dict[str, Any]] = []
+    for selected_row, _qualification in select_slices_by_shot(DECOMPOSITION_BANK):
+        shot = int(selected_row["shot"])
+        row = int(selected_row["slice_index"])
+        if shot not in requested_shots:
+            continue
+        key = (shot, row)
+        if key not in expected_keys:
+            raise RuntimeError("the selected row differs from the frozen-six control")
+        reference = measure_newton_reference(
+            store,
+            shot,
+            row,
+            cache_box,
+            banked_by_key[key],
+            scoreability[key],
+        )
+        references.append(reference)
+        newly_measured.append(reference)
+        _write_newton_attempt(output, reference, topology_receipt_digest)
+    if len(newly_measured) != len(requested_shots):
+        raise RuntimeError("the requested frozen-six references were not all measured")
+    references.sort(
+        key=lambda item: (item["reference"]["shot"], item["reference"]["slice_index"])
+    )
+    figure_path = output / NEWTON_REPLAY_FIGURE_NAME
+    render_newton_figure(references, figure_path)
+    protected_after = _protected_dual_basin_digests(output)
+    if protected_after != protected_before:
+        raise RuntimeError("a landed dual-basin artifact changed during the replay")
+
+    measured_keys = {
+        (reference["reference"]["shot"], reference["reference"]["slice_index"])
+        for reference in references
+    }
+    terminal_currents_exact = all(
+        reference["reported_terminal"]["target_current_relative_error"]
+        <= TARGET_CURRENT_EXACT_TOLERANCE
+        for reference in references
+    )
+    receipt = {
+        "receipt": "MAST same-shot warm-neighbour pinned-Newton replay",
+        "measurement_status": (
+            "complete" if measured_keys == expected_keys else "partial"
+        ),
+        "measurement_rule": (
+            "report the preregistered two-reference closed-axis stratum and "
+            "four-reference no-closed-axis stratum separately; no pooled "
+            "convergence rate is defined"
+        ),
+        "solver": _newton_solver_contract(),
+        "reuse": {
+            "imported_unchanged": [
+                "benchmarks.diiid_constrained_cold_start.NEIGHBOUR_FRAME_OFFSETS",
+                "benchmarks.diiid_constrained_cold_start._neighbour_candidates",
+                "benchmarks.diiid_constrained_cold_start._solve_public_seam",
+            ],
+            "duck_typed_adapter": (
+                "_MastFrame plus _NewtonBranchProfileAdapter; helper-visible "
+                "selected, row, profile, current, and seed surfaces are preserved"
+            ),
+            "not_reused": (
+                "benchmarks.diiid_constrained_cold_start._find_warm_source; "
+                "the MAST walk is local and retains earlier-first ordering"
+            ),
+        },
+        "offset_ladder": {
+            "offsets": list(NEIGHBOUR_FRAME_OFFSETS),
+            "repr": repr(NEIGHBOUR_FRAME_OFFSETS),
+        },
+        "baseline_inputs": {
+            "banked_warm_arm": {
+                "path": str(BANKED_WARM_RECEIPT),
+                "sha256": _sha256(BANKED_WARM_RECEIPT),
+            },
+            "banked_newton_control": {
+                "path": str(BANKED_CONSTRAINED_RECEIPT),
+                "sha256": _sha256(BANKED_CONSTRAINED_RECEIPT),
+            },
+            "preregistered_scoreability": {
+                "path": str(TARED_TOPOLOGY_RECEIPT),
+                "sha256": topology_receipt_digest,
+            },
+        },
+        "references": references,
+        "split_results": _newton_replay_split(references, expected_keys),
+        "integrity": {
+            "all_reported_terminal_currents_exact_at_target": terminal_currents_exact,
+            "all_cold_newton_controls_reproduce_banked": all(
+                reference["cold_newton_control"]["reproduces_banked_newton_control"]
+                for reference in references
+            ),
+            "protected_dual_basin_artifact_count": len(protected_after),
+            "protected_dual_basin_artifacts_unchanged": True,
+            "protected_sha256_by_name": protected_after,
+        },
+        "unmeasured_references": [
+            {"shot": shot, "slice_index": row}
+            for shot, row in sorted(expected_keys - measured_keys)
+        ],
+        "attempt_receipts": [
+            str(output / f"{NEWTON_REPLAY_ATTEMPT_PREFIX}-{shot}-{row}.json")
+            for shot, row in sorted(measured_keys)
+        ],
+        "figure": str(figure_path),
+    }
+    (output / NEWTON_REPLAY_RECEIPT_NAME).write_text(
+        json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    )
+    return receipt
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--store", type=Path, default=SHOT_STORE)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--shots", nargs="+", type=int)
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--newton-replay", action="store_true")
+    parser.add_argument("--newton-output", type=Path, default=NEWTON_REPLAY_OUTPUT)
     arguments = parser.parse_args()
-    receipt = run(
-        arguments.store,
-        arguments.output,
-        shots=None if arguments.shots is None else tuple(arguments.shots),
-        resume=arguments.resume,
-    )
-    print(json.dumps(receipt["aggregate"], indent=2, sort_keys=True))
+    selected_shots = None if arguments.shots is None else tuple(arguments.shots)
+    if arguments.newton_replay:
+        receipt = run_newton_replay(
+            arguments.store,
+            arguments.newton_output,
+            shots=selected_shots,
+            resume=arguments.resume,
+        )
+        summary = {
+            "measurement_status": receipt["measurement_status"],
+            "split_results": receipt["split_results"],
+            "unmeasured_references": receipt["unmeasured_references"],
+        }
+    else:
+        receipt = run(
+            arguments.store,
+            arguments.output,
+            shots=selected_shots,
+            resume=arguments.resume,
+        )
+        summary = receipt["aggregate"]
+    print(json.dumps(summary, indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":

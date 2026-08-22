@@ -1,0 +1,425 @@
+{
+  "offset_ladder": {
+    "offsets": [
+      -1,
+      1,
+      -2,
+      2,
+      -4,
+      4,
+      -8,
+      8,
+      -16,
+      16,
+      -32,
+      32
+    ],
+    "repr": "(-1, 1, -2, 2, -4, 4, -8, 8, -16, 16, -32, 32)",
+    "selection_rule": "earlier offsets first; the first candidate whose own constrained Newton solve converges supplies the seed; no EFIT score enters source selection",
+    "source": "benchmarks.diiid_constrained_cold_start.NEIGHBOUR_FRAME_OFFSETS"
+  },
+  "preregistered_scoreability_source": {
+    "path": "docs/figures/efit-forward-parity/tared-plasma-support-solve.json",
+    "sha256": "14ee0945438613f5c65ba79663de09eba0a75e9ee053eb5b1fbe814abaf9f7c2"
+  },
+  "receipt": "MAST same-shot warm-neighbour Newton replay attempt",
+  "reference": {
+    "cold_newton_control": {
+      "banked_terminal_fixed_point_residual": 0.001255977522269408,
+      "converged": false,
+      "iterations": 24,
+      "outcome_class": "bounded_non_convergence",
+      "per_metric_qualification": {
+        "all_carried_tolerances_pass": false,
+        "fixed_point_defect": {
+          "passes": false,
+          "registered_bound": 1e-08,
+          "value": 0.001255977522269408
+        },
+        "flux_rms_fraction_of_span": {
+          "passes": null,
+          "registered_bound": null,
+          "status": "reported deviation; no registered tolerance is carried",
+          "value": 0.009608301123513314
+        },
+        "flux_sup_fraction_of_span": {
+          "passes": null,
+          "registered_bound": null,
+          "status": "reported deviation; no registered tolerance is carried",
+          "value": 0.025851456580959276
+        },
+        "internal_inductance_signed_relative_deviation": {
+          "passes": null,
+          "registered_bound": null,
+          "status": "reported deviation; no registered tolerance is carried",
+          "value": 0.04565620403255877
+        },
+        "lcfs_distance_m": {
+          "passes": false,
+          "registered_bound": 0.00033047,
+          "value": 0.14261520322413904
+        },
+        "magnetic_axis_distance_m": {
+          "passes": false,
+          "registered_bound": 0.00101344,
+          "value": 0.03895569646648795
+        },
+        "plasma_current_signed_relative_deviation": {
+          "passes": null,
+          "registered_bound": null,
+          "status": "reported deviation; no registered tolerance is carried",
+          "value": 0.0
+        },
+        "poloidal_beta_signed_relative_deviation": {
+          "passes": null,
+          "registered_bound": null,
+          "status": "reported deviation; no registered tolerance is carried",
+          "value": 0.006290733479060284
+        },
+        "topology_class_agreement": {
+          "passes": true,
+          "registered_bound": 1.0,
+          "value": 1.0
+        },
+        "x_point_distance_m": {
+          "passes": false,
+          "registered_bound": 0.014,
+          "value": 0.5728284357833935
+        }
+      },
+      "registered_parity_metrics": {
+        "flux_map": {
+          "comparison_target": "efm/psirz multiplied by 2*pi into total Wb",
+          "raw_same_gauge_comparison": true,
+          "reference_span_wb": 1.3681872286612768,
+          "rms_fraction_of_reference_span": 0.009608301123513314,
+          "rms_wb": 0.013145954886322713,
+          "sup_fraction_of_reference_span": 0.025851456580959276,
+          "sup_norm_wb": 0.03536963273636
+        },
+        "internal_inductance": {
+          "reference": 0.783221423625946,
+          "signed_relative_deviation": 0.04565620403255877,
+          "solved": 0.8189803407456834
+        },
+        "lcfs": {
+          "passes": false,
+          "registered_bound_m": 0.00033047,
+          "symmetric_mean_distance_m": 0.14261520322413904
+        },
+        "magnetic_axis": {
+          "distance_m": 0.03895569646648795,
+          "passes": false,
+          "registered_bound_m": 0.00101344
+        },
+        "plasma_current": {
+          "reference_a": 813718.375,
+          "signed_relative_deviation": 0.0,
+          "solved_a": 813718.375
+        },
+        "poloidal_beta": {
+          "reference": 0.3646782636642456,
+          "signed_relative_deviation": 0.006290733479060284,
+          "solved": 0.3669723574265638
+        },
+        "topology": {
+          "agreement": 1.0,
+          "passes": true,
+          "reference_class": "diverted",
+          "registered_bound": 1.0,
+          "solved_class": "diverted"
+        },
+        "x_point": {
+          "distance_m": 0.5728284357833935,
+          "passes": false,
+          "registered_bound_m": 0.014
+        }
+      },
+      "reproduces_banked_newton_control": true,
+      "residual_trajectory": [
+        0.00880414172841433,
+        0.0017195284621669643,
+        0.0017195284621669643,
+        0.001204199470404804,
+        0.001204199470404804,
+        0.0011286069373525763,
+        0.0011286069373525763,
+        0.0011390219065090937,
+        0.0011390219065090937,
+        0.0012933437818305935,
+        0.0012933437818305935,
+        0.0012341750869058036,
+        0.0012341750869058036,
+        0.001460099141371664,
+        0.001460099141371664,
+        0.0012581984607933762,
+        0.0012581984607933762,
+        0.0012820980158474759,
+        0.0012820980158474759,
+        0.001365365476517914,
+        0.001365365476517914,
+        0.0014006229654605407,
+        0.0014006229654605407,
+        0.001255977522269408
+      ],
+      "target_current_relative_error": 0.0,
+      "terminal_fixed_point_residual": 0.001255977522269408,
+      "terminal_plasma_current_a": 813718.375,
+      "termination": "public host Krylov solver returned"
+    },
+    "preregistered_scoreability": {
+      "branch_count": 4,
+      "closed_branch_point_count": 61,
+      "distance": {
+        "correspondence_constraint": "none; unordered cKDTree nearest neighbours",
+        "left_to_right": {
+          "max_m": 0.3163878196475545,
+          "mean_m": 0.11863222325858327,
+          "median_m": 0.12554494387249227,
+          "min_m": 0.020113416627825703,
+          "p90_m": 0.22657018796089812
+        },
+        "right_to_left": {
+          "max_m": 0.5183149250068642,
+          "mean_m": 0.1657730152899465,
+          "median_m": 0.1360205078879143,
+          "min_m": 0.020113416627825703,
+          "p90_m": 0.3583929616998617
+        },
+        "symmetric_mean_distance_m": 0.1422026192742649
+      },
+      "longest_polyline_fallback_used": false,
+      "selection": "longest explicitly closed unit branch enclosing the magnetic axis",
+      "solved_polygon": {
+        "arclength_m": 4.2865721988714,
+        "area_centroid_major_radius_m": 0.8084233081384199,
+        "area_first_moment_m3": 1.025299969047353,
+        "exact_solid_of_revolution_m3": 6.4421497009700115,
+        "first_moment_approximation_m3": 6.442149700970013,
+        "point_count": 61,
+        "poloidal_area_m2": 1.2682711628000203,
+        "quadrature_relative_difference": 2.220446049250313e-16
+      },
+      "status": "scoreable",
+      "stored_polygon": {
+        "arclength_m": 5.696427412780672,
+        "area_centroid_major_radius_m": 0.7466736083010495,
+        "area_first_moment_m3": 1.4446262003336312,
+        "exact_solid_of_revolution_m3": 9.076854116302945,
+        "first_moment_approximation_m3": 9.076854116302945,
+        "point_count": 155,
+        "poloidal_area_m2": 1.934749245551446,
+        "quadrature_relative_difference": 0.0
+      }
+    },
+    "reference": {
+      "shot": 21983,
+      "slice_index": 35,
+      "target_current_a": 813718.375,
+      "target_current_source": "abs(efm/plasma_current_c) on the selected row",
+      "time_s": 0.1899999976158142
+    },
+    "reported_terminal": {
+      "converged": false,
+      "outcome_class": "bounded_non_convergence",
+      "target_current_relative_error": 1.1102230246251565e-16,
+      "terminal_fixed_point_residual": 0.0012942617600103313,
+      "terminal_plasma_current_a": 813718.3749999999
+    },
+    "reported_terminal_arm": "warm_newton",
+    "warm_neighbour_search": {
+      "candidate_offsets": [
+        -1,
+        1,
+        -2,
+        2,
+        -4,
+        4,
+        -8,
+        8,
+        -16,
+        16,
+        -32,
+        32
+      ],
+      "checks": [
+        {
+          "achieved_class": "diverted",
+          "converged": true,
+          "fixed_point_residual": 1.2412780242354454e-12,
+          "outcome_class": "converged_plasma_root",
+          "row": 34,
+          "target_current_relative_error": 1.1102230246251565e-16,
+          "terminal_plasma_current_a": 793357.0624999999,
+          "time_s": 0.1850000023841858,
+          "topology_consistent": true
+        }
+      ],
+      "qualified_source_found": true,
+      "selected_source": {
+        "own_cold_fixed_point_residual": 1.2412780242354454e-12,
+        "row": 34,
+        "time_offset_s": -0.004999995231628418,
+        "time_s": 0.1850000023841858
+      },
+      "selection_rule": "declared symmetric row-offset ladder, earlier before later; the first same-shot candidate whose own Newton solve converges wins, without consulting any EFIT score",
+      "triggered": true
+    },
+    "warm_newton_solve": {
+      "converged": false,
+      "iterations": 24,
+      "lifted_to_converged_plasma_root": false,
+      "outcome_class": "bounded_non_convergence",
+      "per_metric_qualification": {
+        "all_carried_tolerances_pass": false,
+        "fixed_point_defect": {
+          "passes": false,
+          "registered_bound": 1e-08,
+          "value": 0.0012942617600103313
+        },
+        "flux_rms_fraction_of_span": {
+          "passes": null,
+          "registered_bound": null,
+          "status": "reported deviation; no registered tolerance is carried",
+          "value": 0.00772233420061483
+        },
+        "flux_sup_fraction_of_span": {
+          "passes": null,
+          "registered_bound": null,
+          "status": "reported deviation; no registered tolerance is carried",
+          "value": 0.020793130960558293
+        },
+        "internal_inductance_signed_relative_deviation": {
+          "passes": null,
+          "registered_bound": null,
+          "status": "reported deviation; no registered tolerance is carried",
+          "value": 0.07005829392097618
+        },
+        "lcfs_distance_m": {
+          "passes": false,
+          "registered_bound": 0.00033047,
+          "value": 0.14080018190660473
+        },
+        "magnetic_axis_distance_m": {
+          "passes": false,
+          "registered_bound": 0.00101344,
+          "value": 0.03108618714322078
+        },
+        "plasma_current_signed_relative_deviation": {
+          "passes": null,
+          "registered_bound": null,
+          "status": "reported deviation; no registered tolerance is carried",
+          "value": -1.1102230246251565e-16
+        },
+        "poloidal_beta_signed_relative_deviation": {
+          "passes": null,
+          "registered_bound": null,
+          "status": "reported deviation; no registered tolerance is carried",
+          "value": 0.022756861066295153
+        },
+        "topology_class_agreement": {
+          "passes": true,
+          "registered_bound": 1.0,
+          "value": 1.0
+        },
+        "x_point_distance_m": {
+          "passes": false,
+          "registered_bound": 0.014,
+          "value": 0.5954646832404388
+        }
+      },
+      "registered_parity_metrics": {
+        "flux_map": {
+          "comparison_target": "efm/psirz multiplied by 2*pi into total Wb",
+          "raw_same_gauge_comparison": true,
+          "reference_span_wb": 1.3681872286612768,
+          "rms_fraction_of_reference_span": 0.00772233420061483,
+          "rms_wb": 0.010565599028735401,
+          "sup_fraction_of_reference_span": 0.020793130960558293,
+          "sup_norm_wb": 0.028448896224117243
+        },
+        "internal_inductance": {
+          "reference": 0.783221423625946,
+          "signed_relative_deviation": 0.07005829392097618,
+          "solved": 0.838092580327538
+        },
+        "lcfs": {
+          "passes": false,
+          "registered_bound_m": 0.00033047,
+          "symmetric_mean_distance_m": 0.14080018190660473
+        },
+        "magnetic_axis": {
+          "distance_m": 0.03108618714322078,
+          "passes": false,
+          "registered_bound_m": 0.00101344
+        },
+        "plasma_current": {
+          "reference_a": 813718.375,
+          "signed_relative_deviation": -1.1102230246251565e-16,
+          "solved_a": 813718.3749999999
+        },
+        "poloidal_beta": {
+          "reference": 0.3646782636642456,
+          "signed_relative_deviation": 0.022756861066295153,
+          "solved": 0.3729771962443506
+        },
+        "topology": {
+          "agreement": 1.0,
+          "passes": true,
+          "reference_class": "diverted",
+          "registered_bound": 1.0,
+          "solved_class": "diverted"
+        },
+        "x_point": {
+          "distance_m": 0.5954646832404388,
+          "passes": false,
+          "registered_bound_m": 0.014
+        }
+      },
+      "residual_trajectory": [
+        0.036015610844566906,
+        0.02048616000768867,
+        0.02048616000768867,
+        0.016674569433203723,
+        0.016674569433203723,
+        0.0013095392209306845,
+        0.0013095392209306845,
+        0.0011828884548474655,
+        0.0011828884548474655,
+        0.0008812617886965544,
+        0.0008812617886965544,
+        0.0008820817653149986,
+        0.0008820817653149986,
+        0.0007671662039912876,
+        0.0007671662039912876,
+        0.001121862641586226,
+        0.001121862641586226,
+        0.0010359542604347612,
+        0.0010359542604347612,
+        0.0012361544922953153,
+        0.0012361544922953153,
+        0.0011813210506896401,
+        0.0011813210506896401,
+        0.0012942617600103313
+      ],
+      "target_current_relative_error": 1.1102230246251565e-16,
+      "terminal_fixed_point_residual": 0.0012942617600103313,
+      "terminal_plasma_current_a": 813718.3749999999,
+      "termination": "public host Krylov solver returned"
+    }
+  },
+  "solver": {
+    "gmres_iterations_per_promotion": 12,
+    "newton_promotions": 12,
+    "prescribed_current_policy": "all 101 fitted EFIT circuits through the passive-inclusive prescribed-current response policy",
+    "public_entry_point": "ForwardProfile.solve_branch(target_current=...)",
+    "registered_fixed_point_criterion": 1e-08,
+    "relaxation": 0.5,
+    "requested_class": "diverted",
+    "route": "newton_krylov",
+    "shared_call_path": "imported benchmarks.diiid_constrained_cold_start._solve_public_seam calling a duck-typed profile adapter whose solve delegates to the public pinned Newton branch",
+    "step_cap": 10.0,
+    "target_current_policy": "abs(efm/plasma_current_c) on the row being solved",
+    "warmup_sweeps": 0
+  }
+}

@@ -24,10 +24,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-version" content="19">
-<meta name="plan-commits" content="a2fbfa13,73f48ca0f672f8cd118bae4fd7e53520a03d998f,2ad4520637736e29898e23a961bada5d11595add,dea730511f076e662736a97c33d5c300545da6e4,cf812416343bbc821757fa2382d1e333d55e9f4f,10de2710fdbf76552e96240230d5597cf31563c4,83d1f6a0969c26ce6e44073401304d5dafaf790c,80fad8d23bce6748edcdbbf72dcb20ba58cdaea0,a0aee18c330c35e8009bbe0b96f7fd3d078b9a00">
-<meta name="plan-artifacts" content="docs/figures/current-constrained-forward-solve/circuit-vacuum,docs/figures/current-constrained-forward-solve/inclusion-ladder,docs/figures/current-constrained-forward-solve/pinned-cohort,docs/figures/current-constrained-forward-solve/mast-constrained">
-<meta name="plan-impl" content="0.778">
+<meta name="plan-version" content="21">
+<meta name="plan-commits" content="a2fbfa13,73f48ca0f672f8cd118bae4fd7e53520a03d998f,2ad4520637736e29898e23a961bada5d11595add,dea730511f076e662736a97c33d5c300545da6e4,cf812416343bbc821757fa2382d1e333d55e9f4f,10de2710fdbf76552e96240230d5597cf31563c4,83d1f6a0969c26ce6e44073401304d5dafaf790c,80fad8d23bce6748edcdbbf72dcb20ba58cdaea0,a0aee18c330c35e8009bbe0b96f7fd3d078b9a00,818722b340f74b8578ce4663495953cce707e337">
+<meta name="plan-artifacts" content="docs/figures/current-constrained-forward-solve/circuit-vacuum,docs/figures/current-constrained-forward-solve/inclusion-ladder,docs/figures/current-constrained-forward-solve/pinned-cohort,docs/figures/current-constrained-forward-solve/mast-constrained,docs/figures/current-constrained-forward-solve/cold-start">
+<meta name="plan-impl" content="0.889">
 </head>
 <body>
   <main class="plan-doc">
@@ -164,27 +164,20 @@
     vacuum</a>.</p>
     </section>
 
-    <h2 id="s8">§8 — Cold-start robustness of the eliminated route</h2>
-    <p>The circuit-discovery validation banked the evidence base: on five score-blind diverted frames
-    outside every calibration and polarity population, the eliminated <code>newton_krylov</code> route
-    converges 2/5 from cold starts while three frames stall at relative residual 1e-2 to 1e-1 in
-    <em>both</em> current arms — a solver-robustness gap, not a current gap. The preregistered
-    three-converged-frame recovery floor fails on exactly this.</p>
-    <p>The reuse map corrects the mechanism list: dual-basin branch pinning, two-branch portfolio solves,
-    warm-starting from a converged neighbour along a shot's time sequence, near-basin qualification and
-    hysteresis selection are all reusable — but <strong>no successful cold-start continuation exists to
-    consume</strong>. The banked scalar source-strength homotopy converged to the dominating limited root,
-    and <code>nova/equilibrium/continuation.py</code> is source-domain continuation across supports, not a
-    solve-state homotopy — it must not be repurposed by name. The first measurement is therefore whether
-    the constrained map itself — the vacuum root removed from its range — lifts cold entry, with
-    warm-neighbour seeding as the reusable second arm. If frames still stall after both,
-    a new solve-state continuation driver is <code>dual-basin-solve</code>-owned work consumed here, not
-    built here. Anderson stays out of the production lane per the owner direction, and the current vector
-    comes from the fixed-wiring circuit records.</p>
-    <p><strong>Done-when:</strong> three or more of the same five score-blind frames are
-    convergence-qualified at the landed criteria (1e-6 relative residual, diverted), re-scored against the
-    EFIT labels with the same receipt schema as the banked validation — flipping the banked
-    <code>recovery_demonstrated</code> verdict.</p>
+    <section id="s8-landed" class="section-landed">
+    <header><span class="badge badge-shipped">✓ landed 2026-08-22</span>
+    <h2 id="s8">§8 — Cold-start robustness of the eliminated route</h2></header>
+    <p class="landed-summary">Measured through the public seam on the same five score-blind frames
+    (commit <code>818722b3</code>): the constrained map alone does <em>not</em> fix cold entry — 2/5
+    qualified cold, unchanged from the banked baseline — but the declared same-shot warm-neighbour offset
+    ladder lifts it to <strong>4/5 qualified, flipping <code>recovery_demonstrated</code> to true</strong>
+    at the preregistered ≥3 threshold, with 24 fixed-wiring currents, zero label reads, and Anderson
+    absent. Best warm recovery: f144 diverted at 5.9 mm X-point separation. The one unrecovered frame
+    (00f40d3919 f54, limited at 7.7e-2 after a legal 2.7e-10 warm seed) needs solve-state continuation
+    beyond the neighbour ladder — <code>dual-basin-solve</code>-owned, this plan's one cross-plan handoff.
+    Full record:
+    <a href="/nova/evidence/archive/current-constrained-forward-solve-landed#cold-start">cold start</a>.</p>
+    </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -237,10 +230,11 @@
     <pre class="r-fu-prompt">/reckon-ship current-constrained-forward-solve §5</pre>
     <p class="r-fu-outcome">All three items disposed. (1) The zero-current guard ordering was already repaired at 2ad45206 — division is reached only after the finite-positive admissibility test, with the locked reject-step policy implemented in the residual wrapper. (2) The scored inference arms now consume the fixed-wiring resolver (dea73051, 12/12 tests): complete_profile_current_adapter with use_circuit=True supplies all 24 response-ordered currents with zero free slots and per-conductor uncertainties in every frame receipt, while label-recovered currents survive only under diagnostic_label_recovered with uses_reconstruction_label=true, excluded from inference conclusions; the frame-102 diagnostic is enforced at residual 1.5899788903681545e-09 (rtol 1e-5), exactly 4 iterations, diverted. (3) Run r-20260821T204446383949 was already promoted with its gate passed — the circuit-vacuum result is recorded at the evidence record's #circuit-vacuum anchor, and §5 remains the MAST cross-machine section with the historical mis-dispatch noted in comments.</p>
     </article>
-<article class="r-fu" data-id="f-ccfs-cold-start" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship current-constrained-forward-solve §5" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ccfs-cold-start" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship current-constrained-forward-solve §5" data-resolved-at="2026-08-22T13:48:26+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Lift cold-start convergence of the eliminated route on out-of-cohort frames (§5)</h4>
     <div class="r-fu-body"><p>The circuit-discovery validation banked the evidence base: on five score-blind diverted frames outside every calibration and polarity population, the eliminated newton_krylov route converges 2/5 from cold starts while three frames stall at relative residual 1e-2 to 1e-1 in both current arms — a solver-robustness gap, not a current gap. The preregistered three-converged-frame recovery floor fails on exactly this. Candidate mechanisms already discussed in the banked record: homotopy or continuation from a converged neighbour frame, warm-starting along a shot's time sequence, and basin-entry seeding from the dual-basin machinery this plan already depends on. Success measure inherited from the validation: three or more of the same five frames convergence-qualified at the landed criteria, re-scored against the EFIT labels with the same receipt schema, which would flip the banked recovery_demonstrated verdict. Consume the fixed-wiring circuit records for the current vector (f-ccfs-tier-consume covers the rewire) and keep Anderson out of the production lane per the owner direction.</p></div>
     <pre class="r-fu-prompt">/reckon-ship current-constrained-forward-solve §5</pre>
+    <p class="r-fu-outcome">Recovery demonstrated (run r-20260822T130913771085, gate passed, commit 818722b3, merge e86d2fa4). On the same five score-blind frames, the public target-current seam qualifies 2/5 from cold starts (matching the banked baseline) and 4/5 after the declared same-shot warm-neighbour offset ladder (-1,+1,-2,+2,...,-32,+32; earlier first, never selected by EFIT score), flipping recovery_demonstrated to true at the preregistered &gt;=3 threshold. Every target carries the 24 fixed-wiring currents with zero label reads; Anderson is absent from the lane; EFIT re-scoring uses the landed receipt schema. Warm sources: f171 at 2.75e-8 recovered f169, f129 at 9.03e-9 recovered f125; f86 at 2.69e-10 did NOT recover f54, which remains explicitly limited - solve-state continuation beyond the neighbour ladder is dual-basin-solve-owned work, recorded as this plan's one cross-plan handoff.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -273,6 +267,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260822T1330-seam-landed" data-who="reckon-ship" data-when="2026-08-22T13:30:00Z">
     <div class="r-comment-body">SCALAR-CURRENT SEAM LANDED — run r-20260822T125018360336, gate passed, commit cf812416 (merge 2e1236f8), 44 tests passed with both pre-existing forward suites unchanged, ruff exit 0 over all six changed paths, 9 new acceptance cases including three pre-division inadmissibility values. The optional target_current threads through ForwardProfile flux_map, observe, solve, solve_branch, solve_portfolio, solve_batch and the diverted-perturbation paths; absence selects the original absolute expressions. The constrained ForwardFluxOperator path computes the amplitude from the sum of exact integrated cell-current moments, applies the same amplitude to cell_current, radial_moment and vertical_moment, rejects non-finite, zero, sign-reversed or out-of-band amplitudes BEFORE division, never clips, and lets the host Krylov line search reject inadmissible trials — both locked decisions honoured. Receipt smoke: requested 970087.5877824266 A, observed 970087.5877824267 A (one ulp), recovered amplitude 1.2, policy declared_scalar_current through ForwardEquilibrium.normalisation. §4 stays open on one remaining node: rewiring the prototype benchmark to drive this seam with its landed numbers reproduced, queued behind the in-flight cohort run on the shared benchmark file.</div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-20260822T1440-cold-start-landed" data-who="reckon-ship" data-when="2026-08-22T14:40:00Z">
+    <div class="r-comment-body">COLD-START MEASUREMENT LANDED - WARM-NEIGHBOUR SEEDING LIFTS 2/5 TO 4/5 AND FLIPS THE BANKED VERDICT. Run r-20260822T130913771085, gate passed, commit 818722b3 (merge e86d2fa4); benchmark exit 0 both arms; strict receipt audit exit 0; 9 constrained-seam tests plus the slow host-Krylov hold test passed; ruff check and format clean. Cold public-seam: 2/5 qualified, reproducing the banked control at 1.19e-7 diverted in 5 iterations on 0112bdc95d f96. Final selected terminals: f54 warm 7.68e-2 LIMITED (unrecovered), f96 cold 1.19e-7 diverted, f169 warm 8.54e-8 diverted, f144 cold 5.55e-7 diverted at X-point separation 5.9 mm, f125 warm 1.79e-7 diverted. recovery_demonstrated is exactly qualified_frames &gt;= 3 and flipped true at 4/5. The constrained map alone does NOT fix cold entry (2/5 unchanged) - the lift comes from legal same-shot warm-neighbour seeding through the seam, confirming the reuse map's banked negative on scalar homotopy while establishing the warm ladder as the production mechanism.</div>
 </div>
 </section>
 </main>

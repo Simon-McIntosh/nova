@@ -197,6 +197,37 @@
       <code>docs/figures/current-constrained-forward-solve/mast-constrained/current-constrained-frozen-six-scorecard.json</code>.</figcaption>
     </figure>
 
+    <h2 id="cold-start">Cold-start measurement — warm-neighbour seeding flips the recovery verdict — 2026-08-22</h2>
+    <p>Run <code>r-20260822T130913771085-constrained-cold-start</code>, gate <strong>passed</strong>;
+    commit <code>818722b3</code> (merge <code>e86d2fa4</code>); benchmark exit 0 in both arms; strict
+    receipt audit exit 0; 9 constrained-seam tests plus the slow host-Krylov hold test passed; ruff check
+    and format clean.</p>
+    <table>
+      <caption>Final selected terminal per score-blind frame, public seam, fixed-wiring currents,
+      zero label reads. Cold arm alone: 2/5 (unchanged from the banked baseline).</caption>
+      <thead><tr><th>Frame</th><th>Route</th><th>Residual</th><th>Topology</th><th>X-point sep (m)</th></tr></thead>
+      <tbody>
+        <tr><td>00f40d3919 f54</td><td>warm (f86 @ 2.7e-10)</td><td>7.680e-2</td><td>limited — unrecovered</td><td>0.7366</td></tr>
+        <tr><td>0112bdc95d f96</td><td>cold</td><td>1.186e-7</td><td>diverted</td><td>0.4565</td></tr>
+        <tr><td>0112d94419 f169</td><td>warm (f171 @ 2.8e-8)</td><td>8.541e-8</td><td>diverted</td><td>2.5632</td></tr>
+        <tr><td>01177bc9fa f144</td><td>cold</td><td>5.545e-7</td><td>diverted</td><td><strong>0.0059</strong></td></tr>
+        <tr><td>012c431151 f125</td><td>warm (f129 @ 9.0e-9)</td><td>1.793e-7</td><td>diverted</td><td>2.7199</td></tr>
+      </tbody>
+    </table>
+    <p><strong>4/5 qualified; <code>recovery_demonstrated</code> = (qualified ≥ 3) flips true.</strong>
+    Warm sources come only from the declared same-shot offset ladder (−1,+1,−2,+2,…,−32,+32; earlier
+    first), never selected by EFIT score. The constrained map alone does not fix cold entry — the lift is
+    legal warm-neighbour seeding through the seam — confirming the banked negative on scalar homotopy
+    while establishing the warm ladder as the production mechanism. The unrecovered f54 needs solve-state
+    continuation beyond the neighbour ladder: <code>dual-basin-solve</code>-owned work, the plan's one
+    cross-plan handoff.</p>
+    <figure>
+      <img src="/nova/figures/current-constrained-forward-solve/cold-start/constrained_cold_start_summary.png"
+           alt="Two-panel residual and terminal X-point summary of the cold and warm constrained arms">
+      <figcaption>Residual and terminal X-point summary per frame and arm. Receipt:
+      <code>docs/figures/current-constrained-forward-solve/cold-start/constrained_cold_start_receipt.json</code>.</figcaption>
+    </figure>
+
   </main>
 </body>
 </html>

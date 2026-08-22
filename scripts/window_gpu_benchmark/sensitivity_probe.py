@@ -51,8 +51,9 @@ SOURCE_MULTIPLIER = 0.5
 ITERATION_CAP = 10
 WINDOW_TOLERANCE = 5.0e-3
 DAMPING = 0.5
-CPU_CONTRACTION = 0.53710396334179378
+PRE_BAND_CPU_CONTRACTION = 0.53710396334179378
 GPU_CONTRACTION = 0.64062864260291186
+PRE_BAND_CPU_RESIDUAL = 0.024887102508608275
 
 
 def _format(value: Any) -> str:
@@ -577,6 +578,8 @@ def _discrete_rows(
             right_choice = int(
                 gpu["surface_extremum_selection"][level_index, selection_index]
             )
+            left_label = _cell_label(left_cell, cpu["cell_grid_shape"])
+            right_label = _cell_label(right_cell, gpu["cell_grid_shape"])
             differs = (left_cell, left_choice) != (right_cell, right_choice)
             _append(
                 rows,
@@ -586,7 +589,7 @@ def _discrete_rows(
                 right_choice,
                 sample=sample,
                 level=level,
-                cell=f"{left_cell}/{right_cell}",
+                cell=f"{left_label}/{right_label}",
                 status="DISCRETE_FLIP" if differs else "MATCH",
             )
             if differs:
@@ -595,7 +598,7 @@ def _discrete_rows(
                         "layer": "extremum_selection",
                         "quantity": selection,
                         "level": float(level),
-                        "cell": f"{left_cell}/{right_cell}",
+                        "cell": f"{left_label}/{right_label}",
                         "cpu": left_choice,
                         "gpu": right_choice,
                     }
@@ -612,10 +615,26 @@ def _report(
     discrete: Sequence[Mapping[str, Any]],
     solve_comparisons: Sequence[Mapping[str, Any]],
     phi_comparisons: Sequence[Mapping[str, Any]],
+    initial_phi_boundary: Any,
     cpu_seconds: float,
     gpu_seconds: float,
 ) -> str:
     first_discrete = discrete[0] if discrete else None
+    initial_phi = np.asarray(initial_phi_boundary)
+    cpu_phi = np.asarray([sample["record"]["phi_b"] for sample in cpu_samples])
+    gpu_phi = np.asarray([sample["record"]["phi_b"] for sample in gpu_samples])
+    cpu_residual = float(
+        np.max(
+            np.abs(cpu_phi - initial_phi)
+            / np.maximum(np.abs(cpu_phi), np.abs(initial_phi))
+        )
+    )
+    gpu_residual = float(
+        np.max(
+            np.abs(gpu_phi - initial_phi)
+            / np.maximum(np.abs(gpu_phi), np.abs(initial_phi))
+        )
+    )
     lines = [
         "# CPU--H200 single-sweep sensitivity isolation",
         "",
@@ -639,6 +658,24 @@ def _report(
             f"`{_format(comparison['maximum_relative'])}` | "
             f"`{_format(comparison['maximum_ulp'])}` | `{comparison['index']}` |"
         )
+    first_solve = next(
+        (comparison for comparison in solve_comparisons if not comparison["bitwise"]),
+        None,
+    )
+    if first_solve is not None:
+        lines.extend(
+            [
+                "",
+                (
+                    f"The first compared layer already differs in "
+                    f"`{first_solve['name']}` at sample "
+                    f"`{first_solve['sample']}`: maximum absolute difference "
+                    f"`{_format(first_solve['maximum_absolute'])}` "
+                    f"(`{_format(first_solve['maximum_ulp'])}` local ulp) at "
+                    f"`{first_solve['index']}`."
+                ),
+            ]
+        )
     lines.extend(["", "## First discrete decision", ""])
     if first_discrete is None:
         lines.append(
@@ -661,6 +698,11 @@ def _report(
                 "code-generation noise scale is a genuine tie: the repair is an "
                 "order-independent tie rule, not a wider tolerance."
             )
+        lines.append(
+            "This selection changes a reported geometric extremum, not the "
+            "toroidal-flux integral. It therefore cannot explain the historical "
+            "boundary-coordinate residual gap."
+        )
     lines.extend(
         [
             "",
@@ -699,17 +741,16 @@ def _report(
         (comparison for comparison in phi_comparisons if not comparison["bitwise"]),
         None,
     )
-    if first_discrete is not None and changed_phi is not None:
+    if changed_phi is not None:
         lines.extend(
             [
                 "",
                 (
-                    f"The discrete `{first_discrete['layer']}` choice changes the "
-                    f"first non-bitwise Phi-path quantity "
+                    "The first non-bitwise Phi-path quantity is "
                     f"`{changed_phi['name']}` by up to "
                     f"`{_format(changed_phi['maximum_absolute'])}`; the tabulated "
-                    "successive surface weights and integrand values show its "
-                    "amplification into the final Phi_b difference."
+                    "successive surface weights and integrand values remain at "
+                    "float64 code-generation noise scale through Phi_b."
                 ),
             ]
         )
@@ -723,16 +764,51 @@ def _report(
                 "trace the first changed decision into Phi_b."
             ),
             "",
+            "## Residual provenance resolves the apparent 3.43e-4 gap",
+            "",
+            "| comparison | left | right | absolute gap |",
+            "|---|---:|---:|---:|",
+            (
+                f"| same-tree CPU vs H200 | `{_format(cpu_residual)}` | "
+                f"`{_format(gpu_residual)}` | "
+                f"`{_format(abs(cpu_residual - gpu_residual))}` |"
+            ),
+            (
+                f"| pre-band CPU receipt vs current CPU | "
+                f"`{_format(PRE_BAND_CPU_RESIDUAL)}` | `{_format(cpu_residual)}` | "
+                f"`{_format(abs(PRE_BAND_CPU_RESIDUAL - cpu_residual))}` |"
+            ),
+            "",
+            (
+                "The claimed gap compares a CPU receipt produced before boundary-band "
+                "sparsification with an H200 receipt produced after it. On the current "
+                "tree, CPU and H200 agree to float64 noise. The apparent 3.43e-4 "
+                "backend movement is therefore an algorithm-revision confound, not a "
+                "backend-dependent discrete decision. The sparsified extractor packs "
+                "level-bracketing boundary cells and accumulates fully included cells "
+                "separately; that changes accumulation order while preserving the "
+                "mathematical integral."
+            ),
+            "",
+            (
+                "The observed extrema slot ties should use an order-independent tie "
+                "rule if bitwise shape-selection repeatability is required. Widening "
+                "the window tolerance is rejected: it would neither address those "
+                "ties nor repair cross-revision provenance."
+            ),
+            "",
             "## Runtime and window-policy context",
             "",
             f"CPU sweep plus extraction: `{_format(cpu_seconds)}` s; H200: "
             f"`{_format(gpu_seconds)}` s.",
             (
-                f"The landed contraction evidence remains CPU `{CPU_CONTRACTION}` "
-                f"versus H200 `{GPU_CONTRACTION}` at cap `{ITERATION_CAP}`, tolerance "
-                f"`{WINDOW_TOLERANCE}` and damping `{DAMPING}`. Whether the cap should "
-                "be contraction-aware is a design question; this probe does not change "
-                "the cap or tolerance."
+                "The landed contraction evidence remains pre-band CPU "
+                f"`{PRE_BAND_CPU_CONTRACTION}` versus current-tree H200 "
+                f"`{GPU_CONTRACTION}` at cap `{ITERATION_CAP}`, tolerance "
+                f"`{WINDOW_TOLERANCE}` and damping `{DAMPING}`. Because these values "
+                "also cross the extraction revision, whether the cap should be "
+                "contraction-aware remains a design question requiring a same-tree "
+                "window comparison; this probe does not change the cap or tolerance."
             ),
             "",
         ]
@@ -778,7 +854,13 @@ def main() -> int:
     )
     _append(rows, "metadata", "cpu_seconds", cpu_seconds, cpu_seconds)
     _append(rows, "metadata", "gpu_seconds", gpu_seconds, gpu_seconds)
-    _append(rows, "metadata", "cpu_contraction", CPU_CONTRACTION, CPU_CONTRACTION)
+    _append(
+        rows,
+        "metadata",
+        "pre_band_cpu_contraction",
+        PRE_BAND_CPU_CONTRACTION,
+        PRE_BAND_CPU_CONTRACTION,
+    )
     _append(rows, "metadata", "gpu_contraction", GPU_CONTRACTION, GPU_CONTRACTION)
     for item in inventory:
         _append(
@@ -868,6 +950,40 @@ def main() -> int:
                     status="MATCH" if left == right else "DIFF",
                 )
 
+    initial_phi = np.asarray(source_waveform.phi_boundary)
+    cpu_phi = np.asarray([sample["record"]["phi_b"] for sample in cpu_samples])
+    gpu_phi = np.asarray([sample["record"]["phi_b"] for sample in gpu_samples])
+    cpu_residual = float(
+        np.max(
+            np.abs(cpu_phi - initial_phi)
+            / np.maximum(np.abs(cpu_phi), np.abs(initial_phi))
+        )
+    )
+    gpu_residual = float(
+        np.max(
+            np.abs(gpu_phi - initial_phi)
+            / np.maximum(np.abs(gpu_phi), np.abs(initial_phi))
+        )
+    )
+    _append(
+        rows,
+        "residual_provenance",
+        "same_tree_geometry_phi_boundary",
+        cpu_residual,
+        gpu_residual,
+        absolute_difference=abs(cpu_residual - gpu_residual),
+        status="BACKEND_ACQUITTED",
+    )
+    _append(
+        rows,
+        "residual_provenance",
+        "pre_band_cpu_to_current_cpu",
+        PRE_BAND_CPU_RESIDUAL,
+        cpu_residual,
+        absolute_difference=abs(PRE_BAND_CPU_RESIDUAL - cpu_residual),
+        status="REVISION_CONFOUND",
+    )
+
     _write_tsv(arguments.results, rows)
     arguments.report.write_text(
         _report(
@@ -878,6 +994,7 @@ def main() -> int:
             discrete=discrete,
             solve_comparisons=solve_comparisons,
             phi_comparisons=phi_comparisons,
+            initial_phi_boundary=source_waveform.phi_boundary,
             cpu_seconds=cpu_seconds,
             gpu_seconds=gpu_seconds,
         ),

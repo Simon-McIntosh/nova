@@ -141,6 +141,35 @@ def test_power_iteration_receipt_is_strict_json_serializable() -> None:
     json.dumps(result, allow_nan=False)
 
 
+def test_unconverged_nonfinite_values_are_explicitly_not_computed() -> None:
+    serial = pinned._serialise_arm(
+        {
+            "state": np.ones(2),
+            "mapped": lambda state: state,
+            "relative_residual": float("inf"),
+            "current_relative_error": float("inf"),
+            "current_constraint_required": True,
+            "amplitude": float("inf"),
+            "topology": "limited",
+            "x_point_rz_m": np.asarray([np.nan, np.nan]),
+            "lambda_guard_triggered": True,
+        }
+    )
+
+    assert serial["relative_residual"] is None
+    assert serial["current_relative_error"] is None
+    assert serial["amplitude"] is None
+    assert serial["qualified_equilibrium_metrics"]["status"] == "not-computed"
+    assert set(serial["not_computed_fields"]) == {
+        "amplitude",
+        "current_relative_error",
+        "relative_residual",
+        "x_point_rz_m",
+    }
+    assert "zero is never used" in serial["sentinel_policy"]
+    json.dumps(serial, allow_nan=False)
+
+
 def test_summary_requires_representative_current_and_diverted_convergence() -> None:
     eigenvalue = {
         "absolute_dominant_eigenvalue_estimate": 1.1,
@@ -189,10 +218,22 @@ def test_summary_requires_representative_current_and_diverted_convergence() -> N
 def test_label_recovered_frame_102_remains_an_explicit_diagnostic_control() -> None:
     path = pinned.DEFAULT_OUTPUT / pinned.CHECKPOINT_NAME
     frame = json.loads(path.read_text().splitlines()[0])
-    eliminated = frame["arms"]["pinned_eliminated"]
+    diagnostic = {
+        "shot": frame["shot"],
+        "frame": frame["frame"],
+        "arms": frame["diagnostic_label_recovered"]["arms"],
+    }
+    eliminated = diagnostic["arms"]["pinned_eliminated"]
 
-    assert pinned.diagnostic_frame_102_reproduced(frame)
-    assert eliminated["relative_residual"] == pytest.approx(1.5899788903681545e-9)
+    assert frame["diagnostic_label_recovered"]["uses_reconstruction_label"]
+    assert frame["diagnostic_label_recovered"]["frame_102_landed_control_reproduced"]
+    assert pinned.diagnostic_frame_102_reproduced(diagnostic)
+    assert eliminated["relative_residual"] == pytest.approx(
+        1.5899788903681545e-9,
+        rel=0.0,
+        abs=pinned.DIAGNOSTIC_RESIDUAL_ABSOLUTE_TOLERANCE,
+    )
+    assert eliminated["relative_residual"] <= pinned.RELATIVE_RESIDUAL_CRITERION
     assert eliminated["iterations"] == 4
     assert eliminated["topology"] == "diverted"
 

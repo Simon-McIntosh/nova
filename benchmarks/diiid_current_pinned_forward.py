@@ -59,7 +59,7 @@ from nova.imas.diiid_description import (
 from nova.jax.config import configure_dtypes
 
 
-DEFAULT_OUTPUT = Path("docs/figures/diiid-forward-onboarding/current-pinned")
+DEFAULT_OUTPUT = Path("docs/figures/current-constrained-forward-solve/pinned-cohort")
 PREREGISTRATION_NAME = "current_pinned_forward_preregistration.json"
 CHECKPOINT_NAME = "current_pinned_forward_frames.jsonl"
 RECEIPT_NAME = "current_pinned_forward_receipt.json"
@@ -72,7 +72,6 @@ DIAGNOSTIC_FRAME_102 = {
     "eliminated_iterations": 4,
     "eliminated_topology": "diverted",
 }
-DIAGNOSTIC_RESIDUAL_RELATIVE_TOLERANCE = 1.0e-5
 LAMBDA_BAND = (1.0e-6, 1.0e6)
 RELATIVE_RESIDUAL_CRITERION = 1.0e-6
 CURRENT_CONSTRAINT_CRITERION = 1.0e-10
@@ -90,6 +89,7 @@ PLASMA_CURRENT_COLUMNS = (
 )
 REPRESENTATIVE_CURRENT_FLOOR_A = 200_000.0
 COHORT_PREFLIGHT_RELATIVE_TOLERANCE = 2.0e-6
+DIAGNOSTIC_RESIDUAL_ABSOLUTE_TOLERANCE = COHORT_PREFLIGHT_RELATIVE_TOLERANCE
 LOW_CURRENT_CONTROL = ("d3d_shot_00000c4a7b.parquet", 0)
 REPRESENTATIVE_COHORT = (
     {
@@ -484,8 +484,8 @@ def diagnostic_frame_102_reproduced(record: dict[str, Any]) -> bool:
         np.isclose(
             eliminated["relative_residual"],
             DIAGNOSTIC_FRAME_102["eliminated_relative_residual"],
-            rtol=DIAGNOSTIC_RESIDUAL_RELATIVE_TOLERANCE,
-            atol=0.0,
+            rtol=0.0,
+            atol=DIAGNOSTIC_RESIDUAL_ABSOLUTE_TOLERANCE,
         )
         and eliminated["iterations"] == DIAGNOSTIC_FRAME_102["eliminated_iterations"]
         and eliminated["topology"] == DIAGNOSTIC_FRAME_102["eliminated_topology"]
@@ -656,14 +656,35 @@ def _serialise_arm(result: dict[str, Any]) -> dict[str, Any]:
     serial = {
         key: value for key, value in result.items() if key not in {"state", "mapped"}
     }
-    for key in ("relative_residual", "current_relative_error"):
-        value = float(serial[key])
-        serial[key] = value if np.isfinite(value) else None
+    not_computed: list[str] = []
+    x_point_is_finite = bool(np.all(np.isfinite(serial["x_point_rz_m"])))
     serial["x_point_rz_m"] = (
         np.asarray(serial["x_point_rz_m"], dtype=float).tolist()
-        if np.all(np.isfinite(serial["x_point_rz_m"]))
+        if x_point_is_finite
         else None
     )
+    if not x_point_is_finite:
+        not_computed.append("x_point_rz_m")
+
+    def strict_value(value: Any, path: str) -> Any:
+        if isinstance(value, dict):
+            return {
+                key: strict_value(item, f"{path}.{key}" if path else key)
+                for key, item in value.items()
+            }
+        if isinstance(value, list | tuple):
+            return [
+                strict_value(item, f"{path}[{index}]")
+                for index, item in enumerate(value)
+            ]
+        if isinstance(value, np.generic):
+            value = value.item()
+        if isinstance(value, float) and not np.isfinite(value):
+            not_computed.append(path)
+            return None
+        return value
+
+    serial = strict_value(serial, "")
     current_ok = bool(
         not serial.get("current_constraint_required", False)
         or (
@@ -678,6 +699,23 @@ def _serialise_arm(result: dict[str, Any]) -> dict[str, Any]:
         and serial["topology"] == "diverted"
         and not serial["lambda_guard_triggered"]
     )
+    serial["not_computed_fields"] = sorted(not_computed)
+    serial["sentinel_policy"] = (
+        "non-finite values are null and named in not_computed_fields; zero is "
+        "never used as a not-computed sentinel"
+    )
+    serial["qualified_equilibrium_metrics"] = {
+        "status": (
+            "computed"
+            if serial["simultaneously_meets_1e-6_and_diverted"]
+            else "not-computed"
+        ),
+        "reason": (
+            None
+            if serial["simultaneously_meets_1e-6_and_diverted"]
+            else "terminal state did not meet the residual and diverted criteria"
+        ),
+    }
     return serial
 
 
@@ -804,7 +842,13 @@ def solve_frame(
     )
     reproduction = diagnostic_frame_102_reproduced(diagnostic_record)
     if frame_102_control and not reproduction:
-        raise RuntimeError("label-recovered frame-102 diagnostic control drifted")
+        measured_control = diagnostic_record["arms"][ARM_NAMES[1]]
+        raise RuntimeError(
+            "label-recovered frame-102 diagnostic control drifted: "
+            f"relative_residual={measured_control['relative_residual']!r}, "
+            f"iterations={measured_control['iterations']!r}, "
+            f"topology={measured_control['topology']!r}"
+        )
     record = {
         "shot": frame_input.shot,
         "frame": frame_input.frame,

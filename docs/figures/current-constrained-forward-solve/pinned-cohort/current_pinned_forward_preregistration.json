@@ -1,0 +1,125 @@
+{
+  "arms": {
+    "pinned_eliminated": {
+      "definition": "lambda = target Ip / unscaled clipped-support Ip at every map evaluation; lambda multiplies all current moments",
+      "route": "host Jacobian-free Newton-Krylov with Armijo search",
+      "unknowns_and_rows": "N flux unknowns and N flux residual rows"
+    },
+    "unpinned": {
+      "control_absolute_tolerance": 2e-07,
+      "gmres_iterations": 24,
+      "low_current_full_24_plateau_control": 0.03491124178554655,
+      "low_current_shipped_20_plateau_control": 0.1233879,
+      "newton_steps": 24,
+      "relaxation": 0.5,
+      "representative_current_comparison": "remeasure shipped-20 and full-24 from the same seed per frame",
+      "route": "accelerated newton_krylov",
+      "step_cap": 10.0,
+      "warmup": 8
+    }
+  },
+  "dropped_comparison_arm": {
+    "alpha_stability": "not applicable",
+    "name": "pinned_augmented",
+    "reason": "an explicit current-residual row requires a clipped-support observation primitive the public ForwardOperator does not expose; closed-form elimination satisfies Ip exactly without that primitive, keeps the system square and needs no residual weight",
+    "status": "not applicable and not scored"
+  },
+  "host_budget": {
+    "maximum_inner_iterations": 40,
+    "maximum_outer_iterations": 100
+  },
+  "lambda_guard": {
+    "inclusive_band": [
+      1e-06,
+      1000000.0
+    ],
+    "policy": "no clipping: evaluation raises LambdaOutOfBand and the arm records a loud guard termination"
+  },
+  "measurement": "plasma-current constrained free-boundary map",
+  "nova_equilibrium_modified": false,
+  "qualification": {
+    "relative_current_error": 1e-10,
+    "relative_flux_residual": 1e-06,
+    "requires_terminal_diverted": true
+  },
+  "selection": {
+    "absolute_recorded_ip_floor_a": 200000.0,
+    "cohort_declared_before_solver_scoring": [
+      {
+        "frame": 102,
+        "recorded_ip_a": 1283617.6680326462,
+        "seed_lambda": 1.1282545096762369,
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "time_ms": 2200.0,
+        "unscaled_source_ip_a": 1137702.226779481
+      },
+      {
+        "frame": 89,
+        "recorded_ip_a": 1745309.6601366997,
+        "seed_lambda": 0.9554470481184465,
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "time_ms": 1980.0,
+        "unscaled_source_ip_a": 1826694.2826122313
+      },
+      {
+        "frame": 215,
+        "recorded_ip_a": 990789.0240550041,
+        "seed_lambda": 1.4870168697536397,
+        "shot": "d3d_shot_001270afa9.parquet",
+        "time_ms": 5100.0,
+        "unscaled_source_ip_a": 666293.0624446461
+      },
+      {
+        "frame": 41,
+        "recorded_ip_a": 1006624.5902478695,
+        "seed_lambda": 0.9963729956971843,
+        "shot": "d3d_shot_001554e054.parquet",
+        "time_ms": 1160.0,
+        "unscaled_source_ip_a": 1010288.9124805233
+      },
+      {
+        "frame": 252,
+        "recorded_ip_a": 998801.5315532684,
+        "seed_lambda": 1.2458304613931273,
+        "shot": "d3d_shot_001cbcc9e6.parquet",
+        "time_ms": 5600.0,
+        "unscaled_source_ip_a": 801715.452065907
+      }
+    ],
+    "frames": 5,
+    "low_current_control_fixture": {
+      "frame": 0,
+      "recorded_ip_a": -3465.503291954519,
+      "role": "selection-defect control only; excluded from every cohort statistic and constrained solve because seed lambda is negative",
+      "shot": "d3d_shot_00000c4a7b.parquet",
+      "time_ms": 160.0
+    },
+    "polarity_screen": "every selected shot is absent from the landed 603-shot population",
+    "preflight_reproducibility_relative_tolerance": 2e-06,
+    "rule": "one maximum-absolute-current banked diverted frame per distinct shot, absolute recorded Ip at least 200 kA, retained only when target Ip and extracted unscaled source Ip have the same sign",
+    "source": "docs/figures/diiid-forward-onboarding/boundary-recovery/boundary_current_recovery_frames.jsonl"
+  },
+  "shared_inputs": {
+    "coefficients_fitted": 0,
+    "current_set": "nineteen shipped poloidal currents plus five recovered currents; the shipped bcoil channel supplies the toroidal-field function",
+    "currents_adjusted": 0,
+    "poloidal_conductors": 24,
+    "seed": "the same convention-clean labelled branch seed in every arm"
+  },
+  "spectral_estimate": {
+    "comparison_band": [
+      1.25,
+      1.4
+    ],
+    "interpretation": "estimate the Picard-map spectral radius; rho below one after pinning would rehabilitate damped fixed-point routes, while rho above one does not make the Newton root singular because the Newton residual Jacobian eigenvalue is 1-rho",
+    "iterations": 16,
+    "method": "central-difference map action inside fixed-count power iteration",
+    "relative_step": 1e-06
+  },
+  "target_current": {
+    "inference_availability": "admissible competition input and may also be supplied by a partner transport solve",
+    "source": "magnetics_plasma_current interpolated at the labelled time",
+    "status": "declared constraint, not a fitted coefficient",
+    "unit_crossing": "recorded kA multiplied by 1000 exactly once"
+  }
+}

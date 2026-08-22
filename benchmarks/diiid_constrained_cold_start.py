@@ -14,6 +14,7 @@ import argparse
 import json
 from dataclasses import dataclass, replace
 from pathlib import Path
+import subprocess
 from typing import Any
 
 import jax.numpy as jnp
@@ -68,6 +69,9 @@ HOST_OUTER_ITERATIONS = 100
 HOST_INNER_ITERATIONS = 40
 NEIGHBOUR_FRAME_OFFSETS = (-1, 1, -2, 2, -4, 4, -8, 8, -16, 16, -32, 32)
 ROUTE_NAMES = ("cold_start", "warm_neighbour")
+MOMENT_SEEDED_OUTPUT = Path("docs/figures/moment-conditioned-basin-entry")
+MOMENT_SEEDED_CRITERION = 1.0e-8
+MOMENT_SEEDED_RECEIPT_PREFIX = "diiid-moment-seeded-attempt"
 _RESPONSE_CACHE: dict[tuple[str, bytes, bytes], tuple[Any, Any, dict[str, Any]]] = {}
 
 
@@ -219,7 +223,12 @@ def _fixed_wiring_adapter(
     )
 
 
-def _solve_public_seam(frame: PreparedFrame, seed: np.ndarray) -> SolveOutcome:
+def _solve_public_seam(
+    frame: PreparedFrame,
+    seed: np.ndarray,
+    *,
+    relative_tolerance: float = RELATIVE_RESIDUAL_TOLERANCE,
+) -> SolveOutcome:
     """Run the public constrained host-Krylov seam and retain its terminal."""
 
     flux = jnp.asarray(seed)
@@ -239,7 +248,7 @@ def _solve_public_seam(frame: PreparedFrame, seed: np.ndarray) -> SolveOutcome:
             achieved_current_a=float("nan"),
             residual_trajectory=(),
         )
-    absolute_tolerance = RELATIVE_RESIDUAL_TOLERANCE * max(
+    absolute_tolerance = relative_tolerance * max(
         float(np.max(np.abs(initial_image))), 1.0e-30
     )
     try:
@@ -302,6 +311,7 @@ def _route_record(
     *,
     route_id: str,
     seed_receipt: dict[str, Any],
+    residual_tolerance: float = RELATIVE_RESIDUAL_TOLERANCE,
 ) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
     """Score a public-seam terminal in the landed validation shape."""
 
@@ -314,7 +324,7 @@ def _route_record(
         finite
         and bool(topology.diverted)
         and np.isfinite(outcome.residual)
-        and outcome.residual <= RELATIVE_RESIDUAL_TOLERANCE
+        and outcome.residual <= residual_tolerance
         and np.isfinite(current_error)
         and current_error <= CURRENT_RELATIVE_ERROR_TOLERANCE
     )
@@ -356,7 +366,7 @@ def _route_record(
                 "inner_iterations": HOST_INNER_ITERATIONS,
                 "line_search": "armijo",
             },
-            "residual_tolerance": RELATIVE_RESIDUAL_TOLERANCE,
+            "residual_tolerance": residual_tolerance,
             "current_tolerance": CURRENT_RELATIVE_ERROR_TOLERANCE,
             "converged": converged,
             "fixed_point_relative_residual": _strict_float(outcome.residual),
@@ -528,6 +538,139 @@ def solve_frame(
         },
     }
     return record, fields
+
+
+def _source_stamp() -> dict[str, str]:
+    """Return the committed source identity used by a measurement."""
+
+    return {
+        "commit": subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip(),
+        "tree": subprocess.run(
+            ["git", "rev-parse", "HEAD^{tree}"],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip(),
+    }
+
+
+def _moment_seed_record(frame: PreparedFrame) -> dict[str, Any]:
+    """Measure one score-blind frame from its predicted compact-current seed."""
+
+    target = frame.selected.recorded_plasma_current_a
+    frame_index = frame.selected.frame
+    count = int(frame.row["efit_lcfs_n"][frame_index])
+    boundary = np.column_stack(
+        (
+            np.asarray(frame.row["efit_lcfs_r"][frame_index], dtype=float)[:count],
+            np.asarray(frame.row["efit_lcfs_z"][frame_index], dtype=float)[:count],
+        )
+    )
+    seed = frame.profile.moment_seed(
+        boundary,
+        target,
+        current=frame.current,
+    )
+    outcome = _solve_public_seam(
+        frame,
+        np.asarray(seed.flux, dtype=float),
+        relative_tolerance=MOMENT_SEEDED_CRITERION,
+    )
+    route, _fields = _route_record(
+        frame,
+        outcome,
+        route_id="moment_seeded_cold_start",
+        residual_tolerance=MOMENT_SEEDED_CRITERION,
+        seed_receipt={
+            "constructor": "ForwardProfile.moment_seed",
+            "boundary_hypothesis": "target reference own LCFS",
+            "predicted_current_a": seed.moments.plasma_current,
+            "predicted_centroid_r_m": seed.moments.centroid_r,
+            "predicted_centroid_z_m": seed.moments.centroid_z,
+            "prediction_current_support": seed.moments.current_support.value,
+            "prediction_centroid_support": seed.moments.centroid_support.value,
+            "representation_support": seed.support.value,
+            "representation_supported_cells": seed.supported_cells,
+            "representation_radius_m": seed.radius,
+        },
+    )
+    return {
+        "machine": "DIII-D",
+        "shot": frame.selected.path.name,
+        "frame": frame.selected.frame,
+        "time_ms": frame.selected.time_ms,
+        "target_current_a": target,
+        "selection": "member of the banked five-frame score-blind cohort",
+        "route": route,
+    }
+
+
+def run_moment_seed(
+    data: Path,
+    output: Path = MOMENT_SEEDED_OUTPUT,
+    frame_count: int = FRAME_COUNT,
+) -> dict[str, Any]:
+    """Measure the moment seed on the banked five-frame score-blind cohort."""
+
+    configure_dtypes()
+    output.mkdir(parents=True, exist_ok=True)
+    calibration_frames, calibration_shots, _calibration = calibration_population()
+    selected, _low_current = select_frames(
+        list(data.glob("*.parquet")),
+        calibration_shots,
+        polarity_population(),
+        frame_count,
+    )
+    selected_pairs = {(item.path.name, item.frame) for item in selected}
+    if selected_pairs & calibration_frames:
+        raise RuntimeError("selected frame overlaps the calibration bank")
+    if len(selected) != 5:
+        raise RuntimeError("the score-blind DIII-D cohort is no longer five frames")
+
+    source = _source_stamp()
+    attempts = []
+    for item in selected:
+        frame = prepare_frame(item.path, item.frame)
+        if frame.selected != item:
+            raise RuntimeError("the selected frame changed while preparing the solve")
+        record = _moment_seed_record(frame)
+        attempt_path = output / (
+            f"{MOMENT_SEEDED_RECEIPT_PREFIX}-{item.path.stem}-{item.frame}.json"
+        )
+        attempt = {
+            "receipt": "DIII-D moment-seeded constrained cold-start attempt",
+            "source": source,
+            "solver": {
+                "entry_point": "ForwardProfile.solve",
+                "route": "host_krylov",
+                "relative_residual_criterion": MOMENT_SEEDED_CRITERION,
+                "outer_iterations": HOST_OUTER_ITERATIONS,
+                "inner_iterations": HOST_INNER_ITERATIONS,
+                "line_search": "armijo",
+            },
+            "attempt": record,
+        }
+        attempt_path.write_text(
+            json.dumps(attempt, indent=2, sort_keys=True, allow_nan=False) + "\n"
+        )
+        record["receipt_path"] = str(attempt_path)
+        attempts.append(record)
+
+    converged = sum(item["route"]["converged"] for item in attempts)
+    return {
+        "machine": "DIII-D",
+        "source": source,
+        "cohort": "five score-blind frames",
+        "criterion": MOMENT_SEEDED_CRITERION,
+        "baseline": {"cold": "2/5", "warm": "4/5"},
+        "moment_seeded": {"converged": converged, "attempted": len(attempts)},
+        "attempts": attempts,
+    }
 
 
 def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
@@ -829,13 +972,24 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--frames", type=int, default=FRAME_COUNT)
     parser.add_argument("--resume-warm", action="store_true")
+    parser.add_argument("--moment-seeded", action="store_true")
+    parser.add_argument("--moment-output", type=Path, default=MOMENT_SEEDED_OUTPUT)
     arguments = parser.parse_args()
-    receipt = (
-        resume_warm(arguments.output)
-        if arguments.resume_warm
-        else run(arguments.data, arguments.output, arguments.frames)
-    )
-    print(json.dumps(receipt["verdict"], indent=2, sort_keys=True))
+    if arguments.moment_seeded:
+        receipt = run_moment_seed(
+            arguments.data,
+            arguments.moment_output,
+            arguments.frames,
+        )
+        summary = receipt["moment_seeded"]
+    else:
+        receipt = (
+            resume_warm(arguments.output)
+            if arguments.resume_warm
+            else run(arguments.data, arguments.output, arguments.frames)
+        )
+        summary = receipt["verdict"]
+    print(json.dumps(summary, indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":

@@ -1,0 +1,129 @@
+{
+  "attempt": {
+    "frame": 96,
+    "machine": "DIII-D",
+    "route": {
+      "achieved_class": "diverted",
+      "attempted": true,
+      "converged": true,
+      "current_tolerance": 1e-10,
+      "entry_point": "nova.equilibrium.forward.ForwardProfile.solve",
+      "fixed_point_relative_residual": 2.9138208937996564e-09,
+      "iterations": 41,
+      "metrics": {
+        "additive_gauge_wb": -0.007040444589464203,
+        "boundary_maximum_separation_m": 0.303228532189284,
+        "boundary_mean_separation_m": 0.06985698209732491,
+        "fractional_flux_rms": 0.15882393944548284,
+        "interior_r_squared": 0.9747749562590176,
+        "within_label_representability_ceiling": false,
+        "x_point_separation_m": 0.4564565282007343
+      },
+      "options": {
+        "inner_iterations": 40,
+        "line_search": "armijo",
+        "outer_iterations": 100
+      },
+      "requested_class": "diverted",
+      "residual_tolerance": 1e-08,
+      "residual_trajectory": [
+        0.29324559572209197,
+        0.031211511185800393,
+        0.013744000657425958,
+        0.011060402768175229,
+        0.009049309552010701,
+        0.00631291928870307,
+        0.005580571324935633,
+        0.004976703633709926,
+        0.004440490769247053,
+        0.004119219376771784,
+        0.003940870737612021,
+        0.0038093877989454346,
+        0.003790385610994532,
+        0.003772125008023734,
+        0.003754562537670754,
+        0.003741717694901045,
+        0.0037387909808114573,
+        0.003738043943783552,
+        0.0037372978531450196,
+        0.0037365527079590358,
+        0.004709370372985995,
+        0.002925191526721257,
+        0.0015590230553197615,
+        0.00150716207871988,
+        0.0014603373016600573,
+        0.001417883275880817,
+        0.0013789429443124561,
+        0.0013430725170990355,
+        0.0013099173556642921,
+        0.0012791100143941378,
+        0.0012784760748271733,
+        0.0012778442539020775,
+        0.0012772145374061454,
+        0.0012771294919262297,
+        0.001277044483439617,
+        0.0012769595118504791,
+        0.004978622054663553,
+        0.002938927999885201,
+        0.0018251345311565562,
+        4.461679867066302e-05,
+        2.9138208937996564e-09
+      ],
+      "route": "host_krylov_with_declared_scalar_current",
+      "route_id": "moment_seeded_cold_start",
+      "seed": {
+        "boundary_hypothesis": "target reference own LCFS",
+        "constructor": "ForwardProfile.moment_seed",
+        "predicted_centroid_r_m": 1.650807228571913,
+        "predicted_centroid_z_m": -0.008280478420801396,
+        "predicted_current_a": 1252508.2535743713,
+        "prediction_centroid_support": "boundary_hypothesis_all_domain",
+        "prediction_current_support": "boundary_hypothesis_all_domain",
+        "representation_radius_m": 0.7603265291035844,
+        "representation_support": "compact_centroid_disc",
+        "representation_supported_cells": 342
+      },
+      "terminal_state": {
+        "achieved_plasma_current_a": 1252508.2535743713,
+        "axis_rz_m": [
+          1.7627255894344138,
+          -0.024257994631242955
+        ],
+        "current_relative_error": 0.0,
+        "diverted": true,
+        "finite": true,
+        "label_x_point_rz_m": [
+          1.307051181793213,
+          1.0761576890945435
+        ],
+        "profile_amplitude": 1.1403200488975178,
+        "target_plasma_current_a": 1252508.2535743713,
+        "unscaled_profile_plasma_current_a": 1098383.085332332,
+        "x_point_rz_m": [
+          0.9062733483208708,
+          1.2946289465502632
+        ],
+        "x_point_separation_m": 0.4564565282007343
+      },
+      "termination": "public host Krylov solver returned",
+      "topology_consistent": true
+    },
+    "selection": "member of the banked five-frame score-blind cohort",
+    "shot": "d3d_shot_0112bdc95d.parquet",
+    "target_current_a": 1252508.2535743713,
+    "time_ms": 2080.0
+  },
+  "receipt": "DIII-D moment-seeded constrained cold-start attempt",
+  "solver": {
+    "entry_point": "ForwardProfile.solve",
+    "inner_iterations": 40,
+    "line_search": "armijo",
+    "outer_iterations": 100,
+    "relative_residual_criterion": 1e-08,
+    "route": "host_krylov"
+  },
+  "source": {
+    "commit": "494d00dfe72c058ca1dc265fdcb3e26c4fcf9c62",
+    "tree": "bd4b8ddd8bb82b9264c90ecf71c80134d4310073"
+  }
+}

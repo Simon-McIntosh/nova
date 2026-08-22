@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T10:13:07",
+  "updated": "2026-08-22T10:23:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -52,6 +52,13 @@
         "role": "implement",
         "session_id": "01a0262f-830e-7402-92b6-cffc3106b047",
         "created": "2026-08-21"
+      },
+      {
+        "id": "circuit-ensemble",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-22"
       },
       {
         "id": "circuit-reviewer",
@@ -20765,9 +20772,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T065231647290-mast-near-axis-shape",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a79",
+        "node": "mast-near-axis-shape",
+        "role": "implement",
+        "member": "transport-env",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T06:52:35Z",
+        "completed_at": "2026-08-22T08:22:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 5372,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 5372,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "80a4aa2b67a656af5ae25cbfb3dfaa2ff66809f1",
+        "commits": [
+          "649855c4773f54e6c353b600f877d701fef5bb70"
+        ],
+        "changed_lines": {
+          "added": 351,
+          "removed": 3,
+          "files": 3
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "MAST lower triangularity falls 38.27 to 4.39 percent - every MAST field now single-digit - via axis-expansion shape for faces under-resolved in their limiting poloidal half (face 3 expansion at 8 cells, face 4 clipped at 12), from the same sole spline with closed-form Bernstein coefficient derivatives and no nested autodiff. The memory ladder resolved honestly: closed-form alone did not fix the 17.9 GiB kill, the custom VJP routing cotangents only into each face selected representation did (formerly-fatal test completes), and the compiled-boundary rung measured negative and was removed. Focused 1/1, reference 6/6, extraction 10/10, sequential fresh processes, ruff clean",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T065231647290-mast-near-axis-shape/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 51633152,
+            "cached_input_tokens_cumulative": 411954432,
+            "input_tokens": 52377620,
+            "input_tokens_cumulative": 419518944,
+            "output_tokens": 60615,
+            "output_tokens_cumulative": 701470,
+            "reasoning_output_tokens": 20635,
+            "reasoning_output_tokens_cumulative": 225663
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 503
+    "_version": 505
   }
 }

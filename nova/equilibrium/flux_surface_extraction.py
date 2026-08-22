@@ -1,11 +1,11 @@
 """Traced structured-grid extraction of flux-surface-averaged geometry.
 
 The composition and reuse boundaries follow
-``scripts/geometry_service_reuse/report.md``: one axis-connected flood fill
-establishes topology, a global tensor spline supplies every cell polynomial,
-fixed-capacity clips carry Green-theorem moments, and masked reductions select
-the constrained extrema.  The returned dictionary is the fixed-shape record
-consumed by the transport geometry adapter.
+``scripts/geometry_service_reuse/report.md``: axis-connected flood fills
+establish topology at every surface level, a global tensor spline supplies every
+cell polynomial, fixed-capacity clips carry Green-theorem moments, and masked
+reductions select the constrained extrema.  The returned dictionary is the
+fixed-shape record consumed by the transport geometry adapter.
 """
 
 from functools import partial
@@ -1612,7 +1612,7 @@ def traced_flux_surface_geometry(
 
 
 def _axis_connected_core(psi_n, inside_limiter):
-    """Qualify every nested surface with one axis-connected flood fill."""
+    """Return the axis-connected component inside the boundary surface."""
     confined = (psi_n < 1.0) & inside_limiter
     seed_position = jnp.argmin(jnp.where(confined, psi_n, jnp.inf).reshape(-1))
     seed = jnp.zeros(psi_n.size, dtype=bool).at[seed_position].set(True)
@@ -1656,6 +1656,7 @@ def _surface_clips(
     psi2d,
     psi_n_grid,
     core,
+    inside_limiter,
     radius,
     height,
     f_profile_psi_n,
@@ -1693,17 +1694,31 @@ def _surface_clips(
 
     flat_flux = psi_n_grid.reshape(-1)
     flat_eligible = ((core > 0.0) | (psi_n_grid >= 1.0)).reshape(-1)
-    cell_participation = jnp.any((core > 0.0).reshape(-1)[cell_nodes], axis=1)
+    confined_seed = (core > 0.0) & inside_limiter
+    seed_position = jnp.argmin(
+        jnp.where(confined_seed, psi_n_grid, jnp.inf).reshape(-1)
+    )
+    seed = jnp.zeros(psi_n_grid.size, dtype=bool).at[seed_position].set(True)
+    seed = seed.reshape(psi_n_grid.shape)
+
+    def level_cell_participation(level):
+        level_core = flood_fill_core(
+            (psi_n_grid < level) & inside_limiter,
+            seed,
+            psi_n_grid.shape[0] + psi_n_grid.shape[1],
+        )
+        return jnp.any((level_core > 0.0).reshape(-1)[cell_nodes], axis=1)
 
     def signed_flux(level):
         return jnp.where(flat_eligible, level - flat_flux, -1.0)
 
-    def required_vertex_count(level):
+    def required_vertex_count(level, participation):
         inside = signed_flux(level)[cell_nodes] > 0.0
         crossing = inside != jnp.roll(inside, -1, axis=1)
-        return jnp.max(jnp.sum(inside, axis=1) + jnp.sum(crossing, axis=1))
+        count = jnp.sum(inside, axis=1) + jnp.sum(crossing, axis=1)
+        return jnp.max(jnp.where(participation, count, 0))
 
-    def clip(level, *, separatrix):
+    def clip(level, participation):
         supports = _traced_clip(
             coordinates,
             cell_nodes,
@@ -1712,10 +1727,10 @@ def _surface_clips(
             _SUPPORT_CAPACITY,
             signed_flux(level),
         )
-        return supports.qualify(cell_participation) if separatrix else supports
+        return supports.qualify(participation)
 
-    def corrected_clip(level, *, separatrix):
-        supports = clip(level, separatrix=separatrix)
+    def corrected_clip(level, participation):
+        supports = clip(level, participation)
         base_moments = jnp.stack(
             (
                 supports.area,
@@ -1760,9 +1775,9 @@ def _surface_clips(
             invalid_boundary,
         )
 
-    def cumulative(level, *, separatrix):
+    def cumulative(level, participation):
         supports, correction, *_, boundary_valid, invalid_boundary = corrected_clip(
-            level, separatrix=separatrix
+            level, participation
         )
         integrals = jax.vmap(
             lambda values: jnp.sum(
@@ -1772,13 +1787,13 @@ def _surface_clips(
         return (
             integrals,
             jnp.max(supports.vertex_count),
-            required_vertex_count(level),
+            required_vertex_count(level, participation),
             boundary_valid,
             jnp.sum(invalid_boundary),
             jnp.argmax(invalid_boundary),
         )
 
-    def arc_surface_average(level, *, separatrix):
+    def arc_surface_average(level, participation):
         (
             supports,
             _,
@@ -1792,7 +1807,7 @@ def _surface_clips(
             arc_valid,
             boundary_valid,
             invalid_boundary,
-        ) = corrected_clip(level, separatrix=separatrix)
+        ) = corrected_clip(level, participation)
         _, physical_r, physical_z, *_ = _bicubic_derivatives(
             physical_coefficient[:, None], arc_r, arc_z
         )
@@ -1841,10 +1856,13 @@ def _surface_clips(
 
     levels = jnp.linspace(psi_n_min, psi_n_max, n_surface_bins + 1, dtype=dtype)
     surface_level = 0.5 * (levels[:-1] + levels[1:])
+    cumulative_participation = jax.lax.map(level_cell_participation, levels)
+    surface_participation = jax.lax.map(level_cell_participation, surface_level)
     interior_cumulative = jax.lax.map(
-        lambda level: cumulative(level, separatrix=False), levels[:-1]
+        lambda inputs: cumulative(inputs[0], inputs[1]),
+        (levels[:-1], cumulative_participation[:-1]),
     )
-    edge_cumulative = cumulative(levels[-1], separatrix=True)
+    edge_cumulative = cumulative(levels[-1], cumulative_participation[-1])
     cumulative_values = jnp.concatenate(
         (interior_cumulative[0], edge_cumulative[0][None]), axis=0
     )
@@ -1865,11 +1883,12 @@ def _surface_clips(
     )
     cell_origin = coordinates[cell_nodes[:, 0]]
     interior_arc_average = jax.lax.map(
-        lambda level: arc_surface_average(level, separatrix=False), surface_level
+        lambda inputs: arc_surface_average(inputs[0], inputs[1]),
+        (surface_level, surface_participation),
     )
-    edge_arc_average = arc_surface_average(levels[-1], separatrix=True)
+    edge_arc_average = arc_surface_average(levels[-1], cumulative_participation[-1])
 
-    def extrema(level, *, separatrix):
+    def extrema(level, participation):
         (
             supports,
             _,
@@ -1883,12 +1902,12 @@ def _surface_clips(
             arc_valid,
             boundary_valid,
             invalid_boundary,
-        ) = corrected_clip(level, separatrix=separatrix)
+        ) = corrected_clip(level, participation)
         samples = jnp.concatenate(
             (crossing_points, jnp.stack((arc_r, arc_z), axis=-1)), axis=1
         )
         sample_valid = jnp.concatenate((crossing, arc_sample_valid), axis=1)
-        sample_valid &= cell_participation[:, None]
+        sample_valid &= participation[:, None]
 
         def cell_seed(coordinate, *, largest):
             fill = -jnp.inf if largest else jnp.inf
@@ -1917,7 +1936,7 @@ def _surface_clips(
                 radial_extremum=radial_extremum,
             )
             stationary.append(jnp.stack((point_r, point_z), axis=-1))
-            stationary_valid.append(point_valid & arc_valid & cell_participation)
+            stationary_valid.append(point_valid & arc_valid & participation)
         samples = jnp.concatenate((samples, jnp.stack(stationary, axis=1)), axis=1)
         sample_valid = jnp.concatenate(
             (sample_valid, jnp.stack(stationary_valid, axis=1)), axis=1
@@ -1948,7 +1967,7 @@ def _surface_clips(
                 r_lower,
                 r_upper,
                 jnp.max(supports.vertex_count),
-                required_vertex_count(level),
+                required_vertex_count(level, participation),
                 boundary_valid,
                 jnp.sum(invalid_boundary),
                 jnp.argmax(invalid_boundary),
@@ -1956,7 +1975,8 @@ def _surface_clips(
         )
 
     surface_extrema = jax.lax.map(
-        lambda level: extrema(level, separatrix=False), surface_level
+        lambda inputs: extrema(inputs[0], inputs[1]),
+        (surface_level, surface_participation),
     )
     (
         r_in,
@@ -1972,7 +1992,7 @@ def _surface_clips(
         surface_invalid_cell,
     ) = surface_extrema.T
     edge_level = levels[-1]
-    edge_extrema = extrema(edge_level, separatrix=True)
+    edge_extrema = extrema(edge_level, cumulative_participation[-1])
     (
         edge_r_in,
         edge_r_out,
@@ -1987,7 +2007,7 @@ def _surface_clips(
         edge_invalid_cell,
     ) = edge_extrema
     edge_supports, edge_correction, *_, edge_integral_valid, _ = corrected_clip(
-        edge_level, separatrix=True
+        edge_level, cumulative_participation[-1]
     )
     edge_values = jax.vmap(
         lambda values: jnp.sum(
@@ -2161,6 +2181,7 @@ def extract_flux_surface_geometry(
         psi2d,
         psi_n_grid,
         core,
+        inside_limiter,
         radius,
         height,
         psi_n_profile,

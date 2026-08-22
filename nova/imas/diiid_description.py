@@ -2,9 +2,9 @@
 
 The challenge rows are the geometry registry input: every selection is keyed by
 the digest of the shipped conductor table, and every field in that table has a
-receipt.  The Green-function route consumes the current channels exactly in the
-units declared by the dataset.  In particular, F-coil currents are already
-ampere-turns, ECOILA remains a plain current with unresolved physical turns, and
+receipt.  The Green-function route consumes every fusion-coil channel on the
+dataset-wide kA.turn contract.  A fit-once ``pf_active`` calibration record
+routes the shipped ECOILA ampere-turns through the unshipped ohmic conductors;
 the toroidal bcoil has no axisymmetric poloidal-flux section.
 """
 
@@ -35,6 +35,7 @@ DATASET_SOURCE = "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-ch
 F_COILS = tuple(f"F{number}{side}" for side in ("A", "B") for number in range(1, 10))
 POLOIDAL_CONDUCTORS = F_COILS + ("ECOILA",)
 ALL_CONDUCTORS = POLOIDAL_CONDUCTORS + ("bcoil",)
+CIRCUIT_DRIVEN_CONDUCTORS = ("ECOILB", "E567UP", "E567DN", "E89UP", "E89DN")
 
 _GEOMETRY_COLUMNS = (
     "coil_name",
@@ -173,6 +174,348 @@ class DiiidDescription:
 
 
 @dataclass(frozen=True)
+class CircuitFitUncertainty:
+    """Ensemble uncertainty retained beside one fitted circuit gain."""
+
+    leave_one_shot_out_r_squared: float
+    leave_one_shot_out_rmse_a_turn: float
+    leave_one_shot_out_median_absolute_error_a_turn: float
+    residual_rms_a_turn: float
+    residual_sample_standard_deviation_a_turn: float
+    residual_rms_fraction: float
+
+    def validate(self) -> None:
+        values = tuple(self.as_record().values())
+        if not np.all(np.isfinite(values)):
+            raise DiiidDescriptionError("circuit uncertainty must be finite")
+        if not 0.0 <= self.leave_one_shot_out_r_squared <= 1.0:
+            raise DiiidDescriptionError("circuit predictive score is outside [0, 1]")
+        if any(value < 0.0 for value in values[1:]):
+            raise DiiidDescriptionError("circuit residual spreads must be nonnegative")
+
+    def as_record(self) -> dict[str, float]:
+        """Return the uncertainty fields as a JSON-compatible record."""
+
+        return {
+            "leave_one_shot_out_r_squared": self.leave_one_shot_out_r_squared,
+            "leave_one_shot_out_rmse_a_turn": self.leave_one_shot_out_rmse_a_turn,
+            "leave_one_shot_out_median_absolute_error_a_turn": (
+                self.leave_one_shot_out_median_absolute_error_a_turn
+            ),
+            "residual_rms_a_turn": self.residual_rms_a_turn,
+            "residual_sample_standard_deviation_a_turn": (
+                self.residual_sample_standard_deviation_a_turn
+            ),
+            "residual_rms_fraction": self.residual_rms_fraction,
+        }
+
+    @classmethod
+    def from_record(cls, record: Mapping[str, Any]) -> CircuitFitUncertainty:
+        """Rebuild one uncertainty record without changing its values."""
+
+        return cls(
+            **{field: float(record[field]) for field in cls.__dataclass_fields__}
+        )
+
+
+@dataclass(frozen=True)
+class PfActiveSupplyRecord:
+    """One logical supply driven by a shipped competition current channel."""
+
+    name: str
+    identifier: str
+    input_column: str
+    input_unit: str
+    output_unit: str
+    scale_to_output: float
+    statement: str
+
+    def validate(self) -> None:
+        if self.input_column != "magnetics_ECOILA":
+            raise DiiidDescriptionError("ohmic supply must use shipped ECOILA")
+        if self.input_unit != "kA.turn" or self.output_unit != "A.turn":
+            raise DiiidDescriptionError("ohmic supply units must preserve ampere-turns")
+        if self.scale_to_output != 1000.0:
+            raise DiiidDescriptionError(
+                "kA.turn supply conversion must be exactly 1000"
+            )
+        if not self.name or not self.identifier or not self.statement:
+            raise DiiidDescriptionError("ohmic supply record is incomplete")
+
+    def as_record(self) -> dict[str, Any]:
+        """Return the supply as a JSON-compatible record."""
+
+        return {
+            "name": self.name,
+            "identifier": self.identifier,
+            "input_column": self.input_column,
+            "input_unit": self.input_unit,
+            "output_unit": self.output_unit,
+            "scale_to_output": self.scale_to_output,
+            "statement": self.statement,
+        }
+
+    @classmethod
+    def from_record(cls, record: Mapping[str, Any]) -> PfActiveSupplyRecord:
+        """Rebuild one supply record."""
+
+        result = cls(
+            name=str(record["name"]),
+            identifier=str(record["identifier"]),
+            input_column=str(record["input_column"]),
+            input_unit=str(record["input_unit"]),
+            output_unit=str(record["output_unit"]),
+            scale_to_output=float(record["scale_to_output"]),
+            statement=str(record["statement"]),
+        )
+        result.validate()
+        return result
+
+
+@dataclass(frozen=True)
+class PfActiveCircuitDriveRecord:
+    """Effective ampere-turn drive from one supply to one conductor."""
+
+    conductor: str
+    gain: float
+    uncertainty: CircuitFitUncertainty
+
+    def validate(self) -> None:
+        if self.conductor not in CIRCUIT_DRIVEN_CONDUCTORS:
+            raise DiiidDescriptionError(
+                f"unexpected circuit conductor {self.conductor}"
+            )
+        if not math.isfinite(self.gain) or self.gain <= 0.0:
+            raise DiiidDescriptionError("circuit gain must be finite and positive")
+        self.uncertainty.validate()
+
+    def as_record(self) -> dict[str, Any]:
+        """Return the drive as a JSON-compatible record."""
+
+        return {
+            "conductor": self.conductor,
+            "gain": self.gain,
+            "uncertainty": self.uncertainty.as_record(),
+        }
+
+    @classmethod
+    def from_record(cls, record: Mapping[str, Any]) -> PfActiveCircuitDriveRecord:
+        """Rebuild one calibrated drive record."""
+
+        result = cls(
+            conductor=str(record["conductor"]),
+            gain=float(record["gain"]),
+            uncertainty=CircuitFitUncertainty.from_record(record["uncertainty"]),
+        )
+        result.validate()
+        return result
+
+
+@dataclass(frozen=True)
+class PfActiveCircuitRecord:
+    """One-supply ohmic topology and its effective conductor drives."""
+
+    name: str
+    identifier: str
+    supply_identifier: str
+    source_conductor: str
+    current_unit: str
+    component_order: tuple[str, ...]
+    connections: tuple[tuple[int, ...], ...]
+    drives: tuple[PfActiveCircuitDriveRecord, ...]
+    provenance: str
+    caveats: tuple[str, ...]
+
+    def validate(self) -> None:
+        if self.source_conductor != "ECOILA" or self.current_unit != "A.turn":
+            raise DiiidDescriptionError(
+                "ohmic circuit source must be ECOILA ampere-turns"
+            )
+        drive_names = tuple(drive.conductor for drive in self.drives)
+        if drive_names != CIRCUIT_DRIVEN_CONDUCTORS:
+            raise DiiidDescriptionError(
+                "ohmic circuit drives are incomplete or unordered"
+            )
+        expected_components = (
+            self.supply_identifier,
+            self.source_conductor,
+            *CIRCUIT_DRIVEN_CONDUCTORS,
+        )
+        if self.component_order != expected_components:
+            raise DiiidDescriptionError("ohmic circuit component order is invalid")
+        matrix = np.asarray(self.connections, dtype=int)
+        component_count = len(self.component_order)
+        if matrix.shape != (component_count, 2 * component_count):
+            raise DiiidDescriptionError(
+                "ohmic circuit connection matrix has wrong shape"
+            )
+        if not np.all((matrix == 0) | (matrix == 1)):
+            raise DiiidDescriptionError("ohmic circuit connections must be binary")
+        if not np.all(matrix.sum(axis=0) == 1) or not np.all(matrix.sum(axis=1) == 2):
+            raise DiiidDescriptionError(
+                "ohmic circuit must form one closed series loop"
+            )
+        if not self.name or not self.identifier or len(self.caveats) < 4:
+            raise DiiidDescriptionError("ohmic circuit provenance is incomplete")
+        for drive in self.drives:
+            drive.validate()
+
+    def currents(self, source_current_a_turn: float) -> dict[str, float]:
+        """Map one shipped ECOILA value to every unshipped conductor."""
+
+        if not math.isfinite(source_current_a_turn):
+            raise DiiidDescriptionError("ohmic circuit source current must be finite")
+        return {
+            drive.conductor: drive.gain * source_current_a_turn for drive in self.drives
+        }
+
+    def as_record(self) -> dict[str, Any]:
+        """Return the complete circuit as a JSON-compatible record."""
+
+        return {
+            "name": self.name,
+            "identifier": self.identifier,
+            "supply_identifier": self.supply_identifier,
+            "source_conductor": self.source_conductor,
+            "current_unit": self.current_unit,
+            "component_order": list(self.component_order),
+            "connections": [list(row) for row in self.connections],
+            "drives": [drive.as_record() for drive in self.drives],
+            "provenance": self.provenance,
+            "caveats": list(self.caveats),
+        }
+
+    @classmethod
+    def from_record(cls, record: Mapping[str, Any]) -> PfActiveCircuitRecord:
+        """Rebuild a complete circuit record and revalidate its topology."""
+
+        result = cls(
+            name=str(record["name"]),
+            identifier=str(record["identifier"]),
+            supply_identifier=str(record["supply_identifier"]),
+            source_conductor=str(record["source_conductor"]),
+            current_unit=str(record["current_unit"]),
+            component_order=tuple(str(value) for value in record["component_order"]),
+            connections=tuple(
+                tuple(int(value) for value in row) for row in record["connections"]
+            ),
+            drives=tuple(
+                PfActiveCircuitDriveRecord.from_record(drive)
+                for drive in record["drives"]
+            ),
+            provenance=str(record["provenance"]),
+            caveats=tuple(str(value) for value in record["caveats"]),
+        )
+        result.validate()
+        return result
+
+
+def _closed_series_connections(component_count: int) -> tuple[tuple[int, ...], ...]:
+    """Return an IMAS-style node-by-component-side connection matrix."""
+
+    matrix = np.zeros((component_count, 2 * component_count), dtype=int)
+    for component in range(component_count):
+        matrix[component, 2 * component] = 1
+        matrix[(component + 1) % component_count, 2 * component + 1] = 1
+    return tuple(tuple(int(value) for value in row) for row in matrix)
+
+
+PF_ACTIVE_SUPPLY = PfActiveSupplyRecord(
+    name="DIII-D ohmic-heating supply",
+    identifier="diiid_ohmic_supply",
+    input_column="magnetics_ECOILA",
+    input_unit="kA.turn",
+    output_unit="A.turn",
+    scale_to_output=1000.0,
+    statement=(
+        "logical description supply: the competition channel already carries "
+        "total ampere-turns and is converted from kiloampere-turns exactly once"
+    ),
+)
+
+_CIRCUIT_UNCERTAINTY = {
+    "ECOILB": CircuitFitUncertainty(
+        0.9933483532119266,
+        4026.405742311334,
+        1567.41255627204,
+        3886.882865339553,
+        3906.7678929572608,
+        0.07748542028108989,
+    ),
+    "E567UP": CircuitFitUncertainty(
+        0.9556677196797801,
+        5491.813833823248,
+        2924.3729372139474,
+        5329.089678101602,
+        4471.399220840082,
+        0.20400807944058003,
+    ),
+    "E567DN": CircuitFitUncertainty(
+        0.9420419098721444,
+        6197.232415115648,
+        3896.911882108876,
+        6032.300818544522,
+        4912.7339875007765,
+        0.23424237119539848,
+    ),
+    "E89UP": CircuitFitUncertainty(
+        0.9877483760442158,
+        2817.419073607406,
+        2093.257434373751,
+        2793.614101796187,
+        1882.3322191385087,
+        0.10627969377421093,
+    ),
+    "E89DN": CircuitFitUncertainty(
+        0.9851155287064202,
+        3099.582545883437,
+        2543.855213386234,
+        3067.5679718120577,
+        1959.9950004145705,
+        0.11657434222566553,
+    ),
+}
+
+PF_ACTIVE_CIRCUIT = PfActiveCircuitRecord(
+    name="DIII-D effective ohmic circuit",
+    identifier="diiid_effective_ohmic_circuit",
+    supply_identifier=PF_ACTIVE_SUPPLY.identifier,
+    source_conductor="ECOILA",
+    current_unit="A.turn",
+    component_order=(
+        PF_ACTIVE_SUPPLY.identifier,
+        "ECOILA",
+        *CIRCUIT_DRIVEN_CONDUCTORS,
+    ),
+    connections=_closed_series_connections(2 + len(CIRCUIT_DRIVEN_CONDUCTORS)),
+    drives=tuple(
+        PfActiveCircuitDriveRecord(name, gain, _CIRCUIT_UNCERTAINTY[name])
+        for name, gain in (
+            ("ECOILB", 2.000918),
+            ("E567UP", 1.023129),
+            ("E567DN", 1.001657),
+            ("E89UP", 1.045695),
+            ("E89DN", 1.045624),
+        )
+    ),
+    provenance=(
+        "fit once from full-grid Tikhonov label-flux regressions over 60 frames "
+        "and 20 shots; applied deterministically at inference"
+    ),
+    caveats=(
+        "ECOILB and the shipped ECOILA response are nearly degenerate; the "
+        "factor-two ECOILB gain is an effective calibration, not a turn count",
+        "the fitted targets use EFIT label flux during calibration and are not "
+        "an inference-time label read",
+        "post-fit flux closure passes 1 of 60 frames against the 54 of 60 rule; "
+        "the circuit does not explain all labelled flux",
+        "competition fusion-coil channels are kA.turn; multiply by 1000 once to "
+        "obtain the A.turn values consumed by the response operator",
+    ),
+)
+
+
+@dataclass(frozen=True)
 class DiiidDatasetMachineDescription:
     """Competition geometry routed through Nova's static machine seam.
 
@@ -186,6 +529,8 @@ class DiiidDatasetMachineDescription:
     machine: StaticMachineDescription
     grid_r: tuple[float, ...]
     grid_z: tuple[float, ...]
+    active_supplies: tuple[PfActiveSupplyRecord, ...]
+    active_circuits: tuple[PfActiveCircuitRecord, ...]
     receipts: tuple[GeometryReceipt, ...]
 
     def validate(self) -> None:
@@ -211,6 +556,17 @@ class DiiidDatasetMachineDescription:
             raise DiiidDescriptionError("the released EFIT grid must be 65 by 65")
         if not self.machine.sightlines:
             raise DiiidDescriptionError("the released Thomson geometry is empty")
+        if self.active_supplies != (PF_ACTIVE_SUPPLY,):
+            raise DiiidDescriptionError("description must carry the ECOILA supply")
+        if self.active_circuits != (PF_ACTIVE_CIRCUIT,):
+            raise DiiidDescriptionError("description must carry the effective circuit")
+        self.active_supplies[0].validate()
+        self.active_circuits[0].validate()
+        if (
+            self.active_circuits[0].supply_identifier
+            != self.active_supplies[0].identifier
+        ):
+            raise DiiidDescriptionError("active circuit references an absent supply")
         for receipt in self.receipts:
             receipt.validate()
         covered = {field for receipt in self.receipts for field in receipt.fields}
@@ -237,6 +593,19 @@ class DiiidDatasetMachineDescription:
         except DiiidDescriptionError:
             return False
         return True
+
+    def pf_active_record(self) -> dict[str, Any]:
+        """Return the supply and circuit payload for machine-description storage."""
+
+        self.validate()
+        return {
+            "supply": [supply.as_record() for supply in self.active_supplies],
+            "circuit": [circuit.as_record() for circuit in self.active_circuits],
+            "response_order": [
+                *POLOIDAL_CONDUCTORS,
+                *CIRCUIT_DRIVEN_CONDUCTORS,
+            ],
+        }
 
 
 @dataclass
@@ -361,6 +730,8 @@ def dataset_machine_description(
         machine=machine,
         grid_r=grid_r,
         grid_z=grid_z,
+        active_supplies=(PF_ACTIVE_SUPPLY,),
+        active_circuits=(PF_ACTIVE_CIRCUIT,),
         receipts=receipts,
     )
     result.validate()
@@ -607,7 +978,7 @@ def _description_from_row(
                     float(angle1),
                     float(angle2),
                 ),
-                current_unit="kA.turn" if name in F_COILS else "kA",
+                current_unit="kA.turn",
                 turns=turns,
                 receipts=(
                     GeometryReceipt(
@@ -679,14 +1050,14 @@ def _turn_convention(name: str) -> TurnConvention:
     if name == "ECOILA":
         return TurnConvention(
             applied_multiplier=1.0,
-            lower_physical_turns=1.0,
+            lower_physical_turns=48.0,
             upper_physical_turns=96.0,
-            resolved=False,
+            resolved=True,
             affects_axisymmetric_poloidal_flux=True,
             statement=(
-                "recorded ECOILA is plain kA and is used without a fabricated turn "
-                "multiplier; the published 48-element group and omitted co-located "
-                "group bound the unresolved physical convention"
+                "recorded ECOILA already contains total ampere-turns and receives no "
+                "additional turn multiplier; the 48-to-96 physical grouping range is "
+                "topology context rather than an input-unit correction"
             ),
         )
     return TurnConvention(
@@ -720,7 +1091,14 @@ __all__ = [
     "DiiidDescriptionRegistry",
     "DiiidDatasetMachineDescription",
     "F_COILS",
+    "CIRCUIT_DRIVEN_CONDUCTORS",
+    "CircuitFitUncertainty",
     "GeometryReceipt",
+    "PF_ACTIVE_CIRCUIT",
+    "PF_ACTIVE_SUPPLY",
+    "PfActiveCircuitDriveRecord",
+    "PfActiveCircuitRecord",
+    "PfActiveSupplyRecord",
     "STARTER_KIT_VACUUM_BAR_SOURCE",
     "STARTER_KIT_VACUUM_R2_BAR",
     "TurnConvention",

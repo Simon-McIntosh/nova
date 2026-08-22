@@ -21,6 +21,8 @@ from nova.equilibrium.forward import ForwardProfile
 
 from .diiid_description import (
     DiiidDescription,
+    PF_ACTIVE_CIRCUIT,
+    PF_ACTIVE_SUPPLY,
     POLOIDAL_CONDUCTORS,
     active_coil_response_from_imas,
 )
@@ -60,6 +62,23 @@ KNOWABLE_RELATIONS = {
         ),
     ),
 }
+CIRCUIT_RELATIONS = {
+    drive.conductor: StaticCurrentRelation(
+        source=PF_ACTIVE_CIRCUIT.source_conductor,
+        scale=drive.gain,
+        relative_residual=drive.uncertainty.residual_rms_fraction,
+        provenance=(
+            f"{PF_ACTIVE_CIRCUIT.provenance}; leave-one-shot-out R-squared "
+            f"{drive.uncertainty.leave_one_shot_out_r_squared:.6f}; residual RMS "
+            f"{drive.uncertainty.residual_rms_a_turn:.6f} A.turn and sample "
+            "standard deviation "
+            f"{drive.uncertainty.residual_sample_standard_deviation_a_turn:.6f} "
+            "A.turn"
+        ),
+        transfer_caveat="; ".join(PF_ACTIVE_CIRCUIT.caveats),
+    )
+    for drive in PF_ACTIVE_CIRCUIT.drives
+}
 DEFAULT_ACTIVE_COIL_ENTRY = Path("/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc")
 DEFAULT_ACTIVE_COIL_DD_VERSION = "3.41.0"
 
@@ -75,16 +94,21 @@ class DiiidCurrentAdapter:
 
 def current_declarations(
     shipped_names: Sequence[str],
-    unknown_priors: Mapping[str, UnknownCurrentPrior],
+    unknown_priors: Mapping[str, UnknownCurrentPrior] | None = None,
+    *,
+    use_circuit: bool = True,
 ) -> tuple[ConductorCurrentDeclaration, ...]:
-    """Return all DIII-D declarations without consulting label artifacts."""
+    """Return all DIII-D declarations without inference-time label access."""
 
     names = tuple(str(name) for name in shipped_names)
     if set(names) != set(POLOIDAL_CONDUCTORS):
         raise ValueError(
             "DIII-D shipped response must contain its 19 poloidal channels"
         )
-    if set(unknown_priors) != set(UNKNOWN_POLOIDAL_CONDUCTORS):
+    if not use_circuit and (
+        unknown_priors is None
+        or set(unknown_priors) != set(UNKNOWN_POLOIDAL_CONDUCTORS)
+    ):
         raise ValueError(
             "DIII-D unknown priors must name ECOILB, E567DN, and E89UP exactly"
         )
@@ -97,7 +121,16 @@ def current_declarations(
         for name in names
     ]
     for name in OMITTED_POLOIDAL_CONDUCTORS:
-        if name in KNOWABLE_RELATIONS:
+        if use_circuit:
+            declared.append(
+                ConductorCurrentDeclaration(
+                    name=name,
+                    tier=CurrentTier.KNOWABLE,
+                    relation=CIRCUIT_RELATIONS[name],
+                    provenance="fit-once machine-description circuit drive",
+                )
+            )
+        elif name in KNOWABLE_RELATIONS:
             declared.append(
                 ConductorCurrentDeclaration(
                     name=name,
@@ -107,6 +140,7 @@ def current_declarations(
                 )
             )
         else:
+            assert unknown_priors is not None
             declared.append(
                 ConductorCurrentDeclaration(
                     name=name,
@@ -116,6 +150,16 @@ def current_declarations(
                 )
             )
     return tuple(declared)
+
+
+def circuit_current_map(shipped_current_a: Mapping[str, float]) -> dict[str, float]:
+    """Drive every unshipped conductor from shipped ECOILA ampere-turns."""
+
+    try:
+        source = float(shipped_current_a[PF_ACTIVE_CIRCUIT.source_conductor])
+    except KeyError as error:
+        raise ValueError("shipped current map is missing ECOILA") from error
+    return PF_ACTIVE_CIRCUIT.currents(source)
 
 
 def shipped_current_at(
@@ -143,14 +187,20 @@ def shipped_current_at(
 def resolve_diiid_currents(
     shipped_names: Sequence[str],
     shipped_current_a: Mapping[str, float],
-    unknown_priors: Mapping[str, UnknownCurrentPrior],
+    unknown_priors: Mapping[str, UnknownCurrentPrior] | None = None,
+    *,
+    use_circuit: bool = True,
 ) -> CurrentResolution:
-    """Resolve the 24 ordered currents while leaving three explicit holes."""
+    """Resolve 24 ordered currents through the circuit or explicit free slots."""
 
     names = tuple(str(name) for name in shipped_names) + OMITTED_POLOIDAL_CONDUCTORS
     return resolve_conductor_currents(
         names,
-        current_declarations(shipped_names, unknown_priors),
+        current_declarations(
+            shipped_names,
+            unknown_priors,
+            use_circuit=use_circuit,
+        ),
         shipped_current_a,
     )
 
@@ -160,7 +210,8 @@ def complete_profile_current_adapter(
     *,
     shipped_names: Sequence[str],
     shipped_current_a: Mapping[str, float],
-    unknown_priors: Mapping[str, UnknownCurrentPrior],
+    unknown_priors: Mapping[str, UnknownCurrentPrior] | None = None,
+    use_circuit: bool = True,
     active_coil_entry: str | Path = DEFAULT_ACTIVE_COIL_ENTRY,
     active_coil_dd_version: str = DEFAULT_ACTIVE_COIL_DD_VERSION,
 ) -> DiiidCurrentAdapter:
@@ -171,7 +222,12 @@ def complete_profile_current_adapter(
         raise ValueError("grid response columns do not match shipped conductor order")
     if profile.operator.wall.source_target.shape[1] != len(names):
         raise ValueError("wall response columns do not match shipped conductor order")
-    resolution = resolve_diiid_currents(names, shipped_current_a, unknown_priors)
+    resolution = resolve_diiid_currents(
+        names,
+        shipped_current_a,
+        unknown_priors,
+        use_circuit=use_circuit,
+    )
     grid_names, grid_response, grid_receipt = active_coil_response_from_imas(
         active_coil_entry,
         active_coil_dd_version,
@@ -213,6 +269,13 @@ def complete_profile_current_adapter(
             "response_order": list(resolution.names),
             "shipped_count": len(names),
             "complete_count": len(resolution.names),
+            "current_authority": (
+                "pf_active circuit" if use_circuit else "free-parameter opt-out"
+            ),
+            "pf_active": {
+                "supply": PF_ACTIVE_SUPPLY.as_record(),
+                "circuit": PF_ACTIVE_CIRCUIT.as_record(),
+            },
             "grid": grid_receipt,
             "wall": wall_receipt,
         },

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -12,7 +14,11 @@ from nova.equilibrium.conductor_current import (
     solve_conductor_currents,
 )
 from nova.imas import diiid_current
-from nova.imas.diiid_description import POLOIDAL_CONDUCTORS
+from nova.imas.diiid_description import (
+    CIRCUIT_DRIVEN_CONDUCTORS,
+    PF_ACTIVE_CIRCUIT,
+    POLOIDAL_CONDUCTORS,
+)
 
 
 def _priors() -> dict[str, UnknownCurrentPrior]:
@@ -38,29 +44,89 @@ def _shipped() -> dict[str, float]:
 
 
 def test_diiid_tiers_carry_fit_once_values_and_relation_uncertainty() -> None:
-    resolution = diiid_current.resolve_diiid_currents(
-        POLOIDAL_CONDUCTORS, _shipped(), _priors()
-    )
+    resolution = diiid_current.resolve_diiid_currents(POLOIDAL_CONDUCTORS, _shipped())
     by_name = {name: index for index, name in enumerate(resolution.names)}
 
     assert len(resolution.names) == 24
     assert resolution.names[:19] == POLOIDAL_CONDUCTORS
+    assert resolution.unknown_names == ()
+    expected = {
+        "ECOILB": 20_009.18,
+        "E567UP": 10_231.29,
+        "E567DN": 10_016.57,
+        "E89UP": 10_456.95,
+        "E89DN": 10_456.24,
+    }
+    for drive in PF_ACTIVE_CIRCUIT.drives:
+        index = by_name[drive.conductor]
+        assert resolution.template_a[index] == pytest.approx(expected[drive.conductor])
+        assert resolution.prescribed_standard_deviation_a[index] == pytest.approx(
+            abs(expected[drive.conductor]) * drive.uncertainty.residual_rms_fraction
+        )
+        declaration = resolution.declarations[index]
+        assert declaration.relation is diiid_current.CIRCUIT_RELATIONS[drive.conductor]
+        assert "leave-one-shot-out R-squared" in declaration.relation.provenance
+        assert "label flux" in declaration.relation.transfer_caveat
+
+
+def test_circuit_map_reconstructs_all_unshipped_currents_from_ecoila() -> None:
+    shipped = _shipped()
+
+    reconstructed = diiid_current.circuit_current_map(shipped)
+    resolution = diiid_current.resolve_diiid_currents(POLOIDAL_CONDUCTORS, shipped)
+
+    assert tuple(reconstructed) == CIRCUIT_DRIVEN_CONDUCTORS
+    np.testing.assert_allclose(
+        list(reconstructed.values()),
+        [20_009.18, 10_231.29, 10_016.57, 10_456.95, 10_456.24],
+        rtol=0.0,
+        atol=1.0e-10,
+    )
+    np.testing.assert_allclose(
+        resolution.current(())[: len(POLOIDAL_CONDUCTORS)],
+        list(shipped.values()),
+    )
+    np.testing.assert_allclose(
+        resolution.current(())[len(POLOIDAL_CONDUCTORS) :],
+        list(reconstructed.values()),
+    )
+
+
+def test_banked_circuit_receipt_matches_runtime_calibration() -> None:
+    path = (
+        Path(__file__).parents[2]
+        / "docs/figures/coil-circuit-discovery/pf_active_circuit_receipt.json"
+    )
+    receipt = json.loads(path.read_text())
+    banked = receipt["fit"]["drives"]
+
+    assert receipt["reconstruction_fixture"]["complete_response_current_count"] == 24
+    assert receipt["reconstruction_fixture"]["free_current_count_with_circuit"] == 0
+    assert [row["gain"] for row in banked] == [
+        drive.gain for drive in PF_ACTIVE_CIRCUIT.drives
+    ]
+    assert [row["residual_rms_fraction"] for row in banked] == [
+        drive.uncertainty.residual_rms_fraction for drive in PF_ACTIVE_CIRCUIT.drives
+    ]
+    assert "nearly degenerate" in " ".join(receipt["caveats"])
+    assert "1 of 60" in " ".join(receipt["caveats"])
+
+
+def test_circuit_opt_out_retains_three_free_current_slots() -> None:
+    resolution = diiid_current.resolve_diiid_currents(
+        POLOIDAL_CONDUCTORS,
+        _shipped(),
+        _priors(),
+        use_circuit=False,
+    )
+    by_name = {name: index for index, name in enumerate(resolution.names)}
+
     assert resolution.unknown_names == ("ECOILB", "E567DN", "E89UP")
     assert resolution.template_a[by_name["E567UP"]] == pytest.approx(9929.0)
     assert resolution.template_a[by_name["E89DN"]] == pytest.approx(10_165.0)
-    assert resolution.prescribed_standard_deviation_a[
-        by_name["E567UP"]
-    ] == pytest.approx(56.5953)
-    assert resolution.prescribed_standard_deviation_a[
-        by_name["E89DN"]
-    ] == pytest.approx(71.7649)
     assert all(
         np.isnan(resolution.template_a[by_name[name]])
         for name in diiid_current.UNKNOWN_POLOIDAL_CONDUCTORS
-    )
-    assert all(
-        "different pulses" in diiid_current.KNOWABLE_RELATIONS[name].transfer_caveat
-        for name in diiid_current.KNOWABLE_RELATIONS
     )
 
 
@@ -168,6 +234,9 @@ def test_complete_adapter_preserves_response_order(monkeypatch) -> None:
         [[100.0, 101.0, 102.0, 103.0, 104.0]] * 2,
     )
     assert adapter.response_receipt["complete_count"] == 24
+    assert adapter.response_receipt["current_authority"] == "pf_active circuit"
+    assert adapter.resolution.unknown_names == ()
+    assert len(adapter.response_receipt["pf_active"]["circuit"]["drives"]) == 5
 
 
 class RecordingProfile:
@@ -182,7 +251,10 @@ class RecordingProfile:
 
 def test_outer_loop_drives_only_three_diiid_unknown_slots() -> None:
     resolution = diiid_current.resolve_diiid_currents(
-        POLOIDAL_CONDUCTORS, _shipped(), _priors()
+        POLOIDAL_CONDUCTORS,
+        _shipped(),
+        _priors(),
+        use_circuit=False,
     )
     profile = RecordingProfile()
     target = np.asarray([11_500.0, 13_500.0, 15_500.0])

@@ -1,77 +1,78 @@
-NEEDS-HELP: the H200 gentle window exhausts the declared iteration cap at residual 0.0277048 instead of converging at 0.005
+# CPU--H200 coupled-window divergence diagnosis
 
-tried: Ran the same landed gentle configuration in exactly two H200 jobs. Job `1253074` correctly refused the original CUDA-only launch at the host grid-validation callback. Under the amended `JAX_PLATFORMS=cuda,cpu` contract, job `1253082` cleared that seam, executed all ten declared exchanges with the equilibrium solve leaves and returned TORAX state channels guarded as CUDA-only, then returned `WindowConvergenceError`: residual `0.0277048` after cap `10`. The landed CPU run converged at maximum residual `0.0049860186`. No tolerance, damping, source, window, or iteration knob was changed.
+SLURM job `1253087` ran on JAX backend `gpu` and device `NVIDIA H200 NVL`. Configuration: window `0.0025` s, auxiliary source multiplier `0.5`, cap `10`, tolerance `0.005`, damping `0.5`.
 
-options: (1) add a product diagnostic that banks the non-converged GPU residual trace, branch receipts, per-field exchanged values, callback timings, and CPU/GPU precision provenance before raising, then compare it with the landed CPU trajectory; (2) isolate the first CPU/GPU exchange whose residual or branch selection diverges in a focused equivalence test; (3) integrate the post-cut boundary-band implementation and rerun both hardware lanes as a separately versioned comparison rather than mixing it with this pre-band baseline.
+## Precision discriminator
 
-leaning: Option 1 followed by option 2, preserving cap `10`, tolerance `0.005`, and damping `0.5`. The observed residual is 5.54 times the convergence limit, so weakening the gate would turn a hardware-dependent trajectory change into a false pass.
+| backend | inner fixed-point residual | dtype | placement |
+|---|---:|---|---|
+| CPU | `5.6258166556553511e-15` | `float64` | `cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0,cpu:0` |
+| H200 | `4.7216675502821279e-15` | `float64` | `cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0,cuda:0` |
 
-cost-if-wrong: If the discrepancy is caused only by benchmark synchronization or unbanked precision configuration, the product diagnostic can be removed after attribution and this exact job rerun; if the equilibrium branch or TORAX state genuinely differs on CUDA, the affected solver seam needs repair and both timing and receipt evidence must be regenerated.
+Verdict: **FLOAT64 CONFIRMED; PRECISION ACQUITTED**
 
-# Gentle coupled-window H200 outcome
+The CUDA sweep probe recorded `1516` input/output arrays for the first equilibrium and TORAX sweeps. The full TSV names each array's path, dtype, backend, device and shape.
 
-The amended execution contract successfully passed the host callback boundary, but the physics convergence contract did not pass. Job `1253082` ran for 249 s allocation wall time on one H200 and exhausted all ten exchanges at residual `0.0277048`; it did not return a `WindowReceipt`. The result is therefore a measured non-convergence, not an end-to-end timing or receipt success.
+## First trajectory divergence
 
-## Allocation and declared knobs
+The first non-identical quantity is iteration `1`, `geometry.phi_boundary`: CPU `0.024887102508608275`, H200 `0.024544392673846154`, absolute difference `0.00034270983476212061`.
 
-| item | value |
-|---|---:|
-| amended SLURM job | `1253082` |
-| node | `98dci4-gpu-0003` |
-| partition | `betelgeuse` |
-| reservation | `gpu_0003_grpA` |
-| requested accelerator | `gres/gpu:h200:1` |
-| CPUs / memory | `7` / `64 GiB` |
-| TMPDIR | `/tmp` |
-| JAX platforms | `cuda,cpu` |
-| job state / exit | `FAILED` / `1:0` |
-| allocation wall time | `249 s` |
-| window length | `0.0025 s` |
-| auxiliary source multiplier | `0.5` |
-| iteration cap | `10` |
-| convergence tolerance | `0.005` |
-| damping | `0.5` |
+| iteration | CPU maximum residual | H200 maximum residual | difference |
+|---:|---:|---:|---:|
+| 1 | `1.7244181062243822` | `1.7437508271419973` | `0.019332720917615065` |
+| 2 | `0.88526428253015077` | `0.91786089157827588` | `0.032596609048125114` |
+| 3 | `0.45500915267653674` | `0.56534643082695835` | `0.1103372781504216` |
+| 4 | `0.23452428075438966` | `0.36610522244980021` | `0.13158094169541054` |
+| 5 | `0.12137886616668318` | `0.24067272599372327` | `0.11929385982704009` |
+| 6 | `0.063153381130372832` | `0.15833945182031628` | `0.095186070689943447` |
+| 7 | `0.033069976727440283` | `0.10364417454985103` | `0.070574197822410756` |
+| 8 | `0.017446998652218382` | `0.067359458948916179` | `0.049912460296697797` |
+| 9 | `0.0092831536471297878` | `0.043453128418002369` | `0.03416997477087258` |
+| 10 | `0.0049860186161842365` | `0.027837318675274874` | `0.022851300059090637` |
 
-The first job, `1253074`, ran for 97 s and established the callback refusal that motivated the amended platform contract. It remains provenance, not a timing sample.
+## Exhausted or converged receipt
 
-## Device and solver assertions
+Typed outcome: `WindowConvergenceError` — `window exchange did not converge: residual 0.0278373 after 10 iterations`.
+Iterations `10`; measured contraction `0.64062864260291186`; exit residual `0.027837318675274874`; damping `0.5`. The tolerance remains `0.005`.
 
-The amended driver requires JAX backend `gpu` and a separately registered CPU callback device. During each exchange it walks every JAX leaf in the returned `ForwardEquilibrium` and each of the five returned TORAX state channels—rho, psi, ion temperature, electron temperature, and electron density—and raises immediately if any device platform is not GPU. Job `1253082` reached the convergence gate only after ten transport and ten equilibrium updates without a device-placement exception: 20 coarse-sample equilibrium receipts and 10 returned TORAX states traversed those CUDA assertions.
+Failure-path serialization retained `10` residual rows, `20` branch receipts, `10` guard timings, `20` side timings, `1340` solve-array dtype records and `272` exchange-array dtype records before the typed exhaustion crossed the caller boundary.
 
-The source-level owner path is also intact:
+## Wall-time structure
 
-```text
-nova.transport.coupled_window.equilibrium_sweep
-  -> sampled_profile.cold_seed_portfolio(
-       observed.moments.plasma_current, ...)
-  -> sampled_profile.solve_portfolio(...)
-  -> nova.equilibrium.forward.ForwardProfile.solve_portfolio
-```
+Fixture and precision-probe preparation took `58.811444299295545` s. The window took `141.66934043541551` s; the landed CPU window figure is `423.03271608706564` s. That CPU figure is pre-band: boundary-band sparsification landed later at `32942ac3`, whose warm CPU assembly figure is 24.6 s; the CPU window was not rerun.
 
-The relevant definitions and calls are at `nova/transport/coupled_window.py:948`, `nova/transport/coupled_window.py:1015`, `nova/transport/coupled_window.py:1039`, and `nova/equilibrium/forward.py:978`.
+| iteration | side | wall time (s) |
+|---:|---|---:|
+| 1 | transport | `8.3850863883271813` |
+| 1 | equilibrium_sweep | `14.473566920496523` |
+| 2 | transport | `0.12194113899022341` |
+| 2 | equilibrium_sweep | `2.9101942079141736` |
+| 3 | transport | `0.12559798080474138` |
+| 3 | equilibrium_sweep | `2.847257855348289` |
+| 4 | transport | `0.13332195486873388` |
+| 4 | equilibrium_sweep | `2.8589411079883575` |
+| 5 | transport | `0.13555588573217392` |
+| 5 | equilibrium_sweep | `2.8909664116799831` |
+| 6 | transport | `0.14308317191898823` |
+| 6 | equilibrium_sweep | `2.8747726334258914` |
+| 7 | transport | `0.14729427918791771` |
+| 7 | equilibrium_sweep | `2.8791389120742679` |
+| 8 | transport | `0.13336793426424265` |
+| 8 | equilibrium_sweep | `2.9249030221253633` |
+| 9 | transport | `0.13081431295722723` |
+| 9 | equilibrium_sweep | `2.8716153837740421` |
+| 10 | transport | `0.13457444217056036` |
+| 10 | equilibrium_sweep | `2.8659708416089416` |
 
-## Guard callback measurement
+## Guard callback round trips
 
-The driver synchronously wraps `_validated_grid_callback`, blocks its returned array, and records dispatch, CUDA-to-host grid transfer, CPU validation, and returned-array handoff once per adapter construction. Those ten in-memory measurements were not serialized because the driver correctly stopped before its success-only artifact writer after receiving `WindowConvergenceError`. Their numerical cost is therefore **unavailable**, not reconstructed from the 249 s allocation time. A diagnostic rerun would be required to bank them, but the worker contract requires stopping after the same batch command has failed twice following different fixes.
+`10` calls cost `0.024270101450383663` s total and `0.00076295156031847` s median per adapter construction.
 
-This unavailable number means no evidence-based recommendation can yet be made about a provenance-gated guard bypass. The guard stays as-is until its measured cost is durable.
+## Latest transport ledgers
 
-## Pre-band CPU baseline and post-cut sparsification
+Flux closure absolute/relative: `0` / `0`.
+Current continuity absolute/relative: `0` / `0`.
 
-| measurement | landed CPU, pre-band | H200 amended job | finding |
-|---|---:|---:|---|
-| complete window wall time | `423.032716 s` | unavailable | no converged `WindowReceipt` |
-| equilibrium plus FSA | `422.454568 s` | unavailable | per-iteration values were not serialized on error |
-| TORAX | `0.578148 s` | unavailable | per-iteration values were not serialized on error |
-| iterations used | `10` | `10` | both reached the declared cap |
-| maximum exit residual | `0.0049860186` | `0.0277048` | H200 is `0.0227188` higher and 5.54 times the tolerance |
-| measured contraction | `0.5371039633` | unavailable | non-converged receipt was not serialized |
-| flux-consumption ledger closure | `0` | unavailable | terminal ledger was not serialized |
-| plasma-current ledger closure | `0` | unavailable | terminal ledger was not serialized |
-| cold-compile cost | not separately banked | unavailable | first-versus-warm timing rows were not serialized |
+## Solver identity
 
-The `423.032716 s` figure is the landed pre-band CPU window and remains the only directly comparable CPU measurement. Boundary-band sparsification landed on main after this worktree was cut in commit `32942ac3`; warm ITER CPU assembly is now `24.6 s`. The complete CPU window has not been remeasured after that change, so this report does not infer a post-band CPU window time or speedup. The H200 job also executed the pre-band worktree, keeping the failed receipt comparison on the same code lineage.
-
-## Quantitative verdict
-
-The declared success threshold was `0.005`; the observed H200 exit residual was `0.0277048`, an excess of `0.0227048` over the limit and a ratio of `5.54096`. The H200 result therefore fails convergence. End-to-end wall time, per-iteration sweep times, guard callback cost, cold-compile amortisation, contraction, exchanged-field residuals, and the two ledger closures remain unavailable because the driver never promoted the non-converged trajectory to a success artifact.
+`equilibrium_sweep` at `/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s-20260821-geometry/gpu-divergence-diagnosis/nova/transport/coupled_window.py:955` routes through the plasma-current-bearing cold portfolio and `ForwardProfile.solve_portfolio` at `/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s-20260821-geometry/gpu-divergence-diagnosis/nova/equilibrium/forward.py:978`.

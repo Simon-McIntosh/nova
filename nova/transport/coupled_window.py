@@ -809,6 +809,7 @@ def solve_window(
     transport_update: Callable[[Waveform, np.ndarray], ExchangeSweepResult],
     *,
     damping: float = 1.0,
+    failure_serializer: Callable[[WindowConvergenceError], None] | None = None,
 ) -> WindowReceipt:
     """Converge one equilibrium--transport waveform exchange or raise.
 
@@ -818,7 +819,10 @@ def solve_window(
     exchanged profile and coordinate-map field before relaxation.  Exhausting
     the cap raises :class:`WindowConvergenceError`; the exception retains the
     final candidate and convergence receipt for diagnosis, but no degraded
-    :class:`WindowReceipt` is returned.
+    :class:`WindowReceipt` is returned.  A ``failure_serializer`` may persist
+    that typed exception immediately before it is raised.  This keeps storage
+    policy outside the pure iteration while ensuring an exhausted trajectory
+    cannot be lost to a caller that terminates on the exception.
     """
     if not np.isfinite(damping) or not 0.0 < damping <= 1.0:
         raise ValueError("window damping must lie in (0, 1]")
@@ -876,13 +880,16 @@ def solve_window(
                 conservation=conservation,
             )
         if iteration == config.iteration_cap:
-            raise WindowConvergenceError(
+            error = WindowConvergenceError(
                 convergence,
                 geometry_candidate,
                 source_candidate,
                 equilibrated.receipt,
                 transported.receipt,
             )
+            if failure_serializer is not None:
+                failure_serializer(error)
+            raise error
         geometry = _blend_waveform(geometry, geometry_candidate, damping)
         source = _blend_waveform(source, source_candidate, damping)
 

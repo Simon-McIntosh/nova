@@ -1,0 +1,151 @@
+{
+  "aggregate": {
+    "anchor_ratio_minus_native65_formula_ratio": -0.3861398527437985,
+    "nova_over_referee_formula_max": 1.010165242404354,
+    "nova_over_referee_formula_median": 0.9850469558254387,
+    "nova_over_referee_formula_min": 0.9565306016675053,
+    "published_over_referee_formula_max": 1.711845372974562,
+    "published_over_referee_formula_median": 1.6343442452148569,
+    "published_over_referee_formula_min": 1.552088898675206,
+    "shot_count": 6
+  },
+  "ambix_read": {
+    "challenge_loader_scalar": "imas_ambix/challenge/loader.py:29-36,120-143 loads efit_li but derives no consistency scalar",
+    "commit": "2f3dcd0c87be908f3f7912c50168c6fc0dae2b79",
+    "consistency_code_present": false
+  },
+  "execution_qualification": {
+    "exact_scorer_contour_executed": false,
+    "reason": "Ambix and Nova project environments lack the official scorer dependency scikit-image==0.25.2; no dependency was added across the Nova fence",
+    "representative_stored_lcfs_cell_quadrature_volume_error_vs_exact_contour": 0.004475907677901958,
+    "substitute": "official derive.py internal-inductance formula and native 65x65 gradient, evaluated on each banked stored LCFS"
+  },
+  "nova_banked_inputs": {
+    "anchor_ratio": 0.6020235565543425,
+    "anchor_shot": 22086,
+    "anchor_slice_index": 43,
+    "representative_anchor": "docs/figures/efit-forward-parity/field-energy-instrument-control.json",
+    "six_shot_extension": "docs/figures/efit-forward-parity/tared-plasma-support-solve.json"
+  },
+  "official_referee": {
+    "boundary_support": "Bp bilinearly sampled on C; trapezoidal segment sum for circulation and polygon perimeter",
+    "commit": "a67429165b09eb81c311d44db6ff11743f108b0e",
+    "definition": "li(2) = <Bp^2>_V / (integral_C Bp dl / lp)^2",
+    "exact_scorer_contour": "512-point LCFS extracted by the official scorer with the corpus-wide MAST envelope",
+    "flux_convention": "Bp = abs(grad psi)/R; constant psi scale including 2*pi cancels",
+    "repository": "Sophelio/fusion-equilibrium-challenge-starter",
+    "scoring_version": "3.2.0",
+    "source": "https://github.com/Sophelio/fusion-equilibrium-challenge-starter/blob/a67429165b09eb81c311d44db6ff11743f108b0e/fusion_scoring/derive.py#L151-L211",
+    "volume_support": "all native 65x65 grid nodes inside C, full node weights dV=2*pi*R*mean(diff(R))*mean(diff(Z))"
+  },
+  "per_shot": [
+    {
+      "efm_published_field_energy_t2_m3": 0.34803885221481323,
+      "nova_hex33_stored_lcfs_field_energy_t2_m3": 0.2055918451304592,
+      "nova_over_referee_formula": 0.9916562910461535,
+      "published_over_referee_formula": 1.678738361963215,
+      "referee_formula_over_published": 0.5956854401245358,
+      "referee_native65_formula_on_stored_lcfs": {
+        "boundary_circulation_t_m": 1.005981936899858,
+        "boundary_perimeter_m": 5.559377938072465,
+        "field_energy_t2_m3": 0.2073216768620193,
+        "inside_grid_node_count": 996,
+        "internal_inductance": 0.7049291369480456,
+        "volume_node_quadrature_m3": 8.981963466110638
+      },
+      "shot": 21978,
+      "slice_index": 35,
+      "time_s": 0.1899999976158142
+    },
+    {
+      "efm_published_field_energy_t2_m3": 0.38926151394844055,
+      "nova_hex33_stored_lcfs_field_energy_t2_m3": 0.22970442179198824,
+      "nova_over_referee_formula": 1.010165242404354,
+      "published_over_referee_formula": 1.711845372974562,
+      "referee_formula_over_published": 0.5841649110295314,
+      "referee_native65_formula_on_stored_lcfs": {
+        "boundary_circulation_t_m": 1.0221143602348908,
+        "boundary_perimeter_m": 5.696427412780672,
+        "field_energy_t2_m3": 0.22739291766291148,
+        "inside_grid_node_count": 1020,
+        "internal_inductance": 0.7800904264424211,
+        "volume_node_quadrature_m3": 9.053951036068783
+      },
+      "shot": 21983,
+      "slice_index": 35,
+      "time_s": 0.1899999976158142
+    },
+    {
+      "efm_published_field_energy_t2_m3": 0.5990088582038879,
+      "nova_hex33_stored_lcfs_field_energy_t2_m3": 0.3521019435925484,
+      "nova_over_referee_formula": 0.9565306016675053,
+      "published_over_referee_formula": 1.6272852620347082,
+      "referee_formula_over_published": 0.6145204060593716,
+      "referee_native65_formula_on_stored_lcfs": {
+        "boundary_circulation_t_m": 1.173814865211907,
+        "boundary_perimeter_m": 5.280199114284544,
+        "field_energy_t2_m3": 0.3681031667766138,
+        "inside_grid_node_count": 915,
+        "internal_inductance": 0.920190179965782,
+        "volume_node_quadrature_m3": 8.09456190907893
+      },
+      "shot": 21985,
+      "slice_index": 51,
+      "time_s": 0.2750000059604645
+    },
+    {
+      "efm_published_field_energy_t2_m3": 0.5005333423614502,
+      "nova_hex33_stored_lcfs_field_energy_t2_m3": 0.31612115293743753,
+      "nova_over_referee_formula": 0.9802506458326845,
+      "published_over_referee_formula": 1.552088898675206,
+      "referee_formula_over_published": 0.6442929917568224,
+      "referee_native65_formula_on_stored_lcfs": {
+        "boundary_circulation_t_m": 1.0973809645440826,
+        "boundary_perimeter_m": 4.874518792870957,
+        "field_energy_t2_m3": 0.3224901246241006,
+        "inside_grid_node_count": 830,
+        "internal_inductance": 0.8092575774151113,
+        "volume_node_quadrature_m3": 7.862819364995009
+      },
+      "shot": 21986,
+      "slice_index": 46,
+      "time_s": 0.25
+    },
+    {
+      "efm_published_field_energy_t2_m3": 0.5607793927192688,
+      "nova_hex33_stored_lcfs_field_energy_t2_m3": 0.3521670446108275,
+      "nova_over_referee_formula": 0.9819305023527363,
+      "published_over_referee_formula": 1.5635943204464289,
+      "referee_formula_over_published": 0.6395520800526351,
+      "referee_native65_formula_on_stored_lcfs": {
+        "boundary_circulation_t_m": 1.1661816979096105,
+        "boundary_perimeter_m": 5.161257372781259,
+        "field_energy_t2_m3": 0.3586476270642619,
+        "inside_grid_node_count": 898,
+        "internal_inductance": 0.8588566182786166,
+        "volume_node_quadrature_m3": 8.179483581956003
+      },
+      "shot": 21989,
+      "slice_index": 55,
+      "time_s": 0.29499998688697815
+    },
+    {
+      "efm_published_field_energy_t2_m3": 0.496621310710907,
+      "nova_hex33_stored_lcfs_field_energy_t2_m3": 0.2989777277348594,
+      "nova_over_referee_formula": 0.988163409298141,
+      "published_over_referee_formula": 1.6414032283950055,
+      "referee_formula_over_published": 0.6092348197571286,
+      "referee_native65_formula_on_stored_lcfs": {
+        "boundary_circulation_t_m": 1.1717234726442671,
+        "boundary_perimeter_m": 5.527656200206822,
+        "field_energy_t2_m3": 0.30255899471850833,
+        "inside_grid_node_count": 965,
+        "internal_inductance": 0.7671246089157123,
+        "volume_node_quadrature_m3": 8.777603132697315
+      },
+      "shot": 22086,
+      "slice_index": 43,
+      "time_s": 0.22999998927116394
+    }
+  ]
+}

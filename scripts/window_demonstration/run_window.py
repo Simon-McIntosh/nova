@@ -58,6 +58,8 @@ WINDOW_LENGTH_SECONDS = 0.01
 EQUILIBRIUM_TIMES = np.array([0.0, WINDOW_LENGTH_SECONDS])
 TRANSPORT_TIMES = np.array([0.0, WINDOW_LENGTH_SECONDS])
 ITERATION_CAP = 10
+CONTRACTION_THRESHOLD = 0.8
+HARD_ITERATION_CEILING = 20
 CONVERGENCE_TOLERANCE = 5.0e-3
 DAMPING = 0.5
 EQUILIBRIUM_SOLVE_TOLERANCE = 1.0e-6
@@ -601,6 +603,8 @@ def _run_regime(
         transport_grid=time_grid,
         iteration_cap=ITERATION_CAP,
         tolerance=CONVERGENCE_TOLERANCE,
+        contraction_threshold=CONTRACTION_THRESHOLD,
+        hard_iteration_ceiling=HARD_ITERATION_CEILING,
     )
     result = RegimeResult(
         config=config,
@@ -775,8 +779,10 @@ def _two_regime_report(
             "maps still come from the evolving geometry waveform."
         ),
         (
-            f"Common knobs: iteration cap `{ITERATION_CAP}`, convergence and "
-            f"conservation tolerance `{_format(CONVERGENCE_TOLERANCE)}`, damping "
+            f"Common knobs: iteration cap `{ITERATION_CAP}`, contraction "
+            f"threshold `{_format(CONTRACTION_THRESHOLD)}`, hard iteration "
+            f"ceiling `{HARD_ITERATION_CEILING}`, convergence and conservation "
+            f"tolerance `{_format(CONVERGENCE_TOLERANCE)}`, damping "
             f"`{_format(DAMPING)}`, equilibrium portfolio tolerance "
             f"`{_format(EQUILIBRIUM_SOLVE_TOLERANCE)}`. One-time fixture "
             f"preparation: `{_format(preparation_seconds)}` s."
@@ -875,11 +881,28 @@ def _two_regime_report(
                 "",
                 f"- Iterations used: `{convergence.iterations_used}`",
                 (
+                    "- Iterations past ordinary cap: "
+                    f"`{convergence.iterations_past_cap}`"
+                ),
+                (
                     "- Measured contraction estimate: "
                     f"`{_format(convergence.contraction_estimate)}`"
                 ),
                 f"- Maximum exit residual: `{_format(convergence.maximum_residual)}`",
                 f"- Damping applied: `{_format(convergence.damping_applied)}`",
+                "",
+                "| licensed iteration | licensing contraction |",
+                "|---:|---:|",
+            ]
+        )
+        lines.extend(
+            (f"| {ITERATION_CAP + offset} | `{_format(contraction)}` |")
+            for offset, contraction in enumerate(
+                convergence.continuation_contractions, start=1
+            )
+        )
+        lines.extend(
+            [
                 "",
                 "| exchanged field | exit relative residual |",
                 "|---|---:|",
@@ -982,6 +1005,8 @@ def _result_rows(
             "fraction",
         ),
         ("iteration_cap", ITERATION_CAP, "count"),
+        ("contraction_threshold", CONTRACTION_THRESHOLD, "ratio"),
+        ("hard_iteration_ceiling", HARD_ITERATION_CEILING, "count"),
         ("tolerance", CONVERGENCE_TOLERANCE, "relative"),
         ("damping", DAMPING, "fraction"),
         ("equilibrium_solve_tolerance", EQUILIBRIUM_SOLVE_TOLERANCE, "relative"),
@@ -997,6 +1022,7 @@ def _result_rows(
         convergence = result.convergence
         for field, value, unit in (
             ("iterations_used", convergence.iterations_used, "count"),
+            ("iterations_past_cap", convergence.iterations_past_cap, "count"),
             ("contraction_estimate", convergence.contraction_estimate, "ratio"),
             ("maximum_residual", convergence.maximum_residual, "relative"),
             ("damping_applied", convergence.damping_applied, "fraction"),
@@ -1004,6 +1030,17 @@ def _result_rows(
             append("convergence", field, value, unit)
         for field, value in convergence.exit_residual.items():
             append("exit_residual", field, value, "relative")
+        for licensed_iteration, contraction in enumerate(
+            convergence.continuation_contractions,
+            start=ITERATION_CAP + 1,
+        ):
+            append(
+                "continuation_license",
+                "contraction_estimate",
+                contraction,
+                "ratio",
+                iteration=licensed_iteration,
+            )
         for iteration, residuals in enumerate(convergence.residual_trace, start=1):
             for field, value in residuals.items():
                 append(

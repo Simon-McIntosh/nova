@@ -487,13 +487,17 @@ class ConvergedNonConfinedError(RuntimeError):
 
 @dataclass(frozen=True)
 class WindowConfig:
-    """The four declared controls of one coupled exchange window.
+    """The declared controls of one coupled exchange window.
 
     ``length`` fixes the physical window.  The equilibrium and transport time
     arrays jointly form the per-side sample-grid control; both span the whole
     window but may have different interior samples.  ``iteration_cap`` and
     ``tolerance`` control the fixed-point solve without changing either side's
-    native temporal resolution.
+    native temporal resolution.  A caller may declare a larger hard iteration
+    ceiling; iterations beyond the ordinary cap are then licensed one at a
+    time only while the measured contraction remains below
+    ``contraction_threshold``.  Omitting the hard ceiling preserves the
+    ordinary cap exactly.
     """
 
     length: float
@@ -501,6 +505,8 @@ class WindowConfig:
     transport_grid: np.ndarray
     iteration_cap: int
     tolerance: float
+    contraction_threshold: float = 0.9
+    hard_iteration_ceiling: int | None = None
 
     def __post_init__(self) -> None:
         equilibrium_grid = _readonly(self.equilibrium_grid, dtype=np.float64)
@@ -511,6 +517,20 @@ class WindowConfig:
             raise ValueError("window iteration cap must be at least one")
         if not np.isfinite(self.tolerance) or self.tolerance <= 0.0:
             raise ValueError("window convergence tolerance must be finite and positive")
+        if (
+            not np.isfinite(self.contraction_threshold)
+            or not 0.0 <= self.contraction_threshold < 1.0
+        ):
+            raise ValueError(
+                "window contraction threshold must be finite and lie in [0, 1)"
+            )
+        if (
+            self.hard_iteration_ceiling is not None
+            and self.hard_iteration_ceiling < self.iteration_cap
+        ):
+            raise ValueError(
+                "window hard iteration ceiling cannot be below the ordinary cap"
+            )
         for name, grid in (
             ("equilibrium", equilibrium_grid),
             ("transport", transport_grid),
@@ -526,6 +546,13 @@ class WindowConfig:
                 raise ValueError(f"{name} sample grid must end at the window length")
         object.__setattr__(self, "equilibrium_grid", equilibrium_grid)
         object.__setattr__(self, "transport_grid", transport_grid)
+
+    @property
+    def effective_hard_iteration_ceiling(self) -> int:
+        """Return the declared hard ceiling, or the ordinary cap if omitted."""
+        if self.hard_iteration_ceiling is None:
+            return self.iteration_cap
+        return self.hard_iteration_ceiling
 
 
 @dataclass(frozen=True)
@@ -545,6 +572,8 @@ class WindowConvergenceReceipt:
     exit_residual: Mapping[str, float]
     damping_applied: float
     residual_trace: tuple[Mapping[str, float], ...]
+    iterations_past_cap: int = 0
+    continuation_contractions: tuple[float, ...] = ()
 
     def __post_init__(self) -> None:
         exit_residual = MappingProxyType(
@@ -556,6 +585,17 @@ class WindowConvergenceReceipt:
         )
         object.__setattr__(self, "exit_residual", exit_residual)
         object.__setattr__(self, "residual_trace", trace)
+        object.__setattr__(
+            self,
+            "continuation_contractions",
+            tuple(float(value) for value in self.continuation_contractions),
+        )
+        if self.iterations_past_cap < 0:
+            raise ValueError("iterations past cap cannot be negative")
+        if self.iterations_past_cap != len(self.continuation_contractions):
+            raise ValueError(
+                "each iteration past the cap needs one licensing contraction"
+            )
 
     @property
     def maximum_residual(self) -> float:
@@ -588,7 +628,7 @@ class WindowReceipt:
 
 
 class WindowConvergenceError(RuntimeError):
-    """The waveform iteration exhausted its cap before reaching tolerance."""
+    """The waveform iteration exhausted its licensed iterations."""
 
     def __init__(
         self,
@@ -816,13 +856,15 @@ def solve_window(
     The transport side first consumes the current geometry trajectory and
     emits a source trajectory.  The equilibrium side consumes that source and
     emits the next geometry trajectory.  Residuals are measured on every
-    exchanged profile and coordinate-map field before relaxation.  Exhausting
-    the cap raises :class:`WindowConvergenceError`; the exception retains the
-    final candidate and convergence receipt for diagnosis, but no degraded
-    :class:`WindowReceipt` is returned.  A ``failure_serializer`` may persist
-    that typed exception immediately before it is raised.  This keeps storage
-    policy outside the pure iteration while ensuring an exhausted trajectory
-    cannot be lost to a caller that terminates on the exception.
+    exchanged profile and coordinate-map field before relaxation.  Beyond the
+    ordinary cap, each further iteration requires a measured contraction below
+    the declared threshold and cannot pass the hard ceiling.  Exhausting the
+    licensed iterations raises :class:`WindowConvergenceError`; the exception
+    retains the final candidate and convergence receipt for diagnosis, but no
+    degraded :class:`WindowReceipt` is returned.  A ``failure_serializer`` may
+    persist that typed exception immediately before it is raised.  This keeps
+    storage policy outside the pure iteration while ensuring an exhausted
+    trajectory cannot be lost to a caller that terminates on the exception.
     """
     if not np.isfinite(damping) or not 0.0 < damping <= 1.0:
         raise ValueError("window damping must lie in (0, 1]")
@@ -831,8 +873,9 @@ def solve_window(
     geometry = initial_geometry
     source = initial_source
     residual_trace: list[Mapping[str, float]] = []
+    continuation_contractions: list[float] = []
 
-    for iteration in range(1, config.iteration_cap + 1):
+    for iteration in range(1, config.effective_hard_iteration_ceiling + 1):
         transported = transport_update(geometry, config.transport_grid)
         if not isinstance(transported, ExchangeSweepResult):
             raise TypeError("transport update must return ExchangeSweepResult")
@@ -863,6 +906,8 @@ def solve_window(
             exit_residual=residual,
             damping_applied=float(damping),
             residual_trace=tuple(residual_trace),
+            iterations_past_cap=max(0, iteration - config.iteration_cap),
+            continuation_contractions=tuple(continuation_contractions),
         )
         if convergence.maximum_residual <= config.tolerance:
             conservation = _window_conservation(transported.receipt)
@@ -879,7 +924,14 @@ def solve_window(
                 convergence=convergence,
                 conservation=conservation,
             )
-        if iteration == config.iteration_cap:
+        contraction = convergence.contraction_estimate
+        hard_ceiling_reached = iteration == config.effective_hard_iteration_ceiling
+        stalled_at_or_beyond_cap = iteration >= config.iteration_cap and (
+            contraction is None
+            or not np.isfinite(contraction)
+            or contraction >= config.contraction_threshold
+        )
+        if hard_ceiling_reached or stalled_at_or_beyond_cap:
             error = WindowConvergenceError(
                 convergence,
                 geometry_candidate,
@@ -890,6 +942,10 @@ def solve_window(
             if failure_serializer is not None:
                 failure_serializer(error)
             raise error
+        if iteration >= config.iteration_cap:
+            if contraction is None:
+                raise AssertionError("a continuation needs a measured contraction")
+            continuation_contractions.append(float(contraction))
         geometry = _blend_waveform(geometry, geometry_candidate, damping)
         source = _blend_waveform(source, source_candidate, damping)
 

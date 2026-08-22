@@ -512,6 +512,44 @@ def test_window_receipt_closes_flux_and_boundary_current_ledgers():
     assert current.achieved_initial == current.achieved_final
 
 
+def test_contracting_window_finishes_past_its_ordinary_cap():
+    """Measured contraction licenses only the iterations needed to converge."""
+    config = WindowConfig(
+        length=1.0,
+        equilibrium_grid=np.array([0.0, 0.5, 1.0]),
+        transport_grid=np.array([0.0, 0.25, 0.75, 1.0]),
+        iteration_cap=3,
+        tolerance=WINDOW_CONVERGENCE_TOLERANCE,
+        contraction_threshold=0.9,
+        hard_iteration_ceiling=180,
+    )
+    exchange = _AffineWindow(config, coupling=0.8)
+
+    result = solve_window(
+        exchange.geometry_template,
+        exchange.source_template,
+        config,
+        exchange.equilibrium,
+        exchange.transport,
+        damping=0.8,
+    )
+
+    convergence = result.convergence
+    assert convergence.iterations_used > config.iteration_cap
+    assert convergence.iterations_used < config.effective_hard_iteration_ceiling
+    assert convergence.iterations_past_cap == (
+        convergence.iterations_used - config.iteration_cap
+    )
+    assert len(convergence.continuation_contractions) == (
+        convergence.iterations_past_cap
+    )
+    assert all(
+        contraction < config.contraction_threshold
+        for contraction in convergence.continuation_contractions
+    )
+    assert convergence.maximum_residual <= config.tolerance
+
+
 def test_coreless_branch_outcome_names_its_sample_and_window_exchange(
     machine, converged, monkeypatch
 ):
@@ -585,8 +623,10 @@ def test_nonconverging_window_serializes_its_exhaustion_receipt_before_raising(
         transport_grid=np.array([0.0, 0.25, 0.75, 1.0]),
         iteration_cap=4,
         tolerance=WINDOW_CONVERGENCE_TOLERANCE,
+        contraction_threshold=0.99,
+        hard_iteration_ceiling=10,
     )
-    exchange = _AffineWindow(config, coupling=1.05)
+    exchange = _AffineWindow(config, coupling=-1.0)
     serialized = tmp_path / "exhausted-window.tsv"
 
     def serialize_failure(error):
@@ -611,6 +651,9 @@ def test_nonconverging_window_serializes_its_exhaustion_receipt_before_raising(
     assert serialized.is_file()
     assert serialized.read_text(encoding="utf-8").splitlines()[1].split("\t")[0] == "4"
     assert raised.value.convergence.iterations_used == config.iteration_cap
+    assert raised.value.convergence.iterations_used < config.hard_iteration_ceiling
+    assert raised.value.convergence.iterations_past_cap == 0
+    assert raised.value.convergence.continuation_contractions == ()
     assert len(raised.value.convergence.residual_trace) == config.iteration_cap
     assert raised.value.convergence.maximum_residual > config.tolerance
     assert raised.value.convergence.contraction_estimate is not None

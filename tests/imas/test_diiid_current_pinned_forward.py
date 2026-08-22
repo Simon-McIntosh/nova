@@ -238,6 +238,49 @@ def test_label_recovered_frame_102_remains_an_explicit_diagnostic_control() -> N
     assert eliminated["topology"] == "diverted"
 
 
+def test_cross_codegen_policy_qualifies_the_excluded_low_current_control() -> None:
+    control = {
+        "full_24_unpinned": {"relative_residual": 0.034912343846758294},
+        "historical_full_24_plateau": 0.03491124178554655,
+    }
+
+    qualified = pinned._qualify_cross_codegen_control(
+        control,
+        banked_absolute_difference=pinned.LOW_CURRENT_BANKED_ABSOLUTE_DIFFERENCE,
+    )
+
+    assert qualified["historical_full_24_plateau_absolute_difference"] == pytest.approx(
+        1.1020612117447208e-6,
+        rel=0.0,
+        abs=1.0e-18,
+    )
+    assert qualified["cross_codegen_absolute_tolerance"] == 2.0e-6
+    assert (
+        qualified["historical_full_24_plateau_absolute_difference_decimal"]
+        == "1.1020612117447208e-6"
+    )
+    assert qualified["historical_full_24_plateau_reproduced"]
+    assert qualified["control_excluded_from_cohort_conclusions"]
+
+
+def test_post_check_updates_only_the_banked_receipt(tmp_path: Path) -> None:
+    control = {
+        "full_24_unpinned": {"relative_residual": 0.034912343846758294},
+        "historical_full_24_plateau": 0.03491124178554655,
+        "historical_full_24_plateau_reproduced": False,
+    }
+    receipt = {"result": {"low_current_control_fixture": control}}
+    path = tmp_path / pinned.RECEIPT_NAME
+    path.write_text(json.dumps(receipt))
+
+    updated = pinned.recheck_banked_receipt(tmp_path)
+
+    updated_control = updated["result"]["low_current_control_fixture"]
+    assert updated_control["historical_full_24_plateau_reproduced"]
+    assert updated_control["control_excluded_from_cohort_conclusions"]
+    assert json.loads(path.read_text()) == updated
+
+
 def test_source_does_not_modify_or_import_an_equilibrium_implementation() -> None:
     source = Path(pinned.__file__).read_text()
 

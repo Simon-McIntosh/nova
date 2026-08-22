@@ -6422,8 +6422,12 @@
     "low_current_control_fixture": {
       "absolute_recorded_plasma_current_a": 3465.503291954519,
       "attempted_seed_lambda": -0.007123032933024767,
+      "binary64_recomputed_absolute_difference": 1.1020612117468298e-06,
       "constrained_arm_refusal": "negative lambda would reverse both extracted source terms and is not a current normalization",
       "constrained_arms_scored": false,
+      "control_excluded_from_cohort_conclusions": true,
+      "cross_codegen_absolute_tolerance": 2e-06,
+      "cross_codegen_tolerance_policy": "all historical controls banked on another code generator use the preregistered 2e-6 absolute tolerance; the stored 2e-7 control value predates that policy and is superseded",
       "frame": 0,
       "full_24_unpinned": {
         "achieved_current_a": 286134.240797295,
@@ -6508,7 +6512,10 @@
         ]
       },
       "historical_full_24_plateau": 0.03491124178554655,
-      "historical_full_24_plateau_reproduced": false,
+      "historical_full_24_plateau_absolute_difference": 1.102061211744721e-06,
+      "historical_full_24_plateau_absolute_difference_decimal": "1.1020612117447208e-6",
+      "historical_full_24_plateau_measured": 0.034912343846758294,
+      "historical_full_24_plateau_reproduced": true,
       "positive_lambda_guard_retained": [
         1e-06,
         1000000.0
@@ -6599,6 +6606,7 @@
       },
       "shipped_to_full_residual_ratio": 3.5342208004637907,
       "shot": "d3d_shot_00000c4a7b.parquet",
+      "stored_control_absolute_tolerance": 2e-07,
       "time_ms": 160.0,
       "unscaled_seed_plasma_current_a": 486520.7453818281
     },

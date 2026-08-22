@@ -228,6 +228,20 @@
       <code>docs/figures/current-constrained-forward-solve/cold-start/constrained_cold_start_receipt.json</code>.</figcaption>
     </figure>
 
+    <h2 id="benchmark-drives-seam">Benchmark drives the seam — one implementation of the constraint — 2026-08-22</h2>
+    <p>Run <code>r-20260822T133805916121-benchmark-drives-seam</code>, gate <strong>passed</strong>;
+    commit <code>9bf7841e</code> (merge <code>fbc2693e</code>); 11/11 targeted tests; ruff exit 0.
+    The pinned-forward benchmark obtains its constrained map from
+    <code>ForwardProfile.flux_map(target_current=…)</code> and its amplitude/current diagnostics from the
+    public normalized-current moment path; the benchmark-local <code>eliminated_map</code>,
+    <code>_lambda_value</code>, <code>_scaled_moments</code>, <code>MapEvaluation</code> and
+    <code>LambdaOutOfBand</code> copies are deleted (−148 lines). The frame-102 label diagnostic
+    reproduces through the seam at residual 1.6005940972525165e-09 against the banked
+    1.5899788903681545e-09 — inside the preregistered 2e-6 absolute cross-codegen tolerance — with
+    exactly 4 accepted iterations, diverted topology, recovered amplitude 1.0973468678394087. Solver
+    budgets, Armijo search, qualification criterion, receipt schema and preregistration bytes are
+    unchanged.</p>
+
   </main>
 </body>
 </html>

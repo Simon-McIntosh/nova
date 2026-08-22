@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="current-constrained-forward-solve">
   <meta name="plan-title" content="Current-Constrained Forward Solve">
   <meta name="plan-summary" content="Make prescribed total plasma current a first-class constraint of the free-boundary solve by exact profile-amplitude elimination, so the vacuum root leaves the map&#x27;s range and Newton selects the plasma branch by construction rather than by seeding luck">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="6.0">
   <meta name="plan-capability-version" content="1.0">
@@ -24,10 +24,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-version" content="21">
-<meta name="plan-commits" content="a2fbfa13,73f48ca0f672f8cd118bae4fd7e53520a03d998f,2ad4520637736e29898e23a961bada5d11595add,dea730511f076e662736a97c33d5c300545da6e4,cf812416343bbc821757fa2382d1e333d55e9f4f,10de2710fdbf76552e96240230d5597cf31563c4,83d1f6a0969c26ce6e44073401304d5dafaf790c,80fad8d23bce6748edcdbbf72dcb20ba58cdaea0,a0aee18c330c35e8009bbe0b96f7fd3d078b9a00,818722b340f74b8578ce4663495953cce707e337">
+<meta name="plan-version" content="24">
+<meta name="plan-commits" content="a2fbfa13,73f48ca0f672f8cd118bae4fd7e53520a03d998f,2ad4520637736e29898e23a961bada5d11595add,dea730511f076e662736a97c33d5c300545da6e4,cf812416343bbc821757fa2382d1e333d55e9f4f,10de2710fdbf76552e96240230d5597cf31563c4,83d1f6a0969c26ce6e44073401304d5dafaf790c,80fad8d23bce6748edcdbbf72dcb20ba58cdaea0,a0aee18c330c35e8009bbe0b96f7fd3d078b9a00,818722b340f74b8578ce4663495953cce707e337,9bf7841e48cc8bcf7ca700f8cbb74314b5cc612e">
 <meta name="plan-artifacts" content="docs/figures/current-constrained-forward-solve/circuit-vacuum,docs/figures/current-constrained-forward-solve/inclusion-ladder,docs/figures/current-constrained-forward-solve/pinned-cohort,docs/figures/current-constrained-forward-solve/mast-constrained,docs/figures/current-constrained-forward-solve/cold-start">
-<meta name="plan-impl" content="0.889">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -96,20 +96,21 @@
     cohort</a>.</p>
     </section>
 
-    <h2 id="s4">§4 — Promote the constrained map from benchmark to the solver seam</h2>
-    <p>The prototype deliberately lives in <code>benchmarks/</code> with <code>nova/equilibrium/</code>
-    read-only, because peer sessions were active in that tree. That was right for a prototype and is wrong
-    for a capability: a constrained map that only exists in a benchmark cannot be driven by
-    <code>efit-forward-parity</code>, by the DIII-D onboarding, or by any batched production route.</p>
-    <p>The promotion is small in surface and large in reach. The amplitude elimination is one
-    multiplication inside the map plus a guard; the I<sub>p</sub> functional it needs already exists as an
-    exact clipped-support integral. What must be authored carefully is the <em>contract</em>: which caller
-    supplies the target, what happens when it is absent, and how the receipt reports λ so a reader can see
-    how far the prescribed amplitude moved the extracted profiles.</p>
-    <p><strong>Done-when:</strong> the constrained map is reachable through the public forward seam with a
-    target-current argument, an absent target reproduces today's unconstrained behaviour bit-for-bit, the
-    λ guard fails loudly rather than dividing, and the prototype benchmark is rewired to drive the seam
-    rather than its own copy — with its landed numbers reproduced.</p>
+    <section id="s4-landed" class="section-landed">
+    <header><span class="badge badge-shipped">✓ landed 2026-08-22</span>
+    <h2 id="s4">§4 — Promote the constrained map from benchmark to the solver seam</h2></header>
+    <p class="landed-summary">The constraint is a public capability (commits <code>cf812416</code>,
+    <code>9bf7841e</code>): an optional <code>target_current</code> on every <code>ForwardProfile</code>
+    solve shape activates <code>NormalisationPolicy.DECLARED_SCALAR_CURRENT</code>, the amplitude is
+    eliminated from the exact clipped-cell moments with the reject-before-division guard, and the receipt
+    publishes the recovered λ. Absent target: both pre-existing forward suites pass unchanged (44 tests).
+    The prototype benchmark now drives the seam with its local elimination copies deleted — frame-102
+    reproduces at 1.6006e-9 vs banked 1.5900e-9 (inside the 2e-6 cross-codegen tolerance), 4 iterations,
+    diverted, λ 1.0973. One implementation of the constraint exists, and it is the public one. Full
+    record: <a href="/nova/evidence/archive/current-constrained-forward-solve-landed#scalar-current-seam">seam</a>
+    · <a href="/nova/evidence/archive/current-constrained-forward-solve-landed#benchmark-drives-seam">benchmark
+    rewire</a>.</p>
+    </section>
 
     <section id="s5-landed" class="section-landed">
     <header><span class="badge badge-shipped">✓ landed 2026-08-22</span>
@@ -236,6 +237,11 @@
     <pre class="r-fu-prompt">/reckon-ship current-constrained-forward-solve §5</pre>
     <p class="r-fu-outcome">Recovery demonstrated (run r-20260822T130913771085, gate passed, commit 818722b3, merge e86d2fa4). On the same five score-blind frames, the public target-current seam qualifies 2/5 from cold starts (matching the banked baseline) and 4/5 after the declared same-shot warm-neighbour offset ladder (-1,+1,-2,+2,...,-32,+32; earlier first, never selected by EFIT score), flipping recovery_demonstrated to true at the preregistered &gt;=3 threshold. Every target carries the 24 fixed-wiring currents with zero label reads; Anderson is absent from the lane; EFIT re-scoring uses the landed receipt schema. Warm sources: f171 at 2.75e-8 recovered f169, f129 at 9.03e-9 recovered f125; f86 at 2.69e-10 did NOT recover f54, which remains explicitly limited - solve-state continuation beyond the neighbour ladder is dual-basin-solve-owned work, recorded as this plan's one cross-plan handoff.</p>
     </article>
+<article class="r-fu" data-id="f-ccfs-handoff" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship efit-forward-parity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Continuation lives with the parity and basin plans (foreign-owner handoff)</h4>
+    <div class="r-fu-body"><p>This plan's chain continues in two owning plans, each already carrying the concrete followup: <code>efit-forward-parity</code> f-efp-constrained-arm-parity (five bounded stalls on the frozen six, and the machine-precision recovered root that misses the parity tolerance set — including trying neighbour-frame warm seeding, the mechanism that lifted DIII-D 2/5 to 4/5) and <code>dual-basin-solve</code> f-dbs-solve-state-continuation (solve-state continuation beyond the same-shot neighbour ladder for the one unrecovered frame). Nothing foldable remains in this plan; this row is the drain ledger's foreign-owner pointer kept open as the visible continuation.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship efit-forward-parity</pre>
+    </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s5" data-id="c-20260821-inclusion-ladder-partial" data-who="reckon-ship" data-when="2026-08-21T21:25:00+00:00">
@@ -259,6 +265,9 @@
 <div class="r-comment" data-section="_top" data-id="c-20260822T1250-reuse-map" data-who="reckon-ship" data-when="2026-08-22T12:50:00Z">
     <div class="r-comment-body">PRIOR-ART REUSE MAP LANDED — run r-20260822T123951456311, gate passed, 417 s wall, 28/28 cited paths verified present, 5/5 capability areas with fitness verdicts; full report at ~/.config/reckon/crew/reports/ccfs-reuse-map.md, summarised in the evidence record. VERDICTS: seam EXTEND IN PLACE — ForwardProfile/ForwardSource/ForwardFluxOperator carry reserved extension points (NormalisationPolicy.DECLARED_SCALAR_CURRENT, NormalisationRecord) and the prototype acceptance tests name the contract to relocate. Clipped-current functional REUSE DIRECTLY — the amplitude divides the sum of CellCurrentMoments.cell_current and must scale the integrated moments so the flux image and the receipt cannot diverge. Dual-basin PARTIAL — branch pinning, two-branch portfolio solves, warm-neighbour starts, near-basin qualification, hysteresis selection all reusable, but NO successful cold-start continuation exists: the scalar source-strength homotopy is a banked negative (converged to the dominating limited root) and nova/equilibrium/continuation.py is source-domain continuation, not a solve-state homotopy. DIII-D resolver REUSE DIRECTLY — complete_profile_current_adapter / resolve_diiid_currents with use_circuit=True, zero free parameters, label-free. MAST lane REUSE AS VALIDATION HARNESS — efit_forward_parity_slice.py + parity_tolerances against the frozen-six baseline (0 converged plasma roots), constrained arm emitted beside, never over, the banked failure. DAG RESHAPED on the map: §4 splits into seam-in-place (runs parallel with the benchmark rewire on disjoint files) then benchmark-drives-seam (after the cohort run); §8's first arm measures whether the constrained map itself fixes cold entry before any new driver is considered — a new solve-state driver would be dual-basin-solve-owned work. Denominator 9 executable nodes; impl 3/9.</div>
 </div>
+<div class="r-comment" data-section="_top" data-id="c-20260822T1510-drain-ledger" data-who="reckon-ship" data-when="2026-08-22T15:10:00Z">
+    <div class="r-comment-body">DRAIN LEDGER at plan closure. Rows and dispositions: [1] scout follow-on, public scalar-current seam plus tests: folded to node scalar-current-seam, commit cf812416. [2] scout follow-on, warm-neighbour driver for cold stalls: folded to node constrained-cold-start, commit 818722b3. [3] scout follow-on, solve-state continuation if stalls remain: foreign-owner, dual-basin-solve, recorded there as followup f-dbs-solve-state-continuation. [4] cohort follow-on, excluded-control tolerance disposition: folded to the pinned-cohort-scoring resume, commit 83d1f6a0. [5] MAST follow-on, five bounded stalls on the parity lane: foreign-owner, efit-forward-parity, followup f-efp-constrained-arm-parity. [6] MAST follow-on, recovered root misses parity tolerances: foreign-owner, efit-forward-parity, same followup. [7] cold-start follow-on, f54 beyond the neighbour ladder: foreign-owner, dual-basin-solve, same followup as row 3. [8] f-ccf-001: folded to pinned-cohort-scoring, resolved with outcome. [9] f-ccfs-tier-consume: folded to fixed-wiring-current-rewire plus the coordinator record, resolved with outcome. [10] f-ccfs-cold-start: folded to constrained-cold-start, resolved with outcome. [11] f-ccfs-handoff: the foreign-owner pointer kept open as the visible continuation into the two owning plans. Rows 11, foldable-remaining 0. Plan shipped at impl 9/9: two nodes landed before this session (inclusion ladder, circuit vacuum) and seven this session (reuse map, fixed-wiring rewire, five-frame cohort, public seam, MAST constrained arm, cold-start measurement, benchmark-drives-seam).</div>
+</div>
 <div class="r-comment" data-section="s3" data-id="c-20260822T1310-rewire-landed" data-who="reckon-ship" data-when="2026-08-22T13:10:00Z">
     <div class="r-comment-body">FIXED-WIRING REWIRE LANDED — run r-20260822T125011546078, gate passed, commit dea73051 (merge 48ea4a1c), 496 s wall, 12/12 targeted tests, ruff exit 0. Scored inference arms consume complete_profile_current_adapter (use_circuit=True, 24 response-ordered currents, zero free current slots, per-conductor uncertainties carried in every frame receipt). Label-recovered currents survive only under diagnostic_label_recovered with uses_reconstruction_label=true and are excluded from inference conclusions. The historical preregistration was retained byte-for-byte; the frame-102 diagnostic is enforced at residual 1.5899788903681545e-09 (rtol 1e-5), exactly 4 iterations, diverted topology. Next node on this member: the §3 five-frame cohort scoring run.</div>
 </div>
@@ -267,6 +276,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260822T1330-seam-landed" data-who="reckon-ship" data-when="2026-08-22T13:30:00Z">
     <div class="r-comment-body">SCALAR-CURRENT SEAM LANDED — run r-20260822T125018360336, gate passed, commit cf812416 (merge 2e1236f8), 44 tests passed with both pre-existing forward suites unchanged, ruff exit 0 over all six changed paths, 9 new acceptance cases including three pre-division inadmissibility values. The optional target_current threads through ForwardProfile flux_map, observe, solve, solve_branch, solve_portfolio, solve_batch and the diverted-perturbation paths; absence selects the original absolute expressions. The constrained ForwardFluxOperator path computes the amplitude from the sum of exact integrated cell-current moments, applies the same amplitude to cell_current, radial_moment and vertical_moment, rejects non-finite, zero, sign-reversed or out-of-band amplitudes BEFORE division, never clips, and lets the host Krylov line search reject inadmissible trials — both locked decisions honoured. Receipt smoke: requested 970087.5877824266 A, observed 970087.5877824267 A (one ulp), recovered amplitude 1.2, policy declared_scalar_current through ForwardEquilibrium.normalisation. §4 stays open on one remaining node: rewiring the prototype benchmark to drive this seam with its landed numbers reproduced, queued behind the in-flight cohort run on the shared benchmark file.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260822T1500-benchmark-seam-landed" data-who="reckon-ship" data-when="2026-08-22T15:00:00Z">
+    <div class="r-comment-body">BENCHMARK DRIVES THE SEAM - SECTION 4 DONE-WHEN FULLY MET. Run r-20260822T133805916121, gate passed, commit 9bf7841e (merge fbc2693e), 11/11 targeted tests, ruff exit 0. The pinned-forward benchmark now obtains its constrained map from ForwardProfile.flux_map with target_current and its amplitude/current diagnostics from the public normalized-current moment path; the benchmark-local eliminated_map, _lambda_value, _scaled_moments, MapEvaluation and LambdaOutOfBand copies are deleted, so exactly one implementation of the constraint exists and it is the public one. The frame-102 label diagnostic reproduces through the seam at residual 1.6005940972525165e-09 against the banked 1.5899788903681545e-09 (within the preregistered 2e-6 absolute cross-codegen tolerance), exactly 4 accepted iterations, diverted, recovered amplitude 1.0973468678394087 - matching the plan's own -2.7 percent prototype movement. Solver budgets, Armijo search, qualification criterion, receipt schema and preregistration bytes unchanged. With this, all four of the section's done-when clauses hold: public reachability (cf812416), bit-for-bit absent-target behaviour, loud pre-division guard, and the benchmark rewired with landed numbers reproduced.</div>
 </div>
 <div class="r-comment" data-section="s8" data-id="c-20260822T1440-cold-start-landed" data-who="reckon-ship" data-when="2026-08-22T14:40:00Z">
     <div class="r-comment-body">COLD-START MEASUREMENT LANDED - WARM-NEIGHBOUR SEEDING LIFTS 2/5 TO 4/5 AND FLIPS THE BANKED VERDICT. Run r-20260822T130913771085, gate passed, commit 818722b3 (merge e86d2fa4); benchmark exit 0 both arms; strict receipt audit exit 0; 9 constrained-seam tests plus the slow host-Krylov hold test passed; ruff check and format clean. Cold public-seam: 2/5 qualified, reproducing the banked control at 1.19e-7 diverted in 5 iterations on 0112bdc95d f96. Final selected terminals: f54 warm 7.68e-2 LIMITED (unrecovered), f96 cold 1.19e-7 diverted, f169 warm 8.54e-8 diverted, f144 cold 5.55e-7 diverted at X-point separation 5.9 mm, f125 warm 1.79e-7 diverted. recovery_demonstrated is exactly qualified_frames &gt;= 3 and flipped true at 4/5. The constrained map alone does NOT fix cold entry (2/5 unchanged) - the lift comes from legal same-shot warm-neighbour seeding through the seam, confirming the reuse map's banked negative on scalar homotopy while establishing the warm ladder as the production mechanism.</div>

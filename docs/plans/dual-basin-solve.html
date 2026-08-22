@@ -22,11 +22,11 @@
   <title>Dual-Basin Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-21">
+<meta name="plan-modified" content="2026-08-22">
 <meta name="plan-commits" content="4a4cf70f,46c55d1d,1d795411,f53ddc39,e3e55311,87ed6fdf,b16d032c,a86857ac,6f889817,d3093912,3ecc283e,3dce4ada">
 <meta name="plan-artifacts" content="scripts/dual_basin_reuse/reuse-report.md,scripts/dual_basin_fixtures/topology-classification.json,scripts/dual_basin_fixtures/diverted-receipt.json,scripts/dual_basin_fixtures/diverted-state.npz,scripts/dual_basin_fixtures/diverted-root-receipt.json,scripts/dual_basin_audit/diverted-separatrix-audit.json,benchmarks/portfolio_warm_start.py,docs/figures/dual-basin-solve/topology-classification.png,docs/figures/dual-basin-solve/diverted-separatrix-audit.png,docs/figures/dual-basin-solve/portfolio-warm-start-receipt.json,docs/figures/dual-basin-solve/portfolio-warm-start.png,docs/evidence/archive/dual-basin-solve-landed.html">
 <meta name="plan-impl" content="1.0">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 </head>
 <body>
   <main class="plan-doc">
@@ -143,6 +143,11 @@
         force. Scheduled with the GPU-catalog sprint, which consumes all three.</p></div>
     <pre class="r-fu-prompt">/reckon-ship dual-basin-solve</pre>
     <p class="r-fu-outcome">done - all three deliverables landed and collapsed: the topology-pinned two-branch portfolio with per-class cold seeds and the two-class acceptance (near-basin recovery at 1.58e-16 against 1e-10 floors, per the locked strategy after the scalar-homotopy negative was banked); the pure hysteresis selector (14/14 matrix tests, one switch and zero chatter on the transition sequence); and the H200 warm-start economy (catalog rung 2 Newton steps both branches, 19.07 ms per portfolio state vs the 1 ms target, gap attributed to Newton-step economy). Continuation: efit-forward-parity consumes the portfolio through its existing dependency edge (f-efp-002 on that plan), and the remaining 1 ms-gap iteration economy is owned by the GPU catalog plan ladder - no followup on this plan.</p>
+    </article>
+<article class="r-fu" data-id="f-dbs-solve-state-continuation" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship dual-basin-solve" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Solve-state continuation beyond the same-shot neighbour ladder</h4>
+    <div class="r-fu-body"><p>Handed from <code>current-constrained-forward-solve</code>, which landed the constrained cold-start measurement (commit <code>818722b3</code>): on the five score-blind frames the public target-current seam qualifies 2/5 cold and 4/5 with the declared same-shot warm-neighbour offset ladder — but <code>00f40d3919</code> f54 stays limited at residual 7.7e-2 even after a legal warm seed converged to 2.7e-10. The banked negatives stand: scalar source-strength homotopy converges to the dominating limited root, and <code>nova/equilibrium/continuation.py</code> is source-domain continuation, not a solve-state homotopy. A solve-state continuation or richer basin-entry driver is this plan's capability; it should compose the public constrained seam (<code>cf812416</code>) rather than any benchmark-local map. Evidence: <code>docs/figures/current-constrained-forward-solve/cold-start/constrained_cold_start_receipt.json</code>.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship dual-basin-solve</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

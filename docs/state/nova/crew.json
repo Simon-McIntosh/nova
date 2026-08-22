@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T18:04:34",
+  "updated": "2026-08-22T18:32:36",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -463,7 +463,7 @@
         "id": "root-geometry",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02a29-6f4e-7a22-963f-165aae8460f5",
         "created": "2026-08-22"
       },
       {
@@ -22979,9 +22979,75 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T160545479006-pint-first-experiment",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a710",
+        "node": "pint-first-experiment",
+        "role": "implement",
+        "spec_level": "",
+        "member": "transport-pint",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T16:05:48Z",
+        "completed_at": "2026-08-22T16:31:21Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1533,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1533,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "89398f3d6a6c9bc5e20ace7c9d6624f6b65763a9",
+        "commits": [
+          "391b3305",
+          "e4582716",
+          "bb506bc3"
+        ],
+        "changed_lines": {
+          "added": 1623,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "qualified negative with the mechanism named and nothing tuned: the pre-registered eight-window serial baseline does not exist because the fixture loses its confined branch at window 5 exchange 1 after four cleanly converged windows (4-5 exchanges each, zero flux closures, causal history) - roughly 11 ms of accumulated coupled evolution on a fixed uncontrolled coil set exceeds the fixture confinement horizon, the same physics as the strong regime arriving by accumulation. Parareal was never evaluated: corrections 0, speedup unmeasurable. The experiment-regime decision (fewer windows, gentler drive, a controlled equilibrium, or parking PinT until a quasi-stationary case exists) is the owner call, since pre-registration exists precisely to prevent silent redesign after seeing data",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T160545479006-pint-first-experiment/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02a38-9e7b-7322-9b11-1ad379a1d447",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13883136,
+            "cached_input_tokens_cumulative": 13883136,
+            "input_tokens": 14144545,
+            "input_tokens_cumulative": 14144545,
+            "output_tokens": 37147,
+            "output_tokens_cumulative": 37147,
+            "reasoning_output_tokens": 10781,
+            "reasoning_output_tokens_cumulative": 10781
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 551
+    "_version": 553
   }
 }

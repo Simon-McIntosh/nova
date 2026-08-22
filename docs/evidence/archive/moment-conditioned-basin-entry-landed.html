@@ -65,6 +65,39 @@
   <code>IntegralObservation.plasma_current</code> integrates the confined core while the target-current
   path integrates all domains, so an unmapped constraint is wrong by ~0.447 before any physics.</p>
 
+
+  <h3 id="s3-newton-replay">§3 baseline — the Newton warm ladder is a measured negative</h3>
+
+  <p><strong>Commits <code>f2035bed</code>/<code>d6b7f95a</code> (merged <code>3186a97e</code>); gate
+  passed.</strong> The previously unmeasured newton&nbsp;&times;&nbsp;warm-ladder cell — the cheapest
+  untried arm registered on <code>dual-basin-solve</code> f-dbs-basin-reachability — is now measured
+  through the public constrained seam on the pinned Newton branch
+  (<code>ForwardProfile.solve_branch(..., route="newton_krylov")</code>), reusing
+  <code>NEIGHBOUR_FRAME_OFFSETS</code>, <code>_neighbour_candidates</code> and
+  <code>_solve_public_seam</code> unchanged behind a duck-typed adapter, with <code>_find_warm_source</code>
+  deliberately not reused.</p>
+
+  <p><strong>Result, on the preregistered split and never pooled:</strong> warm lifts
+  <strong>0/2</strong> in the scoreable closed-LCFS stratum (21983/35 terminal residual 1.294e-3;
+  21985/51 at 2.869e-3) and <strong>0/3</strong> in the unscoreable stratum (21978/35 at 1.081e-2;
+  21986/46 at 3.943e-2; 21989/55 at 2.010e-3); 22086/43 keeps its pre-existing cold Newton root at
+  2.912e-16 and never triggers a warm arm. Every stalled reference found a legal earlier-first same-shot
+  source (own residuals 2.8e-16 to 3.6e-10; selection by own convergence only, never EFIT score). Cold
+  arms exactly reproduce the banked Newton residuals; maximum target-current relative error 2.22e-16;
+  the four pre-existing dual-basin artifact digests are unchanged.</p>
+
+  <figure>
+    <img src="/nova/figures/dual-basin-solve/newton-warm-ladder-replay.png"
+         alt="Residual trajectories for every cold and warm Newton attempt across the six frozen references" style="max-width:100%">
+    <figcaption>Every residual trajectory of the replay: no warm attempt reaches the 1e-8 criterion on any
+    stalled reference.</figcaption>
+  </figure>
+
+  <p><strong>Consequence for the driver design:</strong> both warm arms (imported host-Krylov seam and
+  Newton branch) are now measured negatives, so §3's pre-registered bar is complete — cold 1/6 (the
+  converged root sits in the <em>unscoreable</em> stratum), warm 0/5 twice over — and the moment-seeded
+  cold start is the remaining candidate mechanism.</p>
+
 </main>
 </body>
 </html>

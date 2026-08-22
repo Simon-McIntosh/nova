@@ -23,8 +23,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-impl" content="0.2">
-<meta name="plan-version" content="7">
+<meta name="plan-impl" content="0.4">
+<meta name="plan-version" content="8">
 </head>
 <body>
   <main class="plan-doc">
@@ -138,6 +138,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260822T2129-constraint-support-decision" data-who="reckon-ship" data-when="2026-08-22T21:29:00+00:00">
     <div class="r-comment-body">DECISION REQUIRED BEFORE ANY CONSTRAINT FOLDS (from the §2 worker's fenced-out follow_ons, folded here): each promoted moment must declare a numerical tolerance and either keep the constraint on the all-domain support or supply a topology-qualified confined-core support mapping — IntegralObservation.plasma_current integrates the confined core while the target-current path integrates all domains (audited ratio 0.446884), so an unmapped constraint is wrong by ~0.447 before any physics. The §4 node contract carries this as a required decision step, resolved on measured grounds or escalated to the owner if it proves a convention choice.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260822T2202-newton-replay-baseline" data-who="reckon-ship" data-when="2026-08-22T22:02:00+00:00">
+    <div class="r-comment-body">newton-warm-ladder-replay landed — commits f2035bed/d6b7f95a (merged 3186a97e); gate passed (12/12 warm-neighbour suite, cold arms exactly reproduce banked Newton residuals, max target-current relative error 2.22e-16). THE CHEAPEST UNTRIED ARM IS MEASURED AND NEGATIVE: on the pinned Newton branch through the public constrained seam, the same-shot warm ladder lifts 0/2 in the scoreable closed-LCFS stratum (21983/35 terminal 1.294e-3; 21985/51 terminal 2.869e-3) and 0/3 in the unscoreable stratum (21978/35 1.081e-2; 21986/46 3.943e-2; 21989/55 2.010e-3); 22086/43 keeps its cold root at 2.912e-16 and never triggers a warm arm. All five stalled references found legal earlier-first sources (selection by own convergence only, never EFIT score, honouring the no-identity-keying rule). NEIGHBOUR_FRAME_OFFSETS, _neighbour_candidates and _solve_public_seam reused unchanged behind a duck-typed adapter; _find_warm_source not reused. §3's baseline set is complete: warm-neighbour (host-Krylov) lifts 0/5, newton x warm lifts 0/5, cold 1/6 with the converged root in the unscoreable stratum — the moment-seeded driver is the remaining candidate and its bar is now fully pre-registered. Record: /nova/evidence/archive/moment-conditioned-basin-entry-landed#s3-newton-replay</div>
 </div>
 </section>
 

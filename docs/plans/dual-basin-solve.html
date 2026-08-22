@@ -26,7 +26,7 @@
 <meta name="plan-commits" content="4a4cf70f,46c55d1d,1d795411,f53ddc39,e3e55311,87ed6fdf,b16d032c,a86857ac,6f889817,d3093912,3ecc283e,3dce4ada">
 <meta name="plan-artifacts" content="scripts/dual_basin_reuse/reuse-report.md,scripts/dual_basin_fixtures/topology-classification.json,scripts/dual_basin_fixtures/diverted-receipt.json,scripts/dual_basin_fixtures/diverted-state.npz,scripts/dual_basin_fixtures/diverted-root-receipt.json,scripts/dual_basin_audit/diverted-separatrix-audit.json,benchmarks/portfolio_warm_start.py,docs/figures/dual-basin-solve/topology-classification.png,docs/figures/dual-basin-solve/diverted-separatrix-audit.png,docs/figures/dual-basin-solve/portfolio-warm-start-receipt.json,docs/figures/dual-basin-solve/portfolio-warm-start.png,docs/evidence/archive/dual-basin-solve-landed.html">
 <meta name="plan-impl" content="1.0">
-<meta name="plan-version" content="25">
+<meta name="plan-version" content="26">
 </head>
 <body>
   <main class="plan-doc">
@@ -207,6 +207,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260821T2020-limited-lane" data-who="reckon-ship" data-when="2026-08-21T20:20:00+00:00">
     <div class="r-comment-body">limited-lane-timing landed - commit 3dce4ada, merged ab0e5273; gate PASSED; SECTION 4 CLOSES AND THE PLAN SHIPS. The limited lane reconstructs the banked coarse root with a finite 1.270 Wb pinned span: 54/54 finite rows, every distance qualifying within the bounded budget, minimum steps 1/2/10 by distance band; the catalog rung qualifies BOTH branches in 2 Newton steps; combined catalog projection 19.070 ms per portfolio state vs the 1 ms target with the 18.07 ms gap owned by first-step Krylov/promotion (8.944 ms) plus additional Newton work (9.463 ms); diverted rows digest-verified unchanged (SHA-256 4f52587e). All four sections landed: the topology-pinned portfolio, the two-class acceptance with its banked continuation negative, the hysteresis selector, and the measured warm-start economy. Record: /nova/evidence/archive/dual-basin-solve-landed#s4-warm-start.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260822T2204-newton-replay-consumed" data-who="reckon-ship" data-when="2026-08-22T22:04:00+00:00">
+    <div class="r-comment-body">f-dbs-basin-reachability SEQUENCING FACT (2) IS CONSUMED: the newton-branch warm-ladder replay (commits f2035bed/d6b7f95a on moment-conditioned-basin-entry §3, merged 3186a97e) measured the previously untried newton x warm-ladder cell and it lifts NONE of the five MAST stalls — 0/2 in the closed axis-enclosing LCFS stratum, 0/3 in the unscoreable stratum, receipts per attempt under docs/figures/dual-basin-solve/. Both warm arms (host-Krylov and newton) are now measured negatives, so basin reachability rests entirely on the moment-conditioned driver owned by moment-conditioned-basin-entry §§3–4. This followup stays open only as the reachability tracker until that driver's verdict lands.</div>
 </div>
 </section>
 </main>

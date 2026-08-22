@@ -846,6 +846,39 @@
     are viable; CPU windows are not at production resolution. That is an architectural fact for
     every §6 consumer, found before the window demonstration was designed around the wrong
     hardware. The 96-bin probe (607 s execution) is recorded separately as non-production.</p>
+    <h2 id="window-receipts">The first converged coupled window &#8212; measured, two regimes</h2>
+    <p>Commit <code>40a7bda5</code>, after a demonstration arc that surfaced and repaired five
+    real defects across four attempts (the exact-evaluation seam, the callback deadlock, the
+    phantom arc splits, branch continuity in the window sweep &#8212; each receipted in the plan
+    stream). The coupled equilibrium&#8656;&#8658;TORAX window now runs on a real free-boundary
+    equilibrium, and its receipts are the plan's founding claim made concrete.</p>
+    <table>
+      <thead><tr><th></th><th>strong regime</th><th>gentle regime</th></tr></thead>
+      <tbody>
+        <tr><td>window / auxiliary multiplier</td><td>10 ms / 1.0</td><td>2.5 ms / 0.5</td></tr>
+        <tr><td>outcome</td><td><strong>typed <code>ConvergedNonConfinedError</code></strong> at exchange 5, reason <code>no_admissible_alternative</code></td><td><strong>converged WindowReceipt</strong></td></tr>
+        <tr><td>iterations</td><td>&#8212; (confined through 4: core 496&#8594;543&#8594;559&#8594;569&#8594;576 cells)</td><td>10</td></tr>
+        <tr><td><strong>measured contraction</strong></td><td>non-contractive</td><td><strong>0.5371</strong></td></tr>
+        <tr><td>max exit residual</td><td>&#8212;</td><td>0.004986 &lt; 0.005 (on delta_upper_face)</td></tr>
+        <tr><td>flux-consumption closure</td><td>&#8212;</td><td><strong>exactly 0 Wb, 0 relative</strong></td></tr>
+        <tr><td>plasma-current continuity</td><td>&#8212;</td><td><strong>exactly 0 A, 0 relative</strong></td></tr>
+        <tr><td>extraction validity</td><td>fail-closed refusal before any invalid record</td><td>30/30 valid</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Both §2 design claims now stand on a real system.</strong> The first measured
+    contraction of a genuine equilibrium&#8211;transport pair, 0.537, sits between the affine
+    model's declared weak (0.002) and strong (0.84) cases; and the strong regime demonstrates
+    the raise-rather-than-degrade contract on real physics &#8212; the confined branch genuinely
+    vanishes under order-unity drive changes on an uncontrolled coil set (proven not to be
+    numerical seeding: branch continuity with history-threaded selection holds a growing core
+    for four exchanges before the vanishing), and the window surrenders a typed refusal naming
+    the exchange and the reason rather than a degraded state.</p>
+    <p><strong>The cost structure confirms the benchmark's verdict in vivo:</strong> each
+    equilibrium-plus-FSA sweep costs 42&#8211;47 s on CPU at fixture scale while a warmed TORAX
+    sweep costs 45&#8211;65 ms &#8212; the equilibrium leg dominates by three orders of
+    magnitude, which is exactly why the H200 lane exists for production windows. 1,350 receipt
+    rows in <code>scripts/window_demonstration/receipts.tsv</code>; the basin regression driver
+    at <code>exchange_diagnosis/probe.py</code> receipts the full sequence either way.</p>
   </main>
 </body>
 </html>

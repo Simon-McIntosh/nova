@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T01:59:03",
+  "updated": "2026-08-22T02:27:10",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -19912,9 +19912,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T000039333474-two-regime-window-receipts",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a76",
+        "node": "two-regime-window-receipts",
+        "role": "implement",
+        "member": "transport-window",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T00:00:41Z",
+        "completed_at": "2026-08-22T00:26:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1562,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1562,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "3a3ab4f30b63c91855aee1ab4309baed38b97ee3",
+        "commits": [
+          "40a7bda52c50e5974a4efc4368be29f3de545612"
+        ],
+        "changed_lines": {
+          "added": 2148,
+          "removed": 415,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "the first converged real coupled window: gentle regime (2.5 ms, multiplier 0.5) converges in 10 iterations at MEASURED contraction 0.5371, max exit residual 0.004986 under the 0.005 tolerance, flux closure exactly 0 Wb and current continuity exactly 0 A, 30/30 valid extractions, 1350 receipt rows; the strong regime (10 ms, multiplier 1) reports its typed ConvergedNonConfinedError at exchange 5 verbatim beside it. CPU cost structure on the page: equilibrium+FSA sweep 42-47 s, warmed TORAX sweep 45-65 ms - the equilibrium leg dominates by three orders, consistent with the benchmark. Section 6 item 3 is complete",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T000039333474-two-regime-window-receipts/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f8b-c81b-70c3-a5d8-007c4d512626",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10326272,
+            "cached_input_tokens_cumulative": 69127936,
+            "input_tokens": 10618460,
+            "input_tokens_cumulative": 71197550,
+            "output_tokens": 39144,
+            "output_tokens_cumulative": 241595,
+            "reasoning_output_tokens": 6694,
+            "reasoning_output_tokens_cumulative": 83187
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 488
+    "_version": 489
   }
 }

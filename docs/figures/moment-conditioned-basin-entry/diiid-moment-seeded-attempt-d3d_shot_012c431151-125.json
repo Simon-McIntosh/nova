@@ -1,0 +1,87 @@
+{
+  "attempt": {
+    "frame": 125,
+    "machine": "DIII-D",
+    "route": {
+      "achieved_class": "diverted",
+      "attempted": true,
+      "converged": false,
+      "current_tolerance": 1e-10,
+      "entry_point": "nova.equilibrium.forward.ForwardProfile.solve",
+      "fixed_point_relative_residual": 0.5774803260842193,
+      "iterations": 100,
+      "metrics": {
+        "additive_gauge_wb": 1.2431954606808837,
+        "boundary_maximum_separation_m": null,
+        "boundary_mean_separation_m": null,
+        "fractional_flux_rms": 1.9470063651052287,
+        "interior_r_squared": -2.7908337857602747,
+        "within_label_representability_ceiling": false,
+        "x_point_separation_m": null
+      },
+      "options": {
+        "inner_iterations": 40,
+        "line_search": "armijo",
+        "outer_iterations": 100
+      },
+      "requested_class": "diverted",
+      "residual_tolerance": 1e-08,
+      "residual_trajectory": [],
+      "route": "host_krylov_with_declared_scalar_current",
+      "route_id": "moment_seeded_cold_start",
+      "seed": {
+        "boundary_hypothesis": "target reference own LCFS",
+        "constructor": "ForwardProfile.moment_seed",
+        "predicted_centroid_r_m": 1.7269052069645614,
+        "predicted_centroid_z_m": -0.10313741293232219,
+        "predicted_current_a": 267807.6736629009,
+        "prediction_centroid_support": "boundary_hypothesis_all_domain",
+        "prediction_current_support": "boundary_hypothesis_all_domain",
+        "representation_radius_m": 0.7623852791850428,
+        "representation_support": "compact_centroid_disc",
+        "representation_supported_cells": 344
+      },
+      "terminal_state": {
+        "achieved_plasma_current_a": 267807.673662901,
+        "axis_rz_m": [
+          0.9988684093944099,
+          1.5296669153245517
+        ],
+        "current_relative_error": 2.173487417942156e-16,
+        "diverted": true,
+        "finite": true,
+        "label_x_point_rz_m": [
+          1.290911078453064,
+          -1.1653355360031128
+        ],
+        "profile_amplitude": 14.295368157689706,
+        "target_plasma_current_a": 267807.6736629009,
+        "unscaled_profile_plasma_current_a": 18733.877344658868,
+        "x_point_rz_m": [
+          0.863523096172316,
+          1.344013784962162
+        ],
+        "x_point_separation_m": 2.5454851211560627
+      },
+      "termination": "public host Krylov outer iteration ceiling exhausted",
+      "topology_consistent": true
+    },
+    "selection": "member of the banked five-frame score-blind cohort",
+    "shot": "d3d_shot_012c431151.parquet",
+    "target_current_a": 267807.6736629009,
+    "time_ms": 3460.0
+  },
+  "receipt": "DIII-D moment-seeded constrained cold-start attempt",
+  "solver": {
+    "entry_point": "ForwardProfile.solve",
+    "inner_iterations": 40,
+    "line_search": "armijo",
+    "outer_iterations": 100,
+    "relative_residual_criterion": 1e-08,
+    "route": "host_krylov"
+  },
+  "source": {
+    "commit": "494d00dfe72c058ca1dc265fdcb3e26c4fcf9c62",
+    "tree": "bd4b8ddd8bb82b9264c90ecf71c80134d4310073"
+  }
+}

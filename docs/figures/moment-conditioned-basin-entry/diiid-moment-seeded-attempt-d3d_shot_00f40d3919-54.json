@@ -1,0 +1,126 @@
+{
+  "attempt": {
+    "frame": 54,
+    "machine": "DIII-D",
+    "route": {
+      "achieved_class": "limited",
+      "attempted": true,
+      "converged": false,
+      "current_tolerance": 1e-10,
+      "entry_point": "nova.equilibrium.forward.ForwardProfile.solve",
+      "fixed_point_relative_residual": 3.583054263466747e-12,
+      "iterations": 38,
+      "metrics": {
+        "additive_gauge_wb": 2.3234251024387484,
+        "boundary_maximum_separation_m": null,
+        "boundary_mean_separation_m": null,
+        "fractional_flux_rms": 2.07748193191082,
+        "interior_r_squared": -3.315931177415915,
+        "within_label_representability_ceiling": false,
+        "x_point_separation_m": null
+      },
+      "options": {
+        "inner_iterations": 40,
+        "line_search": "armijo",
+        "outer_iterations": 100
+      },
+      "requested_class": "diverted",
+      "residual_tolerance": 1e-08,
+      "residual_trajectory": [
+        0.05861856537676039,
+        0.05793001401886896,
+        0.09547466190612366,
+        0.14145160264125453,
+        0.13994436324105555,
+        0.13958353513650473,
+        0.13921474388783675,
+        0.13913405643310467,
+        0.2087377278815694,
+        0.19493265414926492,
+        0.20609450271879917,
+        0.10067304396199585,
+        0.08528374921449662,
+        0.06917796706582516,
+        0.052046909705560376,
+        0.050252944937859506,
+        0.04942761263091661,
+        0.048710109943697205,
+        0.04803811704008328,
+        0.04743019329579594,
+        0.04687386955662173,
+        0.04636018123523577,
+        0.04624823924667417,
+        0.04621971972446429,
+        0.04619129496629402,
+        0.04618410718017325,
+        0.04617692547174865,
+        0.04616974983172126,
+        0.046167943111059845,
+        0.04616613677616086,
+        0.04525266665474412,
+        0.04491531197852358,
+        0.04458893151708545,
+        0.04450599028192747,
+        0.04448635857388144,
+        0.056047941171544456,
+        0.018647438933677984,
+        3.583054263466747e-12
+      ],
+      "route": "host_krylov_with_declared_scalar_current",
+      "route_id": "moment_seeded_cold_start",
+      "seed": {
+        "boundary_hypothesis": "target reference own LCFS",
+        "constructor": "ForwardProfile.moment_seed",
+        "predicted_centroid_r_m": 1.6867836265668699,
+        "predicted_centroid_z_m": -0.034748087553077164,
+        "predicted_current_a": 1283728.2760441303,
+        "prediction_centroid_support": "boundary_hypothesis_all_domain",
+        "prediction_current_support": "boundary_hypothesis_all_domain",
+        "representation_radius_m": 0.7927052872990455,
+        "representation_support": "compact_centroid_disc",
+        "representation_supported_cells": 373
+      },
+      "terminal_state": {
+        "achieved_plasma_current_a": 1283728.27604413,
+        "axis_rz_m": [
+          2.435724356229407,
+          1.060040666905857
+        ],
+        "current_relative_error": 1.8137065919537764e-16,
+        "diverted": false,
+        "finite": true,
+        "label_x_point_rz_m": [
+          1.4573438167572021,
+          -1.176513671875
+        ],
+        "profile_amplitude": 70.51028740317872,
+        "target_plasma_current_a": 1283728.2760441303,
+        "unscaled_profile_plasma_current_a": 528229.8563027236,
+        "x_point_rz_m": [
+          2.4798014911710435,
+          0.9795672728524448
+        ],
+        "x_point_separation_m": 2.3862323307223363
+      },
+      "termination": "public host Krylov solver returned",
+      "topology_consistent": false
+    },
+    "selection": "member of the banked five-frame score-blind cohort",
+    "shot": "d3d_shot_00f40d3919.parquet",
+    "target_current_a": 1283728.2760441303,
+    "time_ms": 1540.0
+  },
+  "receipt": "DIII-D moment-seeded constrained cold-start attempt",
+  "solver": {
+    "entry_point": "ForwardProfile.solve",
+    "inner_iterations": 40,
+    "line_search": "armijo",
+    "outer_iterations": 100,
+    "relative_residual_criterion": 1e-08,
+    "route": "host_krylov"
+  },
+  "source": {
+    "commit": "494d00dfe72c058ca1dc265fdcb3e26c4fcf9c62",
+    "tree": "bd4b8ddd8bb82b9264c90ecf71c80134d4310073"
+  }
+}

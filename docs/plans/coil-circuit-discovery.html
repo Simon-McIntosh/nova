@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-version" content="29">
+<meta name="plan-version" content="30">
 <meta name="plan-impl" content="1.0">
 <meta name="plan-commits" content="5855f2ba,d5a7c0dc,49fb0592,749f28f6,e3460384,b742b160,b02e5572,23ee641e,2090335c,e1aeb4af,69fad1fe,7f53b42a,e68ae8be">
 <meta name="plan-artifacts" content="docs/evidence/archive/coil-circuit-discovery-landed.html,docs/figures/coil-circuit-discovery/pf_active_circuit_receipt.json,docs/figures/coil-circuit-discovery/pf_passive_description_receipt.json,docs/figures/coil-circuit-discovery/pf_passive_slender_operator.npz,docs/figures/coil-circuit-discovery/grid_residual_current_regression_receipt.json,docs/figures/coil-circuit-discovery/ensemble_relation_assessment_receipt.json,docs/figures/coil-circuit-discovery/circuit-driven-forward-validation/circuit_driven_forward_validation_receipt.json">
@@ -233,6 +233,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20260822T1130" data-who="reckon-ship" data-when="2026-08-22T11:30:00Z">
     <div class="r-comment-body">globalized-forward-validation landed — runs r-20260822T100138164495 (round one, gate failed: cold-start fixed point stalls both arms) and r-20260822T102445118797 (globalized, gate passed after two answered fences), commits 69fad1fe + 7f53b42a merged at e68ae8be; forward-validation-review (run r-20260822T110427459189, gate passed) independently reconstructed both exclusion populations, all route tables and hygiene counters. Result: on five score-blind out-of-cohort frames with all 24 currents from shipped channels through the fixed-wiring circuit, the current-pinned route converges 2/5 and Anderson 1/5, and the best recovery reaches 1.437 % fractional flux RMS (inside the 4.29 % representability ceiling) with 5.92 mm X-point separation against the EFIT label. The preregistered three-frame floor is unmet so recovery_demonstrated is recorded false; the residual obstacle is cold-start solve-route robustness, owned by the sibling constrained-solve plan. Evidence: /nova/evidence/archive/coil-circuit-discovery-landed#forward-validation.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260822T1400" data-who="reckon-ship" data-when="2026-08-22T14:00:00Z">
+    <div class="r-comment-body">ink-style-contour-overlays landed — run r-20260822T130941099717, commit a3bfcf6e merged at df19548b, 1 test added (4 passing). Owner-specified figures delivered: one plot per convergence-qualified frame, label and circuit-driven GS flux as line contours at seventeen identical label-derived levels in two colors, first wall and 19 coil outlines, both LCFS curves and X-points, no axes/grid/colorbars (imas-ink style), RMS and X-point annotations; three figures + sidecar banked and embedded in the evidence record under #forward-validation. En route the node surfaced and I adjudicated an evidence-policy fork: the route-internal fixed-point residual is nondeterministic at 5.3e-4 relative while all state-derived metrics reproduce at ≤1.1e-9, so the reproduction guard now asserts flux RMS, boundary and X-point separations at rtol 1e-6 and reports the residual as a bounded diagnostic (rtol 1e-2, both values in the sidecar); the banked validation receipt is untouched (SHA verified before/after). Post-ship figure work only; plan remains shipped.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

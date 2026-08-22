@@ -100,7 +100,9 @@ def _write_tsv(path: Path, rows: Sequence[Mapping[str, str]]) -> None:
             stream, fieldnames=TSV_FIELDS, delimiter="\t", lineterminator="\n"
         )
         writer.writeheader()
-        writer.writerows(rows)
+        writer.writerows(
+            {**row, "status": row["status"] or "RECORDED"} for row in rows
+        )
 
 
 def _cpu_trace() -> dict[tuple[int, str], float]:
@@ -597,7 +599,7 @@ def main() -> int:
         side_events.append(
             {
                 "iteration": equilibrium_iteration,
-                "side": "equilibrium_plus_fsa",
+                "side": "equilibrium_sweep",
                 "seconds": time.perf_counter() - started,
             }
         )
@@ -723,7 +725,7 @@ def main() -> int:
         cpu_residual=float(np.asarray(cpu_residual)),
         cpu_dtype=str(cpu_residual.dtype),
         cpu_placement=",".join(
-            sorted(row["device"] for row in cpu_records if row["backend"] != "host")
+            sorted({row["device"] for row in cpu_records if row["backend"] != "host"})
         ),
     )
     del cpu_profile, cpu_seed, cpu_equilibrium
@@ -741,7 +743,7 @@ def main() -> int:
         gpu_residual=float(np.asarray(gpu_residual)),
         gpu_dtype=str(gpu_residual.dtype),
         gpu_placement=",".join(
-            sorted(row["device"] for row in gpu_records if row["backend"] != "host")
+            sorted({row["device"] for row in gpu_records if row["backend"] != "host"})
         ),
     )
     gpu_float_dtypes = {

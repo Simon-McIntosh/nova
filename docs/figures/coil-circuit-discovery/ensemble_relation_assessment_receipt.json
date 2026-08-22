@@ -1,0 +1,1596 @@
+{
+  "artifacts": {
+    "receipt": "docs/figures/coil-circuit-discovery/ensemble_relation_assessment_receipt.json",
+    "reconciliation_figure": "docs/figures/coil-circuit-discovery/ensemble_residual_threshold_reconciliation.png",
+    "relation_figure": "docs/figures/coil-circuit-discovery/ensemble_fitted_current_relations.png"
+  },
+  "cohort": {
+    "frames": 60,
+    "negative_ecoila_supply_frames": 35,
+    "positive_ecoila_supply_frames": 25,
+    "qualified_recorded_plasma_current_below_50ka_frames": 29,
+    "recorded_plasma_current_at_or_above_50ka_frames": 31,
+    "shots": 20
+  },
+  "conductors": {
+    "E567DN": {
+      "candidate_static_relation": "E567DN_current_a = 1.00165682447 * same_frame_ECOILA_current_a",
+      "frame_covariate_drift": {
+        "any_detected": true,
+        "detected_covariates": [
+          "post_fit_rms_wb"
+        ],
+        "method": "shot-cluster-robust residual regressions; Holm correction over all 45 conductor-covariate tests",
+        "tested": {
+          "absolute_fitted_gauge_wb": {
+            "cluster_robust_p_value": 0.16569091350039586,
+            "covariate_standard_deviation_native_units": 0.0753409010751669,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 2417.4661281384942
+          },
+          "absolute_recorded_plasma_current_a": {
+            "cluster_robust_p_value": 0.8923251768025835,
+            "covariate_standard_deviation_native_units": 621702.4564655029,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": -117.12379699253967
+          },
+          "absolute_same_frame_ecoila_current_a": {
+            "cluster_robust_p_value": 0.819639005473943,
+            "covariate_standard_deviation_native_units": 13573.283018230431,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 204.89316288425985
+          },
+          "flux_threshold_wb": {
+            "cluster_robust_p_value": 0.8303385912488279,
+            "covariate_standard_deviation_native_units": 0.001323799976256511,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 301.3617458454901
+          },
+          "fractional_l2_reduction": {
+            "cluster_robust_p_value": 0.29625411278197966,
+            "covariate_standard_deviation_native_units": 0.19138076340711097,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": -1018.1559982641455
+          },
+          "frame_time_ms": {
+            "cluster_robust_p_value": 0.006762865778422283,
+            "covariate_standard_deviation_native_units": 2259.113645498348,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 0.2772774969153136,
+            "residual_change_a_per_covariate_sd": -1351.4185146341038
+          },
+          "log10_selected_lambda": {
+            "cluster_robust_p_value": 0.44867732554706447,
+            "covariate_standard_deviation_native_units": 0.7541473528132145,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 679.491228797715
+          },
+          "post_fit_rms_wb": {
+            "cluster_robust_p_value": 3.7789867972670575e-08,
+            "covariate_standard_deviation_native_units": 0.004060324024383228,
+            "drift_detected_at_familywise_0p05": true,
+            "holm_familywise_adjusted_p_value": 1.700544058770176e-06,
+            "residual_change_a_per_covariate_sd": 3900.4137703622687
+          },
+          "pre_fit_rms_wb": {
+            "cluster_robust_p_value": 0.7840216749375353,
+            "covariate_standard_deviation_native_units": 0.02974773407344289,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 210.46226540607705
+          }
+        }
+      },
+      "intercept_freedom": {
+        "free_intercept_slope": 1.0267971654554013,
+        "free_minus_origin_bic": -22.526638693222296,
+        "intercept_95pct_ci_a": [
+          2537.9042348515177,
+          4792.591060499873
+        ],
+        "intercept_a": 3665.247647675695,
+        "intercept_p_value": 1.6960417518457403e-06,
+        "intercept_standard_error_a": 538.6194250609672,
+        "intercept_t_statistic": 6.804893171576239,
+        "method": "shot-cluster-robust free-intercept OLS",
+        "null_hypothesis": "intercept equals zero",
+        "shot_clusters": 20,
+        "zero_intercept_not_rejected_at_0p05": false
+      },
+      "leave_one_shot_out_prediction": {
+        "held_out_shots": 20,
+        "median_absolute_error_a": 3896.911882108876,
+        "method": "leave-one-complete-shot-out through-origin fit",
+        "r_squared": 0.9420419098721444,
+        "rmse_a": 6197.232415115648,
+        "training_slope_distribution": {
+          "maximum": 1.0376186260390552,
+          "mean": 1.0015826144098332,
+          "median": 1.0007371046429197,
+          "minimum": 0.9901560169594719,
+          "q25": 0.996963531225255,
+          "q75": 1.0029904524874804
+        }
+      },
+      "promotion_recommendation": {
+        "existing_independent_current_tier_impact": "unknown tier remains unchanged",
+        "fitted_current_relation": "withhold",
+        "joint_both_required_decision": "failed",
+        "predictive_relation_evidence": "supported but qualified",
+        "reasons": [
+          "full-grid residual closes 1/60 frames; the banked flux criterion requires 54/60",
+          "a zero intercept is rejected by shot-cluster-robust inference",
+          "familywise-significant residual drift remains with post_fit_rms_wb"
+        ],
+        "residual_closure_evidence": "failed"
+      },
+      "recorded_plasma_current_strata": {
+        "at_or_above_50ka": {
+          "correlation": 0.970438077738506,
+          "frames": 31,
+          "relative_slope_deviation_from_all_frames": -0.04599284780430468,
+          "residual_rms_a_against_all_frame_relation": 7068.714055163449,
+          "shots": 17,
+          "through_origin_slope": 0.9555877745947668
+        },
+        "qualified_below_50ka": {
+          "correlation": 0.9921063271326517,
+          "frames": 29,
+          "relative_slope_deviation_from_all_frames": 0.11048148895042997,
+          "residual_rms_a_against_all_frame_relation": 4676.982964001141,
+          "shots": 14,
+          "through_origin_slope": 1.1123213618603442
+        }
+      },
+      "residual_spread": {
+        "median_absolute_a": 3685.629000115412,
+        "rms_a": 6032.300818544522,
+        "rms_fraction_of_response_rms": 0.23424237119539848,
+        "sample_standard_deviation_a": 4912.7339875007765
+      },
+      "shot_stability": {
+        "maximum_absolute_relative_deviation_from_all_frames": 0.5539171706759338,
+        "per_shot_through_origin_slopes": {
+          "d3d_shot_00000c4a7b.parquet": 1.0525490453162178,
+          "d3d_shot_0003ff34e7.parquet": 0.969475106235565,
+          "d3d_shot_0011c2afc9.parquet": 1.1974939254392059,
+          "d3d_shot_001270afa9.parquet": 1.1303798711881665,
+          "d3d_shot_001554e054.parquet": 1.2003683303524895,
+          "d3d_shot_001cbcc9e6.parquet": 0.9291159893346357,
+          "d3d_shot_002495e835.parquet": 1.008616683392801,
+          "d3d_shot_0040a29bad.parquet": 0.935015412986216,
+          "d3d_shot_0040ca9bdc.parquet": 0.8944528649389117,
+          "d3d_shot_004f4e5bed.parquet": 1.018693384105258,
+          "d3d_shot_0065291fe9.parquet": 1.034874329164946,
+          "d3d_shot_006a097379.parquet": 1.087828909220497,
+          "d3d_shot_0073c37714.parquet": 1.1216938662985616,
+          "d3d_shot_0079897d3b.parquet": 0.4468219102735622,
+          "d3d_shot_008b4474ec.parquet": 0.8257378430143194,
+          "d3d_shot_0092a9ade0.parquet": 1.087904998870149,
+          "d3d_shot_0093deb434.parquet": 1.0244458520057795,
+          "d3d_shot_00a4b7af57.parquet": 1.0659419843129088,
+          "d3d_shot_00a6212403.parquet": 1.1644549722568294,
+          "d3d_shot_00b8fe1f50.parquet": 1.0260338164472596
+        },
+        "slope_distribution": {
+          "maximum": 1.2003683303524895,
+          "mean": 1.0110949547577142,
+          "median": 1.0304540728061027,
+          "minimum": 0.4468219102735622,
+          "q25": 0.9608601829232277,
+          "q75": 1.096352215727252
+        }
+      },
+      "supply_polarity_strata": {
+        "definition": "subgroup is the measured sign of same-frame shipped ECOILA",
+        "negative_ecoila": {
+          "correlation": 0.9335966583385338,
+          "frames": 35,
+          "relative_slope_deviation_from_all_frames": -0.09427947047805407,
+          "residual_rms_a_against_all_frame_relation": 6778.26024506622,
+          "shots": 18,
+          "through_origin_slope": 0.9072211494627571
+        },
+        "positive_ecoila": {
+          "correlation": 0.9802146167512167,
+          "frames": 25,
+          "relative_slope_deviation_from_all_frames": 0.18152904414618698,
+          "residual_rms_a_against_all_frame_relation": 4796.877199513005,
+          "shots": 20,
+          "through_origin_slope": 1.1834866303844378
+        }
+      },
+      "through_origin": {
+        "correlation": 0.982223644561927,
+        "correlation_p_value": 7.740085953329683e-44,
+        "slope": 1.0016568244749882
+      }
+    },
+    "E567UP": {
+      "candidate_static_relation": "E567UP_current_a = 1.0231285863 * same_frame_ECOILA_current_a",
+      "frame_covariate_drift": {
+        "any_detected": true,
+        "detected_covariates": [
+          "frame_time_ms",
+          "post_fit_rms_wb"
+        ],
+        "method": "shot-cluster-robust residual regressions; Holm correction over all 45 conductor-covariate tests",
+        "tested": {
+          "absolute_fitted_gauge_wb": {
+            "cluster_robust_p_value": 0.18662359562560749,
+            "covariate_standard_deviation_native_units": 0.0753409010751669,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 2390.9802833942017
+          },
+          "absolute_recorded_plasma_current_a": {
+            "cluster_robust_p_value": 0.7102139093286598,
+            "covariate_standard_deviation_native_units": 621702.4564655029,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": -314.5109431592035
+          },
+          "absolute_same_frame_ecoila_current_a": {
+            "cluster_robust_p_value": 0.9850598385423559,
+            "covariate_standard_deviation_native_units": 13573.283018230431,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 13.413256074325147
+          },
+          "flux_threshold_wb": {
+            "cluster_robust_p_value": 0.7053365509323432,
+            "covariate_standard_deviation_native_units": 0.001323799976256511,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 495.1508405590462
+          },
+          "fractional_l2_reduction": {
+            "cluster_robust_p_value": 0.24725229361389378,
+            "covariate_standard_deviation_native_units": 0.19138076340711097,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": -1052.9677685242823
+          },
+          "frame_time_ms": {
+            "cluster_robust_p_value": 0.00018629289270106388,
+            "covariate_standard_deviation_native_units": 2259.113645498348,
+            "drift_detected_at_familywise_0p05": true,
+            "holm_familywise_adjusted_p_value": 0.008010594386145747,
+            "residual_change_a_per_covariate_sd": -1339.40332380467
+          },
+          "log10_selected_lambda": {
+            "cluster_robust_p_value": 0.2716615293186328,
+            "covariate_standard_deviation_native_units": 0.7541473528132145,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 887.8534375711271
+          },
+          "post_fit_rms_wb": {
+            "cluster_robust_p_value": 0.0002481475778516468,
+            "covariate_standard_deviation_native_units": 0.004060324024383228,
+            "drift_detected_at_familywise_0p05": true,
+            "holm_familywise_adjusted_p_value": 0.010422198269769166,
+            "residual_change_a_per_covariate_sd": 3529.8278821452777
+          },
+          "pre_fit_rms_wb": {
+            "cluster_robust_p_value": 0.946608556972796,
+            "covariate_standard_deviation_native_units": 0.02974773407344289,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 36.88804291563996
+          }
+        }
+      },
+      "intercept_freedom": {
+        "free_intercept_slope": 1.0440193798914033,
+        "free_minus_origin_bic": -18.78467165684228,
+        "intercept_95pct_ci_a": [
+          2086.5213560881793,
+          4004.878289778716
+        ],
+        "intercept_a": 3045.6998229334476,
+        "intercept_p_value": 2.3407499336998505e-06,
+        "intercept_standard_error_a": 458.2739815268989,
+        "intercept_t_statistic": 6.646023875904194,
+        "method": "shot-cluster-robust free-intercept OLS",
+        "null_hypothesis": "intercept equals zero",
+        "shot_clusters": 20,
+        "zero_intercept_not_rejected_at_0p05": false
+      },
+      "leave_one_shot_out_prediction": {
+        "held_out_shots": 20,
+        "median_absolute_error_a": 2924.3729372139474,
+        "method": "leave-one-complete-shot-out through-origin fit",
+        "r_squared": 0.9556677196797801,
+        "rmse_a": 5491.813833823248,
+        "training_slope_distribution": {
+          "maximum": 1.057047563975926,
+          "mean": 1.0230616470551737,
+          "median": 1.0222892673064101,
+          "minimum": 1.0108798146779951,
+          "q25": 1.0194660680895073,
+          "q75": 1.0236402951365768
+        }
+      },
+      "promotion_recommendation": {
+        "existing_independent_current_tier_impact": "independent trace relation remains separately knowable; this assessment does not supersede it",
+        "fitted_current_relation": "withhold",
+        "joint_both_required_decision": "failed",
+        "predictive_relation_evidence": "supported but qualified",
+        "reasons": [
+          "full-grid residual closes 1/60 frames; the banked flux criterion requires 54/60",
+          "a zero intercept is rejected by shot-cluster-robust inference",
+          "familywise-significant residual drift remains with frame_time_ms, post_fit_rms_wb"
+        ],
+        "residual_closure_evidence": "failed"
+      },
+      "recorded_plasma_current_strata": {
+        "at_or_above_50ka": {
+          "correlation": 0.9734082739656306,
+          "frames": 31,
+          "relative_slope_deviation_from_all_frames": -0.041071455423854486,
+          "residual_rms_a_against_all_frame_relation": 6526.500645974136,
+          "shots": 17,
+          "through_origin_slope": 0.9811072061739758
+        },
+        "qualified_below_50ka": {
+          "correlation": 0.998860648227976,
+          "frames": 29,
+          "relative_slope_deviation_from_all_frames": 0.09865959089760867,
+          "residual_rms_a_against_all_frame_relation": 3636.5020929839206,
+          "shots": 14,
+          "through_origin_slope": 1.1240700340589385
+        }
+      },
+      "residual_spread": {
+        "median_absolute_a": 2923.943691908327,
+        "rms_a": 5329.089678101602,
+        "rms_fraction_of_response_rms": 0.20400807944058003,
+        "sample_standard_deviation_a": 4471.399220840082
+      },
+      "shot_stability": {
+        "maximum_absolute_relative_deviation_from_all_frames": 0.5114873260090098,
+        "per_shot_through_origin_slopes": {
+          "d3d_shot_00000c4a7b.parquet": 1.0773306229412682,
+          "d3d_shot_0003ff34e7.parquet": 0.9759925911317828,
+          "d3d_shot_0011c2afc9.parquet": 1.1848488231897887,
+          "d3d_shot_001270afa9.parquet": 1.0461278642080507,
+          "d3d_shot_001554e054.parquet": 1.18003636332651,
+          "d3d_shot_001cbcc9e6.parquet": 1.0085885809217527,
+          "d3d_shot_002495e835.parquet": 1.0722298845563383,
+          "d3d_shot_0040a29bad.parquet": 0.9307111226008858,
+          "d3d_shot_0040ca9bdc.parquet": 1.0422924533970097,
+          "d3d_shot_004f4e5bed.parquet": 1.046877767172203,
+          "d3d_shot_0065291fe9.parquet": 1.045286926451595,
+          "d3d_shot_006a097379.parquet": 1.0892792742656605,
+          "d3d_shot_0073c37714.parquet": 1.1502830635578287,
+          "d3d_shot_0079897d3b.parquet": 0.4998112815295596,
+          "d3d_shot_008b4474ec.parquet": 0.8978015759508914,
+          "d3d_shot_0092a9ade0.parquet": 0.9768986187188252,
+          "d3d_shot_0093deb434.parquet": 1.0166204457586148,
+          "d3d_shot_00a4b7af57.parquet": 1.1463551709699096,
+          "d3d_shot_00a6212403.parquet": 1.1192102725779414,
+          "d3d_shot_00b8fe1f50.parquet": 1.0480548334721098
+        },
+        "slope_distribution": {
+          "maximum": 1.1848488231897887,
+          "mean": 1.0277318768349264,
+          "median": 1.0465028156901268,
+          "minimum": 0.4998112815295596,
+          "q25": 1.000666090371021,
+          "q75": 1.0967620238437308
+        }
+      },
+      "supply_polarity_strata": {
+        "definition": "subgroup is the measured sign of same-frame shipped ECOILA",
+        "negative_ecoila": {
+          "correlation": 0.941695527731147,
+          "frames": 35,
+          "relative_slope_deviation_from_all_frames": -0.07421086566072943,
+          "residual_rms_a_against_all_frame_relation": 6256.777275870076,
+          "shots": 18,
+          "through_origin_slope": 0.9472013282275384
+        },
+        "positive_ecoila": {
+          "correlation": 0.994501466427068,
+          "frames": 25,
+          "relative_slope_deviation_from_all_frames": 0.14288823898082015,
+          "residual_rms_a_against_all_frame_relation": 3654.0259552466014,
+          "shots": 20,
+          "through_origin_slope": 1.1693216282462318
+        }
+      },
+      "through_origin": {
+        "correlation": 0.9856421407471255,
+        "correlation_p_value": 1.6563506517493657e-46,
+        "slope": 1.0231285862990276
+      }
+    },
+    "E89DN": {
+      "candidate_static_relation": "E89DN_current_a = 1.04562407643 * same_frame_ECOILA_current_a",
+      "frame_covariate_drift": {
+        "any_detected": false,
+        "detected_covariates": [],
+        "method": "shot-cluster-robust residual regressions; Holm correction over all 45 conductor-covariate tests",
+        "tested": {
+          "absolute_fitted_gauge_wb": {
+            "cluster_robust_p_value": 0.40070847267851906,
+            "covariate_standard_deviation_native_units": 0.0753409010751669,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": -164.10687460345434
+          },
+          "absolute_recorded_plasma_current_a": {
+            "cluster_robust_p_value": 0.7052458297810119,
+            "covariate_standard_deviation_native_units": 621702.4564655029,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": -130.60948745953277
+          },
+          "absolute_same_frame_ecoila_current_a": {
+            "cluster_robust_p_value": 0.37083089530266017,
+            "covariate_standard_deviation_native_units": 13573.283018230431,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": -270.2525734273028
+          },
+          "flux_threshold_wb": {
+            "cluster_robust_p_value": 0.2466494285289079,
+            "covariate_standard_deviation_native_units": 0.001323799976256511,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 406.3594248516632
+          },
+          "fractional_l2_reduction": {
+            "cluster_robust_p_value": 0.2084490198890612,
+            "covariate_standard_deviation_native_units": 0.19138076340711097,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": -366.7360948687888
+          },
+          "frame_time_ms": {
+            "cluster_robust_p_value": 0.031968265426277974,
+            "covariate_standard_deviation_native_units": 2259.113645498348,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 491.35586340466295
+          },
+          "log10_selected_lambda": {
+            "cluster_robust_p_value": 0.6348922877007299,
+            "covariate_standard_deviation_native_units": 0.7541473528132145,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 165.5796333762425
+          },
+          "post_fit_rms_wb": {
+            "cluster_robust_p_value": 0.041865103779720594,
+            "covariate_standard_deviation_native_units": 0.004060324024383228,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": -421.7686952234884
+          },
+          "pre_fit_rms_wb": {
+            "cluster_robust_p_value": 0.26201922474968997,
+            "covariate_standard_deviation_native_units": 0.02974773407344289,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": -327.4900522422097
+          }
+        }
+      },
+      "intercept_freedom": {
+        "free_intercept_slope": 1.0288525990071982,
+        "free_minus_origin_bic": -53.43936641098325,
+        "intercept_95pct_ci_a": [
+          -3191.388275606244,
+          -1698.8889269627641
+        ],
+        "intercept_a": -2445.138601284504,
+        "intercept_p_value": 1.5242194073012442e-06,
+        "intercept_standard_error_a": 356.5413750262428,
+        "intercept_t_statistic": -6.857937879171899,
+        "method": "shot-cluster-robust free-intercept OLS",
+        "null_hypothesis": "intercept equals zero",
+        "shot_clusters": 20,
+        "zero_intercept_not_rejected_at_0p05": false
+      },
+      "leave_one_shot_out_prediction": {
+        "held_out_shots": 20,
+        "median_absolute_error_a": 2543.855213386234,
+        "method": "leave-one-complete-shot-out through-origin fit",
+        "r_squared": 0.9851155287064202,
+        "rmse_a": 3099.582545883437,
+        "training_slope_distribution": {
+          "maximum": 1.0519594718665923,
+          "mean": 1.0455832775605718,
+          "median": 1.0454905303160804,
+          "minimum": 1.041186647037509,
+          "q25": 1.0435237918265505,
+          "q75": 1.0470913837396714
+        }
+      },
+      "promotion_recommendation": {
+        "existing_independent_current_tier_impact": "independent trace relation remains separately knowable; this assessment does not supersede it",
+        "fitted_current_relation": "withhold",
+        "joint_both_required_decision": "failed",
+        "predictive_relation_evidence": "supported but qualified",
+        "reasons": [
+          "full-grid residual closes 1/60 frames; the banked flux criterion requires 54/60",
+          "a zero intercept is rejected by shot-cluster-robust inference"
+        ],
+        "residual_closure_evidence": "failed"
+      },
+      "recorded_plasma_current_strata": {
+        "at_or_above_50ka": {
+          "correlation": 0.9971565288860891,
+          "frames": 31,
+          "relative_slope_deviation_from_all_frames": 0.02239784631343067,
+          "residual_rms_a_against_all_frame_relation": 3216.3200344362112,
+          "shots": 17,
+          "through_origin_slope": 1.0690438037979269
+        },
+        "qualified_below_50ka": {
+          "correlation": 0.9953401963422698,
+          "frames": 29,
+          "relative_slope_deviation_from_all_frames": -0.053802874319060945,
+          "residual_rms_a_against_all_frame_relation": 2900.1322456163043,
+          "shots": 14,
+          "through_origin_slope": 0.9893664956630965
+        }
+      },
+      "residual_spread": {
+        "median_absolute_a": 2505.9181394674806,
+        "rms_a": 3067.5679718120577,
+        "rms_fraction_of_response_rms": 0.11657434222566553,
+        "sample_standard_deviation_a": 1959.9950004145705
+      },
+      "shot_stability": {
+        "maximum_absolute_relative_deviation_from_all_frames": 0.18841694364719286,
+        "per_shot_through_origin_slopes": {
+          "d3d_shot_00000c4a7b.parquet": 1.0652601442846543,
+          "d3d_shot_0003ff34e7.parquet": 1.0292955206708487,
+          "d3d_shot_0011c2afc9.parquet": 0.9025084687015574,
+          "d3d_shot_001270afa9.parquet": 1.0814492391406787,
+          "d3d_shot_001554e054.parquet": 0.900127412756497,
+          "d3d_shot_001cbcc9e6.parquet": 1.1176321416256136,
+          "d3d_shot_002495e835.parquet": 1.12061496171655,
+          "d3d_shot_0040a29bad.parquet": 1.1003513153139293,
+          "d3d_shot_0040ca9bdc.parquet": 1.0846824126268093,
+          "d3d_shot_004f4e5bed.parquet": 0.9933898745425647,
+          "d3d_shot_0065291fe9.parquet": 1.084725625132075,
+          "d3d_shot_006a097379.parquet": 1.0008108052575357,
+          "d3d_shot_0073c37714.parquet": 0.9437699365276627,
+          "d3d_shot_0079897d3b.parquet": 1.087397080365746,
+          "d3d_shot_008b4474ec.parquet": 1.0633383243811394,
+          "d3d_shot_0092a9ade0.parquet": 0.8486107837470654,
+          "d3d_shot_0093deb434.parquet": 1.075266030045204,
+          "d3d_shot_00a4b7af57.parquet": 1.0543213447381032,
+          "d3d_shot_00a6212403.parquet": 0.9191280698934238,
+          "d3d_shot_00b8fe1f50.parquet": 1.025727271219879
+        },
+        "slope_distribution": {
+          "maximum": 1.12061496171655,
+          "mean": 1.0249203381343768,
+          "median": 1.0588298345596212,
+          "minimum": 0.8486107837470654,
+          "q25": 0.9809848900388392,
+          "q75": 1.0846932157531257
+        }
+      },
+      "supply_polarity_strata": {
+        "definition": "subgroup is the measured sign of same-frame shipped ECOILA",
+        "negative_ecoila": {
+          "correlation": 0.991693378981186,
+          "frames": 35,
+          "relative_slope_deviation_from_all_frames": 0.06232372914749873,
+          "residual_rms_a_against_all_frame_relation": 2874.417696269005,
+          "shots": 18,
+          "through_origin_slope": 1.1107912681620462
+        },
+        "positive_ecoila": {
+          "correlation": 0.990814703433371,
+          "frames": 25,
+          "relative_slope_deviation_from_all_frames": -0.12000032374391378,
+          "residual_rms_a_against_all_frame_relation": 3319.1486707249155,
+          "shots": 20,
+          "through_origin_slope": 0.9201488487460562
+        }
+      },
+      "through_origin": {
+        "correlation": 0.9972019819366135,
+        "correlation_p_value": 4.902673403432962e-67,
+        "slope": 1.0456240764323717
+      }
+    },
+    "E89UP": {
+      "candidate_static_relation": "E89UP_current_a = 1.04569475695 * same_frame_ECOILA_current_a",
+      "frame_covariate_drift": {
+        "any_detected": false,
+        "detected_covariates": [],
+        "method": "shot-cluster-robust residual regressions; Holm correction over all 45 conductor-covariate tests",
+        "tested": {
+          "absolute_fitted_gauge_wb": {
+            "cluster_robust_p_value": 0.5830510650235956,
+            "covariate_standard_deviation_native_units": 0.0753409010751669,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 134.7641049911611
+          },
+          "absolute_recorded_plasma_current_a": {
+            "cluster_robust_p_value": 0.642048606294066,
+            "covariate_standard_deviation_native_units": 621702.4564655029,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 132.24898420384628
+          },
+          "absolute_same_frame_ecoila_current_a": {
+            "cluster_robust_p_value": 0.8584839921710459,
+            "covariate_standard_deviation_native_units": 13573.283018230431,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 50.46370309248985
+          },
+          "flux_threshold_wb": {
+            "cluster_robust_p_value": 0.2853615117188133,
+            "covariate_standard_deviation_native_units": 0.001323799976256511,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 247.4392083266439
+          },
+          "fractional_l2_reduction": {
+            "cluster_robust_p_value": 0.3361856086532197,
+            "covariate_standard_deviation_native_units": 0.19138076340711097,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": -258.75609981455926
+          },
+          "frame_time_ms": {
+            "cluster_robust_p_value": 0.06014790122297368,
+            "covariate_standard_deviation_native_units": 2259.113645498348,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 432.8573142125947
+          },
+          "log10_selected_lambda": {
+            "cluster_robust_p_value": 0.8827569796687698,
+            "covariate_standard_deviation_native_units": 0.7541473528132145,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 44.87359683759445
+          },
+          "post_fit_rms_wb": {
+            "cluster_robust_p_value": 0.7051229657625195,
+            "covariate_standard_deviation_native_units": 0.004060324024383228,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 54.13127239337686
+          },
+          "pre_fit_rms_wb": {
+            "cluster_robust_p_value": 0.8893085499225114,
+            "covariate_standard_deviation_native_units": 0.02974773407344289,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 37.710579620501505
+          }
+        }
+      },
+      "intercept_freedom": {
+        "free_intercept_slope": 1.0310063851905884,
+        "free_minus_origin_bic": -46.58929846495327,
+        "intercept_95pct_ci_a": [
+          -2815.078004208275,
+          -1467.8010609493112
+        ],
+        "intercept_a": -2141.439532578793,
+        "intercept_p_value": 2.3051392502774614e-06,
+        "intercept_standard_error_a": 321.84936919892084,
+        "intercept_t_statistic": -6.653545843227253,
+        "method": "shot-cluster-robust free-intercept OLS",
+        "null_hypothesis": "intercept equals zero",
+        "shot_clusters": 20,
+        "zero_intercept_not_rejected_at_0p05": false
+      },
+      "leave_one_shot_out_prediction": {
+        "held_out_shots": 20,
+        "median_absolute_error_a": 2093.257434373751,
+        "method": "leave-one-complete-shot-out through-origin fit",
+        "r_squared": 0.9877483760442158,
+        "rmse_a": 2817.419073607406,
+        "training_slope_distribution": {
+          "maximum": 1.0508889039978504,
+          "mean": 1.0456854549312833,
+          "median": 1.0456279660517338,
+          "minimum": 1.041742556291643,
+          "q25": 1.044347470256724,
+          "q75": 1.0463987747151013
+        }
+      },
+      "promotion_recommendation": {
+        "existing_independent_current_tier_impact": "unknown tier remains unchanged",
+        "fitted_current_relation": "withhold",
+        "joint_both_required_decision": "failed",
+        "predictive_relation_evidence": "supported but qualified",
+        "reasons": [
+          "full-grid residual closes 1/60 frames; the banked flux criterion requires 54/60",
+          "a zero intercept is rejected by shot-cluster-robust inference"
+        ],
+        "residual_closure_evidence": "failed"
+      },
+      "recorded_plasma_current_strata": {
+        "at_or_above_50ka": {
+          "correlation": 0.9982203702841375,
+          "frames": 31,
+          "relative_slope_deviation_from_all_frames": 0.01828968924360308,
+          "residual_rms_a_against_all_frame_relation": 2548.420293288506,
+          "shots": 17,
+          "through_origin_slope": 1.0648201890978908
+        },
+        "qualified_below_50ka": {
+          "correlation": 0.9938732830025772,
+          "frames": 29,
+          "relative_slope_deviation_from_all_frames": -0.043934485393721356,
+          "residual_rms_a_against_all_frame_relation": 3033.8831340248103,
+          "shots": 14,
+          "through_origin_slope": 0.9997526959241234
+        }
+      },
+      "residual_spread": {
+        "median_absolute_a": 2081.415329815185,
+        "rms_a": 2793.614101796187,
+        "rms_fraction_of_response_rms": 0.10627969377421093,
+        "sample_standard_deviation_a": 1882.3322191385087
+      },
+      "shot_stability": {
+        "maximum_absolute_relative_deviation_from_all_frames": 0.11778431873482287,
+        "per_shot_through_origin_slopes": {
+          "d3d_shot_00000c4a7b.parquet": 1.0472696596434703,
+          "d3d_shot_0003ff34e7.parquet": 1.0665726165925875,
+          "d3d_shot_0011c2afc9.parquet": 0.9401548153547636,
+          "d3d_shot_001270afa9.parquet": 1.0940476123145804,
+          "d3d_shot_001554e054.parquet": 0.9397006898608148,
+          "d3d_shot_001cbcc9e6.parquet": 1.079816529128766,
+          "d3d_shot_002495e835.parquet": 1.1168810232453084,
+          "d3d_shot_0040a29bad.parquet": 1.1095077905072834,
+          "d3d_shot_0040ca9bdc.parquet": 1.052083710838621,
+          "d3d_shot_004f4e5bed.parquet": 1.0500222416341467,
+          "d3d_shot_0065291fe9.parquet": 1.119359487118346,
+          "d3d_shot_006a097379.parquet": 1.0334514239460029,
+          "d3d_shot_0073c37714.parquet": 0.9225283123977305,
+          "d3d_shot_0079897d3b.parquet": 1.0329610055262761,
+          "d3d_shot_008b4474ec.parquet": 1.0114611583223756,
+          "d3d_shot_0092a9ade0.parquet": 1.057604400634307,
+          "d3d_shot_0093deb434.parquet": 1.0742565217232947,
+          "d3d_shot_00a4b7af57.parquet": 1.0080329536535488,
+          "d3d_shot_00a6212403.parquet": 1.0523618163539847,
+          "d3d_shot_00b8fe1f50.parquet": 1.0310144079310561
+        },
+        "slope_distribution": {
+          "maximum": 1.119359487118346,
+          "mean": 1.041954408836363,
+          "median": 1.0510529762363838,
+          "minimum": 0.9225283123977305,
+          "q25": 1.026126095528886,
+          "q75": 1.0756465235746626
+        }
+      },
+      "supply_polarity_strata": {
+        "definition": "subgroup is the measured sign of same-frame shipped ECOILA",
+        "negative_ecoila": {
+          "correlation": 0.9943124186794556,
+          "frames": 35,
+          "relative_slope_deviation_from_all_frames": 0.05012222041509462,
+          "residual_rms_a_against_all_frame_relation": 2445.805423283133,
+          "shots": 18,
+          "through_origin_slope": 1.0981073000443549
+        },
+        "positive_ecoila": {
+          "correlation": 0.9833591495005155,
+          "frames": 25,
+          "relative_slope_deviation_from_all_frames": -0.09650710506010396,
+          "residual_rms_a_against_all_frame_relation": 3217.999621414704,
+          "shots": 20,
+          "through_origin_slope": 0.9447777831798807
+        }
+      },
+      "through_origin": {
+        "correlation": 0.9974088283729817,
+        "correlation_p_value": 5.3012042297365e-68,
+        "slope": 1.0456947569496173
+      }
+    },
+    "ECOILB": {
+      "candidate_static_relation": "ECOILB_current_a = 2.00091807709 * same_frame_ECOILA_current_a",
+      "frame_covariate_drift": {
+        "any_detected": true,
+        "detected_covariates": [
+          "post_fit_rms_wb"
+        ],
+        "method": "shot-cluster-robust residual regressions; Holm correction over all 45 conductor-covariate tests",
+        "tested": {
+          "absolute_fitted_gauge_wb": {
+            "cluster_robust_p_value": 0.1179108706726251,
+            "covariate_standard_deviation_native_units": 0.0753409010751669,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 1944.955977555077
+          },
+          "absolute_recorded_plasma_current_a": {
+            "cluster_robust_p_value": 0.831307463354174,
+            "covariate_standard_deviation_native_units": 621702.4564655029,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": -153.9254253682328
+          },
+          "absolute_same_frame_ecoila_current_a": {
+            "cluster_robust_p_value": 0.7398310011649571,
+            "covariate_standard_deviation_native_units": 13573.283018230431,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": -208.29215273914662
+          },
+          "flux_threshold_wb": {
+            "cluster_robust_p_value": 0.37972192096685675,
+            "covariate_standard_deviation_native_units": 0.001323799976256511,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 923.1604210190987
+          },
+          "fractional_l2_reduction": {
+            "cluster_robust_p_value": 0.059690569521010525,
+            "covariate_standard_deviation_native_units": 0.19138076340711097,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": -1414.0027454430249
+          },
+          "frame_time_ms": {
+            "cluster_robust_p_value": 0.2573909404596943,
+            "covariate_standard_deviation_native_units": 2259.113645498348,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": -358.72580867970055
+          },
+          "log10_selected_lambda": {
+            "cluster_robust_p_value": 0.25019472848989244,
+            "covariate_standard_deviation_native_units": 0.7541473528132145,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": 923.5756112273882
+          },
+          "post_fit_rms_wb": {
+            "cluster_robust_p_value": 8.971007936571702e-05,
+            "covariate_standard_deviation_native_units": 0.004060324024383228,
+            "drift_detected_at_familywise_0p05": true,
+            "holm_familywise_adjusted_p_value": 0.003947243492091549,
+            "residual_change_a_per_covariate_sd": 2698.4905211222863
+          },
+          "pre_fit_rms_wb": {
+            "cluster_robust_p_value": 0.5890507233240668,
+            "covariate_standard_deviation_native_units": 0.02974773407344289,
+            "drift_detected_at_familywise_0p05": false,
+            "holm_familywise_adjusted_p_value": 1.0,
+            "residual_change_a_per_covariate_sd": -272.7735298458273
+          }
+        }
+      },
+      "intercept_freedom": {
+        "free_intercept_slope": 1.9986900269700056,
+        "free_minus_origin_bic": 3.686229370271746,
+        "intercept_95pct_ci_a": [
+          -1393.8246239396276,
+          744.163151444553
+        ],
+        "intercept_a": -324.8307362475373,
+        "intercept_p_value": 0.5323644184054379,
+        "intercept_standard_error_a": 510.7413292458751,
+        "intercept_t_statistic": -0.635998533204978,
+        "method": "shot-cluster-robust free-intercept OLS",
+        "null_hypothesis": "intercept equals zero",
+        "shot_clusters": 20,
+        "zero_intercept_not_rejected_at_0p05": true
+      },
+      "leave_one_shot_out_prediction": {
+        "held_out_shots": 20,
+        "median_absolute_error_a": 1567.41255627204,
+        "method": "leave-one-complete-shot-out through-origin fit",
+        "r_squared": 0.9933483532119266,
+        "rmse_a": 4026.405742311334,
+        "training_slope_distribution": {
+          "maximum": 2.026787492605101,
+          "mean": 2.0008077602394874,
+          "median": 2.000624069557481,
+          "minimum": 1.9882848651319986,
+          "q25": 1.9989673335706408,
+          "q75": 2.0013059591258875
+        }
+      },
+      "promotion_recommendation": {
+        "existing_independent_current_tier_impact": "unknown tier remains unchanged",
+        "fitted_current_relation": "withhold",
+        "joint_both_required_decision": "failed",
+        "predictive_relation_evidence": "supported but qualified",
+        "reasons": [
+          "full-grid residual closes 1/60 frames; the banked flux criterion requires 54/60",
+          "familywise-significant residual drift remains with post_fit_rms_wb",
+          "normalisation or conductor definition remains under audit"
+        ],
+        "residual_closure_evidence": "failed"
+      },
+      "recorded_plasma_current_strata": {
+        "at_or_above_50ka": {
+          "correlation": 0.9954770359227685,
+          "frames": 31,
+          "relative_slope_deviation_from_all_frames": -0.0024249463442647112,
+          "residual_rms_a_against_all_frame_relation": 4787.473462492237,
+          "shots": 17,
+          "through_origin_slope": 1.9960659581162272
+        },
+        "qualified_below_50ka": {
+          "correlation": 0.9974715382970446,
+          "frames": 29,
+          "relative_slope_deviation_from_all_frames": 0.0058250727130291224,
+          "residual_rms_a_against_all_frame_relation": 2599.4332124663656,
+          "shots": 14,
+          "through_origin_slope": 2.0125735703843235
+        }
+      },
+      "residual_spread": {
+        "median_absolute_a": 1519.7325718654483,
+        "rms_a": 3886.882865339553,
+        "rms_fraction_of_response_rms": 0.07748542028108989,
+        "sample_standard_deviation_a": 3906.7678929572608
+      },
+      "shot_stability": {
+        "maximum_absolute_relative_deviation_from_all_frames": 0.19947094748081795,
+        "per_shot_through_origin_slopes": {
+          "d3d_shot_00000c4a7b.parquet": 2.0568213005972114,
+          "d3d_shot_0003ff34e7.parquet": 1.9704634971359813,
+          "d3d_shot_0011c2afc9.parquet": 1.9933632427194838,
+          "d3d_shot_001270afa9.parquet": 2.0498390934456108,
+          "d3d_shot_001554e054.parquet": 2.0027616600178026,
+          "d3d_shot_001cbcc9e6.parquet": 2.053846789660605,
+          "d3d_shot_002495e835.parquet": 2.0792188689344675,
+          "d3d_shot_0040a29bad.parquet": 2.0134370507183785,
+          "d3d_shot_0040ca9bdc.parquet": 2.000904232176575,
+          "d3d_shot_004f4e5bed.parquet": 1.9881218019949731,
+          "d3d_shot_0065291fe9.parquet": 2.073266044500129,
+          "d3d_shot_006a097379.parquet": 2.0207141309078573,
+          "d3d_shot_0073c37714.parquet": 1.9596026194472722,
+          "d3d_shot_0079897d3b.parquet": 1.6017930524233193,
+          "d3d_shot_008b4474ec.parquet": 1.7905155934218235,
+          "d3d_shot_0092a9ade0.parquet": 1.8316472060718993,
+          "d3d_shot_0093deb434.parquet": 2.053525173878699,
+          "d3d_shot_00a4b7af57.parquet": 2.0384958667681574,
+          "d3d_shot_00a6212403.parquet": 2.0034949739867938,
+          "d3d_shot_00b8fe1f50.parquet": 2.0161123541065225
+        },
+        "slope_distribution": {
+          "maximum": 2.0792188689344675,
+          "mean": 1.9798972276456783,
+          "median": 2.008466012352586,
+          "minimum": 1.6017930524233193,
+          "q25": 1.983707225780225,
+          "q75": 2.0507606135538827
+        }
+      },
+      "supply_polarity_strata": {
+        "definition": "subgroup is the measured sign of same-frame shipped ECOILA",
+        "negative_ecoila": {
+          "correlation": 0.9892574502826863,
+          "frames": 35,
+          "relative_slope_deviation_from_all_frames": 0.005724998002526904,
+          "residual_rms_a_against_all_frame_relation": 4625.5964509254745,
+          "shots": 18,
+          "through_origin_slope": 2.01237332908702
+        },
+        "positive_ecoila": {
+          "correlation": 0.9938636967715221,
+          "frames": 25,
+          "relative_slope_deviation_from_all_frames": -0.011023114680934643,
+          "residual_rms_a_against_all_frame_relation": 2510.828676701863,
+          "shots": 20,
+          "through_origin_slope": 1.9788617276615006
+        }
+      },
+      "through_origin": {
+        "correlation": 0.9969169329054671,
+        "correlation_p_value": 8.139480594279796e-66,
+        "slope": 2.0009180770924457
+      }
+    }
+  },
+  "generated_at_utc": "2026-08-22T08:21:56.771709+00:00",
+  "inputs": {
+    "current_level": {
+      "path": "docs/figures/coil-circuit-discovery/five_column_residual_adjudication_receipt.json",
+      "sha256": "1b95ee726861db59d039e06a2df3805b807c4dd283eb6f9a36ceea88741e88bf"
+    },
+    "fitted_current": {
+      "path": "docs/figures/coil-circuit-discovery/grid_residual_current_regression_receipt.json",
+      "sha256": "0db335f258b2571af2da04f555154981e509127fb588ed76de34c7b891bb7753"
+    },
+    "flux_threshold": {
+      "path": "docs/figures/coil-circuit-discovery/flux_space_adjudication_receipt.json",
+      "sha256": "01c7c73e12ddcecabc0754078f3f3e8d3bfdc88bcbce1526523d1609d513cff8"
+    }
+  },
+  "measurement": "ensemble assessment of fitted omitted-conductor relations",
+  "policy": {
+    "ecoilb_constraint": "withhold pending normalisation audit",
+    "promotion_test": "both-required",
+    "relation_fit_scope": "fit-once-static",
+    "scope_note": "recommendations apply only to label-conditioned fitted relations; independent trace relations retain their separate authority"
+  },
+  "residual_threshold_reconciliation": {
+    "closure_frames": 1,
+    "interpretation": "the fitted currents strongly track ECOILA, while residual flux still contains content outside the five-conductor response space",
+    "passes": false,
+    "per_frame": [
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0002604953238353943,
+        "frame": 0,
+        "post_fit_rms_wb": 0.004281113158167946,
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "threshold_ratio": 16.434510589806827,
+        "time_ms": 160.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0025509982195265784,
+        "frame": 179,
+        "post_fit_rms_wb": 0.007499095654190319,
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "threshold_ratio": 2.93967106554156,
+        "time_ms": 3740.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.003381464808842414,
+        "frame": 358,
+        "post_fit_rms_wb": 0.008042377749456982,
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "threshold_ratio": 2.3783709735575074,
+        "time_ms": 7340.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0002411364944360124,
+        "frame": 0,
+        "post_fit_rms_wb": 0.00695965419911092,
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "threshold_ratio": 28.861886772421844,
+        "time_ms": 200.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0012992811227742927,
+        "frame": 44,
+        "post_fit_rms_wb": 0.0057780903597152294,
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "threshold_ratio": 4.447144084859441,
+        "time_ms": 1080.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0023840167371478637,
+        "frame": 89,
+        "post_fit_rms_wb": 0.007299568582549088,
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "threshold_ratio": 3.061878076947556,
+        "time_ms": 1980.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.00028374182041294104,
+        "frame": 0,
+        "post_fit_rms_wb": 0.006332734556825023,
+        "shot": "d3d_shot_0011c2afc9.parquet",
+        "threshold_ratio": 22.318650622628475,
+        "time_ms": 160.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0012879383869481354,
+        "frame": 36,
+        "post_fit_rms_wb": 0.006391156572457842,
+        "shot": "d3d_shot_0011c2afc9.parquet",
+        "threshold_ratio": 4.962315462622523,
+        "time_ms": 980.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.00337683186929131,
+        "frame": 72,
+        "post_fit_rms_wb": 0.006318052685319105,
+        "shot": "d3d_shot_0011c2afc9.parquet",
+        "threshold_ratio": 1.8710000763659766,
+        "time_ms": 1720.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0003464691024519748,
+        "frame": 0,
+        "post_fit_rms_wb": 0.004319229550965832,
+        "shot": "d3d_shot_001270afa9.parquet",
+        "threshold_ratio": 12.466420585265707,
+        "time_ms": 100.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0016934383152608927,
+        "frame": 126,
+        "post_fit_rms_wb": 0.00421414341593616,
+        "shot": "d3d_shot_001270afa9.parquet",
+        "threshold_ratio": 2.48851309076878,
+        "time_ms": 2660.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0010948449026958497,
+        "frame": 251,
+        "post_fit_rms_wb": 0.0045354091277928586,
+        "shot": "d3d_shot_001270afa9.parquet",
+        "threshold_ratio": 4.142512895319936,
+        "time_ms": 6040.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0009618028965023987,
+        "frame": 0,
+        "post_fit_rms_wb": 0.00565254020941046,
+        "shot": "d3d_shot_001554e054.parquet",
+        "threshold_ratio": 5.877025563102328,
+        "time_ms": 340.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.004035166436406173,
+        "frame": 144,
+        "post_fit_rms_wb": 0.006790153729727019,
+        "shot": "d3d_shot_001554e054.parquet",
+        "threshold_ratio": 1.6827444014365145,
+        "time_ms": 3240.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.00242128434764388,
+        "frame": 289,
+        "post_fit_rms_wb": 0.006233437717686711,
+        "shot": "d3d_shot_001554e054.parquet",
+        "threshold_ratio": 2.574434400384402,
+        "time_ms": 6140.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0008897652424578339,
+        "frame": 0,
+        "post_fit_rms_wb": 0.0036529851615568583,
+        "shot": "d3d_shot_001cbcc9e6.parquet",
+        "threshold_ratio": 4.105560643688522,
+        "time_ms": 500.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0016678129227622282,
+        "frame": 126,
+        "post_fit_rms_wb": 0.005707009348384129,
+        "shot": "d3d_shot_001cbcc9e6.parquet",
+        "threshold_ratio": 3.42185221765292,
+        "time_ms": 3040.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.001650641942194219,
+        "frame": 252,
+        "post_fit_rms_wb": 0.006268550908769325,
+        "shot": "d3d_shot_001cbcc9e6.parquet",
+        "threshold_ratio": 3.7976442670761545,
+        "time_ms": 5600.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0012500733266754235,
+        "frame": 0,
+        "post_fit_rms_wb": 0.006956829442990897,
+        "shot": "d3d_shot_002495e835.parquet",
+        "threshold_ratio": 5.565137095991497,
+        "time_ms": 260.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0036710614458564947,
+        "frame": 146,
+        "post_fit_rms_wb": 0.007710823498318452,
+        "shot": "d3d_shot_002495e835.parquet",
+        "threshold_ratio": 2.100434332697322,
+        "time_ms": 3180.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.002600248513109625,
+        "frame": 292,
+        "post_fit_rms_wb": 0.00741957205366371,
+        "shot": "d3d_shot_002495e835.parquet",
+        "threshold_ratio": 2.85340882467833,
+        "time_ms": 6100.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0009665291205423061,
+        "frame": 0,
+        "post_fit_rms_wb": 0.005846961012630055,
+        "shot": "d3d_shot_0040a29bad.parquet",
+        "threshold_ratio": 6.049441127391388,
+        "time_ms": 260.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0015690669462910876,
+        "frame": 114,
+        "post_fit_rms_wb": 0.009471969323877541,
+        "shot": "d3d_shot_0040a29bad.parquet",
+        "threshold_ratio": 6.036689094921726,
+        "time_ms": 2540.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.002473515504398531,
+        "frame": 227,
+        "post_fit_rms_wb": 0.011549053823331257,
+        "shot": "d3d_shot_0040a29bad.parquet",
+        "threshold_ratio": 4.669084872439305,
+        "time_ms": 4800.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0012204289057514948,
+        "frame": 0,
+        "post_fit_rms_wb": 0.006350041969798366,
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "threshold_ratio": 5.203123213382303,
+        "time_ms": 260.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0025075190399903836,
+        "frame": 137,
+        "post_fit_rms_wb": 0.008631050081881324,
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "threshold_ratio": 3.442067615133413,
+        "time_ms": 3000.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0014794635146867534,
+        "frame": 274,
+        "post_fit_rms_wb": 0.006888957102458967,
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "threshold_ratio": 4.6563886395789655,
+        "time_ms": 5740.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0004394200913034382,
+        "frame": 0,
+        "post_fit_rms_wb": 0.006429038576213567,
+        "shot": "d3d_shot_004f4e5bed.parquet",
+        "threshold_ratio": 14.630734241448335,
+        "time_ms": 420.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0025149744831979982,
+        "frame": 110,
+        "post_fit_rms_wb": 0.010017955625291458,
+        "shot": "d3d_shot_004f4e5bed.parquet",
+        "threshold_ratio": 3.9833229689681775,
+        "time_ms": 2720.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0033008935582443475,
+        "frame": 221,
+        "post_fit_rms_wb": 0.010281264822867552,
+        "shot": "d3d_shot_004f4e5bed.parquet",
+        "threshold_ratio": 3.114691413538299,
+        "time_ms": 5060.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0008873065499926554,
+        "frame": 0,
+        "post_fit_rms_wb": 0.009750453367736325,
+        "shot": "d3d_shot_0065291fe9.parquet",
+        "threshold_ratio": 10.988821583495618,
+        "time_ms": 200.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0017340988970962036,
+        "frame": 68,
+        "post_fit_rms_wb": 0.008497703212982939,
+        "shot": "d3d_shot_0065291fe9.parquet",
+        "threshold_ratio": 4.900356736984596,
+        "time_ms": 1560.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0025628763505650648,
+        "frame": 137,
+        "post_fit_rms_wb": 0.008828465378135524,
+        "shot": "d3d_shot_0065291fe9.parquet",
+        "threshold_ratio": 3.444748856568526,
+        "time_ms": 2940.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0004443160281765994,
+        "frame": 0,
+        "post_fit_rms_wb": 0.005754053184773088,
+        "shot": "d3d_shot_006a097379.parquet",
+        "threshold_ratio": 12.950361499194132,
+        "time_ms": 300.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0019991088952082785,
+        "frame": 144,
+        "post_fit_rms_wb": 0.0038707315577471914,
+        "shot": "d3d_shot_006a097379.parquet",
+        "threshold_ratio": 1.936228470107386,
+        "time_ms": 3220.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0011566575599420705,
+        "frame": 288,
+        "post_fit_rms_wb": 0.004310483115347621,
+        "shot": "d3d_shot_006a097379.parquet",
+        "threshold_ratio": 3.726671803851353,
+        "time_ms": 6100.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.00046190686510456556,
+        "frame": 0,
+        "post_fit_rms_wb": 0.0051437331059778066,
+        "shot": "d3d_shot_0073c37714.parquet",
+        "threshold_ratio": 11.135866328406655,
+        "time_ms": 300.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0009270381690995122,
+        "frame": 132,
+        "post_fit_rms_wb": 0.00403379599576231,
+        "shot": "d3d_shot_0073c37714.parquet",
+        "threshold_ratio": 4.351272828043939,
+        "time_ms": 2960.0
+      },
+      {
+        "closes": true,
+        "flux_threshold_wb": 0.0017438426597252109,
+        "frame": 263,
+        "post_fit_rms_wb": 0.0016082341544008166,
+        "shot": "d3d_shot_0073c37714.parquet",
+        "threshold_ratio": 0.9222358137827853,
+        "time_ms": 6880.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0004187128804374306,
+        "frame": 0,
+        "post_fit_rms_wb": 0.006702374257445776,
+        "shot": "d3d_shot_0079897d3b.parquet",
+        "threshold_ratio": 16.007088796608755,
+        "time_ms": 180.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0017225782463294351,
+        "frame": 71,
+        "post_fit_rms_wb": 0.006192804631367367,
+        "shot": "d3d_shot_0079897d3b.parquet",
+        "threshold_ratio": 3.5950788561061517,
+        "time_ms": 1600.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.005025501671919449,
+        "frame": 142,
+        "post_fit_rms_wb": 0.03454229921569686,
+        "shot": "d3d_shot_0079897d3b.parquet",
+        "threshold_ratio": 6.873403188522613,
+        "time_ms": 3020.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.00136912238851281,
+        "frame": 0,
+        "post_fit_rms_wb": 0.004709226912064749,
+        "shot": "d3d_shot_008b4474ec.parquet",
+        "threshold_ratio": 3.4395952849621287,
+        "time_ms": 720.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.002601850928116752,
+        "frame": 136,
+        "post_fit_rms_wb": 0.005904155303573,
+        "shot": "d3d_shot_008b4474ec.parquet",
+        "threshold_ratio": 2.269213520179072,
+        "time_ms": 3440.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0014400239685479512,
+        "frame": 271,
+        "post_fit_rms_wb": 0.006502893529642272,
+        "shot": "d3d_shot_008b4474ec.parquet",
+        "threshold_ratio": 4.5158231193884,
+        "time_ms": 6600.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.002821223430652701,
+        "frame": 0,
+        "post_fit_rms_wb": 0.005084923392439959,
+        "shot": "d3d_shot_0092a9ade0.parquet",
+        "threshold_ratio": 1.8023823768057754,
+        "time_ms": 640.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.003827027751707084,
+        "frame": 37,
+        "post_fit_rms_wb": 0.006772182254435912,
+        "shot": "d3d_shot_0092a9ade0.parquet",
+        "threshold_ratio": 1.7695670619098889,
+        "time_ms": 1420.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0063661887206632375,
+        "frame": 74,
+        "post_fit_rms_wb": 0.007943637911919457,
+        "shot": "d3d_shot_0092a9ade0.parquet",
+        "threshold_ratio": 1.2477854899488243,
+        "time_ms": 2240.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0006653848760484095,
+        "frame": 0,
+        "post_fit_rms_wb": 0.00499304131868796,
+        "shot": "d3d_shot_0093deb434.parquet",
+        "threshold_ratio": 7.503989793607356,
+        "time_ms": 260.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.002065747911701431,
+        "frame": 106,
+        "post_fit_rms_wb": 0.0077496557695845925,
+        "shot": "d3d_shot_0093deb434.parquet",
+        "threshold_ratio": 3.7515011999705576,
+        "time_ms": 2560.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0013793818534532357,
+        "frame": 212,
+        "post_fit_rms_wb": 0.006709814840568343,
+        "shot": "d3d_shot_0093deb434.parquet",
+        "threshold_ratio": 4.864363572545593,
+        "time_ms": 5100.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0004569874607129837,
+        "frame": 0,
+        "post_fit_rms_wb": 0.005431872025050841,
+        "shot": "d3d_shot_00a4b7af57.parquet",
+        "threshold_ratio": 11.88626054766608,
+        "time_ms": 140.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0049482611276234125,
+        "frame": 134,
+        "post_fit_rms_wb": 0.00812383917209148,
+        "shot": "d3d_shot_00a4b7af57.parquet",
+        "threshold_ratio": 1.641756358964277,
+        "time_ms": 2900.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.003295873999426748,
+        "frame": 268,
+        "post_fit_rms_wb": 0.004779528210622053,
+        "shot": "d3d_shot_00a4b7af57.parquet",
+        "threshold_ratio": 1.450155015468843,
+        "time_ms": 6280.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0007785518312397665,
+        "frame": 0,
+        "post_fit_rms_wb": 0.0052679147496937405,
+        "shot": "d3d_shot_00a6212403.parquet",
+        "threshold_ratio": 6.766299350044696,
+        "time_ms": 260.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.001313319903974248,
+        "frame": 51,
+        "post_fit_rms_wb": 0.006400034992177302,
+        "shot": "d3d_shot_00a6212403.parquet",
+        "threshold_ratio": 4.873172920634268,
+        "time_ms": 1280.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0009620189080587915,
+        "frame": 102,
+        "post_fit_rms_wb": 0.004144815367585487,
+        "shot": "d3d_shot_00a6212403.parquet",
+        "threshold_ratio": 4.308455200687372,
+        "time_ms": 6100.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.000962257791185188,
+        "frame": 0,
+        "post_fit_rms_wb": 0.006287848338816255,
+        "shot": "d3d_shot_00b8fe1f50.parquet",
+        "threshold_ratio": 6.534473813999131,
+        "time_ms": 280.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.004029415710734758,
+        "frame": 142,
+        "post_fit_rms_wb": 0.008787919538791142,
+        "shot": "d3d_shot_00b8fe1f50.parquet",
+        "threshold_ratio": 2.180941399364494,
+        "time_ms": 3120.0
+      },
+      {
+        "closes": false,
+        "flux_threshold_wb": 0.0029283376181848575,
+        "frame": 285,
+        "post_fit_rms_wb": 0.006463022217950477,
+        "shot": "d3d_shot_00b8fe1f50.parquet",
+        "threshold_ratio": 2.207061842123453,
+        "time_ms": 5980.0
+      }
+    ],
+    "post_fit_rms_wb": {
+      "maximum": 0.03454229921569686,
+      "mean": 0.00691867128407356,
+      "median": 0.006370599271128104,
+      "minimum": 0.0016082341544008166,
+      "q25": 0.0052368693387647575,
+      "q75": 0.0075520276152223524
+    },
+    "post_fit_source": "grid_residual_current_regression_receipt records post_fit.rms_wb",
+    "required_closure_frames": 54,
+    "threshold_ratio": {
+      "maximum": 28.861886772421844,
+      "mean": 5.733026530992645,
+      "median": 4.1240367695042295,
+      "minimum": 0.9222358137827853,
+      "q25": 2.5529540729804965,
+      "q75": 6.039877103039141
+    },
+    "threshold_source": "flux_space_adjudication_receipt records tare_threshold.selected_wb",
+    "total_frames": 60
+  }
+}

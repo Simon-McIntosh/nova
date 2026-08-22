@@ -144,6 +144,39 @@
   twice over, moment seeding negative — the residual suspect set is exactly the operator and its
   discretisation.</p>
 
+
+  <h3 id="s5-mesh-verdict">§5 verdict — the stalls are discretisation-limited, unanimously</h3>
+
+  <p><strong>Commits <code>e1797032</code>/<code>c490046a</code> (merged <code>8f0634ce</code>); gate
+  passed</strong> (14/14 tared-benchmark suite; all 23 protected banked digests verified before and after
+  the fine solves; coarse terminals reused without rerun from the protected tared control). Each of the
+  five stalled references was re-solved into the ground-truth-validated tared background on the fine mesh
+  under the identical banked budget (12 Newton promotions, 12 GMRES per promotion, relaxation 0.5, step
+  cap 10.0, criterion 1e-8).</p>
+
+  <p><strong>Every floor moves with the mesh.</strong> Per reference (coarse → fine terminal residual,
+  fine/coarse ratio, observed order): closed-axis 21983/35 0.01005 → 0.001545 (0.154, 2.70);
+  closed-axis 21985/51 0.01294 → 0.001307 (0.101, 3.31); confinement-construction 21978/35
+  0.01036 → 0.005300 (0.512, 0.97); 21989/55 0.01771 → 0.001693 (0.096, 3.39); 22086/43
+  0.01102 → 0.003542 (0.321, 1.64). Zero mesh-invariant, zero ambiguous; both preregistered strata are
+  unanimous, so the aggregate branch verdict is <strong>discretisation-limited</strong> and the
+  ambiguous-only long-budget plateau/orbit arm never dispatches.</p>
+
+  <figure>
+    <img src="/nova/figures/moment-conditioned-basin-entry/stall-mesh-sensitivity.png"
+         alt="Coarse and fine terminal residual floors for the five stalled references, split by topology stratum" style="max-width:100%">
+    <figcaption>Terminal residual floors at both mesh resolutions, per reference and per stratum: every
+    floor drops on the finer mesh, up to 10.5&times;.</figcaption>
+  </figure>
+
+  <p><strong>Campaign conclusion.</strong> With this measurement the reliability question that has held the
+  full-catalog solve is attributed end-to-end, every link measured: external field exonerated → branch
+  selection closed by construction → warm continuation negative twice over → moment seeding negative →
+  <em>the GS operator's discretisation owns the stalls</em>. Basin-entry mechanisms cannot close them;
+  operator refinement can, and that handoff is recorded as f-mcbe-002 (owner to commission the
+  operator-refinement plan). §4's constraint-folding clause closes as a measured no-go; the
+  portfolio-revisit clause proceeds on its own owner direction.</p>
+
 </main>
 </body>
 </html>

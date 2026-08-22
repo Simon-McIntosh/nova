@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T00:52:04",
+  "updated": "2026-08-23T01:14:58",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -561,7 +561,7 @@
         "id": "support-tare",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02baf-2192-77e3-ad89-52c8152ec743",
         "created": "2026-08-22"
       },
       {
@@ -24125,9 +24125,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T225449420139-stall-mesh-sensitivity",
+        "plan": "moment-conditioned-basin-entry",
+        "section": "\u00a75",
+        "node": "stall-mesh-sensitivity",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "support-tare",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T22:54:52Z",
+        "completed_at": "2026-08-22T23:14:05Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1153,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1153,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "8f51e03a901824928c6af008afc84d72c05e2a99",
+        "commits": [
+          "c490046aa34c4a958798f3217df7627756393f9b"
+        ],
+        "changed_lines": {
+          "added": 2768,
+          "removed": 2,
+          "files": 4
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T225449420139-stall-mesh-sensitivity/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02baf-2192-77e3-ad89-52c8152ec743",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8571648,
+            "cached_input_tokens_cumulative": 8571648,
+            "input_tokens": 8758050,
+            "input_tokens_cumulative": 8758050,
+            "output_tokens": 32711,
+            "output_tokens_cumulative": 32711,
+            "reasoning_output_tokens": 11032,
+            "reasoning_output_tokens_cumulative": 11032
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 582
+    "_version": 584
   }
 }

@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+from scipy import stats
 
 from nova.biot.polygon import polygon_greens
 
@@ -273,12 +274,233 @@ class PfActiveSupplyRecord:
 
 
 @dataclass(frozen=True)
+class WiringSystematic:
+    """Measured departure from exact wiring with a named physical suspect."""
+
+    name: str
+    measured_deviation: float
+    mutual_agreement: str
+    suspect_mechanism: str
+
+    def as_record(self) -> dict[str, Any]:
+        return {
+            "name": self.name,
+            "measured_deviation": self.measured_deviation,
+            "mutual_agreement": self.mutual_agreement,
+            "suspect_mechanism": self.suspect_mechanism,
+        }
+
+    @classmethod
+    def from_record(cls, record: Mapping[str, Any]) -> WiringSystematic:
+        return cls(
+            name=str(record["name"]),
+            measured_deviation=float(record["measured_deviation"]),
+            mutual_agreement=str(record["mutual_agreement"]),
+            suspect_mechanism=str(record["suspect_mechanism"]),
+        )
+
+
+@dataclass(frozen=True)
+class CircuitWiringAdjudication:
+    """Cluster-robust decision between exact wiring and a named systematic."""
+
+    fitted_slope: float
+    cluster_robust_standard_error: float
+    confidence_interval: tuple[float, float]
+    tested_ratios: tuple[float, ...]
+    wiring_ratio: float
+    classification: str
+    fitted_deviation: float
+    systematic: WiringSystematic | None = None
+
+    @property
+    def effective_gain(self) -> float:
+        if self.systematic is None:
+            return self.wiring_ratio
+        return self.wiring_ratio + self.systematic.measured_deviation
+
+    def validate(self) -> None:
+        values = (
+            self.fitted_slope,
+            self.cluster_robust_standard_error,
+            *self.confidence_interval,
+            self.wiring_ratio,
+            self.fitted_deviation,
+        )
+        if not np.all(np.isfinite(values)):
+            raise DiiidDescriptionError("wiring adjudication must be finite")
+        low, high = self.confidence_interval
+        if low >= high or self.cluster_robust_standard_error <= 0.0:
+            raise DiiidDescriptionError("wiring confidence interval is invalid")
+        if self.classification == "snapped-exact":
+            if self.systematic is not None or not low <= self.wiring_ratio <= high:
+                raise DiiidDescriptionError(
+                    "exact wiring is not admitted by its interval"
+                )
+        elif self.classification == "integer-plus-systematic":
+            if self.systematic is None or low <= self.wiring_ratio <= high:
+                raise DiiidDescriptionError(
+                    "systematic wiring must exclude its integer"
+                )
+        else:
+            raise DiiidDescriptionError("unknown wiring adjudication class")
+        if not math.isclose(
+            self.fitted_deviation,
+            self.fitted_slope - self.wiring_ratio,
+            rel_tol=0.0,
+            abs_tol=1.0e-15,
+        ):
+            raise DiiidDescriptionError("wiring deviation does not match the fit")
+
+    def as_record(self) -> dict[str, Any]:
+        return {
+            "fitted_slope": self.fitted_slope,
+            "cluster_robust_standard_error": self.cluster_robust_standard_error,
+            "confidence_interval": list(self.confidence_interval),
+            "tested_ratios": list(self.tested_ratios),
+            "wiring_ratio": self.wiring_ratio,
+            "classification": self.classification,
+            "fitted_deviation": self.fitted_deviation,
+            "systematic": None
+            if self.systematic is None
+            else self.systematic.as_record(),
+        }
+
+    @classmethod
+    def from_record(cls, record: Mapping[str, Any]) -> CircuitWiringAdjudication:
+        systematic = record["systematic"]
+        result = cls(
+            fitted_slope=float(record["fitted_slope"]),
+            cluster_robust_standard_error=float(
+                record["cluster_robust_standard_error"]
+            ),
+            confidence_interval=tuple(
+                float(value) for value in record["confidence_interval"]
+            ),
+            tested_ratios=tuple(float(value) for value in record["tested_ratios"]),
+            wiring_ratio=float(record["wiring_ratio"]),
+            classification=str(record["classification"]),
+            fitted_deviation=float(record["fitted_deviation"]),
+            systematic=(
+                None if systematic is None else WiringSystematic.from_record(systematic)
+            ),
+        )
+        result.validate()
+        return result
+
+
+_TURN_COUNTS = (48, 6, 6, 7, 7)
+EXACT_WIRING_RATIOS = tuple(
+    sorted(
+        {
+            1.0,
+            2.0,
+            *(
+                numerator / denominator
+                for numerator in _TURN_COUNTS
+                for denominator in _TURN_COUNTS
+            ),
+        }
+    )
+)
+
+
+def adjudicate_circuit_wiring(
+    frame_table: Sequence[Mapping[str, Any]],
+    ensemble_receipt: Mapping[str, Any],
+) -> tuple[CircuitWiringAdjudication, ...]:
+    """Recompute exact-wiring decisions from the landed shot-clustered table."""
+
+    predictor = np.asarray(
+        [row["same_frame_ecoila_current_a"] for row in frame_table], dtype=float
+    )
+    clusters = np.asarray([row["shot"] for row in frame_table])
+    labels = np.unique(clusters)
+    if predictor.shape != (60,) or len(labels) != 20:
+        raise DiiidDescriptionError(
+            "wiring adjudication requires 60 frames in 20 shots"
+        )
+    denominator = float(predictor @ predictor)
+    correction = (len(labels) / (len(labels) - 1)) * (
+        (len(predictor) - 1) / (len(predictor) - 1)
+    )
+    critical = float(stats.t.ppf(0.975, len(labels) - 1))
+    slopes = {
+        name: float(ensemble_receipt["conductors"][name]["through_origin"]["slope"])
+        for name in CIRCUIT_DRIVEN_CONDUCTORS
+    }
+    pair_difference = abs(slopes["E89UP"] - slopes["E89DN"])
+    decisions = []
+    for name in CIRCUIT_DRIVEN_CONDUCTORS:
+        response = np.asarray(
+            [row["equivalent_coil_currents_a"][name] for row in frame_table],
+            dtype=float,
+        )
+        fitted = float(predictor @ response / denominator)
+        if fitted != slopes[name]:
+            raise DiiidDescriptionError(f"{name} frame table and ensemble slope differ")
+        residual = response - fitted * predictor
+        meat = sum(
+            float(predictor[clusters == label] @ residual[clusters == label]) ** 2
+            for label in labels
+        )
+        standard_error = math.sqrt(correction * meat / denominator**2)
+        interval = (
+            fitted - critical * standard_error,
+            fitted + critical * standard_error,
+        )
+        admitted = tuple(
+            ratio
+            for ratio in EXACT_WIRING_RATIOS
+            if interval[0] <= ratio <= interval[1]
+        )
+        if admitted:
+            wiring_ratio = min(admitted, key=lambda ratio: abs(ratio - fitted))
+            classification = "snapped-exact"
+            systematic = None
+        else:
+            wiring_ratio = min((1.0, 2.0), key=lambda ratio: abs(ratio - fitted))
+            classification = "integer-plus-systematic"
+            systematic = WiringSystematic(
+                name="end_loop_bundle_normalisation",
+                measured_deviation=fitted - wiring_ratio,
+                mutual_agreement=(
+                    "E89UP and E89DN fitted deviations agree within "
+                    f"{pair_difference:.12g}"
+                ),
+                suspect_mechanism=(
+                    "turn-count or normalisation of the paired 6-turn and 7-turn "
+                    "end-loop bundles"
+                ),
+            )
+        decision = CircuitWiringAdjudication(
+            fitted_slope=fitted,
+            cluster_robust_standard_error=standard_error,
+            confidence_interval=interval,
+            tested_ratios=EXACT_WIRING_RATIOS,
+            wiring_ratio=wiring_ratio,
+            classification=classification,
+            fitted_deviation=fitted - wiring_ratio,
+            systematic=systematic,
+        )
+        decision.validate()
+        decisions.append(decision)
+    return tuple(decisions)
+
+
+@dataclass(frozen=True)
 class PfActiveCircuitDriveRecord:
     """Effective ampere-turn drive from one supply to one conductor."""
 
     conductor: str
-    gain: float
+    wiring: CircuitWiringAdjudication
     uncertainty: CircuitFitUncertainty
+
+    @property
+    def gain(self) -> float:
+        """Return exact wiring plus any explicitly named systematic."""
+
+        return self.wiring.effective_gain
 
     def validate(self) -> None:
         if self.conductor not in CIRCUIT_DRIVEN_CONDUCTORS:
@@ -287,6 +509,7 @@ class PfActiveCircuitDriveRecord:
             )
         if not math.isfinite(self.gain) or self.gain <= 0.0:
             raise DiiidDescriptionError("circuit gain must be finite and positive")
+        self.wiring.validate()
         self.uncertainty.validate()
 
     def as_record(self) -> dict[str, Any]:
@@ -294,7 +517,8 @@ class PfActiveCircuitDriveRecord:
 
         return {
             "conductor": self.conductor,
-            "gain": self.gain,
+            "effective_gain": self.gain,
+            "wiring": self.wiring.as_record(),
             "uncertainty": self.uncertainty.as_record(),
         }
 
@@ -304,7 +528,7 @@ class PfActiveCircuitDriveRecord:
 
         result = cls(
             conductor=str(record["conductor"]),
-            gain=float(record["gain"]),
+            wiring=CircuitWiringAdjudication.from_record(record["wiring"]),
             uncertainty=CircuitFitUncertainty.from_record(record["uncertainty"]),
         )
         result.validate()
@@ -476,6 +700,72 @@ _CIRCUIT_UNCERTAINTY = {
     ),
 }
 
+_E89_MUTUAL_AGREEMENT = (
+    "E89UP and E89DN fitted deviations agree within 7.06805172457e-05"
+)
+_E89_SYSTEMATIC_MECHANISM = (
+    "turn-count or normalisation of the paired 6-turn and 7-turn end-loop bundles"
+)
+_CIRCUIT_WIRING = {
+    "ECOILB": CircuitWiringAdjudication(
+        2.0009180770924457,
+        0.028551398014115485,
+        (1.9411593142619163, 2.060676839922975),
+        EXACT_WIRING_RATIOS,
+        2.0,
+        "snapped-exact",
+        0.0009180770924457349,
+    ),
+    "E567UP": CircuitWiringAdjudication(
+        1.0231285862990276,
+        0.036427631398339336,
+        (0.946884677537184, 1.0993724950608712),
+        EXACT_WIRING_RATIOS,
+        1.0,
+        "snapped-exact",
+        0.023128586299027587,
+    ),
+    "E567DN": CircuitWiringAdjudication(
+        1.0016568244749882,
+        0.039088807917220636,
+        (0.9198430092460994, 1.083470639703877),
+        EXACT_WIRING_RATIOS,
+        1.0,
+        "snapped-exact",
+        0.001656824474988161,
+    ),
+    "E89UP": CircuitWiringAdjudication(
+        1.0456947569496173,
+        0.010163742188341523,
+        (1.0244218000666139, 1.0669677138326208),
+        EXACT_WIRING_RATIOS,
+        1.0,
+        "integer-plus-systematic",
+        0.04569475694961733,
+        WiringSystematic(
+            "end_loop_bundle_normalisation",
+            0.04569475694961733,
+            _E89_MUTUAL_AGREEMENT,
+            _E89_SYSTEMATIC_MECHANISM,
+        ),
+    ),
+    "E89DN": CircuitWiringAdjudication(
+        1.0456240764323717,
+        0.012211304685183416,
+        (1.0200655219905739, 1.0711826308741694),
+        EXACT_WIRING_RATIOS,
+        1.0,
+        "integer-plus-systematic",
+        0.04562407643237165,
+        WiringSystematic(
+            "end_loop_bundle_normalisation",
+            0.04562407643237165,
+            _E89_MUTUAL_AGREEMENT,
+            _E89_SYSTEMATIC_MECHANISM,
+        ),
+    ),
+}
+
 PF_ACTIVE_CIRCUIT = PfActiveCircuitRecord(
     name="DIII-D effective ohmic circuit",
     identifier="diiid_effective_ohmic_circuit",
@@ -489,22 +779,20 @@ PF_ACTIVE_CIRCUIT = PfActiveCircuitRecord(
     ),
     connections=_closed_series_connections(2 + len(CIRCUIT_DRIVEN_CONDUCTORS)),
     drives=tuple(
-        PfActiveCircuitDriveRecord(name, gain, _CIRCUIT_UNCERTAINTY[name])
-        for name, gain in (
-            ("ECOILB", 2.000918),
-            ("E567UP", 1.023129),
-            ("E567DN", 1.001657),
-            ("E89UP", 1.045695),
-            ("E89DN", 1.045624),
+        PfActiveCircuitDriveRecord(
+            name,
+            _CIRCUIT_WIRING[name],
+            _CIRCUIT_UNCERTAINTY[name],
         )
+        for name in CIRCUIT_DRIVEN_CONDUCTORS
     ),
     provenance=(
         "fit once from full-grid Tikhonov label-flux regressions over 60 frames "
         "and 20 shots; applied deterministically at inference"
     ),
     caveats=(
-        "ECOILB and the shipped ECOILA response are nearly degenerate; the "
-        "factor-two ECOILB gain is an effective calibration, not a turn count",
+        "ECOILB and the shipped ECOILA response are nearly degenerate; exact "
+        "factor-two wiring means the co-located response carries both branches",
         "the fitted targets use EFIT label flux during calibration and are not "
         "an inference-time label read",
         "post-fit flux closure passes 1 of 60 frames against the 54 of 60 rule; "
@@ -1093,6 +1381,8 @@ __all__ = [
     "F_COILS",
     "CIRCUIT_DRIVEN_CONDUCTORS",
     "CircuitFitUncertainty",
+    "CircuitWiringAdjudication",
+    "EXACT_WIRING_RATIOS",
     "GeometryReceipt",
     "PF_ACTIVE_CIRCUIT",
     "PF_ACTIVE_SUPPLY",
@@ -1102,7 +1392,9 @@ __all__ = [
     "STARTER_KIT_VACUUM_BAR_SOURCE",
     "STARTER_KIT_VACUUM_R2_BAR",
     "TurnConvention",
+    "WiringSystematic",
     "active_coil_response_from_imas",
+    "adjudicate_circuit_wiring",
     "dataset_machine_description",
     "geometry_digest",
     "section_vertices",

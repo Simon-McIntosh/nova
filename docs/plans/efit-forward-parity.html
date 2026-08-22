@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-version" content="31">
-<meta name="plan-commits" content="c1e180d5,71c1ec36,457caddd,252bdd77,d026b0dc,57a1bfb9,c3f9f83a,6700b088,783229ac,325f6a85,56b1518b,e4dc6155,d7bf1035,c7ea1772,19e0d865,9641608b,f771f90d,d2e27d60,c3828a88,c9152535,ed601260,c308025d,ede61ac7">
+<meta name="plan-version" content="32">
+<meta name="plan-commits" content="c1e180d5,71c1ec36,457caddd,252bdd77,d026b0dc,57a1bfb9,c3f9f83a,6700b088,783229ac,325f6a85,56b1518b,e4dc6155,d7bf1035,c7ea1772,19e0d865,9641608b,f771f90d,d2e27d60,c3828a88,c9152535,ed601260,c308025d,ede61ac7,a031c210,f8feb25f">
 <meta name="plan-artifacts" content="scripts/dina_profile_routes/reuse-report.md,scripts/dina_profile_routes/receipt.json,scripts/dina_profile_routes/addendum.json,scripts/constrained_parity_reuse/reuse-report.md,benchmarks/efit_forward_parity_slice.py,benchmarks/efit_parity_root_geometry.py,benchmarks/efit_parity_warm_neighbour.py,docs/figures/efit-forward-parity/reference-seeded-forward-slice.json,docs/figures/efit-forward-parity/pinned-parity-slice.json,docs/figures/efit-forward-parity/boundary-imbalance-attribution.json,docs/figures/efit-forward-parity/passive-inclusive-parity-slice.json,docs/figures/efit-forward-parity/passive-inclusive-frozen-six-scorecard.json,docs/figures/efit-forward-parity/passive-inclusive-frozen-six-trajectories.png,docs/figures/efit-forward-parity/converged-root-geometry-attribution.json,docs/figures/efit-forward-parity/converged-root-geometry-attribution.png,docs/figures/efit-forward-parity/warm-neighbour-stall-lift.json,docs/figures/efit-forward-parity/warm-neighbour-stall-lift.png,docs/evidence/archive/efit-forward-parity-landed.html">
-<meta name="plan-impl" content="0.95">
+<meta name="plan-impl" content="0.952">
 </head>
 <body>
   <main class="plan-doc">
@@ -210,6 +210,55 @@
       </p>
     </section>
 
+    <h2 id="s7">&sect;7 &mdash; Scoring the moment rows once, under one definition</h2>
+
+    <p><strong>The two moment rows are not comparable as they stand, and the measurement says so with
+    numbers rather than with suspicion.</strong> Nova normalises both <code>&beta;<sub>p</sub></code>
+    and <code>l<sub>i</sub></code> by a single shared denominator
+    <code>&frac12;&mu;<sub>0</sub><sup>2</sup>R<sub>vol</sub>I<sub>p</sub><sup>2</sup></code> built
+    from the topology-qualified confined-core current. The reference normalises
+    <code>&beta;<sub>p</sub></code> by the <em>squared mean</em> boundary field and
+    <code>l<sub>i</sub></code> by the <em>mean squared</em> boundary field &mdash; two quantities that
+    differ from each other by a factor 1.632. The supports differ too: on the converged root the
+    current constraint pins the all-domain cell-current sum at 933,034.875&nbsp;A while both moment
+    denominators integrate the confined core at 416,958.25&nbsp;A, leaving 516,076.62&nbsp;A &mdash;
+    fifty-five percent of the pinned current &mdash; outside the core the moments describe.</p>
+
+    <p>A &plus;42&nbsp;percent deviation between two differently-normalised quantities on two
+    different supports is not a physics result. It becomes one only after a single definition is
+    chosen and applied to both sides from what each side actually publishes.</p>
+
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Quantity</th><th>Nova publishes</th><th>Reference publishes</th></tr></thead>
+      <tbody>
+        <tr><td>pressure volume integral</td><td>23,057.44 Pa&middot;m&sup3; (computed)</td>
+            <td>52,744.24 Pa&middot;m&sup3; (implied by stored <code>betap</code>; agrees with
+            &#8532; of stored thermal energy to &minus;4.70e&minus;08)</td></tr>
+        <tr><td><code>B<sub>p</sub><sup>2</sup></code> volume integral</td>
+            <td>0.131930 T&sup2;m&sup3; (computed)</td><td>0.496621 T&sup2;m&sup3; (published directly)</td></tr>
+        <tr><td>plasma volume</td><td>3.51888 m&sup3; (confined core)</td><td>8.79159 m&sup3;</td></tr>
+        <tr><td>current entering the denominator</td><td>416,958.25 A (confined core)</td>
+            <td>933,034.875 A, with a 5.52766 m stored LCFS perimeter</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p><strong>Both sides publish enough to be rescored without another solve.</strong> The
+    reference's own integrals are recoverable from what it stores, and nova's come off the live
+    equilibrium; the choice of definition is therefore a reporting decision, not a new measurement
+    campaign. What must not happen is a silent pick: whichever definition is adopted, the other
+    must be reported beside it, because a moment row that changed meaning between scorecards is
+    worse than one that was never scored.</p>
+
+    <p><em>Done-when:</em> <code>&beta;<sub>p</sub></code> and <code>l<sub>i</sub></code> are
+    reported for the converged <code>22086/43</code> root under both definitions &mdash; nova's
+    shared volume-current denominator and the reference's two boundary-field denominators &mdash;
+    each applied to both sides from their own published integrals, with the confined-core and
+    all-domain current supports stated for every number; the residual deviation under a matched
+    definition is quantified and either passes or fails on its own terms; and the &sect;4 verdict
+    records whether these two rows are scoreable at all, with the answer carrying its arithmetic.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="forward-parity-seed" data-choice="reference-seed" data-by="Simon McIntosh" data-when="2026-08-21T10:09:38+00:00">
@@ -294,6 +343,15 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260822T1640-warm-neighbour" data-who="reckon-ship" data-when="2026-08-22T16:40:00Z">
     <div class="r-comment-body">WARM-NEIGHBOUR STALL LIFT LANDED - run r-20260822T154944726648, gate PASSED (the receipt is the measure), commits c9152535 + ed601260 + c308025d + ede61ac7, merged 761409cc, 12 tests, ruff clean, 23/23 banked digests unchanged, scope-changed (the reuse-report correction was a widened fence). VERDICT FAIL_WARM_NEIGHBOUR_LIFTS_NO_BOUNDED_STALL: all five bounded references were measured, all five FOUND an earlier-first same-shot converged warm source, and ZERO of five warm target solves converged. The total converged-plasma-root count on the frozen six stays at the banked 1 of 6. The mechanism that lifted DIII-D cold starts 2/5 to 4/5 does not transfer to this lane. Per reference as banked-cold / imported-seam-cold / selected source row and its own residual / warm-target residual: 21978/35 1.0763e-2 / 1.0843e-3 / row 34 at 2.840e-8 / 7.970e-4; 21983/35 1.2560e-3 / 1.8281e-2 / row 34 at 1.694e-8 / 1.4953e-3; 21985/51 3.2317e-3 / 2.4516e-3 / row 49 at 4.695e-8 / 1.3028e-3; 21986/46 2.0058e-4 / 5.3209e-3 / row 47 at 7.582e-11 / 9.4491e-3; 21989/55 2.8230e-3 / 2.2900e-3 / row 39 at 1.128e-8 / 1.7490e-2. All five bounded non-convergence. Warm-over-cold residual ratios 0.735, 0.0818, 0.531, 1.776, 7.638 - warm seeding IMPROVES the residual on three references and WORSENS it on two, and closes none, which is the signature of a map with no reachable root near these references rather than of a seeding deficit. Every cold and warm terminal current is on target to 2.22e-16 relative. The declared ladder was imported unchanged and the receipt records its tuple repr (-1, 1, -2, 2, -4, 4, -8, 8, -16, 16, -32, 32); NEIGHBOUR_FRAME_OFFSETS, _neighbour_candidates and _solve_public_seam were imported per the coupling ruling, with only the warm-source walk written locally. QUALIFICATION THAT MUST STAY VISIBLE, and it is a cost of the orchestrator's own ruling: the imported shared seam is host-Krylov while the banked constrained arm ran the newton branch, so the imported cold control reproduces ZERO of five banked terminal residuals - 21983 differs by an order of magnitude (1.256e-3 banked vs 1.828e-2 imported). Insisting on importing the solve unchanged bought comparability with the DIII-D result at the price of comparability with this lane's own banked route. The worker surfaced that rather than burying it and controlled for it correctly: cold and warm are measured within the SAME imported seam, so the warm-lift conclusion is internally valid and route-independent even though the absolute residuals are not the banked ones. A replay of the warm ladder on the newton branch would be needed to compare warm terminals against the banked scorecard directly. Receipt: docs/figures/efit-forward-parity/warm-neighbour-stall-lift.json; figure: warm-neighbour-stall-lift.png.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260822T1700-reference-hosted" data-who="reckon-ship" data-when="2026-08-22T17:00:00Z">
+    <div class="r-comment-body">CONVERGED-ROOT ATTRIBUTION COMPLETE - run r-20260822T154910165109, gate PASSED, commits a031c210 + f8feb25f on top of c3828a88, merged 761409cc then this node's merge, 6 tests, ruff clean, 23/23 banked digests byte-identical, zero edits to the shipped constrained-arm benchmark. TWO FINDINGS, AND BOTH RELOCATE THE PARITY GAP.
+
+MEASUREMENT B - VERDICT REFERENCE_HOSTED_DIFFERENT_ROOT, and it excludes BOTH hypotheses the node was written to discriminate. One constrained primal map application at 2*pi*efm/psirz with the 101 prescribed circuits and target 933,034.875 A, zero solves, decomposition closure 1.110e-16 Wb: gauge-aligned residual sup 0.0099607 Wb = 0.62884 percent of span, RMS 0.0021393 Wb = 0.13506 percent. Interior RMS 0.14579 and exterior RMS 0.13195 percent of span - BALANCED, neither dominating, which is precisely what rules out representability (interior-dominated) and reference completeness (exterior-dominated) as the mechanism. Wall sup 0.47394 percent, only 0.0672 percentage points above the repaired passive-inclusive bank of 0.40676, against the active-only 3.44094 before repair; the banked active-only update sup/RMS were 4.07538/1.65844 percent, so the repaired constrained composition hosts the reference 12x tighter in RMS. READ IT PRECISELY: 0.135 percent of span is far above the registered 1e-8 criterion, so the reference is NOT a fixed point - it is merely CLOSE to one. Nova's actual constrained root near the EFIT reference is a different, genuinely nearby equilibrium, and the parity gap is therefore the real difference between two equilibria at fixed sources rather than a solver failure or a data defect. That is the physics answer this plan was built to obtain, and it is DINA-class.
+
+MEASUREMENT C - VERDICT COMMON_SOLVED_NORMALISER_DISTINCT_REFERENCE_NORMALISERS, and it makes the two moment rows unscoreable as they stand. The +42.53 percent beta_p and +41.34 percent l_i deviations are NOT a profile-amplitude effect (recovered amplitude 1.008098, current exactly on target, flux RMS 0.565 percent of span - stated as excluded) and NOT one common cross-reference scale error. Two definition mismatches carry them. FIRST, the supports differ: the target-current check sums equilibrium.cell_current over ALL domains at 933,034.875 A, while IntegralObservation.plasma_current - the integral in BOTH nova moment denominators - is the topology-qualified confined-core current at 416,958.25 A. The ratio is 0.44688, so 516,076.62 A, fifty-five percent of the pinned current, sits OUTSIDE the moment core. SECOND, the conventions differ: nova normalises both moments by 0.5*mu0^2*R_volume*Ip^2 from one shared denominator, whereas the reference uses squared mean boundary field for beta_p and mean squared boundary field for l_i, whose normalisers differ from each other by 1.63186. So the solved side is coupled and the reference side is independent. The volumes differ too - solved 3.51888 m3 against reference 8.79159 m3, a factor 0.4002 - with solved-over-reference ratios 0.43716 on the pressure integral, 0.26566 on the Bp-squared integral, 0.30671 and 0.18795 on the two normalisers; the integral and normaliser ratios do not cancel, which is what leaves the residual 42 percent. A diagnostic counterfactual substituting the constrained total into nova's denominator gives beta_p 0.09539 and l_i 0.21717 against the reference 0.33513 and 0.76938, so neither current definition reproduces the reference - the convention gap is real and not a bookkeeping slip. REFERENCE INTERNAL CONSISTENCY IS SOUND and worth recording: the pressure integral implied by the stored beta_p agrees with two-thirds of the stored thermal energy to -4.70e-08 relative, and the Bp-squared volume integral is published directly.
+
+CONSEQUENCE FOR THE SECTION-4 VERDICT, stated now rather than deferred: of the six carried rows, topology agrees, plasma current is exact by construction, flux map and the three geometry rows are genuine measured deviations at 0.565 percent of span and a coherent two-to-three centimetre displacement, and beta_p with l_i CANNOT BE SCORED until a common definition is chosen because the two sides normalise differently on different supports. Folding that reconciliation as this plan's next node rather than resolving the verdict around it. Receipt: docs/figures/efit-forward-parity/converged-root-geometry-attribution.json. Ledger: 20 of 21 executable nodes landed, impl 0.952.</div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260820T1140" data-who="reckon-ship" data-when="2026-08-20T11:40:00+00:00">
     <div class="r-comment-body">Owner ruling 2026-08-20 adds a hard prerequisite: all further forward-model progress gates on agreement with the Solov'ev oracle. solovev-exact-recovery owns that gate set (pre-registered agreement gates with convergence clauses, Urankar-exact kernel defaults, hexagon-section enforcement, the cell-moment wiring conviction, and the accuracy-cost ladder with the ~1 ms GPU fixed-point target). This plan's entry now waits on that plan in the DAG. Calibration note this plan already carries: the DINA demonstration's axis 41.2 mm / Ip -1.12% deviations match the Solov'ev root drift (42 mm / -1.15%) - the same composition systematic - so the recovery work directly sharpens what a forward-parity deviation here will mean.</div>

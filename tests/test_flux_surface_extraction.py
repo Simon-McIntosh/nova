@@ -11,6 +11,7 @@ from scipy.interpolate import RectBivariateSpline
 
 from nova.equilibrium.flux_surface_extraction import (
     _bicubic_arc_moment_correction,
+    _pack_boundary_band,
     _select_shape_representation,
     extract_flux_surface_geometry,
 )
@@ -243,6 +244,34 @@ def test_bicubic_iterations_preserve_carry_dtype_and_float64_values():
         np.testing.assert_allclose(float32_value, float64_value, rtol=2e-6, atol=2e-6)
 
 
+def test_boundary_band_is_fixed_shape_and_overflow_fails_closed():
+    """Boundary cells pack deterministically and report lost capacity."""
+    corner_flux = jnp.asarray(
+        (
+            (0.0, 0.4, 0.6, 0.2),
+            (0.6, 0.8, 0.9, 0.7),
+            (0.1, 0.9, 0.8, 0.2),
+            (0.3, 0.7, 0.6, 0.4),
+        )
+    )
+    participation = jnp.asarray((True, True, True, True))
+    indices, valid, count, overflow = _pack_boundary_band(
+        jnp.asarray(0.5), corner_flux, participation, 2
+    )
+    np.testing.assert_array_equal(indices, (0, 2))
+    np.testing.assert_array_equal(valid, (True, True))
+    assert int(count) == 3
+    assert bool(overflow)
+
+    indices, valid, count, overflow = _pack_boundary_band(
+        jnp.asarray(0.5), corner_flux, participation, 4
+    )
+    np.testing.assert_array_equal(indices[:3], (0, 2, 3))
+    np.testing.assert_array_equal(valid, (True, True, True, False))
+    assert int(count) == 3
+    assert not bool(overflow)
+
+
 def test_even_edge_root_pair_is_resolved_on_iter_inner_surface():
     """A cubic edge is bracketed on both sides of its interior minimum."""
     configure_dtypes()
@@ -406,6 +435,12 @@ def test_analytic_shape_gradient_jit_and_batch_contract():
     assert record["rho_face"].shape == (13,)
     assert record["shape_axis_expansion_face"].shape == record["rho_face"].shape
     assert record["shape_boundary_cell_count_face"].shape == record["rho_face"].shape
+    assert not bool(record["surface_cell_band_overflow"])
+    assert int(record["surface_cell_band_max_count"]) <= int(
+        record["surface_cell_band_capacity"]
+    )
+    full_cell_count = (inputs["psi2d"].shape[0] - 1) * (inputs["psi2d"].shape[1] - 1)
+    assert int(record["surface_cell_band_capacity"]) < full_cell_count
     np.testing.assert_allclose(record["elongation_face"][-1], 1.55, rtol=4e-3)
     np.testing.assert_allclose(record["delta_upper_face"][-1], -0.12, atol=7e-3)
     np.testing.assert_allclose(record["delta_lower_face"][-1], -0.12, atol=7e-3)

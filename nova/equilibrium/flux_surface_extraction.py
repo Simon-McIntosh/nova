@@ -32,6 +32,9 @@ _BICUBIC_ARC_POINT, _BICUBIC_ARC_WEIGHT = _arc_rule(12)
 _BICUBIC_EDGE_ROOT_CAPACITY = 3
 _BICUBIC_ARC_CAPACITY = 2
 _SUPPORT_CAPACITY = 8
+# Four structured-grid perimeters allow multiple lobes and near-tangent runs
+# while keeping the traced cell dimension proportional to grid width, not area.
+_BOUNDARY_BAND_PERIMETERS = 4
 # Fewer than twelve boundary cells in either poloidal half leave an extremum
 # controlled by which individual cell contains its turning point, so those
 # faces take their shape from the spline axis expansion.
@@ -1928,6 +1931,19 @@ def _masked_extremum(value, payload, valid, *, largest):
     return candidate[slot], payload[slot]
 
 
+def _pack_boundary_band(level, corner_flux, participation, capacity):
+    """Pack cells whose corner range brackets ``level`` into fixed capacity."""
+    bracketed = (
+        participation
+        & (jnp.min(corner_flux, axis=1) <= level)
+        & (jnp.max(corner_flux, axis=1) >= level)
+    )
+    count = jnp.sum(bracketed, dtype=jnp.int32)
+    indices = jnp.nonzero(bracketed, size=capacity, fill_value=0)[0]
+    valid = jnp.arange(capacity, dtype=jnp.int32) < count
+    return indices, valid, count, count > capacity
+
+
 def _surface_clips(
     psi2d,
     psi_n_grid,
@@ -1957,6 +1973,11 @@ def _surface_clips(
         dtype
     )
     psi_n_cells = psi_n_grid.reshape(-1)[cell_nodes]
+    cell_count = cell_nodes.shape[0]
+    band_capacity = min(
+        cell_count,
+        _BOUNDARY_BAND_PERIMETERS * (psi_n_grid.shape[0] + psi_n_grid.shape[1]),
+    )
 
     radius_cells = coordinates[cell_nodes, 0]
     volume_weighted_values = jnp.stack(
@@ -1967,9 +1988,13 @@ def _surface_clips(
         ),
         axis=0,
     )
+    full_cell_integrals = jnp.mean(volume_weighted_values, axis=-1) * dr * dz
+    cell_origin = coordinates[cell_nodes[:, 0]]
 
     flat_flux = psi_n_grid.reshape(-1)
     flat_eligible = ((core > 0.0) | (psi_n_grid >= 1.0)).reshape(-1)
+    eligible_cells = flat_eligible[cell_nodes]
+    band_corner_flux = jnp.where(eligible_cells, psi_n_cells, jnp.inf)
     confined_seed = (core > 0.0) & inside_limiter
     seed_position = jnp.argmin(
         jnp.where(confined_seed, psi_n_grid, jnp.inf).reshape(-1)
@@ -1988,25 +2013,25 @@ def _surface_clips(
     def signed_flux(level):
         return jnp.where(flat_eligible, level - flat_flux, -1.0)
 
-    def required_vertex_count(level, participation):
-        inside = signed_flux(level)[cell_nodes] > 0.0
+    def required_vertex_count(level, band_indices, band_valid):
+        inside = signed_flux(level)[cell_nodes[band_indices]] > 0.0
         crossing = inside != jnp.roll(inside, -1, axis=1)
         count = jnp.sum(inside, axis=1) + jnp.sum(crossing, axis=1)
-        return jnp.max(jnp.where(participation, count, 0))
+        return jnp.max(jnp.where(band_valid, count, 0))
 
-    def clip(level, participation):
+    def clip(level, band_indices, band_valid):
         supports = _traced_clip(
             coordinates,
-            cell_nodes,
-            vertex_count,
-            centroids,
+            cell_nodes[band_indices],
+            vertex_count[band_indices],
+            centroids[band_indices],
             _SUPPORT_CAPACITY,
             signed_flux(level),
         )
-        return supports.qualify(participation)
+        return supports.qualify(band_valid)
 
-    def corrected_clip(level, participation):
-        supports = clip(level, participation)
+    def corrected_clip(level, band_indices, band_valid):
+        supports = clip(level, band_indices, band_valid)
         base_moments = jnp.stack(
             (
                 supports.area,
@@ -2028,8 +2053,8 @@ def _surface_clips(
             arc_valid,
         ) = _bicubic_arc_moment_correction(
             level,
-            normalised_coefficient,
-            psi_n_cells,
+            normalised_coefficient[band_indices],
+            psi_n_cells[band_indices],
             dr,
             dz,
             base_moments,
@@ -2051,25 +2076,27 @@ def _surface_clips(
             invalid_boundary,
         )
 
-    def cumulative(level, participation):
+    def cumulative(level, band, full_integral):
+        band_indices, band_valid, _band_count, band_overflow = band
         supports, correction, *_, boundary_valid, invalid_boundary = corrected_clip(
-            level, participation
+            level, band_indices, band_valid
         )
         integrals = jax.vmap(
             lambda values: jnp.sum(
                 _integrate_bilinear(supports, values, dr, dz, correction)
             )
-        )(volume_weighted_values)
+        )(volume_weighted_values[:, band_indices])
         return (
-            integrals,
+            integrals + full_integral,
             jnp.max(supports.vertex_count),
-            required_vertex_count(level, participation),
-            boundary_valid,
+            required_vertex_count(level, band_indices, band_valid),
+            boundary_valid & ~band_overflow,
             jnp.sum(invalid_boundary),
-            jnp.argmax(invalid_boundary),
+            band_indices[jnp.argmax(invalid_boundary)],
         )
 
-    def arc_surface_average(level, participation):
+    def arc_surface_average(level, band):
+        band_indices, band_valid, _band_count, band_overflow = band
         (
             supports,
             _,
@@ -2083,12 +2110,12 @@ def _surface_clips(
             arc_valid,
             boundary_valid,
             invalid_boundary,
-        ) = corrected_clip(level, participation)
+        ) = corrected_clip(level, band_indices, band_valid)
         _, physical_r, physical_z, *_ = _bicubic_derivatives(
-            physical_coefficient[:, None], arc_r, arc_z
+            physical_coefficient[band_indices, None], arc_r, arc_z
         )
         physical_gradient = jnp.hypot(physical_r / dr, physical_z / dz)
-        radius_at_arc = cell_origin[:, None, 0] + dr * arc_r
+        radius_at_arc = cell_origin[band_indices, None, 0] + dr * arc_r
         field_at_surface = jnp.interp(level, f_profile_psi_n, f_profile)
         gradient_psi = physical_gradient / _TWO_PI
         magnetic_field_squared = (
@@ -2123,9 +2150,9 @@ def _surface_clips(
         maximum_coarea_weight = jnp.max(jnp.where(sample_valid, arc_weight, 0.0))
         return (
             line_values,
-            boundary_valid & (denominator > 0.0),
+            boundary_valid & (denominator > 0.0) & ~band_overflow,
             jnp.sum(invalid_boundary),
-            jnp.argmax(invalid_boundary),
+            band_indices[jnp.argmax(invalid_boundary)],
             minimum_ordinate_derivative,
             maximum_coarea_weight,
         )
@@ -2134,11 +2161,41 @@ def _surface_clips(
     surface_level = 0.5 * (levels[:-1] + levels[1:])
     cumulative_participation = jax.lax.map(level_cell_participation, levels)
     surface_participation = jax.lax.map(level_cell_participation, surface_level)
-    interior_cumulative = jax.lax.map(
-        lambda inputs: cumulative(inputs[0], inputs[1]),
-        (levels[:-1], cumulative_participation[:-1]),
+    cumulative_band = jax.lax.map(
+        lambda inputs: _pack_boundary_band(
+            inputs[0], band_corner_flux, inputs[1], band_capacity
+        ),
+        (levels, cumulative_participation),
     )
-    edge_cumulative = cumulative(levels[-1], cumulative_participation[-1])
+    surface_band = jax.lax.map(
+        lambda inputs: _pack_boundary_band(
+            inputs[0], band_corner_flux, inputs[1], band_capacity
+        ),
+        (surface_level, surface_participation),
+    )
+    fully_included = (
+        cumulative_participation
+        & jnp.all(eligible_cells, axis=1)[None, :]
+        & (jnp.max(psi_n_cells, axis=1)[None, :] < levels[:, None])
+    )
+    inclusion_delta = jnp.diff(
+        fully_included.astype(dtype), axis=0, prepend=jnp.zeros((1, cell_count), dtype)
+    )
+    full_integral_delta = jnp.einsum("lc,kc->lk", inclusion_delta, full_cell_integrals)
+    cumulative_full_integral = jnp.cumsum(full_integral_delta, axis=0)
+    interior_cumulative = jax.lax.map(
+        lambda inputs: cumulative(inputs[0], inputs[1], inputs[2]),
+        (
+            levels[:-1],
+            tuple(value[:-1] for value in cumulative_band),
+            cumulative_full_integral[:-1],
+        ),
+    )
+    edge_cumulative = cumulative(
+        levels[-1],
+        tuple(value[-1] for value in cumulative_band),
+        cumulative_full_integral[-1],
+    )
     cumulative_values = jnp.concatenate(
         (interior_cumulative[0], edge_cumulative[0][None]), axis=0
     )
@@ -2157,16 +2214,18 @@ def _surface_clips(
     cumulative_invalid_cell = jnp.concatenate(
         (interior_cumulative[5], edge_cumulative[5][None])
     )
-    cell_origin = coordinates[cell_nodes[:, 0]]
     axis_position = jnp.argmin(jnp.where(core > 0.0, psi_n_grid, jnp.inf))
     axis_height = coordinates[axis_position, 1]
     interior_arc_average = jax.lax.map(
         lambda inputs: arc_surface_average(inputs[0], inputs[1]),
-        (surface_level, surface_participation),
+        (surface_level, surface_band),
     )
-    edge_arc_average = arc_surface_average(levels[-1], cumulative_participation[-1])
+    edge_arc_average = arc_surface_average(
+        levels[-1], tuple(value[-1] for value in cumulative_band)
+    )
 
-    def extrema(level, participation):
+    def extrema(level, band):
+        band_indices, band_valid, _band_count, band_overflow = band
         (
             supports,
             _,
@@ -2180,12 +2239,12 @@ def _surface_clips(
             arc_valid,
             boundary_valid,
             invalid_boundary,
-        ) = corrected_clip(level, participation)
+        ) = corrected_clip(level, band_indices, band_valid)
         samples = jnp.concatenate(
             (crossing_points, jnp.stack((arc_r, arc_z), axis=-1)), axis=1
         )
         sample_valid = jnp.concatenate((crossing, arc_sample_valid), axis=1)
-        sample_valid &= participation[:, None]
+        sample_valid &= band_valid[:, None]
 
         def cell_seed(coordinate, *, largest):
             fill = -jnp.inf if largest else jnp.inf
@@ -2207,20 +2266,20 @@ def _surface_clips(
         stationary_valid = []
         for seed, radial_extremum in seeds:
             point_r, point_z, point_valid = _bicubic_stationary_point(
-                normalised_coefficient,
+                normalised_coefficient[band_indices],
                 level,
                 seed[:, 0],
                 seed[:, 1],
                 radial_extremum=radial_extremum,
             )
             stationary.append(jnp.stack((point_r, point_z), axis=-1))
-            stationary_valid.append(point_valid & arc_valid & participation)
+            stationary_valid.append(point_valid & arc_valid & band_valid)
         samples = jnp.concatenate((samples, jnp.stack(stationary, axis=1)), axis=1)
         sample_valid = jnp.concatenate(
             (sample_valid, jnp.stack(stationary_valid, axis=1)), axis=1
         )
-        radial = cell_origin[:, None, 0] + dr * samples[..., 0]
-        vertical = cell_origin[:, None, 1] + dz * samples[..., 1]
+        radial = cell_origin[band_indices, None, 0] + dr * samples[..., 0]
+        vertical = cell_origin[band_indices, None, 1] + dz * samples[..., 1]
         flat_valid = sample_valid.reshape(-1)
         flat_radial = radial.reshape(-1)
         flat_vertical = vertical.reshape(-1)
@@ -2236,12 +2295,12 @@ def _surface_clips(
         z_upper, r_upper = _masked_extremum(
             flat_vertical, flat_radial, flat_valid, largest=True
         )
-        boundary_cells = supports.boundary & participation
+        boundary_cells = supports.boundary & band_valid
         lower_boundary_cells = jnp.sum(
-            boundary_cells & (centroids[:, 1] <= axis_height)
+            boundary_cells & (centroids[band_indices, 1] <= axis_height)
         )
         upper_boundary_cells = jnp.sum(
-            boundary_cells & (centroids[:, 1] >= axis_height)
+            boundary_cells & (centroids[band_indices, 1] >= axis_height)
         )
         return jnp.asarray(
             (
@@ -2252,17 +2311,17 @@ def _surface_clips(
                 r_lower,
                 r_upper,
                 jnp.max(supports.vertex_count),
-                required_vertex_count(level, participation),
+                required_vertex_count(level, band_indices, band_valid),
                 jnp.minimum(lower_boundary_cells, upper_boundary_cells),
-                boundary_valid,
+                boundary_valid & ~band_overflow,
                 jnp.sum(invalid_boundary),
-                jnp.argmax(invalid_boundary),
+                band_indices[jnp.argmax(invalid_boundary)],
             )
         )
 
     surface_extrema = jax.lax.map(
         lambda inputs: extrema(inputs[0], inputs[1]),
-        (surface_level, surface_participation),
+        (surface_level, surface_band),
     )
     (
         r_in,
@@ -2279,7 +2338,7 @@ def _surface_clips(
         surface_invalid_cell,
     ) = surface_extrema.T
     edge_level = levels[-1]
-    edge_extrema = extrema(edge_level, cumulative_participation[-1])
+    edge_extrema = extrema(edge_level, tuple(value[-1] for value in cumulative_band))
     (
         edge_r_in,
         edge_r_out,
@@ -2294,14 +2353,8 @@ def _surface_clips(
         edge_invalid_count,
         edge_invalid_cell,
     ) = edge_extrema
-    edge_supports, edge_correction, *_, edge_integral_valid, _ = corrected_clip(
-        edge_level, cumulative_participation[-1]
-    )
-    edge_values = jax.vmap(
-        lambda values: jnp.sum(
-            _integrate_bilinear(edge_supports, values, dr, dz, edge_correction)
-        )
-    )(volume_weighted_values)
+    edge_values = cumulative_values[-1]
+    edge_integral_valid = cumulative_valid[-1]
     edge_spacing = levels[-1] - levels[-2]
     boundary_fraction = (jnp.asarray(1.0, dtype=dtype) - edge_level) / edge_spacing
     total_values = edge_values + boundary_fraction * (
@@ -2334,6 +2387,8 @@ def _surface_clips(
         & jnp.all(surface_valid > 0.0)
         & (edge_valid > 0.0)
         & edge_integral_valid
+        & ~jnp.any(cumulative_band[3])
+        & ~jnp.any(surface_band[3])
     )
     diagnostic_count = jnp.concatenate(
         (
@@ -2408,6 +2463,12 @@ def _surface_clips(
             "clipped_vertex_count_max": maximum_used,
             "clipped_vertex_count_required": maximum_required,
             "clipped_vertex_capacity": jnp.asarray(_SUPPORT_CAPACITY),
+            "surface_cell_band_capacity": jnp.asarray(band_capacity),
+            "surface_cell_band_max_count": jnp.max(
+                jnp.concatenate((cumulative_band[2], surface_band[2]))
+            ),
+            "surface_cell_band_overflow": jnp.any(cumulative_band[3])
+            | jnp.any(surface_band[3]),
             "surface_arc_invalid_count": jnp.sum(diagnostic_count),
             "surface_arc_first_invalid_cell": diagnostic_cell[first_invalid_group],
             "surface_arc_first_invalid_level": diagnostic_level[first_invalid_group],
@@ -2534,6 +2595,9 @@ def extract_flux_surface_geometry(
             "surface_arc_min_ordinate_derivative"
         ],
         "surface_arc_max_coarea_weight": torax_columns["surface_arc_max_coarea_weight"],
+        "surface_cell_band_capacity": torax_columns["surface_cell_band_capacity"],
+        "surface_cell_band_max_count": torax_columns["surface_cell_band_max_count"],
+        "surface_cell_band_overflow": torax_columns["surface_cell_band_overflow"],
     }
 
 

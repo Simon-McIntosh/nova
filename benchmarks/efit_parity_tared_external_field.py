@@ -54,9 +54,23 @@ from nova.equilibrium.convention import (  # noqa: E402
     delta_star_from_current_density,
 )
 from nova.equilibrium.forward_operator import PrescribedCurrentField  # noqa: E402
-from nova.equilibrium.stencil_mesh import CellCurrentMoments  # noqa: E402
+from nova.equilibrium.stencil_mesh import (  # noqa: E402
+    CellCurrentMoments,
+    StencilMesh,
+)
 from nova.imas.mast_solve_inputs import SHOT_STORE  # noqa: E402
 from nova.jax.config import configure_dtypes  # noqa: E402
+from scripts.analytic_oracle_fixtures.measure import (  # noqa: E402
+    FIXTURE_REQUESTS as ANALYTIC_FIXTURE_REQUESTS,
+    TOTAL_FLUX_FACTOR,
+    WALL_POINT_COUNT as ANALYTIC_WALL_POINT_COUNT,
+    _internal_flux_image as _analytic_internal_flux_image,
+    analytic_case,
+    cached_machine,
+    exact_current_moments,
+    exact_state,
+    forward_operator as analytic_forward_operator,
+)
 
 OUTPUT_DIRECTORY = Path("docs/figures/efit-forward-parity")
 OUTPUT_RECEIPT = OUTPUT_DIRECTORY / "tared-external-field-solve.json"
@@ -69,6 +83,8 @@ REPRESENTATIVE_SHOT = 22086
 BANKED_CONVERGED_PLASMA_ROOTS = 1
 BANKED_BOUNDED_RESIDUAL_MINIMUM = 2.006e-4
 BANKED_BOUNDED_RESIDUAL_MAXIMUM = 1.076e-2
+ANALYTIC_SOURCE_RELATIVE_TOLERANCE = 1.0e-3
+ANALYTIC_EXTERNAL_SPAN_TOLERANCE = 1.0e-2
 
 
 def _sha256(path: Path) -> str:
@@ -167,6 +183,220 @@ def build_tare(profile, reference_state: np.ndarray, reference_grid: np.ndarray)
         "implied": implied,
         "closure": closure_receipt,
     }
+
+
+def _solovev_separation_row(fixture: str, requested_cells: int) -> dict[str, Any]:
+    """Apply the reference tare literally to one closed-form oracle carrier."""
+    case = analytic_case()
+    machine = cached_machine(
+        case, requested_cells, wall_nodes=ANALYTIC_WALL_POINT_COUNT
+    )
+    coordinates = np.vstack(
+        [machine.node, machine.wall_node, machine.sample_coordinates]
+    )
+    reference = exact_state(case, coordinates)
+    operator = analytic_forward_operator(case, machine)
+    analytic_physical = exact_current_moments(case, operator, reference)
+    analytic_coefficients = operator.coupling_current_moments(analytic_physical)
+    analytic_plasma = _analytic_internal_flux_image(operator, analytic_coefficients)
+    analytic_external = reference - analytic_plasma
+
+    mesh = StencilMesh(machine.node, machine.stencil, machine.area)
+    grid_reference = reference[: len(machine.node)]
+    elliptic = np.asarray(delta_star(mesh, jnp.asarray(grid_reference)))
+    radius = np.asarray(mesh.node_radius, dtype=np.float64)
+    unit_current_elliptic = np.asarray(
+        delta_star_from_current_density(radius, np.ones_like(radius)),
+        dtype=np.float64,
+    )
+    recovered_density = elliptic / unit_current_elliptic
+    valid = np.asarray(mesh.interior(), dtype=bool) & np.isfinite(recovered_density)
+    recovered_density = np.where(valid, recovered_density, 0.0)
+    recovered_current = recovered_density * np.asarray(mesh.cell_area)
+    zero = jnp.zeros_like(jnp.asarray(recovered_current))
+    recovered_plasma = _analytic_internal_flux_image(
+        operator,
+        CellCurrentMoments(jnp.asarray(recovered_current), zero, zero),
+    )
+    recovered_external = reference - recovered_plasma
+
+    analytic_density = np.asarray(
+        case.toroidal_current_density(machine.node[:, 0], machine.node[:, 1]),
+        dtype=np.float64,
+    )
+    valid_analytic_current = float(
+        np.sum(analytic_density[valid] * np.asarray(mesh.cell_area)[valid])
+    )
+    recovered_valid_current = float(np.sum(recovered_current[valid]))
+    density_scale = float(np.max(np.abs(analytic_density[valid])))
+    density_error = recovered_density[valid] - analytic_density[valid]
+    external_error = recovered_external - analytic_external
+    grid_count = len(machine.node)
+    wall_count = len(machine.wall_node)
+    span = TOTAL_FLUX_FACTOR * case.axis_flux
+    external_sup = float(np.max(np.abs(external_error)))
+    source_relative_error = float(
+        np.max(np.abs(density_error)) / max(density_scale, np.finfo(float).tiny)
+    )
+    external_span_error = external_sup / span
+    return {
+        "fixture": fixture,
+        "requested_cells": requested_cells,
+        "realised_cells": len(machine.node),
+        "valid_stencil_cells": int(np.count_nonzero(valid)),
+        "cache": machine.cache,
+        "analytic_closed_form_plasma_current_a": float(case.plasma_current()),
+        "analytic_authored_support_current_a": float(
+            np.sum(np.asarray(analytic_physical.cell_current))
+        ),
+        "analytic_valid_stencil_current_a": valid_analytic_current,
+        "delta_star_valid_stencil_current_a": recovered_valid_current,
+        "valid_stencil_current_signed_relative_error": (
+            recovered_valid_current / valid_analytic_current - 1.0
+        ),
+        "delta_star_current_vs_closed_form_signed_relative_error": (
+            recovered_valid_current / case.plasma_current() - 1.0
+        ),
+        "current_density_sup_relative_error_on_valid_stencils": (source_relative_error),
+        "analytic_external_recovery": {
+            "sup_error_wb": external_sup,
+            "rms_error_wb": float(np.sqrt(np.mean(external_error**2))),
+            "grid_sup_error_wb": float(np.max(np.abs(external_error[:grid_count]))),
+            "wall_sup_error_wb": float(
+                np.max(np.abs(external_error[grid_count : grid_count + wall_count]))
+            ),
+            "sample_sup_error_wb": float(
+                np.max(np.abs(external_error[grid_count + wall_count :]))
+            ),
+            "sup_error_fraction_of_analytic_span": external_span_error,
+            "sup_error_fraction_of_analytic_plasma_image": (
+                external_sup / np.max(np.abs(analytic_plasma))
+            ),
+        },
+        "source_recovery_passes": bool(
+            source_relative_error <= ANALYTIC_SOURCE_RELATIVE_TOLERANCE
+        ),
+        "external_recovery_passes": bool(
+            external_span_error <= ANALYTIC_EXTERNAL_SPAN_TOLERANCE
+        ),
+    }
+
+
+def solovev_null_test() -> dict[str, Any]:
+    """Test the tare against independent analytic current and exterior truth."""
+    configure_dtypes()
+    rows = [
+        _solovev_separation_row(name, requested)
+        for name, requested in ANALYTIC_FIXTURE_REQUESTS.items()
+    ]
+    fine = rows[-1]
+    source_passes = all(row["source_recovery_passes"] for row in rows)
+    external_passes = all(row["external_recovery_passes"] for row in rows)
+    passes = source_passes and external_passes
+    return {
+        "purpose": (
+            "non-tautological attribution test against independently known "
+            "closed-form plasma current and analytic external field"
+        ),
+        "separation": (
+            "the identical Delta-star, valid-stencil centroid-current image, "
+            "and subtraction used for the six MAST controls"
+        ),
+        "criteria": {
+            "current_density_sup_relative_error": (ANALYTIC_SOURCE_RELATIVE_TOLERANCE),
+            "external_sup_error_fraction_of_analytic_span": (
+                ANALYTIC_EXTERNAL_SPAN_TOLERANCE
+            ),
+        },
+        "fixtures": rows,
+        "source_recovery_passes": source_passes,
+        "external_recovery_passes": external_passes,
+        "passes": passes,
+        "verdict": (
+            "SEPARATION_RECOVERS_ANALYTIC_TRUTH"
+            if passes
+            else "SEPARATION_FAILS_ANALYTIC_EXTERNAL_NULL"
+        ),
+        "finding": (
+            "The Delta-star density converges to the analytic source on valid "
+            "stencils, but the identical finite-mesh plasma image does not "
+            "recover the independent analytic external field; the MAST tared "
+            "root count is therefore void for residual attribution."
+            if not passes
+            else "The identical separation recovers both analytic source and exterior."
+        ),
+        "finest_external_sup_error_wb": fine["analytic_external_recovery"][
+            "sup_error_wb"
+        ],
+        "finest_external_sup_error_fraction_of_analytic_span": fine[
+            "analytic_external_recovery"
+        ]["sup_error_fraction_of_analytic_span"],
+    }
+
+
+def _banked_solve_digest(receipt: dict[str, Any]) -> str:
+    payload = {
+        "per_shot": receipt["per_shot"],
+        "six_reference_score_table": receipt["six_reference_score_table"],
+    }
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(encoded.encode()).hexdigest()
+
+
+def adjudicate_banked_receipt(
+    output_path: Path = OUTPUT_RECEIPT,
+) -> dict[str, Any]:
+    """Adjudicate the existing six solves without evaluating a solve again."""
+    receipt = json.loads(output_path.read_text())
+    solve_digest = _banked_solve_digest(receipt)
+    analytic = solovev_null_test()
+    if analytic["passes"]:
+        adjudicated = "MAST_EXTERIOR_CURRENT_REQUIRES_CONDUCTOR_LOCALISATION"
+        finding = (
+            "The analytic null validates the separation machinery; the MAST "
+            "exterior current must next be tested against the fitted circuits."
+        )
+    else:
+        adjudicated = "MAST_TARED_SOLVE_VOID_ANALYTIC_NULL_FAILED"
+        finding = (
+            "The tared root count regressed from one of six to zero of six and "
+            "the identical split fails the analytic external-field null. This "
+            "is evidence against a faithful background split, not evidence "
+            "about the Grad--Shafranov fixed point or discretisation."
+        )
+    receipt["attribution_adjudication"] = {
+        "solovev_analytic_null": analytic,
+        "six_reference_solve_reused_without_rerun": True,
+        "banked_solve_payload_sha256": solve_digest,
+        "verdict": adjudicated,
+        "finding": finding,
+        "conductor_localisation": {
+            "status": "not_reached_after_decisive_null_failure",
+            "reason": (
+                "The analytic external field was not recovered, so spatial "
+                "attribution of the MAST exterior current cannot rescue this tare."
+            ),
+        },
+    }
+    receipt["aggregate"].update(
+        {
+            "verdict": adjudicated,
+            "statement": finding,
+            "tared_background_faithful_for_attribution": bool(analytic["passes"]),
+            "mast_root_result_valid_for_gs_attribution": bool(analytic["passes"]),
+        }
+    )
+    receipt["receipt"]["status"] = "complete_control_void_for_attribution"
+    if _banked_solve_digest(receipt) != solve_digest:
+        raise RuntimeError("the banked six-reference solve payload changed")
+    protected_after = _verify_protected_artifacts(
+        json.loads(PROTECTED_SOURCE.read_text())
+    )
+    receipt["protected_banked_artifacts"]["verified_after_adjudication"] = (
+        protected_after
+    )
+    output_path.write_text(json.dumps(receipt, indent=2, allow_nan=False) + "\n")
+    return receipt
 
 
 def _plot_external_field_comparison(
@@ -619,12 +849,19 @@ def run_control(
             "The tared background materially increased converged plasma-root recovery, "
             "so external-field error contributed to the banked residual."
         )
-    else:
-        verdict = "EXTERNAL_FIELD_EXONERATED_FIXED_POINT_OR_DISCRETISATION"
+    elif roots < BANKED_CONVERGED_PLASMA_ROOTS:
+        verdict = "ROOT_COUNT_REGRESSED_TARE_FIDELITY_REQUIRES_ADJUDICATION"
         statement = (
-            "The tared background did not improve the converged plasma-root count "
-            "beyond the banked one of six, placing the obstacle in the GS fixed "
-            "point or its discretisation."
+            "The tared background reduced converged plasma-root recovery, which is "
+            "evidence against a faithful field split until an independent null test "
+            "validates the tare. It is not evidence about the GS fixed point."
+        )
+    else:
+        verdict = "ROOT_COUNT_UNCHANGED_TARE_FIDELITY_REQUIRES_ADJUDICATION"
+        statement = (
+            "The tared background did not improve the converged plasma-root count; "
+            "an independent null test must establish that the split is faithful "
+            "before attributing the residual."
         )
     receipt["receipt"]["status"] = "complete"
     receipt["per_shot"] = solved

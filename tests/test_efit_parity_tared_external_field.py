@@ -9,8 +9,10 @@ from benchmarks.efit_parity_tared_external_field import (
     BANKED_STORED_FIELD_CLOSURE_WB,
     GAUGE_CONSTANT_WB,
     OUTPUT_FIGURE,
+    OUTPUT_RECEIPT,
     REFERENCE_HALO_CURRENT_A,
     REPRESENTATIVE_SHOT,
+    adjudicate_banked_receipt,
     run_control,
 )
 
@@ -138,4 +140,29 @@ def test_representative_field_instrument_ratio_reproduces_the_bank(result):
     )
     assert field["banked_representative_instrument_ratio"] == pytest.approx(
         0.6020235565543425, rel=2.0e-15
+    )
+
+
+def test_solovev_null_rejects_the_external_split_without_rerunning_mast():
+    receipt = adjudicate_banked_receipt(OUTPUT_RECEIPT)
+    adjudication = receipt["attribution_adjudication"]
+    null = adjudication["solovev_analytic_null"]
+    assert adjudication["six_reference_solve_reused_without_rerun"] is True
+    assert [row["fixture"] for row in null["fixtures"]] == ["coarse", "fine"]
+    assert null["source_recovery_passes"] is True
+    assert null["external_recovery_passes"] is False
+    assert null["passes"] is False
+    assert (
+        null["fixtures"][1]["current_density_sup_relative_error_on_valid_stencils"]
+        < null["fixtures"][0]["current_density_sup_relative_error_on_valid_stencils"]
+    )
+    assert null["finest_external_sup_error_fraction_of_analytic_span"] > 0.5
+    assert receipt["aggregate"]["banked_converged_plasma_roots"] == 1
+    assert receipt["aggregate"]["tared_converged_plasma_roots"] == 0
+    assert receipt["aggregate"]["mast_root_result_valid_for_gs_attribution"] is False
+    assert (
+        receipt["protected_banked_artifacts"]["verified_after_adjudication"][
+            "verified_digest_count"
+        ]
+        == 23
     )

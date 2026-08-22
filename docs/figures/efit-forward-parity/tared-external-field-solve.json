@@ -1,7 +1,7 @@
 {
   "receipt": {
     "kind": "tared_external_field_control",
-    "status": "complete",
+    "status": "complete_control_void_for_attribution",
     "selection": "select_slices_by_shot on the frozen decomposition bank",
     "shot_count": 6
   },
@@ -159,6 +159,12 @@
     "integrity_source": "docs/figures/efit-forward-parity/converged-root-geometry-attribution.json",
     "integrity_source_sha256": "67cc1b1578e8aac066e248f10d6deaca4ccb80628934e6ed21c2984c0d4d455a",
     "verified_after_solves": {
+      "declared_count": 23,
+      "verified_digest_count": 23,
+      "all_digests_match": true,
+      "source_and_output_receipts_are_outside_protected_set": true
+    },
+    "verified_after_adjudication": {
       "declared_count": 23,
       "verified_digest_count": 23,
       "all_digests_match": true,
@@ -2676,8 +2682,103 @@
     "tared_converged_plasma_roots": 0,
     "change_in_converged_plasma_roots": -1,
     "all_target_currents_exact": true,
-    "verdict": "EXTERNAL_FIELD_EXONERATED_FIXED_POINT_OR_DISCRETISATION",
-    "statement": "The tared background did not improve the converged plasma-root count beyond the banked one of six, placing the obstacle in the GS fixed point or its discretisation.",
-    "parity_claim": false
+    "verdict": "MAST_TARED_SOLVE_VOID_ANALYTIC_NULL_FAILED",
+    "statement": "The tared root count regressed from one of six to zero of six and the identical split fails the analytic external-field null. This is evidence against a faithful background split, not evidence about the Grad--Shafranov fixed point or discretisation.",
+    "parity_claim": false,
+    "tared_background_faithful_for_attribution": false,
+    "mast_root_result_valid_for_gs_attribution": false
+  },
+  "attribution_adjudication": {
+    "solovev_analytic_null": {
+      "purpose": "non-tautological attribution test against independently known closed-form plasma current and analytic external field",
+      "separation": "the identical Delta-star, valid-stencil centroid-current image, and subtraction used for the six MAST controls",
+      "criteria": {
+        "current_density_sup_relative_error": 0.001,
+        "external_sup_error_fraction_of_analytic_span": 0.01
+      },
+      "fixtures": [
+        {
+          "fixture": "coarse",
+          "requested_cells": -500,
+          "realised_cells": 551,
+          "valid_stencil_cells": 373,
+          "cache": {
+            "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_500.zarr",
+            "semantic_key": "030667d40f96d904",
+            "hit": true,
+            "lock_wait_seconds": 1.6694888472557068e-05,
+            "load_seconds": 0.17496789200231433,
+            "build_seconds": 0.0,
+            "store_seconds": 0.0
+          },
+          "analytic_closed_form_plasma_current_a": 1627957.0127122786,
+          "analytic_authored_support_current_a": 1625644.334902816,
+          "analytic_valid_stencil_current_a": 1342445.1487587576,
+          "delta_star_valid_stencil_current_a": 1342207.3439294184,
+          "valid_stencil_current_signed_relative_error": -0.00017714305091653948,
+          "delta_star_current_vs_closed_form_signed_relative_error": -0.1755265443445484,
+          "current_density_sup_relative_error_on_valid_stencils": 0.00023831833744617032,
+          "analytic_external_recovery": {
+            "sup_error_wb": 1.1361563949563815,
+            "rms_error_wb": 0.7000423943339545,
+            "grid_sup_error_wb": 1.1344733080964726,
+            "wall_sup_error_wb": 1.1249087106584699,
+            "sample_sup_error_wb": 1.1361563949563815,
+            "sup_error_fraction_of_analytic_span": 0.8225776910715236,
+            "sup_error_fraction_of_analytic_plasma_image": 0.21663795654559256
+          },
+          "source_recovery_passes": true,
+          "external_recovery_passes": false
+        },
+        {
+          "fixture": "fine",
+          "requested_cells": -1000,
+          "realised_cells": 1076,
+          "valid_stencil_cells": 815,
+          "cache": {
+            "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_1000.zarr",
+            "semantic_key": "7c94be9b777c55ba",
+            "hit": true,
+            "lock_wait_seconds": 1.0527903214097023e-05,
+            "load_seconds": 0.1554051130078733,
+            "build_seconds": 0.0,
+            "store_seconds": 0.0
+          },
+          "analytic_closed_form_plasma_current_a": 1627957.0127122786,
+          "analytic_authored_support_current_a": 1626730.8083787183,
+          "analytic_valid_stencil_current_a": 1469071.4379369258,
+          "delta_star_valid_stencil_current_a": 1468941.2349751554,
+          "valid_stencil_current_signed_relative_error": -8.862942836407317e-05,
+          "delta_star_current_vs_closed_form_signed_relative_error": -0.0976781183381451,
+          "current_density_sup_relative_error_on_valid_stencils": 0.0001212784115237635,
+          "analytic_external_recovery": {
+            "sup_error_wb": 0.7791504291587774,
+            "rms_error_wb": 0.43911502519302803,
+            "grid_sup_error_wb": 0.7785679465655333,
+            "wall_sup_error_wb": 0.7720851090139096,
+            "sample_sup_error_wb": 0.7791504291587774,
+            "sup_error_fraction_of_analytic_span": 0.5641052269387783,
+            "sup_error_fraction_of_analytic_plasma_image": 0.1484828918232951
+          },
+          "source_recovery_passes": true,
+          "external_recovery_passes": false
+        }
+      ],
+      "source_recovery_passes": true,
+      "external_recovery_passes": false,
+      "passes": false,
+      "verdict": "SEPARATION_FAILS_ANALYTIC_EXTERNAL_NULL",
+      "finding": "The Delta-star density converges to the analytic source on valid stencils, but the identical finite-mesh plasma image does not recover the independent analytic external field; the MAST tared root count is therefore void for residual attribution.",
+      "finest_external_sup_error_wb": 0.7791504291587774,
+      "finest_external_sup_error_fraction_of_analytic_span": 0.5641052269387783
+    },
+    "six_reference_solve_reused_without_rerun": true,
+    "banked_solve_payload_sha256": "01f02d867cf30756330414c1ee675bd06f3aba3515d2cce5dec1a4f64ee5b8c8",
+    "verdict": "MAST_TARED_SOLVE_VOID_ANALYTIC_NULL_FAILED",
+    "finding": "The tared root count regressed from one of six to zero of six and the identical split fails the analytic external-field null. This is evidence against a faithful background split, not evidence about the Grad--Shafranov fixed point or discretisation.",
+    "conductor_localisation": {
+      "status": "not_reached_after_decisive_null_failure",
+      "reason": "The analytic external field was not recovered, so spatial attribution of the MAST exterior current cannot rescue this tare."
+    }
   }
 }

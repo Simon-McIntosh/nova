@@ -1,0 +1,195 @@
+{
+  "receipt": {
+    "kind": "moment_definition_rescore",
+    "shot": 22086,
+    "slice_index": 43,
+    "input_receipt": "docs/figures/efit-forward-parity/converged-root-geometry-attribution.json",
+    "input_receipt_sha256": "67cc1b1578e8aac066e248f10d6deaca4ccb80628934e6ed21c2984c0d4d455a"
+  },
+  "execution_contract": {
+    "nonlinear_solve_calls": 0,
+    "new_equilibria": 0,
+    "input_mode": "banked published integrals only"
+  },
+  "definitions": {
+    "nova_poloidal_beta": "2*mu0*integral(p dV) divided by 0.5*mu0^2*R_volume*Ip^2",
+    "nova_internal_inductance": "integral(Bp^2 dV) divided by 0.5*mu0^2*R_volume*Ip^2",
+    "reference_poloidal_beta": "2*mu0*integral(p dV) divided by (<Bp>_LCFS^2*plasma_volume), with <Bp>_LCFS=mu0*Ip/perimeter",
+    "reference_internal_inductance": "integral(Bp^2 dV) divided by (<Bp^2>_LCFS*plasma_volume)"
+  },
+  "current_supports": {
+    "confined_core": 416958.2541259555,
+    "all_domain_constrained": 933034.875,
+    "confined_core_over_all_domain": 0.4468838896573459,
+    "outside_confined_core_a": 516076.6208740445
+  },
+  "four_by_two_rescore": {
+    "rows": [
+      {
+        "definition": "nova_shared_volume_current",
+        "definition_label": "Nova shared volume-current denominator",
+        "side": "solved",
+        "poloidal_beta": {
+          "confined_core": {
+            "value": 0.477668987733386,
+            "current_support": "confined_core",
+            "current_a": 416958.2541259555,
+            "denominator_t2_m3": 0.12131763008234392
+          },
+          "all_domain_constrained": {
+            "value": 0.0953929859047701,
+            "current_support": "all_domain_constrained",
+            "current_a": 933034.875,
+            "denominator_t2_m3": 0.6074835482505726
+          }
+        },
+        "internal_inductance": {
+          "confined_core": {
+            "value": 1.0874773833240172,
+            "current_support": "confined_core",
+            "current_a": 416958.2541259555,
+            "denominator_t2_m3": 0.12131763008234392
+          },
+          "all_domain_constrained": {
+            "value": 0.21717490011532029,
+            "current_support": "all_domain_constrained",
+            "current_a": 933034.875,
+            "denominator_t2_m3": 0.6074835482505726
+          }
+        }
+      },
+      {
+        "definition": "nova_shared_volume_current",
+        "definition_label": "Nova shared volume-current denominator",
+        "side": "reference",
+        "poloidal_beta": {
+          "confined_core": {
+            "value": 1.0926748745751427,
+            "current_support": "confined_core",
+            "current_a": 416958.2541259555,
+            "denominator_t2_m3": 0.12131763008234392
+          },
+          "all_domain_constrained": {
+            "value": 0.21821286620144076,
+            "current_support": "all_domain_constrained",
+            "current_a": 933034.875,
+            "denominator_t2_m3": 0.6074835482505726
+          }
+        },
+        "internal_inductance": {
+          "confined_core": {
+            "value": 4.093562579270853,
+            "current_support": "confined_core",
+            "current_a": 416958.2541259555,
+            "denominator_t2_m3": 0.12131763008234392
+          },
+          "all_domain_constrained": {
+            "value": 0.8175057779606937,
+            "current_support": "all_domain_constrained",
+            "current_a": 933034.875,
+            "denominator_t2_m3": 0.6074835482505726
+          }
+        }
+      },
+      {
+        "definition": "reference_boundary_field",
+        "definition_label": "Reference boundary-field denominators",
+        "side": "solved",
+        "poloidal_beta": {
+          "confined_core": {
+            "value": 0.7336021991637692,
+            "current_support": "confined_core",
+            "current_a": 416958.2541259555,
+            "denominator_t2_m3": 0.07899331493512866
+          },
+          "all_domain_constrained": {
+            "value": 0.14650418185322475,
+            "current_support": "all_domain_constrained",
+            "current_a": 933034.875,
+            "denominator_t2_m3": 0.39554959334678574
+          }
+        },
+        "internal_inductance": {
+          "current_independent": {
+            "value": 0.20439001580294291,
+            "current_support": "not_used_mean_squared_boundary_field",
+            "current_a": null,
+            "denominator_t2_m3": 0.6454825026297535
+          }
+        }
+      },
+      {
+        "definition": "reference_boundary_field",
+        "definition_label": "Reference boundary-field denominators",
+        "side": "reference",
+        "poloidal_beta": {
+          "confined_core": {
+            "value": 1.678125881194389,
+            "current_support": "confined_core",
+            "current_a": 416958.2541259555,
+            "denominator_t2_m3": 0.07899331493512866
+          },
+          "all_domain_constrained": {
+            "value": 0.3351304829120636,
+            "current_support": "all_domain_constrained",
+            "current_a": 933034.875,
+            "denominator_t2_m3": 0.39554959334678574
+          }
+        },
+        "internal_inductance": {
+          "current_independent": {
+            "value": 0.7693799734115601,
+            "current_support": "not_used_mean_squared_boundary_field",
+            "current_a": null,
+            "denominator_t2_m3": 0.6454825026297535
+          }
+        }
+      }
+    ],
+    "html_table": "<div style=\"overflow-x:auto\"><table><thead><tr><th>Definition</th><th>Integral side</th><th>beta_p</th><th>l_i</th></tr></thead><tbody><tr><td>Nova shared volume-current denominator</td><td>solved</td><td><ul><li>confined core, Ip=416958.254125956 A: 0.477668987733386</li><li>all domain constrained, Ip=933034.875000000 A: 0.0953929859047701</li></ul></td><td><ul><li>confined core, Ip=416958.254125956 A: 1.08747738332402</li><li>all domain constrained, Ip=933034.875000000 A: 0.21717490011532</li></ul></td></tr><tr><td>Nova shared volume-current denominator</td><td>reference</td><td><ul><li>confined core, Ip=416958.254125956 A: 1.09267487457514</li><li>all domain constrained, Ip=933034.875000000 A: 0.218212866201441</li></ul></td><td><ul><li>confined core, Ip=416958.254125956 A: 4.09356257927085</li><li>all domain constrained, Ip=933034.875000000 A: 0.817505777960694</li></ul></td></tr><tr><td>Reference boundary-field denominators</td><td>solved</td><td><ul><li>confined core, Ip=416958.254125956 A: 0.733602199163769</li><li>all domain constrained, Ip=933034.875000000 A: 0.146504181853225</li></ul></td><td><ul><li>current independent: 0.204390015802943</li></ul></td></tr><tr><td>Reference boundary-field denominators</td><td>reference</td><td><ul><li>confined core, Ip=416958.254125956 A: 1.67812588119439</li><li>all domain constrained, Ip=933034.875000000 A: 0.335130482912064</li></ul></td><td><ul><li>current independent: 0.76937997341156</li></ul></td></tr></tbody></table></div>"
+  },
+  "reference_definition_reproduction": {
+    "poloidal_beta": {
+      "reproduced": 0.3351304829120636,
+      "published": 0.3351304829120636,
+      "signed_relative_error": 0.0,
+      "absolute_relative_error": 0.0,
+      "passes": true
+    },
+    "internal_inductance": {
+      "reproduced": 0.7693799734115601,
+      "published": 0.7693799734115601,
+      "signed_relative_error": 0.0,
+      "absolute_relative_error": 0.0,
+      "passes": true
+    },
+    "relative_tolerance": 1e-12
+  },
+  "matched_definition_deviations": {
+    "poloidal_beta": {
+      "signed_relative_deviation": -0.5628443566810165,
+      "absolute_relative_deviation": 0.5628443566810165,
+      "verdict": "FAIL_REFERENCE_REPRODUCTION",
+      "reading": "The solved pressure integral is smaller under either common scoring scale."
+    },
+    "internal_inductance": {
+      "signed_relative_deviation": -0.7343445074393564,
+      "absolute_relative_deviation": 0.7343445074393564,
+      "verdict": "FAIL_REFERENCE_REPRODUCTION",
+      "reading": "The solved Bp-squared volume integral is smaller under either common scoring scale."
+    },
+    "invariant_across_definitions_and_current_supports": true
+  },
+  "parity_verdict_scoreability": {
+    "scoreable": true,
+    "verdict": "SCOREABLE_MATCHED_DEFINITIONS_FAIL_REPRODUCTION",
+    "reason": "Both published numerator integrals can be scored on either common denominator family; the matched solved/reference deviations are therefore definition- and support-invariant.",
+    "additional_quantity_required": null
+  },
+  "protected_banked_artifacts": {
+    "declared_count": 23,
+    "verified_digest_count": 23,
+    "all_digests_match": true,
+    "source_receipt_and_this_receipt_are_outside_protected_set": true
+  }
+}

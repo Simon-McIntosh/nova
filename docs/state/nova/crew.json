@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T01:27:34",
+  "updated": "2026-08-22T01:59:03",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -19849,9 +19849,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T232930197081-window-branch-continuity",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a76",
+        "node": "window-branch-continuity",
+        "role": "implement",
+        "member": "transport-window",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T23:29:32Z",
+        "completed_at": "2026-08-21T23:57:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1697,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1697,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "7a6871ce82fd46e41ab6d364b865f899d311cb9b",
+        "commits": [
+          "d66b1f4d"
+        ],
+        "changed_lines": {
+          "added": 260,
+          "removed": 7,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "branch continuity threads the landed selection machinery through the window equilibrium sweep read-only (BranchAdmissibility, SelectionHistory, select_forward_branch; cold portfolio on empty history; both rungs seeded from the prior confined flux) and the same-experiment probe now receipts all exchanges: confined and growing through four (496 to 576 exact core cells, sole_valid then history_continuity), then the typed converged-non-confined outcome at exchange five with reason no_admissible_alternative - the confined branch GENUINELY vanishes under continuity, so the collapse is physics (a non-contractive exchange on an uncontrolled coil set), not seeding. The 157-cell topology-inconsistent alternate was correctly refused. 7 passed window tests plus the gradient test in fresh sequential processes; probe upgraded to the standing basin regression driver; scope-changed for the granted probe conversion",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T232930197081-window-branch-continuity/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a01f8b-c81b-70c3-a5d8-007c4d512626",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12891904,
+            "cached_input_tokens_cumulative": 58801664,
+            "input_tokens": 13259151,
+            "input_tokens_cumulative": 60579090,
+            "output_tokens": 39672,
+            "output_tokens_cumulative": 202451,
+            "reasoning_output_tokens": 17586,
+            "reasoning_output_tokens_cumulative": 76493
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 487
+    "_version": 488
   }
 }

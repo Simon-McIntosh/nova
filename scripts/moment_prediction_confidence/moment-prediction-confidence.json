@@ -1,0 +1,305 @@
+{
+  "schema": "moment-prediction-confidence-1.0",
+  "source": {
+    "commit": "1583381cb1747ca9242af423b97e28cf9396af63",
+    "tree": "dc3c1a4b4642c875aaf6aa1a0da5b4df457332b6",
+    "predictor_scope": "scripts-local; no nova package API additions"
+  },
+  "cohort": {
+    "frames": 11,
+    "mast_frames": 6,
+    "diiid_frames": 5,
+    "boundary_scales": [
+      0.9,
+      0.95,
+      1.0,
+      1.05,
+      1.1
+    ],
+    "rows": 55
+  },
+  "support_contract": {
+    "prediction": "boundary_hypothesis_all_domain",
+    "reference": "reference_boundary_all_domain",
+    "confined_core_predictions_claimed": false
+  },
+  "support_control": {
+    "source": "docs/figures/efit-forward-parity/inductance-deficit-partition.json",
+    "confined_core_current_a": 416958.25412595563,
+    "all_domain_current_a": 933034.875,
+    "ratio": 0.446883889657346
+  },
+  "instrument_control": {
+    "source": "docs/figures/efit-forward-parity/field-energy-instrument-control.json",
+    "nova_over_published": 0.6020235565543425,
+    "divided_out_ratio": 0.9994265612566154,
+    "study_instrument": "nova_finite_cell_plasma_field_energy",
+    "published_inductance_scored": false
+  },
+  "reference_boundary_error": {
+    "all": {
+      "frames": 11,
+      "current_relative_error": {
+        "median": 0.0,
+        "p90": 1.4524803774321844e-16,
+        "maximum": 2.495412013981467e-16
+      },
+      "centroid_vector_error_m": {
+        "median": 0.04624451222501412,
+        "p90": 0.0597964216760492,
+        "maximum": 0.06719127195225716
+      },
+      "centroid_r_error_m": {
+        "median": 0.04376233728580681,
+        "p90": 0.05976613152855981,
+        "maximum": 0.0671377504562235
+      },
+      "centroid_z_error_m": {
+        "median": 0.0030518414363216216,
+        "p90": 0.016793208972832093,
+        "maximum": 0.020816460491956748
+      },
+      "variance_rr_relative_error": {
+        "median": 0.02557963654095302,
+        "p90": 0.0424059695535743,
+        "maximum": 0.09715431116677832
+      },
+      "variance_zz_relative_error": {
+        "median": 0.1268213812899369,
+        "p90": 0.18295413842055722,
+        "maximum": 0.19929382449572225
+      },
+      "width_rms_relative_error": {
+        "median": 0.04767844240195486,
+        "p90": 0.06797400341663645,
+        "maximum": 0.07226889738630632
+      },
+      "internal_inductance_relative_error": {
+        "median": 0.1663443223646547,
+        "p90": 0.2138695432674926,
+        "maximum": 0.23684486952623057
+      }
+    },
+    "DIII-D": {
+      "frames": 5,
+      "current_relative_error": {
+        "median": 0.0,
+        "p90": 0.0,
+        "maximum": 0.0
+      },
+      "centroid_vector_error_m": {
+        "median": 0.03720415167124189,
+        "p90": 0.04319767737561377,
+        "maximum": 0.04633026305255225
+      },
+      "centroid_r_error_m": {
+        "median": 0.03319844927058435,
+        "p90": 0.04021752908742391,
+        "maximum": 0.04139043666241626
+      },
+      "centroid_z_error_m": {
+        "median": 0.003957406332499337,
+        "p90": 0.019207159884306886,
+        "maximum": 0.020816460491956748
+      },
+      "variance_rr_relative_error": {
+        "median": 0.04116078270097458,
+        "p90": 0.07525497452149671,
+        "maximum": 0.09715431116677832
+      },
+      "variance_zz_relative_error": {
+        "median": 0.0675220575325683,
+        "p90": 0.18009507367850375,
+        "maximum": 0.19929382449572225
+      },
+      "width_rms_relative_error": {
+        "median": 0.030000972066668106,
+        "p90": 0.06682918606358423,
+        "maximum": 0.07226889738630632
+      },
+      "internal_inductance_relative_error": {
+        "median": 0.11040719688083181,
+        "p90": 0.14820529688605746,
+        "maximum": 0.1505508194441401
+      }
+    },
+    "MAST": {
+      "frames": 6,
+      "current_relative_error": {
+        "median": 1.3419574216597506e-16,
+        "p90": 1.9739461957068256e-16,
+        "maximum": 2.495412013981467e-16
+      },
+      "centroid_vector_error_m": {
+        "median": 0.049998764259550514,
+        "p90": 0.06349384681415318,
+        "maximum": 0.06719127195225716
+      },
+      "centroid_r_error_m": {
+        "median": 0.04963425645376718,
+        "p90": 0.06345194099239165,
+        "maximum": 0.0671377504562235
+      },
+      "centroid_z_error_m": {
+        "median": 0.002866581958001125,
+        "p90": 0.011111843461556766,
+        "maximum": 0.01663435444525649
+      },
+      "variance_rr_relative_error": {
+        "median": 0.011035885585884987,
+        "p90": 0.033500230159816666,
+        "maximum": 0.03390403293495932
+      },
+      "variance_zz_relative_error": {
+        "median": 0.13165337618805037,
+        "p90": 0.16670874705183147,
+        "maximum": 0.18295413842055722
+      },
+      "width_rms_relative_error": {
+        "median": 0.048376686866966244,
+        "p90": 0.06253380613923949,
+        "maximum": 0.06797400341663645
+      },
+      "internal_inductance_relative_error": {
+        "median": 0.18496117354620875,
+        "p90": 0.22535720639686158,
+        "maximum": 0.23684486952623057
+      }
+    }
+  },
+  "boundary_sensitivity": {
+    "boundary_scales": [
+      0.9,
+      0.95,
+      1.0,
+      1.05,
+      1.1
+    ],
+    "per_frame": [
+      {
+        "identity": "DIII-D-d3d_shot_00f40d3919-54",
+        "machine": "DIII-D",
+        "centroid_r_range_m": 0.004540636741508619,
+        "centroid_z_range_m": 0.0070056167802267436,
+        "width_rms_fractional_range": 0.2010480103861583,
+        "internal_inductance_fractional_range": 0.03736835366488835
+      },
+      {
+        "identity": "DIII-D-d3d_shot_0112bdc95d-96",
+        "machine": "DIII-D",
+        "centroid_r_range_m": 0.008270460789997935,
+        "centroid_z_range_m": 0.0017004320234162073,
+        "width_rms_fractional_range": 0.21505901959546175,
+        "internal_inductance_fractional_range": 0.030911442499037097
+      },
+      {
+        "identity": "DIII-D-d3d_shot_0112d94419-169",
+        "machine": "DIII-D",
+        "centroid_r_range_m": 0.009508770684281798,
+        "centroid_z_range_m": 0.003629035312396049,
+        "width_rms_fractional_range": 0.21119657166589842,
+        "internal_inductance_fractional_range": 0.033901722501923776
+      },
+      {
+        "identity": "DIII-D-d3d_shot_01177bc9fa-144",
+        "machine": "DIII-D",
+        "centroid_r_range_m": 0.05679593713348652,
+        "centroid_z_range_m": 0.006978564284065011,
+        "width_rms_fractional_range": 0.1852162172235573,
+        "internal_inductance_fractional_range": 0.11793203362855109
+      },
+      {
+        "identity": "DIII-D-d3d_shot_012c431151-125",
+        "machine": "DIII-D",
+        "centroid_r_range_m": 0.03337764356162487,
+        "centroid_z_range_m": 0.0034696120582938944,
+        "width_rms_fractional_range": 0.19080129361386206,
+        "internal_inductance_fractional_range": 0.07300829154253724
+      },
+      {
+        "identity": "MAST-21978-35",
+        "machine": "MAST",
+        "centroid_r_range_m": 0.01780269105139154,
+        "centroid_z_range_m": 0.001150811127889782,
+        "width_rms_fractional_range": 0.2056850098921298,
+        "internal_inductance_fractional_range": 0.12802234709690458
+      },
+      {
+        "identity": "MAST-21983-35",
+        "machine": "MAST",
+        "centroid_r_range_m": 0.016630461057195012,
+        "centroid_z_range_m": 0.0002821109557800163,
+        "width_rms_fractional_range": 0.210215238924129,
+        "internal_inductance_fractional_range": 0.11952452962252605
+      },
+      {
+        "identity": "MAST-21985-51",
+        "machine": "MAST",
+        "centroid_r_range_m": 0.013749266749381706,
+        "centroid_z_range_m": 0.00016431371827796073,
+        "width_rms_fractional_range": 0.2148969079181153,
+        "internal_inductance_fractional_range": 0.10181605347787348
+      },
+      {
+        "identity": "MAST-21986-46",
+        "machine": "MAST",
+        "centroid_r_range_m": 0.020595170517532013,
+        "centroid_z_range_m": 0.0008506017819593509,
+        "width_rms_fractional_range": 0.2067805502104048,
+        "internal_inductance_fractional_range": 0.10178840965985005
+      },
+      {
+        "identity": "MAST-21989-55",
+        "machine": "MAST",
+        "centroid_r_range_m": 0.010068991437848895,
+        "centroid_z_range_m": 0.0007351787168844021,
+        "width_rms_fractional_range": 0.21014941047977886,
+        "internal_inductance_fractional_range": 0.07111396946063561
+      },
+      {
+        "identity": "MAST-22086-43",
+        "machine": "MAST",
+        "centroid_r_range_m": 0.01807342456611316,
+        "centroid_z_range_m": 0.00029540445938833513,
+        "width_rms_fractional_range": 0.2106110337579028,
+        "internal_inductance_fractional_range": 0.09452333679487211
+      }
+    ],
+    "aggregate": {
+      "centroid_r_range_m": {
+        "median": 0.016630461057195012,
+        "p90": 0.03337764356162487,
+        "maximum": 0.05679593713348652
+      },
+      "centroid_z_range_m": {
+        "median": 0.001150811127889782,
+        "p90": 0.006978564284065011,
+        "maximum": 0.0070056167802267436
+      },
+      "width_rms_fractional_range": {
+        "median": 0.21014941047977886,
+        "p90": 0.2148969079181153,
+        "maximum": 0.21505901959546175
+      },
+      "internal_inductance_fractional_range": {
+        "median": 0.09452333679487211,
+        "p90": 0.11952452962252605,
+        "maximum": 0.12802234709690458
+      }
+    }
+  },
+  "input_digests": {
+    "docs/figures/efit-forward-parity/passive-inclusive-frozen-six-scorecard.json": "e2a625b2a1a4ce7324bd437eee0c9631d6b056b9406e5a3ae2393b0dc27a0aa6",
+    "docs/figures/current-constrained-forward-solve/cold-start/constrained_cold_start_receipt.json": "e5f555763d0b987b43e542c3fa539dc2cf6c6701e02f1d6c1c641448da25a722",
+    "docs/figures/efit-forward-parity/inductance-deficit-partition.json": "a2702e78ab901bd844562a28424ebd6edcb334124008d2a70e47d85a37aff494",
+    "docs/figures/efit-forward-parity/field-energy-instrument-control.json": "71aaccc7fd1d483105e8a8fbaa071f4165484055e68caa291b74face20e87a95",
+    "scripts/moment_infrastructure_survey/report.md": "e8ab6c57543e57c8493236a43d67b44044ac6766beddc5e8132a69b7c0f91f18",
+    "docs/figures/efit-flux-decomposition/native-grid-decomposition.json": "2b60e2de1caf27e3b2af34e28d3e9ca007b1f992e417fe540d5de84098e5958a"
+  },
+  "artifacts": {
+    "table": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/47247cc9-be75-4e83-a22e-ed27792dda52/moment-prediction-confidence/scripts/moment_prediction_confidence/moment-prediction-confidence.tsv",
+    "report": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/47247cc9-be75-4e83-a22e-ed27792dda52/moment-prediction-confidence/scripts/moment_prediction_confidence/report.md",
+    "reference_figure": "docs/figures/moment-conditioned-basin-entry/reference-boundary-errors.png",
+    "sensitivity_figure": "docs/figures/moment-conditioned-basin-entry/boundary-sensitivity.png"
+  }
+}

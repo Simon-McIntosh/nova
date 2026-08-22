@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 </head>
 <body>
   <main class="plan-doc">
@@ -113,16 +113,14 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="stall-attribution-branch" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="stall-attribution-branch" data-choice="stalls-persist" data-by="reckon-ship (pre-registered evidence branch; owner sequencing 2026-08-22)" data-when="2026-08-22T20:53:17+00:00">
     <p class="r-dec-q">What did the tared-external-field control attribute the five MAST stalls to?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="stalls-dissolve">stalls converge in the tared background — external-field defect; §§3–4 re-scope to cold-start economy</button>
-      <button class="r-opt" data-value="stalls-persist">stalls persist — basin-entry defect; §§3–4 proceed as the driver design</button>
+      <button class="r-opt chosen" data-value="stalls-persist">stalls persist — basin-entry defect; §§3–4 proceed as the driver design</button>
       <button class="r-opt" data-value="mixed">mixed verdict — split per-reference and proceed on the persisting subset</button>
       </p>
-    <p class="r-dec-rat">Open until run r-20260822T192210062115 (efit-forward-parity side) lands
-    its converged count against the banked 1 of 6. Consuming that verdict before driver design is
-    the sequencing recorded on dual-basin-solve f-dbs-basin-reachability.</p>
+    <p class="r-dec-rat">Gated verdict EXTERNAL_FIELD_EXONERATED_FIXED_POINT_OR_DISCRETISATION from run r-20260822T202422623972 (gate passed 38.4x: analytic external-field recovery 0.026 percent of span against the void split&#x27;s 56.4 percent, a 2166-fold improvement with Delta-star inversion unchanged, so the correction touched attribution only). Into the ground-truth-validated background the converged count is 1 of 6 - equal to the modelled background. A better boundary condition does not buy convergence: the external field is excluded by test, and the obstacle is the GS fixed point or its discretisation. Sections 3-4 proceed as the driver design, carrying the discretisation caveat: if the driver also fails on a reference sitting 0.135 percent of span from a balanced fixed point, discretisation becomes the lead suspect and the work re-scopes to the operator, not the seed.</p>
     </div>
 </section>
 
@@ -143,6 +141,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20260822T2045-tare-void-corrected-run" data-who="reckon-ship" data-when="2026-08-22T20:45:00+00:00">
     <div class="r-comment-body">TARE VERDICT: VOID (MAST_TARED_SOLVE_VOID_ANALYTIC_NULL_FAILED). The 0/6 carries NO attribution in either direction; the stall-attribution decision stays open on the CORRECTED run r-20260822T202422623972-plasma-support-tare-solve. The Solovev null split the machinery cleanly: Delta-star inversion works (recovered current density matches analytic at relative sup 2.38e-4 coarse / 1.21e-4 fine) but the SPLIT fails (analytic external field missed by 82.3 / 56.4 percent of span, refinement helps but does not rescue). ROOT CAUSE, one line: psi_plasma was composed from ALL valid-cell Delta-star current, so in-grid fitted-conductor current was classified as plasma and the remainder background had its own conductor field SUBTRACTED - the 1/6 to 0/6 regression is an artifact of that split. THE EXTERIOR-CONDUCTOR HYPOTHESIS IS CONFIRMED SPATIALLY: 99.02+ percent of absolute exterior Delta-star current lies within one grid diagonal of the 938 fcoil filaments, per-circuit Pearson 0.976-0.987 across 101 circuits - but amplitudes miss at per-circuit L1 0.831-0.855, so this localises on conductors WITHOUT reproducing them and is not promotable as a conductor-model validation. The corrected run composes psi_plasma from plasma-SUPPORT current only (already measured 0.406-0.596 percent below efm/plasma_current_c) and is gated: Solovev analytic external-field recovery must reach 1 percent of span on the fine mesh before any MAST solve runs, else it reports and stops. The next verdict carries real attribution or honestly says it cannot.</div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20260822T2110-branch-fired" data-who="reckon-ship" data-when="2026-08-22T21:10:00+00:00">
+    <div class="r-comment-body">BRANCH FIRED on the corrected tare (run r-20260822T202422623972, commits 2af4037c/d7add809, merged): stalls-persist is locked and sections 3-4 are the driver design, justified on measured grounds rather than by elimination. THE FIX was the owner's diagnosis in one line - compose psi_plasma from current inside the LCFS only (248-257 cells, 0.406-0.596 percent below abs(efm/plasma_current_c)); the void split's 841 all-valid cells total -957,109 A against a reference +801,493 A, opposite in sign. THREE MEASURED CONSTRAINTS FOR THE DRIVER, sharpened from the earlier relay: (1) the reference sits 0.135 percent of span from a balanced fixed point - a root exists nearby; (2) only TWO of six terminals carry a closed axis-enclosing LCFS branch at all (21983/35 at 0.142 m, 21985/51 at 0.220 m; the other four are unscoreable_no_closed_axis_branch with the longest-polyline fallback correctly refused) - on four of six the driver CONSTRUCTS confinement rather than refining it, the strongest form yet of the asymmetry favouring the moment-seeded cold start; (3) FRAGILE-ANCHOR WARNING for section 4's portfolio revisit: the convergent reference CHANGED IDENTITY between backgrounds (modelled 22086/43, tared 21986/46 at residual 3.27e-16) - the count is robust to a boundary-condition change, which member converges is not, so no selection mechanism may key on the identity of a known-good frame. Cross-plan: efit-forward-parity shipped at impl 25/25; the catalog hold's falsifiable exit (convergence materially above 1 in 6 under a declared route) now has no boundary-condition explanation available for failing it - this plan's sections 3-4 are the declared route.</div>
 </div>
 </section>
 

@@ -22,6 +22,7 @@ import matplotlib
 import numpy as np
 from contourpy import contour_generator
 from matplotlib.path import Path as MplPath
+from scipy.constants import mu_0
 from scipy.spatial import cKDTree
 
 matplotlib.use("Agg")
@@ -53,6 +54,10 @@ SMALL_REFERENCE_RESIDUAL_FRACTION = 0.01
 BANKED_COMPOSITION_NAME = "mast-dina-composition-diff.json"
 BANKED_BOUNDARY_NAME = "boundary-imbalance-attribution.json"
 BANKED_PASSIVE_NAME = "passive-inclusive-parity-slice.json"
+CONSTRAINED_SCORECARD = Path(
+    "docs/figures/current-constrained-forward-solve/mast-constrained/"
+    "current-constrained-frozen-six-scorecard.json"
+)
 
 EXPECTED_REFERENCE = {
     "shot": 22086,
@@ -456,6 +461,204 @@ def _banked_residual_comparators(output: Path, observed: dict[str, Any]) -> dict
     }
 
 
+def _moment_normalisation_attribution(
+    equilibrium, group, row: int, stored_contour: np.ndarray, scorecard: dict
+) -> dict[str, Any]:
+    """Expose the volume integrals and boundary normalisers of both moments."""
+    moments = equilibrium.moments
+    solved_current = float(moments.plasma_current)
+    solved_radius = float(moments.major_radius)
+    solved_normaliser = 0.5 * mu_0**2 * solved_radius * solved_current**2
+    solved_pressure_integral = float(moments.pressure_integral)
+    solved_field_integral = float(moments.poloidal_field_integral)
+    solved_beta_numerator = 2.0 * mu_0 * solved_pressure_integral
+    solved_beta = solved_beta_numerator / solved_normaliser
+    solved_li = solved_field_integral / solved_normaliser
+    if not np.isclose(solved_beta, float(moments.poloidal_beta), rtol=2e-15):
+        raise RuntimeError("the solved poloidal-beta components do not close")
+    if not np.isclose(solved_li, float(moments.internal_inductance), rtol=2e-15):
+        raise RuntimeError("the solved internal-inductance components do not close")
+
+    reference_current = abs(float(group["plasma_current_c"][row]))
+    reference_volume = float(group["plasma_volume"][row])
+    reference_perimeter = _contour_geometry(stored_contour)["total_arclength_m"]
+    reference_mean_boundary_field = mu_0 * reference_current / reference_perimeter
+    reference_beta_normaliser = reference_mean_boundary_field**2 * reference_volume
+    reference_beta = float(group["betap"][row])
+    reference_pressure_integral = (
+        reference_beta * reference_beta_normaliser / (2.0 * mu_0)
+    )
+    reference_thermal_energy = float(group["plasma_energy"][row])
+    reference_pressure_from_energy_factor = (2.0 / 3.0) * reference_thermal_energy
+
+    reference_li = float(group["li"][row])
+    reference_field_integral = float(group["bpol_squared"][row])
+    reference_li_normaliser = reference_field_integral / reference_li
+    reference_surface_mean_field_squared = reference_li_normaliser / reference_volume
+
+    scorecard_metrics = scorecard["constrained_solve"]["metrics"]
+    constrained_current = float(scorecard["target_current"]["value_a"])
+    constrained_current_normaliser = (
+        0.5 * mu_0**2 * solved_radius * constrained_current**2
+    )
+    constrained_current_beta = solved_beta_numerator / constrained_current_normaliser
+    constrained_current_li = solved_field_integral / constrained_current_normaliser
+    beta_score = scorecard_metrics["poloidal_beta"]
+    li_score = scorecard_metrics["internal_inductance"]
+    if not np.isclose(solved_beta, beta_score["solved"], rtol=2e-15):
+        raise RuntimeError(
+            "the live solved poloidal beta differs from the banked score"
+        )
+    if not np.isclose(solved_li, li_score["solved"], rtol=2e-15):
+        raise RuntimeError(
+            "the live solved internal inductance differs from the banked score"
+        )
+
+    pressure_ratio = solved_pressure_integral / reference_pressure_integral
+    field_ratio = solved_field_integral / reference_field_integral
+    beta_normaliser_ratio = solved_normaliser / reference_beta_normaliser
+    li_normaliser_ratio = solved_normaliser / reference_li_normaliser
+    beta_ratio = solved_beta / reference_beta
+    li_ratio = solved_li / reference_li
+    if not np.isclose(pressure_ratio / beta_normaliser_ratio, beta_ratio, rtol=2e-15):
+        raise RuntimeError("the poloidal-beta ratio attribution does not close")
+    if not np.isclose(field_ratio / li_normaliser_ratio, li_ratio, rtol=2e-15):
+        raise RuntimeError("the internal-inductance ratio attribution does not close")
+
+    return {
+        "definitions": {
+            "nova_poloidal_beta": (
+                "2*mu0*integral(p dV) divided by 0.5*mu0^2*R_volume*Ip^2"
+            ),
+            "nova_internal_inductance": (
+                "integral(Bp^2 dV) divided by 0.5*mu0^2*R_volume*Ip^2"
+            ),
+            "reference_poloidal_beta": (
+                "2*mu0*integral(p dV) divided by "
+                "(<Bp>_LCFS^2*plasma_volume), with <Bp>_LCFS=mu0*Ip/perimeter"
+            ),
+            "reference_internal_inductance": (
+                "integral(Bp^2 dV) divided by (<Bp^2>_LCFS*plasma_volume)"
+            ),
+        },
+        "solved_live_equilibrium": {
+            "plasma_volume_m3": float(moments.volume),
+            "volume_weighted_major_radius_m": solved_radius,
+            "moment_confined_core_current_a": solved_current,
+            "constrained_terminal_cell_current_sum_a": constrained_current,
+            "moment_core_current_over_constrained_terminal_current": (
+                solved_current / constrained_current
+            ),
+            "current_outside_moment_core_by_subtraction_a": (
+                constrained_current - solved_current
+            ),
+            "pressure_volume_integral_pa_m3": solved_pressure_integral,
+            "poloidal_field_squared_volume_integral_t2_m3": solved_field_integral,
+            "common_boundary_normaliser_t2_m3": solved_normaliser,
+            "same_geometry_constrained_current_normaliser_t2_m3": (
+                constrained_current_normaliser
+            ),
+            "common_normaliser_over_constrained_current_counterfactual": (
+                solved_normaliser / constrained_current_normaliser
+            ),
+            "poloidal_beta_numerator_t2_m3": solved_beta_numerator,
+            "poloidal_beta": solved_beta,
+            "internal_inductance": solved_li,
+            "same_integrals_with_constrained_current_counterfactual": {
+                "poloidal_beta": constrained_current_beta,
+                "internal_inductance": constrained_current_li,
+                "qualification": (
+                    "Diagnostic only: substitutes the constrained total cell-current "
+                    "sum into Nova's denominator while holding the live core "
+                    "geometry and integrals fixed; it is not a rescored metric."
+                ),
+            },
+            "current_definition_reading": (
+                "The target-current check sums equilibrium.cell_current over all "
+                "domains, while IntegralObservation.plasma_current is the "
+                "topology-qualified confined-core integral used in both moment "
+                "denominators."
+            ),
+        },
+        "reference": {
+            "plasma_volume_m3": reference_volume,
+            "stored_lcfs_perimeter_m": reference_perimeter,
+            "plasma_current_a": reference_current,
+            "perimeter_averaged_boundary_field_t": reference_mean_boundary_field,
+            "poloidal_beta_boundary_normaliser_t2_m3": (reference_beta_normaliser),
+            "pressure_volume_integral_implied_by_betap_pa_m3": (
+                reference_pressure_integral
+            ),
+            "published_thermal_energy_j": reference_thermal_energy,
+            "two_thirds_published_thermal_energy_pa_m3": (
+                reference_pressure_from_energy_factor
+            ),
+            "pressure_integral_relative_difference_from_two_thirds_energy": (
+                reference_pressure_integral / reference_pressure_from_energy_factor
+                - 1.0
+            ),
+            "poloidal_beta": reference_beta,
+            "poloidal_field_squared_volume_integral_t2_m3": (reference_field_integral),
+            "internal_inductance_boundary_normaliser_t2_m3": (reference_li_normaliser),
+            "lcfs_surface_mean_poloidal_field_squared_t2": (
+                reference_surface_mean_field_squared
+            ),
+            "internal_inductance": reference_li,
+            "normaliser_ratio_li_over_beta": (
+                reference_li_normaliser / reference_beta_normaliser
+            ),
+            "qualification": (
+                "The pressure integral is implied by stored betap and its LCFS "
+                "mean-field definition; it agrees with two-thirds of the stored "
+                "thermal energy, but that energy field does not state its "
+                "pressure-to-energy convention. The Bp-squared volume integral "
+                "is published directly."
+            ),
+        },
+        "solved_over_reference": {
+            "pressure_volume_integral": pressure_ratio,
+            "poloidal_field_squared_volume_integral": field_ratio,
+            "poloidal_beta_boundary_normaliser": beta_normaliser_ratio,
+            "internal_inductance_boundary_normaliser": li_normaliser_ratio,
+            "poloidal_beta": beta_ratio,
+            "internal_inductance": li_ratio,
+        },
+        "signed_relative_deviations": {
+            "poloidal_beta": beta_ratio - 1.0,
+            "internal_inductance": li_ratio - 1.0,
+        },
+        "common_or_independent": (
+            "COMMON_SOLVED_NORMALISER_DISTINCT_REFERENCE_NORMALISERS"
+        ),
+        "normalisation_reading": (
+            "The two Nova moments share one solved normaliser built from the "
+            "416958 A confined-core current, not the exact 933035 A constrained "
+            "total cell-current sum. The EFM reference then uses squared mean "
+            "boundary field for betap and mean squared boundary field for li, "
+            "whose normalisers differ by a factor 1.632. Thus the solved side is "
+            "coupled, the reference side is independent, and the similar 42 "
+            "percent deviations are not one common cross-reference scale error."
+        ),
+        "profile_amplitude_excluded": {
+            "recovered_amplitude": scorecard["constrained_solve"][
+                "recovered_amplitude"
+            ],
+            "terminal_current_signed_relative_error": scorecard["target_current"][
+                "signed_terminal_relative_error"
+            ],
+            "flux_rms_fraction_of_span": scorecard_metrics["flux_map"][
+                "rms_fraction_of_reference_span"
+            ],
+            "statement": (
+                "The recovered amplitude is 1.0081, current is exactly on target, "
+                "and flux RMS is 0.565 percent of span; profile amplitude scaling "
+                "is excluded as the cause of the approximately 42 percent moment "
+                "deviations."
+            ),
+        },
+    }
+
+
 def run_lcfs_attribution(
     store: Path = SHOT_STORE,
     bank: Path = DECOMPOSITION_BANK,
@@ -616,13 +819,110 @@ def run_reference_residual_attribution(
     return receipt
 
 
+def run_moment_normalisation_attribution(
+    store: Path = SHOT_STORE,
+    bank: Path = DECOMPOSITION_BANK,
+    output: Path = OUTPUT_DIRECTORY,
+) -> dict[str, Any]:
+    """Solve once and read moment components from the live equilibrium."""
+    configure_dtypes()
+    receipt_path = output / RECEIPT_NAME
+    receipt = json.loads(receipt_path.read_text())
+    baseline = _banked_digests(output)
+    recorded = receipt["banked_artifact_integrity"]
+    if baseline != recorded["sha256"] or len(baseline) != EXPECTED_BANKED_FILE_COUNT:
+        raise RuntimeError("the banked parity artifacts changed before moment scoring")
+
+    selected = next(
+        item
+        for item in select_slices_by_shot(bank)
+        if int(item[0]["shot"]) == TARGET_SHOT
+    )
+    mast_case, context = _mast_case_from_selection(store, *selected)
+    _assert_reference(mast_case["reference"])
+    passive_case, profile, _policy = _passive_inclusive_case(mast_case, context, None)
+    target_current = abs(float(mast_case["reference"]["plasma_current_a"]))
+    solve, _trace, branch = _passive_inclusive_solve(
+        passive_case,
+        context,
+        profile,
+        newton_budget=NEWTON_STEPS,
+        target_current=target_current,
+    )
+    root = solve["forward_branch_receipt"]
+    terminal = solve["terminal_state"]
+    if not np.isclose(root["residual"], EXPECTED_ROOT["residual"], rtol=1e-12):
+        raise RuntimeError("the live constrained root residual did not reproduce")
+    if float(terminal["plasma_current_a"]) != EXPECTED_ROOT["plasma_current_a"]:
+        raise RuntimeError("the live constrained root current did not reproduce")
+    if not np.isclose(
+        terminal["normalisation_amplitude"],
+        EXPECTED_ROOT["amplitude"],
+        rtol=0.0,
+        atol=1e-15,
+    ):
+        raise RuntimeError("the live constrained root amplitude did not reproduce")
+
+    scorecard = json.loads(CONSTRAINED_SCORECARD.read_text())
+    scorecard_row = next(
+        item
+        for item in scorecard["per_shot"]
+        if int(item["reference"]["shot"]) == TARGET_SHOT
+    )
+    stored_contour = _stored_lcfs(context["group"], context["row"])
+    receipt["moment_normalisation_attribution"] = {
+        "execution_contract": {
+            "nonlinear_solve_calls": 1,
+            "terminal_state_serialisations_for_moments": 0,
+            "equilibrium_reconstructions_from_serialised_state": 0,
+            "moment_source": (
+                "branch.equilibrium.moments read from the live equilibrium in "
+                "the same process as the constrained row solve"
+            ),
+        },
+        **_moment_normalisation_attribution(
+            branch.equilibrium,
+            context["group"],
+            context["row"],
+            stored_contour,
+            scorecard_row,
+        ),
+    }
+    for symbol in (
+        "_passive_inclusive_solve live equilibrium",
+        "IntegralObservation volume integrals",
+    ):
+        if symbol not in receipt["reuse"]["symbols"]:
+            receipt["reuse"]["symbols"].append(symbol)
+    receipt["banked_artifact_integrity"].update(
+        {
+            "verified_digest_count": len(baseline),
+            "before_equals_after": _banked_digests(output) == baseline,
+        }
+    )
+    if not receipt["banked_artifact_integrity"]["before_equals_after"]:
+        raise RuntimeError("a banked parity artifact changed during moment scoring")
+    receipt_path.write_text(json.dumps(receipt, indent=2) + "\n")
+    if _banked_digests(output) != baseline:
+        raise RuntimeError(
+            "a banked parity artifact changed while updating the receipt"
+        )
+    return receipt
+
+
 def main() -> None:
     """Run the requested attribution stage and print its quantitative verdict."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
         "--reference-residual",
         action="store_true",
         help="apply the constrained map once at the reference flux map",
+    )
+    mode.add_argument(
+        "--moment-normalisation",
+        action="store_true",
+        help="solve once and read moment components from the live equilibrium",
     )
     arguments = parser.parse_args()
     if arguments.reference_residual:
@@ -635,6 +935,16 @@ def main() -> None:
             "REFERENCE_RESIDUAL_ATTRIBUTION "
             f"residual_verdict={residual_record['verdict']} "
             f"residual_sup_fraction={residual_sup:.12g}"
+        )
+    elif arguments.moment_normalisation:
+        receipt = run_moment_normalisation_attribution()
+        record = receipt["moment_normalisation_attribution"]
+        deviations = record["signed_relative_deviations"]
+        print(
+            "MOMENT_NORMALISATION_ATTRIBUTION "
+            f"verdict={record['common_or_independent']} "
+            f"beta_relative={deviations['poloidal_beta']:.12g} "
+            f"li_relative={deviations['internal_inductance']:.12g}"
         )
     else:
         receipt = run_lcfs_attribution()

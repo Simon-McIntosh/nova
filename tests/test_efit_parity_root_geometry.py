@@ -114,3 +114,46 @@ def test_banked_receipt_applies_constrained_map_once_at_reference() -> None:
     }
     assert record["decomposition_closure"]["sup_wb"] <= 5.0e-15
     assert receipt["banked_artifact_integrity"]["verified_digest_count"] == 23
+
+
+def test_banked_receipt_uses_live_moment_normalisers() -> None:
+    receipt = json.loads(
+        Path(
+            "docs/figures/efit-forward-parity/converged-root-geometry-attribution.json"
+        ).read_text()
+    )
+    record = receipt["moment_normalisation_attribution"]
+    solved = record["solved_live_equilibrium"]
+    reference = record["reference"]
+
+    assert record["execution_contract"] == {
+        "nonlinear_solve_calls": 1,
+        "terminal_state_serialisations_for_moments": 0,
+        "equilibrium_reconstructions_from_serialised_state": 0,
+        "moment_source": (
+            "branch.equilibrium.moments read from the live equilibrium in "
+            "the same process as the constrained row solve"
+        ),
+    }
+    assert solved["constrained_terminal_cell_current_sum_a"] == 933034.875
+    assert solved["moment_confined_core_current_a"] == 416958.2541259555
+    assert np.isclose(
+        solved["poloidal_beta_numerator_t2_m3"]
+        / solved["common_boundary_normaliser_t2_m3"],
+        solved["poloidal_beta"],
+        rtol=2e-15,
+    )
+    assert np.isclose(
+        solved["poloidal_field_squared_volume_integral_t2_m3"]
+        / solved["common_boundary_normaliser_t2_m3"],
+        solved["internal_inductance"],
+        rtol=2e-15,
+    )
+    assert reference["normaliser_ratio_li_over_beta"] == 1.6318623846083615
+    assert (
+        record["common_or_independent"]
+        == "COMMON_SOLVED_NORMALISER_DISTINCT_REFERENCE_NORMALISERS"
+    )
+    assert record["profile_amplitude_excluded"]["recovered_amplitude"] == (
+        1.008098186771406
+    )

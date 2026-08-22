@@ -1273,7 +1273,9 @@
       "_symmetric_mean_distance",
       "_stored_lcfs",
       "_composition_case_receipt one-application pattern",
-      "_boundary_attribution_receipt gauge and exterior split"
+      "_boundary_attribution_receipt gauge and exterior split",
+      "_passive_inclusive_solve live equilibrium",
+      "IntegralObservation volume integrals"
     ]
   },
   "banked_artifact_integrity": {
@@ -1639,6 +1641,80 @@
         "wall_sup_fraction_of_span": -0.02967006793920199
       },
       "constrained_minus_banked_passive_repaired_wall_sup_fraction_of_span": 0.0006717986894346105
+    }
+  },
+  "moment_normalisation_attribution": {
+    "execution_contract": {
+      "nonlinear_solve_calls": 1,
+      "terminal_state_serialisations_for_moments": 0,
+      "equilibrium_reconstructions_from_serialised_state": 0,
+      "moment_source": "branch.equilibrium.moments read from the live equilibrium in the same process as the constrained row solve"
+    },
+    "definitions": {
+      "nova_poloidal_beta": "2*mu0*integral(p dV) divided by 0.5*mu0^2*R_volume*Ip^2",
+      "nova_internal_inductance": "integral(Bp^2 dV) divided by 0.5*mu0^2*R_volume*Ip^2",
+      "reference_poloidal_beta": "2*mu0*integral(p dV) divided by (<Bp>_LCFS^2*plasma_volume), with <Bp>_LCFS=mu0*Ip/perimeter",
+      "reference_internal_inductance": "integral(Bp^2 dV) divided by (<Bp^2>_LCFS*plasma_volume)"
+    },
+    "solved_live_equilibrium": {
+      "plasma_volume_m3": 3.5188798289237955,
+      "volume_weighted_major_radius_m": 0.8837899006808431,
+      "moment_confined_core_current_a": 416958.2541259555,
+      "constrained_terminal_cell_current_sum_a": 933034.875,
+      "moment_core_current_over_constrained_terminal_current": 0.4468838896573459,
+      "current_outside_moment_core_by_subtraction_a": 516076.6208740445,
+      "pressure_volume_integral_pa_m3": 23057.440903852024,
+      "poloidal_field_squared_volume_integral_t2_m3": 0.13193017891301845,
+      "common_boundary_normaliser_t2_m3": 0.12131763008234392,
+      "same_geometry_constrained_current_normaliser_t2_m3": 0.6074835482505726,
+      "common_normaliser_over_constrained_current_counterfactual": 0.1997052108352789,
+      "poloidal_beta_numerator_t2_m3": 0.0579496695556466,
+      "poloidal_beta": 0.477668987733386,
+      "internal_inductance": 1.0874773833240172,
+      "same_integrals_with_constrained_current_counterfactual": {
+        "poloidal_beta": 0.0953929859047701,
+        "internal_inductance": 0.21717490011532029,
+        "qualification": "Diagnostic only: substitutes the constrained total cell-current sum into Nova's denominator while holding the live core geometry and integrals fixed; it is not a rescored metric."
+      },
+      "current_definition_reading": "The target-current check sums equilibrium.cell_current over all domains, while IntegralObservation.plasma_current is the topology-qualified confined-core integral used in both moment denominators."
+    },
+    "reference": {
+      "plasma_volume_m3": 8.79159164428711,
+      "stored_lcfs_perimeter_m": 5.527656200206822,
+      "plasma_current_a": 933034.875,
+      "perimeter_averaged_boundary_field_t": 0.21211272208618046,
+      "poloidal_beta_boundary_normaliser_t2_m3": 0.39554959334678574,
+      "pressure_volume_integral_implied_by_betap_pa_m3": 52744.237106936955,
+      "published_thermal_energy_j": 79116.359375,
+      "two_thirds_published_thermal_energy_pa_m3": 52744.23958333333,
+      "pressure_integral_relative_difference_from_two_thirds_energy": -4.695102995277978e-08,
+      "poloidal_beta": 0.3351304829120636,
+      "poloidal_field_squared_volume_integral_t2_m3": 0.496621310710907,
+      "internal_inductance_boundary_normaliser_t2_m3": 0.6454825026297535,
+      "lcfs_surface_mean_poloidal_field_squared_t2": 0.07342043724803761,
+      "internal_inductance": 0.7693799734115601,
+      "normaliser_ratio_li_over_beta": 1.6318623846083615,
+      "qualification": "The pressure integral is implied by stored betap and its LCFS mean-field definition; it agrees with two-thirds of the stored thermal energy, but that energy field does not state its pressure-to-energy convention. The Bp-squared volume integral is published directly."
+    },
+    "solved_over_reference": {
+      "pressure_volume_integral": 0.4371556433189835,
+      "poloidal_field_squared_volume_integral": 0.26565549256064364,
+      "poloidal_beta_boundary_normaliser": 0.30670649679061224,
+      "internal_inductance_boundary_normaliser": 0.18794875087718882,
+      "poloidal_beta": 1.4253224104914495,
+      "internal_inductance": 1.4134464385678767
+    },
+    "signed_relative_deviations": {
+      "poloidal_beta": 0.4253224104914495,
+      "internal_inductance": 0.41344643856787666
+    },
+    "common_or_independent": "COMMON_SOLVED_NORMALISER_DISTINCT_REFERENCE_NORMALISERS",
+    "normalisation_reading": "The two Nova moments share one solved normaliser built from the 416958 A confined-core current, not the exact 933035 A constrained total cell-current sum. The EFM reference then uses squared mean boundary field for betap and mean squared boundary field for li, whose normalisers differ by a factor 1.632. Thus the solved side is coupled, the reference side is independent, and the similar 42 percent deviations are not one common cross-reference scale error.",
+    "profile_amplitude_excluded": {
+      "recovered_amplitude": 1.008098186771406,
+      "terminal_current_signed_relative_error": 0.0,
+      "flux_rms_fraction_of_span": 0.0056499012585266625,
+      "statement": "The recovered amplitude is 1.0081, current is exactly on target, and flux RMS is 0.565 percent of span; profile amplitude scaling is excluded as the cause of the approximately 42 percent moment deviations."
     }
   }
 }

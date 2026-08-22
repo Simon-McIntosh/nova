@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH --job-name=window-gpu
+#SBATCH --job-name=window-sensitivity
 #SBATCH --partition=betelgeuse
 #SBATCH --reservation=gpu_0003_grpA
 #SBATCH --nodes=1
@@ -8,14 +8,14 @@
 #SBATCH --gpus=h200:1
 #SBATCH --mem=64G
 #SBATCH --time=00:50:00
-#SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T092709918280-gpu-divergence-diagnosis/window-%j.log
+#SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T094745902957-backend-sensitivity-isolation/probe-%j.log
 
 set -euo pipefail
 trap 'code=$?; echo "EXIT_MARKER=${code}"' EXIT
 
 readonly ROOT="${SLURM_SUBMIT_DIR}"
 readonly ENVIRONMENT="/home/ITER/mcintos/Code/nova/.venv"
-readonly DRIVER="${ROOT}/scripts/window_gpu_benchmark/run_gpu_window.py"
+readonly DRIVER="${ROOT}/scripts/window_gpu_benchmark/sensitivity_probe.py"
 readonly REPORT="${ROOT}/scripts/window_gpu_benchmark/report.md"
 readonly RESULTS="${ROOT}/scripts/window_gpu_benchmark/results.tsv"
 

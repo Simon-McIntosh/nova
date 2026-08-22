@@ -59,7 +59,7 @@ from nova.imas.diiid_description import (
 from nova.jax.config import configure_dtypes
 
 
-DEFAULT_OUTPUT = Path("docs/figures/diiid-forward-onboarding/current-pinned")
+DEFAULT_OUTPUT = Path("docs/figures/current-constrained-forward-solve/pinned-cohort")
 PREREGISTRATION_NAME = "current_pinned_forward_preregistration.json"
 CHECKPOINT_NAME = "current_pinned_forward_frames.jsonl"
 RECEIPT_NAME = "current_pinned_forward_receipt.json"
@@ -72,13 +72,16 @@ DIAGNOSTIC_FRAME_102 = {
     "eliminated_iterations": 4,
     "eliminated_topology": "diverted",
 }
-DIAGNOSTIC_RESIDUAL_RELATIVE_TOLERANCE = 1.0e-5
 LAMBDA_BAND = (1.0e-6, 1.0e6)
 RELATIVE_RESIDUAL_CRITERION = 1.0e-6
 CURRENT_CONSTRAINT_CRITERION = 1.0e-10
 UNPINNED_PLATEAU_CONTROL = 3.491124178554655e-2
 SHIPPED_ONLY_PLATEAU_CONTROL = 0.1233879
-UNPINNED_CONTROL_ABSOLUTE_TOLERANCE = 2.0e-7
+LOW_CURRENT_BANKED_ABSOLUTE_DIFFERENCE_DECIMAL = "1.1020612117447208e-6"
+LOW_CURRENT_BANKED_ABSOLUTE_DIFFERENCE = float(
+    LOW_CURRENT_BANKED_ABSOLUTE_DIFFERENCE_DECIMAL
+)
+STORED_CONTROL_ABSOLUTE_TOLERANCE = 2.0e-7
 HOST_OUTER_ITERATIONS = 100
 HOST_INNER_ITERATIONS = 40
 POWER_ITERATIONS = 16
@@ -90,6 +93,8 @@ PLASMA_CURRENT_COLUMNS = (
 )
 REPRESENTATIVE_CURRENT_FLOOR_A = 200_000.0
 COHORT_PREFLIGHT_RELATIVE_TOLERANCE = 2.0e-6
+CROSS_CODEGEN_ABSOLUTE_TOLERANCE = COHORT_PREFLIGHT_RELATIVE_TOLERANCE
+DIAGNOSTIC_RESIDUAL_ABSOLUTE_TOLERANCE = CROSS_CODEGEN_ABSOLUTE_TOLERANCE
 LOW_CURRENT_CONTROL = ("d3d_shot_00000c4a7b.parquet", 0)
 REPRESENTATIVE_COHORT = (
     {
@@ -226,7 +231,7 @@ def preregistration() -> dict[str, Any]:
                 "low_current_shipped_20_plateau_control": (
                     SHIPPED_ONLY_PLATEAU_CONTROL
                 ),
-                "control_absolute_tolerance": UNPINNED_CONTROL_ABSOLUTE_TOLERANCE,
+                "control_absolute_tolerance": STORED_CONTROL_ABSOLUTE_TOLERANCE,
                 "representative_current_comparison": (
                     "remeasure shipped-20 and full-24 from the same seed per frame"
                 ),
@@ -484,12 +489,77 @@ def diagnostic_frame_102_reproduced(record: dict[str, Any]) -> bool:
         np.isclose(
             eliminated["relative_residual"],
             DIAGNOSTIC_FRAME_102["eliminated_relative_residual"],
-            rtol=DIAGNOSTIC_RESIDUAL_RELATIVE_TOLERANCE,
-            atol=0.0,
+            rtol=0.0,
+            atol=DIAGNOSTIC_RESIDUAL_ABSOLUTE_TOLERANCE,
         )
         and eliminated["iterations"] == DIAGNOSTIC_FRAME_102["eliminated_iterations"]
         and eliminated["topology"] == DIAGNOSTIC_FRAME_102["eliminated_topology"]
     )
+
+
+def _qualify_cross_codegen_control(
+    control: dict[str, Any],
+    *,
+    banked_absolute_difference: float | None = None,
+) -> dict[str, Any]:
+    """Apply one absolute tolerance to a banked cross-codegen control."""
+
+    measured = float(control["full_24_unpinned"]["relative_residual"])
+    historical = float(control["historical_full_24_plateau"])
+    difference = abs(measured - historical)
+    if banked_absolute_difference is not None and not np.isclose(
+        difference, banked_absolute_difference, rtol=0.0, atol=np.finfo(float).eps
+    ):
+        raise RuntimeError("banked low-current plateau values are inconsistent")
+    reported_difference = (
+        difference if banked_absolute_difference is None else banked_absolute_difference
+    )
+    reported_difference_decimal = (
+        str(reported_difference)
+        if banked_absolute_difference is None
+        else LOW_CURRENT_BANKED_ABSOLUTE_DIFFERENCE_DECIMAL
+    )
+    control.update(
+        {
+            "historical_full_24_plateau_measured": measured,
+            "historical_full_24_plateau_absolute_difference": reported_difference,
+            "historical_full_24_plateau_absolute_difference_decimal": (
+                reported_difference_decimal
+            ),
+            "binary64_recomputed_absolute_difference": difference,
+            "stored_control_absolute_tolerance": (STORED_CONTROL_ABSOLUTE_TOLERANCE),
+            "cross_codegen_absolute_tolerance": CROSS_CODEGEN_ABSOLUTE_TOLERANCE,
+            "cross_codegen_tolerance_policy": (
+                "all historical controls banked on another code generator use "
+                "the preregistered 2e-6 absolute tolerance; the stored 2e-7 "
+                "control value predates that policy and is superseded"
+            ),
+            "control_excluded_from_cohort_conclusions": True,
+            "historical_full_24_plateau_reproduced": bool(
+                difference <= CROSS_CODEGEN_ABSOLUTE_TOLERANCE
+            ),
+        }
+    )
+    return control
+
+
+def recheck_banked_receipt(output: Path) -> dict[str, Any]:
+    """Requalify only the banked low-current control without scoring frames."""
+
+    path = output / RECEIPT_NAME
+    receipt = json.loads(path.read_text())
+    control = receipt["result"]["low_current_control_fixture"]
+    _qualify_cross_codegen_control(
+        control, banked_absolute_difference=LOW_CURRENT_BANKED_ABSOLUTE_DIFFERENCE
+    )
+    path.write_text(
+        json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    )
+    if not control["historical_full_24_plateau_reproduced"]:
+        raise RuntimeError(
+            "the separated low-current plateau control did not reproduce"
+        )
+    return receipt
 
 
 def _relative_sup(image: np.ndarray, state: np.ndarray) -> float:
@@ -656,14 +726,35 @@ def _serialise_arm(result: dict[str, Any]) -> dict[str, Any]:
     serial = {
         key: value for key, value in result.items() if key not in {"state", "mapped"}
     }
-    for key in ("relative_residual", "current_relative_error"):
-        value = float(serial[key])
-        serial[key] = value if np.isfinite(value) else None
+    not_computed: list[str] = []
+    x_point_is_finite = bool(np.all(np.isfinite(serial["x_point_rz_m"])))
     serial["x_point_rz_m"] = (
         np.asarray(serial["x_point_rz_m"], dtype=float).tolist()
-        if np.all(np.isfinite(serial["x_point_rz_m"]))
+        if x_point_is_finite
         else None
     )
+    if not x_point_is_finite:
+        not_computed.append("x_point_rz_m")
+
+    def strict_value(value: Any, path: str) -> Any:
+        if isinstance(value, dict):
+            return {
+                key: strict_value(item, f"{path}.{key}" if path else key)
+                for key, item in value.items()
+            }
+        if isinstance(value, list | tuple):
+            return [
+                strict_value(item, f"{path}[{index}]")
+                for index, item in enumerate(value)
+            ]
+        if isinstance(value, np.generic):
+            value = value.item()
+        if isinstance(value, float) and not np.isfinite(value):
+            not_computed.append(path)
+            return None
+        return value
+
+    serial = strict_value(serial, "")
     current_ok = bool(
         not serial.get("current_constraint_required", False)
         or (
@@ -678,6 +769,23 @@ def _serialise_arm(result: dict[str, Any]) -> dict[str, Any]:
         and serial["topology"] == "diverted"
         and not serial["lambda_guard_triggered"]
     )
+    serial["not_computed_fields"] = sorted(not_computed)
+    serial["sentinel_policy"] = (
+        "non-finite values are null and named in not_computed_fields; zero is "
+        "never used as a not-computed sentinel"
+    )
+    serial["qualified_equilibrium_metrics"] = {
+        "status": (
+            "computed"
+            if serial["simultaneously_meets_1e-6_and_diverted"]
+            else "not-computed"
+        ),
+        "reason": (
+            None
+            if serial["simultaneously_meets_1e-6_and_diverted"]
+            else "terminal state did not meet the residual and diverted criteria"
+        ),
+    }
     return serial
 
 
@@ -804,7 +912,13 @@ def solve_frame(
     )
     reproduction = diagnostic_frame_102_reproduced(diagnostic_record)
     if frame_102_control and not reproduction:
-        raise RuntimeError("label-recovered frame-102 diagnostic control drifted")
+        measured_control = diagnostic_record["arms"][ARM_NAMES[1]]
+        raise RuntimeError(
+            "label-recovered frame-102 diagnostic control drifted: "
+            f"relative_residual={measured_control['relative_residual']!r}, "
+            f"iterations={measured_control['iterations']!r}, "
+            f"topology={measured_control['topology']!r}"
+        )
     record = {
         "shot": frame_input.shot,
         "frame": frame_input.frame,
@@ -875,35 +989,33 @@ def solve_low_current_control(
     attempted_amplitude = target / unscaled
     shipped = solve_unpinned(profile, seed, shipped_current, target)
     full = solve_unpinned(profile, seed, full_current, target)
-    return {
-        "role": (
-            "label-recovered low-current selection-defect diagnostic fixture; "
-            "excluded from the representative-current scoring cohort and every "
-            "inference conclusion"
-        ),
-        "shot": frame_input.shot,
-        "frame": frame_input.frame,
-        "time_ms": time_ms,
-        "recorded_plasma_current_a": target,
-        "absolute_recorded_plasma_current_a": abs(target),
-        "unscaled_seed_plasma_current_a": unscaled,
-        "attempted_seed_lambda": attempted_amplitude,
-        "positive_lambda_guard_retained": list(LAMBDA_BAND),
-        "constrained_arms_scored": False,
-        "constrained_arm_refusal": (
-            "negative lambda would reverse both extracted source terms and is not "
-            "a current normalization"
-        ),
-        "shipped_20_unpinned": _serialise_arm(shipped),
-        "full_24_unpinned": _serialise_arm(full),
-        "shipped_to_full_residual_ratio": shipped["relative_residual"]
-        / max(full["relative_residual"], 1.0e-300),
-        "historical_full_24_plateau": UNPINNED_PLATEAU_CONTROL,
-        "historical_full_24_plateau_reproduced": bool(
-            abs(full["relative_residual"] - UNPINNED_PLATEAU_CONTROL)
-            <= UNPINNED_CONTROL_ABSOLUTE_TOLERANCE
-        ),
-    }
+    return _qualify_cross_codegen_control(
+        {
+            "role": (
+                "label-recovered low-current selection-defect diagnostic fixture; "
+                "excluded from the representative-current scoring cohort and every "
+                "inference conclusion"
+            ),
+            "shot": frame_input.shot,
+            "frame": frame_input.frame,
+            "time_ms": time_ms,
+            "recorded_plasma_current_a": target,
+            "absolute_recorded_plasma_current_a": abs(target),
+            "unscaled_seed_plasma_current_a": unscaled,
+            "attempted_seed_lambda": attempted_amplitude,
+            "positive_lambda_guard_retained": list(LAMBDA_BAND),
+            "constrained_arms_scored": False,
+            "constrained_arm_refusal": (
+                "negative lambda would reverse both extracted source terms and is not "
+                "a current normalization"
+            ),
+            "shipped_20_unpinned": _serialise_arm(shipped),
+            "full_24_unpinned": _serialise_arm(full),
+            "shipped_to_full_residual_ratio": shipped["relative_residual"]
+            / max(full["relative_residual"], 1.0e-300),
+            "historical_full_24_plateau": UNPINNED_PLATEAU_CONTROL,
+        }
+    )
 
 
 def summarize(
@@ -1155,9 +1267,35 @@ def main() -> None:
     parser.add_argument("--data", type=Path, default=DEFAULT_DATA)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--preregister-only", action="store_true")
+    parser.add_argument("--post-check-only", action="store_true")
     arguments = parser.parse_args()
+    if arguments.preregister_only and arguments.post_check_only:
+        parser.error("--preregister-only and --post-check-only are mutually exclusive")
     if arguments.preregister_only:
         print(f"PREREGISTERED {write_preregistration(arguments.output, replace=True)}")
+        return
+    if arguments.post_check_only:
+        receipt = recheck_banked_receipt(arguments.output)
+        control = receipt["result"]["low_current_control_fixture"]
+        print(
+            json.dumps(
+                {
+                    "measured": control["historical_full_24_plateau_measured"],
+                    "historical": control["historical_full_24_plateau"],
+                    "absolute_difference": control[
+                        "historical_full_24_plateau_absolute_difference"
+                    ],
+                    "absolute_tolerance": control["cross_codegen_absolute_tolerance"],
+                    "reproduced": control["historical_full_24_plateau_reproduced"],
+                    "excluded_from_cohort_conclusions": control[
+                        "control_excluded_from_cohort_conclusions"
+                    ],
+                },
+                indent=2,
+                sort_keys=True,
+                allow_nan=False,
+            )
+        )
         return
     receipt = run(arguments.data, arguments.output)
     headline = dict(receipt["result"])

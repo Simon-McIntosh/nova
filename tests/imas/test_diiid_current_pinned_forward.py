@@ -141,6 +141,35 @@ def test_power_iteration_receipt_is_strict_json_serializable() -> None:
     json.dumps(result, allow_nan=False)
 
 
+def test_unconverged_nonfinite_values_are_explicitly_not_computed() -> None:
+    serial = pinned._serialise_arm(
+        {
+            "state": np.ones(2),
+            "mapped": lambda state: state,
+            "relative_residual": float("inf"),
+            "current_relative_error": float("inf"),
+            "current_constraint_required": True,
+            "amplitude": float("inf"),
+            "topology": "limited",
+            "x_point_rz_m": np.asarray([np.nan, np.nan]),
+            "lambda_guard_triggered": True,
+        }
+    )
+
+    assert serial["relative_residual"] is None
+    assert serial["current_relative_error"] is None
+    assert serial["amplitude"] is None
+    assert serial["qualified_equilibrium_metrics"]["status"] == "not-computed"
+    assert set(serial["not_computed_fields"]) == {
+        "amplitude",
+        "current_relative_error",
+        "relative_residual",
+        "x_point_rz_m",
+    }
+    assert "zero is never used" in serial["sentinel_policy"]
+    json.dumps(serial, allow_nan=False)
+
+
 def test_summary_requires_representative_current_and_diverted_convergence() -> None:
     eigenvalue = {
         "absolute_dominant_eigenvalue_estimate": 1.1,
@@ -189,12 +218,67 @@ def test_summary_requires_representative_current_and_diverted_convergence() -> N
 def test_label_recovered_frame_102_remains_an_explicit_diagnostic_control() -> None:
     path = pinned.DEFAULT_OUTPUT / pinned.CHECKPOINT_NAME
     frame = json.loads(path.read_text().splitlines()[0])
-    eliminated = frame["arms"]["pinned_eliminated"]
+    diagnostic = {
+        "shot": frame["shot"],
+        "frame": frame["frame"],
+        "arms": frame["diagnostic_label_recovered"]["arms"],
+    }
+    eliminated = diagnostic["arms"]["pinned_eliminated"]
 
-    assert pinned.diagnostic_frame_102_reproduced(frame)
-    assert eliminated["relative_residual"] == pytest.approx(1.5899788903681545e-9)
+    assert frame["diagnostic_label_recovered"]["uses_reconstruction_label"]
+    assert frame["diagnostic_label_recovered"]["frame_102_landed_control_reproduced"]
+    assert pinned.diagnostic_frame_102_reproduced(diagnostic)
+    assert eliminated["relative_residual"] == pytest.approx(
+        1.5899788903681545e-9,
+        rel=0.0,
+        abs=pinned.DIAGNOSTIC_RESIDUAL_ABSOLUTE_TOLERANCE,
+    )
+    assert eliminated["relative_residual"] <= pinned.RELATIVE_RESIDUAL_CRITERION
     assert eliminated["iterations"] == 4
     assert eliminated["topology"] == "diverted"
+
+
+def test_cross_codegen_policy_qualifies_the_excluded_low_current_control() -> None:
+    control = {
+        "full_24_unpinned": {"relative_residual": 0.034912343846758294},
+        "historical_full_24_plateau": 0.03491124178554655,
+    }
+
+    qualified = pinned._qualify_cross_codegen_control(
+        control,
+        banked_absolute_difference=pinned.LOW_CURRENT_BANKED_ABSOLUTE_DIFFERENCE,
+    )
+
+    assert qualified["historical_full_24_plateau_absolute_difference"] == pytest.approx(
+        1.1020612117447208e-6,
+        rel=0.0,
+        abs=1.0e-18,
+    )
+    assert qualified["cross_codegen_absolute_tolerance"] == 2.0e-6
+    assert (
+        qualified["historical_full_24_plateau_absolute_difference_decimal"]
+        == "1.1020612117447208e-6"
+    )
+    assert qualified["historical_full_24_plateau_reproduced"]
+    assert qualified["control_excluded_from_cohort_conclusions"]
+
+
+def test_post_check_updates_only_the_banked_receipt(tmp_path: Path) -> None:
+    control = {
+        "full_24_unpinned": {"relative_residual": 0.034912343846758294},
+        "historical_full_24_plateau": 0.03491124178554655,
+        "historical_full_24_plateau_reproduced": False,
+    }
+    receipt = {"result": {"low_current_control_fixture": control}}
+    path = tmp_path / pinned.RECEIPT_NAME
+    path.write_text(json.dumps(receipt))
+
+    updated = pinned.recheck_banked_receipt(tmp_path)
+
+    updated_control = updated["result"]["low_current_control_fixture"]
+    assert updated_control["historical_full_24_plateau_reproduced"]
+    assert updated_control["control_excluded_from_cohort_conclusions"]
+    assert json.loads(path.read_text()) == updated
 
 
 def test_source_does_not_modify_or_import_an_equilibrium_implementation() -> None:

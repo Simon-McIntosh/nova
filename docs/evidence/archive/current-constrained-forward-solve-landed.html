@@ -91,6 +91,22 @@
       <code>docs/figures/current-constrained-forward-solve/circuit-vacuum/circuit_driven_vacuum_receipt.json</code>.</figcaption>
     </figure>
 
+    <h2 id="reuse-map">Prior-art reuse map — five capability areas, one measured gap — 2026-08-22</h2>
+    <p>Run <code>r-20260822T123951456311-prior-art-reuse-map</code>, gate <strong>passed</strong>;
+    28/28 cited module, test, and artifact paths verified present; full report at
+    <code>~/.config/reckon/crew/reports/ccfs-reuse-map.md</code>.</p>
+    <table>
+      <caption>Fitness verdicts per capability area.</caption>
+      <thead><tr><th>Capability</th><th>Verdict</th><th>Load-bearing detail</th></tr></thead>
+      <tbody>
+        <tr><td>Public forward-solve seam</td><td>extend in place</td><td><code>NormalisationPolicy.DECLARED_SCALAR_CURRENT</code> and <code>NormalisationRecord(policy, amplitude, rescaled)</code> are reserved extension points; the prototype acceptance tests in <code>tests/imas/test_diiid_current_pinned_forward.py</code> name the contract to relocate.</td></tr>
+        <tr><td>Exact clipped-support I<sub>p</sub> functional</td><td>reuse directly</td><td>λ divides <code>sum(CellCurrentMoments.cell_current)</code> and must scale the integrated moments, so the flux image and the receipt cannot diverge; no second quadrature.</td></tr>
+        <tr><td>Dual-basin machinery</td><td>partial — cold-entry gap</td><td>Branch pinning, portfolio solves, warm-neighbour starts, hysteresis selection reusable; <strong>no successful cold-start continuation exists</strong> — the scalar homotopy is a banked negative (limited root), and <code>continuation.py</code> is source-domain, not solve-state.</td></tr>
+        <tr><td>DIII-D conductor-current resolver</td><td>reuse directly</td><td><code>complete_profile_current_adapter</code> / <code>resolve_diiid_currents</code> with <code>use_circuit=True</code>: label-free ordered 24-current vector, zero free parameters.</td></tr>
+        <tr><td>MAST parity reference lane</td><td>reuse as validation harness</td><td><code>efit_forward_parity_slice.py</code> + <code>parity_tolerances</code> against the frozen-six baseline (0 converged plasma roots); the constrained arm is emitted beside, never over, the banked failure.</td></tr>
+      </tbody>
+    </table>
+
   </main>
 </body>
 </html>

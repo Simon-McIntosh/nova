@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T21:34:53",
+  "updated": "2026-08-22T21:44:41",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -672,6 +672,11 @@
             "slug": "diiid-pulse-replay",
             "why_now": "No pulse has ever been replayed through the coupled forward; the recorded closed-loop coil currents supply the machine's real feedback, and the open-loop drift horizon this measures is the forecast-skill floor any assimilator must beat.",
             "done_when": "One ~100 ms diverted flat-top segment marched end-to-end with full receipts (or typed confinement loss banked as a finding); time-trace figures of marched vs labeled q95, betaN, boundary metrics and per-frame psi RMS, every row tree-stamped; drift horizon reported against a pre-registered tolerance band."
+          },
+          {
+            "slug": "ensemble-forward-seam",
+            "why_now": "The seam survey fixed the split by inventory: two tested estimator harnesses exist ambix-side running on 1-D radial physics only; the 2-D batched ensemble coupled forward, the Thomson synthesizer, and the window receipt contract are absent on both sides and are nova's half of the locked authority seam. The published throughput budget is what buys the entry's posterior sharpness.",
+            "done_when": "Batched member-preserving window evaluator green with typed per-member receipts and refused-unconverged semantics; windows-per-second throughput budget published tree-stamped (CPU + H200); Thomson synthesizer and virtual-magnetics kernels receipted for units/COCOS/support; joint twin gate run from ambix over nova 2-D forwards with stated coverage."
           }
         ]
       }
@@ -834,6 +839,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 54
+    "_version": 55
   }
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T21:24:09",
+  "updated": "2026-08-22T21:40:43",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -386,7 +386,7 @@
         "id": "moment-infra",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02aee-69e2-7670-8cc3-04b66a6973b9",
         "created": "2026-08-22"
       },
       {
@@ -512,7 +512,7 @@
         "id": "seam-scout",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02aee-9de5-7530-8e1f-b6898937f427",
         "created": "2026-08-22"
       },
       {
@@ -23478,9 +23478,137 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T192420100325-moment-infrastructure-survey",
+        "plan": "dual-basin-solve",
+        "section": "",
+        "node": "moment-infrastructure-survey",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "moment-infra",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T19:24:22Z",
+        "completed_at": "2026-08-22T19:37:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 776,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 776,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "46921c8a60a55e6c6ea060111e8e40b975d1a3f1",
+        "commits": [
+          "510ab39bc47d6214878a8492979b05b17fe7e22d"
+        ],
+        "changed_lines": {
+          "added": 390,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "Six-question basin-entry inventory: moment/constraint/seed machinery mapped with 100 file:line refs; flux-functions-only predictor, second moments, non-scalar constraints, and independent NK current state all absent; DIII-D cold start proven a labelled-flux seed",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T192420100325-moment-infrastructure-survey/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02aee-69e2-7670-8cc3-04b66a6973b9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6181376,
+            "cached_input_tokens_cumulative": 6181376,
+            "input_tokens": 6505078,
+            "input_tokens_cumulative": 6505078,
+            "output_tokens": 24338,
+            "output_tokens_cumulative": 24338,
+            "reasoning_output_tokens": 6250,
+            "reasoning_output_tokens_cumulative": 6250
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T192433207372-ambix-seam-survey",
+        "plan": "diiid-forward-onboarding",
+        "section": "",
+        "node": "ambix-seam-survey",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "seam-scout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T19:24:35Z",
+        "completed_at": "2026-08-22T19:38:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 840,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 840,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "46921c8a60a55e6c6ea060111e8e40b975d1a3f1",
+        "commits": [
+          "b3667a8e65537b4d8d9d8a0dbcfa012d0eb0d10a"
+        ],
+        "changed_lines": {
+          "added": 300,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "Cross-repo seam survey: 12 tested / 8 absent capabilities with 66 file:line refs and 7 quoted decision ids; premise-corrected the learned-vs-EnKF claim; scoped nova to the ensemble forward, deterministic kernels, and the window receipt contract",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T192433207372-ambix-seam-survey/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02aee-9de5-7530-8e1f-b6898937f427",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7399936,
+            "cached_input_tokens_cumulative": 7399936,
+            "input_tokens": 7701006,
+            "input_tokens_cumulative": 7701006,
+            "output_tokens": 32066,
+            "output_tokens_cumulative": 32066,
+            "reasoning_output_tokens": 9359,
+            "reasoning_output_tokens_cumulative": 9359
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 567
+    "_version": 571
   }
 }

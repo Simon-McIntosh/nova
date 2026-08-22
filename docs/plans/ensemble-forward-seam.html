@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="ensemble-forward-seam">
+  <meta name="plan-title" content="Ensemble Forward Seam — batched coupled forwards, deterministic kernels, twin truth">
+  <meta name="plan-summary" content="Ship nova's side of the assimilation seam: a batched member-preserving ensemble coupled forward with typed convergence receipts and a published throughput budget, the missing deterministic Thomson synthesizer and observation-operator receipts, a differentiable observation/moment map with Jacobian for constraint work, and forward-only twin truth — so the existing ambix estimators run on real two-dimensional coupled physics; no estimator, likelihood, or innovation classifier is authored nova-side">
+  <meta name="plan-status" content="pending">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="6.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint" content="S12">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="coupling-surface-contract,flux-function-forward-transport">
+  <title>Ensemble Forward Seam | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-22">
+<meta name="plan-impl" content="0.0">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The seam, surveyed, and what actually falls to nova</h2>
+
+    <p><strong>The authority split is locked and quoted:</strong> "Nova produces every
+    deterministic response kernel and fits with none of them"; "everything statistical about a
+    signal stays in Ambix"; differentiable geometry-bearing physics is nova's, anything carrying
+    a sigma, a prior, or a decision is ambix's (ambix flux-function-state-interface, the seam
+    litmus). The cross-repo survey (<code>scripts/assimilation_seam_survey/report.md</code>,
+    20 capabilities, 12 tested / 8 absent) then settled the feasibility question the owner
+    raised — is a nova-side ensemble-Kalman demonstration useful before the ambix learned
+    assimilator? — by inventory rather than doctrine: ambix already has the estimators. Its
+    <code>NovaEnsembleEstimator</code> is a tested twin/assimilation harness (46 tests, receipts
+    on one, five and eight H200s) and <code>sequential_da</code> a tested rank-6 localized
+    ψ(ρ) filter; the challenge entry specifies a windowed iterated ensemble smoother over
+    ~12–16 parameters per window admitting only converged members. What every one of those runs
+    on today is at most <em>one-dimensional radial current diffusion</em> — the harness's own
+    plan says its equilibrium product is a radial flux history, not a two-dimensional
+    Grad–Shafranov map. The feasibility demonstration is therefore not a third estimator; it is
+    promoting the physics under the existing estimators to nova's real coupled forwards. Nova
+    ships the forward, the kernels, and the truth; ambix runs the filter it already owns.</p>
+
+    <h2 id="s2">§2 — The batched ensemble coupled forward, and the published throughput budget</h2>
+
+    <p>A member-preserving, batched evaluator of coupled transport–equilibrium windows: accept
+    ambix member payloads (per-slice state at the seam is ambix's <code>FluxFunctionState</code>,
+    consumed, never recreated), actuator waveforms and geometry; advance every member through the
+    coupled window; return member-tagged fields, transport state, topology class, moment and
+    conservation ledgers, and the typed convergence receipt per member — with the entry doctrine's
+    admission rule enforced by construction: an unconverged member is refused typed, never
+    silently used. The equilibrium portfolio already batches under vmap; the window loop does not;
+    this section closes that gap. <strong>The named deliverable beside the code is the throughput
+    budget:</strong> the ambix entry sets ensemble sizes "by the measured throughput budget nova
+    publishes", so this section publishes windows-per-second and members-per-window, batched, CPU
+    and H200, tree-stamped — the number that buys posterior sharpness.</p>
+
+    <h2 id="s3">§3 — Observation-operator receipts: the Thomson synthesizer and virtual magnetics</h2>
+
+    <p>The survey's one important deterministic hole, absent on <em>both</em> sides: no function
+    maps (solved flux map, T<sub>e</sub>(ψ<sub>N</sub>), n<sub>e</sub>(ψ<sub>N</sub>), chord
+    geometry) to predicted Thomson signals — ambix's four Thomson operators are measurement-side
+    only. That synthesizer is exactly the seam litmus's nova side: pure, geometry-bearing,
+    differentiable, receipted for units, COCOS, interpolation support and numerical error. Nova
+    accepts the T<sub>e</sub>/n<sub>e</sub> flux functions as explicit typed arrays without
+    claiming the durable state schema (an ambix contract decision, registered on their side).
+    Beside it, virtual-magnetics kernels (flux loops, probes) at declared sensor geometry — nearly
+    free through the biot operators — for machines that provide magnetics; the challenge machines
+    do not, so Thomson plus net current is the observation vector that matters first.</p>
+
+    <h2 id="s4">§4 — The constraint seam: observation and moment maps with Jacobians</h2>
+
+    <p>The owner's question — can Thomson constrain the plasma the way the net current now does? —
+    splits along the seam: the isoflux <em>claim</em> and its confidence are ambix's (their
+    pedestal-foot detector and calibration own that); the deterministic consequence of a
+    <em>trusted</em> pin is nova's. This section exposes the differentiable Thomson observation
+    map and the current-moment map with Jacobians, and accepts typed, uncertainty-stated pin sets
+    (isoflux-class from ambix, moment-class from <code>moment-conditioned-basin-entry</code> §2)
+    into the solve's constraint machinery, measuring basin restriction on the same pre-registered
+    convergence baselines the moment plan uses (1/6 frozen MAST, 2/5 DIII-D cold). Any likelihood,
+    prior weighting, nuisance fit or posterior update stays ambix-side.</p>
+
+    <h2 id="s5">§5 — Forward-only twin truth, and the joint feasibility gate</h2>
+
+    <p>Nova generates deterministic twin truth: a marched coupled trajectory with known flux
+    functions and drives, plus counterfactual forwards and synthetic observations through §3's
+    kernels, all receipted. The feasibility gate is joint and explicitly forward-only on nova's
+    side: the <em>existing</em> ambix estimator, pointed at nova's two-dimensional ensemble
+    forward through the §2 seam, recovers the windowed low-dimensional state (the ~12–16
+    parameters the entry names) from synthetic Thomson plus net current within stated coverage —
+    run from ambix, scored in ambix, with nova contributing truth, forwards and receipts. No
+    second production estimator is created beside <code>NovaEnsembleEstimator</code> and
+    <code>sequential_da</code>; if the ambix side prefers to wire its DIII-D windowed smoother
+    first, the twin consumes that instead — the nova deliverables are identical either way.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="estimator-placement" data-choice="physics-here-filter-there" data-by="Simon McIntosh" data-when="2026-08-22T19:45:00+00:00">
+    <p class="r-dec-q">Does nova implement an ensemble-Kalman filter as a feasibility demonstration, or ship the seam the existing ambix estimators consume?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="physics-here-filter-there">nova ships the 2-D ensemble forward, kernels, receipts and twin truth; the existing ambix estimators run the filter</button>
+      <button class="r-opt" data-value="nova-demo-enkf">nova authors its own ensemble-Kalman demonstration beside the physics</button>
+      </p>
+    <p class="r-dec-rat">Owner challenge 2026-08-22 answered by the seam survey inventory rather
+    than doctrine: two tested estimator harnesses already exist ambix-side and the survey's scope
+    note bans a third; what has never existed is the two-dimensional coupled forward under them.
+    The feasibility demonstration the owner wants is the joint twin gate of §5 — real physics
+    under the real filter — which needs no new estimator anywhere.</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-efs-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship ensemble-forward-seam">
+    <h4 class="r-fu-title">Land §2 and §3 first; §4 follows the moment plan's confidence study; §5 closes jointly</h4>
+    <div class="r-fu-body"><p>§2 (batched member/window evaluator plus the published throughput
+    budget) and §3 (Thomson synthesizer plus virtual-magnetics receipts) are independent and
+    dispatch in parallel once the coupling-surface contract lands. §4 waits on
+    moment-conditioned-basin-entry §2 for the moment-pin classes. §5's joint twin gate is
+    coordinated with the ambix side and consumes whichever of their estimators they nominate;
+    nova's deliverables are unchanged either way.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship ensemble-forward-seam</pre>
+    </article>
+</section>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<h2><span class="sec">§</span> Comments</h2>
+</section>
+
+  </main>
+</body>
+</html>

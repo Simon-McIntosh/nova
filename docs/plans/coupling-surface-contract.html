@@ -18,6 +18,7 @@
   <meta name="plan-sprint" content="S12">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="flux-function-forward-transport">
+  <meta name="plan-blocks" content="ensemble-forward-seam">
   <title>Coupling Surface Contract | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -88,6 +89,16 @@
     residuals, gating and all-field norms, damping events, ledger closures) unchanged in content
     and provenance-stamped by the contract version. No physics changes; the gate composition and
     adaptive damping stay exactly as the two locked owner decisions state them.</p>
+
+    <p><strong>The boundary the cross-repo survey fixed (2026-08-22):</strong> the per-slice,
+    per-member state at the seam is ambix's <code>FluxFunctionState</code> — tested, immutable,
+    COCOS-provenanced — and nova consumes it rather than recreating it. What ambix does NOT have,
+    in code or contract, is the time-dependent piece: its interface plan specifies "time-varying
+    coordinate maps, interpolation policy and convergence receipts containing iterations,
+    contraction estimate, exit residual and damping" in prose, with no matching type anywhere in
+    <code>imas_ambix</code>. The <code>CouplingState</code> is exactly that missing piece, defined
+    on nova's side of the litmus (deterministic, geometry-bearing, no sigma), and its exported
+    schema is the adapter contract the ambix consumer binds.</p>
 
     <p><strong>Done when</strong> the coupled-window suite passes unchanged on the refactored
     exchange, the gentle demonstration window reproduces its banked receipt (4 iterations, gating

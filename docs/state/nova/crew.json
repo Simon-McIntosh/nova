@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T14:47:37",
+  "updated": "2026-08-22T14:59:16",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -22302,9 +22302,137 @@
           "previous_run_id": "r-20260821T210817771028-prior-art-reuse-map",
           "root_run_id": "r-20260821T210817771028-prior-art-reuse-map"
         }
+      },
+      {
+        "run_id": "r-20260822T122128731710-convergence-composition-study",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a710",
+        "node": "convergence-composition-study",
+        "role": "implement",
+        "spec_level": "",
+        "member": "transport-pint",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T12:21:31Z",
+        "completed_at": "2026-08-22T12:59:01Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2250,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2250,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "5714aac8194d609512e41e44c393b6d7cf7190d1",
+        "commits": [
+          "57b48ee4f63b9fc08ac9936828f72b280792d46f"
+        ],
+        "changed_lines": {
+          "added": 1010,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "three measured answers: the contraction shift is attributed by synthetic-tree bisection to the near-axis shape landing (band-only 0.5376 versus band-plus-shape 0.6406, +0.103); every gentle-window iteration is gated by triangularity, with a shape-excluded stopping gate converging at 9 iterations versus 14 and a 0.25 weighting at 11, shape still exchanged in all variants; damping 1.0 converges in 6 iterations at 108 s versus 14 at 233 s for the 0.5 default, a 2.15x wall gain; Anderson rejects the host-bearing exchange without an unauthorized adapter. Every tsv row carries its tree SHA; no product file changed. Two owner decisions surfaced: the convergence-norm policy and the damping default",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T122128731710-convergence-composition-study/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0296b-4a07-7e02-b5cf-b34b1b6ead02",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 28263936,
+            "cached_input_tokens_cumulative": 28263936,
+            "input_tokens": 28569059,
+            "input_tokens_cumulative": 28569059,
+            "output_tokens": 47463,
+            "output_tokens_cumulative": 47463,
+            "reasoning_output_tokens": 13844,
+            "reasoning_output_tokens_cumulative": 13844
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T125011546078-fixed-wiring-current-rewire",
+        "plan": "current-constrained-forward-solve",
+        "section": "\u00a73",
+        "node": "fixed-wiring-current-rewire",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T12:50:14Z",
+        "completed_at": "2026-08-22T12:58:30Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 496,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 496,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "d6fff4fc6cf2f7020d6de4fe8e626c1f9adb52d2",
+        "commits": [
+          "dea730511f076e662736a97c33d5c300545da6e4"
+        ],
+        "changed_lines": {
+          "added": 192,
+          "removed": 42,
+          "files": 2
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T125011546078-fixed-wiring-current-rewire/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01bd8-2268-7ff3-bcd9-eb3700561ec8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4055040,
+            "cached_input_tokens_cumulative": 183602560,
+            "input_tokens": 4450009,
+            "input_tokens_cumulative": 189072228,
+            "output_tokens": 15904,
+            "output_tokens_cumulative": 530656,
+            "reasoning_output_tokens": 4923,
+            "reasoning_output_tokens_cumulative": 149207
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 532
+    "_version": 534
   }
 }

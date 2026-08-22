@@ -107,6 +107,21 @@
       </tbody>
     </table>
 
+    <h2 id="fixed-wiring-rewire">Fixed-wiring rewire — inference arms consume the label-free resolver — 2026-08-22</h2>
+    <p>Run <code>r-20260822T125011546078-fixed-wiring-current-rewire</code>, gate <strong>passed</strong>;
+    commit <code>dea73051</code> (merge <code>48ea4a1c</code>); 12/12 targeted tests; ruff exit 0;
+    496 s wall.</p>
+    <p>The scored arms of <code>benchmarks/diiid_current_pinned_forward.py</code> now consume
+    <code>complete_profile_current_adapter</code> with <code>use_circuit=True</code>: all 24
+    response-ordered conductor currents come from the description-owned fixed wiring with
+    <strong>zero free current slots</strong>, and every frame receipt carries the current authority,
+    response order, prescribed currents, fixed-relation uncertainties, and the response receipt.
+    Label-recovered currents survive only under <code>diagnostic_label_recovered</code> with
+    <code>uses_reconstruction_label=true</code>, excluded from inference conclusions. The historical
+    preregistration was retained byte-for-byte, and the frame-102 diagnostic is enforced against
+    residual 1.5899788903681545e-09 at relative tolerance 1e-5, exactly 4 iterations, diverted
+    topology.</p>
+
   </main>
 </body>
 </html>

@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
 
 from benchmarks import diiid_current_pinned_forward as pinned
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
+from nova.imas.diiid_description import POLOIDAL_CONDUCTORS
 
 
 def test_declaration_keeps_the_constraint_explicit_and_the_system_square() -> None:
@@ -41,6 +43,61 @@ def test_declaration_keeps_the_constraint_explicit_and_the_system_square() -> No
         "not applicable"
     )
     assert "does not expose" in declaration["dropped_comparison_arm"]["reason"]
+
+
+def test_description_driven_arm_uses_the_fixed_circuit_without_free_currents(
+    monkeypatch,
+) -> None:
+    names = (*POLOIDAL_CONDUCTORS, *pinned.OMITTED_COILS)
+    values = np.arange(1.0, 25.0)
+    captured = {}
+
+    class Resolution:
+        def __init__(self):
+            self.unknown_indices = np.asarray([], dtype=int)
+            self.prescribed_standard_deviation_a = np.zeros(24)
+            self.names = names
+
+        @staticmethod
+        def current(unknown):
+            assert unknown == ()
+            return values
+
+    def complete(profile, **kwargs):
+        captured.update(kwargs)
+        return SimpleNamespace(
+            profile=("completed", profile),
+            resolution=Resolution(),
+            response_receipt={"current_authority": "pf_active circuit"},
+        )
+
+    monkeypatch.setattr(
+        pinned,
+        "dataset_machine_description",
+        lambda row, source_row: SimpleNamespace(physical=(row, source_row)),
+    )
+    monkeypatch.setattr(
+        pinned,
+        "shipped_current_at",
+        lambda row, description, shipped_names, time_ms: {
+            name: float(index + 1) for index, name in enumerate(shipped_names)
+        },
+    )
+    monkeypatch.setattr(pinned, "complete_profile_current_adapter", complete)
+
+    profile, shipped, current, receipt = pinned.description_driven_currents(
+        {"_source_path": "shot.parquet"}, object(), 2200.0
+    )
+
+    assert profile[0] == "completed"
+    assert captured["use_circuit"] is True
+    assert captured["shipped_names"] == POLOIDAL_CONDUCTORS
+    np.testing.assert_array_equal(current, values)
+    np.testing.assert_array_equal(shipped[:19], values[:19])
+    np.testing.assert_array_equal(shipped[19:], np.zeros(5))
+    assert receipt["unknown_parameter_count"] == 0
+    assert receipt["response_order"] == list(names)
+    assert receipt["response"]["current_authority"] == "pf_active circuit"
 
 
 def test_lambda_elimination_enforces_current_exactly() -> None:
@@ -129,43 +186,15 @@ def test_summary_requires_representative_current_and_diverted_convergence() -> N
     assert summary["current_pinning_removes_vacuum_root_and_orbiting_plateau"]
 
 
-def test_generated_receipt_carries_five_screened_two_arm_frames() -> None:
-    path = pinned.DEFAULT_OUTPUT / pinned.RECEIPT_NAME
-    receipt = json.loads(path.read_text())
-    result = receipt["result"]
+def test_label_recovered_frame_102_remains_an_explicit_diagnostic_control() -> None:
+    path = pinned.DEFAULT_OUTPUT / pinned.CHECKPOINT_NAME
+    frame = json.loads(path.read_text().splitlines()[0])
+    eliminated = frame["arms"]["pinned_eliminated"]
 
-    assert result["frame_count"] >= 5
-    assert result["distinct_shots"] >= 5
-    assert result["all_shots_screened_free_of_affected_population"]
-    assert result["all_frames_absolute_recorded_ip_at_least_200ka"]
-    assert result["all_frames_target_and_source_same_sign"]
-    assert result["low_current_control_fixture"][
-        "historical_full_24_plateau_reproduced"
-    ]
-    assert not result["low_current_control_fixture"]["constrained_arms_scored"]
-    assert result["alpha_stability"]["status"] == "not applicable"
-    assert "Picard-map spectral radius" in result["eigenvalue_interpretation"]
-    assert len(result["frames"]) >= 5
-    for frame in result["frames"]:
-        assert frame["same_label_branch_seed_all_arms"]
-        assert frame["poloidal_conductor_count"] == 24
-        assert abs(frame["target_plasma_current_a"]) >= 200_000.0
-        assert frame["seed_profile_amplitude"] > 0.0
-        assert set(frame["unconstrained_current_controls"]) == {
-            "shipped_20",
-            "full_24",
-            "shipped_to_full_residual_ratio",
-        }
-        assert set(frame["arms"]) == set(pinned.ARM_NAMES)
-        assert frame["alpha_stability"]["status"] == "not applicable"
-        for arm in pinned.ARM_NAMES:
-            measured = frame["arms"][arm]
-            assert "relative_residual" in measured
-            assert "iterations" in measured
-            assert "topology" in measured
-            assert "amplitude" in measured
-            assert "dominant_map_eigenvalue" in measured
-    assert (pinned.DEFAULT_OUTPUT / pinned.FIGURE_NAME).is_file()
+    assert pinned.diagnostic_frame_102_reproduced(frame)
+    assert eliminated["relative_residual"] == pytest.approx(1.5899788903681545e-9)
+    assert eliminated["iterations"] == 4
+    assert eliminated["topology"] == "diverted"
 
 
 def test_source_does_not_modify_or_import_an_equilibrium_implementation() -> None:

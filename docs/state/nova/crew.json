@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T08:52:04",
+  "updated": "2026-08-22T09:33:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -20531,9 +20531,123 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T064317675696-target-composition-oracle",
+        "plan": "coil-circuit-discovery",
+        "section": "\u00a73",
+        "node": "target-composition-oracle",
+        "role": "implement",
+        "member": "circuit-adjudicator",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T06:43:20Z",
+        "completed_at": "2026-08-22T07:21:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2277,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2277,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "a08aa07365507804eb2fc9492bb08e904d931d5b",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "Not integrated: review refuted the cohort verdict on raw data \u2014 magnetics_time shares the millisecond coordinate of efit_times, so the added /1000 conversion sampled shipped currents near zero time and manufactured the 0.612 Wb pre-fit residual and mixed-sign 41-166 kA fitted currents; the endpoint-clamp claim and its cross-study blast radius are retired, the seven earlier helper callers pass milliseconds correctly, and the oracle remained partially circular by composing its label downstream of the read path",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T064317675696-target-composition-oracle/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0262f-830e-7402-92b6-cffc3106b047",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 28263040,
+            "cached_input_tokens_cumulative": 74274048,
+            "input_tokens": 28444486,
+            "input_tokens_cumulative": 75586452,
+            "output_tokens": 32957,
+            "output_tokens_cumulative": 173643,
+            "reasoning_output_tokens": 6508,
+            "reasoning_output_tokens_cumulative": 42650
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T072254806886-time-base-audit-review",
+        "plan": "coil-circuit-discovery",
+        "section": "\u00a73",
+        "node": "time-base-audit-review",
+        "role": "implement",
+        "member": "circuit-reviewer",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T07:23:03Z",
+        "completed_at": "2026-08-22T07:31:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 536,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 536,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "80a4aa2b67a656af5ae25cbfb3dfaa2ff66809f1",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T072254806886-time-base-audit-review/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0264c-544b-73b2-aba0-4bf197b6375c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1948928,
+            "cached_input_tokens_cumulative": 13113728,
+            "input_tokens": 2278177,
+            "input_tokens_cumulative": 13980070,
+            "output_tokens": 15528,
+            "output_tokens_cumulative": 74325,
+            "reasoning_output_tokens": 4044,
+            "reasoning_output_tokens_cumulative": 21694
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 499
+    "_version": 501
   }
 }

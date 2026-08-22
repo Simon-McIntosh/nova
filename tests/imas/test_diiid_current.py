@@ -13,7 +13,7 @@ from nova.equilibrium.conductor_current import (
     UnknownCurrentPrior,
     solve_conductor_currents,
 )
-from nova.imas import diiid_current
+from nova.imas import diiid_current, diiid_description
 from nova.imas.diiid_description import (
     CIRCUIT_DRIVEN_CONDUCTORS,
     PF_ACTIVE_CIRCUIT,
@@ -51,11 +51,11 @@ def test_diiid_tiers_carry_fit_once_values_and_relation_uncertainty() -> None:
     assert resolution.names[:19] == POLOIDAL_CONDUCTORS
     assert resolution.unknown_names == ()
     expected = {
-        "ECOILB": 20_009.18,
-        "E567UP": 10_231.29,
-        "E567DN": 10_016.57,
-        "E89UP": 10_456.95,
-        "E89DN": 10_456.24,
+        "ECOILB": 20_000.0,
+        "E567UP": 10_000.0,
+        "E567DN": 10_000.0,
+        "E89UP": 10_456.947569496173,
+        "E89DN": 10_456.240764323717,
     }
     for drive in PF_ACTIVE_CIRCUIT.drives:
         index = by_name[drive.conductor]
@@ -78,7 +78,7 @@ def test_circuit_map_reconstructs_all_unshipped_currents_from_ecoila() -> None:
     assert tuple(reconstructed) == CIRCUIT_DRIVEN_CONDUCTORS
     np.testing.assert_allclose(
         list(reconstructed.values()),
-        [20_009.18, 10_231.29, 10_016.57, 10_456.95, 10_456.24],
+        [20_000.0, 10_000.0, 10_000.0, 10_456.947569496173, 10_456.240764323717],
         rtol=0.0,
         atol=1.0e-10,
     )
@@ -93,21 +93,36 @@ def test_circuit_map_reconstructs_all_unshipped_currents_from_ecoila() -> None:
 
 
 def test_banked_circuit_receipt_matches_runtime_calibration() -> None:
-    path = (
-        Path(__file__).parents[2]
-        / "docs/figures/coil-circuit-discovery/pf_active_circuit_receipt.json"
+    root = Path(__file__).parents[2]
+    receipt = json.loads(
+        (
+            root / "docs/figures/coil-circuit-discovery/pf_active_circuit_receipt.json"
+        ).read_text()
     )
-    receipt = json.loads(path.read_text())
-    banked = receipt["fit"]["drives"]
+    ensemble = json.loads(
+        (
+            root
+            / "docs/figures/coil-circuit-discovery"
+            / "ensemble_relation_assessment_receipt.json"
+        ).read_text()
+    )
+    frame_receipt = json.loads(
+        (root / ensemble["inputs"]["fitted_current"]["path"]).read_text()
+    )
+    reproduced = diiid_description.adjudicate_circuit_wiring(
+        frame_receipt["ensemble_ready_fitted_current_table"], ensemble
+    )
+    banked = receipt["adjudication"]["drives"]
 
     assert receipt["reconstruction_fixture"]["complete_response_current_count"] == 24
     assert receipt["reconstruction_fixture"]["free_current_count_with_circuit"] == 0
-    assert [row["gain"] for row in banked] == [
+    assert reproduced == tuple(drive.wiring for drive in PF_ACTIVE_CIRCUIT.drives)
+    assert [row["effective_gain"] for row in banked] == [
         drive.gain for drive in PF_ACTIVE_CIRCUIT.drives
     ]
-    assert [row["residual_rms_fraction"] for row in banked] == [
-        drive.uncertainty.residual_rms_fraction for drive in PF_ACTIVE_CIRCUIT.drives
-    ]
+    for row, drive in zip(banked, PF_ACTIVE_CIRCUIT.drives, strict=True):
+        assert row["wiring"] == drive.wiring.as_record()
+        assert row["uncertainty"] == drive.uncertainty.as_record()
     assert "nearly degenerate" in " ".join(receipt["caveats"])
     assert "1 of 60" in " ".join(receipt["caveats"])
 

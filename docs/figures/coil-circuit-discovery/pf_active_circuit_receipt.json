@@ -4,7 +4,7 @@
     "competition_channels": "kA.turn",
     "response_operator_currents": "A.turn",
     "conversion": 1000.0,
-    "statement": "Multiply each shipped fusion-coil channel by 1000 exactly once; the fitted drive gains are dimensionless ampere-turn ratios."
+    "statement": "Multiply each shipped fusion-coil channel by 1000 exactly once; wiring ratios and named systematic corrections are dimensionless ampere-turn ratios."
   },
   "supply": {
     "name": "DIII-D ohmic-heating supply",
@@ -19,16 +19,8 @@
     "identifier": "diiid_effective_ohmic_circuit",
     "source_conductor": "ECOILA",
     "source_unit": "A.turn",
-    "topology": "one logical supply in a closed series record with ECOILA and all five calibrated conductor drives",
-    "component_order": [
-      "diiid_ohmic_supply",
-      "ECOILA",
-      "ECOILB",
-      "E567UP",
-      "E567DN",
-      "E89UP",
-      "E89DN"
-    ],
+    "topology": "one logical supply in a closed series record with ECOILA and all five conductor drives",
+    "component_order": ["diiid_ohmic_supply", "ECOILA", "ECOILB", "E567UP", "E567DN", "E89UP", "E89DN"],
     "connections": [
       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
       [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -39,89 +31,57 @@
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0]
     ]
   },
-  "fit": {
-    "method": "fit once from full-grid Tikhonov label-flux regressions",
-    "corpus": {
-      "frames": 60,
-      "shots": 20
-    },
+  "adjudication": {
+    "method": "through-origin OLS with small-sample corrected shot-cluster-robust 95 percent confidence intervals using 60 frames in 20 shots",
+    "frame_table": "docs/figures/coil-circuit-discovery/grid_residual_current_regression_receipt.json#ensemble_ready_fitted_current_table",
+    "ensemble_receipt": "docs/figures/coil-circuit-discovery/ensemble_relation_assessment_receipt.json",
+    "tested_ratios": [0.125, 0.14583333333333334, 0.8571428571428571, 1.0, 1.1666666666666667, 2.0, 6.857142857142857, 8.0],
     "drives": [
       {
         "conductor": "ECOILB",
-        "gain": 2.000918,
-        "leave_one_shot_out_r_squared": 0.9933483532119266,
-        "leave_one_shot_out_rmse_a_turn": 4026.405742311334,
-        "leave_one_shot_out_median_absolute_error_a_turn": 1567.41255627204,
-        "residual_rms_a_turn": 3886.882865339553,
-        "residual_sample_standard_deviation_a_turn": 3906.7678929572608,
-        "residual_rms_fraction": 0.07748542028108989
+        "effective_gain": 2.0,
+        "wiring": {"fitted_slope": 2.0009180770924457, "cluster_robust_standard_error": 0.028551398014115485, "confidence_interval": [1.9411593142619163, 2.060676839922975], "tested_ratios": [0.125, 0.14583333333333334, 0.8571428571428571, 1.0, 1.1666666666666667, 2.0, 6.857142857142857, 8.0], "wiring_ratio": 2.0, "classification": "snapped-exact", "fitted_deviation": 0.0009180770924457349, "systematic": null},
+        "uncertainty": {"leave_one_shot_out_r_squared": 0.9933483532119266, "leave_one_shot_out_rmse_a_turn": 4026.405742311334, "leave_one_shot_out_median_absolute_error_a_turn": 1567.41255627204, "residual_rms_a_turn": 3886.882865339553, "residual_sample_standard_deviation_a_turn": 3906.7678929572608, "residual_rms_fraction": 0.07748542028108989}
       },
       {
         "conductor": "E567UP",
-        "gain": 1.023129,
-        "leave_one_shot_out_r_squared": 0.9556677196797801,
-        "leave_one_shot_out_rmse_a_turn": 5491.813833823248,
-        "leave_one_shot_out_median_absolute_error_a_turn": 2924.3729372139474,
-        "residual_rms_a_turn": 5329.089678101602,
-        "residual_sample_standard_deviation_a_turn": 4471.399220840082,
-        "residual_rms_fraction": 0.20400807944058003
+        "effective_gain": 1.0,
+        "wiring": {"fitted_slope": 1.0231285862990276, "cluster_robust_standard_error": 0.036427631398339336, "confidence_interval": [0.946884677537184, 1.0993724950608712], "tested_ratios": [0.125, 0.14583333333333334, 0.8571428571428571, 1.0, 1.1666666666666667, 2.0, 6.857142857142857, 8.0], "wiring_ratio": 1.0, "classification": "snapped-exact", "fitted_deviation": 0.023128586299027587, "systematic": null},
+        "uncertainty": {"leave_one_shot_out_r_squared": 0.9556677196797801, "leave_one_shot_out_rmse_a_turn": 5491.813833823248, "leave_one_shot_out_median_absolute_error_a_turn": 2924.3729372139474, "residual_rms_a_turn": 5329.089678101602, "residual_sample_standard_deviation_a_turn": 4471.399220840082, "residual_rms_fraction": 0.20400807944058003}
       },
       {
         "conductor": "E567DN",
-        "gain": 1.001657,
-        "leave_one_shot_out_r_squared": 0.9420419098721444,
-        "leave_one_shot_out_rmse_a_turn": 6197.232415115648,
-        "leave_one_shot_out_median_absolute_error_a_turn": 3896.911882108876,
-        "residual_rms_a_turn": 6032.300818544522,
-        "residual_sample_standard_deviation_a_turn": 4912.7339875007765,
-        "residual_rms_fraction": 0.23424237119539848
+        "effective_gain": 1.0,
+        "wiring": {"fitted_slope": 1.0016568244749882, "cluster_robust_standard_error": 0.039088807917220636, "confidence_interval": [0.9198430092460994, 1.083470639703877], "tested_ratios": [0.125, 0.14583333333333334, 0.8571428571428571, 1.0, 1.1666666666666667, 2.0, 6.857142857142857, 8.0], "wiring_ratio": 1.0, "classification": "snapped-exact", "fitted_deviation": 0.001656824474988161, "systematic": null},
+        "uncertainty": {"leave_one_shot_out_r_squared": 0.9420419098721444, "leave_one_shot_out_rmse_a_turn": 6197.232415115648, "leave_one_shot_out_median_absolute_error_a_turn": 3896.911882108876, "residual_rms_a_turn": 6032.300818544522, "residual_sample_standard_deviation_a_turn": 4912.7339875007765, "residual_rms_fraction": 0.23424237119539848}
       },
       {
         "conductor": "E89UP",
-        "gain": 1.045695,
-        "leave_one_shot_out_r_squared": 0.9877483760442158,
-        "leave_one_shot_out_rmse_a_turn": 2817.419073607406,
-        "leave_one_shot_out_median_absolute_error_a_turn": 2093.257434373751,
-        "residual_rms_a_turn": 2793.614101796187,
-        "residual_sample_standard_deviation_a_turn": 1882.3322191385087,
-        "residual_rms_fraction": 0.10627969377421093
+        "effective_gain": 1.0456947569496173,
+        "wiring": {"fitted_slope": 1.0456947569496173, "cluster_robust_standard_error": 0.010163742188341523, "confidence_interval": [1.0244218000666139, 1.0669677138326208], "tested_ratios": [0.125, 0.14583333333333334, 0.8571428571428571, 1.0, 1.1666666666666667, 2.0, 6.857142857142857, 8.0], "wiring_ratio": 1.0, "classification": "integer-plus-systematic", "fitted_deviation": 0.04569475694961733, "systematic": {"name": "end_loop_bundle_normalisation", "measured_deviation": 0.04569475694961733, "mutual_agreement": "E89UP and E89DN fitted deviations agree within 7.06805172457e-05", "suspect_mechanism": "turn-count or normalisation of the paired 6-turn and 7-turn end-loop bundles"}},
+        "uncertainty": {"leave_one_shot_out_r_squared": 0.9877483760442158, "leave_one_shot_out_rmse_a_turn": 2817.419073607406, "leave_one_shot_out_median_absolute_error_a_turn": 2093.257434373751, "residual_rms_a_turn": 2793.614101796187, "residual_sample_standard_deviation_a_turn": 1882.3322191385087, "residual_rms_fraction": 0.10627969377421093}
       },
       {
         "conductor": "E89DN",
-        "gain": 1.045624,
-        "leave_one_shot_out_r_squared": 0.9851155287064202,
-        "leave_one_shot_out_rmse_a_turn": 3099.582545883437,
-        "leave_one_shot_out_median_absolute_error_a_turn": 2543.855213386234,
-        "residual_rms_a_turn": 3067.5679718120577,
-        "residual_sample_standard_deviation_a_turn": 1959.9950004145705,
-        "residual_rms_fraction": 0.11657434222566553
+        "effective_gain": 1.0456240764323717,
+        "wiring": {"fitted_slope": 1.0456240764323717, "cluster_robust_standard_error": 0.012211304685183416, "confidence_interval": [1.0200655219905739, 1.0711826308741694], "tested_ratios": [0.125, 0.14583333333333334, 0.8571428571428571, 1.0, 1.1666666666666667, 2.0, 6.857142857142857, 8.0], "wiring_ratio": 1.0, "classification": "integer-plus-systematic", "fitted_deviation": 0.04562407643237165, "systematic": {"name": "end_loop_bundle_normalisation", "measured_deviation": 0.04562407643237165, "mutual_agreement": "E89UP and E89DN fitted deviations agree within 7.06805172457e-05", "suspect_mechanism": "turn-count or normalisation of the paired 6-turn and 7-turn end-loop bundles"}},
+        "uncertainty": {"leave_one_shot_out_r_squared": 0.9851155287064202, "leave_one_shot_out_rmse_a_turn": 3099.582545883437, "leave_one_shot_out_median_absolute_error_a_turn": 2543.855213386234, "residual_rms_a_turn": 3067.5679718120577, "residual_sample_standard_deviation_a_turn": 1959.9950004145705, "residual_rms_fraction": 0.11657434222566553}
       }
     ]
   },
   "reconstruction_fixture": {
     "shipped_ecoila_a_turn": 10000.0,
-    "unshipped_current_order": [
-      "ECOILB",
-      "E567UP",
-      "E567DN",
-      "E89UP",
-      "E89DN"
-    ],
-    "unshipped_currents_a_turn": [
-      20009.18,
-      10231.29,
-      10016.57,
-      10456.95,
-      10456.24
-    ],
+    "unshipped_current_order": ["ECOILB", "E567UP", "E567DN", "E89UP", "E89DN"],
+    "unshipped_currents_a_turn": [20000.0, 10000.0, 10000.0, 10456.947569496173, 10456.240764323717],
     "complete_response_current_count": 24,
     "free_current_count_with_circuit": 0,
     "free_current_count_when_declined": 3
   },
   "caveats": [
-    "ECOILB and the shipped ECOILA response are nearly degenerate; the factor-two ECOILB gain is an effective calibration, not a physical turn count.",
+    "ECOILB and the shipped ECOILA response are nearly degenerate; exact factor-two wiring means the co-located response carries both branches.",
     "The fitted targets use EFIT label flux during calibration. Runtime current reconstruction does not read an EFIT or recovered-label artifact.",
     "Post-fit flux closure passes 1 of 60 frames against the 54 of 60 closure rule, so the circuit does not explain all labelled flux.",
-    "The gains are applied to competition-channel ampere-turns after the single kA.turn to A.turn conversion."
+    "The E89 pair carries integer wiring plus a named shared end-loop bundle normalisation systematic; it is not represented as an unexplained fitted gain.",
+    "The drives are applied to competition-channel ampere-turns after the single kA.turn to A.turn conversion."
   ]
 }

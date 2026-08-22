@@ -97,12 +97,22 @@ def test_pf_active_supply_and_circuit_round_trip_without_losing_uncertainty() ->
     ]
     assert np.asarray(circuit.connections).shape == (7, 14)
     assert [drive.gain for drive in circuit.drives] == [
-        2.000918,
-        1.023129,
-        1.001657,
-        1.045695,
-        1.045624,
+        2.0,
+        1.0,
+        1.0,
+        1.0456947569496173,
+        1.0456240764323717,
     ]
+    assert [drive.wiring.classification for drive in circuit.drives] == [
+        "snapped-exact",
+        "snapped-exact",
+        "snapped-exact",
+        "integer-plus-systematic",
+        "integer-plus-systematic",
+    ]
+    assert [drive.wiring.wiring_ratio for drive in circuit.drives] == [2, 1, 1, 1, 1]
+    assert all(drive.wiring.systematic is None for drive in circuit.drives[:3])
+    assert all(drive.wiring.systematic is not None for drive in circuit.drives[3:])
     assert all(drive.uncertainty.residual_rms_a_turn > 0.0 for drive in circuit.drives)
     assert "nearly degenerate" in " ".join(circuit.caveats)
     assert "closure passes 1 of 60" in " ".join(circuit.caveats)

@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
 <meta name="plan-impl" content="0.0">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -127,7 +128,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-mcbe-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship moment-conditioned-basin-entry">
+<article class="r-fu" data-id="f-mcbe-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship moment-conditioned-basin-entry" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Run §2 now; hold §§3–4 on the tared-control verdict and the survey</h4>
     <div class="r-fu-body"><p>§2's moment-prediction confidence study is gate-independent and
     starts once the f-dbs-moment-survey inventory lands (it names the machinery §2 composes).
@@ -137,7 +138,9 @@
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
-<h2><span class="sec">§</span> Comments</h2>
+<div class="r-comment" data-section="s1" data-id="c-20260822T2010-tared-control-qualified" data-who="reckon-ship" data-when="2026-08-22T20:10:00+00:00">
+    <div class="r-comment-body">TARED-FIELD CONTROL RETURNED QUALIFIED (parity session, run r-20260822T192210062115) - the stall-attribution decision stays OPEN; do not branch on this result. The number: 0 of 6 converged into the tared background against the banked 1 of 6, with all six tares closing algebraically at max sup 2.78e-17 Wb and terminal target currents exact. Two disqualifiers, both caught by the worker: (1) the closure gate verifies arithmetic by construction (psi_ext = psi_ref - psi_plasma recomposes identically), so it says nothing about whether the split is physically faithful; (2) the tare LOST the one converged root, 1/6 to 0/6 - a faithful zero-conductor-error background should do at least as well as the modelled one, so going backwards indicts the split, not the GS solve. Material finding underneath: the reference's own Delta-star-implied current OUTSIDE the declared support is -1.75e6 to -3.56e6 A (-1.88 to -3.81 times the plasma current, over three thousand times nova's 786 A halo); leading candidate is real in-grid conductor current - MAST carries 101 fitted circuits across 938 filaments inside the grid, and Delta-star at a conductor-bearing cell returns that conductor's current density. ADJUDICATION RUNNING on the parity side: a Solovev null test (analytic split known in closed form, composed forward map already proven exact to 4.6e-15 Wb) decides whether the tare machinery is sound; a localisation test checks whether the exterior current integrates per circuit to the stored efm/fcoil_c. If the Solovev tare recovers the analytic split, 0/6 means the GS fixed point owns the obstacle and stalls-persist fires hard; if not, the tare is void and the external field stays a live suspect. ONE FINDING SOLID EITHER WAY, and it reshapes the section-3 driver design: five of the six stalled terminals have NO closed axis-enclosing LCFS branch at all - recorded unscoreable, with the convicted longest-polyline fallback correctly refused. A driver that assumes it is nudging a confined state toward a nearby root is doing something else on these five: it must CONSTRUCT confinement, not refine it. That asymmetry favours the moment-seeded cold start over trajectory-continuation mechanisms, because a moment-predicted compact current representation builds a confined topology from prior information by construction rather than deforming an unconfined terminal state.</div>
+</div>
 </section>
 
   </main>

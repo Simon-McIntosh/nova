@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="moment-conditioned-basin-entry">
   <meta name="plan-title" content="Moment-Conditioned Basin Entry — seed and constrain the solve with predicted current moments">
   <meta name="plan-summary" content="Predict the integral current moments — net current, centroid, and the inductance-class second-moment content — from the prescribed flux functions before any converged solve, initialize the plasma-current representation carrying them, and where the predictions prove confident fold them into the Newton-Krylov free-boundary solve as constraints beside the net-current amplitude elimination, so the admissible basin set shrinks by construction; the cold-seed portfolio is revisited under this richer information">
-  <meta name="plan-status" content="pending">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="4.0">
   <meta name="plan-capability-version" content="1.0">
@@ -23,8 +23,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-23">
-<meta name="plan-impl" content="0.83">
-<meta name="plan-version" content="14">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-version" content="17">
 </head>
 <body>
   <main class="plan-doc">
@@ -81,7 +81,20 @@
     <a href="/nova/evidence/archive/moment-conditioned-basin-entry-landed#s3-driver">§3 landed</a>.</p>
     </section>
 
-    <h2 id="s4">§4 — Moment constraints in the solve, and the portfolio revisited</h2>
+    <section id="s4" class="section-landed">
+    <header><span class="badge badge-shipped">✓ landed 2026-08-23</span>
+    <h2>§4 — Moment constraints in the solve, and the portfolio revisited</h2></header>
+    <p class="landed-summary">Both clauses closed by measurement. <strong>Constraint folding is a measured
+    no-go</strong>: its escalation condition (measured seeding wins) was never met and the §5
+    discretisation verdict removes the premise — shrinking the basin set cannot move an operator-limited
+    floor. <strong>The portfolio revisit restates the role</strong> (commit <code>b72ad478</code>, merged
+    <code>6e0debb5</code>): across 13 measured cases hysteresis decided 0, moment discriminators 2
+    (4.4&nbsp;cm centroid margin on same-class roots), structural amplitude elimination 11 (closure
+    2.5e-16) — the two-branch portfolio is a topology-discovery and transition-safety mechanism, not a
+    same-class root selector; restatement recorded on <code>dual-basin-solve</code>. Full record:
+    <a href="/nova/evidence/archive/moment-conditioned-basin-entry-landed#s4-portfolio-revisit">§4
+    landed</a>.</p>
+    <div hidden>
 
     <p>Where §2 proves a moment confidently predictable, fold it into the solve the way the net
     current was folded in — by construction, shrinking the map's range, not by penalty — starting
@@ -93,6 +106,8 @@
     the machines where both roots share a class, and restate its role accordingly. The locked
     dual-basin-strategy decision is honoured: any change here is a measured restatement recorded
     on that plan, not a silent redesign.</p>
+    </div>
+    </section>
 
     <section id="s5" class="section-landed">
     <header><span class="badge badge-shipped">✓ landed 2026-08-23</span>
@@ -163,6 +178,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260823T0007-s4-constraint-clause-closed" data-who="reckon-ship" data-when="2026-08-23T00:07:00+00:00">
     <div class="r-comment-body">§4's CONSTRAINT-FOLDING CLAUSE CLOSES AS A MEASURED NO-GO: its own escalation condition (measured wins) was never met, and the §5 verdict removes the premise — a discretisation-limited floor is not moved by shrinking the admissible basin set, so folding centroid constraints cannot lift the stalls. The constraint-support-mapping decision stays recorded for any future constraint work but gates nothing now. The PORTFOLIO-REVISIT clause remains live on its own owner direction (measure what of the two-branch portfolio still earns its cost with selection closed and moments available as discriminators) and dispatches as this section's one remaining node; its restatement is recorded on dual-basin-solve per the locked dual-basin-strategy decision.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260823T0040-portfolio-revisit-landed" data-who="reckon-ship" data-when="2026-08-23T00:40:00+00:00">
+    <div class="r-comment-body">portfolio-moment-revisit landed — commit b72ad478 (merged 6e0debb5); gate passed (13/13 verified case receipts, 5/5 input digests unchanged, no production code touched). MEASURE: of 13 cases, portfolio hysteresis decided 0, moment discriminators 2 (the same-class fixture roots, radial-centroid margin 4.443–4.448 cm over the alternate; selected closed-form error 1.387 cm vs rejected 5.833 cm), structurally-unique root 11 (every frozen reference; amplitude-elimination closure max 2.495e-16); known-good-identity selections 0. ROLE RESTATEMENT recorded on dual-basin-solve per the locked dual-basin-strategy decision: the two-branch portfolio remains a topology-discovery and transition-safety mechanism where limited and diverted solutions genuinely coexist; it is not a root-identity selector for same-class roots and does not earn a second solve on current-constrained lanes. §4 closes: constraint clause a measured no-go, portfolio clause a measured restatement. PLAN SHIPS at impl 1.0 (6/6 executable nodes); the one open followup f-mcbe-002 is the authority-required operator-refinement handoff, exempt by design.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260822T2202-newton-replay-baseline" data-who="reckon-ship" data-when="2026-08-22T22:02:00+00:00">
     <div class="r-comment-body">newton-warm-ladder-replay landed — commits f2035bed/d6b7f95a (merged 3186a97e); gate passed (12/12 warm-neighbour suite, cold arms exactly reproduce banked Newton residuals, max target-current relative error 2.22e-16). THE CHEAPEST UNTRIED ARM IS MEASURED AND NEGATIVE: on the pinned Newton branch through the public constrained seam, the same-shot warm ladder lifts 0/2 in the scoreable closed-LCFS stratum (21983/35 terminal 1.294e-3; 21985/51 terminal 2.869e-3) and 0/3 in the unscoreable stratum (21978/35 1.081e-2; 21986/46 3.943e-2; 21989/55 2.010e-3); 22086/43 keeps its cold root at 2.912e-16 and never triggers a warm arm. All five stalled references found legal earlier-first sources (selection by own convergence only, never EFIT score, honouring the no-identity-keying rule). NEIGHBOUR_FRAME_OFFSETS, _neighbour_candidates and _solve_public_seam reused unchanged behind a duck-typed adapter; _find_warm_source not reused. §3's baseline set is complete: warm-neighbour (host-Krylov) lifts 0/5, newton x warm lifts 0/5, cold 1/6 with the converged root in the unscoreable stratum — the moment-seeded driver is the remaining candidate and its bar is now fully pre-registered. Record: /nova/evidence/archive/moment-conditioned-basin-entry-landed#s3-newton-replay</div>

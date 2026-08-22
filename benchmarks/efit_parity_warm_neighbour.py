@@ -1171,8 +1171,24 @@ def _newton_replay_split(
                 {"shot": shot, "slice_index": row}
                 for shot, row in sorted(keys - measured_by_key.keys())
             ],
-            "converged_count": sum(
+            "terminal_converged_count": sum(
                 reference["reported_terminal"]["converged"] for reference in measured
+            ),
+            "cold_converged_count": sum(
+                reference["cold_newton_control"]["converged"]
+                for reference in measured
+            ),
+            "warm_attempted_count": sum(
+                reference["warm_newton_solve"] is not None for reference in measured
+            ),
+            "warm_source_found_count": sum(
+                reference["warm_neighbour_search"]["qualified_source_found"]
+                for reference in measured
+            ),
+            "warm_lifted_count": sum(
+                reference["warm_newton_solve"] is not None
+                and reference["warm_newton_solve"]["converged"]
+                for reference in measured
             ),
             "per_reference": [
                 {
@@ -1199,12 +1215,13 @@ def _newton_replay_split(
                 "PARTIAL"
                 if len(measured) != len(keys)
                 else (
-                    "AT_LEAST_ONE_CONVERGED"
+                    "WARM_LIFTS_AT_LEAST_ONE"
                     if any(
-                        reference["reported_terminal"]["converged"]
+                        reference["warm_newton_solve"] is not None
+                        and reference["warm_newton_solve"]["converged"]
                         for reference in measured
                     )
-                    else "NONE_CONVERGED"
+                    else "WARM_LIFTS_NONE"
                 )
             ),
         }
@@ -1258,6 +1275,8 @@ def run_newton_replay(
     configure_dtypes()
     if NEIGHBOUR_FRAME_OFFSETS != DECLARED_NEIGHBOUR_FRAME_OFFSETS:
         raise RuntimeError("the imported warm-neighbour offset ladder changed")
+    if RELATIVE_RESIDUAL_TOLERANCE != FIXED_POINT_CRITERION:
+        raise RuntimeError("the imported and banked convergence criteria differ")
     output.mkdir(parents=True, exist_ok=True)
     protected_before = _protected_dual_basin_digests(output)
     existing = _existing_newton_replay(output, resume)

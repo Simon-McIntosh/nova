@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="coupling-surface-contract">
+  <meta name="plan-title" content="Coupling Surface Contract — one typed state, four consumers">
+  <meta name="plan-summary" content="Replace the organically grown transport–equilibrium exchange dictionary with one typed coupling-state contract that declares every exchanged field's meaning, direction, time base, units, gate-versus-receipt role and differentiability class — the same surface the window exchange, the time-parallel boundary state, the ensemble-filter state vector and the learned-surrogate I/O schema all consume">
+  <meta name="plan-status" content="pending">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="2.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S12">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="flux-function-forward-transport">
+  <title>Coupling Surface Contract | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-22">
+<meta name="plan-impl" content="0.0">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The exchange surface is under-specified, and the proof is measured</h2>
+
+    <p><strong>The transport–equilibrium window exchanges a dictionary that grew one field at a
+    time, and nobody can state its contract.</strong> The convergence-composition study proved
+    this the hard way: which exchanged fields participate in the stopping gate and which are
+    merely receipted was decided <em>post hoc</em>, by measuring three candidate gate
+    compositions against landed traces (all-field at 14 iterations, shape down-weighted at 11,
+    shape-excluded at 9) and asking the owner to rule. A surface whose gate membership has to be
+    discovered by experiment after the fact is a surface without a contract. The exchange today
+    carries geometry face waveforms, source drives, boundary values and representation metadata
+    with their roles, directions, time bases and differentiability classes implicit in
+    <code>solve_window</code>'s internals.</p>
+
+    <p><strong>Four consumers now need the same surface, which is why the contract is worth a
+    plan rather than a refactor commit.</strong> The window exchange is the first consumer. The
+    time-parallel experiment showed the second: the Parareal coarse/fine handoff state <em>is</em>
+    the window-boundary exchange state, and its qualified negative concluded that a useful coarse
+    propagator must advance exactly this state without an equilibrium solve. The ensemble-filter
+    direction (owner, 2026-08-22) makes it the third: an ensemble filter's state vector and its
+    analysis-update injection point are this same window-boundary state. And the ambix learned
+    surrogate makes it the fourth: a model trained to advance the coupled state must consume and
+    emit a schema, and that schema must be this contract or the surrogate trains against a moving
+    target. Defining the surface once, before the ambix assimilator hardens its interface, is the
+    cheap ordering.</p>
+
+    <figure>
+      <svg viewBox="0 0 720 250" role="img" aria-label="One typed coupling state consumed by four mechanisms" style="max-width:720px;width:100%">
+        <style>text{font-family:system-ui;font-size:13px;fill:#1a1a1a}.t{font-size:14px;font-weight:600}</style>
+        <rect x="270" y="95" width="180" height="60" fill="none" stroke="#1a1a1a" stroke-width="1.2"/>
+        <text x="360" y="120" text-anchor="middle" class="t">CouplingState</text>
+        <text x="360" y="140" text-anchor="middle">typed, receipted, traced</text>
+        <g stroke="#666" stroke-width="1" fill="none">
+          <line x1="270" y1="110" x2="150" y2="55"/><line x1="270" y1="140" x2="150" y2="195"/>
+          <line x1="450" y1="110" x2="570" y2="55"/><line x1="450" y1="140" x2="570" y2="195"/>
+        </g>
+        <text x="145" y="45" text-anchor="end" class="t">window exchange</text>
+        <text x="145" y="62" text-anchor="end">gate vs receipt roles</text>
+        <text x="145" y="200" text-anchor="end" class="t">time-parallel boundary</text>
+        <text x="145" y="217" text-anchor="end">coarse/fine handoff</text>
+        <text x="575" y="45" class="t">ensemble-filter state</text>
+        <text x="575" y="62">analysis update injects here</text>
+        <text x="575" y="200" class="t">surrogate I/O schema</text>
+        <text x="575" y="217">exported for ambix training</text>
+      </svg>
+      <figcaption>One contract, four consumers. Every consumer binds the same window-boundary
+      state; a field added for one is visible, typed and receipted for all.</figcaption>
+    </figure>
+
+    <h2 id="s2">§2 — The contract</h2>
+
+    <p>A typed <code>CouplingState</code> in <code>nova/transport</code> declaring, per field:
+    physical meaning and units; exchange direction (equilibrium→transport, transport→equilibrium,
+    or bidirectional); the time base it is sampled on (equilibrium coarse samples versus transport
+    steps) and the interpolation rule between them; its stopping-gate role (gating, receipted, or
+    excluded-with-reason — the shape channels' exclusion becomes a declared property instead of a
+    solver constant); its differentiability class (traced, host-boundary, or static); and its
+    fail-closed serialization. The window exchange in <code>solve_window</code> is refactored to
+    construct, exchange and receipt this type, with the existing receipts (per-field exit
+    residuals, gating and all-field norms, damping events, ledger closures) unchanged in content
+    and provenance-stamped by the contract version. No physics changes; the gate composition and
+    adaptive damping stay exactly as the two locked owner decisions state them.</p>
+
+    <p><strong>Done when</strong> the coupled-window suite passes unchanged on the refactored
+    exchange, the gentle demonstration window reproduces its banked receipt (4 iterations, gating
+    contraction 0.236, flux closure exactly 0) bit-for-bit on the gating trajectory, and a schema
+    artifact (versioned field table: name, meaning, units, direction, time base, gate role,
+    differentiability) is exported under <code>scripts/coupling_surface/</code> for the ambix
+    consumers to read.</p>
+
+    <h2 id="s3">§3 — Consumer bindings</h2>
+
+    <p>Three thin bindings prove the contract carries its consumers, each a measure rather than a
+    promise: (a) the window exchange consumes it (the §2 gate); (b) a window-boundary
+    extract/restore round-trip — serialize the state at a window boundary, restore it, continue
+    the solve, and show the continued trajectory matches the uninterrupted one to receipt
+    precision, which is exactly the property both a time-parallel corrector and an ensemble-filter
+    analysis update require at that boundary; (c) the exported schema is read back and validated
+    field-for-field against the live exchange by a test, so schema drift fails visibly. The
+    ensemble and filter consumers themselves are separate plans; this plan owes them only the
+    surface.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="coupling-surface-authority" data-choice="one-typed-contract" data-by="Simon McIntosh" data-when="2026-08-22T19:00:00+00:00">
+    <p class="r-dec-q">How is the transport–equilibrium coupling surface defined?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="one-typed-contract">one typed CouplingState contract; window, time-parallel, filter and surrogate all bind it</button>
+      <button class="r-opt" data-value="per-consumer-adapters">keep the exchange dict; each consumer adapts it locally</button>
+      </p>
+    <p class="r-dec-rat">Owner direction 2026-08-22: the coupling surface is not well defined and
+    must be, before the ambix assimilator hardens its interface. The gate-composition study is the
+    measured evidence that implicit surfaces cost real iterations and post-hoc rulings.</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-csc-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship coupling-surface-contract">
+    <h4 class="r-fu-title">Land the contract, the window refactor, and the three consumer bindings</h4>
+    <div class="r-fu-body"><p>§2 first (the type and the window refactor, gated on the banked
+    gentle receipt reproducing), then §3's three bindings. The boundary round-trip binding is the
+    load-bearing one — it is the property the ensemble-forward and time-parallel work will build
+    on without re-deriving.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship coupling-surface-contract</pre>
+    </article>
+</section>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<h2><span class="sec">§</span> Comments</h2>
+</section>
+
+  </main>
+</body>
+</html>

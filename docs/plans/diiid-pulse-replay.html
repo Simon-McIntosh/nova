@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="diiid-pulse-replay">
+  <meta name="plan-title" content="DIII-D Pulse Replay — the coupled forward against a real discharge">
+  <meta name="plan-summary" content="March the coupled transport–equilibrium forward through a segment of a real DIII-D discharge driven by the recorded closed-loop coil currents, initialize from an early labeled frame's extracted flux functions, and score the marched maps and scalars against the labeled frames as time traces — the first real-machine, real-feedback demonstration of the transport ladder, and the measurement of its open-loop drift horizon">
+  <meta name="plan-status" content="pending">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="4.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint" content="S12">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="diiid-forward-onboarding,flux-function-forward-transport">
+  <title>DIII-D Pulse Replay | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-22">
+<meta name="plan-impl" content="0.0">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — What replay is, and why the horizon finding demands it</h2>
+
+    <p><strong>No pulse has ever been replayed through the coupled forward model.</strong> The
+    transport ladder is validated on a synthetic fixture (2.5&nbsp;ms windows, longest coupled
+    evolution ~11&nbsp;ms) and DIII-D so far is per-slice: vacuum gate, differencing gate,
+    Newton-Krylov free-boundary solves on individual labeled frames. The capability the ladder
+    exists for — given a machine's actuator record, march the plasma state forward through time —
+    is undemonstrated on any real machine.</p>
+
+    <p><strong>The fixture's confinement horizon is the argument for replay, not against
+    it.</strong> The time-parallel experiment's qualified negative measured that an
+    <em>uncontrolled</em> equilibrium under sustained transport evolution leaves the confined
+    branch in ~11&nbsp;ms — with arbitrary fixed coil currents no controller ever chose. A real
+    DIII-D discharge record inverts that premise: the recorded coil currents are the closed-loop
+    currents (locked doctrine, DIII-D onboarding), the machine's real control actions are in the
+    data, and replaying them supplies the feedback that kept the real plasma confined. What replay
+    does <em>not</em> supply is correction of our model's drift relative to the real trajectory —
+    the recorded currents corrected the real plasma, not our simulation of it. That residual
+    open-loop drift is precisely the quantity this plan measures, and precisely what an ensemble
+    filter later absorbs. Replay is therefore both the first real-machine demonstration and the
+    baseline any assimilation work is scored against.</p>
+
+    <h2 id="s2">§2 — Segment replay, honestly costed</h2>
+
+    <p>One diverted flat-top segment of one development-split shot, on the order of 100&nbsp;ms
+    (several labeled frames at the catalog cadence). Initialize the flux functions from the
+    segment's first labeled frame through the landed differencing/extraction machinery; drive
+    every window with the recorded coil-current waveforms interpolated onto the window time base;
+    march coupled windows end-to-end with the shipped gate and damping defaults; carry the full
+    receipt chain (per-window iterations, gating and all-field norms, ledger closures, branch
+    class with causal selection history). Corpus access goes through the ambix-homed read/COCOS
+    authority — nova carries no challenge-convention modules; this plan consumes conditioned
+    inputs exactly as the onboarding plan's solve gates do.</p>
+
+    <p><strong>Cost is stated, not hidden:</strong> at the measured ~66–82&nbsp;s per 2.5&nbsp;ms
+    window on CPU, 100&nbsp;ms is ~40 windows ≈ 45–55 CPU-minutes; the same-tree H200 lane
+    (5.25× per iteration pair) brings a segment under ten minutes once the current-tree H200
+    measurement lands (transport plan followup). Full-shot replay is a stretch rung gated on the
+    acceleration followups (sample/member batching, warm starts), not a promise of this plan.</p>
+
+    <p><strong>Done when</strong> the segment marches to completion (or fails typed, which is a
+    result: a replay that loses confinement under the real coil record is a measured model defect,
+    not a crash), and the evidence records time-trace figures of nova-marched versus labeled
+    q<sub>95</sub>, β<sub>N</sub>, boundary metrics and per-frame ψ RMS over the segment, every
+    row tree-stamped.</p>
+
+    <h2 id="s3">§3 — The drift horizon</h2>
+
+    <p>The replay analogue of the fixture's confinement horizon: how far does the marched state
+    stay within a pre-registered tolerance band of the labeled trajectory before drift exceeds it?
+    Pre-register the band (per-metric, from the per-slice solve residuals the onboarding plan
+    banked) before the first scored run; report the horizon in milliseconds and in labeled frames;
+    attribute the first band exit (flux-function drift, boundary drift, or transport-source
+    mismatch) from the receipt chain. This number is the honest statement of what the physics
+    forward alone gives an assimilator to work with — the forecast-skill floor an ensemble filter
+    must beat to earn its keep.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="replay-scope" data-choice="segment-first" data-by="Simon McIntosh" data-when="2026-08-22T19:00:00+00:00">
+    <p class="r-dec-q">Replay a full pulse immediately, or a labeled flat-top segment first?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="segment-first">one ~100 ms diverted flat-top segment; full shots are a stretch rung gated on acceleration</button>
+      <button class="r-opt" data-value="full-shot-first">attempt a full shot immediately</button>
+      </p>
+    <p class="r-dec-rat">Owner direction 2026-08-22 to replay a pulse through the forward models,
+    scoped by the measured window cost: a segment demonstrates the capability and measures the
+    drift horizon at ~40 windows; a full shot at current wall times would spend hours before the
+    first finding. Escalate scope with the measured acceleration, not ahead of it.</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-dpr-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship diiid-pulse-replay">
+    <h4 class="r-fu-title">Land segment replay, then the drift-horizon measurement</h4>
+    <div class="r-fu-body"><p>§2 first — shot and segment selection from the development split,
+    initialization from the first labeled frame, the marched run with full receipts, and the
+    time-trace evidence figures. §3's horizon measurement follows on the same marched trajectory
+    with its tolerance band pre-registered before the scored run. A typed confinement loss under
+    the real coil record is a banked finding, not a failed node.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship diiid-pulse-replay</pre>
+    </article>
+</section>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<h2><span class="sec">§</span> Comments</h2>
+</section>
+
+  </main>
+</body>
+</html>

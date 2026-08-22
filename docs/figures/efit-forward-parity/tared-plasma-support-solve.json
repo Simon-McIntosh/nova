@@ -1,0 +1,131 @@
+{
+  "receipt": {
+    "kind": "tared_plasma_support_control",
+    "status": "analytic_null_passed_solve_authorised",
+    "selection": "six frozen references remain unopened for solving",
+    "shot_count": 0
+  },
+  "control_caveat": "This is a control and not a parity claim, because the tared field is derived from the reference own map and hands the solve information no production run would have; it bounds the GS solve own fidelity and attributes the residual, and must never be cited as parity.",
+  "execution_order": [
+    "Solovev analytic null",
+    "six-reference current-constrained solve only after a passing fine mesh"
+  ],
+  "analytic_null_gate": {
+    "purpose": "non-tautological attribution test against independently known closed-form plasma current and analytic external field",
+    "separation": "the identical Delta-star recovery followed by a declared-plasma-support centroid-current image and subtraction used for the six MAST controls",
+    "plasma_composition_support": "the source-declared boundary support intersected with valid stencils; every other cell remains in the external field by subtraction",
+    "criteria": {
+      "current_density_sup_relative_error": 0.001,
+      "external_sup_error_fraction_of_analytic_span": 0.01
+    },
+    "banked_uncorrected_support_failures": {
+      "coarse": {
+        "sup_error_wb": 1.1361563949563815,
+        "sup_error_fraction_of_analytic_span": 0.8225776910715236
+      },
+      "fine": {
+        "sup_error_wb": 0.7791504291587774,
+        "sup_error_fraction_of_analytic_span": 0.5641052269387783
+      }
+    },
+    "fixtures": [
+      {
+        "fixture": "coarse",
+        "requested_cells": -500,
+        "realised_cells": 551,
+        "valid_stencil_cells": 373,
+        "declared_support_cells": 456,
+        "declared_support_valid_stencil_cells": 373,
+        "cache": {
+          "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_500.zarr",
+          "semantic_key": "030667d40f96d904",
+          "hit": true,
+          "lock_wait_seconds": 2.4662120267748833e-05,
+          "load_seconds": 0.20036982488818467,
+          "build_seconds": 0.0,
+          "store_seconds": 0.0
+        },
+        "analytic_closed_form_plasma_current_a": 1627957.0127122786,
+        "analytic_authored_support_current_a": 1625644.334902816,
+        "analytic_valid_stencil_current_a": 1342445.1487587576,
+        "analytic_declared_support_centroid_current_a": 1342445.1487587576,
+        "delta_star_valid_stencil_current_a": 1342207.3439294184,
+        "delta_star_declared_support_current_a": 1342207.3439294181,
+        "valid_stencil_current_signed_relative_error": -0.00017714305091653948,
+        "delta_star_current_vs_closed_form_signed_relative_error": -0.1755265443445484,
+        "current_density_sup_relative_error_on_valid_stencils": 0.00023831833744617032,
+        "analytic_external_recovery": {
+          "sup_error_wb": 0.0006798756748018775,
+          "rms_error_wb": 0.0005029961276289147,
+          "grid_sup_error_wb": 0.0006794380472845418,
+          "wall_sup_error_wb": 0.0005923350808334504,
+          "sample_sup_error_wb": 0.0006798756748018775,
+          "sup_error_fraction_of_analytic_span": 0.0004922302644924977,
+          "sup_error_fraction_of_analytic_plasma_image": 0.00015824869501098411
+        },
+        "source_recovery_passes": true,
+        "external_recovery_passes": true
+      },
+      {
+        "fixture": "fine",
+        "requested_cells": -1000,
+        "realised_cells": 1076,
+        "valid_stencil_cells": 815,
+        "declared_support_cells": 907,
+        "declared_support_valid_stencil_cells": 810,
+        "cache": {
+          "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_1000.zarr",
+          "semantic_key": "7c94be9b777c55ba",
+          "hit": true,
+          "lock_wait_seconds": 1.0839896276593208e-05,
+          "load_seconds": 0.176367366919294,
+          "build_seconds": 0.0,
+          "store_seconds": 0.0
+        },
+        "analytic_closed_form_plasma_current_a": 1627957.0127122786,
+        "analytic_authored_support_current_a": 1626730.8083787183,
+        "analytic_valid_stencil_current_a": 1469071.4379369258,
+        "analytic_declared_support_centroid_current_a": 1461506.645647231,
+        "delta_star_valid_stencil_current_a": 1468941.2349751554,
+        "delta_star_declared_support_current_a": 1461377.6922217933,
+        "valid_stencil_current_signed_relative_error": -8.862942836407317e-05,
+        "delta_star_current_vs_closed_form_signed_relative_error": -0.0976781183381451,
+        "current_density_sup_relative_error_on_valid_stencils": 0.0001212784115237635,
+        "analytic_external_recovery": {
+          "sup_error_wb": 0.0003597793391740822,
+          "rms_error_wb": 0.0002740050515344635,
+          "grid_sup_error_wb": 0.00035977321845415133,
+          "wall_sup_error_wb": 0.00031774044352683717,
+          "sample_sup_error_wb": 0.0003597793391740822,
+          "sup_error_fraction_of_analytic_span": 0.0002604803875829233,
+          "sup_error_fraction_of_analytic_plasma_image": 7.805462963668165e-05
+        },
+        "source_recovery_passes": true,
+        "external_recovery_passes": true
+      }
+    ],
+    "source_recovery_passes": true,
+    "external_recovery_passes": true,
+    "passes": true,
+    "verdict": "SEPARATION_RECOVERS_ANALYTIC_TRUTH",
+    "finding": "The declared-support separation recovers both the analytic source and exterior, so the six-reference control may run.",
+    "finest_external_sup_error_wb": 0.0003597793391740822,
+    "finest_external_sup_error_fraction_of_analytic_span": 0.0002604803875829233
+  },
+  "attribution": {
+    "available": false,
+    "finding": "The analytic null passed; attribution remains pending the six-reference solve."
+  },
+  "gauge": {
+    "rule": "preserve the stored reference total-flux gauge",
+    "additive_constant_wb": 0.0
+  },
+  "protected_banked_artifacts": {
+    "declared_count": 23,
+    "verified_digest_count": 23,
+    "all_digests_match": true,
+    "source_and_output_receipts_are_outside_protected_set": true,
+    "integrity_source": "docs/figures/efit-forward-parity/converged-root-geometry-attribution.json",
+    "integrity_source_sha256": "67cc1b1578e8aac066e248f10d6deaca4ccb80628934e6ed21c2984c0d4d455a"
+  }
+}

@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-commits" content="a2fbfa13,73f48ca0f672f8cd118bae4fd7e53520a03d998f,2ad4520637736e29898e23a961bada5d11595add">
 <meta name="plan-artifacts" content="docs/figures/current-constrained-forward-solve/circuit-vacuum,docs/figures/current-constrained-forward-solve/inclusion-ladder">
 <meta name="plan-impl" content="0.25">
@@ -162,6 +162,22 @@
     ladder</a> · <a href="/nova/evidence/archive/current-constrained-forward-solve-landed#circuit-vacuum">circuit
     vacuum</a>.</p>
     </section>
+
+    <h2 id="s8">§8 — Cold-start robustness of the eliminated route</h2>
+    <p>The circuit-discovery validation banked the evidence base: on five score-blind diverted frames
+    outside every calibration and polarity population, the eliminated <code>newton_krylov</code> route
+    converges 2/5 from cold starts while three frames stall at relative residual 1e-2 to 1e-1 in
+    <em>both</em> current arms — a solver-robustness gap, not a current gap. The preregistered
+    three-converged-frame recovery floor fails on exactly this.</p>
+    <p>Candidate mechanisms, all consumed from <code>dual-basin-solve</code> machinery per §6 — this plan
+    does not build continuation ladders of its own: homotopy or continuation from a converged neighbour
+    frame, warm-starting along a shot's time sequence, and basin-entry seeding. Anderson stays out of the
+    production lane per the owner direction, and the current vector comes from the fixed-wiring circuit
+    records.</p>
+    <p><strong>Done-when:</strong> three or more of the same five score-blind frames are
+    convergence-qualified at the landed criteria (1e-6 relative residual, diverted), re-scored against the
+    EFIT labels with the same receipt schema as the banked validation — flipping the banked
+    <code>recovery_demonstrated</code> verdict.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>

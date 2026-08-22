@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="transport-pint-options">
+  <meta name="plan-title" content="Parallel-in-Time Composition for the Coupled Transport Window">
+  <meta name="plan-summary" content="Assessment of Parareal, MGRIT, PFASST and a nested Parareal-waveform composition against Nova's landed equilibrium-TORAX window contract, with one bounded experiment recommendation">
+  <meta name="plan-informs" content="flux-function-forward-transport">
+  <title>Parallel-in-Time Composition for the Coupled Transport Window | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="decision">Decision</h2>
+    <p><strong>Recommend two-level Parareal across fully converged coupled windows, using one frozen-geometry, fixed-step TORAX advance as the coarse propagator.</strong> The fine propagator remains the landed <code>solve_window</code>: it iterates the free-boundary equilibrium plus FSA extraction against the TORAX waveform until the window receipt meets tolerance. The coarse propagator advances all four transport channels cheaply while holding the incoming geometry sample fixed. Fine windows share one static shape and batch across window index with <code>vmap</code>; the causal coarse prediction and correction remain serial.</p>
+    <p>This is an architectural recommendation, not a performance pass. The transport equations are parabolic and therefore favourable to Parareal, but the coupled propagator also contains a nonlinear free-boundary solve and discrete branch selection. A good coarse propagator should need roughly <strong>one to three</strong> Parareal corrections on a branch-consistent, gently coupled horizon; one or two is the useful regime, three is diagnostic, and convergence approaching the eight-window count has no speedup. The exact count depends primarily on how well the frozen-geometry TORAX coarse step predicts the fine window boundary. No landed receipt measures that mismatch yet.</p>
+
+    <figure>
+      <img src="/nova/figures/flux-function-forward-transport/pint-composition.svg" alt="A serial frozen-geometry TORAX predictor supplies window boundaries; converged equilibrium-TORAX waveform windows run concurrently; a serial correction resamples continuous fields onto the explicit coordinate map and threads branch history without blending topology">
+      <figcaption>The recommended nesting. Parallelism sits <em>outside</em> the receipted waveform fixed point, so each expensive fine call remains the same innovation-pure deterministic window already landed. Branch history is causal metadata, not an algebraic correction field.</figcaption>
+    </figure>
+
+    <h2 id="contract">What the landed contract permits</h2>
+    <p>The unit of composition is already available as a pure fixed-shape function. <code>Waveform</code> and <code>WaveformSample</code> carry the per-slice radial grid, boundary toroidal flux, axis reference and boundary reference; interpolation recovers an analytic moving-coordinate profile to <strong>2.0e-14</strong> by resampling both bracketing states onto one common normalised grid before time blending. The equilibrium and transport sweep primitives are immutable, and the converged window exposes the fine propagator without weakening its semantics.</p>
+    <p>The landed real gentle case is the relevant fixture: 2.5 ms, auxiliary multiplier 0.5, ten waveform iterations, measured contraction <strong>0.5371</strong>, maximum exit residual <strong>0.004986 &lt; 0.005</strong>, exactly zero flux-closure error, exactly zero boundary-current discontinuity, and 30/30 valid extraction records. The strong 10 ms case is equally important counter-evidence: the confined branch genuinely disappears at exchange five and the solve returns typed <code>ConvergedNonConfinedError</code>. A time-parallel layer must preserve both outcomes rather than turn the latter into a vector correction.</p>
+    <p>The GPU shape exists. The production 129×129 extraction service ran a warmed batch of eight maps on one H200 in <strong>5.925816 s total, 0.740727 s per map</strong>, versus 1.567967 s for one map. That is a <strong>2.117× throughput gain</strong>, not an eightfold latency gain. It proves that eight fine-window maps can enter one compiled <code>vmap</code> executable; it does not prove an end-to-end batched window speedup.</p>
+
+    <h2 id="options">Options against this window</h2>
+    <table>
+      <thead>
+        <tr><th>Composition</th><th>Convergence and GPU shape</th><th>Contract fit</th><th>Verdict</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Parareal over sequential windows</strong></td>
+          <td>For dissipative parabolic evolution, a stable coarse propagator can converge in a few corrections; the count worsens directly with coarse/fine mismatch. Fine windows are black-box calls with identical static shapes and batch naturally over the window axis.</td>
+          <td>Keeps <code>solve_window</code> and every nested receipt intact. Requires one explicit boundary-state projection and a branch-aware correction guard.</td>
+          <td><strong>Recommend now.</strong> Smallest addition, measures the decisive two-level convergence before committing to a hierarchy.</td>
+        </tr>
+        <tr>
+          <td><strong>MGRIT-style multilevel</strong></td>
+          <td>Extends the same idea to several temporal grids and can expose more concurrency on long horizons. Its quality depends on temporal restriction, interpolation, relaxation and coarse operators on every level.</td>
+          <td>The four-channel state can transfer, but moving coordinate maps and branch history do not yet have multilevel restriction semantics. Nonlinear FAS receipts and branch-safe relaxation would be new machinery.</td>
+          <td><strong>Defer.</strong> Promote only after the two-level experiment shows a stable coarse correction and horizons long enough to amortise extra levels.</td>
+        </tr>
+        <tr>
+          <td><strong>PFASST</strong></td>
+          <td>Combines parallel spectral deferred-correction sweeps with a multilevel coarse correction and is attractive for smooth parabolic PDEs at high temporal order.</td>
+          <td>TORAX is landed as a fixed-step propagator, not as collocation residuals and sweep preconditioners. The free-boundary solve, extraction validity and branch selector are not collocation-node algebra. Adopting PFASST would replace rather than compose the window API.</td>
+          <td><strong>Reject for this seam.</strong> Revisit only if a native residual-level transport integrator becomes the authority.</td>
+        </tr>
+        <tr>
+          <td><strong>Parareal inside waveform relaxation</strong></td>
+          <td>Parallelises time intervals inside every outer exchange, multiplying inner and outer iteration counts. Equilibrium sample solves already batch directly and branch continuity makes their accepted sequence causal.</td>
+          <td>If applied only to TORAX, it attacks 0.137% of the landed gentle-window wall time. If applied to the whole exchange sweep, it duplicates the outer fixed-point receipts and introduces another non-convergence mode inside each fine window.</td>
+          <td><strong>Reject.</strong> The parallel layer belongs outside the innovation-pure window, around the expensive equilibrium-plus-FSA leg.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>This ranking follows the methods' native shapes. MGRIT calls an existing time-step routine on a temporal hierarchy; PFASST interlaces fine parallel and coarse serial collocation sweeps; and published Parareal-waveform methods establish that the nesting is mathematically legitimate for parabolic problems. Legitimacy is not the selection criterion here: the landed cost split and receipt boundary are.</p>
+
+    <h2 id="coarse">Coarse-propagator candidates</h2>
+    <table>
+      <thead><tr><th>Candidate</th><th>Landed status</th><th>State and geometry treatment</th><th>Use</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>native ψ-diffusion</td>
+          <td>Landed, jit/vmap/grad-safe, and relative RMS <strong>&lt;1%</strong> against TORAX on the shared circular pure-ohmic case.</td>
+          <td>Frozen geometry and ψ only; T<sub>i</sub>, T<sub>e</sub> and n<sub>e</sub> have no coarse evolution. A lift that merely holds three channels would dominate the coarse/fine mismatch in a multi-channel run.</td>
+          <td>Keep as the cheap control arm and a ψ-only fallback, not the recommended full-state coarse propagator.</td>
+        </tr>
+        <tr>
+          <td>frozen-geometry TORAX, one coarse step</td>
+          <td>The ingredients are landed: step-wise fixed-step TORAX, full four-channel immutable state, moving-coordinate waveform types and warmed transport sweeps of 45–65 ms. The named Parareal coarse composition itself is not yet implemented or verified.</td>
+          <td>Construct a constant two-endpoint geometry waveform from the incoming boundary sample; carry <code>radial_grid</code>, <code>phi_boundary</code>, <code>axis_reference</code> and <code>boundary_reference</code> unchanged while TORAX advances ψ, T<sub>i</sub>, T<sub>e</sub> and n<sub>e</sub>.</td>
+          <td><strong>Selected.</strong> It matches the fine state space at negligible cost relative to the equilibrium leg and avoids an unvalidated channel lift.</td>
+        </tr>
+        <tr>
+          <td>learned surrogate</td>
+          <td>Future work: no landed training corpus, calibration envelope, conservation receipt, coordinate-map contract or branch-continuity result.</td>
+          <td>Could predict the full boundary state and eventually improve the coarse/fine match, but must be bounded by exactly the same physics and topology guards.</td>
+          <td>Do not place in the first experiment. Train only after fine-minus-coarse corrections have produced a governed corpus.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 id="state">Coordinate maps and branch continuity</h2>
+    <p>The Parareal boundary state is not four arrays. It is the continuous transport state, the boundary <code>WaveformSample</code>, conservation totals, and an immutable equilibrium <code>SelectionHistory</code>. Corrections are formed only after the fine and coarse outputs have been resampled onto the same declared normalised radial grid. Continuous profile and geometry fields may then be differenced in that coordinate representation. The resulting predictor is internal to the time-parallel iteration and must pass the existing geometry and conservation validators before it can seed another fine window.</p>
+    <p><strong>Discrete topology is never added, averaged or interpolated.</strong> The branch class, selector verdict, core-cell counts and history token pass causally from the most recent accepted predecessor. A fine/coarse branch-class disagreement is a typed outer-iteration refusal, not a large numeric correction. Within each fine window, every equilibrium sample is still seeded from the previous selected confined flux exactly as in the landed branch-continuity path. Across window boundaries, the final selection history of window n becomes the initial history of window n+1; Parareal may speculate on later windows with the previous iteration's history, but it exposes only the fine-validated prefix. This retains the standard prefix-causality intuition without pretending the branch selector is differentiable vector algebra.</p>
+
+    <h2 id="receipts">What one time-parallel iteration owes</h2>
+    <p>Innovation purity requires the outer iteration to distinguish its own error from the already-receipted equilibrium–transport splitting error. Every Parareal correction therefore owes:</p>
+    <ul>
+      <li>window index, outer iteration, coarse and fine propagator provenance, input/output state hashes, static batch shape, backend, compile reuse and wall time;</li>
+      <li>the complete nested <code>WindowReceipt</code> for every fine call: waveform iterations, measured contraction, exit residual per exchanged field, damping, extraction validity, flux consumption, plasma-current continuity and engine status;</li>
+      <li>coarse and fine boundary states on their original coordinate maps, the common grid used for correction, and per-field correction norms before and after resampling;</li>
+      <li>outer residual and contraction per corrected field, accepted-prefix length, stopping tolerance, iteration cap, and whether the exit was converged, exhausted or refused;</li>
+      <li>the branch history entering and leaving every window, selected class, selector reason, core counts, branch mismatch and any typed non-confined outcome;</li>
+      <li>immutability checks and a proof that no measurement, learned innovation or silent rescaling entered either propagator.</li>
+    </ul>
+    <p>A trajectory is publishable only when every fine window is converged, the outer correction meets its declared tolerance, every conservation and geometry guard is green, and the accepted branch history is continuous. Otherwise the outer solve raises with all diagnostic receipts. It must never relabel a partial Parareal iterate as a physical innovation.</p>
+
+    <h2 id="timing">Timing arithmetic from landed receipts</h2>
+    <table>
+      <caption>No new solve was run for this assessment. Fixture rows are sums of the ten gentle-window receipt entries; production extraction rows are warmed H200 medians.</caption>
+      <thead><tr><th>Quantity</th><th>Landed arithmetic</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>gentle fine window, equilibrium plus FSA</td><td>sum of ten exchanges</td><td>422.454568 s</td></tr>
+        <tr><td>gentle fine window, TORAX</td><td>sum of ten exchanges</td><td>0.578148 s</td></tr>
+        <tr><td>gentle fine window total</td><td>422.454568 + 0.578148</td><td><strong>423.032716 s</strong></td></tr>
+        <tr><td>TORAX share</td><td>0.578148 / 423.032716</td><td><strong>0.1367%</strong></td></tr>
+        <tr><td>eight serial fine windows</td><td>8 × 423.032716</td><td><strong>3384.261729 s = 56.404 min</strong></td></tr>
+        <tr><td>ideal two-correction critical path</td><td>2 × 423.032716 + 24 × 0.057815 coarse-step proxy</td><td>847.452987 s = 14.124 min; <strong>3.993× ideal</strong></td></tr>
+        <tr><td>H200 extraction, scalar versus batch eight</td><td>1.567967 s versus 5.925816 s total</td><td>batch/scalar latency 3.779; throughput <strong>2.117×</strong></td></tr>
+        <tr><td>two-correction extraction-only ceiling on one H200</td><td>8 × 1.567967 / (2 × 5.925816)</td><td><strong>1.058×</strong> before coarse work and overhead</td></tr>
+      </tbody>
+    </table>
+    <p>The 3.993× row is the mathematical eight-way concurrency ceiling if a batched or sharded fine phase costs one scalar window. The landed single-H200 extraction ratio shows that assumption is currently false for at least one dominant kernel: batch eight costs 3.779 scalar calls. With two Parareal corrections, a measured <strong>2×</strong> whole-window speedup requires the end-to-end batch/scalar latency ratio to be at most 2; a <strong>3×</strong> speedup requires at most 4/3. At the landed extraction ratio, one correction would yield 2.117× for that component, while two yield only 1.058×. Convergence and batch efficiency are therefore co-equal gates.</p>
+    <p>The 57.815 ms coarse-step value is the mean warmed TORAX time observed inside the gentle fine window and is used only as a cost proxy. The proposed frozen-geometry coarse propagator has not itself been timed. Compilation, communication, correction and free-boundary solve batching are absent from this arithmetic; the first experiment must measure them rather than inherit the ideal row.</p>
+
+    <h2 id="experiment">Bounded first experiment</h2>
+    <p><strong>Fixture and horizon.</strong> Tile the landed gentle case into eight contiguous 2.5 ms windows: the repository's 25×25 free-boundary fixture, exact evaluation on 49×49, eight TORAX radial cells, 14 surface bins, auxiliary multiplier 0.5, waveform damping 0.5, tolerance 0.005 and ten-iteration cap. This gives a 20 ms horizon and exactly the batch size already demonstrated by extraction.</p>
+    <p><strong>Composition.</strong> Fine <code>F</code> is unchanged <code>solve_window</code>. Coarse <code>G</code> is one fixed TORAX step on the incoming geometry held as a constant two-endpoint waveform. Run the sequential coarse prediction, then at most <strong>three</strong> Parareal corrections. Batch the eight fine windows with <code>vmap</code> on one H200, separating one cold compile from three warmed measurements. Also measure one warmed scalar fine window and the eight-window serial fine baseline on that same device; do not mix the CPU receipt arithmetic into the measured verdict.</p>
+    <p><strong>Pre-registered outcome.</strong> Scientific acceptance requires the final state and every continuous boundary field to agree with the sequential fine chain at the declared 0.005 window tolerance, conservation closures unchanged, all extraction records valid, and identical branch-selection history. Any typed non-confined result must match at the same window and exchange. Performance passes at <strong>at least 2× end-to-end speedup with no more than two corrections</strong>. Three corrections, a batch/scalar latency ratio above 2, or any branch mismatch is a qualified negative that ends the experiment; no surrogate, tolerance relaxation, extra device or altered physics is introduced in the same run.</p>
+
+    <h2 id="sources">Method sources and landed evidence</h2>
+    <ul>
+      <li><a href="https://epubs.siam.org/doi/10.1137/23M1619733">Jin, Lin and Zhou, “Optimizing Coarse Propagators in Parareal Algorithms”</a> — coarse-propagator quality controls useful convergence on parabolic models.</li>
+      <li><a href="https://www.math.mun.ca/~smaclachlan/research/mgrit.pdf">Falgout et al., “Parallel Time Integration with Multigrid”</a> — MGRIT as a hierarchy calling an existing adjustable time-step routine.</li>
+      <li><a href="https://arxiv.org/abs/1603.03586">Bolten, Moser and Speck, “A multigrid perspective on PFASST”</a> — fine parallel block sweeps interlaced with coarse serial corrections.</li>
+      <li><a href="https://epubs.siam.org/doi/10.1137/21M1419428">Bui et al., “Coupling Parareal with Optimized Schwarz Waveform Relaxation for Parabolic Problems”</a> — evidence that Parareal and waveform relaxation can compose for parabolic equations.</li>
+      <li><a href="/nova/evidence/archive/flux-function-forward-transport-landed#waveform-primitives">Landed waveform and fixed-point evidence</a>, <a href="/nova/evidence/archive/flux-function-forward-transport-landed#window-receipts">real coupled-window receipts</a>, and <a href="/nova/evidence/archive/flux-function-forward-transport-landed#geometry-service">H200 extraction benchmark</a>.</li>
+    </ul>
+  </main>
+</body>
+</html>

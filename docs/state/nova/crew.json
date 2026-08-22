@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T11:07:55",
+  "updated": "2026-08-22T11:28:23",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -21126,9 +21126,201 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T082440664912-boundary-band-sparsification",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a710",
+        "node": "boundary-band-sparsification",
+        "role": "implement",
+        "member": "transport-env",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T08:24:43Z",
+        "completed_at": "2026-08-22T09:10:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2724,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2724,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "3f3e610d59137f3af23eb9805e6fc44238f36719",
+        "commits": [
+          "32942ac3861af0b95dd19cf279e4b3ab211fa705"
+        ],
+        "changed_lines": {
+          "added": 153,
+          "removed": 54,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "provably lossless 7.29x: ITER production warm assembly 179.33 to 24.59 s, MAST 24.20 to 10.05 s, focused-gradient peak RSS halved 18.6 to 8.8 GiB; per-level fixed-capacity boundary bands (four-perimeter capacity, 1032 slots vs 16384 cells, overflow fails closed, max live band 146/520) with enclosed cells accumulated by per-level mask deltas of once-computed full-cell integrals; every reference gate at recorded values, 22-field parity intact, 11+6 green sequential fresh suites",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T082440664912-boundary-band-sparsification/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 33530368,
+            "cached_input_tokens_cumulative": 445484800,
+            "input_tokens": 34086449,
+            "input_tokens_cumulative": 453605393,
+            "output_tokens": 42016,
+            "output_tokens_cumulative": 743486,
+            "reasoning_output_tokens": 10207,
+            "reasoning_output_tokens_cumulative": 235870
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T082436600704-h200-window-end-to-end",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a710",
+        "node": "h200-window-end-to-end",
+        "role": "implement",
+        "spec_level": "",
+        "member": "transport-window",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T08:24:39Z",
+        "completed_at": "2026-08-22T09:25:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3640,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3640,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "3f3e610d59137f3af23eb9805e6fc44238f36719",
+        "commits": [
+          "da6835e07baae32de4ad667717f33b2201687a99",
+          "9ffe76198200efb37fc554a6855c53dffe4d15a3"
+        ],
+        "changed_lines": {
+          "added": 933,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "the amended run proved end-to-end CUDA computation (10/10 exchanges, 20 equilibrium receipts and 10 TORAX states device-asserted, callback cleared by CPU registration) and discharged the solver-identity source audit - and found a real cross-backend divergence: the window that converges on CPU at residual 0.004986 exhausts cap 10 on the H200 at 0.0277, about three iterations behind at the measured contraction, suggesting a per-sweep accuracy floor rather than reduction noise. The success-only writer discarded the exhausted trace, so the timing and receipt set is unavailable; a diagnosis node adds failure-path serialization and isolates the first CPU/GPU divergence, precision provenance first",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T082436600704-h200-window-end-to-end/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f8b-c81b-70c3-a5d8-007c4d512626",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11333888,
+            "cached_input_tokens_cumulative": 80461824,
+            "input_tokens": 11807519,
+            "input_tokens_cumulative": 83005069,
+            "output_tokens": 56370,
+            "output_tokens_cumulative": 297965,
+            "reasoning_output_tokens": 17880,
+            "reasoning_output_tokens_cumulative": 101067
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T090935018376-pf-passive-description",
+        "plan": "coil-circuit-discovery",
+        "section": "\u00a74",
+        "node": "pf-passive-description",
+        "role": "implement",
+        "spec_level": "",
+        "member": "circuit-adjudicator",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T09:09:37Z",
+        "completed_at": "2026-08-22T09:19:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 576,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 576,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "981cbb0c06b2dbce7dcd5f551543363df8f1e970",
+        "commits": [
+          "acd413085bb60571fc1bd7bbecfcdd2ab4a0b12f"
+        ],
+        "changed_lines": {
+          "added": 4707,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "Delivered its contract in full (99-loop DD 4.1.1 pf_passive from the banked hex mesh, published material priors, operator attached, caveats documented) but held unmerged: the owner redirected the passive mesh to slender wall-following polygons before integration, so a superseding node replaces the hex construction in place",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T090935018376-pf-passive-description/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0262f-830e-7402-92b6-cffc3106b047",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6103168,
+            "cached_input_tokens_cumulative": 104796672,
+            "input_tokens": 6264629,
+            "input_tokens_cumulative": 106668749,
+            "output_tokens": 20362,
+            "output_tokens_cumulative": 246055,
+            "reasoning_output_tokens": 5256,
+            "reasoning_output_tokens_cumulative": 61917
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 511
+    "_version": 514
   }
 }

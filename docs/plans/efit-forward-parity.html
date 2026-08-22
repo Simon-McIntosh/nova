@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-version" content="33">
-<meta name="plan-commits" content="c1e180d5,71c1ec36,457caddd,252bdd77,d026b0dc,57a1bfb9,c3f9f83a,6700b088,783229ac,325f6a85,56b1518b,e4dc6155,d7bf1035,c7ea1772,19e0d865,9641608b,f771f90d,d2e27d60,c3828a88,c9152535,ed601260,c308025d,ede61ac7,a031c210,f8feb25f,aad1a445">
-<meta name="plan-artifacts" content="scripts/dina_profile_routes/reuse-report.md,scripts/dina_profile_routes/receipt.json,scripts/dina_profile_routes/addendum.json,scripts/constrained_parity_reuse/reuse-report.md,benchmarks/efit_forward_parity_slice.py,benchmarks/efit_parity_root_geometry.py,benchmarks/efit_parity_warm_neighbour.py,benchmarks/efit_parity_moment_definitions.py,docs/figures/efit-forward-parity/reference-seeded-forward-slice.json,docs/figures/efit-forward-parity/pinned-parity-slice.json,docs/figures/efit-forward-parity/boundary-imbalance-attribution.json,docs/figures/efit-forward-parity/passive-inclusive-parity-slice.json,docs/figures/efit-forward-parity/passive-inclusive-frozen-six-scorecard.json,docs/figures/efit-forward-parity/passive-inclusive-frozen-six-trajectories.png,docs/figures/efit-forward-parity/converged-root-geometry-attribution.json,docs/figures/efit-forward-parity/converged-root-geometry-attribution.png,docs/figures/efit-forward-parity/warm-neighbour-stall-lift.json,docs/figures/efit-forward-parity/warm-neighbour-stall-lift.png,docs/figures/efit-forward-parity/moment-definition-rescore.json,docs/evidence/archive/efit-forward-parity-landed.html">
-<meta name="plan-impl" content="0.954">
+<meta name="plan-version" content="34">
+<meta name="plan-commits" content="c1e180d5,71c1ec36,457caddd,252bdd77,d026b0dc,57a1bfb9,c3f9f83a,6700b088,783229ac,325f6a85,56b1518b,e4dc6155,d7bf1035,c7ea1772,19e0d865,9641608b,f771f90d,d2e27d60,c3828a88,c9152535,ed601260,c308025d,ede61ac7,a031c210,f8feb25f,aad1a445,8c39bf42">
+<meta name="plan-artifacts" content="scripts/dina_profile_routes/reuse-report.md,scripts/dina_profile_routes/receipt.json,scripts/dina_profile_routes/addendum.json,scripts/constrained_parity_reuse/reuse-report.md,benchmarks/efit_forward_parity_slice.py,benchmarks/efit_parity_root_geometry.py,benchmarks/efit_parity_warm_neighbour.py,benchmarks/efit_parity_moment_definitions.py,benchmarks/efit_parity_boundary_volume.py,docs/figures/efit-forward-parity/reference-seeded-forward-slice.json,docs/figures/efit-forward-parity/pinned-parity-slice.json,docs/figures/efit-forward-parity/boundary-imbalance-attribution.json,docs/figures/efit-forward-parity/passive-inclusive-parity-slice.json,docs/figures/efit-forward-parity/passive-inclusive-frozen-six-scorecard.json,docs/figures/efit-forward-parity/passive-inclusive-frozen-six-trajectories.png,docs/figures/efit-forward-parity/converged-root-geometry-attribution.json,docs/figures/efit-forward-parity/converged-root-geometry-attribution.png,docs/figures/efit-forward-parity/warm-neighbour-stall-lift.json,docs/figures/efit-forward-parity/warm-neighbour-stall-lift.png,docs/figures/efit-forward-parity/moment-definition-rescore.json,docs/figures/efit-forward-parity/boundary-enclosed-volume-reconciliation.json,docs/figures/efit-forward-parity/boundary-enclosed-volume-reconciliation.png,docs/evidence/archive/efit-forward-parity-landed.html">
+<meta name="plan-impl" content="0.957">
 </head>
 <body>
   <main class="plan-doc">
@@ -310,6 +310,53 @@
     integrate the region their own reported boundary encloses, with the surviving deviation quantified
     or stated as eliminated.</p>
 
+    <h2 id="s9">&sect;9 &mdash; Whether the surviving inductance deficit is the same clipping</h2>
+
+    <p><strong>One row is left standing, and the mechanism that explains every other retracted row is
+    the obvious suspect for it too.</strong> On matched boundary support
+    <code>l<sub>i</sub></code> sits at &minus;35.695&nbsp;percent while
+    <code>&beta;<sub>p</sub></code> has collapsed to &plus;5.818&nbsp;percent. The confined-core mask
+    that convicted the volume figure covers only 0.4063 of the area inside nova's <em>own</em> closed
+    separatrix branch, and 516,076.62&nbsp;A &mdash; fifty-five percent of the pinned current &mdash;
+    lies outside it. An internal inductance integrated over 41&nbsp;percent of the region its own
+    boundary encloses, with more than half the current outside that region, is the expected shape of
+    a &minus;36&nbsp;percent <code>l<sub>i</sub></code>.</p>
+
+    <p>But expected shape is not measurement, and the alternative is a real physics result: nova's
+    forward equilibrium genuinely distributing current more towards the edge than the reference does,
+    which is what a low internal inductance means when the supports <em>do</em> agree. The two are
+    distinguishable, and distinguishing them is what decides whether this plan ends with one
+    surviving deviation or none.</p>
+
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Reading</th><th>What decides it</th></tr></thead>
+      <tbody>
+        <tr><td>the deficit is the core mask under-selecting</td>
+            <td><code>&int;B<sub>p</sub>&sup2;dV</code> taken over the full boundary-enclosed region
+            closes most of the &minus;35.7&nbsp;percent, and the out-of-core current is interior
+            current the mask omitted</td></tr>
+        <tr><td>the deficit is a genuine current-distribution difference</td>
+            <td>the boundary-enclosed integral leaves a substantial deficit, and the out-of-core
+            current sits outside the separatrix rather than inside it &mdash; a real edge-weighted
+            profile</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p>The discriminator is where the 516,076.62&nbsp;A actually sits. Current inside the closed
+    branch but outside the core mask is a masking artifact; current outside the closed branch is
+    physics, and belongs to whatever plan owns edge and scrape-off-layer current representation
+    rather than to this one.</p>
+
+    <p><em>Done-when:</em> the 516,076.62&nbsp;A of out-of-core current is partitioned into the part
+    lying inside nova's closed separatrix branch and the part outside it, with both amounts and the
+    cell counts stated; <code>l<sub>i</sub></code> is recomputed with
+    <code>&int;B<sub>p</sub>&sup2;dV</code> and the current integral both taken over the full
+    boundary-enclosed region and reported against the &minus;35.695&nbsp;percent matched-support
+    figure; and the &sect;4 verdict records the surviving deviation with its mechanism named as
+    masking or as current distribution, on the strength of that partition.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="forward-parity-seed" data-choice="reference-seed" data-by="Simon McIntosh" data-when="2026-08-21T10:09:38+00:00">
@@ -457,6 +504,9 @@ CONSEQUENCE FOR THE SECTION-4 VERDICT, stated now rather than deferred: of the s
 </div>
 <div class="r-comment" data-section="s7" data-id="c-20260822T1725-moment-rescore" data-who="reckon-ship" data-when="2026-08-22T17:25:00Z">
     <div class="r-comment-body">MOMENT DEFINITIONS RESCORED - run r-20260822T170950037793, gate PASSED, commit aad1a445, 5 tests, ruff clean, zero solves, 23/23 protected banked digests unchanged. VERDICT SCOREABLE_MATCHED_DEFINITIONS_FAIL_REPRODUCTION, and the rows are worse than the scorecard reported, in the OPPOSITE direction. THE VALIDATING CHECK PASSES EXACTLY: the reference boundary-field definitions applied to the reference's own published integrals reproduce its stored beta_p 0.3351304829120636 and l_i 0.7693799734115601 at relative error 0.0 and 0.0 against a 1e-12 tolerance, so the conventions are correctly identified and nothing is being fitted. MATCHED-DEFINITION DEVIATIONS: beta_p -56.284 percent and l_i -73.434 percent, both FAIL_REFERENCE_REPRODUCTION - against the scorecard's reported +42.53 and +41.34 percent. The sign flips and the magnitude grows because the original figures compared nova's own convention against the reference's; scored on a common scale, nova's solved equilibrium is moment-DEFICIENT, not moment-excessive. Both rows ARE scoreable, no further published quantity is needed, and the receipt records the four-by-two table: nova shared denominator solved/reference beta_p 0.477669/1.092675 on the core support and 0.095393/0.218213 all-domain, l_i 1.087477/4.093563 core and 0.217175/0.817506 all-domain; reference boundary-field solved/reference beta_p 0.733602/1.678126 core and 0.146504/0.335130 all-domain, l_i 0.204390/0.769380 current-independent. THE DEVIATION IS DEFINITION- AND SUPPORT-INVARIANT, which is the receipt's own finding and it relocates the cause once more: it sits in the NUMERATOR INTEGRALS, not in any denominator. Solved pressure integral 23,057.44 against 52,744.24 Pa m3 (ratio 0.43716) and solved Bp-squared integral 0.131930 against 0.496621 T2 m3 (ratio 0.26566). DIVIDE BY VOLUME AND THE PICTURE INVERTS FOR PRESSURE: solved mean pressure 6,552.49 Pa against the reference 5,999.40 Pa - nova is 9.2 percent HIGHER - while solved mean Bp-squared is 0.0374921 against 0.0564882 T2, 33.6 percent lower. So beta_p's deficit is almost entirely the VOLUME (integral ratio 0.43716 against volume ratio 0.40026), and l_i carries a genuine mean-field deficit on top of it. WHICH EXPOSES AN INTERNAL INCONSISTENCY THAT MUST BE RUN DOWN: the solved plasma volume is 3.518880 m3 against the reference 8.791592 m3, a factor 0.40026, YET the two boundary curves agree to 2.4 percent - solved closed-branch arclength 5.394335 m against the stored LCFS perimeter 5.527656 m. Two nearly identical closed boundaries at comparable major radius cannot enclose toroidal volumes differing by two and a half times. The confined-core current fraction is 0.44688 of the pinned total, close to the same 0.40 volume fraction, so ONE clipping plausibly accounts for both deficits. Folded as section 8. Receipt: docs/figures/efit-forward-parity/moment-definition-rescore.json. Ledger: 21 of 22 executable nodes landed, impl 0.954.</div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-20260822T1745-volume-support" data-who="reckon-ship" data-when="2026-08-22T17:45:00Z">
+    <div class="r-comment-body">VOLUME RECONCILED, AND ONE OF THE TWO PUBLISHED FIGURES IS CONVICTED - run r-20260822T172100225230, gate PASSED, commit 8c39bf42, 6 tests, ruff clean, zero nonlinear solves, 23/23 protected banked digests unchanged. VERDICT SOLVED_PUBLISHED_VOLUME_IS_CONFINED_CORE_NOT_BOUNDARY_ENCLOSED. Both contours integrated by the same quadrature, with the exact solid-of-revolution and first-moment forms agreeing to 2.22e-16 relative so the quadrature itself is excluded: solved closed branch encloses area 1.7718310 m2 at centroid R 0.7651776 m for volume 8.5185245 m3; stored LCFS encloses 1.8370302 m2 at centroid R 0.7617411 m for volume 8.7923220 m3. THE REFERENCE IS SELF-CONSISTENT - its published 8.7915916 m3 matches its own enclosed 8.7923220 m3 at ratio 0.9999169. NOVA'S IS NOT - its published 3.5188798 m3 equals the reconstructed 95-cell confined-core volume exactly and is only 0.4130856 of the 8.5185245 m3 its own boundary encloses, low by factor 2.4208058. The three candidates resolve cleanly. CANDIDATE 1 SUPPORTED, one clipping for both deficits: core AREA fraction 0.4063152 against core CURRENT fraction 0.4468839, differing by 0.0405687 absolute. CANDIDATE 2 EXCLUDED, the boundaries are not different curves: solved-over-stored area ratio 0.9645083 and enclosed-volume ratio 0.9688595, nowhere near the published 0.4002551 - the two regions agree to within three and a half percent, as the shaded overlay shows, differing only in the lower divertor leg and a small upper horn. CANDIDATE 3 EXCLUDED, no convention difference: centroid-radius ratio 1.0045113, and the two revolution formulas agree. THE RESCORE ON MATCHED BOUNDARY SUPPORT IS THE HEADLINE: beta_p moves from -56.284 percent to +5.818 percent, its volume deficit ELIMINATED, landing inside DINA class - that reference's banked beta_p deviation was +2.24 percent. l_i moves from -73.434 percent to -35.695 percent and SURVIVES as the one substantive moment deviation left standing. So of the moment rows originally reported at +42.53 and +41.34 percent, one is an instrument artifact end to end and the other is real at roughly a third. THE SURVIVING l_i DEFICIT HAS A NAMED LEADING MECHANISM and it is the same clipping: nova's confined-core mask covers only 0.4063 of the area inside nova's OWN closed separatrix branch, and 516,076.62 A - fifty-five percent of the pinned current - lies outside it. An internal inductance computed over 41 percent of the region its own boundary encloses, with more than half the current outside that region, is the expected shape of a -36 percent l_i. Folding that verification rather than asserting it. Receipt: docs/figures/efit-forward-parity/boundary-enclosed-volume-reconciliation.json; figure: boundary-enclosed-volume-reconciliation.png. Ledger: 22 of 23 executable nodes landed, impl 0.957.</div>
 </div>
 </section>
 </main>

@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="coil-circuit-discovery">
   <meta name="plan-title" content="Coil Circuit Discovery">
   <meta name="plan-summary" content="Recover the unshipped conductor currents from the plasma- and coil-tared flux residual by least squares across the corpus, adjudicate them against the independently measured ohmic circuit, and promote only the relations that survive into static constraints that predict unknown currents from shipped channels — everything else stays an explicit free parameter">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="10.0">
   <meta name="plan-capability-version" content="1.0">
@@ -24,10 +24,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-version" content="27">
-<meta name="plan-impl" content="0.96">
-<meta name="plan-commits" content="5855f2ba,31e10c89,d5a7c0dc,bdf58a45">
-<meta name="plan-artifacts" content="docs/figures/coil-circuit-discovery/five_column_residual_adjudication_receipt.json,docs/figures/coil-circuit-discovery/flux_space_adjudication_preregistration.json,docs/figures/coil-circuit-discovery/flux_space_adjudication_receipt.json,docs/evidence/archive/coil-circuit-discovery-landed.html">
+<meta name="plan-version" content="29">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-commits" content="5855f2ba,d5a7c0dc,49fb0592,749f28f6,e3460384,b742b160,b02e5572,23ee641e,2090335c,e1aeb4af,69fad1fe,7f53b42a,e68ae8be">
+<meta name="plan-artifacts" content="docs/evidence/archive/coil-circuit-discovery-landed.html,docs/figures/coil-circuit-discovery/pf_active_circuit_receipt.json,docs/figures/coil-circuit-discovery/pf_passive_description_receipt.json,docs/figures/coil-circuit-discovery/pf_passive_slender_operator.npz,docs/figures/coil-circuit-discovery/grid_residual_current_regression_receipt.json,docs/figures/coil-circuit-discovery/ensemble_relation_assessment_receipt.json,docs/figures/coil-circuit-discovery/circuit-driven-forward-validation/circuit_driven_forward_validation_receipt.json">
 </head>
 <body>
   <main class="plan-doc">
@@ -69,30 +69,23 @@
     (commits <code>5855f2ba</code>, <code>d5a7c0dc</code>).
     </p>
 
-    <h2 id="s3">§3 — Circuit discovery by regularised full-grid regression, assessed en-ensemble</h2>
-    <p><strong>Reopened on owner clarification 2026-08-22: the earlier closure judged the method by
-    per-frame criteria it never claimed.</strong> The instrument is a two-stage discovery. Stage one is a
-    per-frame calibration regression that <em>intentionally</em> uses the labelled shots: solve
-    <code>G·I_c = ψ_residual</code> over the <em>full grid</em>, where the residual is the label flux
-    minus the plasma field from the exact separatrix-clipped hex-cell current moments and minus the
-    19 known-conductor fields at shipped currents, <code>G</code> holds the five unshipped-conductor
-    full-grid response columns from the shared exact-polygon builder, and <code>I_c</code> — the
-    ampere-turns of each unshipped coil — is solved by Tikhonov-regularised least squares with the
-    additive flux gauge handled explicitly and the regularisation strength chosen by a stated,
-    sensitivity-swept criterion. The GS operator's current-density view remains a diagnostic, not the
-    fit target.</p>
-    <p>Stage two is where physicality is judged: the fitted currents are assessed <em>en-ensemble</em>
-    across frames, shots and current levels. A circuit is a relation among fitted currents (or between a
-    fitted current and a shipped channel) that holds with tight spread across the ensemble; per-frame
-    scatter is expected and is what the regularisation and the ensemble average are for. The banked
-    acquisition-scale and polarity faults stay screened, and the earlier adjudication measurements stand
-    as context: interior Δ* is blind to these coils, and the independent ohmic traces give near-unity
-    mutual scales on a different pulse.</p>
-    <p><strong>Done-when:</strong> per-frame fitted ampere-turns with residual norms before and after the
-    fit are banked for a multi-shot cohort; post-fit residuals are plotted as line contours beside their
-    pre-fit state in the evidence record for several frames from multiple shots; and the ensemble
-    assessment reports, per conductor, the candidate relations to shipped channels with their spread and
-    stability across shots and current level — promoted or withheld per the locked decisions.</p>
+    <h2 id="s3">§3 — Circuit discovery by regularised full-grid regression, assessed en-ensemble <span class="badge badge-shipped">✓ landed 2026-08-22</span></h2>
+    <p class="landed-summary">
+    Ran as the owner specified, in two stages with every convention leg oracle-proven. Stage one: the
+    full-grid Tikhonov regression explains <strong>84.0 %</strong> of the tared flux residual on
+    60 frames / 20 shots (condition 18.0, GCV off-boundary everywhere) with pre/post line contours
+    banked for six shots. Stage two: the fitted currents track same-frame ECOILA at through-origin
+    slopes 1.0017–1.0457 with leave-one-shot-out R² 0.94–0.99 across polarity and current strata —
+    the published series circuit recovered from label flux — and after two review-refuted correction
+    rounds settled the corpus <code>kA.turn</code> contract, the wiring adjudication snapped ECOILB to
+    exactly 2 (the A/B co-location), the E567 pair to exactly 1, and kept the E89 pair as integer 1
+    plus a named +4.57 % normalisation systematic that two conductors reproduce to 7×10⁻⁵. Label-fitted
+    promotion is withheld under the locked both-required rule (flux closure 1/60); the circuit landed
+    instead as machine-description fixed wiring per the owner directive. Full record:
+    <a href="/nova/evidence/archive/coil-circuit-discovery-landed#series-circuit-recovered">discovery</a>,
+    <a href="/nova/evidence/archive/coil-circuit-discovery-landed#fixed-wiring">wiring</a>
+    (commits <code>749f28f6</code>, <code>e3460384</code>, <code>b742b160</code>, <code>b02e5572</code>).
+    </p>
 
     <h2 id="s4">§4 — Known, knowable, unknown: the discipline that makes the model honest <span class="badge badge-shipped">✓ landed 2026-08-22</span></h2>
     <p class="landed-summary">
@@ -208,6 +201,9 @@
 <div class="r-comment" data-section="_top" data-id="c-20260822T0150" data-who="reckon-ship" data-when="2026-08-22T01:50:00Z">
     <div class="r-comment-body">DRAIN LEDGER — plan @ 2026-08-22T01:50Z. Rows: (1) write §2 committed result and keep corpus discovery gated — folded → landing beats v4–v8, §3 closed as refuted. (2) record the undecidable flux verdict — folded → v6 decision locks + f-ccd-001 resolution. (3) ohmic_pattern_shape discriminator bookkeeping — folded → clarification in evidence #flux-adjudication (contextual, not an authority gate). (4) zero-current division-ordering defect in diiid_current_pinned_forward.py, stale sibling §5 text, and tier-resolver consumption rewire — foreign-owner → current-constrained-forward-solve f-ccfs-tier-consume. (5) observability program for ECOILB/E567DN/E89UP — authority-required → owner authorisation of new scope, held open as f-ccd-002 with question q-ccd-observability. Rows: 5. foldable-remaining: 0.</div>
 </div>
+<div class="r-comment" data-section="_top" data-id="c-20260822T1135" data-who="reckon-ship" data-when="2026-08-22T11:35:00Z">
+    <div class="r-comment-body">DRAIN LEDGER — plan @ 2026-08-22T11:35Z (final). Rows: (1) reopen §3 with the owner-clarified two-stage method — folded → grid-residual-current-regression + reviews (4 rounds). (2) sign/units convention chain — folded → sign-control, oracle, time-invariant, unit-premise nodes; all legs proven. (3) ensemble + ECOILB factor-two — folded → ensemble-relation-assessment + ecoilb audit + integer-wiring-adjudication. (4) owner directive: pf_active/pf_passive landing — folded → pf-active-circuit-records + gain precision + slender-arclength (two review rounds each). (5) owner directive: forward validation — folded → circuit-driven + globalized validation + review; one within-ceiling recovery banked, three-frame floor unmet. (6) solve-route robustness on cold-started out-of-cohort frames — foreign-owner → current-constrained-forward-solve (its §5 followup f-ccfs-tier-consume already carries the pinned-forward scope; the per-route failure table at #forward-validation is its evidence base). (7) observability program for free-current identifiability — authority-required → f-ccd-002 open with question q-ccd-observability. (8) restore two absent onboarding receipts named by the pf_active test sweep — foreign-owner → diiid-forward-onboarding scope. Rows: 8. foldable-remaining: 0.</div>
+</div>
 <div class="r-comment" data-section="s3" data-id="c-20260822T0930" data-who="reckon-ship" data-when="2026-08-22T09:30:00Z">
     <div class="r-comment-body">OWNER CLARIFICATION reopens §3 — the shipped closure misread the method. The intended instrument is a full-grid regression G·Ic = ψ_residual, with ψ_residual = label flux − plasma field from exact separatrix-clipped hex-cell current moments − known-conductor field, and Ic the ampere-turns of each unshipped coil solved per frame by Tikhonov-regularised least squares. Per-frame use of the labelled shots is intentional calibration-stage regression, not an inference claim; post-fit residuals are plotted as line contours in the evidence record over frames from multiple shots; circuits are discovered by assessing the fitted currents en-ensemble — not by the per-frame flux-closure and shape thresholds the adjudication rounds scored, so the 0/60 discriminators refute per-frame criteria, not this method. Plan back to active, impl reset to 8 completed of ~12 nodes. The GS-operator findings stand as measurements; they are one view, not the fit target.</div>
 </div>
@@ -234,6 +230,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20260822T1120" data-who="reckon-ship" data-when="2026-08-22T11:20:00Z">
     <div class="r-comment-body">circuit-driven-forward-validation round one landed with gate FAILED — run r-20260822T100138164495, commit 69fad1fe merged at 43576b81, 3 tests. Instrument verified: five score-blind frames from five shots outside both the 60-frame calibration bank and the 603-shot polarity census; all 24 currents from shipped channels through the fixed-wiring circuit with zero label reads, fits or unknowns; shipped-19 control arm. Measured: circuit arm preserves diverted topology 5/5 (shipped-only 4/5) and lowers residual on 3/5, but NEITHER arm converges at the landed 1e-5 fixed-point criterion on any frame (circuit residual median 0.0814, shipped 0.0550; terminal flux RMS medians 0.224 vs 0.221) — so boundary/X-point recovery is deliberately unscored: a cold-start single fixed-point route stalls on out-of-cohort frames regardless of currents. Rerun dispatched with the landed solve repertoire (current-pinned/eliminated route prescribing shipped plasma current, Anderson/newton_krylov globalizations, branch selection) — the earlier circuit-vacuum study reached 1.4e-9-class convergence on these currents, so convergence is attainable and the recovery question remains open, not answered.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260822T1130" data-who="reckon-ship" data-when="2026-08-22T11:30:00Z">
+    <div class="r-comment-body">globalized-forward-validation landed — runs r-20260822T100138164495 (round one, gate failed: cold-start fixed point stalls both arms) and r-20260822T102445118797 (globalized, gate passed after two answered fences), commits 69fad1fe + 7f53b42a merged at e68ae8be; forward-validation-review (run r-20260822T110427459189, gate passed) independently reconstructed both exclusion populations, all route tables and hygiene counters. Result: on five score-blind out-of-cohort frames with all 24 currents from shipped channels through the fixed-wiring circuit, the current-pinned route converges 2/5 and Anderson 1/5, and the best recovery reaches 1.437 % fractional flux RMS (inside the 4.29 % representability ceiling) with 5.92 mm X-point separation against the EFIT label. The preregistered three-frame floor is unmet so recovery_demonstrated is recorded false; the residual obstacle is cold-start solve-route robustness, owned by the sibling constrained-solve plan. Evidence: /nova/evidence/archive/coil-circuit-discovery-landed#forward-validation.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T12:24:01",
+  "updated": "2026-08-22T13:13:16",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -21936,9 +21936,194 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T101928995343-same-tree-window-contraction",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a710",
+        "node": "same-tree-window-contraction",
+        "role": "test",
+        "spec_level": "",
+        "member": "transport-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T10:19:32Z",
+        "completed_at": "2026-08-22T10:47:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1686,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1686,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "08f371e139437820d0ca729de384903475ac87d8",
+        "commits": [
+          "3d8650894951e61361034e8ae6f07f067808d00c"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "unresolvable_revision"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "same-tree, both backends, decisive: contraction 0.64062864104 CPU versus 0.64062864561 H200 (gap 4.6e-9), exit residuals matching to 4e-11, ledgers exactly zero - no backend effect exists. Both lanes exhaust cap 10 at the post-band contraction 0.641 while contracting monotonically toward convergence at about iteration 14, so the cap policy is the owner decision with three framed options. Warm combined medians: CPU 15.88 s versus H200 3.02 s, a 5.25x same-tree speedup with the band already in both",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T101928995343-same-tree-window-contraction/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0255d-e2ec-79c0-b2ef-c2072de1fa22",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 14956032,
+            "cached_input_tokens_cumulative": 56850432,
+            "input_tokens": 15305462,
+            "input_tokens_cumulative": 57837611,
+            "output_tokens": 48453,
+            "output_tokens_cumulative": 122380,
+            "reasoning_output_tokens": 14513,
+            "reasoning_output_tokens_cumulative": 39901
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T102445118797-globalized-forward-validation",
+        "plan": "coil-circuit-discovery",
+        "section": "\u00a75",
+        "node": "globalized-forward-validation",
+        "role": "implement",
+        "spec_level": "",
+        "member": "forward-slice",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T10:24:48Z",
+        "completed_at": "2026-08-22T11:03:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2328,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2328,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "db7505d17aa83e3d264ba739d93987cb6a675745",
+        "commits": [
+          "7f53b42a1863948b933618ce9296c1a5c83c95a3"
+        ],
+        "changed_lines": {
+          "added": 10846,
+          "removed": 1333,
+          "files": 4
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T102445118797-globalized-forward-validation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a024c1-c68c-70e3-8edf-4bf5cd7f1e5c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 16451072,
+            "cached_input_tokens_cumulative": 126486528,
+            "input_tokens": 16865902,
+            "input_tokens_cumulative": 129356787,
+            "output_tokens": 56066,
+            "output_tokens_cumulative": 337187,
+            "reasoning_output_tokens": 17200,
+            "reasoning_output_tokens_cumulative": 102050
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T110427459189-forward-validation-review",
+        "plan": "coil-circuit-discovery",
+        "section": "\u00a75",
+        "node": "forward-validation-review",
+        "role": "implement",
+        "spec_level": "",
+        "member": "circuit-reviewer",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T11:04:30Z",
+        "completed_at": "2026-08-22T11:13:03Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 513,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 513,
+        "stalled": false,
+        "time_budget": "15m",
+        "base_sha": "e68ae8bef81dabbfb999041067c397fd4685830c",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T110427459189-forward-validation-review/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0264c-544b-73b2-aba0-4bf197b6375c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2652416,
+            "cached_input_tokens_cumulative": 28770432,
+            "input_tokens": 2819149,
+            "input_tokens_cumulative": 30246712,
+            "output_tokens": 12416,
+            "output_tokens_cumulative": 139149,
+            "reasoning_output_tokens": 2841,
+            "reasoning_output_tokens_cumulative": 39272
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 524
+    "_version": 527
   }
 }

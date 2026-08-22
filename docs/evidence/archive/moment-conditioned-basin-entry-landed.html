@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-evidence-for" content="moment-conditioned-basin-entry">
+  <meta name="plan-verifies" content="moment-conditioned-basin-entry#s2">
+  <title>Moment-Conditioned Basin Entry — landed evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>Moment-Conditioned Basin Entry — cumulative execution evidence</h1>
+
+  <p>Execution record for <a href="/nova/plans/moment-conditioned-basin-entry">the plan</a>. One anchored
+  section per material result; updated at every landing beat.</p>
+
+  <h3 id="s2-confidence">§2 — the moments are predictable before any solve, and the centroid is the confident one</h3>
+
+  <p><strong>Commit <code>a3119b61</code> (merged <code>b3713905</code>); gate passed.</strong> The study
+  (<code>scripts/moment_prediction_confidence/</code>: <code>measure.py</code>, independent
+  <code>verify.py</code>, 55 tree-stamped TSV rows, machine-readable JSON with six input digests) predicts
+  the integral current moments from the prescribed flux functions alone — no converged solve — on the six
+  frozen MAST references plus the five DIII-D score-blind cold-start frames, first with each reference's
+  own boundary and then across a five-scale boundary ladder (0.90/0.95/1.00/1.05/1.10).</p>
+
+  <p><strong>Own-boundary all-frame medians:</strong> centroid vector error 4.624&nbsp;cm; RMS-width error
+  4.768%; radial second-moment error 2.558%; Nova-internal inductance error 16.634%.
+  <strong>Boundary-hypothesis sensitivity (median full-ladder range):</strong> radial centroid
+  1.663&nbsp;cm; vertical centroid 0.115&nbsp;cm; RMS width 21.015%; Nova-internal inductance 9.452%.
+  The reading for the driver design: the <em>centroid</em> is both accurate and nearly insensitive to the
+  boundary hypothesis — the confident moment; RMS width is accurate at the true boundary but strongly
+  boundary-sensitive; the inductance class is weak and remains instrument-gated
+  (banked Nova/published instrument ratio 0.602024; divided-out same-instrument control 0.999427).</p>
+
+  <p>Support discipline held throughout: every prediction row declares
+  <code>boundary_hypothesis_all_domain</code> and every reference row
+  <code>reference_boundary_all_domain</code>; no confined-core prediction is claimed, and the audited
+  confined-core/all-domain current ratio 0.446884 (416,958.254&nbsp;A / 933,034.875&nbsp;A) stays explicit.
+  Two caveats bank with the record: net-current exactness is <em>structural</em> (target-current amplitude
+  elimination), never predictive accuracy; and the DIII-D prescribed flux functions are label-derived, so
+  their rows are optimistic controls. Snapshot: source commit <code>1583381c</code>, tree
+  <code>dc3c1a4b</code>.</p>
+
+  <figure>
+    <img src="/nova/figures/moment-conditioned-basin-entry/reference-boundary-errors.png"
+         alt="Per-moment prediction error on each frozen frame at the reference boundary" style="max-width:100%">
+    <figcaption>Per-frame, per-moment prediction error at the reference's own boundary (all-domain support).</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/moment-conditioned-basin-entry/boundary-sensitivity.png"
+         alt="Moment prediction error across the five-scale perturbed-boundary ladder" style="max-width:100%">
+    <figcaption>Sensitivity of each predicted moment to the boundary hypothesis across the 0.90–1.10 ladder.</figcaption>
+  </figure>
+
+  <p><strong>Decision surfaced for §4 (folded into its node contract):</strong> before any moment is
+  promoted into a solve constraint, declare its numerical tolerance and either keep the constraint on the
+  all-domain support or supply a topology-qualified confined-core support mapping — the seam's
+  <code>IntegralObservation.plasma_current</code> integrates the confined core while the target-current
+  path integrates all domains, so an unmapped constraint is wrong by ~0.447 before any physics.</p>
+
+</main>
+</body>
+</html>

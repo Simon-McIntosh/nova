@@ -23,8 +23,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.2">
+<meta name="plan-version" content="6">
 </head>
 <body>
   <main class="plan-doc">
@@ -52,39 +52,20 @@
     warm ladder, the cheapest untried arm. This plan's §2 (moment prediction) is gate-independent
     and proceeds immediately; §§3–4 consume the control's verdict before design.</p>
 
-    <h2 id="s2">§2 — Predict the moments before any solve, with declared supports</h2>
-
-    <p>Given the prescribed flux functions p′(ψ) and FF′(ψ), a boundary hypothesis, and the net
-    current, the toroidal current density j<sub>φ</sub> = R·p′ + FF′/(μ₀R) determines every
-    integral moment of the plasma current up to the flux-map unknown. The deliverable is a
-    measured answer to the owner's question — <em>how confident can we be of these metrics?</em> —
-    on the frozen six MAST references plus the DIII-D score-blind frames: predict M₀ (net
-    current), the current centroid (first radial and vertical moments), and the second-moment /
-    internal-inductance-class content from the flux functions with the reference's own boundary,
-    then with a perturbed boundary ladder, and report per-moment prediction error and its
-    sensitivity to the boundary hypothesis. The existing machinery is inventoried first
-    (<code>f-dbs-moment-survey</code>, survey in flight): the spine's centroid seeding, the biot
-    moment stacks, the differencing-gate extraction that already projects labeled plasma current
-    onto filaments.</p>
-
-    <p><strong>Binding design rule — every moment declares its support.</strong> The measured
-    hazard from the parity session: the target-current check integrates all domains
-    (933,034.875&nbsp;A on the audited frame) while <code>IntegralObservation.plasma_current</code>
-    integrates the topology-qualified confined core (416,958.25&nbsp;A) — a ratio of 0.4469. A
-    moment predicted on one support and compared against, or constrained onto, another is wrong by
-    a factor near 0.4 before any physics enters. Every predicted moment, every constraint, and
-    every receipt in this plan states its defining current integral; a quantity silent on support
-    fails review. Receipts: <code>docs/figures/efit-forward-parity/inductance-deficit-partition.json</code>,
-    <code>boundary-enclosed-volume-reconciliation.json</code>.</p>
-
-    <p><strong>The internal-inductance rung is instrument-gated.</strong> Nova's ∫B<sub>p</sub>²dV
-    instrument disagrees with the published EFIT value by a 0.602 ratio on the same flux map
-    (<code>efit-forward-parity</code> f-efp-004, owned by <code>equilibrium-metric-parity</code>).
-    Until that instrument question closes, ℓ<sub>i</sub>-class predictions are used only in
-    nova-internal form with the divided-out control (0.06 percent agreement) as the cross-check —
-    and the challenge referee derives ℓ<sub>i</sub> from submitted maps inside its Consistency
-    term (20 percent of the score), which is why the instrument work is score-relevant and
-    scheduled in the same sprint.</p>
+    <section id="s2" class="section-landed">
+    <header><span class="badge badge-shipped">✓ landed 2026-08-22</span>
+    <h2>§2 — Predict the moments before any solve, with declared supports</h2></header>
+    <p class="landed-summary">Built <code>scripts/moment_prediction_confidence/</code> (measure +
+    independent verify, 55 tree-stamped rows on 6 MAST + 5 DIII-D frames, 5-scale boundary ladder).
+    Own-boundary medians: centroid 4.624&nbsp;cm, RMS width 4.768%, radial second moment 2.558%,
+    nova-internal inductance 16.634%; ladder ranges: radial centroid 1.663&nbsp;cm, vertical centroid
+    0.115&nbsp;cm, RMS width 21.015%, inductance 9.452% — the <strong>centroid is the confident,
+    boundary-insensitive moment</strong>. Binding rules carried forward: every moment declares its
+    current-integral support (all-domain vs confined-core, audited ratio 0.446884); ℓ<sub>i</sub>-class
+    stays nova-internal-only until the instrument ratio (f-emp-003) closes. Full record:
+    <a href="/nova/evidence/archive/moment-conditioned-basin-entry-landed#s2-confidence">§2 landed</a>
+    (commit <code>a3119b61</code>, merged <code>b3713905</code>).</p>
+    </section>
 
     <h2 id="s3">§3 — Moment-conditioned seeding through the constrained seam</h2>
 
@@ -126,13 +107,14 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-mcbe-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship moment-conditioned-basin-entry" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mcbe-001" data-status="resolved" data-written-by="reckon-create" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship moment-conditioned-basin-entry" data-resolved-at="2026-08-22T21:20:49+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Run §2 now; hold §§3–4 on the tared-control verdict and the survey</h4>
     <div class="r-fu-body"><p>§2's moment-prediction confidence study is gate-independent and
     starts once the f-dbs-moment-survey inventory lands (it names the machinery §2 composes).
     §§3–4 wait on the stall-attribution decision above. The support-declaration rule and the
     ℓ<sub>i</sub> instrument gate bind from the first commit.</p></div>
     <pre class="r-fu-prompt">/reckon-ship moment-conditioned-basin-entry</pre>
+    <p class="r-fu-outcome">§2 ran and landed — commit a3119b61, merged b3713905; gate PASSED. Both holds on §§3–4 are lifted: the tared-control verdict fired stalls-persist and the f-dbs-moment-survey inventory landed. Measured confidence on 6 MAST + 5 DIII-D frames, 5-scale boundary ladder, 55 rows: own-boundary medians — centroid 4.624 cm, RMS width 4.768%, radial second moment 2.558%, nova-internal inductance 16.634%; ladder ranges — radial centroid 1.663 cm, vertical centroid 0.115 cm, RMS width 21.015%, inductance 9.452%. The centroid is the confident, boundary-insensitive moment; width is boundary-sensitive; inductance stays instrument-gated. Continuation is live in the plan: §3 driver design proceeds (newton-warm-ladder baseline in flight, run r-20260822T210506890245) and §4 carries the constraint-support-mapping decision folded from this node's follow_ons. Record: /nova/evidence/archive/moment-conditioned-basin-entry-landed#s2-confidence</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -147,6 +129,12 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20260822T2135-ownership-and-inheritance" data-who="reckon-ship" data-when="2026-08-22T21:35:00+00:00">
     <div class="r-comment-body">OWNERSHIP SETTLED with the S12 sprint coordinator (ownership-follows-context): this plan's execution belongs to the authoring session; S12 coordination tracks it at sprint level only and dispatches nothing onto it. THREE INHERITED FACTS pinned for whatever node runs first, relayed from the parity side through the sprint coordinator: (1) all five tared-background stall terminals were reached in only 12 iterations - BUDGET-LIMITED, spread factor 1.76 over residuals 0.01005-0.01771 - and the long-budget plateau/orbit classifier (docs/figures/efit-forward-parity/long-budget-plasma-route.json) has NEVER been run on the tared background, so 'stall' on those five is an iteration-budget observation, not yet a classified plateau or orbit; (2) any convergence claim over the stalled set uses a PREREGISTERED 2/4 SPLIT - 21983/35 and 21985/51 carry a closed axis-enclosing LCFS branch, the other four need confinement constructed - never a pooled six-frame or five-frame rate; (3) the parity plan's section-11 tare is a CONTROL, never a parity claim - no parity number may be quoted from it in this plan's baselines or evidence.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260822T2128-confidence-landed" data-who="reckon-ship" data-when="2026-08-22T21:28:00+00:00">
+    <div class="r-comment-body">moment-prediction-confidence landed — commit a3119b61 (merged b3713905); gate passed (independent verify.py: 55 rows, exact machine split, complete ladder, explicit support on every row, max current relative error 3.72e-16). Own-boundary medians: centroid 4.624 cm / RMS width 4.768% / radial second moment 2.558% / nova-internal inductance 16.634%. Ladder ranges: radial centroid 1.663 cm, vertical centroid 0.115 cm, RMS width 21.015%, inductance 9.452%. VERDICT for the driver: centroid is the confident moment (accurate and boundary-insensitive); width accurate only at the true boundary; inductance weak and instrument-gated. Net-current exactness is structural, not predictive; DIII-D flux functions are label-derived optimistic controls. Predictor is scripts-local by design; promotion into nova/ belongs to §3.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260822T2129-constraint-support-decision" data-who="reckon-ship" data-when="2026-08-22T21:29:00+00:00">
+    <div class="r-comment-body">DECISION REQUIRED BEFORE ANY CONSTRAINT FOLDS (from the §2 worker's fenced-out follow_ons, folded here): each promoted moment must declare a numerical tolerance and either keep the constraint on the all-domain support or supply a topology-qualified confined-core support mapping — IntegralObservation.plasma_current integrates the confined core while the target-current path integrates all domains (audited ratio 0.446884), so an unmapped constraint is wrong by ~0.447 before any physics. The §4 node contract carries this as a required decision step, resolved on measured grounds or escalated to the owner if it proves a convention choice.</div>
 </div>
 </section>
 

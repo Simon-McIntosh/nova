@@ -123,7 +123,7 @@ class Plasma(Plot, netCDF, Flux, PlasmaLoc):
         poloidal_field = self.grid.bp[self.aloc["plasma", "ionize"]]
         surface = np.sum(poloidal_field**2 * filament_volume) / volume
         # boundary = (mu_0 * self.i_plasma / self.lcfs.length)**2
-        radius = 6.2  # self.lcfs.geometric_radius
+        radius = self.lcfs.geometric_radius
         boundary = (mu_0 * self.i_plasma) ** 2 * radius / (2 * volume)
         return surface / boundary
 

@@ -1,0 +1,127 @@
+{
+  "schema": "nova.diiid.pf_active_circuit_receipt",
+  "units": {
+    "competition_channels": "kA.turn",
+    "response_operator_currents": "A.turn",
+    "conversion": 1000.0,
+    "statement": "Multiply each shipped fusion-coil channel by 1000 exactly once; the fitted drive gains are dimensionless ampere-turn ratios."
+  },
+  "supply": {
+    "name": "DIII-D ohmic-heating supply",
+    "identifier": "diiid_ohmic_supply",
+    "input_column": "magnetics_ECOILA",
+    "input_unit": "kA.turn",
+    "output_unit": "A.turn",
+    "scale_to_output": 1000.0
+  },
+  "circuit": {
+    "name": "DIII-D effective ohmic circuit",
+    "identifier": "diiid_effective_ohmic_circuit",
+    "source_conductor": "ECOILA",
+    "source_unit": "A.turn",
+    "topology": "one logical supply in a closed series record with ECOILA and all five calibrated conductor drives",
+    "component_order": [
+      "diiid_ohmic_supply",
+      "ECOILA",
+      "ECOILB",
+      "E567UP",
+      "E567DN",
+      "E89UP",
+      "E89DN"
+    ],
+    "connections": [
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0]
+    ]
+  },
+  "fit": {
+    "method": "fit once from full-grid Tikhonov label-flux regressions",
+    "corpus": {
+      "frames": 60,
+      "shots": 20
+    },
+    "drives": [
+      {
+        "conductor": "ECOILB",
+        "gain": 2.000918,
+        "leave_one_shot_out_r_squared": 0.9933483532119266,
+        "leave_one_shot_out_rmse_a_turn": 4026.405742311334,
+        "leave_one_shot_out_median_absolute_error_a_turn": 1567.41255627204,
+        "residual_rms_a_turn": 3886.882865339553,
+        "residual_sample_standard_deviation_a_turn": 3906.7678929572608,
+        "residual_rms_fraction": 0.07748542028108989
+      },
+      {
+        "conductor": "E567UP",
+        "gain": 1.023129,
+        "leave_one_shot_out_r_squared": 0.9556677196797801,
+        "leave_one_shot_out_rmse_a_turn": 5491.813833823248,
+        "leave_one_shot_out_median_absolute_error_a_turn": 2924.3729372139474,
+        "residual_rms_a_turn": 5329.089678101602,
+        "residual_sample_standard_deviation_a_turn": 4471.399220840082,
+        "residual_rms_fraction": 0.20400807944058003
+      },
+      {
+        "conductor": "E567DN",
+        "gain": 1.001657,
+        "leave_one_shot_out_r_squared": 0.9420419098721444,
+        "leave_one_shot_out_rmse_a_turn": 6197.232415115648,
+        "leave_one_shot_out_median_absolute_error_a_turn": 3896.911882108876,
+        "residual_rms_a_turn": 6032.300818544522,
+        "residual_sample_standard_deviation_a_turn": 4912.7339875007765,
+        "residual_rms_fraction": 0.23424237119539848
+      },
+      {
+        "conductor": "E89UP",
+        "gain": 1.045695,
+        "leave_one_shot_out_r_squared": 0.9877483760442158,
+        "leave_one_shot_out_rmse_a_turn": 2817.419073607406,
+        "leave_one_shot_out_median_absolute_error_a_turn": 2093.257434373751,
+        "residual_rms_a_turn": 2793.614101796187,
+        "residual_sample_standard_deviation_a_turn": 1882.3322191385087,
+        "residual_rms_fraction": 0.10627969377421093
+      },
+      {
+        "conductor": "E89DN",
+        "gain": 1.045624,
+        "leave_one_shot_out_r_squared": 0.9851155287064202,
+        "leave_one_shot_out_rmse_a_turn": 3099.582545883437,
+        "leave_one_shot_out_median_absolute_error_a_turn": 2543.855213386234,
+        "residual_rms_a_turn": 3067.5679718120577,
+        "residual_sample_standard_deviation_a_turn": 1959.9950004145705,
+        "residual_rms_fraction": 0.11657434222566553
+      }
+    ]
+  },
+  "reconstruction_fixture": {
+    "shipped_ecoila_a_turn": 10000.0,
+    "unshipped_current_order": [
+      "ECOILB",
+      "E567UP",
+      "E567DN",
+      "E89UP",
+      "E89DN"
+    ],
+    "unshipped_currents_a_turn": [
+      20009.18,
+      10231.29,
+      10016.57,
+      10456.95,
+      10456.24
+    ],
+    "complete_response_current_count": 24,
+    "free_current_count_with_circuit": 0,
+    "free_current_count_when_declined": 3
+  },
+  "caveats": [
+    "ECOILB and the shipped ECOILA response are nearly degenerate; the factor-two ECOILB gain is an effective calibration, not a physical turn count.",
+    "The fitted targets use EFIT label flux during calibration. Runtime current reconstruction does not read an EFIT or recovered-label artifact.",
+    "Post-fit flux closure passes 1 of 60 frames against the 54 of 60 closure rule, so the circuit does not explain all labelled flux.",
+    "The gains are applied to competition-channel ampere-turns after the single kA.turn to A.turn conversion."
+  ]
+}

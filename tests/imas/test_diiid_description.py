@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 import numpy as np
 import pytest
 
@@ -29,6 +31,20 @@ def _row() -> dict[str, object]:
     }
 
 
+def _machine_row() -> dict[str, object]:
+    row = _row()
+    row.update(
+        {
+            "efit_grid_R": np.linspace(0.84, 2.54, 65),
+            "efit_grid_Z": np.linspace(-1.6, 1.6, 65),
+            "thomson_chord_name": ["core", "edge"],
+            "thomson_chord_R": [1.5, 2.0],
+            "thomson_chord_Z": [-0.2, 0.3],
+        }
+    )
+    return row
+
+
 def test_registry_selection_has_complete_element_receipts() -> None:
     row = _row()
     registry = diiid.DiiidDescriptionRegistry()
@@ -41,6 +57,55 @@ def test_registry_selection_has_complete_element_receipts() -> None:
     )
     assert all(conductor.receipts for conductor in description.conductors)
     assert next(c for c in description.conductors if c.name == "bcoil").vertices is None
+
+
+def test_poloidal_channels_share_the_ampere_turn_unit_contract() -> None:
+    description = diiid.DiiidDescriptionRegistry().ingest(
+        _row(), source_row="d3d_shot_example.parquet"
+    )
+    poloidal = [
+        conductor
+        for conductor in description.conductors
+        if conductor.name in diiid.POLOIDAL_CONDUCTORS
+    ]
+    ecoila = next(conductor for conductor in poloidal if conductor.name == "ECOILA")
+
+    assert {conductor.current_unit for conductor in poloidal} == {"kA.turn"}
+    assert ecoila.turns.applied_multiplier == 1.0
+    assert ecoila.turns.resolved
+    assert (ecoila.turns.lower_physical_turns, ecoila.turns.upper_physical_turns) == (
+        48.0,
+        96.0,
+    )
+    assert "topology context" in ecoila.turns.statement
+
+
+def test_pf_active_supply_and_circuit_round_trip_without_losing_uncertainty() -> None:
+    description = diiid.dataset_machine_description(
+        _machine_row(), source_row="d3d_shot_example.parquet"
+    )
+    record = json.loads(json.dumps(description.pf_active_record()))
+
+    supply = diiid.PfActiveSupplyRecord.from_record(record["supply"][0])
+    circuit = diiid.PfActiveCircuitRecord.from_record(record["circuit"][0])
+
+    assert supply == diiid.PF_ACTIVE_SUPPLY
+    assert circuit == diiid.PF_ACTIVE_CIRCUIT
+    assert record["response_order"] == [
+        *diiid.POLOIDAL_CONDUCTORS,
+        *diiid.CIRCUIT_DRIVEN_CONDUCTORS,
+    ]
+    assert np.asarray(circuit.connections).shape == (7, 14)
+    assert [drive.gain for drive in circuit.drives] == [
+        2.000918,
+        1.023129,
+        1.001657,
+        1.045695,
+        1.045624,
+    ]
+    assert all(drive.uncertainty.residual_rms_a_turn > 0.0 for drive in circuit.drives)
+    assert "nearly degenerate" in " ".join(circuit.caveats)
+    assert "closure passes 1 of 60" in " ".join(circuit.caveats)
 
 
 def test_skewed_sections_are_parallelograms_with_mirrored_shear() -> None:

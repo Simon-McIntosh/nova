@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T12:00:56",
+  "updated": "2026-08-22T12:24:01",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -21807,9 +21807,138 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T094745902957-backend-sensitivity-isolation",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a710",
+        "node": "backend-sensitivity-isolation",
+        "role": "implement",
+        "spec_level": "",
+        "member": "transport-window",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T09:47:49Z",
+        "completed_at": "2026-08-22T10:18:10Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1821,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1821,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "dd261e84c56cfb1772beda32380c5c3b975ad313",
+        "commits": [
+          "df0020278412a85c7d8270e4ec037e37dd2a0f23",
+          "95f9d76f8a59e37faa00a0129874fa94f8bf5730"
+        ],
+        "changed_lines": {
+          "added": 1602,
+          "removed": 4165,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "the backend divergence is dissolved: same-tree same-snapshot CPU and H200 agree to 436 ulp on the solved map and 1.6e-14 on the phi_boundary residual, with identical topology, branch and band decisions; the 3.43e-4 was a cross-revision confound - pre-band CPU against post-band H200 - reproduced to 2.4e-15 by comparing pre-band against current-tree CPU. The only genuine discrete flips are 27 cosmetic extremum slot ties on adjacent samples, with an order-independent tie rule recommended if bitwise shape repeatability is ever required and tolerance widening rejected. The 0.537-versus-0.641 contraction also crossed revisions, so the cap question needs one same-tree two-backend window rerun",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T094745902957-backend-sensitivity-isolation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f8b-c81b-70c3-a5d8-007c4d512626",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11934720,
+            "cached_input_tokens_cumulative": 99351808,
+            "input_tokens": 12243554,
+            "input_tokens_cumulative": 102581438,
+            "output_tokens": 53071,
+            "output_tokens_cumulative": 386518,
+            "reasoning_output_tokens": 15487,
+            "reasoning_output_tokens_cumulative": 127053
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T100138164495-circuit-driven-forward-validation",
+        "plan": "coil-circuit-discovery",
+        "section": "\u00a75",
+        "node": "circuit-driven-forward-validation",
+        "role": "implement",
+        "spec_level": "",
+        "member": "forward-slice",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T10:01:41Z",
+        "completed_at": "2026-08-22T10:23:16Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1295,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1295,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "0eb2573c1ab4f266cc1fd9a408e1de841266ca7b",
+        "commits": [
+          "69fad1fe53706da694450f1ab8fffd714bcad905"
+        ],
+        "changed_lines": {
+          "added": 6517,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 3,
+        "gate": "failed",
+        "outcome": "Instrument verified and merged (score-blind out-of-cohort selection, 24 currents from shipped channels with zero label reads, control arm); the recovery gate did not pass because neither arm converged at 1e-5 on any frame \u2014 a solve-route limitation, not a circuit defect (circuit arm kept diverted topology 5/5 vs 4/5 and lowered residual on 3/5); rerun dispatched with the landed globalized and current-pinned routes",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T100138164495-circuit-driven-forward-validation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a024c1-c68c-70e3-8edf-4bf5cd7f1e5c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11559168,
+            "cached_input_tokens_cumulative": 110035456,
+            "input_tokens": 11945508,
+            "input_tokens_cumulative": 112490885,
+            "output_tokens": 30582,
+            "output_tokens_cumulative": 281121,
+            "reasoning_output_tokens": 6450,
+            "reasoning_output_tokens_cumulative": 84850
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 522
+    "_version": 524
   }
 }

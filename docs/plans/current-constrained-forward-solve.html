@@ -24,10 +24,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-version" content="15">
-<meta name="plan-commits" content="a2fbfa13,73f48ca0f672f8cd118bae4fd7e53520a03d998f,2ad4520637736e29898e23a961bada5d11595add,dea730511f076e662736a97c33d5c300545da6e4,cf812416343bbc821757fa2382d1e333d55e9f4f">
-<meta name="plan-artifacts" content="docs/figures/current-constrained-forward-solve/circuit-vacuum,docs/figures/current-constrained-forward-solve/inclusion-ladder">
-<meta name="plan-impl" content="0.556">
+<meta name="plan-version" content="17">
+<meta name="plan-commits" content="a2fbfa13,73f48ca0f672f8cd118bae4fd7e53520a03d998f,2ad4520637736e29898e23a961bada5d11595add,dea730511f076e662736a97c33d5c300545da6e4,cf812416343bbc821757fa2382d1e333d55e9f4f,10de2710fdbf76552e96240230d5597cf31563c4,83d1f6a0969c26ce6e44073401304d5dafaf790c">
+<meta name="plan-artifacts" content="docs/figures/current-constrained-forward-solve/circuit-vacuum,docs/figures/current-constrained-forward-solve/inclusion-ladder,docs/figures/current-constrained-forward-solve/pinned-cohort">
+<meta name="plan-impl" content="0.667">
 </head>
 <body>
   <main class="plan-doc">
@@ -81,21 +81,20 @@
     still a regular root. <strong>No vertical-position constraint belongs in this design</strong>; that
     caveat was raised against the prototype and withdrawn on exactly this reasoning.</p>
 
-    <h2 id="s3">§3 — Complete the cohort measurement (first node)</h2>
-    <p>The prototype scored 1 of its 5 preregistered frames. It stopped on a guard-ordering defect:
-    during an Armijo line search the solver visited a state with <code>unscaled_current_a</code> exactly
-    0.0, and <code>_lambda_value</code> performed the division <em>before</em> reaching its finite-positive
-    band check, raising <code>ZeroDivisionError</code>.</p>
-    <p><strong>The guard repair is landed</strong> (commit <code>2ad45206</code>): <code>_lambda_value</code>
-    now tests zero and non-finite unscaled current before dividing, raising <code>LambdaOutOfBand</code>, and
-    the residual wrapper implements the locked reject-step policy, counting rejected trial evaluations. What
-    remains of this section is the scoring run itself. Everything preregistered must not move: the five-frame
-    cohort, the positive λ band, the 1e-6 criterion, the 2e-6 cross-codegen tolerance, and the separately
-    reported low-current control fixture.</p>
-    <p><strong>Done-when:</strong> all five preregistered frames score, each reporting whether the
-    eliminated arm meets 1e-6 and diverted simultaneously where the unpinned control does not, with the
-    per-frame recovered λ beside its seed value and the paired Picard spectral radii. The single completed
-    frame is <em>not</em> generalised until the other four agree.</p>
+    <section id="s3-landed" class="section-landed">
+    <header><span class="badge badge-shipped">✓ landed 2026-08-22</span>
+    <h2 id="s3">§3 — Complete the cohort measurement (first node)</h2></header>
+    <p class="landed-summary">All five preregistered frames scored on inference-admissible fixed-wiring
+    currents (commits <code>10de2710</code>, <code>83d1f6a0</code>; guard repair earlier at
+    <code>2ad45206</code>): the eliminated arm qualifies 1/5 at 1e-6∧diverted
+    (<code>1cbcc9e6</code> f252, 3.93e-8, ρ 0.990) against the unpinned control's 0/5, with median
+    residual 3.51e-4 vs 1.05e-1 and median Picard radius 1.137 vs 1.303 — the constraint removes the
+    vacuum root on every frame while cold-start convergence remains the binding obstacle (§8). Current
+    provenance moves convergence itself: prototype frame 102 read 1.59e-9 on label currents, 7.01e-5
+    unqualified on fixed wiring. Full record:
+    <a href="/nova/evidence/archive/current-constrained-forward-solve-landed#pinned-cohort">pinned
+    cohort</a>.</p>
+    </section>
 
     <h2 id="s4">§4 — Promote the constrained map from benchmark to the solver seam</h2>
     <p>The prototype deliberately lives in <code>benchmarks/</code> with <code>nova/equilibrium/</code>
@@ -224,10 +223,11 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-ccf-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship current-constrained-forward-solve §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ccf-001" data-status="resolved" data-written-by="reckon-create" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship current-constrained-forward-solve §3" data-resolved-at="2026-08-22T13:36:51+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Repair the lambda guard ordering and complete the five-frame cohort (§3)</h4>
     <div class="r-fu-body"><p>The prototype scored 1 of 5 preregistered frames and stopped on a guard-ordering defect: during an Armijo line search the solver visited a state with <code>unscaled_current_a</code> exactly 0.0, and <code>_lambda_value</code> divided <em>before</em> reaching its finite-positive band check, raising <code>ZeroDivisionError</code>. The repair is to route a zero unscaled current onto the existing loud <code>LambdaOutOfBand</code> path instead of dividing first.</p><p><strong>Everything else is committed and must not move:</strong> the five-frame cohort (<code>d3d_shot_00000c4a7b</code> f102, <code>d3d_shot_0003ff34e7</code> f89, <code>d3d_shot_001270afa9</code> f215, <code>d3d_shot_001554e054</code> f41, <code>d3d_shot_001cbcc9e6</code> f252, recorded |I<sub>p</sub>| 0.99–1.75 MA, seed λ 0.955–1.487), the positive λ band, the 1e-6 criterion, the 2e-6 cross-codegen tolerance, and the separately reported 160 ms low-current control fixture.</p><p><strong>Report per frame:</strong> whether the eliminated arm meets 1e-6 and diverted simultaneously where the unpinned control does not; the recovered λ beside its seed value; and the paired Picard spectral radii against the banked 1.25–1.40 diverted-state figure. Do not generalise the one completed frame until the other four agree — and note the <code>zero-current-guard</code> decision is open, so if rejecting the trial step proves better numerics than failing loudly, that is a decision to lock rather than a liberty to take.</p></div>
     <pre class="r-fu-prompt">/reckon-ship current-constrained-forward-solve §3</pre>
+    <p class="r-fu-outcome">All five preregistered frames scored (commits 10de2710, 83d1f6a0; run r-20260822T130118874424, gate passed). On inference-admissible fixed-wiring currents the eliminated arm qualifies 1/5 simultaneously at 1e-6 and diverted (d3d_shot_001cbcc9e6 f252, residual 3.925e-8, Picard radius 0.990) versus the unpinned control 0/5; eliminated median residual 3.51e-4 versus unpinned 1.05e-1; eliminated median Picard radius 1.137 versus 1.303 against the banked 1.25-1.40 diverted band; recovered lambda sits beside its seed for every frame in the receipt. The guard repair had already landed at 2ad45206, and the excluded low-current control reproduced within the preregistered 2e-6 cross-codegen tolerance (difference 1.10e-6). The single prototype frame is NOT generalised: the constraint removes the vacuum root on every frame, but only one frame convergence-qualifies from a cold start - the binding obstacle is cold-start convergence, now measured under section 8.</p>
     </article>
 <article class="r-fu" data-id="f-ccfs-tier-consume" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship current-constrained-forward-solve §5" data-resolved-at="2026-08-22T13:00:34+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Consume the landed conductor tier resolver and repair the pinned-forward zero-current guard (§5)</h4>
@@ -262,6 +262,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260822T1310-rewire-landed" data-who="reckon-ship" data-when="2026-08-22T13:10:00Z">
     <div class="r-comment-body">FIXED-WIRING REWIRE LANDED — run r-20260822T125011546078, gate passed, commit dea73051 (merge 48ea4a1c), 496 s wall, 12/12 targeted tests, ruff exit 0. Scored inference arms consume complete_profile_current_adapter (use_circuit=True, 24 response-ordered currents, zero free current slots, per-conductor uncertainties carried in every frame receipt). Label-recovered currents survive only under diagnostic_label_recovered with uses_reconstruction_label=true and are excluded from inference conclusions. The historical preregistration was retained byte-for-byte; the frame-102 diagnostic is enforced at residual 1.5899788903681545e-09 (rtol 1e-5), exactly 4 iterations, diverted topology. Next node on this member: the §3 five-frame cohort scoring run.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260822T1400-cohort-landed" data-who="reckon-ship" data-when="2026-08-22T14:00:00Z">
+    <div class="r-comment-body">COHORT SCORED 5/5 - THE CONSTRAINT SELECTS THE BRANCH, COLD-START CONVERGENCE STILL BINDS. Run r-20260822T130118874424, gate passed, commits 10de2710 + 83d1f6a0 (merge 9029c4c7), 15 tests, ruff clean checks exit 0. Per frame eliminated residual/topology/lambda(seed)/rho: c4a7b f102 7.010e-5 diverted 1.106(1.128) 1.137; 3ff34e7 f89 4.499e-2 diverted 0.708(0.955) 0.665; 1270afa9 f215 4.787e-3 LIMITED 0.669(1.487) 1.322; 1554e054 f41 3.510e-4 diverted 1.030(0.996) rho 635.4 flagged non-equilibrium; 1cbcc9e6 f252 3.925e-8 diverted 0.949(1.246) 0.990 - the sole qualifier. Unpinned control 0/5. Note the prototype frame-102 read 1.59e-9 on LABEL currents; on fixed-wiring inference currents it reads 7.01e-5 unqualified, so current provenance moves convergence itself - the label diagnostic reproduced at 1.61e-9 within the 2e-6 cross-codegen tolerance. The mid-run NEEDS-HELP was answered by unifying the excluded low-current control onto the preregistered 2e-6 cross-codegen tolerance (drift 1.10e-6); the five banked frames were not rerun and every artifact hash is unchanged.</div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260822T1330-seam-landed" data-who="reckon-ship" data-when="2026-08-22T13:30:00Z">
     <div class="r-comment-body">SCALAR-CURRENT SEAM LANDED — run r-20260822T125018360336, gate passed, commit cf812416 (merge 2e1236f8), 44 tests passed with both pre-existing forward suites unchanged, ruff exit 0 over all six changed paths, 9 new acceptance cases including three pre-division inadmissibility values. The optional target_current threads through ForwardProfile flux_map, observe, solve, solve_branch, solve_portfolio, solve_batch and the diverted-perturbation paths; absence selects the original absolute expressions. The constrained ForwardFluxOperator path computes the amplitude from the sum of exact integrated cell-current moments, applies the same amplitude to cell_current, radial_moment and vertical_moment, rejects non-finite, zero, sign-reversed or out-of-band amplitudes BEFORE division, never clips, and lets the host Krylov line search reject inadmissible trials — both locked decisions honoured. Receipt smoke: requested 970087.5877824266 A, observed 970087.5877824267 A (one ulp), recovered amplitude 1.2, policy declared_scalar_current through ForwardEquilibrium.normalisation. §4 stays open on one remaining node: rewiring the prototype benchmark to drive this seam with its landed numbers reproduced, queued behind the in-flight cohort run on the shared benchmark file.</div>

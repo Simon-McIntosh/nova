@@ -141,6 +141,39 @@
     status. Receipt smoke: requested 970087.5877824266 A, observed 970087.5877824267 A (one ulp),
     recovered amplitude 1.2.</p>
 
+    <h2 id="pinned-cohort">Pinned five-frame cohort — branch selection works, cold starts still bind — 2026-08-22</h2>
+    <p>Run <code>r-20260822T130118874424-pinned-cohort-scoring</code>, gate <strong>passed</strong>;
+    commits <code>10de2710</code>, <code>83d1f6a0</code> (merge <code>9029c4c7</code>); 15 targeted
+    tests; ruff check and format exit 0; SLURM job 1253101, 5/5 frames, 7 m 38 s.</p>
+    <table>
+      <caption>Eliminated arm per preregistered frame, inference-admissible fixed-wiring currents.
+      Unpinned control: 0/5 qualified.</caption>
+      <thead><tr><th>Frame</th><th>Residual</th><th>Topology</th><th>λ (seed)</th><th>Picard ρ</th><th>1e-6 ∧ diverted</th></tr></thead>
+      <tbody>
+        <tr><td>c4a7b f102</td><td>7.010e-5</td><td>diverted</td><td>1.106 (1.128)</td><td>1.137</td><td>—</td></tr>
+        <tr><td>3ff34e7 f89</td><td>4.499e-2</td><td>diverted</td><td>0.708 (0.955)</td><td>0.665</td><td>—</td></tr>
+        <tr><td>1270afa9 f215</td><td>4.787e-3</td><td>limited</td><td>0.669 (1.487)</td><td>1.322</td><td>—</td></tr>
+        <tr><td>1554e054 f41</td><td>3.510e-4</td><td>diverted</td><td>1.030 (0.996)</td><td>635.4 †</td><td>—</td></tr>
+        <tr><td><strong>1cbcc9e6 f252</strong></td><td><strong>3.925e-8</strong></td><td><strong>diverted</strong></td><td><strong>0.949 (1.246)</strong></td><td><strong>0.990</strong></td><td><strong>passed</strong></td></tr>
+      </tbody>
+    </table>
+    <p>† terminal iterate unconverged — explicitly flagged not an equilibrium metric. Medians:
+    eliminated residual 3.51e-4 vs unpinned 1.05e-1; eliminated Picard radius 1.137 vs 1.303 against the
+    banked 1.25–1.40 diverted band. <strong>Reading:</strong> the constraint removes the vacuum root on
+    every frame (no unpinned arm qualifies anywhere), but only one frame convergence-qualifies from a
+    cold start — cold-start convergence, not branch selection, is the binding obstacle, measured under
+    the plan's cold-start section. Current provenance moves convergence itself: prototype frame 102 read
+    1.59e-9 on label-recovered currents and 7.01e-5 unqualified on fixed wiring (the label diagnostic
+    reproduced at 1.61e-9 within the preregistered 2e-6 cross-codegen tolerance). The excluded
+    low-current control reproduced at difference 1.10e-6, unified onto the same 2e-6 cross-codegen
+    tolerance mid-run without rerunning any scored frame; all banked artifact hashes unchanged.</p>
+    <figure>
+      <img src="/nova/figures/current-constrained-forward-solve/pinned-cohort/current_pinned_forward.png"
+           alt="Three-panel cohort figure: terminal residual, profile amplitude lambda, and dominant map eigenvalue magnitude per frame and arm">
+      <figcaption>Cohort residual, λ, and spectral-radius panels. Receipt:
+      <code>docs/figures/current-constrained-forward-solve/pinned-cohort/current_pinned_forward_receipt.json</code>.</figcaption>
+    </figure>
+
   </main>
 </body>
 </html>

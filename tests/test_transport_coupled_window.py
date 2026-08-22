@@ -575,7 +575,9 @@ def test_coreless_branch_outcome_names_its_sample_and_window_exchange(
     assert qualified.value.branch_receipt is unqualified.value.branch_receipt
 
 
-def test_nonconverging_window_raises_with_its_exhaustion_receipt():
+def test_nonconverging_window_serializes_its_exhaustion_receipt_before_raising(
+    tmp_path,
+):
     """A divergent exchange cannot escape as a degraded window result."""
     config = WindowConfig(
         length=1.0,
@@ -585,6 +587,16 @@ def test_nonconverging_window_raises_with_its_exhaustion_receipt():
         tolerance=WINDOW_CONVERGENCE_TOLERANCE,
     )
     exchange = _AffineWindow(config, coupling=1.05)
+    serialized = tmp_path / "exhausted-window.tsv"
+
+    def serialize_failure(error):
+        serialized.write_text(
+            "iterations\tmaximum_residual\ttrace_rows\n"
+            f"{error.convergence.iterations_used}\t"
+            f"{error.convergence.maximum_residual:.17g}\t"
+            f"{len(error.convergence.residual_trace)}\n",
+            encoding="utf-8",
+        )
 
     with pytest.raises(WindowConvergenceError, match="did not converge") as raised:
         solve_window(
@@ -593,9 +605,13 @@ def test_nonconverging_window_raises_with_its_exhaustion_receipt():
             config,
             exchange.equilibrium,
             exchange.transport,
+            failure_serializer=serialize_failure,
         )
 
+    assert serialized.is_file()
+    assert serialized.read_text(encoding="utf-8").splitlines()[1].split("\t")[0] == "4"
     assert raised.value.convergence.iterations_used == config.iteration_cap
+    assert len(raised.value.convergence.residual_trace) == config.iteration_cap
     assert raised.value.convergence.maximum_residual > config.tolerance
     assert raised.value.convergence.contraction_estimate is not None
     assert np.isfinite(raised.value.convergence.contraction_estimate)

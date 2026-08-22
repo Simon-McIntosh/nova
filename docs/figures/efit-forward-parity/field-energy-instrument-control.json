@@ -1,0 +1,127 @@
+{
+  "receipt": {
+    "kind": "field_energy_instrument_control",
+    "shot": 22086,
+    "slice_index": 43,
+    "source_receipts": [
+      "docs/figures/efit-forward-parity/converged-root-geometry-attribution.json",
+      "docs/figures/efit-forward-parity/moment-definition-rescore.json",
+      "docs/figures/efit-forward-parity/boundary-enclosed-volume-reconciliation.json",
+      "docs/figures/efit-forward-parity/inductance-deficit-partition.json"
+    ],
+    "source_receipt_sha256": {
+      "docs/figures/efit-forward-parity/converged-root-geometry-attribution.json": "67cc1b1578e8aac066e248f10d6deaca4ccb80628934e6ed21c2984c0d4d455a",
+      "docs/figures/efit-forward-parity/moment-definition-rescore.json": "09a36f45a53aa533a7442eb32ba6eadf062a6b5747fc466943b726b115e8aa76",
+      "docs/figures/efit-forward-parity/boundary-enclosed-volume-reconciliation.json": "1b1c18d850e5fdc6d96a130deea5d310261161612fe7a078d17b6c048d21143b",
+      "docs/figures/efit-forward-parity/inductance-deficit-partition.json": "a2702e78ab901bd844562a28424ebd6edcb334124008d2a70e47d85a37aff494"
+    }
+  },
+  "outcomes_declared_before_measurement": {
+    "reference_map_near_reference_published": {
+      "verdict": "INSTRUMENT_EXONERATED_GENUINE_CURRENT_DISTRIBUTION_DIFFERENCE",
+      "row_disposition": "RETAIN_AS_PHYSICS_DIFFERENCE"
+    },
+    "reference_map_near_nova_solved": {
+      "verdict": "INSTRUMENT_DIFFERENCE",
+      "row_disposition": "RETRACT"
+    },
+    "reference_map_near_neither_endpoint": {
+      "verdict": "MIXED_INSTRUMENT_AND_CURRENT_DISTRIBUTION_DIFFERENCE",
+      "row_disposition": "RETAIN_WITH_SPLIT_ATTRIBUTION"
+    },
+    "near_relative_tolerance": 0.004475907677901958,
+    "near_tolerance_source": "maximum absolute stored-LCFS cell-quadrature area or volume reproduction error"
+  },
+  "execution_contract": {
+    "nonlinear_solve_calls": 0,
+    "equilibrium_observations_from_serialised_state": 1,
+    "reference_flux_source": "2*pi*efm/psirz",
+    "reference_native_grid_shape": [
+      65,
+      65
+    ],
+    "nova_operator_grid_shape": [
+      33,
+      33
+    ],
+    "gradient_operator": "nova.equilibrium.conservation.poloidal_field",
+    "cell_quadrature": "2*pi*R*cell_area",
+    "imported_integrator": "benchmarks.efit_parity_inductance_partition._boundary_moments",
+    "support_policy": "one 243-centroid stored-LCFS mask for both fields"
+  },
+  "controlled_region": {
+    "contour": "stored_lcfs",
+    "contour_point_count": 151,
+    "exact_poloidal_area_m2": 1.837030238598465,
+    "exact_toroidal_volume_m3": 8.792322015190356,
+    "definition": "mesh-cell centroids inside the stored LCFS contour",
+    "authoritative_cell_count": 243,
+    "banked_solved_branch_cell_count": 234,
+    "overlap_cell_count": 231,
+    "symmetric_difference_cell_count": 15,
+    "stored_only_cell_count": 12,
+    "solved_only_cell_count": 3,
+    "cell_quadrature_poloidal_area_m2": 1.8414843762730015,
+    "cell_quadrature_toroidal_volume_m3": 8.831675636804732,
+    "cell_quadrature_area_relative_error_from_exact_contour": 0.0024246403684322626,
+    "cell_quadrature_volume_relative_error_from_exact_contour": 0.004475907677901958,
+    "net_area_change_from_banked_support_m2": 0.0682031250471482,
+    "net_area_change_fraction_of_stored_support": 0.037037037037037035,
+    "net_area_change_fraction_of_banked_support": 0.038461538461538464,
+    "geometric_support_scale_statement": "The net area change is 3.85 percent of the banked support. The directly rebaselined field-energy shift below is the controlled measure of its effect on this nonuniform integrand.",
+    "banked_solved_field_energy_t2_m3": 0.28949138263178675,
+    "rebaselined_solved_field_energy_t2_m3": 0.29880628232236717,
+    "rebaselined_over_banked": 1.0321767770974666,
+    "signed_relative_field_energy_shift": 0.03217677709746658,
+    "prior_published_deficit_magnitude": 0.41707821153026325,
+    "support_shift_cannot_explain_prior_deficit": true
+  },
+  "field_energy_comparison_table": [
+    {
+      "field": "reference_own_map",
+      "operator": "nova",
+      "support": "stored_lcfs_243_centroids",
+      "field_energy_t2_m3": 0.2989777277348594
+    },
+    {
+      "field": "nova_solved_terminal_map",
+      "operator": "nova",
+      "support": "stored_lcfs_243_centroids",
+      "field_energy_t2_m3": 0.29880628232236717
+    },
+    {
+      "field": "reference_own_map",
+      "operator": "reference_published",
+      "support": "reference_published",
+      "field_energy_t2_m3": 0.496621310710907
+    }
+  ],
+  "instrument_control": {
+    "control_accuracy_floor_relative": 0.004475907677901958,
+    "nova_operator_on_reference_over_reference_published": 0.6020235565543425,
+    "instrument_signed_relative_deviation": -0.3979764434456575,
+    "nova_solved_over_nova_operator_on_reference": 0.9994265612566154,
+    "physics_signed_relative_deviation_after_instrument_division": -0.0005734387433845578,
+    "nova_solved_over_reference_published": 0.6016783329225841,
+    "total_signed_relative_deviation": -0.3983216670774159,
+    "multiplicative_closure_residual": 0.0,
+    "deficit_split_on_published_energy_scale": {
+      "total_t2_m3": 0.19781502838853982,
+      "instrument_t2_m3": 0.19764358297604756,
+      "physics_t2_m3": 0.00017144541249225487,
+      "instrument_fraction": 0.9991333044112528,
+      "physics_fraction": 0.0008666955887472267,
+      "additive_closure_residual_t2_m3": 0.0
+    },
+    "verdict": "INSTRUMENT_DIFFERENCE",
+    "row_disposition": "RETRACT",
+    "reading": "Nova's operator returns the solved-map energy on the reference map within the control floor. The row retracts and carries no current-distribution claim."
+  },
+  "protected_banked_artifacts": {
+    "declared_count": 23,
+    "verified_digest_count": 23,
+    "all_digests_match": true,
+    "source_and_output_receipts_are_outside_protected_set": true
+  },
+  "figure": "docs/figures/efit-forward-parity/field-energy-instrument-control.png"
+}

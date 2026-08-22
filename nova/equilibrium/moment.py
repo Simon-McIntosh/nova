@@ -50,10 +50,13 @@ the spine. Conventions: total poloidal flux :math:`\\Phi = 2 \\pi R A_\\phi`
 """
 
 from dataclasses import dataclass, field
-from enum import IntEnum
+from enum import Enum, IntEnum
 
+from matplotlib.path import Path as PolygonPath
 import numpy as np
 from scipy.optimize import minimize
+from scipy.spatial import cKDTree
+import shapely
 
 from nova.biot.greens import hybrid_greens
 from nova.equilibrium.measurement import (
@@ -61,6 +64,56 @@ from nova.equilibrium.measurement import (
     SliceMeasurement,
     whitened_solve,
 )
+from nova.equilibrium.source import DomainProfile
+
+
+class CurrentIntegralSupport(str, Enum):
+    """Spatial support over which a reported current moment is integrated."""
+
+    BOUNDARY_HYPOTHESIS_ALL_DOMAIN = "boundary_hypothesis_all_domain"
+    COMPACT_CENTROID_DISC = "compact_centroid_disc"
+
+
+@dataclass(frozen=True)
+class PredictedCurrentMoments:
+    """Flux-functions-only amplitude and centroid with explicit supports."""
+
+    plasma_current: float
+    centroid_r: float
+    centroid_z: float
+    raw_source_current: float
+    supported_cells: int
+    current_support: CurrentIntegralSupport
+    centroid_support: CurrentIntegralSupport
+
+    @property
+    def centroid(self) -> tuple[float, float]:
+        """Return the predicted current centroid as ``(R, Z)`` [m]."""
+
+        return self.centroid_r, self.centroid_z
+
+
+@dataclass(frozen=True)
+class MomentSeed:
+    """Compact current representation and flux state for a constrained solve."""
+
+    flux: object
+    cell_current: object
+    moments: PredictedCurrentMoments
+    radius: float
+    support: CurrentIntegralSupport
+    supported_cells: int
+
+    def solve(self, profile, **options):
+        """Use this flux as the public constrained seam's initial state."""
+
+        if "target_current" in options:
+            raise TypeError("MomentSeed supplies target_current from its moments")
+        return profile.solve(
+            self.flux,
+            target_current=self.moments.plasma_current,
+            **options,
+        )
 
 
 class UnsupportedSlice(ValueError):
@@ -122,6 +175,57 @@ def _term_label(p: int, q: int) -> str:
     if q:
         parts.append("v" if q == 1 else f"v^{q}")
     return "".join(parts)
+
+
+def _boundary_centroid(boundary: np.ndarray) -> np.ndarray:
+    """Return the area centroid of a valid closed-boundary hypothesis."""
+
+    polygon = shapely.Polygon(np.asarray(boundary, dtype=float))
+    if not polygon.is_valid:
+        polygon = shapely.make_valid(polygon)
+    if polygon.is_empty or polygon.area <= 0.0:
+        raise ValueError("boundary hypothesis does not enclose positive area")
+    centroid = polygon.centroid
+    return np.asarray([centroid.x, centroid.y], dtype=float)
+
+
+def _sample_boundary(boundary: np.ndarray, samples_per_segment: int = 24) -> np.ndarray:
+    """Densely sample a boundary for the distance-defined flux coordinate."""
+
+    vertices = np.asarray(boundary, dtype=float)
+    following = np.roll(vertices, -1, axis=0)
+    fraction = np.linspace(0.0, 1.0, samples_per_segment, endpoint=False)
+    samples = (
+        vertices[:, None, :]
+        + fraction[None, :, None] * (following - vertices)[:, None, :]
+    )
+    return samples.reshape(-1, 2)
+
+
+def boundary_flux_coordinate(
+    cells: "CurrentCells", boundary: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return the measured boundary-only normalized-flux proxy and support.
+
+    The squared distance ratio is the package form of the confidence-study
+    predictor: distance from the boundary's area centroid divided by that
+    distance plus the nearest-boundary distance. It consumes no labelled flux
+    sample and performs no equilibrium evaluation.
+    """
+
+    vertices = np.asarray(boundary, dtype=float)
+    if vertices.ndim != 2 or vertices.shape[0] < 3 or vertices.shape[1] != 2:
+        raise ValueError("boundary must contain at least three (R, Z) vertices")
+    points = np.column_stack([cells.r, cells.z]).astype(float, copy=False)
+    support = PolygonPath(vertices).contains_points(points, radius=1.0e-12)
+    support &= np.asarray(cells.candidate, dtype=float) > 0.0
+    centre = _boundary_centroid(vertices)
+    distance_axis = np.linalg.norm(points - centre, axis=1)
+    distance_boundary = cKDTree(_sample_boundary(vertices)).query(points)[0]
+    denominator = np.maximum(distance_axis + distance_boundary, 1.0e-15)
+    coordinate = (distance_axis / denominator) ** 2
+    coordinate[~support] = 1.0
+    return coordinate, support
 
 
 def build_moment_basis(
@@ -537,6 +641,95 @@ class ReconstructMoment:
         )
 
     # --- the self-sized centroid seed --------------------------------------
+
+    def predict_profile_moments(
+        self,
+        profile: DomainProfile,
+        boundary: np.ndarray,
+        plasma_current: float,
+        *,
+        cell_area: np.ndarray | None = None,
+    ) -> PredictedCurrentMoments:
+        """Predict net current and centroid from flux functions and a boundary.
+
+        The current density is evaluated on :func:`boundary_flux_coordinate`
+        and one common amplitude is eliminated to the declared plasma current.
+        Both emitted moments name the all-domain boundary-hypothesis support;
+        no confined-core topology is inferred from a boundary polygon.
+        """
+
+        if not isinstance(profile, DomainProfile):
+            raise TypeError("profile must be a DomainProfile")
+        coordinate, support = boundary_flux_coordinate(self.cells, boundary)
+        radius = np.asarray(self.cells.r, dtype=np.float64)
+        if cell_area is None:
+            radial = np.broadcast_to(self.cells.dr, (self.cells.number,))
+            vertical = np.broadcast_to(self.cells.dz, (self.cells.number,))
+            area = np.asarray(radial * vertical, dtype=np.float64)
+        else:
+            area = np.asarray(cell_area, dtype=np.float64)
+        if area.shape != (self.cells.number,) or np.any(area <= 0.0):
+            raise ValueError("cell_area must be positive with one value per cell")
+
+        density = np.asarray(profile.current_density(radius, coordinate), dtype=float)
+        raw = np.where(support, density * area, 0.0)
+        raw_current = float(np.sum(raw))
+        absolute_sum = float(np.sum(np.abs(raw)))
+        if not np.isfinite(raw_current) or abs(raw_current) <= 1.0e-12 * max(
+            absolute_sum, 1.0
+        ):
+            raise ValueError("source density has no stable non-zero current integral")
+        current = raw * (float(plasma_current) / raw_current)
+        integrated = float(np.sum(current))
+        centroid_r = float(np.sum(current * radius) / integrated)
+        centroid_z = float(np.sum(current * np.asarray(self.cells.z)) / integrated)
+        moment_support = CurrentIntegralSupport.BOUNDARY_HYPOTHESIS_ALL_DOMAIN
+        return PredictedCurrentMoments(
+            plasma_current=integrated,
+            centroid_r=centroid_r,
+            centroid_z=centroid_z,
+            raw_source_current=raw_current,
+            supported_cells=int(np.count_nonzero(support)),
+            current_support=moment_support,
+            centroid_support=moment_support,
+        )
+
+    def centroid_disc(
+        self, r0: float, z0: float, radius: float, plasma_current: float
+    ) -> np.ndarray:
+        """Return the disc-supported current carrying exact zeroth/first moments.
+
+        The existing uniform disc defines the compact support. Its degree-one
+        moment basis then removes only cell-centering error, so integration of
+        the representation returns the requested current and centroid exactly
+        without introducing a width-class prediction.
+        """
+
+        uniform = self.uniform_disc(r0, z0, radius, plasma_current)
+        selected = uniform != 0.0
+        basis, _labels, _scale = build_moment_basis(
+            self.cells.r,
+            self.cells.z,
+            selected,
+            r0,
+            order=MomentOrder.CENTROID,
+            z0=z0,
+            scale=radius,
+        )
+        coordinate = np.vstack([np.ones(self.cells.number), self.cells.r, self.cells.z])
+        targets = float(plasma_current) * np.asarray([1.0, r0, z0])
+        coefficients = np.linalg.solve(coordinate @ basis, targets)
+        current = basis @ coefficients
+        tolerance = 1.0e-12 * max(abs(float(plasma_current)), 1.0)
+        polarity = np.sign(float(plasma_current)) or 1.0
+        if np.min(polarity * current[selected]) < -tolerance:
+            raise UnsupportedSlice(
+                "centroid-disc-requires-current-reversal",
+                centroid_r_m=float(r0),
+                centroid_z_m=float(z0),
+                seed_radius_m=float(radius),
+            )
+        return np.where(selected, current, 0.0)
 
     def filament_signature(self, r0: float, z0: float) -> np.ndarray:
         """Return the per-ampere sensor signature of one trial filament."""

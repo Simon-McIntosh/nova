@@ -24,6 +24,7 @@ RECEIPT_PATH = (
     / "docs/figures/coil-circuit-discovery/circuit-driven-forward-validation"
     / study.RECEIPT_NAME
 )
+CONTOUR_RECEIPT_PATH = RECEIPT_PATH.with_name(study.CONTOUR_RECEIPT_NAME)
 
 
 def _receipt() -> dict:
@@ -177,3 +178,46 @@ def test_receipt_carries_route_coverage_and_convergence_qualified_metrics() -> N
     figure = ROOT / receipt["artifacts"]["overlay_figure"]
     assert figure.is_file()
     assert figure.stat().st_size > 10_000
+
+
+def test_contour_figures_reproduce_banked_converged_rows() -> None:
+    sidecar = json.loads(CONTOUR_RECEIPT_PATH.read_text())
+    receipt = _receipt()
+    expected = {
+        (frame["shot"], frame["frame"], route_name)
+        for frame in receipt["frames"]
+        for route_name, route in frame["circuit_driven"]["routes"].items()
+        if route["converged"]
+    }
+
+    policy = sidecar["guard_policy"]
+    assert policy["state_derived_science_metric_relative_tolerance"] == 1.0e-6
+    assert policy["route_diagnostic_residual_relative_tolerance"] == 1.0e-2
+    assert "5.3204e-4 relative" in policy["route_diagnostic_note"]
+    assert "original banked validation run" in policy["route_diagnostic_note"]
+    assert sidecar["all_banked_values_reproduced"] is True
+    assert sidecar["figure_count"] == len(expected) == 3
+    assert {
+        (item["shot"], item["frame"], item["route"]) for item in sidecar["figures"]
+    } == expected
+    for item in sidecar["figures"]:
+        levels = np.asarray(item["shared_contour_levels_wb"], dtype=float)
+        assert len(levels) == 17
+        assert np.all(np.isfinite(levels))
+        assert np.all(np.diff(levels) > 0.0)
+        assert "passed verbatim" in item["shared_level_identity"]
+        for metric_name, comparison in item["banked_comparison"].items():
+            expected_tolerance = (
+                1.0e-2 if metric_name == "fixed_point_relative_residual" else 1.0e-6
+            )
+            assert comparison["relative_tolerance"] == expected_tolerance
+            assert comparison["matched"] is True
+            np.testing.assert_allclose(
+                comparison["reproduced"],
+                comparison["banked"],
+                rtol=expected_tolerance,
+                atol=0.0,
+            )
+        figure = ROOT / item["figure"]
+        assert figure.is_file()
+        assert figure.stat().st_size > 10_000

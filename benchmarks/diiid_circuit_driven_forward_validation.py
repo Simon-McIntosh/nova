@@ -22,6 +22,7 @@ import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.lines import Line2D
 
 from benchmarks import diiid_current_pinned_forward as current_pinned
 from benchmarks.diiid_forward_gs_match import (
@@ -57,6 +58,7 @@ from nova.imas.diiid_description import (
     dataset_machine_description,
     geometry_digest,
 )
+from nova.imas.diiid_passive import build_description as build_passive_description
 from nova.jax.config import configure_dtypes
 
 
@@ -72,6 +74,7 @@ POLARITY_RECEIPT = Path(
 )
 RECEIPT_NAME = "circuit_driven_forward_validation_receipt.json"
 FIGURE_NAME = "circuit_driven_forward_validation_overlay.png"
+CONTOUR_RECEIPT_NAME = "circuit_driven_flux_contour_comparisons.json"
 FRAME_COUNT = 5
 RECORDED_PLASMA_CURRENT_FLOOR_A = 50_000.0
 LABEL_REPRESENTABILITY_CEILING_FRACTIONAL_RMS = 0.0429
@@ -686,6 +689,11 @@ def solve_frame(
     description = dataset_machine_description(
         current_row, source_row=str(selected.path)
     ).physical
+    coil_outlines = [
+        np.asarray(conductor.vertices, dtype=float)
+        for conductor in description.conductors
+        if conductor.vertices is not None
+    ]
     shipped = shipped_current_at(
         current_row,
         description,
@@ -793,6 +801,7 @@ def solve_frame(
         "label": label,
         "label_boundary": _label_boundary(row, selected.frame),
         "wall": wall,
+        "coil_outlines": coil_outlines,
         "shipped": shipped_fields,
         "circuit": circuit_fields,
         "best_circuit_route": best_circuit,
@@ -1032,6 +1041,333 @@ def render_overlay(
     axes[0, 0].legend(loc="lower left", fontsize=6)
     figure.savefig(path, dpi=180)
     plt.close(figure)
+
+
+def _converged_circuit_rows(
+    records: list[dict[str, Any]], fields: list[dict[str, Any]]
+) -> dict[tuple[str, int, str], tuple[dict[str, Any], dict[str, np.ndarray], dict]]:
+    """Index every convergence-qualified circuit route and its fields."""
+
+    indexed = {}
+    for record, frame_fields in zip(records, fields, strict=True):
+        for route_name, route in record["circuit_driven"]["routes"].items():
+            if route["converged"]:
+                key = (record["shot"], int(record["frame"]), route_name)
+                indexed[key] = (
+                    route,
+                    frame_fields["circuit"][route_name],
+                    frame_fields,
+                )
+    return indexed
+
+
+def _banked_converged_circuit_rows(
+    receipt: dict[str, Any],
+) -> dict[tuple[str, int, str], dict[str, Any]]:
+    """Index convergence-qualified circuit rows from a banked receipt."""
+
+    indexed = {}
+    for frame in receipt["frames"]:
+        for route_name, route in frame["circuit_driven"]["routes"].items():
+            if route["converged"]:
+                indexed[(frame["shot"], int(frame["frame"]), route_name)] = route
+    return indexed
+
+
+def _shared_label_levels(label: np.ndarray, count: int = 17) -> np.ndarray:
+    """Return one robust line-contour level array derived only from the label."""
+
+    finite = np.asarray(label, dtype=float)
+    finite = finite[np.isfinite(finite)]
+    low, high = np.quantile(finite, [0.01, 0.99])
+    levels = np.linspace(low, high, count)
+    if not np.all(np.diff(levels) > 0.0):
+        raise RuntimeError("label flux does not span distinct contour levels")
+    return levels
+
+
+def _contour_figure_name(shot: str, frame: int, route_name: str) -> str:
+    """Return a stable capability-named figure path component."""
+
+    shot_token = Path(shot).stem.removeprefix("d3d_shot_")
+    return f"circuit_driven_flux_contours_{shot_token}_f{frame}_{route_name}.png"
+
+
+def render_contour_comparisons(
+    banked_receipt: dict[str, Any],
+    records: list[dict[str, Any]],
+    fields: list[dict[str, Any]],
+    output: Path,
+    banked_receipt_sha256: str,
+) -> dict[str, Any]:
+    """Verify and render every banked convergence-qualified circuit route."""
+
+    banked = _banked_converged_circuit_rows(banked_receipt)
+    reproduced = _converged_circuit_rows(records, fields)
+    if set(reproduced) != set(banked):
+        raise RuntimeError(
+            "convergence-qualified circuit rows changed during contour reproduction"
+        )
+
+    first_wall = np.asarray(
+        build_passive_description().limiter_contour_rz_m, dtype=float
+    )
+    sidecar_rows = []
+    label_colors = {"label": "#1f77b4", "forward": "#d62728"}
+    for key in sorted(reproduced):
+        shot, frame, route_name = key
+        route, route_fields, frame_fields = reproduced[key]
+        banked_route = banked[key]
+        comparisons = {}
+        for metric_name, reproduced_value, banked_value in (
+            (
+                "fixed_point_relative_residual",
+                route["fixed_point_relative_residual"],
+                banked_route["fixed_point_relative_residual"],
+            ),
+            (
+                "fractional_flux_rms",
+                route["metrics"]["fractional_flux_rms"],
+                banked_route["metrics"]["fractional_flux_rms"],
+            ),
+            (
+                "boundary_mean_separation_m",
+                route["metrics"]["boundary_mean_separation_m"],
+                banked_route["metrics"]["boundary_mean_separation_m"],
+            ),
+            (
+                "boundary_maximum_separation_m",
+                route["metrics"]["boundary_maximum_separation_m"],
+                banked_route["metrics"]["boundary_maximum_separation_m"],
+            ),
+            (
+                "x_point_separation_m",
+                route["metrics"]["x_point_separation_m"],
+                banked_route["metrics"]["x_point_separation_m"],
+            ),
+        ):
+            relative_tolerance = (
+                1.0e-2 if metric_name == "fixed_point_relative_residual" else 1.0e-6
+            )
+            matched = bool(
+                np.isclose(
+                    reproduced_value,
+                    banked_value,
+                    rtol=relative_tolerance,
+                    atol=0.0,
+                )
+            )
+            if not matched:
+                raise RuntimeError(
+                    f"{key} no longer reproduces banked {metric_name} at "
+                    f"rtol {relative_tolerance}"
+                )
+            comparisons[metric_name] = {
+                "banked": float(banked_value),
+                "reproduced": float(reproduced_value),
+                "relative_difference": float(
+                    abs(reproduced_value - banked_value) / abs(banked_value)
+                ),
+                "relative_tolerance": relative_tolerance,
+                "matched": matched,
+            }
+
+        label = np.asarray(frame_fields["label"], dtype=float)
+        levels = _shared_label_levels(label)
+        radius = np.asarray(route_fields["radius"], dtype=float)
+        height = np.asarray(route_fields["height"], dtype=float)
+        forward = np.asarray(route_fields["aligned"], dtype=float)
+        figure, axis = plt.subplots(figsize=(5.2, 7.0), constrained_layout=True)
+        for outline in frame_fields["coil_outlines"]:
+            closed = np.vstack((outline, outline[0]))
+            axis.plot(closed[:, 0], closed[:, 1], color="0.72", linewidth=0.45)
+        axis.plot(first_wall[:, 0], first_wall[:, 1], color="0.38", linewidth=0.75)
+        axis.contour(
+            radius,
+            height,
+            label.T,
+            levels=levels,
+            colors=label_colors["label"],
+            linewidths=0.65,
+        )
+        axis.contour(
+            radius,
+            height,
+            forward.T,
+            levels=levels,
+            colors=label_colors["forward"],
+            linewidths=0.65,
+            linestyles="dashed",
+        )
+        label_boundary = np.asarray(frame_fields["label_boundary"], dtype=float)
+        solved_boundary = np.asarray(route_fields["boundary"], dtype=float)
+        axis.plot(
+            label_boundary[:, 0],
+            label_boundary[:, 1],
+            color=label_colors["label"],
+            linewidth=1.8,
+        )
+        axis.plot(
+            solved_boundary[:, 0],
+            solved_boundary[:, 1],
+            color=label_colors["forward"],
+            linewidth=1.8,
+            linestyle="dashed",
+        )
+        label_x = np.asarray(route["terminal_state"]["label_x_point_rz_m"])
+        solved_x = np.asarray(route_fields["x_point"], dtype=float)
+        axis.plot(
+            *label_x,
+            marker="o",
+            markersize=5,
+            markerfacecolor="none",
+            markeredgecolor=label_colors["label"],
+            linestyle="none",
+        )
+        axis.plot(
+            *solved_x,
+            marker="x",
+            markersize=6,
+            color=label_colors["forward"],
+            linestyle="none",
+        )
+        axis.legend(
+            handles=(
+                Line2D([], [], color=label_colors["label"], label="EFIT label"),
+                Line2D(
+                    [],
+                    [],
+                    color=label_colors["forward"],
+                    linestyle="dashed",
+                    label="circuit-driven GS",
+                ),
+            ),
+            loc="lower center",
+            frameon=False,
+            fontsize=8,
+            ncol=2,
+        )
+        axis.text(
+            0.5,
+            0.985,
+            f"flux RMS {route['metrics']['fractional_flux_rms']:.3%}  ·  "
+            f"X-point {1000.0 * route['metrics']['x_point_separation_m']:.1f} mm",
+            transform=axis.transAxes,
+            ha="center",
+            va="top",
+            fontsize=8,
+        )
+        axis.set_aspect("equal")
+        axis.set_xlim(float(radius.min()), float(radius.max()))
+        axis.set_ylim(float(height.min()), float(height.max()))
+        axis.axis("off")
+        figure_name = _contour_figure_name(shot, frame, route_name)
+        figure.savefig(output / figure_name, dpi=220, transparent=True)
+        plt.close(figure)
+        sidecar_rows.append(
+            {
+                "shot": shot,
+                "frame": frame,
+                "route": route_name,
+                "figure": str(output / figure_name),
+                "shared_contour_levels_wb": levels.tolist(),
+                "shared_level_identity": (
+                    "one label-derived array passed verbatim to both contour calls"
+                ),
+                "reproduced_fixed_point_relative_residual": float(
+                    route["fixed_point_relative_residual"]
+                ),
+                "reproduced_fractional_flux_rms": float(
+                    route["metrics"]["fractional_flux_rms"]
+                ),
+                "reproduced_boundary_mean_separation_m": float(
+                    route["metrics"]["boundary_mean_separation_m"]
+                ),
+                "reproduced_boundary_maximum_separation_m": float(
+                    route["metrics"]["boundary_maximum_separation_m"]
+                ),
+                "reproduced_x_point_separation_m": float(
+                    route["metrics"]["x_point_separation_m"]
+                ),
+                "banked_comparison": comparisons,
+            }
+        )
+    sidecar = {
+        "measurement": (
+            "imas-ink-style shared-level total-flux contour comparison for every "
+            "convergence-qualified circuit route"
+        ),
+        "banked_validation_receipt": str(DEFAULT_OUTPUT / RECEIPT_NAME),
+        "banked_validation_receipt_sha256": banked_receipt_sha256,
+        "guard_policy": {
+            "state_derived_science_metric_relative_tolerance": 1.0e-6,
+            "state_derived_science_metrics": [
+                "fractional_flux_rms",
+                "boundary_mean_separation_m",
+                "boundary_maximum_separation_m",
+                "x_point_separation_m",
+            ],
+            "route_diagnostic_residual_relative_tolerance": 1.0e-2,
+            "route_diagnostic_note": (
+                "The current-pinned terminal residual varied by 5.3204e-4 relative "
+                "in the bounded reproduction diagnostic while all state-derived "
+                "science metrics reproduced at 1.1e-9 relative or better. The "
+                "terminal residual is therefore reported with both values as a "
+                "route-internal diagnostic; convergence qualification derives from "
+                "the original banked validation run, not this reproduction."
+            ),
+        },
+        "all_banked_values_reproduced": True,
+        "figure_count": len(sidecar_rows),
+        "figures": sidecar_rows,
+    }
+    (output / CONTOUR_RECEIPT_NAME).write_text(
+        json.dumps(sidecar, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    )
+    return sidecar
+
+
+def run_contour_reproduction(output: Path) -> dict[str, Any]:
+    """Re-solve only bank-qualified frames without rewriting validation evidence."""
+
+    configure_dtypes()
+    output.mkdir(parents=True, exist_ok=True)
+    banked_receipt_path = output / RECEIPT_NAME
+    if not banked_receipt_path.is_file():
+        raise RuntimeError("a banked validation receipt is required for reproduction")
+    banked_receipt_sha256 = _sha256(banked_receipt_path)
+    banked_receipt = json.loads(banked_receipt_path.read_text())
+    qualified_keys = _banked_converged_circuit_rows(banked_receipt)
+    qualified_frames = {(shot, frame) for shot, frame, _route in qualified_keys}
+    selection = {
+        (item["shot"], int(item["frame"])): item
+        for item in banked_receipt["selection"]["selected_frames"]
+    }
+    records = []
+    fields = []
+    for key in sorted(qualified_frames):
+        try:
+            item = selection[key]
+        except KeyError as error:
+            raise RuntimeError(
+                f"banked converged frame {key} lacks selection data"
+            ) from error
+        selected = SelectedFrame(
+            DEFAULT_DATA / item["shot"],
+            int(item["frame"]),
+            float(item["time_ms"]),
+            float(item["recorded_plasma_current_a"]),
+        )
+        record, frame_fields = solve_frame(selected)
+        records.append(record)
+        fields.append(frame_fields)
+    return render_contour_comparisons(
+        banked_receipt,
+        records,
+        fields,
+        output,
+        banked_receipt_sha256,
+    )
 
 
 def run(data: Path, output: Path, frame_count: int = FRAME_COUNT) -> dict[str, Any]:
@@ -1281,7 +1617,27 @@ def main() -> None:
     parser.add_argument("--data", type=Path, default=DEFAULT_DATA)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--frames", type=int, default=FRAME_COUNT)
+    parser.add_argument(
+        "--contours-only",
+        action="store_true",
+        help="reproduce bank-qualified contour figures without rewriting validation",
+    )
     arguments = parser.parse_args()
+    if arguments.contours_only:
+        sidecar = run_contour_reproduction(arguments.output)
+        print(
+            json.dumps(
+                {
+                    "all_banked_values_reproduced": sidecar[
+                        "all_banked_values_reproduced"
+                    ],
+                    "figure_count": sidecar["figure_count"],
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return
     receipt = run(arguments.data, arguments.output, arguments.frames)
     print(json.dumps(receipt["verdict"], indent=2, sort_keys=True))
 

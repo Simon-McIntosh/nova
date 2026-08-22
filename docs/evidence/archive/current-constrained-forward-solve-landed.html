@@ -122,6 +122,25 @@
     residual 1.5899788903681545e-09 at relative tolerance 1e-5, exactly 4 iterations, diverted
     topology.</p>
 
+    <h2 id="scalar-current-seam">Scalar-current seam — the constrained map is public — 2026-08-22</h2>
+    <p>Run <code>r-20260822T125018360336-scalar-current-seam</code>, gate <strong>passed</strong>;
+    commit <code>cf812416</code> (merge <code>2e1236f8</code>); 44 tests passed with both pre-existing
+    forward suites unchanged; 9 new acceptance cases (three pre-division inadmissibility values);
+    ruff exit 0 over all six changed paths.</p>
+    <p>An optional <code>target_current</code> now threads through <code>ForwardProfile.flux_map</code>,
+    <code>observe</code>, <code>solve</code>, <code>solve_branch</code>, <code>solve_portfolio</code>,
+    <code>solve_batch</code> and the diverted-perturbation paths; absence selects the original absolute
+    expressions. The constrained <code>ForwardFluxOperator</code> path computes the amplitude from the
+    sum of the exact integrated cell-current moments, applies the same amplitude to
+    <code>cell_current</code>, <code>radial_moment</code> and <code>vertical_moment</code> (the flux
+    image and receipt cannot diverge), rejects non-finite, zero, sign-reversed or out-of-band amplitudes
+    <em>before</em> division, never clips, and lets the host Krylov line search reject inadmissible
+    trials — the locked reject-step and optional-target decisions in operation.
+    <code>ForwardEquilibrium.normalisation</code> publishes
+    <code>NormalisationPolicy.DECLARED_SCALAR_CURRENT</code>, the recovered amplitude and rescaled
+    status. Receipt smoke: requested 970087.5877824266 A, observed 970087.5877824267 A (one ulp),
+    recovered amplitude 1.2.</p>
+
   </main>
 </body>
 </html>

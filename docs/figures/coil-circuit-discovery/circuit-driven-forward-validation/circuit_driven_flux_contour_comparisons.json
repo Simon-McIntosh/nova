@@ -1,0 +1,224 @@
+{
+  "all_banked_values_reproduced": true,
+  "banked_validation_receipt": "docs/figures/coil-circuit-discovery/circuit-driven-forward-validation/circuit_driven_forward_validation_receipt.json",
+  "banked_validation_receipt_sha256": "0800b08cac41668180bcb490ea8af4a7da21c1b4cbe0a635e60576fde7818f03",
+  "figure_count": 3,
+  "figures": [
+    {
+      "banked_comparison": {
+        "boundary_maximum_separation_m": {
+          "banked": 0.3032291711442572,
+          "matched": true,
+          "relative_difference": 9.484989317026317e-10,
+          "relative_tolerance": 1e-06,
+          "reproduced": 0.30322917085664464
+        },
+        "boundary_mean_separation_m": {
+          "banked": 0.06985693938512014,
+          "matched": true,
+          "relative_difference": 1.0811600127308729e-10,
+          "relative_tolerance": 1e-06,
+          "reproduced": 0.06985693939267279
+        },
+        "fixed_point_relative_residual": {
+          "banked": 1.1861186490377328e-07,
+          "matched": true,
+          "relative_difference": 0.0002196482931020829,
+          "relative_tolerance": 0.01,
+          "reproduced": 1.1863791779744104e-07
+        },
+        "fractional_flux_rms": {
+          "banked": 0.15882358297213975,
+          "matched": true,
+          "relative_difference": 1.1391764037136998e-09,
+          "relative_tolerance": 1e-06,
+          "reproduced": 0.15882358315306783
+        },
+        "x_point_separation_m": {
+          "banked": 0.4564565794501275,
+          "matched": true,
+          "relative_difference": 1.2637546482912578e-10,
+          "relative_tolerance": 1e-06,
+          "reproduced": 0.4564565793924426
+        }
+      },
+      "figure": "docs/figures/coil-circuit-discovery/circuit-driven-forward-validation/circuit_driven_flux_contours_0112bdc95d_f96_current_pinned_eliminated.png",
+      "frame": 96,
+      "reproduced_boundary_maximum_separation_m": 0.30322917085664464,
+      "reproduced_boundary_mean_separation_m": 0.06985693939267279,
+      "reproduced_fixed_point_relative_residual": 1.1863791779744104e-07,
+      "reproduced_fractional_flux_rms": 0.15882358315306783,
+      "reproduced_x_point_separation_m": 0.4564565793924426,
+      "route": "current_pinned_eliminated",
+      "shared_contour_levels_wb": [
+        -2.7863268077125087,
+        -2.523867095596925,
+        -2.261407383481341,
+        -1.9989476713657572,
+        -1.7364879592501734,
+        -1.4740282471345896,
+        -1.2115685350190057,
+        -0.9491088229034219,
+        -0.6866491107878381,
+        -0.424189398672254,
+        -0.16172968655667042,
+        0.1007300255589132,
+        0.36318973767449725,
+        0.6256494497900813,
+        0.8881091619056649,
+        1.1505688740212485,
+        1.4130285861368328
+      ],
+      "shared_level_identity": "one label-derived array passed verbatim to both contour calls",
+      "shot": "d3d_shot_0112bdc95d.parquet"
+    },
+    {
+      "banked_comparison": {
+        "boundary_maximum_separation_m": {
+          "banked": 0.5381557808521383,
+          "matched": true,
+          "relative_difference": 4.126028425699276e-16,
+          "relative_tolerance": 1e-06,
+          "reproduced": 0.5381557808521386
+        },
+        "boundary_mean_separation_m": {
+          "banked": 0.042895707221571364,
+          "matched": true,
+          "relative_difference": 3.3970012716977387e-15,
+          "relative_tolerance": 1e-06,
+          "reproduced": 0.04289570722157122
+        },
+        "fixed_point_relative_residual": {
+          "banked": 1.709425836951392e-13,
+          "matched": true,
+          "relative_difference": 0.002844500632111394,
+          "relative_tolerance": 0.01,
+          "reproduced": 1.7142882998251478e-13
+        },
+        "fractional_flux_rms": {
+          "banked": 0.030178983565236833,
+          "matched": true,
+          "relative_difference": 3.5408404623428785e-14,
+          "relative_tolerance": 1e-06,
+          "reproduced": 0.030178983565235764
+        },
+        "x_point_separation_m": {
+          "banked": 0.013506838014782925,
+          "matched": true,
+          "relative_difference": 4.302504878019521e-14,
+          "relative_tolerance": 1e-06,
+          "reproduced": 0.013506838014783506
+        }
+      },
+      "figure": "docs/figures/coil-circuit-discovery/circuit-driven-forward-validation/circuit_driven_flux_contours_01177bc9fa_f144_anderson_portfolio.png",
+      "frame": 144,
+      "reproduced_boundary_maximum_separation_m": 0.5381557808521386,
+      "reproduced_boundary_mean_separation_m": 0.04289570722157122,
+      "reproduced_fixed_point_relative_residual": 1.7142882998251478e-13,
+      "reproduced_fractional_flux_rms": 0.030178983565235764,
+      "reproduced_x_point_separation_m": 0.013506838014783506,
+      "route": "anderson_portfolio",
+      "shared_contour_levels_wb": [
+        -1.4498802312686865,
+        -1.2661682227057844,
+        -1.0824562141428822,
+        -0.8987442055799801,
+        -0.7150321970170781,
+        -0.5313201884541761,
+        -0.3476081798912738,
+        -0.16389617132837175,
+        0.019815837234530287,
+        0.20352784579743233,
+        0.38723985436033437,
+        0.5709518629232366,
+        0.7546638714861389,
+        0.9383758800490407,
+        1.122087888611943,
+        1.3057998971748448,
+        1.4895119057377473
+      ],
+      "shared_level_identity": "one label-derived array passed verbatim to both contour calls",
+      "shot": "d3d_shot_01177bc9fa.parquet"
+    },
+    {
+      "banked_comparison": {
+        "boundary_maximum_separation_m": {
+          "banked": 0.5652469519893931,
+          "matched": true,
+          "relative_difference": 9.057347463470324e-11,
+          "relative_tolerance": 1e-06,
+          "reproduced": 0.5652469519381967
+        },
+        "boundary_mean_separation_m": {
+          "banked": 0.042825154298494136,
+          "matched": true,
+          "relative_difference": 7.516897341421613e-10,
+          "relative_tolerance": 1e-06,
+          "reproduced": 0.042825154330685365
+        },
+        "fixed_point_relative_residual": {
+          "banked": 5.541132367671057e-07,
+          "matched": true,
+          "relative_difference": 0.0005498750884856809,
+          "relative_tolerance": 0.01,
+          "reproduced": 5.538085437020073e-07
+        },
+        "fractional_flux_rms": {
+          "banked": 0.014373236112390305,
+          "matched": true,
+          "relative_difference": 7.626438448630682e-09,
+          "relative_tolerance": 1e-06,
+          "reproduced": 0.014373236002773704
+        },
+        "x_point_separation_m": {
+          "banked": 0.0059150708054218695,
+          "matched": true,
+          "relative_difference": 8.516153069332673e-08,
+          "relative_tolerance": 1e-06,
+          "reproduced": 0.005915070301685386
+        }
+      },
+      "figure": "docs/figures/coil-circuit-discovery/circuit-driven-forward-validation/circuit_driven_flux_contours_01177bc9fa_f144_current_pinned_eliminated.png",
+      "frame": 144,
+      "reproduced_boundary_maximum_separation_m": 0.5652469519381967,
+      "reproduced_boundary_mean_separation_m": 0.042825154330685365,
+      "reproduced_fixed_point_relative_residual": 5.538085437020073e-07,
+      "reproduced_fractional_flux_rms": 0.014373236002773704,
+      "reproduced_x_point_separation_m": 0.005915070301685386,
+      "route": "current_pinned_eliminated",
+      "shared_contour_levels_wb": [
+        -1.4498802312686865,
+        -1.2661682227057844,
+        -1.0824562141428822,
+        -0.8987442055799801,
+        -0.7150321970170781,
+        -0.5313201884541761,
+        -0.3476081798912738,
+        -0.16389617132837175,
+        0.019815837234530287,
+        0.20352784579743233,
+        0.38723985436033437,
+        0.5709518629232366,
+        0.7546638714861389,
+        0.9383758800490407,
+        1.122087888611943,
+        1.3057998971748448,
+        1.4895119057377473
+      ],
+      "shared_level_identity": "one label-derived array passed verbatim to both contour calls",
+      "shot": "d3d_shot_01177bc9fa.parquet"
+    }
+  ],
+  "guard_policy": {
+    "route_diagnostic_note": "The current-pinned terminal residual varied by 5.3204e-4 relative in the bounded reproduction diagnostic while all state-derived science metrics reproduced at 1.1e-9 relative or better. The terminal residual is therefore reported with both values as a route-internal diagnostic; convergence qualification derives from the original banked validation run, not this reproduction.",
+    "route_diagnostic_residual_relative_tolerance": 0.01,
+    "state_derived_science_metric_relative_tolerance": 1e-06,
+    "state_derived_science_metrics": [
+      "fractional_flux_rms",
+      "boundary_mean_separation_m",
+      "boundary_maximum_separation_m",
+      "x_point_separation_m"
+    ]
+  },
+  "measurement": "imas-ink-style shared-level total-flux contour comparison for every convergence-qualified circuit route"
+}

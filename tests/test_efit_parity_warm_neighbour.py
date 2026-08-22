@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import fields
 from pathlib import Path
 from types import SimpleNamespace
@@ -128,6 +129,23 @@ def test_mast_frame_exposes_exact_shared_helper_surface() -> None:
         "current",
         "seed",
     ]
+
+
+def test_existing_measurement_retains_partial_references(tmp_path: Path) -> None:
+    measured = [{"shot": 21978, "slice_index": 35}]
+    references = [{"reference": measured[0]}]
+    receipt = {
+        "aggregate": {"measured_references": measured},
+        "references": references,
+    }
+    path = tmp_path / warm_neighbour.RECEIPT_NAME
+    path.write_text(json.dumps(receipt))
+
+    loaded, segments = warm_neighbour._existing_measurement(tmp_path, resume=True)
+
+    assert loaded == references
+    assert segments[0]["measured_references"] == measured
+    assert len(segments[0]["source_receipt_sha256"]) == 64
 
 
 def test_candidate_rows_are_earlier_offsets_first_and_in_bounds() -> None:

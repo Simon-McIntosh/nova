@@ -444,10 +444,34 @@ def _banked_artifact_digests(output: Path) -> dict[str, str]:
     }
 
 
+def _existing_measurement(
+    output: Path,
+    resume: bool,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Load committed partial references when extending a measurement."""
+    receipt_path = output / RECEIPT_NAME
+    if not resume:
+        return [], []
+    if not receipt_path.is_file():
+        raise FileNotFoundError("resume requested without an existing receipt")
+    receipt_digest = _sha256(receipt_path)
+    prior = json.loads(receipt_path.read_text())
+    segments = list(prior.get("run_segments", []))
+    if not segments:
+        segments.append(
+            {
+                "measured_references": prior["aggregate"]["measured_references"],
+                "source_receipt_sha256": receipt_digest,
+            }
+        )
+    return list(prior["references"]), segments
+
+
 def run(
     store: Path = SHOT_STORE,
     output: Path = DEFAULT_OUTPUT,
     shots: tuple[int, ...] | None = None,
+    resume: bool = False,
 ) -> dict[str, Any]:
     """Measure warm-neighbour stall lift on the five bounded frozen-six rows."""
     configure_dtypes()
@@ -459,6 +483,7 @@ def run(
         raise RuntimeError(
             "the immutable parity bank no longer contains exactly 23 files"
         )
+    existing_references, run_segments = _existing_measurement(output, resume)
     banked_receipt = json.loads(BANKED_CONSTRAINED_RECEIPT.read_text())
     banked_by_shot = {int(row["shot"]): row for row in banked_receipt["per_shot_table"]}
     bounded_keys = {
@@ -467,15 +492,30 @@ def run(
         if row["constrained_outcome"] != "converged_plasma_root"
     }
     requested_shots = None if shots is None else set(shots)
+    existing_keys = {
+        (
+            int(reference["reference"]["shot"]),
+            int(reference["reference"]["slice_index"]),
+        )
+        for reference in existing_references
+    }
+    if not existing_keys <= bounded_keys:
+        raise RuntimeError("the existing receipt contains an unexpected reference")
     if requested_shots is not None:
         unknown = requested_shots - {shot for shot, _row in bounded_keys}
         if unknown:
             raise ValueError(
                 f"requested shots are not bounded frozen-six references: {sorted(unknown)}"
             )
+        overlap = requested_shots & {shot for shot, _row in existing_keys}
+        if overlap:
+            raise ValueError(
+                f"requested shots already exist in the resumed receipt: {sorted(overlap)}"
+            )
     selected = select_slices_by_shot(DECOMPOSITION_BANK)
     cache_box: list[Any] = [None]
-    references = []
+    references = list(existing_references)
+    newly_measured = []
     already_converged = None
     for selected_row, _qualification in selected:
         shot = int(selected_row["shot"])
@@ -496,14 +536,34 @@ def run(
             continue
         if requested_shots is not None and shot not in requested_shots:
             continue
-        references.append(
-            measure_reference(store, shot, row, cache_box, banked_control)
-        )
+        measured = measure_reference(store, shot, row, cache_box, banked_control)
+        references.append(measured)
+        newly_measured.append(measured)
     expected_reference_count = (
-        len(bounded_keys) if requested_shots is None else len(requested_shots)
+        len(bounded_keys) - len(existing_keys)
+        if requested_shots is None
+        else len(requested_shots)
     )
-    if len(references) != expected_reference_count:
+    if len(newly_measured) != expected_reference_count:
         raise RuntimeError("the requested bounded references were not all measured")
+    reference_order = {
+        int(row["shot"]): position
+        for position, row in enumerate(banked_receipt["per_shot_table"])
+    }
+    references.sort(
+        key=lambda reference: reference_order[reference["reference"]["shot"]]
+    )
+    run_segments.append(
+        {
+            "measured_references": [
+                {
+                    "shot": reference["reference"]["shot"],
+                    "slice_index": reference["reference"]["slice_index"],
+                }
+                for reference in newly_measured
+            ]
+        }
+    )
     figure_path = output / FIGURE_NAME
     render_figure(references, figure_path)
     banked_artifacts_after = _banked_artifact_digests(output)
@@ -672,6 +732,7 @@ def run(
         },
         "already_converged_baseline": already_converged,
         "references": references,
+        "run_segments": run_segments,
         "aggregate": aggregate,
         "banked_artifact_integrity": {
             "verified_unchanged_count": len(banked_artifacts_after),
@@ -694,11 +755,13 @@ def main() -> None:
     parser.add_argument("--store", type=Path, default=SHOT_STORE)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--shots", nargs="+", type=int)
+    parser.add_argument("--resume", action="store_true")
     arguments = parser.parse_args()
     receipt = run(
         arguments.store,
         arguments.output,
         shots=None if arguments.shots is None else tuple(arguments.shots),
+        resume=arguments.resume,
     )
     print(json.dumps(receipt["aggregate"], indent=2, sort_keys=True))
 

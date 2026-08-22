@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T15:54:10",
+  "updated": "2026-08-22T21:34:53",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -647,6 +647,33 @@
         "starts": "2026-09-14",
         "ends": "2026-09-27",
         "description": "Nova is a physics solver; producing and packaging machine description is not its job. Once the map-driven producer in imas-ambix serves MAST descriptions, remove the three surfaces that grew here only because nothing else carried the geometry: the nova-machine-geometry-registry schema with its physical and registry digests, the content-addressed artifact caches and the OCI reference helper nothing publishes through, and the machine-specific solve-input IDS builder. The geometry itself is kept and migrates into the MAST map. The digest scheme goes because it answers 'is this the same machine' as a single global question, which a machine whose geometry changes across and within campaigns cannot satisfy \u2014 which is why it needed a coordinated cutover every time the description moved."
+      },
+      {
+        "id": "S12",
+        "status": "planned",
+        "theme": "Assimilation-ready forwards \u2014 pulse replay, moment-conditioned reachability, and the coupling seam",
+        "items": [
+          {
+            "slug": "coupling-surface-contract",
+            "why_now": "Every downstream consumer \u2014 window exchange, time-parallel boundary, ensemble-filter state, learned-surrogate schema \u2014 binds this surface; typing it before the ambix assimilator hardens its interface is the cheap ordering, and the gate-composition study measured what the implicit surface costs.",
+            "done_when": "Coupled-window suite green on the refactored exchange; banked gentle receipt (4 iterations, gating contraction 0.236, flux closure 0) reproduced; versioned schema artifact exported under scripts/coupling_surface/ and validated field-for-field against the live exchange by a test."
+          },
+          {
+            "slug": "moment-conditioned-basin-entry",
+            "why_now": "The full-catalog GPU solve holds on convergence reliability at 1 of 6 frozen references; moment conditioning is the owner-selected basin-entry driver, with the prediction-confidence study gate-independent and the driver sections sequenced behind the in-flight tared-external-field control.",
+            "done_when": "\u00a72 per-moment prediction errors banked on the frozen six plus the DIII-D score-blind frames with every moment declaring its current support; stall-attribution decision consumed; \u00a7\u00a73-4 convergence counts measured against the pre-registered 1/6 and 2/5-cold baselines through the public constrained seam."
+          },
+          {
+            "slug": "equilibrium-metric-parity",
+            "why_now": "The 0.602 field-energy instrument ratio blocks every internal-inductance comparison, gates the moment plan's inductance rung, and the challenge referee derives internal inductance from submitted maps inside the Consistency term worth 20 percent of the DIII-D score.",
+            "done_when": "f-emp-003 resolved: the 0.29897773 vs 0.49662131 ratio explained with a stated conversion, and a referee-matched inductance instrument banked with receipts on the six frozen shots."
+          },
+          {
+            "slug": "diiid-pulse-replay",
+            "why_now": "No pulse has ever been replayed through the coupled forward; the recorded closed-loop coil currents supply the machine's real feedback, and the open-loop drift horizon this measures is the forecast-skill floor any assimilator must beat.",
+            "done_when": "One ~100 ms diverted flat-top segment marched end-to-end with full receipts (or typed confinement loss banked as a finding); time-trace figures of marched vs labeled q95, betaN, boundary metrics and per-frame psi RMS, every row tree-stamped; drift horizon reported against a pre-registered tolerance band."
+          }
+        ]
       }
     ],
     "active_sprint_id": "S9",
@@ -807,6 +834,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 53
+    "_version": 54
   }
 }

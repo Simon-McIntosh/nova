@@ -16,15 +16,15 @@
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-context" content="extended">
   <meta name="plan-capability-verification" content="strict">
-  <meta name="plan-sprint" content="S7">
+  <meta name="plan-sprint" content="S12">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="efit-map-inversion">
   <meta name="plan-blocks" content="efit-forward-parity,flux-function-forward-transport">
   <title>Equilibrium Metric Parity | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-15">
-<meta name="plan-version" content="8">
+<meta name="plan-modified" content="2026-08-22">
+<meta name="plan-version" content="10">
 <meta name="plan-commits" content="8868a7f9,19261655,225140d1">
 <meta name="plan-artifacts" content="benchmarks/efit_derived_quantity_census.py,benchmarks/efit_metric_parity_comparison.py,benchmarks/efit_absent_quantity_triage.py">
 <meta name="plan-impl" content="1.0">
@@ -163,6 +163,11 @@
     <h4 class="r-fu-title">Lock the metric-disagreement-tolerance decision, then register cross-code tolerances if report-only-first-pass is chosen</h4>
     <div class="r-fu-body"><p><strong>Exemption: authority-required — locking a plan decision is owner authority the orchestrator does not hold.</strong> The comparison ran deliberately unbounded (verdict UNBOUNDED_FIRST_PASS, pass_fail_applied false) and the measured spreads are banked: interior medians 1e-4 to 1e-5 per paired quantity across the six frozen shots. The open decision <code>metric-disagreement-tolerance</code> asks what bound a paired metric must meet. If the owner locks <code>report-only-first-pass</code>, the follow-on work is registering per-quantity cross-code tolerances from the banked spread and wiring them as a scored second pass; the other options need no further node. The banked record is sufficient either way for the forward gate to consume.</p></div>
     <pre class="r-fu-prompt">/reckon-ship equilibrium-metric-parity §3</pre>
+    </article>
+<article class="r-fu" data-id="f-emp-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship equilibrium-metric-parity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close the 0.602 field-energy instrument ratio; match the referee&#x27;s inductance instrument</h4>
+    <div class="r-fu-body"><p>Handed from <code>efit-forward-parity</code> f-efp-004, which measured it as a by-product of retracting that plan's l_i row: nova's ∫B_p²dV operator applied to the reference's OWN flux map over the stored-LCFS region returns 0.29897773 T²m³ against the reference's published 0.49662131 — an instrument ratio of 0.60202 that neither support choice (+3.85 percent of area) nor cell quadrature (+0.24 percent area, +0.45 percent volume against the exact contour) explains. Until it closes, no nova l_i compares to a published EFIT l_i without a stated conversion. Candidates to separate, from the routing note: a different normalising volume or surface in the published definition, a rad-versus-weber convention on ψ entering the gradient, and hexagonal-mesh gradient resolution against the reference's 65×65 grid. The tension making this urgent beyond hygiene: this plan's own banked first pass recorded interior medians of 1e-4 to 1e-5 per paired quantity on the same six shots, which a 40 percent gap on a paired integral moment contradicts — either the pairing did not cover ∫B_p²dV or the published quantity is not the volume integral it is being read as. SCORE RELEVANCE (2026-08-22): the challenge's Consistency term — 20 percent of the DIII-D score — includes internal inductance the REFEREE derives from the submitted map, so predicting our own Consistency score requires reproducing the referee's l_i instrument, the same work as closing this ratio. The moment-conditioned-basin-entry plan's inductance rung is gated on this followup. Receipt: <code>docs/figures/efit-forward-parity/field-energy-instrument-control.json</code>.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship equilibrium-metric-parity</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

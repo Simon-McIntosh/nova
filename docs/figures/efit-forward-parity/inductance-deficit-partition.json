@@ -1,0 +1,105 @@
+{
+  "receipt": {
+    "kind": "inductance_deficit_partition",
+    "shot": 22086,
+    "slice_index": 43,
+    "source_receipts": [
+      "docs/figures/efit-forward-parity/converged-root-geometry-attribution.json",
+      "docs/figures/efit-forward-parity/moment-definition-rescore.json",
+      "docs/figures/efit-forward-parity/boundary-enclosed-volume-reconciliation.json"
+    ],
+    "source_receipt_sha256": {
+      "docs/figures/efit-forward-parity/converged-root-geometry-attribution.json": "67cc1b1578e8aac066e248f10d6deaca4ccb80628934e6ed21c2984c0d4d455a",
+      "docs/figures/efit-forward-parity/moment-definition-rescore.json": "09a36f45a53aa533a7442eb32ba6eadf062a6b5747fc466943b726b115e8aa76",
+      "docs/figures/efit-forward-parity/boundary-enclosed-volume-reconciliation.json": "1b1c18d850e5fdc6d96a130deea5d310261161612fe7a078d17b6c048d21143b"
+    }
+  },
+  "discriminator_declared_before_measurement": {
+    "inside_closed_branch_outside_core": "MASKING_ARTIFACT",
+    "outside_closed_branch": "PHYSICS_EDGE_CURRENT",
+    "decision_rule": "The larger share of the banked out-of-core current determines which reading the partition supports."
+  },
+  "execution_contract": {
+    "nonlinear_solve_calls": 0,
+    "equilibrium_observations_from_serialised_state": 1,
+    "cell_classification": "point-in-polygon test of every mesh cell centroid against the closed axis-enclosing separatrix branch"
+  },
+  "separatrix": {
+    "point_count": 75,
+    "poloidal_area_m2": 1.7718309749521555,
+    "area_centroid_major_radius_m": 0.7651775528698174,
+    "area_first_moment_m3": 1.355765289512833,
+    "exact_solid_of_revolution_m3": 8.518524547051108,
+    "first_moment_approximation_m3": 8.51852454705111,
+    "quadrature_relative_difference": 2.220446049250313e-16,
+    "arclength_m": 5.394335403671512
+  },
+  "current_partition_table": {
+    "confined_core": {
+      "cell_count": 95,
+      "cell_current_a": 416958.25412595563
+    },
+    "inside_closed_branch_outside_core": {
+      "cell_count": 139,
+      "cell_current_a": 515290.2244376731
+    },
+    "outside_closed_branch": {
+      "cell_count": 855,
+      "cell_current_a": 786.3964363712394
+    }
+  },
+  "current_closure": {
+    "summed_partition_current_a": 933034.875,
+    "pinned_total_current_a": 933034.875,
+    "closure_residual_a": 0.0,
+    "banked_out_of_core_current_a": 516076.6208740445,
+    "partitioned_out_of_core_current_a": 516076.62087404437
+  },
+  "boundary_enclosed_moment_rescore": {
+    "support": {
+      "cell_count": 234,
+      "toroidal_volume_m3": 8.549052255480996,
+      "volume_weighted_major_radius_m": 0.8654269524060091,
+      "current_integral_a": 932248.4785636287
+    },
+    "integrals": {
+      "pressure_volume_integral_pa_m3": 50558.537863093894,
+      "poloidal_field_squared_volume_integral_t2_m3": 0.28949138263178675
+    },
+    "reference_boundary_field_definition": {
+      "poloidal_beta": "2*mu0*integral(p dV) divided by the reference squared-mean boundary-field denominator, rescaled to the enclosed current",
+      "internal_inductance": "integral(Bp^2 dV) divided by the published mean-squared boundary-field denominator; current is not used in this definition"
+    },
+    "poloidal_beta": {
+      "solved": 0.32178501123910763,
+      "published_reference": 0.3351304829120636,
+      "denominator_t2_m3": 0.3948831065669281,
+      "signed_relative_deviation": -0.03982171826624836,
+      "matched_support_estimate_signed_relative_deviation": 0.05818098840723218,
+      "change_from_matched_support_estimate": -0.09800270667348054
+    },
+    "internal_inductance": {
+      "solved": 0.4484883501138651,
+      "published_reference": 0.7693799734115601,
+      "denominator_t2_m3": 0.6454825026297535,
+      "signed_relative_deviation": -0.41707821153026325,
+      "matched_support_estimate_signed_relative_deviation": -0.35695307611867966,
+      "change_from_matched_support_estimate": -0.0601251354115836
+    }
+  },
+  "discriminator_result": {
+    "current_location_supported_reading": "MASKING_ARTIFACT",
+    "inside_share_of_out_of_core_current": 0.998476202167346,
+    "outside_share_of_out_of_core_current": 0.0015237978326539947,
+    "deciding_figure_a": 515290.2244376731,
+    "internal_inductance_mechanism_verdict": "MASKING_CURRENT_CONFIRMED_BUT_FIELD_DEFICIT_SURVIVES",
+    "reading": "The current omitted by the 95-cell core mask lies predominantly inside the closed separatrix, so the current partition supports the masking reading. The spatial field integral nevertheless leaves the inductance deficit standing, so masking does not by itself explain that field deficit."
+  },
+  "protected_banked_artifacts": {
+    "declared_count": 23,
+    "verified_digest_count": 23,
+    "all_digests_match": true,
+    "source_and_output_receipts_are_outside_protected_set": true
+  },
+  "figure": "docs/figures/efit-forward-parity/inductance-deficit-partition.png"
+}

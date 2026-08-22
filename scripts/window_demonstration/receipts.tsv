@@ -1,36 +1,1351 @@
-kind	iteration	side	field	value	unit
-window_status			outcome	blocked_before_window_receipt	text
-window_status			window_attempts	1	count
-window_status			window_receipt_returned	false	boolean
-window_status			transport_rung_advanced	true	boolean
-configuration			backend	cpu	text
-configuration			window_length	0.01	s
-configuration			equilibrium_time_start	0	s
-configuration			equilibrium_time_end	0.01	s
-configuration			transport_time_start	0	s
-configuration			transport_time_end	0.01	s
-configuration			iteration_cap	10	count
-configuration			convergence_tolerance	0.005	relative
-configuration			damping	0.5	fraction
-configuration			extraction_points_per_axis	49	count
-configuration			transport_radial_cells	8	count
-configuration			surface_bins	14	count
-extraction_diagnostic	0	baseline	record_valid	true	boolean
-extraction_diagnostic		equilibrium_sample	record_valid	false	boolean
-extraction_diagnostic		equilibrium_sample	map_height	49	count
-extraction_diagnostic		equilibrium_sample	map_radius	49	count
-extraction_diagnostic		equilibrium_sample	axis_connected_core_cells	0	count
-extraction_diagnostic		equilibrium_sample	minimum_required_core_cells	200	count
-extraction_diagnostic		equilibrium_sample	surface_arc_valid	false	boolean
-extraction_diagnostic		equilibrium_sample	surface_arc_invalid_count	0	count
-extraction_diagnostic		equilibrium_sample	surface_arc_first_invalid_cell	0	index
-extraction_diagnostic		equilibrium_sample	surface_arc_first_invalid_level	0.04	normalized_flux
-unavailable_receipt			iterations_used	unavailable	count
-unavailable_receipt			contraction_estimate	unavailable	ratio
-unavailable_receipt			exit_residuals	unavailable	relative
-unavailable_receipt			damping_applied	unavailable	fraction
-unavailable_receipt			flux_closure_absolute	unavailable	Wb
-unavailable_receipt			flux_closure_relative	unavailable	relative
-unavailable_receipt			current_closure_absolute	unavailable	A
-unavailable_receipt			current_closure_relative	unavailable	relative
-unavailable_receipt			exchange_sweep_wall_time	unavailable	s
+regime	candidate	kind	iteration	sample	side	field	value	unit
+strong		configuration				window_length	0.01	s
+strong		configuration				auxiliary_source_multiplier	1	fraction
+strong		configuration				iteration_cap	10	count
+strong		configuration				tolerance	0.0050000000000000001	relative
+strong		configuration				damping	0.5	fraction
+strong		configuration				equilibrium_solve_tolerance	9.9999999999999995e-07	relative
+strong		configuration				radial_cells	8	count
+strong		configuration				surface_bins	14	count
+strong		configuration				extraction_points_per_axis	49	count
+strong		configuration				preparation_wall_time	55.001441712956876	s
+strong		configuration				outcome_type	ConvergedNonConfinedError	text
+strong		configuration				outcome	equilibrium portfolio converged without a selectable confined branch at exchange 5, sample 1; core cells limited/diverted = (0, 157); selection reason = no_admissible_alternative; availability limited/diverted = (True, False); residuals limited/diverted = (7.607266075789316e-17, 4.4197234248998465e-16)	text
+strong		branch_selection	1	0	equilibrium	sample_time	0	s
+strong		branch_selection	1	0	equilibrium	limited_core_cells	126	count
+strong		branch_selection	1	0	equilibrium	diverted_core_cells	157	count
+strong		branch_selection	1	0	equilibrium	selected_class	limited	text
+strong		branch_selection	1	0	equilibrium	previous_class	none	text
+strong		branch_selection	1	0	equilibrium	switched	false	text
+strong		branch_selection	1	0	equilibrium	reason	sole_valid	text
+strong		branch_selection	1	0	equilibrium	limited_available	true	boolean
+strong		branch_selection	1	0	equilibrium	diverted_available	false	boolean
+strong		branch_selection	1	0	equilibrium	limited_admissible	true	boolean
+strong		branch_selection	1	0	equilibrium	diverted_admissible	true	boolean
+strong		branch_selection	1	0	equilibrium	limited_residual	1.4566846697679485e-14	relative
+strong		branch_selection	1	0	equilibrium	diverted_residual	4.0756513704185692e-16	relative
+strong		branch_selection	1	1	equilibrium	sample_time	0.01	s
+strong		branch_selection	1	1	equilibrium	limited_core_cells	133	count
+strong		branch_selection	1	1	equilibrium	diverted_core_cells	157	count
+strong		branch_selection	1	1	equilibrium	selected_class	limited	text
+strong		branch_selection	1	1	equilibrium	previous_class	limited	text
+strong		branch_selection	1	1	equilibrium	switched	false	text
+strong		branch_selection	1	1	equilibrium	reason	history_continuity	text
+strong		branch_selection	1	1	equilibrium	limited_available	true	boolean
+strong		branch_selection	1	1	equilibrium	diverted_available	false	boolean
+strong		branch_selection	1	1	equilibrium	limited_admissible	true	boolean
+strong		branch_selection	1	1	equilibrium	diverted_admissible	true	boolean
+strong		branch_selection	1	1	equilibrium	limited_residual	1.1807326829759295e-15	relative
+strong		branch_selection	1	1	equilibrium	diverted_residual	4.1314148218640533e-16	relative
+strong		branch_selection	2	0	equilibrium	sample_time	0	s
+strong		branch_selection	2	0	equilibrium	limited_core_cells	126	count
+strong		branch_selection	2	0	equilibrium	diverted_core_cells	157	count
+strong		branch_selection	2	0	equilibrium	selected_class	limited	text
+strong		branch_selection	2	0	equilibrium	previous_class	none	text
+strong		branch_selection	2	0	equilibrium	switched	false	text
+strong		branch_selection	2	0	equilibrium	reason	sole_valid	text
+strong		branch_selection	2	0	equilibrium	limited_available	true	boolean
+strong		branch_selection	2	0	equilibrium	diverted_available	false	boolean
+strong		branch_selection	2	0	equilibrium	limited_admissible	true	boolean
+strong		branch_selection	2	0	equilibrium	diverted_admissible	true	boolean
+strong		branch_selection	2	0	equilibrium	limited_residual	1.4566846697679485e-14	relative
+strong		branch_selection	2	0	equilibrium	diverted_residual	4.0756513704185692e-16	relative
+strong		branch_selection	2	1	equilibrium	sample_time	0.01	s
+strong		branch_selection	2	1	equilibrium	limited_core_cells	139	count
+strong		branch_selection	2	1	equilibrium	diverted_core_cells	157	count
+strong		branch_selection	2	1	equilibrium	selected_class	limited	text
+strong		branch_selection	2	1	equilibrium	previous_class	limited	text
+strong		branch_selection	2	1	equilibrium	switched	false	text
+strong		branch_selection	2	1	equilibrium	reason	history_continuity	text
+strong		branch_selection	2	1	equilibrium	limited_available	true	boolean
+strong		branch_selection	2	1	equilibrium	diverted_available	false	boolean
+strong		branch_selection	2	1	equilibrium	limited_admissible	true	boolean
+strong		branch_selection	2	1	equilibrium	diverted_admissible	true	boolean
+strong		branch_selection	2	1	equilibrium	limited_residual	1.9700427553286153e-15	relative
+strong		branch_selection	2	1	equilibrium	diverted_residual	8.464117776286397e-16	relative
+strong		branch_selection	3	0	equilibrium	sample_time	0	s
+strong		branch_selection	3	0	equilibrium	limited_core_cells	126	count
+strong		branch_selection	3	0	equilibrium	diverted_core_cells	157	count
+strong		branch_selection	3	0	equilibrium	selected_class	limited	text
+strong		branch_selection	3	0	equilibrium	previous_class	none	text
+strong		branch_selection	3	0	equilibrium	switched	false	text
+strong		branch_selection	3	0	equilibrium	reason	sole_valid	text
+strong		branch_selection	3	0	equilibrium	limited_available	true	boolean
+strong		branch_selection	3	0	equilibrium	diverted_available	false	boolean
+strong		branch_selection	3	0	equilibrium	limited_admissible	true	boolean
+strong		branch_selection	3	0	equilibrium	diverted_admissible	true	boolean
+strong		branch_selection	3	0	equilibrium	limited_residual	1.4566846697679485e-14	relative
+strong		branch_selection	3	0	equilibrium	diverted_residual	4.0756513704185692e-16	relative
+strong		branch_selection	3	1	equilibrium	sample_time	0.01	s
+strong		branch_selection	3	1	equilibrium	limited_core_cells	145	count
+strong		branch_selection	3	1	equilibrium	diverted_core_cells	157	count
+strong		branch_selection	3	1	equilibrium	selected_class	limited	text
+strong		branch_selection	3	1	equilibrium	previous_class	limited	text
+strong		branch_selection	3	1	equilibrium	switched	false	text
+strong		branch_selection	3	1	equilibrium	reason	history_continuity	text
+strong		branch_selection	3	1	equilibrium	limited_available	true	boolean
+strong		branch_selection	3	1	equilibrium	diverted_available	false	boolean
+strong		branch_selection	3	1	equilibrium	limited_admissible	true	boolean
+strong		branch_selection	3	1	equilibrium	diverted_admissible	true	boolean
+strong		branch_selection	3	1	equilibrium	limited_residual	7.8841951755872654e-16	relative
+strong		branch_selection	3	1	equilibrium	diverted_residual	1.0063048270005709e-15	relative
+strong		branch_selection	4	0	equilibrium	sample_time	0	s
+strong		branch_selection	4	0	equilibrium	limited_core_cells	126	count
+strong		branch_selection	4	0	equilibrium	diverted_core_cells	157	count
+strong		branch_selection	4	0	equilibrium	selected_class	limited	text
+strong		branch_selection	4	0	equilibrium	previous_class	none	text
+strong		branch_selection	4	0	equilibrium	switched	false	text
+strong		branch_selection	4	0	equilibrium	reason	sole_valid	text
+strong		branch_selection	4	0	equilibrium	limited_available	true	boolean
+strong		branch_selection	4	0	equilibrium	diverted_available	false	boolean
+strong		branch_selection	4	0	equilibrium	limited_admissible	true	boolean
+strong		branch_selection	4	0	equilibrium	diverted_admissible	true	boolean
+strong		branch_selection	4	0	equilibrium	limited_residual	1.4566846697679485e-14	relative
+strong		branch_selection	4	0	equilibrium	diverted_residual	4.0756513704185692e-16	relative
+strong		branch_selection	4	1	equilibrium	sample_time	0.01	s
+strong		branch_selection	4	1	equilibrium	limited_core_cells	145	count
+strong		branch_selection	4	1	equilibrium	diverted_core_cells	157	count
+strong		branch_selection	4	1	equilibrium	selected_class	limited	text
+strong		branch_selection	4	1	equilibrium	previous_class	limited	text
+strong		branch_selection	4	1	equilibrium	switched	false	text
+strong		branch_selection	4	1	equilibrium	reason	history_continuity	text
+strong		branch_selection	4	1	equilibrium	limited_available	true	boolean
+strong		branch_selection	4	1	equilibrium	diverted_available	false	boolean
+strong		branch_selection	4	1	equilibrium	limited_admissible	true	boolean
+strong		branch_selection	4	1	equilibrium	diverted_admissible	true	boolean
+strong		branch_selection	4	1	equilibrium	limited_residual	8.8820024954242939e-16	relative
+strong		branch_selection	4	1	equilibrium	diverted_residual	5.8316109414077684e-16	relative
+strong		branch_selection	5	1	equilibrium	sample_time	0.01	s
+strong		branch_selection	5	1	equilibrium	limited_core_cells	0	count
+strong		branch_selection	5	1	equilibrium	diverted_core_cells	157	count
+strong		branch_selection	5	1	equilibrium	selected_class	limited	text
+strong		branch_selection	5	1	equilibrium	previous_class	limited	text
+strong		branch_selection	5	1	equilibrium	switched	false	text
+strong		branch_selection	5	1	equilibrium	reason	no_admissible_alternative	text
+strong		branch_selection	5	1	equilibrium	limited_available	true	boolean
+strong		branch_selection	5	1	equilibrium	diverted_available	false	boolean
+strong		branch_selection	5	1	equilibrium	limited_admissible	false	boolean
+strong		branch_selection	5	1	equilibrium	diverted_admissible	true	boolean
+strong		branch_selection	5	1	equilibrium	limited_residual	7.6072660757893158e-17	relative
+strong		branch_selection	5	1	equilibrium	diverted_residual	4.4197234248998465e-16	relative
+strong		exchange_timing	1		transport	wall_time	5.8675248131621629	s
+strong		exchange_timing	1		equilibrium_plus_fsa	wall_time	46.657166521064937	s
+strong		exchange_timing	2		transport	wall_time	0.05290511786006391	s
+strong		exchange_timing	2		equilibrium_plus_fsa	wall_time	42.651266149943694	s
+strong		exchange_timing	3		transport	wall_time	0.050963010871782899	s
+strong		exchange_timing	3		equilibrium_plus_fsa	wall_time	43.026880852179602	s
+strong		exchange_timing	4		transport	wall_time	0.059855333995074034	s
+strong		exchange_timing	4		equilibrium_plus_fsa	wall_time	43.833987721940503	s
+strong		exchange_timing	5		transport	wall_time	0.06599286594428122	s
+strong		exchange_timing	5		equilibrium	wall_time	1.7779766409657896	s
+strong		extraction_diagnostic	0	0	equilibrium	map_height	49	count
+strong		extraction_diagnostic	0	0	equilibrium	map_radius	49	count
+strong		extraction_diagnostic	0	0	equilibrium	core_count	496	count
+strong		extraction_diagnostic	0	0	equilibrium	record_valid	true	boolean
+strong		extraction_diagnostic	0	0	equilibrium	surface_arc_valid	true	boolean
+strong		extraction_diagnostic	0	0	equilibrium	surface_arc_invalid_count	0	count
+strong		extraction_diagnostic	0	0	equilibrium	surface_arc_first_invalid_cell	0	index
+strong		extraction_diagnostic	0	0	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+strong		extraction_diagnostic	0	0	equilibrium	exact_evaluation_seconds	3.8709240639582276	s
+strong		extraction_diagnostic	1	0	equilibrium	map_height	49	count
+strong		extraction_diagnostic	1	0	equilibrium	map_radius	49	count
+strong		extraction_diagnostic	1	0	equilibrium	core_count	496	count
+strong		extraction_diagnostic	1	0	equilibrium	record_valid	true	boolean
+strong		extraction_diagnostic	1	0	equilibrium	surface_arc_valid	true	boolean
+strong		extraction_diagnostic	1	0	equilibrium	surface_arc_invalid_count	0	count
+strong		extraction_diagnostic	1	0	equilibrium	surface_arc_first_invalid_cell	0	index
+strong		extraction_diagnostic	1	0	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+strong		extraction_diagnostic	1	0	equilibrium	exact_evaluation_seconds	4.4076768769882619	s
+strong		extraction_diagnostic	1	1	equilibrium	map_height	49	count
+strong		extraction_diagnostic	1	1	equilibrium	map_radius	49	count
+strong		extraction_diagnostic	1	1	equilibrium	core_count	543	count
+strong		extraction_diagnostic	1	1	equilibrium	record_valid	true	boolean
+strong		extraction_diagnostic	1	1	equilibrium	surface_arc_valid	true	boolean
+strong		extraction_diagnostic	1	1	equilibrium	surface_arc_invalid_count	0	count
+strong		extraction_diagnostic	1	1	equilibrium	surface_arc_first_invalid_cell	0	index
+strong		extraction_diagnostic	1	1	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+strong		extraction_diagnostic	1	1	equilibrium	exact_evaluation_seconds	4.4080723340157419	s
+strong		extraction_diagnostic	2	0	equilibrium	map_height	49	count
+strong		extraction_diagnostic	2	0	equilibrium	map_radius	49	count
+strong		extraction_diagnostic	2	0	equilibrium	core_count	496	count
+strong		extraction_diagnostic	2	0	equilibrium	record_valid	true	boolean
+strong		extraction_diagnostic	2	0	equilibrium	surface_arc_valid	true	boolean
+strong		extraction_diagnostic	2	0	equilibrium	surface_arc_invalid_count	0	count
+strong		extraction_diagnostic	2	0	equilibrium	surface_arc_first_invalid_cell	0	index
+strong		extraction_diagnostic	2	0	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+strong		extraction_diagnostic	2	0	equilibrium	exact_evaluation_seconds	4.3863747150171548	s
+strong		extraction_diagnostic	2	1	equilibrium	map_height	49	count
+strong		extraction_diagnostic	2	1	equilibrium	map_radius	49	count
+strong		extraction_diagnostic	2	1	equilibrium	core_count	559	count
+strong		extraction_diagnostic	2	1	equilibrium	record_valid	true	boolean
+strong		extraction_diagnostic	2	1	equilibrium	surface_arc_valid	true	boolean
+strong		extraction_diagnostic	2	1	equilibrium	surface_arc_invalid_count	0	count
+strong		extraction_diagnostic	2	1	equilibrium	surface_arc_first_invalid_cell	0	index
+strong		extraction_diagnostic	2	1	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+strong		extraction_diagnostic	2	1	equilibrium	exact_evaluation_seconds	4.4531851599458605	s
+strong		extraction_diagnostic	3	0	equilibrium	map_height	49	count
+strong		extraction_diagnostic	3	0	equilibrium	map_radius	49	count
+strong		extraction_diagnostic	3	0	equilibrium	core_count	496	count
+strong		extraction_diagnostic	3	0	equilibrium	record_valid	true	boolean
+strong		extraction_diagnostic	3	0	equilibrium	surface_arc_valid	true	boolean
+strong		extraction_diagnostic	3	0	equilibrium	surface_arc_invalid_count	0	count
+strong		extraction_diagnostic	3	0	equilibrium	surface_arc_first_invalid_cell	0	index
+strong		extraction_diagnostic	3	0	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+strong		extraction_diagnostic	3	0	equilibrium	exact_evaluation_seconds	4.4531181808561087	s
+strong		extraction_diagnostic	3	1	equilibrium	map_height	49	count
+strong		extraction_diagnostic	3	1	equilibrium	map_radius	49	count
+strong		extraction_diagnostic	3	1	equilibrium	core_count	569	count
+strong		extraction_diagnostic	3	1	equilibrium	record_valid	true	boolean
+strong		extraction_diagnostic	3	1	equilibrium	surface_arc_valid	true	boolean
+strong		extraction_diagnostic	3	1	equilibrium	surface_arc_invalid_count	0	count
+strong		extraction_diagnostic	3	1	equilibrium	surface_arc_first_invalid_cell	0	index
+strong		extraction_diagnostic	3	1	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+strong		extraction_diagnostic	3	1	equilibrium	exact_evaluation_seconds	4.4946686390321702	s
+strong		extraction_diagnostic	4	0	equilibrium	map_height	49	count
+strong		extraction_diagnostic	4	0	equilibrium	map_radius	49	count
+strong		extraction_diagnostic	4	0	equilibrium	core_count	496	count
+strong		extraction_diagnostic	4	0	equilibrium	record_valid	true	boolean
+strong		extraction_diagnostic	4	0	equilibrium	surface_arc_valid	true	boolean
+strong		extraction_diagnostic	4	0	equilibrium	surface_arc_invalid_count	0	count
+strong		extraction_diagnostic	4	0	equilibrium	surface_arc_first_invalid_cell	0	index
+strong		extraction_diagnostic	4	0	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+strong		extraction_diagnostic	4	0	equilibrium	exact_evaluation_seconds	4.4403217760846019	s
+strong		extraction_diagnostic	4	1	equilibrium	map_height	49	count
+strong		extraction_diagnostic	4	1	equilibrium	map_radius	49	count
+strong		extraction_diagnostic	4	1	equilibrium	core_count	576	count
+strong		extraction_diagnostic	4	1	equilibrium	record_valid	true	boolean
+strong		extraction_diagnostic	4	1	equilibrium	surface_arc_valid	true	boolean
+strong		extraction_diagnostic	4	1	equilibrium	surface_arc_invalid_count	0	count
+strong		extraction_diagnostic	4	1	equilibrium	surface_arc_first_invalid_cell	0	index
+strong		extraction_diagnostic	4	1	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+strong		extraction_diagnostic	4	1	equilibrium	exact_evaluation_seconds	4.3498209430836141	s
+strong		conservation				flux_boundary	0.0099265700235486864	Wb
+strong		conservation				flux_resistive	0.0016115280578548052	Wb
+strong		conservation				flux_internal	0.0083150419656938812	Wb
+strong		conservation				flux_closure_error	0	Wb
+strong		conservation				flux_closure_residual	0	relative
+strong		conservation				current_requested_initial	557455.09288717515	A
+strong		conservation				current_requested_final	557455.09288717515	A
+strong		conservation				current_achieved_initial	557455.09288717515	A
+strong		conservation				current_achieved_final	557455.09288717515	A
+strong		conservation				current_continuity_error	0	A
+strong		conservation				current_continuity_residual	0	relative
+strong		interval_flux_ledger	1		transport	boundary	0.0099265700235486864	Wb
+strong		interval_flux_ledger	1		transport	resistive	0.0016115280578548052	Wb
+strong		interval_flux_ledger	1		transport	internal	0.0083150419656938812	Wb
+strong		interval_flux_ledger	1		transport	mean_axis_voltage	0.16115280578548052	V
+strong		interval_flux_ledger	1		transport	mean_boundary_voltage	0.99265700235486864	V
+strong		interval_current_ledger	1		transport	requested_initial	557455.09288717515	A
+strong		interval_current_ledger	1		transport	requested_final	557455.09288717515	A
+strong		interval_current_ledger	1		transport	achieved_initial	557455.09288717515	A
+strong		interval_current_ledger	1		transport	achieved_final	557455.09288717515	A
+gentle	1	configuration				window_length	0.0025000000000000001	s
+gentle	1	configuration				auxiliary_source_multiplier	0.5	fraction
+gentle	1	configuration				iteration_cap	10	count
+gentle	1	configuration				tolerance	0.0050000000000000001	relative
+gentle	1	configuration				damping	0.5	fraction
+gentle	1	configuration				equilibrium_solve_tolerance	9.9999999999999995e-07	relative
+gentle	1	configuration				radial_cells	8	count
+gentle	1	configuration				surface_bins	14	count
+gentle	1	configuration				extraction_points_per_axis	49	count
+gentle	1	configuration				preparation_wall_time	55.001441712956876	s
+gentle	1	configuration				outcome_type	WindowReceipt	text
+gentle	1	configuration				outcome	converged	text
+gentle	1	convergence				iterations_used	10	count
+gentle	1	convergence				contraction_estimate	0.53710396334179378	ratio
+gentle	1	convergence				maximum_residual	0.0049860186161842365	relative
+gentle	1	convergence				damping_applied	0.5	fraction
+gentle	1	exit_residual				geometry.radial_grid	0	relative
+gentle	1	exit_residual				geometry.phi_boundary	0.00030926807100344961	relative
+gentle	1	exit_residual				geometry.axis_reference	7.4297520823139713e-05	relative
+gentle	1	exit_residual				geometry.boundary_reference	7.4003504924477503e-05	relative
+gentle	1	exit_residual				geometry.b2_cell	6.2746177844996744e-05	relative
+gentle	1	exit_residual				geometry.b2_face	6.6064887965290622e-05	relative
+gentle	1	exit_residual				geometry.clipped_vertex_capacity	0	relative
+gentle	1	exit_residual				geometry.clipped_vertex_count_max	0	relative
+gentle	1	exit_residual				geometry.clipped_vertex_count_required	0	relative
+gentle	1	exit_residual				geometry.delta_lower_face	0.0049860186156783313	relative
+gentle	1	exit_residual				geometry.delta_upper_face	0.0049860186161842365	relative
+gentle	1	exit_residual				geometry.elongation_face	4.6548105492172183e-05	relative
+gentle	1	exit_residual				geometry.f_cell	2.9596536732913224e-06	relative
+gentle	1	exit_residual				geometry.f_face	2.997263250536417e-06	relative
+gentle	1	exit_residual				geometry.flux_sign	0	relative
+gentle	1	exit_residual				geometry.g2_face	0.00028988151251776941	relative
+gentle	1	exit_residual				geometry.g3_cell	6.5404044924835241e-05	relative
+gentle	1	exit_residual				geometry.g3_face	6.9362267820176929e-05	relative
+gentle	1	exit_residual				geometry.grad_psi2_face	0.00045482379636984554	relative
+gentle	1	exit_residual				geometry.grad_psi2_over_r2_face	0.0004175832288633455	relative
+gentle	1	exit_residual				geometry.grad_psi_face	0.0002409795382426533	relative
+gentle	1	exit_residual				geometry.gradient_moment_scale	0	relative
+gentle	1	exit_residual				geometry.int_dl_over_bp_face	0.00028070088351724319	relative
+gentle	1	exit_residual				geometry.inv_b2_face	3.8316545743940907e-05	relative
+gentle	1	exit_residual				geometry.inv_r_cell	3.0192484533605124e-05	relative
+gentle	1	exit_residual				geometry.inv_r_face	3.1148316757702154e-05	relative
+gentle	1	exit_residual				geometry.ip_amperes	1.6644983812728374e-06	relative
+gentle	1	exit_residual				geometry.ip_profile_face	5.2626104848436899e-05	relative
+gentle	1	exit_residual				geometry.psi_face	7.4322481651418264e-05	relative
+gentle	1	exit_residual				geometry.psi_n_cell	6.2737209200017782e-06	relative
+gentle	1	exit_residual				geometry.psi_n_face	6.8391454284694175e-06	relative
+gentle	1	exit_residual				geometry.q_face	0.00034984822950073503	relative
+gentle	1	exit_residual				geometry.r0	2.1014131864567882e-05	relative
+gentle	1	exit_residual				geometry.r_in_face	5.3780313940384109e-05	relative
+gentle	1	exit_residual				geometry.r_out_face	1.1861546284144304e-05	relative
+gentle	1	exit_residual				geometry.rho_cell	0	relative
+gentle	1	exit_residual				geometry.surface_arc_first_invalid_cell	0	relative
+gentle	1	exit_residual				geometry.surface_arc_first_invalid_level	0	relative
+gentle	1	exit_residual				geometry.surface_arc_invalid_count	0	relative
+gentle	1	exit_residual				geometry.surface_arc_max_coarea_weight	0.00020971265553732091	relative
+gentle	1	exit_residual				geometry.surface_arc_min_ordinate_derivative	0.00013101663180541413	relative
+gentle	1	exit_residual				geometry.surface_arc_valid	0	relative
+gentle	1	exit_residual				geometry.valid	0	relative
+gentle	1	exit_residual				geometry.volume	0.00025994534260029593	relative
+gentle	1	exit_residual				geometry.volume_face	0.00025994534260029593	relative
+gentle	1	exit_residual				geometry.vpr_cell	0.00024399981314617825	relative
+gentle	1	exit_residual				geometry.vpr_face	0.00024021759224857056	relative
+gentle	1	exit_residual				source.radial_grid	0	relative
+gentle	1	exit_residual				source.phi_boundary	0.0011318871778522089	relative
+gentle	1	exit_residual				source.axis_reference	0.0001111532673261033	relative
+gentle	1	exit_residual				source.boundary_reference	0.00011295514933840653	relative
+gentle	1	exit_residual				source.boundary_field_function	0	relative
+gentle	1	exit_residual				source.boundary_pressure	0.0019531250000000395	relative
+gentle	1	exit_residual				source.ff_prime	0.00037457637327342389	relative
+gentle	1	exit_residual				source.p_prime	0.00096568121897497414	relative
+gentle	1	residual_trace	1			geometry.radial_grid	0	relative
+gentle	1	residual_trace	1			geometry.phi_boundary	0.024887102508608275	relative
+gentle	1	residual_trace	1			geometry.axis_reference	0.0070287365184433931	relative
+gentle	1	residual_trace	1			geometry.boundary_reference	0.006624609499193356	relative
+gentle	1	residual_trace	1			geometry.b2_cell	0.0080660612384450148	relative
+gentle	1	residual_trace	1			geometry.b2_face	0.00798649772238684	relative
+gentle	1	residual_trace	1			geometry.clipped_vertex_capacity	0	relative
+gentle	1	residual_trace	1			geometry.clipped_vertex_count_max	0	relative
+gentle	1	residual_trace	1			geometry.clipped_vertex_count_required	0	relative
+gentle	1	residual_trace	1			geometry.delta_lower_face	1.7244181062243822	relative
+gentle	1	residual_trace	1			geometry.delta_upper_face	1.7244181062216464	relative
+gentle	1	residual_trace	1			geometry.elongation_face	0.0026651835580476504	relative
+gentle	1	residual_trace	1			geometry.f_cell	0.0018521110032342358	relative
+gentle	1	residual_trace	1			geometry.f_face	0.0020188435046470821	relative
+gentle	1	residual_trace	1			geometry.flux_sign	0	relative
+gentle	1	residual_trace	1			geometry.g2_face	0.023178973852448527	relative
+gentle	1	residual_trace	1			geometry.g3_cell	0.0054544711961384412	relative
+gentle	1	residual_trace	1			geometry.g3_face	0.0054079321790953027	relative
+gentle	1	residual_trace	1			geometry.grad_psi2_face	0.012408829059875257	relative
+gentle	1	residual_trace	1			geometry.grad_psi2_over_r2_face	0.0074428567221619807	relative
+gentle	1	residual_trace	1			geometry.grad_psi_face	0.0065707175340714175	relative
+gentle	1	residual_trace	1			geometry.gradient_moment_scale	0	relative
+gentle	1	residual_trace	1			geometry.int_dl_over_bp_face	0.0089450211169313475	relative
+gentle	1	residual_trace	1			geometry.inv_b2_face	0.0085169964879557598	relative
+gentle	1	residual_trace	1			geometry.inv_r_cell	0.0028907813520172515	relative
+gentle	1	residual_trace	1			geometry.inv_r_face	0.0028406211042579211	relative
+gentle	1	residual_trace	1			geometry.ip_amperes	0.017662682362548872	relative
+gentle	1	residual_trace	1			geometry.ip_profile_face	0.014651578365086938	relative
+gentle	1	residual_trace	1			geometry.psi_face	0.0070287365184433931	relative
+gentle	1	residual_trace	1			geometry.psi_n_cell	0.0011432750427290718	relative
+gentle	1	residual_trace	1			geometry.psi_n_face	0.00099364039896110423	relative
+gentle	1	residual_trace	1			geometry.q_face	0.010908016472557142	relative
+gentle	1	residual_trace	1			geometry.r0	0.0032887964547344108	relative
+gentle	1	residual_trace	1			geometry.r_in_face	0.0040868592938217508	relative
+gentle	1	residual_trace	1			geometry.r_out_face	0.0023866943931541928	relative
+gentle	1	residual_trace	1			geometry.rho_cell	0	relative
+gentle	1	residual_trace	1			geometry.surface_arc_first_invalid_cell	0	relative
+gentle	1	residual_trace	1			geometry.surface_arc_first_invalid_level	0	relative
+gentle	1	residual_trace	1			geometry.surface_arc_invalid_count	0	relative
+gentle	1	residual_trace	1			geometry.surface_arc_max_coarea_weight	0.035440066538527146	relative
+gentle	1	residual_trace	1			geometry.surface_arc_min_ordinate_derivative	0.00074996713470606101	relative
+gentle	1	residual_trace	1			geometry.surface_arc_valid	0	relative
+gentle	1	residual_trace	1			geometry.valid	0	relative
+gentle	1	residual_trace	1			geometry.volume	0.020562966433806923	relative
+gentle	1	residual_trace	1			geometry.volume_face	0.020562966433806923	relative
+gentle	1	residual_trace	1			geometry.vpr_cell	0.021994336766092686	relative
+gentle	1	residual_trace	1			geometry.vpr_face	0.021988667812409671	relative
+gentle	1	residual_trace	1			source.radial_grid	0	relative
+gentle	1	residual_trace	1			source.phi_boundary	0	relative
+gentle	1	residual_trace	1			source.axis_reference	0	relative
+gentle	1	residual_trace	1			source.boundary_reference	0	relative
+gentle	1	residual_trace	1			source.boundary_field_function	0	relative
+gentle	1	residual_trace	1			source.boundary_pressure	1	relative
+gentle	1	residual_trace	1			source.ff_prime	0.42548397369189883	relative
+gentle	1	residual_trace	1			source.p_prime	0.50074118385161692	relative
+gentle	1	residual_trace	2			geometry.radial_grid	0	relative
+gentle	1	residual_trace	2			geometry.phi_boundary	0.015198512303209273	relative
+gentle	1	residual_trace	2			geometry.axis_reference	0.0025947606663656616	relative
+gentle	1	residual_trace	2			geometry.boundary_reference	0.0024319279579264122	relative
+gentle	1	residual_trace	2			geometry.b2_cell	0.0041899738972985745	relative
+gentle	1	residual_trace	2			geometry.b2_face	0.0041485152669649573	relative
+gentle	1	residual_trace	2			geometry.clipped_vertex_capacity	0	relative
+gentle	1	residual_trace	2			geometry.clipped_vertex_count_max	0	relative
+gentle	1	residual_trace	2			geometry.clipped_vertex_count_required	0	relative
+gentle	1	residual_trace	2			geometry.delta_lower_face	0.88526428253015077	relative
+gentle	1	residual_trace	2			geometry.delta_upper_face	0.88526428252790224	relative
+gentle	1	residual_trace	2			geometry.elongation_face	0.0015454864280351872	relative
+gentle	1	residual_trace	2			geometry.f_cell	0.00085561555263770903	relative
+gentle	1	residual_trace	2			geometry.f_face	0.00093590929860247853	relative
+gentle	1	residual_trace	2			geometry.flux_sign	0	relative
+gentle	1	residual_trace	2			geometry.g2_face	0.014185274006247171	relative
+gentle	1	residual_trace	2			geometry.g3_cell	0.0030245335083197602	relative
+gentle	1	residual_trace	2			geometry.g3_face	0.0029981006946787083	relative
+gentle	1	residual_trace	2			geometry.grad_psi2_face	0.010864340779079246	relative
+gentle	1	residual_trace	2			geometry.grad_psi2_over_r2_face	0.007457910669641154	relative
+gentle	1	residual_trace	2			geometry.grad_psi_face	0.0055468385957865938	relative
+gentle	1	residual_trace	2			geometry.gradient_moment_scale	0	relative
+gentle	1	residual_trace	2			geometry.int_dl_over_bp_face	0.0068192000921191744	relative
+gentle	1	residual_trace	2			geometry.inv_b2_face	0.0044154278513917639	relative
+gentle	1	residual_trace	2			geometry.inv_r_cell	0.001623823875998976	relative
+gentle	1	residual_trace	2			geometry.inv_r_face	0.0015739153098616706	relative
+gentle	1	residual_trace	2			geometry.ip_amperes	0.0085165427391266386	relative
+gentle	1	residual_trace	2			geometry.ip_profile_face	0.0070444811299948482	relative
+gentle	1	residual_trace	2			geometry.psi_face	0.0025947606663656616	relative
+gentle	1	residual_trace	2			geometry.psi_n_cell	0.00062056300107408047	relative
+gentle	1	residual_trace	2			geometry.psi_n_face	0.00053171421871323066	relative
+gentle	1	residual_trace	2			geometry.q_face	0.0085246374838013703	relative
+gentle	1	residual_trace	2			geometry.r0	0.0018008967953422462	relative
+gentle	1	residual_trace	2			geometry.r_in_face	0.0025318441274899154	relative
+gentle	1	residual_trace	2			geometry.r_out_face	0.0012694327625958853	relative
+gentle	1	residual_trace	2			geometry.rho_cell	0	relative
+gentle	1	residual_trace	2			geometry.surface_arc_first_invalid_cell	0	relative
+gentle	1	residual_trace	2			geometry.surface_arc_first_invalid_level	0	relative
+gentle	1	residual_trace	2			geometry.surface_arc_invalid_count	0	relative
+gentle	1	residual_trace	2			geometry.surface_arc_max_coarea_weight	0.014831420545437473	relative
+gentle	1	residual_trace	2			geometry.surface_arc_min_ordinate_derivative	0.00050430549049232224	relative
+gentle	1	residual_trace	2			geometry.surface_arc_valid	0	relative
+gentle	1	residual_trace	2			geometry.valid	0	relative
+gentle	1	residual_trace	2			geometry.volume	0.012597765334386527	relative
+gentle	1	residual_trace	2			geometry.volume_face	0.012597765334386527	relative
+gentle	1	residual_trace	2			geometry.vpr_cell	0.013129811067887281	relative
+gentle	1	residual_trace	2			geometry.vpr_face	0.013090793357282301	relative
+gentle	1	residual_trace	2			source.radial_grid	0	relative
+gentle	1	residual_trace	2			source.phi_boundary	0.012600344284226793	relative
+gentle	1	residual_trace	2			source.axis_reference	0.0035267626017672629	relative
+gentle	1	residual_trace	2			source.boundary_reference	0.0033233125736185976	relative
+gentle	1	residual_trace	2			source.boundary_field_function	0	relative
+gentle	1	residual_trace	2			source.boundary_pressure	0.5	relative
+gentle	1	residual_trace	2			source.ff_prime	0.20831845334834562	relative
+gentle	1	residual_trace	2			source.p_prime	0.25035921925034271	relative
+gentle	1	residual_trace	3			geometry.radial_grid	0	relative
+gentle	1	residual_trace	3			geometry.phi_boundary	0.0092985698960074362	relative
+gentle	1	residual_trace	3			geometry.axis_reference	0.00072509840066721314	relative
+gentle	1	residual_trace	3			geometry.boundary_reference	0.00066365871939635436	relative
+gentle	1	residual_trace	3			geometry.b2_cell	0.0021912903636174298	relative
+gentle	1	residual_trace	3			geometry.b2_face	0.0021695649842828854	relative
+gentle	1	residual_trace	3			geometry.clipped_vertex_capacity	0	relative
+gentle	1	residual_trace	3			geometry.clipped_vertex_count_max	0	relative
+gentle	1	residual_trace	3			geometry.clipped_vertex_count_required	0	relative
+gentle	1	residual_trace	3			geometry.delta_lower_face	0.45500915267653674	relative
+gentle	1	residual_trace	3			geometry.delta_upper_face	0.45500915267585412	relative
+gentle	1	residual_trace	3			geometry.elongation_face	0.00090328220605043392	relative
+gentle	1	residual_trace	3			geometry.f_cell	0.00038472333735382474	relative
+gentle	1	residual_trace	3			geometry.f_face	0.0004230228146276512	relative
+gentle	1	residual_trace	3			geometry.flux_sign	0	relative
+gentle	1	residual_trace	3			geometry.g2_face	0.0086920487490447541	relative
+gentle	1	residual_trace	3			geometry.g3_cell	0.0017228196028438066	relative
+gentle	1	residual_trace	3			geometry.g3_face	0.0017081706392457082	relative
+gentle	1	residual_trace	3			geometry.grad_psi2_face	0.0082864231844032212	relative
+gentle	1	residual_trace	3			geometry.grad_psi2_over_r2_face	0.0064173227199666926	relative
+gentle	1	residual_trace	3			geometry.grad_psi_face	0.0042313189264047779	relative
+gentle	1	residual_trace	3			geometry.gradient_moment_scale	0	relative
+gentle	1	residual_trace	3			geometry.int_dl_over_bp_face	0.0049349380617203656	relative
+gentle	1	residual_trace	3			geometry.inv_b2_face	0.0023034895055405718	relative
+gentle	1	residual_trace	3			geometry.inv_r_cell	0.00092166029952939525	relative
+gentle	1	residual_trace	3			geometry.inv_r_face	0.00088109817416816511	relative
+gentle	1	residual_trace	3			geometry.ip_amperes	0.004047924107752795	relative
+gentle	1	residual_trace	3			geometry.ip_profile_face	0.0033466209430582229	relative
+gentle	1	residual_trace	3			geometry.psi_face	0.00072509840066721314	relative
+gentle	1	residual_trace	3			geometry.psi_n_cell	0.00033901338909955291	relative
+gentle	1	residual_trace	3			geometry.psi_n_face	0.00029445978517361748	relative
+gentle	1	residual_trace	3			geometry.q_face	0.0064108140083514852	relative
+gentle	1	residual_trace	3			geometry.r0	0.00099628113542440857	relative
+gentle	1	residual_trace	3			geometry.r_in_face	0.0015656967881108898	relative
+gentle	1	residual_trace	3			geometry.r_out_face	0.0006813620480019424	relative
+gentle	1	residual_trace	3			geometry.rho_cell	0	relative
+gentle	1	residual_trace	3			geometry.surface_arc_first_invalid_cell	0	relative
+gentle	1	residual_trace	3			geometry.surface_arc_first_invalid_level	0	relative
+gentle	1	residual_trace	3			geometry.surface_arc_invalid_count	0	relative
+gentle	1	residual_trace	3			geometry.surface_arc_max_coarea_weight	0.0056077037225291436	relative
+gentle	1	residual_trace	3			geometry.surface_arc_min_ordinate_derivative	0.00042754160183126926	relative
+gentle	1	residual_trace	3			geometry.surface_arc_valid	0	relative
+gentle	1	residual_trace	3			geometry.valid	0	relative
+gentle	1	residual_trace	3			geometry.volume	0.0077307361192697566	relative
+gentle	1	residual_trace	3			geometry.volume_face	0.0077307361192697566	relative
+gentle	1	residual_trace	3			geometry.vpr_cell	0.0078786660973316058	relative
+gentle	1	residual_trace	3			geometry.vpr_face	0.0078360937423197097	relative
+gentle	1	residual_trace	3			source.radial_grid	0	relative
+gentle	1	residual_trace	3			source.phi_boundary	0.01390937596073848	relative
+gentle	1	residual_trace	3			source.axis_reference	0.0030601562681858291	relative
+gentle	1	residual_trace	3			source.boundary_reference	0.0028770776601915503	relative
+gentle	1	residual_trace	3			source.boundary_field_function	0	relative
+gentle	1	residual_trace	3			source.boundary_pressure	0.24999999999999992	relative
+gentle	1	residual_trace	3			source.ff_prime	0.10114936661411146	relative
+gentle	1	residual_trace	3			source.p_prime	0.12515396593261019	relative
+gentle	1	residual_trace	4			geometry.radial_grid	0	relative
+gentle	1	residual_trace	4			geometry.phi_boundary	0.0056981781442206675	relative
+gentle	1	residual_trace	4			geometry.axis_reference	7.6500309767042183e-06	relative
+gentle	1	residual_trace	4			geometry.boundary_reference	1.2998058641940916e-05	relative
+gentle	1	residual_trace	4			geometry.b2_cell	0.0011598644812257889	relative
+gentle	1	residual_trace	4			geometry.b2_face	0.0011474298464937819	relative
+gentle	1	residual_trace	4			geometry.clipped_vertex_capacity	0	relative
+gentle	1	residual_trace	4			geometry.clipped_vertex_count_max	0	relative
+gentle	1	residual_trace	4			geometry.clipped_vertex_count_required	0	relative
+gentle	1	residual_trace	4			geometry.delta_lower_face	0.23452428075438966	relative
+gentle	1	residual_trace	4			geometry.delta_upper_face	0.23452428075383941	relative
+gentle	1	residual_trace	4			geometry.elongation_face	0.00053122384892010874	relative
+gentle	1	residual_trace	4			geometry.f_cell	0.00016594112267272738	relative
+gentle	1	residual_trace	4			geometry.f_face	0.00018397554209194272	relative
+gentle	1	residual_trace	4			geometry.flux_sign	0	relative
+gentle	1	residual_trace	4			geometry.g2_face	0.0053323337783352572	relative
+gentle	1	residual_trace	4			geometry.g3_cell	0.0010045538400901743	relative
+gentle	1	residual_trace	4			geometry.g3_face	0.0010097247112635659	relative
+gentle	1	residual_trace	4			geometry.grad_psi2_face	0.0058959812453363465	relative
+gentle	1	residual_trace	4			geometry.grad_psi2_over_r2_face	0.0048600809454272696	relative
+gentle	1	residual_trace	4			geometry.grad_psi_face	0.0030483386304939941	relative
+gentle	1	residual_trace	4			geometry.gradient_moment_scale	0	relative
+gentle	1	residual_trace	4			geometry.int_dl_over_bp_face	0.0035410766825690245	relative
+gentle	1	residual_trace	4			geometry.inv_b2_face	0.0012106003514234759	relative
+gentle	1	residual_trace	4			geometry.inv_r_cell	0.00052844632102238523	relative
+gentle	1	residual_trace	4			geometry.inv_r_face	0.00051184985353665714	relative
+gentle	1	residual_trace	4			geometry.ip_amperes	0.0018872543562334784	relative
+gentle	1	residual_trace	4			geometry.ip_profile_face	0.0015641191516305262	relative
+gentle	1	residual_trace	4			geometry.psi_face	3.9135241610357877e-05	relative
+gentle	1	residual_trace	4			geometry.psi_n_cell	0.00018633548994890847	relative
+gentle	1	residual_trace	4			geometry.psi_n_face	0.00016419919876775602	relative
+gentle	1	residual_trace	4			geometry.q_face	0.0045325173368824896	relative
+gentle	1	residual_trace	4			geometry.r0	0.00055704670049032574	relative
+gentle	1	residual_trace	4			geometry.r_in_face	0.00096743867308488843	relative
+gentle	1	residual_trace	4			geometry.r_out_face	0.00036942619269569968	relative
+gentle	1	residual_trace	4			geometry.rho_cell	0	relative
+gentle	1	residual_trace	4			geometry.surface_arc_first_invalid_cell	0	relative
+gentle	1	residual_trace	4			geometry.surface_arc_first_invalid_level	0	relative
+gentle	1	residual_trace	4			geometry.surface_arc_invalid_count	0	relative
+gentle	1	residual_trace	4			geometry.surface_arc_max_coarea_weight	0.0016807760859007246	relative
+gentle	1	residual_trace	4			geometry.surface_arc_min_ordinate_derivative	0.00036069646832361457	relative
+gentle	1	residual_trace	4			geometry.surface_arc_valid	0	relative
+gentle	1	residual_trace	4			geometry.valid	0	relative
+gentle	1	residual_trace	4			geometry.volume	0.0047500590917544201	relative
+gentle	1	residual_trace	4			geometry.volume_face	0.0047500590917544201	relative
+gentle	1	residual_trace	4			geometry.vpr_cell	0.0047494029987311124	relative
+gentle	1	residual_trace	4			geometry.vpr_face	0.0047135249162765435	relative
+gentle	1	residual_trace	4			source.radial_grid	0	relative
+gentle	1	residual_trace	4			source.phi_boundary	0.011593204386737031	relative
+gentle	1	residual_trace	4			source.axis_reference	0.0018922038942273147	relative
+gentle	1	residual_trace	4			source.boundary_reference	0.001770000829198059	relative
+gentle	1	residual_trace	4			source.boundary_field_function	0	relative
+gentle	1	residual_trace	4			source.boundary_pressure	0.12499999999999996	relative
+gentle	1	residual_trace	4			source.ff_prime	0.048659448572496912	relative
+gentle	1	residual_trace	4			source.p_prime	0.062550985734941306	relative
+gentle	1	residual_trace	5			geometry.radial_grid	0	relative
+gentle	1	residual_trace	5			geometry.phi_boundary	0.0034969964909429122	relative
+gentle	1	residual_trace	5			geometry.axis_reference	0.00021568633432681334	relative
+gentle	1	residual_trace	5			geometry.boundary_reference	0.00022104819211110871	relative
+gentle	1	residual_trace	5			geometry.b2_cell	0.00063305683051466703	relative
+gentle	1	residual_trace	5			geometry.b2_face	0.00063534027414252452	relative
+gentle	1	residual_trace	5			geometry.clipped_vertex_capacity	0	relative
+gentle	1	residual_trace	5			geometry.clipped_vertex_count_max	0	relative
+gentle	1	residual_trace	5			geometry.clipped_vertex_count_required	0	relative
+gentle	1	residual_trace	5			geometry.delta_lower_face	0.12137886616668318	relative
+gentle	1	residual_trace	5			geometry.delta_upper_face	0.1213788661664084	relative
+gentle	1	residual_trace	5			geometry.elongation_face	0.0003312918295846597	relative
+gentle	1	residual_trace	5			geometry.f_cell	6.6739331821259027e-05	relative
+gentle	1	residual_trace	5			geometry.f_face	7.5081310878607289e-05	relative
+gentle	1	residual_trace	5			geometry.flux_sign	0	relative
+gentle	1	residual_trace	5			geometry.g2_face	0.0032749370150666674	relative
+gentle	1	residual_trace	5			geometry.g3_cell	0.00063036109069455849	relative
+gentle	1	residual_trace	5			geometry.g3_face	0.00065767098842982471	relative
+gentle	1	residual_trace	5			geometry.grad_psi2_face	0.0040259253353816249	relative
+gentle	1	residual_trace	5			geometry.grad_psi2_over_r2_face	0.0034457347395646944	relative
+gentle	1	residual_trace	5			geometry.grad_psi_face	0.0020982353731210639	relative
+gentle	1	residual_trace	5			geometry.gradient_moment_scale	0	relative
+gentle	1	residual_trace	5			geometry.int_dl_over_bp_face	0.0024337643970165101	relative
+gentle	1	residual_trace	5			geometry.inv_b2_face	0.00064260630074205983	relative
+gentle	1	residual_trace	5			geometry.inv_r_cell	0.00030593837974216839	relative
+gentle	1	residual_trace	5			geometry.inv_r_face	0.00030427610827685311	relative
+gentle	1	residual_trace	5			geometry.ip_amperes	0.00085635495799711613	relative
+gentle	1	residual_trace	5			geometry.ip_profile_face	0.00071452995756345159	relative
+gentle	1	residual_trace	5			geometry.psi_face	0.00022186535284088535	relative
+gentle	1	residual_trace	5			geometry.psi_n_cell	0.00010298038547060004	relative
+gentle	1	residual_trace	5			geometry.psi_n_face	9.2128746860264954e-05	relative
+gentle	1	residual_trace	5			geometry.q_face	0.0030865216218565164	relative
+gentle	1	residual_trace	5			geometry.r0	0.00031482163756721713	relative
+gentle	1	residual_trace	5			geometry.r_in_face	0.00059758652445802518	relative
+gentle	1	residual_trace	5			geometry.r_out_face	0.00020248454536929604	relative
+gentle	1	residual_trace	5			geometry.rho_cell	0	relative
+gentle	1	residual_trace	5			geometry.surface_arc_first_invalid_cell	0	relative
+gentle	1	residual_trace	5			geometry.surface_arc_first_invalid_level	0	relative
+gentle	1	residual_trace	5			geometry.surface_arc_invalid_count	0	relative
+gentle	1	residual_trace	5			geometry.surface_arc_max_coarea_weight	0.00014516574004635118	relative
+gentle	1	residual_trace	5			geometry.surface_arc_min_ordinate_derivative	0.00028711539945666062	relative
+gentle	1	residual_trace	5			geometry.surface_arc_valid	0	relative
+gentle	1	residual_trace	5			geometry.valid	0	relative
+gentle	1	residual_trace	5			geometry.volume	0.002921672048022531	relative
+gentle	1	residual_trace	5			geometry.volume_face	0.002921672048022531	relative
+gentle	1	residual_trace	5			geometry.vpr_cell	0.0028747283555422068	relative
+gentle	1	residual_trace	5			geometry.vpr_face	0.0028476106448943081	relative
+gentle	1	residual_trace	5			source.radial_grid	0	relative
+gentle	1	residual_trace	5			source.phi_boundary	0.0086372695438200961	relative
+gentle	1	residual_trace	5			source.axis_reference	0.00094992335836447143	relative
+gentle	1	residual_trace	5			source.boundary_reference	0.00087850709472142628	relative
+gentle	1	residual_trace	5			source.boundary_field_function	0	relative
+gentle	1	residual_trace	5			source.boundary_pressure	0.062499999999999979	relative
+gentle	1	residual_trace	5			source.ff_prime	0.02314430544088749	relative
+gentle	1	residual_trace	5			source.p_prime	0.031253892406703863	relative
+gentle	1	residual_trace	6			geometry.radial_grid	0	relative
+gentle	1	residual_trace	6			geometry.phi_boundary	0.0021488800999918999	relative
+gentle	1	residual_trace	6			geometry.axis_reference	0.00024346615307900283	relative
+gentle	1	residual_trace	6			geometry.boundary_reference	0.00024378820391981126	relative
+gentle	1	residual_trace	6			geometry.b2_cell	0.00039295842585665241	relative
+gentle	1	residual_trace	6			geometry.b2_face	0.00041003549841008306	relative
+gentle	1	residual_trace	6			geometry.clipped_vertex_capacity	0	relative
+gentle	1	residual_trace	6			geometry.clipped_vertex_count_max	0	relative
+gentle	1	residual_trace	6			geometry.clipped_vertex_count_required	0	relative
+gentle	1	residual_trace	6			geometry.delta_lower_face	0.063153381130314573	relative
+gentle	1	residual_trace	6			geometry.delta_upper_face	0.063153381130372832	relative
+gentle	1	residual_trace	6			geometry.elongation_face	0.0002160978576580037	relative
+gentle	1	residual_trace	6			geometry.f_cell	2.3385926328425062e-05	relative
+gentle	1	residual_trace	6			geometry.f_face	2.714721559911107e-05	relative
+gentle	1	residual_trace	6			geometry.flux_sign	0	relative
+gentle	1	residual_trace	6			geometry.g2_face	0.002013410302959138	relative
+gentle	1	residual_trace	6			geometry.g3_cell	0.00040661826506702055	relative
+gentle	1	residual_trace	6			geometry.g3_face	0.00042638930640159442	relative
+gentle	1	residual_trace	6			geometry.grad_psi2_face	0.0026765701216696822	relative
+gentle	1	residual_trace	6			geometry.grad_psi2_over_r2_face	0.0023481359175559612	relative
+gentle	1	residual_trace	6			geometry.grad_psi_face	0.0014027148373645759	relative
+gentle	1	residual_trace	6			geometry.gradient_moment_scale	0	relative
+gentle	1	residual_trace	6			geometry.int_dl_over_bp_face	0.0016267097685835272	relative
+gentle	1	residual_trace	6			geometry.inv_b2_face	0.00034602004334089635	relative
+gentle	1	residual_trace	6			geometry.inv_r_cell	0.00018562322480673044	relative
+gentle	1	residual_trace	6			geometry.inv_r_face	0.00018879790026466069	relative
+gentle	1	residual_trace	6			geometry.ip_amperes	0.00037303319964748885	relative
+gentle	1	residual_trace	6			geometry.ip_profile_face	0.00031562121626409743	relative
+gentle	1	residual_trace	6			geometry.psi_face	0.00024592350942762942	relative
+gentle	1	residual_trace	6			geometry.psi_n_cell	5.7195661426849377e-05	relative
+gentle	1	residual_trace	6			geometry.psi_n_face	5.1980897928349812e-05	relative
+gentle	1	residual_trace	6			geometry.q_face	0.0020503497801553036	relative
+gentle	1	residual_trace	6			geometry.r0	0.00017981065229600275	relative
+gentle	1	residual_trace	6			geometry.r_in_face	0.00036910644800987639	relative
+gentle	1	residual_trace	6			geometry.r_out_face	0.00011224788950396911	relative
+gentle	1	residual_trace	6			geometry.rho_cell	0	relative
+gentle	1	residual_trace	6			geometry.surface_arc_first_invalid_cell	0	relative
+gentle	1	residual_trace	6			geometry.surface_arc_first_invalid_level	0	relative
+gentle	1	residual_trace	6			geometry.surface_arc_invalid_count	0	relative
+gentle	1	residual_trace	6			geometry.surface_arc_max_coarea_weight	0.0003570327000379044	relative
+gentle	1	residual_trace	6			geometry.surface_arc_min_ordinate_derivative	0.00021648297387153961	relative
+gentle	1	residual_trace	6			geometry.surface_arc_valid	0	relative
+gentle	1	residual_trace	6			geometry.valid	0	relative
+gentle	1	residual_trace	6			geometry.volume	0.0017986386570150261	relative
+gentle	1	residual_trace	6			geometry.volume_face	0.0017986386570150261	relative
+gentle	1	residual_trace	6			geometry.vpr_cell	0.0017462095937333247	relative
+gentle	1	residual_trace	6			geometry.vpr_face	0.0017269000250288548	relative
+gentle	1	residual_trace	6			source.radial_grid	0	relative
+gentle	1	residual_trace	6			source.phi_boundary	0.006062631266871607	relative
+gentle	1	residual_trace	6			source.axis_reference	0.00036715810751188684	relative
+gentle	1	residual_trace	6			source.boundary_reference	0.00032876578784667452	relative
+gentle	1	residual_trace	6			source.boundary_field_function	0	relative
+gentle	1	residual_trace	6			source.boundary_pressure	0.031250000000000062	relative
+gentle	1	residual_trace	6			source.ff_prime	0.010846981677202872	relative
+gentle	1	residual_trace	6			source.p_prime	0.015610578166764475	relative
+gentle	1	residual_trace	7			geometry.radial_grid	0	relative
+gentle	1	residual_trace	7			geometry.phi_boundary	0.00132192113734045	relative
+gentle	1	residual_trace	7			geometry.axis_reference	0.00020549343048485662	relative
+gentle	1	residual_trace	7			geometry.boundary_reference	0.00020459482646455031	relative
+gentle	1	residual_trace	7			geometry.b2_cell	0.00025047563232861829	relative
+gentle	1	residual_trace	7			geometry.b2_face	0.00026214875829010592	relative
+gentle	1	residual_trace	7			geometry.clipped_vertex_capacity	0	relative
+gentle	1	residual_trace	7			geometry.clipped_vertex_count_max	0	relative
+gentle	1	residual_trace	7			geometry.clipped_vertex_count_required	0	relative
+gentle	1	residual_trace	7			geometry.delta_lower_face	0.033069976727440283	relative
+gentle	1	residual_trace	7			geometry.delta_upper_face	0.033069976727423483	relative
+gentle	1	residual_trace	7			geometry.elongation_face	0.00015517867074861543	relative
+gentle	1	residual_trace	7			geometry.f_cell	5.5467143618058118e-06	relative
+gentle	1	residual_trace	7			geometry.f_face	7.1783229579939395e-06	relative
+gentle	1	residual_trace	7			geometry.flux_sign	0	relative
+gentle	1	residual_trace	7			geometry.g2_face	0.0012389414464340867	relative
+gentle	1	residual_trace	7			geometry.g3_cell	0.00025984055932729239	relative
+gentle	1	residual_trace	7			geometry.g3_face	0.00027353720577525856	relative
+gentle	1	residual_trace	7			geometry.grad_psi2_face	0.0017470951350622688	relative
+gentle	1	residual_trace	7			geometry.grad_psi2_over_r2_face	0.0015592195119889516	relative
+gentle	1	residual_trace	7			geometry.grad_psi_face	0.00091926120912402083	relative
+gentle	1	residual_trace	7			geometry.gradient_moment_scale	0	relative
+gentle	1	residual_trace	7			geometry.int_dl_over_bp_face	0.001066643950081848	relative
+gentle	1	residual_trace	7			geometry.inv_b2_face	0.00018831569936635757	relative
+gentle	1	residual_trace	7			geometry.inv_r_cell	0.00011909269119128746	relative
+gentle	1	residual_trace	7			geometry.inv_r_face	0.00012173087261686818	relative
+gentle	1	residual_trace	7			geometry.ip_amperes	0.00015187547157686671	relative
+gentle	1	residual_trace	7			geometry.ip_profile_face	0.00014415444977970503	relative
+gentle	1	residual_trace	7			geometry.psi_face	0.0002064136545283018	relative
+gentle	1	residual_trace	7			geometry.psi_n_cell	3.2490015626832506e-05	relative
+gentle	1	residual_trace	7			geometry.psi_n_face	2.9472604146318915e-05	relative
+gentle	1	residual_trace	7			geometry.q_face	0.0013386885215424089	relative
+gentle	1	residual_trace	7			geometry.r0	0.00010374024650499881	relative
+gentle	1	residual_trace	7			geometry.r_in_face	0.00022799848960854501	relative
+gentle	1	residual_trace	7			geometry.r_out_face	6.2945023072596813e-05	relative
+gentle	1	residual_trace	7			geometry.rho_cell	0	relative
+gentle	1	residual_trace	7			geometry.surface_arc_first_invalid_cell	0	relative
+gentle	1	residual_trace	7			geometry.surface_arc_first_invalid_level	0	relative
+gentle	1	residual_trace	7			geometry.surface_arc_invalid_count	0	relative
+gentle	1	residual_trace	7			geometry.surface_arc_max_coarea_weight	0.00044388029598061454	relative
+gentle	1	residual_trace	7			geometry.surface_arc_min_ordinate_derivative	7.0430934971403347e-05	relative
+gentle	1	residual_trace	7			geometry.surface_arc_valid	0	relative
+gentle	1	residual_trace	7			geometry.valid	0	relative
+gentle	1	residual_trace	7			geometry.volume	0.0011080874453484975	relative
+gentle	1	residual_trace	7			geometry.volume_face	0.0011080874453484975	relative
+gentle	1	residual_trace	7			geometry.vpr_cell	0.0010639393634615381	relative
+gentle	1	residual_trace	7			geometry.vpr_face	0.0010506913669574265	relative
+gentle	1	residual_trace	7			source.radial_grid	0	relative
+gentle	1	residual_trace	7			source.phi_boundary	0.0041036508764430487	relative
+gentle	1	residual_trace	7			source.axis_reference	6.185350683412368e-05	relative
+gentle	1	residual_trace	7			source.boundary_reference	4.2493971727954119e-05	relative
+gentle	1	residual_trace	7			source.boundary_field_function	0	relative
+gentle	1	residual_trace	7			source.boundary_pressure	0.015625000000000031	relative
+gentle	1	residual_trace	7			source.ff_prime	0.0049819097882433218	relative
+gentle	1	residual_trace	7			source.p_prime	0.0077935257723347083	relative
+gentle	1	residual_trace	8			geometry.radial_grid	0	relative
+gentle	1	residual_trace	8			geometry.phi_boundary	0.0008139541541327687	relative
+gentle	1	residual_trace	8			geometry.axis_reference	0.00015446514433584721	relative
+gentle	1	residual_trace	8			geometry.boundary_reference	0.00015358783397738637	relative
+gentle	1	residual_trace	8			geometry.b2_cell	0.00015862257445809559	relative
+gentle	1	residual_trace	8			geometry.b2_face	0.00016641679917276479	relative
+gentle	1	residual_trace	8			geometry.clipped_vertex_capacity	0	relative
+gentle	1	residual_trace	8			geometry.clipped_vertex_count_max	0	relative
+gentle	1	residual_trace	8			geometry.clipped_vertex_count_required	0	relative
+gentle	1	residual_trace	8			geometry.delta_lower_face	0.017446998652218382	relative
+gentle	1	residual_trace	8			geometry.delta_upper_face	0.017446998651825529	relative
+gentle	1	residual_trace	8			geometry.elongation_face	0.00010658510252815779	relative
+gentle	1	residual_trace	8			geometry.f_cell	2.7857993798885147e-06	relative
+gentle	1	residual_trace	8			geometry.f_face	2.9382372520026839e-06	relative
+gentle	1	residual_trace	8			geometry.flux_sign	0	relative
+gentle	1	residual_trace	8			geometry.g2_face	0.00076296423403532897	relative
+gentle	1	residual_trace	8			geometry.g3_cell	0.00016487891791240706	relative
+gentle	1	residual_trace	8			geometry.g3_face	0.00017409889832445882	relative
+gentle	1	residual_trace	8			geometry.grad_psi2_face	0.0011255035684663475	relative
+gentle	1	residual_trace	8			geometry.grad_psi2_over_r2_face	0.0010169509735030542	relative
+gentle	1	residual_trace	8			geometry.grad_psi_face	0.00059395747014298129	relative
+gentle	1	residual_trace	8			geometry.gradient_moment_scale	0	relative
+gentle	1	residual_trace	8			geometry.int_dl_over_bp_face	0.00068988463219102358	relative
+gentle	1	residual_trace	8			geometry.inv_b2_face	0.0001058959055425742	relative
+gentle	1	residual_trace	8			geometry.inv_r_cell	7.5797930221442537e-05	relative
+gentle	1	residual_trace	8			geometry.inv_r_face	7.7774831136271627e-05	relative
+gentle	1	residual_trace	8			geometry.ip_amperes	5.4251020736816635e-05	relative
+gentle	1	residual_trace	8			geometry.ip_profile_face	0.00010906356882024666	relative
+gentle	1	residual_trace	8			geometry.psi_face	0.00015478143439604991	relative
+gentle	1	residual_trace	8			geometry.psi_n_cell	1.8712693254118946e-05	relative
+gentle	1	residual_trace	8			geometry.psi_n_face	1.6780039905794908e-05	relative
+gentle	1	residual_trace	8			geometry.q_face	0.00086319017752343238	relative
+gentle	1	residual_trace	8			geometry.r0	6.0419352783600244e-05	relative
+gentle	1	residual_trace	8			geometry.r_in_face	0.0001408532049437283	relative
+gentle	1	residual_trace	8			geometry.r_out_face	3.5701346634805308e-05	relative
+gentle	1	residual_trace	8			geometry.rho_cell	0	relative
+gentle	1	residual_trace	8			geometry.surface_arc_first_invalid_cell	0	relative
+gentle	1	residual_trace	8			geometry.surface_arc_first_invalid_level	0	relative
+gentle	1	residual_trace	8			geometry.surface_arc_invalid_count	0	relative
+gentle	1	residual_trace	8			geometry.surface_arc_max_coarea_weight	0.00038589280960116577	relative
+gentle	1	residual_trace	8			geometry.surface_arc_min_ordinate_derivative	0.00011523263473450536	relative
+gentle	1	residual_trace	8			geometry.surface_arc_valid	0	relative
+gentle	1	residual_trace	8			geometry.valid	0	relative
+gentle	1	residual_trace	8			geometry.volume	0.00068307580961591034	relative
+gentle	1	residual_trace	8			geometry.volume_face	0.00068307580961591034	relative
+gentle	1	residual_trace	8			geometry.vpr_cell	0.00064991343089491915	relative
+gentle	1	residual_trace	8			geometry.vpr_face	0.0006410485629299215	relative
+gentle	1	residual_trace	8			source.radial_grid	0	relative
+gentle	1	residual_trace	8			source.phi_boundary	0.0027118660920291771	relative
+gentle	1	residual_trace	8			source.axis_reference	7.182218305241767e-05	relative
+gentle	1	residual_trace	8			source.boundary_reference	8.1052149482244382e-05	relative
+gentle	1	residual_trace	8			source.boundary_field_function	0	relative
+gentle	1	residual_trace	8			source.boundary_pressure	0.0078125000000000156	relative
+gentle	1	residual_trace	8			source.ff_prime	0.0022224301975440324	relative
+gentle	1	residual_trace	8			source.p_prime	0.0038885926185134199	relative
+gentle	1	residual_trace	9			geometry.radial_grid	0	relative
+gentle	1	residual_trace	9			geometry.phi_boundary	0.00050156689962633518	relative
+gentle	1	residual_trace	9			geometry.axis_reference	0.00010916412985517037	relative
+gentle	1	residual_trace	9			geometry.boundary_reference	0.00010859126483515511	relative
+gentle	1	residual_trace	9			geometry.b2_cell	9.9956095038208656e-05	relative
+gentle	1	residual_trace	9			geometry.b2_face	0.00010507370666084661	relative
+gentle	1	residual_trace	9			geometry.clipped_vertex_capacity	0	relative
+gentle	1	residual_trace	9			geometry.clipped_vertex_count_max	0	relative
+gentle	1	residual_trace	9			geometry.clipped_vertex_count_required	0	relative
+gentle	1	residual_trace	9			geometry.delta_lower_face	0.0092831536471297878	relative
+gentle	1	residual_trace	9			geometry.delta_upper_face	0.0092831536470790073	relative
+gentle	1	residual_trace	9			geometry.elongation_face	7.1134426307789905e-05	relative
+gentle	1	residual_trace	9			geometry.f_cell	3.286910118907583e-06	relative
+gentle	1	residual_trace	9			geometry.f_face	3.4939197920053663e-06	relative
+gentle	1	residual_trace	9			geometry.flux_sign	0	relative
+gentle	1	residual_trace	9			geometry.g2_face	0.00047015620024157755	relative
+gentle	1	residual_trace	9			geometry.g3_cell	0.00010406077623089002	relative
+gentle	1	residual_trace	9			geometry.g3_face	0.0001101452085521627	relative
+gentle	1	residual_trace	9			geometry.grad_psi2_face	0.00071808306616303241	relative
+gentle	1	residual_trace	9			geometry.grad_psi2_over_r2_face	0.00065477319891643127	relative
+gentle	1	residual_trace	9			geometry.grad_psi_face	0.00037980362246827745	relative
+gentle	1	residual_trace	9			geometry.gradient_moment_scale	0	relative
+gentle	1	residual_trace	9			geometry.int_dl_over_bp_face	0.00044172719501374858	relative
+gentle	1	residual_trace	9			geometry.inv_b2_face	6.2390389854968773e-05	relative
+gentle	1	residual_trace	9			geometry.inv_r_cell	4.7950316008024856e-05	relative
+gentle	1	residual_trace	9			geometry.inv_r_face	4.9349619026374598e-05	relative
+gentle	1	residual_trace	9			geometry.ip_amperes	1.3577102265288676e-05	relative
+gentle	1	residual_trace	9			geometry.ip_profile_face	7.7277183503563025e-05	relative
+gentle	1	residual_trace	9			geometry.psi_face	0.00010926013559823669	relative
+gentle	1	residual_trace	9			geometry.psi_n_cell	1.0818222893249048e-05	relative
+gentle	1	residual_trace	9			geometry.psi_n_face	1.0308875971171139e-05	relative
+gentle	1	residual_trace	9			geometry.q_face	0.00055145714394101773	relative
+gentle	1	residual_trace	9			geometry.r0	3.5494177364123757e-05	relative
+gentle	1	residual_trace	9			geometry.r_in_face	8.70290020469586e-05	relative
+gentle	1	residual_trace	9			geometry.r_out_face	2.0472489091449957e-05	relative
+gentle	1	residual_trace	9			geometry.rho_cell	0	relative
+gentle	1	residual_trace	9			geometry.surface_arc_first_invalid_cell	0	relative
+gentle	1	residual_trace	9			geometry.surface_arc_first_invalid_level	0	relative
+gentle	1	residual_trace	9			geometry.surface_arc_invalid_count	0	relative
+gentle	1	residual_trace	9			geometry.surface_arc_max_coarea_weight	0.00029424567432359051	relative
+gentle	1	residual_trace	9			geometry.surface_arc_min_ordinate_derivative	0.00014955459966636744	relative
+gentle	1	residual_trace	9			geometry.surface_arc_valid	0	relative
+gentle	1	residual_trace	9			geometry.valid	0	relative
+gentle	1	residual_trace	9			geometry.volume	0.00042129261972671643	relative
+gentle	1	residual_trace	9			geometry.volume_face	0.00042129261972671643	relative
+gentle	1	residual_trace	9			geometry.vpr_cell	0.00039786155559249828	relative
+gentle	1	residual_trace	9			geometry.vpr_face	0.00039203356997184199	relative
+gentle	1	residual_trace	9			source.radial_grid	0	relative
+gentle	1	residual_trace	9			source.phi_boundary	0.0017625237625145003	relative
+gentle	1	residual_trace	9			source.axis_reference	0.00011314217974147483	relative
+gentle	1	residual_trace	9			source.boundary_reference	0.00011731852187703439	relative
+gentle	1	residual_trace	9			source.boundary_field_function	0	relative
+gentle	1	residual_trace	9			source.boundary_pressure	0.0039062500000000789	relative
+gentle	1	residual_trace	9			source.ff_prime	0.00094791295330489832	relative
+gentle	1	residual_trace	9			source.p_prime	0.0019387539986590301	relative
+gentle	1	residual_trace	10			geometry.radial_grid	0	relative
+gentle	1	residual_trace	10			geometry.phi_boundary	0.00030926807100344961	relative
+gentle	1	residual_trace	10			geometry.axis_reference	7.4297520823139713e-05	relative
+gentle	1	residual_trace	10			geometry.boundary_reference	7.4003504924477503e-05	relative
+gentle	1	residual_trace	10			geometry.b2_cell	6.2746177844996744e-05	relative
+gentle	1	residual_trace	10			geometry.b2_face	6.6064887965290622e-05	relative
+gentle	1	residual_trace	10			geometry.clipped_vertex_capacity	0	relative
+gentle	1	residual_trace	10			geometry.clipped_vertex_count_max	0	relative
+gentle	1	residual_trace	10			geometry.clipped_vertex_count_required	0	relative
+gentle	1	residual_trace	10			geometry.delta_lower_face	0.0049860186156783313	relative
+gentle	1	residual_trace	10			geometry.delta_upper_face	0.0049860186161842365	relative
+gentle	1	residual_trace	10			geometry.elongation_face	4.6548105492172183e-05	relative
+gentle	1	residual_trace	10			geometry.f_cell	2.9596536732913224e-06	relative
+gentle	1	residual_trace	10			geometry.f_face	2.997263250536417e-06	relative
+gentle	1	residual_trace	10			geometry.flux_sign	0	relative
+gentle	1	residual_trace	10			geometry.g2_face	0.00028988151251776941	relative
+gentle	1	residual_trace	10			geometry.g3_cell	6.5404044924835241e-05	relative
+gentle	1	residual_trace	10			geometry.g3_face	6.9362267820176929e-05	relative
+gentle	1	residual_trace	10			geometry.grad_psi2_face	0.00045482379636984554	relative
+gentle	1	residual_trace	10			geometry.grad_psi2_over_r2_face	0.0004175832288633455	relative
+gentle	1	residual_trace	10			geometry.grad_psi_face	0.0002409795382426533	relative
+gentle	1	residual_trace	10			geometry.gradient_moment_scale	0	relative
+gentle	1	residual_trace	10			geometry.int_dl_over_bp_face	0.00028070088351724319	relative
+gentle	1	residual_trace	10			geometry.inv_b2_face	3.8316545743940907e-05	relative
+gentle	1	residual_trace	10			geometry.inv_r_cell	3.0192484533605124e-05	relative
+gentle	1	residual_trace	10			geometry.inv_r_face	3.1148316757702154e-05	relative
+gentle	1	residual_trace	10			geometry.ip_amperes	1.6644983812728374e-06	relative
+gentle	1	residual_trace	10			geometry.ip_profile_face	5.2626104848436899e-05	relative
+gentle	1	residual_trace	10			geometry.psi_face	7.4322481651418264e-05	relative
+gentle	1	residual_trace	10			geometry.psi_n_cell	6.2737209200017782e-06	relative
+gentle	1	residual_trace	10			geometry.psi_n_face	6.8391454284694175e-06	relative
+gentle	1	residual_trace	10			geometry.q_face	0.00034984822950073503	relative
+gentle	1	residual_trace	10			geometry.r0	2.1014131864567882e-05	relative
+gentle	1	residual_trace	10			geometry.r_in_face	5.3780313940384109e-05	relative
+gentle	1	residual_trace	10			geometry.r_out_face	1.1861546284144304e-05	relative
+gentle	1	residual_trace	10			geometry.rho_cell	0	relative
+gentle	1	residual_trace	10			geometry.surface_arc_first_invalid_cell	0	relative
+gentle	1	residual_trace	10			geometry.surface_arc_first_invalid_level	0	relative
+gentle	1	residual_trace	10			geometry.surface_arc_invalid_count	0	relative
+gentle	1	residual_trace	10			geometry.surface_arc_max_coarea_weight	0.00020971265553732091	relative
+gentle	1	residual_trace	10			geometry.surface_arc_min_ordinate_derivative	0.00013101663180541413	relative
+gentle	1	residual_trace	10			geometry.surface_arc_valid	0	relative
+gentle	1	residual_trace	10			geometry.valid	0	relative
+gentle	1	residual_trace	10			geometry.volume	0.00025994534260029593	relative
+gentle	1	residual_trace	10			geometry.volume_face	0.00025994534260029593	relative
+gentle	1	residual_trace	10			geometry.vpr_cell	0.00024399981314617825	relative
+gentle	1	residual_trace	10			geometry.vpr_face	0.00024021759224857056	relative
+gentle	1	residual_trace	10			source.radial_grid	0	relative
+gentle	1	residual_trace	10			source.phi_boundary	0.0011318871778522089	relative
+gentle	1	residual_trace	10			source.axis_reference	0.0001111532673261033	relative
+gentle	1	residual_trace	10			source.boundary_reference	0.00011295514933840653	relative
+gentle	1	residual_trace	10			source.boundary_field_function	0	relative
+gentle	1	residual_trace	10			source.boundary_pressure	0.0019531250000000395	relative
+gentle	1	residual_trace	10			source.ff_prime	0.00037457637327342389	relative
+gentle	1	residual_trace	10			source.p_prime	0.00096568121897497414	relative
+gentle	1	branch_selection	1	0	equilibrium	sample_time	0	s
+gentle	1	branch_selection	1	0	equilibrium	limited_core_cells	126	count
+gentle	1	branch_selection	1	0	equilibrium	diverted_core_cells	157	count
+gentle	1	branch_selection	1	0	equilibrium	selected_class	limited	text
+gentle	1	branch_selection	1	0	equilibrium	previous_class	none	text
+gentle	1	branch_selection	1	0	equilibrium	switched	false	text
+gentle	1	branch_selection	1	0	equilibrium	reason	sole_valid	text
+gentle	1	branch_selection	1	0	equilibrium	limited_available	true	boolean
+gentle	1	branch_selection	1	0	equilibrium	diverted_available	false	boolean
+gentle	1	branch_selection	1	0	equilibrium	limited_admissible	true	boolean
+gentle	1	branch_selection	1	0	equilibrium	diverted_admissible	true	boolean
+gentle	1	branch_selection	1	0	equilibrium	limited_residual	1.4566846697679485e-14	relative
+gentle	1	branch_selection	1	0	equilibrium	diverted_residual	4.0756513704185692e-16	relative
+gentle	1	branch_selection	1	1	equilibrium	sample_time	0.0025000000000000001	s
+gentle	1	branch_selection	1	1	equilibrium	limited_core_cells	126	count
+gentle	1	branch_selection	1	1	equilibrium	diverted_core_cells	157	count
+gentle	1	branch_selection	1	1	equilibrium	selected_class	limited	text
+gentle	1	branch_selection	1	1	equilibrium	previous_class	limited	text
+gentle	1	branch_selection	1	1	equilibrium	switched	false	text
+gentle	1	branch_selection	1	1	equilibrium	reason	history_continuity	text
+gentle	1	branch_selection	1	1	equilibrium	limited_available	true	boolean
+gentle	1	branch_selection	1	1	equilibrium	diverted_available	false	boolean
+gentle	1	branch_selection	1	1	equilibrium	limited_admissible	true	boolean
+gentle	1	branch_selection	1	1	equilibrium	diverted_admissible	true	boolean
+gentle	1	branch_selection	1	1	equilibrium	limited_residual	8.003859118404628e-16	relative
+gentle	1	branch_selection	1	1	equilibrium	diverted_residual	6.8582906597520288e-16	relative
+gentle	1	branch_selection	2	0	equilibrium	sample_time	0	s
+gentle	1	branch_selection	2	0	equilibrium	limited_core_cells	126	count
+gentle	1	branch_selection	2	0	equilibrium	diverted_core_cells	157	count
+gentle	1	branch_selection	2	0	equilibrium	selected_class	limited	text
+gentle	1	branch_selection	2	0	equilibrium	previous_class	none	text
+gentle	1	branch_selection	2	0	equilibrium	switched	false	text
+gentle	1	branch_selection	2	0	equilibrium	reason	sole_valid	text
+gentle	1	branch_selection	2	0	equilibrium	limited_available	true	boolean
+gentle	1	branch_selection	2	0	equilibrium	diverted_available	false	boolean
+gentle	1	branch_selection	2	0	equilibrium	limited_admissible	true	boolean
+gentle	1	branch_selection	2	0	equilibrium	diverted_admissible	true	boolean
+gentle	1	branch_selection	2	0	equilibrium	limited_residual	1.4566846697679485e-14	relative
+gentle	1	branch_selection	2	0	equilibrium	diverted_residual	4.0756513704185692e-16	relative
+gentle	1	branch_selection	2	1	equilibrium	sample_time	0.0025000000000000001	s
+gentle	1	branch_selection	2	1	equilibrium	limited_core_cells	126	count
+gentle	1	branch_selection	2	1	equilibrium	diverted_core_cells	157	count
+gentle	1	branch_selection	2	1	equilibrium	selected_class	limited	text
+gentle	1	branch_selection	2	1	equilibrium	previous_class	limited	text
+gentle	1	branch_selection	2	1	equilibrium	switched	false	text
+gentle	1	branch_selection	2	1	equilibrium	reason	history_continuity	text
+gentle	1	branch_selection	2	1	equilibrium	limited_available	true	boolean
+gentle	1	branch_selection	2	1	equilibrium	diverted_available	false	boolean
+gentle	1	branch_selection	2	1	equilibrium	limited_admissible	true	boolean
+gentle	1	branch_selection	2	1	equilibrium	diverted_admissible	true	boolean
+gentle	1	branch_selection	2	1	equilibrium	limited_residual	1.7012099800023355e-15	relative
+gentle	1	branch_selection	2	1	equilibrium	diverted_residual	4.1259788905963054e-16	relative
+gentle	1	branch_selection	3	0	equilibrium	sample_time	0	s
+gentle	1	branch_selection	3	0	equilibrium	limited_core_cells	126	count
+gentle	1	branch_selection	3	0	equilibrium	diverted_core_cells	157	count
+gentle	1	branch_selection	3	0	equilibrium	selected_class	limited	text
+gentle	1	branch_selection	3	0	equilibrium	previous_class	none	text
+gentle	1	branch_selection	3	0	equilibrium	switched	false	text
+gentle	1	branch_selection	3	0	equilibrium	reason	sole_valid	text
+gentle	1	branch_selection	3	0	equilibrium	limited_available	true	boolean
+gentle	1	branch_selection	3	0	equilibrium	diverted_available	false	boolean
+gentle	1	branch_selection	3	0	equilibrium	limited_admissible	true	boolean
+gentle	1	branch_selection	3	0	equilibrium	diverted_admissible	true	boolean
+gentle	1	branch_selection	3	0	equilibrium	limited_residual	1.4566846697679485e-14	relative
+gentle	1	branch_selection	3	0	equilibrium	diverted_residual	4.0756513704185692e-16	relative
+gentle	1	branch_selection	3	1	equilibrium	sample_time	0.0025000000000000001	s
+gentle	1	branch_selection	3	1	equilibrium	limited_core_cells	126	count
+gentle	1	branch_selection	3	1	equilibrium	diverted_core_cells	157	count
+gentle	1	branch_selection	3	1	equilibrium	selected_class	limited	text
+gentle	1	branch_selection	3	1	equilibrium	previous_class	limited	text
+gentle	1	branch_selection	3	1	equilibrium	switched	false	text
+gentle	1	branch_selection	3	1	equilibrium	reason	history_continuity	text
+gentle	1	branch_selection	3	1	equilibrium	limited_available	true	boolean
+gentle	1	branch_selection	3	1	equilibrium	diverted_available	false	boolean
+gentle	1	branch_selection	3	1	equilibrium	limited_admissible	true	boolean
+gentle	1	branch_selection	3	1	equilibrium	diverted_admissible	true	boolean
+gentle	1	branch_selection	3	1	equilibrium	limited_residual	9.0077153346307962e-16	relative
+gentle	1	branch_selection	3	1	equilibrium	diverted_residual	2.7551487171207431e-16	relative
+gentle	1	branch_selection	4	0	equilibrium	sample_time	0	s
+gentle	1	branch_selection	4	0	equilibrium	limited_core_cells	126	count
+gentle	1	branch_selection	4	0	equilibrium	diverted_core_cells	157	count
+gentle	1	branch_selection	4	0	equilibrium	selected_class	limited	text
+gentle	1	branch_selection	4	0	equilibrium	previous_class	none	text
+gentle	1	branch_selection	4	0	equilibrium	switched	false	text
+gentle	1	branch_selection	4	0	equilibrium	reason	sole_valid	text
+gentle	1	branch_selection	4	0	equilibrium	limited_available	true	boolean
+gentle	1	branch_selection	4	0	equilibrium	diverted_available	false	boolean
+gentle	1	branch_selection	4	0	equilibrium	limited_admissible	true	boolean
+gentle	1	branch_selection	4	0	equilibrium	diverted_admissible	true	boolean
+gentle	1	branch_selection	4	0	equilibrium	limited_residual	1.4566846697679485e-14	relative
+gentle	1	branch_selection	4	0	equilibrium	diverted_residual	4.0756513704185692e-16	relative
+gentle	1	branch_selection	4	1	equilibrium	sample_time	0.0025000000000000001	s
+gentle	1	branch_selection	4	1	equilibrium	limited_core_cells	126	count
+gentle	1	branch_selection	4	1	equilibrium	diverted_core_cells	157	count
+gentle	1	branch_selection	4	1	equilibrium	selected_class	limited	text
+gentle	1	branch_selection	4	1	equilibrium	previous_class	limited	text
+gentle	1	branch_selection	4	1	equilibrium	switched	false	text
+gentle	1	branch_selection	4	1	equilibrium	reason	history_continuity	text
+gentle	1	branch_selection	4	1	equilibrium	limited_available	true	boolean
+gentle	1	branch_selection	4	1	equilibrium	diverted_available	false	boolean
+gentle	1	branch_selection	4	1	equilibrium	limited_admissible	true	boolean
+gentle	1	branch_selection	4	1	equilibrium	diverted_admissible	true	boolean
+gentle	1	branch_selection	4	1	equilibrium	limited_residual	8.0075908841500922e-16	relative
+gentle	1	branch_selection	4	1	equilibrium	diverted_residual	4.136861844989314e-16	relative
+gentle	1	branch_selection	5	0	equilibrium	sample_time	0	s
+gentle	1	branch_selection	5	0	equilibrium	limited_core_cells	126	count
+gentle	1	branch_selection	5	0	equilibrium	diverted_core_cells	157	count
+gentle	1	branch_selection	5	0	equilibrium	selected_class	limited	text
+gentle	1	branch_selection	5	0	equilibrium	previous_class	none	text
+gentle	1	branch_selection	5	0	equilibrium	switched	false	text
+gentle	1	branch_selection	5	0	equilibrium	reason	sole_valid	text
+gentle	1	branch_selection	5	0	equilibrium	limited_available	true	boolean
+gentle	1	branch_selection	5	0	equilibrium	diverted_available	false	boolean
+gentle	1	branch_selection	5	0	equilibrium	limited_admissible	true	boolean
+gentle	1	branch_selection	5	0	equilibrium	diverted_admissible	true	boolean
+gentle	1	branch_selection	5	0	equilibrium	limited_residual	1.4566846697679485e-14	relative
+gentle	1	branch_selection	5	0	equilibrium	diverted_residual	4.0756513704185692e-16	relative
+gentle	1	branch_selection	5	1	equilibrium	sample_time	0.0025000000000000001	s
+gentle	1	branch_selection	5	1	equilibrium	limited_core_cells	126	count
+gentle	1	branch_selection	5	1	equilibrium	diverted_core_cells	157	count
+gentle	1	branch_selection	5	1	equilibrium	selected_class	limited	text
+gentle	1	branch_selection	5	1	equilibrium	previous_class	limited	text
+gentle	1	branch_selection	5	1	equilibrium	switched	false	text
+gentle	1	branch_selection	5	1	equilibrium	reason	history_continuity	text
+gentle	1	branch_selection	5	1	equilibrium	limited_available	true	boolean
+gentle	1	branch_selection	5	1	equilibrium	diverted_available	false	boolean
+gentle	1	branch_selection	5	1	equilibrium	limited_admissible	true	boolean
+gentle	1	branch_selection	5	1	equilibrium	diverted_admissible	true	boolean
+gentle	1	branch_selection	5	1	equilibrium	limited_residual	9.0090557848268688e-16	relative
+gentle	1	branch_selection	5	1	equilibrium	diverted_residual	4.1394047146076272e-16	relative
+gentle	1	branch_selection	6	0	equilibrium	sample_time	0	s
+gentle	1	branch_selection	6	0	equilibrium	limited_core_cells	126	count
+gentle	1	branch_selection	6	0	equilibrium	diverted_core_cells	157	count
+gentle	1	branch_selection	6	0	equilibrium	selected_class	limited	text
+gentle	1	branch_selection	6	0	equilibrium	previous_class	none	text
+gentle	1	branch_selection	6	0	equilibrium	switched	false	text
+gentle	1	branch_selection	6	0	equilibrium	reason	sole_valid	text
+gentle	1	branch_selection	6	0	equilibrium	limited_available	true	boolean
+gentle	1	branch_selection	6	0	equilibrium	diverted_available	false	boolean
+gentle	1	branch_selection	6	0	equilibrium	limited_admissible	true	boolean
+gentle	1	branch_selection	6	0	equilibrium	diverted_admissible	true	boolean
+gentle	1	branch_selection	6	0	equilibrium	limited_residual	1.4566846697679485e-14	relative
+gentle	1	branch_selection	6	0	equilibrium	diverted_residual	4.0756513704185692e-16	relative
+gentle	1	branch_selection	6	1	equilibrium	sample_time	0.0025000000000000001	s
+gentle	1	branch_selection	6	1	equilibrium	limited_core_cells	126	count
+gentle	1	branch_selection	6	1	equilibrium	diverted_core_cells	157	count
+gentle	1	branch_selection	6	1	equilibrium	selected_class	limited	text
+gentle	1	branch_selection	6	1	equilibrium	previous_class	limited	text
+gentle	1	branch_selection	6	1	equilibrium	switched	false	text
+gentle	1	branch_selection	6	1	equilibrium	reason	history_continuity	text
+gentle	1	branch_selection	6	1	equilibrium	limited_available	true	boolean
+gentle	1	branch_selection	6	1	equilibrium	diverted_available	false	boolean
+gentle	1	branch_selection	6	1	equilibrium	limited_admissible	true	boolean
+gentle	1	branch_selection	6	1	equilibrium	diverted_admissible	true	boolean
+gentle	1	branch_selection	6	1	equilibrium	limited_residual	1.0010419645893778e-15	relative
+gentle	1	branch_selection	6	1	equilibrium	diverted_residual	4.14096840420605e-16	relative
+gentle	1	branch_selection	7	0	equilibrium	sample_time	0	s
+gentle	1	branch_selection	7	0	equilibrium	limited_core_cells	126	count
+gentle	1	branch_selection	7	0	equilibrium	diverted_core_cells	157	count
+gentle	1	branch_selection	7	0	equilibrium	selected_class	limited	text
+gentle	1	branch_selection	7	0	equilibrium	previous_class	none	text
+gentle	1	branch_selection	7	0	equilibrium	switched	false	text
+gentle	1	branch_selection	7	0	equilibrium	reason	sole_valid	text
+gentle	1	branch_selection	7	0	equilibrium	limited_available	true	boolean
+gentle	1	branch_selection	7	0	equilibrium	diverted_available	false	boolean
+gentle	1	branch_selection	7	0	equilibrium	limited_admissible	true	boolean
+gentle	1	branch_selection	7	0	equilibrium	diverted_admissible	true	boolean
+gentle	1	branch_selection	7	0	equilibrium	limited_residual	1.4566846697679485e-14	relative
+gentle	1	branch_selection	7	0	equilibrium	diverted_residual	4.0756513704185692e-16	relative
+gentle	1	branch_selection	7	1	equilibrium	sample_time	0.0025000000000000001	s
+gentle	1	branch_selection	7	1	equilibrium	limited_core_cells	126	count
+gentle	1	branch_selection	7	1	equilibrium	diverted_core_cells	157	count
+gentle	1	branch_selection	7	1	equilibrium	selected_class	limited	text
+gentle	1	branch_selection	7	1	equilibrium	previous_class	limited	text
+gentle	1	branch_selection	7	1	equilibrium	switched	false	text
+gentle	1	branch_selection	7	1	equilibrium	reason	history_continuity	text
+gentle	1	branch_selection	7	1	equilibrium	limited_available	true	boolean
+gentle	1	branch_selection	7	1	equilibrium	diverted_available	false	boolean
+gentle	1	branch_selection	7	1	equilibrium	limited_admissible	true	boolean
+gentle	1	branch_selection	7	1	equilibrium	diverted_admissible	true	boolean
+gentle	1	branch_selection	7	1	equilibrium	limited_residual	8.0085138378799384e-16	relative
+gentle	1	branch_selection	7	1	equilibrium	diverted_residual	5.5225741348712867e-16	relative
+gentle	1	branch_selection	8	0	equilibrium	sample_time	0	s
+gentle	1	branch_selection	8	0	equilibrium	limited_core_cells	126	count
+gentle	1	branch_selection	8	0	equilibrium	diverted_core_cells	157	count
+gentle	1	branch_selection	8	0	equilibrium	selected_class	limited	text
+gentle	1	branch_selection	8	0	equilibrium	previous_class	none	text
+gentle	1	branch_selection	8	0	equilibrium	switched	false	text
+gentle	1	branch_selection	8	0	equilibrium	reason	sole_valid	text
+gentle	1	branch_selection	8	0	equilibrium	limited_available	true	boolean
+gentle	1	branch_selection	8	0	equilibrium	diverted_available	false	boolean
+gentle	1	branch_selection	8	0	equilibrium	limited_admissible	true	boolean
+gentle	1	branch_selection	8	0	equilibrium	diverted_admissible	true	boolean
+gentle	1	branch_selection	8	0	equilibrium	limited_residual	1.4566846697679485e-14	relative
+gentle	1	branch_selection	8	0	equilibrium	diverted_residual	4.0756513704185692e-16	relative
+gentle	1	branch_selection	8	1	equilibrium	sample_time	0.0025000000000000001	s
+gentle	1	branch_selection	8	1	equilibrium	limited_core_cells	126	count
+gentle	1	branch_selection	8	1	equilibrium	diverted_core_cells	157	count
+gentle	1	branch_selection	8	1	equilibrium	selected_class	limited	text
+gentle	1	branch_selection	8	1	equilibrium	previous_class	limited	text
+gentle	1	branch_selection	8	1	equilibrium	switched	false	text
+gentle	1	branch_selection	8	1	equilibrium	reason	history_continuity	text
+gentle	1	branch_selection	8	1	equilibrium	limited_available	true	boolean
+gentle	1	branch_selection	8	1	equilibrium	diverted_available	false	boolean
+gentle	1	branch_selection	8	1	equilibrium	limited_admissible	true	boolean
+gentle	1	branch_selection	8	1	equilibrium	diverted_admissible	true	boolean
+gentle	1	branch_selection	8	1	equilibrium	limited_residual	1.1011858805709726e-15	relative
+gentle	1	branch_selection	8	1	equilibrium	diverted_residual	4.1425229889064104e-16	relative
+gentle	1	branch_selection	9	0	equilibrium	sample_time	0	s
+gentle	1	branch_selection	9	0	equilibrium	limited_core_cells	126	count
+gentle	1	branch_selection	9	0	equilibrium	diverted_core_cells	157	count
+gentle	1	branch_selection	9	0	equilibrium	selected_class	limited	text
+gentle	1	branch_selection	9	0	equilibrium	previous_class	none	text
+gentle	1	branch_selection	9	0	equilibrium	switched	false	text
+gentle	1	branch_selection	9	0	equilibrium	reason	sole_valid	text
+gentle	1	branch_selection	9	0	equilibrium	limited_available	true	boolean
+gentle	1	branch_selection	9	0	equilibrium	diverted_available	false	boolean
+gentle	1	branch_selection	9	0	equilibrium	limited_admissible	true	boolean
+gentle	1	branch_selection	9	0	equilibrium	diverted_admissible	true	boolean
+gentle	1	branch_selection	9	0	equilibrium	limited_residual	1.4566846697679485e-14	relative
+gentle	1	branch_selection	9	0	equilibrium	diverted_residual	4.0756513704185692e-16	relative
+gentle	1	branch_selection	9	1	equilibrium	sample_time	0.0025000000000000001	s
+gentle	1	branch_selection	9	1	equilibrium	limited_core_cells	126	count
+gentle	1	branch_selection	9	1	equilibrium	diverted_core_cells	157	count
+gentle	1	branch_selection	9	1	equilibrium	selected_class	limited	text
+gentle	1	branch_selection	9	1	equilibrium	previous_class	limited	text
+gentle	1	branch_selection	9	1	equilibrium	switched	false	text
+gentle	1	branch_selection	9	1	equilibrium	reason	history_continuity	text
+gentle	1	branch_selection	9	1	equilibrium	limited_available	true	boolean
+gentle	1	branch_selection	9	1	equilibrium	diverted_available	false	boolean
+gentle	1	branch_selection	9	1	equilibrium	limited_admissible	true	boolean
+gentle	1	branch_selection	9	1	equilibrium	diverted_admissible	true	boolean
+gentle	1	branch_selection	9	1	equilibrium	limited_residual	1.5016300109756059e-15	relative
+gentle	1	branch_selection	9	1	equilibrium	diverted_residual	1.380962618820271e-16	relative
+gentle	1	branch_selection	10	0	equilibrium	sample_time	0	s
+gentle	1	branch_selection	10	0	equilibrium	limited_core_cells	126	count
+gentle	1	branch_selection	10	0	equilibrium	diverted_core_cells	157	count
+gentle	1	branch_selection	10	0	equilibrium	selected_class	limited	text
+gentle	1	branch_selection	10	0	equilibrium	previous_class	none	text
+gentle	1	branch_selection	10	0	equilibrium	switched	false	text
+gentle	1	branch_selection	10	0	equilibrium	reason	sole_valid	text
+gentle	1	branch_selection	10	0	equilibrium	limited_available	true	boolean
+gentle	1	branch_selection	10	0	equilibrium	diverted_available	false	boolean
+gentle	1	branch_selection	10	0	equilibrium	limited_admissible	true	boolean
+gentle	1	branch_selection	10	0	equilibrium	diverted_admissible	true	boolean
+gentle	1	branch_selection	10	0	equilibrium	limited_residual	1.4566846697679485e-14	relative
+gentle	1	branch_selection	10	0	equilibrium	diverted_residual	4.0756513704185692e-16	relative
+gentle	1	branch_selection	10	1	equilibrium	sample_time	0.0025000000000000001	s
+gentle	1	branch_selection	10	1	equilibrium	limited_core_cells	126	count
+gentle	1	branch_selection	10	1	equilibrium	diverted_core_cells	157	count
+gentle	1	branch_selection	10	1	equilibrium	selected_class	limited	text
+gentle	1	branch_selection	10	1	equilibrium	previous_class	limited	text
+gentle	1	branch_selection	10	1	equilibrium	switched	false	text
+gentle	1	branch_selection	10	1	equilibrium	reason	history_continuity	text
+gentle	1	branch_selection	10	1	equilibrium	limited_available	true	boolean
+gentle	1	branch_selection	10	1	equilibrium	diverted_available	false	boolean
+gentle	1	branch_selection	10	1	equilibrium	limited_admissible	true	boolean
+gentle	1	branch_selection	10	1	equilibrium	diverted_admissible	true	boolean
+gentle	1	branch_selection	10	1	equilibrium	limited_residual	1.1012012163550921e-15	relative
+gentle	1	branch_selection	10	1	equilibrium	diverted_residual	2.7620751129083367e-16	relative
+gentle	1	exchange_timing	1		transport	wall_time	0.047859359998255968	s
+gentle	1	exchange_timing	1		equilibrium_plus_fsa	wall_time	42.905863158870488	s
+gentle	1	exchange_timing	2		transport	wall_time	0.062670045997947454	s
+gentle	1	exchange_timing	2		equilibrium_plus_fsa	wall_time	43.112658370984718	s
+gentle	1	exchange_timing	3		transport	wall_time	0.061839377973228693	s
+gentle	1	exchange_timing	3		equilibrium_plus_fsa	wall_time	42.818313711090013	s
+gentle	1	exchange_timing	4		transport	wall_time	0.060834288131445646	s
+gentle	1	exchange_timing	4		equilibrium_plus_fsa	wall_time	42.003369207959622	s
+gentle	1	exchange_timing	5		transport	wall_time	0.059510410064831376	s
+gentle	1	exchange_timing	5		equilibrium_plus_fsa	wall_time	41.927456183126196	s
+gentle	1	exchange_timing	6		transport	wall_time	0.061132893897593021	s
+gentle	1	exchange_timing	6		equilibrium_plus_fsa	wall_time	42.253127231029794	s
+gentle	1	exchange_timing	7		transport	wall_time	0.064742129994556308	s
+gentle	1	exchange_timing	7		equilibrium_plus_fsa	wall_time	42.113762564025819	s
+gentle	1	exchange_timing	8		transport	wall_time	0.057275077793747187	s
+gentle	1	exchange_timing	8		equilibrium_plus_fsa	wall_time	41.957216871203855	s
+gentle	1	exchange_timing	9		transport	wall_time	0.044893278041854501	s
+gentle	1	exchange_timing	9		equilibrium_plus_fsa	wall_time	41.84535274701193	s
+gentle	1	exchange_timing	10		transport	wall_time	0.057390824891626835	s
+gentle	1	exchange_timing	10		equilibrium_plus_fsa	wall_time	41.517448354978114	s
+gentle	1	extraction_diagnostic	0	0	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	0	0	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	0	0	equilibrium	core_count	496	count
+gentle	1	extraction_diagnostic	0	0	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	0	0	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	0	0	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	0	0	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	0	0	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	0	0	equilibrium	exact_evaluation_seconds	3.8709240639582276	s
+gentle	1	extraction_diagnostic	1	0	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	1	0	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	1	0	equilibrium	core_count	496	count
+gentle	1	extraction_diagnostic	1	0	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	1	0	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	1	0	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	1	0	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	1	0	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	1	0	equilibrium	exact_evaluation_seconds	4.2065359570551664	s
+gentle	1	extraction_diagnostic	1	1	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	1	1	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	1	1	equilibrium	core_count	504	count
+gentle	1	extraction_diagnostic	1	1	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	1	1	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	1	1	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	1	1	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	1	1	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	1	1	equilibrium	exact_evaluation_seconds	4.2056592530570924	s
+gentle	1	extraction_diagnostic	2	0	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	2	0	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	2	0	equilibrium	core_count	496	count
+gentle	1	extraction_diagnostic	2	0	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	2	0	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	2	0	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	2	0	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	2	0	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	2	0	equilibrium	exact_evaluation_seconds	4.1733650479000062	s
+gentle	1	extraction_diagnostic	2	1	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	2	1	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	2	1	equilibrium	core_count	506	count
+gentle	1	extraction_diagnostic	2	1	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	2	1	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	2	1	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	2	1	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	2	1	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	2	1	equilibrium	exact_evaluation_seconds	4.3483095860574394	s
+gentle	1	extraction_diagnostic	3	0	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	3	0	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	3	0	equilibrium	core_count	496	count
+gentle	1	extraction_diagnostic	3	0	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	3	0	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	3	0	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	3	0	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	3	0	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	3	0	equilibrium	exact_evaluation_seconds	4.0730520440265536	s
+gentle	1	extraction_diagnostic	3	1	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	3	1	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	3	1	equilibrium	core_count	508	count
+gentle	1	extraction_diagnostic	3	1	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	3	1	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	3	1	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	3	1	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	3	1	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	3	1	equilibrium	exact_evaluation_seconds	4.1762892019469291	s
+gentle	1	extraction_diagnostic	4	0	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	4	0	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	4	0	equilibrium	core_count	496	count
+gentle	1	extraction_diagnostic	4	0	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	4	0	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	4	0	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	4	0	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	4	0	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	4	0	equilibrium	exact_evaluation_seconds	4.0368204051628709	s
+gentle	1	extraction_diagnostic	4	1	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	4	1	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	4	1	equilibrium	core_count	508	count
+gentle	1	extraction_diagnostic	4	1	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	4	1	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	4	1	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	4	1	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	4	1	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	4	1	equilibrium	exact_evaluation_seconds	3.9729917789809406	s
+gentle	1	extraction_diagnostic	5	0	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	5	0	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	5	0	equilibrium	core_count	496	count
+gentle	1	extraction_diagnostic	5	0	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	5	0	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	5	0	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	5	0	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	5	0	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	5	0	equilibrium	exact_evaluation_seconds	4.0168329211883247	s
+gentle	1	extraction_diagnostic	5	1	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	5	1	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	5	1	equilibrium	core_count	508	count
+gentle	1	extraction_diagnostic	5	1	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	5	1	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	5	1	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	5	1	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	5	1	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	5	1	equilibrium	exact_evaluation_seconds	3.9393796329386532	s
+gentle	1	extraction_diagnostic	6	0	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	6	0	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	6	0	equilibrium	core_count	496	count
+gentle	1	extraction_diagnostic	6	0	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	6	0	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	6	0	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	6	0	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	6	0	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	6	0	equilibrium	exact_evaluation_seconds	3.9411334109026939	s
+gentle	1	extraction_diagnostic	6	1	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	6	1	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	6	1	equilibrium	core_count	508	count
+gentle	1	extraction_diagnostic	6	1	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	6	1	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	6	1	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	6	1	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	6	1	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	6	1	equilibrium	exact_evaluation_seconds	4.1621368390042335	s
+gentle	1	extraction_diagnostic	7	0	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	7	0	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	7	0	equilibrium	core_count	496	count
+gentle	1	extraction_diagnostic	7	0	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	7	0	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	7	0	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	7	0	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	7	0	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	7	0	equilibrium	exact_evaluation_seconds	3.9865071969106793	s
+gentle	1	extraction_diagnostic	7	1	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	7	1	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	7	1	equilibrium	core_count	508	count
+gentle	1	extraction_diagnostic	7	1	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	7	1	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	7	1	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	7	1	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	7	1	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	7	1	equilibrium	exact_evaluation_seconds	3.9523892910219729	s
+gentle	1	extraction_diagnostic	8	0	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	8	0	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	8	0	equilibrium	core_count	496	count
+gentle	1	extraction_diagnostic	8	0	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	8	0	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	8	0	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	8	0	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	8	0	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	8	0	equilibrium	exact_evaluation_seconds	4.0594082060270011	s
+gentle	1	extraction_diagnostic	8	1	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	8	1	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	8	1	equilibrium	core_count	508	count
+gentle	1	extraction_diagnostic	8	1	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	8	1	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	8	1	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	8	1	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	8	1	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	8	1	equilibrium	exact_evaluation_seconds	3.9932002760469913	s
+gentle	1	extraction_diagnostic	9	0	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	9	0	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	9	0	equilibrium	core_count	496	count
+gentle	1	extraction_diagnostic	9	0	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	9	0	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	9	0	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	9	0	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	9	0	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	9	0	equilibrium	exact_evaluation_seconds	3.9742888598702848	s
+gentle	1	extraction_diagnostic	9	1	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	9	1	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	9	1	equilibrium	core_count	508	count
+gentle	1	extraction_diagnostic	9	1	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	9	1	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	9	1	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	9	1	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	9	1	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	9	1	equilibrium	exact_evaluation_seconds	3.9833866620901972	s
+gentle	1	extraction_diagnostic	10	0	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	10	0	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	10	0	equilibrium	core_count	496	count
+gentle	1	extraction_diagnostic	10	0	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	10	0	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	10	0	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	10	0	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	10	0	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	10	0	equilibrium	exact_evaluation_seconds	3.9075569261331111	s
+gentle	1	extraction_diagnostic	10	1	equilibrium	map_height	49	count
+gentle	1	extraction_diagnostic	10	1	equilibrium	map_radius	49	count
+gentle	1	extraction_diagnostic	10	1	equilibrium	core_count	508	count
+gentle	1	extraction_diagnostic	10	1	equilibrium	record_valid	true	boolean
+gentle	1	extraction_diagnostic	10	1	equilibrium	surface_arc_valid	true	boolean
+gentle	1	extraction_diagnostic	10	1	equilibrium	surface_arc_invalid_count	0	count
+gentle	1	extraction_diagnostic	10	1	equilibrium	surface_arc_first_invalid_cell	0	index
+gentle	1	extraction_diagnostic	10	1	equilibrium	surface_arc_first_invalid_level	0.040000000000000001	normalized_flux
+gentle	1	extraction_diagnostic	10	1	equilibrium	exact_evaluation_seconds	4.0147697608917952	s
+gentle	1	conservation				flux_boundary	0.0031385773159375852	Wb
+gentle	1	conservation				flux_resistive	0.00043144854900178942	Wb
+gentle	1	conservation				flux_internal	0.0027071287669357957	Wb
+gentle	1	conservation				flux_closure_error	0	Wb
+gentle	1	conservation				flux_closure_residual	0	relative
+gentle	1	conservation				current_requested_initial	557455.09288717515	A
+gentle	1	conservation				current_requested_final	557455.09288717515	A
+gentle	1	conservation				current_achieved_initial	557455.09288717515	A
+gentle	1	conservation				current_achieved_final	557455.09288717515	A
+gentle	1	conservation				current_continuity_error	0	A
+gentle	1	conservation				current_continuity_residual	0	relative
+gentle	1	interval_flux_ledger	1		transport	boundary	0.0031385773159375852	Wb
+gentle	1	interval_flux_ledger	1		transport	resistive	0.00043144854900178942	Wb
+gentle	1	interval_flux_ledger	1		transport	internal	0.0027071287669357957	Wb
+gentle	1	interval_flux_ledger	1		transport	mean_axis_voltage	0.17257941960071577	V
+gentle	1	interval_flux_ledger	1		transport	mean_boundary_voltage	1.2554309263750341	V
+gentle	1	interval_current_ledger	1		transport	requested_initial	557455.09288717515	A
+gentle	1	interval_current_ledger	1		transport	requested_final	557455.09288717515	A
+gentle	1	interval_current_ledger	1		transport	achieved_initial	557455.09288717515	A
+gentle	1	interval_current_ledger	1		transport	achieved_final	557455.09288717515	A

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T10:23:34",
+  "updated": "2026-08-22T10:28:45",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -57,7 +57,7 @@
         "id": "circuit-ensemble",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02889-7bc4-7001-9507-a81210aef170",
         "created": "2026-08-22"
       },
       {
@@ -20835,9 +20835,129 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T081450275879-ensemble-relation-assessment",
+        "plan": "coil-circuit-discovery",
+        "section": "\u00a73",
+        "node": "ensemble-relation-assessment",
+        "role": "implement",
+        "member": "circuit-ensemble",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T08:14:53Z",
+        "completed_at": "2026-08-22T08:27:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 738,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 738,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "7bd0ab65b88607738f74226148a32b07a3be9466",
+        "commits": [
+          "b742b160"
+        ],
+        "changed_lines": {
+          "added": 2418,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T081450275879-ensemble-relation-assessment/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02889-7bc4-7001-9507-a81210aef170",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4578304,
+            "cached_input_tokens_cumulative": 4578304,
+            "input_tokens": 4742510,
+            "input_tokens_cumulative": 4742510,
+            "output_tokens": 28395,
+            "output_tokens_cumulative": 28395,
+            "reasoning_output_tokens": 7795,
+            "reasoning_output_tokens_cumulative": 7795
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T081455440762-ecoilb-normalization-audit",
+        "plan": "coil-circuit-discovery",
+        "section": "\u00a73",
+        "node": "ecoilb-normalization-audit",
+        "role": "implement",
+        "member": "circuit-scout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T08:14:58Z",
+        "completed_at": "2026-08-22T08:25:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 614,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 614,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "7bd0ab65b88607738f74226148a32b07a3be9466",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T081455440762-ecoilb-normalization-audit/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02627-434c-7813-854b-811643929182",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3162112,
+            "cached_input_tokens_cumulative": 13055232,
+            "input_tokens": 3483321,
+            "input_tokens_cumulative": 13951481,
+            "output_tokens": 16475,
+            "output_tokens_cumulative": 49302,
+            "reasoning_output_tokens": 4777,
+            "reasoning_output_tokens_cumulative": 11990
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 505
+    "_version": 508
   }
 }

@@ -24,8 +24,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-version" content="19">
-<meta name="plan-impl" content="0.85">
+<meta name="plan-version" content="20">
+<meta name="plan-impl" content="0.9">
 <meta name="plan-commits" content="5855f2ba,31e10c89,d5a7c0dc,bdf58a45">
 <meta name="plan-artifacts" content="docs/figures/coil-circuit-discovery/five_column_residual_adjudication_receipt.json,docs/figures/coil-circuit-discovery/flux_space_adjudication_preregistration.json,docs/figures/coil-circuit-discovery/flux_space_adjudication_receipt.json,docs/evidence/archive/coil-circuit-discovery-landed.html">
 </head>
@@ -210,6 +210,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260822T0830" data-who="reckon-ship" data-when="2026-08-22T08:30:00Z">
     <div class="r-comment-body">corpus-time-invariant-regression landed with gate PASSED — run r-20260822T073419688205, commit e3460384 merged at d30a5148, 3 tests added. read-path-oracle-review (run r-20260822T080437908453, gate passed) independently confirmed all of it: the raw-label oracle traverses parquet write → production reader → corpus flux transform → composition → regression with 5/5 positive recovery at 1.988e-12; the millisecond invariant holds on 20/20 parquets (min margin 4116.7 ms); raw ECOILA equals the receipt on 60/60 records at 0.0 A difference with median −6924.264 A over a 35-negative/25-positive cohort; the retired /1000 sampling exactly reproduces the earlier phantom +46895.411 A. THE CENTRAL POSITIVE RESULT: fitted currents track same-frame ECOILA — through-origin slopes E567UP 1.0457 / E567DN 1.0017-class / E89UP+E89DN near-unity (range 1.0017–1.0457), correlations 0.9822–0.9974, sign agreement 58–59/60 — the published series circuit recovered from label flux across a mixed-polarity cohort. ECOILB is a coherent factor-two anomaly (median ratio 2.02031, slope 2.00092), a normalisation or conductor-definition question. Next: formal ensemble assessment with promotion recommendation per the locked decisions, ECOILB normalisation audit, and the reconciliation note that closure-tier flux thresholds remain unmet even under the best five-coil fit (the labels retain non-conductor content), so the earlier undecidable closure verdict and this relation discovery coexist.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260822T0910" data-who="reckon-ship" data-when="2026-08-22T09:10:00Z">
+    <div class="r-comment-body">ensemble-relation-assessment landed — run r-20260822T081450275879, commit b742b160 merged at b5500665, 5 tests added (22 passing). Measure: through-origin slopes / correlations / leave-one-shot-out R² — E567DN 1.0017/0.9822/0.9420, E567UP 1.0231/0.9856/0.9557, E89DN 1.0456/0.9972/0.9851, E89UP 1.0457/0.9974/0.9877, ECOILB 2.0009/0.9969/0.9933; zero-intercept null rejected for the four near-unity relations (cluster-robust p≈2e-6) but not ECOILB; Holm drift on E567DN/E567UP/ECOILB vs post-fit RMS, E89 pair clean; closure 1/60 vs the 54/60 rule (residual/threshold median 4.12). Recommendation adopted: withhold every label-fitted promotion under the locked both-required rule; independent-trace authority for E567UP/E89DN unaffected. ecoilb-normalization-audit (run r-20260822T081455440762, gate passed, report-only) LOCATED the factor two: netCDF holds ECOILA and ECOILB as equal 48-element series windings, but the registry supplies ECOILA current at multiplier 1 against a per-ampere-turn response, so the shipped subtraction removes ~1/48 of the A-winding flux and the co-located B column absorbs both branches (combined-pair diagnostic 1.00102). Falsifiable prediction for the corrective node: with ECOILA at multiplier 48 the ECOILB slope must move from 2.00092 toward the banked branch-sharing scale 1.01717 with the read-path oracle still passing. Reports: ~/.config/reckon/crew/reports/nova/coil-circuit-discovery/ecoilb-normalization-audit.md.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

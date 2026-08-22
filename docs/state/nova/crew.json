@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T10:28:45",
+  "updated": "2026-08-22T10:59:39",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -20955,9 +20955,123 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T082927042887-ecoila-turn-normalization",
+        "plan": "coil-circuit-discovery",
+        "section": "\u00a73",
+        "node": "ecoila-turn-normalization",
+        "role": "implement",
+        "member": "circuit-adjudicator",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T08:29:29Z",
+        "completed_at": "2026-08-22T08:49:21Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1192,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1192,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "63bd8d15fc15a4db94f849e37a3ae1c062419614",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "Held unmerged: review reproduced every number (48x on 60/60 records, all five corrected slopes, oracle 1.99e-12) but refuted the premise as unestablished \u2014 the corpus schema declares a blanket kA.turn contract with no ECOILA exception, the landed producer-units receipt records none, and the new test derives ECOILA unit class from the registry it modified; the 48x interpretation is correct only if ECOILA records branch amperes, to be settled from producer-side and physical-magnitude evidence before any receipt regeneration",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T082927042887-ecoila-turn-normalization/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0262f-830e-7402-92b6-cffc3106b047",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12592896,
+            "cached_input_tokens_cumulative": 98693504,
+            "input_tokens": 12790292,
+            "input_tokens_cumulative": 100404120,
+            "output_tokens": 24375,
+            "output_tokens_cumulative": 225693,
+            "reasoning_output_tokens": 7239,
+            "reasoning_output_tokens_cumulative": 56661
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T085048517050-turn-normalization-review",
+        "plan": "coil-circuit-discovery",
+        "section": "\u00a73",
+        "node": "turn-normalization-review",
+        "role": "implement",
+        "member": "circuit-reviewer",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T08:50:56Z",
+        "completed_at": "2026-08-22T08:58:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 430,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 430,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "63bd8d15fc15a4db94f849e37a3ae1c062419614",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T085048517050-turn-normalization-review/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0264c-544b-73b2-aba0-4bf197b6375c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2541056,
+            "cached_input_tokens_cumulative": 18167424,
+            "input_tokens": 2704910,
+            "input_tokens_cumulative": 19275304,
+            "output_tokens": 11392,
+            "output_tokens_cumulative": 100252,
+            "reasoning_output_tokens": 2473,
+            "reasoning_output_tokens_cumulative": 28625
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 508
+    "_version": 510
   }
 }

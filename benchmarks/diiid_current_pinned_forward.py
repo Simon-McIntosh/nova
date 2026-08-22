@@ -48,6 +48,14 @@ from nova.equilibrium import fixed_point
 from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
 from nova.equilibrium.topology import TopologyClass
+from nova.imas.diiid_current import (
+    complete_profile_current_adapter,
+    shipped_current_at,
+)
+from nova.imas.diiid_description import (
+    POLOIDAL_CONDUCTORS,
+    dataset_machine_description,
+)
 from nova.jax.config import configure_dtypes
 
 
@@ -57,6 +65,14 @@ CHECKPOINT_NAME = "current_pinned_forward_frames.jsonl"
 RECEIPT_NAME = "current_pinned_forward_receipt.json"
 FIGURE_NAME = "current_pinned_forward.png"
 ARM_NAMES = ("unpinned", "pinned_eliminated")
+DIAGNOSTIC_FRAME_102 = {
+    "shot": "d3d_shot_00000c4a7b.parquet",
+    "frame": 102,
+    "eliminated_relative_residual": 1.5899788903681545e-9,
+    "eliminated_iterations": 4,
+    "eliminated_topology": "diverted",
+}
+DIAGNOSTIC_RESIDUAL_RELATIVE_TOLERANCE = 1.0e-5
 LAMBDA_BAND = (1.0e-6, 1.0e6)
 RELATIVE_RESIDUAL_CRITERION = 1.0e-6
 CURRENT_CONSTRAINT_CRITERION = 1.0e-10
@@ -408,6 +424,74 @@ def eliminated_map(
     return mapped, evaluated
 
 
+def description_driven_currents(
+    row: dict[str, Any], profile: ForwardProfile, time_ms: float
+) -> tuple[ForwardProfile, np.ndarray, np.ndarray, dict[str, Any]]:
+    """Bind fixed-wiring currents and responses without reading label artifacts."""
+
+    description = dataset_machine_description(
+        row, source_row=str(row.get("_source_path", "corpus row"))
+    ).physical
+    shipped_by_name = shipped_current_at(
+        row,
+        description,
+        POLOIDAL_CONDUCTORS,
+        time_ms,
+    )
+    adapter = complete_profile_current_adapter(
+        profile,
+        shipped_names=POLOIDAL_CONDUCTORS,
+        shipped_current_a=shipped_by_name,
+        use_circuit=True,
+    )
+    current = adapter.resolution.current(())
+    shipped = np.zeros_like(current)
+    shipped[: len(POLOIDAL_CONDUCTORS)] = [
+        shipped_by_name[name] for name in POLOIDAL_CONDUCTORS
+    ]
+    receipt = {
+        "authority": "label-free fixed-wiring machine-description circuit",
+        "uses_circuit": True,
+        "unknown_parameter_count": len(adapter.resolution.unknown_indices),
+        "response_order": list(adapter.resolution.names),
+        "currents_a": {
+            name: float(value)
+            for name, value in zip(adapter.resolution.names, current, strict=True)
+        },
+        "prescribed_standard_deviation_a": {
+            name: float(value)
+            for name, value in zip(
+                adapter.resolution.names,
+                adapter.resolution.prescribed_standard_deviation_a,
+                strict=True,
+            )
+        },
+        "response": adapter.response_receipt,
+    }
+    return adapter.profile, shipped, current, receipt
+
+
+def diagnostic_frame_102_reproduced(record: dict[str, Any]) -> bool:
+    """Qualify the banked label-current control without admitting it to inference."""
+
+    if (
+        record["shot"] != DIAGNOSTIC_FRAME_102["shot"]
+        or record["frame"] != DIAGNOSTIC_FRAME_102["frame"]
+    ):
+        return False
+    eliminated = record["arms"]["pinned_eliminated"]
+    return bool(
+        np.isclose(
+            eliminated["relative_residual"],
+            DIAGNOSTIC_FRAME_102["eliminated_relative_residual"],
+            rtol=DIAGNOSTIC_RESIDUAL_RELATIVE_TOLERANCE,
+            atol=0.0,
+        )
+        and eliminated["iterations"] == DIAGNOSTIC_FRAME_102["eliminated_iterations"]
+        and eliminated["topology"] == DIAGNOSTIC_FRAME_102["eliminated_topology"]
+    )
+
+
 def _relative_sup(image: np.ndarray, state: np.ndarray) -> float:
     return float(
         np.max(np.abs(np.asarray(image) - np.asarray(state)))
@@ -655,14 +739,19 @@ def solve_frame(
     geometry: dict[str, tuple[tuple[np.ndarray, float], ...]],
     declared: dict[str, Any],
 ) -> dict[str, Any]:
-    """Run every registered arm from one identical labelled branch seed."""
+    """Run inference and diagnostic arms from one identical branch seed."""
 
-    profile, seed, _label, _wall, _reliable, _statement = build_profile(
+    base_profile, seed, _label, _wall, _reliable, _statement = build_profile(
         row, frame_input.frame, PSEUDO_WALL_EXPANSION
     )
-    profile = append_recovered_conductors(profile, geometry)
-    shipped_current, current = current_arms(profile, frame_input.recovered_currents_a)
     time_ms = float(row["efit_times"][frame_input.frame])
+    profile, shipped_current, current, current_receipt = description_driven_currents(
+        row, base_profile, time_ms
+    )
+    diagnostic_profile = append_recovered_conductors(base_profile, geometry)
+    _diagnostic_shipped, diagnostic_current = current_arms(
+        diagnostic_profile, frame_input.recovered_currents_a
+    )
     target = _target_current(row, time_ms)
     seed_unscaled = float(
         np.sum(np.asarray(profile.operator.cell_current(seed, TopologyClass.DIVERTED)))
@@ -690,11 +779,32 @@ def solve_frame(
     shipped_unpinned = solve_unpinned(profile, seed, shipped_current, target)
     unpinned = solve_unpinned(profile, seed, current, target)
     eliminated = solve_eliminated(profile, seed, current, target)
+    diagnostic_unpinned = solve_unpinned(
+        diagnostic_profile, seed, diagnostic_current, target
+    )
+    diagnostic_eliminated = solve_eliminated(
+        diagnostic_profile, seed, diagnostic_current, target
+    )
 
     for result in (unpinned, eliminated):
         result["dominant_map_eigenvalue"] = power_iteration(
             result["mapped"], result["state"]
         )
+    diagnostic_record = {
+        "shot": frame_input.shot,
+        "frame": frame_input.frame,
+        "arms": {
+            ARM_NAMES[0]: _serialise_arm(diagnostic_unpinned),
+            ARM_NAMES[1]: _serialise_arm(diagnostic_eliminated),
+        },
+    }
+    frame_102_control = (
+        frame_input.shot == DIAGNOSTIC_FRAME_102["shot"]
+        and frame_input.frame == DIAGNOSTIC_FRAME_102["frame"]
+    )
+    reproduction = diagnostic_frame_102_reproduced(diagnostic_record)
+    if frame_102_control and not reproduction:
+        raise RuntimeError("label-recovered frame-102 diagnostic control drifted")
     record = {
         "shot": frame_input.shot,
         "frame": frame_input.frame,
@@ -710,12 +820,22 @@ def solve_frame(
             "input set or from a partner transport solve"
         ),
         "poloidal_conductor_count": 24,
+        "inference_current_authority": current_receipt,
         "same_label_branch_seed_all_arms": True,
         "coefficients_fitted": 0,
         "currents_adjusted": 0,
         "arms": {
             ARM_NAMES[0]: _serialise_arm(unpinned),
             ARM_NAMES[1]: _serialise_arm(eliminated),
+        },
+        "diagnostic_label_recovered": {
+            "status": "diagnostic only; excluded from inference conclusions",
+            "uses_reconstruction_label": True,
+            "frame_102_landed_control": frame_102_control,
+            "frame_102_landed_control_reproduced": (
+                reproduction if frame_102_control else None
+            ),
+            "arms": diagnostic_record["arms"],
         },
         "unconstrained_current_controls": {
             "shipped_20": _serialise_arm(shipped_unpinned),
@@ -757,8 +877,9 @@ def solve_low_current_control(
     full = solve_unpinned(profile, seed, full_current, target)
     return {
         "role": (
-            "low-current selection-defect control fixture; excluded from the "
-            "representative-current scoring cohort"
+            "label-recovered low-current selection-defect diagnostic fixture; "
+            "excluded from the representative-current scoring cohort and every "
+            "inference conclusion"
         ),
         "shot": frame_input.shot,
         "frame": frame_input.frame,

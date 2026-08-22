@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T07:57:18",
+  "updated": "2026-08-22T08:09:45",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -542,6 +542,13 @@
         "role": "documentation",
         "session_id": null,
         "created": "2026-08-20"
+      },
+      {
+        "id": "transport-pint",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-22"
       },
       {
         "id": "transport-seam",
@@ -20221,9 +20228,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T055136445210-mast-contour-evidence",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a79",
+        "node": "mast-contour-evidence",
+        "role": "documentation",
+        "member": "transport-figures",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T05:51:39Z",
+        "completed_at": "2026-08-22T06:09:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1058,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1058,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "cb3cce8ec4bcfd164a7f6d172152fbf2bf29ad74",
+        "commits": [
+          "ccd942b23e16db342dab11a9dead4f56951411c2"
+        ],
+        "changed_lines": {
+          "added": 5255,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "the owner challenge is upheld by the figure: at psi_n 0.675 the map carries exactly three closed contours - one enclosing the axis and two off-axis pockets 10.4 mm from a coil-case plate and 22-35 mm from the P2 divertor coils, flux values 0.661-0.672 quoted per node. The MAST plasma contour family is NESTED; the earlier framing is reversed with the defect re-attributed to boundary-fill footprint reuse as interior membership authority. Theme-safe two-panel SVG with zoom, 4306-line committed source, deterministic re-extraction proven",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T055136445210-mast-contour-evidence/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02806-587f-7082-a639-68291e204b3a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9341312,
+            "cached_input_tokens_cumulative": 9341312,
+            "input_tokens": 9579277,
+            "input_tokens_cumulative": 9579277,
+            "output_tokens": 43993,
+            "output_tokens_cumulative": 43993,
+            "reasoning_output_tokens": 17496,
+            "reasoning_output_tokens_cumulative": 17496
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 493
+    "_version": 495
   }
 }

@@ -7,9 +7,9 @@
   <meta name="reckon-type" content="evidence">
   <meta name="plan-slug" content="efit-forward-parity-landed">
   <meta name="plan-title" content="EFIT Forward Parity — cumulative execution evidence">
-  <meta name="plan-summary" content="Landed outcomes of the forward-parity plan: the dual-route DINA flux-function receipt and the reproduction-input qualification it delivers">
+  <meta name="plan-summary" content="Landed outcomes of the forward-parity plan: the dual-route DINA flux-function receipt, the passive-inclusive boundary repair, and the instrument-controlled parity verdict that retracted four failing rows and left convergence reliability as the residual">
   <meta name="plan-evidence-for" content="efit-forward-parity">
-  <meta name="plan-verifies" content="efit-forward-parity#s6">
+  <meta name="plan-verifies" content="efit-forward-parity#s2,efit-forward-parity#s3,efit-forward-parity#s4,efit-forward-parity#s6,efit-forward-parity#s7,efit-forward-parity#s8,efit-forward-parity#s9,efit-forward-parity#s10">
   <title>EFIT Forward Parity — landed evidence | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -223,6 +223,184 @@
   holds the basin. Receipt:
   <code>docs/figures/efit-forward-parity/reference-seeded-forward-slice.json</code>; trajectory
   figure <code>vacuum-branch-diagnosis.png</code>.</p>
+
+
+  <h2 id="s3-routes">&sect;3 &mdash; both seeding conditions, and why the seed is not the missing ingredient</h2>
+
+  <p><strong>Landed 2026-08-21 to 2026-08-22; commits <code>6700b088</code>, <code>783229ac</code>,
+  <code>325f6a85</code>, <code>56b1518b</code>, <code>ede61ac7</code>.</strong> The plan declared the
+  seed a reported axis of the demonstration. Both conditions are now measured and neither closes the
+  root.</p>
+
+  <p><strong>Reference-seeded.</strong> Eight routes from one seed: <code>newton_krylov</code>
+  (residual 0, 12 iterations) and Anderson (1.06e-16) both converge on the <em>vacuum</em> root at
+  0&nbsp;A, while a kink-aware nonmonotone route and five declared damped hybrids retain the plasma
+  basin at 942,356&ndash;1,088,924&nbsp;A without reaching 1e-8. Extended budgets do not help: 50 and
+  100 promotions reproduce the 12-promotion descent bit-for-bit (prefix sup difference 0) and then
+  first cross 1e-8 at promotion 25 on the vacuum root, so the promotion schedule rather than the
+  iteration count exits the basin. The nonmonotone route stalls in a two-promotion limit cycle
+  (dominant period 2.0&ndash;2.08, spectral power 0.81&ndash;1.0, log-tail slope
+  &minus;2.8e-4/promotion). Stationary polish from the banked 2.767e-3 minimum descends to 2.090e-3
+  and then escapes monotonically to 0.9423. The free-anchor arm &mdash; nova own-topology
+  normalisation, zero declared reference constants &mdash; plateaus at 0.3727 with terminal
+  <code>I_p</code> 0.5236 of reference, closing the anchor hypothesis: neither prescribed nor free
+  anchors admit a convergent plasma root.</p>
+
+  <p><strong>Independently seeded.</strong> Same-shot warm-neighbour seeding through the declared
+  offset ladder <code>(-1,1,-2,2,-4,4,-8,8,-16,16,-32,32)</code>, imported unchanged with its tuple
+  repr recorded, found an earlier-first converged source on <em>all five</em> bounded references and
+  converged <em>none</em> of their targets. Warm-over-cold residual ratios 0.735, 0.082, 0.531, 1.776,
+  7.638 &mdash; three improved, two worsened, none closed. That is the signature of no reachable root
+  nearby rather than a seeding deficit, and it is the mechanism that lifted DIII-D cold starts 2/5 to
+  4/5, so its failure here is informative rather than merely negative.</p>
+
+  <p><strong>Qualification retained.</strong> The warm arm ran the imported host-Krylov seam, not the
+  banked newton branch, so its cold control reproduces none of the five banked terminal residuals
+  (21983 differs by an order of magnitude). Cold and warm were measured within the same imported seam,
+  so the lift conclusion is internally controlled and route-independent; comparing warm terminals
+  against the banked scorecard directly would need a newton-branch replay. Receipts:
+  <code>pinned-route-survey.json</code>, <code>long-budget-plasma-route.json</code>,
+  <code>two-phase-polish.json</code>, <code>free-anchor-arm.json</code>,
+  <code>warm-neighbour-stall-lift.json</code>.</p>
+
+  <h2 id="s7-moment-definitions">&sect;7 &mdash; the moment rows were never comparable, and the correction changes their sign</h2>
+
+  <p><strong>Landed 2026-08-22, commit <code>aad1a445</code>; verdict
+  SCOREABLE_MATCHED_DEFINITIONS_FAIL_REPRODUCTION.</strong> The validating check passes exactly: the
+  reference's boundary-field definitions applied to its <em>own</em> published integrals reproduce its
+  stored <code>&beta;_p</code> 0.3351304829120636 and <code>l_i</code> 0.7693799734115601 at relative
+  error 0.0 against a 1e-12 tolerance, so the conventions are correctly identified and nothing is
+  fitted.</p>
+
+  <p>Nova normalises both moments by one shared
+  <code>&frac12;&mu;<sub>0</sub><sup>2</sup>R<sub>vol</sub>I<sub>p</sub><sup>2</sup></code> built from
+  the topology-qualified confined-core current; the reference uses <em>squared mean</em> boundary field
+  for <code>&beta;_p</code> and <em>mean squared</em> for <code>l_i</code>, normalisers differing from
+  each other by 1.632. The supports differ too: the constraint pins the all-domain cell-current sum at
+  933,034.875&nbsp;A while both moment denominators integrate the core at 416,958.25&nbsp;A, leaving
+  516,076.62&nbsp;A &mdash; 55&nbsp;percent &mdash; outside.</p>
+
+  <p><strong>Scored on a common scale the rows read &minus;56.28 and &minus;73.43&nbsp;percent</strong>
+  &mdash; sign-flipped and larger than the reported +42.53 and +41.34, because those compared nova's
+  convention against the reference's. The deviation proved invariant across both definitions and both
+  current supports, placing it in the numerator integrals rather than any denominator: pressure
+  integral ratio 0.43716, <code>B_p</code>-squared ratio 0.26566. Dividing by volume inverts the
+  pressure finding &mdash; nova's mean pressure 6,552.49&nbsp;Pa is 9.2&nbsp;percent <em>above</em> the
+  reference's 5,999.40 &mdash; which is what exposed the volume discrepancy below. Receipt:
+  <code>moment-definition-rescore.json</code>.</p>
+
+  <h2 id="s8-volume">&sect;8 &mdash; one published volume is not the volume its own boundary encloses</h2>
+
+  <p><strong>Landed 2026-08-22, commit <code>8c39bf42</code>; verdict
+  SOLVED_PUBLISHED_VOLUME_IS_CONFINED_CORE_NOT_BOUNDARY_ENCLOSED.</strong> Both contours integrated by
+  one quadrature, with the exact solid-of-revolution and first-moment forms agreeing to 2.22e-16, so
+  quadrature is excluded.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th></th><th>published</th><th>own boundary encloses</th><th>ratio</th></tr></thead>
+    <tbody>
+      <tr><td>reference</td><td>8.7915916 m&sup3;</td><td>8.7923220 m&sup3;</td><td>0.99992</td></tr>
+      <tr><td>solved</td><td>3.5188798 m&sup3;</td><td>8.5185245 m&sup3;</td><td>0.41309</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>The reference is self-consistent; nova's figure is the 95-cell clipped core, low by 2.4208&times;
+  against its own boundary. The two boundaries are <em>not</em> different curves &mdash; area ratio
+  0.96451, enclosed-volume ratio 0.96886, differing only in the lower divertor leg and a small upper
+  horn &mdash; and no revolution convention differs (centroid-radius ratio 1.00451). One clipping
+  explains two deficits: core area fraction 0.40632 against core current fraction 0.44688.</p>
+
+  <p><strong>Rescored on matched boundary support, <code>&beta;_p</code> moves &minus;56.28&nbsp;&rarr;
+  <strong>+5.82</strong>&nbsp;percent</strong>, its volume deficit eliminated and landing inside DINA
+  class against that reference's banked +2.24&nbsp;percent; <code>l_i</code> moves &minus;73.43 &rarr;
+  &minus;35.70&nbsp;percent and survives. Receipt:
+  <code>boundary-enclosed-volume-reconciliation.json</code>; figure with the shaded overlay beside it.</p>
+
+  <h2 id="s9-partition">&sect;9 &mdash; the out-of-core current is interior, and the field deficit survives anyway</h2>
+
+  <p><strong>Landed 2026-08-22, commit <code>10ef9053</code>; verdict
+  MASKING_CURRENT_CONFIRMED_BUT_FIELD_DEFICIT_SURVIVES.</strong> The partition is exact at residual
+  0.0&nbsp;A: 95 core cells carry 416,958.254&nbsp;A, 139 enclosed non-core cells carry
+  515,290.224&nbsp;A, and 855 exterior cells carry <strong>786.396&nbsp;A</strong>. So
+  99.848&nbsp;percent of out-of-core current lies inside nova's closed separatrix and exterior
+  scrape-off current is 0.084&nbsp;percent of the total &mdash; the edge-weighted-profile reading is
+  excluded, and the core mask was under-selecting exactly as suspected.</p>
+
+  <p>But the boundary-support rescore does not rescue the inductance: on the full 234-centroid support
+  carrying 932,248.479&nbsp;A, <code>l_i</code> moves to &minus;41.71&nbsp;percent &mdash; worse by 6
+  points &mdash; while <code>&beta;_p</code> settles at &minus;3.98&nbsp;percent. Four ratios on one
+  boundary then framed the remaining question: volume 0.96886, total current 0.99916,
+  <code>&int;p dV</code> 0.95856, <code>&int;B_p&sup2;dV</code> <strong>0.58292</strong>. The same
+  current in the same volume bounded by the same curve cannot carry 42&nbsp;percent less poloidal field
+  energy. Receipt: <code>inductance-deficit-partition.json</code>.</p>
+
+  <h2 id="s10-instrument">&sect;10 &mdash; the last row was an instrument, and the equilibria agree to 0.06 percent</h2>
+
+  <p><strong>Landed 2026-08-22, commit <code>67d584c7</code>; verdict INSTRUMENT_DIFFERENCE, row
+  RETRACTED.</strong> One operator, one 243-centroid stored-LCFS region, two fields. Nova's
+  <code>&int;B_p&sup2;dV</code> applied to the <em>reference's own</em> flux map returns
+  0.29897773&nbsp;T&sup2;m&sup3; against the reference's published 0.49662131 &mdash; an instrument
+  ratio of <strong>0.60202</strong>. Applied to nova's own solved map it returns 0.29880628, so the
+  physics ratio with the instrument divided out is <strong>0.99943</strong>: the two equilibria agree
+  in poloidal field energy to six hundredths of a percent. The &minus;39.83&nbsp;percent
+  published-scale deficit decomposes as 99.913&nbsp;percent instrument and 0.087&nbsp;percent
+  physics.</p>
+
+  <p><strong>The support escape is foreclosed by arithmetic.</strong> Rebaselining onto the 243-cell
+  support moved nova's own energy only +3.218&nbsp;percent from the banked 234-cell value; the two
+  supports differ by 15 cells for a net +3.846&nbsp;percent of area; and the stored-LCFS cell
+  quadrature reproduces the exact contour to +0.242&nbsp;percent in area and +0.448&nbsp;percent in
+  volume. None of that touches a 41.7&nbsp;percent deficit.</p>
+
+  <p><strong>A real defect is left behind, and it is not a parity failure.</strong> Nova's
+  poloidal-field-energy integration disagrees with EFIT's published value by 40&nbsp;percent
+  <em>on the same field</em>, so no nova <code>l_i</code> may be compared to a published EFIT
+  <code>l_i</code> without a stated conversion. That sits in tension with
+  <code>equilibrium-metric-parity</code>'s banked interior medians of 1e-4 to 1e-5 per paired quantity
+  on these same six shots, which is why it routes there as <code>f-efp-004</code> rather than being
+  absorbed here. Receipt: <code>field-energy-instrument-control.json</code>; shared-scale side-by-side
+  <code>B_p</code> maps beside it.</p>
+
+  <h2 id="s4-verdict-final">&sect;4 &mdash; the verdict, restated on instrument-controlled measurements</h2>
+
+  <p><strong>QUALIFIED_REPRODUCTION_AT_DINA_CLASS_WITH_CONVERGENCE_UNRELIABLE</strong>, superseding the
+  banked FAIL. Four of the originally-failing rows were instruments rather than physics, each retracted
+  by applying one side's instrument to both sides &mdash; the contour branch, the two moment
+  conventions, the clipped volume support, and the field-energy operator.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Row</th><th>As banked</th><th>Instrument-controlled</th><th>Reading</th></tr></thead>
+    <tbody>
+      <tr><td>topology class</td><td>1.0</td><td>1.0</td><td>pass</td></tr>
+      <tr><td>plasma current</td><td>exact on target</td><td>0.99916 of reference on the boundary support</td><td>constraint satisfied</td></tr>
+      <tr><td>flux map sup / RMS</td><td>1.506 / 0.565 % of span</td><td>unchanged</td><td>genuine deviation</td></tr>
+      <tr><td>magnetic axis</td><td>0.0222 m</td><td>unchanged</td><td>genuine</td></tr>
+      <tr><td>X-point</td><td>0.0206 m</td><td>unchanged</td><td>genuine</td></tr>
+      <tr><td>LCFS distance</td><td>0.4469 m</td><td><strong>0.0305 m</strong></td><td>branch-selection artifact, 14.67&times;</td></tr>
+      <tr><td><code>&beta;_p</code></td><td>+42.53 %</td><td><strong>&minus;3.98 %</strong></td><td>DINA class</td></tr>
+      <tr><td><code>l_i</code></td><td>+41.34 %</td><td><strong>retracted</strong></td><td>instrument ratio 0.602; field energy agrees to 0.06 %</td></tr>
+      <tr><td>converged at 1e-8</td><td>0 / 6</td><td><strong>1 / 6</strong></td><td>reliability failure</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>The honest headline.</strong> Given a reference's own flux functions and its 101 fitted
+  conductor currents, nova's current-constrained free-boundary fixed point reproduces that reference to
+  a coherent two-to-three centimetre displacement, 0.565&nbsp;percent of flux span,
+  <code>&beta;_p</code> within four percent, and poloidal field energy within 0.06&nbsp;percent on a
+  matched instrument. The reference itself sits 0.135&nbsp;percent of span from being a fixed point of
+  nova's constrained map, with interior and exterior contributions balanced &mdash; close to, but not
+  itself, a root.</p>
+
+  <p><strong>What fails is reliability, not fidelity.</strong> Only 1 of 6 frozen references reaches a
+  converged plasma root at the registered 1e-8; five stall bounded at 2.006e-4 to 1.076e-2; warm
+  seeding lifts none. The GPU catalog therefore remains held, and per the plan's own &sect;4 clause the
+  hold now rests on this verdict rather than on the superseded reconstruction result &mdash; with its
+  stated reason changed from parity fidelity to <strong>convergence reliability at 1 of 6</strong>,
+  carried to <code>dual-basin-solve</code> as <code>f-efp-005</code>.</p>
 
 </main>
 </body>

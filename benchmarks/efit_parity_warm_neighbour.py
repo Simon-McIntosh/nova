@@ -1623,7 +1623,7 @@ def _render_moment_seed_figure(
     """Plot per-attempt residuals and convergence counts against baselines."""
 
     figure, (residual_axis, count_axis) = plt.subplots(
-        2, 1, figsize=(10.5, 7.2), constrained_layout=True
+        2, 1, figsize=(13.5, 7.2), constrained_layout=True
     )
     labels = [
         f"M {row['reference']['shot']}\n{row['reference']['slice_index']}"
@@ -1647,7 +1647,14 @@ def _render_moment_seed_figure(
     )
     residual_axis.set_yscale("log")
     residual_axis.set_ylabel("terminal relative residual")
-    residual_axis.set_xticks(x, labels, fontsize=7)
+    residual_axis.set_xticks(
+        x,
+        labels,
+        fontsize=6,
+        rotation=32,
+        ha="right",
+        rotation_mode="anchor",
+    )
     residual_axis.legend(fontsize=8)
 
     names = ["MAST closed", "MAST construct", "DIII-D"]

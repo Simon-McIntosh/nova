@@ -388,6 +388,52 @@
       measured markers point at, taken only if the line-integral estimator leaves a residual.</li>
     </ol>
 
+    <h2 id="s10">§10 — Runtime acceleration</h2>
+    <p><strong>Owner mandate 2026-08-22: target every area for GPU acceleration.</strong> The
+    measured baseline this section attacks, all figures from landed receipts: an
+    equilibrium-plus-FSA window sweep costs 42&#8211;47 s on CPU at fixture scale against a
+    45&#8211;65 ms warmed TORAX sweep &#8212; three orders of magnitude, all in one leg; the
+    production 129&#178; extraction record costs 179 s CPU against <strong>1.57 s on the H200
+    (0.74 s per map batched)</strong>; the CPU executable is runtime-dominated (7 s compile,
+    179 s execution), so compile caching buys nothing; per-level fills are free (+0.5%); a
+    strong 124-iteration window projects to 6.2 h/sample CPU versus 3.2 min H200.</p>
+    <ol>
+      <li><strong>End-to-end H200 window.</strong> Run <code>solve_window</code> whole on the
+      GPU lane (sbatch template banked by the benchmark node): the free-boundary solve's Biot
+      matvecs and jitted scans are GPU-shaped like the extraction already proven at 114&#215;.
+      Amortise the single cold compile across samples &#215; iterations &#8212; fixed shapes
+      make the executable reusable by construction. Measure first, then gate: the gentle
+      fixture window end-to-end on H200 versus its ~500 s CPU cost, and one production-scale
+      window (129&#178; maps, 3 samples, 10 iterations) with its wall time on the page.</li>
+      <li><strong>Boundary-band sparsification of the extraction contraction.</strong> The
+      per-shell &#215; per-cell contraction evaluates every cell at every level; only the cells
+      whose corner flux range brackets the level carry arcs. Precompute a fixed-capacity
+      per-level cell band (padded, fixed-shape, the TracedClippedSupports pattern) and contract
+      over the band only &#8212; the classic 10&#8211;100&#215; on this kernel shape, paying on
+      CPU and GPU alike. No accuracy change: the excluded cells contribute exactly zero
+      today.</li>
+      <li><strong>Sample and member batching inside the window.</strong> §2 designed it:
+      equilibrium solves batch over members &#215; sample times per sweep. Wire the window's
+      equilibrium leg through vmap the way the ensemble batch already proved (batch-8 at
+      0.74 s/map), so one relaxation sweep issues one batched solve instead of sequential
+      samples.</li>
+      <li><strong>Warm starts and mask reuse across relaxation iterations.</strong> Iteration
+      k+1 re-solves and re-extracts maps that moved little from iteration k: seed each solve
+      from the previous iterate's converged state (branch continuity already threads the
+      history), and reuse per-level topology masks with a cheap fail-closed revalidation
+      &#8212; reuse is an optimisation only when a guard proves the mask still qualifies,
+      never an assumption.</li>
+      <li><strong>Precision ladder.</strong> Runtime precision selection already exists in the
+      solver stack: measure a float32 GS iteration with float64 receipt verification on the
+      H200, where fp32 roughly doubles throughput; acceptance is receipts unchanged at
+      declared tolerances, and the ladder rung recorded in provenance like every other
+      fidelity choice.</li>
+    </ol>
+    <p><strong>Discipline:</strong> every node benchmarks before it gates (this plan's
+    characterise-then-tighten pattern), reports CPU and H200 side by side, and no acceleration
+    may change a receipt outside declared tolerances &#8212; the conservation ledgers closing
+    at exactly zero are the invariant the speedups must preserve.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="fsa-extraction-seam" data-choice="equilibrium-service-grid-in" data-by="Simon McIntosh" data-when="2026-08-21T09:30:00+00:00">

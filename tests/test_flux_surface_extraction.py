@@ -11,6 +11,7 @@ from scipy.interpolate import RectBivariateSpline
 
 from nova.equilibrium.flux_surface_extraction import (
     _bicubic_arc_moment_correction,
+    _select_shape_representation,
     extract_flux_surface_geometry,
 )
 from nova.equilibrium.flux_surface_geometry import (
@@ -403,6 +404,8 @@ def test_analytic_shape_gradient_jit_and_batch_contract():
     assert bool(record["valid"])
     assert bool(record["surface_arc_valid"])
     assert record["rho_face"].shape == (13,)
+    assert record["shape_axis_expansion_face"].shape == record["rho_face"].shape
+    assert record["shape_boundary_cell_count_face"].shape == record["rho_face"].shape
     np.testing.assert_allclose(record["elongation_face"][-1], 1.55, rtol=4e-3)
     np.testing.assert_allclose(record["delta_upper_face"][-1], -0.12, atol=7e-3)
     np.testing.assert_allclose(record["delta_lower_face"][-1], -0.12, atol=7e-3)
@@ -439,6 +442,28 @@ def test_analytic_shape_gradient_jit_and_batch_contract():
     )
     assert batched.shape == (2,)
     np.testing.assert_allclose(batched, jnp.asarray([1.55, 1.55]), rtol=4e-3)
+
+
+def test_shape_representation_gradient_routes_only_selected_faces():
+    """The discrete shape choice sends gradients only to its selected values."""
+    expansion = jnp.asarray((1.0, 2.0, 3.0))
+    clipped = jnp.asarray((4.0, 5.0, 6.0))
+    use_expansion = jnp.asarray((True, False, True))
+
+    def selected_sum(expansion_values, clipped_values):
+        return jnp.sum(
+            _select_shape_representation(
+                expansion_values,
+                clipped_values,
+                use_expansion,
+            )
+        )
+
+    expansion_gradient, clipped_gradient = jax.grad(selected_sum, argnums=(0, 1))(
+        expansion, clipped
+    )
+    np.testing.assert_array_equal(expansion_gradient, (1.0, 0.0, 1.0))
+    np.testing.assert_array_equal(clipped_gradient, (0.0, 1.0, 0.0))
 
 
 def test_analytic_surface_line_averages():

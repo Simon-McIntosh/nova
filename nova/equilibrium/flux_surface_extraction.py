@@ -32,6 +32,11 @@ _BICUBIC_ARC_POINT, _BICUBIC_ARC_WEIGHT = _arc_rule(12)
 _BICUBIC_EDGE_ROOT_CAPACITY = 3
 _BICUBIC_ARC_CAPACITY = 2
 _SUPPORT_CAPACITY = 8
+# Fewer than twelve boundary cells in either poloidal half leave an extremum
+# controlled by which individual cell contains its turning point, so those
+# faces take their shape from the spline axis expansion.
+_NEAR_AXIS_SHAPE_CELL_THRESHOLD = 12
+_AXIS_NEWTON_STEPS = 8
 NONNEGATIVE_EXPONENTS = (0.5, 1.0, 1.5, 2.0, 3.0)
 
 
@@ -165,6 +170,215 @@ def _bicubic_derivatives(coefficient, radial, vertical):
         _tensor_bernstein(vertical_second, radial, vertical, 3, 1),
     )
     return tuple(jnp.asarray(value, dtype=coefficient.dtype) for value in values)
+
+
+def _bicubic_third_derivatives(coefficient, radial, vertical, dr, dz):
+    """Evaluate the four independent physical third derivatives of a bicubic."""
+    radial_first = 3.0 * jnp.diff(coefficient, axis=-1)
+    vertical_first = 3.0 * jnp.diff(coefficient, axis=-2)
+    radial_second = 2.0 * jnp.diff(radial_first, axis=-1)
+    vertical_second = 2.0 * jnp.diff(vertical_first, axis=-2)
+    radial_third = jnp.diff(radial_second, axis=-1)
+    radial_radial_vertical = 3.0 * jnp.diff(radial_second, axis=-2)
+    radial_vertical_vertical = 3.0 * jnp.diff(vertical_second, axis=-1)
+    vertical_third = jnp.diff(vertical_second, axis=-2)
+    values = (
+        _tensor_bernstein(radial_third, radial, vertical, 0, 3) / dr**3,
+        _tensor_bernstein(radial_radial_vertical, radial, vertical, 1, 2)
+        / (dr**2 * dz),
+        _tensor_bernstein(radial_vertical_vertical, radial, vertical, 2, 1)
+        / (dr * dz**2),
+        _tensor_bernstein(vertical_third, radial, vertical, 3, 0) / dz**3,
+    )
+    return tuple(jnp.asarray(value, dtype=coefficient.dtype) for value in values)
+
+
+def _axis_expansion_shape(spline, seed_radius, seed_height, levels):
+    """Return quadratic-cubic shape limits about the spline magnetic axis."""
+    dtype = spline.coefficients.dtype
+    zero = jnp.zeros((), dtype=dtype)
+    one = jnp.ones((), dtype=dtype)
+    two = jnp.asarray(2.0, dtype=dtype)
+    determinant_floor = jnp.asarray(1e-14, dtype=dtype)
+    radial_node = jnp.clip(
+        jnp.searchsorted(spline.radial, seed_radius), 1, spline.radial.size - 2
+    )
+    vertical_node = jnp.clip(
+        jnp.searchsorted(spline.vertical, seed_height), 1, spline.vertical.size - 2
+    )
+    radial_cell = radial_node + jnp.asarray((-1, 0, -1, 0), dtype=jnp.int32)
+    vertical_cell = vertical_node + jnp.asarray((-1, -1, 0, 0), dtype=jnp.int32)
+    dr_candidates = spline.radial[radial_cell + 1] - spline.radial[radial_cell]
+    dz_candidates = spline.vertical[vertical_cell + 1] - spline.vertical[vertical_cell]
+    coefficient_candidates = spline.coefficients[vertical_cell, radial_cell]
+    initial_radial = (seed_radius - spline.radial[radial_cell]) / dr_candidates
+    initial_vertical = (seed_height - spline.vertical[vertical_cell]) / dz_candidates
+
+    def refine(_, point):
+        _, gradient_r, gradient_z, hessian_rr, hessian_rz, hessian_zz = (
+            _bicubic_derivatives(
+                coefficient_candidates,
+                point[0],
+                point[1],
+            )
+        )
+        determinant = hessian_rr * hessian_zz - hessian_rz**2
+        safe_determinant = jnp.where(
+            jnp.abs(determinant) > determinant_floor,
+            determinant,
+            jnp.where(determinant < zero, -determinant_floor, determinant_floor),
+        )
+        radial_step = (
+            hessian_zz * gradient_r - hessian_rz * gradient_z
+        ) / safe_determinant
+        vertical_step = (
+            -hessian_rz * gradient_r + hessian_rr * gradient_z
+        ) / safe_determinant
+        return (
+            jnp.clip(point[0] - jnp.clip(radial_step, -one, one), -one, two),
+            jnp.clip(point[1] - jnp.clip(vertical_step, -one, one), -one, two),
+        )
+
+    local_radial, local_vertical = jax.lax.fori_loop(
+        0,
+        _AXIS_NEWTON_STEPS,
+        refine,
+        (initial_radial, initial_vertical),
+    )
+    axis_value, _gradient_r, _gradient_z, hessian_rr, hessian_rz, hessian_zz = (
+        _bicubic_derivatives(
+            coefficient_candidates,
+            local_radial,
+            local_vertical,
+        )
+    )
+    determinant_candidates = hessian_rr * hessian_zz - hessian_rz**2
+    candidate_valid = (
+        (local_radial >= zero)
+        & (local_radial <= one)
+        & (local_vertical >= zero)
+        & (local_vertical <= one)
+        & (determinant_candidates > determinant_floor)
+        & (hessian_rr > zero)
+        & (hessian_zz > zero)
+    )
+    slot = jnp.argmin(jnp.where(candidate_valid, axis_value, jnp.inf))
+    coefficient = coefficient_candidates[slot]
+    local_r = local_radial[slot]
+    local_z = local_vertical[slot]
+    dr = dr_candidates[slot]
+    dz = dz_candidates[slot]
+    axis_value = axis_value[slot]
+    hessian_rr = hessian_rr[slot] / dr**2
+    hessian_rz = hessian_rz[slot] / (dr * dz)
+    hessian_zz = hessian_zz[slot] / dz**2
+    hessian = jnp.asarray(
+        (
+            (hessian_rr, hessian_rz),
+            (hessian_rz, hessian_zz),
+        ),
+        dtype=dtype,
+    )
+    determinant = jnp.linalg.det(hessian)
+    safe_determinant = jnp.where(
+        jnp.abs(determinant) > determinant_floor, determinant, determinant_floor
+    )
+    inverse_hessian = (
+        jnp.asarray(
+            (
+                (hessian[1, 1], -hessian[0, 1]),
+                (-hessian[1, 0], hessian[0, 0]),
+            ),
+            dtype=dtype,
+        )
+        / safe_determinant
+    )
+
+    third = _bicubic_third_derivatives(coefficient, local_r, local_z, dr, dz)
+
+    def support(direction):
+        inverse_direction = inverse_hessian @ direction
+        scale = jnp.sqrt(jnp.maximum(direction @ inverse_direction, determinant_floor))
+        vector = inverse_direction / scale
+        radial, vertical = vector
+        contracted = jnp.asarray(
+            (
+                third[0] * radial**2
+                + 2.0 * third[1] * radial * vertical
+                + third[2] * vertical**2,
+                third[1] * radial**2
+                + 2.0 * third[2] * radial * vertical
+                + third[3] * vertical**2,
+            ),
+            dtype=dtype,
+        )
+        cubic = vector @ contracted
+        correction = inverse_hessian @ (
+            cubic / (3.0 * scale) * direction - 0.5 * contracted
+        )
+        return scale, vector, correction
+
+    radial_support = support(jnp.asarray((1.0, 0.0), dtype=dtype))
+    vertical_support = support(jnp.asarray((0.0, 1.0), dtype=dtype))
+    level_offset = jnp.maximum(levels - axis_value, zero)
+    amplitude = jnp.sqrt(2.0 * level_offset)
+    minor_radius = amplitude * radial_support[0]
+    safe_minor_radius = jnp.maximum(minor_radius, jnp.asarray(1e-14, dtype=dtype))
+    radial_centre = amplitude**2 * radial_support[2][0]
+    upper_radius = (
+        amplitude * vertical_support[1][0] + amplitude**2 * vertical_support[2][0]
+    )
+    lower_radius = (
+        -amplitude * vertical_support[1][0] + amplitude**2 * vertical_support[2][0]
+    )
+    elongation = jnp.full_like(levels, vertical_support[0] / radial_support[0])
+    resolved = minor_radius > jnp.asarray(1e-14, dtype=dtype)
+    axis_delta_upper = -vertical_support[1][0] / radial_support[0]
+    axis_delta_lower = vertical_support[1][0] / radial_support[0]
+    delta_upper = jnp.where(
+        resolved,
+        (radial_centre - upper_radius) / safe_minor_radius,
+        axis_delta_upper,
+    )
+    delta_lower = jnp.where(
+        resolved,
+        (radial_centre - lower_radius) / safe_minor_radius,
+        axis_delta_lower,
+    )
+    valid = (
+        candidate_valid[slot]
+        & (determinant > determinant_floor)
+        & (hessian[0, 0] > zero)
+        & (hessian[1, 1] > zero)
+        & jnp.all(jnp.isfinite(jnp.concatenate((elongation, delta_upper, delta_lower))))
+    )
+    return elongation, delta_upper, delta_lower, valid
+
+
+@jax.custom_vjp
+def _select_shape_representation(expansion, clipped, use_expansion):
+    """Select one face representation and differentiate only that branch."""
+    return jnp.where(use_expansion, expansion, clipped)
+
+
+def _select_shape_representation_forward(expansion, clipped, use_expansion):
+    selected = jnp.where(use_expansion, expansion, clipped)
+    return selected, use_expansion
+
+
+def _select_shape_representation_backward(use_expansion, cotangent):
+    zero = jnp.zeros_like(cotangent)
+    return (
+        jnp.where(use_expansion, cotangent, zero),
+        jnp.where(use_expansion, zero, cotangent),
+        None,
+    )
+
+
+_select_shape_representation.defvjp(
+    _select_shape_representation_forward,
+    _select_shape_representation_backward,
+)
 
 
 def _bicubic_edge_coordinates(edge, fraction):
@@ -1442,6 +1656,66 @@ def traced_assemble_flux_surface_geometry(
     delta_lower_face = torax_face(
         "delta_lower_surface", torax_columns["delta_lower_surface"][0]
     )
+    if "axis_expansion_elongation_surface" in torax_columns:
+        expansion_elongation_face = torax_face(
+            "axis_expansion_elongation_surface",
+            torax_columns["axis_expansion_elongation_axis"],
+        )
+        expansion_delta_upper_face = torax_face(
+            "axis_expansion_delta_upper_surface",
+            torax_columns["axis_expansion_delta_upper_axis"],
+        )
+        expansion_delta_lower_face = torax_face(
+            "axis_expansion_delta_lower_surface",
+            torax_columns["axis_expansion_delta_lower_axis"],
+        )
+        shape_sample_rho = jnp.concatenate((rho_surface, jnp.ones(1, dtype=dtype)))
+        shape_sample_cells = jnp.concatenate(
+            (
+                torax_columns["shape_boundary_cells_surface"],
+                torax_columns["shape_boundary_cells_edge"][None],
+            )
+        )
+        upper_slot = jnp.clip(
+            jnp.searchsorted(shape_sample_rho, rho_face),
+            0,
+            shape_sample_rho.size - 1,
+        )
+        lower_slot = jnp.maximum(upper_slot - 1, 0)
+        upper_distance = jnp.abs(shape_sample_rho[upper_slot] - rho_face)
+        lower_distance = jnp.abs(shape_sample_rho[lower_slot] - rho_face)
+        nearest_slot = jnp.where(
+            lower_distance <= upper_distance, lower_slot, upper_slot
+        )
+        shape_boundary_cell_count_face = shape_sample_cells[nearest_slot].astype(
+            jnp.int32
+        )
+        shape_boundary_cell_count_face = shape_boundary_cell_count_face.at[0].set(0)
+        shape_axis_expansion_face = (
+            shape_boundary_cell_count_face < _NEAR_AXIS_SHAPE_CELL_THRESHOLD
+        ) & torax_columns["axis_expansion_valid"]
+        elongation_face = _select_shape_representation(
+            expansion_elongation_face,
+            elongation_face,
+            shape_axis_expansion_face,
+        )
+        delta_upper_face = _select_shape_representation(
+            expansion_delta_upper_face,
+            delta_upper_face,
+            shape_axis_expansion_face,
+        )
+        delta_lower_face = _select_shape_representation(
+            expansion_delta_lower_face,
+            delta_lower_face,
+            shape_axis_expansion_face,
+        )
+    else:
+        shape_axis_expansion_face = jnp.zeros(rho_face.shape, dtype=bool)
+        shape_boundary_cell_count_face = jnp.full(
+            rho_face.shape,
+            _NEAR_AXIS_SHAPE_CELL_THRESHOLD,
+            dtype=jnp.int32,
+        )
     int_dl_over_bp_face = volume_derivative_per_flux_face
 
     finite_arrays = (
@@ -1497,6 +1771,8 @@ def traced_assemble_flux_surface_geometry(
         "elongation_face": elongation_face,
         "delta_upper_face": delta_upper_face,
         "delta_lower_face": delta_lower_face,
+        "shape_axis_expansion_face": shape_axis_expansion_face,
+        "shape_boundary_cell_count_face": shape_boundary_cell_count_face,
         "clipped_vertex_count_max": torax_columns["clipped_vertex_count_max"],
         "clipped_vertex_count_required": torax_columns["clipped_vertex_count_required"],
         "clipped_vertex_capacity": torax_columns["clipped_vertex_capacity"],
@@ -1882,6 +2158,8 @@ def _surface_clips(
         (interior_cumulative[5], edge_cumulative[5][None])
     )
     cell_origin = coordinates[cell_nodes[:, 0]]
+    axis_position = jnp.argmin(jnp.where(core > 0.0, psi_n_grid, jnp.inf))
+    axis_height = coordinates[axis_position, 1]
     interior_arc_average = jax.lax.map(
         lambda inputs: arc_surface_average(inputs[0], inputs[1]),
         (surface_level, surface_participation),
@@ -1958,6 +2236,13 @@ def _surface_clips(
         z_upper, r_upper = _masked_extremum(
             flat_vertical, flat_radial, flat_valid, largest=True
         )
+        boundary_cells = supports.boundary & participation
+        lower_boundary_cells = jnp.sum(
+            boundary_cells & (centroids[:, 1] <= axis_height)
+        )
+        upper_boundary_cells = jnp.sum(
+            boundary_cells & (centroids[:, 1] >= axis_height)
+        )
         return jnp.asarray(
             (
                 r_in,
@@ -1968,6 +2253,7 @@ def _surface_clips(
                 r_upper,
                 jnp.max(supports.vertex_count),
                 required_vertex_count(level, participation),
+                jnp.minimum(lower_boundary_cells, upper_boundary_cells),
                 boundary_valid,
                 jnp.sum(invalid_boundary),
                 jnp.argmax(invalid_boundary),
@@ -1987,6 +2273,7 @@ def _surface_clips(
         r_upper,
         surface_used,
         surface_required,
+        surface_boundary_cells,
         surface_valid,
         surface_invalid_count,
         surface_invalid_cell,
@@ -2002,6 +2289,7 @@ def _surface_clips(
         edge_r_upper,
         edge_used,
         edge_required,
+        edge_boundary_cells,
         edge_valid,
         edge_invalid_count,
         edge_invalid_cell,
@@ -2029,8 +2317,16 @@ def _surface_clips(
     maximum_required = jnp.max(
         jnp.concatenate((cumulative_required, surface_required, edge_required[None]))
     )
-    axis_position = jnp.argmin(jnp.where(core > 0.0, psi_n_grid, jnp.inf))
     axis_radius = mesh_radius.reshape(-1)[axis_position]
+    expansion_levels = jnp.concatenate(
+        (jnp.zeros(1, dtype=dtype), surface_level, edge_level[None])
+    )
+    expansion_shape = _axis_expansion_shape(
+        normalised_spline,
+        coordinates[axis_position, 0],
+        coordinates[axis_position, 1],
+        expansion_levels,
+    )
     all_arcs_valid = (
         jnp.all(cumulative_valid)
         & jnp.all(interior_arc_average[1])
@@ -2096,6 +2392,18 @@ def _surface_clips(
             "delta_upper_edge": (edge_major - edge_r_upper) / edge_minor,
             "delta_lower_surface": (local_major - r_lower) / local_minor,
             "delta_lower_edge": (edge_major - edge_r_lower) / edge_minor,
+            "shape_boundary_cells_surface": surface_boundary_cells,
+            "shape_boundary_cells_edge": edge_boundary_cells,
+            "axis_expansion_elongation_axis": expansion_shape[0][0],
+            "axis_expansion_elongation_surface": expansion_shape[0][1:-1],
+            "axis_expansion_elongation_edge": expansion_shape[0][-1],
+            "axis_expansion_delta_upper_axis": expansion_shape[1][0],
+            "axis_expansion_delta_upper_surface": expansion_shape[1][1:-1],
+            "axis_expansion_delta_upper_edge": expansion_shape[1][-1],
+            "axis_expansion_delta_lower_axis": expansion_shape[2][0],
+            "axis_expansion_delta_lower_surface": expansion_shape[2][1:-1],
+            "axis_expansion_delta_lower_edge": expansion_shape[2][-1],
+            "axis_expansion_valid": expansion_shape[3],
             "axis_radius": jnp.asarray(axis_radius, dtype=dtype),
             "clipped_vertex_count_max": maximum_used,
             "clipped_vertex_count_required": maximum_required,

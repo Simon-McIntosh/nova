@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T23:05:53",
+  "updated": "2026-08-22T15:54:10",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -573,7 +573,8 @@
                 "risk": "elevated"
               }
             }
-          }
+          },
+          "current-constrained-forward-solve"
         ],
         "starts": "2026-09-01",
         "ends": "2026-09-19",
@@ -806,6 +807,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 52
+    "_version": 53
   }
 }

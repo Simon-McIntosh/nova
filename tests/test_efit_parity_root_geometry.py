@@ -79,3 +79,81 @@ def test_banked_receipt_attributes_open_longest_component() -> None:
     )
     assert receipt["banked_artifact_integrity"]["verified_digest_count"] == 23
     assert receipt["constrained_root"]["terminal_state"]["value_count"] == 1126
+
+
+def test_banked_receipt_applies_constrained_map_once_at_reference() -> None:
+    receipt = json.loads(
+        Path(
+            "docs/figures/efit-forward-parity/converged-root-geometry-attribution.json"
+        ).read_text()
+    )
+    record = receipt["constrained_map_at_reference_flux"]
+    execution = record["execution_contract"]
+    comparators = record["banked_comparators"]
+
+    assert execution == {
+        "nonlinear_solve_calls": 0,
+        "constrained_map_primal_applications": 1,
+        "tangent_applications": 0,
+        "method": (
+            "jax.linearize primal at the stored reference state, matching "
+            "_composition_case_receipt with target_current supplied"
+        ),
+    }
+    assert record["constraint"] == {
+        "target_current_a": 933034.875,
+        "prescribed_circuit_count": 101,
+    }
+    assert comparators["banked_mast_active_only_update"] == {
+        "sup_fraction_of_span": 0.04075378153386053,
+        "rms_fraction_of_span": 0.016584418612654646,
+    }
+    assert comparators["banked_wall_boundary_imbalance"] == {
+        "before_passive_repair_fraction_of_span": 0.03440945100896484,
+        "after_passive_repair_fraction_of_span": 0.004067584380328243,
+    }
+    assert record["decomposition_closure"]["sup_wb"] <= 5.0e-15
+    assert receipt["banked_artifact_integrity"]["verified_digest_count"] == 23
+
+
+def test_banked_receipt_uses_live_moment_normalisers() -> None:
+    receipt = json.loads(
+        Path(
+            "docs/figures/efit-forward-parity/converged-root-geometry-attribution.json"
+        ).read_text()
+    )
+    record = receipt["moment_normalisation_attribution"]
+    solved = record["solved_live_equilibrium"]
+    reference = record["reference"]
+
+    assert record["execution_contract"] == {
+        "nonlinear_solve_calls": 1,
+        "terminal_state_serialisations_for_moments": 0,
+        "equilibrium_reconstructions_from_serialised_state": 0,
+        "moment_source": (
+            "branch.equilibrium.moments read from the live equilibrium in "
+            "the same process as the constrained row solve"
+        ),
+    }
+    assert solved["constrained_terminal_cell_current_sum_a"] == 933034.875
+    assert solved["moment_confined_core_current_a"] == 416958.2541259555
+    assert np.isclose(
+        solved["poloidal_beta_numerator_t2_m3"]
+        / solved["common_boundary_normaliser_t2_m3"],
+        solved["poloidal_beta"],
+        rtol=2e-15,
+    )
+    assert np.isclose(
+        solved["poloidal_field_squared_volume_integral_t2_m3"]
+        / solved["common_boundary_normaliser_t2_m3"],
+        solved["internal_inductance"],
+        rtol=2e-15,
+    )
+    assert reference["normaliser_ratio_li_over_beta"] == 1.6318623846083615
+    assert (
+        record["common_or_independent"]
+        == "COMMON_SOLVED_NORMALISER_DISTINCT_REFERENCE_NORMALISERS"
+    )
+    assert record["profile_amplitude_excluded"]["recovered_amplitude"] == (
+        1.008098186771406
+    )

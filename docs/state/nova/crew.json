@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T15:50:18",
+  "updated": "2026-08-22T18:04:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -376,6 +376,13 @@
         "created": "2026-08-13"
       },
       {
+        "id": "parity-reuse-scout",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": "5593f2dc-a8a8-438d-ad0d-944be6ce1e2b",
+        "created": "2026-08-22"
+      },
+      {
         "id": "parity-tolerances",
         "harness": "claude",
         "role": "implement",
@@ -451,6 +458,20 @@
         "role": "implement",
         "session_id": "01a01171-0694-7063-985b-f5d112e74147",
         "created": "2026-08-17"
+      },
+      {
+        "id": "root-geometry",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-22"
+      },
+      {
+        "id": "root-geometry-attrib",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": "297a0335-c275-49a5-842c-7df6a50f5fe5",
+        "created": "2026-08-22"
       },
       {
         "id": "saddle-partition",
@@ -598,6 +619,20 @@
         "role": "implement",
         "session_id": "019ff740-cea5-7b52-9521-1e7339657bf8",
         "created": "2026-08-12"
+      },
+      {
+        "id": "warm-neighbour",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a02a29-f3c3-7272-be25-35e99ecee3f9",
+        "created": "2026-08-22"
+      },
+      {
+        "id": "warm-neighbour-lift",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": "873551b5-ecde-42de-b56e-a097270f68b8",
+        "created": "2026-08-22"
       }
     ],
     "runs": [
@@ -22814,9 +22849,139 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T151731916188-constrained-parity-reuse-map",
+        "plan": "efit-forward-parity",
+        "section": "\u00a74",
+        "node": "constrained-parity-reuse-map",
+        "role": "implement",
+        "spec_level": "open",
+        "member": "parity-reuse-scout",
+        "backend": "claude",
+        "agent": {
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T15:17:34Z",
+        "completed_at": "2026-08-22T15:24:27.653Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 404,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 413,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "3beecf600ef0400d4c744fc80e8d7939aa7d52fc",
+        "commits": [
+          "d2e27d60ac883059e3dac866286781e58efc4f6f"
+        ],
+        "changed_lines": {
+          "added": 132,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T151731916188-constrained-parity-reuse-map/manifest.md",
+        "scope_changed": false,
+        "session_id": "5593f2dc-a8a8-438d-ad0d-944be6ce1e2b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 98715,
+            "cache_creation_input_tokens_cumulative": 98715,
+            "cache_read_input_tokens": 750630,
+            "cache_read_input_tokens_cumulative": 750630,
+            "inference_geo": "not_available",
+            "input_tokens": 14,
+            "input_tokens_cumulative": 14,
+            "output_tokens": 1793,
+            "output_tokens_cumulative": 1793,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 0.562944,
+          "detail": "rate-limit event carried no numeric utilisation",
+          "cost_usd_cumulative": 0.562944
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T151117616586-coupled-gate-and-damping",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a710",
+        "node": "coupled-gate-and-damping",
+        "role": "implement",
+        "spec_level": "",
+        "member": "transport-window",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T15:11:20Z",
+        "completed_at": "2026-08-22T16:03:34Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3134,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3134,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "3beecf600ef0400d4c744fc80e8d7939aa7d52fc",
+        "commits": [
+          "f9f04f65937724102191542e5e651d09f58cba9c"
+        ],
+        "changed_lines": {
+          "added": 737,
+          "removed": 1603,
+          "files": 5
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "both owner decisions implemented after a mid-turn quota death and one-call resume recovery: the stopping gate excludes the seven shape channels while exchanging and receipting them (all-field norm always beside the gating norm), and damping starts 1.0 with measured-contraction backoff to a floor. The gentle window converges in 4 iterations (from 14 this morning) at gating contraction 0.236 with flux closure exactly zero; the strong regime reports its typed non-confined outcome at exchange 3 under undamped exchange, verbatim; regressions pin shape-only convergence, the backoff trigger and the floor-stall raise; 10+1 green sequential",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T151117616586-coupled-gate-and-damping/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f8b-c81b-70c3-a5d8-007c4d512626",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9632000,
+            "cached_input_tokens_cumulative": 114812928,
+            "input_tokens": 9991515,
+            "input_tokens_cumulative": 118734352,
+            "output_tokens": 31991,
+            "output_tokens_cumulative": 436651,
+            "reasoning_output_tokens": 14483,
+            "reasoning_output_tokens_cumulative": 146966
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 540
+    "_version": 551
   }
 }

@@ -2002,13 +2002,14 @@ def _surface_clips(
     seed = jnp.zeros(psi_n_grid.size, dtype=bool).at[seed_position].set(True)
     seed = seed.reshape(psi_n_grid.shape)
 
-    def level_cell_participation(level):
+    def level_topology(level):
         level_core = flood_fill_core(
             (psi_n_grid < level) & inside_limiter,
             seed,
             psi_n_grid.shape[0] + psi_n_grid.shape[1],
         )
-        return jnp.any((level_core > 0.0).reshape(-1)[cell_nodes], axis=1)
+        participation = jnp.any((level_core > 0.0).reshape(-1)[cell_nodes], axis=1)
+        return participation, jnp.sum(level_core, dtype=jnp.int32)
 
     def signed_flux(level):
         return jnp.where(flat_eligible, level - flat_flux, -1.0)
@@ -2159,8 +2160,12 @@ def _surface_clips(
 
     levels = jnp.linspace(psi_n_min, psi_n_max, n_surface_bins + 1, dtype=dtype)
     surface_level = 0.5 * (levels[:-1] + levels[1:])
-    cumulative_participation = jax.lax.map(level_cell_participation, levels)
-    surface_participation = jax.lax.map(level_cell_participation, surface_level)
+    cumulative_participation, cumulative_topology_population = jax.lax.map(
+        level_topology, levels
+    )
+    surface_participation, surface_topology_population = jax.lax.map(
+        level_topology, surface_level
+    )
     cumulative_band = jax.lax.map(
         lambda inputs: _pack_boundary_band(
             inputs[0], band_corner_flux, inputs[1], band_capacity
@@ -2302,7 +2307,7 @@ def _surface_clips(
         upper_boundary_cells = jnp.sum(
             boundary_cells & (centroids[band_indices, 1] >= axis_height)
         )
-        return jnp.asarray(
+        extrema_values = jnp.asarray(
             (
                 r_in,
                 r_out,
@@ -2318,8 +2323,38 @@ def _surface_clips(
                 band_indices[jnp.argmax(invalid_boundary)],
             )
         )
+        samples_per_cell = radial.shape[1]
+        selected_slot = jnp.asarray(
+            (
+                jnp.argmin(jnp.where(flat_valid, flat_radial, jnp.inf)),
+                jnp.argmax(jnp.where(flat_valid, flat_radial, -jnp.inf)),
+                jnp.argmin(jnp.where(flat_valid, flat_vertical, jnp.inf)),
+                jnp.argmax(jnp.where(flat_valid, flat_vertical, -jnp.inf)),
+            ),
+            dtype=jnp.int32,
+        )
+        selected_band_slot = selected_slot // samples_per_cell
+        selected_sample = selected_slot % samples_per_cell
+        selected_cell = band_indices[selected_band_slot]
+        return (
+            extrema_values,
+            selected_cell,
+            selected_sample,
+            supports.vertex_count,
+            supports.boundary,
+            band_indices,
+            band_valid,
+        )
 
-    surface_extrema = jax.lax.map(
+    (
+        surface_extrema,
+        surface_extremum_cell,
+        surface_extremum_selection,
+        surface_clip_vertex_count,
+        surface_clip_boundary,
+        surface_band_indices,
+        surface_band_valid,
+    ) = jax.lax.map(
         lambda inputs: extrema(inputs[0], inputs[1]),
         (surface_level, surface_band),
     )
@@ -2338,7 +2373,15 @@ def _surface_clips(
         surface_invalid_cell,
     ) = surface_extrema.T
     edge_level = levels[-1]
-    edge_extrema = extrema(edge_level, tuple(value[-1] for value in cumulative_band))
+    (
+        edge_extrema,
+        edge_extremum_cell,
+        edge_extremum_selection,
+        edge_clip_vertex_count,
+        edge_clip_boundary,
+        edge_band_indices,
+        edge_band_valid,
+    ) = extrema(edge_level, tuple(value[-1] for value in cumulative_band))
     (
         edge_r_in,
         edge_r_out,
@@ -2480,6 +2523,36 @@ def _surface_clips(
             ),
         },
         all_arcs_valid,
+        {
+            "cumulative_level": levels,
+            "surface_level": surface_level,
+            "cumulative_topology_population": cumulative_topology_population,
+            "surface_topology_population": surface_topology_population,
+            "cumulative_participation": cumulative_participation,
+            "surface_participation": surface_participation,
+            "cell_grid_shape": jnp.asarray(
+                (psi_n_grid.shape[0] - 1, psi_n_grid.shape[1] - 1),
+                dtype=jnp.int32,
+            ),
+            "cell_corner_flux": psi_n_cells,
+            "cell_eligible": jnp.all(eligible_cells, axis=1),
+            "cumulative_band_count": cumulative_band[2],
+            "surface_band_count": surface_band[2],
+            "cumulative_band_indices": cumulative_band[0],
+            "cumulative_band_valid": cumulative_band[1],
+            "surface_band_indices": surface_band_indices,
+            "surface_band_valid": surface_band_valid,
+            "surface_clip_vertex_count": surface_clip_vertex_count,
+            "surface_clip_boundary": surface_clip_boundary,
+            "surface_extremum_cell": surface_extremum_cell,
+            "surface_extremum_selection": surface_extremum_selection,
+            "edge_band_indices": edge_band_indices,
+            "edge_band_valid": edge_band_valid,
+            "edge_clip_vertex_count": edge_clip_vertex_count,
+            "edge_clip_boundary": edge_clip_boundary,
+            "edge_extremum_cell": edge_extremum_cell,
+            "edge_extremum_selection": edge_extremum_selection,
+        },
     )
 
 
@@ -2491,6 +2564,7 @@ def _surface_clips(
         "n_radial_cells",
         "n_surface_bins",
         "nonnegative",
+        "return_diagnostics",
     ),
 )
 def extract_flux_surface_geometry(
@@ -2515,8 +2589,14 @@ def extract_flux_surface_geometry(
     psi_n_min=0.04,
     psi_n_max=0.985,
     nonnegative: bool = True,
+    return_diagnostics: bool = False,
 ):
-    """Return the complete fixed-shape FSA record for one structured flux map."""
+    """Return the complete fixed-shape FSA record for one structured flux map.
+
+    When requested, fixed-shape diagnostics expose the discrete topology, band,
+    clipping, and extremum choices together with the toroidal-flux integrand.
+    The ordinary record and its default return structure remain unchanged.
+    """
     psi2d = jnp.asarray(psi2d)
     radius = jnp.asarray(radius, dtype=psi2d.dtype)
     height = jnp.asarray(height, dtype=psi2d.dtype)
@@ -2546,7 +2626,7 @@ def extract_flux_surface_geometry(
             jnp.asarray(field_function_psi_n, dtype=psi2d.dtype),
             jnp.asarray(field_function, dtype=psi2d.dtype),
         )
-    surface_bins, torax_columns, arcs_valid = _surface_clips(
+    surface_bins, torax_columns, arcs_valid, diagnostics = _surface_clips(
         psi2d,
         psi_n_grid,
         core,
@@ -2580,7 +2660,7 @@ def extract_flux_surface_geometry(
         nonnegative=nonnegative,
         torax_columns=torax_columns,
     )
-    return {
+    result = {
         **record,
         "valid": record["valid"] & arcs_valid,
         "surface_arc_valid": arcs_valid,
@@ -2599,6 +2679,31 @@ def extract_flux_surface_geometry(
         "surface_cell_band_max_count": torax_columns["surface_cell_band_max_count"],
         "surface_cell_band_overflow": torax_columns["surface_cell_band_overflow"],
     }
+    if return_diagnostics:
+        surface_level = surface_bins["pn_s"]
+        volume_derivative = surface_bins["dv_dpn"]
+        inverse_radius_squared = surface_bins["inv_r2"]
+        f_surface = jnp.interp(surface_level, psi_n_profile, f_profile)
+        phi_integrand = (
+            jnp.abs(f_surface) * inverse_radius_squared * volume_derivative / _TWO_PI
+        )
+        edge_integrand = (
+            jnp.abs(f_profile[-1])
+            * surface_bins["inv_r2_edge"]
+            * surface_bins["dv_dpn_edge"]
+            / _TWO_PI
+        )
+        diagnostics = {
+            **diagnostics,
+            "volume_derivative": volume_derivative,
+            "inverse_radius_squared": inverse_radius_squared,
+            "field_function_surface": f_surface,
+            "phi_integrand": phi_integrand,
+            "phi_integrand_edge": edge_integrand,
+            "phi_boundary": result["phi_b"],
+        }
+        return result, diagnostics
+    return result
 
 
 __all__ = [

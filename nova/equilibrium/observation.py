@@ -182,6 +182,10 @@ class ClippedIntegralMeasure(NamedTuple):
     field_volume: jax.Array
     masks: DomainMasks
 
+    def with_current_amplitude(self, amplitude: jax.Array) -> ClippedIntegralMeasure:
+        """Return this measure with its exact cell-current integral rescaled."""
+        return self._replace(cell_current=amplitude * self.cell_current)
+
 
 def clipped_support_quadrature(support, selection):
     """Return fixed-shape degree-fifteen Duffy quadrature on each support.

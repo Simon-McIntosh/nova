@@ -9,10 +9,10 @@ the resulting cell currents are mapped back to flux through the precomputed
 coupling operators. A root of :meth:`ForwardFluxOperator.residual` is a
 free-boundary equilibrium.
 
-The supplied source reaches the current image unchanged. There is no net
-plasma current on this operator and no place to put one: the amplitude the
-caller supplied is the amplitude the map uses, so a current image can never
-be silently rescaled to meet a target.
+Without a declared target the supplied source reaches the current image
+unchanged. A caller may instead declare a scalar plasma current; the operator
+then eliminates one common profile amplitude from the exact clipped current
+moments and applies it to every component before forming the flux image.
 
 The operator is immutable host-and-device state that the traced maps close
 over rather than a traced argument, so a flux function may be any callable —
@@ -28,7 +28,7 @@ direct pre-clip sample nodes.
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import InitVar, dataclass, field
 
 import jax
 import jax.numpy as jnp
@@ -40,7 +40,11 @@ from nova.equilibrium.observation import (
     ClippedIntegralMeasure,
     clipped_support_quadrature,
 )
-from nova.equilibrium.source import ForwardSource
+from nova.equilibrium.source import (
+    SCALAR_CURRENT_AMPLITUDE_BAND,
+    CurrentNormalisationError,
+    ForwardSource,
+)
 from nova.equilibrium.stencil_mesh import (
     CellCurrentMoments,
     MomentGeometry,
@@ -97,12 +101,14 @@ class ForwardFluxOperator:
     moment_geometry: MomentGeometry | None = field(repr=False, default=None)
     sample: FluxTarget | None = field(repr=False, default=None)
     use_linear_moments: bool = field(repr=False, default=True)
-    prescribed_current_field: PrescribedCurrentField | None = field(
-        repr=False, default=None
+    prescribed_current_field: InitVar[PrescribedCurrentField | None] = None
+    prescribed_field: PrescribedCurrentField | None = field(
+        init=False, repr=False, default=None
     )
 
-    def __post_init__(self):
+    def __post_init__(self, prescribed_current_field: PrescribedCurrentField | None):
         """Build the topology read and default the material mask."""
+        self.prescribed_field = prescribed_current_field
         self.topology = Topology(self.grid.null, self.wall.null)
         self.external_current = jnp.asarray(self.external_current)
         self.area = jnp.asarray(self.area)
@@ -115,8 +121,8 @@ class ForwardFluxOperator:
         if self.inside_material.shape != (self.grid.node_number,):
             raise ValueError("inside_material must carry one flag per grid node")
         if (
-            self.prescribed_current_field is not None
-            and self.prescribed_current_field.response.shape[0] != self.node_number
+            self.prescribed_field is not None
+            and self.prescribed_field.response.shape[0] != self.node_number
         ):
             raise ValueError(
                 "prescribed current response rows must match every operator target"
@@ -196,9 +202,15 @@ class ForwardFluxOperator:
             if self.sample is None
             else jnp.r_[physical, self.sample.external(conductor)]
         )
-        if self.prescribed_current_field is None:
+        if self.prescribed_field is None:
             return external
-        return external + self.prescribed_current_field.flux()
+        return external + self.prescribed_field.flux()
+
+    def __getattribute__(self, name: str):
+        """Retain the public prescribed-current accessor without storing a target."""
+        if name == "prescribed_current_field":
+            return object.__getattribute__(self, "prescribed_field")
+        return object.__getattribute__(self, name)
 
     def read(self, psi, requested_class=None) -> tuple[DomainMasks, TopologyState]:
         """Return one shared domain/topology read, optionally class-pinned."""
@@ -411,6 +423,57 @@ class ForwardFluxOperator:
             self._support_partition(psi, requested_class)
         )
 
+    @staticmethod
+    def scaled_current_moments(
+        moments: CellCurrentMoments, amplitude: jax.Array
+    ) -> CellCurrentMoments:
+        """Apply one common amplitude to every integrated current moment."""
+        return CellCurrentMoments(*(amplitude * value for value in moments))
+
+    @staticmethod
+    def current_normalisation_amplitude(target_current, unscaled_current) -> jax.Array:
+        """Return a guarded declared-current amplitude without clipping.
+
+        Admissibility is established by products and magnitude comparisons
+        before the division. Eager evaluations raise so an accepted state can
+        never masquerade as normalised; traced evaluations return a non-finite
+        amplitude which the solver rejects rather than clipping to a bound.
+        """
+        target = jnp.asarray(target_current)
+        unscaled = jnp.asarray(unscaled_current, dtype=target.dtype)
+        magnitude = jnp.abs(unscaled)
+        lower, upper = SCALAR_CURRENT_AMPLITUDE_BAND
+        admissible = (
+            jnp.isfinite(target)
+            & jnp.isfinite(unscaled)
+            & (target * unscaled > 0.0)
+            & (jnp.abs(target) >= lower * magnitude)
+            & (jnp.abs(target) <= upper * magnitude)
+        )
+        safe_unscaled = jnp.where(admissible, unscaled, jnp.ones_like(unscaled))
+        amplitude = jnp.where(admissible, target / safe_unscaled, jnp.nan)
+        if not isinstance(admissible, jax.core.Tracer) and not bool(admissible):
+            target_value = float(target)
+            unscaled_value = float(unscaled)
+            if not np.isfinite(target_value) or not np.isfinite(unscaled_value):
+                attempted = float("nan")
+            elif unscaled_value == 0.0:
+                attempted = float("inf")
+            else:
+                attempted = target_value / unscaled_value
+            raise CurrentNormalisationError(attempted)
+        return amplitude
+
+    def normalised_current_moments(
+        self, psi, target_current, requested_class=None
+    ) -> tuple[CellCurrentMoments, jax.Array]:
+        """Return exact clipped moments and their declared-current amplitude."""
+        moments = self.cell_current_moments(psi, requested_class)
+        amplitude = self.current_normalisation_amplitude(
+            target_current, jnp.sum(moments.cell_current)
+        )
+        return self.scaled_current_moments(moments, amplitude), amplitude
+
     def current_moments_and_observation(self, psi, requested_class=None):
         """Return current moments and observations from one traced partition."""
         partition = self._support_partition(psi, requested_class)
@@ -419,6 +482,23 @@ class ForwardFluxOperator:
             self._clipped_integral_measure(partition),
             partition[0],
             partition[1],
+        )
+
+    def normalised_current_moments_and_observation(
+        self, psi, target_current, requested_class=None
+    ):
+        """Return one clipped partition, its scaled moments, and amplitude."""
+        partition = self._support_partition(psi, requested_class)
+        moments = self._partitioned_current_moments(partition)
+        amplitude = self.current_normalisation_amplitude(
+            target_current, jnp.sum(moments.cell_current)
+        )
+        return (
+            self.scaled_current_moments(moments, amplitude),
+            self._clipped_integral_measure(partition).with_current_amplitude(amplitude),
+            partition[0],
+            partition[1],
+            amplitude,
         )
 
     def current_domain_masks(self, psi, requested_class=None) -> DomainMasks:
@@ -437,13 +517,24 @@ class ForwardFluxOperator:
         )
         return DomainMasks(label=label, psi_norm=masks.psi_norm)
 
-    def cell_current(self, psi, requested_class=None) -> jax.Array:
+    def cell_current(self, psi, requested_class=None, target_current=None) -> jax.Array:
         """Return the per-cell plasma current [A] a trial flux drives."""
-        return self.cell_current_moments(psi, requested_class).cell_current
+        if target_current is None:
+            moments = self.cell_current_moments(psi, requested_class)
+        else:
+            moments, _amplitude = self.normalised_current_moments(
+                psi, target_current, requested_class
+            )
+        return moments.cell_current
 
-    def internal(self, psi, requested_class=None) -> jax.Array:
+    def internal(self, psi, requested_class=None, target_current=None) -> jax.Array:
         """Return the flux map [Wb] generated by the plasma current."""
-        moments = self.cell_current_moments(psi, requested_class)
+        if target_current is None:
+            moments = self.cell_current_moments(psi, requested_class)
+        else:
+            moments, _amplitude = self.normalised_current_moments(
+                psi, target_current, requested_class
+            )
         return self.current_moment_image(moments)
 
     def current_moment_image(self, moments: CellCurrentMoments) -> jax.Array:
@@ -453,16 +544,22 @@ class ForwardFluxOperator:
             return physical
         return jnp.r_[physical, self.sample.internal(moments)]
 
-    def __call__(self, psi, current=None, requested_class=None) -> jax.Array:
+    def __call__(
+        self, psi, current=None, requested_class=None, target_current=None
+    ) -> jax.Array:
         """Return the total poloidal flux [Wb] one write-then-read cycle gives."""
-        return self.external(current) + self.internal(psi, requested_class)
+        return self.external(current) + self.internal(
+            psi, requested_class, target_current
+        )
 
-    def residual(self, psi, current=None, requested_class=None) -> jax.Array:
+    def residual(
+        self, psi, current=None, requested_class=None, target_current=None
+    ) -> jax.Array:
         """Return the free-boundary flux residual of a trial flux map."""
-        return psi - self(psi, current, requested_class)
+        return psi - self(psi, current, requested_class, target_current)
 
     def flux_map(
-        self, current=None, requested_class=None
+        self, current=None, requested_class=None, target_current=None
     ) -> Callable[[jax.Array], jax.Array]:
         """Return the fixed-point map ``psi -> g(psi)`` at one conductor state.
 
@@ -473,6 +570,6 @@ class ForwardFluxOperator:
 
         def mapped(psi: jax.Array) -> jax.Array:
             """Return the free-boundary flux map of one trial flux."""
-            return external + self.internal(psi, requested_class)
+            return external + self.internal(psi, requested_class, target_current)
 
         return mapped

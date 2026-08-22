@@ -862,7 +862,7 @@ def measure_tares(
             "figure": str(figure_path),
             "figure_sha256": _sha256(figure_path),
             "figure_src": (
-                "/nova/figures/efit-forward-parity/tared-external-field-solve.png"
+                "/nova/figures/efit-forward-parity/tared-plasma-support-solve.png"
             ),
         },
         "protected_banked_artifacts": {

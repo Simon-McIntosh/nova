@@ -1,11 +1,182 @@
 {
   "receipt": {
     "kind": "tared_plasma_support_control",
-    "status": "analytic_null_passed_solve_authorised",
-    "selection": "six frozen references remain unopened for solving",
-    "shot_count": 0
+    "status": "complete",
+    "selection": "select_slices_by_shot on the frozen decomposition bank",
+    "shot_count": 6
   },
   "control_caveat": "This is a control and not a parity claim, because the tared field is derived from the reference own map and hands the solve information no production run would have; it bounds the GS solve own fidelity and attributes the residual, and must never be cited as parity.",
+  "tare_construction": {
+    "reference_flux": "2*pi*efm/psirz on the benchmark mesh",
+    "delta_star_implementation": "nova.equilibrium.conservation.delta_star",
+    "current_relation_implementation": "nova.equilibrium.convention.delta_star_from_current_density",
+    "current_relation": "DeltaStar(Phi) = -2*pi*mu0*R*j_phi",
+    "plasma_composition": "ForwardFluxOperator.current_moment_image with centroid current moments only on the reference declared-boundary plasma support; all other valid cells, including in-grid conductor cells, remain in psi_ext by subtraction",
+    "external_field": "psi_ext = psi_ref - psi_plasma",
+    "delta_star_interpretation": "Delta-star recovers all valid-cell current, but only the declared plasma support is composed as plasma; the external field is the reference remainder"
+  },
+  "gauge": {
+    "rule": "preserve the stored reference total-flux gauge",
+    "additive_constant_wb": 0.0
+  },
+  "closure_gate": {
+    "all_six_at_roundoff": true,
+    "maximum_sup_difference_wb": 2.220446049250313e-16,
+    "banked_stored_field_closure_wb": 2.22e-15,
+    "passes": true
+  },
+  "current_integral_table": [
+    {
+      "shot": 21978,
+      "slice_index": 35,
+      "qualification_passes": true,
+      "reference_declared_current_a": 801493.25,
+      "valid_stencil_cell_count": 841,
+      "declared_support_cell_count": 248,
+      "declared_support_valid_cell_count": 248,
+      "outside_declared_support_valid_cell_count": 593,
+      "declared_support_current_integral_a": 796715.8953699284,
+      "outside_declared_support_current_integral_a": -1753824.8572996557,
+      "total_valid_stencil_current_integral_a": -957108.9619297272,
+      "plasma_image_current_integral_a": 796715.8953699284,
+      "plasma_image_uses_declared_support_only": true,
+      "outside_over_banked_nova_halo": -2230.2057198913217,
+      "declared_support_signed_relative_current_error": -0.005960567515785775,
+      "closure_sup_difference_wb": 1.1102230246251565e-16,
+      "closure_at_roundoff": true
+    },
+    {
+      "shot": 21983,
+      "slice_index": 35,
+      "qualification_passes": true,
+      "reference_declared_current_a": 813718.375,
+      "valid_stencil_cell_count": 841,
+      "declared_support_cell_count": 257,
+      "declared_support_valid_cell_count": 257,
+      "outside_declared_support_valid_cell_count": 584,
+      "declared_support_current_integral_a": 810414.6557952181,
+      "outside_declared_support_current_integral_a": -2121928.382048025,
+      "total_valid_stencil_current_integral_a": -1311513.7262528068,
+      "plasma_image_current_integral_a": 810414.6557952182,
+      "plasma_image_uses_declared_support_only": true,
+      "outside_over_banked_nova_halo": -2698.2949837588503,
+      "declared_support_signed_relative_current_error": -0.004060027776541131,
+      "closure_sup_difference_wb": 1.1102230246251565e-16,
+      "closure_at_roundoff": true
+    },
+    {
+      "shot": 21985,
+      "slice_index": 51,
+      "qualification_passes": true,
+      "reference_declared_current_a": 934383.875,
+      "valid_stencil_cell_count": 841,
+      "declared_support_cell_count": 227,
+      "declared_support_valid_cell_count": 227,
+      "outside_declared_support_valid_cell_count": 614,
+      "declared_support_current_integral_a": 929335.5626890885,
+      "outside_declared_support_current_integral_a": -3555339.099966214,
+      "total_valid_stencil_current_integral_a": -2626003.5372771258,
+      "plasma_image_current_integral_a": 929335.5626890885,
+      "plasma_image_uses_declared_support_only": true,
+      "outside_over_banked_nova_halo": -4521.054405116779,
+      "declared_support_signed_relative_current_error": -0.0054028247340114355,
+      "closure_sup_difference_wb": 2.220446049250313e-16,
+      "closure_at_roundoff": true
+    },
+    {
+      "shot": 21986,
+      "slice_index": 46,
+      "qualification_passes": true,
+      "reference_declared_current_a": 874260.4375,
+      "valid_stencil_cell_count": 841,
+      "declared_support_cell_count": 208,
+      "declared_support_valid_cell_count": 208,
+      "outside_declared_support_valid_cell_count": 633,
+      "declared_support_current_integral_a": 870489.4399417209,
+      "outside_declared_support_current_integral_a": -3400774.6640268127,
+      "total_valid_stencil_current_integral_a": -2530285.2240850916,
+      "plasma_image_current_integral_a": 870489.4399417209,
+      "plasma_image_uses_declared_support_only": true,
+      "outside_over_banked_nova_halo": -4324.506564157006,
+      "declared_support_signed_relative_current_error": -0.004313357206306212,
+      "closure_sup_difference_wb": 2.220446049250313e-16,
+      "closure_at_roundoff": true
+    },
+    {
+      "shot": 21989,
+      "slice_index": 55,
+      "qualification_passes": true,
+      "reference_declared_current_a": 928902.8125,
+      "valid_stencil_cell_count": 841,
+      "declared_support_cell_count": 222,
+      "declared_support_valid_cell_count": 222,
+      "outside_declared_support_valid_cell_count": 619,
+      "declared_support_current_integral_a": 924212.1425399883,
+      "outside_declared_support_current_integral_a": -3558023.102237799,
+      "total_valid_stencil_current_integral_a": -2633810.959697811,
+      "plasma_image_current_integral_a": 924212.1425399883,
+      "plasma_image_uses_declared_support_only": true,
+      "outside_over_banked_nova_halo": -4524.467446728874,
+      "declared_support_signed_relative_current_error": -0.005049688618540715,
+      "closure_sup_difference_wb": 2.220446049250313e-16,
+      "closure_at_roundoff": true
+    },
+    {
+      "shot": 22086,
+      "slice_index": 43,
+      "qualification_passes": true,
+      "reference_declared_current_a": 933034.875,
+      "valid_stencil_cell_count": 841,
+      "declared_support_cell_count": 243,
+      "declared_support_valid_cell_count": 243,
+      "outside_declared_support_valid_cell_count": 598,
+      "declared_support_current_integral_a": 928359.0210245351,
+      "outside_declared_support_current_integral_a": -2658922.7990492187,
+      "total_valid_stencil_current_integral_a": -1730563.7780246837,
+      "plasma_image_current_integral_a": 928359.0210245352,
+      "plasma_image_uses_declared_support_only": true,
+      "outside_over_banked_nova_halo": -3381.1499537754753,
+      "declared_support_signed_relative_current_error": -0.005011446089263183,
+      "closure_sup_difference_wb": 2.220446049250313e-16,
+      "closure_at_roundoff": true
+    }
+  ],
+  "banked_comparison": {
+    "nova_solved_outside_separatrix_current_a": 786.396,
+    "comparison_note": "The table reports the reference-own Delta-star current outside each declared support separately from the support integral."
+  },
+  "instrument_control_basis_reserved_for_solve": {
+    "closed_axis_branch": "benchmarks.efit_parity_root_geometry._unit_boundary_branches + benchmarks.efit_parity_root_geometry._closed_axis_branch + benchmarks.efit_parity_root_geometry._distance_pair",
+    "matched_boundary_support": "benchmarks.efit_parity_inductance_partition._boundary_moments and benchmarks.efit_parity_boundary_volume._polygon_measure",
+    "field_energy_instrument_ratio": 0.6020235565543425,
+    "relative_error_helper": "benchmarks.efit_parity_moment_definitions._relative_error",
+    "field_magnitude_helper": "benchmarks.efit_parity_field_instrument._field_magnitude"
+  },
+  "passive_inclusive_comparison": {
+    "shot": 22086,
+    "modeled_policy": "explicit prescribed-current response matrix",
+    "modeled_stored_circuit_count": 101,
+    "ordinary_active_drive_zeroed": true,
+    "figure_rebuilt_this_call": false,
+    "figure_provenance": "retained from the closure-gated exact-kernel build in this worker run",
+    "figure": "docs/figures/efit-forward-parity/tared-plasma-support-solve.png",
+    "figure_sha256": "fbeeab01f52499838cb1b56b2927833569333cb86e40a8a7ed4ca46c05d4e592",
+    "figure_src": "/nova/figures/efit-forward-parity/tared-plasma-support-solve.png"
+  },
+  "protected_banked_artifacts": {
+    "declared_count": 23,
+    "verified_digest_count": 23,
+    "all_digests_match": true,
+    "source_and_output_receipts_are_outside_protected_set": true,
+    "integrity_source": "docs/figures/efit-forward-parity/converged-root-geometry-attribution.json",
+    "integrity_source_sha256": "67cc1b1578e8aac066e248f10d6deaca4ccb80628934e6ed21c2984c0d4d455a",
+    "verified_after_solves": {
+      "declared_count": 23,
+      "verified_digest_count": 23,
+      "all_digests_match": true,
+      "source_and_output_receipts_are_outside_protected_set": true
+    }
+  },
   "execution_order": [
     "Solovev analytic null",
     "six-reference current-constrained solve only after a passing fine mesh"
@@ -40,8 +211,8 @@
           "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_500.zarr",
           "semantic_key": "030667d40f96d904",
           "hit": true,
-          "lock_wait_seconds": 2.4662120267748833e-05,
-          "load_seconds": 0.20036982488818467,
+          "lock_wait_seconds": 1.9633909687399864e-05,
+          "load_seconds": 0.2209506130311638,
           "build_seconds": 0.0,
           "store_seconds": 0.0
         },
@@ -77,8 +248,8 @@
           "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_1000.zarr",
           "semantic_key": "7c94be9b777c55ba",
           "hit": true,
-          "lock_wait_seconds": 1.0839896276593208e-05,
-          "load_seconds": 0.176367366919294,
+          "lock_wait_seconds": 1.1825934052467346e-05,
+          "load_seconds": 0.19447124795988202,
           "build_seconds": 0.0,
           "store_seconds": 0.0
         },
@@ -112,20 +283,2566 @@
     "finest_external_sup_error_wb": 0.0003597793391740822,
     "finest_external_sup_error_fraction_of_analytic_span": 0.0002604803875829233
   },
+  "decisive_readout_declared_before_measurement": {
+    "measure": "number of six references reaching a converged nonzero plasma root at 1e-8",
+    "banked_converged_plasma_roots": 1,
+    "banked_uncorrected_tare_converged_plasma_roots": 0,
+    "banked_modelled_background_converged_plasma_roots": 1,
+    "banked_bounded_stall_range": {
+      "minimum": 0.0002006,
+      "maximum": 0.01076
+    },
+    "marked_improvement_reading": "external-field error was material and the GS solve is sound",
+    "unchanged_near_one_of_six_reading": "external field is exonerated; the obstacle is the GS fixed point or discretisation"
+  },
+  "per_shot": [
+    {
+      "reference": {
+        "machine": "MAST",
+        "shot": 21978,
+        "slice_index": 35,
+        "time_s": 0.1899999976158142,
+        "span_wb": 1.3164269165679459,
+        "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+        "plasma_current_a": 801493.25,
+        "source_coordinate": {
+          "axis_wb": 0.3139541104088807,
+          "boundary_wb": -0.06830239871478015,
+          "support_nodes": 248
+        },
+        "qualification_before_attribution": {
+          "typed_saddle_resolved": true,
+          "typed_saddle_candidate_count": 2,
+          "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 9.890979271575737e-09,
+          "declared_boundary_to_map_saddle_limit": 0.01,
+          "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0039565704776983734,
+          "stored_lcfs_contour_limit": 0.006,
+          "passes": true
+        }
+      },
+      "qualification_before_solve": {
+        "typed_saddle_resolved": true,
+        "typed_saddle_candidate_count": 2,
+        "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 9.890979271575737e-09,
+        "declared_boundary_to_map_saddle_limit": 0.01,
+        "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0039565704776983734,
+        "stored_lcfs_contour_limit": 0.006,
+        "passes": true
+      },
+      "target_current": {
+        "source": "abs(efm/plasma_current_c)",
+        "value_a": 801493.25,
+        "terminal_value_a": 801493.2499999999,
+        "signed_terminal_relative_error": -1.1102230246251565e-16
+      },
+      "solve": {
+        "entry_point": "ForwardProfile.solve_branch(target_current=...)",
+        "route": "newton_krylov",
+        "registered_fixed_point_criterion": 1e-08,
+        "outcome_class": "bounded_non_convergence",
+        "converged": false,
+        "converged_plasma_root": false,
+        "terminal_residual": 0.010356795810607609,
+        "iterations": 12,
+        "residual_trajectory": [
+          0.005878039087130932,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.010435526156762359,
+          0.010435526156762359,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.010236026276970692,
+          0.010236026276970692,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.0327526945501126,
+          0.0327526945501126,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.03198852225090803,
+          0.03198852225090803,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011117605026268683,
+          0.011117605026268683,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.01006506706122189,
+          0.01006506706122189,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.016104979227824258,
+          0.016104979227824258,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.01474003514118293,
+          0.01474003514118293,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.015804730915308905,
+          0.015804730915308905,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.015347614170550614,
+          0.015347614170550614,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.012062651093436485,
+          0.012062651093436485,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.010356795810607609
+        ]
+      },
+      "raw_registered_rows": {
+        "metrics": {
+          "flux_map": {
+            "comparison_target": "efm/psirz multiplied by 2*pi into total Wb",
+            "sup_norm_wb": 0.03152579256544363,
+            "rms_wb": 0.01097605671795199,
+            "sup_fraction_of_reference_span": 0.023948000582998157,
+            "rms_fraction_of_reference_span": 0.0083377638210009,
+            "reference_span_wb": 1.3164269165679459,
+            "raw_same_gauge_comparison": true
+          },
+          "magnetic_axis": {
+            "distance_m": 0.03406415215375177,
+            "registered_bound_m": 0.00101344,
+            "passes": false
+          },
+          "lcfs": {
+            "symmetric_mean_distance_m": 0.11334212024864344,
+            "registered_bound_m": 0.00033047,
+            "passes": false
+          },
+          "x_point": {
+            "distance_m": 0.038001527370682686,
+            "registered_bound_m": 0.014,
+            "passes": false
+          },
+          "topology": {
+            "solved_class": "diverted",
+            "reference_class": "diverted",
+            "agreement": 1.0,
+            "registered_bound": 1.0,
+            "passes": true
+          },
+          "plasma_current": {
+            "solved_a": 801493.2499999999,
+            "reference_a": 801493.25,
+            "signed_relative_deviation": -1.1102230246251565e-16
+          },
+          "poloidal_beta": {
+            "solved": 0.44102125118366264,
+            "reference": 0.33498355746269226,
+            "signed_relative_deviation": 0.31654596579051497
+          },
+          "internal_inductance": {
+            "solved": 0.8150297589733879,
+            "reference": 0.7068039774894714,
+            "signed_relative_deviation": 0.15311993838564475
+          }
+        },
+        "qualification": {
+          "flux_sup_fraction_of_span": {
+            "value": 0.023948000582998157,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "flux_rms_fraction_of_span": {
+            "value": 0.0083377638210009,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "magnetic_axis_distance_m": {
+            "value": 0.03406415215375177,
+            "registered_bound": 0.00101344,
+            "passes": false
+          },
+          "lcfs_distance_m": {
+            "value": 0.11334212024864344,
+            "registered_bound": 0.00033047,
+            "passes": false
+          },
+          "x_point_distance_m": {
+            "value": 0.038001527370682686,
+            "registered_bound": 0.014,
+            "passes": false
+          },
+          "topology_class_agreement": {
+            "value": 1.0,
+            "registered_bound": 1.0,
+            "passes": true
+          },
+          "plasma_current_signed_relative_deviation": {
+            "value": -1.1102230246251565e-16,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "poloidal_beta_signed_relative_deviation": {
+            "value": 0.31654596579051497,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "internal_inductance_signed_relative_deviation": {
+            "value": 0.15311993838564475,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "fixed_point_defect": {
+            "value": 0.010356795810607609,
+            "registered_bound": 1e-08,
+            "passes": false
+          },
+          "all_carried_tolerances_pass": false
+        },
+        "note": "Retained beside the controlled score so the longest-branch and clipped-core instrument readings remain visible."
+      },
+      "instrument_controlled_rows": {
+        "lcfs_closed_branch": {
+          "status": "unscoreable_no_closed_axis_branch",
+          "selection": "longest explicitly closed unit branch enclosing the magnetic axis",
+          "branch_count": 1,
+          "closed_branch_point_count": null,
+          "distance": null,
+          "reason": "no closed unit-boundary branch encloses the solved axis",
+          "longest_polyline_fallback_used": false
+        },
+        "matched_stored_boundary_support": {
+          "definition": "mesh centroids inside the stored LCFS for both fields",
+          "cell_count": 248,
+          "solved": {
+            "support": {
+              "cell_count": 248,
+              "toroidal_volume_m3": 9.05379850923778,
+              "volume_weighted_major_radius_m": 0.8699367280028786,
+              "current_integral_a": 801493.2499999998
+            },
+            "integrals": {
+              "pressure_volume_integral_pa_m3": 39267.91557235371,
+              "poloidal_field_squared_volume_integral_t2_m3": 0.2044968812471362
+            },
+            "reference_boundary_field_definition": {
+              "poloidal_beta": "2*mu0*integral(p dV) divided by the reference squared-mean boundary-field denominator, rescaled to the enclosed current",
+              "internal_inductance": "integral(Bp^2 dV) divided by the published mean-squared boundary-field denominator; current is not used in this definition"
+            },
+            "poloidal_beta": {
+              "solved": 0.3339988428603012,
+              "published_reference": 0.33498355746269226,
+              "denominator_t2_m3": 0.2954831675730108,
+              "signed_relative_deviation": -0.0029395908558906836,
+              "matched_support_estimate_signed_relative_deviation": 0.05818098840723218,
+              "change_from_matched_support_estimate": -0.061120579263122865
+            },
+            "internal_inductance": {
+              "solved": 0.41529618928997286,
+              "published_reference": 0.7068039774894714,
+              "denominator_t2_m3": 0.4924121302359219,
+              "signed_relative_deviation": -0.4124308825127415,
+              "matched_support_estimate_signed_relative_deviation": -0.35695307611867966,
+              "change_from_matched_support_estimate": -0.05547780639406186
+            }
+          },
+          "reference_published": {
+            "poloidal_beta": 0.33498355746269226,
+            "internal_inductance": 0.7068039774894714,
+            "pressure_volume_integral_pa_m3": 39383.6875,
+            "poloidal_field_squared_volume_integral_t2_m3": 0.34803885221481323,
+            "plasma_volume_m3": 9.00255298614502
+          },
+          "poloidal_beta_signed_relative_deviation": -0.0029395908558906836
+        },
+        "poloidal_field_energy_instrument_control": {
+          "solved_nova_operator_t2_m3": 0.2044968812471362,
+          "reference_own_map_nova_operator_t2_m3": 0.2055918451304592,
+          "reference_published_t2_m3": 0.34803885221481323,
+          "nova_on_reference_over_reference_published": 0.5907152141840927,
+          "banked_representative_instrument_ratio": 0.6020235565543425,
+          "solved_over_reference_published_raw": 0.5875691174872585,
+          "solved_over_reference_after_instrument_division": 0.9946740889327192,
+          "instrument_controlled_signed_relative_deviation": -0.005325911067280753,
+          "multiplicative_closure_residual": 0.0
+        }
+      }
+    },
+    {
+      "reference": {
+        "machine": "MAST",
+        "shot": 21983,
+        "slice_index": 35,
+        "time_s": 0.1899999976158142,
+        "span_wb": 1.3681872286612768,
+        "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+        "plasma_current_a": 813718.375,
+        "source_coordinate": {
+          "axis_wb": 0.3051764380864529,
+          "boundary_wb": -0.1034512467596711,
+          "support_nodes": 257
+        },
+        "qualification_before_attribution": {
+          "typed_saddle_resolved": true,
+          "typed_saddle_candidate_count": 2,
+          "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 5.358574284817005e-09,
+          "declared_boundary_to_map_saddle_limit": 0.01,
+          "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.003801441005144457,
+          "stored_lcfs_contour_limit": 0.006,
+          "passes": true
+        }
+      },
+      "qualification_before_solve": {
+        "typed_saddle_resolved": true,
+        "typed_saddle_candidate_count": 2,
+        "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 5.358574284817005e-09,
+        "declared_boundary_to_map_saddle_limit": 0.01,
+        "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.003801441005144457,
+        "stored_lcfs_contour_limit": 0.006,
+        "passes": true
+      },
+      "target_current": {
+        "source": "abs(efm/plasma_current_c)",
+        "value_a": 813718.375,
+        "terminal_value_a": 813718.375,
+        "signed_terminal_relative_error": 0.0
+      },
+      "solve": {
+        "entry_point": "ForwardProfile.solve_branch(target_current=...)",
+        "route": "newton_krylov",
+        "registered_fixed_point_criterion": 1e-08,
+        "outcome_class": "bounded_non_convergence",
+        "converged": false,
+        "converged_plasma_root": false,
+        "terminal_residual": 0.010050357331518338,
+        "iterations": 12,
+        "residual_trajectory": [
+          0.005126514723111526,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.01083487768214955,
+          0.01083487768214955,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.01013507470826131,
+          0.01013507470826131,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011864474732511721,
+          0.011864474732511721,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011157858866084492,
+          0.011157858866084492,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011266941753763117,
+          0.011266941753763117,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011034865141405023,
+          0.011034865141405023,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011242115530392581,
+          0.011242115530392581,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.010925636269582,
+          0.010925636269582,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011501842119355317,
+          0.011501842119355317,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.010842873312918435,
+          0.010842873312918435,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011821496850221252,
+          0.011821496850221252,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.010050357331518338
+        ]
+      },
+      "raw_registered_rows": {
+        "metrics": {
+          "flux_map": {
+            "comparison_target": "efm/psirz multiplied by 2*pi into total Wb",
+            "sup_norm_wb": 0.07506754446336933,
+            "rms_wb": 0.027876900963129867,
+            "sup_fraction_of_reference_span": 0.05486642682436108,
+            "rms_fraction_of_reference_span": 0.020375062987838612,
+            "reference_span_wb": 1.3681872286612768,
+            "raw_same_gauge_comparison": true
+          },
+          "magnetic_axis": {
+            "distance_m": 0.11753665216185917,
+            "registered_bound_m": 0.00101344,
+            "passes": false
+          },
+          "lcfs": {
+            "symmetric_mean_distance_m": 0.1422026192742649,
+            "registered_bound_m": 0.00033047,
+            "passes": false
+          },
+          "x_point": {
+            "distance_m": 0.607149070831309,
+            "registered_bound_m": 0.014,
+            "passes": false
+          },
+          "topology": {
+            "solved_class": "diverted",
+            "reference_class": "diverted",
+            "agreement": 1.0,
+            "registered_bound": 1.0,
+            "passes": true
+          },
+          "plasma_current": {
+            "solved_a": 813718.375,
+            "reference_a": 813718.375,
+            "signed_relative_deviation": 0.0
+          },
+          "poloidal_beta": {
+            "solved": 0.3500726567706443,
+            "reference": 0.3646782636642456,
+            "signed_relative_deviation": -0.04005066478831454
+          },
+          "internal_inductance": {
+            "solved": 0.7629555939572519,
+            "reference": 0.783221423625946,
+            "signed_relative_deviation": -0.025874968504912554
+          }
+        },
+        "qualification": {
+          "flux_sup_fraction_of_span": {
+            "value": 0.05486642682436108,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "flux_rms_fraction_of_span": {
+            "value": 0.020375062987838612,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "magnetic_axis_distance_m": {
+            "value": 0.11753665216185917,
+            "registered_bound": 0.00101344,
+            "passes": false
+          },
+          "lcfs_distance_m": {
+            "value": 0.1422026192742649,
+            "registered_bound": 0.00033047,
+            "passes": false
+          },
+          "x_point_distance_m": {
+            "value": 0.607149070831309,
+            "registered_bound": 0.014,
+            "passes": false
+          },
+          "topology_class_agreement": {
+            "value": 1.0,
+            "registered_bound": 1.0,
+            "passes": true
+          },
+          "plasma_current_signed_relative_deviation": {
+            "value": 0.0,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "poloidal_beta_signed_relative_deviation": {
+            "value": -0.04005066478831454,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "internal_inductance_signed_relative_deviation": {
+            "value": -0.025874968504912554,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "fixed_point_defect": {
+            "value": 0.010050357331518338,
+            "registered_bound": 1e-08,
+            "passes": false
+          },
+          "all_carried_tolerances_pass": false
+        },
+        "note": "Retained beside the controlled score so the longest-branch and clipped-core instrument readings remain visible."
+      },
+      "instrument_controlled_rows": {
+        "lcfs_closed_branch": {
+          "status": "scoreable",
+          "selection": "longest explicitly closed unit branch enclosing the magnetic axis",
+          "branch_count": 4,
+          "closed_branch_point_count": 61,
+          "distance": {
+            "symmetric_mean_distance_m": 0.1422026192742649,
+            "left_to_right": {
+              "min_m": 0.020113416627825703,
+              "median_m": 0.12554494387249227,
+              "p90_m": 0.22657018796089812,
+              "max_m": 0.3163878196475545,
+              "mean_m": 0.11863222325858327
+            },
+            "right_to_left": {
+              "min_m": 0.020113416627825703,
+              "median_m": 0.1360205078879143,
+              "p90_m": 0.3583929616998617,
+              "max_m": 0.5183149250068642,
+              "mean_m": 0.1657730152899465
+            },
+            "correspondence_constraint": "none; unordered cKDTree nearest neighbours"
+          },
+          "solved_polygon": {
+            "point_count": 61,
+            "poloidal_area_m2": 1.2682711628000203,
+            "area_centroid_major_radius_m": 0.8084233081384199,
+            "area_first_moment_m3": 1.025299969047353,
+            "exact_solid_of_revolution_m3": 6.4421497009700115,
+            "first_moment_approximation_m3": 6.442149700970013,
+            "quadrature_relative_difference": 2.220446049250313e-16,
+            "arclength_m": 4.2865721988714
+          },
+          "stored_polygon": {
+            "point_count": 155,
+            "poloidal_area_m2": 1.934749245551446,
+            "area_centroid_major_radius_m": 0.7466736083010495,
+            "area_first_moment_m3": 1.4446262003336312,
+            "exact_solid_of_revolution_m3": 9.076854116302945,
+            "first_moment_approximation_m3": 9.076854116302945,
+            "quadrature_relative_difference": 0.0,
+            "arclength_m": 5.696427412780672
+          },
+          "longest_polyline_fallback_used": false
+        },
+        "matched_stored_boundary_support": {
+          "definition": "mesh centroids inside the stored LCFS for both fields",
+          "cell_count": 257,
+          "solved": {
+            "support": {
+              "cell_count": 257,
+              "toroidal_volume_m3": 9.189202992979173,
+              "volume_weighted_major_radius_m": 0.8646602504891887,
+              "current_integral_a": 813718.375
+            },
+            "integrals": {
+              "pressure_volume_integral_pa_m3": 26004.413369438204,
+              "poloidal_field_squared_volume_integral_t2_m3": 0.23399354596381178
+            },
+            "reference_boundary_field_definition": {
+              "poloidal_beta": "2*mu0*integral(p dV) divided by the reference squared-mean boundary-field denominator, rescaled to the enclosed current",
+              "internal_inductance": "integral(Bp^2 dV) divided by the published mean-squared boundary-field denominator; current is not used in this definition"
+            },
+            "poloidal_beta": {
+              "solved": 0.22346877513874414,
+              "published_reference": 0.3646782636642456,
+              "denominator_t2_m3": 0.2924624218871957,
+              "signed_relative_deviation": -0.38721663064489953,
+              "matched_support_estimate_signed_relative_deviation": 0.05818098840723218,
+              "change_from_matched_support_estimate": -0.4453976190521317
+            },
+            "internal_inductance": {
+              "solved": 0.4708113995912133,
+              "published_reference": 0.783221423625946,
+              "denominator_t2_m3": 0.4970005954974306,
+              "signed_relative_deviation": -0.3988782924098546,
+              "matched_support_estimate_signed_relative_deviation": -0.35695307611867966,
+              "change_from_matched_support_estimate": -0.04192521629117496
+            }
+          },
+          "reference_published": {
+            "poloidal_beta": 0.3646782636642456,
+            "internal_inductance": 0.783221423625946,
+            "pressure_volume_integral_pa_m3": 42436.55208333333,
+            "poloidal_field_squared_volume_integral_t2_m3": 0.38926151394844055,
+            "plasma_volume_m3": 9.07626724243164
+          },
+          "poloidal_beta_signed_relative_deviation": -0.38721663064489953
+        },
+        "poloidal_field_energy_instrument_control": {
+          "solved_nova_operator_t2_m3": 0.23399354596381178,
+          "reference_own_map_nova_operator_t2_m3": 0.22970442179198824,
+          "reference_published_t2_m3": 0.38926151394844055,
+          "nova_on_reference_over_reference_published": 0.5901030889542644,
+          "banked_representative_instrument_ratio": 0.6020235565543425,
+          "solved_over_reference_published_raw": 0.6011217075901454,
+          "solved_over_reference_after_instrument_division": 1.018672362239973,
+          "instrument_controlled_signed_relative_deviation": 0.01867236223997293,
+          "multiplicative_closure_residual": 0.0
+        }
+      }
+    },
+    {
+      "reference": {
+        "machine": "MAST",
+        "shot": 21985,
+        "slice_index": 51,
+        "time_s": 0.2750000059604645,
+        "span_wb": 1.823353801798901,
+        "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+        "plasma_current_a": 934383.875,
+        "source_coordinate": {
+          "axis_wb": 0.33908170628553735,
+          "boundary_wb": -0.2193531903351262,
+          "support_nodes": 227
+        },
+        "qualification_before_attribution": {
+          "typed_saddle_resolved": true,
+          "typed_saddle_candidate_count": 2,
+          "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 1.424904549219899e-08,
+          "declared_boundary_to_map_saddle_limit": 0.01,
+          "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0026320993551678384,
+          "stored_lcfs_contour_limit": 0.006,
+          "passes": true
+        }
+      },
+      "qualification_before_solve": {
+        "typed_saddle_resolved": true,
+        "typed_saddle_candidate_count": 2,
+        "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 1.424904549219899e-08,
+        "declared_boundary_to_map_saddle_limit": 0.01,
+        "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0026320993551678384,
+        "stored_lcfs_contour_limit": 0.006,
+        "passes": true
+      },
+      "target_current": {
+        "source": "abs(efm/plasma_current_c)",
+        "value_a": 934383.875,
+        "terminal_value_a": 934383.875,
+        "signed_terminal_relative_error": 0.0
+      },
+      "solve": {
+        "entry_point": "ForwardProfile.solve_branch(target_current=...)",
+        "route": "newton_krylov",
+        "registered_fixed_point_criterion": 1e-08,
+        "outcome_class": "bounded_non_convergence",
+        "converged": false,
+        "converged_plasma_root": false,
+        "terminal_residual": 0.01294253111102598,
+        "iterations": 12,
+        "residual_trajectory": [
+          0.00746588891223975,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.014202131531295315,
+          0.014202131531295315,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011830204654681464,
+          0.011830204654681464,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.01598661993967904,
+          0.01598661993967904,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.01086037208626547,
+          0.01086037208626547,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.01352554955131926,
+          0.01352554955131926,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.024820993515895718,
+          0.024820993515895718,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.02152916160872662,
+          0.02152916160872662,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.01307139370536334,
+          0.01307139370536334,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.012875836762063782,
+          0.012875836762063782,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.012942459069932837,
+          0.012942459069932837,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.01287621945497153,
+          0.01287621945497153,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.01294253111102598
+        ]
+      },
+      "raw_registered_rows": {
+        "metrics": {
+          "flux_map": {
+            "comparison_target": "efm/psirz multiplied by 2*pi into total Wb",
+            "sup_norm_wb": 0.10543374997548509,
+            "rms_wb": 0.037927537146000403,
+            "sup_fraction_of_reference_span": 0.05782407663913899,
+            "rms_fraction_of_reference_span": 0.020800975163778695,
+            "reference_span_wb": 1.823353801798901,
+            "raw_same_gauge_comparison": true
+          },
+          "magnetic_axis": {
+            "distance_m": 0.09236639246246091,
+            "registered_bound_m": 0.00101344,
+            "passes": false
+          },
+          "lcfs": {
+            "symmetric_mean_distance_m": 0.22045747485785655,
+            "registered_bound_m": 0.00033047,
+            "passes": false
+          },
+          "x_point": {
+            "distance_m": 0.8257294889891337,
+            "registered_bound_m": 0.014,
+            "passes": false
+          },
+          "topology": {
+            "solved_class": "diverted",
+            "reference_class": "diverted",
+            "agreement": 1.0,
+            "registered_bound": 1.0,
+            "passes": true
+          },
+          "plasma_current": {
+            "solved_a": 934383.875,
+            "reference_a": 934383.875,
+            "signed_relative_deviation": 0.0
+          },
+          "poloidal_beta": {
+            "solved": 0.42200635926093305,
+            "reference": 0.43646058440208435,
+            "signed_relative_deviation": -0.03311690827924918
+          },
+          "internal_inductance": {
+            "solved": 0.9712856023682112,
+            "reference": 0.9248143434524536,
+            "signed_relative_deviation": 0.05024928435071008
+          }
+        },
+        "qualification": {
+          "flux_sup_fraction_of_span": {
+            "value": 0.05782407663913899,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "flux_rms_fraction_of_span": {
+            "value": 0.020800975163778695,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "magnetic_axis_distance_m": {
+            "value": 0.09236639246246091,
+            "registered_bound": 0.00101344,
+            "passes": false
+          },
+          "lcfs_distance_m": {
+            "value": 0.22045747485785655,
+            "registered_bound": 0.00033047,
+            "passes": false
+          },
+          "x_point_distance_m": {
+            "value": 0.8257294889891337,
+            "registered_bound": 0.014,
+            "passes": false
+          },
+          "topology_class_agreement": {
+            "value": 1.0,
+            "registered_bound": 1.0,
+            "passes": true
+          },
+          "plasma_current_signed_relative_deviation": {
+            "value": 0.0,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "poloidal_beta_signed_relative_deviation": {
+            "value": -0.03311690827924918,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "internal_inductance_signed_relative_deviation": {
+            "value": 0.05024928435071008,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "fixed_point_defect": {
+            "value": 0.01294253111102598,
+            "registered_bound": 1e-08,
+            "passes": false
+          },
+          "all_carried_tolerances_pass": false
+        },
+        "note": "Retained beside the controlled score so the longest-branch and clipped-core instrument readings remain visible."
+      },
+      "instrument_controlled_rows": {
+        "lcfs_closed_branch": {
+          "status": "scoreable",
+          "selection": "longest explicitly closed unit branch enclosing the magnetic axis",
+          "branch_count": 5,
+          "closed_branch_point_count": 51,
+          "distance": {
+            "symmetric_mean_distance_m": 0.22045747485785655,
+            "left_to_right": {
+              "min_m": 0.06695451338625392,
+              "median_m": 0.1926945516643587,
+              "p90_m": 0.29506447480756076,
+              "max_m": 0.38175599390665066,
+              "mean_m": 0.18564073517875726
+            },
+            "right_to_left": {
+              "min_m": 0.06695451338625392,
+              "median_m": 0.2329844440232997,
+              "p90_m": 0.47047384024983807,
+              "max_m": 0.6282184342424431,
+              "mean_m": 0.25527421453695587
+            },
+            "correspondence_constraint": "none; unordered cKDTree nearest neighbours"
+          },
+          "solved_polygon": {
+            "point_count": 51,
+            "poloidal_area_m2": 0.8101284782039302,
+            "area_centroid_major_radius_m": 0.8387028532009458,
+            "area_first_moment_m3": 0.6794570661289765,
+            "exact_solid_of_revolution_m3": 4.269154654760932,
+            "first_moment_approximation_m3": 4.269154654760934,
+            "quadrature_relative_difference": 4.440892098500626e-16,
+            "arclength_m": 3.340107400860861
+          },
+          "stored_polygon": {
+            "point_count": 147,
+            "poloidal_area_m2": 1.7315788599204724,
+            "area_centroid_major_radius_m": 0.7444958339764387,
+            "area_first_moment_m3": 1.289153247412463,
+            "exact_solid_of_revolution_m3": 8.099988742844838,
+            "first_moment_approximation_m3": 8.099988742844838,
+            "quadrature_relative_difference": 0.0,
+            "arclength_m": 5.280199114284544
+          },
+          "longest_polyline_fallback_used": false
+        },
+        "matched_stored_boundary_support": {
+          "definition": "mesh centroids inside the stored LCFS for both fields",
+          "cell_count": 227,
+          "solved": {
+            "support": {
+              "cell_count": 227,
+              "toroidal_volume_m3": 7.974818205456889,
+              "volume_weighted_major_radius_m": 0.8397259377121565,
+              "current_integral_a": 934383.875
+            },
+            "integrals": {
+              "pressure_volume_integral_pa_m3": 26860.520009952426,
+              "poloidal_field_squared_volume_integral_t2_m3": 0.35652408840810285
+            },
+            "reference_boundary_field_definition": {
+              "poloidal_beta": "2*mu0*integral(p dV) divided by the reference squared-mean boundary-field denominator, rescaled to the enclosed current",
+              "internal_inductance": "integral(Bp^2 dV) divided by the published mean-squared boundary-field denominator; current is not used in this definition"
+            },
+            "poloidal_beta": {
+              "solved": 0.16855512150913438,
+              "published_reference": 0.43646058440208435,
+              "denominator_t2_m3": 0.40050903974058655,
+              "signed_relative_deviation": -0.6138136465632029,
+              "matched_support_estimate_signed_relative_deviation": 0.05818098840723218,
+              "change_from_matched_support_estimate": -0.6719946349704351
+            },
+            "internal_inductance": {
+              "solved": 0.5504402584876232,
+              "published_reference": 0.9248143434524536,
+              "denominator_t2_m3": 0.6477071451635461,
+              "signed_relative_deviation": -0.40480998982697725,
+              "matched_support_estimate_signed_relative_deviation": -0.35695307611867966,
+              "change_from_matched_support_estimate": -0.04785691370829759
+            }
+          },
+          "reference_published": {
+            "poloidal_beta": 0.43646058440208435,
+            "internal_inductance": 0.9248143434524536,
+            "pressure_volume_integral_pa_m3": 69553.26041666666,
+            "poloidal_field_squared_volume_integral_t2_m3": 0.5990088582038879,
+            "plasma_volume_m3": 8.099207878112793
+          },
+          "poloidal_beta_signed_relative_deviation": -0.6138136465632029
+        },
+        "poloidal_field_energy_instrument_control": {
+          "solved_nova_operator_t2_m3": 0.35652408840810285,
+          "reference_own_map_nova_operator_t2_m3": 0.3521019435925484,
+          "reference_published_t2_m3": 0.5990088582038879,
+          "nova_on_reference_over_reference_published": 0.5878075737449304,
+          "banked_representative_instrument_ratio": 0.6020235565543425,
+          "solved_over_reference_published_raw": 0.5951900101730229,
+          "solved_over_reference_after_instrument_division": 1.0125592740853249,
+          "instrument_controlled_signed_relative_deviation": 0.012559274085324867,
+          "multiplicative_closure_residual": 0.0
+        }
+      }
+    },
+    {
+      "reference": {
+        "machine": "MAST",
+        "shot": 21986,
+        "slice_index": 46,
+        "time_s": 0.25,
+        "span_wb": 1.6435873151288796,
+        "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+        "plasma_current_a": 874260.4375,
+        "source_coordinate": {
+          "axis_wb": 0.34640685309873315,
+          "boundary_wb": -0.17698577198495025,
+          "support_nodes": 208
+        },
+        "qualification_before_attribution": {
+          "typed_saddle_resolved": true,
+          "typed_saddle_candidate_count": 2,
+          "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 1.0428598159594444e-08,
+          "declared_boundary_to_map_saddle_limit": 0.01,
+          "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0029569918752245794,
+          "stored_lcfs_contour_limit": 0.006,
+          "passes": true
+        }
+      },
+      "qualification_before_solve": {
+        "typed_saddle_resolved": true,
+        "typed_saddle_candidate_count": 2,
+        "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 1.0428598159594444e-08,
+        "declared_boundary_to_map_saddle_limit": 0.01,
+        "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0029569918752245794,
+        "stored_lcfs_contour_limit": 0.006,
+        "passes": true
+      },
+      "target_current": {
+        "source": "abs(efm/plasma_current_c)",
+        "value_a": 874260.4375,
+        "terminal_value_a": 874260.4375,
+        "signed_terminal_relative_error": 0.0
+      },
+      "solve": {
+        "entry_point": "ForwardProfile.solve_branch(target_current=...)",
+        "route": "newton_krylov",
+        "registered_fixed_point_criterion": 1e-08,
+        "outcome_class": "converged_plasma_root",
+        "converged": true,
+        "converged_plasma_root": true,
+        "terminal_residual": 3.270854734228347e-16,
+        "iterations": 12,
+        "residual_trajectory": [
+          0.006563322508504018,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.020621310843929125,
+          0.020621310843929125,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.009438242193994018,
+          0.009438242193994018,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.004007730200635948,
+          0.004007730200635948,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.00018450982855264443,
+          0.00018450982855264443,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          6.756661255323342e-08,
+          6.756661255323342e-08,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          2.495413228606934e-09,
+          2.495413228606934e-09,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          7.999293309611272e-11,
+          7.999293309611272e-11,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          2.564523875802391e-12,
+          2.564523875802391e-12,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          8.188380398720761e-14,
+          8.188380398720761e-14,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          2.7291194188717883e-15,
+          2.7291194188717883e-15,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          2.964212102894441e-16,
+          2.964212102894441e-16,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          3.270854734228347e-16
+        ]
+      },
+      "raw_registered_rows": {
+        "metrics": {
+          "flux_map": {
+            "comparison_target": "efm/psirz multiplied by 2*pi into total Wb",
+            "sup_norm_wb": 0.16147169012911172,
+            "rms_wb": 0.05515735703635661,
+            "sup_fraction_of_reference_span": 0.0982434511648991,
+            "rms_fraction_of_reference_span": 0.033559127968830496,
+            "reference_span_wb": 1.6435873151288796,
+            "raw_same_gauge_comparison": true
+          },
+          "magnetic_axis": {
+            "distance_m": 1.7546280239832868,
+            "registered_bound_m": 0.00101344,
+            "passes": false
+          },
+          "lcfs": {
+            "symmetric_mean_distance_m": 0.21283192090574926,
+            "registered_bound_m": 0.00033047,
+            "passes": false
+          },
+          "x_point": {
+            "distance_m": 0.6429876249499091,
+            "registered_bound_m": 0.014,
+            "passes": false
+          },
+          "topology": {
+            "solved_class": "diverted",
+            "reference_class": "diverted",
+            "agreement": 1.0,
+            "registered_bound": 1.0,
+            "passes": true
+          },
+          "plasma_current": {
+            "solved_a": 874260.4375,
+            "reference_a": 874260.4375,
+            "signed_relative_deviation": 0.0
+          },
+          "poloidal_beta": {
+            "solved": 0.0,
+            "reference": 0.19849573075771332,
+            "signed_relative_deviation": -1.0
+          },
+          "internal_inductance": {
+            "solved": 0.0,
+            "reference": 0.8104227781295776,
+            "signed_relative_deviation": -1.0
+          }
+        },
+        "qualification": {
+          "flux_sup_fraction_of_span": {
+            "value": 0.0982434511648991,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "flux_rms_fraction_of_span": {
+            "value": 0.033559127968830496,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "magnetic_axis_distance_m": {
+            "value": 1.7546280239832868,
+            "registered_bound": 0.00101344,
+            "passes": false
+          },
+          "lcfs_distance_m": {
+            "value": 0.21283192090574926,
+            "registered_bound": 0.00033047,
+            "passes": false
+          },
+          "x_point_distance_m": {
+            "value": 0.6429876249499091,
+            "registered_bound": 0.014,
+            "passes": false
+          },
+          "topology_class_agreement": {
+            "value": 1.0,
+            "registered_bound": 1.0,
+            "passes": true
+          },
+          "plasma_current_signed_relative_deviation": {
+            "value": 0.0,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "poloidal_beta_signed_relative_deviation": {
+            "value": -1.0,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "internal_inductance_signed_relative_deviation": {
+            "value": -1.0,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "fixed_point_defect": {
+            "value": 3.270854734228347e-16,
+            "registered_bound": 1e-08,
+            "passes": true
+          },
+          "all_carried_tolerances_pass": false
+        },
+        "note": "Retained beside the controlled score so the longest-branch and clipped-core instrument readings remain visible."
+      },
+      "instrument_controlled_rows": {
+        "lcfs_closed_branch": {
+          "status": "unscoreable_no_closed_axis_branch",
+          "selection": "longest explicitly closed unit branch enclosing the magnetic axis",
+          "branch_count": 1,
+          "closed_branch_point_count": null,
+          "distance": null,
+          "reason": "no closed unit-boundary branch encloses the solved axis",
+          "longest_polyline_fallback_used": false
+        },
+        "matched_stored_boundary_support": {
+          "definition": "mesh centroids inside the stored LCFS for both fields",
+          "cell_count": 208,
+          "solved": {
+            "support": {
+              "cell_count": 208,
+              "toroidal_volume_m3": 7.862804475052145,
+              "volume_weighted_major_radius_m": 0.887162034712952,
+              "current_integral_a": 874260.4375
+            },
+            "integrals": {
+              "pressure_volume_integral_pa_m3": -660.6187479653133,
+              "poloidal_field_squared_volume_integral_t2_m3": 0.3213866378261224
+            },
+            "reference_boundary_field_definition": {
+              "poloidal_beta": "2*mu0*integral(p dV) divided by the reference squared-mean boundary-field denominator, rescaled to the enclosed current",
+              "internal_inductance": "integral(Bp^2 dV) divided by the published mean-squared boundary-field denominator; current is not used in this definition"
+            },
+            "poloidal_beta": {
+              "solved": -0.004145877111095692,
+              "published_reference": 0.19849573075771332,
+              "denominator_t2_m3": 0.4004740033616675,
+              "signed_relative_deviation": -1.020886480002717,
+              "matched_support_estimate_signed_relative_deviation": 0.05818098840723218,
+              "change_from_matched_support_estimate": -1.0790674684099493
+            },
+            "internal_inductance": {
+              "solved": 0.5203630404559247,
+              "published_reference": 0.8104227781295776,
+              "denominator_t2_m3": 0.6176200322462068,
+              "signed_relative_deviation": -0.3579116302025701,
+              "matched_support_estimate_signed_relative_deviation": -0.35695307611867966,
+              "change_from_matched_support_estimate": -0.0009585540838904505
+            }
+          },
+          "reference_published": {
+            "poloidal_beta": 0.19849573075771332,
+            "internal_inductance": 0.8104227781295776,
+            "pressure_volume_integral_pa_m3": 31629.013020833332,
+            "poloidal_field_squared_volume_integral_t2_m3": 0.5005333423614502,
+            "plasma_volume_m3": 7.883815288543701
+          },
+          "poloidal_beta_signed_relative_deviation": -1.020886480002717
+        },
+        "poloidal_field_energy_instrument_control": {
+          "solved_nova_operator_t2_m3": 0.3213866378261224,
+          "reference_own_map_nova_operator_t2_m3": 0.31612115293743753,
+          "reference_published_t2_m3": 0.5005333423614502,
+          "nova_on_reference_over_reference_published": 0.6315686212750976,
+          "banked_representative_instrument_ratio": 0.6020235565543425,
+          "solved_over_reference_published_raw": 0.6420883697974299,
+          "solved_over_reference_after_instrument_division": 1.016656540822268,
+          "instrument_controlled_signed_relative_deviation": 0.016656540822268084,
+          "multiplicative_closure_residual": 0.0
+        }
+      }
+    },
+    {
+      "reference": {
+        "machine": "MAST",
+        "shot": 21989,
+        "slice_index": 55,
+        "time_s": 0.29499998688697815,
+        "span_wb": 1.8040098584002995,
+        "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+        "plasma_current_a": 928902.8125,
+        "source_coordinate": {
+          "axis_wb": 0.3320751947333506,
+          "boundary_wb": -0.2131394633484559,
+          "support_nodes": 222
+        },
+        "qualification_before_attribution": {
+          "typed_saddle_resolved": true,
+          "typed_saddle_candidate_count": 2,
+          "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 1.396327141354339e-08,
+          "declared_boundary_to_map_saddle_limit": 0.01,
+          "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0038093633492954915,
+          "stored_lcfs_contour_limit": 0.006,
+          "passes": true
+        }
+      },
+      "qualification_before_solve": {
+        "typed_saddle_resolved": true,
+        "typed_saddle_candidate_count": 2,
+        "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 1.396327141354339e-08,
+        "declared_boundary_to_map_saddle_limit": 0.01,
+        "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0038093633492954915,
+        "stored_lcfs_contour_limit": 0.006,
+        "passes": true
+      },
+      "target_current": {
+        "source": "abs(efm/plasma_current_c)",
+        "value_a": 928902.8125,
+        "terminal_value_a": 928902.8125,
+        "signed_terminal_relative_error": 0.0
+      },
+      "solve": {
+        "entry_point": "ForwardProfile.solve_branch(target_current=...)",
+        "route": "newton_krylov",
+        "registered_fixed_point_criterion": 1e-08,
+        "outcome_class": "bounded_non_convergence",
+        "converged": false,
+        "converged_plasma_root": false,
+        "terminal_residual": 0.017714765374879503,
+        "iterations": 12,
+        "residual_trajectory": [
+          0.005222144135983801,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011638112339213424,
+          0.011638112339213424,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.004366028607747298,
+          0.004366028607747298,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.017506461949034026,
+          0.017506461949034026,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.017591148079621043,
+          0.017591148079621043,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.0177492588471624,
+          0.0177492588471624,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.01771499373757844,
+          0.01771499373757844,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.017843847339548444,
+          0.017843847339548444,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.017714946820642483,
+          0.017714946820642483,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.01783571370271185,
+          0.01783571370271185,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.017714763082266567,
+          0.017714763082266567,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.01783574088384998,
+          0.01783574088384998,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.017714765374879503
+        ]
+      },
+      "raw_registered_rows": {
+        "metrics": {
+          "flux_map": {
+            "comparison_target": "efm/psirz multiplied by 2*pi into total Wb",
+            "sup_norm_wb": 0.09906762390046117,
+            "rms_wb": 0.03610762307464828,
+            "sup_fraction_of_reference_span": 0.05491523421513289,
+            "rms_fraction_of_reference_span": 0.020015202747653834,
+            "reference_span_wb": 1.8040098584002995,
+            "raw_same_gauge_comparison": true
+          },
+          "magnetic_axis": {
+            "distance_m": 0.07771363890736141,
+            "registered_bound_m": 0.00101344,
+            "passes": false
+          },
+          "lcfs": {
+            "symmetric_mean_distance_m": 0.16764188251017545,
+            "registered_bound_m": 0.00033047,
+            "passes": false
+          },
+          "x_point": {
+            "distance_m": 0.07059893080270739,
+            "registered_bound_m": 0.014,
+            "passes": false
+          },
+          "topology": {
+            "solved_class": "diverted",
+            "reference_class": "diverted",
+            "agreement": 1.0,
+            "registered_bound": 1.0,
+            "passes": true
+          },
+          "plasma_current": {
+            "solved_a": 928902.8125,
+            "reference_a": 928902.8125,
+            "signed_relative_deviation": 0.0
+          },
+          "poloidal_beta": {
+            "solved": 0.6233027774886927,
+            "reference": 0.4675656855106354,
+            "signed_relative_deviation": 0.3330806703831881
+          },
+          "internal_inductance": {
+            "solved": 1.1173755794358116,
+            "reference": 0.8673111200332642,
+            "signed_relative_deviation": 0.288321518802799
+          }
+        },
+        "qualification": {
+          "flux_sup_fraction_of_span": {
+            "value": 0.05491523421513289,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "flux_rms_fraction_of_span": {
+            "value": 0.020015202747653834,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "magnetic_axis_distance_m": {
+            "value": 0.07771363890736141,
+            "registered_bound": 0.00101344,
+            "passes": false
+          },
+          "lcfs_distance_m": {
+            "value": 0.16764188251017545,
+            "registered_bound": 0.00033047,
+            "passes": false
+          },
+          "x_point_distance_m": {
+            "value": 0.07059893080270739,
+            "registered_bound": 0.014,
+            "passes": false
+          },
+          "topology_class_agreement": {
+            "value": 1.0,
+            "registered_bound": 1.0,
+            "passes": true
+          },
+          "plasma_current_signed_relative_deviation": {
+            "value": 0.0,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "poloidal_beta_signed_relative_deviation": {
+            "value": 0.3330806703831881,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "internal_inductance_signed_relative_deviation": {
+            "value": 0.288321518802799,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "fixed_point_defect": {
+            "value": 0.017714765374879503,
+            "registered_bound": 1e-08,
+            "passes": false
+          },
+          "all_carried_tolerances_pass": false
+        },
+        "note": "Retained beside the controlled score so the longest-branch and clipped-core instrument readings remain visible."
+      },
+      "instrument_controlled_rows": {
+        "lcfs_closed_branch": {
+          "status": "unscoreable_no_closed_axis_branch",
+          "selection": "longest explicitly closed unit branch enclosing the magnetic axis",
+          "branch_count": 1,
+          "closed_branch_point_count": null,
+          "distance": null,
+          "reason": "no closed unit-boundary branch encloses the solved axis",
+          "longest_polyline_fallback_used": false
+        },
+        "matched_stored_boundary_support": {
+          "definition": "mesh centroids inside the stored LCFS for both fields",
+          "cell_count": 222,
+          "solved": {
+            "support": {
+              "cell_count": 222,
+              "toroidal_volume_m3": 8.142392414859462,
+              "volume_weighted_major_radius_m": 0.8710779861443348,
+              "current_integral_a": 928902.8125
+            },
+            "integrals": {
+              "pressure_volume_integral_pa_m3": 70189.8492528707,
+              "poloidal_field_squared_volume_integral_t2_m3": 0.34977782185993966
+            },
+            "reference_boundary_field_definition": {
+              "poloidal_beta": "2*mu0*integral(p dV) divided by the reference squared-mean boundary-field denominator, rescaled to the enclosed current",
+              "internal_inductance": "integral(Bp^2 dV) divided by the published mean-squared boundary-field denominator; current is not used in this definition"
+            },
+            "poloidal_beta": {
+              "solved": 0.42317485579749886,
+              "published_reference": 0.4675656855106354,
+              "denominator_t2_m3": 0.4168639260472482,
+              "signed_relative_deviation": -0.09494030697453049,
+              "matched_support_estimate_signed_relative_deviation": 0.05818098840723218,
+              "change_from_matched_support_estimate": -0.15312129538176267
+            },
+            "internal_inductance": {
+              "solved": 0.5409724365388863,
+              "published_reference": 0.8673111200332642,
+              "denominator_t2_m3": 0.6465723542178972,
+              "signed_relative_deviation": -0.3762648442485803,
+              "matched_support_estimate_signed_relative_deviation": -0.35695307611867966,
+              "change_from_matched_support_estimate": -0.019311768129900653
+            }
+          },
+          "reference_published": {
+            "poloidal_beta": 0.4675656855106354,
+            "internal_inductance": 0.8673111200332642,
+            "pressure_volume_integral_pa_m3": 77552.72916666666,
+            "poloidal_field_squared_volume_integral_t2_m3": 0.5607793927192688,
+            "plasma_volume_m3": 8.149765014648438
+          },
+          "poloidal_beta_signed_relative_deviation": -0.09494030697453049
+        },
+        "poloidal_field_energy_instrument_control": {
+          "solved_nova_operator_t2_m3": 0.34977782185993966,
+          "reference_own_map_nova_operator_t2_m3": 0.3521670446108275,
+          "reference_published_t2_m3": 0.5607793927192688,
+          "nova_on_reference_over_reference_published": 0.6279956952468214,
+          "banked_representative_instrument_ratio": 0.6020235565543425,
+          "solved_over_reference_published_raw": 0.6237351557514197,
+          "solved_over_reference_after_instrument_division": 0.9932156549357759,
+          "instrument_controlled_signed_relative_deviation": -0.0067843450642240954,
+          "multiplicative_closure_residual": 0.0
+        }
+      }
+    },
+    {
+      "reference": {
+        "machine": "MAST",
+        "shot": 22086,
+        "slice_index": 43,
+        "time_s": 0.22999998927116394,
+        "span_wb": 1.5839675751331153,
+        "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+        "plasma_current_a": 933034.875,
+        "source_coordinate": {
+          "axis_wb": 0.3423115953376666,
+          "boundary_wb": -0.1292985047045701,
+          "support_nodes": 243
+        },
+        "qualification_before_attribution": {
+          "typed_saddle_resolved": true,
+          "typed_saddle_candidate_count": 2,
+          "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 3.1250758187846145e-09,
+          "declared_boundary_to_map_saddle_limit": 0.01,
+          "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0034558984831316586,
+          "stored_lcfs_contour_limit": 0.006,
+          "passes": true
+        }
+      },
+      "qualification_before_solve": {
+        "typed_saddle_resolved": true,
+        "typed_saddle_candidate_count": 2,
+        "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 3.1250758187846145e-09,
+        "declared_boundary_to_map_saddle_limit": 0.01,
+        "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0034558984831316586,
+        "stored_lcfs_contour_limit": 0.006,
+        "passes": true
+      },
+      "target_current": {
+        "source": "abs(efm/plasma_current_c)",
+        "value_a": 933034.875,
+        "terminal_value_a": 933034.875,
+        "signed_terminal_relative_error": 0.0
+      },
+      "solve": {
+        "entry_point": "ForwardProfile.solve_branch(target_current=...)",
+        "route": "newton_krylov",
+        "registered_fixed_point_criterion": 1e-08,
+        "outcome_class": "bounded_non_convergence",
+        "converged": false,
+        "converged_plasma_root": false,
+        "terminal_residual": 0.011016939705021812,
+        "iterations": 12,
+        "residual_trajectory": [
+          0.0057820370614266176,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011333697531371208,
+          0.011333697531371208,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011288976180608676,
+          0.011288976180608676,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.0112547410490412,
+          0.0112547410490412,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011021975400368773,
+          0.011021975400368773,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011427458945178591,
+          0.011427458945178591,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011426403311143482,
+          0.011426403311143482,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011240533512299861,
+          0.011240533512299861,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011016939806329536,
+          0.011016939806329536,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011427363963993171,
+          0.011427363963993171,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011426402802422497,
+          0.011426402802422497,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011240533459641435,
+          0.011240533459641435,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0.011016939705021812
+        ]
+      },
+      "raw_registered_rows": {
+        "metrics": {
+          "flux_map": {
+            "comparison_target": "efm/psirz multiplied by 2*pi into total Wb",
+            "sup_norm_wb": 0.016164993780419877,
+            "rms_wb": 0.005120601966608854,
+            "sup_fraction_of_reference_span": 0.010205381747831161,
+            "rms_fraction_of_reference_span": 0.0032327694373279854,
+            "reference_span_wb": 1.5839675751331153,
+            "raw_same_gauge_comparison": true
+          },
+          "magnetic_axis": {
+            "distance_m": 0.1326697039152878,
+            "registered_bound_m": 0.00101344,
+            "passes": false
+          },
+          "lcfs": {
+            "symmetric_mean_distance_m": 0.10333842879222484,
+            "registered_bound_m": 0.00033047,
+            "passes": false
+          },
+          "x_point": {
+            "distance_m": 0.019280780024798536,
+            "registered_bound_m": 0.014,
+            "passes": false
+          },
+          "topology": {
+            "solved_class": "diverted",
+            "reference_class": "diverted",
+            "agreement": 1.0,
+            "registered_bound": 1.0,
+            "passes": true
+          },
+          "plasma_current": {
+            "solved_a": 933034.875,
+            "reference_a": 933034.875,
+            "signed_relative_deviation": 0.0
+          },
+          "poloidal_beta": {
+            "solved": 0.42306607170060495,
+            "reference": 0.3351304829120636,
+            "signed_relative_deviation": 0.2623920928482508
+          },
+          "internal_inductance": {
+            "solved": 0.8805952193205835,
+            "reference": 0.7693799734115601,
+            "signed_relative_deviation": 0.14455178163252191
+          }
+        },
+        "qualification": {
+          "flux_sup_fraction_of_span": {
+            "value": 0.010205381747831161,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "flux_rms_fraction_of_span": {
+            "value": 0.0032327694373279854,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "magnetic_axis_distance_m": {
+            "value": 0.1326697039152878,
+            "registered_bound": 0.00101344,
+            "passes": false
+          },
+          "lcfs_distance_m": {
+            "value": 0.10333842879222484,
+            "registered_bound": 0.00033047,
+            "passes": false
+          },
+          "x_point_distance_m": {
+            "value": 0.019280780024798536,
+            "registered_bound": 0.014,
+            "passes": false
+          },
+          "topology_class_agreement": {
+            "value": 1.0,
+            "registered_bound": 1.0,
+            "passes": true
+          },
+          "plasma_current_signed_relative_deviation": {
+            "value": 0.0,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "poloidal_beta_signed_relative_deviation": {
+            "value": 0.2623920928482508,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "internal_inductance_signed_relative_deviation": {
+            "value": 0.14455178163252191,
+            "registered_bound": null,
+            "passes": null,
+            "status": "reported deviation; no registered tolerance is carried"
+          },
+          "fixed_point_defect": {
+            "value": 0.011016939705021812,
+            "registered_bound": 1e-08,
+            "passes": false
+          },
+          "all_carried_tolerances_pass": false
+        },
+        "note": "Retained beside the controlled score so the longest-branch and clipped-core instrument readings remain visible."
+      },
+      "instrument_controlled_rows": {
+        "lcfs_closed_branch": {
+          "status": "unscoreable_no_closed_axis_branch",
+          "selection": "longest explicitly closed unit branch enclosing the magnetic axis",
+          "branch_count": 1,
+          "closed_branch_point_count": null,
+          "distance": null,
+          "reason": "no closed unit-boundary branch encloses the solved axis",
+          "longest_polyline_fallback_used": false
+        },
+        "matched_stored_boundary_support": {
+          "definition": "mesh centroids inside the stored LCFS for both fields",
+          "cell_count": 243,
+          "solved": {
+            "support": {
+              "cell_count": 243,
+              "toroidal_volume_m3": 8.831675636804732,
+              "volume_weighted_major_radius_m": 0.8647600985158236,
+              "current_integral_a": 933034.875
+            },
+            "integrals": {
+              "pressure_volume_integral_pa_m3": 52183.57755223975,
+              "poloidal_field_squared_volume_integral_t2_m3": 0.29776417601512023
+            },
+            "reference_boundary_field_definition": {
+              "poloidal_beta": "2*mu0*integral(p dV) divided by the reference squared-mean boundary-field denominator, rescaled to the enclosed current",
+              "internal_inductance": "integral(Bp^2 dV) divided by the published mean-squared boundary-field denominator; current is not used in this definition"
+            },
+            "poloidal_beta": {
+              "solved": 0.3315681045610783,
+              "published_reference": 0.3351304829120636,
+              "denominator_t2_m3": 0.39554961191824745,
+              "signed_relative_deviation": -0.010629824896949192,
+              "matched_support_estimate_signed_relative_deviation": 0.05818098840723218,
+              "change_from_matched_support_estimate": -0.06881081330418137
+            },
+            "internal_inductance": {
+              "solved": 0.4613047988163929,
+              "published_reference": 0.7693799734115601,
+              "denominator_t2_m3": 0.6454825026297535,
+              "signed_relative_deviation": -0.40042005932271674,
+              "matched_support_estimate_signed_relative_deviation": -0.35695307611867966,
+              "change_from_matched_support_estimate": -0.04346698320403708
+            }
+          },
+          "reference_published": {
+            "poloidal_beta": 0.3351304829120636,
+            "internal_inductance": 0.7693799734115601,
+            "pressure_volume_integral_pa_m3": 52744.23958333333,
+            "poloidal_field_squared_volume_integral_t2_m3": 0.496621310710907,
+            "plasma_volume_m3": 8.79159164428711
+          },
+          "poloidal_beta_signed_relative_deviation": -0.010629824896949192
+        },
+        "poloidal_field_energy_instrument_control": {
+          "solved_nova_operator_t2_m3": 0.29776417601512023,
+          "reference_own_map_nova_operator_t2_m3": 0.2989777277348594,
+          "reference_published_t2_m3": 0.496621310710907,
+          "nova_on_reference_over_reference_published": 0.6020235565543425,
+          "banked_representative_instrument_ratio": 0.6020235565543425,
+          "solved_over_reference_published_raw": 0.5995799406772832,
+          "solved_over_reference_after_instrument_division": 0.9959409962443243,
+          "instrument_controlled_signed_relative_deviation": -0.004059003755675694,
+          "multiplicative_closure_residual": 0.0
+        }
+      }
+    }
+  ],
+  "six_reference_score_table": [
+    {
+      "shot": 21978,
+      "slice_index": 35,
+      "outcome_class": "bounded_non_convergence",
+      "converged_plasma_root": false,
+      "terminal_residual": 0.010356795810607609,
+      "raw_flux_rms_fraction_of_span": 0.0083377638210009,
+      "raw_lcfs_longest_branch_distance_m": 0.11334212024864344,
+      "controlled_lcfs_closed_branch_distance_m": null,
+      "raw_poloidal_beta_signed_relative_deviation": 0.31654596579051497,
+      "controlled_poloidal_beta_signed_relative_deviation": -0.0029395908558906836,
+      "raw_internal_inductance_signed_relative_deviation": 0.15311993838564475,
+      "controlled_field_energy_signed_relative_deviation": -0.005325911067280753
+    },
+    {
+      "shot": 21983,
+      "slice_index": 35,
+      "outcome_class": "bounded_non_convergence",
+      "converged_plasma_root": false,
+      "terminal_residual": 0.010050357331518338,
+      "raw_flux_rms_fraction_of_span": 0.020375062987838612,
+      "raw_lcfs_longest_branch_distance_m": 0.1422026192742649,
+      "controlled_lcfs_closed_branch_distance_m": 0.1422026192742649,
+      "raw_poloidal_beta_signed_relative_deviation": -0.04005066478831454,
+      "controlled_poloidal_beta_signed_relative_deviation": -0.38721663064489953,
+      "raw_internal_inductance_signed_relative_deviation": -0.025874968504912554,
+      "controlled_field_energy_signed_relative_deviation": 0.01867236223997293
+    },
+    {
+      "shot": 21985,
+      "slice_index": 51,
+      "outcome_class": "bounded_non_convergence",
+      "converged_plasma_root": false,
+      "terminal_residual": 0.01294253111102598,
+      "raw_flux_rms_fraction_of_span": 0.020800975163778695,
+      "raw_lcfs_longest_branch_distance_m": 0.22045747485785655,
+      "controlled_lcfs_closed_branch_distance_m": 0.22045747485785655,
+      "raw_poloidal_beta_signed_relative_deviation": -0.03311690827924918,
+      "controlled_poloidal_beta_signed_relative_deviation": -0.6138136465632029,
+      "raw_internal_inductance_signed_relative_deviation": 0.05024928435071008,
+      "controlled_field_energy_signed_relative_deviation": 0.012559274085324867
+    },
+    {
+      "shot": 21986,
+      "slice_index": 46,
+      "outcome_class": "converged_plasma_root",
+      "converged_plasma_root": true,
+      "terminal_residual": 3.270854734228347e-16,
+      "raw_flux_rms_fraction_of_span": 0.033559127968830496,
+      "raw_lcfs_longest_branch_distance_m": 0.21283192090574926,
+      "controlled_lcfs_closed_branch_distance_m": null,
+      "raw_poloidal_beta_signed_relative_deviation": -1.0,
+      "controlled_poloidal_beta_signed_relative_deviation": -1.020886480002717,
+      "raw_internal_inductance_signed_relative_deviation": -1.0,
+      "controlled_field_energy_signed_relative_deviation": 0.016656540822268084
+    },
+    {
+      "shot": 21989,
+      "slice_index": 55,
+      "outcome_class": "bounded_non_convergence",
+      "converged_plasma_root": false,
+      "terminal_residual": 0.017714765374879503,
+      "raw_flux_rms_fraction_of_span": 0.020015202747653834,
+      "raw_lcfs_longest_branch_distance_m": 0.16764188251017545,
+      "controlled_lcfs_closed_branch_distance_m": null,
+      "raw_poloidal_beta_signed_relative_deviation": 0.3330806703831881,
+      "controlled_poloidal_beta_signed_relative_deviation": -0.09494030697453049,
+      "raw_internal_inductance_signed_relative_deviation": 0.288321518802799,
+      "controlled_field_energy_signed_relative_deviation": -0.0067843450642240954
+    },
+    {
+      "shot": 22086,
+      "slice_index": 43,
+      "outcome_class": "bounded_non_convergence",
+      "converged_plasma_root": false,
+      "terminal_residual": 0.011016939705021812,
+      "raw_flux_rms_fraction_of_span": 0.0032327694373279854,
+      "raw_lcfs_longest_branch_distance_m": 0.10333842879222484,
+      "controlled_lcfs_closed_branch_distance_m": null,
+      "raw_poloidal_beta_signed_relative_deviation": 0.2623920928482508,
+      "controlled_poloidal_beta_signed_relative_deviation": -0.010629824896949192,
+      "raw_internal_inductance_signed_relative_deviation": 0.14455178163252191,
+      "controlled_field_energy_signed_relative_deviation": -0.004059003755675694
+    }
+  ],
+  "aggregate": {
+    "shot_count": 6,
+    "registered_fixed_point_criterion": 1e-08,
+    "banked_converged_plasma_roots": 1,
+    "banked_uncorrected_tare_converged_plasma_roots": 0,
+    "banked_modelled_background_converged_plasma_roots": 1,
+    "tared_converged_plasma_roots": 1,
+    "change_in_converged_plasma_roots": 0,
+    "all_target_currents_exact": true,
+    "verdict": "EXTERNAL_FIELD_EXONERATED_FIXED_POINT_OR_DISCRETISATION",
+    "statement": "The ground-truth-qualified tared background recovered at most one of six plasma roots, so the external field is exonerated and the obstacle is the GS fixed point or its discretisation.",
+    "analytic_null_passed_before_solves": true,
+    "attribution_available": true,
+    "parity_claim": false
+  },
   "attribution": {
-    "available": false,
-    "finding": "The analytic null passed; attribution remains pending the six-reference solve."
-  },
-  "gauge": {
-    "rule": "preserve the stored reference total-flux gauge",
-    "additive_constant_wb": 0.0
-  },
-  "protected_banked_artifacts": {
-    "declared_count": 23,
-    "verified_digest_count": 23,
-    "all_digests_match": true,
-    "source_and_output_receipts_are_outside_protected_set": true,
-    "integrity_source": "docs/figures/efit-forward-parity/converged-root-geometry-attribution.json",
-    "integrity_source_sha256": "67cc1b1578e8aac066e248f10d6deaca4ccb80628934e6ed21c2984c0d4d455a"
+    "available": true,
+    "basis": "the corrected declared-support tare passed the independent Solovev external-field recovery null before any MAST solve",
+    "finding": "The ground-truth-qualified tared background recovered at most one of six plasma roots, so the external field is exonerated and the obstacle is the GS fixed point or its discretisation."
   }
 }

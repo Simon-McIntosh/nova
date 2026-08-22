@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-version" content="32">
-<meta name="plan-commits" content="c1e180d5,71c1ec36,457caddd,252bdd77,d026b0dc,57a1bfb9,c3f9f83a,6700b088,783229ac,325f6a85,56b1518b,e4dc6155,d7bf1035,c7ea1772,19e0d865,9641608b,f771f90d,d2e27d60,c3828a88,c9152535,ed601260,c308025d,ede61ac7,a031c210,f8feb25f">
-<meta name="plan-artifacts" content="scripts/dina_profile_routes/reuse-report.md,scripts/dina_profile_routes/receipt.json,scripts/dina_profile_routes/addendum.json,scripts/constrained_parity_reuse/reuse-report.md,benchmarks/efit_forward_parity_slice.py,benchmarks/efit_parity_root_geometry.py,benchmarks/efit_parity_warm_neighbour.py,docs/figures/efit-forward-parity/reference-seeded-forward-slice.json,docs/figures/efit-forward-parity/pinned-parity-slice.json,docs/figures/efit-forward-parity/boundary-imbalance-attribution.json,docs/figures/efit-forward-parity/passive-inclusive-parity-slice.json,docs/figures/efit-forward-parity/passive-inclusive-frozen-six-scorecard.json,docs/figures/efit-forward-parity/passive-inclusive-frozen-six-trajectories.png,docs/figures/efit-forward-parity/converged-root-geometry-attribution.json,docs/figures/efit-forward-parity/converged-root-geometry-attribution.png,docs/figures/efit-forward-parity/warm-neighbour-stall-lift.json,docs/figures/efit-forward-parity/warm-neighbour-stall-lift.png,docs/evidence/archive/efit-forward-parity-landed.html">
-<meta name="plan-impl" content="0.952">
+<meta name="plan-version" content="33">
+<meta name="plan-commits" content="c1e180d5,71c1ec36,457caddd,252bdd77,d026b0dc,57a1bfb9,c3f9f83a,6700b088,783229ac,325f6a85,56b1518b,e4dc6155,d7bf1035,c7ea1772,19e0d865,9641608b,f771f90d,d2e27d60,c3828a88,c9152535,ed601260,c308025d,ede61ac7,a031c210,f8feb25f,aad1a445">
+<meta name="plan-artifacts" content="scripts/dina_profile_routes/reuse-report.md,scripts/dina_profile_routes/receipt.json,scripts/dina_profile_routes/addendum.json,scripts/constrained_parity_reuse/reuse-report.md,benchmarks/efit_forward_parity_slice.py,benchmarks/efit_parity_root_geometry.py,benchmarks/efit_parity_warm_neighbour.py,benchmarks/efit_parity_moment_definitions.py,docs/figures/efit-forward-parity/reference-seeded-forward-slice.json,docs/figures/efit-forward-parity/pinned-parity-slice.json,docs/figures/efit-forward-parity/boundary-imbalance-attribution.json,docs/figures/efit-forward-parity/passive-inclusive-parity-slice.json,docs/figures/efit-forward-parity/passive-inclusive-frozen-six-scorecard.json,docs/figures/efit-forward-parity/passive-inclusive-frozen-six-trajectories.png,docs/figures/efit-forward-parity/converged-root-geometry-attribution.json,docs/figures/efit-forward-parity/converged-root-geometry-attribution.png,docs/figures/efit-forward-parity/warm-neighbour-stall-lift.json,docs/figures/efit-forward-parity/warm-neighbour-stall-lift.png,docs/figures/efit-forward-parity/moment-definition-rescore.json,docs/evidence/archive/efit-forward-parity-landed.html">
+<meta name="plan-impl" content="0.954">
 </head>
 <body>
   <main class="plan-doc">
@@ -259,6 +259,57 @@
     definition is quantified and either passes or fails on its own terms; and the &sect;4 verdict
     records whether these two rows are scoreable at all, with the answer carrying its arithmetic.</p>
 
+    <h2 id="s8">&sect;8 &mdash; Two boundaries that agree, enclosing volumes that do not</h2>
+
+    <p><strong>One number now carries most of what is left of the parity gap, and it is arithmetically
+    impossible as it stands.</strong> On the converged <code>22086/43</code> root the solved plasma
+    volume is 3.518880&nbsp;m&sup3; against the reference's 8.791592&nbsp;m&sup3;, a factor 0.40026
+    &mdash; yet the two boundary curves agree to 2.4&nbsp;percent, the solved closed branch measuring
+    5.394335&nbsp;m of arclength against the stored LCFS perimeter of 5.527656&nbsp;m. Two nearly
+    identical closed curves at comparable major radius cannot enclose toroidal volumes differing by
+    two and a half times. One of the two volumes is not the volume enclosed by the curve reported
+    beside it.</p>
+
+    <p>That single discrepancy propagates into every remaining row. The
+    <code>&beta;<sub>p</sub></code> deficit is almost entirely volume &mdash; the pressure integral
+    ratio 0.43716 tracks the volume ratio 0.40026, and dividing through inverts the sign of the
+    finding, since nova's mean pressure of 6,552.49&nbsp;Pa is 9.2&nbsp;percent <em>above</em> the
+    reference's 5,999.40&nbsp;Pa. The confined-core current fraction is 0.44688 of the pinned total,
+    close to the same 0.40, which is what makes a single clipping the leading candidate for both
+    deficits at once.</p>
+
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Candidate</th><th>What it would predict</th></tr></thead>
+      <tbody>
+        <tr><td>nova integrates clipped confined-core cells; the reference integrates the
+            LCFS-enclosed toroidal volume</td>
+            <td>volume and current deficits track each other at the same fraction, and both vanish
+            when nova's integral is taken over the region its own boundary encloses</td></tr>
+        <tr><td>the two volumes are enclosed by genuinely different curves, and the arclength
+            agreement is coincidental</td>
+            <td>the enclosed areas differ by the same factor as the volumes, visible directly from
+            the two contours already banked</td></tr>
+        <tr><td>a revolution or Jacobian convention differs between the two volume figures</td>
+            <td>the ratio is a clean function of major radius rather than 0.40, and no clipping is
+            involved</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p>All three are separable from quantities already on disk: the two contours are banked in the
+    converged-root receipt, and the volume, current and integral figures are banked beside them. No
+    solve is required to tell these apart.</p>
+
+    <p><em>Done-when:</em> the enclosed poloidal area and the revolved toroidal volume are computed
+    directly from both banked contours by the same quadrature and reported beside the two published
+    volume figures, identifying which published volume disagrees with the region its own boundary
+    encloses and by what factor; the confined-core clipping is quantified as a cell count and an area
+    fraction against the same boundary; and the &sect;4 verdict records whether the
+    <code>&beta;<sub>p</sub></code> and <code>l<sub>i</sub></code> deviations survive once both sides
+    integrate the region their own reported boundary encloses, with the surviving deviation quantified
+    or stated as eliminated.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="forward-parity-seed" data-choice="reference-seed" data-by="Simon McIntosh" data-when="2026-08-21T10:09:38+00:00">
@@ -403,6 +454,9 @@ CONSEQUENCE FOR THE SECTION-4 VERDICT, stated now rather than deferred: of the s
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260821T1210b" data-who="reckon-ship" data-when="2026-08-21T12:10:00+00:00">
     <div class="r-comment-body">dual-route-owner-questions landed - commit 252bdd77, merged 8b92c2d4; gate PASSED. The owner's three questions are answered by measurement. (1) ROTATION: bounded, not detected - a centrifugal-shaped third column (mu0*R^2*(R^2-R0^2), the nova/equilibrium/rotation.py shape) is insignificant on all 19 shells (max amplitude/uncertainty 1.046 vs 1.96 proxy; aggregate residual falls 0.96%), and constraints/pressure_rotational is unfilled in the dataset. VARIANCE: the two-column affine basis explains 99.7711% of R*j_phi (residual RMS 2.5615e5 vs signal 5.3541e6 A/m = 4.78%). (2) FORCING RECORD CORRECTED: the banked 1.294 Wb declared-route arm normalized its density argument with MAP-SADDLE constants despite the receipt wording; the factorial reproduces it to 5.7e-14 Wb and collapses it to 0.0754 Wb under declared constants, reconciling exactly with the normalization-constant discriminator (1.2523 to 0.0595 Wb) - constants, not in-cell values, carry the forcing. (3) COORDINATE CONTROL: the extracted-route 2.749 Wb was reproduction-arm mechanics, not force-balance failure - 2.274 Wb in its own map coordinate, 0.1775 Wb after extending extraction to 27/27 reliable shells over psi_N [0.01, 0.99] (support-holding image 2.233 Wb sup, coordinate bias 0.694 Wb sup). VERDICT: the stored DINA map IS consistent with a two-function Grad-Shafranov balance at 4.78% weighted R*j_phi residual; neither route is out of force balance, and the routes stay unreconciled as sources. Record: /nova/evidence/archive/efit-forward-parity-landed#s6-owner-questions.</div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20260822T1725-moment-rescore" data-who="reckon-ship" data-when="2026-08-22T17:25:00Z">
+    <div class="r-comment-body">MOMENT DEFINITIONS RESCORED - run r-20260822T170950037793, gate PASSED, commit aad1a445, 5 tests, ruff clean, zero solves, 23/23 protected banked digests unchanged. VERDICT SCOREABLE_MATCHED_DEFINITIONS_FAIL_REPRODUCTION, and the rows are worse than the scorecard reported, in the OPPOSITE direction. THE VALIDATING CHECK PASSES EXACTLY: the reference boundary-field definitions applied to the reference's own published integrals reproduce its stored beta_p 0.3351304829120636 and l_i 0.7693799734115601 at relative error 0.0 and 0.0 against a 1e-12 tolerance, so the conventions are correctly identified and nothing is being fitted. MATCHED-DEFINITION DEVIATIONS: beta_p -56.284 percent and l_i -73.434 percent, both FAIL_REFERENCE_REPRODUCTION - against the scorecard's reported +42.53 and +41.34 percent. The sign flips and the magnitude grows because the original figures compared nova's own convention against the reference's; scored on a common scale, nova's solved equilibrium is moment-DEFICIENT, not moment-excessive. Both rows ARE scoreable, no further published quantity is needed, and the receipt records the four-by-two table: nova shared denominator solved/reference beta_p 0.477669/1.092675 on the core support and 0.095393/0.218213 all-domain, l_i 1.087477/4.093563 core and 0.217175/0.817506 all-domain; reference boundary-field solved/reference beta_p 0.733602/1.678126 core and 0.146504/0.335130 all-domain, l_i 0.204390/0.769380 current-independent. THE DEVIATION IS DEFINITION- AND SUPPORT-INVARIANT, which is the receipt's own finding and it relocates the cause once more: it sits in the NUMERATOR INTEGRALS, not in any denominator. Solved pressure integral 23,057.44 against 52,744.24 Pa m3 (ratio 0.43716) and solved Bp-squared integral 0.131930 against 0.496621 T2 m3 (ratio 0.26566). DIVIDE BY VOLUME AND THE PICTURE INVERTS FOR PRESSURE: solved mean pressure 6,552.49 Pa against the reference 5,999.40 Pa - nova is 9.2 percent HIGHER - while solved mean Bp-squared is 0.0374921 against 0.0564882 T2, 33.6 percent lower. So beta_p's deficit is almost entirely the VOLUME (integral ratio 0.43716 against volume ratio 0.40026), and l_i carries a genuine mean-field deficit on top of it. WHICH EXPOSES AN INTERNAL INCONSISTENCY THAT MUST BE RUN DOWN: the solved plasma volume is 3.518880 m3 against the reference 8.791592 m3, a factor 0.40026, YET the two boundary curves agree to 2.4 percent - solved closed-branch arclength 5.394335 m against the stored LCFS perimeter 5.527656 m. Two nearly identical closed boundaries at comparable major radius cannot enclose toroidal volumes differing by two and a half times. The confined-core current fraction is 0.44688 of the pinned total, close to the same 0.40 volume fraction, so ONE clipping plausibly accounts for both deficits. Folded as section 8. Receipt: docs/figures/efit-forward-parity/moment-definition-rescore.json. Ledger: 21 of 22 executable nodes landed, impl 0.954.</div>
 </div>
 </section>
 </main>

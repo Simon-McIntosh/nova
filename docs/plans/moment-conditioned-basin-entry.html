@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
 <meta name="plan-impl" content="0.2">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 </head>
 <body>
   <main class="plan-doc">
@@ -129,6 +129,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20260822T2135-ownership-and-inheritance" data-who="reckon-ship" data-when="2026-08-22T21:35:00+00:00">
     <div class="r-comment-body">OWNERSHIP SETTLED with the S12 sprint coordinator (ownership-follows-context): this plan's execution belongs to the authoring session; S12 coordination tracks it at sprint level only and dispatches nothing onto it. THREE INHERITED FACTS pinned for whatever node runs first, relayed from the parity side through the sprint coordinator: (1) all five tared-background stall terminals were reached in only 12 iterations - BUDGET-LIMITED, spread factor 1.76 over residuals 0.01005-0.01771 - and the long-budget plateau/orbit classifier (docs/figures/efit-forward-parity/long-budget-plasma-route.json) has NEVER been run on the tared background, so 'stall' on those five is an iteration-budget observation, not yet a classified plateau or orbit; (2) any convergence claim over the stalled set uses a PREREGISTERED 2/4 SPLIT - 21983/35 and 21985/51 carry a closed axis-enclosing LCFS branch, the other four need confinement constructed - never a pooled six-frame or five-frame rate; (3) the parity plan's section-11 tare is a CONTROL, never a parity claim - no parity number may be quoted from it in this plan's baselines or evidence.</div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20260822T2142-instrument-gate-lifted" data-who="reckon-ship" data-when="2026-08-22T21:42:00+00:00">
+    <div class="r-comment-body">THE INTERNAL-INDUCTANCE INSTRUMENT GATE IS SUBSTANTIALLY CLOSED (referee-inductance-instrument, commit 23d865d8 on equilibrium-metric-parity): the banked 0.602 nova/published ratio was a cross-normalizer artifact — the referee's li(2) normalizer is V·(G/lp)^2 and nova/referee field energies agree at median 0.985047 on the six frozen shots, with the referee formula reproducing published EFM li within 0.9748%. §§3–4 may therefore score li-class quantities in the REFEREE convention using nova's own instrument plus the named normalizer; the remaining hold is only the ambix-side scorer pin and evaluator adapter (equilibrium-metric-parity f-emp-005) for exact-contour self-scored Consistency. Note the §2 confidence caveat is unchanged: li-class PREDICTION error is 16.634% median regardless of instrument, so the centroid remains the confident constraint candidate.</div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260822T2128-confidence-landed" data-who="reckon-ship" data-when="2026-08-22T21:28:00+00:00">
     <div class="r-comment-body">moment-prediction-confidence landed — commit a3119b61 (merged b3713905); gate passed (independent verify.py: 55 rows, exact machine split, complete ladder, explicit support on every row, max current relative error 3.72e-16). Own-boundary medians: centroid 4.624 cm / RMS width 4.768% / radial second moment 2.558% / nova-internal inductance 16.634%. Ladder ranges: radial centroid 1.663 cm, vertical centroid 0.115 cm, RMS width 21.015%, inductance 9.452%. VERDICT for the driver: centroid is the confident moment (accurate and boundary-insensitive); width accurate only at the true boundary; inductance weak and instrument-gated. Net-current exactness is structural, not predictive; DIII-D flux functions are label-derived optimistic controls. Predictor is scripts-local by design; promotion into nova/ belongs to §3.</div>

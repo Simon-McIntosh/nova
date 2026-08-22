@@ -212,5 +212,35 @@
   cause of the 0.602 field-energy instrument ratio (wrong magnitude; that measurement never routed through
   this property).</p>
 
+
+  <h3 id="referee-inductance-instrument">The referee's inductance instrument, and the 0.602 ratio closed as a normalizer artifact</h3>
+
+  <p><strong>Commit <code>23d865d8</code> (merged <code>c47b7b98</code>); gate passed (6/6 shots,
+  assertion harness EXIT=0).</strong> The challenge referee's definition is
+  l<sub>i</sub>(2) = &lt;B<sub>p</sub>&sup2;&gt;<sub>V</sub> / (&#8750;B<sub>p</sub>&thinsp;dl / l<sub>p</sub>)&sup2;,
+  so the field-energy normalizer is V&middot;(G/l<sub>p</sub>)&sup2; — and the banked 0.602
+  nova/published instrument ratio was a <em>cross-normalizer artifact</em>, never a nova energy deficit:
+  the prior 0.49662&nbsp;T&sup2;m&sup3; backcalculation used a normalizer 1.6366&times; too large, while the
+  correct referee energy on 22086/43 is 0.30256 against nova's 0.29898.</p>
+
+  <p>Measured across the six frozen MAST shots (stored-LCFS, native 65&times;65): nova/referee field-energy
+  ratio 0.9565–1.0102, median 0.985047; the referee formula reproduces the published EFM l<sub>i</sub>
+  within 0.9748% maximum. The Wb/rad-versus-total-Wb question cancels because nova divides the total-flux
+  gradient by 2&pi;R. Scorer authority pinned: Sophelio/fusion-equilibrium-challenge-starter commit
+  <code>a6742916</code>. Artifacts: <code>scripts/referee_inductance_instrument/</code> (report,
+  comparison.json, normalizer-comparison.json).</p>
+
+  <figure>
+    <img src="/nova/figures/equilibrium-metric-parity/referee-inductance-comparison.png"
+         alt="Nova versus referee field energy and internal inductance across the six frozen shots" style="max-width:100%">
+    <figcaption>Nova's instrument against the referee definition per frozen shot: energies agree at ~1.5%;
+    the referee formula recovers published l<sub>i</sub> within 1%.</figcaption>
+  </figure>
+
+  <p><strong>Honest qualification:</strong> the exact 512-point contour extraction of the official scorer
+  was NOT executed (it needs <code>scikit-image==0.25.2</code>, absent from both project environments) —
+  the executable seam, scorer pin and evaluator-only Consistency adapter are ambix-side work, tracked as
+  f-emp-005; ambix currently pins only the dataset revision.</p>
+
 </main></body>
 </html>

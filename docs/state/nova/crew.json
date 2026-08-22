@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T03:09:03",
+  "updated": "2026-08-22T04:22:54",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -20038,9 +20038,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T010953797529-mast-reference-equilibrium",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a79",
+        "node": "mast-reference-equilibrium",
+        "role": "implement",
+        "member": "transport-env",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T01:09:56Z",
+        "completed_at": "2026-08-22T02:22:02Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4326,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4326,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "3b06b2f858206d536f51905f8b20065b483218fa",
+        "commits": [
+          "bd60c2bc2ce953b5908edd15c39027f4a363031c"
+        ],
+        "changed_lines": {
+          "added": 380,
+          "removed": 2,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "the competition machine is in the reference set and it corrected the architecture on first contact: MAST falsified the nested-family one-fill assumption (two mirrored disconnected lobes at psi_n 0.675, R 0.575 m, Z +/-1.8 m, pinned in a regression), and per-level flood-fill qualification of every shell collapsed all fields from order-unity to single digits - g1 104.4 to 5.84 percent inside the required band, elongation 135 to 1.33 with the face-14 jump exactly resolved - at a measured cost under half a percent. Lower triangularity keeps an honestly-banded 38 percent near-axis extremum residual at face 3 only. Read through novas own MAST layer at DD 4.1.1, COCOS 3 converted explicitly, stored-precision lattice verification per the standing caution; two-way referees stated as such since TORAX has no EFM reader. Focused 1/1, reference 6/6, extraction 9/9 in sequential fresh processes",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T010953797529-mast-reference-equilibrium/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 57984768,
+            "cached_input_tokens_cumulative": 360321280,
+            "input_tokens": 59217610,
+            "input_tokens_cumulative": 367141324,
+            "output_tokens": 75137,
+            "output_tokens_cumulative": 640855,
+            "reasoning_output_tokens": 28173,
+            "reasoning_output_tokens_cumulative": 205028
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 490
+    "_version": 491
   }
 }

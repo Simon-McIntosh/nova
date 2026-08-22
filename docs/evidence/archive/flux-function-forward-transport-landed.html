@@ -879,6 +879,44 @@
     magnitude, which is exactly why the H200 lane exists for production windows. 1,350 receipt
     rows in <code>scripts/window_demonstration/receipts.tsv</code>; the basin regression driver
     at <code>exchange_diagnosis/probe.py</code> receipts the full sequence either way.</p>
+    <h2 id="mast-reference">MAST enters the reference set &#8212; and corrects the architecture on first contact</h2>
+    <p>Commit <code>bd60c2bc</code>. The competition's machine, read through Nova's own shipped
+    MAST layer (shot 21978, EFM slice at 0.245 s, DD 4.1.1 from the new
+    <code>tests/data-manifest.json</code>, COCOS 3 Wb/rad converted explicitly, the stored
+    float32-precision lattice verified before endpoint-preserving reconstruction), measured
+    two-way against the host contour route &#8212; stated as two-way because TORAX has no EFM
+    reader.</p>
+    <p><strong>First contact falsified a locked assumption.</strong> The one-fill rule &#8212;
+    "one axis-connected boundary fill qualifies every interior shell" &#8212; is true only for
+    genuinely nested maps, and every EQDSK the pipeline had seen genuinely nested. MAST's tall
+    divertor-shaped flux structure does not: at &#968;&#770; 0.675 two mirrored disconnected
+    lobes appear inside the boundary core (four nodes at R 0.575 m, |Z| 1.75/1.81 m), growing
+    to 207 non-axis nodes by &#968;&#770; 0.99, and the service's shells absorbed them &#8212;
+    elongation jumped 1.64&#8594;4.22 at face 14 while the contour tracer stayed at 1.63.
+    The correction: <code>flood_fill_core</code> now runs at <em>every</em> shell level, its
+    mask qualifying clipped moments, arc line-integral samples, stationary candidates and all
+    extrema reductions; the boundary fill survives only as the eligible domain. Measured cost
+    of 28 fills instead of one: <strong>+0.48% cold, +0.02% warm</strong> on MAST &#8212; the
+    scan-based fill is effectively free, so the feared trade never materialised.</p>
+    <table>
+      <caption>MAST service&#8596;contour relative error, one-fill &#8594; per-level connectivity.</caption>
+      <thead><tr><th>Field</th><th>before</th><th>after</th></tr></thead>
+      <tbody>
+        <tr><td><code>g1</code></td><td>104.4%</td><td><strong>5.84%</strong></td></tr>
+        <tr><td><code>g2</code> / <code>g2g3</code></td><td>114.0 / 99.1%</td><td>5.92 / 8.03%</td></tr>
+        <tr><td><code>vpr</code> / <code>g0</code></td><td>38.9 / 36.6%</td><td>2.80 / 1.12%</td></tr>
+        <tr><td>&#934; / volume / area</td><td>32.1 / 19.1 / 27.7%</td><td>3.31 / 2.06 / 2.13%</td></tr>
+        <tr><td>elongation</td><td>135.2%</td><td><strong>1.33%</strong> (face 14: 4.2248 &#8594; 1.63568 vs referee 1.63381)</td></tr>
+        <tr><td>upper / lower triangularity</td><td>168.1 / 179.4%</td><td>4.62% / 38.3%&#8224;</td></tr>
+      </tbody>
+    </table>
+    <p>&#8224; The lower-triangularity residual is honestly banded, not hidden: it concentrates
+    entirely at face 3 (&#948; 0.194 vs referee 0.052) and tracks the referee from face 4
+    outward &#8212; a near-axis shape-extremum sensitivity, mechanistically distinct from the
+    repaired lobe defect, left as the recorded open edge of MAST accuracy. The mirrored lobes
+    themselves are pinned in a regression by their coordinates, so the assumption cannot
+    silently return. Focused gate 1/1, reference file 6/6, extraction file 9/9, sequential
+    fresh processes, all records valid with zero invalid arcs.</p>
   </main>
 </body>
 </html>

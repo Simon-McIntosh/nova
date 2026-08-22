@@ -1,0 +1,507 @@
+{
+  "artifacts": {
+    "closure_figure": "docs/figures/dual-basin-solve/portfolio-selection-closure.png",
+    "mechanism_figure": "docs/figures/dual-basin-solve/portfolio-decision-mechanisms.png",
+    "report": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/47247cc9-be75-4e83-a22e-ed27792dda52/portfolio-moment-revisit/scripts/portfolio_moment_revisit/report.md"
+  },
+  "bank_facts": {
+    "alternate_topology": "limited",
+    "closed_form_topology": "limited",
+    "frozen_reference_frames": 11,
+    "frozen_reference_machine_split": {
+      "DIII-D": 5,
+      "MAST": 6
+    },
+    "moment_capability": {
+      "measured_discriminator": "radial current centroid",
+      "prediction_payload": "PredictedCurrentMoments",
+      "seed_entry_point": "ForwardProfile.moment_seed"
+    },
+    "same_class_root_count_per_resolution": 2
+  },
+  "cases": [
+    {
+      "case_key": "dual-root-coarse",
+      "cohort": "banked_same_class_roots",
+      "decision": {
+        "known_good_frame_identity_used": false,
+        "mechanism": "moment_discriminator",
+        "portfolio_hysteresis_can_distinguish": false,
+        "portfolio_hysteresis_changed_outcome": false,
+        "reason": "both genuine roots have the same topology class; the candidate nearest the declared radial current centroid is selected",
+        "selected_class": "limited",
+        "selected_root": "closed_form",
+        "selection_margin_m": 0.04448351670761386
+      },
+      "resolution": "coarse",
+      "selection_inputs": {
+        "candidate_classes": [
+          "limited",
+          "limited"
+        ],
+        "candidate_roots": [
+          {
+            "centroid_absolute_error_m": 0.013864490731555268,
+            "centroid_r_m": 1.6740837108474012,
+            "current_a": 1625644.334902816,
+            "current_relative_error": 0.0014206012759572708,
+            "root_label": "closed_form",
+            "topology_class": "limited"
+          },
+          {
+            "centroid_absolute_error_m": 0.058348007439169125,
+            "centroid_r_m": 1.6018712126766768,
+            "current_a": 1544153.3512101837,
+            "current_relative_error": 0.05147780982402771,
+            "root_label": "alternate",
+            "topology_class": "limited"
+          }
+        ],
+        "centroid_is_confident_discriminator": true,
+        "declared_centroid_m": [
+          1.6602192201158459,
+          0.0
+        ],
+        "declared_current_a": 1627957.0127122786,
+        "structural_candidate_count": 2
+      }
+    },
+    {
+      "case_key": "dual-root-fine",
+      "cohort": "banked_same_class_roots",
+      "decision": {
+        "known_good_frame_identity_used": false,
+        "mechanism": "moment_discriminator",
+        "portfolio_hysteresis_can_distinguish": false,
+        "portfolio_hysteresis_changed_outcome": false,
+        "reason": "both genuine roots have the same topology class; the candidate nearest the declared radial current centroid is selected",
+        "selected_class": "limited",
+        "selected_root": "closed_form",
+        "selection_margin_m": 0.04443472582867414
+      },
+      "resolution": "fine",
+      "selection_inputs": {
+        "candidate_classes": [
+          "limited",
+          "limited"
+        ],
+        "candidate_roots": [
+          {
+            "centroid_absolute_error_m": 0.013869007329699645,
+            "centroid_r_m": 1.6740882274455455,
+            "current_a": 1626730.8083787183,
+            "current_relative_error": 0.0007532166537477393,
+            "root_label": "closed_form",
+            "topology_class": "limited"
+          },
+          {
+            "centroid_absolute_error_m": 0.05830373315837378,
+            "centroid_r_m": 1.601915486957472,
+            "current_a": 1544007.4827634222,
+            "current_relative_error": 0.05156741197299262,
+            "root_label": "alternate",
+            "topology_class": "limited"
+          }
+        ],
+        "centroid_is_confident_discriminator": true,
+        "declared_centroid_m": [
+          1.6602192201158459,
+          0.0
+        ],
+        "declared_current_a": 1627957.0127122786,
+        "structural_candidate_count": 2
+      }
+    },
+    {
+      "case_key": "MAST-21978-35",
+      "cohort": "frozen_current_constrained_references",
+      "decision": {
+        "known_good_frame_identity_used": false,
+        "mechanism": "structurally_unique_root",
+        "portfolio_hysteresis_can_distinguish": false,
+        "portfolio_hysteresis_changed_outcome": false,
+        "reason": "exact nonzero-current amplitude elimination excludes the vacuum branch before post-solve history is consulted",
+        "selected_class": "plasma",
+        "selected_root": "current_constrained_plasma_branch"
+      },
+      "machine": "MAST",
+      "selection_inputs": {
+        "amplitude_elimination": "exact_nonzero_target_current",
+        "candidate_classes": [
+          "plasma"
+        ],
+        "current_relative_error": 1.4524803774321844e-16,
+        "moment_discriminator_available_but_not_needed": true,
+        "predicted_centroid_m": [
+          0.7262637690591779,
+          -0.009708633631117633
+        ],
+        "reference_centroid_m": [
+          0.7700458894762363,
+          -0.00411930115326059
+        ],
+        "structural_candidate_count": 1,
+        "target_current_a": 801493.25
+      }
+    },
+    {
+      "case_key": "MAST-21983-35",
+      "cohort": "frozen_current_constrained_references",
+      "decision": {
+        "known_good_frame_identity_used": false,
+        "mechanism": "structurally_unique_root",
+        "portfolio_hysteresis_can_distinguish": false,
+        "portfolio_hysteresis_changed_outcome": false,
+        "reason": "exact nonzero-current amplitude elimination excludes the vacuum branch before post-solve history is consulted",
+        "selected_class": "plasma",
+        "selected_root": "current_constrained_plasma_branch"
+      },
+      "machine": "MAST",
+      "selection_inputs": {
+        "amplitude_elimination": "exact_nonzero_target_current",
+        "candidate_classes": [
+          "plasma"
+        ],
+        "current_relative_error": 1.430658633300923e-16,
+        "moment_discriminator_available_but_not_needed": true,
+        "predicted_centroid_m": [
+          0.7182477692124131,
+          0.0002365211976586811
+        ],
+        "reference_centroid_m": [
+          0.7713405254535441,
+          0.0032883626339803027
+        ],
+        "structural_candidate_count": 1,
+        "target_current_a": 813718.375
+      }
+    },
+    {
+      "case_key": "MAST-21985-51",
+      "cohort": "frozen_current_constrained_references",
+      "decision": {
+        "known_good_frame_identity_used": false,
+        "mechanism": "structurally_unique_root",
+        "portfolio_hysteresis_can_distinguish": false,
+        "portfolio_hysteresis_changed_outcome": false,
+        "reason": "exact nonzero-current amplitude elimination excludes the vacuum branch before post-solve history is consulted",
+        "selected_class": "plasma",
+        "selected_root": "current_constrained_plasma_branch"
+      },
+      "machine": "MAST",
+      "selection_inputs": {
+        "amplitude_elimination": "exact_nonzero_target_current",
+        "candidate_classes": [
+          "plasma"
+        ],
+        "current_relative_error": 0.0,
+        "moment_discriminator_available_but_not_needed": true,
+        "predicted_centroid_m": [
+          0.7259968226673434,
+          0.0005339975337324578
+        ],
+        "reference_centroid_m": [
+          0.7931345731235669,
+          0.0032153200134130864
+        ],
+        "structural_candidate_count": 1,
+        "target_current_a": 934383.875
+      }
+    },
+    {
+      "case_key": "MAST-21986-46",
+      "cohort": "frozen_current_constrained_references",
+      "decision": {
+        "known_good_frame_identity_used": false,
+        "mechanism": "structurally_unique_root",
+        "portfolio_hysteresis_can_distinguish": false,
+        "portfolio_hysteresis_changed_outcome": false,
+        "reason": "exact nonzero-current amplitude elimination excludes the vacuum branch before post-solve history is consulted",
+        "selected_class": "plasma",
+        "selected_root": "current_constrained_plasma_branch"
+      },
+      "machine": "MAST",
+      "selection_inputs": {
+        "amplitude_elimination": "exact_nonzero_target_current",
+        "candidate_classes": [
+          "plasma"
+        ],
+        "current_relative_error": 0.0,
+        "moment_discriminator_available_but_not_needed": true,
+        "predicted_centroid_m": [
+          0.7557624491448919,
+          0.11552863937943583
+        ],
+        "reference_centroid_m": [
+          0.7995247864306987,
+          0.09889428493417934
+        ],
+        "structural_candidate_count": 1,
+        "target_current_a": 874260.4375
+      }
+    },
+    {
+      "case_key": "MAST-21989-55",
+      "cohort": "frozen_current_constrained_references",
+      "decision": {
+        "known_good_frame_identity_used": false,
+        "mechanism": "structurally_unique_root",
+        "portfolio_hysteresis_can_distinguish": false,
+        "portfolio_hysteresis_changed_outcome": false,
+        "reason": "exact nonzero-current amplitude elimination excludes the vacuum branch before post-solve history is consulted",
+        "selected_class": "plasma",
+        "selected_root": "current_constrained_plasma_branch"
+      },
+      "machine": "MAST",
+      "selection_inputs": {
+        "amplitude_elimination": "exact_nonzero_target_current",
+        "candidate_classes": [
+          "plasma"
+        ],
+        "current_relative_error": 1.2532562100185784e-16,
+        "moment_discriminator_available_but_not_needed": true,
+        "predicted_centroid_m": [
+          0.7503296987422887,
+          0.014489090763915214
+        ],
+        "reference_centroid_m": [
+          0.8100958302708485,
+          0.012586049153551354
+        ],
+        "structural_candidate_count": 1,
+        "target_current_a": 928902.8125
+      }
+    },
+    {
+      "case_key": "MAST-22086-43",
+      "cohort": "frozen_current_constrained_references",
+      "decision": {
+        "known_good_frame_identity_used": false,
+        "mechanism": "structurally_unique_root",
+        "portfolio_hysteresis_can_distinguish": false,
+        "portfolio_hysteresis_changed_outcome": false,
+        "reason": "exact nonzero-current amplitude elimination excludes the vacuum branch before post-solve history is consulted",
+        "selected_class": "plasma",
+        "selected_root": "current_constrained_plasma_branch"
+      },
+      "machine": "MAST",
+      "selection_inputs": {
+        "amplitude_elimination": "exact_nonzero_target_current",
+        "candidate_classes": [
+          "plasma"
+        ],
+        "current_relative_error": 2.495412013981467e-16,
+        "moment_discriminator_available_but_not_needed": true,
+        "predicted_centroid_m": [
+          0.7319836459125536,
+          8.664148234654842e-05
+        ],
+        "reference_centroid_m": [
+          0.7781594025789569,
+          0.0026074364392189614
+        ],
+        "structural_candidate_count": 1,
+        "target_current_a": 933034.875
+      }
+    },
+    {
+      "case_key": "DIII-D-d3d_shot_00f40d3919-54",
+      "cohort": "frozen_current_constrained_references",
+      "decision": {
+        "known_good_frame_identity_used": false,
+        "mechanism": "structurally_unique_root",
+        "portfolio_hysteresis_can_distinguish": false,
+        "portfolio_hysteresis_changed_outcome": false,
+        "reason": "exact nonzero-current amplitude elimination excludes the vacuum branch before post-solve history is consulted",
+        "selected_class": "plasma",
+        "selected_root": "current_constrained_plasma_branch"
+      },
+      "machine": "DIII-D",
+      "selection_inputs": {
+        "amplitude_elimination": "exact_nonzero_target_current",
+        "candidate_classes": [
+          "plasma"
+        ],
+        "current_relative_error": 0.0,
+        "moment_discriminator_available_but_not_needed": true,
+        "predicted_centroid_m": [
+          1.68678362656687,
+          -0.03474808755307713
+        ],
+        "reference_centroid_m": [
+          1.7013060975363785,
+          -0.030790681220577792
+        ],
+        "structural_candidate_count": 1,
+        "target_current_a": 1283728.2760441303
+      }
+    },
+    {
+      "case_key": "DIII-D-d3d_shot_0112bdc95d-96",
+      "cohort": "frozen_current_constrained_references",
+      "decision": {
+        "known_good_frame_identity_used": false,
+        "mechanism": "structurally_unique_root",
+        "portfolio_hysteresis_can_distinguish": false,
+        "portfolio_hysteresis_changed_outcome": false,
+        "reason": "exact nonzero-current amplitude elimination excludes the vacuum branch before post-solve history is consulted",
+        "selected_class": "plasma",
+        "selected_root": "current_constrained_plasma_branch"
+      },
+      "machine": "DIII-D",
+      "selection_inputs": {
+        "amplitude_elimination": "exact_nonzero_target_current",
+        "candidate_classes": [
+          "plasma"
+        ],
+        "current_relative_error": 0.0,
+        "moment_discriminator_available_but_not_needed": true,
+        "predicted_centroid_m": [
+          1.6508072285719138,
+          -0.008280478420801398
+        ],
+        "reference_centroid_m": [
+          1.684005677842498,
+          -0.02507368739363349
+        ],
+        "structural_candidate_count": 1,
+        "target_current_a": 1252508.2535743713
+      }
+    },
+    {
+      "case_key": "DIII-D-d3d_shot_0112d94419-169",
+      "cohort": "frozen_current_constrained_references",
+      "decision": {
+        "known_good_frame_identity_used": false,
+        "mechanism": "structurally_unique_root",
+        "portfolio_hysteresis_can_distinguish": false,
+        "portfolio_hysteresis_changed_outcome": false,
+        "reason": "exact nonzero-current amplitude elimination excludes the vacuum branch before post-solve history is consulted",
+        "selected_class": "plasma",
+        "selected_root": "current_constrained_plasma_branch"
+      },
+      "machine": "DIII-D",
+      "selection_inputs": {
+        "amplitude_elimination": "exact_nonzero_target_current",
+        "candidate_classes": [
+          "plasma"
+        ],
+        "current_relative_error": 0.0,
+        "moment_discriminator_available_but_not_needed": true,
+        "predicted_centroid_m": [
+          1.6837747744308496,
+          -0.03371208502087672
+        ],
+        "reference_centroid_m": [
+          1.7251652110932658,
+          -0.012895624528919972
+        ],
+        "structural_candidate_count": 1,
+        "target_current_a": 685050.7490634918
+      }
+    },
+    {
+      "case_key": "DIII-D-d3d_shot_01177bc9fa-144",
+      "cohort": "frozen_current_constrained_references",
+      "decision": {
+        "known_good_frame_identity_used": false,
+        "mechanism": "structurally_unique_root",
+        "portfolio_hysteresis_can_distinguish": false,
+        "portfolio_hysteresis_changed_outcome": false,
+        "reason": "exact nonzero-current amplitude elimination excludes the vacuum branch before post-solve history is consulted",
+        "selected_class": "plasma",
+        "selected_root": "current_constrained_plasma_branch"
+      },
+      "machine": "DIII-D",
+      "selection_inputs": {
+        "amplitude_elimination": "exact_nonzero_target_current",
+        "candidate_classes": [
+          "plasma"
+        ],
+        "current_relative_error": 0.0,
+        "moment_discriminator_available_but_not_needed": true,
+        "predicted_centroid_m": [
+          1.7689765631213452,
+          -0.026595454023757563
+        ],
+        "reference_centroid_m": [
+          1.7910998123567161,
+          -0.024017072109606706
+        ],
+        "structural_candidate_count": 1,
+        "target_current_a": 979762.2680664062
+      }
+    },
+    {
+      "case_key": "DIII-D-d3d_shot_012c431151-125",
+      "cohort": "frozen_current_constrained_references",
+      "decision": {
+        "known_good_frame_identity_used": false,
+        "mechanism": "structurally_unique_root",
+        "portfolio_hysteresis_can_distinguish": false,
+        "portfolio_hysteresis_changed_outcome": false,
+        "reason": "exact nonzero-current amplitude elimination excludes the vacuum branch before post-solve history is consulted",
+        "selected_class": "plasma",
+        "selected_root": "current_constrained_plasma_branch"
+      },
+      "machine": "DIII-D",
+      "selection_inputs": {
+        "amplitude_elimination": "exact_nonzero_target_current",
+        "candidate_classes": [
+          "plasma"
+        ],
+        "current_relative_error": 0.0,
+        "moment_discriminator_available_but_not_needed": true,
+        "predicted_centroid_m": [
+          1.72690520696456,
+          -0.10313741293232222
+        ],
+        "reference_centroid_m": [
+          1.7653633746894954,
+          -0.10136912310332315
+        ],
+        "structural_candidate_count": 1,
+        "target_current_a": 267807.6736629009
+      }
+    }
+  ],
+  "fixture_measurement": {
+    "median_candidate_centroid_separation_m": 0.07219261932939891,
+    "median_rejected_centroid_error_m": 0.058325870298771454,
+    "median_selected_centroid_error_m": 0.013866749030627457,
+    "selected_root_on_both_meshes": "closed_form"
+  },
+  "input_digests": {
+    "scripts/dual_basin_fixtures/topology-classification.json": "315a3abc2e01f2ecb00b333f67b62d14ad031b7ef24d469bb826689dce5dc6da",
+    "scripts/moment_prediction_confidence/moment-prediction-confidence.json": "5794f1d46db3cf5e742e48a8729308e780c8a9686a0a20eca14b676d56853acd",
+    "scripts/moment_prediction_confidence/moment-prediction-confidence.tsv": "11fcd187bb8b699843b0a83fb9643f94adf8a10c4eaf8d5bc877ef246bfdeee7",
+    "scripts/oracle_rebaseline/receipt-coarse.json": "8e288da4029bb42964d85b6975d194f5ec208f0ef1f6e04f451dba4f30338df7",
+    "scripts/oracle_rebaseline/receipt-fine.json": "b26d82e45184197a83146d74749bb8954f872c821b8ddfe0b58b0127c202ef9e"
+  },
+  "policy": {
+    "hysteresis_rule": "history is consulted only when multiple admissible topology classes remain after structural and moment discrimination",
+    "known_good_frame_identity_is_a_selection_input": false,
+    "moment_rule": "among multiple roots, select the unique minimum absolute radial-centroid error when finite predicted moments distinguish them",
+    "order": [
+      "structurally_unique_root",
+      "moment_discriminator",
+      "portfolio_hysteresis"
+    ],
+    "structural_rule": "one admissible root after exact amplitude elimination decides without history"
+  },
+  "role_restatement": "ROLE RESTATEMENT \u2014 The topology-pinned two-branch portfolio remains a topology-discovery and transition-safety mechanism where genuinely limited and diverted solutions coexist. It is not a root-identity selector for same-class multiple roots, and it does not earn a second solve on current-constrained reference lanes where amplitude elimination leaves one admissible plasma branch. In this measurement, predicted centroid moments resolve the two same-class fixture cases, while structural current constraint resolves all frozen reference cases before history can act. Hysteresis remains the policy only when both topology-pinned classes are simultaneously valid and admissible and topology history is genuinely informative.",
+  "schema": "nova.portfolio-moment-revisit",
+  "schema_version": 1,
+  "summary": {
+    "case_count": 13,
+    "known_good_frame_identity_selection_count": 0,
+    "maximum_reference_current_relative_error": 2.495412013981467e-16,
+    "mechanism_counts": {
+      "moment_discriminator": 2,
+      "portfolio_hysteresis": 0,
+      "structurally_unique_root": 11
+    },
+    "portfolio_cost_verdict": "no selection benefit in this cohort: same-class roots need moments; current-constrained references are structurally closed",
+    "portfolio_hysteresis_changed_count": 0
+  }
+}

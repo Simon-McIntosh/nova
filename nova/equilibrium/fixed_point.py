@@ -56,6 +56,9 @@ __all__ = [
 ]
 
 
+_BACKTRACKING_FACTORS = (1.0, 0.5, 0.25, 0.125, 0.0625, 0.03125)
+
+
 class AmplificationObservation(IntEnum):
     """Advisory shape of the increments along a qualified solve trajectory."""
 
@@ -106,7 +109,7 @@ class KinkAwareResult(NamedTuple):
     ``trace`` records the residual at each relaxed warmup state and each
     accepted nonlinear state.  ``crossings`` identifies nonlinear steps whose
     unconstrained Newton proposal straddled the caller's detected surface.
-    ``candidate_admissibility`` records which of the four nonmonotone
+    ``candidate_admissibility`` records which of the fixed nonmonotone
     backtracking factors had finite evaluations and passed the caller's
     predicate.  ``accepted_factors`` is zero when no trial was selected.
     ``krylov_action_qualification`` retains the first refused linear action.
@@ -502,7 +505,7 @@ def kink_aware_newton_krylov(
     The four policies alter only proposal acceptance; ``map_fn`` is never
     smoothed or modified.  ``clarke`` averages exact tangents immediately on
     either side of a detected crossing.  ``nonmonotone`` selects the longest
-    of four backtracking proposals admitted by the recent residual envelope;
+    fixed-ladder proposal admitted by the recent residual envelope;
     when ``admissibility_fn`` is supplied, a trial must also have a finite map
     evaluation and make that predicate true before it can be selected.
     ``surface_restricted`` shortens a straddling proposal to just beyond the
@@ -658,7 +661,7 @@ def kink_aware_newton_krylov(
             promoted = map_fn(proposal)
             accepted_residual = _relative_residual(promoted, proposal)
         elif strategy == "nonmonotone":
-            factors = jnp.asarray((1.0, 0.5, 0.25, 0.125), dtype=initial.dtype)
+            factors = jnp.asarray(_BACKTRACKING_FACTORS, dtype=initial.dtype)
             trial_step = jnp.where(action_accepted, step, jnp.zeros_like(step))
             candidates = state[None, :] + factors[:, None] * trial_step[None, :]
 
@@ -764,8 +767,8 @@ def kink_aware_newton_krylov(
             initial_residual,
             trace,
             jnp.zeros(newton_steps, dtype=jnp.bool_),
-            jnp.full(4, jnp.nan, dtype=initial.dtype),
-            jnp.zeros((newton_steps, 4), dtype=jnp.bool_),
+            jnp.full(len(_BACKTRACKING_FACTORS), jnp.nan, dtype=initial.dtype),
+            jnp.zeros((newton_steps, len(_BACKTRACKING_FACTORS)), dtype=jnp.bool_),
             jnp.zeros(newton_steps, dtype=initial.dtype),
             jnp.asarray(KrylovActionQualification.NOT_APPLICABLE, dtype=jnp.int32),
             amplification,

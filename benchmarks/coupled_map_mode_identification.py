@@ -378,6 +378,8 @@ def _stable_measurement() -> tuple[dict[str, object], object, object, np.ndarray
     leading_alignment = _projection_fraction(
         driven["terminal_vector"], _orthonormal_basis(vectors[:, 0])
     )
+    leading_value = values[0]
+    scalar_resolvent = 1.0 / abs(1.0 - leading_value)
     root_residual = float(
         np.max(np.abs(np.asarray(mapped - root)))
         / max(float(np.max(np.abs(np.asarray(root)))), np.finfo(float).tiny)
@@ -402,6 +404,27 @@ def _stable_measurement() -> tuple[dict[str, object], object, object, np.ndarray
         "solve": solve_receipt,
         "root_relative_map_residual": root_residual,
         "dominant_eigenpairs": pairs,
+        "leading_mode_comparison": {
+            "leading_eigenvalue": _complex(leading_value),
+            "measured_late_growth": STABLE_LATE_GROWTH,
+            "absolute_eigenvalue_minus_late_growth": float(
+                abs(abs(leading_value) - STABLE_LATE_GROWTH)
+            ),
+            "relative_eigenvalue_minus_late_growth": float(
+                abs(abs(leading_value) - STABLE_LATE_GROWTH) / STABLE_LATE_GROWTH
+            ),
+            "scalar_modal_resolvent_factor": float(scalar_resolvent),
+            "measured_peak_field_resolvent_gain": STABLE_RESOLVENT_GAIN,
+            "measured_gain_over_scalar_modal_factor": float(
+                STABLE_RESOLVENT_GAIN / scalar_resolvent
+            ),
+            "interpretation": (
+                "The eigenvalue fixes the near-pole denominator. The measured "
+                "peak-field gain is larger than the scalar modal factor because "
+                "the drive, eigenvector and reported grid-peak norm are not a "
+                "unit-normal orthogonal scalar channel."
+            ),
+        },
         "passive_driven_tangent": {
             key: value for key, value in driven.items() if key != "terminal_vector"
         },

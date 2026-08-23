@@ -1,0 +1,344 @@
+{
+  "schema": "nova-seed-alignment-power/1.0",
+  "status": "banked",
+  "completed_utc": "2026-08-23T22:54:29.507048+00:00",
+  "preregistration": {
+    "recorded_utc": "2026-08-23T22:29:08.235980+00:00",
+    "recorded_before_any_added_frame_score": true,
+    "recorded_before_any_new_outcome_measurement": true,
+    "frame_selection_rule": "Retain the locked five-frame corpus; take the complete six-shot frozen held-out cohort selected by native-grid-decomposition; then sort that cohort by shot and add the immediately following slice from its first two shots. Sort unique (shot, slice_index) pairs. No observable score, growth, or terminal residual enters selection.",
+    "selection_authority": {
+      "path": "docs/figures/efit-flux-decomposition/native-grid-decomposition.json",
+      "sha256": "2b60e2de1caf27e3b2af34e28d3e9ca007b1f992e417fe540d5de84098e5958a"
+    },
+    "banked_cases": [
+      {
+        "shot": 21978,
+        "slice_index": 35
+      },
+      {
+        "shot": 21983,
+        "slice_index": 35
+      },
+      {
+        "shot": 21985,
+        "slice_index": 51
+      },
+      {
+        "shot": 21986,
+        "slice_index": 46
+      },
+      {
+        "shot": 21989,
+        "slice_index": 55
+      }
+    ],
+    "added_cases": [
+      {
+        "shot": 21978,
+        "slice_index": 36
+      },
+      {
+        "shot": 21983,
+        "slice_index": 36
+      },
+      {
+        "shot": 22086,
+        "slice_index": 43
+      }
+    ],
+    "enlarged_corpus": [
+      {
+        "shot": 21978,
+        "slice_index": 35
+      },
+      {
+        "shot": 21978,
+        "slice_index": 36
+      },
+      {
+        "shot": 21983,
+        "slice_index": 35
+      },
+      {
+        "shot": 21983,
+        "slice_index": 36
+      },
+      {
+        "shot": 21985,
+        "slice_index": 51
+      },
+      {
+        "shot": 21986,
+        "slice_index": 46
+      },
+      {
+        "shot": 21989,
+        "slice_index": 55
+      },
+      {
+        "shot": 22086,
+        "slice_index": 43
+      }
+    ],
+    "banked_sample_count": 5,
+    "added_sample_count": 3,
+    "enlarged_sample_count": 8,
+    "observable": {
+      "name": "seed residual-action amplification",
+      "definition": "For seed s, fixed-point map F, residual r = F(s) - s, and local action A = I - J_F(s), score q(s,F) = ||r||_2 / ||A r||_2.",
+      "definition_sha256": "e711aa2384122ccdea8203359db3cd3eeb74f1fe75550ff95d77627418ccf5d7",
+      "ranking_direction": "ascending is preferred; larger predicts worse outcome",
+      "inputs": [
+        "candidate seed",
+        "fixed-point map at seed",
+        "map tangent"
+      ],
+      "outcome_exclusions": [
+        "converged solve",
+        "terminal state",
+        "terminal residual",
+        "cumulative growth",
+        "reference equilibrium"
+      ],
+      "singular_convention": "an exact fixed point scores zero; nonzero residual with zero action scores positive infinity",
+      "locked_source": {
+        "path": "docs/figures/topology-preserving-continuation/seed-alignment-ranking.json",
+        "sha256": "f2c47491e2061d0e3f7858a0888a78a0e9c02fe45c3683ee34ad9cb6d1f665cc"
+      },
+      "changed_from_locked_source": false
+    },
+    "association_test": "two-sided Spearman rank correlation on all selected frames",
+    "significance_alpha": 0.05,
+    "power_definition": "two-sided Fisher-z normal approximation at alpha 0.05; reported both at the banked effect sizes and at the enlarged observed effects"
+  },
+  "measurement_sequence": {
+    "preregistered_utc": "2026-08-23T22:29:08.235980+00:00",
+    "all_outcomes_banked_utc": "2026-08-23T22:38:54.681087+00:00",
+    "added_scores_computed_only_after_outcome_bank_completed": true
+  },
+  "observable_execution": {
+    "definition_carried_forward_unchanged": true,
+    "definition": "For seed s, fixed-point map F, residual r = F(s) - s, and local action A = I - J_F(s), score q(s,F) = ||r||_2 / ||A r||_2.",
+    "converged_solve_enters_observable": false,
+    "statement": "Every score uses only the cold moment seed, one fixed-point map evaluation, and one tangent action at that seed. The outcome bank was completed before any added-frame score was computed; the five locked scores are carried verbatim from their banked receipt.",
+    "backend": "gpu",
+    "precision": "float64"
+  },
+  "outcome_definitions": {
+    "cumulative_growth": "maximum eager-compiled flux separation after twelve production nonlinear updates divided by the separation after one map application",
+    "terminal_residual": "terminal fixed-point residual from the cold target-current-constrained public host-Krylov solve"
+  },
+  "ranking": {
+    "rows": [
+      {
+        "shot": 21978,
+        "slice_index": 35,
+        "time_s": 0.1899999976158142,
+        "cumulative_growth": 2156276.0,
+        "terminal_residual": 0.0010843246548355142,
+        "outcome_source": "locked five-frame receipt",
+        "seed_residual_action_amplification": 0.9322689958968416,
+        "score_time_s": 0.1899999976158142,
+        "score_source": "locked five-frame receipt",
+        "corpus_role": "banked_five"
+      },
+      {
+        "shot": 21978,
+        "slice_index": 36,
+        "time_s": 0.19499999284744263,
+        "cumulative_growth": 369.625,
+        "growth_measurement": {
+          "nonlinear_updates": 12,
+          "initial_eager_compiled_maximum_absolute_difference": 2.220446049250313e-16,
+          "terminal_eager_compiled_maximum_absolute_difference": 8.20732370954147e-14,
+          "eager_terminal_residual": 0.140506624251144,
+          "compiled_terminal_residual": 0.14050662425113525
+        },
+        "terminal_residual": 2.1269469382856163e-07,
+        "terminal_measurement": {
+          "iterations": 8,
+          "termination": "public host Krylov solver returned",
+          "achieved_current_a": 819780.6249999999
+        },
+        "outcome_source": "current-tree preregistered measurement",
+        "seed_residual_action_amplification": 0.911610494019064,
+        "score_time_s": 0.19499999284744263,
+        "score_source": "current-tree unchanged observable",
+        "corpus_role": "added"
+      },
+      {
+        "shot": 21983,
+        "slice_index": 35,
+        "time_s": 0.1899999976158142,
+        "cumulative_growth": 575064.125,
+        "terminal_residual": 0.018280965423722807,
+        "outcome_source": "locked five-frame receipt",
+        "seed_residual_action_amplification": 0.9533225665401838,
+        "score_time_s": 0.1899999976158142,
+        "score_source": "locked five-frame receipt",
+        "corpus_role": "banked_five"
+      },
+      {
+        "shot": 21983,
+        "slice_index": 36,
+        "time_s": 0.19499999284744263,
+        "cumulative_growth": 60.75,
+        "growth_measurement": {
+          "nonlinear_updates": 12,
+          "initial_eager_compiled_maximum_absolute_difference": 3.3306690738754696e-16,
+          "terminal_eager_compiled_maximum_absolute_difference": 2.0233814623793478e-14,
+          "eager_terminal_residual": 0.15531346682898584,
+          "compiled_terminal_residual": 0.1553134668289861
+        },
+        "terminal_residual": 0.006299788326640744,
+        "terminal_measurement": {
+          "iterations": 100,
+          "termination": "public host Krylov outer iteration ceiling exhausted",
+          "achieved_current_a": 829336.1875
+        },
+        "outcome_source": "current-tree preregistered measurement",
+        "seed_residual_action_amplification": 0.9639191733138764,
+        "score_time_s": 0.19499999284744263,
+        "score_source": "current-tree unchanged observable",
+        "corpus_role": "added"
+      },
+      {
+        "shot": 21985,
+        "slice_index": 51,
+        "time_s": 0.2750000059604645,
+        "cumulative_growth": 52452978116.0,
+        "terminal_residual": 0.002451587844592516,
+        "outcome_source": "locked five-frame receipt",
+        "seed_residual_action_amplification": 1.0026929545189016,
+        "score_time_s": 0.2750000059604645,
+        "score_source": "locked five-frame receipt",
+        "corpus_role": "banked_five"
+      },
+      {
+        "shot": 21986,
+        "slice_index": 46,
+        "time_s": 0.25,
+        "cumulative_growth": 564602919.75,
+        "terminal_residual": 0.005320862474684456,
+        "outcome_source": "locked five-frame receipt",
+        "seed_residual_action_amplification": 0.9951411056094699,
+        "score_time_s": 0.25,
+        "score_source": "locked five-frame receipt",
+        "corpus_role": "banked_five"
+      },
+      {
+        "shot": 21989,
+        "slice_index": 55,
+        "time_s": 0.29499998688697815,
+        "cumulative_growth": 22921153.0,
+        "terminal_residual": 0.002289950466828694,
+        "outcome_source": "locked five-frame receipt",
+        "seed_residual_action_amplification": 1.065876598525219,
+        "score_time_s": 0.29499998688697815,
+        "score_source": "locked five-frame receipt",
+        "corpus_role": "banked_five"
+      },
+      {
+        "shot": 22086,
+        "slice_index": 43,
+        "time_s": 0.22999998927116394,
+        "cumulative_growth": 3.0,
+        "terminal_residual": 2.911868346631881e-16,
+        "outcome_source": "previously banked frozen-six receipts",
+        "seed_residual_action_amplification": 0.9668409291813004,
+        "score_time_s": 0.22999998927116394,
+        "score_source": "current-tree unchanged observable",
+        "corpus_role": "added"
+      }
+    ],
+    "banked_five_readings": {
+      "spearman_against_cumulative_growth": {
+        "statistic": 0.6,
+        "two_sided_pvalue": 0.28475697986529386,
+        "sample_count": 5
+      },
+      "spearman_against_terminal_residual": {
+        "statistic": 0.0,
+        "two_sided_pvalue": 1.0,
+        "sample_count": 5
+      }
+    },
+    "spearman_against_cumulative_growth": {
+      "statistic": 0.523809523809524,
+      "two_sided_pvalue": 0.1827207505397148,
+      "sample_count": 8
+    },
+    "spearman_against_terminal_residual": {
+      "statistic": 0.14285714285714288,
+      "two_sided_pvalue": 0.735764859879812,
+      "sample_count": 8
+    }
+  },
+  "statistical_power": {
+    "alpha": 0.05,
+    "sample_count": 8,
+    "method": "two-sided Fisher-z normal approximation; descriptive achieved power under a continuous bivariate alternative",
+    "at_banked_effect_sizes": {
+      "cumulative_growth": {
+        "effect_size": 0.6,
+        "power": 0.34111253441146583
+      },
+      "terminal_residual": {
+        "effect_size": 0.0,
+        "power": 0.05
+      }
+    },
+    "at_enlarged_observed_effect_sizes": {
+      "cumulative_growth": {
+        "effect_size": 0.523809523809524,
+        "power": 0.25533662540809166
+      },
+      "terminal_residual": {
+        "effect_size": 0.14285714285714288,
+        "power": 0.061933304732192274
+      }
+    },
+    "adequate_power_threshold": 0.8
+  },
+  "scientific_verdict": {
+    "status": "UNDERPOWERED_NEGATIVE",
+    "promote_as_seed_selector": false,
+    "growth_reaches_positive_significance": false,
+    "residual_reaches_positive_significance": false,
+    "failing_outcomes": [
+      "cumulative_growth",
+      "terminal_residual"
+    ],
+    "reason": "Promotion still requires a positive, significant rank association against both outcomes. The enlarged result is closed at its measured power even when that requirement is not met."
+  },
+  "comparison_scope": {
+    "claim": "rank association only; no causal performance attribution",
+    "locked_score_source_commit": "0b9ab88a0974341b656668a70863855e1a091cc3",
+    "added_measurement_source_commit": "f7bf288c8ac44d339f07146228644cd5d801c275",
+    "production_paths_changed_since_locked_score_tree": [
+      "nova/equilibrium/fixed_point.py",
+      "nova/equilibrium/manifold_advance.py",
+      "nova/equilibrium/seed_alignment.py"
+    ],
+    "qualification": "The five historical outcomes, the previously banked sixth frame, and six current-tree additions do not share one fully identified production tree. Multiple production paths changed, so the pooled association answers ranking power only and cannot attribute an outcome delta to the observable or to any solver mechanism."
+  },
+  "source_identity": {
+    "commit": "f7bf288c8ac44d339f07146228644cd5d801c275",
+    "tree": "4adc782fc47b8f3e93964c6878f735a8b82a1016"
+  },
+  "authority_inputs": {
+    "docs/figures/topology-preserving-continuation/seed-alignment-ranking.json": {
+      "sha256": "f2c47491e2061d0e3f7858a0888a78a0e9c02fe45c3683ee34ad9cb6d1f665cc"
+    },
+    "docs/figures/mast-catalog-gpu-solve/parity-divergence-attribution.json": {
+      "sha256": "2c2c856375b53f0d4bfdce81133dbcef39b314acad6c3a59f2b1b52849cca7f7"
+    },
+    "docs/figures/dual-basin-solve/newton-warm-ladder-replay.json": {
+      "sha256": "5ef394172afa1982e551dce7dda4080c7476a9a11016c470f95ae64072db90f6"
+    },
+    "docs/figures/efit-flux-decomposition/native-grid-decomposition.json": {
+      "sha256": "2b60e2de1caf27e3b2af34e28d3e9ca007b1f992e417fe540d5de84098e5958a"
+    }
+  }
+}

@@ -33,7 +33,7 @@
       1e-06,
       1000000.0
     ],
-    "policy": "no clipping: evaluation raises LambdaOutOfBand and the arm records a loud guard termination"
+    "policy": "no clipping: current_normalisation_amplitude raises CurrentNormalisationError and the arm records a loud guard termination"
   },
   "measurement": "plasma-current constrained free-boundary map",
   "nova_equilibrium_modified": false,
@@ -101,8 +101,10 @@
   },
   "shared_inputs": {
     "coefficients_fitted": 0,
-    "current_set": "nineteen shipped poloidal currents plus five recovered currents; the shipped bcoil channel supplies the toroidal-field function",
+    "current_authority": "nova.imas.diiid_current fixed wiring",
+    "current_set": "nineteen shipped poloidal currents plus five conductors driven from the shipped ECOILA channel by the fixed-wiring pf_active circuit; the shipped bcoil channel supplies the toroidal-field function",
     "currents_adjusted": 0,
+    "label_recovered_current_prescriptions_used": false,
     "poloidal_conductors": 24,
     "seed": "the same convention-clean labelled branch seed in every arm"
   },

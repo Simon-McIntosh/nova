@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from types import SimpleNamespace
 
 import numpy as np
 
@@ -48,13 +49,17 @@ def test_declaration_separates_root_gate_from_label_diagnostic() -> None:
     assert declared["solver"]["relative_residual_criterion"] == 1.0e-6
     assert declared["solver"]["maximum_outer_iterations"] == 1000
     assert declared["solver"]["maximum_inner_gmres_iterations"] == 400
+    assert declared["solver"]["diagnostic_control_outer_iterations"] == 100
+    assert declared["solver"]["diagnostic_control_inner_gmres_iterations"] == 40
     assert declared["current_arms"]["poloidal_conductor_count"] == 24
     assert declared["current_arms"]["coefficients_fitted"] == 0
+    assert declared["current_arms"]["arm_choice"] == "circuit_driven_fixed_wiring"
+    assert not declared["current_arms"]["label_recovered_current_prescriptions_used"]
     assert declared["label_distance"]["representability_ceiling"] == 0.0429
     assert "never included" in declared["label_distance"]["role"]
 
 
-def test_landed_inputs_are_distinct_screened_and_keep_exact_currents() -> None:
+def test_landed_inputs_are_distinct_screened_and_ignore_recovered_currents() -> None:
     frames = []
     for index in range(5):
         frames.append(
@@ -78,7 +83,9 @@ def test_landed_inputs_are_distinct_screened_and_keep_exact_currents() -> None:
     }
     selected = roots.selected_inputs(receipt, set())
     assert len(selected) == 5
-    assert selected[3].recovered_currents_a == tuple(3000.0 + i for i in range(5))
+    assert selected[3].shot == "shot-3"
+    assert selected[3].frame == 3
+    assert selected[3].recovered_currents_a == ()
 
 
 def test_control_can_converge_numerically_without_passing_topology() -> None:
@@ -90,24 +97,57 @@ def test_control_can_converge_numerically_without_passing_topology() -> None:
 
 def test_label_distance_above_ceiling_does_not_fail_a_diverted_root() -> None:
     result = roots.summarize([_frame(label_rms=0.9) for _ in range(5)])
-    assert min(result["full_current_label_fractional_rms"]) > 0.0429
+    assert min(result["circuit_driven_label_fractional_rms"]) > 0.0429
     assert result["label_distance_is_diagnostic_only"]
-    assert result["full_current_converged_diverted_frames"] == 5
+    assert result["circuit_driven_converged_diverted_frames"] == 5
     assert result["passed"]
 
 
-def test_current_arms_append_recovered_values_without_adjustment() -> None:
-    class Operator:
-        external_current = np.arange(24.0)
+def test_current_arms_use_fixed_wiring_without_free_parameters(monkeypatch) -> None:
+    names = (*roots.POLOIDAL_CONDUCTORS, *roots.OMITTED_COILS)
+    circuit = np.arange(1.0, 25.0)
 
-    class Profile:
-        operator = Operator()
+    class Resolution:
+        def __init__(self):
+            self.unknown_indices = np.asarray([], dtype=int)
+            self.names = names
 
-    recovered = (41.0, 42.0, 43.0, 44.0, 45.0)
-    arms = roots.current_arms(Profile(), recovered)
-    np.testing.assert_array_equal(arms[0, -5:], 0.0)
-    np.testing.assert_array_equal(arms[1, -5:], recovered)
-    np.testing.assert_array_equal(arms[0, :-5], arms[1, :-5])
+        @staticmethod
+        def current(unknown):
+            assert unknown == ()
+            return circuit
+
+    monkeypatch.setattr(
+        roots,
+        "dataset_machine_description",
+        lambda row, source_row: SimpleNamespace(physical=(row, source_row)),
+    )
+    monkeypatch.setattr(
+        roots,
+        "shipped_current_at",
+        lambda row, description, shipped_names, time_ms: {
+            name: float(index + 1) for index, name in enumerate(shipped_names)
+        },
+    )
+    monkeypatch.setattr(
+        roots,
+        "complete_profile_current_adapter",
+        lambda profile, **kwargs: SimpleNamespace(
+            profile=("completed", profile),
+            resolution=Resolution(),
+            response_receipt={"current_authority": "pf_active circuit"},
+        ),
+    )
+
+    profile, arms, receipt = roots.description_driven_currents(
+        {"_source_path": "shot.parquet"}, object(), 2200.0
+    )
+    assert profile[0] == "completed"
+    np.testing.assert_array_equal(arms[0, :19], circuit[:19])
+    np.testing.assert_array_equal(arms[0, 19:], np.zeros(5))
+    np.testing.assert_array_equal(arms[1], circuit)
+    assert receipt["unknown_parameter_count"] == 0
+    assert receipt["response_order"] == list(names)
 
 
 def test_large_budget_receipt_separates_root_from_terminal_topology() -> None:
@@ -157,17 +197,24 @@ def test_plateau_diagnostic_identifies_nonfinite_exact_tangent() -> None:
     )
 
 
-def test_committed_receipt_carries_five_paired_diverted_roots() -> None:
+def test_committed_receipt_carries_five_paired_circuit_outcomes() -> None:
     receipt = json.loads((roots.DEFAULT_OUTPUT / roots.RECEIPT_NAME).read_text())
     result = receipt["result"]
     assert result["frame_count"] >= 5
     assert result["all_shots_screened_free_of_affected_population"]
-    assert result["full_current_converged_diverted_frames"] == result["frame_count"]
-    assert result["passed"]
+    assert result["circuit_driven_converged_diverted_frames"] == 1
+    assert result["passed"] is False
+    choice = receipt["current_arm_choice"]
+    assert choice["uses_pf_active_circuit"] is True
+    assert choice["label_recovered_current_prescriptions_used"] is False
     for frame in result["frames"]:
         assert frame["coefficients_fitted"] == 0
         assert frame["current_adjustments"] == 0
-        assert len(frame["recovered_currents_a"]) == 5
+        assert frame["current_arm_choice"] == "circuit_driven_fixed_wiring"
+        assert frame["label_recovered_current_prescriptions_used"] is False
+        authority = frame["inference_current_authority"]
+        assert authority["uses_circuit"] is True
+        assert authority["unknown_parameter_count"] == 0
         for name in roots.CURRENT_ARM_NAMES:
             arm = frame["arms"][name]
             assert "relative_residual" in arm["fixed_point"]
@@ -175,3 +222,15 @@ def test_committed_receipt_carries_five_paired_diverted_roots() -> None:
             assert "class" in arm["topology"]
             assert "x_point_rz_m" in arm["topology"]
             assert arm["label_map_diagnostic"]["used_as_pass_criterion"] is False
+        assert (
+            frame["arms"][roots.CURRENT_ARM_NAMES[0]]["fixed_point"][
+                "declared_outer_iterations"
+            ]
+            == roots.CONTROL_OUTER_ITERATIONS
+        )
+        assert (
+            frame["arms"][roots.CURRENT_ARM_NAMES[1]]["fixed_point"][
+                "declared_outer_iterations"
+            ]
+            == roots.HOST_OUTER_ITERATIONS
+        )

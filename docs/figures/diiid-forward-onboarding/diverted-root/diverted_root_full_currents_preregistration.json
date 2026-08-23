@@ -1,0 +1,38 @@
+{
+  "current_arms": {
+    "arm_choice": "circuit_driven_fixed_wiring",
+    "authority": "nova.imas.diiid_current fixed wiring",
+    "coefficients_fitted": 0,
+    "control": "nineteen shipped poloidal conductors plus the shipped bcoil channel used by the toroidal-field source",
+    "current_adjustments": 0,
+    "full": "the same shipped channels plus ECOILB, E567UP, E567DN, E89UP and E89DN driven from shipped ECOILA by the fixed-wiring pf_active circuit",
+    "label_recovered_current_prescriptions_used": false,
+    "poloidal_conductor_count": 24
+  },
+  "label_distance": {
+    "measure": "gauge-aligned RMS on the labelled LCFS interior divided by the whole labelled-map range",
+    "representability_ceiling": 0.0429,
+    "role": "diagnostic only; never included in the pass criterion"
+  },
+  "measurement": "diverted free-boundary root with complete current set",
+  "pass_criterion": "finite terminal receipt AND relative residual <= 1e-6 AND unpinned terminal topology classified diverted",
+  "selection": {
+    "frames": 5,
+    "polarity_screen": "every shot is absent from the landed 603-shot affected population",
+    "rule": "the five distinct-shot replacement frames already banked by the boundary-current recovery measurement; only shot and frame are read, never its label-recovered current prescriptions",
+    "source": "docs/figures/diiid-forward-onboarding/boundary-recovery/boundary_current_recovery_receipt.json"
+  },
+  "solver": {
+    "budget_multiplier_over_recorded_100_by_40_host_fixture": 10,
+    "diagnostic_control_inner_gmres_iterations": 40,
+    "diagnostic_control_outer_iterations": 100,
+    "entry_point": "scipy.optimize.newton_krylov over ForwardProfile.flux_map",
+    "line_search": "armijo",
+    "maximum_inner_gmres_iterations": 400,
+    "maximum_outer_iterations": 1000,
+    "relative_residual_criterion": 1e-06,
+    "requested_class": "diverted",
+    "route": "host_newton_krylov",
+    "seed": "the convention-clean labelled map, used only to select the diverted branch; it is not an equilibrium input"
+  }
+}

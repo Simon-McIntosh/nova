@@ -1,0 +1,372 @@
+{
+  "schema": "nova-dimension-general-conditioning",
+  "completed_utc": "2026-08-23T21:05:41.844125+00:00",
+  "status": "complete",
+  "source": {
+    "fixed_point_sha256": "820aaabb08cb5dd97c1c03ab8805f66f2f88fd51f6a22857d151b6f6f077f676",
+    "test_sha256": "0735cc1fd878352a997894ad3c4506b3ebc54f9a3f8b5e661eac8172385a447c"
+  },
+  "mechanism": {
+    "projected_condition": "largest divided by smallest active singular value of the fixed-shape rectangular Arnoldi projection",
+    "online_baseline": "largest divided by median active singular value, combined geometrically with the preceding projection baseline",
+    "trigger": "projected_condition / online_baseline > e while nonlinear residual exceeds the fourth root of machine precision",
+    "trigger_ratio": 2.718281828459045,
+    "trigger_principle": "one natural-log unit separates the smallest singular tail from the projection typical scale; e is mathematical and was not measured from either dataset",
+    "release_principle": "the fourth-root machine-precision scale releases trajectory damping before local convergence; it derives from the active dtype and is not a dataset tolerance",
+    "damping": "online_baseline / (e * projected_condition)",
+    "damping_exponent": 1,
+    "exponent_principle": "inverse proportionality is the unique first-power monomial that makes condition-weighted step scale independent of measured condition; the additional e margin is symmetric with the trigger in log space",
+    "fixed_shape": true,
+    "data_dependent_python_control_flow": false,
+    "data_dependent_jax_control_flow": false,
+    "jit_safe": true,
+    "vmap_safe": true,
+    "dimension_specific_constants": [],
+    "dataset_fitted_constants": [],
+    "requires_recalibration_per_dimension": false
+  },
+  "measurements": [
+    {
+      "projection_dimension": 12,
+      "machine": "MAST",
+      "route": "frozen held-out production solve",
+      "trajectory_case": {
+        "shot": 21985,
+        "slice_index": 51
+      },
+      "nonlinear_update_count": 12,
+      "intervention_count": 12,
+      "maximum_projected_condition": 267.39861174239996,
+      "per_update_separations": [
+        {
+          "update": 1,
+          "maximum_absolute_separation": 2.220446049250313e-16,
+          "growth_from_preceding_update": null,
+          "intervention_count": 1,
+          "maximum_projected_condition": 44.38341278719975
+        },
+        {
+          "update": 2,
+          "maximum_absolute_separation": 2.220446049250313e-16,
+          "growth_from_preceding_update": 1.0,
+          "intervention_count": 2,
+          "maximum_projected_condition": 44.38341278719975
+        },
+        {
+          "update": 3,
+          "maximum_absolute_separation": 4.440892098500626e-16,
+          "growth_from_preceding_update": 2.0,
+          "intervention_count": 3,
+          "maximum_projected_condition": 44.38341278719975
+        },
+        {
+          "update": 4,
+          "maximum_absolute_separation": 4.440892098500626e-16,
+          "growth_from_preceding_update": 1.0,
+          "intervention_count": 4,
+          "maximum_projected_condition": 44.38341278719975
+        },
+        {
+          "update": 5,
+          "maximum_absolute_separation": 4.440892098500626e-16,
+          "growth_from_preceding_update": 1.0,
+          "intervention_count": 5,
+          "maximum_projected_condition": 69.86646199294937
+        },
+        {
+          "update": 6,
+          "maximum_absolute_separation": 8.049116928532385e-16,
+          "growth_from_preceding_update": 1.8125,
+          "intervention_count": 6,
+          "maximum_projected_condition": 228.50274687643775
+        },
+        {
+          "update": 7,
+          "maximum_absolute_separation": 9.159339953157541e-16,
+          "growth_from_preceding_update": 1.1379310344827587,
+          "intervention_count": 7,
+          "maximum_projected_condition": 242.7576188128187
+        },
+        {
+          "update": 8,
+          "maximum_absolute_separation": 6.661338147750939e-16,
+          "growth_from_preceding_update": 0.7272727272727273,
+          "intervention_count": 8,
+          "maximum_projected_condition": 242.7576188128187
+        },
+        {
+          "update": 9,
+          "maximum_absolute_separation": 6.661338147750939e-16,
+          "growth_from_preceding_update": 1.0,
+          "intervention_count": 9,
+          "maximum_projected_condition": 250.85814309672122
+        },
+        {
+          "update": 10,
+          "maximum_absolute_separation": 8.881784197001252e-16,
+          "growth_from_preceding_update": 1.3333333333333333,
+          "intervention_count": 10,
+          "maximum_projected_condition": 250.85814309672122
+        },
+        {
+          "update": 11,
+          "maximum_absolute_separation": 1.4155343563970746e-15,
+          "growth_from_preceding_update": 1.59375,
+          "intervention_count": 11,
+          "maximum_projected_condition": 262.9729682579087
+        },
+        {
+          "update": 12,
+          "maximum_absolute_separation": 1.5681900222830336e-15,
+          "growth_from_preceding_update": 1.107843137254902,
+          "intervention_count": 12,
+          "maximum_projected_condition": 267.39861174239996
+        }
+      ],
+      "cumulative_separation_growth": 7.0625,
+      "burst_count": 0,
+      "six_case_maximum_flux_absolute_difference": 5.505623734691767e-12,
+      "dimension_specific_or_dataset_fitted_constant_remaining": false,
+      "banked_comparison": {
+        "burst_count": 0,
+        "cumulative_separation_growth": 2.217948717948718,
+        "six_case_maximum_flux_absolute_difference": 3.5787553476218648e-12
+      },
+      "reproduction_tolerances": {
+        "burst_count": "exactly zero",
+        "cumulative_separation_growth": "less than 10, the existing order-of-magnitude burst discriminator",
+        "six_case_maximum_flux_absolute_difference": "at most 1e-10, the retired parity ceiling retained only as a reproduction tolerance"
+      },
+      "reproduced_within_stated_tolerances": true
+    },
+    {
+      "projection_dimension": 24,
+      "machine": "DIII-D",
+      "route": "topology-qualified nonmonotone production route",
+      "trajectory_case": {
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "frame": 179,
+        "time_ms": 3740.0
+      },
+      "nonlinear_update_count": 12,
+      "intervention_count": 12,
+      "banked_intervention_count": 0,
+      "maximum_projected_condition": 4087.40844825275,
+      "per_update_separations": [
+        {
+          "update": 1,
+          "maximum_absolute_separation": 2.1316282072803006e-14,
+          "growth_from_preceding": null,
+          "eager_interventions": 1,
+          "compiled_interventions": 1,
+          "eager_maximum_condition": 152.40839492783508,
+          "compiled_maximum_condition": 152.40839492776988
+        },
+        {
+          "update": 2,
+          "maximum_absolute_separation": 1.1368683772161603e-13,
+          "growth_from_preceding": 5.333333333333333,
+          "eager_interventions": 2,
+          "compiled_interventions": 2,
+          "eager_maximum_condition": 206.05017211372882,
+          "compiled_maximum_condition": 206.0501721138846
+        },
+        {
+          "update": 3,
+          "maximum_absolute_separation": 7.505107646466058e-14,
+          "growth_from_preceding": 0.66015625,
+          "eager_interventions": 3,
+          "compiled_interventions": 3,
+          "eager_maximum_condition": 384.1665518992517,
+          "compiled_maximum_condition": 384.166551898761
+        },
+        {
+          "update": 4,
+          "maximum_absolute_separation": 4.156675004196586e-13,
+          "growth_from_preceding": 5.538461538461538,
+          "eager_interventions": 4,
+          "compiled_interventions": 4,
+          "eager_maximum_condition": 1182.833130580283,
+          "compiled_maximum_condition": 1182.833130586899
+        },
+        {
+          "update": 5,
+          "maximum_absolute_separation": 9.766631947627502e-13,
+          "growth_from_preceding": 2.3496260683760686,
+          "eager_interventions": 5,
+          "compiled_interventions": 5,
+          "eager_maximum_condition": 4087.40844825275,
+          "compiled_maximum_condition": 4087.408447898962
+        },
+        {
+          "update": 6,
+          "maximum_absolute_separation": 3.353761712787673e-12,
+          "growth_from_preceding": 3.433897919745368,
+          "eager_interventions": 6,
+          "compiled_interventions": 6,
+          "eager_maximum_condition": 4087.40844825275,
+          "compiled_maximum_condition": 4087.408447898962
+        },
+        {
+          "update": 7,
+          "maximum_absolute_separation": 2.2097879082139116e-12,
+          "growth_from_preceding": 0.6588983050847458,
+          "eager_interventions": 7,
+          "compiled_interventions": 7,
+          "eager_maximum_condition": 4087.40844825275,
+          "compiled_maximum_condition": 4087.408447898962
+        },
+        {
+          "update": 8,
+          "maximum_absolute_separation": 7.368328169832239e-12,
+          "growth_from_preceding": 3.334405144694534,
+          "eager_interventions": 8,
+          "compiled_interventions": 8,
+          "eager_maximum_condition": 4087.40844825275,
+          "compiled_maximum_condition": 4087.408447898962
+        },
+        {
+          "update": 9,
+          "maximum_absolute_separation": 9.897860309138196e-12,
+          "growth_from_preceding": 1.3432979749276759,
+          "eager_interventions": 9,
+          "compiled_interventions": 9,
+          "eager_maximum_condition": 4087.40844825275,
+          "compiled_maximum_condition": 4087.408447898962
+        },
+        {
+          "update": 10,
+          "maximum_absolute_separation": 1.1006306976923952e-11,
+          "growth_from_preceding": 1.1119885139985644,
+          "eager_interventions": 10,
+          "compiled_interventions": 10,
+          "eager_maximum_condition": 4087.40844825275,
+          "compiled_maximum_condition": 4087.408447898962
+        },
+        {
+          "update": 11,
+          "maximum_absolute_separation": 1.1930012533412082e-11,
+          "growth_from_preceding": 1.0839251129761136,
+          "eager_interventions": 11,
+          "compiled_interventions": 11,
+          "eager_maximum_condition": 4087.40844825275,
+          "compiled_maximum_condition": 4087.408447898962
+        },
+        {
+          "update": 12,
+          "maximum_absolute_separation": 1.1539214028744027e-11,
+          "growth_from_preceding": 0.9672424061941632,
+          "eager_interventions": 12,
+          "compiled_interventions": 12,
+          "eager_maximum_condition": 4087.40844825275,
+          "compiled_maximum_condition": 4087.408447898962
+        }
+      ],
+      "cumulative_separation_growth": 541.3333333333334,
+      "dimension_specific_or_dataset_fitted_constant_remaining": false
+    },
+    {
+      "projection_dimension": 8,
+      "machine": "MAST",
+      "route": "frozen held-out production solve",
+      "trajectory_case": {
+        "shot": 21985,
+        "slice_index": 51
+      },
+      "nonlinear_update_count": 12,
+      "intervention_count": 12,
+      "maximum_projected_condition": 280.4948288532528,
+      "per_update_separations": [
+        {
+          "update": 1,
+          "maximum_absolute_separation": 2.220446049250313e-16,
+          "growth_from_preceding_update": null,
+          "intervention_count": 1,
+          "maximum_projected_condition": 37.057492104283575
+        },
+        {
+          "update": 2,
+          "maximum_absolute_separation": 2.220446049250313e-16,
+          "growth_from_preceding_update": 1.0,
+          "intervention_count": 2,
+          "maximum_projected_condition": 37.057492104283575
+        },
+        {
+          "update": 3,
+          "maximum_absolute_separation": 2.220446049250313e-16,
+          "growth_from_preceding_update": 1.0,
+          "intervention_count": 3,
+          "maximum_projected_condition": 37.057492104283575
+        },
+        {
+          "update": 4,
+          "maximum_absolute_separation": 2.220446049250313e-16,
+          "growth_from_preceding_update": 1.0,
+          "intervention_count": 4,
+          "maximum_projected_condition": 37.057492104283575
+        },
+        {
+          "update": 5,
+          "maximum_absolute_separation": 2.220446049250313e-16,
+          "growth_from_preceding_update": 1.0,
+          "intervention_count": 5,
+          "maximum_projected_condition": 92.500283459371
+        },
+        {
+          "update": 6,
+          "maximum_absolute_separation": 2.220446049250313e-16,
+          "growth_from_preceding_update": 1.0,
+          "intervention_count": 6,
+          "maximum_projected_condition": 249.49976476142496
+        },
+        {
+          "update": 7,
+          "maximum_absolute_separation": 2.220446049250313e-16,
+          "growth_from_preceding_update": 1.0,
+          "intervention_count": 7,
+          "maximum_projected_condition": 249.49976476142496
+        },
+        {
+          "update": 8,
+          "maximum_absolute_separation": 2.220446049250313e-16,
+          "growth_from_preceding_update": 1.0,
+          "intervention_count": 8,
+          "maximum_projected_condition": 280.4948288532528
+        },
+        {
+          "update": 9,
+          "maximum_absolute_separation": 2.220446049250313e-16,
+          "growth_from_preceding_update": 1.0,
+          "intervention_count": 9,
+          "maximum_projected_condition": 280.4948288532528
+        },
+        {
+          "update": 10,
+          "maximum_absolute_separation": 2.220446049250313e-16,
+          "growth_from_preceding_update": 1.0,
+          "intervention_count": 10,
+          "maximum_projected_condition": 280.4948288532528
+        },
+        {
+          "update": 11,
+          "maximum_absolute_separation": 2.220446049250313e-16,
+          "growth_from_preceding_update": 1.0,
+          "intervention_count": 11,
+          "maximum_projected_condition": 280.4948288532528
+        },
+        {
+          "update": 12,
+          "maximum_absolute_separation": 4.440892098500626e-16,
+          "growth_from_preceding_update": 2.0,
+          "intervention_count": 12,
+          "maximum_projected_condition": 280.4948288532528
+        }
+      ],
+      "cumulative_separation_growth": 2.0,
+      "burst_count": 0,
+      "six_case_maximum_flux_absolute_difference": 2.1596613386520858e-13,
+      "dimension_specific_or_dataset_fitted_constant_remaining": false
+    }
+  ],
+  "conclusion": "The same online ratio mechanism engaged without recalibration at projection dimensions 8, 12, and 24; no dimension-specific or dataset-fitted constant remains in the conditioning path."
+}

@@ -37,6 +37,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from enum import IntEnum
+import math
 from typing import Literal, NamedTuple
 
 import jax
@@ -58,9 +59,7 @@ __all__ = [
 
 _BACKTRACKING_FACTORS = (1.0, 0.5, 0.25, 0.125, 0.0625, 0.03125)
 _RECORDED_BACKTRACKING_FACTOR_COUNT = 4
-_PROJECTED_KRYLOV_CONDITION_DIMENSION = 12
-_PROJECTED_KRYLOV_CONDITION_LIMIT = 44.5
-_PROJECTED_KRYLOV_QUIET_REFERENCE = 27.781718445022726
+_PROJECTED_KRYLOV_CONDITION_RATIO_LIMIT = math.e
 
 
 class AmplificationObservation(IntEnum):
@@ -149,6 +148,7 @@ class _QualifiedKrylovStep(NamedTuple):
     qualification: jax.Array
     projected_condition: jax.Array
     conditioning_applied: jax.Array
+    condition_baseline: jax.Array
 
 
 class _AmplificationState(NamedTuple):
@@ -225,7 +225,7 @@ def _projected_krylov_condition(
     residual_vector: jax.Array,
     *,
     krylov_dimension: int,
-) -> jax.Array:
+) -> tuple[jax.Array, jax.Array]:
     """Measure the rectangular Arnoldi projection condition at one iteration.
 
     The fixed-shape, twice-orthogonalised Arnoldi construction matches the
@@ -295,8 +295,14 @@ def _projected_krylov_condition(
     smallest_index = jnp.maximum(active_columns - 1, 0)
     largest = singular_values[0]
     smallest = singular_values[smallest_index]
+    median_index = jnp.maximum((active_columns - 1) // 2, 0)
+    median = singular_values[median_index]
     condition = largest / jnp.maximum(smallest, jnp.finfo(smallest.dtype).tiny)
-    return jnp.where(active_columns > 0, condition, 1.0)
+    spectral_baseline = largest / jnp.maximum(median, jnp.finfo(median.dtype).tiny)
+    return (
+        jnp.where(active_columns > 0, condition, 1.0),
+        jnp.where(active_columns > 0, spectral_baseline, 1.0),
+    )
 
 
 def _relative_residual(mapped: jax.Array, state: jax.Array) -> jax.Array:
@@ -312,7 +318,8 @@ def _qualified_krylov_step(
     nonlinear_residual: jax.Array,
     *,
     gmres_iterations: int,
-    condition_limit: float,
+    condition_ratio_limit: float,
+    preceding_condition_baseline: jax.Array,
 ) -> _QualifiedKrylovStep:
     """Solve, condition, and apply the shared linear-action qualification."""
     probe_scale = jnp.maximum(jnp.max(jnp.abs(residual_vector)), 1.0e-300)
@@ -322,10 +329,18 @@ def _qualified_krylov_step(
         jnp.ones_like(residual_vector) / jnp.sqrt(residual_vector.size),
     )
     finite_linear_action = jnp.all(jnp.isfinite(linear_action(probe)))
-    projected_condition = _projected_krylov_condition(
+    projected_condition, spectral_baseline = _projected_krylov_condition(
         linear_action,
         residual_vector,
         krylov_dimension=gmres_iterations,
+    )
+    has_preceding_baseline = jnp.isfinite(preceding_condition_baseline) & (
+        preceding_condition_baseline > 0.0
+    )
+    condition_baseline = jnp.where(
+        has_preceding_baseline,
+        jnp.sqrt(preceding_condition_baseline * spectral_baseline),
+        spectral_baseline,
     )
 
     step, info = jax.scipy.sparse.linalg.gmres(
@@ -349,12 +364,13 @@ def _qualified_krylov_step(
     finite_condition = jnp.isfinite(projected_condition)
     conditioning_applied = (
         finite_condition
-        & (gmres_iterations == _PROJECTED_KRYLOV_CONDITION_DIMENSION)
-        & (projected_condition > condition_limit)
+        & jnp.isfinite(condition_baseline)
+        & (projected_condition > condition_ratio_limit * condition_baseline)
+        & (nonlinear_residual > jnp.finfo(residual_vector.dtype).eps ** 0.25)
     )
     damping = jnp.where(
         conditioning_applied,
-        (_PROJECTED_KRYLOV_QUIET_REFERENCE / projected_condition) ** 3,
+        condition_baseline / (condition_ratio_limit * projected_condition),
         1.0,
     )
     step = step * damping
@@ -385,6 +401,7 @@ def _qualified_krylov_step(
         qualification=qualification,
         projected_condition=projected_condition,
         conditioning_applied=conditioning_applied,
+        condition_baseline=condition_baseline,
     )
 
 
@@ -502,7 +519,7 @@ def newton_krylov(
     warmup: int = 8,
     relaxation: float = 0.5,
     step_cap: float = 10.0,
-    krylov_condition_limit: float = _PROJECTED_KRYLOV_CONDITION_LIMIT,
+    krylov_condition_limit: float = _PROJECTED_KRYLOV_CONDITION_RATIO_LIMIT,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Exact-tangent Jacobian-free Newton–Krylov on the fixed-point residual.
@@ -515,12 +532,20 @@ def newton_krylov(
     GMRES reports a non-successful status, the achieved linear residual is
     non-finite, or an exactly-zero step carries a material nonlinear residual.
     Before promotion, the same fixed Krylov projection measures the condition
-    of ``I - J``.  At the calibrated twelve-vector projection dimension,
-    values above ``krylov_condition_limit`` damp the step by the cubed ratio
-    of the quiet-reference condition to the measured condition, mitigating an
-    ill-conditioned transient where it occurs.  Other projection dimensions
-    remain observed but unconditioned because their condition scales are not
-    interchangeable.  A qualified step is then capped at
+    of ``I - J``.  Its largest-to-median singular-value ratio supplies a robust
+    typical-spectrum baseline, combined geometrically with the preceding
+    projection's baseline.  When the full condition exceeds
+    ``krylov_condition_limit`` times that online baseline, the step is scaled
+    by baseline divided by condition and by the default ratio.  The default
+    trigger is one natural-log unit of separation (a ratio of ``e``), so its
+    scale comes from the ratio coordinate rather than a measured trajectory;
+    applying the same margin below the baseline supplies symmetric log-space
+    hysteresis.  The first-power inverse law is the proportional normalization
+    that returns condition-weighted step size to a fixed baseline multiple; it
+    needs no projection-dimension calibration.  Damping releases below the
+    fourth root of machine precision so local convergence can finish without
+    trajectory control.  A qualified
+    step is then capped at
     ``step_cap`` × the relaxed step, bounding excursions while the
     current-centroid pin holds the basin.  The trace
     retains its ``2 + gmres_iterations`` stride (one linearisation value,
@@ -559,6 +584,7 @@ def newton_krylov(
             amplification,
             conditioning_count,
             maximum_condition,
+            condition_baseline,
         ) = carry
         mapped, tangent = jax.linearize(map_fn, state)
         f = mapped - state
@@ -574,7 +600,8 @@ def newton_krylov(
             f,
             nonlinear_residual,
             gmres_iterations=gmres_iterations,
-            condition_limit=krylov_condition_limit,
+            condition_ratio_limit=krylov_condition_limit,
+            preceding_condition_baseline=condition_baseline,
         )
         step = qualified_step.step
         step_qualification = qualified_step.qualification
@@ -609,6 +636,7 @@ def newton_krylov(
             amplification,
             conditioning_count,
             maximum_condition,
+            qualified_step.condition_baseline,
         )
 
     (
@@ -619,6 +647,7 @@ def newton_krylov(
         amplification,
         conditioning_count,
         maximum_condition,
+        _condition_baseline,
     ) = jax.lax.fori_loop(
         0,
         newton_steps,
@@ -631,6 +660,7 @@ def newton_krylov(
             amplification,
             jnp.asarray(0, dtype=jnp.int32),
             jnp.asarray(0.0, dtype=initial.dtype),
+            jnp.asarray(jnp.nan, dtype=initial.dtype),
         ),
     )
     return FixedPointResult(
@@ -654,7 +684,7 @@ def kink_aware_newton_krylov(
     warmup: int = 8,
     relaxation: float = 0.5,
     step_cap: float = 10.0,
-    krylov_condition_limit: float = _PROJECTED_KRYLOV_CONDITION_LIMIT,
+    krylov_condition_limit: float = _PROJECTED_KRYLOV_CONDITION_RATIO_LIMIT,
     surface_fn: Callable[[jax.Array], jax.Array] | None = None,
     admissibility_fn: Callable[[jax.Array], jax.Array] | None = None,
     nonmonotone_allowance: float = 0.05,
@@ -720,13 +750,14 @@ def kink_aware_newton_krylov(
         ),
     )
 
-    def krylov_step(tangent, residual_vector, nonlinear_residual):
+    def krylov_step(tangent, residual_vector, nonlinear_residual, condition_baseline):
         return _qualified_krylov_step(
             lambda vector: vector - tangent(vector),
             residual_vector,
             nonlinear_residual,
             gmres_iterations=gmres_iterations,
-            condition_limit=krylov_condition_limit,
+            condition_ratio_limit=krylov_condition_limit,
+            preceding_condition_baseline=condition_baseline,
         )
 
     def bounded_step(step, residual_vector):
@@ -774,11 +805,14 @@ def kink_aware_newton_krylov(
             amplification,
             conditioning_count,
             maximum_condition,
+            condition_baseline,
         ) = carry
         mapped, tangent = jax.linearize(map_fn, state)
         residual_vector = mapped - state
         current_residual = _relative_residual(mapped, state)
-        qualified_step = krylov_step(tangent, residual_vector, current_residual)
+        qualified_step = krylov_step(
+            tangent, residual_vector, current_residual, condition_baseline
+        )
         step_qualification = qualified_step.qualification
         action_accepted = step_qualification == KrylovActionQualification.ACCEPTED
         step = bounded_step(qualified_step.step, residual_vector)
@@ -811,7 +845,8 @@ def kink_aware_newton_krylov(
                     residual_vector,
                     current_residual,
                     gmres_iterations=gmres_iterations,
-                    condition_limit=krylov_condition_limit,
+                    condition_ratio_limit=krylov_condition_limit,
+                    preceding_condition_baseline=condition_baseline,
                 )
                 return bounded_step(
                     averaged.step,
@@ -919,6 +954,7 @@ def kink_aware_newton_krylov(
             amplification,
             conditioning_count,
             maximum_condition,
+            qualified_step.condition_baseline,
         )
 
     initial_residual = jnp.where(
@@ -936,6 +972,7 @@ def kink_aware_newton_krylov(
         amplification,
         conditioning_count,
         maximum_condition,
+        _condition_baseline,
     ) = jax.lax.fori_loop(
         0,
         newton_steps,
@@ -955,6 +992,7 @@ def kink_aware_newton_krylov(
             amplification,
             jnp.asarray(0, dtype=jnp.int32),
             jnp.asarray(0.0, dtype=initial.dtype),
+            jnp.asarray(jnp.nan, dtype=initial.dtype),
         ),
     )
     return KinkAwareResult(

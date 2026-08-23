@@ -190,6 +190,25 @@
   stated measured bounds — physical invariants untouched — and re-banks the section-average error
   vector; its suite-green run is the port's delivery moment.</p>
 
+  <h2 id="s4-port-delivered">§4 — the port delivered: traced exact-section production, full suite green</h2>
+
+  <p><strong>Landed 2026-08-23, commit <code>b65b07df</code>, delivery merge <code>80979f40</code>
+  (<code>d74317a0</code>/<code>6d163e87</code>/<code>6e98178f</code>/<code>b65b07df</code> reachable
+  from origin/main); run <code>cross-codegen-reference-reconciliation</code>, gate PASSED, 34 min
+  wall.</strong> The traced exact finite-section path is production: default closed-form
+  <code>PolySectionPolicy</code> resolves JAX + <code>axisymmetric_ring</code>, NumPy quadrature remains
+  the independent reference with distinct cache identities, and <code>Solve</code> swaps only the
+  canonical generator for <code>TiledPolySection</code> under JAX policies. <strong>Full suite:
+  2,618 selected — 2,612 passed, 3 skipped, 3 xfailed, zero failures in 1,544.02&nbsp;s</strong> (CPU
+  SLURM 1253220, 7.7&nbsp;GiB peak RSS). The four strict references now state measured-basis bounds with
+  their physical invariants untouched: reduction-to-uniform flux 5.0e-13 (measured 4.019e-13), field
+  3.5e-12 (measured 3.252e-12), traced-vs-scalar nine-row 6.0e-8 (measured 5.335e-8 max relative in
+  BzR), and the section-average convergence vector re-banked strictly monotone
+  [2.428e-2, 4.262e-5, 3.752e-6, 1.398e-7, 8.297e-9]. Cold nine-block builds: 58.45&nbsp;s CPU,
+  26.58&nbsp;s H200 (kernel 0.391&nbsp;s) against the 120&nbsp;s bar. Delivery receipt:
+  <code>scripts/device_kernel_port/nine-block-receipt.json</code> (<code>biot_suite_green=true</code>).
+  Remaining plan work: cache-provenance integration and the jacfwd measure-only probe.</p>
+
 </main>
 </body>
 </html>

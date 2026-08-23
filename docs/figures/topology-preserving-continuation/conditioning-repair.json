@@ -1,0 +1,229 @@
+{
+  "artifact": "conditioning_shrinkage_repair",
+  "cohort_summary": {
+    "disabled_total_newton_step_equivalents": 18.88321289494938,
+    "frame_count": 5,
+    "frames_residual_no_worse_than_disabled": 5,
+    "repaired_total_admitted_advances_out_of_445": 47,
+    "repaired_total_interventions_out_of_445": 11,
+    "repaired_total_newton_step_equivalents": 18.92998900409446
+  },
+  "comparison_contract": {
+    "banked_pre_repair_values_are_context_only": true,
+    "pair_difference": "condition ratio limit e versus infinity",
+    "production_paths_changed_from_banked_source": [
+      "nova/equilibrium/fixed_point.py",
+      "nova/equilibrium/manifold_advance.py",
+      "nova/equilibrium/seed_alignment.py"
+    ],
+    "same_tree_pair_is_causal_control": true
+  },
+  "completed_utc": "2026-08-23T22:20:11.577001+00:00",
+  "conclusion": {
+    "dimension_engagement_retained": true,
+    "production_engagement_retained": true,
+    "residual_gate_passed": true,
+    "verdict": "PASS"
+  },
+  "frame_records": [
+    {
+      "banked_pre_repair_conditioning_disabled": {
+        "achieved_newton_step_equivalents": 3.21875,
+        "admitted_advance_count_out_of_89": 7,
+        "intervention_count_out_of_89": 0,
+        "terminal_relative_residual": 0.10704471039091447
+      },
+      "banked_pre_repair_conditioning_enabled": {
+        "achieved_newton_step_equivalents": 0.1125996041838135,
+        "admitted_advance_count_out_of_89": 89,
+        "intervention_count_out_of_89": 89,
+        "terminal_relative_residual": 5.9969660129145375
+      },
+      "enabled_residual_no_worse_than_same_tree_disabled": true,
+      "frame": 179,
+      "repaired_conditioning_disabled_same_tree": {
+        "achieved_newton_step_equivalents": 3.21875,
+        "admitted_advance_count_out_of_89": 7,
+        "intervention_count_out_of_89": 0,
+        "terminal_relative_residual": 0.10704471039091447,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true
+      },
+      "repaired_conditioning_enabled": {
+        "achieved_newton_step_equivalents": 3.2199825000659112,
+        "admitted_advance_count_out_of_89": 8,
+        "intervention_count_out_of_89": 1,
+        "terminal_relative_residual": 0.10690242237460541,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true
+      },
+      "shot": "d3d_shot_00000c4a7b.parquet",
+      "time_ms": 3740.0
+    },
+    {
+      "banked_pre_repair_conditioning_disabled": {
+        "achieved_newton_step_equivalents": 4.193294139261007,
+        "admitted_advance_count_out_of_89": 6,
+        "intervention_count_out_of_89": 0,
+        "terminal_relative_residual": 0.10077482131394641
+      },
+      "banked_pre_repair_conditioning_enabled": {
+        "achieved_newton_step_equivalents": 0.4048326525248699,
+        "admitted_advance_count_out_of_89": 89,
+        "intervention_count_out_of_89": 89,
+        "terminal_relative_residual": 6.345010525309393
+      },
+      "enabled_residual_no_worse_than_same_tree_disabled": true,
+      "frame": 44,
+      "repaired_conditioning_disabled_same_tree": {
+        "achieved_newton_step_equivalents": 4.193294139261007,
+        "admitted_advance_count_out_of_89": 6,
+        "intervention_count_out_of_89": 0,
+        "terminal_relative_residual": 0.10077482131394641,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true
+      },
+      "repaired_conditioning_enabled": {
+        "achieved_newton_step_equivalents": 4.203302472809529,
+        "admitted_advance_count_out_of_89": 9,
+        "intervention_count_out_of_89": 3,
+        "terminal_relative_residual": 0.09970075362827917,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true
+      },
+      "shot": "d3d_shot_0003ff34e7.parquet",
+      "time_ms": 1080.0
+    },
+    {
+      "banked_pre_repair_conditioning_disabled": {
+        "achieved_newton_step_equivalents": 3.3634607051038814,
+        "admitted_advance_count_out_of_89": 10,
+        "intervention_count_out_of_89": 0,
+        "terminal_relative_residual": 0.1553929757220097
+      },
+      "banked_pre_repair_conditioning_enabled": {
+        "achieved_newton_step_equivalents": 0.389171758027934,
+        "admitted_advance_count_out_of_89": 89,
+        "intervention_count_out_of_89": 89,
+        "terminal_relative_residual": 3.7540271627429744
+      },
+      "enabled_residual_no_worse_than_same_tree_disabled": true,
+      "frame": 144,
+      "repaired_conditioning_disabled_same_tree": {
+        "achieved_newton_step_equivalents": 3.3634607051038814,
+        "admitted_advance_count_out_of_89": 10,
+        "intervention_count_out_of_89": 0,
+        "terminal_relative_residual": 0.1553929757220097,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true
+      },
+      "repaired_conditioning_enabled": {
+        "achieved_newton_step_equivalents": 3.3815541369487643,
+        "admitted_advance_count_out_of_89": 12,
+        "intervention_count_out_of_89": 2,
+        "terminal_relative_residual": 0.15255853230708596,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true
+      },
+      "shot": "d3d_shot_001554e054.parquet",
+      "time_ms": 3240.0
+    },
+    {
+      "banked_pre_repair_conditioning_disabled": {
+        "achieved_newton_step_equivalents": 2.9171534022732244,
+        "admitted_advance_count_out_of_89": 4,
+        "intervention_count_out_of_89": 0,
+        "terminal_relative_residual": 0.08696912567989223
+      },
+      "banked_pre_repair_conditioning_enabled": {
+        "achieved_newton_step_equivalents": 0.17651307050110607,
+        "admitted_advance_count_out_of_89": 89,
+        "intervention_count_out_of_89": 89,
+        "terminal_relative_residual": 4.27275196119138
+      },
+      "enabled_residual_no_worse_than_same_tree_disabled": true,
+      "frame": 146,
+      "repaired_conditioning_disabled_same_tree": {
+        "achieved_newton_step_equivalents": 2.9171534022732244,
+        "admitted_advance_count_out_of_89": 4,
+        "intervention_count_out_of_89": 0,
+        "terminal_relative_residual": 0.08696912567989223,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true
+      },
+      "repaired_conditioning_enabled": {
+        "achieved_newton_step_equivalents": 2.9323650168757105,
+        "admitted_advance_count_out_of_89": 7,
+        "intervention_count_out_of_89": 3,
+        "terminal_relative_residual": 0.08646603357046066,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true
+      },
+      "shot": "d3d_shot_002495e835.parquet",
+      "time_ms": 3180.0
+    },
+    {
+      "banked_pre_repair_conditioning_disabled": {
+        "achieved_newton_step_equivalents": 5.190554648311268,
+        "admitted_advance_count_out_of_89": 9,
+        "intervention_count_out_of_89": 0,
+        "terminal_relative_residual": 0.12290690751401612
+      },
+      "banked_pre_repair_conditioning_enabled": {
+        "achieved_newton_step_equivalents": 0.06860155692910576,
+        "admitted_advance_count_out_of_89": 89,
+        "intervention_count_out_of_89": 89,
+        "terminal_relative_residual": 4.713585403867379
+      },
+      "enabled_residual_no_worse_than_same_tree_disabled": true,
+      "frame": 137,
+      "repaired_conditioning_disabled_same_tree": {
+        "achieved_newton_step_equivalents": 5.190554648311268,
+        "admitted_advance_count_out_of_89": 9,
+        "intervention_count_out_of_89": 0,
+        "terminal_relative_residual": 0.12290690751401612,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true
+      },
+      "repaired_conditioning_enabled": {
+        "achieved_newton_step_equivalents": 5.192784877394542,
+        "admitted_advance_count_out_of_89": 11,
+        "intervention_count_out_of_89": 2,
+        "terminal_relative_residual": 0.12255579619151723,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true
+      },
+      "shot": "d3d_shot_0040ca9bdc.parquet",
+      "time_ms": 3000.0
+    }
+  ],
+  "measurement_scope": {
+    "banked_comparator": "docs/figures/topology-preserving-continuation/admissible-step-control.json",
+    "banked_comparator_sha256": "2fd7fcb9673e763522b805b100293276026a9c60c809055641016e62770a11df",
+    "data_root": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train",
+    "newton_steps_per_frame": 89,
+    "projection_dimension": 24,
+    "score_labels_read": false,
+    "selection": "five banked score-blind circuit-current frames"
+  },
+  "mechanism": {
+    "dataset_fitted_constants_absent": true,
+    "dimension_engagement": [
+      {
+        "intervention_count_out_of_1": 1,
+        "projection_dimension": 8
+      },
+      {
+        "intervention_count_out_of_1": 1,
+        "projection_dimension": 12
+      },
+      {
+        "intervention_count_out_of_1": 1,
+        "projection_dimension": 24
+      }
+    ],
+    "dimension_specific_gate_absent": true,
+    "rule": "try the raw fixed ladder first; use conditioned damping only after total raw-ladder refusal and only for a candidate that does not increase the current relative residual"
+  },
+  "source_commit": "35c7c0358ec6b072d623688d6d13c861f04be232"
+}

@@ -145,7 +145,11 @@ class KinkAwareResult(NamedTuple):
     ``amplification_observation`` is the same independent advisory trajectory
     observation carried by :class:`FixedPointResult`.
     ``krylov_conditioning_count`` and ``maximum_projected_krylov_condition``
-    carry the iteration-local Krylov conditioning receipt.
+    carry the iteration-local Krylov conditioning receipt.  On a caller-
+    qualified nonmonotone route, conditioning is a fallback after the raw
+    ladder has no admissible trial and is promoted only when it does not raise
+    the current residual.  ``effective_newton_fractions`` records each promoted
+    step length relative to its undamped, uncapped Newton step.
     """
 
     state: jax.Array
@@ -158,6 +162,7 @@ class KinkAwareResult(NamedTuple):
     amplification_observation: jax.Array | int = AmplificationObservation.NOT_APPLICABLE
     krylov_conditioning_count: jax.Array | int = 0
     maximum_projected_krylov_condition: jax.Array | float = float("nan")
+    effective_newton_fractions: jax.Array | float = float("nan")
 
 
 class _QualifiedKrylovStep(NamedTuple):
@@ -168,6 +173,7 @@ class _QualifiedKrylovStep(NamedTuple):
     projected_condition: jax.Array
     conditioning_applied: jax.Array
     condition_baseline: jax.Array
+    unconditioned_step: jax.Array
 
 
 class _AmplificationState(NamedTuple):
@@ -369,6 +375,7 @@ def _qualified_krylov_step(
         restart=gmres_iterations,
         solve_method="batched",
     )
+    unconditioned_step = step
     achieved_linear_residual = residual_vector - linear_action(step)
     finite_achieved_residual = jnp.all(jnp.isfinite(step)) & jnp.all(
         jnp.isfinite(achieved_linear_residual)
@@ -421,6 +428,7 @@ def _qualified_krylov_step(
         projected_condition=projected_condition,
         conditioning_applied=conditioning_applied,
         condition_baseline=condition_baseline,
+        unconditioned_step=unconditioned_step,
     )
 
 
@@ -1181,6 +1189,7 @@ def kink_aware_newton_krylov(
             conditioning_count,
             maximum_condition,
             condition_baseline,
+            effective_newton_fractions,
         ) = carry
         mapped, tangent = jax.linearize(map_fn, state)
         residual_vector = mapped - state
@@ -1191,7 +1200,11 @@ def kink_aware_newton_krylov(
         step_qualification = qualified_step.qualification
         action_accepted = step_qualification == KrylovActionQualification.ACCEPTED
         step = bounded_step(qualified_step.step, residual_vector)
+        unconditioned_step = bounded_step(
+            qualified_step.unconditioned_step, residual_vector
+        )
         proposal = state + step
+        conditioning_used = action_accepted & qualified_step.conditioning_applied
 
         if surface_fn is None:
             crossed = jnp.asarray(False)
@@ -1240,34 +1253,93 @@ def kink_aware_newton_krylov(
             accepted_residual = _relative_residual(promoted, proposal)
         elif strategy == "nonmonotone":
             factors = jnp.asarray(_BACKTRACKING_FACTORS, dtype=initial.dtype)
-            trial_step = jnp.where(action_accepted, step, jnp.zeros_like(step))
-            candidates = state[None, :] + factors[:, None] * trial_step[None, :]
 
             def score(candidate):
                 candidate_mapped = map_fn(candidate)
                 return _relative_residual(candidate_mapped, candidate)
 
-            scores = jax.lax.map(score, candidates)
-            if admissibility_fn is None:
-                caller_admitted = jnp.ones(factors.shape, dtype=jnp.bool_)
-            else:
-                caller_admitted = jax.lax.map(admissibility_fn, candidates).astype(
-                    jnp.bool_
-                )
-            finite_trials = jnp.all(jnp.isfinite(candidates), axis=1) & jnp.isfinite(
-                scores
-            )
-            candidate_admitted = finite_trials & caller_admitted & action_accepted
             envelope = jnp.max(
                 jnp.where(jnp.isfinite(recent), recent, current_residual)
             )
-            within_envelope = candidate_admitted & (
-                scores <= envelope * (1.0 + nonmonotone_allowance)
-            )
-            first = jnp.argmax(within_envelope)
-            best_admissible = jnp.argmin(jnp.where(candidate_admitted, scores, jnp.inf))
-            selected = jnp.where(jnp.any(within_envelope), first, best_admissible)
-            any_admissible = jnp.any(candidate_admitted)
+
+            def evaluate_ladder(trial_step):
+                candidates = state[None, :] + factors[:, None] * trial_step[None, :]
+                scores = jax.lax.map(score, candidates)
+                if admissibility_fn is None:
+                    caller_admitted = jnp.ones(factors.shape, dtype=jnp.bool_)
+                else:
+                    caller_admitted = jax.lax.map(admissibility_fn, candidates).astype(
+                        jnp.bool_
+                    )
+                finite_trials = jnp.all(
+                    jnp.isfinite(candidates), axis=1
+                ) & jnp.isfinite(scores)
+                admitted = finite_trials & caller_admitted & action_accepted
+                within_envelope = admitted & (
+                    scores <= envelope * (1.0 + nonmonotone_allowance)
+                )
+                first = jnp.argmax(within_envelope)
+                best = jnp.argmin(jnp.where(admitted, scores, jnp.inf))
+                selected = jnp.where(jnp.any(within_envelope), first, best)
+                return candidates, scores, admitted, selected
+
+            if admissibility_fn is None:
+                conditioned = evaluate_ladder(step)
+                candidates, scores, candidate_admitted, selected = conditioned
+                any_admissible = jnp.any(candidate_admitted)
+            else:
+                unconditioned = evaluate_ladder(unconditioned_step)
+                (
+                    unconditioned_candidates,
+                    unconditioned_scores,
+                    unconditioned_admitted,
+                    unconditioned_selected,
+                ) = unconditioned
+                any_unconditioned = jnp.any(unconditioned_admitted)
+                conditioned = jax.lax.cond(
+                    qualified_step.conditioning_applied & ~any_unconditioned,
+                    evaluate_ladder,
+                    lambda _trial_step: unconditioned,
+                    step,
+                )
+                (
+                    conditioned_candidates,
+                    conditioned_scores,
+                    conditioned_admitted,
+                    _conditioned_selected,
+                ) = conditioned
+                improving_conditioned = conditioned_admitted & (
+                    conditioned_scores <= current_residual
+                )
+                any_conditioned = jnp.any(improving_conditioned)
+                best_conditioned = jnp.argmin(
+                    jnp.where(improving_conditioned, conditioned_scores, jnp.inf)
+                )
+                conditioning_used = (
+                    action_accepted
+                    & qualified_step.conditioning_applied
+                    & ~any_unconditioned
+                    & any_conditioned
+                )
+                candidates = jnp.where(
+                    conditioning_used,
+                    conditioned_candidates,
+                    unconditioned_candidates,
+                )
+                scores = jnp.where(
+                    conditioning_used,
+                    conditioned_scores,
+                    unconditioned_scores,
+                )
+                candidate_admitted = jnp.where(
+                    conditioning_used,
+                    improving_conditioned,
+                    unconditioned_admitted,
+                )
+                selected = jnp.where(
+                    conditioning_used, best_conditioned, unconditioned_selected
+                )
+                any_admissible = any_unconditioned | conditioning_used
             proposal = jnp.where(any_admissible, candidates[selected], state)
             accepted_residual = jnp.where(
                 any_admissible, scores[selected], current_residual
@@ -1277,6 +1349,18 @@ def kink_aware_newton_krylov(
             )
             accepted_factors = accepted_factors.at[index].set(
                 jnp.where(any_admissible, factors[selected], 0.0)
+            )
+            selected_step = jnp.where(conditioning_used, step, unconditioned_step)
+            raw_step_norm = jnp.linalg.norm(qualified_step.unconditioned_step)
+            effective_newton_fraction = jnp.where(
+                any_admissible & (raw_step_norm > 0.0),
+                factors[selected]
+                * jnp.linalg.norm(selected_step)
+                / jnp.maximum(raw_step_norm, jnp.finfo(initial.dtype).tiny),
+                0.0,
+            )
+            effective_newton_fractions = effective_newton_fractions.at[index].set(
+                effective_newton_fraction
             )
         else:
             if hybrid_schedule == "fixed":
@@ -1312,7 +1396,7 @@ def kink_aware_newton_krylov(
         )
         qualification = jnp.where(prior_failed, qualification, step_qualification)
         conditioning_count = conditioning_count + jnp.asarray(
-            action_accepted & qualified_step.conditioning_applied, dtype=jnp.int32
+            conditioning_used, dtype=jnp.int32
         )
         maximum_condition = jnp.maximum(
             maximum_condition, qualified_step.projected_condition
@@ -1330,6 +1414,7 @@ def kink_aware_newton_krylov(
             conditioning_count,
             maximum_condition,
             qualified_step.condition_baseline,
+            effective_newton_fractions,
         )
 
     initial_residual = jnp.where(
@@ -1348,6 +1433,7 @@ def kink_aware_newton_krylov(
         conditioning_count,
         maximum_condition,
         _condition_baseline,
+        effective_newton_fractions,
     ) = jax.lax.fori_loop(
         0,
         newton_steps,
@@ -1368,6 +1454,7 @@ def kink_aware_newton_krylov(
             jnp.asarray(0, dtype=jnp.int32),
             jnp.asarray(0.0, dtype=initial.dtype),
             jnp.asarray(jnp.nan, dtype=initial.dtype),
+            jnp.zeros(newton_steps, dtype=initial.dtype),
         ),
     )
     return KinkAwareResult(
@@ -1381,4 +1468,5 @@ def kink_aware_newton_krylov(
         _amplification_result(amplification, qualification),
         conditioning_count,
         maximum_condition,
+        effective_newton_fractions,
     )

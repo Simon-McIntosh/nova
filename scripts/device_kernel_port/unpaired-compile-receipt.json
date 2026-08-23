@@ -1,0 +1,136 @@
+{
+  "configuration": {
+    "edge_count": 11,
+    "exact_finite_section": true,
+    "pair_block": 1024,
+    "paired": false,
+    "residual_nodes": 128,
+    "source_tile": 32,
+    "target_tile": 32
+  },
+  "lanes": {
+    "cpu": {
+      "allocation": {
+        "cpus": 16,
+        "elapsed_seconds": 18,
+        "job_id": "1253204",
+        "memory_mib": 184320,
+        "partition": "vega_debug",
+        "scheduler_state": "COMPLETED",
+        "time_limit": null,
+        "time_limit_seconds": 2100
+      },
+      "backend": "cpu",
+      "compile_seconds": 4.856954660266638,
+      "configuration": {
+        "edge_count": 11,
+        "exact_finite_section": true,
+        "pair_block": 1024,
+        "paired": false,
+        "residual_nodes": 128,
+        "source_tile": 32,
+        "target_tile": 32
+      },
+      "device_kind": "cpu",
+      "hostname": "98dci4-clu-4073.iter.org",
+      "jax_enable_x64": true,
+      "jax_version": "0.11.0",
+      "kernel_seconds": 0.05927734076976776,
+      "peak_rss_kib": 1098088,
+      "platform": "Linux-5.14.0-284.25.1.el9_2.x86_64-x86_64-with-glibc2.34",
+      "spot_check": {
+        "absolute_deviation": [
+          1.6352987486280973e-16,
+          8.637089084033694e-20,
+          1.750711222856232e-19
+        ],
+        "atol": 2e-18,
+        "device_value": [
+          9.115634151698096e-06,
+          -1.2675235234366207e-07,
+          1.3122760221618756e-07
+        ],
+        "passed": true,
+        "production_numpy_value": [
+          9.115634151861626e-06,
+          -1.267523523435757e-07,
+          1.312276022160125e-07
+        ],
+        "relative_deviation": [
+          1.7939495172632953e-11,
+          6.814145003496224e-13,
+          1.33410288178123e-12
+        ],
+        "rtol": 2e-10
+      },
+      "status": "compiled_and_executed"
+    },
+    "h200": {
+      "allocation": {
+        "cpus": 8,
+        "elapsed_seconds": 20,
+        "job_id": "1253205",
+        "memory_mib": 153600,
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA",
+        "scheduler_state": "COMPLETED",
+        "time_limit": null,
+        "time_limit_seconds": 2100
+      },
+      "backend": "gpu",
+      "compile_seconds": 12.32656442373991,
+      "configuration": {
+        "edge_count": 11,
+        "exact_finite_section": true,
+        "pair_block": 1024,
+        "paired": false,
+        "residual_nodes": 128,
+        "source_tile": 32,
+        "target_tile": 32
+      },
+      "device_kind": "NVIDIA H200 NVL",
+      "hostname": "98dci4-gpu-0003.iter.org",
+      "jax_enable_x64": true,
+      "jax_version": "0.11.0",
+      "kernel_seconds": 0.03534811548888683,
+      "peak_rss_kib": 4569444,
+      "platform": "Linux-6.12.0-124.11.1.el10_1.x86_64-x86_64-with-glibc2.39",
+      "spot_check": {
+        "absolute_deviation": [
+          1.8109564412296941e-16,
+          3.7685025218935856e-19,
+          1.6459967747519191e-18
+        ],
+        "atol": 2e-18,
+        "device_value": [
+          9.115634152042722e-06,
+          -1.2675235234395255e-07,
+          1.312276022143665e-07
+        ],
+        "passed": true,
+        "production_numpy_value": [
+          9.115634151861626e-06,
+          -1.267523523435757e-07,
+          1.312276022160125e-07
+        ],
+        "relative_deviation": [
+          1.9866488837310945e-11,
+          2.973122354115101e-12,
+          1.2543068279510736e-11
+        ],
+        "rtol": 2e-10
+      },
+      "status": "compiled_and_executed"
+    }
+  },
+  "paired_graph_context": {
+    "cpu_compile_wall_floor_seconds": 2335,
+    "cpu_peak_rss_kib": 149811136,
+    "h200_compile_wall_floor_seconds": 2335,
+    "h200_observed_peak_rss_floor_kib": 58935472,
+    "mechanism": "paired-fp64 expansion multiplies the primitive graph and prevents the compact compilation measured here"
+  },
+  "production_source_changed": false,
+  "status": "complete",
+  "verdict": "the ordinary-fp64 exact-section graph compiles within both bounded allocations and its post-compile values agree with the production NumPy finite-section evaluation"
+}

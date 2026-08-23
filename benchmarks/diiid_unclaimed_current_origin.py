@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import subprocess
 from collections import deque
 from pathlib import Path
 from typing import Any
@@ -27,6 +28,7 @@ from benchmarks import diiid_unclaimed_current_patches as patches
 from benchmarks.diiid_label_resolve_gate import _operator
 from benchmarks.diiid_negative_tail_attribution import _current_vector
 from benchmarks.diiid_root_existence import _profile_source
+from benchmarks.diiid_state_of_play_figures import boundary_gradient_minimum
 from nova.equilibrium.map_extraction import apply_delta_star
 from nova.imas.diiid_description import DiiidDescriptionRegistry, vacuum_response
 from nova.jax.config import configure_dtypes
@@ -38,6 +40,7 @@ PREREGISTRATION_NAME = "unclaimed_current_origin_preregistration.json"
 RECEIPT_NAME = "unclaimed_current_origin_receipt.json"
 FIGURE_NAME = "unclaimed_current_origin.png"
 CHECKPOINT_NAME = "unclaimed_current_origin_frames.jsonl"
+SETTLEMENT_RECEIPT_NAME = "cluster_lead_settlement_receipt.json"
 
 FRAME_COUNT = 60
 SHOT_COUNT = 20
@@ -51,6 +54,10 @@ NON_GS_LABEL_CONTENT_FRACTION = 0.9968
 RESOLUTION_MAXIMUM_RELATIVE_CHANGE = 0.20
 LANDED_MEDIAN_UNCLAIMED_AMPERE_TURNS = 452_070.90359150956
 LANDED_MEDIAN_UNCLAIMED_FRACTION = 0.6149271950681132
+LEAD_CLUSTER_CENTRES_RZ_M = {
+    2: (2.3475159346026016, 1.2498395802321838),
+    3: (2.357307745680109, -1.2496513053830223),
+}
 
 
 def preregistration() -> dict[str, Any]:
@@ -305,6 +312,363 @@ def _source_patch_records(
                     }
                 )
     return flat, by_frame
+
+
+def _sha256(path: Path) -> str:
+    """Return the byte digest of one banked evidence input."""
+
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _source_stamp() -> dict[str, str]:
+    """Return the clean committed source identity used by a measurement."""
+
+    status = subprocess.run(
+        ["git", "status", "--porcelain"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+    if status:
+        raise RuntimeError("cluster settlement requires a clean checkout")
+
+    def revision(name: str) -> str:
+        return subprocess.run(
+            ["git", "rev-parse", name],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+
+    return {"commit": revision("HEAD"), "tree": revision("HEAD^{tree}")}
+
+
+def _lead_current_summary(
+    patch_records: list[dict[str, Any]], labels: np.ndarray, cluster: int
+) -> dict[str, Any]:
+    """Report a lead's signed member-patch current on the banked scale."""
+
+    indices = np.flatnonzero(labels == cluster)
+    signed = np.asarray(
+        [patch_records[index]["signed_current_a"] for index in indices], dtype=float
+    )
+    if not len(signed):
+        raise RuntimeError(f"banked cluster {cluster} has no member patches")
+    median = float(np.median(signed))
+    return {
+        "aggregation_for_fraction": "median signed current across member patches",
+        "member_patch_count": int(len(signed)),
+        "signed_current_a": _distribution(signed),
+        "median_signed_current_a": median,
+        "median_signed_current_fraction_of_unclaimed_median": (
+            median / LANDED_MEDIAN_UNCLAIMED_AMPERE_TURNS
+        ),
+        "member_patch_signed_current_sum_a": float(np.sum(signed)),
+        "unclaimed_current_median_a_turn": LANDED_MEDIAN_UNCLAIMED_AMPERE_TURNS,
+    }
+
+
+def _nearest_feature(point: np.ndarray, coordinates: np.ndarray) -> dict[str, Any]:
+    """Return the nearest coordinate and its distance from one lead."""
+
+    distance = np.linalg.norm(coordinates - point[None, :], axis=1)
+    nearest = int(np.argmin(distance))
+    return {
+        "distance_m": float(distance[nearest]),
+        "coordinate_rz_m": coordinates[nearest].tolist(),
+        "within_one_native_cell": bool(distance[nearest] <= NATIVE_CELL_M),
+    }
+
+
+def _fixed_feature_summary(
+    point: np.ndarray,
+    radius: np.ndarray,
+    height: np.ndarray,
+    wall: np.ndarray,
+    x_points: np.ndarray,
+) -> dict[str, Any]:
+    """Measure proximity to every declared fixed geometric feature."""
+
+    radial_boundary = min(abs(point[0] - radius[0]), abs(point[0] - radius[-1]))
+    vertical_boundary = min(abs(point[1] - height[0]), abs(point[1] - height[-1]))
+    radial_node = float(np.min(np.abs(radius - point[0])))
+    vertical_node = float(np.min(np.abs(height - point[1])))
+    grid_boundary = min(radial_boundary, vertical_boundary)
+    grid_node_line = min(radial_node, vertical_node)
+    wall_vertex = _nearest_feature(point, wall)
+    x_point_locus = _nearest_feature(point, x_points)
+    grid = {
+        "boundary_distance_m": float(grid_boundary),
+        "radial_boundary_distance_m": float(radial_boundary),
+        "vertical_boundary_distance_m": float(vertical_boundary),
+        "nearest_node_line_distance_m": float(grid_node_line),
+        "nearest_radial_node_line_distance_m": radial_node,
+        "nearest_vertical_node_line_distance_m": vertical_node,
+        "boundary_within_one_native_cell": bool(grid_boundary <= NATIVE_CELL_M),
+        "node_line_within_one_native_cell": bool(grid_node_line <= NATIVE_CELL_M),
+        "radial_extent_m": [float(radius[0]), float(radius[-1])],
+        "vertical_extent_m": [float(height[0]), float(height[-1])],
+    }
+    fixed_coincidence = bool(
+        wall_vertex["within_one_native_cell"]
+        or grid["boundary_within_one_native_cell"]
+        or grid["node_line_within_one_native_cell"]
+        or x_point_locus["within_one_native_cell"]
+    )
+    return {
+        "tolerance_m": NATIVE_CELL_M,
+        "wall_vertex": wall_vertex,
+        "efit_grid": grid,
+        "frames_x_point_locus": {
+            **x_point_locus,
+            "frame_count": int(len(x_points)),
+        },
+        "coincides_with_any_declared_feature": fixed_coincidence,
+    }
+
+
+def _decimated_lead_matches(
+    patch_records: list[dict[str, Any]], labels: np.ndarray
+) -> tuple[dict[int, dict[str, Any]], dict[str, Any]]:
+    """Match banked leads to clusters after the registered grid decimation."""
+
+    position = position_summary(patch_records, labels)
+    clusters = position["largest_clusters"]
+    matches: dict[int, dict[str, Any]] = {}
+    for lead, centre_values in LEAD_CLUSTER_CENTRES_RZ_M.items():
+        centre = np.asarray(centre_values, dtype=float)
+        candidates = []
+        for item in clusters:
+            candidate = np.asarray(
+                [item["centroid_r_m"], item["centroid_z_m"]], dtype=float
+            )
+            candidates.append((float(np.linalg.norm(candidate - centre)), item))
+        if not candidates:
+            matches[lead] = {
+                "survives": False,
+                "nearest_decimated_cluster": None,
+                "distance_m": None,
+                "reason": "no decimated detectable cluster exists",
+            }
+            continue
+        distance, nearest = min(candidates, key=lambda item: item[0])
+        survives = bool(
+            distance <= CLUSTER_RADIUS_M and nearest["shots"] >= POSITION_MINIMUM_SHOTS
+        )
+        matches[lead] = {
+            "survives": survives,
+            "matching_rule": (
+                "nearest decimated DBSCAN cluster within 0.042 m and spanning "
+                "at least fifteen shots"
+            ),
+            "distance_m": distance,
+            "distance_in_native_cells": distance / NATIVE_CELL_M,
+            "nearest_decimated_cluster": nearest,
+        }
+    return matches, position
+
+
+def settle_cluster_leads(
+    data: Path, output: Path, *, workers: int = 1
+) -> dict[str, Any]:
+    """Settle the two banked position-stable leads without rewriting banked data."""
+
+    stamp = _source_stamp()
+    configure_dtypes()
+    source_path = SOURCE_RECEIPT
+    origin_path = DEFAULT_OUTPUT / RECEIPT_NAME
+    input_digests = {
+        str(origin_path): _sha256(origin_path),
+        str(source_path): _sha256(source_path),
+    }
+    source = json.loads(source_path.read_text())
+    origin = json.loads(origin_path.read_text())
+    patch_records, source_by_frame = _source_patch_records(source)
+    coordinates = np.asarray(
+        [[item["centroid_r_m"], item["centroid_z_m"]] for item in patch_records]
+    )
+    labels = cluster_centroids(coordinates)
+    for cluster, expected_values in LEAD_CLUSTER_CENTRES_RZ_M.items():
+        members = coordinates[labels == cluster]
+        measured = np.mean(members, axis=0)
+        if not np.allclose(measured, expected_values, rtol=0.0, atol=1e-12):
+            raise RuntimeError(f"banked cluster {cluster} centroid changed")
+    banked_centres = {
+        item["cluster"]: (item["centroid_r_m"], item["centroid_z_m"])
+        for item in origin["position_stability"]["largest_clusters"]
+    }
+    for cluster, expected in LEAD_CLUSTER_CENTRES_RZ_M.items():
+        if cluster not in banked_centres or not np.allclose(
+            banked_centres[cluster], expected, rtol=0.0, atol=1e-12
+        ):
+            raise RuntimeError(f"origin receipt cluster {cluster} changed")
+
+    affected = exact_tare.polarity_population()
+    selected, limited_rows = exact_tare.select_frames(
+        sorted(data.glob("*.parquet")),
+        affected,
+        SHOT_COUNT,
+        FRAME_COUNT // SHOT_COUNT,
+    )
+    selected_keys = [(item.path.name, item.frame) for item in selected]
+    if set(selected_keys) != set(source_by_frame):
+        raise RuntimeError(
+            "selected decimation cohort differs from banked patch cohort"
+        )
+    rows = {name: exact_tare._read(data / name) for name in limited_rows}
+    first = rows[selected[0].path.name]
+    radius, height = exact_tare.canonical_axes(first)
+    mesh, geometry, width, vertical_extent = exact_tare.rectangular_geometry(
+        radius, height
+    )
+    prepared = [
+        exact_tare.prepare_frame(item, rows[item.path.name], radius, height)
+        for item in selected
+    ]
+    source_mask = np.any(
+        np.stack([item.participation_zr.reshape(-1) for item in prepared]), axis=0
+    )
+    source_indices = np.flatnonzero(source_mask & np.asarray(mesh.interior()))
+    blocks = exact_tare.response_blocks(
+        mesh, source_indices, width, vertical_extent, max(1, workers)
+    )
+    integrate = exact_tare.moment_integrator(mesh, geometry)
+    with np.load(patches.VESSEL_ARTIFACT) as vessel:
+        wall = np.asarray(vessel["limiter_contour_rz_m"], dtype=float)
+
+    decimated_records: list[dict[str, Any]] = []
+    x_points = []
+    for prepared_frame in prepared:
+        key = (prepared_frame.selected.path.name, prepared_frame.selected.frame)
+        row = rows[key[0]]
+        exact_vectors = integrate(
+            prepared_frame.psi_norm_zr,
+            prepared_frame.participation_zr,
+            prepared_frame.profile_surface,
+            prepared_frame.p_prime,
+            prepared_frame.ff_prime,
+        )
+        exact_current, exact_radial, exact_vertical, _boundary = (
+            np.asarray(value) for value in jax.block_until_ready(exact_vectors)
+        )
+        exact_flux_zr = (
+            blocks[0] @ exact_current[source_indices]
+            + blocks[1] @ exact_radial[source_indices]
+            + blocks[2] @ exact_vertical[source_indices]
+        ).reshape(prepared_frame.label_total_zr.shape)
+        tared_total_zr = prepared_frame.label_total_zr - exact_flux_zr
+        decimated_radius = radius[::2]
+        decimated_height = height[::2]
+        decimated_core = prepared_frame.core_rz[::2, ::2]
+        decimated_delta = apply_delta_star(
+            decimated_radius, decimated_height, tared_total_zr[::2, ::2].T
+        )
+        decimated_density = np.asarray(decimated_delta.toroidal_current_density)
+        decimated_exterior = (
+            ~decimated_core & decimated_delta.valid & np.isfinite(decimated_density)
+        )
+        detected, _metrics, _masks = patches.locate_patches(
+            decimated_density,
+            decimated_exterior,
+            decimated_core,
+            decimated_radius,
+            decimated_height,
+            wall,
+            float(np.sum(exact_current)),
+        )
+        decimated_records.extend(
+            {
+                "shot": key[0],
+                "frame": key[1],
+                **item,
+            }
+            for item in detected
+            if item["detectable_above_tare_floor"]
+        )
+        count = int(row["efit_lcfs_n"][key[1]])
+        boundary = np.column_stack(
+            (
+                np.asarray(row["efit_lcfs_r"][key[1]][:count], dtype=float),
+                np.asarray(row["efit_lcfs_z"][key[1]][:count], dtype=float),
+            )
+        )
+        x_points.append(
+            boundary_gradient_minimum(
+                radius,
+                height,
+                np.asarray(row["efit_psirz"][key[1]], dtype=float),
+                boundary,
+            )
+        )
+
+    decimated_coordinates = np.asarray(
+        [[item["centroid_r_m"], item["centroid_z_m"]] for item in decimated_records]
+    )
+    decimated_labels = cluster_centroids(decimated_coordinates)
+    decimated_matches, decimated_position = _decimated_lead_matches(
+        decimated_records, decimated_labels
+    )
+    x_point_array = np.asarray(x_points, dtype=float)
+    leads = []
+    for cluster, centre_values in LEAD_CLUSTER_CENTRES_RZ_M.items():
+        centre = np.asarray(centre_values, dtype=float)
+        leads.append(
+            {
+                "banked_cluster": cluster,
+                "centroid_rz_m": centre.tolist(),
+                "signed_current": _lead_current_summary(patch_records, labels, cluster),
+                "fixed_geometry": _fixed_feature_summary(
+                    centre, radius, height, wall, x_point_array
+                ),
+                "factor_two_decimation": decimated_matches[cluster],
+            }
+        )
+    surviving = sum(item["factor_two_decimation"]["survives"] for item in leads)
+    feature_coincidences = sum(
+        item["fixed_geometry"]["coincides_with_any_declared_feature"] for item in leads
+    )
+    confirmed = surviving == len(leads) and feature_coincidences == 0
+    receipt = {
+        "source_stamp": stamp,
+        "evidence_input_sha256": input_digests,
+        "evidence_inputs_remained_byte_identical": bool(
+            input_digests[str(origin_path)] == _sha256(origin_path)
+            and input_digests[str(source_path)] == _sha256(source_path)
+        ),
+        "native_cell_m": NATIVE_CELL_M,
+        "wall": {
+            "authored_vertex_count": int(len(wall)),
+            "outer_extent_r_m": float(np.max(wall[:, 0])),
+        },
+        "grid": {
+            "native_shape_rz": [int(len(radius)), int(len(height))],
+            "decimated_shape_rz": [int(len(radius[::2])), int(len(height[::2]))],
+        },
+        "lead_count": len(leads),
+        "leads": leads,
+        "decimated_population": decimated_position,
+        "verdict": {
+            "word": "lead-confirmed" if confirmed else "lead-dismissed",
+            "rule": (
+                "lead-confirmed only when both banked leads match a decimated "
+                "cross-shot cluster and neither lies within one native cell of a "
+                "declared fixed geometric feature"
+            ),
+            "surviving_lead_count": surviving,
+            "fixed_feature_coincidence_count": feature_coincidences,
+            "discriminating_number": {
+                "name": "fixed_feature_coincidence_count",
+                "value": feature_coincidences,
+                "required_for_confirmation": 0,
+            },
+        },
+    }
+    output.mkdir(parents=True, exist_ok=True)
+    receipt_path = output / SETTLEMENT_RECEIPT_NAME
+    receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+    if not receipt["evidence_inputs_remained_byte_identical"]:
+        raise RuntimeError("a banked evidence receipt changed during settlement")
+    return receipt
 
 
 def _magnitude_summary(
@@ -673,17 +1037,28 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--data", type=Path, default=DEFAULT_DATA)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--workers", type=int, default=1)
+    parser.add_argument(
+        "--settle-cluster-leads",
+        action="store_true",
+        help="settle the two banked position-stable leads without rewriting inputs",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     arguments = parse_args()
-    receipt = run(arguments.data, arguments.output, workers=arguments.workers)
-    print(
-        json.dumps(
-            {"selection": receipt["selection"], "verdict": receipt["verdict"]}, indent=2
+    if arguments.settle_cluster_leads:
+        receipt = settle_cluster_leads(
+            arguments.data, arguments.output, workers=arguments.workers
         )
-    )
+        summary = {
+            "lead_count": receipt["lead_count"],
+            "verdict": receipt["verdict"],
+        }
+    else:
+        receipt = run(arguments.data, arguments.output, workers=arguments.workers)
+        summary = {"selection": receipt["selection"], "verdict": receipt["verdict"]}
+    print(json.dumps(summary, indent=2))
 
 
 if __name__ == "__main__":

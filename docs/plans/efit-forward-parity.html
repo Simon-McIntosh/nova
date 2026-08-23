@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="efit-forward-parity">
   <meta name="plan-title" content="EFIT Forward Parity — the fixed-point free-boundary solve against a reference equilibrium">
   <meta name="plan-summary" content="Demonstrate that nova&#x27;s free-boundary Grad-Shafranov fixed point reproduces a reference EFIT equilibrium when given that reference&#x27;s own flux functions and conductor currents — a forward solve with no measurements, no whitening and no fitted coefficients">
-  <meta name="plan-status" content="shipped">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="6.0">
   <meta name="plan-capability-version" content="1.0">
@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-23">
-<meta name="plan-version" content="47">
+<meta name="plan-version" content="48">
 <meta name="plan-commits" content="c1e180d5,71c1ec36,457caddd,252bdd77,d026b0dc,57a1bfb9,c3f9f83a,6700b088,783229ac,325f6a85,56b1518b,e4dc6155,d7bf1035,c7ea1772,19e0d865,9641608b,f771f90d,d2e27d60,c3828a88,c9152535,ed601260,c308025d,ede61ac7,a031c210,f8feb25f,aad1a445,8c39bf42,10ef9053,67d584c7,76d86fb1,f5598fee,71758d98,db136e54,67bf18e7,2af4037c,d7add809,dd6be953,e4334fc8,2f0adb98,b7645363,9391e008">
 <meta name="plan-artifacts" content="scripts/dina_profile_routes/reuse-report.md,scripts/constrained_parity_reuse/reuse-report.md,benchmarks/efit_forward_parity_slice.py,benchmarks/efit_parity_root_geometry.py,benchmarks/efit_parity_warm_neighbour.py,benchmarks/efit_parity_moment_definitions.py,benchmarks/efit_parity_boundary_volume.py,benchmarks/efit_parity_inductance_partition.py,benchmarks/efit_parity_field_instrument.py,benchmarks/efit_parity_tared_external_field.py,docs/figures/efit-forward-parity/passive-inclusive-frozen-six-scorecard.json,docs/figures/efit-forward-parity/converged-root-geometry-attribution.json,docs/figures/efit-forward-parity/warm-neighbour-stall-lift.json,docs/figures/efit-forward-parity/moment-definition-rescore.json,docs/figures/efit-forward-parity/boundary-enclosed-volume-reconciliation.json,docs/figures/efit-forward-parity/inductance-deficit-partition.json,docs/figures/efit-forward-parity/field-energy-instrument-control.json,docs/figures/efit-forward-parity/tared-external-field-solve.json,docs/figures/efit-forward-parity/tared-plasma-support-solve.json,docs/figures/efit-forward-parity/tared-plasma-support-solve.png,docs/evidence/archive/efit-forward-parity-landed.html">
-<meta name="plan-impl" content="1.0">
+<meta name="plan-impl" content="0.93">
 </head>
 <body>
   <main class="plan-doc">
@@ -228,6 +228,70 @@
       </p>
     </section>
 
+    <h2 id="s13">&sect;13 &mdash; Where the convergence criterion came from</h2>
+
+    <p><strong>The registered fixed-point criterion has no physical basis, and its own registry entry
+    says so.</strong> <code>parity_tolerances.py</code> records the bound as 1.0e-8 on a relative sup
+    norm <code>max|g(x)&minus;x| / max|g(x)|</code>, with basis <em>"the profile accelerator's existing
+    strict convergence criterion"</em> and evidence <code>nova/equilibrium/fixed_point.py</code>. That is
+    a solver's internal stopping tolerance, inherited from the accelerator and promoted to a
+    cross-code parity gate. Nothing in the registry connects it to the reference's accuracy, to the
+    discretisation error, or to any physical scale.</p>
+
+    <p><strong>This is the same class of error as the four already retracted here</strong> &mdash; an
+    instrument built for one purpose applied where it does not belong &mdash; and it is the most
+    consequential instance, because every downstream conclusion inherits it. The 1-of-6 convergence
+    verdict is a count against this gate. The mesh-refinement requirement is the cost of chasing this
+    gate: extrapolating each observed order to 1e-8 needed between 1.25 million and astronomically many
+    interior cells. If the target is indefensible then the requirement derived from it is not a
+    requirement at all, and the honest response is to discard both rather than to fund the second.</p>
+
+    <p><strong>What a defensible criterion looks like.</strong> A fixed point converged far below its own
+    discretisation error is precision without accuracy: it solves the discrete problem to eight digits
+    when the discrete problem differs from the continuous one in the third. The natural bound is therefore
+    the discretisation error itself, which the measured orders now make estimable. Two other physical
+    scales are available and measured: the reference's own boundary self-consistency, whose stored-LCFS
+    contour discrepancy runs to 3.456e-3 of span against a registered 6e-3 limit, and the flux agreement
+    actually achieved at 0.565&nbsp;percent RMS of span. All three sit near 1e-3, and the fine-mesh
+    residuals run 1.307e-3 to 5.300e-3 &mdash; the same order. If that comparison survives a units audit,
+    the solves are already as converged as the data and the mesh permit, and the reliability verdict is an
+    artifact of the gate rather than a statement about the solver.</p>
+
+    <p><em>Done-when:</em> the provenance of every registered bound this plan scores against is traced to
+    its origin and classified as physically motivated or inherited, with the quoted basis for each; the
+    fixed-point residual's normalisation is stated exactly and its comparability to the
+    fraction-of-span figures either established or refused with the reason; a discretisation-consistent
+    criterion is derived from the measured per-reference orders and stated as a formula with its value per
+    reference; the six references are re-scored against it beside the 1e-8 count; and the verdict states
+    whether the 1-of-6 reliability figure survives a defensible criterion, with the 1e-8 count retained
+    beside it so nothing is overwritten.</p>
+
+    <h2 id="s14">&sect;14 &mdash; Fixed boundary first, on the one reference that discriminates</h2>
+
+    <p><strong>Owner direction: run the double seed, on 21978/35 alone.</strong> That reference is the
+    single most diagnostic case in the set because it sits in <em>both</em> low strata &mdash; observed
+    mesh order 0.97, the weakest response to refinement of the six, and no closed axis-enclosing flux
+    surface at all. It is simultaneously the case where interior refinement helps least and the case with
+    no confined topology to refine, which is exactly the combination a fixed-boundary first pass
+    addresses.</p>
+
+    <p><strong>The distinction from the banked negative matters.</strong> Source-strength homotopy &mdash;
+    scaling the plasma source from zero &mdash; converged to the dominating limited root, and
+    <code>nova/equilibrium/continuation.py</code> is source-domain continuation. Homotopy in
+    <em>boundary-condition</em> space, fixed to free, is untried and is a different path through a
+    different space. A fixed-boundary solve cannot fail the way the free-boundary iterates fail, because
+    the boundary is imposed and the interior current must arrange itself inside a confined domain. What it
+    produces is precisely what the free pass lacks: a physically distributed current on a confined
+    support, and its moments.</p>
+
+    <p><em>Done-when:</em> a fixed-boundary solve on the reference's own declared boundary runs for
+    21978/35 and its interior current distribution is reported against the &Delta;*-implied distribution
+    on the same support; the free-boundary current-constrained solve is then seeded from that state and its
+    terminal residual reported against the banked cold figures of 1.035680e-2 coarse and 5.300e-3 fine;
+    the outcome is stated as whether boundary-condition homotopy enters the plasma basin where
+    source-strength homotopy did not; and the two homotopies are kept explicitly distinct in the record so
+    neither result is ever read as the other.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="forward-parity-seed" data-choice="reference-seed" data-by="Simon McIntosh" data-when="2026-08-21T10:09:38+00:00">
@@ -308,7 +372,7 @@
     </article>
 <article class="r-fu" data-id="f-efp-006" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-23" data-recommends-skill="/reckon-ship nova-test-lane-health" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">The forward-solve suite reports a false green when run the obvious way (foreign-owner: nova-test-lane-health)</h4>
-    <div class="r-fu-body"><p><strong>Exemption: foreign-owner.</strong> Test-lane marker policy belongs to <code>nova-test-lane-health</code>, and this is a repo-wide hazard rather than a parity one. Caught as a byproduct of the tree-hygiene audit, which reported it transparently instead of counting it: <code>pytest tests/test_equilibrium_forward_solve.py</code> collects <strong>0 tests, 28 deselected, and exits 0</strong>. Only the marker override selecting slow-or-not-slow picks up the 28 that this plan's record cites as its forward-solve gate. So the naive invocation &mdash; the one any agent, contributor or CI step would reach for &mdash; produces a silent, exit-zero, zero-test pass that reads as green to anyone not counting collected tests. Independently reproduced here: collect-only returns no tests collected, 28 deselected.</p><p>Two things worth that plan's attention. The failure mode is <em>false confidence</em> rather than inconvenience: a suite that cannot run by default is worse than a suite that fails, because it is indistinguishable from success. And it is not confined to one file &mdash; whatever marker default deselects these 28 will deselect any similarly-marked suite, so the fix is a policy question (a default marker expression, or markers that do not require an override to select anything) rather than a one-file edit. The audit worker's own handling is the model to copy: it ran the preflight, noticed 0 of 28 selected, refused to count it as a suite execution, and retained the zero-test log for transparency.</p></div>
+    <div class="r-fu-body"><p><strong>Exemption: foreign-owner.</strong> Test-lane marker policy belongs to <code>nova-test-lane-health</code>, and this is a repo-wide hazard rather than a parity one. Caught as a byproduct of the tree-hygiene audit, which reported it transparently instead of counting it: <code>pytest tests/test_equilibrium_forward_solve.py</code> collects <strong>0 tests, 28 deselected, and exits 0</strong>. Only the marker override selecting slow-or-not-slow picks up the 28 that this plan's record cites as its forward-solve gate. So the naive invocation — the one any agent, contributor or CI step would reach for — produces a silent, exit-zero, zero-test pass that reads as green to anyone not counting collected tests. Independently reproduced here: collect-only returns no tests collected, 28 deselected.</p><p>Two things worth that plan's attention. The failure mode is <em>false confidence</em> rather than inconvenience: a suite that cannot run by default is worse than a suite that fails, because it is indistinguishable from success. And it is not confined to one file — whatever marker default deselects these 28 will deselect any similarly-marked suite, so the fix is a policy question (a default marker expression, or markers that do not require an override to select anything) rather than a one-file edit. The audit worker's own handling is the model to copy: it ran the preflight, noticed 0 of 28 selected, refused to count it as a suite execution, and retained the zero-test log for transparency.</p></div>
     <pre class="r-fu-prompt">/reckon-ship nova-test-lane-health</pre>
     </article>
 </section>
@@ -432,6 +496,9 @@ CONSEQUENCE FOR THE SECTION-4 VERDICT, stated now rather than deferred: of the s
 </div>
 <div class="r-comment" data-section="s12" data-id="c-20260823T1030-hygiene-landed" data-who="reckon-ship" data-when="2026-08-23T10:30:00Z">
     <div class="r-comment-body">TREE HYGIENE AUDIT LANDED - run r-20260823T080558417226, gate PASSED, commits dd6be953, e4334fc8, 2f0adb98, b7645363, 9391e008, merged; scope-changed for the four-log fence extension. THE TREE WAS CLEANER THAN THE DAY'S FAILURE COUNT SUGGESTS, because the failures lived in worktrees that were removed rather than in the tree. All 74 unique paths across the 36-commit set classified: 23 LIVE, 47 DELIBERATELY-BANKED-EVIDENCE, 4 DEBRIS. The four debris paths were uncited stale console captures under scripts/dina_profile_routes (measure.log, measure_controls.log, verify.log, verify_addendum.log, 297 to 439 bytes each, independently confirmed as cited in zero documents) and are removed; that directory's cited artifacts - reuse-report.md, receipt.json, addendum.json - stay. TWO CONFIRMATIONS THAT MATTER MORE THAN THE DELETIONS. No all-cell tare path survives beside its replacement: the corrected tare composes only declared_valid current, so the void implementation was genuinely replaced rather than left alongside. And no constant-boolean dead branch exists anywhere in the six parity modules. THE REAL FIND WAS DUPLICATION, which is what six workers writing six modules in one day produces: the relative-difference helper had been copied FOUR times and _source_digests TWICE. Both are now single definitions - relative-error arithmetic in efit_parity_moment_definitions.py because it owns scoring semantics, _source_digests in efit_parity_inductance_partition.py because it owns the source receipts the field-instrument module consumes - with the others importing. A normalised-AST post-check reports 0 exact duplicate groups across all six audited modules. RULED RETAINED, NOT DEBRIS: the 20 definition-only routines in benchmarks/efit_forward_parity_slice.py, plus adjudicate_banked_receipt. A routine that reproduces a banked receipt is evidence INFRASTRUCTURE even when no current entry point calls it, and deleting the reproduction path for digest-protected evidence is the same error as deleting the evidence; retention costs nothing while a wrong deletion makes receipts unreproducible. The discriminator for any future pass is recorded rather than applied: does the routine produce an artifact a plan or evidence record cites. PROOF OF SAFETY: the seven-file parity suite 55 passed in 162.12 s exit 0, and the forward-solve suite 28 passed in 54.00 s exit 0, with 23/23 protected banked digests matching AFTER the test runs. Naming sweep clean - the only hits were hexadecimal plot colours and Ruff E402 tool codes, 0 violations. Report: scripts/parity_tree_audit/report.md. This closes the plan's last node; status returns to shipped at impl 26/26.</div>
+</div>
+<div class="r-comment" data-section="s13" data-id="c-20260823T1130-criterion-challenged" data-who="reckon-ship" data-when="2026-08-23T11:30:00Z">
+    <div class="r-comment-body">OWNER CHALLENGE 2026-08-23: where does the 1e-8 and the resulting million-cell requirement come from, because it is hard to justify. TRACED, AND THE CHALLENGE IS CORRECT - THE BOUND HAS NO PHYSICAL BASIS AND ITS OWN REGISTRY ENTRY SAYS SO. nova/imas/parity_tolerances.py records ScorecardField.FIXED_POINT_DEFECT with bound 1.0e-8, direction at-most, unit 'relative sup norm' meaning max|g(x)-x| divided by max|g(x)|, basis quoted verbatim as 'the profile accelerator's existing strict convergence criterion, applied to max|g(x)-x|/max|g(x)| without substituting the cross-substrate current-reproduction bound', and evidence nova/equilibrium/fixed_point.py. So it is a SOLVER'S INTERNAL STOPPING TOLERANCE, inherited from the accelerator and promoted to a cross-code physics parity gate. Nothing in the registry connects it to the reference's accuracy, to the discretisation error, or to any physical scale. THIS IS THE SAME CLASS OF ERROR AS THE FOUR ROWS ALREADY RETRACTED IN THIS PLAN - an instrument built for one purpose applied where it does not belong - and it is the most consequential instance, because every downstream conclusion inherits it. The 1-of-6 reliability verdict is a count against this gate. The mesh-refinement requirement is the COST OF CHASING this gate: extrapolating each measured order to 1e-8 needed 1.25 million interior cells in the best case and astronomically more in the worst. If the target is indefensible then the requirement derived from it is not a requirement, and the honest response is to discard both rather than fund the second. I am withdrawing the million-cell figure as a REQUIREMENT while retaining it as what it actually is: the arithmetic consequence of a target nobody justified. THREE PHYSICAL SCALES ARE AVAILABLE AND ALL MEASURED, and they agree on an order. The reference's own boundary self-consistency: stored-LCFS contour discrepancy up to 3.456e-3 of span against a registered 6e-3 limit. The flux agreement actually achieved: 0.565 percent RMS of span. The discretisation error, now estimable from the measured per-reference orders 0.97 to 3.39. All three sit near 1e-3 - and the fine-mesh residuals run 1.307e-3 to 5.300e-3, the same order. A fixed point converged far below its own discretisation error is precision without accuracy: it solves the discrete problem to eight digits when the discrete problem differs from the continuous one in the third. IF THE UNITS COMPARISON SURVIVES AUDIT - and it must be audited rather than assumed, since the residual is a relative sup norm while the reference figures are fractions of span, and equating differently-normalised quantities is exactly the error that produced four false failures here - then the solves are already as converged as the data and the mesh permit, and the reliability verdict is an artifact of the gate. That would retract the fifth and last standing negative. Section 13 is the audit; it re-scores the six against a derived criterion and retains the 1e-8 count beside it so nothing is overwritten. URGENT COORDINATION CONSEQUENCE: nova-3d's f-mcbe-002 handoff commissions an operator-refinement plan on the premise that 1e-8 is unreachable by interior refinement. That premise is now under challenge at its root. The commissioning brief must not be executed on an unjustified target, and nova-3d has been told.</div>
 </div>
 </section>
 </main>

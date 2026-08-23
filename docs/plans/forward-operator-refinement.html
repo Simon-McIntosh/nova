@@ -19,7 +19,7 @@
 <meta name="plan-effort-hours" content="6.0">
 <meta name="plan-depends-on" content="scoring-criteria-derivation">
 <meta name="plan-informs" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="15">
 <meta name="plan-impl" content="0.22">
 </head>
 <body>
@@ -155,10 +155,20 @@
   between the two arms. Repair follows in its own node once the mechanism is named, scoped
   at file level against the concurrent solver-defect lane in <code>nova/equilibrium/</code>
   (three named repairs run there; the shared stability survey of §5 is the pre-read).</p>
-  <p><strong>Done when (trace):</strong> the mechanism is named with the exact code path
-  quoted (file:line), demonstrated by a receipt that reproduces the amplification on one
-  fixed carrier and shows the arithmetic decomposition of the 0.64-point move into its
-  named contribution; the repair node's file-level scope is stated in the same receipt.</p>
+  <p>The trace reports the move <strong>per iteration</strong>, not only terminally,
+  because the map's measured non-contractivity (spectral radius 1.1456 pinned) supplies a
+  gain mechanism of its own: a ~6.2&times; amplification of a correct small drive by a
+  converged expanding map wants a route/screening repair (the solver lane's
+  action-qualification work), while a term wrong at iteration one, before amplification,
+  wants a closure-path repair. The verdict states which top-level class holds:
+  EXPANDING_MAP_AMPLIFICATION (geometric per-iteration growth at a rate consistent with the
+  measured spectral radius, every closure term arithmetically correct) or
+  CLOSURE_PATH_ERROR (a specific wrong term at iteration one, file:line named; the
+  source-normalisation, seed/basin and support/mask candidates sit under this class).</p>
+  <p><strong>Done when (trace):</strong> the two-class verdict is banked with
+  iteration-resolved evidence, the mechanism or amplification rate is quoted with its code
+  path or spectral-rate comparison, the arithmetic decomposition of the 0.64-point move is
+  shown, and the repair node's file-level scope is stated in the same receipt.</p>
 </section>
 
 <section id="s3">
@@ -171,7 +181,12 @@
   in 4 iterations to 1.59e-9 on the same expanding map &mdash; so no resolution bump
   rehabilitates damped fixed-point routes, and the adjudication separates FLOOR movement
   (discretisation) from route CONDITIONING (solver), crediting resolution only with the
-  first. The deliverable is a decision-grade statement for the solver
+  first. Baseline route: the catalog lane has locked matrix-free Newton&ndash;Krylov with a
+  finite-difference residual action as the DEFAULT solve route
+  (<code>solver-default-route</code>); the floors here are measured on that incoming
+  default once it lands &mdash; the warm-neighbour campaign already showed a route change
+  reproduces zero banked terminal residuals, so measuring on the outgoing route would date
+  the receipts on arrival. The deliverable is a decision-grade statement for the solver
   lane: refine, raise order, or both, each with its measured cost.</p>
   <p><strong>Done when:</strong> the order-versus-mesh table (floor moved, criterion verdict,
   build cost, memory) is banked with a one-paragraph ruling, and the DIII-D forward-gate

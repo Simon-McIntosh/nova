@@ -743,6 +743,12 @@ def _representation_response() -> dict[str, object]:
             ),
             "cpu_reproduction": 7.726885632464709e-6,
             "gpu_reproduction": incident_widened_residual,
+            "attribution_boundary": (
+                "The rejected reconstruction also traversed the current "
+                "construction-time cell-current representation. It corroborates "
+                "amplification of representation-scale changes but is not used as "
+                "a passive-only eigenvalue sensitivity estimate."
+            ),
             "mechanism": (
                 "Reconstructing a semantically zero passive-current suffix changed "
                 "the fixed source matrix representation and floating reduction "
@@ -957,9 +963,9 @@ def _plot(receipt: dict[str, object], path: Path) -> None:
     representations = response["representations"]
     names = [
         {
-            "baseline": "16 conductors\n1.08 expansion",
-            "refined_conductor_count": "32 conductors\n1.08 expansion",
-            "changed_shell_standoff": "16 conductors\n1.16 expansion",
+            "baseline": "16 at 1.08x",
+            "refined_conductor_count": "32 at 1.08x",
+            "changed_shell_standoff": "16 at 1.16x",
         }[row["name"]]
         for row in representations
     ]
@@ -988,19 +994,20 @@ def _plot(receipt: dict[str, object], path: Path) -> None:
 
     figure, axes = plt.subplots(1, 3, figsize=(13.4, 4.2), constrained_layout=True)
     position = np.arange(len(names))
-    axes[0].plot(position, eigenvalues, marker="o", linewidth=1.5, color="C0")
-    axes[0].axhline(
-        BASELINE_LEADING_EIGENVALUE,
-        color="0.35",
-        linestyle="--",
-        linewidth=1.0,
-        label="banked baseline",
+    movement = 1.0e15 * (eigenvalues - BASELINE_LEADING_EIGENVALUE)
+    axes[0].plot(position, movement, marker="o", linewidth=1.5, color="C0")
+    axes[0].axhline(0.0, color="0.35", linestyle="--", linewidth=1.0)
+    axes[0].text(
+        0.03,
+        0.97,
+        f"banked lambda = {BASELINE_LEADING_EIGENVALUE:.9f}",
+        transform=axes[0].transAxes,
+        va="top",
+        fontsize=8,
     )
     axes[0].set_xticks(position, names)
-    axes[0].set_ylabel("leading eigenvalue")
-    axes[0].ticklabel_format(axis="y", style="plain", useOffset=False)
-    axes[0].set_title("vertical-channel pole")
-    axes[0].legend(frameon=False, fontsize=8)
+    axes[0].set_ylabel("lambda movement from banked [1e-15]")
+    axes[0].set_title("vertical-channel pole movement")
     inset = axes[0].inset_axes([0.56, 0.1, 0.4, 0.32])
     inset.semilogy(position, residuals, marker=".", color="C3")
     inset.set_xticks([])

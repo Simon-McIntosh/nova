@@ -19,7 +19,7 @@
 <meta name="plan-effort-hours" content="6.0">
 <meta name="plan-depends-on" content="scoring-criteria-derivation">
 <meta name="plan-informs" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-impl" content="0.14">
 </head>
 <body>
@@ -126,7 +126,13 @@
   equivalent, all as explicit arguments): a move that collapses toward the documented
   response at denser cells convicts the coarse carrier and the fix is the consistency bump
   this section owns; a mesh-independent move convicts the closure path and routes to a
-  defect node with the mechanism named.</p>
+  defect node with the mechanism named. Before scoping any repair into
+  <code>nova/equilibrium/</code>, consult the shared stability survey the catalog lane is
+  building over exactly that tree
+  (<code>scripts/forward_stability_survey/report.md</code>: every Jacobian-action,
+  Krylov-driver, globalisation and line-search-guard mechanism with file:line and a
+  tested/untested/absent verdict), and re-scope at file level with that lane's orchestrator
+  &mdash; three named solver-defect repairs run there concurrently.</p>
   <p><strong>Done when:</strong> the inventory table is banked with a consistency verdict
   and proposed value per default; the passive-closure mesh-response ladder is banked with
   its verdict (coarse-carrier artifact versus mesh-independent defect); and the follow-on

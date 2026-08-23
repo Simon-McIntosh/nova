@@ -126,6 +126,62 @@
   (sha256 <code>57333213…</code>), two-panel comparison figure alongside.</p>
 </section>
 
+<section id="scored-lane-default">
+  <h2 id="scored-lane-default-h">§1 — The reference-native scored-lane default</h2>
+  <p><strong>reference-native-resolution-default</strong> landed 2026-08-23 — commits
+  <code>e436294a</code>+<code>99e8f85c</code>, merged <code>0388a3d6</code>, gate PASSED
+  (green-except-classified), scope-changed twice under owner rulings. The verdict-producing
+  parity lane passes a fixed 95-point grid (2,161 control cells, cohort 1789–2200), stride
+  retained only for explicit mesh-intervention instruments. Ladder banked: 248/996/2161
+  cells at residuals 1.036e-2 / 5.300e-3 / 2.773e-3, topology 1.0 throughout; the control
+  passes the held-out criterion at ratio 0.199. Coupling 0.655 GB active / 1.964 GB
+  resident at 95; fresh L4 builds 50.98/117.01 s. The four reference-suite failures were
+  proven store-independent (isolated vs shared data home: bit-identical values, no
+  persistent store group loaded in either arm) and base-independent — pre-existing
+  regressions un-hidden by the marker-policy fix, classified separately. Receipt:
+  <code>docs/figures/forward-operator-refinement/reference-native-resolution-default.json</code>.</p>
+</section>
+
+<section id="order-axis">
+  <h2 id="order-axis-h">§2 — The order axis: −7.7% at zero rebuild, and the refreshed criteria</h2>
+  <p><strong>operator-order-floor-move</strong> landed 2026-08-23 — commit
+  <code>862e712a</code>, merged <code>e31ca7ed</code>, gate PASSED, 44 focused tests green.
+  Degree-three-exact five-node cubic-cross cell average (centre 5/6, axial neighbours 1/24):
+  the 4,225-node floor moves 7.9305e-5 → 7.3196e-5, <strong>−7.70%</strong> — against mesh
+  refinement's −72.9% — at demonstrably zero rebuild (all matrix blocks byte-identical by
+  sha256, build wall unchanged, order selection post-build), all runs qualification-ACCEPTED,
+  verdict on the refreshed held-out criteria with the inherited 1e-8 unused. Per-stratum
+  orders re-measured: closed-axis 2.70–3.31 → 2.40–3.00; confinement 0.97–3.39 → 1.20–3.35.
+  <strong>three-spacing-criterion-refresh</strong> landed beside it — commit
+  <code>d486aee6</code>, merged <code>d6834674</code>, zero solves: three of six criteria
+  independently lifted on the h = [0.125, 0.0625, 0.0426] ladder (21986 → 1.1890e-2,
+  21989 → 1.0614e-2, 22086 → 1.2390e-2), three retained where the only third rung is
+  target-owned; confinement stratum partially lifted 3/4, closed-axis honestly retained.
+  Receipts: <code>operator-order-floor-receipt.json</code> (sha256 <code>1848a6a8…</code>),
+  <code>three-spacing-criterion-refresh.json</code> (sha256 <code>ff004cf0…</code>).</p>
+</section>
+
+<section id="mode-identification">
+  <h2 id="mode-identification-h">§6 — The mode identified: a physical vertical displacement channel</h2>
+  <p><strong>coupled-map-mode-identification</strong> landed 2026-08-23 — commit
+  <code>20af1a89</code>, merged <code>41cd83e9</code>, gate PASSED. Verdict:
+  <strong>PHYSICAL_NEAR_MARGINAL_MODE</strong> —
+  <code>vertical_free_boundary_axis_displacement_mode</code>. Leading eigenvalue 0.987429
+  (Ritz residual 6.4e-16) against the measured 0.988369 late growth (Δ 0.095%); clean
+  spectral gap (next pair 0.536); scalar modal factor 1/|1−λ| = 79.5 beside the 106.99×
+  grid-peak gain (1.34× non-scalar channel factor). Localisation: passive-drive overlap
+  0.851, axis-translation 0.568, axis motion [−0.0234, −0.9997] — pure vertical;
+  passive-current state content exactly 0, normalisation 0.0099 — the algebraic-constraint,
+  normalisation and mesh-artifact classes measured out. The field-index says stable
+  (n = 0.5718) yet the discrete map carries the vertical channel at λ ≈ 0.987; and the
+  elongated 1.3372 growth belongs to a <em>distinct radial-dominant mode</em>
+  (|dR/dZ| = 2.467 vs 0.023, alignment 0.397) — each configuration owns its own
+  near-marginal channel, so no scalar screen or ceiling can serve both. The event-resolved
+  question (burst amplification along the real trajectory) remains the open §6 item.
+  Receipt: <code>docs/figures/forward-operator-refinement/coupled-map-mode-identification.json</code>,
+  three-panel figure alongside.</p>
+</section>
+
 <section id="gpu-rebuild">
   <h2 id="gpu-rebuild-h">§4 — The bumped default, demonstrated live on the H200</h2>
   <p><strong>global-dplasma-gpu-rebuild</strong> landed 2026-08-23 — commit

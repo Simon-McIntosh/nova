@@ -15,10 +15,17 @@ import math
 from pathlib import Path
 from typing import Any
 
+from benchmarks.efit_topology_boundary_score import (
+    BOUNDARY_MACHINE_SEMANTIC_IDENTITY,
+    resolve_semantic_machine_artifact,
+)
 from nova.imas.parity_tolerances import ScorecardField, registered_tolerances
 
 OUTPUT_PATH = Path(
     "docs/figures/efit-forward-parity/convergence-criterion-provenance.json"
+)
+BOUND_CLASSIFICATION_OUTPUT = Path(
+    "docs/figures/scoring-criteria-derivation/bound-classification.json"
 )
 PROTECTED_SOURCE = Path(
     "docs/figures/efit-forward-parity/converged-root-geometry-attribution.json"
@@ -112,6 +119,50 @@ EVIDENCE_RELATIONSHIPS = {
     },
 }
 
+BOUND_CLASSIFICATIONS = {
+    ScorecardField.MAGNETIC_AXIS_DISTANCE_M: "merely contained",
+    ScorecardField.LCFS_DISTANCE_M: "merely contained",
+    ScorecardField.X_POINT_DISTANCE_M: "supported",
+    ScorecardField.TOPOLOGY_CLASS_AGREEMENT_FRACTION: "supported",
+    ScorecardField.FIXED_POINT_DEFECT: "reclassified",
+}
+
+BOUND_CLASSIFICATION_REASONS = {
+    ScorecardField.MAGNETIC_AXIS_DISTANCE_M: (
+        "The semantically pinned machine description resolves and the banked "
+        "0.025336 cm reference is numerically contained, but neither source "
+        "derives the four-times multiplier."
+    ),
+    ScorecardField.LCFS_DISTANCE_M: (
+        "The semantically pinned machine description resolves and the banked "
+        "0.008262 cm reference is numerically contained, but neither source "
+        "derives the four-times multiplier."
+    ),
+    ScorecardField.X_POINT_DISTANCE_M: EVIDENCE_RELATIONSHIPS[
+        ScorecardField.X_POINT_DISTANCE_M
+    ]["finding"],
+    ScorecardField.TOPOLOGY_CLASS_AGREEMENT_FRACTION: EVIDENCE_RELATIONSHIPS[
+        ScorecardField.TOPOLOGY_CLASS_AGREEMENT_FRACTION
+    ]["finding"],
+    ScorecardField.FIXED_POINT_DEFECT: EVIDENCE_RELATIONSHIPS[
+        ScorecardField.FIXED_POINT_DEFECT
+    ]["finding"],
+}
+
+REPLACEMENT_READINGS = {
+    ScorecardField.FIXED_POINT_DEFECT: (
+        "Read 1e-8 as the strict stopping policy of the profile accelerator, not "
+        "as a derived physical or discretisation-accuracy bound."
+    ),
+}
+
+SEMANTICALLY_REPINNED_FIELDS = frozenset(
+    {
+        ScorecardField.MAGNETIC_AXIS_DISTANCE_M,
+        ScorecardField.LCFS_DISTANCE_M,
+    }
+)
+
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -164,6 +215,116 @@ def _provenance_table() -> list[dict[str, Any]]:
             }
         )
     return table
+
+
+def _bound_classification_table(
+    artifact_resolution: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Return the final interpretation of every carried registered bound."""
+
+    tolerances = registered_tolerances()
+    table = []
+    for field in CARRIED_FIELDS:
+        tolerance = tolerances[field]
+        classification = BOUND_CLASSIFICATIONS[field]
+        citation = None
+        if field in SEMANTICALLY_REPINNED_FIELDS:
+            citation = {
+                "metric": field.value,
+                "identity_kind": artifact_resolution["identity_kind"],
+                "semantic_identity": artifact_resolution["semantic_identity"],
+                "resolved_materialisation_digest": artifact_resolution[
+                    "materialisation_digest"
+                ],
+                "fully_verified": artifact_resolution["fully_verified"],
+                "authority_statement": (
+                    "The semantic identity names the authored machine description; "
+                    "the resolved materialisation digest is provenance only."
+                ),
+            }
+        table.append(
+            {
+                "field": field.value,
+                "bound": tolerance.bound,
+                "direction": tolerance.direction.value,
+                "unit": tolerance.unit,
+                "classification": classification,
+                "classification_reason": BOUND_CLASSIFICATION_REASONS[field],
+                "replacement_reading": REPLACEMENT_READINGS.get(field),
+                "registered_evidence_locator": tolerance.evidence,
+                "semantic_citation": citation,
+            }
+        )
+    return table
+
+
+def build_bound_classification_receipt(
+    artifact_cache: Path | str,
+) -> dict[str, Any]:
+    """Classify the carried bounds after resolving semantic citations."""
+
+    resolution = resolve_semantic_machine_artifact(artifact_cache)
+    rows = _bound_classification_table(resolution)
+    counts = {
+        label: sum(row["classification"] == label for row in rows)
+        for label in ("supported", "merely contained", "reclassified")
+    }
+    semantic_citations = [
+        row["semantic_citation"] for row in rows if row["semantic_citation"] is not None
+    ]
+    reclassified = [row for row in rows if row["classification"] == "reclassified"]
+    if len(rows) != 5 or sum(counts.values()) != len(rows):
+        raise RuntimeError("the carried-bound classification is incomplete")
+    if len(semantic_citations) != 2 or not all(
+        citation["fully_verified"] for citation in semantic_citations
+    ):
+        raise RuntimeError("the axis and LCFS semantic citations did not resolve")
+    if not all(row["replacement_reading"] for row in reclassified):
+        raise RuntimeError("a reclassified bound has no replacement reading")
+    return {
+        "receipt": {
+            "kind": "carried_bound_classification",
+            "status": "complete",
+            "output": str(BOUND_CLASSIFICATION_OUTPUT),
+        },
+        "classification_counts": counts,
+        "bounds": rows,
+        "semantic_artifact_resolution": resolution,
+        "semantic_citation_contract": {
+            "pinned_identity": BOUNDARY_MACHINE_SEMANTIC_IDENTITY,
+            "citation_count": len(semantic_citations),
+            "resolved_citation_count": sum(
+                citation["fully_verified"] for citation in semantic_citations
+            ),
+            "materialisation_digest_is_authority": False,
+            "failure_mode": (
+                "Resolution raises if the semantic identity is absent, or if the "
+                "resolved manifest fails physical, registry, content or file checks."
+            ),
+        },
+        "claim_bounds": {
+            "registered_tolerances_changed": False,
+            "axis_or_lcfs_multiplier_derived": False,
+            "machine_artifact_semantics_verified": True,
+            "machine_artifact_completeness_required": False,
+            "reason_incomplete_allowed": (
+                "The citation addresses authored machine semantics; unresolved "
+                "non-boundary fields remain visible and are not defaulted."
+            ),
+        },
+    }
+
+
+def write_bound_classification_receipt(
+    artifact_cache: Path | str,
+    path: Path = BOUND_CLASSIFICATION_OUTPUT,
+) -> dict[str, Any]:
+    """Write and return the fail-closed carried-bound classification receipt."""
+
+    receipt = build_bound_classification_receipt(artifact_cache)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(receipt, indent=2, allow_nan=False) + "\n")
+    return receipt
 
 
 def _units_audit() -> dict[str, Any]:
@@ -433,7 +594,26 @@ def write_receipt(path: Path = OUTPUT_PATH) -> dict[str, Any]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=OUTPUT_PATH)
+    parser.add_argument("--classify-bounds", action="store_true")
+    parser.add_argument("--artifact-cache", type=Path)
     arguments = parser.parse_args()
+    if arguments.classify_bounds:
+        if arguments.artifact_cache is None:
+            parser.error("--classify-bounds requires --artifact-cache")
+        receipt = write_bound_classification_receipt(
+            arguments.artifact_cache,
+            arguments.output,
+        )
+        counts = receipt["classification_counts"]
+        resolution = receipt["semantic_artifact_resolution"]
+        print(
+            f"bounds={len(receipt['bounds'])} supported={counts['supported']} "
+            f"merely_contained={counts['merely contained']} "
+            f"reclassified={counts['reclassified']} semantic_citations=2/2 "
+            f"identity={resolution['semantic_identity']} "
+            f"materialisation={resolution['materialisation_digest']}"
+        )
+        return
     receipt = write_receipt(arguments.output)
     rescore = receipt["rescore"]
     protected = receipt["protected_banked_artifacts"]

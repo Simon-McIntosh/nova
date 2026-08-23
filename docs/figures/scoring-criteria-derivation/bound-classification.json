@@ -1,0 +1,109 @@
+{
+  "receipt": {
+    "kind": "carried_bound_classification",
+    "status": "complete",
+    "output": "docs/figures/scoring-criteria-derivation/bound-classification.json"
+  },
+  "classification_counts": {
+    "supported": 2,
+    "merely contained": 2,
+    "reclassified": 1
+  },
+  "bounds": [
+    {
+      "field": "magnetic_axis_distance_m",
+      "bound": 0.00101344,
+      "direction": "at-most",
+      "unit": "m",
+      "classification": "merely contained",
+      "classification_reason": "The semantically pinned machine description resolves and the banked 0.025336 cm reference is numerically contained, but neither source derives the four-times multiplier.",
+      "replacement_reading": null,
+      "registered_evidence_locator": "physics-spine-v0-mast-heldout-6-08ae0dee74-98dci4-clu-3141.yaml",
+      "semantic_citation": {
+        "metric": "magnetic_axis_distance_m",
+        "identity_kind": "MachineArtifactManifest.semantic_identity",
+        "semantic_identity": "sha256:8df7a0a6c3f6162dbe0f226660bc069f37de8eb69f0f7c80bbfedc2bd4be220c",
+        "resolved_materialisation_digest": "sha256:16cb20357da22dac498813c7953c380871e3429648f793d6c87aad6c09937ebc",
+        "fully_verified": true,
+        "authority_statement": "The semantic identity names the authored machine description; the resolved materialisation digest is provenance only."
+      }
+    },
+    {
+      "field": "lcfs_distance_m",
+      "bound": 0.00033047,
+      "direction": "at-most",
+      "unit": "m",
+      "classification": "merely contained",
+      "classification_reason": "The semantically pinned machine description resolves and the banked 0.008262 cm reference is numerically contained, but neither source derives the four-times multiplier.",
+      "replacement_reading": null,
+      "registered_evidence_locator": "physics-spine-v0-mast-heldout-6-08ae0dee74-98dci4-clu-3141.yaml",
+      "semantic_citation": {
+        "metric": "lcfs_distance_m",
+        "identity_kind": "MachineArtifactManifest.semantic_identity",
+        "semantic_identity": "sha256:8df7a0a6c3f6162dbe0f226660bc069f37de8eb69f0f7c80bbfedc2bd4be220c",
+        "resolved_materialisation_digest": "sha256:16cb20357da22dac498813c7953c380871e3429648f793d6c87aad6c09937ebc",
+        "fully_verified": true,
+        "authority_statement": "The semantic identity names the authored machine description; the resolved materialisation digest is provenance only."
+      }
+    },
+    {
+      "field": "x_point_distance_m",
+      "bound": 0.014,
+      "direction": "at-most",
+      "unit": "m",
+      "classification": "supported",
+      "classification_reason": "The cited receipt reports a 0.5223816696605883-cell resolved localisation maximum and complete physical-saddle recall, supporting the upward-rounded 0.522-cell physical scale used by the bound.",
+      "replacement_reading": null,
+      "registered_evidence_locator": "docs/figures/jax-dissolution/fieldnull_production_route.json",
+      "semantic_citation": null
+    },
+    {
+      "field": "topology_class_agreement_fraction",
+      "bound": 1.0,
+      "direction": "at-least",
+      "unit": "fraction",
+      "classification": "supported",
+      "classification_reason": "The cited receipt reports integer/state parity, 49 physical saddles with zero extras or misses, and recall one; this supports exact categorical agreement rather than a fractional category margin.",
+      "replacement_reading": null,
+      "registered_evidence_locator": "docs/figures/jax-dissolution/fieldnull_production_route.json",
+      "semantic_citation": null
+    },
+    {
+      "field": "fixed_point_defect",
+      "bound": 1e-08,
+      "direction": "at-most",
+      "unit": "relative sup norm",
+      "classification": "reclassified",
+      "classification_reason": "The cited source implements max|g(x)-x|/max|g(x)|, with a 1e-30 denominator floor, but contains no 1e-8 physical or discretisation argument.",
+      "replacement_reading": "Read 1e-8 as the strict stopping policy of the profile accelerator, not as a derived physical or discretisation-accuracy bound.",
+      "registered_evidence_locator": "nova/equilibrium/fixed_point.py",
+      "semantic_citation": null
+    }
+  ],
+  "semantic_artifact_resolution": {
+    "identity_kind": "MachineArtifactManifest.semantic_identity",
+    "semantic_identity": "sha256:8df7a0a6c3f6162dbe0f226660bc069f37de8eb69f0f7c80bbfedc2bd4be220c",
+    "physical_digest": "b55c5bb005a2cb67",
+    "registry_digest": "2a26cc0a3a22e7fb8f42a53ee4c45e639290f0c5587e5f56405772b007f31bfd",
+    "materialisation_digest": "sha256:16cb20357da22dac498813c7953c380871e3429648f793d6c87aad6c09937ebc",
+    "cache_directory": "/home/ITER/mcintos/.cache/imas-ambix/machine-artifact",
+    "manifest_path": "/home/ITER/mcintos/.cache/imas-ambix/machine-artifact/sha256/16cb20357da22dac498813c7953c380871e3429648f793d6c87aad6c09937ebc/manifest.json",
+    "complete": false,
+    "unresolved_gap_count": 6,
+    "fully_verified": true
+  },
+  "semantic_citation_contract": {
+    "pinned_identity": "sha256:8df7a0a6c3f6162dbe0f226660bc069f37de8eb69f0f7c80bbfedc2bd4be220c",
+    "citation_count": 2,
+    "resolved_citation_count": 2,
+    "materialisation_digest_is_authority": false,
+    "failure_mode": "Resolution raises if the semantic identity is absent, or if the resolved manifest fails physical, registry, content or file checks."
+  },
+  "claim_bounds": {
+    "registered_tolerances_changed": false,
+    "axis_or_lcfs_multiplier_derived": false,
+    "machine_artifact_semantics_verified": true,
+    "machine_artifact_completeness_required": false,
+    "reason_incomplete_allowed": "The citation addresses authored machine semantics; unresolved non-boundary fields remain visible and are not defaulted."
+  }
+}

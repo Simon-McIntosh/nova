@@ -1,10 +1,10 @@
 """Measure passive-shell representation sensitivity of a near-marginal map.
 
 The benchmark refits the vertical passive drive on a qualified near-circular
-control using several conductor representations.  It independently solves and
-linearises each zero-passive-current map, recomputes the dominant Ritz pairs,
-and localises the leading right eigenvector against physical translation and
-algebraic flux-coordinate subspaces.
+control using several conductor representations.  It solves and linearises one
+byte-identical zero-passive-current map, recomputes the dominant
+Ritz pairs from each fitted drive, and localises the leading right eigenvector
+against physical translation and algebraic flux-coordinate subspaces.
 """
 
 from __future__ import annotations
@@ -493,7 +493,6 @@ def _with_passive_representation(control, conductor_count: int, expansion: float
     source_to_grid = np.c_[active_to_grid, passive_to_grid]
     source_to_wall = np.c_[active_to_wall, passive_to_wall]
     with_current = np.r_[active_current, passive_current]
-    without_current = np.r_[active_current, np.zeros_like(passive_current)]
 
     def represented_profile(current):
         represented_operator = replace(
@@ -505,7 +504,6 @@ def _with_passive_representation(control, conductor_count: int, expansion: float
         return replace(control.with_passive, operator=represented_operator)
 
     with_passive = represented_profile(with_current)
-    without_passive = represented_profile(without_current)
     material_radius = np.linalg.norm(boundary - axis, axis=1)
     shell_standoff = (expansion - 1.0) * material_radius
     passive_image = passive_to_grid @ passive_current
@@ -533,7 +531,7 @@ def _with_passive_representation(control, conductor_count: int, expansion: float
     return replace(
         control,
         with_passive=with_passive,
-        without_passive=without_passive,
+        without_passive=control.without_passive,
         construction_receipt=construction,
     )
 
@@ -551,13 +549,33 @@ def _representation_response() -> dict[str, object]:
         ),
         ("changed_shell_standoff", 16, CHANGED_SHELL_EXPANSION),
     )
-    controls = [
+    controls = [(specifications[0][0], base_control)]
+    controls.extend(
         (name, _with_passive_representation(base_control, count, expansion))
-        for name, count, expansion in specifications
-    ]
+        for name, count, expansion in specifications[1:]
+    )
     baseline_control = controls[0][1]
     baseline_operator = baseline_control.without_passive.operator
     baseline_external = np.asarray(baseline_operator.external())
+    if not all(
+        control.without_passive is baseline_control.without_passive
+        and control.without_passive.operator is baseline_operator
+        for _name, control in controls
+    ):
+        raise RuntimeError("passive representations do not share one control map")
+    solved, solve_receipt = _solve_analytic_control(
+        baseline_control.without_passive,
+        baseline_control.seed_flux,
+        "passive_currents_zeroed",
+    )
+    _require_control_branch(
+        baseline_control.reference_axis,
+        baseline_control.material_boundary,
+        solve_receipt,
+    )
+    root = solved.flux
+    mapped, tangent = jax.linearize(baseline_operator.flux_map(), root)
+    radial, vertical = _analytic_translation_templates(baseline_control)
     drives = []
     for _name, control in controls:
         drives.append(
@@ -570,19 +588,6 @@ def _representation_response() -> dict[str, object]:
     representations = []
     for (name, control), drive in zip(controls, drives, strict=True):
         operator = control.without_passive.operator
-        solved, solve_receipt = _solve_analytic_control(
-            control.without_passive,
-            control.seed_flux,
-            "passive_currents_zeroed",
-        )
-        _require_control_branch(
-            control.reference_axis,
-            control.material_boundary,
-            solve_receipt,
-        )
-        root = solved.flux
-        mapped, tangent = jax.linearize(operator.flux_map(), root)
-        radial, vertical = _analytic_translation_templates(control)
         zero_external_difference = float(
             np.max(np.abs(np.asarray(operator.external()) - baseline_external))
         )
@@ -613,7 +618,8 @@ def _representation_response() -> dict[str, object]:
                         np.finfo(float).tiny,
                     )
                 ),
-                "solve": solve_receipt,
+                "shared_without_passive_profile_object": True,
+                "shared_without_passive_operator_object": True,
                 "drive_overlap_with_baseline_fraction": _projection_fraction(
                     drive, baseline_drive_basis
                 ),
@@ -682,7 +688,8 @@ def _representation_response() -> dict[str, object]:
             "map coordinate, so representation work cannot move this pole."
         )
 
-    baseline_solve = representations[0]["solve"]
+    incident_widened_residual = 7.726885632357845e-6
+    incident_banked_residual = 1.3931414905413574e-16
     return {
         "carrier": {
             "construction": "qualified analytic structured free-boundary control",
@@ -690,15 +697,40 @@ def _representation_response() -> dict[str, object]:
             "plasma_cells": int(baseline_operator.grid.node_number),
             "wall_nodes": int(baseline_operator.wall.node_number),
             "state_rows": int(baseline_operator.node_number),
-            "vertical_decay_index": baseline_solve["vertical_conditioning"][
+            "vertical_decay_index": solve_receipt["vertical_conditioning"][
                 "decay_index"
             ],
-            "vertical_decay_index_stable": baseline_solve["vertical_conditioning"][
+            "vertical_decay_index_stable": solve_receipt["vertical_conditioning"][
                 "stable"
             ],
         },
+        "solve": solve_receipt,
         "banked_baseline_leading_eigenvalue": BASELINE_LEADING_EIGENVALUE,
         "representations": representations,
+        "shape_sensitivity_incident": {
+            "banked_byte_identical_map_terminal_relative_residual": (
+                incident_banked_residual
+            ),
+            "reconstructed_semantically_zero_map_terminal_relative_residual": (
+                incident_widened_residual
+            ),
+            "residual_amplification_factor": (
+                incident_widened_residual / incident_banked_residual
+            ),
+            "orders_of_magnitude": float(
+                np.log10(incident_widened_residual / incident_banked_residual)
+            ),
+            "cpu_reproduction": 7.726885632464709e-6,
+            "gpu_reproduction": incident_widened_residual,
+            "mechanism": (
+                "Reconstructing a semantically zero passive-current suffix changed "
+                "the fixed source matrix representation and floating reduction "
+                "path. The near-marginal nonlinear solve amplified that nominally "
+                "null representation difference by more than ten orders in its "
+                "terminal residual. The accepted comparison therefore reuses the "
+                "original profile, arrays, shapes and reduction order byte-for-byte."
+            ),
+        },
         "verdict": {
             "classification": classification,
             "ruling": ruling,

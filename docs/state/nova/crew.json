@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T17:58:54",
+  "updated": "2026-08-23T18:01:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -446,6 +446,13 @@
         "created": "2026-08-12"
       },
       {
+        "id": "parity-divergence",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
         "id": "parity-gate",
         "harness": "codex",
         "role": "implement",
@@ -605,6 +612,13 @@
         "role": "implement",
         "session_id": "01a00738-4206-7582-b3b5-e5ed51fa5e91",
         "created": "2026-08-15"
+      },
+      {
+        "id": "step-ladder",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "supply-topology",
@@ -27398,9 +27412,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T154439871251-jitted-eager-parity-gate",
+        "plan": "mast-catalog-gpu-solve",
+        "section": "\u00a73",
+        "node": "jitted-eager-parity-gate",
+        "role": "implement",
+        "spec_level": "",
+        "member": "parity-gate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T15:44:43Z",
+        "completed_at": "2026-08-23T15:59:50Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 907,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 907,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "044adfdfc97d25d11562c1fd67b044ce1c52c419",
+        "commits": [
+          "e00ec926015521b3ee15d1f2edcd750245010bea"
+        ],
+        "changed_lines": {
+          "added": 1379,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "failed",
+        "outcome": "Preregistered 1e-10 parity gate FAILS on the profile solve: 31 of 69 exposed quantities diverge, only 1 of 6 held-out cases passes, flux max absolute difference 1.1646900802908533e-05 and max relative 2.090888477060583e-06. The moment seed is green at 4.44e-16. Tolerance was written into the receipt before any case was scored. This falsifies the plan's asserted batched-equals-per-slice 1e-10 pin for the solve half and is a hard blocker on the throughput ladder.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T154439871251-jitted-eager-parity-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff9f0-e230-7e31-89ba-5240b76a2cce",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8175104,
+            "cached_input_tokens_cumulative": 59570432,
+            "input_tokens": 8596940,
+            "input_tokens_cumulative": 60978639,
+            "output_tokens": 26517,
+            "output_tokens_cumulative": 140472,
+            "reasoning_output_tokens": 8221,
+            "reasoning_output_tokens_cumulative": 40577
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 648
+    "_version": 651
   }
 }

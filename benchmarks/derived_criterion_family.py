@@ -30,6 +30,9 @@ MESH_SOURCE = Path(
 DIIID_REGISTRATION_SOURCE = Path(
     "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_preregistration.json"
 )
+DIIID_REMEASURE_SOURCE = Path(
+    "docs/figures/diiid-forward-onboarding/repaired-solve-five-frame-remeasure.json"
+)
 PARITY_GATE_SOURCE = Path(
     "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
 )
@@ -50,15 +53,30 @@ JSON_SOURCES = (
     MODE_SOURCE,
     MESH_SOURCE,
     DIIID_REGISTRATION_SOURCE,
+    DIIID_REMEASURE_SOURCE,
     PARITY_GATE_SOURCE,
     PARITY_ATTRIBUTION_SOURCE,
     EVENT_SOURCE,
 )
 CONSUMER_SOURCES = (COUPLED_CONSUMER, DIIID_CONSUMER, PARITY_CONSUMER)
 
+UNCHALLENGED_MEMBER_DIGESTS = {
+    "coupled_response": (
+        "41070e96db5ead21fbf86cac2b59788dcfb2185e459de8233ed34d6cf485c8a1"
+    ),
+    "terminal_compiled_parity": (
+        "fc3a6feb8693725a83b0fc391e096443bf6c9201c5a28d23da7c7e6b7275dc9f"
+    ),
+}
+
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _serialised_digest(value: Any) -> str:
+    payload = json.dumps(value, indent=2, allow_nan=False).encode()
+    return hashlib.sha256(payload).hexdigest()
 
 
 def _close(left: float, right: float, *, label: str) -> None:
@@ -208,6 +226,8 @@ def _coupled_response_criterion(
 def _diiid_criterion(
     mesh: dict[str, Any],
     registration: dict[str, Any],
+    control: dict[str, Any],
+    remeasure: dict[str, Any],
     consumer_source: str,
 ) -> dict[str, Any]:
     if "REGISTERED_RESIDUAL_TOLERANCE = 1.0e-5" not in consumer_source:
@@ -220,10 +240,13 @@ def _diiid_criterion(
     fine = float(rungs[1]["solver"]["terminal_relative_residual"])
     observed_order = float(mesh["verdict"]["observed_order"])
     candidates = [1.0e-6, 1.0e-5]
-    eligible = [candidate for candidate in candidates if candidate <= fine]
-    if not eligible:
-        raise RuntimeError("no declared DIII-D residual candidate is below the floor")
-    selected = max(eligible)
+    controls = {
+        row["arm"]: float(row["terminal_relative_fixed_point_residual"])
+        for row in control["production_solves"]
+    }
+    frame_residuals = [
+        float(row["terminal_relative_residual"]) for row in remeasure["frame_records"]
+    ]
 
     bar_basis = registration["score"]["bar_basis"]
     registered_bar = float(
@@ -234,25 +257,73 @@ def _diiid_criterion(
     ) * float(bar_basis["fraction_of_measured_ceiling_retained"])
     _close(registered_bar, expected_bar, label="DIII-D reference-accuracy bar")
     _close(fine, 7.930534999195602e-5, label="DIII-D fine-mesh floor")
+    if remeasure["counts"]["at_or_below_benchmark_registered_1e_5"] != 0:
+        raise RuntimeError("the banked DIII-D registered-bound pass count changed")
 
     return {
         "consumer": str(DIIID_CONSUMER),
-        "formula": (
-            "tau_DIII-D = max{t in T_declared : t <= E_disc,fine}, "
-            "T_declared = {1e-6, 1e-5}"
-        ),
-        "selected_relative_residual_bound": selected,
+        "criterion_status": "NO_DEFENSIBLE_DIIID_TOLERANCE_DERIVED",
+        "formula": None,
+        "selected_relative_residual_bound": None,
+        "anchor_object_adjudication": {
+            "object": "achieved terminal relative fixed-point residual floor",
+            "source_field": (
+                "rungs[reference_native].solver.terminal_relative_residual"
+            ),
+            "value": fine,
+            "mesh": {
+                "name": rungs[1]["name"],
+                "grid_shape": rungs[1]["grid_shape"],
+                "interior_cell_count": rungs[1]["achieved_interior_cell_count"],
+            },
+            "is_independent_discretisation_error_estimate": False,
+            "classification_reading": (
+                "DISCRETISATION_LIMITED establishes that the achieved stall moves "
+                "with mesh. It does not turn a solver residual into a Richardson "
+                "or solution-difference discretisation-error estimate."
+            ),
+            "circularity_verdict": (
+                "Selecting a gate because it lies below the achieved residual it "
+                "must gate uses the gated outcome as its own derivation input. The "
+                "1e-5 candidate is 7.93 times below this achieved floor, making "
+                "it circular and unpassable by construction for the banked DIII-D "
+                "route on this mesh; the derivation requires correction."
+            ),
+        },
+        "empirical_stall_mesh_law": {
+            "formula": "R_stall(h) = R_fine * (h / h_fine)**p_stall",
+            "object": "achieved-residual stall, not a convergence criterion",
+            "reference_mesh": "65 by 65 lattice with 4,225 interior cells",
+            "R_fine": fine,
+            "p_stall": observed_order,
+            "refinement_ratio": float(mesh["verdict"]["mesh_refinement_ratio"]),
+            "qualification": (
+                "The floor moves at observed order 1.93, but no independent "
+                "discretisation-error magnitude was measured."
+            ),
+        },
+        "required_correction": {
+            "independent_object_needed": (
+                "a same-observable discretisation-error estimate from solution "
+                "differences or an independently confirmed Richardson model"
+            ),
+            "admissible_future_form": "tau(h) = q * E_disc(h), with 0 < q < 1",
+            "mesh_law_when_supported": "E_disc(h) = C * h**p",
+            "numeric_value_available_now": False,
+            "reason": (
+                "Neither the achieved residual floor nor the differently normalised "
+                "reference R-squared supplies E_disc(h)."
+            ),
+        },
         "candidate_table": [
             {
                 "candidate": candidate,
-                "candidate_over_fine_mesh_floor": candidate / fine,
-                "fine_mesh_floor_over_candidate": fine / candidate,
-                "below_discretisation_floor": candidate <= fine,
-                "adjudication": (
-                    "REJECTED_PRECISION_WITHOUT_ACCURACY"
-                    if candidate < selected
-                    else "SURVIVES_WITH_DERIVED_READING"
+                "candidate_over_achieved_residual_floor": candidate / fine,
+                "achieved_residual_floor_over_candidate": fine / candidate,
+                "banked_five_frame_pass_count": sum(
+                    residual <= candidate for residual in frame_residuals
                 ),
+                "adjudication": "UNTRACED_AND_UNPASSABLE_ON_BANKED_DIIID_ROUTE",
             }
             for candidate in candidates
         ],
@@ -265,6 +336,57 @@ def _diiid_criterion(
             "krylov_action_qualification": [
                 rung["solver"]["krylov_action_qualification"] for rung in rungs
             ],
+        },
+        "passability_diagnostic": {
+            "comparison_bound": 1.0e-5,
+            "analytic_control_roots": [
+                {
+                    "arm": arm,
+                    "terminal_relative_residual": residual,
+                    "clears_1e_5": residual <= 1.0e-5,
+                    "bound_over_residual": 1.0e-5 / residual,
+                }
+                for arm, residual in controls.items()
+            ],
+            "diiid_reference_native_route": {
+                "terminal_relative_residual": fine,
+                "clears_1e_5": fine <= 1.0e-5,
+                "residual_over_bound": fine / 1.0e-5,
+            },
+            "current_five_frame_remeasure": {
+                "frame_count": int(remeasure["counts"]["frames"]),
+                "pass_count_at_1e_5": int(
+                    remeasure["counts"]["at_or_below_benchmark_registered_1e_5"]
+                ),
+                "pass_count_at_1e_6": int(
+                    remeasure["counts"]["at_or_below_shipped_hard_coded_1e_6"]
+                ),
+                "terminal_residual_minimum": min(frame_residuals),
+                "terminal_residual_maximum": max(frame_residuals),
+                "all_terminal_diverted": (
+                    remeasure["counts"]["terminal_diverted"]
+                    == remeasure["counts"]["frames"]
+                ),
+                "all_krylov_actions_accepted": (
+                    remeasure["counts"]["krylov_action_accepted"]
+                    == remeasure["counts"]["frames"]
+                ),
+            },
+            "gate_rerun_now": {
+                "execution": "banked re-score only; no equilibrium solve run",
+                "verdict": "FAIL",
+                "passing_frames": 0,
+                "total_frames": int(remeasure["counts"]["frames"]),
+                "statement": (
+                    "A gate re-run credited from today's banked qualified frames "
+                    "returns 0 of 5 at 1e-5; no DIII-D frame passes a defensibly "
+                    "derived residual tolerance because none is yet available."
+                ),
+            },
+            "conclusion": (
+                "The analytic control proves 1e-5 is attainable by this solver "
+                "family, but the DIII-D qualified route does not attain it."
+            ),
         },
         "reference_accuracy_trace": {
             "measured_label_representability_median_r_squared": float(
@@ -280,19 +402,15 @@ def _diiid_criterion(
             "normalisation_adjudication": (
                 "R-squared reference accuracy and fixed-point relative residual "
                 "have different normalisations, so they are traced together but "
-                "not numerically equated. Only the same-norm discretisation floor "
-                "selects the residual bound."
+                "not numerically equated. The achieved residual floor cannot stand "
+                "in for an independently measured discretisation error."
             ),
         },
-        "surviving_value_justification": (
-            "The 1e-5 candidate is the least over-solving declared candidate: it "
-            "remains 7.93 times below the measured same-norm fine-mesh floor. The "
-            "1e-6 candidate is 79.3 times below that floor and cannot improve the "
-            "independently limited reference accuracy."
-        ),
         "receipt_inputs": [
             str(MESH_SOURCE),
             str(DIIID_REGISTRATION_SOURCE),
+            str(STABILITY_CONTROL_SOURCE),
+            str(DIIID_REMEASURE_SOURCE),
             str(DIIID_CONSUMER),
         ],
     }
@@ -459,6 +577,8 @@ def build_receipt_from_data(
     diiid = _diiid_criterion(
         receipts[MESH_SOURCE],
         receipts[DIIID_REGISTRATION_SOURCE],
+        receipts[STABILITY_CONTROL_SOURCE],
+        receipts[DIIID_REMEASURE_SOURCE],
         consumers[DIIID_CONSUMER],
     )
     parity = _terminal_parity_criterion(
@@ -468,6 +588,12 @@ def build_receipt_from_data(
         consumers[PARITY_CONSUMER],
     )
     observable_count = parity["terminal_observable_registration"]["observable_count"]
+    unchallenged_digests = {
+        "coupled_response": _serialised_digest(coupled),
+        "terminal_compiled_parity": _serialised_digest(parity),
+    }
+    if unchallenged_digests != UNCHALLENGED_MEMBER_DIGESTS:
+        raise RuntimeError("an unchallenged criterion-family member changed")
 
     return {
         "receipt": {
@@ -485,6 +611,10 @@ def build_receipt_from_data(
             "diiid_forward_gate": diiid,
             "terminal_compiled_parity": parity,
         },
+        "unchallenged_member_integrity": {
+            "indented_json_sha256": unchallenged_digests,
+            "byte_unchanged": True,
+        },
         "inherited_constants_replaced": [
             {
                 "consumer": str(COUPLED_CONSUMER),
@@ -499,15 +629,17 @@ def build_receipt_from_data(
                 "consumer": str(DIIID_CONSUMER),
                 "inherited_reading": "GATE_RESIDUAL_TOLERANCE = 1e-6",
                 "replacement_reading": (
-                    "rejected: 79.305 times below the measured fine-mesh floor"
+                    "untraced and unpassable: 79.305 times below the achieved "
+                    "fine-mesh residual floor; current banked pass count 0 of 5"
                 ),
             },
             {
                 "consumer": str(DIIID_CONSUMER),
                 "inherited_reading": "REGISTERED_RESIDUAL_TOLERANCE = 1e-5",
                 "replacement_reading": (
-                    "1e-5 survives numerically, re-derived as the largest declared "
-                    "candidate below the 7.930534999195602e-5 same-norm floor"
+                    "derived status withdrawn: the 7.930534999195602e-5 anchor is "
+                    "an achieved residual, not an independent discretisation-error "
+                    "estimate; current banked pass count 0 of 5"
                 ),
             },
             {
@@ -526,6 +658,8 @@ def build_receipt_from_data(
             "banked_measurements_only": True,
             "coupled_relation_interpolates_between_configurations": False,
             "diiid_reference_accuracy_equated_to_solver_residual": False,
+            "diiid_achieved_residual_treated_as_discretisation_error": False,
+            "diiid_derived_tolerance_available": False,
             "terminal_observable_envelopes_are_physics_tolerances": False,
             "terminal_parity_without_seed_alignment_claimed": False,
         },
@@ -562,7 +696,7 @@ def main() -> None:
     print(
         "consumers=3 "
         f"configurations={len(family['coupled_response']['configuration_table'])} "
-        "diiid=1e-5 "
+        "diiid=no-defensible-tolerance "
         f"terminal_observables={terminal_count} "
         "solves=0"
     )

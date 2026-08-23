@@ -73,22 +73,55 @@
     },
     "diiid_forward_gate": {
       "consumer": "benchmarks/diiid_forward_gs_match.py",
-      "formula": "tau_DIII-D = max{t in T_declared : t <= E_disc,fine}, T_declared = {1e-6, 1e-5}",
-      "selected_relative_residual_bound": 1e-05,
+      "criterion_status": "NO_DEFENSIBLE_DIIID_TOLERANCE_DERIVED",
+      "formula": null,
+      "selected_relative_residual_bound": null,
+      "anchor_object_adjudication": {
+        "object": "achieved terminal relative fixed-point residual floor",
+        "source_field": "rungs[reference_native].solver.terminal_relative_residual",
+        "value": 7.930534999195602e-05,
+        "mesh": {
+          "name": "reference_native",
+          "grid_shape": [
+            65,
+            65
+          ],
+          "interior_cell_count": 4225
+        },
+        "is_independent_discretisation_error_estimate": false,
+        "classification_reading": "DISCRETISATION_LIMITED establishes that the achieved stall moves with mesh. It does not turn a solver residual into a Richardson or solution-difference discretisation-error estimate.",
+        "circularity_verdict": "Selecting a gate because it lies below the achieved residual it must gate uses the gated outcome as its own derivation input. The 1e-5 candidate is 7.93 times below this achieved floor, making it circular and unpassable by construction for the banked DIII-D route on this mesh; the derivation requires correction."
+      },
+      "empirical_stall_mesh_law": {
+        "formula": "R_stall(h) = R_fine * (h / h_fine)**p_stall",
+        "object": "achieved-residual stall, not a convergence criterion",
+        "reference_mesh": "65 by 65 lattice with 4,225 interior cells",
+        "R_fine": 7.930534999195602e-05,
+        "p_stall": 1.9255759546587183,
+        "refinement_ratio": 1.9696969696969697,
+        "qualification": "The floor moves at observed order 1.93, but no independent discretisation-error magnitude was measured."
+      },
+      "required_correction": {
+        "independent_object_needed": "a same-observable discretisation-error estimate from solution differences or an independently confirmed Richardson model",
+        "admissible_future_form": "tau(h) = q * E_disc(h), with 0 < q < 1",
+        "mesh_law_when_supported": "E_disc(h) = C * h**p",
+        "numeric_value_available_now": false,
+        "reason": "Neither the achieved residual floor nor the differently normalised reference R-squared supplies E_disc(h)."
+      },
       "candidate_table": [
         {
           "candidate": 1e-06,
-          "candidate_over_fine_mesh_floor": 0.01260948977718944,
-          "fine_mesh_floor_over_candidate": 79.30534999195602,
-          "below_discretisation_floor": true,
-          "adjudication": "REJECTED_PRECISION_WITHOUT_ACCURACY"
+          "candidate_over_achieved_residual_floor": 0.01260948977718944,
+          "achieved_residual_floor_over_candidate": 79.30534999195602,
+          "banked_five_frame_pass_count": 0,
+          "adjudication": "UNTRACED_AND_UNPASSABLE_ON_BANKED_DIIID_ROUTE"
         },
         {
           "candidate": 1e-05,
-          "candidate_over_fine_mesh_floor": 0.1260948977718944,
-          "fine_mesh_floor_over_candidate": 7.930534999195601,
-          "below_discretisation_floor": true,
-          "adjudication": "SURVIVES_WITH_DERIVED_READING"
+          "candidate_over_achieved_residual_floor": 0.1260948977718944,
+          "achieved_residual_floor_over_candidate": 7.930534999195601,
+          "banked_five_frame_pass_count": 0,
+          "adjudication": "UNTRACED_AND_UNPASSABLE_ON_BANKED_DIIID_ROUTE"
         }
       ],
       "mesh_evidence": {
@@ -102,17 +135,57 @@
           "ACCEPTED"
         ]
       },
+      "passability_diagnostic": {
+        "comparison_bound": 1e-05,
+        "analytic_control_roots": [
+          {
+            "arm": "declared_passive_currents",
+            "terminal_relative_residual": 1.7571246480565615e-12,
+            "clears_1e_5": true,
+            "bound_over_residual": 5691115.887003426
+          },
+          {
+            "arm": "passive_currents_zeroed",
+            "terminal_relative_residual": 1.7414268631766974e-16,
+            "clears_1e_5": true,
+            "bound_over_residual": 57424174459.7765
+          }
+        ],
+        "diiid_reference_native_route": {
+          "terminal_relative_residual": 7.930534999195602e-05,
+          "clears_1e_5": false,
+          "residual_over_bound": 7.930534999195601
+        },
+        "current_five_frame_remeasure": {
+          "frame_count": 5,
+          "pass_count_at_1e_5": 0,
+          "pass_count_at_1e_6": 0,
+          "terminal_residual_minimum": 0.08540058568223574,
+          "terminal_residual_maximum": 0.16437432961354986,
+          "all_terminal_diverted": true,
+          "all_krylov_actions_accepted": true
+        },
+        "gate_rerun_now": {
+          "execution": "banked re-score only; no equilibrium solve run",
+          "verdict": "FAIL",
+          "passing_frames": 0,
+          "total_frames": 5,
+          "statement": "A gate re-run credited from today's banked qualified frames returns 0 of 5 at 1e-5; no DIII-D frame passes a defensibly derived residual tolerance because none is yet available."
+        },
+        "conclusion": "The analytic control proves 1e-5 is attainable by this solver family, but the DIII-D qualified route does not attain it."
+      },
       "reference_accuracy_trace": {
         "measured_label_representability_median_r_squared": 0.949,
         "retained_fraction": 0.95,
         "registered_median_interior_r_squared_bar": 0.90155,
         "strict_gs_residual_attributed_to_irreducible_non_gs_content": 0.9968,
-        "normalisation_adjudication": "R-squared reference accuracy and fixed-point relative residual have different normalisations, so they are traced together but not numerically equated. Only the same-norm discretisation floor selects the residual bound."
+        "normalisation_adjudication": "R-squared reference accuracy and fixed-point relative residual have different normalisations, so they are traced together but not numerically equated. The achieved residual floor cannot stand in for an independently measured discretisation error."
       },
-      "surviving_value_justification": "The 1e-5 candidate is the least over-solving declared candidate: it remains 7.93 times below the measured same-norm fine-mesh floor. The 1e-6 candidate is 79.3 times below that floor and cannot improve the independently limited reference accuracy.",
       "receipt_inputs": [
         "docs/figures/diiid-forward-onboarding/topology-qualified-mesh-convergence.json",
         "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_preregistration.json",
+        "docs/figures/forward-operator-refinement/passive-closure-stability-control.json",
+        "docs/figures/diiid-forward-onboarding/repaired-solve-five-frame-remeasure.json",
         "benchmarks/diiid_forward_gs_match.py"
       ]
     },
@@ -1090,6 +1163,13 @@
       ]
     }
   },
+  "unchallenged_member_integrity": {
+    "indented_json_sha256": {
+      "coupled_response": "41070e96db5ead21fbf86cac2b59788dcfb2185e459de8233ed34d6cf485c8a1",
+      "terminal_compiled_parity": "fc3a6feb8693725a83b0fc391e096443bf6c9201c5a28d23da7c7e6b7275dc9f"
+    },
+    "byte_unchanged": true
+  },
   "inherited_constants_replaced": [
     {
       "consumer": "tests/test_equilibrium_forward_reference.py",
@@ -1099,12 +1179,12 @@
     {
       "consumer": "benchmarks/diiid_forward_gs_match.py",
       "inherited_reading": "GATE_RESIDUAL_TOLERANCE = 1e-6",
-      "replacement_reading": "rejected: 79.305 times below the measured fine-mesh floor"
+      "replacement_reading": "untraced and unpassable: 79.305 times below the achieved fine-mesh residual floor; current banked pass count 0 of 5"
     },
     {
       "consumer": "benchmarks/diiid_forward_gs_match.py",
       "inherited_reading": "REGISTERED_RESIDUAL_TOLERANCE = 1e-5",
-      "replacement_reading": "1e-5 survives numerically, re-derived as the largest declared candidate below the 7.930534999195602e-5 same-norm floor"
+      "replacement_reading": "derived status withdrawn: the 7.930534999195602e-5 anchor is an achieved residual, not an independent discretisation-error estimate; current banked pass count 0 of 5"
     },
     {
       "consumer": "benchmarks/jitted_eager_parity_gate.py",
@@ -1118,6 +1198,8 @@
     "banked_measurements_only": true,
     "coupled_relation_interpolates_between_configurations": false,
     "diiid_reference_accuracy_equated_to_solver_residual": false,
+    "diiid_achieved_residual_treated_as_discretisation_error": false,
+    "diiid_derived_tolerance_available": false,
     "terminal_observable_envelopes_are_physics_tolerances": false,
     "terminal_parity_without_seed_alignment_claimed": false
   },
@@ -1127,6 +1209,7 @@
     "docs/figures/forward-operator-refinement/coupled-map-mode-identification.json": "b62bee532afe4ae2f33e81b6feccdcf8ec1d2b9a3262067fc5d0e2317a52b96a",
     "docs/figures/diiid-forward-onboarding/topology-qualified-mesh-convergence.json": "b4d9dcb5248dded7cc0ce50982e46f59947c632dbd2353aaa7ed1d80d7806347",
     "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_preregistration.json": "bf3d1cb3ef29d60ddb632454bfdda8914f397421a2a46e2fc16310653c1457f5",
+    "docs/figures/diiid-forward-onboarding/repaired-solve-five-frame-remeasure.json": "f2b14c3b0b974991db9def51b6a67a2dd93ad4f3d866d1afcebf191d9e8d46ce",
     "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json": "2e6bf51cb3134bce2c9da3c5a55a23a32df3d3544d3d17143ca969e1e00af6b1",
     "docs/figures/mast-catalog-gpu-solve/parity-divergence-attribution.json": "2c2c856375b53f0d4bfdce81133dbcef39b314acad6c3a59f2b1b52849cca7f7",
     "docs/figures/forward-operator-refinement/event-resolved-amplification.json": "bf26f40c41712de34e6b17c18a128172f68ac9929072266c3d0fac4393228e49",

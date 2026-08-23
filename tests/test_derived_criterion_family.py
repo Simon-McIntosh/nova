@@ -57,22 +57,79 @@ def test_coupled_relation_refuses_unmeasured_interpolation(receipt):
     assert all(row["receipt_inputs"] for row in criterion["configuration_table"])
 
 
-def test_diiid_bound_is_selected_below_same_norm_mesh_floor(receipt):
+def test_diiid_anchor_is_an_achieved_residual_not_an_error_estimate(receipt):
     criterion = receipt["criterion_family"]["diiid_forward_gate"]
+    anchor = criterion["anchor_object_adjudication"]
     candidates = {row["candidate"]: row for row in criterion["candidate_table"]}
 
-    assert criterion["selected_relative_residual_bound"] == 1.0e-5
+    assert criterion["criterion_status"] == "NO_DEFENSIBLE_DIIID_TOLERANCE_DERIVED"
+    assert criterion["selected_relative_residual_bound"] is None
+    assert criterion["formula"] is None
+    assert anchor["object"] == "achieved terminal relative fixed-point residual floor"
+    assert anchor["source_field"] == (
+        "rungs[reference_native].solver.terminal_relative_residual"
+    )
+    assert anchor["is_independent_discretisation_error_estimate"] is False
+    assert anchor["value"] == pytest.approx(7.930534999195602e-5)
+    assert (
+        "uses the gated outcome as its own derivation input"
+        in anchor["circularity_verdict"]
+    )
     assert criterion["mesh_evidence"]["fine_relative_residual"] == pytest.approx(
         7.930534999195602e-5
     )
-    assert criterion["mesh_evidence"]["observed_order"] == pytest.approx(
-        1.9255759546587183
+    assert candidates[1.0e-5]["achieved_residual_floor_over_candidate"] == (
+        pytest.approx(7.930534999195602)
     )
-    assert candidates[1.0e-6]["adjudication"] == ("REJECTED_PRECISION_WITHOUT_ACCURACY")
-    assert candidates[1.0e-5]["adjudication"] == "SURVIVES_WITH_DERIVED_READING"
-    assert candidates[1.0e-5]["fine_mesh_floor_over_candidate"] == pytest.approx(
-        7.930534999195602
+    assert all(
+        row["adjudication"] == "UNTRACED_AND_UNPASSABLE_ON_BANKED_DIIID_ROUTE"
+        for row in candidates.values()
     )
+
+
+def test_diiid_mesh_law_describes_the_stall_not_a_gate(receipt):
+    criterion = receipt["criterion_family"]["diiid_forward_gate"]
+    law = criterion["empirical_stall_mesh_law"]
+    correction = criterion["required_correction"]
+
+    assert law["formula"] == "R_stall(h) = R_fine * (h / h_fine)**p_stall"
+    assert law["object"] == "achieved-residual stall, not a convergence criterion"
+    assert law["reference_mesh"] == "65 by 65 lattice with 4,225 interior cells"
+    assert law["p_stall"] == pytest.approx(1.9255759546587183)
+    assert correction["numeric_value_available_now"] is False
+    assert correction["admissible_future_form"] == (
+        "tau(h) = q * E_disc(h), with 0 < q < 1"
+    )
+
+
+def test_diiid_passability_is_reported_from_banked_measurements(receipt):
+    diagnostic = receipt["criterion_family"]["diiid_forward_gate"][
+        "passability_diagnostic"
+    ]
+    controls = {row["arm"]: row for row in diagnostic["analytic_control_roots"]}
+    frames = diagnostic["current_five_frame_remeasure"]
+    rerun = diagnostic["gate_rerun_now"]
+
+    assert controls["declared_passive_currents"]["terminal_relative_residual"] == (
+        pytest.approx(1.7571246480565615e-12)
+    )
+    assert controls["passive_currents_zeroed"]["terminal_relative_residual"] == (
+        pytest.approx(1.7414268631766974e-16)
+    )
+    assert all(row["clears_1e_5"] for row in controls.values())
+    assert diagnostic["diiid_reference_native_route"]["clears_1e_5"] is False
+    assert diagnostic["diiid_reference_native_route"]["residual_over_bound"] == (
+        pytest.approx(7.930534999195602)
+    )
+    assert frames["frame_count"] == 5
+    assert frames["pass_count_at_1e_5"] == frames["pass_count_at_1e_6"] == 0
+    assert frames["terminal_residual_minimum"] == pytest.approx(0.08540058568223574)
+    assert frames["terminal_residual_maximum"] == pytest.approx(0.16437432961354986)
+    assert frames["all_terminal_diverted"] is True
+    assert frames["all_krylov_actions_accepted"] is True
+    assert rerun["execution"] == "banked re-score only; no equilibrium solve run"
+    assert rerun["verdict"] == "FAIL"
+    assert (rerun["passing_frames"], rerun["total_frames"]) == (0, 5)
 
 
 def test_diiid_reference_accuracy_is_traced_without_norm_equation(receipt):
@@ -89,6 +146,14 @@ def test_diiid_reference_accuracy_is_traced_without_norm_equation(receipt):
         receipt["claim_bounds"]["diiid_reference_accuracy_equated_to_solver_residual"]
         is False
     )
+    assert receipt["claim_bounds"]["diiid_derived_tolerance_available"] is False
+
+
+def test_unchallenged_family_members_are_byte_unchanged(receipt):
+    integrity = receipt["unchallenged_member_integrity"]
+
+    assert integrity["byte_unchanged"] is True
+    assert integrity["indented_json_sha256"] == family.UNCHALLENGED_MEMBER_DIGESTS
 
 
 def test_one_map_parity_uses_the_banked_float64_roundoff_band(receipt):

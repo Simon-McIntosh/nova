@@ -245,6 +245,21 @@
   pandas <code>StringDtype</code> in the route-identity Zarr round-trip test — reconciled by its own
   node. Receipt: <code>scripts/device_kernel_port/cache-provenance-receipt.json</code>.</p>
 
+  <h2 id="s4-zarr-string-repair">§4 — the folded drain row: extension-string Zarr encoding repaired, plan closed</h2>
+
+  <p><strong>Landed 2026-08-23, commit <code>69005ae5</code> (merge <code>bb01a387</code>); run
+  <code>zarr-string-encoding-reconciliation</code>, gate PASSED, 24 min wall.</strong> Mechanism:
+  pandas&nbsp;3 <code>StringDtype</code> reached xarray 2025.6.1's CF datetime coding, whose NumPy
+  <code>issubdtype</code> cannot interpret a pandas extension dtype. The shared Zarr write context now
+  coerces non-NumPy string dtypes to NumPy strings before encoding — dimensions, attributes, and
+  encoding preserved, writes serialized under a reentrant lock while the scoped hook is installed —
+  with every round-trip, policy-reconstruction, and cache-hash assertion unchanged. Database selection:
+  45 collected — 26 passed, 19 data-availability skips, zero failures in 206.69&nbsp;s. This closes the
+  plan at impl 17/17: sections §4 and §5 are collapsed in the evergreen, the drain ledger reads
+  <code>rows: 5, foldable-remaining: 0</code> (one <code>foreign-owner</code> row — compiled-jacfwd
+  adoption — belongs to <code>coil-geometry-inversion</code> per the locked measure-only scope), and
+  status is <code>shipped</code>.</p>
+
 </main>
 </body>
 </html>

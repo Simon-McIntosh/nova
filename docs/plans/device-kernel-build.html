@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="device-kernel-build">
   <meta name="plan-title" content="Device Kernel Build — exact Green matrices in minutes, differentiable by design">
   <meta name="plan-summary" content="Port the exact Part V section-kernel evaluation to single-source JAX so design matrices build on the H200 in the minutes class from one code path, with compute-provenance cache keys, tolerance-based cross-device verification, and a measured route to geometry gradients for the inversion consumer">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="6.0">
   <meta name="plan-capability-version" content="1.0">
@@ -21,10 +21,10 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-modified" content="2026-08-23">
-<meta name="plan-version" content="21">
-<meta name="plan-commits" content="489197aa,9229dc53,25aede7d,d0b14cbf,bedf6c67,eae4c863,3e32f08c,2173eb46,3067dc08,7578c8b6,e1a441f6,38f43c5b,8a71abfb,2b8d503a,247ded2d,00161db3,57a8b1f4,dedaf852,d74317a0,6e98178f,b65b07df,2bc36ae8,aefd0c5f,699eee8f">
+<meta name="plan-version" content="25">
+<meta name="plan-commits" content="489197aa,9229dc53,25aede7d,d0b14cbf,bedf6c67,eae4c863,3e32f08c,2173eb46,3067dc08,7578c8b6,e1a441f6,38f43c5b,8a71abfb,2b8d503a,247ded2d,00161db3,57a8b1f4,dedaf852,d74317a0,6e98178f,b65b07df,2bc36ae8,aefd0c5f,699eee8f,69005ae5">
 <meta name="plan-artifacts" content="scripts/device_kernel_reuse/reuse-report.md,scripts/device_kernel_port/receipt.json,scripts/device_kernel_port/receipt.md,scripts/device_kernel_port/reduction-diagnosis.json,scripts/device_kernel_port/arbitrary-precision-oracle.json,scripts/device_kernel_port/paired-primitive-investigation.json,scripts/device_kernel_port/far-contour-localization.json,scripts/device_kernel_port/unpaired-compile-receipt.json,scripts/device_kernel_port/nine-block-receipt.json,scripts/device_kernel_port/jacfwd-probe-receipt.json,scripts/device_kernel_port/cache-provenance-receipt.json,docs/evidence/archive/device-kernel-build-landed.html">
-<meta name="plan-impl" content="0.94">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -106,46 +106,28 @@
       the evaluation chunks at fixed shape rather than falling back.</li>
     </ul>
 
-    <h2 id="s4">§4 — Work items</h2>
+    <h2 id="s4">§4 — Work items <span class="badge badge-shipped">✓ landed 2026-08-23</span></h2>
 
-    <ol>
-      <li><strong>Consume the build profile.</strong> Take the stage decomposition from the
-      recovery ladder's profiled build benchmark and rank the port targets by measured share;
-      no porting starts against unprofiled stages.</li>
-      <li><strong>One-block prototype on the H200.</strong> Port the flux G₀ block alone:
-      correctness against the host block at the stated tolerance on the coarse fixture, and
-      measured device throughput. This is the go/no-go gate — the projected full-build time and
-      the CPU-lane check decide whether the full port proceeds (decision
-      <code>port-go-threshold</code> below).</li>
-      <li><strong>Full nine-block port with companions</strong>, replacing the NumPy evaluation
-      in place, with the fixed-iteration <code>cel</code> and residual chains pinned per device
-      and the complete suite green on the CPU lane.</li>
-      <li><strong>Cache provenance integration</strong>: the compute-provenance key field, per-
-      provenance verification, and a cold H200 build of both recovery fixtures published to the
-      shared store beside their CPU siblings.</li>
-      <li><strong>Geometry-gradient feasibility, re-measured.</strong> jacfwd through the ported
-      evaluation (plain kernels, batched targets) with peak memory per target measured against
-      the banked 12.2 GiB AD failure — a measurement node, not a commitment; its number decides
-      whether the inversion consumer gets its differentiable build, and that adoption belongs to
-      the coil-geometry-inversion plan.</li>
-    </ol>
+    <p class="landed-summary">All five items shipped across 17 nodes. Profile consumed and
+    reuse-mapped (<code>489197aa</code>); the H200 prototype and its sliver/oracle/paired repair
+    chain conditioned the exact path; the nine-block single-source port is production
+    (<code>d74317a0</code>…<code>b65b07df</code>, merge <code>80979f40</code>) — biot selection
+    2,618 selected / zero failures, cold builds 58.45&nbsp;s CPU / 26.58&nbsp;s H200 against the
+    120&nbsp;s bar; compute provenance keys the cache with hard cross-device misses pinned
+    (<code>aefd0c5f</code>/<code>699eee8f</code>); jacfwd banked eager at 0.0019&nbsp;GiB per
+    target with the compiled route held (<code>2bc36ae8</code>). Full record:
+    <a href="/nova/evidence/archive/device-kernel-build-landed">landed evidence</a>.</p>
 
-    <h2 id="s5">§5 — Acceptance gates</h2>
+    <h2 id="s5">§5 — Acceptance gates <span class="badge badge-shipped">✓ measured 2026-08-23</span></h2>
 
-    <ul>
-      <li>Device blocks reproduce host blocks within the stated tolerance on both recovery
-      fixtures, and the Richardson pin set passes per device.</li>
-      <li>Cold device build wall time measured on the H200 for both fixtures, with the profiled
-      stage decomposition attached — the target class is minutes, and the measured number is the
-      deliverable, not a pass/fail line invented in advance.</li>
-      <li>The CPU lane does not regress beyond a pre-registered bound when the single-source
-      implementation replaces NumPy — measured on the same staged-snapshot protocol the
-      exact-kernel benchmark banked.</li>
-      <li>Cache provenance proves no cross-device contamination: a CPU consumer never warm-loads
-      a device artifact or vice versa, pinned by test.</li>
-      <li>The gradient feasibility number (peak memory and wall time per target for jacfwd
-      through one block) is banked with its verdict stated in mechanism terms.</li>
-    </ul>
+    <p class="landed-summary">All five gates measured. Device-vs-host agreement carried as stated
+    measured absolute bounds (CPU-XLA 1.61e-9 / H200 1.22e-9 against production NumPy's own
+    1.35e-9; H200 production spot checks 1.8e-11/2.0e-11). Cold H200 walls with stage splits in
+    the receipts: 26.58&nbsp;s nine-block parity fixture, 28.03/34.64&nbsp;s recovery fixtures,
+    published. CPU lane improved rather than regressed (traced 0.45× the NumPy stage; suite
+    2,618 selected / zero failures). Provenance separation pinned by test in both directions.
+    jacfwd verdict banked in mechanism terms: eager cheap (0.0019&nbsp;GiB/target), compiled held
+    on XLA lowering cost. Receipts under <code>scripts/device_kernel_port/</code>.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -220,10 +202,11 @@
     <pre class="r-fu-prompt">/reckon-ship device-kernel-build</pre>
     <p class="r-fu-outcome">Authority given and the blockers are settled. The owner delegated the go/no-go on 2026-08-23; it is locked as port-go-disposition = accept-absolute-then-measure-unpaired. The backlog condition this followup carried is long discharged - the solovev-exact-recovery section-5 ladder landed its profiled decomposition (builds 97.2 to 99.0 percent exact-kernel work, device contraction 0.1244 to 0.1536 ms per moment block) and all four framing decisions locked against measured prototype numbers rather than in advance, exactly as intended. What was blocked was the plan-level ruling, not the profile. RULING IN ONE LINE: accept the far-target error as an ABSOLUTE bound of 1.49e-9 (median 3.3e-10) rather than a 1.976e-3 relative failure, then measure whether the UNPAIRED device graph compiles - production already runs unpaired, so the 38:55 / 149.8 GB wall was measured on a configuration production does not use - and reach for compiler-graph reduction only if that still will not compile. Declining is refused: the performance half passes at 12.4 s projected against a 120 s bar. Remaining plan work is released: the full port, the compute-provenance cache descriptor with its separation tests, the cross-device ULP receipt re-run, and the jacfwd probe under the locked measure-only gradient scope. Continuation is registered as f-dkb-002.</p>
     </article>
-<article class="r-fu" data-id="f-dkb-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-23" data-recommends-skill="/reckon-ship device-kernel-build" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-dkb-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-23" data-recommends-skill="/reckon-ship device-kernel-build" data-resolved-at="2026-08-23T12:42:05+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Execute the released port work, unpaired-compile measurement first</h4>
     <div class="r-fu-body"><p>The go/no-go is settled as <code>port-go-disposition</code> and the remaining work is released. <strong>Order matters and the first node is the cheapest:</strong> measure whether the UNPAIRED device graph compiles, because production runs at <code>paired=False</code> and the recorded 38:55 / 149.8 GB wall was measured on the exact-paired configuration. If it compiles, that wall was an artifact of a configuration nothing uses and the port proceeds directly; if it does not, compiler-graph reduction is authorised on that evidence rather than on the paired measurement.</p><p>Then, in the plan's own order: the full single-source port with the far-target error carried as a stated ABSOLUTE bound of 1.49e-9 (median 3.3e-10) rather than a relative gate; the compute-provenance cache descriptor and its separation tests; the cross-device ULP and byte-identity receipt re-run unchanged; and the jacfwd memory-and-time probe under the locked measure-only gradient scope, whose adoption decision belongs to <code>coil-geometry-inversion</code>.</p><p><strong>Two facts to carry in.</strong> This plan can deploy alongside the S12 lane with no fence contention: it touches <code>nova/biot/{completeelliptic,gradedresidual,pairedfloat}.py</code> and <code>scripts/device_kernel_port/</code>, while the S12 workers are fenced at <code>nova/transport/</code>, three <code>nova/equilibrium/</code> observation files, and <code>nova/imas/</code> plus <code>tests/imas/</code> — disjoint, and solver internals were explicitly ceded to the parity lane. And the port is a throughput-and-gradient investment rather than an accuracy prerequisite: it makes MESH refinement affordable, about 8.8 CPU-hours per nine-block build at reference-native resolution against roughly 2.4 minutes on device, and is irrelevant to OPERATOR refinement, which changes no mesh and rebuilds nothing.</p></div>
     <pre class="r-fu-prompt">/reckon-ship device-kernel-build</pre>
+    <p class="r-fu-outcome">All released work is landed, merged, and reachable from origin/main. The unpaired compile exonerated the wall (4.86 s CPU / 12.33 s H200 vs the banked &gt;=2,335 s / 149.8 GB paired floor); the nine-block single-source port replaced the NumPy evaluation in place with the traced exact-section path as production, full biot selection 2,618 selected / zero failures, cold builds 58.45 s CPU / 26.58 s H200 against the 120 s bar, far-target error carried as measured absolute bounds (CPU-XLA 1.61e-9, H200 1.22e-9, production NumPy 1.35e-9); compute provenance keys the cache with hard cross-device misses pinned by test and both fixtures published minutes-class (28.03 / 34.64 s); the jacfwd probe banked eager forward mode at 0.0019 GiB per target with the compiled route held on XLA lowering cost. One surfaced defect folded rather than walked past: the pandas StringDtype Zarr encoding repair. CONTINUATION CLOSES: done - the one cross-plan continuation, compiled-jacfwd adoption or an alternative compiled gradient formulation, is owned by coil-geometry-inversion per the locked measure-only gradient-scope decision with the banked receipt as its input; new work there is a new plan, the owner's call. No followup.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -277,6 +260,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20260823T1200-refinement-consumer" data-who="reckon-ship" data-when="2026-08-23T12:00:00Z">
     <div class="r-comment-body">CURRENCY AUDIT AND A NEW CONSUMER THAT RAISES THIS PLAN'S ROI FROM MID TO HIGH. AUDIT FIRST - the plan text matches the code and nothing here is stale. nova/biot/pairedfloat.py exists with 14 primitives; graded_residual in nova/biot/gradedresidual.py carries the single-source signature (panels, pieces, nodes, xp, *, paired=False), so the xp dispatch is landed; the centroid-filament branch is grep-absent from nova/biot and nova/*, confirming the locked far-field-section-fidelity removal held. ONE FACT THE GO/NO-GO PACKAGE DOES NOT STATE AND WHICH CHANGES ITS READING: all three graded_residual call sites - polygonanalytic.py:440, polygonanalytic.py:691, polygonarc.py:290 - pass no paired argument, so PRODUCTION RUNS UNPAIRED at the default. The 38:55 / 149.8 GB compile wall was therefore measured on the EXACT-PAIRED configuration, which is not the configuration production uses. Whether the UNPAIRED device graph compiles is unmeasured and is the cheapest question in the package; it belongs ahead of the three recorded routes rather than inside them. THE NEW CONSUMER: efit-forward-parity's refinement question needs interaction matrices at resolutions this repository has never built, and the build cost is quadratic in mesh because pair count is source times target. From the banked prototype rates - H200 kernel 1.140e6 pairs/s, NumPy G0 stage 5,172 pairs/s, a 220x kernel ratio, CPU-JAX lane 12,478 pairs/s - the per-block build cost runs: current parity mesh 248 sources x 1,126 targets = 279,248 pairs, NumPy 54 s and H200 0.2 s; nova's fine mesh 1,010 x 4,225 = 4.27e6 pairs, NumPy 14 min and H200 3.7 s; reference-native 2,141 x 8,500 = 1.82e7 pairs, NumPy 0.98 HOURS and H200 16 s. At nine blocks that is about 8.8 CPU-hours per build against roughly 2.4 minutes on device, and a refinement study needs several resolutions rather than one. SO MESH REFINEMENT IS CPU-INFEASIBLE AND DEVICE-FEASIBLE, and this plan's go/no-go now gates another plan's central question rather than only its own throughput. THE ASYMMETRY THAT MATTERS MOST, and it is the owner's own point: OPERATOR refinement changes no mesh, so the source and target counts are unchanged, so the interaction matrices are IDENTICAL and the build cost is exactly ZERO additional. Mesh refinement is quadratic in both build compute and coupling storage; operator refinement is free in both. Combined with the separately measured fact that raising the observed order beats shrinking h for reaching any criterion, operator refinement dominates mesh refinement on both the accuracy axis and the cost axis - which means this plan's port is what makes the mesh route affordable, while the operator route needs nothing from it. Both readings should be in front of the owner at the ruling: the port is necessary for one route and irrelevant to the other, and the routes are not equally attractive.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260823T1310-drain-ledger" data-who="reckon-ship" data-when="2026-08-23T13:10:00+00:00">
+    <div class="r-comment-body">DRAIN LEDGER - device-kernel-build @ 2026-08-23T13:10Z. Row 1: f-dkb-002 (execute the released port work) - folded -&gt; unpaired-compile-measurement, nine-block-single-source-port, production-route-selection, cross-codegen-reference-reconciliation, cache-provenance-integration, jacfwd-feasibility-probe; resolved with outcome. Row 2: nine-block manifest follow_ons (fence extension + bound adjudication + route selection) - folded -&gt; production-route-selection. Row 3: route-selection manifest follow_ons (four strict-reference reconciliations + section-average vector) - folded -&gt; cross-codegen-reference-reconciliation. Row 4: cache-provenance manifest follow_on (pandas StringDtype Zarr encoding failure) - folded -&gt; zarr-string-encoding-reconciliation. Row 5: jacfwd manifest follow_on (compiled-jacfwd adoption; graph reduction or alternative compiled gradient formulation) - foreign-owner -&gt; coil-geometry-inversion, per the locked measure-only gradient-scope decision; that plan is a completed record, so resumption there is a new-plan decision for the owner, with scripts/device_kernel_port/jacfwd-probe-receipt.json banked as its input. rows: 5, foldable-remaining: 0. Sprint altitude from roadmap: S8 completion now rests on efit-forward-parity (93 percent, another session's lane) which alone gates mast-catalog-gpu-solve; this plan's delivery feeds that consumer directly - minutes-class device builds are the catalog solve's build substrate.</div>
 </div>
 </section>
 </main>

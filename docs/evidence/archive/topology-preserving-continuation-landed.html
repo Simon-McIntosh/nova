@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="topology-preserving-continuation-landed">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="topology-preserving-continuation">
+<title>topology-preserving-continuation-landed</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="Topology-Preserving Continuation — cumulative execution evidence">
+<meta name="plan-summary" content="Landing record of the topology-preserving-continuation plan: the dimension-general step conditioning, the admissible-step control re-measure, the manifold advance, and the seed-alignment observable, each with commits, receipts and gate outcomes">
+</head>
+<body>
+<main class="plan-doc">
+
+<h1>Topology-Preserving Continuation — cumulative execution evidence</h1>
+
+<section id="s4">
+  <h2 id="s4-h">§4 — Step conditioning independent of Krylov dimension</h2>
+
+  <p><strong>dimension-general-conditioning</strong> landed 2026-08-23 — commit
+  <code>6cdc60c4</code>, merged <code>b9715571</code>, gate PASSED, 10 tests added. The node ran
+  on <a href="/nova/diiid-forward-onboarding">diiid-forward-onboarding</a> §5 against the
+  requirement this section states, so §4 is satisfied by verified landed work rather than by a
+  node of its own. Receipt:
+  <code>docs/figures/diiid-forward-onboarding/dimension-general-conditioning.json</code>.</p>
+
+  <p><strong>The fitted rule became a method.</strong> Both dataset constants — a trigger of
+  44.5 placed between one burst-local minimum and one preceding quiet event, and a baseline of
+  27.781718445022726 taken as one quiet median — are gone from the tree, together with the
+  dimension-12 gate. Verified independently at integration: <code>grep</code> for either
+  constant across <code>nova/</code> returns nothing.</p>
+
+  <table>
+    <caption>What replaced each fitted constant, and the principle it derives from</caption>
+    <thead>
+      <tr><th scope="col">Element</th><th scope="col">Retired form</th><th scope="col">Landed form</th><th scope="col">Principle</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>trigger</td>
+        <td>absolute projected condition &gt; 44.5</td>
+        <td>projected condition / online baseline &gt; <em>e</em></td>
+        <td>one natural-log unit separates the smallest singular tail from the projection's typical scale; <em>e</em> is mathematical, measured from neither dataset</td>
+      </tr>
+      <tr>
+        <td>baseline</td>
+        <td>fixed 27.781718445022726</td>
+        <td>largest-to-median active singular value, combined geometrically with the preceding projection's baseline</td>
+        <td>estimated online from the solve's own recent projections, so it carries the projection dimension with it</td>
+      </tr>
+      <tr>
+        <td>damping</td>
+        <td>inherited cube</td>
+        <td>online_baseline / (<em>e</em> · projected_condition), exponent 1</td>
+        <td>inverse proportionality is the unique first-power monomial making condition-weighted step scale independent of measured condition; the extra <em>e</em> margin is symmetric with the trigger in log space</td>
+      </tr>
+      <tr>
+        <td>release</td>
+        <td>dataset tolerance</td>
+        <td>fourth root of active-dtype machine precision</td>
+        <td>derives from the dtype, releasing trajectory damping before local convergence</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p><strong>The decisive measurement is that the mechanism now fires where the fitted one was
+  inert.</strong> Dimension 24 DIII-D records <strong>12 interventions against the banked
+  zero</strong>, at a maximum projected condition of 4087.40844825275. Engagement is
+  demonstrated at three projection dimensions, with fixed shapes and no data-dependent Python
+  or JAX control flow, and <code>jit</code>/<code>vmap</code> contracts passing at all three.</p>
+
+  <table>
+    <caption>Engagement and cost at three projection dimensions</caption>
+    <thead>
+      <tr><th scope="col">Dimension</th><th scope="col">Machine</th><th scope="col">Interventions</th><th scope="col">Max projected condition</th><th scope="col">Cumulative growth</th><th scope="col">Bursts</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>8</td><td>MAST</td><td>12</td><td>280.4948288532528</td><td>2.0</td><td>0</td></tr>
+      <tr><td>12</td><td>MAST held-out</td><td>12</td><td>267.39861174239996</td><td>7.0625</td><td>0</td></tr>
+      <tr><td>24</td><td>DIII-D production</td><td>12</td><td>4087.40844825275</td><td>541.3333333333334</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>The honest cost, stated because the section's requirement was generality and not
+  improvement.</strong> At dimension 12, where the retired rule was tuned, the method is
+  slightly worse: cumulative growth 7.0625 against the fitted 2.217948717948718, and six-case
+  maximum flux difference 5.505623734691767e-12 against 3.5787553476218648e-12 — still 18×
+  inside the retired 1e-10 parity ceiling, with burst count still exactly 0. Dimension 8 is the
+  best of the three at growth 2.0 and flux difference 2.1596613386520858e-13. Dimension 24
+  fires but does not fully tame: growth 541.3333333333334, and the conditioned DIII-D route is
+  recorded as materially noisier even tamed. Seven suite modules reproduce every unedited
+  baseline at 72 passed.</p>
+
+  <p><strong>Attribution, per the method requirements this plan binds on every comparative
+  node.</strong> Because this mechanism fires on the DIII-D route where its predecessor was
+  inert, the banked five-frame numbers in §1 — admissions 4 to 9 of 89, terminal residuals
+  0.0854 to 0.1644, largest admissible fraction 0.03125 — were measured on a tree where
+  conditioning never engaged. The state model is therefore three-valued, not two:
+  pre-conditioning, fitted-inert, and dimension-general-conditioned. No later node may compare
+  a new mechanism against those banked numbers without a control measured on the current tree.</p>
+</section>
+
+</main>
+</body>
+</html>

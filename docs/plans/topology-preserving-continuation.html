@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="topology-preserving-continuation">
   <meta name="plan-title" content="Topology-Preserving Continuation — reach the root without leaving the branch">
   <meta name="plan-summary" content="Close the measured convergence frontier: topology admissibility caps the Newton step near one thirty-second, so an 89-iteration budget traverses under three step-equivalents. Advance along the topology-preserving manifold instead of backtracking into it, choose the seed by alignment rather than proximity, and condition ill-conditioned Krylov steps at any projection dimension.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="12.0">
   <meta name="plan-capability-version" content="1.0">
@@ -25,8 +25,11 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-23">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-sprint" content="S14">
+<meta name="plan-commits" content="6cdc60c46ef0b0e1c611ff2c5404ec561e4abbce,b971557179559797f03d2438c3b5b041a102154e">
+<meta name="plan-artifacts" content="docs/figures/diiid-forward-onboarding/dimension-general-conditioning.json,docs/evidence/archive/topology-preserving-continuation-landed.html">
+<meta name="plan-impl" content="0.143">
 </head>
 <body>
   <main class="plan-doc">
@@ -68,6 +71,13 @@
     unqualified plateaus of 0.0259 to 0.0847, so the topology guard currently converts a
     confidently wrong answer into a correct-but-stalled one. That is a better failure and it is
     not convergence.</p>
+
+    <p><strong>Tree scope of the numbers above.</strong> Every figure in this section was
+    measured before dimension-general step conditioning engaged on this route. That mechanism has
+    since landed and fires 12 times at 24 projection vectors where its predecessor was inert, so the
+    admission counts, terminal residuals and the 0.03125 cap are the pre-conditioning readings of a
+    frontier that now has a third tree state. They remain the historical frontier; they are not the
+    comparator a node on the current tree may use.</p>
 
     <p><strong>Why finer backtracking cannot be the answer, stated as mechanism rather than as a
     measurement.</strong> Backtracking searches <em>into</em> the admissible region from outside
@@ -169,30 +179,29 @@
     banked, quoting rank correlation against both cumulative growth and terminal residual. The
     21985/51 outlier is adjudicated in the same receipt.</p>
 
-    <h2 id="s4">§4 — Step conditioning independent of Krylov dimension</h2>
-
-    <p>Conditioning ill-conditioned Krylov steps at the iteration they occur closed the
-    reproducibility half of the problem on the route it was calibrated for: bursts 3 to 0,
-    cumulative growth 5.379792627282051e9 to 2.217948717948718, six-case maximum flux difference
-    1.1646900802908533e-05 to <strong>3.5787553476218648e-12</strong>, with the one-map separation
-    unchanged at 2.220446049250313e-16 so single-application agreement was not traded away
-    (commit <code>c710c3f1</code>).</p>
-
-    <p><strong>But it is a fitted rule, not a method, and this is the weakness to remove.</strong>
-    Three constants come from one dataset: a trigger of 44.5 placed between one burst-local
-    minimum and one preceding quiet event, a baseline of 27.7817 taken as one quiet median, and an
-    exponent of 3 that is unexplained. A projected operator's condition scales with the projection
-    dimension, so an absolute threshold cannot transfer — and it did not: <strong>all seven DIII-D
-    carriers recorded zero conditioning interventions</strong>, because they run a 24-vector route
-    while the discriminator was calibrated at 12. The mechanism was inert exactly where the gate
-    lives.</p>
-
-    <p><strong>Done when</strong> the trigger is a ratio against a baseline the solve estimates
-    online from its own recent projected conditions, the damping scales from measured condition
-    relative to that baseline, the exponent is derived from a stated principle rather than
-    inherited, and engagement is demonstrated at three projection dimensions including 12 and 24 —
-    with a nonzero intervention count at 24 against the banked zero, and no dimension-specific or
-    dataset-fitted constant remaining anywhere in the path.</p>
+    <section id="s4" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-23</span>
+        <h2>§4 — Step conditioning independent of Krylov dimension</h2></header>
+      <p class="landed-summary">Replaced the fitted rule with a method: the trigger is projected
+      condition over an online largest-to-median spectral baseline exceeding <em>e</em>, damping is
+      <code>online_baseline/(e·projected_condition)</code> at exponent 1 derived from
+      inverse-proportional condition-weighted step normalisation, releasing below the fourth root of
+      active-dtype precision. Both dataset constants and the dimension-12 gate are gone from the tree
+      (verified by grep). Engagement demonstrated at dimensions 8, 12 and 24 under
+      <code>jit</code>/<code>vmap</code>; <strong>dimension 24 DIII-D records 12 interventions against
+      the banked zero</strong>. Honest cost: at dimension 12 growth 7.0625 against the fitted 2.2179
+      and six-case flux 5.506e-12 against 3.579e-12, still 18× inside the retired 1e-10, bursts
+      still 0; dimension 24 fires but does not tame, growth 541.33. Landed on
+      <a href="/nova/diiid-forward-onboarding">diiid-forward-onboarding</a> §5 against this
+      section's requirement, so §4 needed no node of its own. Receipt
+      <code>docs/figures/diiid-forward-onboarding/dimension-general-conditioning.json</code>; full
+      record: <a href="/nova/evidence/archive/topology-preserving-continuation-landed#s4">§4
+      landed</a> (commit <code>6cdc60c4</code>, merged <code>b9715571</code>, 10 tests).
+      <strong>Consequence for every later node here:</strong> the §1 banked numbers were measured
+      on a tree where conditioning never engaged, so the state model is three-valued —
+      pre-conditioning, fitted-inert, dimension-general-conditioned — and no new mechanism may be
+      compared against them without a control measured on the current tree.</p>
+    </section>
 
     <h2 id="s5">§5 — Method requirements binding on every comparative node here</h2>
 
@@ -256,6 +265,11 @@
     </article>
 </section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s4" data-id="c-20260823T2125-s4" data-who="reckon-ship" data-when="2026-08-23T21:25:00Z">
+    <div class="r-comment-body">dimension-general-conditioning satisfied this section under diiid-forward-onboarding section 5 — commit 6cdc60c4, merged b9715571; gate PASSED; measures: 12 interventions at projection dimension 24 against the banked 0, engagement demonstrated at dimensions 8, 12 and 24 under jit/vmap, both dataset constants (44.5, 27.781718445022726) and the dimension-12 gate absent from nova/ (verified by grep at integration), cost at dimension 12 cumulative growth 7.0625 against the fitted 2.217948717948718 and six-case flux 5.505623734691767e-12 against 3.5787553476218648e-12 (18x inside the retired 1e-10, bursts 0), dimension 24 fires without taming at growth 541.3333333333334; 10 tests added, 72 suite passes across seven modules. Artifact: docs/figures/diiid-forward-onboarding/dimension-general-conditioning.json. Section collapsed to a landed summary. Currency repair in the same beat: the frontier section's banked numbers are annotated as pre-conditioning readings, because this mechanism now fires on the DIII-D route where it was inert, so the state model is three-valued and no later node may compare against them without a control on the current tree.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

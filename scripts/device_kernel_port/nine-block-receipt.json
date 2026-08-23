@@ -1,0 +1,95 @@
+{
+  "baselines": {
+    "numpy_exact_kernel_families_seconds": 286.023,
+    "numpy_grid_family_three_flux_orders_seconds": 76.67684297636151,
+    "original_byte_identical_fraction": 0.01434,
+    "original_p999_ulp": 1875000000000
+  },
+  "configuration": {
+    "exact_finite_section": true,
+    "fixed_trip_cel_iterations": 14,
+    "paired": false,
+    "residual_nodes": 128,
+    "rows": 9,
+    "tile": [
+      32,
+      32
+    ]
+  },
+  "cpu": {
+    "artifact": "scripts/device_kernel_port/nine-block-work/cpu.npy",
+    "backend": "cpu",
+    "cold_nine_block_seconds": 58.452204601839185,
+    "compile_count": 1,
+    "compile_seconds": 18.334985859692097,
+    "device_kind": "cpu",
+    "hostname": "98dci4-clu-3141.iter.org",
+    "jax_version": "0.11.0",
+    "kernel_pair_rows_per_second": 69725.67780709361,
+    "kernel_seconds": 39.18798763863742,
+    "matrix_sha256": "ab0ddcee451b323d40c2988cce3584934da360605d6ec32cc4ed93f724de9bb2",
+    "matrix_shape": [
+      9,
+      551,
+      551
+    ],
+    "pair_count": 303601,
+    "platform": "Linux-5.14.0-284.25.1.el9_2.x86_64-x86_64-with-glibc2.34",
+    "tile_count": 324
+  },
+  "gpu": {
+    "artifact": "scripts/device_kernel_port/nine-block-work/gpu.npy",
+    "backend": "gpu",
+    "cold_nine_block_seconds": 26.57620202563703,
+    "compile_count": 1,
+    "compile_seconds": 25.345392546616495,
+    "device_kind": "NVIDIA H200 NVL",
+    "hostname": "98dci4-gpu-0003.iter.org",
+    "jax_version": "0.11.0",
+    "kernel_pair_rows_per_second": 6988039.469181754,
+    "kernel_seconds": 0.3910122448578477,
+    "matrix_sha256": "5effd47350a849c02f8a6bd2d74b403f425cc2666ceba908ed62b26858143134",
+    "matrix_shape": [
+      9,
+      551,
+      551
+    ],
+    "pair_count": 303601,
+    "platform": "Linux-6.12.0-124.11.1.el10_1.x86_64-x86_64-with-glibc2.39",
+    "tile_count": 324
+  },
+  "gpu_to_cpu_ulp": {
+    "byte_identical_count": 60238,
+    "byte_identical_fraction": 0.022045747909628464,
+    "count": 2732409,
+    "max": 8964084725603857419,
+    "p50": 4763908,
+    "p90": 192114811,
+    "p99": 478712534412,
+    "p999": 8617350547552581613
+  },
+  "oracle_column": {
+    "accepted_far_absolute_bound": 1.49e-09,
+    "cpu_far_target_absolute": 1.6082512401776555e-09,
+    "cpu_max_absolute": 4.045865422151184e-09,
+    "cpu_median_absolute": 4.895696141178371e-10,
+    "far_target": 525,
+    "gpu_far_target_absolute": 1.2244882396135323e-09,
+    "gpu_max_absolute": 3.4598139850884808e-09,
+    "gpu_median_absolute": 5.134523867992079e-10,
+    "source_column": 184,
+    "within_accepted_far_bound": false
+  },
+  "scheduler": {
+    "cpu_job_id": "1253212",
+    "gpu_job_id": "1253213",
+    "gpu_reservation": "gpu_0003_grpA",
+    "tmpdir": "/tmp"
+  },
+  "verdict": {
+    "cpu_under_120_seconds": true,
+    "gpu_under_120_seconds": true,
+    "production_numpy_path_replaced": false,
+    "production_path_selection_pending": true
+  }
+}

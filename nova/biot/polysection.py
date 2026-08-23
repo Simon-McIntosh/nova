@@ -25,6 +25,8 @@ from nova.biot.greens import section_centroid
 from nova.biot.matrix import Matrix
 from nova.biot.polygon import _N_NODES, _N_PANELS, polygon_greens
 from nova.biot.polygonanalytic import (
+    _horizontal_reflection,
+    _section_centroid,
     polygon_analytic_field_moments,
     polygon_analytic_flux_moments,
     polygon_analytic_greens,
@@ -57,10 +59,6 @@ class PolySectionPolicy:
             raise ValueError(
                 f"the {self.backend!r} backend requires {expected_device!r} "
                 "device eligibility"
-            )
-        if self.backend == "jax" and self.exact_kernel != "quadrature":
-            raise ValueError(
-                "the tiled ring backend requires the compiled quadrature kernel"
             )
         if self.exact_kernel == "closed_form" and self.quadrature is not None:
             raise ValueError("closed-form routing does not accept a quadrature rule")
@@ -364,8 +362,94 @@ class TiledPolySection(PolySection):
         )
 
     @cached_property
+    def _closed_coupling(self) -> tuple[np.ndarray, ...]:
+        """Return all nine exact rows from one fixed-shape traced evaluator."""
+        from nova.biot.polygon import pad_batch
+        from nova.biot.tiledassembly import TilePlan, tile_evaluator
+
+        target_r = np.hypot(
+            np.asarray(self.target.x, dtype=np.float64),
+            np.asarray(self.target.y, dtype=np.float64),
+        )
+        target_z = np.asarray(self.target.z, dtype=np.float64)
+        sections, owner, fraction = self._packed_sections
+        outputs = np.zeros((9, target_r.size, len(self.source)), dtype=np.float64)
+        if target_r.size == 0 or not sections:
+            return tuple(outputs)
+
+        edge, weight, norm = pad_batch(sections)
+        section_centre = np.column_stack(
+            [_section_centroid(vertices) for vertices in sections]
+        )
+        authored_centre = np.column_stack(
+            [
+                self._material_area_centroid(
+                    self._material_geometry(np.asarray(self.source["poly"])[column])
+                )
+                for column in owner
+            ]
+        )
+        reflection_axis = np.full(len(sections), np.nan, dtype=np.float64)
+        reflection_partner = np.repeat(
+            np.arange(edge.shape[0], dtype=np.intp)[:, None], len(sections), axis=1
+        )
+        for column, vertices in enumerate(sections):
+            reflection = _horizontal_reflection(vertices)
+            if reflection is None:
+                continue
+            axis, vertex_partner = reflection
+            reflection_axis[column] = axis
+            count = len(vertices)
+            for index in range(count):
+                reflection_partner[index, column] = vertex_partner[(index + 1) % count]
+
+        target_tile = min(self._tile_side, target_r.size)
+        source_tile = min(self._tile_side, len(sections))
+        plan = TilePlan(
+            target_tile=target_tile,
+            source_tile=source_tile,
+            block=target_tile * source_tile,
+            n_panels=16,
+            n_nodes=48,
+        )
+        evaluate = tile_evaluator(
+            plan,
+            batched=True,
+            kernel="moments",
+            precision=self.policy.precision,
+            edge_count=edge.shape[0],
+        )
+        for rows, columns in plan.tiles(target_r.size, len(sections)):
+            tile = evaluate(
+                target_r[rows],
+                target_z[rows],
+                edge[:, :, columns],
+                weight[:, columns],
+                norm[columns],
+                section_centre[:, columns],
+                authored_centre[:, columns],
+                reflection_axis[columns],
+                reflection_partner[:, columns],
+            )
+            tile_owner = owner[columns]
+            tile_fraction = fraction[columns]
+            for result, values in zip(outputs, tile, strict=True):
+                reduced = np.zeros(
+                    (rows.stop - rows.start, len(self.source)), dtype=np.float64
+                )
+                np.add.at(
+                    reduced.T,
+                    tile_owner,
+                    (values * tile_fraction[np.newaxis, :]).T,
+                )
+                result[rows] += reduced
+        return tuple(outputs)
+
+    @cached_property
     def _coupling(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Return packed tile results accumulated onto authored source columns."""
+        if self.policy.exact_kernel == "closed_form":
+            return tuple(self._closed_coupling[index] for index in (0, 3, 6))
         from nova.biot.polygon import pad_batch
         from nova.biot.polygonanalytic import polygon_analytic_greens
         from nova.biot.tiledassembly import TilePlan, tile_evaluator
@@ -440,6 +524,13 @@ class TiledPolySection(PolySection):
                 )
                 result[authored_rows] += reduced
         return tuple(components)
+
+    @cached_property
+    def _moment_coupling(self) -> tuple[np.ndarray, ...]:
+        """Return traced companions, retaining the host quadrature reference."""
+        if self.policy.exact_kernel == "closed_form":
+            return tuple(self._closed_coupling[index] for index in (1, 2, 4, 5, 7, 8))
+        return super()._moment_coupling
 
     @cached_property
     def Aphi(self):

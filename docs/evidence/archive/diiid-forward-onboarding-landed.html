@@ -1180,6 +1180,93 @@
       <li>pf_passive, static tf conductor geometry and Thomson line-of-sight endpoints remain
       declared absent, not silently omitted.</li>
     </ul>
+  
+    <h2 id="s5-stability-reuse-map">Forward-solve stability reuse map — 2026-08-23</h2>
+    <p>Commit <code>2275c199</code> (node <code>forward-stability-reuse-map</code>), gate
+    PASSED. Dispatched ahead of any solver repair under the pre-implementation reuse rule:
+    16 candidate mechanisms surveyed, 14 carrying a test or a banked machine measurement, 2
+    untested for this path, 4 required mechanisms absent, across
+    <strong>126 unique validated file:line citations with 0 invalid</strong>.
+    Artifact: <code>scripts/forward_stability_survey/report.md</code>.</p>
+
+    <p><strong>It retracted a defect this plan was carrying, before a worker was spent on
+    it.</strong> The <code>_lambda_value</code> divide-before-guard <code>ZeroDivisionError</code>
+    recorded on the solver thread is no longer live: the symbol is absent from the tree, its
+    replacement <code>current_normalisation_amplitude</code> guards finiteness, sign and band
+    <em>before</em> dividing (<code>nova/equilibrium/forward_operator.py:434-464</code>), the
+    zero / wrong-sign / NaN cases are covered by a passing test
+    (<code>tests/test_equilibrium_forward_constrained.py::test_guard_checks_admissibility_before_division</code>),
+    and the host Armijo path maps an invalid trial onto a finite rejection residual rather
+    than raising. A repair node had been drafted and contract-validated; it was cancelled
+    unrun. The monkeypatch in <code>benchmarks/diiid_circuit_driven_vacuum.py</code> that
+    re-implements this guard is now redundant scaffolding around a fixed source path.</p>
+
+    <p><strong>The two live defects, with paths pinned.</strong> The exact action runs
+    <code>ForwardFluxOperator.flux_map</code> / <code>internal</code> /
+    <code>normalised_current_moments</code> through <code>fixed_point.newton_krylov</code>
+    <code>jax.linearize</code> into batched GMRES
+    (<code>forward_operator.py:467-573</code>, <code>fixed_point.py:242-250</code>); the bank
+    still pins Arnoldi column zero non-finite with a finite zero step while the paired
+    central-difference action stays finite and finite-difference Arnoldi holds rank 64/64.
+    The survey's sharpest warning: <strong>the existing non-finite fallback and relative step
+    cap do not catch this</strong>, because the failure returns a <em>finite</em> zero step
+    and bypasses the rail — health must not be inferred from a finite returned step.
+    Topology-preserving trial admission is absent; the best substrate to adapt is
+    <code>kink_aware_newton_krylov</code>'s nonmonotone four-factor backtracking
+    (<code>fixed_point.py:427-441</code>), which already evaluates fixed-shape factors against
+    a recent residual envelope and needs a caller-supplied admissibility predicate.</p>
+
+    <p><strong>Rejected as repairs, each with a reason:</strong> the Clarke averaged tangent
+    still calls exact tangents on both sides, so it cannot rescue a poisoned primitive; the
+    damped hybrid blends Newton with a non-contractive Picard proposal; Anderson mixing is
+    sound but the live map remains non-contractive after current pinning.
+    <strong>Reusable unchanged:</strong> pinned map reads,
+    <code>ForwardProfile._branch_receipt</code> terminal qualification as the hard terminal
+    gate, the portfolio, and the selector. <strong>Two absences neither defect had named:</strong>
+    there is no production finite-difference residual action or fallback anywhere — only the
+    DIII-D diagnostic has one — and no qualification of the linear action or solver status at
+    all, because production ignores <code>_info</code> and never evaluates the achieved linear
+    residual.</p>
+
+    <h2 id="s5-krylov-action-qualification">Krylov action qualification — 2026-08-23</h2>
+    <p>Commit <code>6143221d</code> (node <code>krylov-action-qualification</code>), gate
+    PASSED, closing the second of the survey's two named absences.
+    <strong>The decisive measurement: the DIII-D plateau at relative residual
+    0.03491124178554655 now records <code>NONFINITE_LINEAR_ACTION</code> and promotes no
+    step.</strong> The silent path is closed — the failure that returned GMRES
+    <code>info=0</code> with a finite exactly-zero step, and which bypassed the existing
+    non-finite fallback and step cap precisely <em>because</em> the step was finite, is now a
+    named refusal instead of a reported success.</p>
+
+    <p>Four refusal conditions land with an explicit precedence, covered 4/4 by independent
+    focused tests: <code>NONFINITE_LINEAR_ACTION</code>,
+    <code>NONSUCCESSFUL_GMRES_STATUS</code>, <code>NONFINITE_ACHIEVED_LINEAR_RESIDUAL</code>,
+    <code>ZERO_STEP_WITH_MATERIAL_NONLINEAR_RESIDUAL</code>, with the material floor at
+    sqrt(machine epsilon). <code>FixedPointResult</code> carries a JAX-safe
+    <code>krylov_action_qualification</code> field — <code>NOT_APPLICABLE</code> for
+    non-Krylov results, <code>ACCEPTED</code> for a fully qualified Newton solve — so
+    downstream evidence asserts on a field rather than on prose. The first failed
+    qualification is retained across fixed-shape Newton steps, and a rejected action leaves
+    the state unpromoted with the measured nonlinear residual preserved. Suites unedited and
+    green: <code>tests/test_fixed_point.py</code> 15/15 including the near-singular step cap
+    and the kink-aware routes, <code>tests/test_equilibrium_forward_solve.py</code> 28/28
+    with one SciPy invalid-value warning in the host root-find test,
+    <code>tests/test_krylov_action_qualification.py</code> 4/4, ruff exit 0. Artifact:
+    <code>docs/figures/diiid-forward-onboarding/krylov-action-qualification.json</code>.</p>
+
+    <p><strong>Scope boundary, retained deliberately because it is the honest one:</strong>
+    this qualifies the Krylov action only. It does not establish basin entry, topology
+    preservation, or gate convergence. It converts an invisible wrong answer into a visible
+    refusal — a prerequisite for trusting any throughput number, and not itself convergence.
+    The node is also the pre-agreed repair vehicle for the operator-refinement lane's
+    mesh-independent closure defect on its expanding-map-amplification branch, where a
+    closure-move screen enters <em>fifth and last</em> in the precedence: the four existing
+    conditions are validity screens asking whether the action is usable at all, while a
+    closure-move screen is a value screen on a usable action, and running a value screen
+    ahead of a validity screen would report a magnitude complaint about a state that was
+    never numerically admissible. That branch resolves the defect <em>as screened</em>, not
+    <em>as fixed</em>.</p>
+
   </main>
 </body>
 </html>

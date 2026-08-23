@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="mast-catalog-gpu-solve-landed">
+  <meta name="plan-title" content="MAST Catalog GPU Solve — landed record">
+  <meta name="plan-summary" content="Cumulative execution evidence for the catalog throughput plan: the measured slice census that replaced the estimated denominator, and the entry-gate state that keeps the throughput ladder shut">
+  <meta name="plan-evidence-for" content="mast-catalog-gpu-solve">
+  <title>MAST Catalog GPU Solve — landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s3-slice-census">Catalog slice census — 2026-08-23</h2>
+    <p>Commit <code>c0eb0e65</code> (node <code>mast-slice-census</code>), gate PASSED.
+    The plan's throughput goal had been carrying an <em>estimated</em> denominator —
+    &ldquo;300&ndash;600 equilibrium timesteps per shot, roughly 3.5&ndash;7&nbsp;M slices&rdquo; —
+    and every rung target below it inherited that estimate. The catalog actually holds
+    <strong>1,341,435 equilibrium slices</strong>.</p>
+
+    <p><strong>Coverage is complete, which is what makes the number usable.</strong> The
+    FAIR-MAST metadata index rows, the unique shots, the shot count this plan asserts, and
+    the reachable mirrored stores <em>all</em> agree at <strong>11,573</strong>, so the
+    catalog-versus-mirror shortfall is exactly zero. Of those stores 11,378 carry
+    equilibrium/time metadata and <strong>195 contain no equilibrium group at all</strong>
+    and contribute exactly zero slices — a real property of the catalog rather than a read
+    failure, and stated as such so a later reader does not treat it as missing data.</p>
+
+    <table>
+      <caption>Equilibrium slices by campaign</caption>
+      <thead>
+        <tr><th scope="col">Campaign</th><th scope="col">Slices</th><th scope="col">Equilibrium-bearing shots</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>M5</td><td>189,372</td><td>1,937</td></tr>
+        <tr><td>M6</td><td>281,827</td><td>2,684</td></tr>
+        <tr><td>M7</td><td>382,886</td><td>3,484</td></tr>
+        <tr><td>M8</td><td>314,180</td><td>1,888</td></tr>
+        <tr><td>M9</td><td>139,015</td><td>1,093</td></tr>
+        <tr><td>Uncampaigned</td><td>34,155</td><td>292</td></tr>
+        <tr><th scope="row">Total</th><th>1,341,435</th><th>11,378</th></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The derived requirement.</strong> A 3,600&nbsp;s wall clock over 8 devices
+    demands <strong>372.620833333 slices/s aggregate</strong> and
+    <strong>46.577604167 slices/s per device</strong> — not the 1,000&ndash;2,000&nbsp;/s
+    aggregate and 125&ndash;250&nbsp;/s per device the plan carried. The requirement is
+    2.7&ndash;5.4&times; gentler than every rung gate written against the estimate, so those
+    gates are over-specified and are restated before the first throughput rung is dispatched
+    rather than after.</p>
+
+    <p><strong>But the hour is marginal, not comfortable, and the larger estimate was hiding
+    that.</strong> 46.6 slices/s per device is a per-slice budget of <strong>21.5&nbsp;ms</strong>.
+    The banked warm-start economy from <a href="/nova/evidence/archive/dual-basin-solve-landed#s4-warm-start">dual-basin-solve §4</a>
+    is <strong>19.070&nbsp;ms per portfolio state</strong> — the same order. An over-estimated
+    denominator had been concealing an under-measured per-slice cost; corrected, the two
+    nearly meet. This also sharpens the plan's open convergence-policy decision: at 21.5&nbsp;ms
+    per slice, a bounded-tail two-pass scheme and a single global budget are separated by a
+    much smaller margin than the plan's framing implies.</p>
+
+    <p><strong>Method and its constraint.</strong> Counting read remote shot/campaign metadata
+    plus local Zarr v3 shape JSON only. Zero equilibrium solves were run and no bulk signal
+    arrays were downloaded, honouring the plan's counting constraint. The enumerator is
+    committed reproducible at <code>scripts/mast_slice_census/census.py</code> and the receipt
+    carries per-campaign rates and content hashes; an independent direct-filesystem JSON
+    invariant check was run against it. Artifacts:
+    <code>docs/figures/mast-catalog-gpu-solve/slice-census.json</code>,
+    <code>scripts/mast_slice_census/report.md</code>.</p>
+
+    <h2 id="entry-gate-state">Entry-gate state — the ladder stays shut</h2>
+    <p>The census is the only throughput-plan node that has landed, and deliberately so. The
+    plan is held at its entry gate under an owner directive that forward-solve stability and
+    the multi-basin question be settled first, on the reasoning that a fast catalog of
+    incorrect equilibria has no value. Recorded here so the gate's state is legible beside
+    the census rather than only inside the plan's comment history.</p>
+
+    <p><strong>Discharged: the multi-basin question.</strong> Closed by
+    <a href="/nova/evidence/archive/dual-basin-solve-landed">dual-basin-solve</a> through
+    attribution rather than by lifting the stalls. Branch <em>selection</em> is closed by
+    construction — amplitude elimination leaves one admissible plasma branch at max closure
+    error <strong>2.495e-16</strong> across all eleven frozen references. A DIII-D pinning
+    control reached <strong>1.59e-09 diverted in four accepted iterations</strong> where its
+    paired unpinned control ended at <strong>0.514 limited after twenty-four</strong>, from
+    the same seed and the same 24-conductor input. Basin <em>reachability</em> was then
+    attributed rather than solved: 5/5 stall floors scale with mesh (ratios 0.096&ndash;0.512,
+    observed orders 0.97&ndash;3.39), so the stalls are discretisation-limited and no
+    basin-entry driver can close them.</p>
+
+    <p><strong>Not discharged: three live forward-solve defects.</strong> None is a basin
+    problem and none is resolution alone.</p>
+    <ul>
+      <li>The exact autodiff residual-Jacobian action is non-finite on the first Arnoldi
+      vector, returning a finite <em>zero</em> step. <strong>Now screened</strong> — commit
+      <code>6143221d</code>, see the DIII-D landed record — but screening makes the failure
+      visible rather than making the solve converge.</li>
+      <li>Topology-preserving trial admission is absent. The only route that converges
+      (7.75e-11 in 89 accepted iterations) crossed topology at iterations 31, 50 and 88 and
+      terminated on the wrong branch. Open.</li>
+      <li>A mesh-independent closure-path defect: the passive-closure reproduction move holds
+      at 0.6098 / 0.6392 / 0.6378 points across realised 566 / 1587 / 2214 cells against a
+      0.15 ceiling, all six solves converged at or below 2.5e-10. Refinement does not buy it
+      back. Owned by the operator-refinement lane and under trace.</li>
+    </ul>
+
+    <p><strong>Two consequences already recorded against the plan's own architecture.</strong>
+    The batched Picard loop §2 specifies is not available: the map is non-contractive with
+    spectral radius <strong>1.1456</strong> after current pinning and <strong>1.2577</strong>
+    without, so the loop is Newton-only and the iteration distribution the first rung profiles
+    is a Newton-step distribution. And the default residual action changes under the locked
+    <code>solver-default-route</code> ruling to a finite-difference action, which costs one
+    extra map evaluation <em>per Krylov vector</em> where an exact tangent reuses a single
+    linearisation — so the 21.5&nbsp;ms per-slice budget above must be re-derived on the
+    differenced arm rather than inherited from an economy measured on the exact one.</p>
+
+  </main>
+</body>
+</html>

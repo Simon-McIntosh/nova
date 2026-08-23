@@ -19,7 +19,7 @@
 <meta name="plan-effort-hours" content="6.0">
 <meta name="plan-depends-on" content="scoring-criteria-derivation">
 <meta name="plan-informs" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
-<meta name="plan-version" content="18">
+<meta name="plan-version" content="19">
 <meta name="plan-impl" content="0.22">
 </head>
 <body>
@@ -174,7 +174,17 @@
   becomes a fifth refusal condition on that lane's in-flight action-qualification node
   (refusing a non-finite action, non-successful status, non-finite achieved linear
   residual, zero step at material residual), landing as one commit; this plan then records
-  the screening spec it handed over and the verdict receipt. <strong>Screened is not
+  the screening spec it handed over and the verdict receipt. The screening vehicle is
+  landed (commit <code>6143221d</code>): four refusal conditions in a named precedence
+  (non-finite action, non-successful status, non-finite achieved linear residual, zero step
+  at a material nonlinear residual, floor &radic;&epsilon;), with
+  <code>FixedPointResult.krylov_action_qualification</code> as the machine-citable field
+  &mdash; assertions here target that field, never prose &mdash; and the DIII-D plateau at
+  residual 0.0349 now recording <code>NONFINITE_LINEAR_ACTION</code> with no step promoted.
+  The closure-move screen enters as the FIFTH condition, LAST in precedence: the four
+  existing conditions detect an unusable action, the fifth a usable action producing a
+  suspect result, and a value screen ahead of a validity screen would complain about the
+  magnitude of a state that was never numerically admissible. <strong>Screened is not
   fixed:</strong> on that branch the screening only refuses to report an amplified state as
   converged &mdash; it hardens the failure into a visible non-convergence and does NOT
   restore the passive-closure move to its documented 0.098-point response, which waits on

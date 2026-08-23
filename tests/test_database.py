@@ -3,7 +3,7 @@ import pytest
 import xarray
 import zarr
 
-from nova.database.filepath import FilePath
+from nova.database.filepath import FilePath, compute_provenance
 from nova.database.zarrstore import ZarrStore
 from nova.biot.polysection import PolySectionPolicy
 from nova.biot.target import TargetQuadraturePolicy
@@ -299,6 +299,53 @@ def test_cache_key_distinguishes_source_lanes_and_target_quadrature():
     assert len(keys) == 5
     assert coil_opt_in["coil_polysection_policy"] == quadrature.key
     assert plasma_opt_in["plasma_polysection_policy"] == quadrature.key
+
+
+def test_kernel_cache_separates_compute_provenance(tmp_path):
+    """A consumer can warm-load only the artifact built by its code generator."""
+    store = ZarrStore(filename="kernel_provenance", dirname=tmp_path)
+    identity = {"geometry": "same", "kernel": "exact-section"}
+    cpu_provenance = compute_provenance(
+        "jax", platform="cpu", device_kind="cpu"
+    )
+    gpu_provenance = compute_provenance(
+        "jax", platform="gpu", device_kind="NVIDIA H200"
+    )
+    cpu_identity = identity | {"compute_provenance": cpu_provenance}
+    gpu_identity = identity | {"compute_provenance": gpu_provenance}
+    assert CoilSet(compute_provenance=cpu_provenance).coilset_attrs[
+        "compute_provenance"
+    ] == cpu_provenance
+    assert CoilSet(compute_provenance=gpu_provenance).coilset_attrs[
+        "compute_provenance"
+    ] == gpu_provenance
+    cpu_group = store.hash_attrs(cpu_identity)
+    gpu_group = store.hash_attrs(gpu_identity)
+    assert cpu_group != gpu_group
+
+    store.group = cpu_group
+    store.data = xarray.Dataset({"matrix": (("row", "column"), [[1.0]])})
+    store.store()
+
+    cpu = ZarrStore(
+        filename=store.filename, dirname=tmp_path, group=cpu_group
+    ).load()
+    assert float(cpu.data["matrix"][0, 0]) == 1.0
+    with pytest.raises(FileNotFoundError):
+        ZarrStore(
+            filename=store.filename, dirname=tmp_path, group=gpu_group
+        ).load()
+
+    gpu = ZarrStore(filename=store.filename, dirname=tmp_path, group=gpu_group)
+    gpu.data = xarray.Dataset({"matrix": (("row", "column"), [[2.0]])})
+    gpu.store()
+    root = ZarrStore(filename=store.filename, dirname=tmp_path)
+    assert sorted(root.group_names()) == sorted((cpu_group, gpu_group))
+    assert float(
+        ZarrStore(
+            filename=store.filename, dirname=tmp_path, group=cpu_group
+        ).load().data["matrix"][0, 0]
+    ) == 1.0
 
 
 def test_route_identity_round_trips_through_the_zarr_root_group(tmp_path):

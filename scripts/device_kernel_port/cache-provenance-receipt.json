@@ -1,0 +1,195 @@
+{
+  "fixtures": {
+    "coarse": {
+      "cpu_sibling": {
+        "compute_provenance": "numpy|platform=cpu|device=host",
+        "group": "7b508f9e4a9edcc2",
+        "hostname": "98dci4-srv-1006.iter.org",
+        "matrix_build_seconds": 0.0,
+        "resolution": "coarse",
+        "semantic_identity": {
+          "analytic_case": "moderate-rotation-conventional",
+          "boundary_condition": "exact-analytic-exterior",
+          "closed_form_constants": {
+            "axis_flux_per_radian_wb": 0.21982714623250468,
+            "axis_temperature_j": 3.204353268e-16,
+            "boundary_field_function_tm": 3.4,
+            "boundary_temperature_j": 8.01088317e-18,
+            "field_coefficient": 0.21982714623250468,
+            "major_radius_m": 1.7,
+            "mean_particle_mass_kg": 3.3435837768e-27,
+            "pressure_coefficient": 0.1429119518229214,
+            "rotation_parameter_per_m2": 0.04238754325259515
+          },
+          "compute_provenance": "numpy|platform=cpu|device=host",
+          "discretisation": {
+            "plasma_shape": "hex",
+            "requested_cells": -500,
+            "wall_content": {
+              "dtype": "<f8",
+              "sha256": "4ce08f1f6f90fb0284a9f99963e39fd8fa9fb92ad63168392d4c561af7e13821",
+              "shape": [
+                121,
+                2
+              ]
+            },
+            "wall_nodes": 121
+          },
+          "kernel": "exact-authored-polygon-moments",
+          "precision": "float64",
+          "schema": "analytic-oracle-hex-machine"
+        },
+        "source_cache_hit": true,
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_500.zarr",
+        "wall_seconds": 0.6631866609677672
+      },
+      "groups_are_separate": true,
+      "h200_cold_build": {
+        "carrier_load_seconds": 0.17600532248616219,
+        "compile_seconds": 25.329681623727083,
+        "compute_provenance": "jax|platform=gpu|device=NVIDIA H200 NVL|jaxlib=0.11.0",
+        "device_kind": "NVIDIA H200 NVL",
+        "group": "02bd9bf89d3210b2",
+        "hostname": "98dci4-gpu-0003.iter.org",
+        "kernel_seconds": 1.14545673225075,
+        "matrix_build_seconds": 28.028763909824193,
+        "pair_count": 1241403,
+        "resolution": "coarse",
+        "semantic_identity": {
+          "analytic_case": "moderate-rotation-conventional",
+          "boundary_condition": "exact-analytic-exterior",
+          "closed_form_constants": {
+            "axis_flux_per_radian_wb": 0.21982714623250468,
+            "axis_temperature_j": 3.204353268e-16,
+            "boundary_field_function_tm": 3.4,
+            "boundary_temperature_j": 8.01088317e-18,
+            "field_coefficient": 0.21982714623250468,
+            "major_radius_m": 1.7,
+            "mean_particle_mass_kg": 3.3435837768e-27,
+            "pressure_coefficient": 0.1429119518229214,
+            "rotation_parameter_per_m2": 0.04238754325259515
+          },
+          "compute_provenance": "jax|platform=gpu|device=NVIDIA H200 NVL|jaxlib=0.11.0",
+          "discretisation": {
+            "plasma_shape": "hex",
+            "requested_cells": -500,
+            "wall_content": {
+              "dtype": "<f8",
+              "sha256": "4ce08f1f6f90fb0284a9f99963e39fd8fa9fb92ad63168392d4c561af7e13821",
+              "shape": [
+                121,
+                2
+              ]
+            },
+            "wall_nodes": 121
+          },
+          "kernel": "exact-authored-polygon-moments",
+          "precision": "float64",
+          "schema": "analytic-oracle-hex-machine"
+        },
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_500.zarr",
+        "store_seconds": 0.45546190813183784
+      },
+      "shared_store": true
+    },
+    "fine": {
+      "cpu_sibling": {
+        "compute_provenance": "numpy|platform=cpu|device=host",
+        "group": "d3c2ce074d76f403",
+        "hostname": "98dci4-srv-1006.iter.org",
+        "matrix_build_seconds": 0.0,
+        "resolution": "fine",
+        "semantic_identity": {
+          "analytic_case": "moderate-rotation-conventional",
+          "boundary_condition": "exact-analytic-exterior",
+          "closed_form_constants": {
+            "axis_flux_per_radian_wb": 0.21982714623250468,
+            "axis_temperature_j": 3.204353268e-16,
+            "boundary_field_function_tm": 3.4,
+            "boundary_temperature_j": 8.01088317e-18,
+            "field_coefficient": 0.21982714623250468,
+            "major_radius_m": 1.7,
+            "mean_particle_mass_kg": 3.3435837768e-27,
+            "pressure_coefficient": 0.1429119518229214,
+            "rotation_parameter_per_m2": 0.04238754325259515
+          },
+          "compute_provenance": "numpy|platform=cpu|device=host",
+          "discretisation": {
+            "plasma_shape": "hex",
+            "requested_cells": -1000,
+            "wall_content": {
+              "dtype": "<f8",
+              "sha256": "4ce08f1f6f90fb0284a9f99963e39fd8fa9fb92ad63168392d4c561af7e13821",
+              "shape": [
+                121,
+                2
+              ]
+            },
+            "wall_nodes": 121
+          },
+          "kernel": "exact-authored-polygon-moments",
+          "precision": "float64",
+          "schema": "analytic-oracle-hex-machine"
+        },
+        "source_cache_hit": true,
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_1000.zarr",
+        "wall_seconds": 0.9950063638389111
+      },
+      "groups_are_separate": true,
+      "h200_cold_build": {
+        "carrier_load_seconds": 0.23030842747539282,
+        "compile_seconds": 26.301797246560454,
+        "compute_provenance": "jax|platform=gpu|device=NVIDIA H200 NVL|jaxlib=0.11.0",
+        "device_kind": "NVIDIA H200 NVL",
+        "group": "322f58f7a79b634a",
+        "hostname": "98dci4-gpu-0003.iter.org",
+        "kernel_seconds": 3.52414586301893,
+        "matrix_build_seconds": 34.638134949840605,
+        "pair_count": 4359952,
+        "resolution": "fine",
+        "semantic_identity": {
+          "analytic_case": "moderate-rotation-conventional",
+          "boundary_condition": "exact-analytic-exterior",
+          "closed_form_constants": {
+            "axis_flux_per_radian_wb": 0.21982714623250468,
+            "axis_temperature_j": 3.204353268e-16,
+            "boundary_field_function_tm": 3.4,
+            "boundary_temperature_j": 8.01088317e-18,
+            "field_coefficient": 0.21982714623250468,
+            "major_radius_m": 1.7,
+            "mean_particle_mass_kg": 3.3435837768e-27,
+            "pressure_coefficient": 0.1429119518229214,
+            "rotation_parameter_per_m2": 0.04238754325259515
+          },
+          "compute_provenance": "jax|platform=gpu|device=NVIDIA H200 NVL|jaxlib=0.11.0",
+          "discretisation": {
+            "plasma_shape": "hex",
+            "requested_cells": -1000,
+            "wall_content": {
+              "dtype": "<f8",
+              "sha256": "4ce08f1f6f90fb0284a9f99963e39fd8fa9fb92ad63168392d4c561af7e13821",
+              "shape": [
+                121,
+                2
+              ]
+            },
+            "wall_nodes": 121
+          },
+          "kernel": "exact-authored-polygon-moments",
+          "precision": "float64",
+          "schema": "analytic-oracle-hex-machine"
+        },
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_1000.zarr",
+        "store_seconds": 0.6075813695788383
+      },
+      "shared_store": true
+    }
+  },
+  "semantic_key_field": "compute_provenance",
+  "verdict": {
+    "cpu_never_loads_device_artifact": true,
+    "device_never_loads_cpu_artifact": true,
+    "h200_and_cpu_siblings_share_store": true,
+    "mechanism": "the semantic identity hashes the code-generator platform, device family and jaxlib version, so unlike provenance is a cache miss while sibling groups coexist in one zarr store"
+  }
+}

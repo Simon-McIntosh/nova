@@ -242,5 +242,36 @@
   the executable seam, scorer pin and evaluator-only Consistency adapter are ambix-side work, tracked as
   f-emp-005; ambix currently pins only the dataset revision.</p>
 
+
+  <h3 id="li3-conventions">The internal-inductance convention family: DD li(3), referee li(2), exact conversions</h3>
+
+  <p><strong>Commit <code>938ea87e</code> (merged <code>84224eed</code>); gate passed (20/20 convention
+  tests, pinned regressions green). Owner-directed 2026-08-23.</strong>
+  <code>nova/equilibrium/internal_inductance.py</code> implements the IMAS DD&nbsp;4.1.1 authority for
+  <code>equilibrium/time_slice/global_quantities/li_3</code> —
+  l<sub>i</sub>(3) = 2&int;B<sub>p</sub>&sup2;dV / (&mu;&#8320;&sup2;I<sub>p</sub>&sup2;R<sub>geometric</sub>) —
+  beside the referee's l<sub>i</sub>(2) (field energy over V&middot;(circulation/perimeter)&sup2;), with
+  exact bidirectional conversions that preserve field energy by the normaliser ratio. All six banked
+  referee rows and all six round trips reproduce at rtol&nbsp;2e-15.</p>
+
+  <p><strong>Unlike conventions are never compared directly:</strong> the published EFM l<sub>i</sub> is
+  treated as l<sub>i</sub>(2) and converted before comparison — direct DD l<sub>i</sub>(3)
+  (0.4944–0.6599) against converted published (0.4957–0.6632) agrees to maximum 0.9748%, median signed
+  &minus;0.346%, preserving the banked referee-formula agreement on the same six frozen shots. The
+  geometric-radius source field cross-checks against LCFS extrema to &le;3.7e-08&nbsp;m.</p>
+
+  <figure>
+    <img src="/nova/figures/equilibrium-metric-parity/internal-inductance-conventions.png"
+         alt="DD li(3), referee li(2), and converted published values across the six frozen shots" style="max-width:100%">
+    <figcaption>The convention family on the six frozen shots: direct DD l<sub>i</sub>(3), referee
+    l<sub>i</sub>(2), and the published value converted into each convention.</figcaption>
+  </figure>
+
+  <p><strong>Egress reconciled:</strong> the legacy <code>Plasma.li_3</code> delegates to the production DD
+  metric (ionised-volume B<sub>p</sub>&sup2;dV, enclosed plasma current, LCFS geometric radius), so the
+  pulse-design path writes <code>global_quantities.li_3</code> in the DDv4 convention unchanged. The
+  differentiable forward observation is retained as an explicitly distinct current-radius convention with
+  its pinned regression green — declared, not silently unified.</p>
+
 </main></body>
 </html>

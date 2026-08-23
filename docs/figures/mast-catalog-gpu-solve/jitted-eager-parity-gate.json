@@ -1,0 +1,919 @@
+{
+  "schema": "nova-jitted-eager-parity/1.0",
+  "status": "failed",
+  "registered_utc": "2026-08-23T15:54:11.070479+00:00",
+  "tolerance_registration": {
+    "registered_before_scoring": true,
+    "absolute_tolerance": 1e-10,
+    "relative_tolerance": 1e-10,
+    "criterion": "numpy.allclose(jitted, eager, atol=1e-10, rtol=1e-10, equal_nan=True) for floating quantities; exact equality for integer and boolean quantities",
+    "derivation": "The live plan pre-registers 1e-10 from Nova's existing jitted operator/topology batched-versus-per-slice parity floor. The same dimensionless floor is retained here before inspecting any result; it is not fitted to this run."
+  },
+  "source_tree": {
+    "commit_sha": "044adfdfc97d25d11562c1fd67b044ce1c52c419",
+    "tree_sha": "89f229ff21a9e029b9399d974a5b56ba272da4f5",
+    "repaired_equilibrium_commits": [
+      "6143221d7a2dc5c3ad2a74b822bf1a026c05eed3",
+      "06b09f5bfdcf184a69066e829a6e7ee16fdd3a2b",
+      "257af9dcbe5dd19313708f862a8bb3a383f917b2",
+      "7e33c4d000131ce0bb76b9b3c7ad2b71ce668d36"
+    ],
+    "repaired_commits_are_ancestors": {
+      "6143221d7a2dc5c3ad2a74b822bf1a026c05eed3": true,
+      "06b09f5bfdcf184a69066e829a6e7ee16fdd3a2b": true,
+      "257af9dcbe5dd19313708f862a8bb3a383f917b2": true,
+      "7e33c4d000131ce0bb76b9b3c7ad2b71ce668d36": true
+    }
+  },
+  "held_out_set": {
+    "root": "/home/ITER/mcintos/Code/imas-ambix/imas_ambix/spine_bench",
+    "shotset_module": "/home/ITER/mcintos/Code/imas-ambix/imas_ambix/spine_bench/shots.py",
+    "shotset_module_sha256": "1ff002ccbee77d8bba969655105778a1ce98ff862bd220f1bc92377887b81018",
+    "version": "v0-mast-heldout-6",
+    "case_count": 6,
+    "cases": [
+      {
+        "shot": 21978,
+        "slice_index": 35,
+        "time_s": 0.1899999976158142,
+        "moment_seed_supported_cells": 91,
+        "moment_seed_passes": true,
+        "profile_solve_passes": false,
+        "failed_moment_quantities": [],
+        "failed_profile_quantities": [
+          "cell_current",
+          "ledger.common_sol",
+          "ledger.core",
+          "moments.internal_inductance",
+          "moments.plasma_current",
+          "moments.poloidal_beta",
+          "moments.poloidal_field_integral",
+          "moments.pressure_integral"
+        ]
+      },
+      {
+        "shot": 21983,
+        "slice_index": 35,
+        "time_s": 0.1899999976158142,
+        "moment_seed_supported_cells": 89,
+        "moment_seed_passes": true,
+        "profile_solve_passes": false,
+        "failed_moment_quantities": [],
+        "failed_profile_quantities": [
+          "cell_current",
+          "domains.psi_norm",
+          "fixed_point.state",
+          "flux",
+          "ledger.common_sol",
+          "moments.pressure_integral"
+        ]
+      },
+      {
+        "shot": 21985,
+        "slice_index": 51,
+        "time_s": 0.2750000059604645,
+        "moment_seed_supported_cells": 89,
+        "moment_seed_passes": true,
+        "profile_solve_passes": false,
+        "failed_moment_quantities": [],
+        "failed_profile_quantities": [
+          "cell_current",
+          "conservation.divergence_b_scale",
+          "conservation.divergence_j",
+          "conservation.divergence_j_scale",
+          "conservation.force_residual",
+          "conservation.force_scale",
+          "conservation.grad_shafranov_residual",
+          "conservation.grad_shafranov_scale",
+          "domains.psi_norm",
+          "fixed_point.residual",
+          "fixed_point.state",
+          "fixed_point.trace",
+          "flux",
+          "moments.flux_span",
+          "moments.internal_inductance",
+          "moments.poloidal_beta",
+          "moments.poloidal_field_integral",
+          "moments.pressure_integral",
+          "normalisation.amplitude",
+          "topology.axis",
+          "topology.axis_flux",
+          "topology.boundary",
+          "topology.boundary_flux",
+          "topology.wall_point",
+          "topology.wall_point_flux",
+          "topology.x_point",
+          "topology.x_point_flux"
+        ]
+      },
+      {
+        "shot": 21986,
+        "slice_index": 46,
+        "time_s": 0.25,
+        "moment_seed_supported_cells": 102,
+        "moment_seed_passes": true,
+        "profile_solve_passes": false,
+        "failed_moment_quantities": [],
+        "failed_profile_quantities": [
+          "cell_current",
+          "conservation.divergence_b_scale",
+          "conservation.divergence_j_scale",
+          "conservation.force_residual",
+          "conservation.grad_shafranov_residual",
+          "domains.psi_norm",
+          "fixed_point.residual",
+          "fixed_point.state",
+          "fixed_point.trace",
+          "flux",
+          "ledger.common_sol",
+          "ledger.core",
+          "ledger.private_flux",
+          "moments.flux_span",
+          "moments.internal_inductance",
+          "moments.plasma_current",
+          "moments.poloidal_beta",
+          "moments.poloidal_field_integral",
+          "moments.pressure_integral",
+          "normalisation.amplitude",
+          "topology.axis",
+          "topology.axis_flux",
+          "topology.boundary",
+          "topology.boundary_flux",
+          "topology.wall_point",
+          "topology.wall_point_flux",
+          "topology.x_point",
+          "topology.x_point_flux"
+        ]
+      },
+      {
+        "shot": 21989,
+        "slice_index": 55,
+        "time_s": 0.29499998688697815,
+        "moment_seed_supported_cells": 102,
+        "moment_seed_passes": true,
+        "profile_solve_passes": false,
+        "failed_moment_quantities": [],
+        "failed_profile_quantities": [
+          "cell_current",
+          "domains.psi_norm",
+          "fixed_point.residual",
+          "fixed_point.state",
+          "fixed_point.trace",
+          "flux",
+          "ledger.common_sol",
+          "ledger.core",
+          "ledger.private_flux",
+          "moments.flux_span",
+          "moments.internal_inductance",
+          "moments.plasma_current",
+          "moments.poloidal_beta",
+          "moments.poloidal_field_integral",
+          "moments.pressure_integral",
+          "normalisation.amplitude",
+          "topology.axis",
+          "topology.axis_flux",
+          "topology.boundary",
+          "topology.x_point"
+        ]
+      },
+      {
+        "shot": 22086,
+        "slice_index": 43,
+        "time_s": 0.22999998927116394,
+        "moment_seed_supported_cells": 92,
+        "moment_seed_passes": true,
+        "profile_solve_passes": true,
+        "failed_moment_quantities": [],
+        "failed_profile_quantities": []
+      }
+    ],
+    "case_selection": "one pre-existing qualified reference slice per frozen shot, selected by select_slices_by_shot from the committed decomposition bank"
+  },
+  "completed_utc": "2026-08-23T15:56:38.539348+00:00",
+  "backend": {
+    "platform": "cpu",
+    "device": "cpu",
+    "jax_version": "0.11.0",
+    "precision": "float64"
+  },
+  "solve_route": {
+    "entry_point": "ForwardProfile.solve",
+    "options": {
+      "route": "newton_krylov",
+      "newton_steps": 12,
+      "gmres_iterations": 12,
+      "warmup": 0
+    },
+    "seed_entry_point": "ForwardProfile.moment_seed"
+  },
+  "comparisons": {
+    "moment_seed_traced_image": {
+      "passes": true,
+      "quantities": {
+        "flux": {
+          "shape": [
+            1126
+          ],
+          "dtype": "float64",
+          "maximum_absolute_difference": 4.440892098500626e-16,
+          "maximum_relative_difference": 3.8223723809183967e-16,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "current_moment_coefficients.cell_current": {
+          "shape": [
+            1089
+          ],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "current_moment_coefficients.radial_moment": {
+          "shape": [
+            1089
+          ],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "current_moment_coefficients.vertical_moment": {
+          "shape": [
+            1089
+          ],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        }
+      }
+    },
+    "profile_solve": {
+      "passes": false,
+      "quantities": {
+        "flux": {
+          "shape": [
+            1126
+          ],
+          "dtype": "float64",
+          "maximum_absolute_difference": 1.1646900802908533e-05,
+          "maximum_relative_difference": 2.090888477060583e-06,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "cell_current": {
+          "shape": [
+            1089
+          ],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.09702486617788963,
+          "maximum_relative_difference": 9.194537100867235e-07,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "domains.label": {
+          "shape": [
+            1089
+          ],
+          "dtype": "int8",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "exact equality",
+          "case_count": 6
+        },
+        "domains.psi_norm": {
+          "shape": [
+            1089
+          ],
+          "dtype": "float64",
+          "maximum_absolute_difference": 9.498624947923417e-06,
+          "maximum_relative_difference": 4.163342056851591e-07,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "topology.axis": {
+          "shape": [
+            2
+          ],
+          "dtype": "float64",
+          "maximum_absolute_difference": 1.2958139949947878e-07,
+          "maximum_relative_difference": 1.3215715032619567e-07,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "topology.axis_flux": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 6.25219581751324e-06,
+          "maximum_relative_difference": 1.1377015040255536e-05,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "topology.boundary": {
+          "shape": [
+            2
+          ],
+          "dtype": "float64",
+          "maximum_absolute_difference": 1.2211194944100612e-07,
+          "maximum_relative_difference": 1.149070623799812e-07,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "topology.boundary_flux": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 2.2892615372249736e-06,
+          "maximum_relative_difference": 4.656705251452418e-06,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "topology.x_point": {
+          "shape": [
+            2
+          ],
+          "dtype": "float64",
+          "maximum_absolute_difference": 8.111818221578915e-07,
+          "maximum_relative_difference": 5.013061851856076e-07,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "topology.x_point_flux": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 4.4432069171151944e-07,
+          "maximum_relative_difference": 7.093194148323502e-06,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "topology.wall_point": {
+          "shape": [
+            2
+          ],
+          "dtype": "float64",
+          "maximum_absolute_difference": 1.2211194944100612e-07,
+          "maximum_relative_difference": 1.149070623799812e-07,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "topology.wall_point_flux": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 2.2892615372249736e-06,
+          "maximum_relative_difference": 4.656705251452418e-06,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "topology.diverted": {
+          "shape": [],
+          "dtype": "bool",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "exact equality",
+          "case_count": 6
+        },
+        "fixed_point.state": {
+          "shape": [
+            1126
+          ],
+          "dtype": "float64",
+          "maximum_absolute_difference": 1.1646900802908533e-05,
+          "maximum_relative_difference": 2.090888477060583e-06,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "fixed_point.residual": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 6.230462863854314e-06,
+          "maximum_relative_difference": 7.92623318976481e-05,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "fixed_point.trace": {
+          "shape": [
+            168
+          ],
+          "dtype": "float64",
+          "maximum_absolute_difference": 6.230462863854314e-06,
+          "maximum_relative_difference": 2.256045286418844e-06,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "fixed_point.krylov_action_qualification": {
+          "shape": [],
+          "dtype": "int32",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "exact equality",
+          "case_count": 6
+        },
+        "fixed_point.amplification_observation": {
+          "shape": [],
+          "dtype": "int64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "exact equality",
+          "case_count": 6
+        },
+        "moments.plasma_current": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.04917502362513915,
+          "maximum_relative_difference": 1.3935866734820125e-07,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "moments.poloidal_beta": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.7109836938907392,
+          "maximum_relative_difference": 1.6206594392513233e-06,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "moments.internal_inductance": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 1.1057762009603067e-05,
+          "maximum_relative_difference": 3.6858192494734793e-06,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "moments.volume": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "moments.major_radius": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 1.1102230246251565e-16,
+          "maximum_relative_difference": 1.1742075037825516e-16,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "moments.pressure_integral": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.1777459234726848,
+          "maximum_relative_difference": 1.6206594392513233e-06,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "moments.poloidal_field_integral": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 1.1057762009603067e-05,
+          "maximum_relative_difference": 3.6858192494734793e-06,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "moments.flux_span": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 3.962934280288266e-06,
+          "maximum_relative_difference": 1.7594357860269103e-06,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "ledger.core": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.04917502362513915,
+          "maximum_relative_difference": 1.3935866734820125e-07,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "ledger.common_sol": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.026452624995727092,
+          "maximum_relative_difference": 1.4309629289811192e-07,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "ledger.private_flux": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.022722398571204394,
+          "maximum_relative_difference": 6.751870019640946e-08,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "ledger.excluded_material": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "ledger.total": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 3.4924596548080444e-10,
+          "maximum_relative_difference": 4.2919758999027704e-16,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "conservation.grad_shafranov_residual": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 3.3233770521334804e-05,
+          "maximum_relative_difference": 3.144218945703662e-06,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "conservation.grad_shafranov_scale": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 4.1059904187790153e-07,
+          "maximum_relative_difference": 6.271190166203176e-08,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "conservation.force_residual": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 12.864408950321376,
+          "maximum_relative_difference": 4.686176355847326e-06,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "conservation.force_scale": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.4882344454526901,
+          "maximum_relative_difference": 1.5777761698537698e-06,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "conservation.divergence_b": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 9.83631031098047e-16,
+          "maximum_relative_difference": 0.8425616333270692,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "conservation.divergence_b_scale": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 7.405174673014159e-06,
+          "maximum_relative_difference": 2.0299611498636115e-06,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "conservation.divergence_j": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 1.3703738919113413e-10,
+          "maximum_relative_difference": 0.15286615188530017,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "conservation.divergence_j_scale": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 4.0136000593192875,
+          "maximum_relative_difference": 7.80431655198555e-06,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "conservation.checked_cells": {
+          "shape": [],
+          "dtype": "int64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "exact equality",
+          "case_count": 6
+        },
+        "normalisation.policy": {
+          "shape": [],
+          "dtype": "int8",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "exact equality",
+          "case_count": 6
+        },
+        "normalisation.amplitude": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 7.740287738755569e-06,
+          "maximum_relative_difference": 1.6331177287715452e-06,
+          "passes": false,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "normalisation.rescaled": {
+          "shape": [],
+          "dtype": "bool",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "exact equality",
+          "case_count": 6
+        },
+        "rotation.closure": {
+          "shape": [],
+          "dtype": "int8",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "exact equality",
+          "case_count": 6
+        },
+        "rotation.reference_radius": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "rotation.mean_particle_mass": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "rotation.axis_mach_number": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "rotation.minimum_centrifugal_factor": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "rotation.maximum_centrifugal_factor": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "continuation.common_sol.domain": {
+          "shape": [],
+          "dtype": "int8",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "exact equality",
+          "case_count": 6
+        },
+        "continuation.common_sol.form": {
+          "shape": [],
+          "dtype": "int8",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "exact equality",
+          "case_count": 6
+        },
+        "continuation.common_sol.continuity": {
+          "shape": [],
+          "dtype": "int8",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "exact equality",
+          "case_count": 6
+        },
+        "continuation.common_sol.support": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "continuation.common_sol.decay_width": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "continuation.common_sol.separatrix_pressure_gradient": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "continuation.common_sol.separatrix_diamagnetic_gradient": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "continuation.common_sol.truncated_fraction": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "continuation.private_flux.domain": {
+          "shape": [],
+          "dtype": "int8",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "exact equality",
+          "case_count": 6
+        },
+        "continuation.private_flux.form": {
+          "shape": [],
+          "dtype": "int8",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "exact equality",
+          "case_count": 6
+        },
+        "continuation.private_flux.continuity": {
+          "shape": [],
+          "dtype": "int8",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "exact equality",
+          "case_count": 6
+        },
+        "continuation.private_flux.support": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "continuation.private_flux.decay_width": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "continuation.private_flux.separatrix_pressure_gradient": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "continuation.private_flux.separatrix_diamagnetic_gradient": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "continuation.private_flux.truncated_fraction": {
+          "shape": [],
+          "dtype": "float64",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "atol=1e-10 plus rtol=1e-10",
+          "case_count": 6
+        },
+        "finite.flux": {
+          "shape": [],
+          "dtype": "bool",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "exact equality",
+          "case_count": 6
+        },
+        "finite.cell_current": {
+          "shape": [],
+          "dtype": "bool",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "exact equality",
+          "case_count": 6
+        },
+        "finite.moments": {
+          "shape": [],
+          "dtype": "bool",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "exact equality",
+          "case_count": 6
+        },
+        "finite.conservation": {
+          "shape": [],
+          "dtype": "bool",
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "passes": true,
+          "criterion": "exact equality",
+          "case_count": 6
+        }
+      }
+    }
+  },
+  "uncomparable_quantities": [
+    {
+      "stage": "moment_seed",
+      "quantities": [
+        "boundary support selection",
+        "predicted current and centroid",
+        "seed radius",
+        "supported cell count"
+      ],
+      "reason": "ForwardProfile.moment_seed deliberately performs polygon, limiter, and constrained-disc construction through host NumPy geometry. Those values are common immutable inputs to both paths and have no traced production counterpart. The JAX production portion beginning at CellCurrentMoments is compared in full; the host-only fields are named here rather than omitted."
+    }
+  ],
+  "overall_passes": false
+}

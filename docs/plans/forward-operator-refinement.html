@@ -19,8 +19,8 @@
 <meta name="plan-effort-hours" content="6.0">
 <meta name="plan-depends-on" content="scoring-criteria-derivation">
 <meta name="plan-informs" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
-<meta name="plan-version" content="11">
-<meta name="plan-impl" content="0.14">
+<meta name="plan-version" content="13">
+<meta name="plan-impl" content="0.22">
 </head>
 <body>
 <main class="plan-doc">
@@ -139,6 +139,28 @@
   bump or defect node is named from those receipts rather than assumed.</p>
 </section>
 
+<section id="s6">
+  <h2 id="s6h">§6 — The passive-closure defect</h2>
+  <p>Convicted by the §5 mesh ladder: with passive source currents zeroed against retained,
+  the solved flux sup-norm reproduction moves ~0.61&ndash;0.64 points at every resolution
+  from 566 to 2,214 cells, against a 0.15-point ceiling and a documented 0.098-point direct
+  passive drive &mdash; a six-fold amplification the mesh cannot explain. The reference
+  assertion (<code>tests/test_equilibrium_forward_reference.py:2182</code>) is correct and
+  stays; the closure path is wrong somewhere between the passive-current contribution and
+  the solved reproduction. First the trace: on one fixed dense carrier, follow the
+  passive-closure route and name the mechanism that amplifies a ~0.1-point drive into a
+  ~0.64-point move &mdash; candidate classes worth separating are the passive contribution
+  entering the source normalisation (amplifying through the span), a closure re-solve that
+  moves the seed or basin rather than only the source, and a support/mask difference
+  between the two arms. Repair follows in its own node once the mechanism is named, scoped
+  at file level against the concurrent solver-defect lane in <code>nova/equilibrium/</code>
+  (three named repairs run there; the shared stability survey of §5 is the pre-read).</p>
+  <p><strong>Done when (trace):</strong> the mechanism is named with the exact code path
+  quoted (file:line), demonstrated by a receipt that reproduces the amplification on one
+  fixed carrier and shows the arithmetic decomposition of the 0.64-point move into its
+  named contribution; the repair node's file-level scope is stated in the same receipt.</p>
+</section>
+
 <section id="s3">
   <h2 id="s3h">§3 — The adjudication: does order move what mesh moved</h2>
   <p>State whether raising operator order moves the convergence floors that mesh refinement
@@ -166,6 +188,9 @@
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s5" data-id="c-20260823T1355" data-who="reckon-ship" data-when="2026-08-23 13:55">
     <div class="r-comment-body">resolution-default-inventory landed — commit <code>33b237ef</code>, merged <code>70f6008d</code>; gate PASSED (28 rows, 28 cited owner definitions verified, naming checks 0 findings). Five direct alignment sites: Frame.dplasma −500→−2100 (demonstrated, 2,210 cells); SUITE_CELLS −500→−2100 pending the mesh-response adjudication; REGISTERED_GRID_STRIDE 2→1 restoring the solve rect lattice 33×33/1,089 → native 65×65/4,225 nodes (currently 0.493× the plasma-mesh scale; cost 3.88× target rows, ~15.1× dense lattice-lattice block); pseudo_wall points_per_side 33→65 (132→260 wall nodes, 1.97× wall-target blocks); Frame.dshell needs a machine-owned physical spacing, never a copied count. Extrapolate.ngrid=5000 / PulseDesign.nlevelset=6000 / Waveform.nlevelset=2500 already same-order but duplicate policy — consolidation follow-on. Generic Biot ngrid/nlevelset/nwall/nhex defaults safely None; dcoil/dshell are per-object controls. Alignment bundle applies only after the passive-closure mesh-response verdict. Artifact: docs/figures/forward-operator-refinement/resolution-default-inventory.md.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260823T1615" data-who="reckon-ship" data-when="2026-08-23 16:15">
+    <div class="r-comment-body">passive-closure-mesh-response landed — commit <code>adb4cb9e</code>, merged <code>ae4332cd</code>; gate PASSED (6 solves, all terminal residuals ≤ 2.52e-10, receipt + figure sha-pinned). VERDICT: MESH_INDEPENDENT_CLOSURE_DEFECT. Ladder at explicit −500/−1500/−2100 (realised 566/1587/2214 cells): closure moves 0.6098 / 0.6392 / 0.6378 points — the reference-scale response is 1.046× the coarse response and 4.25× the 0.15 ceiling, farther from the 0.098-point documented direct response, all carriers cold-built on GPU (233.8/436.5/556.6 s). The coarse carrier is exonerated; the SUITE_CELLS half of the alignment bundle will NOT fix the failing reference assertion — the defect routes to §6. Receipt: docs/figures/forward-operator-refinement/passive-closure-mesh-response.json.</div>
 </div>
 </section>
 </main>

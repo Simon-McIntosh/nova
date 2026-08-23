@@ -45,6 +45,30 @@
   <code>docs/figures/forward-operator-refinement/resolution-default-inventory.md</code>.</p>
 </section>
 
+<section id="mesh-response">
+  <h2 id="mesh-response-h">§5 — The passive-closure mesh ladder: closure path convicted</h2>
+  <p><strong>passive-closure-mesh-response</strong> landed 2026-08-23 — commit
+  <code>adb4cb9e</code>, merged <code>ae4332cd</code>, gate PASSED. Verdict:
+  <strong>MESH_INDEPENDENT_CLOSURE_DEFECT</strong>.</p>
+  <table>
+    <thead><tr><th>Requested / realised cells</th><th>Closure move (points)</th>
+      <th>Cold carrier build (GPU)</th></tr></thead>
+    <tbody>
+      <tr><td>−500 / 566</td><td>0.6098462721</td><td>233.8 s</td></tr>
+      <tr><td>−1500 / 1587</td><td>0.6392158735</td><td>436.5 s</td></tr>
+      <tr><td>−2100 / 2214</td><td>0.6377635705</td><td>556.6 s</td></tr>
+    </tbody>
+  </table>
+  <p>Six solves, all terminal residuals ≤ 2.52e-10. The reference-scale response is 1.046×
+  the coarse response and 4.25× the 0.15-point ceiling, farther still from the documented
+  0.098-point direct passive drive — so the coarse carrier is exonerated, the failing
+  reference assertion stays, and the defect routes to the plan's closure-defect section.
+  Consequence for the alignment bundle: the SUITE_CELLS bump remains a consistency measure
+  only; it does not repair the failing test. Receipt:
+  <code>docs/figures/forward-operator-refinement/passive-closure-mesh-response.json</code>
+  (sha256 <code>659141e0…</code>), ladder figure alongside.</p>
+</section>
+
 </main>
 </body>
 </html>

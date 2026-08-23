@@ -1,10 +1,10 @@
 {
   "schema": "nova-order-vs-mesh-adjudication/1.0",
   "status": "banked",
-  "completed_utc": "2026-08-23T17:58:59.179950+00:00",
+  "completed_utc": "2026-08-23T18:02:26.496723+00:00",
   "source_identity": {
-    "commit": "6fc916374de21c4192d467cf0931d7efbb529bba",
-    "tree": "f4bb9fa868aa98302302c4b371ad5cde5104475a",
+    "commit": "8fb14f738a04e49d5855554889f950958e10bf8c",
+    "tree": "0658d95def18045ee864357b41a36037b74a51fc",
     "backend": "gpu",
     "device": "NVIDIA L4",
     "runtime_mitigations": {
@@ -114,8 +114,8 @@
     }
   ],
   "raised_order_lambda_check": {
-    "source_commit": "6fc916374de21c4192d467cf0931d7efbb529bba",
-    "source_tree": "f4bb9fa868aa98302302c4b371ad5cde5104475a",
+    "source_commit": "8fb14f738a04e49d5855554889f950958e10bf8c",
+    "source_tree": "0658d95def18045ee864357b41a36037b74a51fc",
     "banked_leading_eigenvalue": 0.9874290999339198,
     "centroid_control": {
       "label": "centroid_cell_current",
@@ -146,7 +146,7 @@
         {
           "pass": 1,
           "terminal_relative_fixed_point_residual": 1.3931414905413574e-16,
-          "elapsed_seconds": 8.534786009928212,
+          "elapsed_seconds": 8.808813730021939,
           "solver": {
             "route": "newton_krylov",
             "warmup": 8,
@@ -175,17 +175,17 @@
         "source_to_grid": "0bcfeb9ec14e1cf23d3021e825f6fe5ab73cc779779f804dff08ef578942c869",
         "source_to_wall": "b31a10b306ca74310d7f73a15b5b317a5888a65b7c61785b5038387d729b3879"
       },
-      "elapsed_seconds": 11.004578195977956
+      "elapsed_seconds": 11.27468234510161
     },
     "raised_order_control": {
       "label": "cubic_cross_cell_average",
       "leading_eigenvalue": {
-        "real": 0.9739924893160211,
+        "real": 0.9739924893160241,
         "imaginary": 0.0,
-        "magnitude": 0.9739924893160211
+        "magnitude": 0.9739924893160241
       },
-      "leading_ritz_residual_l2": 5.719246342137397e-16,
-      "root_relative_map_residual": 4.9709046431983164e-08,
+      "leading_ritz_residual_l2": 4.8371349806441685e-16,
+      "root_relative_map_residual": 4.9709046182611416e-08,
       "krylov_action_qualification": "ACCEPTED",
       "physical_branch_qualified": true,
       "direct_branch_receipt": {
@@ -195,18 +195,18 @@
         "topology_branch": "limited_plasma",
         "diverted": false,
         "solved_axis_m": [
-          1.0368112107094432,
-          -0.007232120792572538
+          1.0368112107094434,
+          -0.007232120792574571
         ],
         "axis_finite": true,
-        "flux_span_wb": -0.4474343991757963,
+        "flux_span_wb": -0.4474343991757954,
         "flux_span_valid": true
       },
       "solve_passes": [
         {
           "pass": 1,
-          "terminal_relative_fixed_point_residual": 7.72688563260721e-06,
-          "elapsed_seconds": 5.321839802898467,
+          "terminal_relative_fixed_point_residual": 7.726885632607212e-06,
+          "elapsed_seconds": 5.38840255793184,
           "solver": {
             "route": "newton_krylov",
             "warmup": 8,
@@ -216,8 +216,8 @@
         },
         {
           "pass": 2,
-          "terminal_relative_fixed_point_residual": 7.4795239997546e-07,
-          "elapsed_seconds": 5.103726848959923,
+          "terminal_relative_fixed_point_residual": 7.479523999398357e-07,
+          "elapsed_seconds": 5.34378274413757,
           "solver": {
             "route": "newton_krylov",
             "warmup": 8,
@@ -227,8 +227,8 @@
         },
         {
           "pass": 3,
-          "terminal_relative_fixed_point_residual": 1.955409537347778e-07,
-          "elapsed_seconds": 5.335913314949721,
+          "terminal_relative_fixed_point_residual": 1.9554095391290033e-07,
+          "elapsed_seconds": 5.4729044700507075,
           "solver": {
             "route": "newton_krylov",
             "warmup": 8,
@@ -238,8 +238,8 @@
         },
         {
           "pass": 4,
-          "terminal_relative_fixed_point_residual": 4.970904667786299e-08,
-          "elapsed_seconds": 5.435828211018816,
+          "terminal_relative_fixed_point_residual": 4.9709046428491264e-08,
+          "elapsed_seconds": 5.329598210053518,
           "solver": {
             "route": "newton_krylov",
             "warmup": 8,
@@ -250,7 +250,7 @@
       ],
       "vertical_conditioning": {
         "definition": "n = -(R/Bz)*(dBz/dR)",
-        "decay_index": 0.5662560147784788,
+        "decay_index": 0.5662560147784781,
         "open_stability_window": [
           0.0,
           1.5
@@ -277,15 +277,15 @@
         "source_to_grid": "0bcfeb9ec14e1cf23d3021e825f6fe5ab73cc779779f804dff08ef578942c869",
         "source_to_wall": "b31a10b306ca74310d7f73a15b5b317a5888a65b7c61785b5038387d729b3879"
       },
-      "elapsed_seconds": 21.63786033797078
+      "elapsed_seconds": 21.92504901997745
     },
     "centroid_movement_from_banked": 2.1094237467877974e-15,
-    "raised_order_movement_from_banked": -0.013436610617898692,
-    "paired_raised_minus_centroid_movement": -0.013436610617900802,
-    "absolute_paired_movement": 0.013436610617900802,
+    "raised_order_movement_from_banked": -0.013436610617895695,
+    "paired_raised_minus_centroid_movement": -0.013436610617897804,
+    "absolute_paired_movement": 0.013436610617897804,
     "baseline_contraction_margin": 0.012570900066080193,
     "material_movement_threshold": 0.0012570900066080195,
-    "movement_fraction_of_contraction_margin": 1.068866234499512,
+    "movement_fraction_of_contraction_margin": 1.0688662344992734,
     "interaction_matrices_byte_identical": true,
     "verdict": "ORDER_MOVES_NEAR_MARGINAL_MODE",
     "interpretation": "The raised cell average materially moves the near-marginal pole; the intrinsic-map classification must be amended for operator order."

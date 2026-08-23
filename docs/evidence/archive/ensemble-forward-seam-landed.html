@@ -40,6 +40,31 @@
       <li><strong>Tests:</strong> 8 passed (kernels + map-extraction) in 13.90 s; ruff exits 0.</li>
     </ul>
 
+    <h2 id="s2">§2 the batched window evaluator, and a budget that is honestly slower — 2026-08-23</h2>
+    <p><strong>The window loop's batching gap is closed with member identity preserved
+    end-to-end</strong> (commits <code>5c448153</code>, <code>2f5bae34</code>, <code>87dd7358</code>,
+    <code>912fde52</code>): public <code>solve_window_batch</code> accepts
+    <code>MemberArrayBatch</code> seam-state, actuator and geometry arrays on a shared explicit
+    member axis plus <code>BatchedCouplingState</code>; each side operator is invoked once per
+    exchange for the whole identified batch; admitted members return the full
+    <code>WindowMemberReceipt</code>; an unconverged member raises a typed
+    <code>WindowBatchError</code> — never a degraded batch. Batch-of-one equals scalar
+    <code>solve_window</code> <em>bitwise</em> on the full receipt tree; three-member identity is
+    recovered by tag; 17/17 focused tests.</p>
+    <ul>
+      <li><strong>Throughput budget (tree-stamped 87dd7358, receipt sha256
+      <code>399075eb…</code>):</strong> batch-8 <strong>125.21 CPU / 134.17 H200</strong>
+      member-windows/s against scalar-loop 158.28 / 168.64 — the batch façade is
+      <strong>20.89 % / 20.44 % slower</strong> on the qualified affine full-receipt workload, and
+      the H200 gain over CPU is only 7.2 % because that workload underfills the device. Published
+      as a measured budget, not an acceleration claim; the ambix entry sizes ensembles against
+      these rows.</li>
+      <li><strong>H200 admissibility, earned the hard way:</strong> two earlier reserved-node jobs
+      were refused as evidence (stale pre-amend tree stamp; JAX resolving CPU without
+      <code>JAX_PLATFORMS=cuda,cpu</code>); the admitted run adds an exact committed-tree runtime
+      guard and CUDA provenance (job 1253203, 27 s, cuda:0, reservation gpu_0003_grpA).</li>
+    </ul>
+
     <h2 id="s4">§4 the constraint seam, fail-closed and current-normalised — 2026-08-23</h2>
     <p><strong>The deterministic consequence of a trusted pin is now a public seam</strong>
     (commits <code>d6a5fbf1</code>, <code>ba7c6ff4</code>, <code>060b2c5d</code>,

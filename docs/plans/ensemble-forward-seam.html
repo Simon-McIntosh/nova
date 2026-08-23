@@ -23,9 +23,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-23">
-<meta name="plan-impl" content="0.5">
-<meta name="plan-version" content="4">
-<meta name="plan-commits" content="072dc102,d6a5fbf1,ba7c6ff4,060b2c5d,aef15cea">
+<meta name="plan-impl" content="0.75">
+<meta name="plan-version" content="6">
+<meta name="plan-commits" content="072dc102,d6a5fbf1,ba7c6ff4,060b2c5d,aef15cea,5c448153,2f5bae34,87dd7358,912fde52">
 <meta name="plan-artifacts" content="docs/evidence/archive/ensemble-forward-seam-landed.html">
 </head>
 <body>
@@ -51,19 +51,22 @@
     promoting the physics under the existing estimators to nova's real coupled forwards. Nova
     ships the forward, the kernels, and the truth; ambix runs the filter it already owns.</p>
 
-    <h2 id="s2">§2 — The batched ensemble coupled forward, and the published throughput budget</h2>
-
-    <p>A member-preserving, batched evaluator of coupled transport–equilibrium windows: accept
-    ambix member payloads (per-slice state at the seam is ambix's <code>FluxFunctionState</code>,
-    consumed, never recreated), actuator waveforms and geometry; advance every member through the
-    coupled window; return member-tagged fields, transport state, topology class, moment and
-    conservation ledgers, and the typed convergence receipt per member — with the entry doctrine's
-    admission rule enforced by construction: an unconverged member is refused typed, never
-    silently used. The equilibrium portfolio already batches under vmap; the window loop does not;
-    this section closes that gap. <strong>The named deliverable beside the code is the throughput
-    budget:</strong> the ambix entry sets ensemble sizes "by the measured throughput budget nova
-    publishes", so this section publishes windows-per-second and members-per-window, batched, CPU
-    and H200, tree-stamped — the number that buys posterior sharpness.</p>
+    <section id="s2" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-23</span>
+        <h2>§2 — The batched ensemble coupled forward, and the published throughput budget</h2>
+      </header>
+      <p class="landed-summary">Public <code>solve_window_batch</code> advances N member payloads
+      (explicit typed member axis, <code>MemberArrayBatch</code> + <code>BatchedCouplingState</code>)
+      with per-member typed receipts and fail-closed refusal of unconverged members; batch-of-one
+      equals scalar <code>solve_window</code> <strong>bitwise</strong> on the full receipt tree.
+      Throughput budget published tree-stamped (CPU + H200, cuda:0 provenance admitted): batch-8
+      <strong>125.2 CPU / 134.2 H200 member-windows/s</strong> — currently ~21 % <em>slower</em> than
+      the scalar loop on the qualified affine workload, published as a measured budget, not an
+      acceleration claim. Full record:
+      <a href="/nova/evidence/archive/ensemble-forward-seam-landed#s2">§2 landed</a>
+      (commits <code>5c448153</code>…<code>912fde52</code>).</p>
+    </section>
 
     <section id="s3" class="section-landed">
       <header>
@@ -148,6 +151,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260823T1010-constraint-seam-landed" data-who="reckon-ship" data-when="2026-08-23T10:10:00+00:00">
     <div class="r-comment-body">constraint-seam landed — commits d6a5fbf1, ba7c6ff4, 060b2c5d, aef15cea (integrated tip aef15cea21c0…, note the worker manifest quoted a wrong full SHA aef15cea181f… — integrate rev-parse HEAD, never a manifest-quoted SHA); gate passed. Public maps with Jacobians below the 2e-8 FD gate; typed pin sets with fail-closed refusal; the mid-flight normalisation defect the worker caught itself — pins evaluated without the eliminated solve's target current would use a different normalisation — fixed in 060b2c5d and pinned by a focused regression. Baseline receipt (tree-stamped 060b2c5d/f5bdf5d7): 11 rows, MAST 1/6→1/6 pin-admissible, DIII-D 2/5→2/5, zero converged roots rejected, basin-restriction fraction 0.0 on both cohorts — the pins are consistent with the cold-start truth rather than restrictive at these baselines. QUALIFICATION carried in the receipt: isoflux correctness is FD-tested on the public synthetic map; scoring real isoflux admission waits on the ambix evidence owner banking trusted chord-pair pins (their pedestal-foot calibration owns the claim) — that trigger-gated re-score runs through this same seam when ambix supplies pins.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260823T1035-batch-landed" data-who="reckon-ship" data-when="2026-08-23T10:35:00+00:00">
+    <div class="r-comment-body">batch-window-evaluator landed — commits 5c448153, 2f5bae34, 87dd7358, 912fde52; gate passed after one orchestrator resume (the first two H200 jobs were inadmissible: a stale pre-amend tree stamp and a missing JAX_PLATFORMS=cuda,cpu; the corrected run added an exact committed-tree runtime guard and verified CUDA provenance — job 1253203, 27 s, jax_backend gpu, cuda:0). Focused gate 17/17; bitwise batch-of-one parity; typed WindowBatchError never returns a degraded batch. THE PUBLISHED NUMBER, honestly framed: batch-8 throughput 125.2107768 (CPU) / 134.1683624 (H200) member-windows/s versus scalar-loop 158.2841498 / 168.6424936 — the batch facade is 20.89 % (CPU) / 20.44 % (H200) SLOWER on the affine full-receipt workload, so batching currently buys API shape (member identity, one operator invocation per exchange, typed refusals), not speed; the H200-vs-CPU gain is also small (7.2 %) because the affine evaluator underfills the device. The ambix entry sizes ensembles against this budget as published. Receipt sha256 399075eb… under docs/figures/ensemble-forward-seam/throughput/.</div>
 </div>
 </section>
 </main>

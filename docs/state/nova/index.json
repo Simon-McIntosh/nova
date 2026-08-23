@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T23:08:45",
+  "updated": "2026-08-23T23:32:44",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -505,19 +505,9 @@
       },
       {
         "id": "S8",
-        "status": "planned",
+        "status": "done",
         "theme": "H200 production catalog",
         "items": [
-          {
-            "slug": "mast-catalog-gpu-solve",
-            "why_now": "The validated production substrate is ready for campaign-scale GPU execution and label-store release.",
-            "done_when": "H200 solve meets science, provenance and throughput gates; versioned label store and optional IMAS egress are published.",
-            "capability": {
-              "version": "1.0",
-              "class": "orchestrator",
-              "requirements": {}
-            }
-          },
           {
             "slug": "efit-forward-parity",
             "why_now": "This is the demonstration the sprint's theme actually names and the one nova owes as a forward physics model: the free-boundary Grad-Shafranov fixed point given a reference's own flux functions and conductor currents. It has never been run, and the frozen-six reconstruction gate it replaces cannot answer it because that gate fitted magnetics.",
@@ -722,6 +712,24 @@
           }
         ],
         "description": "The forward solve holds the correct branch and stalls. Topology admissibility caps the Newton step near one thirty-second, so an 89-iteration budget traverses about 2.8 step-equivalents against a need an order of magnitude larger, and extending the backtracking ladder to reach that step is a measured null. This sprint closes that frontier by advancing along the admissible set rather than retreating into it, by choosing seeds on alignment rather than proximity, and by making step conditioning work at any Krylov projection dimension rather than the one it was fitted to."
+      },
+      {
+        "id": "S15",
+        "status": "planned",
+        "theme": "Catalog throughput",
+        "items": [
+          {
+            "slug": "mast-catalog-gpu-solve",
+            "why_now": "The validated production substrate is ready for campaign-scale GPU execution and label-store release.",
+            "done_when": "H200 solve meets science, provenance and throughput gates; versioned label store and optional IMAS egress are published.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
+          }
+        ],
+        "description": "Open the campaign-scale GPU catalog once the forward solve reaches its root on the topology-preserving branch. Relocated out of the S8 slot, which scheduled it before the convergence prerequisite it is blocked on."
       }
     ],
     "active_sprint_id": "S14",
@@ -882,6 +890,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 64
+    "_version": 66
   }
 }

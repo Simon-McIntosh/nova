@@ -3,10 +3,10 @@
 The labelled flux and q95 cross the measured corpus convention boundary once,
 before any Nova kernel sees them.  Each selected diverted frame supplies its
 own deterministically extracted p-prime and FF-prime functions.  The current
-adapter combines the shipped conductor state, two fit-once ohmic relations and
-three explicit free-current priors before ``ForwardProfile`` solves the
-unmodified free-boundary problem.  There is no response fit; the only alignment
-applied when scoring flux is its physically arbitrary additive gauge.
+path completes the shipped conductor state through the fixed machine circuit,
+then ``ForwardProfile`` pins the separately shipped plasma current.  There is
+no response fit; the only alignment applied when scoring flux is its physically
+arbitrary additive gauge.
 
 The competition data do not ship a machine wall.  The rectangular enclosing
 surface used by the topology read is therefore labelled a pseudo-wall.  It is
@@ -19,10 +19,12 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import subprocess
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
+import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
@@ -42,18 +44,20 @@ from benchmarks.diiid_corpus_conventions import (
 from nova.biot.greens import hybrid_greens
 from nova.biot.polygon import polygon_greens
 from nova.equilibrium.conservation import FluxLattice
-from nova.equilibrium.conductor_current import (
-    CurrentResolution,
-    UnknownCurrentPrior,
-    solve_conductor_currents,
+from nova.equilibrium.branch_selection import (
+    BranchAdmissibility,
+    SelectionHistory,
+    SelectionPolicy,
+    select_forward_branch,
 )
 from nova.equilibrium.flux_surface_geometry import (
     FluxSurfaceGeometry,
     SurfaceGeometryError,
 )
-from nova.equilibrium.forward import ForwardProfile
+from nova.equilibrium.forward import ForwardProfile, SaddleSeedGeometry
 from nova.equilibrium.map_extraction import extract_flux_functions
 from nova.equilibrium.source import DomainProfile, ForwardSource
+from nova.equilibrium.topology import TopologyClass
 from nova.imas.diiid_description import (
     POLOIDAL_CONDUCTORS,
     dataset_machine_description,
@@ -61,7 +65,7 @@ from nova.imas.diiid_description import (
     vacuum_response,
 )
 from nova.imas.diiid_current import (
-    UNKNOWN_POLOIDAL_CONDUCTORS,
+    circuit_current_map,
     complete_profile_current_adapter,
     shipped_current_at,
 )
@@ -81,8 +85,11 @@ REGISTERED_MEDIAN_INTERIOR_R2_BAR = (
     RETAINED_CEILING_FRACTION * LABEL_REPRESENTABILITY_MEDIAN_R2
 )
 REGISTERED_FRAME_COUNT = 3
+EXECUTION_FRAME_COUNT = 5
 REGISTERED_GRID_STRIDE = 2
 REGISTERED_RESIDUAL_TOLERANCE = 1.0e-5
+GATE_RESIDUAL_TOLERANCE = 1.0e-6
+REPRESENTATIVE_CURRENT_FLOOR_A = 200_000.0
 REGISTERED_SOLVER_ROUTE = "newton_krylov"
 REGISTERED_PROFILE_EVALUATIONS = 180
 REGISTERED_ACCELERATED_NEWTON_STEPS = 24
@@ -94,6 +101,10 @@ REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION = 0.02
 PSEUDO_WALL_EXPANSIONS = (0.02, 0.05)
 TOROIDAL_FIELD_TURNS = 144
 TOROIDAL_FIELD_TURNS_SOURCE = "https://fusion.gat.com/pubs-ext/SOFT02/A24059.pdf"
+POLARITY_RECEIPT = Path(
+    "docs/figures/diiid-forward-onboarding/current-polarity/"
+    "current_polarity_audit_receipt.json"
+)
 
 _GEOMETRY_COLUMNS = (
     "coil_name",
@@ -125,6 +136,10 @@ _LABEL_COLUMNS = (
 _CURRENT_COLUMNS = ("magnetics_time",) + tuple(
     f"magnetics_{name}" for name in (*POLOIDAL_CONDUCTORS, "bcoil")
 )
+_PLASMA_CURRENT_COLUMNS = (
+    "magnetics_plasma_current",
+    "magnetics_plasma_current_times",
+)
 _COUPLING_CACHE: dict[
     tuple[str, float],
     tuple[tuple[str, ...], np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray],
@@ -138,6 +153,7 @@ class SelectedFrame:
     path: Path
     frame: int
     time_ms: float
+    target_current_a: float
 
 
 @dataclass(frozen=True)
@@ -175,6 +191,11 @@ class FrameResult:
     solver_termination: str
     residual_history: tuple[float, ...]
     metrics: MatchMetrics
+    iterations: int = 0
+    target_current_a: float = float("nan")
+    achieved_current_a: float = float("nan")
+    seed_identity_detected: bool = False
+    branch_selection: dict[str, Any] = field(default_factory=dict)
     conductor_current_receipt: dict[str, Any] = field(default_factory=dict)
 
 
@@ -201,8 +222,7 @@ def preregistration() -> dict[str, Any]:
         },
         "source": (
             "extract_flux_functions(label) p-prime and FF-prime plus the shipped "
-            "nineteen poloidal-conductor currents, two fit-once ohmic relations, "
-            "and three explicit unknown-current priors; zero label-fitted currents"
+            "nineteen poloidal-conductor currents; zero fitted coefficients"
         ),
         "solver": {
             "entry_point": "nova.equilibrium.forward.ForwardProfile",
@@ -380,16 +400,50 @@ def _eligible_frame(row: dict[str, Any]) -> int | None:
     return int(eligible[np.argmin(np.abs(times[eligible] - middle_time))])
 
 
-def select_frames(paths: list[Path], count: int) -> list[SelectedFrame]:
-    """Select the declared cohort without looking at a match metric."""
+def _target_current(row: dict[str, Any], time_ms: float) -> float:
+    """Return the shipped plasma-current input after its single unit crossing."""
 
+    target = 1000.0 * float(
+        np.interp(
+            time_ms,
+            np.asarray(row["magnetics_plasma_current_times"], dtype=float),
+            np.asarray(row["magnetics_plasma_current"], dtype=float),
+        )
+    )
+    if not np.isfinite(target) or abs(target) <= np.finfo(float).tiny:
+        raise RuntimeError(f"target plasma current {target} A is not qualified")
+    return target
+
+
+def polarity_population(path: Path = POLARITY_RECEIPT) -> set[str]:
+    """Return the complete banked coil-current polarity exclusion set."""
+
+    census = json.loads(path.read_text())["full_corpus_census"]
+    affected = {str(name) for name in census["affected_shots"]}
+    if census["shot_count"] != 7_041 or len(affected) != 603:
+        raise RuntimeError("the polarity census no longer carries 7,041/603 shots")
+    return affected
+
+
+def select_frames(
+    paths: list[Path], count: int, polarity_affected: set[str] | None = None
+) -> list[SelectedFrame]:
+    """Select score-blind, polarity-screened representative-current frames."""
+
+    excluded = polarity_population() if polarity_affected is None else polarity_affected
     selected: list[SelectedFrame] = []
     for path in paths:
-        row = _read(path, _LABEL_COLUMNS)
+        if path.name in excluded:
+            continue
+        row = _read(path, _LABEL_COLUMNS + _PLASMA_CURRENT_COLUMNS)
         frame = _eligible_frame(row)
         if frame is None:
             continue
-        selected.append(SelectedFrame(path, frame, float(row["efit_times"][frame])))
+        time_ms = float(row["efit_times"][frame])
+        target_current = _target_current(row, time_ms)
+        if abs(target_current) < REPRESENTATIVE_CURRENT_FLOOR_A:
+            continue
+        selected.append(SelectedFrame(path, frame, time_ms, target_current))
         if len(selected) == count:
             break
     if len(selected) < count:
@@ -692,58 +746,101 @@ def contour_separation(
     return 1000.0 * float(np.mean(distances)), 1000.0 * float(np.max(distances))
 
 
-def _demonstration_unknown_priors(
-    shipped_current_a: dict[str, float],
-) -> dict[str, UnknownCurrentPrior]:
-    """Declare broad non-production priors without using diagnostic scales."""
-
-    centre = float(shipped_current_a["ECOILA"])
-    width = max(abs(centre) * 0.1, 1000.0)
-    return {
-        name: UnknownCurrentPrior(
-            mean_a=centre,
-            standard_deviation_a=width,
-            lower_a=centre - 5.0 * width,
-            upper_a=centre + 5.0 * width,
-            provenance=(
-                "demonstration prior centred on same-frame shipped ECOILA; no "
-                "production prior authority or rejected diagnostic scale used"
-            ),
-        )
-        for name in UNKNOWN_POLOIDAL_CONDUCTORS
-    }
-
-
 def _solve_registered(
     profile: ForwardProfile,
-    seed: np.ndarray,
-    current_resolution: CurrentResolution | None = None,
+    label_seed: np.ndarray,
+    row: dict[str, Any],
+    frame: int,
+    current: np.ndarray,
+    target_current_a: float,
 ):
-    """Run the preregistered fixed-shape Newton-Krylov root solve."""
+    """Run the constrained cold portfolio and select only a diverted root."""
 
     options = {
-        "route": REGISTERED_SOLVER_ROUTE,
+        "newton_steps": REGISTERED_ACCELERATED_NEWTON_STEPS,
         "gmres_iterations": REGISTERED_ACCELERATED_GMRES_ITERATIONS,
         "warmup": REGISTERED_ACCELERATED_WARMUP,
         "relaxation": REGISTERED_ACCELERATED_RELAXATION,
         "step_cap": REGISTERED_ACCELERATED_STEP_CAP,
     }
-    if current_resolution is None:
-        equilibrium = profile.solve(seed, **options)
-        current_receipt = {}
-    else:
-        current_run = solve_conductor_currents(
-            profile,
-            seed,
-            current_resolution,
-            solve_options=options,
+    count = int(row["efit_lcfs_n"][frame])
+    contour = np.c_[
+        np.asarray(row["efit_lcfs_r"][frame][:count], dtype=float),
+        np.asarray(row["efit_lcfs_z"][frame][:count], dtype=float),
+    ]
+    axis = np.asarray(
+        (row["efit_r_axis"][frame], row["efit_z_axis"][frame]), dtype=float
+    )
+    saddle = contour[int(np.argmin(contour[:, 1]))]
+    cold = profile.cold_seed_portfolio(
+        target_current_a,
+        axis,
+        current=jnp.asarray(current),
+        diverted_geometry=SaddleSeedGeometry(tuple(axis), tuple(saddle)),
+    )
+    diverted_seed = np.asarray(
+        cold.branches.flux[int(TopologyClass.DIVERTED)], dtype=float
+    )
+    seed_identity = bool(np.array_equal(diverted_seed, label_seed))
+    portfolio = profile.solve_portfolio(
+        cold.branches.flux,
+        route=REGISTERED_SOLVER_ROUTE,
+        current=jnp.asarray(current),
+        target_current=target_current_a,
+        tolerance=GATE_RESIDUAL_TOLERANCE,
+        **options,
+    )
+    selection = select_forward_branch(
+        portfolio,
+        SelectionHistory(),
+        SelectionPolicy(
+            cold_start_class=TopologyClass.DIVERTED,
+            persistence_threshold=3,
+        ),
+        BranchAdmissibility(limited=False, diverted=True),
+    )
+    diverted = jax.tree.map(
+        lambda value: value[int(TopologyClass.DIVERTED)], portfolio.branches
+    )
+    branches = {}
+    for topology_class in (TopologyClass.LIMITED, TopologyClass.DIVERTED):
+        branch = jax.tree.map(
+            lambda value: value[int(topology_class)], portfolio.branches
         )
-        equilibrium = current_run.equilibrium
-        current_receipt = current_run.receipt
+        branches[topology_class.name.lower()] = {
+            "requested_class": topology_class.name.lower(),
+            "achieved_class": ("diverted" if int(branch.achieved_class) else "limited"),
+            "residual": float(branch.residual),
+            "iterations": int(branch.iterations),
+            "converged": bool(branch.converged),
+            "topology_consistent": bool(branch.topology_consistent),
+            "finite": bool(branch.equilibrium.finite.passed),
+        }
+    selection_receipt = selection.as_dict()
+    selection_receipt["residuals"] = {
+        name: float(value) for name, value in selection_receipt["residuals"].items()
+    }
+    selection_receipt["branches"] = branches
+    selection_receipt["cold_seed"] = {
+        "entry_point": "ForwardProfile.cold_seed_portfolio",
+        "centroid_rz_m": axis.tolist(),
+        "diverted_saddle_rz_m": saddle.tolist(),
+        "stored_flux_samples_used": False,
+        "label_seed_identity": seed_identity,
+    }
+    selected_diverted = selection.selected_class is TopologyClass.DIVERTED
+    termination = (
+        "public branch selector accepted the converged diverted root"
+        if selected_diverted
+        else "public branch selector found no convergence-qualified diverted root"
+    )
     return (
-        equilibrium,
-        "accelerated Newton-Krylov exhausted its preregistered fixed-shape budget",
-        current_receipt,
+        diverted.equilibrium,
+        termination,
+        selection_receipt,
+        int(diverted.iterations),
+        seed_identity,
+        bool(diverted.converged and selected_diverted),
     )
 
 
@@ -764,17 +861,55 @@ def solve_frame(
         POLOIDAL_CONDUCTORS,
         time_ms,
     )
+    circuit_current = circuit_current_map(shipped_current)
     current_adapter = complete_profile_current_adapter(
         profile,
         shipped_names=POLOIDAL_CONDUCTORS,
         shipped_current_a=shipped_current,
-        unknown_priors=_demonstration_unknown_priors(shipped_current),
+        use_circuit=True,
     )
     profile = current_adapter.profile
-    equilibrium, solver_termination, current_receipt = _solve_registered(
-        profile, seed, current_adapter.resolution
+    complete_current = np.asarray(current_adapter.resolution.current(()), dtype=float)
+    if len(complete_current) != 24 or current_adapter.resolution.unknown_names:
+        raise RuntimeError("fixed wiring did not prescribe all 24 conductor currents")
+    by_name = dict(zip(current_adapter.resolution.names, complete_current, strict=True))
+    for name, value in circuit_current.items():
+        if not np.isclose(by_name[name], value, rtol=0.0, atol=1.0e-9):
+            raise RuntimeError(f"fixed-wiring current mismatch for {name}")
+    target_current_a = _target_current(row, time_ms)
+    (
+        equilibrium,
+        solver_termination,
+        branch_selection,
+        iterations,
+        seed_identity,
+        branch_converged,
+    ) = _solve_registered(
+        profile,
+        seed,
+        row,
+        frame,
+        complete_current,
+        target_current_a,
     )
-    current_receipt["response"] = current_adapter.response_receipt
+    current_receipt = {
+        "authority": (
+            "24-conductor inference input from shipped_current_at plus "
+            "circuit_current_map fixed wiring"
+        ),
+        "response_order": list(current_adapter.resolution.names),
+        "shipped_count": len(shipped_current),
+        "complete_count": len(complete_current),
+        "unknown_parameter_count": len(current_adapter.resolution.unknown_names),
+        "shipped_current_a_turn": {
+            name: float(value) for name, value in shipped_current.items()
+        },
+        "circuit_current_a_turn": {
+            name: float(value) for name, value in circuit_current.items()
+        },
+        "response": current_adapter.response_receipt,
+        "label_recovered_prescriptions_used": False,
+    }
     radius = profile.lattice.radius
     height = profile.lattice.height
     predicted = np.asarray(equilibrium.flux[: profile.lattice.node_count]).reshape(
@@ -822,11 +957,18 @@ def solve_frame(
     residual = float(equilibrium.fixed_point.residual)
     finite = bool(equilibrium.finite.passed)
     diverted = bool(topology.diverted)
+    achieved_current_a = float(np.sum(np.asarray(equilibrium.cell_current)))
+    current_relative_error = abs(achieved_current_a - target_current_a) / abs(
+        target_current_a
+    )
     converged = bool(
         finite
         and diverted
+        and branch_converged
+        and not seed_identity
         and np.isfinite(residual)
-        and residual <= REGISTERED_RESIDUAL_TOLERANCE
+        and residual <= GATE_RESIDUAL_TOLERANCE
+        and current_relative_error <= 1.0e-10
     )
     residual_history = tuple(
         float(value)
@@ -842,16 +984,21 @@ def solve_frame(
         pseudo_wall_expansion=expansion,
         pseudo_wall_statement=wall_statement,
         fixed_point_relative_residual=residual,
-        residual_tolerance=REGISTERED_RESIDUAL_TOLERANCE,
+        residual_tolerance=GATE_RESIDUAL_TOLERANCE,
         finite=finite,
         diverted=diverted,
         converged=converged,
         convergence_criterion=(
             "finite receipt AND diverted topology AND fixed-point relative residual "
-            f"<= {REGISTERED_RESIDUAL_TOLERANCE:g}"
+            f"<= {GATE_RESIDUAL_TOLERANCE:g} AND target-current relative error "
+            "<= 1e-10 AND cold seed is not label identity"
         ),
         solver_termination=solver_termination,
         residual_history=residual_history,
+        iterations=iterations,
+        target_current_a=target_current_a,
+        achieved_current_a=achieved_current_a,
+        seed_identity_detected=seed_identity,
         metrics=MatchMetrics(
             interior_r_squared=r_squared,
             interior_fractional_rms=fractional_rms,
@@ -863,6 +1010,7 @@ def solve_frame(
             labelled_q95_nova=labelled_q95,
             signed_relative_q95_error=q95_error,
         ),
+        branch_selection=branch_selection,
         conductor_current_receipt=current_receipt,
     )
     fields = {
@@ -945,6 +1093,24 @@ def summarize(
             ],
             "all_converged": all_converged,
         },
+        "per_frame_gate": [
+            {
+                "shot": item.shot,
+                "frame": item.frame,
+                "interior_r_squared": item.metrics.interior_r_squared,
+                "iterations": item.iterations,
+                "terminal_topology": "diverted" if item.diverted else "limited",
+                "converged": item.converged,
+                "verdict": (
+                    "PASS"
+                    if item.converged
+                    and item.metrics.interior_r_squared
+                    >= REGISTERED_MEDIAN_INTERIOR_R2_BAR
+                    else "FAIL"
+                ),
+            }
+            for item in results
+        ],
         "metrics": {
             "interior_r_squared": _distribution(r_squared),
             "interior_fractional_rms": _distribution(
@@ -968,7 +1134,7 @@ def summarize(
         },
         "registered_median_interior_r_squared_bar": (REGISTERED_MEDIAN_INTERIOR_R2_BAR),
         "passed": bool(
-            len(results) >= REGISTERED_FRAME_COUNT
+            len(results) >= EXECUTION_FRAME_COUNT
             and all_converged
             and median_r_squared >= REGISTERED_MEDIAN_INTERIOR_R2_BAR
         ),
@@ -1095,26 +1261,34 @@ def cohort_figure(results: list[FrameResult], path: Path) -> None:
 
 
 def run(
-    data: Path, output: Path, frames: int = REGISTERED_FRAME_COUNT
+    data: Path, output: Path, frames: int = EXECUTION_FRAME_COUNT
 ) -> dict[str, Any]:
-    """Write the bar, execute the declared cohort, and publish its evidence."""
+    """Read the immutable bar, execute the expanded cohort, and publish evidence."""
 
-    if frames != REGISTERED_FRAME_COUNT:
+    if frames != EXECUTION_FRAME_COUNT:
         raise ValueError(
-            f"scoring requires exactly {REGISTERED_FRAME_COUNT} preregistered frames"
+            f"scoring requires exactly {EXECUTION_FRAME_COUNT} declared frames"
         )
     configure_dtypes()
-    preregistration_path = write_preregistration(output)
+    preregistration_path = output / PREREGISTRATION_NAME
     preregistration_hash = require_preregistration(preregistration_path)
+    registered = json.loads(preregistration_path.read_text())
+    registered_bar = registered["score"]["registered_median_interior_r_squared_bar"]
+    if registered_bar != REGISTERED_MEDIAN_INTERIOR_R2_BAR:
+        raise RuntimeError("the on-disk registered R-squared bar changed")
     paths = sorted(data.glob("*.parquet"))
-    selected = select_frames(paths, frames)
+    affected = polarity_population()
+    selected = select_frames(paths, frames, affected)
     results: list[FrameResult] = []
     fields: list[dict[str, np.ndarray]] = []
     baseline_expansion = REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION
     for number, selected_frame in enumerate(selected, start=1):
         row = _read(
             selected_frame.path,
-            _LABEL_COLUMNS + _GEOMETRY_COLUMNS + _CURRENT_COLUMNS,
+            _LABEL_COLUMNS
+            + _GEOMETRY_COLUMNS
+            + _CURRENT_COLUMNS
+            + _PLASMA_CURRENT_COLUMNS,
         )
         row["_source_path"] = str(selected_frame.path)
         result, frame_fields = solve_frame(
@@ -1133,23 +1307,24 @@ def run(
             ),
             flush=True,
         )
-        if not result.converged:
-            raise RuntimeError(
-                f"non-converged frame {result.shot}:{result.frame}: "
-                f"residual={result.fixed_point_relative_residual:.9e}, "
-                f"diverted={result.diverted}, finite={result.finite}, "
-                f"termination={result.solver_termination}"
-            )
         results.append(result)
         fields.append(frame_fields)
+        frame_passed = bool(
+            result.converged
+            and result.metrics.interior_r_squared >= REGISTERED_MEDIAN_INTERIOR_R2_BAR
+        )
         print(
             f"SOLVED {number}/{len(selected)} {result.shot}:{result.frame} "
             f"residual={result.fixed_point_relative_residual:.6e} "
-            f"converged={result.converged}",
+            f"converged={result.converged} "
+            f"verdict={'PASS' if frame_passed else 'FAIL'}",
             flush=True,
         )
     first = selected[0]
-    first_row = _read(first.path, _LABEL_COLUMNS + _GEOMETRY_COLUMNS + _CURRENT_COLUMNS)
+    first_row = _read(
+        first.path,
+        _LABEL_COLUMNS + _GEOMETRY_COLUMNS + _CURRENT_COLUMNS + _PLASMA_CURRENT_COLUMNS,
+    )
     first_row["_source_path"] = str(first.path)
     sensitivity = []
     for expansion in PSEUDO_WALL_EXPANSIONS:
@@ -1171,18 +1346,52 @@ def run(
                 ),
                 flush=True,
             )
-            if not expanded.converged:
-                raise RuntimeError(
-                    f"non-converged pseudo-wall sensitivity for "
-                    f"{expanded.shot}:{expanded.frame}: "
-                    f"residual={expanded.fixed_point_relative_residual:.9e}, "
-                    f"diverted={expanded.diverted}, finite={expanded.finite}, "
-                    f"termination={expanded.solver_termination}"
-                )
             sensitivity.append(expanded)
+    after_hash = require_preregistration(preregistration_path)
+    if after_hash != preregistration_hash:
+        raise RuntimeError("the preregistration changed during scoring")
+    head = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    status = subprocess.run(
+        ["git", "status", "--porcelain"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
     receipt = {
-        "preregistration": preregistration(),
+        "measurement": "circuit-driven current-pinned forward GS kill gate",
+        "tree_stamp": {
+            "git_head": head,
+            "benchmark_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            "worktree_status": status,
+        },
+        "preregistration": registered,
         "preregistration_path": str(preregistration_path),
+        "execution_authority": {
+            "source_split": "development",
+            "cohort_expansion": (
+                "five frames replace the historical three-frame minimum without "
+                "loosening the score bar"
+            ),
+            "polarity_screen": str(POLARITY_RECEIPT),
+            "polarity_population_size": len(affected),
+            "relative_residual_tolerance": GATE_RESIDUAL_TOLERANCE,
+            "requires_terminal_diverted": True,
+            "seed_identity_accepted": False,
+            "vacuum_root_accepted": False,
+            "current_path": (
+                "shipped_current_at plus circuit_current_map fixed wiring, 24 "
+                "conductors, no label-recovered current prescription"
+            ),
+            "target_current_path": "ForwardProfile target_current",
+            "basin_entry": (
+                "ForwardProfile.cold_seed_portfolio plus select_forward_branch"
+            ),
+        },
         "result": summarize(results, sensitivity, preregistration_hash),
     }
     receipt_path = output / RECEIPT_NAME
@@ -1196,11 +1405,12 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=Path, default=DEFAULT_DATA)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
-    parser.add_argument("--frames", type=int, default=REGISTERED_FRAME_COUNT)
+    parser.add_argument("--frames", type=int, default=EXECUTION_FRAME_COUNT)
     parser.add_argument("--preregister-only", action="store_true")
     arguments = parser.parse_args()
-    path = write_preregistration(arguments.output)
-    print(f"PREREGISTERED {path}", flush=True)
+    path = arguments.output / PREREGISTRATION_NAME
+    preregistration_hash = require_preregistration(path)
+    print(f"PREREGISTRATION_VERIFIED {path} {preregistration_hash}", flush=True)
     if arguments.preregister_only:
         return
     receipt = run(arguments.data, arguments.output, arguments.frames)

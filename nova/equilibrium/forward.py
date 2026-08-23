@@ -168,6 +168,29 @@ def _lattice_cells(lattice: FluxLattice) -> tuple[np.ndarray, ...]:
     return tuple(coordinate + offset for coordinate in lattice.coordinate)
 
 
+def _cubic_cell_average_stencil(
+    shape: tuple[int, int],
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return the degree-three-exact five-node rectangular cell rule.
+
+    The midpoint value carries weight ``5/6`` and its four axial neighbours
+    each carry ``1/24``.  This is the cell-average Taylor correction through
+    the discrete second derivatives, so it integrates every total-degree-three
+    polynomial exactly and has fourth-order error for a smooth density.  At
+    the outermost raster row the centre is repeated in all five slots, keeping
+    the centroid rule where a complete cross does not exist.
+    """
+    radial_count, vertical_count = shape
+    index = np.arange(radial_count * vertical_count, dtype=np.intp).reshape(shape)
+    stencil = np.repeat(index[..., None], 5, axis=2)
+    stencil[1:-1, 1:-1, 1] = index[:-2, 1:-1]
+    stencil[1:-1, 1:-1, 2] = index[2:, 1:-1]
+    stencil[1:-1, 1:-1, 3] = index[1:-1, :-2]
+    stencil[1:-1, 1:-1, 4] = index[1:-1, 2:]
+    weight = np.asarray([5.0 / 6.0, 1.0 / 24.0, 1.0 / 24.0, 1.0 / 24.0, 1.0 / 24.0])
+    return stencil.reshape(-1, 5), weight
+
+
 class FiniteCheck(NamedTuple):
     """Finiteness of every array the result publishes."""
 
@@ -369,6 +392,7 @@ class ForwardProfile:
         plasma_to_wall_z=None,
         polarity: int = 1,
         inside_material=None,
+        cubic_cell_average: bool = True,
         maxsize: int = 5,
         **kwargs,
     ) -> ForwardProfile:
@@ -385,6 +409,9 @@ class ForwardProfile:
             coordinate=lattice.coordinate,
             stencil=hex_stencil(lattice.shape),
             area=lattice.cell_area,
+        )
+        cell_average_stencil, cell_average_weight = _cubic_cell_average_stencil(
+            lattice.shape
         )
         operator = ForwardFluxOperator(
             grid=FluxTarget(
@@ -412,6 +439,8 @@ class ForwardProfile:
             source=source,
             external_current=jnp.asarray(external_current),
             area=jnp.asarray(lattice.cell_area),
+            cell_average_stencil=(cell_average_stencil if cubic_cell_average else None),
+            cell_average_weight=(cell_average_weight if cubic_cell_average else None),
             polarity=polarity,
             inside_material=inside_material,
             moment_geometry=MomentGeometry.from_cells(

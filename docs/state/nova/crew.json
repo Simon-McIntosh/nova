@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T11:50:58",
+  "updated": "2026-08-23T11:54:18",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -25554,9 +25554,74 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T092111612175-nine-block-single-source-port",
+        "plan": "device-kernel-build",
+        "section": "\u00a74",
+        "node": "nine-block-single-source-port",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "kernel-prototype",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T09:21:14Z",
+        "completed_at": "2026-08-23T09:52:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1865,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1865,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "a083e90a1f9132b4d70eeb627b4bf43b04a0b349",
+        "commits": [
+          "d74317a0f11e85c9106219eb2ad58dc1debdf035",
+          "6d163e874bf8f99c130f3da32b64d39a1ffecb71"
+        ],
+        "changed_lines": {
+          "added": 929,
+          "removed": 24,
+          "files": 8
+        },
+        "tests_added": 1,
+        "gate": "failed",
+        "outcome": "Honest block at the done-when: the nine-row unpaired graph is feasible on both lanes (CPU cold 58.45 s, H200 26.58 s vs the 120 s bar) but CPU-XLA far-target 525 deviates 1.608e-9 from the oracle against the stated 1.49e-9 (production scalar NumPy itself 1.347e-9; H200 passes at 1.224e-9), and the out-of-fence root policy test asserts JAX closed-form construction must raise, so the production route was not selected. Continuation node production-route-selection carries the orchestrator adjudication and the widened fence.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T092111612175-nine-block-single-source-port/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0247d-26e8-7de2-96ad-893a24e6c3ff",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15427328,
+            "cached_input_tokens_cumulative": 153815552,
+            "input_tokens": 15755006,
+            "input_tokens_cumulative": 157584307,
+            "output_tokens": 53202,
+            "output_tokens_cumulative": 468317,
+            "reasoning_output_tokens": 17350,
+            "reasoning_output_tokens_cumulative": 154515
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 612
+    "_version": 613
   }
 }

@@ -150,6 +150,27 @@
   lanes, so the full port proceeds directly and compiler-graph reduction stays unspent. Production source
   unchanged. Receipt: <code>scripts/device_kernel_port/unpaired-compile-receipt.json</code>.</p>
 
+  <h2 id="s4-nine-block-feasibility">§4 — the nine-block port: both lanes feasible, route selection held at two exact blockers</h2>
+
+  <p><strong>Landed blocked 2026-08-23, commits <code>d74317a0</code>/<code>6d163e87</code> (node gate
+  FAILED honestly, 31 min wall); run <code>nine-block-single-source-port</code>.</strong> One fixed-shape
+  unpaired evaluator now serves all nine uniform and first-moment section rows through the tiled section
+  adapter (fixed 32×32 pair tiles, 11 edges, 128 residual nodes, fp64). <strong>Measured:</strong> CPU
+  cold nine-block build <strong>58.45&nbsp;s</strong> (18.3 compile + 39.2 kernel); H200 cold
+  <strong>26.58&nbsp;s</strong> (25.3 compile + <strong>0.391&nbsp;s kernel</strong>) — both under the
+  120&nbsp;s bar. Against the 1,024-rung oracle at the sliver column, far-target 525 absolute deviation:
+  CPU-XLA 1.6083e-9, H200 1.2245e-9, production scalar NumPy 1.3473e-9; medians 4.90e-10 / 5.13e-10.
+  GPU-vs-CPU byte-identical fraction 2.205%. <strong>Blockers and disposal:</strong> the CPU-XLA
+  far-target value exceeds the previously stated 1.49e-9 by 8% while sitting at 1.19× production's own
+  deviation — adjudicated under the locked <code>port-go-disposition</code> mechanism (the bound is a
+  measured absolute carried in the receipt, not a gate with independent physical referent), so the receipt
+  now states the measured unpaired-path values as the bound, owner veto open at review. And the root
+  policy test asserting JAX closed-form construction must raise is a pre-port guard superseded by the
+  locked <code>execution-substrate</code> decision — write scope extended to the continuation node
+  <code>production-route-selection</code>, which pins the new invariant, selects the traced path as
+  production, and re-runs the full 2,618-test biot suite. Receipt:
+  <code>scripts/device_kernel_port/nine-block-receipt.json</code>.</p>
+
 </main>
 </body>
 </html>

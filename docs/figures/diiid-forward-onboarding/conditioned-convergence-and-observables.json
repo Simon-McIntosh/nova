@@ -1,0 +1,1606 @@
+{
+  "artifact": "conditioned_convergence_and_observables",
+  "backend": {
+    "device": "NVIDIA H200 NVL",
+    "jax_version": "0.11.0",
+    "platform": "gpu",
+    "precision": "float64"
+  },
+  "completed_utc": "2026-08-23T18:23:35.501360+00:00",
+  "diiid_conditioned_convergence": {
+    "conditioning_intervention_count": 0,
+    "diiid_residual_gate_reason": "No defensible DIII-D terminal relative-residual tolerance exists; the shipped 1e-6 and registered 1e-5 readings remain untraced.",
+    "diiid_residual_gate_verdict": "DECLINED",
+    "favourable_frame": {
+      "frame": 0,
+      "rungs": [
+        {
+          "comparison_disposition": "DISPLACED_FAVOURABLY",
+          "finite_terminal_x_point": true,
+          "full_step_admission_count_of_89": 86,
+          "grid_shape": [
+            33,
+            33
+          ],
+          "krylov_conditioning_count": 0,
+          "maximum_projected_krylov_condition": null,
+          "name": "coarse_carrier",
+          "preconditioning_full_step_admission_count_of_89": 85,
+          "preconditioning_terminal_relative_residual": 0.00029254381732921216,
+          "residual_ratio_vs_preconditioning": 0.7203211860912203,
+          "signed_relative_change_vs_preconditioning": -0.2796788139087797,
+          "terminal_relative_residual": 0.0002107255094822314,
+          "terminal_topology_class": "diverted"
+        },
+        {
+          "comparison_disposition": "DISPLACED_FAVOURABLY",
+          "finite_terminal_x_point": true,
+          "full_step_admission_count_of_89": 87,
+          "grid_shape": [
+            65,
+            65
+          ],
+          "krylov_conditioning_count": 0,
+          "maximum_projected_krylov_condition": null,
+          "name": "reference_native",
+          "preconditioning_full_step_admission_count_of_89": 87,
+          "preconditioning_terminal_relative_residual": 7.930534999195602e-05,
+          "residual_ratio_vs_preconditioning": 0.9232678151579095,
+          "signed_relative_change_vs_preconditioning": -0.07673218484209055,
+          "terminal_relative_residual": 7.322007721740656e-05,
+          "terminal_topology_class": "diverted"
+        }
+      ],
+      "shot": "d3d_shot_00000c4a7b.parquet"
+    },
+    "residual_ratio_range": [
+      0.7203211860912203,
+      1.2534423451053223
+    ],
+    "conditioning_interpretation": "The DIII-D carriers use 24 GMRES iterations, outside the calibrated 12-vector damping route, and recorded zero conditioning interventions. Their residual movement is a final-tree reproducibility outcome and is not attributed to step damping.",
+    "residual_verdict": "REPRODUCIBILITY_AT_CONVERGENCE_COST",
+    "score_blind_frames": [
+      {
+        "admitted_promotion_count_of_89": 7,
+        "finite_terminal_x_point": true,
+        "frame": 179,
+        "krylov_action_qualification": "ACCEPTED",
+        "krylov_conditioning_count": 0,
+        "maximum_projected_krylov_condition": 152.40839492782428,
+        "preconditioning_admitted_promotion_count_of_89": 7,
+        "preconditioning_terminal_relative_residual": 0.08540058568223574,
+        "residual_ratio_vs_preconditioning": 1.2534423451053223,
+        "runtime_seconds": 94.90043472778052,
+        "selected_factor_by_admitted_step": [
+          0.5,
+          0.5,
+          1.0,
+          1.0,
+          0.125,
+          0.0625,
+          0.03125
+        ],
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "signed_relative_change_vs_preconditioning": 0.25344234510532226,
+        "target_current_a": 1279650.1007080078,
+        "terminal_relative_residual": 0.10704471039090957,
+        "terminal_topology_class": "diverted",
+        "time_ms": 3740.0
+      },
+      {
+        "admitted_promotion_count_of_89": 6,
+        "finite_terminal_x_point": true,
+        "frame": 44,
+        "krylov_action_qualification": "ACCEPTED",
+        "krylov_conditioning_count": 0,
+        "maximum_projected_krylov_condition": 55.3498286026485,
+        "preconditioning_admitted_promotion_count_of_89": 7,
+        "preconditioning_terminal_relative_residual": 0.10977362967104506,
+        "residual_ratio_vs_preconditioning": 0.9180239517991199,
+        "runtime_seconds": 46.53489825036377,
+        "selected_factor_by_admitted_step": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.5,
+          0.0625
+        ],
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "signed_relative_change_vs_preconditioning": -0.08197604820088011,
+        "target_current_a": 1182769.0064013004,
+        "terminal_relative_residual": 0.10077482131394591,
+        "terminal_topology_class": "diverted",
+        "time_ms": 1080.0
+      },
+      {
+        "admitted_promotion_count_of_89": 10,
+        "finite_terminal_x_point": true,
+        "frame": 144,
+        "krylov_action_qualification": "ACCEPTED",
+        "krylov_conditioning_count": 0,
+        "maximum_projected_krylov_condition": 64.33674315437909,
+        "preconditioning_admitted_promotion_count_of_89": 10,
+        "preconditioning_terminal_relative_residual": 0.16437432961354986,
+        "residual_ratio_vs_preconditioning": 0.9453603618481285,
+        "runtime_seconds": 46.00046000164002,
+        "selected_factor_by_admitted_step": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.25,
+          0.03125,
+          0.03125,
+          0.25,
+          0.125,
+          0.0625
+        ],
+        "shot": "d3d_shot_001554e054.parquet",
+        "signed_relative_change_vs_preconditioning": -0.05463963815187145,
+        "target_current_a": 988842.2265648842,
+        "terminal_relative_residual": 0.15539297572200905,
+        "terminal_topology_class": "diverted",
+        "time_ms": 3240.0
+      },
+      {
+        "admitted_promotion_count_of_89": 4,
+        "finite_terminal_x_point": true,
+        "frame": 146,
+        "krylov_action_qualification": "ACCEPTED",
+        "krylov_conditioning_count": 0,
+        "maximum_projected_krylov_condition": 30.547509405517857,
+        "preconditioning_admitted_promotion_count_of_89": 5,
+        "preconditioning_terminal_relative_residual": 0.09035889068687517,
+        "residual_ratio_vs_preconditioning": 0.9624855398155694,
+        "runtime_seconds": 46.75258746743202,
+        "selected_factor_by_admitted_step": [
+          1.0,
+          1.0,
+          0.5,
+          0.5
+        ],
+        "shot": "d3d_shot_002495e835.parquet",
+        "signed_relative_change_vs_preconditioning": -0.03751446018443061,
+        "target_current_a": 1623563.1957054138,
+        "terminal_relative_residual": 0.08696912567989307,
+        "terminal_topology_class": "diverted",
+        "time_ms": 3180.0
+      },
+      {
+        "admitted_promotion_count_of_89": 9,
+        "finite_terminal_x_point": true,
+        "frame": 137,
+        "krylov_action_qualification": "ACCEPTED",
+        "krylov_conditioning_count": 0,
+        "maximum_projected_krylov_condition": 195.1773689323604,
+        "preconditioning_admitted_promotion_count_of_89": 9,
+        "preconditioning_terminal_relative_residual": 0.12204384813135218,
+        "residual_ratio_vs_preconditioning": 1.007071715583248,
+        "runtime_seconds": 45.89373577106744,
+        "selected_factor_by_admitted_step": [
+          0.5,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.5,
+          0.0625,
+          0.03125
+        ],
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "signed_relative_change_vs_preconditioning": 0.007071715583248039,
+        "target_current_a": 1629095.3674316406,
+        "terminal_relative_residual": 0.12290690751402222,
+        "terminal_topology_class": "diverted",
+        "time_ms": 3000.0
+      }
+    ],
+    "solver_contract": {
+      "factor_ladder": [
+        1.0,
+        0.5,
+        0.25,
+        0.125,
+        0.0625,
+        0.03125
+      ],
+      "gmres_iterations": 24,
+      "newton_steps": 89,
+      "preconditioning_source": "docs/figures/diiid-forward-onboarding/factor-ladder-extension.json",
+      "preconditioning_source_sha256": "fae346f7e5a2300729f147d362e4e5c979ff9f60a03133e0fd0ba3dba0452ba2",
+      "route": "topology-qualified nonmonotone Newton-Krylov"
+    }
+  },
+  "runtime_seconds": 671.9273813348264,
+  "source_identity": {
+    "commit_sha": "4630608f4d89582120daaafe4859d3c060c62ece",
+    "driver_sha256": "d98a7683179a60db1b0cf8a07fe5e3a36493d807e7c6f30a2a633c83f692d5ec",
+    "tree_sha": "dd2e17938c4c97f30afe747da734f92f9fa2c621"
+  },
+  "status": "complete",
+  "terminal_observable_parity": {
+    "already_measured_one_map_parity": {
+      "bound_over_measurement": 18.796654463151338,
+      "maximum_relative_difference": 1.8900776655575514e-16,
+      "measurement_source": "docs/figures/mast-catalog-gpu-solve/parity-divergence-attribution.json",
+      "measurement_source_sha256": "2c2c856375b53f0d4bfdce81133dbcef39b314acad6c3a59f2b1b52849cca7f7",
+      "passes": true,
+      "registered_sixteen_epsilon_bound": 3.552713678800501e-15,
+      "registered_sixteen_epsilon_bound_decimal": "3.5527136788005009e-15"
+    },
+    "cohort": {
+      "case_count": 6,
+      "cases": [
+        {
+          "compiled_krylov_conditioning_count": 8,
+          "compiled_maximum_projected_krylov_condition": 3674.0697420262945,
+          "eager_krylov_conditioning_count": 8,
+          "eager_maximum_projected_krylov_condition": 3674.0697420015535,
+          "failed_observables": [
+            "moments.volume"
+          ],
+          "registered_observable_fail_count": 1,
+          "registered_observable_pass_count": 68,
+          "shot": 21978,
+          "slice_index": 35,
+          "time_s": 0.1899999976158142
+        },
+        {
+          "compiled_krylov_conditioning_count": 5,
+          "compiled_maximum_projected_krylov_condition": 582.477305839942,
+          "eager_krylov_conditioning_count": 5,
+          "eager_maximum_projected_krylov_condition": 582.477305837558,
+          "failed_observables": [],
+          "registered_observable_fail_count": 0,
+          "registered_observable_pass_count": 69,
+          "shot": 21983,
+          "slice_index": 35,
+          "time_s": 0.1899999976158142
+        },
+        {
+          "compiled_krylov_conditioning_count": 10,
+          "compiled_maximum_projected_krylov_condition": 3405.7560052767417,
+          "eager_krylov_conditioning_count": 10,
+          "eager_maximum_projected_krylov_condition": 3405.756005236425,
+          "failed_observables": [
+            "conservation.divergence_j"
+          ],
+          "registered_observable_fail_count": 1,
+          "registered_observable_pass_count": 68,
+          "shot": 21985,
+          "slice_index": 51,
+          "time_s": 0.2750000059604645
+        },
+        {
+          "compiled_krylov_conditioning_count": 11,
+          "compiled_maximum_projected_krylov_condition": 775.050028057038,
+          "eager_krylov_conditioning_count": 11,
+          "eager_maximum_projected_krylov_condition": 775.0500280536446,
+          "failed_observables": [],
+          "registered_observable_fail_count": 0,
+          "registered_observable_pass_count": 69,
+          "shot": 21986,
+          "slice_index": 46,
+          "time_s": 0.25
+        },
+        {
+          "compiled_krylov_conditioning_count": 3,
+          "compiled_maximum_projected_krylov_condition": 173.0086554185054,
+          "eager_krylov_conditioning_count": 3,
+          "eager_maximum_projected_krylov_condition": 173.0086554183447,
+          "failed_observables": [
+            "conservation.divergence_j",
+            "moments.major_radius"
+          ],
+          "registered_observable_fail_count": 2,
+          "registered_observable_pass_count": 67,
+          "shot": 21989,
+          "slice_index": 55,
+          "time_s": 0.29499998688697815
+        },
+        {
+          "compiled_krylov_conditioning_count": 10,
+          "compiled_maximum_projected_krylov_condition": 1061.0388333600094,
+          "eager_krylov_conditioning_count": 10,
+          "eager_maximum_projected_krylov_condition": 1061.0388334904387,
+          "failed_observables": [
+            "conservation.divergence_j",
+            "moments.major_radius",
+            "moments.volume"
+          ],
+          "registered_observable_fail_count": 3,
+          "registered_observable_pass_count": 66,
+          "shot": 22086,
+          "slice_index": 43,
+          "time_s": 0.22999998927116394
+        }
+      ],
+      "identity": "six frozen MAST references",
+      "seed_alignment": "exact shared seed per eager/compiled case"
+    },
+    "counts": {
+      "case_observable_evaluation_fail_count": 7,
+      "case_observable_evaluation_pass_count": 407,
+      "observable_fail_count": 3,
+      "observable_pass_count": 66
+    },
+    "iterated_quantity_clusters": {
+      "conservation_and_source_normalisation": {
+        "expected_observable_count": 8,
+        "failing_observable_count": 1,
+        "largest_bound_utilisation": {
+          "observable": "conservation.divergence_j",
+          "ratio": 3.9250023147714024
+        },
+        "largest_violation_observable": "conservation.divergence_j",
+        "largest_violation_ratio": 2.9250023147714024,
+        "passing_observable_count": 7,
+        "registered_observable_count": 8
+      },
+      "integrated_moments_and_current_ledger": {
+        "expected_observable_count": 9,
+        "failing_observable_count": 0,
+        "largest_bound_utilisation": {
+          "observable": "ledger.private_flux",
+          "ratio": 7.203462344688312e-06
+        },
+        "largest_violation_observable": null,
+        "largest_violation_ratio": 0.0,
+        "passing_observable_count": 9,
+        "registered_observable_count": 9
+      },
+      "state_domain_topology_and_solver_trace": {
+        "expected_observable_count": 14,
+        "failing_observable_count": 0,
+        "largest_bound_utilisation": {
+          "observable": "domains.psi_norm",
+          "ratio": 6.381747063970337e-05
+        },
+        "largest_violation_observable": null,
+        "largest_violation_ratio": 0.0,
+        "passing_observable_count": 14,
+        "registered_observable_count": 14
+      }
+    },
+    "per_observable": [
+      {
+        "absolute_bound": 0.09702486617788963,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 2.754188699327642e-08,
+        "maximum_bound_ratio": 2.5082092043791124e-06,
+        "maximum_relative_difference": 2.306182258640044e-12,
+        "observable": "cell_current",
+        "pass_count": 6,
+        "relative_bound": 9.194537100867235e-07,
+        "shape": [
+          1089
+        ]
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "int64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "conservation.checked_cells",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "absolute_bound": 9.83631031098047e-16,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 21989,
+          "slice_index": 55
+        },
+        "maximum_absolute_difference": 1.3877787807814457e-16,
+        "maximum_bound_ratio": 0.7417854970823063,
+        "maximum_relative_difference": 0.625,
+        "observable": "conservation.divergence_b",
+        "pass_count": 6,
+        "relative_bound": 0.8425616333270692,
+        "shape": []
+      },
+      {
+        "absolute_bound": 7.405174673014159e-06,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 9.490186414495838e-13,
+        "maximum_bound_ratio": 3.0664133459492256e-07,
+        "maximum_relative_difference": 6.224699961700215e-13,
+        "observable": "conservation.divergence_b_scale",
+        "pass_count": 6,
+        "relative_bound": 2.0299611498636115e-06,
+        "shape": []
+      },
+      {
+        "absolute_bound": 1.3703738919113413e-10,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 3,
+        "failing_cases": [
+          {
+            "shot": 21985,
+            "slice_index": 51
+          },
+          {
+            "shot": 21989,
+            "slice_index": 55
+          },
+          {
+            "shot": 22086,
+            "slice_index": 43
+          }
+        ],
+        "largest_difference_case": {
+          "shot": 21985,
+          "slice_index": 51
+        },
+        "maximum_absolute_difference": 1.1641532182693481e-10,
+        "maximum_bound_ratio": 3.9250023147714024,
+        "maximum_relative_difference": 0.6,
+        "observable": "conservation.divergence_j",
+        "pass_count": 3,
+        "relative_bound": 0.15286615188530017,
+        "shape": []
+      },
+      {
+        "absolute_bound": 4.0136000593192875,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 1.9944272935390472e-06,
+        "maximum_bound_ratio": 4.969172972050696e-07,
+        "maximum_relative_difference": 1.382725605877231e-12,
+        "observable": "conservation.divergence_j_scale",
+        "pass_count": 6,
+        "relative_bound": 7.80431655198555e-06,
+        "shape": []
+      },
+      {
+        "absolute_bound": 12.864408950321376,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 3.192690201103687e-08,
+        "maximum_bound_ratio": 3.860769834890443e-08,
+        "maximum_relative_difference": 1.809224831563218e-13,
+        "observable": "conservation.force_residual",
+        "pass_count": 6,
+        "relative_bound": 4.686176355847326e-06,
+        "shape": []
+      },
+      {
+        "absolute_bound": 0.4882344454526901,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 3.1213858164846897e-09,
+        "maximum_bound_ratio": 5.7954280601052323e-08,
+        "maximum_relative_difference": 9.143888287335896e-14,
+        "observable": "conservation.force_scale",
+        "pass_count": 6,
+        "relative_bound": 1.5777761698537698e-06,
+        "shape": []
+      },
+      {
+        "absolute_bound": 3.3233770521334804e-05,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 1.5001333508735115e-12,
+        "maximum_bound_ratio": 1.4354434716985403e-07,
+        "maximum_relative_difference": 4.5133485592011885e-13,
+        "observable": "conservation.grad_shafranov_residual",
+        "pass_count": 6,
+        "relative_bound": 3.144218945703662e-06,
+        "shape": []
+      },
+      {
+        "absolute_bound": 4.1059904187790153e-07,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 1.951327988081175e-12,
+        "maximum_bound_ratio": 6.861317339440099e-06,
+        "maximum_relative_difference": 4.302862582629609e-13,
+        "observable": "conservation.grad_shafranov_scale",
+        "pass_count": 6,
+        "relative_bound": 6.271190166203176e-08,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "int8",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "continuation.common_sol.continuity",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "continuation.common_sol.decay_width",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "int8",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "continuation.common_sol.domain",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "int8",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "continuation.common_sol.form",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "continuation.common_sol.separatrix_diamagnetic_gradient",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "continuation.common_sol.separatrix_pressure_gradient",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "continuation.common_sol.support",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "continuation.common_sol.truncated_fraction",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "int8",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "continuation.private_flux.continuity",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "continuation.private_flux.decay_width",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "int8",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "continuation.private_flux.domain",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "int8",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "continuation.private_flux.form",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "continuation.private_flux.separatrix_diamagnetic_gradient",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "continuation.private_flux.separatrix_pressure_gradient",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "continuation.private_flux.support",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "continuation.private_flux.truncated_fraction",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "int8",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "domains.label",
+        "pass_count": 6,
+        "shape": [
+          1089
+        ]
+      },
+      {
+        "absolute_bound": 9.498624947923417e-06,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 21983,
+          "slice_index": 35
+        },
+        "maximum_absolute_difference": 6.061782187316567e-10,
+        "maximum_bound_ratio": 6.381747063970337e-05,
+        "maximum_relative_difference": 4.988920029679233e-13,
+        "observable": "domains.psi_norm",
+        "pass_count": 6,
+        "relative_bound": 4.163342056851591e-07,
+        "shape": [
+          1089
+        ]
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "bool",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "finite.cell_current",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "bool",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "finite.conservation",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "bool",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "finite.flux",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "bool",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "finite.moments",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "int64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "fixed_point.amplification_observation",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "int32",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "fixed_point.krylov_action_qualification",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "absolute_bound": 6.230462863854314e-06,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 1.348643419163409e-13,
+        "maximum_bound_ratio": 3.6877271293824297e-07,
+        "maximum_relative_difference": 2.9229785167707125e-11,
+        "observable": "fixed_point.residual",
+        "pass_count": 6,
+        "relative_bound": 7.92623318976481e-05,
+        "shape": []
+      },
+      {
+        "absolute_bound": 1.1646900802908533e-05,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 6.021294574054536e-13,
+        "maximum_bound_ratio": 1.8120632382943583e-07,
+        "maximum_relative_difference": 3.788822144654759e-13,
+        "observable": "fixed_point.state",
+        "pass_count": 6,
+        "relative_bound": 2.090888477060583e-06,
+        "shape": [
+          1126
+        ]
+      },
+      {
+        "absolute_bound": 6.230462863854314e-06,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 2.4033552925573076e-13,
+        "maximum_bound_ratio": 3.5412540142681673e-07,
+        "maximum_relative_difference": 7.989229426901509e-13,
+        "observable": "fixed_point.trace",
+        "pass_count": 6,
+        "relative_bound": 2.256045286418844e-06,
+        "shape": [
+          168
+        ]
+      },
+      {
+        "absolute_bound": 1.1646900802908533e-05,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 6.021294574054536e-13,
+        "maximum_bound_ratio": 1.8120632382943583e-07,
+        "maximum_relative_difference": 3.788822144654759e-13,
+        "observable": "flux",
+        "pass_count": 6,
+        "relative_bound": 2.090888477060583e-06,
+        "shape": [
+          1126
+        ]
+      },
+      {
+        "absolute_bound": 0.026452624995727092,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 9.642099030315876e-08,
+        "maximum_bound_ratio": 4.656762527824853e-06,
+        "maximum_relative_difference": 6.663654546385772e-13,
+        "observable": "ledger.common_sol",
+        "pass_count": 6,
+        "relative_bound": 1.4309629289811192e-07,
+        "shape": []
+      },
+      {
+        "absolute_bound": 0.04917502362513915,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 2.603628672659397e-07,
+        "maximum_bound_ratio": 5.294616007725466e-06,
+        "maximum_relative_difference": 6.915313997875412e-13,
+        "observable": "ledger.core",
+        "pass_count": 6,
+        "relative_bound": 1.3935866734820125e-07,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "ledger.excluded_material",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "absolute_bound": 0.022722398571204394,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 1.6367994248867035e-07,
+        "maximum_bound_ratio": 7.203462344688312e-06,
+        "maximum_relative_difference": 3.974394829357246e-13,
+        "observable": "ledger.private_flux",
+        "pass_count": 6,
+        "relative_bound": 6.751870019640946e-08,
+        "shape": []
+      },
+      {
+        "absolute_bound": 3.4924596548080444e-10,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 3.4924596548080444e-10,
+        "maximum_bound_ratio": 1.0,
+        "maximum_relative_difference": 3.7431180209721993e-16,
+        "observable": "ledger.total",
+        "pass_count": 6,
+        "relative_bound": 4.2919758999027704e-16,
+        "shape": []
+      },
+      {
+        "absolute_bound": 3.962934280288266e-06,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 2.425837308805967e-14,
+        "maximum_bound_ratio": 2.692723457010669e-07,
+        "maximum_relative_difference": 4.737674012138666e-13,
+        "observable": "moments.flux_span",
+        "pass_count": 6,
+        "relative_bound": 1.7594357860269103e-06,
+        "shape": []
+      },
+      {
+        "absolute_bound": 1.1057762009603067e-05,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 1.241229341530925e-12,
+        "maximum_bound_ratio": 3.1356745396061074e-07,
+        "maximum_relative_difference": 1.1557529578164081e-12,
+        "observable": "moments.internal_inductance",
+        "pass_count": 6,
+        "relative_bound": 3.6858192494734793e-06,
+        "shape": []
+      },
+      {
+        "absolute_bound": 1.1102230246251565e-16,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 2,
+        "failing_cases": [
+          {
+            "shot": 21989,
+            "slice_index": 55
+          },
+          {
+            "shot": 22086,
+            "slice_index": 43
+          }
+        ],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 2.220446049250313e-16,
+        "maximum_bound_ratio": 2.7365469397805193,
+        "maximum_relative_difference": 3.2132739511434644e-16,
+        "observable": "moments.major_radius",
+        "pass_count": 4,
+        "relative_bound": 1.1742075037825516e-16,
+        "shape": []
+      },
+      {
+        "absolute_bound": 0.04917502362513915,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 2.603628672659397e-07,
+        "maximum_bound_ratio": 5.294616007725466e-06,
+        "maximum_relative_difference": 6.915313997875412e-13,
+        "observable": "moments.plasma_current",
+        "pass_count": 6,
+        "relative_bound": 1.3935866734820125e-07,
+        "shape": []
+      },
+      {
+        "absolute_bound": 0.7109836938907392,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 6.272760089132134e-14,
+        "maximum_bound_ratio": 2.1601154909434731e-07,
+        "maximum_relative_difference": 3.500811560270546e-13,
+        "observable": "moments.poloidal_beta",
+        "pass_count": 6,
+        "relative_bound": 1.6206594392513233e-06,
+        "shape": []
+      },
+      {
+        "absolute_bound": 1.1057762009603067e-05,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 1.8859913630819847e-14,
+        "maximum_bound_ratio": 6.160304213877147e-08,
+        "maximum_relative_difference": 2.2705767854120974e-13,
+        "observable": "moments.poloidal_field_integral",
+        "pass_count": 6,
+        "relative_bound": 3.6858192494734793e-06,
+        "shape": []
+      },
+      {
+        "absolute_bound": 0.1777459234726848,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 9.553332347422838e-09,
+        "maximum_bound_ratio": 1.0690463952474095e-06,
+        "maximum_relative_difference": 1.7325601314553152e-12,
+        "observable": "moments.pressure_integral",
+        "pass_count": 6,
+        "relative_bound": 1.6206594392513233e-06,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "float64",
+        "fail_count": 2,
+        "failing_cases": [
+          {
+            "shot": 21978,
+            "slice_index": 35
+          },
+          {
+            "shot": 22086,
+            "slice_index": 43
+          }
+        ],
+        "largest_difference_case": {
+          "shot": 21978,
+          "slice_index": 35
+        },
+        "maximum_absolute_difference": 4.440892098500626e-16,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 2.1506225800691684e-16,
+        "observable": "moments.volume",
+        "pass_count": 4,
+        "shape": []
+      },
+      {
+        "absolute_bound": 7.740287738755569e-06,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 2.191580250610059e-13,
+        "maximum_bound_ratio": 8.663881697742325e-08,
+        "maximum_relative_difference": 1.4149138800562304e-13,
+        "observable": "normalisation.amplitude",
+        "pass_count": 6,
+        "relative_bound": 1.6331177287715452e-06,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "int8",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "normalisation.policy",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "bool",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "normalisation.rescaled",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "rotation.axis_mach_number",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "int8",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "rotation.closure",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "rotation.maximum_centrifugal_factor",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "rotation.mean_particle_mass",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "rotation.minimum_centrifugal_factor",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "rotation.reference_radius",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "absolute_bound": 1.2958139949947878e-07,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 5.859063234581185e-13,
+        "maximum_bound_ratio": 6.390774277538458e-06,
+        "maximum_relative_difference": 8.445865168974345e-13,
+        "observable": "topology.axis",
+        "pass_count": 6,
+        "relative_bound": 1.3215715032619567e-07,
+        "shape": [
+          2
+        ]
+      },
+      {
+        "absolute_bound": 6.25219581751324e-06,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 21983,
+          "slice_index": 35
+        },
+        "maximum_absolute_difference": 3.813616089587413e-14,
+        "maximum_bound_ratio": 4.4123664213796176e-08,
+        "maximum_relative_difference": 5.019955913915441e-13,
+        "observable": "topology.axis_flux",
+        "pass_count": 6,
+        "relative_bound": 1.1377015040255536e-05,
+        "shape": []
+      },
+      {
+        "absolute_bound": 1.2211194944100612e-07,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 1.3711254354120683e-13,
+        "maximum_bound_ratio": 1.1228429663834635e-06,
+        "maximum_relative_difference": 8.020065665666749e-14,
+        "observable": "topology.boundary",
+        "pass_count": 6,
+        "relative_bound": 1.149070623799812e-07,
+        "shape": [
+          2
+        ]
+      },
+      {
+        "absolute_bound": 2.2892615372249736e-06,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 21983,
+          "slice_index": 35
+        },
+        "maximum_absolute_difference": 3.8719027983802334e-14,
+        "maximum_bound_ratio": 3.651910392364215e-07,
+        "maximum_relative_difference": 1.7005870301956103e-12,
+        "observable": "topology.boundary_flux",
+        "pass_count": 6,
+        "relative_bound": 4.656705251452418e-06,
+        "shape": []
+      },
+      {
+        "criterion_kind": "exact_equality",
+        "dtype": "bool",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 0.0,
+        "maximum_bound_ratio": 0.0,
+        "maximum_relative_difference": 0.0,
+        "observable": "topology.diverted",
+        "pass_count": 6,
+        "shape": []
+      },
+      {
+        "absolute_bound": 1.2211194944100612e-07,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 2.19824158875781e-14,
+        "maximum_bound_ratio": 1.8001854845662008e-07,
+        "maximum_relative_difference": 1.2444733390791106e-14,
+        "observable": "topology.wall_point",
+        "pass_count": 6,
+        "relative_bound": 1.149070623799812e-07,
+        "shape": [
+          2
+        ]
+      },
+      {
+        "absolute_bound": 2.2892615372249736e-06,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 4.620262505916628e-14,
+        "maximum_bound_ratio": 6.13596686624613e-07,
+        "maximum_relative_difference": 2.8573389128786393e-12,
+        "observable": "topology.wall_point_flux",
+        "pass_count": 6,
+        "relative_bound": 4.656705251452418e-06,
+        "shape": []
+      },
+      {
+        "absolute_bound": 8.111818221578915e-07,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "maximum_absolute_difference": 1.3711254354120683e-13,
+        "maximum_bound_ratio": 1.6902812636563093e-07,
+        "maximum_relative_difference": 8.020065665666749e-14,
+        "observable": "topology.x_point",
+        "pass_count": 6,
+        "relative_bound": 5.013061851856076e-07,
+        "shape": [
+          2
+        ]
+      },
+      {
+        "absolute_bound": 4.4432069171151944e-07,
+        "criterion_kind": "banked_dual_envelope",
+        "dtype": "float64",
+        "fail_count": 0,
+        "failing_cases": [],
+        "largest_difference_case": {
+          "shot": 21983,
+          "slice_index": 35
+        },
+        "maximum_absolute_difference": 3.8719027983802334e-14,
+        "maximum_bound_ratio": 2.3974911649606393e-07,
+        "maximum_relative_difference": 1.7005870301956103e-12,
+        "observable": "topology.x_point_flux",
+        "pass_count": 6,
+        "relative_bound": 7.093194148323502e-06,
+        "shape": []
+      }
+    ],
+    "registration": {
+      "calibration_limit": "These are frozen empirical envelopes for subsequent aligned-seed evaluations, not physics tolerances and not an independent verdict on the calibration cohort.",
+      "criterion_source": "docs/figures/forward-operator-refinement/criterion-family.json",
+      "criterion_source_sha256": "076f83134de45a6a87369c9e7f7177ec8ac5dd290a19f72a0dcb96aa94ffac80",
+      "dual_envelope_count": 34,
+      "exact_equality_count": 35,
+      "observable_count": 69
+    },
+    "unregistered_terminal_diagnostics": [
+      "fixed_point.krylov_conditioning_count",
+      "fixed_point.maximum_projected_krylov_condition"
+    ]
+  },
+  "verdict": "REPRODUCIBILITY_AT_CONVERGENCE_COST"
+}

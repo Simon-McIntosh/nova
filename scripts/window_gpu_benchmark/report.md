@@ -1,214 +1,39 @@
-# Same-tree gentle-window contraction
+# Current-tree H200 coupled-window measurement
 
-## Outcome
+Tree: `143250540524dabcdd4eb0515a9e8de982498f8f`. SLURM job: `1253190`.
 
-The CPU and H200 runs used the identical product tree at
-`08f371e139437820d0ca729de384903475ac87d8` and the identical committed gentle
-configuration: window `0.0025 s`, auxiliary-source multiplier `0.5`, iteration
-cap `10`, convergence tolerance `0.005`, and damping `0.5`. The runs were
-strictly serialized, CPU first.
+One job measured the identical gentle window on the CPU and one H200. The first run on each backend supplies the typed receipt and total window wall. Three deterministic repetitions supply nine warm iteration-pair samples by omitting each repetition's first pair.
 
-**Both backends exhausted cap 10.** CPU returned `WindowConvergenceError` after
-10 iterations with measured contraction `0.64062864104278661` and maximum
-residual `0.027837318712361499`. H200 returned the same typed exhaustion after
-10 iterations with contraction `0.64062864560956367` and maximum residual
-`0.027837318751897697`. The same-tree contraction gap is
-`4.5667770676161012e-09` (relative gap `7.1285871018543689e-09`), and the final
-residual gap is `3.9536197232736825e-11`. The backend trajectories are therefore
-the same for the cap question: the iteration-10 residual is still 5.567 times
-the declared tolerance on both.
+## Declared window
 
-| backend | typed outcome | iterations | contraction | maximum residual | residual / tolerance |
-|---|---|---:|---:|---:|---:|
-| CPU | `WindowConvergenceError` | 10 | `0.64062864104278661` | `0.027837318712361499` | `5.5674637424723` |
-| H200 | `WindowConvergenceError` | 10 | `0.64062864560956367` | `0.027837318751897697` | `5.5674637503795` |
+- Length: `0.0025 s`
+- Auxiliary-source multiplier: `0.5`
+- Ordinary iteration cap: `10`; hard ceiling: `20`
+- Convergence tolerance: `0.005`; contraction threshold: `0.8`
+- Initial damping: `1.0`; damping floor: `0.125`
+- Platforms: `cuda,cpu`; temporary directory: `/tmp`
 
-This is a post-band, same-revision comparison. The earlier H200 diagnostic's
-`cpu_baseline` column referred to the pre-band CPU receipt; it is not used in
-the comparison above.
+## Direct same-tree result
 
-## Per-iteration residual trace
+| backend | device | iterations | first window wall (s) | warm equilibrium + FSA median (s) | warm TORAX median (s) | warm pair median (s), n=9 | gating exit norm | all-field exit norm | flux closure relative | current closure relative |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| cpu | cpu:0 | 4 | 80.045707 | 14.191111 | 0.038787 | 14.230813 | 0.00129137499 | 0.0325971191 | 0 | 2.08833542e-16 |
+| gpu | cuda:0 | 4 | 65.634592 | 11.455618 | 0.167608 | 11.623376 | 0.00129137498 | 0.0325971191 | 0 | 2.08833542e-16 |
 
-The trace below is the maximum exchanged-field residual at each iteration. The
-companion TSV carries these values as separate backend rows.
+The measured warm iteration-pair speedup is `1.224327x`.
 
-| iteration | CPU | H200 | H200 − CPU |
-|---:|---:|---:|---:|
-| 1 | `1.7437508268752859` | `1.7437508267699973` | `-1.0528866667414150e-10` |
-| 2 | `0.91786089149618` | `0.91786089146460281` | `-3.1577185310993627e-11` |
-| 3 | `0.56534643086755976` | `0.56534643078722402` | `-8.0335738061876327e-11` |
-| 4 | `0.36610522239768434` | `0.36610522239943527` | `1.7509327321363344e-12` |
-| 5 | `0.24067272606521295` | `0.24067272598052197` | `-8.4690976454027123e-11` |
-| 6 | `0.15833945163103733` | `0.1583394518032242` | `1.7218687586861847e-10` |
-| 7 | `0.10364417448533883` | `0.10364417458088616` | `9.5547333933687639e-11` |
-| 8 | `0.067359458975216988` | `0.067359458937496688` | `-3.7720299106425159e-11` |
-| 9 | `0.04345312858171492` | `0.043453128333670203` | `-2.4804471671080464e-10` |
-| 10 | `0.027837318712361499` | `0.027837318751897697` | `3.9536197232736825e-11` |
+The prior cross-tree wall projection is retired by these direct, tree-identical measurements. Every TSV row carries the full tree SHA.
 
-The trace contracts monotonically on both backends, but it does not reach
-`0.005` within the declared ten exchanges. No extra iteration was attempted.
+## Receipt comparison
 
-## Sweep timings
+CPU contraction: `0.23619506586175637`; H200: `0.23619506414001976`.
+CPU gating/all-field exit: `0.0012913749879029162` / `0.03259711908303891`.
+H200 gating/all-field exit: `0.0012913749800045624` / `0.032597119133942108`.
+CPU flux closure absolute/relative: `0` / `0`.
+H200 flux closure absolute/relative: `0` / `0`.
+CPU current closure absolute/relative: `1.1641532182693481e-10` / `2.0883354249038394e-16`.
+H200 current closure absolute/relative: `1.1641532182693481e-10` / `2.0883354249038429e-16`.
 
-The first exchange includes compilation and initialization work and is shown
-separately. Exchanges 2–10 are the warm measurements required for the backend
-comparison.
+## Solver and placement checks
 
-| iteration | CPU transport (s) | CPU equilibrium + FSA (s) | CPU combined (s) | H200 transport (s) | H200 equilibrium + FSA (s) | H200 combined (s) |
-|---:|---:|---:|---:|---:|---:|---:|
-| 1, first | `6.1526582690421492` | `21.091670485911891` | `27.24432875495404` | `8.8806349746882915` | `14.517610331997275` | `23.398245306685567` |
-| 2, warm | `0.066379386000335217` | `16.613455896964297` | `16.679835282964632` | `0.12869583163410425` | `2.8992416020482779` | `3.0279374336823821` |
-| 3, warm | `0.058593232883140445` | `16.336691282922402` | `16.395284515805542` | `0.133500668220222` | `2.8378217192366719` | `2.9713223874568939` |
-| 4, warm | `0.049338741926476359` | `16.148263353854418` | `16.197602095780894` | `0.1383110024034977` | `2.884596417658031` | `3.0229074200615287` |
-| 5, warm | `0.04941782308742404` | `16.047595913987607` | `16.097013737075031` | `0.13964456971734762` | `2.9028181172907352` | `3.0424626870080829` |
-| 6, warm | `0.046675649005919695` | `15.796611705096439` | `15.843287354102358` | `0.14067873265594244` | `2.8945591514930129` | `3.0352378841489553` |
-| 7, warm | `0.055848311865702271` | `15.713433308061212` | `15.769281619926915` | `0.1324942372739315` | `2.8758839014917612` | `3.0083781387656927` |
-| 8, warm | `0.049676530063152313` | `15.652617630083114` | `15.702294160146266` | `0.13453178852796555` | `2.8514566570520401` | `2.9859884455800056` |
-| 9, warm | `0.055980568053200841` | `15.824666362954304` | `15.880646931007504` | `0.13288355059921741` | `2.8553649671375751` | `2.9882485177367926` |
-| 10, warm | `0.049355150898918509` | `15.658103142865002` | `15.707458293763921` | `0.13153958506882191` | `3.066060789860785` | `3.1976003749296069` |
-
-Across the nine warm exchanges, the combined-sweep median is
-`15.880646931007504 s` on CPU and `3.0229074200615287 s` on H200, a `5.2534×`
-H200 speedup. The equilibrium-plus-FSA median is `15.824666362954304 s` on CPU
-and `2.884596417658031 s` on H200, a `5.4859×` speedup. Warm transport alone is
-small in the wall budget and is slower on H200 here: `0.133500668220222 s`
-median versus `0.049676530063152313 s` on CPU. The instrumented side timings
-sum to `171.5170327455271 s` on CPU and `50.678328596055508 s` on H200; the H200
-driver's full window wall time is `142.68372930213809 s` because it additionally
-serializes placement and failure diagnostics. The CPU run did not wrap the
-whole window in a comparable outer timer, so no cross-backend full-wall ratio
-is claimed.
-
-## Ledger closures
-
-Both failure receipts retain the latest transport ledger. The flux-consumption
-ledger is bit-identical across backends: boundary `0.0031403700691894354 Wb` =
-resistive `0.00043151827341825211 Wb` + internal
-`0.0027088517957711833 Wb`, with zero absolute and relative closure error.
-
-| backend | flux closure absolute / relative | current continuity absolute / relative |
-|---|---:|---:|
-| CPU | `0 Wb` / `0` | `1.1641532182693481e-10 A` / `2.0883354249038394e-16` |
-| H200 | `0 Wb` / `0` | `0 A` / `0` |
-
-The CPU current difference is one floating-point-scale decrement between the
-requested `557455.09288717515 A` and achieved `557455.09288717504 A`; it is a
-closed ledger, not a physical backend separation.
-
-## Owner decision exposed by the measurement
-
-The post-band trajectory requires more than cap 10 on both backends, and the
-same-tree numbers do not support backend-specific cap policy. The owner decision
-is therefore exactly among these three choices; this benchmark does not select
-one:
-
-1. Raise the demonstration cap above 10, accepting more exchanges for a
-   contraction near `0.64062864`.
-2. Make the cap contraction-aware, using the measured contraction and residual
-   trajectory to allocate the bounded iteration budget.
-3. Keep cap 10 and accept the typed `WindowConvergenceError` as correct
-   fail-closed behavior for this demonstration configuration.
-
-The quantitative inputs to that decision are: 10 iterations on both backends,
-contraction gap `4.5667770676161012e-09`, final residual gap
-`3.9536197232736825e-11`, and residual `0.0278373187` against tolerance `0.005`
-on each backend.
-
-## Provenance
-
-- CPU ran first on login node `98dci4-srv-1006.iter.org`, JAX CPU backend,
-  48 visible host CPUs reported by the node, Intel Xeon Gold 6442Y.
-- H200 ran second as SLURM job `1253093` on `betelgeuse` under reservation
-  `gpu_0003_grpA`, one NVIDIA H200 NVL, seven CPUs, 64 GiB requested memory,
-  `TMPDIR=/tmp`, and a 50-minute limit. The allocation completed in 4 minutes
-  33 seconds with exit code zero. The auxiliary telemetry subprocesses were
-  cancelled only at allocation teardown; the benchmark subprocess completed.
-- The H200 driver confirmed float64 throughout its solve arrays. No precision
-  rung, convergence knob, model choice, or product file changed between lanes.
-- CPU used candidate 1 from `scripts/window_demonstration/run_window.py`
-  directly. H200 used `scripts/window_gpu_benchmark/run_gpu_window.py`, which
-  imports the same candidate and `_run_regime` implementation. The batch
-  launcher is `scripts/window_gpu_benchmark/bench.sbatch`.
-- Full raw CPU and H200 receipts remain in the durable crew-run directory as
-  `cpu-results.tsv`, `gpu-results.tsv`, and `gpu-report.md`; the companion
-  `results.tsv` preserves the earlier sensitivity rows and appends the paired
-  same-tree record.
-
----
-
-# Retained CPU--H200 single-sweep sensitivity isolation
-
-SLURM job `1253092` replayed one host-serialized iteration-1 input (`sha256:fee1c18196eec3e018404480d4083cc3bcfad2222629a0d49c3a5f30e90b1d57`) through one equilibrium sweep and exact dense-lattice extraction on CPU and NVIDIA H200 in float64.
-
-## Solved flux maps first
-
-| sample | map | bitwise | max absolute | max relative | max ulp scale | location |
-|---:|---|---|---:|---:|---:|---|
-| 0 | `equilibrium_flux` | `False` | `9.681144774731365e-14` | `5.7455539967499685e-14` | `436` | `(342,)` |
-| 0 | `evaluated_flux` | `False` | `1.0658141036401503e-13` | `6.4400483171195618e-14` | `480` | `(34, 25)` |
-| 0 | `fixed_point_residual` | `False` | `3.1142913629523239e-15` | `0.176136363636371` | `986958328883026` | `()` |
-| 0 | `axis_flux` | `False` | `1.7763568394002505e-15` | `8.5275178828318296e-16` | `4` | `()` |
-| 0 | `boundary_flux` | `False` | `6.6613381477509392e-16` | `4.3400453755346216e-16` | `3` | `()` |
-| 0 | `axis_radius` | `False` | `6.6613381477509392e-16` | `6.5826377494067725e-16` | `3` | `()` |
-| 0 | `axis_height` | `False` | `2.5270204765531767e-14` | `2.3273902500647198e-10` | `1864612` | `()` |
-| 0 | `core_cells` | `True` | `0` | `0` | `0` | `()` |
-| 1 | `equilibrium_flux` | `False` | `4.9071857688431919e-14` | `2.879587110614374e-14` | `221` | `(307,)` |
-| 1 | `evaluated_flux` | `False` | `4.9737991503207013e-14` | `2.9353647706078582e-14` | `224` | `(33, 25)` |
-| 1 | `fixed_point_residual` | `False` | `4.9303806576313238e-30` | `4.9281246421977366e-15` | `25` | `()` |
-| 1 | `axis_flux` | `False` | `1.7763568394002505e-15` | `8.4665978709275379e-16` | `4` | `()` |
-| 1 | `boundary_flux` | `False` | `2.2204460492503131e-16` | `1.4369534672959723e-16` | `1` | `()` |
-| 1 | `axis_radius` | `False` | `2.2204460492503131e-16` | `2.2014069332034902e-16` | `1` | `()` |
-| 1 | `axis_height` | `False` | `1.3130216857358545e-14` | `1.584992583243289e-10` | `968839` | `()` |
-| 1 | `core_cells` | `True` | `0` | `0` | `0` | `()` |
-
-The first compared layer already differs in the solved equilibrium flux at sample 0: maximum absolute difference `9.681144774731365e-14` (`436` local ulp) at coefficient index `342`. Exact dense-lattice evaluation raises the maximum only to `1.0658141036401503e-13` (`480` local ulp) at map cell `(34,25)`; this is float64 code-generation noise, not the historical residual shift.
-
-## First discrete decision
-
-The first discrete difference is `extremum_selection` / `z_upper` at level `0.20874999999999999`, flattened cell `1416` (`row=29`, `column=24`) on both backends: CPU selected sample slot `39`, H200 selected adjacent slot `38`.
-
-This is a code-generation-scale tie between adjacent samples of the same cell. It changes a reported geometric extremum, not the toroidal-flux integral, so it does not explain the historical boundary-coordinate residual gap. If bitwise shape-selection repeatability is required, the repair is an order-independent tie rule; widening the window tolerance is rejected.
-
-## Downstream toroidal-flux amplification
-
-| sample | CPU Phi_b | H200 Phi_b | absolute difference | relative difference |
-|---:|---:|---:|---:|---:|
-| 0 | `0.75453222110088702` | `0.75453222110088314` | `3.8857805861880479e-15` | `5.149920013380698e-15` |
-| 1 | `0.7735177443586172` | `0.77351774435860654` | `1.0658141036401503e-14` | `1.3778793200457197e-14` |
-
-| sample | Phi path layer | bitwise | max absolute | max relative | location |
-|---:|---|---|---:|---:|---|
-| 0 | `volume_derivative` | `False` | `4.3520742565306136e-14` | `6.3493223124319502e-14` | `(0,)` |
-| 0 | `inverse_radius_squared` | `False` | `1.3322676295501878e-15` | `1.2463466168039417e-15` | `(13,)` |
-| 0 | `field_function_surface` | `False` | `8.8817841970012523e-16` | `1.7678817598956161e-16` | `(2,)` |
-| 0 | `phi_integrand` | `False` | `3.3750779948604759e-14` | `6.2727590816313119e-14` | `(0,)` |
-| 0 | `phi_integrand_edge` | `False` | `9.3258734068513149e-15` | `7.5034131335210921e-15` | `()` |
-| 0 | `phi_boundary` | `False` | `3.8857805861880479e-15` | `5.149920013380698e-15` | `()` |
-| 1 | `volume_derivative` | `False` | `5.3512749786932545e-14` | `7.6699414160660657e-14` | `(0,)` |
-| 1 | `inverse_radius_squared` | `False` | `6.6613381477509392e-16` | `6.6071368625398145e-16` | `(5,)` |
-| 1 | `field_function_surface` | `True` | `0` | `0` | `(0,)` |
-| 1 | `phi_integrand` | `False` | `4.2077452633293433e-14` | `7.6272481506018136e-14` | `(0,)` |
-| 1 | `phi_integrand_edge` | `False` | `2.886579864025407e-15` | `2.280898416151738e-15` | `()` |
-| 1 | `phi_boundary` | `False` | `1.0658141036401503e-14` | `1.3778793200457197e-14` | `()` |
-
-The first non-bitwise Phi-path quantity is `volume_derivative`, differing by at most `4.3520742565306136e-14`. Successive surface weights and integrand values remain at float64 code-generation noise scale through Phi_b (`3.8857805861880479e-15` at sample 0 and `1.0658141036401503e-14` at sample 1); there is no three-parts-in-ten-thousand amplification.
-
-The machine-readable TSV carries every per-level topology population, band count, membership flip, clip-vertex flip, extremum selection, surface integrand comparison and the cell/level payload needed to trace the first changed decision into Phi_b.
-
-## Residual provenance resolves the apparent 3.43e-4 gap
-
-The quantity previously called `geometry.phi_boundary` was the iteration-one relative waveform residual, not raw Phi_b. Reconstructing that residual from the same serialized coordinate input gives:
-
-| comparison | left | right | absolute gap |
-|---|---:|---:|---:|
-| same-tree CPU vs H200 | `0.024544392673843753` | `0.024544392673827374` | `1.6379259060173013e-14` |
-| pre-band CPU receipt vs current CPU | `0.024887102508608275` | `0.024544392673843753` | `0.00034270983476452245` |
-
-The historical comparison joined a CPU receipt produced before boundary-band sparsification with an H200 receipt produced after commit `32942ac3861af0b95dd19cf279e4b3ab211fa705`. Its full reported CPU–H200 gap (`0.00034270983476212061`) is reproduced by that cross-revision CPU comparison to within `2.4018e-15`. On one current tree, CPU and H200 agree at float64 noise scale.
-
-Therefore no backend-dependent discrete decision moves the boundary coordinate by 3.43e-4. The confounding algorithmic change packs only level-bracketing cells for clipping and separately accumulates fully included cells, changing floating-point accumulation order while preserving the mathematical integral. The first actual same-code discrete flip is the harmless extrema tie above; it is not on the Phi_b integration path.
-
-## Runtime and window-policy context
-
-CPU sweep plus extraction: `44.476793549023569` s; H200: `67.010981366038322` s.
-The landed contraction evidence remains pre-band CPU `0.5371039633417938` versus current-tree H200 `0.6406286426029119` at cap `10`, tolerance `0.005` and damping `0.5`. Because those values also cross the extraction revision, whether the cap should become contraction-aware remains a design question requiring a same-tree window comparison; this probe does not change the cap or tolerance.
+The equilibrium leg routes through `ForwardProfile.solve_portfolio` at `/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/47247cc9-be75-4e83-a22e-ed27792dda52/h200-window-measurement/nova/equilibrium/forward.py:1123`. The run inspected `1903` CPU and `1903` H200 solve/state array observations and failed closed if any JAX array occupied the wrong backend.

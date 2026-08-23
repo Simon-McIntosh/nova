@@ -8,7 +8,7 @@
 #SBATCH --gpus=h200:1
 #SBATCH --mem=64G
 #SBATCH --time=00:50:00
-#SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T101928995343-same-tree-window-contraction/gpu-window-%j.log
+#SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T070706146528-h200-window-measurement/gpu-window-%j.log
 
 set -euo pipefail
 trap 'code=$?; echo "EXIT_MARKER=${code}"' EXIT

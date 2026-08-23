@@ -1,0 +1,87 @@
+{
+  "baseline": {
+    "banked_failure_gib_per_target": 12.2,
+    "composition": "flux-antiderivative differentiation",
+    "max_rss_kib": 12235772,
+    "memory_domain": "host peak RSS",
+    "outcome": "terminated before producing the one-target derivative",
+    "scheduler_job_id": "1249084"
+  },
+  "compiled_attempt": {
+    "device_peak_bytes": null,
+    "elapsed_seconds": 1226.0,
+    "elapsed_seconds_per_target": 38.3125,
+    "host_peak_bytes": 17598099456,
+    "host_peak_gib": 16.389507293701172,
+    "host_peak_gib_per_target": 0.5121721029281616,
+    "outcome": "TIMEOUT before a derivative completed",
+    "scheduler_job_id": "1253223"
+  },
+  "configuration": {
+    "backend": "gpu",
+    "device_kind": "NVIDIA H200 NVL",
+    "dtype": "float64",
+    "execution_mode": "eager",
+    "gradient_parameters": [
+      "rigid_source_radial_shift",
+      "rigid_source_vertical_shift"
+    ],
+    "kernel": "exact finite-section uniform-flux row",
+    "mapping": "jacfwd",
+    "ported_function": "nova.biot.polygonanalytic.packed_analytic_greens",
+    "preallocate": false,
+    "source_edge_count": 5,
+    "target_count": 32,
+    "targets_batched": true
+  },
+  "environment": {
+    "hostname": "98dci4-gpu-0003.iter.org",
+    "jax_version": "0.11.0",
+    "platform": "Linux-6.12.0-124.11.1.el10_1.x86_64-x86_64-with-glibc2.39"
+  },
+  "measurement": {
+    "cold_jacfwd_seconds": 46.79149139113724,
+    "cold_jacfwd_seconds_per_target": 1.4622341059730388,
+    "compile_seconds": 0.0,
+    "device_allocator_before": {
+      "bytes_in_use": 256,
+      "bytes_limit": 112585605120,
+      "peak_bytes_in_use": 512
+    },
+    "device_allocator_peak_bytes": 65930496,
+    "device_allocator_peak_gib": 0.06140255928039551,
+    "device_allocator_peak_gib_per_target": 0.0019188299775123596,
+    "device_memory_ratio_to_banked_failure_per_target": 0.0001572811456977344,
+    "first_execution_seconds": 46.79149139113724,
+    "host_peak_after_compile_bytes": 688922624,
+    "host_peak_before_compile_bytes": 688922624,
+    "host_peak_bytes": 1180213248,
+    "host_peak_gib": 1.0991592407226562,
+    "host_peak_gib_per_target": 0.03434872627258301,
+    "host_peak_ratio_to_banked_failure_per_target": 0.0028154693666051648,
+    "jacobian_shape": [
+      32,
+      2
+    ],
+    "warm_jacfwd_seconds": 38.17038715723902,
+    "warm_jacfwd_seconds_per_target": 1.1928245986637194
+  },
+  "primal_check": {
+    "all_finite": true,
+    "max_absolute_difference_from_numpy_namespace": 2.6893296075324036e-20,
+    "max_relative_difference_from_numpy_namespace": 3.5601320259175994e-14
+  },
+  "scope": {
+    "adoption_decision": "coil-geometry-inversion",
+    "commitment": "measure-only"
+  },
+  "source": {
+    "commit": "60ccbf9d29905e93c1e24911b2a113da7833dff2",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s-20260823-device-kernel/jacfwd-feasibility-probe"
+  },
+  "verdict": {
+    "classification": "compiled-jacfwd-hold",
+    "mechanism": "forward mode propagates two geometry tangents through one batched plain-kernel trace; eager execution measures its device footprint, but the compiled form exceeded twenty minutes and 16 GiB host RSS before producing a derivative, so compilation remains the blocker",
+    "qualification": "this is one exact finite-section flux row and two rigid-shift parameters; extension and adoption are owned by coil-geometry-inversion"
+  }
+}

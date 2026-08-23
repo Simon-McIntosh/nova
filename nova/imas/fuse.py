@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from nova.imas.database import Ids
+from nova.imas.dataset import Ids
 from nova.imas.machine import Machine
 
 

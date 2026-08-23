@@ -45,6 +45,7 @@ import jax.numpy as jnp
 from nova.jax.config import Precision, resolve_precision
 
 __all__ = [
+    "AmplificationObservation",
     "FixedPointResult",
     "KinkAwareResult",
     "KrylovActionQualification",
@@ -53,6 +54,14 @@ __all__ = [
     "newton_krylov",
     "picard",
 ]
+
+
+class AmplificationObservation(IntEnum):
+    """Advisory shape of the increments along a qualified solve trajectory."""
+
+    NOT_APPLICABLE = 0
+    CONTRACTING = 1
+    SUSTAINED_GROWTH = 2
 
 
 class KrylovActionQualification(IntEnum):
@@ -76,6 +85,10 @@ class FixedPointResult(NamedTuple):
     ``krylov_action_qualification`` names the first refused linear-action
     condition, reports ``ACCEPTED`` when every Newton action passed, and is
     ``NOT_APPLICABLE`` for the non-Krylov schemes.
+    ``amplification_observation`` independently reports whether two consecutive
+    increment ratios exceeded one before a later increment contracted.  It is
+    advisory: it is derived after promotion and never participates in step
+    qualification or candidate admission.
     """
 
     state: jax.Array
@@ -84,6 +97,7 @@ class FixedPointResult(NamedTuple):
     krylov_action_qualification: jax.Array | int = (
         KrylovActionQualification.NOT_APPLICABLE
     )
+    amplification_observation: jax.Array | int = AmplificationObservation.NOT_APPLICABLE
 
 
 class KinkAwareResult(NamedTuple):
@@ -96,6 +110,8 @@ class KinkAwareResult(NamedTuple):
     backtracking factors had finite evaluations and passed the caller's
     predicate.  ``accepted_factors`` is zero when no trial was selected.
     ``krylov_action_qualification`` retains the first refused linear action.
+    ``amplification_observation`` is the same independent advisory trajectory
+    observation carried by :class:`FixedPointResult`.
     """
 
     state: jax.Array
@@ -105,6 +121,7 @@ class KinkAwareResult(NamedTuple):
     candidate_admissibility: jax.Array
     accepted_factors: jax.Array
     krylov_action_qualification: jax.Array | int
+    amplification_observation: jax.Array | int = AmplificationObservation.NOT_APPLICABLE
 
 
 class _QualifiedKrylovStep(NamedTuple):
@@ -112,6 +129,68 @@ class _QualifiedKrylovStep(NamedTuple):
 
     step: jax.Array
     qualification: jax.Array
+
+
+class _AmplificationState(NamedTuple):
+    """Fixed-shape state for the advisory increment-growth observation."""
+
+    previous_increment: jax.Array
+    consecutive_growth_ratios: jax.Array
+    sustained_growth: jax.Array
+    contracted_after_sustained_growth: jax.Array
+
+
+def _initial_amplification_state(dtype) -> _AmplificationState:
+    """Return an empty advisory observation accumulator."""
+    return _AmplificationState(
+        previous_increment=jnp.asarray(jnp.nan, dtype=dtype),
+        consecutive_growth_ratios=jnp.asarray(0, dtype=jnp.int32),
+        sustained_growth=jnp.asarray(False),
+        contracted_after_sustained_growth=jnp.asarray(False),
+    )
+
+
+def _observe_increment(
+    observation: _AmplificationState,
+    state: jax.Array,
+    candidate: jax.Array,
+    promoted: jax.Array | bool,
+) -> _AmplificationState:
+    """Record one promoted increment without influencing its promotion."""
+    increment = jnp.max(jnp.abs(candidate - state))
+    has_previous = jnp.isfinite(observation.previous_increment)
+    grew = has_previous & (increment > observation.previous_increment)
+    contracted = has_previous & (increment < observation.previous_increment)
+    consecutive = jnp.where(grew, observation.consecutive_growth_ratios + 1, 0)
+    sustained = observation.sustained_growth | (consecutive >= 2)
+    contracted_after_growth = observation.contracted_after_sustained_growth | (
+        observation.sustained_growth & contracted
+    )
+    updated = _AmplificationState(
+        previous_increment=increment,
+        consecutive_growth_ratios=consecutive,
+        sustained_growth=sustained,
+        contracted_after_sustained_growth=contracted_after_growth,
+    )
+    return jax.tree.map(
+        lambda new, old: jnp.where(promoted, new, old), updated, observation
+    )
+
+
+def _amplification_result(
+    observation: _AmplificationState, qualification: jax.Array
+) -> jax.Array:
+    """Classify a qualified trajectory without turning the signal into a gate."""
+    observed = jnp.where(
+        observation.contracted_after_sustained_growth,
+        AmplificationObservation.SUSTAINED_GROWTH,
+        AmplificationObservation.CONTRACTING,
+    )
+    return jnp.where(
+        qualification == KrylovActionQualification.ACCEPTED,
+        observed,
+        AmplificationObservation.NOT_APPLICABLE,
+    )
 
 
 def _solver_state(initial: jax.Array, precision: Precision | str) -> jax.Array:
@@ -322,20 +401,26 @@ def newton_krylov(
     trace_length = warmup + newton_steps * stride
 
     def warm_body(index, carry):
-        state, trace = carry
+        state, trace, amplification = carry
         mapped = map_fn(state)
         trace = trace.at[index].set(_relative_residual(mapped, state))
-        return state + relaxation * (mapped - state), trace
+        candidate = state + relaxation * (mapped - state)
+        amplification = _observe_increment(amplification, state, candidate, True)
+        return candidate, trace, amplification
 
-    state, trace = jax.lax.fori_loop(
+    state, trace, amplification = jax.lax.fori_loop(
         0,
         warmup,
         warm_body,
-        (initial, jnp.full(trace_length, jnp.nan, dtype=initial.dtype)),
+        (
+            initial,
+            jnp.full(trace_length, jnp.nan, dtype=initial.dtype),
+            _initial_amplification_state(initial.dtype),
+        ),
     )
 
     def newton_body(index, carry):
-        state, residual, trace, qualification = carry
+        state, residual, trace, qualification, amplification = carry
         mapped, tangent = jax.linearize(map_fn, state)
         f = mapped - state
         base = warmup + index * stride
@@ -360,7 +445,9 @@ def newton_krylov(
         step = jnp.where(
             norm_step > cap, step * (cap / jnp.maximum(norm_step, 1.0e-300)), step
         )
-        state = jnp.where(accepted, state + step, state)
+        candidate = jnp.where(accepted, state + step, state)
+        amplification = _observe_increment(amplification, state, candidate, accepted)
+        state = candidate
         promoted = map_fn(state)
         residual = _relative_residual(promoted, state)
         trace = trace.at[base + stride - 1].set(residual)
@@ -368,9 +455,9 @@ def newton_krylov(
             qualification != KrylovActionQualification.ACCEPTED
         )
         qualification = jnp.where(prior_failed, qualification, step_qualification)
-        return state, residual, trace, qualification
+        return state, residual, trace, qualification, amplification
 
-    state, residual, trace, qualification = jax.lax.fori_loop(
+    state, residual, trace, qualification, amplification = jax.lax.fori_loop(
         0,
         newton_steps,
         newton_body,
@@ -379,9 +466,16 @@ def newton_krylov(
             trace[jnp.maximum(warmup - 1, 0)],
             trace,
             jnp.asarray(KrylovActionQualification.NOT_APPLICABLE, dtype=jnp.int32),
+            amplification,
         ),
     )
-    return FixedPointResult(state, residual, trace, qualification)
+    return FixedPointResult(
+        state,
+        residual,
+        trace,
+        qualification,
+        _amplification_result(amplification, qualification),
+    )
 
 
 def kink_aware_newton_krylov(
@@ -441,16 +535,22 @@ def kink_aware_newton_krylov(
     trace_length = warmup + newton_steps
 
     def warm_body(index, carry):
-        state, trace = carry
+        state, trace, amplification = carry
         mapped = map_fn(state)
         trace = trace.at[index].set(_relative_residual(mapped, state))
-        return state + relaxation * (mapped - state), trace
+        candidate = state + relaxation * (mapped - state)
+        amplification = _observe_increment(amplification, state, candidate, True)
+        return candidate, trace, amplification
 
-    state, trace = jax.lax.fori_loop(
+    state, trace, amplification = jax.lax.fori_loop(
         0,
         warmup,
         warm_body,
-        (initial, jnp.full(trace_length, jnp.nan, dtype=initial.dtype)),
+        (
+            initial,
+            jnp.full(trace_length, jnp.nan, dtype=initial.dtype),
+            _initial_amplification_state(initial.dtype),
+        ),
     )
 
     def krylov_step(tangent, residual_vector, nonlinear_residual):
@@ -503,6 +603,7 @@ def kink_aware_newton_krylov(
             candidate_admissibility,
             accepted_factors,
             qualification,
+            amplification,
         ) = carry
         mapped, tangent = jax.linearize(map_fn, state)
         residual_vector = mapped - state
@@ -618,6 +719,9 @@ def kink_aware_newton_krylov(
         accepted_residual = jnp.where(
             action_accepted, accepted_residual, current_residual
         )
+        amplification = _observe_increment(
+            amplification, state, proposal, action_accepted
+        )
 
         trace = trace.at[warmup + index].set(accepted_residual)
         crossings = crossings.at[index].set(crossed)
@@ -635,6 +739,7 @@ def kink_aware_newton_krylov(
             candidate_admissibility,
             accepted_factors,
             qualification,
+            amplification,
         )
 
     initial_residual = jnp.where(
@@ -649,6 +754,7 @@ def kink_aware_newton_krylov(
         candidate_admissibility,
         accepted_factors,
         qualification,
+        amplification,
     ) = jax.lax.fori_loop(
         0,
         newton_steps,
@@ -662,6 +768,7 @@ def kink_aware_newton_krylov(
             jnp.zeros((newton_steps, 4), dtype=jnp.bool_),
             jnp.zeros(newton_steps, dtype=initial.dtype),
             jnp.asarray(KrylovActionQualification.NOT_APPLICABLE, dtype=jnp.int32),
+            amplification,
         ),
     )
     return KinkAwareResult(
@@ -672,4 +779,5 @@ def kink_aware_newton_krylov(
         candidate_admissibility,
         accepted_factors,
         qualification,
+        _amplification_result(amplification, qualification),
     )

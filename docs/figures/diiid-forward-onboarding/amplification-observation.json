@@ -1,0 +1,73 @@
+{
+  "adjudication": {
+    "current_disposition": "advisory_only",
+    "physics_context": "The observed gain may be the expected response of a vertically unstable elongated equilibrium rather than a solver defect.",
+    "promotion_to_refusal": "awaits a vertical-stability control verdict"
+  },
+  "calibration": {
+    "field_gain": {
+      "direct_drive_points": 0.09723915202112363,
+      "measured_gain": 6.5998576353591725,
+      "root_response_points": 0.6417645599224641
+    },
+    "increment_growth": {
+      "late_ratio_median": 1.3372082983171414,
+      "measured_unpinned_spectral_radius": 1.2577
+    },
+    "mesh_fixtures": [
+      {
+        "flux_reproduction_move_points": 0.6098462721138205,
+        "realised_plasma_cells": 566
+      },
+      {
+        "flux_reproduction_move_points": 0.6392158734555036,
+        "realised_plasma_cells": 1587
+      },
+      {
+        "flux_reproduction_move_points": 0.6377635705064097,
+        "realised_plasma_cells": 2214
+      }
+    ],
+    "sources": [
+      "docs/figures/forward-operator-refinement/passive-closure-trace.json",
+      "docs/figures/forward-operator-refinement/passive-closure-mesh-response.json"
+    ]
+  },
+  "kind": "fixed_point_amplification_observation",
+  "observation": {
+    "field": "amplification_observation",
+    "increment_norm": "sup_norm",
+    "promotion_effect": "none",
+    "rule": "SUSTAINED_GROWTH requires two consecutive promoted-increment ratios above one followed by a later promoted-increment ratio below one.",
+    "values": {
+      "0": "NOT_APPLICABLE",
+      "1": "CONTRACTING",
+      "2": "SUSTAINED_GROWTH"
+    }
+  },
+  "status": "complete",
+  "verification": {
+    "focused_tests_passed": 7,
+    "refusal_conditions_retained": 4,
+    "regression_suites": {
+      "tests/test_equilibrium_forward_solve.py": {
+        "passed": 28,
+        "warnings": 1
+      },
+      "tests/test_fixed_point.py": {
+        "passed": 15,
+        "warnings": 0
+      },
+      "tests/test_krylov_action_qualification.py": {
+        "passed": 4,
+        "warnings": 0
+      },
+      "tests/test_topology_qualified_admission.py": {
+        "passed": 4,
+        "warnings": 0
+      }
+    },
+    "ruff_check_exit": 0,
+    "sustained_growth_trajectory_promoted": true
+  }
+}

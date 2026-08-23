@@ -28,6 +28,11 @@ import zarr
 
 from nova.equilibrium.connectivity_boundary import host_boundary_read
 from nova.equilibrium.wall_mask import inside_polygon
+from nova.imas.machine_artifact import (
+    MachineArtifactError,
+    MachineArtifactManifest,
+    resolve_machine_artifact,
+)
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
 from nova.imas.parity_tolerances import ScorecardField, registered_tolerances
 
@@ -35,6 +40,14 @@ FROZEN_SHOTS = (21978, 21983, 21985, 21986, 21989, 22086)
 RAY_COUNT = 512
 FLUX_LEVEL_COUNT = 96
 FLUX_BISECTION_COUNT = 18
+
+BOUNDARY_MACHINE_SEMANTIC_IDENTITY = (
+    "sha256:8df7a0a6c3f6162dbe0f226660bc069f37de8eb69f0f7c80bbfedc2bd4be220c"
+)
+BOUNDARY_MACHINE_PHYSICAL_DIGEST = "b55c5bb005a2cb67"
+BOUNDARY_MACHINE_REGISTRY_DIGEST = (
+    "2a26cc0a3a22e7fb8f42a53ee4c45e639290f0c5587e5f56405772b007f31bfd"
+)
 
 
 @dataclass(frozen=True)
@@ -48,6 +61,72 @@ class _BoundaryGrid:
     limiter_z: np.ndarray
     wall_r: np.ndarray
     wall_z: np.ndarray
+
+
+def resolve_semantic_machine_artifact(
+    cache_directory: Path | str,
+    semantic_identity: str = BOUNDARY_MACHINE_SEMANTIC_IDENTITY,
+    *,
+    expected_physical_digest: str = BOUNDARY_MACHINE_PHYSICAL_DIGEST,
+    expected_registry_digest: str = BOUNDARY_MACHINE_REGISTRY_DIGEST,
+) -> dict[str, Any]:
+    """Resolve and verify a machine artifact by authored semantic identity.
+
+    Manifest digests name one container materialisation and can move when the
+    same machine description is authored again.  Discovery therefore compares
+    the semantic identity first; the selected object then passes the complete
+    content-addressed resolver with the expected physical and registry pins.
+    """
+
+    cache = Path(cache_directory)
+    object_root = cache / "sha256"
+    if not object_root.is_dir():
+        raise MachineArtifactError(
+            f"machine artifact cache has no object directory: {object_root}"
+        )
+
+    for directory in sorted(object_root.iterdir()):
+        if not directory.is_dir() or directory.is_symlink():
+            continue
+        manifest_path = directory / "manifest.json"
+        if not manifest_path.is_file() or manifest_path.is_symlink():
+            continue
+        try:
+            manifest = MachineArtifactManifest.from_bytes(manifest_path.read_bytes())
+        except OSError, ValueError:
+            continue
+        if manifest.semantic_identity() != semantic_identity:
+            continue
+
+        resolved = resolve_machine_artifact(
+            cache,
+            manifest.digest,
+            expected_physical_digest=expected_physical_digest,
+            expected_registry_digest=expected_registry_digest,
+            allow_incomplete=True,
+        )
+        resolved_identity = resolved.manifest.semantic_identity()
+        if resolved_identity != semantic_identity:
+            raise MachineArtifactError(
+                "machine artifact semantic identity changed during resolution: "
+                f"expected {semantic_identity}, got {resolved_identity}"
+            )
+        return {
+            "identity_kind": "MachineArtifactManifest.semantic_identity",
+            "semantic_identity": resolved_identity,
+            "physical_digest": resolved.manifest.physical_digest,
+            "registry_digest": resolved.manifest.registry_digest,
+            "materialisation_digest": resolved.digest,
+            "cache_directory": str(cache),
+            "manifest_path": str(manifest_path),
+            "complete": resolved.manifest.complete,
+            "unresolved_gap_count": len(resolved.manifest.unresolved_gaps),
+            "fully_verified": True,
+        }
+
+    raise MachineArtifactError(
+        f"semantic machine artifact {semantic_identity} is absent from {object_root}"
+    )
 
 
 def _valid_points(points: np.ndarray) -> np.ndarray:

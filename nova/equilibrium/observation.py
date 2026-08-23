@@ -58,6 +58,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum
+import operator
 from typing import NamedTuple
 
 import jax
@@ -85,11 +86,13 @@ __all__ = [
     "declared_field_function_squared",
     "declared_pressure",
     "gradient_tail",
+    "layout_invariant_sum",
     "clipped_support_quadrature",
     "moment_residual",
     "observe_current_moments",
     "observe_moments",
     "reject_unsupported_enforcement",
+    "summation_error_bound",
 ]
 
 #: Observation names in residual-vector column order.
@@ -108,6 +111,57 @@ PROFILE_NODES = 257
 _GAUSS_NODE, _GAUSS_WEIGHT = np.polynomial.legendre.leggauss(8)
 _UNIT_NODE = 0.5 * (_GAUSS_NODE + 1.0)
 _UNIT_WEIGHT = 0.5 * _GAUSS_WEIGHT
+
+
+def layout_invariant_sum(values, axis: int = -1) -> jax.Array:
+    """Sum one axis through a fixed binary tree of scalar additions.
+
+    A backend reduction may select a different tree after a leading batch axis
+    is introduced.  This kernel expresses the tree explicitly, so scalar and
+    transformed evaluations retain the same association while still compiling
+    to elementwise array operations.
+    """
+
+    value = jnp.asarray(values)
+    selected_axis = operator.index(axis)
+    if selected_axis < 0:
+        selected_axis += value.ndim
+    if selected_axis < 0 or selected_axis >= value.ndim:
+        raise ValueError(f"axis {axis} is out of bounds for shape {value.shape}")
+    ordered = jnp.moveaxis(value, selected_axis, -1)
+    width = ordered.shape[-1]
+    if width == 0:
+        return jnp.zeros(ordered.shape[:-1], dtype=ordered.dtype)
+    while width > 1:
+        pair_width = width // 2
+        paired = ordered[..., : 2 * pair_width].reshape(
+            (*ordered.shape[:-1], pair_width, 2)
+        )
+        reduced = paired[..., 0] + paired[..., 1]
+        if width % 2:
+            reduced = jnp.concatenate((reduced, ordered[..., -1:]), axis=-1)
+        ordered = reduced
+        width = ordered.shape[-1]
+    return ordered[..., 0]
+
+
+def summation_error_bound(values, axis: int = -1) -> jax.Array:
+    """Return an active-dtype roundoff bound for one finite sum.
+
+    The bound is ``n * epsilon * sum(abs(values))``.  It is deliberately
+    derived from the element count, active dtype, and input scale rather than
+    from an achieved scalar-versus-batched difference.
+    """
+
+    value = jnp.asarray(values)
+    selected_axis = operator.index(axis)
+    if selected_axis < 0:
+        selected_axis += value.ndim
+    if selected_axis < 0 or selected_axis >= value.ndim:
+        raise ValueError(f"axis {axis} is out of bounds for shape {value.shape}")
+    count = value.shape[selected_axis]
+    scale = layout_invariant_sum(jnp.abs(value), axis=selected_axis)
+    return count * jnp.finfo(value.dtype).eps * scale
 
 
 class MomentEnforcementError(ValueError):
@@ -513,12 +567,35 @@ def observe_moments(
     flux_span: jax.Array,
 ) -> IntegralObservation:
     """Return integral observations from one clipped-support measure."""
-    volume = jnp.sum(support_integrals.volume)
+    volume_elements = jax.lax.optimization_barrier(support_integrals.volume)
+    volume = layout_invariant_sum(volume_elements)
     safe_volume = jnp.where(volume > 0.0, volume, 1.0)
-    plasma_current = jnp.sum(support_integrals.cell_current)
-    major_radius = jnp.sum(support_integrals.radial_volume) / safe_volume
-    pressure_integral = jnp.sum(support_integrals.pressure_volume)
-    field_integral = jnp.sum(support_integrals.field_volume)
+    plasma_current = layout_invariant_sum(support_integrals.cell_current)
+
+    area = jax.lax.optimization_barrier(support_integrals.area)
+    supplied_radial_volume = jax.lax.optimization_barrier(
+        support_integrals.radial_volume
+    )
+    nonzero_area = jnp.abs(area) > 0.0
+    inferred_radius = jnp.where(
+        nonzero_area,
+        volume_elements / (2.0 * jnp.pi * area),
+        0.0,
+    )
+    centred_radial_volume = inferred_radius * volume_elements
+    radial_scale = jnp.maximum(
+        jnp.abs(supplied_radial_volume), jnp.abs(centred_radial_volume)
+    )
+    centred_resolution = 16.0 * jnp.finfo(volume_elements.dtype).eps * radial_scale
+    is_cell_centred = (
+        jnp.abs(supplied_radial_volume - centred_radial_volume) <= centred_resolution
+    )
+    radial_volume_elements = jnp.where(
+        is_cell_centred, centred_radial_volume, supplied_radial_volume
+    )
+    major_radius = layout_invariant_sum(radial_volume_elements) / safe_volume
+    pressure_integral = layout_invariant_sum(support_integrals.pressure_volume)
+    field_integral = layout_invariant_sum(support_integrals.field_volume)
 
     beta_reference = mu_0 * major_radius * plasma_current**2
     safe_beta_reference = jnp.where(

@@ -13,6 +13,10 @@
     {
       "path": "nova/imas/fuse.py",
       "import": "from nova.imas.dataset import Ids"
+    },
+    {
+      "path": "nova/imas/transient.py",
+      "import": "from nova.imas.dataset import Ids"
     }
   ],
   "verification": {
@@ -26,22 +30,28 @@
         "module": "nova.imas.fuse",
         "exit_code": 0,
         "output": "fuse import ok; Ids is nova.imas.dataset.Ids: True"
+      },
+      {
+        "module": "nova.imas.transient",
+        "exit_code": 0,
+        "output": "transient import ok; Ids is nova.imas.dataset.Ids: True"
       }
     ],
     "focused_tests": {
       "matching_test_files": 0,
       "tests_run": 0,
-      "reason": "No focused test imports either assigned module; direct import checks exercise both repaired import paths."
+      "reason": "No focused test imports any assigned module; direct import checks exercise all three repaired import paths."
     },
     "ruff": {
-      "paths_checked": 2,
+      "paths_checked": 3,
       "exit_code": 0,
       "output": "All checks passed!"
+    },
+    "stale_import_sweep": {
+      "pattern": "^from nova\\.imas\\.database import Ids$",
+      "search_root": "nova",
+      "matches": 0,
+      "output": "no matches: 0 files import Ids from nova.imas.database"
     }
-  },
-  "out_of_scope_follow_on": {
-    "path": "nova/imas/transient.py",
-    "line": 5,
-    "finding": "This module carries the same stale import from nova.imas.database and was not modified outside the assigned fence."
   }
 }

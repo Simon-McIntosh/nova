@@ -32,6 +32,12 @@ DEFAULT_RECEIPT = Path(
 DEFAULT_FIGURE = Path(
     "docs/figures/forward-operator-refinement/passive-closure-trace.png"
 )
+CONTROL_RECEIPT = Path(
+    "docs/figures/forward-operator-refinement/passive-closure-stability-control.json"
+)
+CONTROL_FIGURE = Path(
+    "docs/figures/forward-operator-refinement/passive-closure-stability-control.png"
+)
 DENSE_CELL_REQUEST = -2100
 PAIRED_MAP_ITERATIONS = 8
 LINEAR_RESPONSE_ITERATIONS = 12
@@ -41,6 +47,10 @@ REGISTERED_CEILING_POINTS = 0.15
 DOCUMENTED_DIRECT_RESPONSE_POINTS = 0.098
 IDENTITY_RELATIVE_TOLERANCE = 2.0e-12
 SPECTRAL_RATIO_RELATIVE_TOLERANCE = 0.25
+CONTROL_BOUNDARY_ELONGATION = 1.05
+ELONGATED_DIRECT_PEAK_POINTS = 0.09723915202112363
+ELONGATED_REPRODUCTION_MOVE_POINTS = 0.6377635705066984
+ELONGATED_FIELD_GAIN = 6.5998576353591725
 
 
 def _strict_json(value):
@@ -56,6 +66,80 @@ def _strict_json(value):
     if isinstance(value, float) and not math.isfinite(value):
         raise ValueError("the trace receipt contains a non-finite scalar")
     return value
+
+
+def _elongation(points: np.ndarray) -> float:
+    """Return total vertical span divided by total radial span."""
+    coordinate = np.asarray(points, dtype=float)
+    return float(np.ptp(coordinate[:, 1]) / np.ptp(coordinate[:, 0]))
+
+
+def _scale_points_height(
+    points: np.ndarray, axis_height: float, factor: float
+) -> np.ndarray:
+    """Return points compressed vertically about one magnetic-axis height."""
+    scaled = np.array(points, dtype=float, copy=True)
+    scaled[:, 1] = axis_height + factor * (scaled[:, 1] - axis_height)
+    return scaled
+
+
+def _scale_conductor_height(conductor, axis_height: float, factor: float):
+    """Return one conductor under the same vertical coordinate transform."""
+    if conductor.rectangle is not None:
+        radius, height, width, extent = conductor.rectangle
+        rectangle = (
+            radius,
+            axis_height + factor * (height - axis_height),
+            width,
+            factor * extent,
+        )
+        return replace(conductor, rectangle=rectangle)
+    return replace(
+        conductor,
+        polygon=_scale_points_height(conductor.polygon, axis_height, factor),
+    )
+
+
+def _stability_control_case(case):
+    """Return a source-strength-preserving near-circular geometry control."""
+    original_elongation = _elongation(case.boundary)
+    height_factor = CONTROL_BOUNDARY_ELONGATION / original_elongation
+    axis_height = float(case.axis[1])
+    source_multiplier = 1.0 / height_factor
+    control = replace(
+        case,
+        p_prime=np.asarray(case.p_prime) * source_multiplier,
+        ff_prime=np.asarray(case.ff_prime) * source_multiplier,
+        boundary=_scale_points_height(case.boundary, axis_height, height_factor),
+        separatrix=_scale_points_height(case.separatrix, axis_height, height_factor),
+        x_point=_scale_points_height(case.x_point, axis_height, height_factor),
+        wall=_scale_points_height(case.wall, axis_height, height_factor),
+        active=tuple(
+            _scale_conductor_height(item, axis_height, height_factor)
+            for item in case.active
+        ),
+        passive=tuple(
+            _scale_conductor_height(item, axis_height, height_factor)
+            for item in case.passive
+        ),
+        grid_height=axis_height
+        + height_factor * (np.asarray(case.grid_height) - axis_height),
+    )
+    return control, {
+        "construction": (
+            "All reference, wall, active-conductor and passive-conductor heights "
+            "are compressed about the stored magnetic-axis height. Both absolute "
+            "source gradients are multiplied by the reciprocal compression to "
+            "preserve the area-integrated source strength to leading order; "
+            "currents, turns, radial geometry and flux span are unchanged."
+        ),
+        "elongated_boundary_elongation": original_elongation,
+        "control_boundary_elongation": _elongation(control.boundary),
+        "elongated_wall_elongation": _elongation(case.wall),
+        "control_wall_elongation": _elongation(control.wall),
+        "vertical_coordinate_factor": height_factor,
+        "source_gradient_multiplier": source_multiplier,
+    }
 
 
 def _grid(values, cell_count: int) -> np.ndarray:
@@ -450,6 +534,52 @@ def _verdict(
     }
 
 
+def _stability_verdict(terminal: dict[str, object]) -> dict[str, object]:
+    """Classify whether low elongation removes the elongated response gain."""
+    gain = float(terminal["root_response_over_direct_peak"])
+    if not np.isfinite(gain) or gain <= 0.0:
+        raise ValueError("the stability-control field gain must be positive and finite")
+    log_distance_from_direct = abs(math.log(gain))
+    log_distance_from_elongated = abs(math.log(gain / ELONGATED_FIELD_GAIN))
+    collapsed = log_distance_from_direct < log_distance_from_elongated
+    if collapsed:
+        classification = "PHYSICS"
+        ruling = (
+            "The near-circular control gain is logarithmically closer to unity "
+            "than to the elongated 6.60x gain. The passive response therefore "
+            "tracks vertical-mode conditioning rather than an anomalous map term."
+        )
+        next_action = (
+            "Re-derive the reference ceiling for converged coupled response from "
+            "stability conditioning; do not refuse healthy elongated equilibria "
+            "solely because their passive response is amplified."
+        )
+    else:
+        classification = "ANOMALOUS_GAIN"
+        ruling = (
+            "The near-circular control gain remains logarithmically closer to the "
+            "elongated 6.60x gain than to unity, excluding the benign vertical-mode "
+            "explanation."
+        )
+        next_action = (
+            "Reopen the coupled-map gain investigation with the control receipt as "
+            "evidence that low elongation does not remove the amplification."
+        )
+    return {
+        "classification": classification,
+        "ruling": ruling,
+        "next_action": next_action,
+        "control_field_gain": gain,
+        "elongated_field_gain": ELONGATED_FIELD_GAIN,
+        "log_distance_from_direct_gain": log_distance_from_direct,
+        "log_distance_from_elongated_gain": log_distance_from_elongated,
+        "decision_rule": (
+            "PHYSICS when the control gain is closer to unity than to the "
+            "elongated gain on a logarithmic scale; otherwise ANOMALOUS_GAIN."
+        ),
+    }
+
+
 def _plot(receipt: dict[str, object], path: Path) -> None:
     """Plot iteration-resolved response and exact-tangent growth."""
     paired = receipt["paired_coupled_map"]["iterations"]
@@ -517,6 +647,83 @@ def _plot(receipt: dict[str, object], path: Path) -> None:
     lower.set_xlabel("coupled-map iteration")
     lower.set_ylabel("increment growth ratio")
     lower.spines[["top", "right"]].set_visible(False)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180, transparent=True)
+    plt.close(figure)
+
+
+def _plot_stability_control(receipt: dict[str, object], path: Path) -> None:
+    """Plot the control response by iteration beside the elongated baseline."""
+    paired = receipt["paired_coupled_map"]["iterations"]
+    linear = receipt["exact_tangent_response"]["iterations"]
+    terminal = receipt["terminal_decomposition"]
+    shape = receipt["shape_control"]
+
+    figure, axes = plt.subplots(2, 1, figsize=(7.4, 6.4), constrained_layout=True)
+    trace, comparison = axes
+    trace.plot(
+        [row["iteration"] for row in paired],
+        [row["response_peak_points"] for row in paired],
+        marker="o",
+        color="#2a6099",
+        label="paired nonlinear response",
+    )
+    trace.plot(
+        [row["iteration"] for row in linear],
+        [row["cumulative_response_peak_points"] for row in linear],
+        marker=".",
+        color="0.4",
+        label="exact-tangent cumulative response",
+    )
+    trace.axhline(
+        terminal["direct_external_peak_points"],
+        color="#b24c3d",
+        linestyle="--",
+        linewidth=1.2,
+        label="control direct passive field",
+    )
+    trace.set_ylabel("response peak [points]")
+    trace.set_xlabel("coupled-map iteration")
+    trace.legend(frameon=False, fontsize=9)
+    trace.spines[["top", "right"]].set_visible(False)
+
+    labels = ["direct field", "root response", "score move"]
+    elongated = [
+        ELONGATED_DIRECT_PEAK_POINTS,
+        ELONGATED_DIRECT_PEAK_POINTS * ELONGATED_FIELD_GAIN,
+        ELONGATED_REPRODUCTION_MOVE_POINTS,
+    ]
+    control = [
+        terminal["direct_external_peak_points"],
+        terminal["root_response_peak_points"],
+        abs(terminal["total_reproduction_move_points"]),
+    ]
+    position = np.arange(len(labels))
+    width = 0.36
+    comparison.bar(
+        position - width / 2,
+        elongated,
+        width,
+        color="0.65",
+        label=(
+            f"elongated κ={shape['elongated_boundary_elongation']:.3f}, "
+            f"gain={ELONGATED_FIELD_GAIN:.2f}x"
+        ),
+    )
+    comparison.bar(
+        position + width / 2,
+        control,
+        width,
+        color="#2a6099",
+        label=(
+            f"control κ={shape['control_boundary_elongation']:.3f}, "
+            f"gain={terminal['root_response_over_direct_peak']:.2f}x"
+        ),
+    )
+    comparison.set_xticks(position, labels)
+    comparison.set_ylabel("flux-span percentage points")
+    comparison.legend(frameon=False, fontsize=9)
+    comparison.spines[["top", "right"]].set_visible(False)
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=180, transparent=True)
     plt.close(figure)
@@ -625,42 +832,173 @@ def run() -> dict[str, object]:
     }
 
 
+def run_stability_control() -> dict[str, object]:
+    """Repeat the passive trace on a low-elongation geometry control."""
+    source_commit = measurement_stamp(Path.cwd())
+    configure_dtypes()
+    elongated_case = reference.require_reference()
+    case, shape_control = _stability_control_case(elongated_case)
+    machine_started = perf_counter()
+    machine = reference.cached_machine(case, DENSE_CELL_REQUEST, passive=True)
+    machine_seconds = perf_counter() - machine_started
+    cache = machine.cache_receipt
+    if cache is None:
+        raise RuntimeError("the stability-control carrier has no cache receipt")
+
+    without_current = machine.source_current.copy()
+    without_current[-machine.passive_columns :] = 0.0
+    without_machine = replace(
+        machine,
+        source_current=without_current,
+        passive_columns=0,
+        cache_receipt=None,
+    )
+    with_operator = reference.forward_operator(case, machine)
+    without_operator = reference.forward_operator(case, without_machine)
+    seed_with = reference.seed_flux(case, machine)
+    seed_without = reference.seed_flux(case, without_machine)
+    seed_identity_error = float(
+        np.max(np.abs(np.asarray(seed_with) - np.asarray(seed_without)))
+    )
+    seed_plasma_current = float(
+        np.sum(np.asarray(with_operator.cell_current(seed_with)))
+    )
+
+    with_solved, with_receipt = _solve(case, machine, "declared_passive_currents")
+    without_solved, without_receipt = _solve(
+        case, without_machine, "passive_currents_zeroed"
+    )
+    cell_count = len(machine.node)
+    span = abs(float(case.flux_span))
+    reference_flux = case.flux(machine.radius, machine.node[:, 1])
+    without_core = np.asarray(without_solved.masks.core, dtype=bool)
+    external_delta = with_operator.external() - without_operator.external()
+    paired = _paired_map_trace(
+        with_operator,
+        without_operator,
+        seed_with,
+        reference_flux,
+        without_core,
+        cell_count,
+        span,
+    )
+    linear = _linear_response_trace(
+        without_operator,
+        without_solved.flux,
+        external_delta,
+        reference_flux,
+        without_core,
+        cell_count,
+        span,
+    )
+    terminal = _terminal_decomposition(
+        with_solved,
+        without_solved,
+        external_delta,
+        reference_flux,
+        cell_count,
+        span,
+    )
+    return {
+        "receipt": {
+            "kind": "passive_closure_vertical_stability_control",
+            "status": "complete",
+            "source_commit": source_commit,
+            "checkout_porcelain_empty_before_measurement": True,
+            "device_backend": jax.default_backend(),
+            "devices": [str(device) for device in jax.devices()],
+            "production_solve_count": 2,
+        },
+        "carrier": {
+            "requested_cells": DENSE_CELL_REQUEST,
+            "realised_plasma_cells": cell_count,
+            "machine_request_seconds": machine_seconds,
+            "cache": asdict(cache),
+            "passive_columns": machine.passive_columns,
+            "reference_flux_span_wb": span,
+        },
+        "shape_control": shape_control,
+        "comparators": {
+            "elongated_direct_external_peak_points": ELONGATED_DIRECT_PEAK_POINTS,
+            "elongated_reproduction_move_points": (ELONGATED_REPRODUCTION_MOVE_POINTS),
+            "elongated_field_gain": ELONGATED_FIELD_GAIN,
+            "documented_direct_response_points": DOCUMENTED_DIRECT_RESPONSE_POINTS,
+            "registered_direct_response_ceiling_points": REGISTERED_CEILING_POINTS,
+        },
+        "controlled_inputs": {
+            "seed_max_absolute_difference_wb": seed_identity_error,
+            "geometry_shared_between_passive_arms": True,
+            "source_profiles_shared_between_passive_arms": True,
+            "only_changed_input_between_passive_arms": (
+                "declared passive-current columns retained or zeroed"
+            ),
+            "seed_plasma_current_a": seed_plasma_current,
+            "seed_plasma_current_over_elongated_reference": (
+                seed_plasma_current / float(elongated_case.plasma_current)
+            ),
+        },
+        "production_solves": [with_receipt, without_receipt],
+        "paired_coupled_map": paired,
+        "exact_tangent_response": linear,
+        "terminal_decomposition": terminal,
+        "stability_verdict": _stability_verdict(terminal),
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--receipt", type=Path, default=DEFAULT_RECEIPT)
-    parser.add_argument("--figure", type=Path, default=DEFAULT_FIGURE)
+    parser.add_argument("--stability-control", action="store_true")
+    parser.add_argument("--receipt", type=Path)
+    parser.add_argument("--figure", type=Path)
     arguments = parser.parse_args()
-    receipt = _strict_json(run())
-    arguments.receipt.parent.mkdir(parents=True, exist_ok=True)
-    arguments.receipt.write_text(
+    if arguments.stability_control:
+        receipt_path = arguments.receipt or CONTROL_RECEIPT
+        figure_path = arguments.figure or CONTROL_FIGURE
+        receipt = _strict_json(run_stability_control())
+        summary = {
+            "classification": receipt["stability_verdict"]["classification"],
+            "control_field_gain": receipt["stability_verdict"]["control_field_gain"],
+            "direct_external_peak_points": receipt["terminal_decomposition"][
+                "direct_external_peak_points"
+            ],
+            "root_response_peak_points": receipt["terminal_decomposition"][
+                "root_response_peak_points"
+            ],
+            "terminal_move_points": receipt["terminal_decomposition"][
+                "total_reproduction_move_points"
+            ],
+        }
+    else:
+        receipt_path = arguments.receipt or DEFAULT_RECEIPT
+        figure_path = arguments.figure or DEFAULT_FIGURE
+        receipt = _strict_json(run())
+        summary = {
+            "classification": receipt["verdict"]["classification"],
+            "mechanism": receipt["verdict"]["mechanism"],
+            "terminal_move_points": receipt["terminal_decomposition"][
+                "total_reproduction_move_points"
+            ],
+            "direct_contribution_points": receipt["terminal_decomposition"][
+                "direct_external_contribution_points"
+            ],
+            "feedback_contribution_points": receipt["terminal_decomposition"][
+                "coupled_plasma_feedback_contribution_points"
+            ],
+            "late_increment_growth_ratio": receipt["exact_tangent_response"][
+                "late_increment_growth_ratio_median"
+            ],
+        }
+    receipt_path.parent.mkdir(parents=True, exist_ok=True)
+    receipt_path.write_text(
         json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n",
         encoding="utf-8",
     )
-    _plot(receipt, arguments.figure)
-    print(
-        json.dumps(
-            {
-                "classification": receipt["verdict"]["classification"],
-                "mechanism": receipt["verdict"]["mechanism"],
-                "terminal_move_points": receipt["terminal_decomposition"][
-                    "total_reproduction_move_points"
-                ],
-                "direct_contribution_points": receipt["terminal_decomposition"][
-                    "direct_external_contribution_points"
-                ],
-                "feedback_contribution_points": receipt["terminal_decomposition"][
-                    "coupled_plasma_feedback_contribution_points"
-                ],
-                "late_increment_growth_ratio": receipt["exact_tangent_response"][
-                    "late_increment_growth_ratio_median"
-                ],
-                "receipt": str(arguments.receipt),
-                "figure": str(arguments.figure),
-            },
-            indent=2,
-            sort_keys=True,
-        )
-    )
+    if arguments.stability_control:
+        _plot_stability_control(receipt, figure_path)
+    else:
+        _plot(receipt, figure_path)
+    summary.update({"receipt": str(receipt_path), "figure": str(figure_path)})
+    print(json.dumps(summary, indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":

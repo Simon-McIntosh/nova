@@ -233,6 +233,8 @@ class ForwardFluxOperator:
     source: ForwardSource
     external_current: jnp.ndarray = field(repr=False)
     area: jnp.ndarray = field(repr=False)
+    cell_average_stencil: jnp.ndarray | None = field(repr=False, default=None)
+    cell_average_weight: jnp.ndarray | None = field(repr=False, default=None)
     polarity: int = 1
     inside_material: jnp.ndarray | None = field(repr=False, default=None)
     moment_geometry: MomentGeometry | None = field(repr=False, default=None)
@@ -252,12 +254,28 @@ class ForwardFluxOperator:
         )
         self.external_current = jnp.asarray(self.external_current)
         self.area = jnp.asarray(self.area)
+        if self.cell_average_stencil is not None:
+            self.cell_average_stencil = jnp.asarray(
+                self.cell_average_stencil, dtype=jnp.int32
+            )
+            self.cell_average_weight = jnp.asarray(
+                self.cell_average_weight, dtype=self.area.dtype
+            )
         if self.inside_material is None:
             self.inside_material = jnp.ones(self.grid.node_number, dtype=bool)
         else:
             self.inside_material = jnp.asarray(self.inside_material, dtype=bool)
         if self.area.shape != (self.grid.node_number,):
             raise ValueError("area must carry one control area per grid node")
+        if (
+            self.cell_average_stencil is not None
+            and self.cell_average_stencil.shape != (self.grid.node_number, 5)
+        ):
+            raise ValueError("cell-average stencil must carry five nodes per grid cell")
+        if self.cell_average_stencil is not None and self.cell_average_weight.shape != (
+            5,
+        ):
+            raise ValueError("cell-average weights must carry five fixed entries")
         if self.inside_material.shape != (self.grid.node_number,):
             raise ValueError("inside_material must carry one flag per grid node")
         if (
@@ -556,7 +574,16 @@ class ForwardFluxOperator:
         """Return the current and first moments driven by one trial flux."""
         if not self.use_linear_moments:
             masks, _topology = self.read(psi, requested_class)
-            current = self.source.cell_current(self.radius, self.area, masks)
+            point_current = self.source.cell_current(self.radius, self.area, masks)
+            density = point_current / self.area
+            if self.cell_average_stencil is None:
+                current = point_current
+            else:
+                gathered = density[self.cell_average_stencil]
+                average = jnp.einsum("ni,i->n", gathered, self.cell_average_weight)
+                current = jnp.where(
+                    self.source.declared_support(masks), average * self.area, 0.0
+                )
             zero = jnp.zeros_like(current)
             return CellCurrentMoments(current, zero, zero)
         return self._partitioned_current_moments(

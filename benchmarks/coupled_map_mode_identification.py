@@ -258,11 +258,10 @@ def _dominant_eigenpairs(tangent, drive, count: int = EIGENPAIR_COUNT):
     """Compute dominant right Ritz pairs of one exact JAX tangent action."""
     drive = np.asarray(drive, dtype=float)
     size = drive.size
-    compiled = jax.jit(tangent)
-    compiled(jnp.asarray(drive)).block_until_ready()
+    tangent(jnp.asarray(drive)).block_until_ready()
 
     def action(vector):
-        return np.asarray(compiled(jnp.asarray(vector)), dtype=float)
+        return np.asarray(tangent(jnp.asarray(vector)), dtype=float)
 
     operator = LinearOperator((size, size), matvec=action, dtype=np.float64)
     generator = np.random.default_rng(982451653)
@@ -295,14 +294,13 @@ def _dominant_eigenpairs(tangent, drive, count: int = EIGENPAIR_COUNT):
 
 def _driven_mode(tangent, drive, grid_nodes: int) -> dict[str, object]:
     """Follow one passive drive until its tangent increment exposes a mode."""
-    compiled = jax.jit(tangent)
     term = jnp.asarray(drive)
     peaks = []
     norms = []
     rows = []
     for iteration in range(1, TANGENT_ITERATIONS + 1):
         if iteration > 1:
-            term = compiled(term)
+            term = tangent(term)
         term.block_until_ready()
         array = np.asarray(term, dtype=float)
         peak = float(np.max(np.abs(array[:grid_nodes])))
@@ -318,7 +316,7 @@ def _driven_mode(tangent, drive, grid_nodes: int) -> dict[str, object]:
         )
         peaks.append(peak)
         norms.append(norm)
-    previous = np.asarray(compiled(term), dtype=float)
+    previous = np.asarray(tangent(term), dtype=float)
     rayleigh = float(
         np.dot(np.asarray(term), previous) / np.dot(np.asarray(term), np.asarray(term))
     )

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T15:41:47",
+  "updated": "2026-08-23T15:49:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -38,6 +38,13 @@
         "role": "implement",
         "session_id": "019fff44-ad0c-79d1-989e-0b3ae0bbf251",
         "created": "2026-08-12"
+      },
+      {
+        "id": "catalog-census",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "ccfs-scout",
@@ -570,6 +577,13 @@
         "role": "implement",
         "session_id": "019ffa72-15c7-78b1-bee8-5f074cebc901",
         "created": "2026-08-13"
+      },
+      {
+        "id": "stability-scout",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "stencil-weights",
@@ -26451,6 +26465,6 @@
       }
     ],
     "holds": [],
-    "_version": 628
+    "_version": 630
   }
 }

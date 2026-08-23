@@ -411,5 +411,66 @@
     "banked_single_map_floor": 2.220446049250313e-16,
     "retired_tolerance": 1e-10,
     "verdict_against_retired_tolerance": "DECLINED"
+  },
+  "validation": {
+    "environment": {
+      "backend": "cpu",
+      "project_environment": "/home/ITER/mcintos/Code/nova/.venv",
+      "worktree_source_first": true,
+      "dependency_sync_performed": false
+    },
+    "tests": [
+      {
+        "path": "tests/test_fixed_point.py",
+        "current_passed": 15,
+        "banked_baseline_passed": 15,
+        "failed": 0
+      },
+      {
+        "path": "tests/test_topology_qualified_admission.py",
+        "current_passed": 4,
+        "banked_baseline_passed": 4,
+        "failed": 0
+      },
+      {
+        "path": "tests/test_krylov_action_qualification.py",
+        "current_passed": 4,
+        "banked_baseline_passed": 4,
+        "failed": 0
+      },
+      {
+        "path": "tests/test_amplification_observation.py",
+        "current_passed": 7,
+        "banked_baseline_passed": 7,
+        "failed": 0
+      },
+      {
+        "path": "tests/test_factor_ladder_extension.py",
+        "current_passed": 1,
+        "banked_baseline_passed": 4,
+        "failed": 0,
+        "qualification": "The current module collects one contract; no test was edited or deselected."
+      },
+      {
+        "path": "tests/test_equilibrium_forward_solve.py",
+        "current_passed": 28,
+        "banked_baseline_passed": 28,
+        "failed": 0,
+        "warnings": 1
+      },
+      {
+        "path": "tests/test_krylov_route_conditioning.py",
+        "current_passed": 4,
+        "failed": 0
+      }
+    ],
+    "ruff": {
+      "paths": [
+        "nova/equilibrium/fixed_point.py",
+        "tests/test_krylov_route_conditioning.py"
+      ],
+      "exit_code": 0
+    },
+    "log_directory": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T170216597084-krylov-route-conditioning/logs"
   }
 }

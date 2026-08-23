@@ -19,7 +19,7 @@
 <meta name="plan-effort-hours" content="6.0">
 <meta name="plan-depends-on" content="scoring-criteria-derivation">
 <meta name="plan-informs" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 </head>
 <body>
 <main class="plan-doc">
@@ -80,7 +80,7 @@
   lane: refine, raise order, or both, each with its measured cost.</p>
   <p><strong>Done when:</strong> the order-versus-mesh table (floor moved, criterion verdict,
   build cost, memory) is banked with a one-paragraph ruling, and the DIII-D forward-gate
-  re-evaluation owner is notified that its prerequisite evidence exists.</p>
+  re-evaluation owner is notified that its prerequisite evidence exists. That re-run is <code>benchmarks/diiid_forward_gs_match.py</code> unchanged except applying its registered 1e-05 bound (the hard-coded 1e-6 is a pinned defect recorded on diiid-forward-onboarding); a pass ships that onboarding plan and unblocks diiid-pulse-replay.</p>
 </section>
 
 </main>

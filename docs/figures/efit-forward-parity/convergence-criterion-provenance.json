@@ -1,0 +1,261 @@
+{
+  "receipt": {
+    "kind": "convergence_criterion_provenance_audit",
+    "status": "complete",
+    "execution_mode": "banked-instrument-audit-no-solves",
+    "output": "docs/figures/efit-forward-parity/convergence-criterion-provenance.json"
+  },
+  "provenance_table": [
+    {
+      "field": "magnetic_axis_distance_m",
+      "bound": 0.00101344,
+      "direction": "at-most",
+      "unit": "m",
+      "basis_verbatim": "four times the 0.025336 cm committed-stamp axis reference; the deterministic reproduction spread was zero",
+      "evidence_verbatim": "physics-spine-v0-mast-heldout-6-08ae0dee74-98dci4-clu-3141.yaml",
+      "classification": "INHERITED",
+      "evidence_read": {
+        "relationship": "merely-contains",
+        "read_status": "cited-locator-not-present-in-checkout",
+        "finding": "The cited YAML locator is absent. The corroborating committed HTML contains the 0.025336 cm source value and 0.101344 cm bound, but does not independently support the four-times multiplier.",
+        "corroborating_path": "docs/research/mast-cutover-parity-evidence.html",
+        "cited_path_exists": false,
+        "cited_path_sha256": null
+      }
+    },
+    {
+      "field": "lcfs_distance_m",
+      "bound": 0.00033047,
+      "direction": "at-most",
+      "unit": "m",
+      "basis_verbatim": "four times the 0.008262 cm committed-stamp LCFS reference; the deterministic reproduction spread was zero",
+      "evidence_verbatim": "physics-spine-v0-mast-heldout-6-08ae0dee74-98dci4-clu-3141.yaml",
+      "classification": "INHERITED",
+      "evidence_read": {
+        "relationship": "merely-contains",
+        "read_status": "cited-locator-not-present-in-checkout",
+        "finding": "The cited YAML locator is absent. The corroborating committed HTML contains the 0.008262 cm source value and 0.033047 cm bound, but does not independently support the four-times multiplier.",
+        "corroborating_path": "docs/research/mast-cutover-parity-evidence.html",
+        "cited_path_exists": false,
+        "cited_path_sha256": null
+      }
+    },
+    {
+      "field": "x_point_distance_m",
+      "bound": 0.014,
+      "direction": "at-most",
+      "unit": "m",
+      "basis_verbatim": "0.522 of the 26.64 mm MAST radial cell, the committed held-out noisy X-point localisation maximum, rounded upward",
+      "evidence_verbatim": "docs/figures/jax-dissolution/fieldnull_production_route.json",
+      "classification": "PHYSICALLY-MOTIVATED",
+      "evidence_read": {
+        "relationship": "supports",
+        "read_status": "read",
+        "finding": "The cited receipt reports a 0.5223816696605883-cell resolved localisation maximum and complete physical-saddle recall, supporting the upward-rounded 0.522-cell physical scale used by the bound.",
+        "corroborating_path": null,
+        "cited_path_exists": true,
+        "cited_path_sha256": "138e50da8f58b65267dc3a9b6f11a5faa615bf5a67c6c97300a3b00a4c6bb079"
+      }
+    },
+    {
+      "field": "topology_class_agreement_fraction",
+      "bound": 1.0,
+      "direction": "at-least",
+      "unit": "fraction",
+      "basis_verbatim": "categorical topology is quantized per slice; any disagreement is one whole observed class error, so no fractional margin exists",
+      "evidence_verbatim": "docs/figures/jax-dissolution/fieldnull_production_route.json",
+      "classification": "PHYSICALLY-MOTIVATED",
+      "evidence_read": {
+        "relationship": "supports",
+        "read_status": "read",
+        "finding": "The cited receipt reports integer/state parity, 49 physical saddles with zero extras or misses, and recall one; this supports exact categorical agreement rather than a fractional category margin.",
+        "corroborating_path": null,
+        "cited_path_exists": true,
+        "cited_path_sha256": "138e50da8f58b65267dc3a9b6f11a5faa615bf5a67c6c97300a3b00a4c6bb079"
+      }
+    },
+    {
+      "field": "fixed_point_defect",
+      "bound": 1e-08,
+      "direction": "at-most",
+      "unit": "relative sup norm",
+      "basis_verbatim": "the profile accelerator's existing strict convergence criterion, applied to max|g(x)-x|/max|g(x)| without substituting the cross-substrate current-reproduction bound",
+      "evidence_verbatim": "nova/equilibrium/fixed_point.py",
+      "classification": "INHERITED",
+      "evidence_read": {
+        "relationship": "merely-contains",
+        "read_status": "read",
+        "finding": "The cited source implements max|g(x)-x|/max|g(x)|, with a 1e-30 denominator floor, but contains no 1e-8 physical or discretisation argument.",
+        "corroborating_path": null,
+        "cited_path_exists": true,
+        "cited_path_sha256": "44281b5170ead543753d50f82439c700f001e506f2f1281525429fe018477d05"
+      }
+    }
+  ],
+  "units_audit": {
+    "fixed_point_residual": {
+      "formula": "max(abs(g(x) - x)) / max(max(abs(g(x))), 1e-30)",
+      "numerator": "sup norm of the write-then-read mapped total-poloidal-flux difference, in Wb",
+      "denominator": "maximum absolute value of g(x) over the full concatenated grid, wall, and direct pre-clip sample-node total-flux vector, in Wb, floored at 1e-30 Wb",
+      "state_and_map": "x is the concatenated total poloidal flux; g(x) is the fixed conductor background plus the plasma-current image produced by x",
+      "benchmark_call_path": "efit_parity_tared_external_field._solve_row -> efit_forward_parity_slice._passive_inclusive_solve -> ForwardProfile.solve_branch(target_current=..., route='newton_krylov') -> fixed_point.newton_krylov",
+      "sources": [
+        "nova/equilibrium/fixed_point.py",
+        "nova/equilibrium/forward.py",
+        "nova/equilibrium/forward_operator.py",
+        "benchmarks/efit_parity_tared_external_field.py"
+      ]
+    },
+    "reference_side_scales": {
+      "stored_lcfs_contour_discrepancy_fraction_of_declared_flux_span": 0.003456,
+      "stored_lcfs_registered_limit_fraction_of_declared_flux_span": 0.006,
+      "achieved_flux_agreement_rms_fraction_of_declared_flux_span": 0.00565,
+      "span_definition": "peak-to-peak reference-grid total flux"
+    },
+    "comparability": {
+      "verdict": "REFUSED",
+      "reason": "The fixed-point residual uses the absolute peak of the mapped full-node vector, while the reference figures use a gauge-invariant peak-to-peak reference-grid span. The 0.565 percent figure is also an RMS norm, not the residual's sup norm, and the contour figure uses another support.",
+      "exact_conversion_formula_if_inputs_existed": "fixed_point_sup_fraction_of_reference_span = fixed_point_residual * max(abs(g(x))) / reference_flux_span",
+      "missing_banked_input": "max(abs(g(x))) at each recorded residual evaluation on a support that can be restricted consistently to the reference grid",
+      "numeric_conversion_supplied": false,
+      "consequence": "No fraction-of-span number is equated to the fixed-point residual. The mesh re-score proceeds only in the residual's native units."
+    }
+  },
+  "discretisation_consistent_criterion": {
+    "formula": "E_f = abs(R_coarse - R_fine) / (r**p - 1); tau = E_f",
+    "mesh_spacing_ratio_r": 2.0,
+    "estimator": "two-level Richardson fine-mesh error estimate",
+    "assumptions": [
+      "R(h) = R_continuum + C*h**p plus higher-order terms",
+      "the coarse and fine runs measure the same branch, map, residual norm, and solver budget",
+      "the residual normalisation scale is sufficiently stable across the two meshes",
+      "the measured order is representative of the local asymptotic trend",
+      "two meshes provide one order estimate with no error bar or independent confirmation",
+      "because p is inferred from the same two residuals under a zero-continuum-floor model, the estimate is not an independent validation of the fine residual"
+    ],
+    "source": "docs/figures/moment-conditioned-basin-entry/stall-mesh-sensitivity.json",
+    "source_sha256": "c23bc32012f02668dd1d567c184d3e23423ac5f557d4f0fe10a480298103eb1f",
+    "banked_source_verdict": "discretisation-limited",
+    "per_reference": [
+      {
+        "reference": "21978/35",
+        "banked_coarse_residual": 0.010356795810607609,
+        "banked_fine_residual": 0.005299693489256675,
+        "observed_order": 0.966596902394278,
+        "fine_mesh_richardson_error_estimate": 0.005299693489256675,
+        "discretisation_consistent_criterion": 0.005299693489256675,
+        "passes_registered_1e8_criterion": false,
+        "passes_discretisation_consistent_criterion": true,
+        "comparison_roundoff_slack": 2.7755575615628914e-17,
+        "trust_qualification": "LEAST-TRUSTWORTHY: measured outside any asymptotic regime; the two-mesh order has no independent confirmation or error bar."
+      },
+      {
+        "reference": "21983/35",
+        "banked_coarse_residual": 0.010050357331518338,
+        "banked_fine_residual": 0.0015446543055689578,
+        "observed_order": 2.7018908925836143,
+        "fine_mesh_richardson_error_estimate": 0.0015446543055689574,
+        "discretisation_consistent_criterion": 0.0015446543055689574,
+        "passes_registered_1e8_criterion": false,
+        "passes_discretisation_consistent_criterion": true,
+        "comparison_roundoff_slack": 6.938893903907228e-18,
+        "trust_qualification": "Two meshes give one order estimate with no error bar or independent confirmation."
+      },
+      {
+        "reference": "21985/51",
+        "banked_coarse_residual": 0.01294253111102598,
+        "banked_fine_residual": 0.0013073838879026022,
+        "observed_order": 3.307365058279396,
+        "fine_mesh_richardson_error_estimate": 0.0013073838879026024,
+        "discretisation_consistent_criterion": 0.0013073838879026024,
+        "passes_registered_1e8_criterion": false,
+        "passes_discretisation_consistent_criterion": true,
+        "comparison_roundoff_slack": 6.938893903907228e-18,
+        "trust_qualification": "Two meshes give one order estimate with no error bar or independent confirmation."
+      },
+      {
+        "reference": "21986/46",
+        "banked_coarse_residual": null,
+        "banked_fine_residual": 3.270854734228347e-16,
+        "observed_order": null,
+        "fine_mesh_richardson_error_estimate": null,
+        "discretisation_consistent_criterion": null,
+        "passes_registered_1e8_criterion": true,
+        "passes_discretisation_consistent_criterion": true,
+        "comparison_roundoff_slack": 0.0,
+        "trust_qualification": "Excluded from the mesh-floor study because it already passed the strict 1e-8 gate; no looser per-reference estimate is needed to retain that pass."
+      },
+      {
+        "reference": "21989/55",
+        "banked_coarse_residual": 0.017714765374879503,
+        "banked_fine_residual": 0.001693384614199005,
+        "observed_order": 3.3869707663836386,
+        "fine_mesh_richardson_error_estimate": 0.0016933846141990048,
+        "discretisation_consistent_criterion": 0.0016933846141990048,
+        "passes_registered_1e8_criterion": false,
+        "passes_discretisation_consistent_criterion": true,
+        "comparison_roundoff_slack": 6.938893903907228e-18,
+        "trust_qualification": "Two meshes give one order estimate with no error bar or independent confirmation."
+      },
+      {
+        "reference": "22086/43",
+        "banked_coarse_residual": 0.011016939705021812,
+        "banked_fine_residual": 0.0035417937581059262,
+        "observed_order": 1.6371714162964488,
+        "fine_mesh_richardson_error_estimate": 0.0035417937581059254,
+        "discretisation_consistent_criterion": 0.0035417937581059254,
+        "passes_registered_1e8_criterion": false,
+        "passes_discretisation_consistent_criterion": true,
+        "comparison_roundoff_slack": 1.3877787807814457e-17,
+        "trust_qualification": "LEAST-TRUSTWORTHY: measured outside any asymptotic regime; the two-mesh order has no independent confirmation or error bar."
+      }
+    ]
+  },
+  "rescore": {
+    "reference_count": 6,
+    "registered_1e8_converged_count": 1,
+    "registered_1e8_count_display": "1 of 6",
+    "discretisation_consistent_converged_count": 6,
+    "discretisation_consistent_count_display": "6 of 6",
+    "both_counts_retained": true,
+    "reliability_figure_survives": false,
+    "verdict": "THE 1-OF-6 NEGATIVE RELIABILITY FIGURE DOES NOT SURVIVE THE DISCRETISATION-CONSISTENT RE-SCORE: 6 OF 6 PASS, qualified by the two-mesh estimator and the least-trustworthy low-order cases."
+  },
+  "claim_bounds": {
+    "instrument_audit_and_banked_residual_rescore": true,
+    "new_equilibrium_solve": false,
+    "equilibrium_solves_run": 0,
+    "banked_residuals_only": true,
+    "registered_tolerance_changed": false,
+    "tolerance_owner_decision_reserved": true,
+    "scope_statement": "This receipt does not establish a production tolerance or general solver reliability; it audits instruments and re-scores the banked six-reference control."
+  },
+  "protected_banked_artifacts": {
+    "before": {
+      "integrity_source": "docs/figures/efit-forward-parity/converged-root-geometry-attribution.json",
+      "declared_digest_count": 23,
+      "verified_digest_count": 23,
+      "all_digests_match": true,
+      "mismatches": []
+    },
+    "after": {
+      "integrity_source": "docs/figures/efit-forward-parity/converged-root-geometry-attribution.json",
+      "declared_digest_count": 23,
+      "verified_digest_count": 23,
+      "all_digests_match": true,
+      "mismatches": []
+    },
+    "verified_digest_count": 23,
+    "byte_for_byte_unchanged": true
+  },
+  "source_digests": {
+    "nova/imas/parity_tolerances.py": "54287a39b366f355acd1866d03496d19f9511ea77f0373a7f0d855eabef4ed74",
+    "nova/equilibrium/fixed_point.py": "44281b5170ead543753d50f82439c700f001e506f2f1281525429fe018477d05",
+    "nova/equilibrium/forward.py": "47985691fee46b81341fb3d0fbbd0b4f29185a8e763d1d4c958e2751427fa4c4",
+    "nova/equilibrium/forward_operator.py": "df13ceb0458a5ebf7c2e1046d52cb46f640569d9e25dcd24f735257978b50c59",
+    "benchmarks/efit_parity_tared_external_field.py": "62764ed6469d7f9a346e85a570edf09c3956762caf7ad47019c2950c2d230173",
+    "docs/figures/jax-dissolution/fieldnull_production_route.json": "138e50da8f58b65267dc3a9b6f11a5faa615bf5a67c6c97300a3b00a4c6bb079",
+    "docs/research/mast-cutover-parity-evidence.html": "38d1ae023e4f61be9ea51caf82a84818d086698cbf2e5978b749c75019a00ba1",
+    "docs/figures/efit-forward-parity/tared-plasma-support-solve.json": "14ee0945438613f5c65ba79663de09eba0a75e9ee053eb5b1fbe814abaf9f7c2"
+  }
+}

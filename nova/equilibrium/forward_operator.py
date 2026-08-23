@@ -34,6 +34,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
+from nova.biot.null import Null2D
 from nova.biot.target import FluxTarget
 from nova.equilibrium.domain import DomainMasks, PlasmaDomain
 from nova.equilibrium.observation import (
@@ -53,6 +54,142 @@ from nova.equilibrium.stencil_mesh import (
 from nova.equilibrium.topology import Topology, TopologyState
 
 __all__ = ["ForwardFluxOperator", "PrescribedCurrentField"]
+
+
+@jax.tree_util.register_pytree_node_class
+@dataclass(frozen=True)
+class _FixedDesignNull2D:
+    """Locate grid nulls without differentiating a fixed SVD factorisation.
+
+    The quadratic design depends only on immutable grid geometry.  Applying its
+    host-built pseudoinverse as a matrix is algebraically the same least-squares
+    fit while keeping JAX differentiation on the sampled flux alone.  This
+    avoids the SVD JVP's undefined singular-vector derivative when a symmetric
+    stencil has repeated singular values.
+    """
+
+    locator: Null2D
+    fit_weight: jax.Array = field(repr=False)
+
+    @classmethod
+    def from_locator(cls, locator: Null2D) -> _FixedDesignNull2D:
+        """Precompute one quadratic least-squares operator per grid stencil."""
+        local = np.asarray(locator.local_coordinate_stencil, dtype=np.float64)
+        radial = local[..., 0]
+        vertical = local[..., 1]
+        design = np.stack(
+            (
+                radial**2,
+                vertical**2,
+                radial,
+                vertical,
+                radial * vertical,
+                np.ones_like(radial),
+            ),
+            axis=-1,
+        )
+        weight = np.linalg.pinv(design)
+        return cls(locator=locator, fit_weight=jnp.asarray(weight, locator.fit_dtype))
+
+    @property
+    def coordinate(self):
+        """Return the physical grid-node coordinates."""
+        return self.locator.coordinate
+
+    @property
+    def node_number(self):
+        """Return the physical grid-node count."""
+        return self.locator.node_number
+
+    @property
+    def fit_dtype(self):
+        """Return the dtype of the local quadratic fits."""
+        return self.locator.fit_dtype
+
+    @jax.jit
+    def __call__(self, psi):
+        """Return extrema and saddles from fixed quadratic fit matrices."""
+        sampled = jnp.asarray(psi, dtype=self.fit_dtype)[self.locator.stencil]
+        sign = sampled[:, 1:] > sampled[:, :1]
+        crossing_count = jnp.sum(sign != jnp.roll(sign, 1, axis=1), axis=1)
+        number = jnp.asarray([jnp.sum(crossing_count == kind) for kind in (0, 4)])
+        index = jnp.stack(
+            [
+                jnp.where(
+                    crossing_count == kind,
+                    size=self.locator.maxsize,
+                    fill_value=0,
+                )[0]
+                for kind in (0, 4)
+            ]
+        )
+        coefficient = jnp.einsum(
+            "...ij,...j->...i", self.fit_weight[index], sampled[index]
+        )
+        determinant = (
+            4.0 * coefficient[..., 0] * coefficient[..., 1] - coefficient[..., 4] ** 2
+        )
+        root_floor = jnp.asarray(1.0e-30, dtype=coefficient.dtype)
+        safe_determinant = jnp.where(
+            jnp.abs(determinant) < root_floor,
+            jnp.where(determinant < 0.0, -root_floor, root_floor),
+            determinant,
+        )
+        local_radial = (
+            coefficient[..., 4] * coefficient[..., 3]
+            - 2.0 * coefficient[..., 1] * coefficient[..., 2]
+        ) / safe_determinant
+        local_vertical = (
+            coefficient[..., 4] * coefficient[..., 2]
+            - 2.0 * coefficient[..., 0] * coefficient[..., 3]
+        ) / safe_determinant
+        local_flux = (
+            coefficient[..., 0] * local_radial**2
+            + coefficient[..., 1] * local_vertical**2
+            + coefficient[..., 2] * local_radial
+            + coefficient[..., 3] * local_vertical
+            + coefficient[..., 4] * local_radial * local_vertical
+            + coefficient[..., 5]
+        )
+        kind = jnp.where(
+            jnp.abs(determinant) < jnp.asarray(1.0e-12, coefficient.dtype),
+            jnp.nan,
+            jnp.where(
+                determinant < 0.0,
+                0.0,
+                jnp.where(
+                    (coefficient[..., 0] > 0.0) & (coefficient[..., 1] > 0.0),
+                    -1.0,
+                    jnp.where(
+                        (coefficient[..., 0] < 0.0) & (coefficient[..., 1] < 0.0),
+                        1.0,
+                        jnp.nan,
+                    ),
+                ),
+            ),
+        )
+        origin = self.locator.physical_origin[index]
+        scale = self.locator.physical_scale[index]
+        physical = origin + jnp.stack((local_radial, local_vertical), axis=-1) * scale
+        result = jnp.concatenate(
+            (physical, local_flux[..., None], kind[..., None]), axis=-1
+        )
+        position = jnp.arange(1, self.locator.maxsize + 1)
+        return jnp.where(
+            position[None, :, None] <= number[:, None, None],
+            result,
+            jnp.full_like(result, jnp.nan),
+        )
+
+    def tree_flatten(self):
+        """Return the locator and its fixed least-squares weights."""
+        return (self.locator, self.fit_weight), {}
+
+    @classmethod
+    def tree_unflatten(cls, aux_data, children):
+        """Rebuild a fixed-design locator from JAX pytree leaves."""
+        del aux_data
+        return cls(*children)
 
 
 @dataclass(frozen=True)
@@ -110,6 +247,9 @@ class ForwardFluxOperator:
         """Build the topology read and default the material mask."""
         self.prescribed_field = prescribed_current_field
         self.topology = Topology(self.grid.null, self.wall.null)
+        self._fixed_design_topology = Topology(
+            _FixedDesignNull2D.from_locator(self.grid.null), self.wall.null
+        )
         self.external_current = jnp.asarray(self.external_current)
         self.area = jnp.asarray(self.area)
         if self.inside_material is None:
@@ -214,7 +354,7 @@ class ForwardFluxOperator:
 
     def read(self, psi, requested_class=None) -> tuple[DomainMasks, TopologyState]:
         """Return one shared domain/topology read, optionally class-pinned."""
-        return self.topology.read(
+        return self._fixed_design_topology.read(
             jnp.asarray(psi)[: self.physical_node_number],
             self.polarity,
             self.inside_material,
@@ -324,7 +464,7 @@ class ForwardFluxOperator:
         if self.moment_geometry is None:
             raise ValueError("moment geometry is required for current moments")
         physical = jnp.asarray(psi)[: self.physical_node_number]
-        masks, topology, connected = self.topology.read_with_connectivity(
+        masks, topology, connected = self._fixed_design_topology.read_with_connectivity(
             physical,
             self.polarity,
             self.inside_material,

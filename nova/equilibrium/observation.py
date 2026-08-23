@@ -57,6 +57,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from enum import Enum
 from typing import NamedTuple
 
 import jax
@@ -71,14 +72,22 @@ __all__ = [
     "CurrentLedger",
     "ClippedIntegralMeasure",
     "IntegralObservation",
+    "ConstraintPinSet",
+    "ConstraintViolationError",
+    "CurrentMomentObservation",
+    "IsofluxPin",
+    "MomentIntegralSupport",
+    "MomentPin",
     "MomentEnforcementError",
     "MomentTargets",
+    "PinUncertainty",
     "declared_body_force",
     "declared_field_function_squared",
     "declared_pressure",
     "gradient_tail",
     "clipped_support_quadrature",
     "moment_residual",
+    "observe_current_moments",
     "observe_moments",
     "reject_unsupported_enforcement",
 ]
@@ -103,6 +112,148 @@ _UNIT_WEIGHT = 0.5 * _GAUSS_WEIGHT
 
 class MomentEnforcementError(ValueError):
     """Raised when more moments are enforced than the closure can solve."""
+
+
+class ConstraintViolationError(ValueError):
+    """Raised when a solved state lies outside a trusted pin interval."""
+
+
+class MomentIntegralSupport(str, Enum):
+    """Current integration domain carried by a deterministic moment pin."""
+
+    ALL_DOMAIN = "all_domain"
+    CONFINED_CORE = "confined_core"
+
+
+@dataclass(frozen=True)
+class PinUncertainty:
+    """Absolute deterministic interval attached to one trusted pin.
+
+    The interval is metadata and an acceptance scale.  It is not interpreted
+    as a probability distribution or used to form a likelihood.
+    """
+
+    absolute: float
+    unit: str
+    statement: str
+
+    def __post_init__(self) -> None:
+        """Require a finite positive interval and its provenance statement."""
+        if not np.isfinite(self.absolute) or self.absolute <= 0.0:
+            raise ValueError("pin uncertainty must be positive and finite")
+        if not self.unit.strip():
+            raise ValueError("pin uncertainty must declare a unit")
+        if not self.statement.strip():
+            raise ValueError("pin uncertainty must declare its basis")
+
+
+@dataclass(frozen=True)
+class IsofluxPin:
+    """Two R-Z points trusted to share one normalised-flux value."""
+
+    first_coordinate: tuple[float, float]
+    second_coordinate: tuple[float, float]
+    psi_norm: float
+    uncertainty: PinUncertainty
+
+    def __post_init__(self) -> None:
+        """Require finite physical coordinates and a finite target."""
+        first = np.asarray(self.first_coordinate, dtype=np.float64)
+        second = np.asarray(self.second_coordinate, dtype=np.float64)
+        if first.shape != (2,) or second.shape != (2,):
+            raise ValueError("isoflux coordinates must be R-Z pairs")
+        if not np.all(np.isfinite(first)) or not np.all(np.isfinite(second)):
+            raise ValueError("isoflux coordinates must be finite")
+        if first[0] <= 0.0 or second[0] <= 0.0:
+            raise ValueError("isoflux major radii must be positive")
+        if not np.isfinite(self.psi_norm):
+            raise ValueError("isoflux target must be finite")
+
+
+@dataclass(frozen=True)
+class MomentPin:
+    """One current amplitude or centroid pin with explicit support."""
+
+    name: str
+    target: float
+    uncertainty: PinUncertainty
+    support: MomentIntegralSupport
+
+    def __post_init__(self) -> None:
+        """Require a supported moment, finite target, and typed support."""
+        if self.name not in ("plasma_current", "centroid_r", "centroid_z"):
+            raise ValueError(f"unknown current moment {self.name!r}")
+        if not np.isfinite(self.target):
+            raise ValueError("moment target must be finite")
+        if not isinstance(self.support, MomentIntegralSupport):
+            raise TypeError("moment support must be a MomentIntegralSupport")
+
+
+@dataclass(frozen=True)
+class ConstraintPinSet:
+    """Trusted deterministic pins supplied by an upstream evidence owner."""
+
+    isoflux: tuple[IsofluxPin, ...] = ()
+    moments: tuple[MomentPin, ...] = ()
+
+    def __post_init__(self) -> None:
+        """Require at least one typed pin and reject duplicate moment claims."""
+        if not self.isoflux and not self.moments:
+            raise ValueError("a constraint pin set must contain at least one pin")
+        if not all(isinstance(pin, IsofluxPin) for pin in self.isoflux):
+            raise TypeError("isoflux pins must be IsofluxPin values")
+        if not all(isinstance(pin, MomentPin) for pin in self.moments):
+            raise TypeError("moment pins must be MomentPin values")
+        keys = [(pin.name, pin.support) for pin in self.moments]
+        if len(keys) != len(set(keys)):
+            raise ValueError("a current moment was pinned twice on one support")
+
+
+class CurrentMomentObservation(NamedTuple):
+    """Net toroidal current and current centroid on one declared support."""
+
+    plasma_current: jax.Array
+    centroid_r: jax.Array
+    centroid_z: jax.Array
+    support: MomentIntegralSupport
+
+    def stack(self) -> jax.Array:
+        """Return amplitude and centroid in the public map's fixed order."""
+        return jnp.stack((self.plasma_current, self.centroid_r, self.centroid_z))
+
+    def value(self, name: str) -> jax.Array:
+        """Return one named current moment."""
+        if name not in ("plasma_current", "centroid_r", "centroid_z"):
+            raise KeyError(f"unknown current moment {name!r}")
+        return getattr(self, name)
+
+
+def observe_current_moments(
+    cell_current,
+    coordinate,
+    *,
+    core_mask,
+    support: MomentIntegralSupport,
+) -> CurrentMomentObservation:
+    """Integrate current amplitude and centroid on the declared domain.
+
+    ``ALL_DOMAIN`` consumes every authored plasma cell. ``CONFINED_CORE``
+    consumes only the topology-qualified core mask. The support therefore
+    stays visible beside every returned moment and cannot be silently mixed.
+    """
+    current = jnp.asarray(cell_current)
+    point = jnp.asarray(coordinate)
+    if current.ndim != 1 or point.shape != (current.size, 2):
+        raise ValueError("cell current and R-Z coordinates must align")
+    if support is MomentIntegralSupport.CONFINED_CORE:
+        selected = jnp.asarray(core_mask, dtype=bool)
+        current = jnp.where(selected, current, 0.0)
+    elif support is not MomentIntegralSupport.ALL_DOMAIN:
+        raise TypeError("support must be a MomentIntegralSupport")
+    total = jnp.sum(current)
+    safe_total = jnp.where(jnp.abs(total) > 0.0, total, 1.0)
+    centroid = jnp.sum(current[:, None] * point, axis=0) / safe_total
+    return CurrentMomentObservation(total, centroid[0], centroid[1], support)
 
 
 @dataclass(frozen=True)

@@ -111,12 +111,12 @@ def _profile_values(values: ArrayLike, size: int, name: str) -> jax.Array:
     return profile
 
 
-def _map_interpolation_error(flux: jax.Array, flux_span: float) -> jax.Array:
+def _map_interpolation_error(flux: jax.Array, flux_span: jax.Array) -> jax.Array:
     """Return the resolved-grid bilinear interpolation error envelope."""
 
     radial_curvature = jnp.max(jnp.abs(jnp.diff(flux, n=2, axis=0)))
     vertical_curvature = jnp.max(jnp.abs(jnp.diff(flux, n=2, axis=1)))
-    return (radial_curvature + vertical_curvature) / (8.0 * abs(flux_span))
+    return (radial_curvature + vertical_curvature) / (8.0 * jnp.abs(flux_span))
 
 
 def _profile_interpolation_error(
@@ -203,7 +203,7 @@ def synthesize_thomson(
     flux_map = jnp.asarray(flux, dtype=temperature.dtype).reshape(
         (np.asarray(radius).size, np.asarray(height).size)
     )
-    flux_span = float(boundary_flux) - float(axis_flux)
+    flux_span = jnp.asarray(boundary_flux) - jnp.asarray(axis_flux)
     map_error = _map_interpolation_error(flux_map, flux_span)
     error_bound = jnp.stack(
         [

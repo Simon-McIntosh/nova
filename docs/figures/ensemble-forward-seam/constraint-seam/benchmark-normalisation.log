@@ -1,0 +1,19 @@
+{
+  "MAST": {
+    "attempts": 6,
+    "cold_converged": 1,
+    "pin_admissible_converged": 1,
+    "candidate_roots_rejected_by_current_pin": 0,
+    "basin_restriction_fraction": 0.0,
+    "maximum_scaled_current_pin_residual": 1.1102230246251564e-07
+  },
+  "DIII-D": {
+    "attempts": 5,
+    "cold_converged": 2,
+    "pin_admissible_converged": 2,
+    "candidate_roots_rejected_by_current_pin": 0,
+    "basin_restriction_fraction": 0.0,
+    "maximum_scaled_current_pin_residual": 1.8589150449861258e-06
+  }
+}
+EXIT=0

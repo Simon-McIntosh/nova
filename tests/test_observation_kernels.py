@@ -5,6 +5,8 @@ from __future__ import annotations
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pytest
+from types import SimpleNamespace
 
 from nova.equilibrium import (
     synthesize_thomson,
@@ -12,6 +14,16 @@ from nova.equilibrium import (
     virtual_poloidal_probes,
 )
 from nova.frame.coilset import CoilSet
+from nova.equilibrium.conservation import FluxLattice
+from nova.equilibrium.forward import ForwardProfile
+from nova.equilibrium.observation import (
+    ConstraintPinSet,
+    ConstraintViolationError,
+    IsofluxPin,
+    MomentIntegralSupport,
+    MomentPin,
+    PinUncertainty,
+)
 from nova.jax.config import configure_dtypes
 
 GRADIENT_RELATIVE_TOLERANCE = 2.0e-8
@@ -39,6 +51,35 @@ def _chord_coordinates():
             [[1.00, 0.12], [1.16, 0.09], [1.27, 0.04]],
         ]
     )
+
+
+def _public_observation_profile():
+    radius, height, flux = _labelled_flux_map()
+    lattice = FluxLattice(radius, height)
+    profile = object.__new__(ForwardProfile)
+    profile.lattice = lattice
+    coordinate = lattice.coordinate
+    core = np.ones(lattice.node_count, dtype=bool)
+    core[::3] = False
+    masks = SimpleNamespace(core=jnp.asarray(core))
+    topology = SimpleNamespace(
+        axis_flux=jnp.asarray(0.0), boundary_flux=jnp.asarray(2.0)
+    )
+    profile.operator = SimpleNamespace(
+        grid=SimpleNamespace(coordinate=coordinate),
+        read=lambda _state: (masks, topology),
+        source=SimpleNamespace(closure_degrees=0),
+    )
+
+    def integral_state(state, requested_class=None, target_current=None):
+        del requested_class
+        current = 2.0 + 0.05 * jnp.asarray(state)[: lattice.node_count]
+        if target_current is not None:
+            current = current * target_current / jnp.sum(current)
+        return SimpleNamespace(cell_current=current), None, masks, topology, None
+
+    profile._integral_state = integral_state
+    return profile, np.asarray(flux).reshape(-1)
 
 
 def _coilset():
@@ -125,6 +166,130 @@ def test_thomson_gradient_matches_central_difference():
     central = float((response(step) - response(-step)) / (2.0 * step))
     relative_error = abs(automatic - central) / max(abs(central), 1.0)
     assert relative_error < GRADIENT_RELATIVE_TOLERANCE
+
+
+def test_public_thomson_map_jacobian_matches_central_difference():
+    configure_dtypes()
+    profile, flux = _public_observation_profile()
+    support, temperature, density = _profile_arrays()
+    coordinates = _chord_coordinates()
+    direction = np.linspace(-0.2, 0.3, flux.size)
+
+    automatic = (
+        np.asarray(
+            profile.thomson_observation_jacobian(
+                flux, support, temperature, density, coordinates
+            )
+        )
+        @ direction
+    )
+    step = 1.0e-5
+    upper = profile.thomson_observation_map(
+        flux + step * direction, support, temperature, density, coordinates
+    )
+    lower = profile.thomson_observation_map(
+        flux - step * direction, support, temperature, density, coordinates
+    )
+    central = np.asarray((upper - lower) / (2.0 * step))
+    relative_error = np.linalg.norm(automatic - central) / max(
+        np.linalg.norm(central), 1.0
+    )
+
+    assert relative_error < GRADIENT_RELATIVE_TOLERANCE
+
+
+def test_current_moment_map_declares_support_and_matches_central_difference():
+    configure_dtypes()
+    profile, flux = _public_observation_profile()
+    direction = np.linspace(-0.3, 0.4, flux.size)
+    support = MomentIntegralSupport.ALL_DOMAIN
+
+    observation = profile.current_moment_observation(flux, support=support)
+    automatic = (
+        np.asarray(profile.current_moment_jacobian(flux, support=support)) @ direction
+    )
+    step = 1.0e-5
+    upper = profile.current_moment_map(flux + step * direction, support=support)
+    lower = profile.current_moment_map(flux - step * direction, support=support)
+    central = np.asarray((upper - lower) / (2.0 * step))
+    relative_error = np.linalg.norm(automatic - central) / max(
+        np.linalg.norm(central), 1.0
+    )
+
+    assert observation.support is support
+    assert relative_error < GRADIENT_RELATIVE_TOLERANCE
+    confined = profile.current_moment_observation(
+        flux, support=MomentIntegralSupport.CONFINED_CORE
+    )
+    assert confined.support is MomentIntegralSupport.CONFINED_CORE
+    assert confined.plasma_current < observation.plasma_current
+
+
+def test_typed_pins_qualify_the_public_solve_without_statistical_state():
+    configure_dtypes()
+    profile, flux = _public_observation_profile()
+    coordinate = _chord_coordinates().reshape(-1, 2)
+    sampled = profile.thomson_observation(
+        flux,
+        np.asarray((0.0, 1.0)),
+        np.asarray((0.0, 1.0)),
+        np.asarray((0.0, 1.0)),
+        coordinate[:2],
+    )
+    target_current = 1000.0
+    pins = ConstraintPinSet(
+        isoflux=(
+            IsofluxPin(
+                tuple(coordinate[0]),
+                tuple(coordinate[1]),
+                float(np.mean(np.asarray(sampled.psi_norm))),
+                PinUncertainty(0.5, "1", "trusted chord-pair interval"),
+            ),
+        ),
+        moments=(
+            MomentPin(
+                "plasma_current",
+                target_current,
+                PinUncertainty(1.0, "A", "declared current interval"),
+                MomentIntegralSupport.ALL_DOMAIN,
+            ),
+        ),
+    )
+    equilibrium = SimpleNamespace(flux=jnp.asarray(flux))
+    profile._solve_accelerated = lambda *args, **options: equilibrium
+
+    solved = profile.solve(flux, pins=pins, target_current=target_current)
+
+    assert solved is equilibrium
+    assert bool(profile.constraints_satisfied(flux, pins, target_current))
+    assert profile.constraint_jacobian(flux, pins, target_current).shape == (
+        3,
+        flux.size,
+    )
+
+
+def test_public_solve_refuses_a_root_outside_a_pin_interval():
+    configure_dtypes()
+    profile, flux = _public_observation_profile()
+    moment = profile.current_moment_observation(
+        flux, support=MomentIntegralSupport.CONFINED_CORE
+    )
+    pins = ConstraintPinSet(
+        moments=(
+            MomentPin(
+                "centroid_z",
+                float(moment.centroid_z) + 0.1,
+                PinUncertainty(1.0e-3, "m", "trusted centroid interval"),
+                MomentIntegralSupport.CONFINED_CORE,
+            ),
+        )
+    )
+    profile._solve_accelerated = lambda *args, **options: SimpleNamespace(
+        flux=jnp.asarray(flux)
+    )
+
+    with pytest.raises(ConstraintViolationError, match="trusted constraint"):
+        profile.solve(flux, pins=pins)
 
 
 def test_virtual_flux_loops_compose_loop_and_point_factories():

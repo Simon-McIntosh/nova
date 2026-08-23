@@ -1,0 +1,13 @@
+11:04:54 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/8b40dd1a-fb25-440d-a310-912e2f9bd0d1/constraint-seam
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 1 item
+
+tests/test_observation_kernels.py .                                      [100%]
+
+============================== 1 passed in 13.31s ==============================
+EXIT=0

@@ -19,7 +19,7 @@
 <meta name="plan-effort-hours" content="6.0">
 <meta name="plan-depends-on" content="scoring-criteria-derivation">
 <meta name="plan-informs" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 <meta name="plan-impl" content="0.22">
 </head>
 <body>
@@ -174,10 +174,24 @@
   becomes a fifth refusal condition on that lane's in-flight action-qualification node
   (refusing a non-finite action, non-successful status, non-finite achieved linear
   residual, zero step at material residual), landing as one commit; this plan then records
-  the screening spec it handed over and the verdict receipt. On CLOSURE_PATH_ERROR the
+  the screening spec it handed over and the verdict receipt. <strong>Screened is not
+  fixed:</strong> on that branch the screening only refuses to report an amplified state as
+  converged &mdash; it hardens the failure into a visible non-convergence and does NOT
+  restore the passive-closure move to its documented 0.098-point response, which waits on
+  the solver lane's topology-admission and expanding-map work. The reference assertion
+  stays visibly red until restoration, by the test-visibility policy, and any suite-green
+  clause elsewhere in this plan closes on that branch only as &ldquo;green except the
+  classified closure defect, screened and owned by the solver lane&rdquo; with this section
+  cited. On CLOSURE_PATH_ERROR the
   repair is this plan's node, file-scoped against that lane's occupancy
   (forward_operator.py and fixed_point.py held; source, sol_closure, conductor_current,
   conservation, domain and wall_mask free).</p>
+  <p>The §3 floor receipts cite the route node's structured fields verbatim:
+  <code>differencing_step</code>, <code>step_selection_rule</code>,
+  <code>step_invariance.second_step</code>, <code>step_invariance.floor_delta</code>,
+  <code>step_invariance.bound</code>, <code>step_invariance.verdict</code> &mdash; the
+  neither-order-nor-mesh attribution case is a lookup of that verdict field, never an
+  inference.</p>
 </section>
 
 <section id="s3">

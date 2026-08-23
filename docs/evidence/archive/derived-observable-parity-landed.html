@@ -139,6 +139,59 @@
   <code>provisional_backend_mismatch</code> rather than presented as a result.</p>
 </section>
 
+<section id="s4">
+  <h2 id="s4-h">§4 — Label parity as a re-runnable acceptance, and the instability it exposed</h2>
+
+  <p><strong>observable-batch-acceptance</strong> landed 2026-08-24 — commit <code>d63685c9</code>,
+  merged <code>e4cc71c9</code>, gate <strong>FAILED</strong> (measurement complete, acceptance
+  failing), 6 tests added. Three H200 evidence runs at 2:41, 2:41 and 2:31. Receipt
+  <code>docs/figures/derived-observable-parity/batch-acceptance.json</code>.</p>
+
+  <p><strong>The acceptance exists and is re-runnable, which is what the section asked for.</strong>
+  One entry point — <code>nova.equilibrium.observable_acceptance.evaluate_observable_bound_acceptance</code>
+  — validates registered shapes and dtypes, applies the registered exact or dual absolute-relative
+  envelope to every case <em>and every batch member</em>, and fails a bound if any member fails. A
+  throughput rung invokes it and re-runs the check; it does not inherit a certificate issued once.
+  The benchmark drives it after <code>ForwardProfile.solve</code> against
+  <code>jax.jit(ForwardProfile.solve_batch)</code> on the exact repeated seed for all six held-out
+  cases at widths 1 and 4.</p>
+
+  <table>
+    <caption>Pass counts by batch width, against the banked figures</caption>
+    <thead>
+      <tr><th scope="col">Width</th><th scope="col">Bounds passing of 69</th><th scope="col">Case-bound evaluations of 414</th><th scope="col">Failing observables</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>65</td><td>407</td><td><code>conservation.divergence_b</code>, <code>conservation.divergence_j</code>, <code>moments.major_radius</code>, <code>moments.volume</code></td></tr>
+      <tr><td>4</td><td>66</td><td>408</td><td><code>conservation.divergence_j</code>, <code>moments.major_radius</code>, <code>moments.volume</code></td></tr>
+      <tr><td>banked</td><td>66</td><td>407</td><td>the original three</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Batch-size dependence is real and it is stated per row.</strong> Three of 69 bounds
+  carry batch-size-dependent case or aggregate pass status —
+  <code>conservation.divergence_b</code>, <code>conservation.divergence_j</code> and
+  <code>moments.major_radius</code> — and every one of the 69 receipt rows explicitly carries
+  <code>pass_status_depends_on_batch_size</code>, so a reader cannot mistake silence for
+  independence. <code>divergence_b</code> is a <em>fourth</em> failing observable that appears only
+  at width 1, which no earlier measurement had surfaced.</p>
+
+  <p><strong>The bigger finding, and the reason this receipt is worth more than a pass would have
+  been: the labels are not reproducible against themselves.</strong> Two retained repetitions on
+  <em>identical inputs and one device</em> moved the aggregate counts — <strong>66 → 65 at width 1
+  and 68 → 66 at width 4</strong>. The worker retained the repetition rather than collapsing it into
+  a pass, recording it as scientific evidence. That instability is a strictly stronger constraint on
+  the label store than batch-size dependence is: batch-size dependence can be characterised and
+  bounded, but a route that disagrees with itself across identical reruns cannot certify anything.
+  Whether the reduction repair removes it is the next measurement, not an assumption.</p>
+
+  <p><strong>The measured constraint the section carried is now demonstrated rather than
+  argued.</strong> The plan warned that a semantically zero representation change had moved a
+  reference root by 10.744 orders, and concluded that label parity at one batch size says nothing
+  about another. That is now measured directly: the pass count itself moves with width, and moves
+  again on a bare rerun. The acceptance is therefore correctly shaped as a per-rung re-run.</p>
+</section>
+
 </main>
 </body>
 </html>

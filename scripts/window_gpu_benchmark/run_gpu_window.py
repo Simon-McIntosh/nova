@@ -1,4 +1,4 @@
-"""Diagnose the first CPU--GPU divergence in the gentle coupled window."""
+"""Measure one coupled-window configuration on CPU and CUDA from one tree."""
 
 # ruff: noqa: E402
 
@@ -9,6 +9,8 @@ import csv
 import dataclasses
 import inspect
 import os
+import statistics
+import subprocess
 import time
 from collections.abc import Mapping, Sequence
 from pathlib import Path
@@ -24,29 +26,42 @@ import jax
 import numpy as np
 
 from nova.equilibrium.forward import ForwardProfile
-from nova.transport import coupled_window, torax_geometry
 
 
-CPU_WINDOW_SECONDS = 423.03271608706564
-CPU_CONTRACTION = 0.53710396334179378
-CPU_MAXIMUM_RESIDUAL = 0.0049860186161842365
-COMPARISON_TOLERANCE = 5.0e-3
-GENTLE_WINDOW_SECONDS = 2.5e-3
-GENTLE_SOURCE_MULTIPLIER = 0.5
-GENTLE_ITERATION_CAP = 10
-GENTLE_DAMPING = 0.5
+REPETITIONS = 3
+WARM_PAIR_COUNT = 9
 TSV_FIELDS = (
+    "tree_sha",
+    "backend",
+    "repetition",
     "category",
     "iteration",
     "side",
     "field",
     "value",
     "unit",
-    "cpu_baseline",
+    "cpu_reference",
     "absolute_deviation",
-    "tolerance",
     "status",
 )
+
+
+@dataclasses.dataclass(frozen=True)
+class ArmMeasurement:
+    """One backend's repeated timing sample and first typed receipt."""
+
+    backend: str
+    device: str
+    outcome_type: str
+    outcome: str
+    convergence: Any
+    conservation: Any
+    preparation_seconds: float
+    window_seconds: tuple[float, ...]
+    pairs: tuple[Mapping[str, Any], ...]
+    warm_pairs: tuple[Mapping[str, Any], ...]
+    array_count: int
+    solve_location: str
 
 
 def _format(value: Any) -> str:
@@ -61,60 +76,14 @@ def _format(value: Any) -> str:
     return f"{float(np.asarray(value)):.17g}"
 
 
-def _append(
-    rows: list[dict[str, str]],
-    category: str,
-    field: str,
-    value: Any,
-    unit: str,
-    *,
-    iteration: int | str = "",
-    side: str = "",
-    cpu_baseline: Any = "",
-    tolerance: Any = "",
-    status: str = "",
-) -> None:
-    deviation = ""
-    if cpu_baseline != "":
-        deviation = abs(float(value) - float(cpu_baseline))
-    rows.append(
-        {
-            "category": category,
-            "iteration": str(iteration),
-            "side": side,
-            "field": field,
-            "value": _format(value),
-            "unit": unit,
-            "cpu_baseline": _format(cpu_baseline) if cpu_baseline != "" else "",
-            "absolute_deviation": _format(deviation) if deviation != "" else "",
-            "tolerance": _format(tolerance) if tolerance != "" else "",
-            "status": status,
-        }
-    )
+def _tree_sha() -> str:
+    return subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
 
 
-def _write_tsv(path: Path, rows: Sequence[Mapping[str, str]]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.DictWriter(
-            stream, fieldnames=TSV_FIELDS, delimiter="\t", lineterminator="\n"
-        )
-        writer.writeheader()
-        writer.writerows(
-            {**row, "status": row["status"] or "RECORDED"} for row in rows
-        )
-
-
-def _cpu_trace() -> dict[tuple[int, str], float]:
-    path = Path("scripts/window_demonstration/receipts.tsv")
-    with path.open(encoding="utf-8", newline="") as stream:
-        return {
-            (int(row["iteration"]), row["field"]): float(row["value"])
-            for row in csv.DictReader(stream, delimiter="\t")
-            if row["regime"] == "gentle"
-            and row["candidate"] == "1"
-            and row["kind"] == "residual_trace"
-        }
+def _source_location(function: Any) -> str:
+    path = inspect.getsourcefile(function)
+    _source, line = inspect.getsourcelines(function)
+    return f"{path}:{line}"
 
 
 def _array_records(tree: Any, prefix: str) -> list[dict[str, str]]:
@@ -123,30 +92,22 @@ def _array_records(tree: Any, prefix: str) -> list[dict[str, str]]:
 
     def visit(value: Any, path: str) -> None:
         if isinstance(value, jax.Array):
-            devices = sorted(str(device) for device in value.devices())
-            backends = sorted(device.platform for device in value.devices())
             records.append(
                 {
                     "path": path,
                     "dtype": str(value.dtype),
-                    "backend": ",".join(backends),
-                    "device": ",".join(devices),
-                    "shape": str(tuple(value.shape)),
+                    "platform": ",".join(
+                        sorted({device.platform for device in value.devices()})
+                    ),
+                    "device": ",".join(
+                        sorted(str(device) for device in value.devices())
+                    ),
                 }
             )
             return
-        if isinstance(value, np.ndarray):
-            records.append(
-                {
-                    "path": path,
-                    "dtype": str(value.dtype),
-                    "backend": "host",
-                    "device": "host",
-                    "shape": str(value.shape),
-                }
-            )
-            return
-        if isinstance(value, str | bytes | int | float | bool | type(None)):
+        if isinstance(
+            value, np.ndarray | str | bytes | int | float | bool | type(None)
+        ):
             return
         identity = id(value)
         if identity in visited:
@@ -166,393 +127,507 @@ def _array_records(tree: Any, prefix: str) -> list[dict[str, str]]:
     return records
 
 
-def _require_cuda(records: Sequence[Mapping[str, str]], label: str) -> None:
-    device_records = [row for row in records if row["backend"] != "host"]
-    if not device_records:
-        raise RuntimeError(f"{label} exposed no JAX arrays")
-    refused = [row for row in device_records if row["backend"] != "gpu"]
+def _require_platform(
+    tree: Any, expected: str, label: str, inventory: list[dict[str, str]]
+) -> None:
+    records = _array_records(tree, label)
+    if not records:
+        raise RuntimeError(f"{label} exposed no JAX solve or state arrays")
+    refused = [record for record in records if record["platform"] != expected]
     if refused:
-        raise RuntimeError(f"{label} contains non-CUDA solve arrays: {refused[:3]}")
+        raise RuntimeError(f"{label} contains arrays off {expected}: {refused[:3]}")
+    inventory.extend(records)
 
 
-def _source_location(function: Any) -> str:
-    path = inspect.getsourcefile(function)
-    _source, line = inspect.getsourcelines(function)
-    return f"{path}:{line}"
-
-
-def _array_rows(
-    rows: list[dict[str, str]], category: str, records: Sequence[Mapping[str, Any]]
-) -> None:
-    for record in records:
-        _append(
-            rows,
-            category,
-            record["path"],
-            record["dtype"],
-            record["shape"],
-            iteration=record.get("iteration", ""),
-            side=record.get("side", record["backend"]),
-            status=f"{record['backend']}:{record['device']}",
-        )
-
-
-def _branch_rows(
-    rows: list[dict[str, str]], branch_records: Sequence[Mapping[str, Any]]
-) -> None:
-    for branch in branch_records:
-        for field in (
-            "sample_time",
-            "limited_core_cells",
-            "diverted_core_cells",
-            "selected_class",
-            "previous_class",
-            "switched",
-            "reason",
-            "limited_available",
-            "diverted_available",
-            "limited_residual",
-            "diverted_residual",
-        ):
-            _append(
-                rows,
-                "branch_receipt",
-                field,
-                branch[field],
-                "receipt",
-                iteration=branch["exchange"],
-                side=f"sample_{branch['sample']}",
+def _paired_timings(result: Any, repetition: int) -> list[dict[str, Any]]:
+    by_iteration: dict[int, dict[str, float]] = {}
+    for event in result.timings:
+        iteration = int(event["iteration"])
+        side = str(event["side"])
+        if side == "equilibrium":
+            continue
+        by_iteration.setdefault(iteration, {})[side] = float(event["seconds"])
+    pairs: list[dict[str, Any]] = []
+    for iteration, sides in sorted(by_iteration.items()):
+        if "equilibrium_plus_fsa" not in sides or "transport" not in sides:
+            raise RuntimeError(
+                f"iteration {iteration} has incomplete side timings: {sides}"
             )
+        pairs.append(
+            {
+                "repetition": repetition,
+                "iteration": iteration,
+                "equilibrium_plus_fsa": sides["equilibrium_plus_fsa"],
+                "transport": sides["transport"],
+                "combined": sides["equilibrium_plus_fsa"] + sides["transport"],
+            }
+        )
+    return pairs
 
 
-def _diagnostic_rows(
-    *,
-    outcome_type: str,
-    outcome: str,
-    convergence: Any,
-    cpu_residuals: Mapping[tuple[int, str], float],
-    precision: Mapping[str, Any],
-    branch_records: Sequence[Mapping[str, Any]],
-    guard_events: Sequence[Mapping[str, Any]],
-    side_events: Sequence[Mapping[str, Any]],
-    solve_arrays: Sequence[Mapping[str, Any]],
-    exchange_arrays: Sequence[Mapping[str, Any]],
-    probe_arrays: Sequence[Mapping[str, Any]],
-    transfer_events: Sequence[Mapping[str, Any]],
-) -> list[dict[str, str]]:
-    rows: list[dict[str, str]] = []
-    for field, value, unit in (
-        ("outcome_type", outcome_type, "text"),
-        ("outcome", outcome, "text"),
-        ("window_length", GENTLE_WINDOW_SECONDS, "s"),
-        ("source_multiplier", GENTLE_SOURCE_MULTIPLIER, "fraction"),
-        ("iteration_cap", GENTLE_ITERATION_CAP, "count"),
-        ("tolerance", COMPARISON_TOLERANCE, "relative"),
-        ("damping", GENTLE_DAMPING, "fraction"),
-        ("cpu_window_baseline", CPU_WINDOW_SECONDS, "s"),
-        ("cpu_baseline_lineage", "pre-band", "text"),
-        ("boundary_band_commit", "32942ac3", "git_commit"),
-    ):
-        _append(rows, "metadata", field, value, unit)
-    for side in ("cpu", "gpu"):
-        _append(
-            rows,
-            "precision",
-            "inner_fixed_point_residual",
-            precision[f"{side}_residual"],
-            "relative",
-            side=side,
-            status=precision[f"{side}_placement"],
-        )
-        _append(
-            rows,
-            "precision",
-            "inner_fixed_point_residual_dtype",
-            precision[f"{side}_dtype"],
-            "dtype",
-            side=side,
-            status=precision[f"{side}_placement"],
-        )
-    _append(rows, "precision", "verdict", precision["verdict"], "text")
-    _append(
-        rows,
-        "convergence",
-        "iterations_used",
+def _receipt_signature(result: Any) -> tuple[Any, ...]:
+    convergence = result.convergence
+    conservation = result.conservation_receipt
+    return (
+        result.outcome_type,
         convergence.iterations_used,
-        "count",
-    )
-    _append(
-        rows,
-        "convergence",
-        "contraction_estimate",
         convergence.contraction_estimate,
-        "ratio",
-        cpu_baseline=CPU_CONTRACTION,
+        convergence.gating_norm,
+        convergence.all_field_norm,
+        conservation.flux_closure_error,
+        conservation.flux_closure_residual,
+        conservation.current_continuity_error,
+        conservation.current_continuity_residual,
     )
-    _append(
-        rows,
-        "convergence",
-        "maximum_exit_residual",
-        convergence.maximum_residual,
-        "relative",
-        cpu_baseline=CPU_MAXIMUM_RESIDUAL,
-        tolerance=COMPARISON_TOLERANCE,
-    )
-    _append(
-        rows,
-        "convergence",
-        "damping_applied",
-        convergence.damping_applied,
-        "fraction",
-    )
-    for iteration, residuals in enumerate(convergence.residual_trace, start=1):
-        for field, value in residuals.items():
-            baseline = cpu_residuals.get((iteration, field), "")
-            _append(
-                rows,
-                "residual_trace",
-                field,
-                value,
-                "relative",
-                iteration=iteration,
-                cpu_baseline=baseline,
-                status=(
-                    "EXACT_MATCH" if baseline != "" and value == baseline else "DIFF"
-                ),
+
+
+def _measure_arm(demonstration: Any, device: Any) -> ArmMeasurement:
+    platform = device.platform
+    original_equilibrium_sweep = demonstration.equilibrium_sweep
+    original_transport_sweep = demonstration.transport_sweep
+    inventory: list[dict[str, str]] = []
+
+    def observed_equilibrium_sweep(*args, **kwargs):
+        receipt = original_equilibrium_sweep(*args, **kwargs)
+        jax.block_until_ready(receipt.equilibria)
+        _require_platform(receipt.equilibria, platform, "equilibrium", inventory)
+        return receipt
+
+    def observed_transport_sweep(*args, **kwargs):
+        receipt = original_transport_sweep(*args, **kwargs)
+        jax.block_until_ready(receipt.receipts)
+        _require_platform(receipt.receipts, platform, "transport", inventory)
+        return receipt
+
+    demonstration.equilibrium_sweep = observed_equilibrium_sweep
+    demonstration.transport_sweep = observed_transport_sweep
+    try:
+        preparation_started = time.perf_counter()
+        with jax.default_device(device):
+            profile, seed, _vacuum = demonstration._fixture_machine()
+            baseline_equilibrium = profile.solve(
+                seed, route="anderson", evaluations=demonstration.EVALUATIONS
             )
-    for field, value in convergence.exit_residual.items():
-        baseline = cpu_residuals.get((convergence.iterations_used, field), "")
+            jax.block_until_ready(baseline_equilibrium)
+            _require_platform(
+                baseline_equilibrium, platform, "baseline_equilibrium", inventory
+            )
+            extraction_lattice = demonstration._extraction_lattice(profile)
+            fixture_sources = demonstration._fixture_sources(profile)
+            baseline_geometry, baseline_extraction = (
+                demonstration._geometry_from_equilibrium(
+                    baseline_equilibrium,
+                    profile.source,
+                    extraction_lattice,
+                    fixture_sources,
+                )
+            )
+        preparation_seconds = time.perf_counter() - preparation_started
+
+        results = []
+        window_seconds = []
+        pairs: list[dict[str, Any]] = []
+        config = demonstration.RegimeConfig("gentle", 0.0025, 0.5, 1)
+        for repetition in range(1, REPETITIONS + 1):
+            started = time.perf_counter()
+            with jax.default_device(device):
+                result = demonstration._run_regime(
+                    config,
+                    profile=profile,
+                    baseline_equilibrium=baseline_equilibrium,
+                    baseline_geometry=baseline_geometry,
+                    baseline_extraction=baseline_extraction,
+                    extraction_lattice=extraction_lattice,
+                    fixture_sources=fixture_sources,
+                )
+            window_seconds.append(time.perf_counter() - started)
+            if not result.converged or result.convergence is None:
+                raise RuntimeError(
+                    f"{platform} gentle window did not converge: "
+                    f"{result.outcome_type}: {result.outcome}"
+                )
+            results.append(result)
+            pairs.extend(_paired_timings(result, repetition))
+
+        reference_signature = np.asarray(
+            _receipt_signature(results[0])[1:], dtype=float
+        )
+        for repetition, result in enumerate(results[1:], start=2):
+            signature = np.asarray(_receipt_signature(result)[1:], dtype=float)
+            if not np.allclose(signature, reference_signature, rtol=1.0e-12, atol=0.0):
+                raise RuntimeError(
+                    f"{platform} receipt changed in repetition {repetition}: "
+                    f"{signature} != {reference_signature}"
+                )
+
+        warm = tuple(pair for pair in pairs if pair["iteration"] > 1)
+        if len(warm) < WARM_PAIR_COUNT:
+            raise RuntimeError(
+                f"{platform} produced {len(warm)} warm pairs; "
+                f"{WARM_PAIR_COUNT} are required"
+            )
+        warm = warm[:WARM_PAIR_COUNT]
+        first = results[0]
+        return ArmMeasurement(
+            backend=platform,
+            device=str(device),
+            outcome_type=first.outcome_type,
+            outcome=first.outcome,
+            convergence=first.convergence,
+            conservation=first.conservation_receipt,
+            preparation_seconds=preparation_seconds,
+            window_seconds=tuple(window_seconds),
+            pairs=tuple(pairs),
+            warm_pairs=warm,
+            array_count=len(inventory),
+            solve_location=_source_location(ForwardProfile.solve_portfolio),
+        )
+    finally:
+        demonstration.equilibrium_sweep = original_equilibrium_sweep
+        demonstration.transport_sweep = original_transport_sweep
+
+
+def _median(arm: ArmMeasurement, field: str) -> float:
+    return statistics.median(float(pair[field]) for pair in arm.warm_pairs)
+
+
+def _append(
+    rows: list[dict[str, str]],
+    tree_sha: str,
+    backend: str,
+    category: str,
+    field: str,
+    value: Any,
+    unit: str,
+    *,
+    repetition: int | str = "",
+    iteration: int | str = "",
+    side: str = "",
+    cpu_reference: Any = "",
+    status: str = "RECORDED",
+) -> None:
+    deviation = ""
+    if cpu_reference != "":
+        deviation = abs(float(value) - float(cpu_reference))
+    rows.append(
+        {
+            "tree_sha": tree_sha,
+            "backend": backend,
+            "repetition": str(repetition),
+            "category": category,
+            "iteration": str(iteration),
+            "side": side,
+            "field": field,
+            "value": _format(value),
+            "unit": unit,
+            "cpu_reference": _format(cpu_reference) if cpu_reference != "" else "",
+            "absolute_deviation": _format(deviation) if deviation != "" else "",
+            "status": status,
+        }
+    )
+
+
+def _arm_rows(
+    rows: list[dict[str, str]], tree_sha: str, arm: ArmMeasurement, cpu: ArmMeasurement
+) -> None:
+    convergence = arm.convergence
+    conservation = arm.conservation
+    comparison = arm.backend != "cpu"
+    cpu_convergence = cpu.convergence
+    cpu_conservation = cpu.conservation
+    for field, value, unit, reference in (
+        (
+            "preparation_wall_time",
+            arm.preparation_seconds,
+            "s",
+            cpu.preparation_seconds,
+        ),
+        ("first_window_wall_time", arm.window_seconds[0], "s", cpu.window_seconds[0]),
+        (
+            "iterations_used",
+            convergence.iterations_used,
+            "count",
+            cpu_convergence.iterations_used,
+        ),
+        (
+            "contraction_estimate",
+            convergence.contraction_estimate,
+            "ratio",
+            cpu_convergence.contraction_estimate,
+        ),
+        (
+            "gating_exit_norm",
+            convergence.gating_norm,
+            "relative",
+            cpu_convergence.gating_norm,
+        ),
+        (
+            "all_field_exit_norm",
+            convergence.all_field_norm,
+            "relative",
+            cpu_convergence.all_field_norm,
+        ),
+        (
+            "damping_applied",
+            convergence.damping_applied,
+            "fraction",
+            cpu_convergence.damping_applied,
+        ),
+        (
+            "flux_closure_error",
+            conservation.flux_closure_error,
+            "Wb",
+            cpu_conservation.flux_closure_error,
+        ),
+        (
+            "flux_closure_residual",
+            conservation.flux_closure_residual,
+            "relative",
+            cpu_conservation.flux_closure_residual,
+        ),
+        (
+            "current_continuity_error",
+            conservation.current_continuity_error,
+            "A",
+            cpu_conservation.current_continuity_error,
+        ),
+        (
+            "current_continuity_residual",
+            conservation.current_continuity_residual,
+            "relative",
+            cpu_conservation.current_continuity_residual,
+        ),
+        (
+            "warm_equilibrium_plus_fsa_median",
+            _median(arm, "equilibrium_plus_fsa"),
+            "s",
+            _median(cpu, "equilibrium_plus_fsa"),
+        ),
+        (
+            "warm_transport_median",
+            _median(arm, "transport"),
+            "s",
+            _median(cpu, "transport"),
+        ),
+        ("warm_pair_median", _median(arm, "combined"), "s", _median(cpu, "combined")),
+        ("warm_pair_count", len(arm.warm_pairs), "count", len(cpu.warm_pairs)),
+        ("solve_and_state_array_count", arm.array_count, "count", cpu.array_count),
+    ):
         _append(
             rows,
-            "exit_residual",
+            tree_sha,
+            arm.backend,
+            "summary",
             field,
             value,
-            "relative",
-            cpu_baseline=baseline,
+            unit,
+            cpu_reference=reference if comparison else "",
+            status="SAME_TREE_COMPARISON" if comparison else "CPU_REFERENCE",
         )
-    _branch_rows(rows, branch_records)
-    for event in guard_events:
+    _append(
+        rows,
+        tree_sha,
+        arm.backend,
+        "summary",
+        "outcome_type",
+        arm.outcome_type,
+        "text",
+    )
+    _append(
+        rows,
+        tree_sha,
+        arm.backend,
+        "summary",
+        "device",
+        arm.device,
+        "text",
+        status="ALL_OBSERVED_JAX_ARRAYS_ON_DECLARED_BACKEND",
+    )
+    for repetition, seconds in enumerate(arm.window_seconds, start=1):
         _append(
             rows,
-            "guard_callback",
-            "uniform_grid_roundtrip_wall_time",
-            event["seconds"],
-            "s",
-            iteration=event["iteration"],
-        )
-    for event in side_events:
-        _append(
-            rows,
-            "sweep_timing",
+            tree_sha,
+            arm.backend,
+            "window_timing",
             "wall_time",
-            event["seconds"],
+            seconds,
             "s",
-            iteration=event["iteration"],
-            side=event["side"],
+            repetition=repetition,
         )
-    for event in transfer_events:
+    for pair in arm.pairs:
+        for side in ("equilibrium_plus_fsa", "transport", "combined"):
+            _append(
+                rows,
+                tree_sha,
+                arm.backend,
+                "iteration_pair_timing",
+                "wall_time",
+                pair[side],
+                "s",
+                repetition=pair["repetition"],
+                iteration=pair["iteration"],
+                side=side,
+                status=(
+                    "WARM_MEDIAN_MEMBER"
+                    if pair in arm.warm_pairs
+                    else "COLD_OR_EXCESS_SAMPLE"
+                ),
+            )
+    for iteration, (gating, all_field) in enumerate(
+        zip(
+            convergence.gating_norm_trace,
+            convergence.all_field_norm_trace,
+            strict=True,
+        ),
+        start=1,
+    ):
         _append(
             rows,
-            "host_roundtrip",
-            event["operation"],
-            event["gpu_fields"],
-            "field_count",
-            iteration=event["call"],
+            tree_sha,
+            arm.backend,
+            "convergence_trace",
+            "gating_norm",
+            gating,
+            "relative",
+            iteration=iteration,
         )
-    _array_rows(rows, "solve_array_dtype", solve_arrays)
-    _array_rows(rows, "exchange_array_dtype", exchange_arrays)
-    _array_rows(rows, "precision_probe_array", probe_arrays)
-    return rows
+        _append(
+            rows,
+            tree_sha,
+            arm.backend,
+            "convergence_trace",
+            "all_field_norm",
+            all_field,
+            "relative",
+            iteration=iteration,
+        )
+    for field, value in convergence.exit_residual.items():
+        _append(rows, tree_sha, arm.backend, "exit_residual", field, value, "relative")
 
 
-def _first_divergence(
-    convergence: Any, cpu_residuals: Mapping[tuple[int, str], float]
-) -> dict[str, Any] | None:
-    for iteration, residuals in enumerate(convergence.residual_trace, start=1):
-        for field, gpu_value in residuals.items():
-            cpu_value = cpu_residuals.get((iteration, field))
-            if cpu_value is not None and float(gpu_value) != cpu_value:
-                return {
-                    "iteration": iteration,
-                    "field": field,
-                    "cpu": cpu_value,
-                    "gpu": float(gpu_value),
-                    "absolute": abs(float(gpu_value) - cpu_value),
-                }
-    return None
+def _write_tsv(path: Path, rows: Sequence[Mapping[str, str]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.DictWriter(
+            stream, fieldnames=TSV_FIELDS, delimiter="\t", lineterminator="\n"
+        )
+        writer.writeheader()
+        writer.writerows(rows)
 
 
 def _render_report(
-    *,
-    job_id: str,
-    backend: str,
-    device_kind: str,
-    result: Any,
-    precision: Mapping[str, Any],
-    first: Mapping[str, Any] | None,
-    cpu_residuals: Mapping[tuple[int, str], float],
-    guard_events: Sequence[Mapping[str, Any]],
-    side_events: Sequence[Mapping[str, Any]],
-    solve_arrays: Sequence[Mapping[str, Any]],
-    exchange_arrays: Sequence[Mapping[str, Any]],
-    probe_arrays: Sequence[Mapping[str, Any]],
-    preparation_seconds: float,
-    window_seconds: float,
-    conservation: Mapping[str, Any] | None,
+    tree_sha: str, job_id: str, cpu: ArmMeasurement, gpu: ArmMeasurement
 ) -> str:
-    convergence = result.convergence
-    lines = [
-        "# CPU--H200 coupled-window divergence diagnosis",
-        "",
-        (
-            f"SLURM job `{job_id}` ran on JAX backend `{backend}` and device "
-            f"`{device_kind}`. Configuration: window `{GENTLE_WINDOW_SECONDS}` s, "
-            f"auxiliary source multiplier `{GENTLE_SOURCE_MULTIPLIER}`, cap "
-            f"`{GENTLE_ITERATION_CAP}`, tolerance `{COMPARISON_TOLERANCE}`, "
-            f"damping `{GENTLE_DAMPING}`."
-        ),
-        "",
-        "## Precision discriminator",
-        "",
-        "| backend | inner fixed-point residual | dtype | placement |",
-        "|---|---:|---|---|",
-        (
-            f"| CPU | `{_format(precision['cpu_residual'])}` | "
-            f"`{precision['cpu_dtype']}` | `{precision['cpu_placement']}` |"
-        ),
-        (
-            f"| H200 | `{_format(precision['gpu_residual'])}` | "
-            f"`{precision['gpu_dtype']}` | `{precision['gpu_placement']}` |"
-        ),
-        "",
-        f"Verdict: **{precision['verdict']}**",
-        "",
-        (
-            f"The CUDA sweep probe recorded `{len(probe_arrays)}` input/output "
-            "arrays for the first equilibrium and TORAX sweeps. The full TSV names "
-            "each array's path, dtype, backend, device and shape."
-        ),
-        "",
-        "## First trajectory divergence",
-        "",
-    ]
-    if first is None:
-        lines.append("No residual-trace quantity differed from the landed CPU trace.")
-    else:
-        lines.extend(
-            [
+    speedup = _median(cpu, "combined") / _median(gpu, "combined")
+    cpu_contraction = _format(cpu.convergence.contraction_estimate)
+    gpu_contraction = _format(gpu.convergence.contraction_estimate)
+    cpu_gating = _format(cpu.convergence.gating_norm)
+    cpu_all_field = _format(cpu.convergence.all_field_norm)
+    gpu_gating = _format(gpu.convergence.gating_norm)
+    gpu_all_field = _format(gpu.convergence.all_field_norm)
+    cpu_flux_error = _format(cpu.conservation.flux_closure_error)
+    cpu_flux_residual = _format(cpu.conservation.flux_closure_residual)
+    gpu_flux_error = _format(gpu.conservation.flux_closure_error)
+    gpu_flux_residual = _format(gpu.conservation.flux_closure_residual)
+    cpu_current_error = _format(cpu.conservation.current_continuity_error)
+    cpu_current_residual = _format(cpu.conservation.current_continuity_residual)
+    gpu_current_error = _format(gpu.conservation.current_continuity_error)
+    gpu_current_residual = _format(gpu.conservation.current_continuity_residual)
+    rows = []
+    for arm in (cpu, gpu):
+        convergence = arm.convergence
+        conservation = arm.conservation
+        rows.append(
+            "| "
+            + " | ".join(
                 (
-                    f"The first non-identical quantity is iteration "
-                    f"`{first['iteration']}`, `{first['field']}`: CPU "
-                    f"`{_format(first['cpu'])}`, H200 `{_format(first['gpu'])}`, "
-                    f"absolute difference `{_format(first['absolute'])}`."
-                ),
-                "",
-                (
-                    "| iteration | CPU maximum residual | H200 maximum residual | "
-                    "difference |"
-                ),
-                "|---:|---:|---:|---:|",
-            ]
-        )
-        for iteration, residuals in enumerate(convergence.residual_trace, start=1):
-            gpu_max = max(residuals.values())
-            cpu_max = max(
-                value
-                for (sample, _field), value in cpu_residuals.items()
-                if sample == iteration
+                    arm.backend,
+                    arm.device,
+                    str(convergence.iterations_used),
+                    f"{arm.window_seconds[0]:.6f}",
+                    f"{_median(arm, 'equilibrium_plus_fsa'):.6f}",
+                    f"{_median(arm, 'transport'):.6f}",
+                    f"{_median(arm, 'combined'):.6f}",
+                    f"{convergence.gating_norm:.9g}",
+                    f"{convergence.all_field_norm:.9g}",
+                    f"{conservation.flux_closure_residual:.9g}",
+                    f"{conservation.current_continuity_residual:.9g}",
+                )
             )
-            lines.append(
-                f"| {iteration} | `{_format(cpu_max)}` | `{_format(gpu_max)}` | "
-                f"`{_format(abs(gpu_max - cpu_max))}` |"
-            )
-    lines.extend(
-        [
-            "",
-            "## Exhausted or converged receipt",
-            "",
-            f"Typed outcome: `{result.outcome_type}` — `{result.outcome}`.",
-            (
-                f"Iterations `{convergence.iterations_used}`; measured contraction "
-                f"`{_format(convergence.contraction_estimate)}`; exit residual "
-                f"`{_format(convergence.maximum_residual)}`; damping "
-                f"`{_format(convergence.damping_applied)}`. The tolerance remains "
-                f"`{COMPARISON_TOLERANCE}`."
-            ),
-            "",
-            (
-                "Failure-path serialization retained "
-                f"`{len(convergence.residual_trace)}` "
-                f"residual rows, `{len(result.branches)}` branch receipts, "
-                f"`{len(guard_events)}` guard timings, `{len(side_events)}` side "
-                f"timings, `{len(solve_arrays)}` solve-array dtype records and "
-                f"`{len(exchange_arrays)}` exchange-array dtype records before the "
-                "typed exhaustion crossed the caller boundary."
-            ),
-            "",
-            "## Wall-time structure",
-            "",
-            (
-                f"Fixture and precision-probe preparation took "
-                f"`{_format(preparation_seconds)}` s. The window took "
-                f"`{_format(window_seconds)}` s; the landed CPU window figure is "
-                f"`{_format(CPU_WINDOW_SECONDS)}` s. That CPU figure is pre-band: "
-                "boundary-band sparsification landed later at `32942ac3`, whose "
-                "warm CPU assembly figure is 24.6 s; the CPU window was not rerun."
-            ),
-            "",
-            "| iteration | side | wall time (s) |",
-            "|---:|---|---:|",
-        ]
-    )
-    lines.extend(
-        f"| {event['iteration']} | {event['side']} | `{_format(event['seconds'])}` |"
-        for event in side_events
-    )
-    lines.extend(["", "## Guard callback round trips", ""])
-    if guard_events:
-        total = sum(float(event["seconds"]) for event in guard_events)
-        lines.append(
-            f"`{len(guard_events)}` calls cost `{_format(total)}` s total and "
-            f"`{_format(np.median([event['seconds'] for event in guard_events]))}` "
-            "s median per adapter construction."
+            + " |"
         )
-    else:
-        lines.append("No guard callback completed.")
-    if conservation is not None:
-        lines.extend(
-            [
-                "",
-                "## Latest transport ledgers",
-                "",
-                (
-                    "Flux closure absolute/relative: "
-                    f"`{_format(conservation['flux_closure_error'])}` / "
-                    f"`{_format(conservation['flux_closure_residual'])}`."
-                ),
-                (
-                    "Current continuity absolute/relative: "
-                    f"`{_format(conservation['current_continuity_error'])}` / "
-                    f"`{_format(conservation['current_continuity_residual'])}`."
-                ),
-            ]
-        )
-    lines.extend(
+    return "\n".join(
         [
+            "# Current-tree H200 coupled-window measurement",
             "",
-            "## Solver identity",
+            f"Tree: `{tree_sha}`. SLURM job: `{job_id}`.",
             "",
             (
-                "`equilibrium_sweep` at "
-                f"`{_source_location(coupled_window.equilibrium_sweep)}` "
-                "routes through the plasma-current-bearing cold portfolio and "
-                f"`ForwardProfile.solve_portfolio` at "
-                f"`{_source_location(ForwardProfile.solve_portfolio)}`."
+                "One job measured the identical gentle window on the CPU and one H200. "
+                "The first run on each backend supplies the typed receipt and total "
+                "window wall. Three deterministic repetitions supply nine warm "
+                "iteration-pair samples by omitting each repetition's first pair."
+            ),
+            "",
+            "## Declared window",
+            "",
+            "- Length: `0.0025 s`",
+            "- Auxiliary-source multiplier: `0.5`",
+            "- Ordinary iteration cap: `10`; hard ceiling: `20`",
+            "- Convergence tolerance: `0.005`; contraction threshold: `0.8`",
+            "- Initial damping: `1.0`; damping floor: `0.125`",
+            "- Platforms: `cuda,cpu`; temporary directory: `/tmp`",
+            "",
+            "## Direct same-tree result",
+            "",
+            (
+                "| backend | device | iterations | first window wall (s) | "
+                "warm equilibrium + FSA median (s) | warm TORAX median (s) | "
+                "warm pair median (s), n=9 | gating exit norm | "
+                "all-field exit norm | flux closure relative | "
+                "current closure relative |"
+            ),
+            "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+            *rows,
+            "",
+            f"The measured warm iteration-pair speedup is `{speedup:.6f}x`.",
+            "",
+            "The prior cross-tree wall projection is retired by these direct, "
+            "tree-identical measurements. Every TSV row carries the full tree SHA.",
+            "",
+            "## Receipt comparison",
+            "",
+            f"CPU contraction: `{cpu_contraction}`; H200: `{gpu_contraction}`.",
+            f"CPU gating/all-field exit: `{cpu_gating}` / `{cpu_all_field}`.",
+            f"H200 gating/all-field exit: `{gpu_gating}` / `{gpu_all_field}`.",
+            (
+                "CPU flux closure absolute/relative: "
+                f"`{cpu_flux_error}` / `{cpu_flux_residual}`."
+            ),
+            (
+                "H200 flux closure absolute/relative: "
+                f"`{gpu_flux_error}` / `{gpu_flux_residual}`."
+            ),
+            (
+                "CPU current closure absolute/relative: "
+                f"`{cpu_current_error}` / `{cpu_current_residual}`."
+            ),
+            (
+                "H200 current closure absolute/relative: "
+                f"`{gpu_current_error}` / `{gpu_current_residual}`."
+            ),
+            "",
+            "## Solver and placement checks",
+            "",
+            (
+                "The equilibrium leg routes through `ForwardProfile.solve_portfolio` "
+                f"at `{gpu.solve_location}`. The run inspected `{cpu.array_count}` CPU "
+                f"and `{gpu.array_count}` H200 solve/state array observations and "
+                "failed closed if any JAX array occupied the wrong backend."
             ),
             "",
         ]
     )
-    return "\n".join(lines)
 
 
 def main() -> int:
@@ -563,298 +638,35 @@ def main() -> int:
 
     gpu_devices = jax.devices("gpu")
     cpu_devices = jax.devices("cpu")
-    if jax.default_backend() != "gpu" or not gpu_devices or not cpu_devices:
-        raise RuntimeError("one CUDA device and the CPU callback platform are required")
-    gpu_device = gpu_devices[0]
-    cpu_device = cpu_devices[0]
+    if not gpu_devices or not cpu_devices or jax.default_backend() != "gpu":
+        raise RuntimeError("one CUDA device and the CPU platform are required")
 
     from scripts.window_demonstration import run_window as demonstration
 
-    original_equilibrium_sweep = demonstration.equilibrium_sweep
-    original_transport_sweep = demonstration.transport_sweep
-    original_solve_window = demonstration.solve_window
-    original_block_and_copy = demonstration._block_and_copy
-    original_grid_callback = torax_geometry._validated_grid_callback
-    guard_events: list[dict[str, Any]] = []
-    side_events: list[dict[str, Any]] = []
-    solve_arrays: list[dict[str, Any]] = []
-    exchange_arrays: list[dict[str, Any]] = []
-    probe_arrays: list[dict[str, Any]] = []
-    transfer_events: list[dict[str, Any]] = []
-    branch_records: list[dict[str, Any]] = []
-    equilibrium_iteration = 0
-    transport_iteration = 0
-    callback_iteration = 0
-    cpu_residuals = _cpu_trace()
-    precision: dict[str, Any] = {}
+    tree_sha = _tree_sha()
+    cpu = _measure_arm(demonstration, cpu_devices[0])
+    gpu = _measure_arm(demonstration, gpu_devices[0])
 
-    def observed_equilibrium_sweep(*args, **kwargs):
-        nonlocal equilibrium_iteration
-        equilibrium_iteration += 1
-        if equilibrium_iteration == 1:
-            probe_arrays.extend(_array_records((args, kwargs), "equilibrium.input"))
-        started = time.perf_counter()
-        receipt = original_equilibrium_sweep(*args, **kwargs)
-        jax.block_until_ready(receipt.equilibria)
-        side_events.append(
-            {
-                "iteration": equilibrium_iteration,
-                "side": "equilibrium_sweep",
-                "seconds": time.perf_counter() - started,
-            }
-        )
-        for sample, equilibrium in enumerate(receipt.equilibria):
-            records = _array_records(
-                equilibrium, f"equilibrium[{equilibrium_iteration},{sample}]"
-            )
-            _require_cuda(records, "equilibrium sweep output")
-            solve_arrays.extend(
-                {**row, "iteration": equilibrium_iteration, "side": f"sample_{sample}"}
-                for row in records
-            )
-        branch_records.extend(
-            demonstration._branch_measurement(branch, equilibrium_iteration)
-            for branch in receipt.branch_receipts
-        )
-        if equilibrium_iteration == 1:
-            probe_arrays.extend(_array_records(receipt, "equilibrium.output"))
-        return receipt
-
-    def observed_transport_sweep(*args, **kwargs):
-        nonlocal transport_iteration, callback_iteration
-        transport_iteration += 1
-        callback_iteration = transport_iteration
-        if transport_iteration == 1:
-            probe_arrays.extend(_array_records((args, kwargs), "transport.input"))
-        started = time.perf_counter()
-        receipt = original_transport_sweep(*args, **kwargs)
-        jax.block_until_ready(receipt.receipts)
-        side_events.append(
-            {
-                "iteration": transport_iteration,
-                "side": "transport",
-                "seconds": time.perf_counter() - started,
-            }
-        )
-        records = _array_records(receipt, f"transport[{transport_iteration}]")
-        _require_cuda(records, "transport sweep output")
-        exchange_arrays.extend(
-            {**row, "iteration": transport_iteration, "side": "transport"}
-            for row in records
-        )
-        if transport_iteration == 1:
-            probe_arrays.extend(_array_records(receipt, "transport.output"))
-        return receipt
-
-    def observed_grid_callback(rho_face):
-        started = time.perf_counter()
-        validated = original_grid_callback(rho_face)
-        validated.block_until_ready()
-        guard_events.append(
-            {
-                "iteration": callback_iteration,
-                "seconds": time.perf_counter() - started,
-            }
-        )
-        return validated
-
-    def observed_block_and_copy(tree):
-        transfer_events.append(
-            {
-                "call": len(transfer_events) + 1,
-                "operation": "FSA device record materialisation",
-                "gpu_fields": sum(
-                    isinstance(value, jax.Array)
-                    and all(device.platform == "gpu" for device in value.devices())
-                    for value in tree.values()
-                ),
-            }
-        )
-        return original_block_and_copy(tree)
-
-    def observed_solve_window(*args, **kwargs):
-        def serialize_failure(error):
-            exchange_records = [
-                {
-                    **row,
-                    "iteration": error.convergence.iterations_used,
-                    "side": "exhausted_waveforms",
-                }
-                for row in _array_records(
-                    (error.geometry_waveform, error.source_waveform),
-                    "failure.exchange",
-                )
-            ]
-            exchange_arrays.extend(exchange_records)
-            rows = _diagnostic_rows(
-                outcome_type=type(error).__name__,
-                outcome=str(error),
-                convergence=error.convergence,
-                cpu_residuals=cpu_residuals,
-                precision=precision,
-                branch_records=branch_records,
-                guard_events=guard_events,
-                side_events=side_events,
-                solve_arrays=solve_arrays,
-                exchange_arrays=exchange_arrays,
-                probe_arrays=probe_arrays,
-                transfer_events=transfer_events,
-            )
-            _write_tsv(arguments.results, rows)
-            print(f"failure_snapshot={arguments.results}", flush=True)
-
-        kwargs["failure_serializer"] = serialize_failure
-        return original_solve_window(*args, **kwargs)
-
-    demonstration.equilibrium_sweep = observed_equilibrium_sweep
-    demonstration.transport_sweep = observed_transport_sweep
-    demonstration.solve_window = observed_solve_window
-    demonstration._block_and_copy = observed_block_and_copy
-    torax_geometry._validated_grid_callback = observed_grid_callback
-
-    preparation_started = time.perf_counter()
-    with jax.default_device(cpu_device):
-        cpu_profile, cpu_seed, _cpu_vacuum = demonstration._fixture_machine()
-        cpu_equilibrium = cpu_profile.solve(
-            cpu_seed, route="anderson", evaluations=demonstration.EVALUATIONS
-        )
-        jax.block_until_ready(cpu_equilibrium)
-    cpu_records = _array_records(cpu_equilibrium, "precision.cpu")
-    cpu_residual = cpu_equilibrium.fixed_point.residual
-    precision.update(
-        cpu_residual=float(np.asarray(cpu_residual)),
-        cpu_dtype=str(cpu_residual.dtype),
-        cpu_placement=",".join(
-            sorted({row["device"] for row in cpu_records if row["backend"] != "host"})
-        ),
-    )
-    del cpu_profile, cpu_seed, cpu_equilibrium
-
-    with jax.default_device(gpu_device):
-        profile, seed, _vacuum = demonstration._fixture_machine()
-        baseline_equilibrium = profile.solve(
-            seed, route="anderson", evaluations=demonstration.EVALUATIONS
-        )
-        jax.block_until_ready(baseline_equilibrium)
-    gpu_records = _array_records(baseline_equilibrium, "precision.gpu")
-    _require_cuda(gpu_records, "precision GPU equilibrium")
-    gpu_residual = baseline_equilibrium.fixed_point.residual
-    precision.update(
-        gpu_residual=float(np.asarray(gpu_residual)),
-        gpu_dtype=str(gpu_residual.dtype),
-        gpu_placement=",".join(
-            sorted({row["device"] for row in gpu_records if row["backend"] != "host"})
-        ),
-    )
-    gpu_float_dtypes = {
-        row["dtype"] for row in gpu_records if row["dtype"].startswith("float")
-    }
-    if "float32" in gpu_float_dtypes:
-        precision["verdict"] = "FLOAT32 PATH PRESENT"
-    elif gpu_float_dtypes == {"float64"}:
-        precision["verdict"] = "FLOAT64 CONFIRMED; PRECISION ACQUITTED"
-    else:
-        precision["verdict"] = f"MIXED OR UNKNOWN DTYPES: {sorted(gpu_float_dtypes)}"
-
-    extraction_lattice = demonstration._extraction_lattice(profile)
-    fixture_sources = demonstration._fixture_sources(profile)
-    baseline_geometry, baseline_extraction = demonstration._geometry_from_equilibrium(
-        baseline_equilibrium, profile.source, extraction_lattice, fixture_sources
-    )
-    baseline_extraction.update(iteration=0, sample=0)
-    preparation_seconds = time.perf_counter() - preparation_started
-
-    config = demonstration.RegimeConfig(
-        "gentle", GENTLE_WINDOW_SECONDS, GENTLE_SOURCE_MULTIPLIER, 1
-    )
-    window_started = time.perf_counter()
-    result = demonstration._run_regime(
-        config,
-        profile=profile,
-        baseline_equilibrium=baseline_equilibrium,
-        baseline_geometry=baseline_geometry,
-        baseline_extraction=baseline_extraction,
-        extraction_lattice=extraction_lattice,
-        fixture_sources=fixture_sources,
-    )
-    window_seconds = time.perf_counter() - window_started
-    if result.convergence is None:
-        raise RuntimeError(f"window returned no convergence trace: {result.outcome}")
-
-    rows = _diagnostic_rows(
-        outcome_type=result.outcome_type,
-        outcome=result.outcome,
-        convergence=result.convergence,
-        cpu_residuals=cpu_residuals,
-        precision=precision,
-        branch_records=branch_records,
-        guard_events=guard_events,
-        side_events=side_events,
-        solve_arrays=solve_arrays,
-        exchange_arrays=exchange_arrays,
-        probe_arrays=probe_arrays,
-        transfer_events=transfer_events,
-    )
-    first = _first_divergence(result.convergence, cpu_residuals)
-    if first is not None:
-        _append(
-            rows,
-            "finding",
-            first["field"],
-            first["gpu"],
-            "relative",
-            iteration=first["iteration"],
-            side="first_cpu_gpu_divergence",
-            cpu_baseline=first["cpu"],
-            status="FIRST_NON_IDENTICAL_QUANTITY",
-        )
-    conservation = (
-        demonstration._transport_conservation(result.transport_receipt)
-        if result.transport_receipt is not None
-        else None
-    )
-    if conservation is not None:
-        for field, value in conservation.items():
-            _append(rows, "conservation", field, value, "receipt")
-    for field, value, unit in (
-        ("preparation_wall_time", preparation_seconds, "s"),
-        ("window_wall_time", window_seconds, "s"),
-    ):
-        _append(rows, "timing", field, value, unit)
+    rows: list[dict[str, str]] = []
+    _arm_rows(rows, tree_sha, cpu, cpu)
+    _arm_rows(rows, tree_sha, gpu, cpu)
     _write_tsv(arguments.results, rows)
     arguments.report.write_text(
         _render_report(
-            job_id=os.environ.get("SLURM_JOB_ID", "unknown"),
-            backend=jax.default_backend(),
-            device_kind=gpu_device.device_kind,
-            result=result,
-            precision=precision,
-            first=first,
-            cpu_residuals=cpu_residuals,
-            guard_events=guard_events,
-            side_events=side_events,
-            solve_arrays=solve_arrays,
-            exchange_arrays=exchange_arrays,
-            probe_arrays=probe_arrays,
-            preparation_seconds=preparation_seconds,
-            window_seconds=window_seconds,
-            conservation=conservation,
+            tree_sha,
+            os.environ.get("SLURM_JOB_ID", "unknown"),
+            cpu,
+            gpu,
         ),
         encoding="utf-8",
     )
-    print(f"precision_verdict={precision['verdict']}")
-    print(f"cpu_inner_residual={precision['cpu_residual']:.17g}")
-    print(f"gpu_inner_residual={precision['gpu_residual']:.17g}")
-    print(f"outcome={result.outcome_type}")
-    print(f"window_seconds={window_seconds:.17g}")
-    if first is not None:
-        print(
-            "first_divergence="
-            f"iteration:{first['iteration']},field:{first['field']},"
-            f"cpu:{first['cpu']:.17g},gpu:{first['gpu']:.17g}"
-        )
-    print(f"report={arguments.report}")
-    print(f"results={arguments.results}")
+    print(f"tree_sha={tree_sha}")
+    print(f"cpu_iterations={cpu.convergence.iterations_used}")
+    print(f"gpu_iterations={gpu.convergence.iterations_used}")
+    print(f"cpu_window_seconds={cpu.window_seconds[0]:.17g}")
+    print(f"gpu_window_seconds={gpu.window_seconds[0]:.17g}")
+    print(f"cpu_warm_pair_median={_median(cpu, 'combined'):.17g}")
+    print(f"gpu_warm_pair_median={_median(gpu, 'combined'):.17g}")
     return 0
 
 

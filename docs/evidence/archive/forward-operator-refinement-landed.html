@@ -203,6 +203,29 @@
   comparator figure alongside.</p>
 </section>
 
+<section id="event-resolution">
+  <h2 id="event-resolution-h">§6 — The bursts resolved: Krylov-conditioned non-normal events</h2>
+  <p><strong>event-resolved-amplification</strong> landed 2026-08-23 — commit
+  <code>5f60d7ad</code>, merged <code>9363b8e3</code>, gate PASSED. Verdict:
+  <strong>KRYLOV_CONDITIONED_NON_NORMAL_EVENT</strong>. The production prefix reproduces all
+  twelve banked separations exactly (2.16e-15 → 1.16e-05, cumulative 5.38e9); no frozen
+  terminal Jacobian was powered — the real-trajectory projected operator-norm product is
+  231.1, carrying the growth no single spectral rate predicts. Bursts at updates 3/8/12
+  correlate with Krylov step conditioning (burst median 292.5 vs quiet 27.8, 10.53×,
+  Spearman ρ 0.664) while active-mode overlap does not discriminate. Both cross-lane
+  predictions confirmed: a different same-shot seed <em>direction</em> eliminates the bursts
+  and reduces cumulative growth eleven orders (5.38e9 → 0.0619); warm-improved frames grow
+  136× less than warm-worsened (median 2.16e6 vs 2.94e8; one qualified outlier). The
+  eigenvector localisation exactly predicts the 14/9/8 failing-quantity clusters and all 35
+  categorical passes. With this the closure-gain investigation is mechanism-complete:
+  per-configuration physical near-marginal channels, amplified non-normally at
+  ill-conditioned Krylov events, direction-dependent — repair home the solver-owned
+  fixed-point route qualification/conditioning; this node supplies the iteration-local
+  discriminator. Receipt:
+  <code>docs/figures/forward-operator-refinement/event-resolved-amplification.json</code>,
+  trajectory/event/warm-prediction figure alongside.</p>
+</section>
+
 </main>
 </body>
 </html>

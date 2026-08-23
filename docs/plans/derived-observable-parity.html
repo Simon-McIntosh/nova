@@ -22,11 +22,11 @@
   <title>Derived-Observable Parity | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-23">
-<meta name="plan-version" content="2">
-<meta name="plan-commits" content="429506cfd767c0dd6365e4168d921f42a630b262,dff48306">
-<meta name="plan-artifacts" content="scripts/observable_parity_reuse/report.md,docs/evidence/archive/derived-observable-parity-landed.html">
-<meta name="plan-impl" content="0.2">
+<meta name="plan-modified" content="2026-08-24">
+<meta name="plan-version" content="3">
+<meta name="plan-commits" content="429506cfd767c0dd6365e4168d921f42a630b262,dff48306,82605bffc6540080fae1d49ebb30b310a69d7f73,a5f281ae">
+<meta name="plan-artifacts" content="scripts/observable_parity_reuse/report.md,docs/figures/derived-observable-parity/computation-discriminator.json,benchmarks/observable_route_discriminator.py,docs/evidence/archive/derived-observable-parity-landed.html">
+<meta name="plan-impl" content="0.4">
 </head>
 <body>
   <main class="plan-doc">
@@ -204,7 +204,7 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="exact-equality-bounds" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="exact-equality-bounds" data-choice="tolerance-bound" data-by="reckon-ship" data-when="2026-08-23T22:27:48+00:00">
     <p class="r-dec-q">Should any terminal observable carry an exact-equality bound
         across two execution routes at all? moments.volume does, and it fails. Exact
         equality is the strongest possible statement and it is either exactly right — the quantity
@@ -213,9 +213,9 @@
         the two readings imply opposite fixes.</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="keep-exact">keep exact equality; a discrete quantity must be identical</button>
-      <button class="r-opt" data-value="tolerance-bound">replace with a derived tolerance bound</button>
+      <button class="r-opt chosen" data-value="tolerance-bound">replace with a derived tolerance bound</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Decided on measurement, not argument. The discriminator evaluated moments.volume twice from ONE shared terminal state, through the scalar ForwardProfile.observe entry and through a jitted vmap of that same entry, on both platforms: the two paths are EXACTLY equal on CPU - a constant-zero difference vector across all six cases, which is why its correlations are undefined there - and differ by 4.440892098500626e-16 on the H200 at observe_moments.volume_reduction. A quantity that is bitwise identical on one execution platform and two units in the last place apart on another is not discrete, and an exact-equality bound on it is not a strong statement about the physics but a claim about a reduction order that the pipeline does not guarantee. The registration agrees: criterion-family.json records terminal_observable_envelopes_are_physics_tolerances = false and the registration itself declares the 69 envelopes frozen empirical envelopes measured for aligned-seed evaluation. So the bound is replaced by a derived tolerance. The tolerance must be DERIVED and not fitted: the section&#x27;s own refusal rule and the method requirements forbid taking it from the achieved value of the quantity it scores, so it comes from the floating-point summation error of the reduction itself - a term proportional to the element count times the active-dtype epsilon times the value scale - which is a property of the algorithm and the dtype rather than of any measurement. This does not excuse the two continuous observables from repair: all three verdicts are COMPUTATION_DIFFERS and the named first-differing operations remain the repair surface. Receipt docs/figures/derived-observable-parity/computation-discriminator.json, commit 82605bff.</p>
     </div>
 </section>
 
@@ -234,6 +234,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260823T2145-reuse-map" data-who="reckon-ship" data-when="2026-08-23T21:45:00Z">
     <div class="r-comment-body">observable-parity-reuse-map landed - commit 429506cf, merged dff48306; gate PASSED; measure: 248 lines, 3 of 3 failing observables each carrying registration site, bound derivation, per-slice path, batched path, shared-state entry, localisation seam and fitness verdict; 7 explicit no-candidate findings. Artifact: scripts/observable_parity_reuse/report.md. Decisive finding: ForwardProfile.solve and solve_batch already terminate in the same _solve_accelerated to _receipt spine, so no route-specific label definitions exist to reconcile and a second batched volume, radius or divergence function would create the duplicate authority this plan forbids. Discriminator arm: scalar ForwardProfile.observe on one selected shared terminal flux per case against jax.jit(jax.vmap(observe)) of the same entry, stable paths from _named_tree/_leaves, committed rules from _score_observable. Scope-changing gaps: neither jitted-eager-parity-gate.json nor conditioned-convergence-and-observables.json retains raw route values or terminal flux arrays, so the discriminator must RUN rather than be reconstructed; no observe_batch exists; no heterogeneous six-profile solve_batch exists and should not be invented until the shared-state arm implicates layout. Bearing on the open decision: moments.volume exact equality is an empirical zero-width float64 calibration envelope, not a discrete-type guarantee.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260824T0040-discriminator" data-who="reckon-ship" data-when="2026-08-24T00:40:00Z">
+    <div class="r-comment-body">observable-computation-discriminator landed - commit 82605bff, merged a5f281ae; gate PASSED; 5 tests added. Receipt status complete on NVIDIA H200 NVL, retaining BOTH platform measurements. Verdicts, all three COMPUTATION_DIFFERS on the platform the failures were banked on: conservation.divergence_j at maximum shared-state difference 1.7462298274040222e-10, first differing operation conservation.field_function_gradient; moments.major_radius at 1.1102230246251565e-16, first differing operation cell_centered_measure.per_cell_radial_volume; moments.volume at 4.440892098500626e-16, first differing operation observe_moments.volume_reduction. The state is exonerated: every evaluation started from ONE shared terminal state through the scalar ForwardProfile.observe entry and a jitted vmap of the same entry, with both values retained for all six cases and the route difference reported against terminal-state agreement as six rows. DECISION-BEARING CROSS-PLATFORM CONTRAST: moments.volume is exactly equal on CPU, a constant-zero difference vector over all six cases with correlations therefore undefined, and differs by 4.440892098500626e-16 on H200 - so its zero-width envelope is an execution-platform claim rather than a discrete-type guarantee. Decision exact-equality-bounds locked to tolerance-bound on that measurement. No repair or bound change was attempted here, by design. Route recovery worth recording: the node reported NEEDS-HELP after two non-successful GPU launches (an omitted memory request expanded to 1.5 TB, then JAX_PLATFORMS=gpu reached for the absent ROCm backend) and was answered in the same session with JAX_PLATFORMS=cuda; the corrected run completed in about two minutes on reservation gpu_0003_grpA. The driver now compares source platform to measurement platform and emits complete only on a match, so the earlier CPU-only artifact was marked provisional_backend_mismatch rather than presented as an adjudication.</div>
 </div>
 </section>
 </main>

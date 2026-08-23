@@ -71,6 +71,74 @@
   0.15286615188530017.</p>
 </section>
 
+<section id="s2">
+  <h2 id="s2-h">§2 — Computation difference or state difference, decided</h2>
+
+  <p><strong>observable-computation-discriminator</strong> landed 2026-08-24 — commit
+  <code>82605bff</code>, merged <code>a5f281ae</code>, gate PASSED, 5 tests added. Receipt
+  <code>docs/figures/derived-observable-parity/computation-discriminator.json</code>, status
+  <em>complete</em> on NVIDIA H200 NVL and retaining both platform measurements. The CUDA run used
+  reservation <code>gpu_0003_grpA</code> with one H200, four CPUs, 32 GB and a
+  ten-minute ceiling; it finished in about two minutes.</p>
+
+  <p><strong>All three verdicts are <code>COMPUTATION_DIFFERS</code>, and the state is
+  exonerated.</strong> Each failing observable was evaluated twice from <em>one shared terminal
+  state</em> — once through the scalar <code>ForwardProfile.observe</code> entry and once through a
+  jitted <code>vmap</code> of that same entry — with both values retained for all six cases and the
+  route-observable difference reported against terminal-state agreement as six explicit rows.</p>
+
+  <table>
+    <caption>H200 verdicts, with the CPU contrast beside them</caption>
+    <thead>
+      <tr><th scope="col">Observable</th><th scope="col">H200 verdict</th><th scope="col">Max shared-state difference (H200)</th><th scope="col">First differing operation</th><th scope="col">CPU verdict and difference</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>conservation.divergence_j</code></td>
+        <td>COMPUTATION_DIFFERS</td>
+        <td>1.7462298274040222e-10</td>
+        <td><code>conservation.field_function_gradient</code></td>
+        <td>COMPUTATION_DIFFERS at 1.177228945874931e-10</td>
+      </tr>
+      <tr>
+        <td><code>moments.major_radius</code></td>
+        <td>COMPUTATION_DIFFERS</td>
+        <td>1.1102230246251565e-16</td>
+        <td><code>cell_centered_measure.per_cell_radial_volume</code></td>
+        <td>COMPUTATION_DIFFERS at 2.220446049250313e-16</td>
+      </tr>
+      <tr>
+        <td><code>moments.volume</code></td>
+        <td>COMPUTATION_DIFFERS</td>
+        <td>4.440892098500626e-16</td>
+        <td><code>observe_moments.volume_reduction</code></td>
+        <td><strong>STATE_INHERITED — exact zero difference, correlation undefined</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p><strong>The cross-platform contrast is the decision-bearing result, and it is what the extra
+  run bought.</strong> <code>moments.volume</code> is <em>exactly equal</em> between the two
+  evaluation paths on CPU — a constant-zero difference vector across all six cases, which is why its
+  correlations are undefined there — and differs by 4.440892098500626e-16 on the H200, at the
+  terminal volume reduction. A quantity that is bitwise identical on one platform and two ULP apart
+  on another is not failing a computation defect; its <strong>zero-width envelope is a claim about an
+  execution platform</strong>, not a discrete-type guarantee. That settles the
+  <code>exact-equality-bounds</code> decision on measurement rather than on argument.</p>
+
+  <p><strong>What the discriminator deliberately did not do.</strong> No repair was attempted and no
+  bound was changed — §2's scope ends at the verdict, and the receipt says so. The three first-differing
+  operations it names — a field-function gradient, a per-cell radial volume, and a terminal volume
+  reduction — are the repair surface §3 inherits.</p>
+
+  <p><strong>One earlier reading is corrected by this run.</strong> The provisional CPU-only pass had
+  <code>moments.volume</code> as <code>STATE_INHERITED</code>. On the platform where the failures were
+  actually banked it is <code>COMPUTATION_DIFFERS</code>. The driver now compares source platform to
+  measurement platform and emits <em>complete</em> only on a match, so a platform-mismatched receipt
+  can no longer be read as an adjudication — the earlier provisional artifact was explicitly marked
+  <code>provisional_backend_mismatch</code> rather than presented as a result.</p>
+</section>
+
 </main>
 </body>
 </html>

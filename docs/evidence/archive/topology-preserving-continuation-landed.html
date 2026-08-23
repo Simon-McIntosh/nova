@@ -56,6 +56,55 @@
   <em>preregister</em> the observable before scoring all available candidates.</p>
 </section>
 
+<section id="s6">
+  <h2 id="s6-h">§6 — The conditioning shrinkage, repaired</h2>
+
+  <p><strong>conditioning-shrinkage-repair</strong> landed 2026-08-24 — commits
+  <code>35c7c035</code> (source) and <code>6df3eb80</code> (receipt), merged <code>6748bec2</code>,
+  gate <strong>PASS</strong>, 24 tests passing across five conditioning and admission modules.
+  Reserved-H200 paired replay SLURM job 1253367, completed in 00:04:47. Receipt
+  <code>docs/figures/topology-preserving-continuation/conditioning-repair.json</code> (SHA-256
+  <code>661f46ffe67f9cf7cf4236c1721f1d2bb4d75577941dadb4608699052404d9a4</code>).</p>
+
+  <p><strong>The repair is an ordering change, and that is why it works.</strong> The production rule
+  now evaluates the <em>undamped</em> fixed ladder first. Conditioned damping is reached for only
+  after every raw trial is physically refused, and the damped fallback is promoted only when it does
+  not increase the current relative residual. An already-admitted raw step is therefore preserved
+  exactly, instead of being shrunk before the predicate sees it — which was the whole mechanism of
+  the regression.</p>
+
+  <table>
+    <caption>Per frame: repaired / same-tree conditioning disabled / pre-repair conditioning enabled</caption>
+    <thead>
+      <tr><th scope="col">Frame</th><th scope="col">Interventions of 89</th><th scope="col">Admitted advances of 89</th><th scope="col">Newton-step-equivalents</th><th scope="col">Terminal residual</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>d3d_shot_00000c4a7b f179</td><td>1 / 0 / 89</td><td>8 / 7 / 89</td><td>3.2199825000659112 / 3.21875 / 0.1125996041838135</td><td>0.10690242237460541 / 0.10704471039091447 / 5.9969660129145375</td></tr>
+      <tr><td>d3d_shot_0003ff34e7 f44</td><td>3 / 0 / 89</td><td>9 / 6 / 89</td><td>4.203302472809529 / 4.193294139261007 / 0.4048326525248699</td><td>0.09970075362827917 / 0.10077482131394641 / 6.345010525309393</td></tr>
+      <tr><td>d3d_shot_001554e054 f144</td><td>2 / 0 / 89</td><td>12 / 10 / 89</td><td>3.3815541369487643 / 3.3634607051038814 / 0.389171758027934</td><td>0.15255853230708596 / 0.1553929757220097 / 3.7540271627429744</td></tr>
+      <tr><td>d3d_shot_002495e835 f146</td><td>3 / 0 / 89</td><td>7 / 4 / 89</td><td>2.9323650168757105 / 2.9171534022732244 / 0.17651307050110607</td><td>0.08646603357046066 / 0.08696912567989223 / 4.27275196119138</td></tr>
+      <tr><td>d3d_shot_0040ca9bdc f137</td><td>2 / 0 / 89</td><td>11 / 9 / 89</td><td>5.192784877394542 / 5.190554648311268 / 0.06860155692910576</td><td>0.12255579619151723 / 0.12290690751401612 / 4.713585403867379</td></tr>
+      <tr><td><strong>cohort</strong></td><td><strong>11 / 0 / 445</strong></td><td><strong>47 / 36 / 445</strong></td><td><strong>18.92998900409446 / 18.88321289494938 / 1.1517186421668293</strong></td><td>residual no worse than disabled on <strong>5/5</strong> frames</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Every clause of the section's gate is met.</strong> Repaired terminal residuals are at
+  or below the disabled arm on all five frames (0.10690 ≤ 0.10704, 0.09970 ≤ 0.10077, 0.15256 ≤
+  0.15539, 0.08647 ≤ 0.08697, 0.12256 ≤ 0.12291). Traversal returns to 18.93 step-equivalents,
+  marginally <em>above</em> the disabled arm, so the mechanism now contributes rather than costing.
+  Admissions rise to 47 against 36 disabled. Dimension-generality is retained: admission-aware
+  conditioning engages at projection dimensions 8, 12 and 24 under compiled fixed-shape tests, and
+  both retired dataset-fitted constants and the projection-dimension gate remain absent from
+  <code>nova/equilibrium/fixed_point.py</code>. All repaired and disabled terminals stay diverted
+  with finite X points.</p>
+
+  <p><strong>Attribution.</strong> The H200 receipt is a causal same-tree pair whose only arm
+  difference is the condition-ratio limit, <em>e</em> against infinity, on production source
+  <code>35c7c035</code>. The earlier pre-repair figures from
+  <code>admissible-step-control.json</code> are quoted as context, explicitly not as causal
+  estimates across trees.</p>
+</section>
+
 <section id="s3-alignment">
   <h2 id="s3-alignment-h">§3 — The preregistered seed-alignment observable, and why it is held</h2>
 

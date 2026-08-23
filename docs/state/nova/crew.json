@@ -1,9 +1,16 @@
 {
-  "updated": "2026-08-24T00:02:23",
+  "updated": "2026-08-24T00:25:49",
   "project": "nova",
   "doc": "crew",
   "data": {
     "members": [
+      {
+        "id": "alignment-power",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a030a6-d6c8-7ba0-883f-e0b57d138801",
+        "created": "2026-08-23"
+      },
       {
         "id": "basin-branches",
         "harness": "codex",
@@ -87,6 +94,13 @@
         "role": "implement",
         "session_id": "01a02627-434c-7813-854b-811643929182",
         "created": "2026-08-21"
+      },
+      {
+        "id": "conditioning-repair",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a030a6-bf48-73c1-8393-1a3224d34818",
+        "created": "2026-08-23"
       },
       {
         "id": "corner-pole",
@@ -428,7 +442,7 @@
         "id": "manifold-measure",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a030a7-b2ee-7cf0-b5ff-679e56a7f772",
         "created": "2026-08-23"
       },
       {
@@ -29331,9 +29345,137 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T220345586141-conditioning-shrinkage-repair",
+        "plan": "topology-preserving-continuation",
+        "section": "\u00a76",
+        "node": "conditioning-shrinkage-repair",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "conditioning-repair",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T22:03:48Z",
+        "completed_at": "2026-08-23T22:22:03Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1095,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1095,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "f7bf288c8ac44d339f07146228644cd5d801c275",
+        "commits": [
+          "6df3eb80efcf7c5f32b48ea8fabc38e6d0198b0e"
+        ],
+        "changed_lines": {
+          "added": 686,
+          "removed": 22,
+          "files": 3
+        },
+        "tests_added": 24,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T220345586141-conditioning-shrinkage-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a030a6-bf48-73c1-8393-1a3224d34818",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9348096,
+            "cached_input_tokens_cumulative": 9348096,
+            "input_tokens": 9540853,
+            "input_tokens_cumulative": 9540853,
+            "output_tokens": 32125,
+            "output_tokens_cumulative": 32125,
+            "reasoning_output_tokens": 11035,
+            "reasoning_output_tokens_cumulative": 11035
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T212908752856-observable-computation-discriminator",
+        "plan": "derived-observable-parity",
+        "section": "\u00a72",
+        "node": "observable-computation-discriminator",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "observable-discriminator",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T21:29:12Z",
+        "completed_at": "2026-08-23T22:23:50Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3278,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3278,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "0b9ab88a0974341b656668a70863855e1a091cc3",
+        "commits": [
+          "82605bffc6540080fae1d49ebb30b310a69d7f73"
+        ],
+        "changed_lines": {
+          "added": 3909,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T212908752856-observable-computation-discriminator/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03087-0f40-77c0-8205-dba9c338ca42",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 26033408,
+            "cached_input_tokens_cumulative": 26033408,
+            "input_tokens": 26478148,
+            "input_tokens_cumulative": 26478148,
+            "output_tokens": 51243,
+            "output_tokens_cumulative": 51243,
+            "reasoning_output_tokens": 15150,
+            "reasoning_output_tokens_cumulative": 15150
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 695
+    "_version": 702
   }
 }

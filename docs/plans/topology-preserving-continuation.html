@@ -25,11 +25,11 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-24">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 <meta name="plan-sprint" content="S14">
-<meta name="plan-commits" content="6cdc60c46ef0b0e1c611ff2c5404ec561e4abbce,b971557179559797f03d2438c3b5b041a102154e,f1adace7cbfecea328cc085bad72f4e7664929f5,f0cec6dcd29b766f3c7b8c8813f4577a0419cd28,e9ec1ca86ae4eda2d91ab67ae7b780bb7935ec3e,5e7265d36bb2ebd3ba83def966d2bb1fbfb440ab,31b9914b,32526f7a7bab5e84c72c82b9706f4927a82d9b86,56ba6e29">
-<meta name="plan-artifacts" content="docs/figures/diiid-forward-onboarding/dimension-general-conditioning.json,docs/figures/topology-preserving-continuation/admissible-step-control.json,docs/figures/topology-preserving-continuation/seed-alignment-ranking.json,scripts/continuation_parameter_choice/report.md,scripts/continuation_manifold_reuse/report.md,nova/equilibrium/manifold_advance.py,nova/equilibrium/seed_alignment.py,docs/evidence/archive/topology-preserving-continuation-landed.html">
-<meta name="plan-impl" content="0.667">
+<meta name="plan-commits" content="6cdc60c46ef0b0e1c611ff2c5404ec561e4abbce,f1adace7cbfecea328cc085bad72f4e7664929f5,f0cec6dcd29b766f3c7b8c8813f4577a0419cd28,e9ec1ca86ae4eda2d91ab67ae7b780bb7935ec3e,5e7265d36bb2ebd3ba83def966d2bb1fbfb440ab,32526f7a7bab5e84c72c82b9706f4927a82d9b86,35c7c0358ec6b072d623688d6d13c861f04be232,6df3eb80efcf7c5f32b48ea8fabc38e6d0198b0e,6748bec2">
+<meta name="plan-artifacts" content="docs/figures/diiid-forward-onboarding/dimension-general-conditioning.json,docs/figures/topology-preserving-continuation/admissible-step-control.json,docs/figures/topology-preserving-continuation/seed-alignment-ranking.json,docs/figures/topology-preserving-continuation/conditioning-repair.json,scripts/continuation_parameter_choice/report.md,scripts/continuation_manifold_reuse/report.md,nova/equilibrium/manifold_advance.py,nova/equilibrium/seed_alignment.py,docs/evidence/archive/topology-preserving-continuation-landed.html">
+<meta name="plan-impl" content="0.778">
 </head>
 <body>
   <main class="plan-doc">
@@ -261,42 +261,23 @@
     test had fired zero times. The rule was under-specified, not the worker wrong. Any verdict here
     that names a cause states the evidence that the cause was active.</p>
 
-    <h2 id="s6">§6 — Repair the conditioning shrinkage that reads as full admission</h2>
-
-    <p>Discovered by this plan's own control measurement and folded here because it is the same
-    plan's subject: the production step conditioning that satisfied §4's generality requirement is a
-    two-order regression on the route §2 must measure. Enabled, it fires on <strong>89 of 89</strong>
-    iterations of every frame and admits <strong>445 of 445</strong> factor-one advances, while
-    effective traversal collapses to <strong>1.15</strong> Newton-step-equivalents against
-    <strong>18.88</strong> with the intervention disabled, and terminal residuals worsen from the
-    0.087–0.155 range to <strong>3.75–6.35</strong>. Both arms hold topology: 5 of 5 diverted with
-    5 of 5 finite X points.</p>
-
-    <p><strong>The mechanism of the defect, which the numbers name precisely.</strong> The rule
-    shrinks the step <em>before</em> the admissibility predicate is consulted, so the predicate is
-    asked about a step small enough to be trivially inside the class. Full admission is therefore
-    what shrinkage looks like from the admission counter — an instrument reading its own damping as
-    success. This also invalidates admitted-advance count as a standalone quality measure anywhere
-    on this plan: a count must always be reported beside achieved traversal.</p>
-
-    <p><strong>Why the trigger firing every iteration is the thing to explain.</strong> §4's trigger
-    is projected condition over an online largest-to-median baseline exceeding <em>e</em>. On a
-    24-vector route whose projected conditions reach 4087, that ratio evidently exceeds <em>e</em>
-    on every update — so either the online baseline is tracking the condition it is meant to
-    normalise against (making the ratio scale-free in the wrong way), or the release condition at
-    the fourth root of dtype precision never engages because the residual never falls that far on a
-    non-converging route. Both are answerable from the banked per-update traces without a new solve.</p>
-
-    <p><strong>Done when</strong> the paired same-tree control is re-run with the repair in place and
-    reports, per frame, intervention count out of 89, admitted-advance count out of 89, achieved
-    Newton-step-equivalents, and terminal relative residual, each quoted beside the corresponding
-    conditioning-enabled and conditioning-disabled figures in
-    <code>docs/figures/topology-preserving-continuation/admissible-step-control.json</code>; with
-    residuals no worse than the disabled arm on every frame, dimension-generality retained — no
-    dataset-fitted or dimension-specific constant reintroduced — and engagement still demonstrated
-    at projection dimensions 8, 12 and 24. A repair that restores residuals by disabling the
-    mechanism is not a repair; if the mechanism cannot both engage and preserve traversal, that is a
-    reportable negative and §4's generality claim is restated as a trade rather than a win.</p>
+    <section id="s6" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-24</span>
+        <h2>§6 — Repair the conditioning shrinkage that reads as full admission</h2></header>
+      <p class="landed-summary">Repaired by reordering: the undamped fixed ladder is evaluated
+      first, conditioned damping is reached for only after every raw trial is physically refused,
+      and the damped fallback is promoted only when it does not raise the current relative residual —
+      so an admitted raw step is preserved exactly rather than shrunk before the predicate sees it.
+      Reserved-H200 paired replay (job 1253367, 4m47s): interventions <strong>445/445 → 11</strong>,
+      admitted advances <strong>47</strong> against 36 with the intervention disabled, traversal
+      <strong>1.15 → 18.93</strong> Newton-step-equivalents against 18.88 disabled, and terminal
+      residuals at or below the disabled arm on <strong>5 of 5</strong> frames. Generality retained:
+      engages at projection dimensions 8, 12 and 24 with no dataset-fitted or dimension-specific
+      constant reintroduced; all terminals diverted with finite X points. 24 tests across five
+      conditioning and admission modules. Full record:
+      <a href="/nova/evidence/archive/topology-preserving-continuation-landed#s6">§6 landed</a>
+      (commits <code>35c7c035</code>, <code>6df3eb80</code>, merged <code>6748bec2</code>).</p>
+    </section>
 
     <h2 id="s7">§7 — Give the alignment ranking enough power to decide</h2>
 
@@ -369,6 +350,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260824T0005-alignment" data-who="reckon-ship" data-when="2026-08-24T00:05:00Z">
     <div class="r-comment-body">seed-alignment-observable landed - commit 32526f7a, merged 56ba6e29; gate PASSED; 4 tests added; verdict HOLD_AS_SEED_SELECTOR. Measure: preregistered score q(s,F) = ||F(s)-s||_2 / ||(I - J_F(s))(F(s)-s)||_2 on a fixed five-frame corpus declared before scores or outcomes were opened; Spearman against cumulative growth 0.60 at p = 0.28475697986529386, n = 5; Spearman against terminal residual 0.00 at p = 1.0, n = 5. The section requires consistency against BOTH outcomes, so this is a NEGATIVE and the section stays open. Scores were 0.9322689958968416 (21978/35), 0.9533225665401838 (21983/35), 1.0026929545189016 (21985/51), 0.9951411056094699 (21986/46), 1.065876598525219 (21989/55). No converged solve enters the observable, which the receipt states explicitly. THE OUTLIER SUB-DELIVERABLE DOES CLOSE: 21985/51 is most-informative and NOT instrumentation-perturbed - the replay reproduced the banked twelve-update trajectory with no production or test source change, and its real same-shot alternate seed moved burst updates from [3, 8, 12] to none and cumulative growth from 5379792627.282051 to 0.061860940695296525. Method requirements honoured: attribution is limited to rank association because the observable is measured on the current tree against outcomes banked on earlier trees in which multiple production mechanisms changed. The receipt's instruction not to tune the score after seeing the outcomes is honoured by locking the definition and folding a power node rather than trying a second observable on the same five points. Artifact: docs/figures/topology-preserving-continuation/seed-alignment-ranking.json.</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260824T0035-repair" data-who="reckon-ship" data-when="2026-08-24T00:35:00Z">
+    <div class="r-comment-body">conditioning-shrinkage-repair landed - commits 35c7c035 (source) and 6df3eb80 (receipt), merged 6748bec2; gate PASS; 24 tests across five conditioning and admission modules; reserved-H200 paired replay SLURM job 1253367 completed in 00:04:47. Mechanism: the undamped fixed ladder is evaluated FIRST, conditioned damping is reached for only after every raw trial is physically refused, and the damped fallback is promoted only when it does not increase the current relative residual, so an admitted raw step is preserved exactly instead of being shrunk before the predicate sees it. Measures, repaired / same-tree disabled / pre-repair enabled: interventions 11 / 0 / 445 of 445; admitted advances 47 / 36 / 445; achieved Newton-step-equivalents 18.92998900409446 / 18.88321289494938 / 1.1517186421668293; terminal residuals at or below the disabled arm on 5 of 5 frames (0.10690242237460541 <= 0.10704471039091447, 0.09970075362827917 <= 0.10077482131394641, 0.15255853230708596 <= 0.1553929757220097, 0.08646603357046066 <= 0.08696912567989223, 0.12255579619151723 <= 0.12290690751401612). Traversal is marginally ABOVE the disabled arm, so the mechanism now contributes rather than costing. Generality retained: engages at projection dimensions 8, 12 and 24 under compiled fixed-shape tests, both retired dataset-fitted constants and the projection-dimension gate still absent from nova/equilibrium/fixed_point.py. All repaired and disabled terminals diverted with finite X points. Attribution: causal same-tree pair on production source 35c7c035 whose only arm difference is the condition-ratio limit e against infinity; pre-repair figures quoted as context, not as cross-tree causal estimates. Artifact: docs/figures/topology-preserving-continuation/conditioning-repair.json, SHA-256 661f46ffe67f9cf7cf4236c1721f1d2bb4d75577941dadb4608699052404d9a4. Section collapsed.</div>
 </div>
 </section>
 </main>

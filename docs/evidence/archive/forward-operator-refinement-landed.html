@@ -69,6 +69,50 @@
   (sha256 <code>659141e0…</code>), ladder figure alongside.</p>
 </section>
 
+<section id="closure-trace">
+  <h2 id="closure-trace-h">§6 — The trace: expanding-map amplification, closure arithmetic exonerated</h2>
+  <p><strong>passive-closure-trace</strong> landed 2026-08-23 — commit <code>3fc45e90</code>,
+  merged <code>0d56b8a7</code>, gate PASSED. Verdict:
+  <strong>EXPANDING_MAP_AMPLIFICATION</strong>, mechanism
+  <code>noncontractive_free_boundary_map_resolvent_gain</code>
+  (forward_operator.py:569–573 external-plus-internal image composition;
+  fixed_point.py:244–255 the (I−J) resolvent solve). Exact decomposition on the fixed
+  2,214-cell carrier: 0.6377635705 points = 0.0285731739 direct external +
+  0.6091903967 coupled plasma feedback + 0 support/mask, identity error 0; direct external
+  peak 0.0972 points against the documented 0.098; field gain 6.60×. Iteration one is
+  arithmetically exact (seed 0 Wb, feedback 0 points, current 0 A differences), excluding
+  closure arithmetic; per-iteration tangent growth ratios settle at median 1.3372,
+  consistent with the measured unpinned spectral radius 1.2577; source-normalisation,
+  seed/basin and support/mask candidates each excluded with quoted measurements. Routing per
+  the pre-agreed cross-lane contract: no repair node in this plan — the screening enters
+  the catalog lane's action-qualification mechanism as the fifth refusal condition, last in
+  precedence, and restoration of the documented response stays owed by that lane's
+  topology-admission and expanding-map work. Receipt:
+  <code>docs/figures/forward-operator-refinement/passive-closure-trace.json</code>
+  (sha256 <code>31999132…</code>), per-iteration figure alongside.</p>
+</section>
+
+<section id="gpu-rebuild">
+  <h2 id="gpu-rebuild-h">§4 — The bumped default, demonstrated live on the H200</h2>
+  <p><strong>global-dplasma-gpu-rebuild</strong> landed 2026-08-23 — commit
+  <code>2e5a7ba6</code>, merged <code>2f2575dc</code>, gate PASSED under the §6
+  green-except-classified clause. <code>Frame.dplasma</code> −500 → −2100, realising 2,210
+  interior cells (103% of the reference-native floor). The forced cold rebuild ran live on
+  an NVIDIA H200 NVL through the landed single-source kernel path (merge
+  <code>80979f40</code> in ancestry, jax/jaxlib 0.11.0, compile cache off): the
+  <strong>full biot interaction rebuild — 9 blocks + 18 moment companions, 17.1 M
+  source-target pairs — completed cold in 62.729 s</strong> (+2.44 s publication), 52% of
+  the 120 s bar, 2.36× the 26.576 s nine-block comparator (27 matrices against 9), 1.81×
+  the 34.638 s fine provenance fixture. Artifacts published under compute-provenance group
+  <code>6214088a</code> with 27/27 float64 matrices reopening from the store; the
+  implicit-mesh identity moved <code>0ae2a6e0</code> → <code>d3fc462b</code> as designed
+  while explicit and other-provenance siblings stayed untouched. Suites at the new default:
+  forward 35/35, constrained 9/9, solve 28/28; the single reference failure is the
+  §6-classified amplification, visibly red until restoration. Receipt:
+  <code>docs/figures/forward-operator-refinement/global-dplasma-gpu-rebuild.json</code>,
+  comparator figure alongside.</p>
+</section>
+
 </main>
 </body>
 </html>

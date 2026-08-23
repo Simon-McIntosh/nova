@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T16:14:22",
+  "updated": "2026-08-23T16:30:50",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -633,6 +633,13 @@
         "role": "implement",
         "session_id": "01a02681-596f-7f21-858e-71de3041eacd",
         "created": "2026-08-21"
+      },
+      {
+        "id": "topology-admission",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "topology-parity",
@@ -26725,9 +26732,201 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T140338153895-nonfinite-jvp-primitive",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a75",
+        "node": "nonfinite-jvp-primitive",
+        "role": "implement",
+        "spec_level": "",
+        "member": "kernel-gradient",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T14:03:42Z",
+        "completed_at": "2026-08-23T14:26:39Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1377,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1377,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "83dc40fbb1bff3c37ce97730b9eaa9bba0344117",
+        "commits": [
+          "06b09f5bfdcf184a69066e829a6e7ee16fdd3a2b"
+        ],
+        "changed_lines": {
+          "added": 279,
+          "removed": 2,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T140338153895-nonfinite-jvp-primitive/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02eef-333b-7823-8c3d-8aeb8dc8d2a6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15007488,
+            "cached_input_tokens_cumulative": 15007488,
+            "input_tokens": 15341054,
+            "input_tokens_cumulative": 15341054,
+            "output_tokens": 39548,
+            "output_tokens_cumulative": 39548,
+            "reasoning_output_tokens": 17149,
+            "reasoning_output_tokens_cumulative": 17149
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T140733543988-passive-closure-trace",
+        "plan": "forward-operator-refinement",
+        "section": "\u00a76",
+        "node": "passive-closure-trace",
+        "role": "implement",
+        "spec_level": "",
+        "member": "lane-health",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T14:07:37Z",
+        "completed_at": "2026-08-23T14:29:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1294,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1294,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "f4174c9ad9b770dca62df0fff3701cab2e36ed89",
+        "commits": [
+          "3fc45e90258181a5ab414da17aba6a6a7ba4ac96"
+        ],
+        "changed_lines": {
+          "added": 1054,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T140733543988-passive-closure-trace/manifest.md",
+        "scope_changed": false,
+        "session_id": "019ffa14-6e29-71a0-8ee1-703091b68cc6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3877760,
+            "cached_input_tokens_cumulative": 40446336,
+            "input_tokens": 4253058,
+            "input_tokens_cumulative": 41632352,
+            "output_tokens": 36847,
+            "output_tokens_cumulative": 109370,
+            "reasoning_output_tokens": 14364,
+            "reasoning_output_tokens_cumulative": 35313
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T121523253511-global-dplasma-gpu-rebuild",
+        "plan": "forward-operator-refinement",
+        "section": "\u00a74",
+        "node": "global-dplasma-gpu-rebuild",
+        "role": "implement",
+        "spec_level": "",
+        "member": "biot-bench",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T12:15:34Z",
+        "completed_at": "2026-08-23T13:20:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3908,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3908,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "37be0f9668a37b2fa62bcd50fd3594f8a7bc7389",
+        "commits": [
+          "2e5a7ba62318e769c117efe8ce6d6d1d9d1cf29a"
+        ],
+        "changed_lines": {
+          "added": 542,
+          "removed": 2,
+          "files": 5
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T121523253511-global-dplasma-gpu-rebuild/manifest.md",
+        "scope_changed": false,
+        "session_id": "019fff4e-9a1b-7652-ac96-f324479b9f67",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 27311872,
+            "cached_input_tokens_cumulative": 88794112,
+            "input_tokens": 27953641,
+            "input_tokens_cumulative": 91084399,
+            "output_tokens": 61122,
+            "output_tokens_cumulative": 250633,
+            "reasoning_output_tokens": 17029,
+            "reasoning_output_tokens_cumulative": 84383
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 635
+    "_version": 639
   }
 }

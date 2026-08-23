@@ -19,8 +19,8 @@
 <meta name="plan-effort-hours" content="6.0">
 <meta name="plan-depends-on" content="scoring-criteria-derivation">
 <meta name="plan-informs" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
-<meta name="plan-version" content="19">
-<meta name="plan-impl" content="0.22">
+<meta name="plan-version" content="21">
+<meta name="plan-impl" content="0.44">
 </head>
 <body>
 <main class="plan-doc">
@@ -245,6 +245,12 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20260823T1615" data-who="reckon-ship" data-when="2026-08-23 16:15">
     <div class="r-comment-body">passive-closure-mesh-response landed — commit <code>adb4cb9e</code>, merged <code>ae4332cd</code>; gate PASSED (6 solves, all terminal residuals ≤ 2.52e-10, receipt + figure sha-pinned). VERDICT: MESH_INDEPENDENT_CLOSURE_DEFECT. Ladder at explicit −500/−1500/−2100 (realised 566/1587/2214 cells): closure moves 0.6098 / 0.6392 / 0.6378 points — the reference-scale response is 1.046× the coarse response and 4.25× the 0.15 ceiling, farther from the 0.098-point documented direct response, all carriers cold-built on GPU (233.8/436.5/556.6 s). The coarse carrier is exonerated; the SUITE_CELLS half of the alignment bundle will NOT fix the failing reference assertion — the defect routes to §6. Receipt: docs/figures/forward-operator-refinement/passive-closure-mesh-response.json.</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260823T1630" data-who="reckon-ship" data-when="2026-08-23 16:30">
+    <div class="r-comment-body">passive-closure-trace landed — commit <code>3fc45e90</code>, merged <code>0d56b8a7</code>; gate PASSED. VERDICT: EXPANDING_MAP_AMPLIFICATION (class A), mechanism <code>noncontractive_free_boundary_map_resolvent_gain</code> at forward_operator.py:569–573 + fixed_point.py:244–255. Exact arithmetic: 0.6377635705 = 0.0285731739 direct external + 0.6091903967 coupled plasma feedback + 0 support/mask, identity error 0; direct external peak 0.0972 points (≈ the documented 0.098, under the 0.15 ceiling); field gain 6.60×; iteration one arithmetically exact (seed 0 Wb / feedback 0 pt / current 0 A differences) so closure arithmetic is EXCLUDED; per-iteration tangent growth ratios settle at median 1.3372, consistent with the measured unpinned spectral radius 1.2577. All three class-B candidates excluded with quoted measurements. Per the pre-agreed routing NO repair node is cut here — the screening spec goes to the catalog lane's qualification mechanism (fifth condition, last precedence) and restoration stays owed by that lane's topology-admission and expanding-map work; the reference assertion stays red until then. Receipt: docs/figures/forward-operator-refinement/passive-closure-trace.json (sha256 31999132…).</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260823T1638" data-who="reckon-ship" data-when="2026-08-23 16:38">
+    <div class="r-comment-body">global-dplasma-gpu-rebuild landed — commit <code>2e5a7ba6</code>, merged <code>2f2575dc</code>; gate PASSED under the §6 green-except-classified clause. Frame.dplasma −500→−2100 (2,210 achieved cells, 103% of the reference-native floor). Live H200 demonstration: full biot interaction rebuild — nine blocks + 18 moment companions, 17.1M source-target pairs — cold in 62.729 s (+2.44 s publication), compile cache off, 52% of the 120 s bar, 2.36× the nine-block port comparator (27 matrices vs 9), published under compute-provenance group 6214088a with 27/27 float64 matrices reopening; implicit-mesh identity 0ae2a6e0→d3fc462b invalidated as designed, explicit and other-provenance siblings untouched. Suites at the new default: forward 35/35, constrained 9/9, solve 28/28; the single reference failure is the §6-classified expanding-map amplification (solver-lane owned, screened-not-fixed, stays red). Receipt: docs/figures/forward-operator-refinement/global-dplasma-gpu-rebuild.json.</div>
 </div>
 </section>
 </main>

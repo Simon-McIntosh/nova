@@ -130,6 +130,15 @@ if TYPE_CHECKING:
         MomentEnforcementError,
         MomentTargets,
     )
+    from nova.equilibrium.observation_kernels import (
+        InterpolationSupportReceipt,
+        ObservationKernelReceipt,
+        ThomsonSignals,
+        VirtualMagneticSignals,
+        synthesize_thomson,
+        virtual_flux_loops,
+        virtual_poloidal_probes,
+    )
     from nova.equilibrium.profile import (
         ProfileDegrees,
         ProfilePrior,
@@ -190,6 +199,7 @@ _DEFERRED_EXPORTS: dict[str, str] = {
     "GridMotion": "flux_surface_geometry",
     "GreenSourceRepresentation": "extraction_lattice",
     "IntegralObservation": "observation",
+    "InterpolationSupportReceipt": "observation_kernels",
     "IsothermalRotation": "rotation",
     "Li2Geometry": "internal_inductance",
     "Li3Geometry": "internal_inductance",
@@ -200,6 +210,7 @@ _DEFERRED_EXPORTS: dict[str, str] = {
     "MomentTargets": "observation",
     "NormalisationPolicy": "source",
     "NormalisationRecord": "source",
+    "ObservationKernelReceipt": "observation_kernels",
     "PlasmaDomain": "domain",
     "PrescribedCurrentField": "forward_operator",
     "PerturbedSeedPolicy": "forward",
@@ -223,7 +234,9 @@ _DEFERRED_EXPORTS: dict[str, str] = {
     "StencilMesh": "stencil_mesh",
     "SurfaceGeometryError": "flux_surface_geometry",
     "SurfaceExtractionReceipt": "map_extraction",
+    "ThomsonSignals": "observation_kernels",
     "VacuumRegionReceipt": "map_extraction",
+    "VirtualMagneticSignals": "observation_kernels",
     "TopologyClass": "topology",
     "apply_delta_star": "map_extraction",
     "convert_li_2_to_li_3": "internal_inductance",
@@ -240,7 +253,10 @@ _DEFERRED_EXPORTS: dict[str, str] = {
     "select_forward_branch": "branch_selection",
     "traced_assemble_flux_surface_geometry": "flux_surface_extraction",
     "traced_flux_surface_geometry": "flux_surface_extraction",
+    "synthesize_thomson": "observation_kernels",
     "vacuum_region_receipt": "map_extraction",
+    "virtual_flux_loops": "observation_kernels",
+    "virtual_poloidal_probes": "observation_kernels",
 }
 
 __all__ = [
@@ -277,6 +293,7 @@ __all__ = [
     "GridMotion",
     "GreenSourceRepresentation",
     "IntegralObservation",
+    "InterpolationSupportReceipt",
     "IsothermalRotation",
     "Li2Geometry",
     "Li3Geometry",
@@ -286,6 +303,7 @@ __all__ = [
     "MomentTargets",
     "NormalisationPolicy",
     "NormalisationRecord",
+    "ObservationKernelReceipt",
     "PlasmaDomain",
     "PrescribedCurrentField",
     "PerturbedSeedPolicy",
@@ -309,8 +327,10 @@ __all__ = [
     "StencilMesh",
     "SurfaceExtractionReceipt",
     "SurfaceGeometryError",
+    "ThomsonSignals",
     "TopologyClass",
     "VacuumRegionReceipt",
+    "VirtualMagneticSignals",
     "apply_delta_star",
     "convert_li_2_to_li_3",
     "convert_li_3_to_li_2",
@@ -329,7 +349,10 @@ __all__ = [
     "select_forward_branch",
     "traced_assemble_flux_surface_geometry",
     "traced_flux_surface_geometry",
+    "synthesize_thomson",
     "vacuum_region_receipt",
+    "virtual_flux_loops",
+    "virtual_poloidal_probes",
 ]
 
 

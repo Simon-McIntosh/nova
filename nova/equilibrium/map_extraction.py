@@ -22,6 +22,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+import jax
+import jax.numpy as jnp
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy.constants import mu_0
@@ -96,10 +98,10 @@ class VacuumRegionReceipt:
 class ChordSamplingReceipt:
     """Normalised flux sampled at supplied chord coordinates."""
 
-    coordinates: NDArray[np.float64]
-    psi_norm: NDArray[np.float64]
-    inside_grid: NDArray[np.bool_]
-    finite: bool
+    coordinates: jax.Array | NDArray[np.float64]
+    psi_norm: jax.Array | NDArray[np.float64]
+    inside_grid: jax.Array | NDArray[np.bool_]
+    finite: bool | jax.Array
     axis_flux: float
     boundary_flux: float
 
@@ -396,46 +398,56 @@ def sample_chord_psi_norm(
 
     radius_axis, _ = _uniform_axis(radius, "radius")
     height_axis, _ = _uniform_axis(height, "height")
-    flux_map = _map(flux, (radius_axis.size, height_axis.size), "flux")
-    point = np.asarray(coordinates, dtype=np.float64)
+    shape = (radius_axis.size, height_axis.size)
+    flux_map = jnp.asarray(flux, dtype=jnp.float64)
+    if flux_map.shape == (shape[0] * shape[1],):
+        flux_map = flux_map.reshape(shape)
+    if flux_map.shape != shape:
+        raise ValueError(f"flux must have shape {shape} or flatten to that shape")
+    point = jnp.asarray(coordinates, dtype=flux_map.dtype)
     if point.ndim < 1 or point.shape[-1] != 2:
         raise ValueError("coordinates must have final dimension (R, Z)")
     span = float(boundary_flux) - float(axis_flux)
     if not np.isfinite(span) or span == 0.0:
         raise ValueError("axis_flux and boundary_flux must define a finite span")
 
+    radius_support = jnp.asarray(radius_axis, dtype=flux_map.dtype)
+    height_support = jnp.asarray(height_axis, dtype=flux_map.dtype)
     flat = point.reshape(-1, 2)
     inside = (
-        np.isfinite(flat).all(axis=1)
-        & (flat[:, 0] >= radius_axis[0])
-        & (flat[:, 0] <= radius_axis[-1])
-        & (flat[:, 1] >= height_axis[0])
-        & (flat[:, 1] <= height_axis[-1])
+        jnp.isfinite(flat).all(axis=1)
+        & (flat[:, 0] >= radius_support[0])
+        & (flat[:, 0] <= radius_support[-1])
+        & (flat[:, 1] >= height_support[0])
+        & (flat[:, 1] <= height_support[-1])
     )
-    sampled = np.full(flat.shape[0], np.nan, dtype=np.float64)
-    if np.any(inside):
-        kept = flat[inside]
-        radial_index = np.searchsorted(radius_axis, kept[:, 0], side="right") - 1
-        vertical_index = np.searchsorted(height_axis, kept[:, 1], side="right") - 1
-        radial_index = np.clip(radial_index, 0, radius_axis.size - 2)
-        vertical_index = np.clip(vertical_index, 0, height_axis.size - 2)
-        radial_fraction = (kept[:, 0] - radius_axis[radial_index]) / (
-            radius_axis[radial_index + 1] - radius_axis[radial_index]
-        )
-        vertical_fraction = (kept[:, 1] - height_axis[vertical_index]) / (
-            height_axis[vertical_index + 1] - height_axis[vertical_index]
-        )
-        lower_left = flux_map[radial_index, vertical_index]
-        upper_left = flux_map[radial_index + 1, vertical_index]
-        lower_right = flux_map[radial_index, vertical_index + 1]
-        upper_right = flux_map[radial_index + 1, vertical_index + 1]
-        interpolated = (
-            (1.0 - radial_fraction) * (1.0 - vertical_fraction) * lower_left
-            + radial_fraction * (1.0 - vertical_fraction) * upper_left
-            + (1.0 - radial_fraction) * vertical_fraction * lower_right
-            + radial_fraction * vertical_fraction * upper_right
-        )
-        sampled[inside] = (interpolated - float(axis_flux)) / span
+    safe_radius = jnp.where(inside, flat[:, 0], radius_support[0])
+    safe_height = jnp.where(inside, flat[:, 1], height_support[0])
+    radial_index = jnp.searchsorted(radius_support, safe_radius, side="right") - 1
+    vertical_index = jnp.searchsorted(height_support, safe_height, side="right") - 1
+    radial_index = jnp.clip(radial_index, 0, radius_axis.size - 2)
+    vertical_index = jnp.clip(vertical_index, 0, height_axis.size - 2)
+    radial_fraction = (safe_radius - radius_support[radial_index]) / (
+        radius_support[radial_index + 1] - radius_support[radial_index]
+    )
+    vertical_fraction = (safe_height - height_support[vertical_index]) / (
+        height_support[vertical_index + 1] - height_support[vertical_index]
+    )
+    lower_left = flux_map[radial_index, vertical_index]
+    upper_left = flux_map[radial_index + 1, vertical_index]
+    lower_right = flux_map[radial_index, vertical_index + 1]
+    upper_right = flux_map[radial_index + 1, vertical_index + 1]
+    interpolated = (
+        (1.0 - radial_fraction) * (1.0 - vertical_fraction) * lower_left
+        + radial_fraction * (1.0 - vertical_fraction) * upper_left
+        + (1.0 - radial_fraction) * vertical_fraction * lower_right
+        + radial_fraction * vertical_fraction * upper_right
+    )
+    sampled = jnp.where(
+        inside,
+        (interpolated - jnp.asarray(axis_flux, dtype=flux_map.dtype)) / span,
+        jnp.nan,
+    )
 
     output_shape = point.shape[:-1]
     psi_norm = sampled.reshape(output_shape)
@@ -444,7 +456,7 @@ def sample_chord_psi_norm(
         coordinates=point,
         psi_norm=psi_norm,
         inside_grid=inside_grid,
-        finite=bool(np.all(np.isfinite(psi_norm[inside_grid]))),
+        finite=jnp.all(jnp.where(inside_grid, jnp.isfinite(psi_norm), True)),
         axis_flux=float(axis_flux),
         boundary_flux=float(boundary_flux),
     )

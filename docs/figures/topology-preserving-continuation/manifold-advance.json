@@ -1,0 +1,3742 @@
+{
+  "artifact": "diiid_manifold_advance",
+  "cohort_summary": {
+    "backtracking_terminal_diverted": 5,
+    "backtracking_terminal_x_point_finite": 5,
+    "backtracking_total_admitted_advances": 22,
+    "backtracking_total_newton_step_equivalents": 12.382302264854005,
+    "predictor_corrector_higher_residual_than_paired_backtracking": 4,
+    "predictor_corrector_lower_residual_than_paired_backtracking": 1,
+    "predictor_corrector_terminal_diverted": 5,
+    "predictor_corrector_terminal_x_point_finite": 5,
+    "predictor_corrector_total_admitted_advances": 13,
+    "predictor_corrector_total_newton_step_equivalents": 16.819631815863758,
+    "quoted_control_residual_range": [
+      0.08696912567989223,
+      0.1553929757220097
+    ],
+    "quoted_control_total_newton_step_equivalents": 18.88321289494938
+  },
+  "comparison_contract": {
+    "delta_definition": "predictor-corrector minus paired backtracking",
+    "paired_current_tree_is_causal_control": true,
+    "quoted_historical_tree_is_causal_control": false
+  },
+  "completed_utc": "2026-08-23T22:25:27Z",
+  "conclusion": {
+    "convergence_gate_declared": false,
+    "paired_backtracking_residual_range": [
+      0.06939041260320641,
+      0.18057463598193801
+    ],
+    "predictor_corrector_residual_range": [
+      0.07474799363761965,
+      1.454384689460721
+    ],
+    "statement": "The predictor-corrector preserved diverted topology and finite X points on every frame and traversed more Newton-step-equivalents than paired backtracking, but admitted fewer advances and ended with a higher residual on four of five frames. It is therefore a topology-preserving negative rather than a convergence result. No threshold is derived from the observed values.",
+    "verdict": "TOPOLOGY_HELD_RESIDUAL_REGRESSED_ON_FOUR_OF_FIVE"
+  },
+  "driver_sha256": "024103d31161fbfe51aa437ac97f1dbea2fd1134965d8e7632c5b456652bff7b",
+  "frame_records": [
+    {
+      "frame": 179,
+      "paired_backtracking_conditioning_disabled": {
+        "achieved_backtracking_step_equivalents": 3.15625,
+        "achieved_newton_step_equivalents": 3.15625,
+        "admitted_advance_count_of_89": 5,
+        "conditioning_enabled": false,
+        "effective_newton_fraction_by_advance": [
+          1.0,
+          1.0,
+          1.0,
+          0.125,
+          0.03125
+        ],
+        "krylov_action_qualification": "ACCEPTED",
+        "krylov_conditioning_count": 0,
+        "largest_admissible_step_fraction": 1.0,
+        "linear_step_trace": [
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.461738572016697,
+            "projected_condition": 6.170400416428718
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.398576320822997,
+            "projected_condition": 4.111913378020375
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4558884240135361,
+            "projected_condition": 13.148058215618112
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4787315558851026,
+            "projected_condition": 6.196362124700639
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.501723876139368,
+            "projected_condition": 6.904989874717562
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5154929923511509,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5224248210897162,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.525902616167737,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.527644491799022,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5285161751292373,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.528952203297059,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5291702640221654,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5292793060469576,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.529333829975156,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293610926682362,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293747241970252,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293815400069826,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.529384947923352,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293866518843842,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293875038656124,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293879298564046,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.529388142851845,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293882493495763,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883025984447,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883292228796,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883425350974,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883491912064,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883525192606,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883541832878,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883550153016,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883554313084,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883556393117,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883557433134,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883557953143,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558213148,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.529388355834315,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558408152,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558440653,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558456902,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558465027,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558469088,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.529388355847112,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558472137,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558472645,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558472898,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473025,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.529388355847309,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.529388355847312,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473136,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473143,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473147,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.529388355847315,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5293883558473151,
+            "projected_condition": 7.309854638224213
+          }
+        ],
+        "maximum_projected_krylov_condition": 13.148058215618112,
+        "mean_admitted_step_fraction": 0.63125,
+        "mean_advance_length_fraction_of_corresponding_newton_step": 0.63125,
+        "mean_effective_newton_fraction_across_89": 0.03546348314606742,
+        "newton_step_equivalent_basis": "sum(backtracking fraction * conditioning damping fraction * conditioned-step cap fraction)",
+        "route": "topology-qualified fixed backtracking",
+        "runtime_seconds": 4.015816479921341,
+        "selected_candidates_were_admitted": true,
+        "selected_step_fraction_by_advance": [
+          1.0,
+          1.0,
+          1.0,
+          0.125,
+          0.03125
+        ],
+        "selected_step_fraction_counts": {
+          "0.03125": 1,
+          "0.0625": 0,
+          "0.125": 1,
+          "0.25": 0,
+          "0.5": 0,
+          "1.0": 3
+        },
+        "smallest_admissible_step_fraction": 0.03125,
+        "terminal_relative_residual": 0.06939041260320641,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true,
+        "terminal_x_point_rz_m": [
+          1.2877506330320445,
+          -1.5692598968301439
+        ]
+      },
+      "paired_predictor_corrector_minus_backtracking": {
+        "achieved_newton_step_equivalents_change": 3.09904119842772,
+        "admitted_advance_count_change": 0,
+        "mean_advance_fraction_change": 0.6198082396855441,
+        "terminal_relative_residual_change": 0.5359510643768116
+      },
+      "predictor_corrector_conditioning_disabled": {
+        "achieved_newton_step_equivalents": 6.25529119842772,
+        "admitted_advance_count_of_89": 5,
+        "advance_fraction_by_promoted_update": [
+          1.0006850036061532,
+          1.354668829991982,
+          1.2539649031928628,
+          1.3459569674343304,
+          1.300015494202392
+        ],
+        "candidate_admissibility_count_of_89": 5,
+        "conditioning_enabled": false,
+        "conditioning_ratio_limit": "infinity",
+        "krylov_conditioning_count": 0,
+        "manifold_advance_qualification_counts": {
+          "ACCEPTED": 5,
+          "INADMISSIBLE_CORRECTED_STATE": 84
+        },
+        "maximum_projected_krylov_condition": 37.205610419083015,
+        "mean_advance_fraction_across_89": 0.0702841707688508,
+        "mean_advance_length_fraction_of_corresponding_newton_step": 1.251058239685544,
+        "newton_step_equivalent_basis": "sum(promoted advance length / corresponding qualified Newton-step length)",
+        "route": "topology-preserving state-arclength predictor-corrector",
+        "runtime_seconds": 7.899508524686098,
+        "terminal_relative_residual": 0.6053414769800181,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true,
+        "terminal_x_point_rz_m": [
+          0.8948602384044028,
+          1.318193576988246
+        ]
+      },
+      "quoted_admissible_step_control_conditioning_disabled": {
+        "achieved_newton_step_equivalents": 3.21875,
+        "admitted_advance_count_of_89": 7,
+        "mean_advance_length_fraction_of_corresponding_newton_step": 0.45982142857142855,
+        "source_commit": "bacbbd81ae98322ecbf2f507257c32b026aac6fd",
+        "terminal_relative_residual": 0.10704471039091447,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true
+      },
+      "shared_admitted_secant_bootstrap": {
+        "candidate_fraction_of_map_residual": 0.5,
+        "construction": "relaxed fixed-point image on the fixed factor ladder",
+        "initial_state_admitted": true,
+        "preceding_state_admitted": true,
+        "relaxation": 0.5,
+        "score_labels_read": false,
+        "selected_factor": 1.0
+      },
+      "shot": "d3d_shot_00000c4a7b.parquet",
+      "target_current_a": 1279650.1007080078,
+      "time_ms": 3740.0
+    },
+    {
+      "frame": 44,
+      "paired_backtracking_conditioning_disabled": {
+        "achieved_backtracking_step_equivalents": 1.375,
+        "achieved_newton_step_equivalents": 1.375,
+        "admitted_advance_count_of_89": 3,
+        "conditioning_enabled": false,
+        "effective_newton_fraction_by_advance": [
+          1.0,
+          0.25,
+          0.125
+        ],
+        "krylov_action_qualification": "ACCEPTED",
+        "krylov_conditioning_count": 0,
+        "largest_admissible_step_fraction": 1.0,
+        "linear_step_trace": [
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6025829916268493,
+            "projected_condition": 18.745911926831813
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4642547813037587,
+            "projected_condition": 4.28183856957523
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4064950099672675,
+            "projected_condition": 5.6893621739693305
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.431956689713367,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4448598607032248,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4513549817214253,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4546134831816797,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4562454763134283,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4570621593770712,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4574706726456232,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457674972228125,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4577771327581885,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578282157081428,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457853757854378,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578665290953137,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578729147577363,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578761075994364,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578777040229087,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578785022353005,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578789013416602,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879100894881,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578792006715018,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578792505598146,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578792755039718,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578792879760505,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578792942120897,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578792973301093,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578792988891192,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879299668624,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578793000583767,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578793002532529,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578793003506911,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578793003994102,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578793004237698,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578793004359496,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578793004420394,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578793004450843,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578793004466066,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300447368,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578793004477486,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300447939,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448034,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578793004480814,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578793004481052,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578793004481172,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578793004481232,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448126,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578793004481276,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4578793004481285,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.457879300448129,
+            "projected_condition": 7.100993426390082
+          }
+        ],
+        "maximum_projected_krylov_condition": 18.745911926831813,
+        "mean_admitted_step_fraction": 0.4583333333333333,
+        "mean_advance_length_fraction_of_corresponding_newton_step": 0.4583333333333333,
+        "mean_effective_newton_fraction_across_89": 0.01544943820224719,
+        "newton_step_equivalent_basis": "sum(backtracking fraction * conditioning damping fraction * conditioned-step cap fraction)",
+        "route": "topology-qualified fixed backtracking",
+        "runtime_seconds": 4.55600590351969,
+        "selected_candidates_were_admitted": true,
+        "selected_step_fraction_by_advance": [
+          1.0,
+          0.25,
+          0.125
+        ],
+        "selected_step_fraction_counts": {
+          "0.03125": 0,
+          "0.0625": 0,
+          "0.125": 1,
+          "0.25": 1,
+          "0.5": 0,
+          "1.0": 1
+        },
+        "smallest_admissible_step_fraction": 0.125,
+        "terminal_relative_residual": 0.18057463598193801,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true,
+        "terminal_x_point_rz_m": [
+          1.0463013466002433,
+          -1.445636207604362
+        ]
+      },
+      "paired_predictor_corrector_minus_backtracking": {
+        "achieved_newton_step_equivalents_change": -0.3724341084545666,
+        "admitted_advance_count_change": -2,
+        "mean_advance_fraction_change": 0.5442325582121001,
+        "terminal_relative_residual_change": -0.10582664234431836
+      },
+      "predictor_corrector_conditioning_disabled": {
+        "achieved_newton_step_equivalents": 1.0025658915454334,
+        "admitted_advance_count_of_89": 1,
+        "advance_fraction_by_promoted_update": [
+          1.0025658915454334
+        ],
+        "candidate_admissibility_count_of_89": 1,
+        "conditioning_enabled": false,
+        "conditioning_ratio_limit": "infinity",
+        "krylov_conditioning_count": 0,
+        "manifold_advance_qualification_counts": {
+          "ACCEPTED": 1,
+          "NONFINITE_CORRECTED_STATE": 88
+        },
+        "maximum_projected_krylov_condition": 197.91549435051672,
+        "mean_advance_fraction_across_89": 0.011264785298263297,
+        "mean_advance_length_fraction_of_corresponding_newton_step": 1.0025658915454334,
+        "newton_step_equivalent_basis": "sum(promoted advance length / corresponding qualified Newton-step length)",
+        "route": "topology-preserving state-arclength predictor-corrector",
+        "runtime_seconds": 5.512034751474857,
+        "terminal_relative_residual": 0.07474799363761965,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true,
+        "terminal_x_point_rz_m": [
+          1.2591704277916027,
+          -1.6503099801686134
+        ]
+      },
+      "quoted_admissible_step_control_conditioning_disabled": {
+        "achieved_newton_step_equivalents": 4.193294139261007,
+        "admitted_advance_count_of_89": 6,
+        "mean_advance_length_fraction_of_corresponding_newton_step": 0.6988823565435012,
+        "source_commit": "bacbbd81ae98322ecbf2f507257c32b026aac6fd",
+        "terminal_relative_residual": 0.10077482131394641,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true
+      },
+      "shared_admitted_secant_bootstrap": {
+        "candidate_fraction_of_map_residual": 0.5,
+        "construction": "relaxed fixed-point image on the fixed factor ladder",
+        "initial_state_admitted": true,
+        "preceding_state_admitted": true,
+        "relaxation": 0.5,
+        "score_labels_read": false,
+        "selected_factor": 1.0
+      },
+      "shot": "d3d_shot_0003ff34e7.parquet",
+      "target_current_a": 1182769.0064013004,
+      "time_ms": 1080.0
+    },
+    {
+      "frame": 144,
+      "paired_backtracking_conditioning_disabled": {
+        "achieved_backtracking_step_equivalents": 2.84375,
+        "achieved_newton_step_equivalents": 2.5023067944565485,
+        "admitted_advance_count_of_89": 7,
+        "conditioning_enabled": false,
+        "effective_newton_fraction_by_advance": [
+          1.0,
+          1.0,
+          0.13425250604466035,
+          0.024304288411888225,
+          0.25,
+          0.0625,
+          0.03125
+        ],
+        "krylov_action_qualification": "ACCEPTED",
+        "krylov_conditioning_count": 0,
+        "largest_admissible_step_fraction": 1.0,
+        "linear_step_trace": [
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.685431819669281,
+            "projected_condition": 322.4307158252583
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5071446826869452,
+            "projected_condition": 3.8151555859293746
+          },
+          {
+            "conditioned_step_cap_fraction": 0.5370100241786414,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.596301790965537,
+            "projected_condition": 25.9081706308875
+          },
+          {
+            "conditioned_step_cap_fraction": 0.0972171536475529,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6074511732821246,
+            "projected_condition": 141.28317217172983
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.518414596711138,
+            "projected_condition": 5.751994819380801
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4634745686722144,
+            "projected_condition": 6.014873213922947
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.431683316964698,
+            "projected_condition": 5.81441073133151
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4156388818439634,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4076842176504245,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4037236631554035,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4017475665388288,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4007605616716297,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4002673198840048,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4000207641249165,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3998975025257083,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3998358757957703,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3998050634481654,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997896575286974,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997819546325463,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997781032003662,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997761774882502,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997752146331857,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997747332059018,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997744924923219,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997743721355476,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997743119571642,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742818679735,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742668233784,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.399774259301081,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742555399322,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742536593578,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742527190706,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.399774252248927,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742520138552,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742518963192,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742518375513,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742518081673,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517934755,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517861294,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517824563,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517806198,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517797016,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517792424,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.399774251779013,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517788982,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517788407,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.399774251778812,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787979,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787906,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.399774251778787,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787852,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787843,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.399774251778784,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.3997742517787837,
+            "projected_condition": 5.725748825248553
+          }
+        ],
+        "maximum_projected_krylov_condition": 322.4307158252583,
+        "mean_admitted_step_fraction": 0.40625,
+        "mean_advance_length_fraction_of_corresponding_newton_step": 0.35747239920807833,
+        "mean_effective_newton_fraction_across_89": 0.02811580667928706,
+        "newton_step_equivalent_basis": "sum(backtracking fraction * conditioning damping fraction * conditioned-step cap fraction)",
+        "route": "topology-qualified fixed backtracking",
+        "runtime_seconds": 4.065390533767641,
+        "selected_candidates_were_admitted": true,
+        "selected_step_fraction_by_advance": [
+          1.0,
+          1.0,
+          0.25,
+          0.25,
+          0.25,
+          0.0625,
+          0.03125
+        ],
+        "selected_step_fraction_counts": {
+          "0.03125": 1,
+          "0.0625": 1,
+          "0.125": 0,
+          "0.25": 3,
+          "0.5": 0,
+          "1.0": 2
+        },
+        "smallest_admissible_step_fraction": 0.03125,
+        "terminal_relative_residual": 0.17411347942110977,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true,
+        "terminal_x_point_rz_m": [
+          1.2704541381352632,
+          -0.6961713491157111
+        ]
+      },
+      "paired_predictor_corrector_minus_backtracking": {
+        "achieved_newton_step_equivalents_change": 1.0211489958590416,
+        "admitted_advance_count_change": -5,
+        "mean_advance_fraction_change": 1.4042554959497167,
+        "terminal_relative_residual_change": 0.7820503618949777
+      },
+      "predictor_corrector_conditioning_disabled": {
+        "achieved_newton_step_equivalents": 3.52345579031559,
+        "admitted_advance_count_of_89": 2,
+        "advance_fraction_by_promoted_update": [
+          1.0070575144517722,
+          2.516398275863818
+        ],
+        "candidate_admissibility_count_of_89": 2,
+        "conditioning_enabled": false,
+        "conditioning_ratio_limit": "infinity",
+        "krylov_conditioning_count": 0,
+        "manifold_advance_qualification_counts": {
+          "ACCEPTED": 2,
+          "INADMISSIBLE_CORRECTED_STATE": 87
+        },
+        "maximum_projected_krylov_condition": 322.43071582452905,
+        "mean_advance_fraction_across_89": 0.03958939090242236,
+        "mean_advance_length_fraction_of_corresponding_newton_step": 1.761727895157795,
+        "newton_step_equivalent_basis": "sum(promoted advance length / corresponding qualified Newton-step length)",
+        "route": "topology-preserving state-arclength predictor-corrector",
+        "runtime_seconds": 5.602690068073571,
+        "terminal_relative_residual": 0.9561638413160874,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true,
+        "terminal_x_point_rz_m": [
+          1.5610033270937518,
+          1.0068333986380815
+        ]
+      },
+      "quoted_admissible_step_control_conditioning_disabled": {
+        "achieved_newton_step_equivalents": 3.3634607051038814,
+        "admitted_advance_count_of_89": 10,
+        "mean_advance_length_fraction_of_corresponding_newton_step": 0.3363460705103881,
+        "source_commit": "bacbbd81ae98322ecbf2f507257c32b026aac6fd",
+        "terminal_relative_residual": 0.1553929757220097,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true
+      },
+      "shared_admitted_secant_bootstrap": {
+        "candidate_fraction_of_map_residual": 0.5,
+        "construction": "relaxed fixed-point image on the fixed factor ladder",
+        "initial_state_admitted": true,
+        "preceding_state_admitted": true,
+        "relaxation": 0.5,
+        "score_labels_read": false,
+        "selected_factor": 1.0
+      },
+      "shot": "d3d_shot_001554e054.parquet",
+      "target_current_a": 988842.2265648842,
+      "time_ms": 3240.0
+    },
+    {
+      "frame": 146,
+      "paired_backtracking_conditioning_disabled": {
+        "achieved_backtracking_step_equivalents": 2.125,
+        "achieved_newton_step_equivalents": 2.098745470397457,
+        "admitted_advance_count_of_89": 3,
+        "conditioning_enabled": false,
+        "effective_newton_fraction_by_advance": [
+          1.0,
+          1.0,
+          0.09874547039745717
+        ],
+        "krylov_action_qualification": "ACCEPTED",
+        "krylov_conditioning_count": 0,
+        "largest_admissible_step_fraction": 1.0,
+        "linear_step_trace": [
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.7683648558577174,
+            "projected_condition": 136.63545744145722
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4362905061120248,
+            "projected_condition": 2.009826246541694
+          },
+          {
+            "conditioned_step_cap_fraction": 0.7899637631796573,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5296781628137288,
+            "projected_condition": 23.521383277064118
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6075006679448371,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6478842755640595,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6684549449216344,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6788363746733974,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6840512876657023,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6866648156114727,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6879731001948015,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6886276229830814,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.688954979544407,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6891186816222472,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892005386111344,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892414685931538,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892619339560682,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892721667305026,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892772831409644,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892798413520065,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892811204589804,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892817600128305,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892820797898462,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892822396783769,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823196226479,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823595947848,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823795808536,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823895738882,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823945704054,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.689282397068664,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823983177931,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823989423578,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823992546402,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823994107815,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823994888522,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995278874,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.689282399547405,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995571637,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995620432,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995644828,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995657027,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995663127,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995666177,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.68928239956677,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995668464,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995668844,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669035,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.689282399566913,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.689282399566918,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669202,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669215,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669222,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          },
+          {
+            "conditioned_step_cap_fraction": 0.4384516065703102,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.6892823995669224,
+            "projected_condition": 44.421055553509504
+          }
+        ],
+        "maximum_projected_krylov_condition": 136.63545744145722,
+        "mean_admitted_step_fraction": 0.7083333333333334,
+        "mean_advance_length_fraction_of_corresponding_newton_step": 0.699581823465819,
+        "mean_effective_newton_fraction_across_89": 0.02358140977974671,
+        "newton_step_equivalent_basis": "sum(backtracking fraction * conditioning damping fraction * conditioned-step cap fraction)",
+        "route": "topology-qualified fixed backtracking",
+        "runtime_seconds": 4.111153627745807,
+        "selected_candidates_were_admitted": true,
+        "selected_step_fraction_by_advance": [
+          1.0,
+          1.0,
+          0.125
+        ],
+        "selected_step_fraction_counts": {
+          "0.03125": 0,
+          "0.0625": 0,
+          "0.125": 1,
+          "0.25": 0,
+          "0.5": 0,
+          "1.0": 2
+        },
+        "smallest_admissible_step_fraction": 0.125,
+        "terminal_relative_residual": 0.09463188678261902,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true,
+        "terminal_x_point_rz_m": [
+          1.252088649046024,
+          1.5517605217325454
+        ]
+      },
+      "paired_predictor_corrector_minus_backtracking": {
+        "achieved_newton_step_equivalents_change": 1.2696438834813177,
+        "admitted_advance_count_change": 0,
+        "mean_advance_fraction_change": 0.42321462782710595,
+        "terminal_relative_residual_change": 1.359752802678102
+      },
+      "predictor_corrector_conditioning_disabled": {
+        "achieved_newton_step_equivalents": 3.368389353878775,
+        "admitted_advance_count_of_89": 3,
+        "advance_fraction_by_promoted_update": [
+          1.0294106577367481,
+          1.0831944056422196,
+          1.255784290499807
+        ],
+        "candidate_admissibility_count_of_89": 3,
+        "conditioning_enabled": false,
+        "conditioning_ratio_limit": "infinity",
+        "krylov_conditioning_count": 0,
+        "manifold_advance_qualification_counts": {
+          "ACCEPTED": 3,
+          "INADMISSIBLE_CORRECTED_STATE": 86
+        },
+        "maximum_projected_krylov_condition": 136.6354574414549,
+        "mean_advance_fraction_across_89": 0.037847071391896345,
+        "mean_advance_length_fraction_of_corresponding_newton_step": 1.122796451292925,
+        "newton_step_equivalent_basis": "sum(promoted advance length / corresponding qualified Newton-step length)",
+        "route": "topology-preserving state-arclength predictor-corrector",
+        "runtime_seconds": 5.649669047445059,
+        "terminal_relative_residual": 1.454384689460721,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true,
+        "terminal_x_point_rz_m": [
+          1.898401669664259,
+          1.3099632483403778
+        ]
+      },
+      "quoted_admissible_step_control_conditioning_disabled": {
+        "achieved_newton_step_equivalents": 2.9171534022732244,
+        "admitted_advance_count_of_89": 4,
+        "mean_advance_length_fraction_of_corresponding_newton_step": 0.7292883505683061,
+        "source_commit": "bacbbd81ae98322ecbf2f507257c32b026aac6fd",
+        "terminal_relative_residual": 0.08696912567989223,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true
+      },
+      "shared_admitted_secant_bootstrap": {
+        "candidate_fraction_of_map_residual": 0.5,
+        "construction": "relaxed fixed-point image on the fixed factor ladder",
+        "initial_state_admitted": true,
+        "preceding_state_admitted": true,
+        "relaxation": 0.5,
+        "score_labels_read": false,
+        "selected_factor": 1.0
+      },
+      "shot": "d3d_shot_002495e835.parquet",
+      "target_current_a": 1623563.1957054138,
+      "time_ms": 3180.0
+    },
+    {
+      "frame": 137,
+      "paired_backtracking_conditioning_disabled": {
+        "achieved_backtracking_step_equivalents": 3.25,
+        "achieved_newton_step_equivalents": 3.25,
+        "admitted_advance_count_of_89": 4,
+        "conditioning_enabled": false,
+        "effective_newton_fraction_by_advance": [
+          1.0,
+          1.0,
+          1.0,
+          0.25
+        ],
+        "krylov_action_qualification": "ACCEPTED",
+        "krylov_conditioning_count": 0,
+        "largest_admissible_step_fraction": 1.0,
+        "linear_step_trace": [
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5773065252099059,
+            "projected_condition": 33.85973094195541
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.4337073564673233,
+            "projected_condition": 4.59981955011635
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5197206766013869,
+            "projected_condition": 13.56557802002819
+          },
+          {
+            "conditioned_step_cap_fraction": 1.0,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.562270956044819,
+            "projected_condition": 8.708301205488032
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5706267523624495,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5748213947082175,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.576922914969244,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5779747265060484,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5785008953305608,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5787640455324279,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5788956370839629,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5789614369727807,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5789943379455023,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790107886889473,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790190141249418,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790231268590071,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790251832300566,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790262114165856,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790267255101011,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790269825569219,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027111080348,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790271753420648,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790272074729241,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790272235383542,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790272315710692,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790272355874266,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790272375956056,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027238599695,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790272391017397,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239352762,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790272394782732,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790272395410287,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790272395724065,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790272395880953,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790272395959397,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239599862,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239601823,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790272396028036,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603294,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790272396035392,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790272396036618,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603723,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790272396037537,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603769,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790272396037766,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790272396037803,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790272396037823,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790272396037834,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.5790272396037839,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          },
+          {
+            "conditioned_step_cap_fraction": 0.8769107276751524,
+            "conditioning_applied": false,
+            "conditioning_damping_fraction": 1.0,
+            "online_condition_baseline": 1.579027239603784,
+            "projected_condition": 13.384035573544343
+          }
+        ],
+        "maximum_projected_krylov_condition": 33.85973094195541,
+        "mean_admitted_step_fraction": 0.8125,
+        "mean_advance_length_fraction_of_corresponding_newton_step": 0.8125,
+        "mean_effective_newton_fraction_across_89": 0.03651685393258427,
+        "newton_step_equivalent_basis": "sum(backtracking fraction * conditioning damping fraction * conditioned-step cap fraction)",
+        "route": "topology-qualified fixed backtracking",
+        "runtime_seconds": 4.147825093008578,
+        "selected_candidates_were_admitted": true,
+        "selected_step_fraction_by_advance": [
+          1.0,
+          1.0,
+          1.0,
+          0.25
+        ],
+        "selected_step_fraction_counts": {
+          "0.03125": 0,
+          "0.0625": 0,
+          "0.125": 0,
+          "0.25": 1,
+          "0.5": 0,
+          "1.0": 3
+        },
+        "smallest_admissible_step_fraction": 0.25,
+        "terminal_relative_residual": 0.09914747975291827,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true,
+        "terminal_x_point_rz_m": [
+          1.2988420186449965,
+          -1.5230633765597337
+        ]
+      },
+      "paired_predictor_corrector_minus_backtracking": {
+        "achieved_newton_step_equivalents_change": -0.5800704183037615,
+        "admitted_advance_count_change": -2,
+        "mean_advance_fraction_change": 0.5224647908481193,
+        "terminal_relative_residual_change": 0.4096060612581144
+      },
+      "predictor_corrector_conditioning_disabled": {
+        "achieved_newton_step_equivalents": 2.6699295816962385,
+        "admitted_advance_count_of_89": 2,
+        "advance_fraction_by_promoted_update": [
+          1.006527962869454,
+          1.6634016188267846
+        ],
+        "candidate_admissibility_count_of_89": 2,
+        "conditioning_enabled": false,
+        "conditioning_ratio_limit": "infinity",
+        "krylov_conditioning_count": 0,
+        "manifold_advance_qualification_counts": {
+          "ACCEPTED": 2,
+          "INADMISSIBLE_CORRECTED_STATE": 87
+        },
+        "maximum_projected_krylov_condition": 33.85973094192754,
+        "mean_advance_fraction_across_89": 0.029999208783103803,
+        "mean_advance_length_fraction_of_corresponding_newton_step": 1.3349647908481193,
+        "newton_step_equivalent_basis": "sum(promoted advance length / corresponding qualified Newton-step length)",
+        "route": "topology-preserving state-arclength predictor-corrector",
+        "runtime_seconds": 5.638482701964676,
+        "terminal_relative_residual": 0.5087535410110327,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true,
+        "terminal_x_point_rz_m": [
+          1.3113335340938608,
+          -1.370536292663522
+        ]
+      },
+      "quoted_admissible_step_control_conditioning_disabled": {
+        "achieved_newton_step_equivalents": 5.190554648311268,
+        "admitted_advance_count_of_89": 9,
+        "mean_advance_length_fraction_of_corresponding_newton_step": 0.5767282942568076,
+        "source_commit": "bacbbd81ae98322ecbf2f507257c32b026aac6fd",
+        "terminal_relative_residual": 0.12290690751401612,
+        "terminal_topology_class": "diverted",
+        "terminal_x_point_finite": true
+      },
+      "shared_admitted_secant_bootstrap": {
+        "candidate_fraction_of_map_residual": 0.5,
+        "construction": "relaxed fixed-point image on the fixed factor ladder",
+        "initial_state_admitted": true,
+        "preceding_state_admitted": true,
+        "relaxation": 0.5,
+        "score_labels_read": false,
+        "selected_factor": 1.0
+      },
+      "shot": "d3d_shot_0040ca9bdc.parquet",
+      "target_current_a": 1629095.3674316406,
+      "time_ms": 3000.0
+    }
+  ],
+  "measurement_scope": {
+    "data_root": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train",
+    "frame_count": 5,
+    "quoted_comparator_receipt": "docs/figures/topology-preserving-continuation/admissible-step-control.json",
+    "quoted_comparator_receipt_sha256": "2fd7fcb9673e763522b805b100293276026a9c60c809055641016e62770a11df",
+    "score_labels_read": false,
+    "selection": "five banked score-blind circuit-current frames"
+  },
+  "production_diff": {
+    "changed_production_paths": [
+      "nova/equilibrium/fixed_point.py",
+      "nova/equilibrium/manifold_advance.py",
+      "nova/equilibrium/seed_alignment.py"
+    ],
+    "historical_attribution": "DECLINED_MULTIPLE_PRODUCTION_CHANGES",
+    "measured_source_commit": "d0357dfeb5e1d09ca4a834e42ccc081fb744969e",
+    "paired_current_tree_attribution": "ISOLATED_ADVANCE_MECHANISM",
+    "paired_current_tree_reason": "Both measured arms share source, data, cold seed, admitted bootstrap, initial state, topology predicate, 89-update budget, 24-vector Krylov route, backtracking factor ladder where applicable, and disabled step conditioning; the predictor-corrector is the only mechanism that differs.",
+    "quoted_comparator_source_commit": "bacbbd81ae98322ecbf2f507257c32b026aac6fd"
+  },
+  "solver_contract": {
+    "admission_predicate_changed_between_arms": false,
+    "condition_ratio_limit_in_both_arms": "infinity",
+    "fixed_backtracking_factors": [
+      1.0,
+      0.5,
+      0.25,
+      0.125,
+      0.0625,
+      0.03125
+    ],
+    "gmres_iterations": 24,
+    "newton_updates_per_arm": 89,
+    "requested_topology_class": "diverted",
+    "shared_bootstrap_factors": [
+      1.0,
+      0.5,
+      0.25,
+      0.125,
+      0.0625,
+      0.03125
+    ],
+    "shared_bootstrap_relaxation": 0.5,
+    "step_conditioning_enabled_in_backtracking": false,
+    "step_conditioning_enabled_in_predictor_corrector": false,
+    "warmup_updates_per_measured_arm": 0
+  },
+  "source_commit": "d0357dfeb5e1d09ca4a834e42ccc081fb744969e"
+}

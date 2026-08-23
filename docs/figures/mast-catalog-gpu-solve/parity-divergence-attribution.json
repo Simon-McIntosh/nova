@@ -1,0 +1,755 @@
+{
+  "schema": "nova-parity-divergence-attribution/1.0",
+  "status": "attributed",
+  "completed_utc": "2026-08-23T16:22:29.531719+00:00",
+  "source_identity": {
+    "current_commit": "f23441eb1630455803be45c945bf789a00edbd3d",
+    "current_tree": "d4ab0219247a417794a1278540c323c0785a4b7e",
+    "historical_commit": "83dc40fbb1bff3c37ce97730b9eaa9bba0344117",
+    "historical_precedes_candidate_repairs": {
+      "6143221d7a2dc5c3ad2a74b822bf1a026c05eed3": true,
+      "06b09f5bfdcf184a69066e829a6e7ee16fdd3a2b": true,
+      "257af9dcbe5dd19313708f862a8bb3a383f917b2": true,
+      "7e33c4d000131ce0bb76b9b3c7ad2b71ce668d36": true
+    }
+  },
+  "held_out_set": {
+    "version": "v0-mast-heldout-6",
+    "shotset_module": "/home/ITER/mcintos/Code/imas-ambix/imas_ambix/spine_bench/shots.py",
+    "shotset_module_sha256": "1ff002ccbee77d8bba969655105778a1ce98ff862bd220f1bc92377887b81018",
+    "case_count": 6,
+    "cases": [
+      {
+        "shot": 21978,
+        "slice_index": 35
+      },
+      {
+        "shot": 21983,
+        "slice_index": 35
+      },
+      {
+        "shot": 21985,
+        "slice_index": 51
+      },
+      {
+        "shot": 21986,
+        "slice_index": 46
+      },
+      {
+        "shot": 21989,
+        "slice_index": 55
+      },
+      {
+        "shot": 22086,
+        "slice_index": 43
+      }
+    ]
+  },
+  "registered_parity_requirement": {
+    "absolute_tolerance": 1e-10,
+    "relative_tolerance": 1e-10,
+    "triggering_flux_absolute_difference": 1.1646900802908533e-05,
+    "triggering_flux_relative_difference": 2.090888477060583e-06,
+    "trigger_receipt": "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json",
+    "trigger_receipt_sha256": "2e6bf51cb3134bce2c9da3c5a55a23a32df3d3544d3d17143ca969e1e00af6b1"
+  },
+  "attribution": {
+    "selected_cause": "AMPLIFIED_REPRESENTATION_DIFFERENCE",
+    "exactly_one_cause_selected": true,
+    "causes": {
+      "REGRESSION_FROM_TODAYS_REPAIRS": {
+        "selected": false,
+        "discriminator": "Repeat the same six cases at a source tree preceding all four candidate repair commits; classify the prior divergence as present, absent, or materially smaller.",
+        "historical_commit": "83dc40fbb1bff3c37ce97730b9eaa9bba0344117",
+        "candidate_repair_commits": [
+          "6143221d7a2dc5c3ad2a74b822bf1a026c05eed3",
+          "06b09f5bfdcf184a69066e829a6e7ee16fdd3a2b",
+          "257af9dcbe5dd19313708f862a8bb3a383f917b2",
+          "7e33c4d000131ce0bb76b9b3c7ad2b71ce668d36"
+        ],
+        "current_maximum_flux_absolute_difference": 1.1646900802908533e-05,
+        "historical_maximum_flux_absolute_difference": 1.1646900802908533e-05,
+        "historical_relation": "present",
+        "materially_smaller_definition": "historical <= 0.1 * current"
+      },
+      "AMPLIFIED_REPRESENTATION_DIFFERENCE": {
+        "selected": true,
+        "discriminator": "At the identical seeded state, compare one eager and compiled map application, then measure separation after each nonlinear update on a map whose spectral radius is already measured.",
+        "maximum_single_map_relative_difference": 1.8900776655575514e-16,
+        "float64_epsilon": 2.220446049250313e-16,
+        "roundoff_band_upper_bound": 3.552713678800501e-15,
+        "trajectory_case": {
+          "shot": 21985,
+          "slice_index": 51
+        },
+        "first_nonzero_trajectory_absolute_difference": 2.1649348980190553e-15,
+        "final_trajectory_absolute_difference": 1.1646900802908533e-05,
+        "cumulative_growth": 5379792627.282051,
+        "pinned_map_spectral_radius": 1.1455670310089587,
+        "unpinned_map_spectral_radius": 1.2576631175347157,
+        "trajectory": [
+          {
+            "nonlinear_update": 1,
+            "shape": [
+              1126
+            ],
+            "maximum_absolute_difference": 2.1649348980190553e-15,
+            "maximum_relative_difference": 1.3362990796914734e-15,
+            "growth_from_preceding_update": null,
+            "eager_residual": 0.08780941113608023,
+            "compiled_residual": 0.08780941113608011
+          },
+          {
+            "nonlinear_update": 2,
+            "shape": [
+              1126
+            ],
+            "maximum_absolute_difference": 6.106226635438361e-15,
+            "maximum_relative_difference": 3.936628097948912e-15,
+            "growth_from_preceding_update": 2.8205128205128207,
+            "eager_residual": 0.22733121951914198,
+            "compiled_residual": 0.22733121951914118
+          },
+          {
+            "nonlinear_update": 3,
+            "shape": [
+              1126
+            ],
+            "maximum_absolute_difference": 5.309225281635577e-13,
+            "maximum_relative_difference": 2.3775589559432296e-13,
+            "growth_from_preceding_update": 86.94772727272728,
+            "eager_residual": 0.9465124103518818,
+            "compiled_residual": 0.9465124103519879
+          },
+          {
+            "nonlinear_update": 4,
+            "shape": [
+              1126
+            ],
+            "maximum_absolute_difference": 3.844702334276917e-12,
+            "maximum_relative_difference": 1.8498370419975814e-12,
+            "growth_from_preceding_update": 7.241550565909507,
+            "eager_residual": 0.4101237358350124,
+            "compiled_residual": 0.4101237358364903
+          },
+          {
+            "nonlinear_update": 5,
+            "shape": [
+              1126
+            ],
+            "maximum_absolute_difference": 2.3652746428126648e-11,
+            "maximum_relative_difference": 1.4511709430537154e-11,
+            "growth_from_preceding_update": 6.152035807103667,
+            "eager_residual": 0.5837041490141831,
+            "compiled_residual": 0.583704149026883
+          },
+          {
+            "nonlinear_update": 6,
+            "shape": [
+              1126
+            ],
+            "maximum_absolute_difference": 5.939565506096756e-11,
+            "maximum_relative_difference": 3.85762308376372e-11,
+            "growth_from_preceding_update": 2.5111525733999858,
+            "eager_residual": 0.12071204641523818,
+            "compiled_residual": 0.12071204640960818
+          },
+          {
+            "nonlinear_update": 7,
+            "shape": [
+              1126
+            ],
+            "maximum_absolute_difference": 3.222788147461131e-10,
+            "maximum_relative_difference": 1.9008565654428803e-10,
+            "growth_from_preceding_update": 5.42596616562786,
+            "eager_residual": 0.6808889901628379,
+            "compiled_residual": 0.6808889901250331
+          },
+          {
+            "nonlinear_update": 8,
+            "shape": [
+              1126
+            ],
+            "maximum_absolute_difference": 1.3114724861651439e-08,
+            "maximum_relative_difference": 4.055864323886388e-09,
+            "growth_from_preceding_update": 40.69372314150728,
+            "eager_residual": 1.2761444021505142,
+            "compiled_residual": 1.276144395481363
+          },
+          {
+            "nonlinear_update": 9,
+            "shape": [
+              1126
+            ],
+            "maximum_absolute_difference": 1.0630589408755498e-08,
+            "maximum_relative_difference": 6.1077849826079785e-09,
+            "growth_from_preceding_update": 0.8105842494523264,
+            "eager_residual": 0.5933967168992745,
+            "compiled_residual": 0.5933967226855847
+          },
+          {
+            "nonlinear_update": 10,
+            "shape": [
+              1126
+            ],
+            "maximum_absolute_difference": 3.1101399233790517e-08,
+            "maximum_relative_difference": 1.568149382096707e-08,
+            "growth_from_preceding_update": 2.925651442071028,
+            "eager_residual": 0.1686936429865421,
+            "compiled_residual": 0.1686936524830972
+          },
+          {
+            "nonlinear_update": 11,
+            "shape": [
+              1126
+            ],
+            "maximum_absolute_difference": 8.079549429496069e-08,
+            "maximum_relative_difference": 4.39133536427728e-08,
+            "growth_from_preceding_update": 2.597808982406791,
+            "eager_residual": 0.8774577753160563,
+            "compiled_residual": 0.8774578214248157
+          },
+          {
+            "nonlinear_update": 12,
+            "shape": [
+              1126
+            ],
+            "maximum_absolute_difference": 1.1646900802908533e-05,
+            "maximum_relative_difference": 2.090888477060583e-06,
+            "growth_from_preceding_update": 144.15285041006257,
+            "eager_residual": 2.7616745556310622,
+            "compiled_residual": 2.761680786093926
+          }
+        ]
+      },
+      "SEMANTIC_DIFFERENCE": {
+        "selected": false,
+        "discriminator": "If a one-application difference exceeds the float64 roundoff band without a repair-tree regression, identify the first behaviourally different operation by source location.",
+        "first_diverging_operation": null,
+        "interpretation": "No semantic operation is named when the selected evidence shows only roundoff-scale one-application separation followed by iterative amplification."
+      }
+    }
+  },
+  "current_source_measurement": {
+    "imported_source_modules": {
+      "nova/equilibrium/fixed_point.py": "d4f604ae0432de78d21082a9841b429d506505887a82c75422e28c402335dade",
+      "nova/equilibrium/forward_operator.py": "c67291d16d6e022068d800a154be3605c5d7183c41bab5f40585047a7e327acd"
+    },
+    "backend": {
+      "platform": "cpu",
+      "device": "cpu",
+      "jax_version": "0.11.0",
+      "precision": "float64"
+    },
+    "cases": [
+      {
+        "shot": 21978,
+        "slice_index": 35,
+        "time_s": 0.1899999976158142,
+        "single_map_application": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 2.220446049250313e-16,
+          "maximum_relative_difference": 1.8900776655575514e-16
+        },
+        "solved_flux": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 4.787894525293268e-10,
+          "maximum_relative_difference": 1.170675690132606e-10
+        },
+        "eager_residual": 3.500268098891902,
+        "compiled_residual": 3.500268099341207
+      },
+      {
+        "shot": 21983,
+        "slice_index": 35,
+        "time_s": 0.1899999976158142,
+        "single_map_application": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 2.220446049250313e-16,
+          "maximum_relative_difference": 1.8031411412687375e-16
+        },
+        "solved_flux": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 1.2768988644218382e-10,
+          "maximum_relative_difference": 9.175427795077218e-11
+        },
+        "eager_residual": 0.26702451957770823,
+        "compiled_residual": 0.26702451957891027
+      },
+      {
+        "shot": 21985,
+        "slice_index": 51,
+        "time_s": 0.2750000059604645,
+        "single_map_application": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 2.220446049250313e-16,
+          "maximum_relative_difference": 1.3805892644503236e-16
+        },
+        "solved_flux": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 1.1646900802908533e-05,
+          "maximum_relative_difference": 2.090888477060583e-06
+        },
+        "eager_residual": 2.7616745556310622,
+        "compiled_residual": 2.761680786093926
+      },
+      {
+        "shot": 21986,
+        "slice_index": 46,
+        "time_s": 0.25,
+        "single_map_application": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 2.220446049250313e-16,
+          "maximum_relative_difference": 1.5923003165469476e-16
+        },
+        "solved_flux": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 1.253670322554079e-07,
+          "maximum_relative_difference": 9.222802361977635e-08
+        },
+        "eager_residual": 0.11353510647982909,
+        "compiled_residual": 0.11353511080029897
+      },
+      {
+        "shot": 21989,
+        "slice_index": 55,
+        "time_s": 0.29499998688697815,
+        "single_map_application": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 2.220446049250313e-16,
+          "maximum_relative_difference": 1.409172355098889e-16
+        },
+        "solved_flux": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 5.089518362311196e-09,
+          "maximum_relative_difference": 2.6947714308044213e-09
+        },
+        "eager_residual": 0.23770551656314384,
+        "compiled_residual": 0.23770551474543059
+      },
+      {
+        "shot": 22086,
+        "slice_index": 43,
+        "time_s": 0.22999998927116394,
+        "single_map_application": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 2.220446049250313e-16,
+          "maximum_relative_difference": 1.5793521313110015e-16
+        },
+        "solved_flux": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 6.661338147750939e-16,
+          "maximum_relative_difference": 4.834585713838214e-16
+        },
+        "eager_residual": 5.718257333846712e-13,
+        "compiled_residual": 5.71780409143604e-13
+      }
+    ],
+    "trajectory": [
+      {
+        "nonlinear_update": 1,
+        "shape": [
+          1126
+        ],
+        "maximum_absolute_difference": 2.1649348980190553e-15,
+        "maximum_relative_difference": 1.3362990796914734e-15,
+        "growth_from_preceding_update": null,
+        "eager_residual": 0.08780941113608023,
+        "compiled_residual": 0.08780941113608011
+      },
+      {
+        "nonlinear_update": 2,
+        "shape": [
+          1126
+        ],
+        "maximum_absolute_difference": 6.106226635438361e-15,
+        "maximum_relative_difference": 3.936628097948912e-15,
+        "growth_from_preceding_update": 2.8205128205128207,
+        "eager_residual": 0.22733121951914198,
+        "compiled_residual": 0.22733121951914118
+      },
+      {
+        "nonlinear_update": 3,
+        "shape": [
+          1126
+        ],
+        "maximum_absolute_difference": 5.309225281635577e-13,
+        "maximum_relative_difference": 2.3775589559432296e-13,
+        "growth_from_preceding_update": 86.94772727272728,
+        "eager_residual": 0.9465124103518818,
+        "compiled_residual": 0.9465124103519879
+      },
+      {
+        "nonlinear_update": 4,
+        "shape": [
+          1126
+        ],
+        "maximum_absolute_difference": 3.844702334276917e-12,
+        "maximum_relative_difference": 1.8498370419975814e-12,
+        "growth_from_preceding_update": 7.241550565909507,
+        "eager_residual": 0.4101237358350124,
+        "compiled_residual": 0.4101237358364903
+      },
+      {
+        "nonlinear_update": 5,
+        "shape": [
+          1126
+        ],
+        "maximum_absolute_difference": 2.3652746428126648e-11,
+        "maximum_relative_difference": 1.4511709430537154e-11,
+        "growth_from_preceding_update": 6.152035807103667,
+        "eager_residual": 0.5837041490141831,
+        "compiled_residual": 0.583704149026883
+      },
+      {
+        "nonlinear_update": 6,
+        "shape": [
+          1126
+        ],
+        "maximum_absolute_difference": 5.939565506096756e-11,
+        "maximum_relative_difference": 3.85762308376372e-11,
+        "growth_from_preceding_update": 2.5111525733999858,
+        "eager_residual": 0.12071204641523818,
+        "compiled_residual": 0.12071204640960818
+      },
+      {
+        "nonlinear_update": 7,
+        "shape": [
+          1126
+        ],
+        "maximum_absolute_difference": 3.222788147461131e-10,
+        "maximum_relative_difference": 1.9008565654428803e-10,
+        "growth_from_preceding_update": 5.42596616562786,
+        "eager_residual": 0.6808889901628379,
+        "compiled_residual": 0.6808889901250331
+      },
+      {
+        "nonlinear_update": 8,
+        "shape": [
+          1126
+        ],
+        "maximum_absolute_difference": 1.3114724861651439e-08,
+        "maximum_relative_difference": 4.055864323886388e-09,
+        "growth_from_preceding_update": 40.69372314150728,
+        "eager_residual": 1.2761444021505142,
+        "compiled_residual": 1.276144395481363
+      },
+      {
+        "nonlinear_update": 9,
+        "shape": [
+          1126
+        ],
+        "maximum_absolute_difference": 1.0630589408755498e-08,
+        "maximum_relative_difference": 6.1077849826079785e-09,
+        "growth_from_preceding_update": 0.8105842494523264,
+        "eager_residual": 0.5933967168992745,
+        "compiled_residual": 0.5933967226855847
+      },
+      {
+        "nonlinear_update": 10,
+        "shape": [
+          1126
+        ],
+        "maximum_absolute_difference": 3.1101399233790517e-08,
+        "maximum_relative_difference": 1.568149382096707e-08,
+        "growth_from_preceding_update": 2.925651442071028,
+        "eager_residual": 0.1686936429865421,
+        "compiled_residual": 0.1686936524830972
+      },
+      {
+        "nonlinear_update": 11,
+        "shape": [
+          1126
+        ],
+        "maximum_absolute_difference": 8.079549429496069e-08,
+        "maximum_relative_difference": 4.39133536427728e-08,
+        "growth_from_preceding_update": 2.597808982406791,
+        "eager_residual": 0.8774577753160563,
+        "compiled_residual": 0.8774578214248157
+      },
+      {
+        "nonlinear_update": 12,
+        "shape": [
+          1126
+        ],
+        "maximum_absolute_difference": 1.1646900802908533e-05,
+        "maximum_relative_difference": 2.090888477060583e-06,
+        "growth_from_preceding_update": 144.15285041006257,
+        "eager_residual": 2.7616745556310622,
+        "compiled_residual": 2.761680786093926
+      }
+    ]
+  },
+  "historical_source_measurement": {
+    "imported_source_modules": {
+      "nova/equilibrium/fixed_point.py": "44281b5170ead543753d50f82439c700f001e506f2f1281525429fe018477d05",
+      "nova/equilibrium/forward_operator.py": "df13ceb0458a5ebf7c2e1046d52cb46f640569d9e25dcd24f735257978b50c59"
+    },
+    "backend": {
+      "platform": "cpu",
+      "device": "cpu",
+      "jax_version": "0.11.0",
+      "precision": "float64"
+    },
+    "cases": [
+      {
+        "shot": 21978,
+        "slice_index": 35,
+        "time_s": 0.1899999976158142,
+        "single_map_application": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 2.220446049250313e-16,
+          "maximum_relative_difference": 1.8900776655575514e-16
+        },
+        "solved_flux": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 4.787894525293268e-10,
+          "maximum_relative_difference": 1.170675690132606e-10
+        },
+        "eager_residual": 3.500268098891902,
+        "compiled_residual": 3.500268099341207
+      },
+      {
+        "shot": 21983,
+        "slice_index": 35,
+        "time_s": 0.1899999976158142,
+        "single_map_application": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 2.220446049250313e-16,
+          "maximum_relative_difference": 1.8031411412687375e-16
+        },
+        "solved_flux": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 1.2768988644218382e-10,
+          "maximum_relative_difference": 9.175427795077218e-11
+        },
+        "eager_residual": 0.26702451957770823,
+        "compiled_residual": 0.26702451957891027
+      },
+      {
+        "shot": 21985,
+        "slice_index": 51,
+        "time_s": 0.2750000059604645,
+        "single_map_application": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 2.220446049250313e-16,
+          "maximum_relative_difference": 1.3805892644503236e-16
+        },
+        "solved_flux": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 1.1646900802908533e-05,
+          "maximum_relative_difference": 2.090888477060583e-06
+        },
+        "eager_residual": 2.7616745556310622,
+        "compiled_residual": 2.761680786093926
+      },
+      {
+        "shot": 21986,
+        "slice_index": 46,
+        "time_s": 0.25,
+        "single_map_application": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 2.220446049250313e-16,
+          "maximum_relative_difference": 1.5923003165469476e-16
+        },
+        "solved_flux": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 1.253670322554079e-07,
+          "maximum_relative_difference": 9.222802361977635e-08
+        },
+        "eager_residual": 0.11353510647982909,
+        "compiled_residual": 0.11353511080029897
+      },
+      {
+        "shot": 21989,
+        "slice_index": 55,
+        "time_s": 0.29499998688697815,
+        "single_map_application": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 2.220446049250313e-16,
+          "maximum_relative_difference": 1.409172355098889e-16
+        },
+        "solved_flux": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 5.089518362311196e-09,
+          "maximum_relative_difference": 2.6947714308044213e-09
+        },
+        "eager_residual": 0.23770551656314384,
+        "compiled_residual": 0.23770551474543059
+      },
+      {
+        "shot": 22086,
+        "slice_index": 43,
+        "time_s": 0.22999998927116394,
+        "single_map_application": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 2.220446049250313e-16,
+          "maximum_relative_difference": 1.5793521313110015e-16
+        },
+        "solved_flux": {
+          "shape": [
+            1126
+          ],
+          "maximum_absolute_difference": 6.661338147750939e-16,
+          "maximum_relative_difference": 4.834585713838214e-16
+        },
+        "eager_residual": 5.718257333846712e-13,
+        "compiled_residual": 5.71780409143604e-13
+      }
+    ],
+    "trajectory": null
+  },
+  "quantity_clusters": {
+    "failing_quantity_count": 31,
+    "passing_quantity_count": 38,
+    "failing_clusters": {
+      "state_domain_topology_and_solver_trace": {
+        "count": 14,
+        "quantities": [
+          "cell_current",
+          "domains.psi_norm",
+          "fixed_point.residual",
+          "fixed_point.state",
+          "fixed_point.trace",
+          "flux",
+          "topology.axis",
+          "topology.axis_flux",
+          "topology.boundary",
+          "topology.boundary_flux",
+          "topology.wall_point",
+          "topology.wall_point_flux",
+          "topology.x_point",
+          "topology.x_point_flux"
+        ]
+      },
+      "integrated_moments_and_current_ledger": {
+        "count": 9,
+        "quantities": [
+          "ledger.common_sol",
+          "ledger.core",
+          "ledger.private_flux",
+          "moments.flux_span",
+          "moments.internal_inductance",
+          "moments.plasma_current",
+          "moments.poloidal_beta",
+          "moments.poloidal_field_integral",
+          "moments.pressure_integral"
+        ]
+      },
+      "conservation_and_source_normalisation": {
+        "count": 8,
+        "quantities": [
+          "conservation.divergence_b_scale",
+          "conservation.divergence_j",
+          "conservation.divergence_j_scale",
+          "conservation.force_residual",
+          "conservation.force_scale",
+          "conservation.grad_shafranov_residual",
+          "conservation.grad_shafranov_scale",
+          "normalisation.amplitude"
+        ]
+      }
+    },
+    "passing_clusters": {
+      "continuous_values_at_relative_roundoff": {
+        "count": 3,
+        "quantities": [
+          "conservation.divergence_b",
+          "ledger.total",
+          "moments.major_radius"
+        ]
+      },
+      "exact_categorical_policy_and_structural_invariants": {
+        "count": 35,
+        "quantities": [
+          "conservation.checked_cells",
+          "continuation.common_sol.continuity",
+          "continuation.common_sol.decay_width",
+          "continuation.common_sol.domain",
+          "continuation.common_sol.form",
+          "continuation.common_sol.separatrix_diamagnetic_gradient",
+          "continuation.common_sol.separatrix_pressure_gradient",
+          "continuation.common_sol.support",
+          "continuation.common_sol.truncated_fraction",
+          "continuation.private_flux.continuity",
+          "continuation.private_flux.decay_width",
+          "continuation.private_flux.domain",
+          "continuation.private_flux.form",
+          "continuation.private_flux.separatrix_diamagnetic_gradient",
+          "continuation.private_flux.separatrix_pressure_gradient",
+          "continuation.private_flux.support",
+          "continuation.private_flux.truncated_fraction",
+          "domains.label",
+          "finite.cell_current",
+          "finite.conservation",
+          "finite.flux",
+          "finite.moments",
+          "fixed_point.amplification_observation",
+          "fixed_point.krylov_action_qualification",
+          "ledger.excluded_material",
+          "moments.volume",
+          "normalisation.policy",
+          "normalisation.rescaled",
+          "rotation.axis_mach_number",
+          "rotation.closure",
+          "rotation.maximum_centrifugal_factor",
+          "rotation.mean_particle_mass",
+          "rotation.minimum_centrifugal_factor",
+          "rotation.reference_radius",
+          "topology.diverted"
+        ]
+      }
+    }
+  },
+  "fixed_point_parity_disposition": {
+    "achievable_as_registered": false,
+    "must_be_rederived": true,
+    "reason": "A non-contractive map with measured spectral radius above one amplified a float64-roundoff one-application difference beyond the registered fixed-point bound. Cross-compilation equality of the terminal state is therefore not a stable requirement; bind parity to one map application and separately bound physically meaningful terminal observables."
+  }
+}

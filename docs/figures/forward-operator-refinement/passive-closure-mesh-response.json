@@ -1,0 +1,251 @@
+{
+  "comparators": {
+    "documented_direct_response_points": 0.098,
+    "registered_ceiling_points": 0.15,
+    "reported_coarse_measurement_points": 0.6098,
+    "reported_measurement_over_ceiling": 4.065333333333333,
+    "reported_measurement_over_direct_response": 6.222448979591837
+  },
+  "method": {
+    "cell_requests": [
+      -500,
+      -1500,
+      -2100
+    ],
+    "controlled_change": "zero only the declared passive-current columns on one shared machine carrier per rung",
+    "intermediate_request": -1500,
+    "measured_quantity": "without-passive flux sup-norm deviation minus passive-inclusive flux sup-norm deviation, in percentage points of reference span",
+    "reference_scale_request": -2100
+  },
+  "receipt": {
+    "checkout_porcelain_empty_before_measurement": true,
+    "device_backend": "gpu",
+    "devices": [
+      "cuda:0"
+    ],
+    "kind": "passive_closure_mesh_response",
+    "rung_count": 3,
+    "solve_count": 6,
+    "source_commit": "d244c4e0828a1a0d3292b9f0b37f748865039714",
+    "status": "complete"
+  },
+  "rungs": [
+    {
+      "cell_pitch_m": 0.23664360293487774,
+      "closure": {
+        "axis_height_move_mm": -2.0477818668896974,
+        "axis_radius_move_mm": 3.7326247941260604,
+        "flux_move_over_without_passive_deviation": 0.08413185152334807,
+        "flux_reproduction_move_points": 0.6098462721138205,
+        "internal_inductance_move_points": 0.054524473934958184
+      },
+      "machine_cache": {
+        "arrays_verified": 31,
+        "bitwise_stored_precision": true,
+        "build_seconds": 233.81046384200454,
+        "bytes_verified": 51411470,
+        "hit": false,
+        "key": "e81dd0f256c1e3d1",
+        "load_seconds": 0.3959656311199069,
+        "lock_wait_seconds": 2.0897947251796722e-05,
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr",
+        "store_seconds": 0.9758327000308782,
+        "validation_seconds": 0.28126117307692766
+      },
+      "machine_request_seconds": 250.30335448984988,
+      "passive_columns": 103,
+      "passive_flux_percent_of_reference_span": 0.0931001229389382,
+      "realised_plasma_cells": 566,
+      "requested_cells": -500,
+      "solves": [
+        {
+          "deviations": {
+            "axis height": -0.18160203871475655,
+            "axis radius": -43.225782470727836,
+            "flux sup-norm": 6.638850399497851,
+            "inboard edge": 160.9938671977602,
+            "internal inductance": -1.009110442052863,
+            "outboard edge": -270.3025739394569,
+            "plasma current": -1.1558818651079217,
+            "poloidal beta": 2.263070390636046
+          },
+          "elapsed_seconds": 38.98095693811774,
+          "final_relative_fixed_point_residual": 9.837247304630962e-12,
+          "first_measured_residual": 0.014860439002442083,
+          "measured_residuals": 20,
+          "minimum_measured_residual": 9.837247304630962e-12,
+          "model": "declared_passive_currents",
+          "trace_slots": 320
+        },
+        {
+          "deviations": {
+            "axis height": 1.8661798281749409,
+            "axis radius": -46.958407264853896,
+            "flux sup-norm": 7.248696671611672,
+            "inboard edge": 160.9938671977602,
+            "internal inductance": -1.0636349159878211,
+            "outboard edge": -270.3025739394569,
+            "plasma current": -1.2579675790531542,
+            "poloidal beta": 2.1317414539149038
+          },
+          "elapsed_seconds": 4.418608016101643,
+          "final_relative_fixed_point_residual": 8.405200159595241e-11,
+          "first_measured_residual": 0.014639416218318659,
+          "measured_residuals": 20,
+          "minimum_measured_residual": 8.405200159595241e-11,
+          "model": "passive_currents_zeroed",
+          "trace_slots": 320
+        }
+      ]
+    },
+    {
+      "cell_pitch_m": 0.13662624785645447,
+      "closure": {
+        "axis_height_move_mm": -2.082262605453966,
+        "axis_radius_move_mm": 3.894813467249847,
+        "flux_move_over_without_passive_deviation": 0.08598390011519423,
+        "flux_reproduction_move_points": 0.6392158734555036,
+        "internal_inductance_move_points": 0.05665819396225569
+      },
+      "machine_cache": {
+        "arrays_verified": 31,
+        "bitwise_stored_precision": true,
+        "build_seconds": 436.5223421759438,
+        "bytes_verified": 349497179,
+        "hit": false,
+        "key": "9750495d37d5aa8c",
+        "load_seconds": 0.003627851838245988,
+        "lock_wait_seconds": 1.2692995369434357e-05,
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr",
+        "store_seconds": 4.067454584175721,
+        "validation_seconds": 2.3128467798233032
+      },
+      "machine_request_seconds": 443.4227713509463,
+      "passive_columns": 103,
+      "passive_flux_percent_of_reference_span": 0.09567683209295026,
+      "realised_plasma_cells": 1587,
+      "requested_cells": -1500,
+      "solves": [
+        {
+          "deviations": {
+            "axis height": 0.05044011957955341,
+            "axis radius": -42.742095561068005,
+            "flux sup-norm": 6.794918570308203,
+            "inboard edge": 15.591609289193897,
+            "internal inductance": -0.9024763599819297,
+            "outboard edge": -124.90031603089058,
+            "plasma current": -1.1710191188179508,
+            "poloidal beta": 2.2499200710227596
+          },
+          "elapsed_seconds": 47.061154203955084,
+          "final_relative_fixed_point_residual": 1.0267129261571327e-15,
+          "first_measured_residual": 0.014703734893385244,
+          "measured_residuals": 20,
+          "minimum_measured_residual": 1.0267129261571327e-15,
+          "model": "declared_passive_currents",
+          "trace_slots": 320
+        },
+        {
+          "deviations": {
+            "axis height": 2.1327027250335195,
+            "axis radius": -46.63690902831785,
+            "flux sup-norm": 7.434134443763707,
+            "inboard edge": 15.591609289193897,
+            "internal inductance": -0.9591345539441853,
+            "outboard edge": -124.90031603089058,
+            "plasma current": -1.2769223305697186,
+            "poloidal beta": 2.114407117362771
+          },
+          "elapsed_seconds": 10.465928308898583,
+          "final_relative_fixed_point_residual": 5.043067300862184e-15,
+          "first_measured_residual": 0.01451141050218886,
+          "measured_residuals": 20,
+          "minimum_measured_residual": 5.043067300862184e-15,
+          "model": "passive_currents_zeroed",
+          "trace_slots": 320
+        }
+      ]
+    },
+    {
+      "cell_pitch_m": 0.11547025468347542,
+      "closure": {
+        "axis_height_move_mm": -2.107278602434315,
+        "axis_radius_move_mm": 3.9033302525952607,
+        "flux_move_over_without_passive_deviation": 0.08555446517854466,
+        "flux_reproduction_move_points": 0.6377635705064097,
+        "internal_inductance_move_points": 0.05517385735662739
+      },
+      "machine_cache": {
+        "arrays_verified": 31,
+        "bitwise_stored_precision": true,
+        "build_seconds": 556.5625047050416,
+        "bytes_verified": 664922638,
+        "hit": false,
+        "key": "63bf04d86dc3223d",
+        "load_seconds": 0.0032874520402401686,
+        "lock_wait_seconds": 8.899951353669167e-06,
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr",
+        "store_seconds": 3.7748993150889874,
+        "validation_seconds": 2.238544185180217
+      },
+      "machine_request_seconds": 563.1975541119464,
+      "passive_columns": 103,
+      "passive_flux_percent_of_reference_span": 0.0972391520211195,
+      "realised_plasma_cells": 2214,
+      "requested_cells": -2100,
+      "solves": [
+        {
+          "deviations": {
+            "axis height": -0.04842909786051397,
+            "axis radius": -42.44266882934866,
+            "flux sup-norm": 6.816710829812185,
+            "inboard edge": -11.461880292825022,
+            "internal inductance": -0.8799306202993629,
+            "outboard edge": -97.84682644887077,
+            "plasma current": -1.172041273512403,
+            "poloidal beta": 2.2492351655781784
+          },
+          "elapsed_seconds": 43.69973123096861,
+          "final_relative_fixed_point_residual": 7.01131131122817e-11,
+          "first_measured_residual": 0.014697938434648823,
+          "measured_residuals": 20,
+          "minimum_measured_residual": 7.01131131122817e-11,
+          "model": "declared_passive_currents",
+          "trace_slots": 320
+        },
+        {
+          "deviations": {
+            "axis height": 2.058849504573801,
+            "axis radius": -46.34599908194392,
+            "flux sup-norm": 7.4544744003185945,
+            "inboard edge": -11.461880292825022,
+            "internal inductance": -0.9351044776559903,
+            "outboard edge": -97.84682644887077,
+            "plasma current": -1.277911232118356,
+            "poloidal beta": 2.1145502347595935
+          },
+          "elapsed_seconds": 9.960615368094295,
+          "final_relative_fixed_point_residual": 2.5204631956615676e-10,
+          "first_measured_residual": 0.014509923316229132,
+          "measured_residuals": 20,
+          "minimum_measured_residual": 2.5204631956615676e-10,
+          "model": "passive_currents_zeroed",
+          "trace_slots": 320
+        }
+      ]
+    }
+  ],
+  "verdict": {
+    "classification": "mesh_independent_closure_defect",
+    "coarse_distance_from_direct_points": 0.5118462721138205,
+    "coarse_move_points": 0.6098462721138205,
+    "collapse_rule": "dense move is positive, no greater than 0.15 points, and closer to 0.098 points than the -500 move",
+    "dense_closer_to_documented_direct_response": false,
+    "dense_distance_from_direct_points": 0.5397635705064098,
+    "dense_inside_registered_ceiling": false,
+    "dense_move_points": 0.6377635705064097,
+    "dense_over_coarse_move": 1.0457775994855616,
+    "follow_on": "trace_the_passive_closure_path_on_a_fixed_dense_carrier",
+    "ruling": "The reference-scale rung does not collapse inside the 0.15-point ceiling toward the documented 0.098-point direct response; the closure path, rather than the coarse carrier, is responsible."
+  }
+}

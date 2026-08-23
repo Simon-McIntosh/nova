@@ -171,6 +171,25 @@
   production, and re-runs the full 2,618-test biot suite. Receipt:
   <code>scripts/device_kernel_port/nine-block-receipt.json</code>.</p>
 
+  <h2 id="s4-route-selected">§4 — the production route selected: suite 2,608/2,618, four strict references left to reconcile</h2>
+
+  <p><strong>Landed blocked 2026-08-23, commit <code>6e98178f</code> (node gate FAILED at the last
+  fence, 42 min wall); run <code>production-route-selection</code>.</strong> The default closed-form
+  <code>PolySectionPolicy</code> now resolves JAX + <code>axisymmetric_ring</code> as production, with
+  NumPy quadrature retained as the independent reference and cache identities kept distinct;
+  <code>Solve</code> swaps only the canonical <code>PolySection</code> generator for
+  <code>TiledPolySection</code> under JAX policies; the pre-port must-raise accelerator guard is
+  rewritten to pin the new invariant. Receipt stamped <code>production_numpy_path_replaced=true</code>,
+  <code>no_further_pairing_layer=true</code>, carrying the adjudicated measured bounds (CPU-XLA
+  1.6083e-9, H200 1.2245e-9, scalar NumPy 1.3473e-9; medians 4.90e-10 / 5.13e-10).
+  <strong>Full suite:</strong> 2,618 collected — 2,608 passed, 3 skipped, 3 xfailed,
+  <strong>4 failed</strong> in 1,900.82&nbsp;s, every failure a strict byte-identity or banked-roundoff
+  reference assertion colliding with cross-codegen fp64 at 4.0184e-13, 8.2767e-13, 2.0246e-12 max
+  relative and 2.7421e-13 abs / 4.2287e-6 rel on the section-average banked error vector. The
+  continuation node re-states those four assertions against the selected cross-codegen invariant with
+  stated measured bounds — physical invariants untouched — and re-banks the section-average error
+  vector; its suite-green run is the port's delivery moment.</p>
+
 </main>
 </body>
 </html>

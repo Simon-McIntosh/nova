@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T12:32:31",
+  "updated": "2026-08-23T12:39:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -26056,9 +26056,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T095636059110-production-route-selection",
+        "plan": "device-kernel-build",
+        "section": "\u00a74",
+        "node": "production-route-selection",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "kernel-prototype",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T09:56:39Z",
+        "completed_at": "2026-08-23T10:38:21Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2502,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2502,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "8780b4606445141cd130542d804743fb276aa0b6",
+        "commits": [
+          "6e98178f0d4f6e9d5dbb8986cbe1b7847b81f669"
+        ],
+        "changed_lines": {
+          "added": 67,
+          "removed": 38,
+          "files": 7
+        },
+        "tests_added": 0,
+        "gate": "failed",
+        "outcome": "Route selected and receipt stamped production_numpy_path_replaced=true; full biot suite 2,618 collected, 2,608 passed, 4 failed - all four are strict byte-identity or banked-roundoff reference assertions colliding with cross-codegen fp64 at 4.0e-13 to 2.0e-12 relative, two files outside the fence and the 45m budget spent after one 31m40s suite run. Continuation node cross-codegen-reference-reconciliation carries the widened test fence.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T095636059110-production-route-selection/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0247d-26e8-7de2-96ad-893a24e6c3ff",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 23071744,
+            "cached_input_tokens_cumulative": 176887296,
+            "input_tokens": 23384651,
+            "input_tokens_cumulative": 180968958,
+            "output_tokens": 39446,
+            "output_tokens_cumulative": 507763,
+            "reasoning_output_tokens": 12107,
+            "reasoning_output_tokens_cumulative": 166622
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 620
+    "_version": 621
   }
 }

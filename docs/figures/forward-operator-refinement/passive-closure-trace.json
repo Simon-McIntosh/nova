@@ -1,0 +1,384 @@
+{
+  "carrier": {
+    "cache": {
+      "arrays_verified": 31,
+      "bitwise_stored_precision": true,
+      "build_seconds": 0.0,
+      "bytes_verified": 664922638,
+      "hit": true,
+      "key": "63bf04d86dc3223d",
+      "load_seconds": 1.600293377880007,
+      "lock_wait_seconds": 1.4321878552436829e-05,
+      "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr",
+      "store_seconds": 0.0,
+      "validation_seconds": 0.0
+    },
+    "machine_request_seconds": 8.496220232918859,
+    "passive_columns": 103,
+    "realised_plasma_cells": 2214,
+    "reference_flux_span_wb": 80.89369098146811,
+    "requested_cells": -2100
+  },
+  "comparators": {
+    "documented_direct_response_points": 0.098,
+    "measured_unpinned_spectral_radius": 1.2577,
+    "registered_ceiling_points": 0.15
+  },
+  "controlled_inputs": {
+    "geometry_shared": true,
+    "only_changed_input": "declared passive-current columns retained or zeroed",
+    "seed_max_absolute_difference_wb": 0.0,
+    "source_profiles_shared": true
+  },
+  "exact_tangent_response": {
+    "iterations": [
+      {
+        "counterfactual_reproduction_move_points": 0.028573173854321787,
+        "cumulative_response_peak_points": 0.09723915202112363,
+        "increment_growth_ratio": null,
+        "increment_peak_points": 0.09723915202112363,
+        "iteration": 1
+      },
+      {
+        "counterfactual_reproduction_move_points": 0.09413933031104804,
+        "cumulative_response_peak_points": 0.16754656135582566,
+        "increment_growth_ratio": 0.9986054072400818,
+        "increment_peak_points": 0.09710354300373439,
+        "iteration": 2
+      },
+      {
+        "counterfactual_reproduction_move_points": 0.22572196549549606,
+        "cumulative_response_peak_points": 0.31790791113641664,
+        "increment_growth_ratio": 1.6627252604243326,
+        "increment_peak_points": 0.16145651382900963,
+        "iteration": 3
+      },
+      {
+        "counterfactual_reproduction_move_points": 0.44594041065000045,
+        "cumulative_response_peak_points": 0.5589695592593822,
+        "increment_growth_ratio": 1.558719527768259,
+        "increment_peak_points": 0.2516654209906633,
+        "iteration": 4
+      },
+      {
+        "counterfactual_reproduction_move_points": 0.7846006392260119,
+        "cumulative_response_peak_points": 0.9231561089072217,
+        "increment_growth_ratio": 1.4841345124942722,
+        "increment_peak_points": 0.37350533689364385,
+        "iteration": 5
+      },
+      {
+        "counterfactual_reproduction_move_points": 1.2834438434958138,
+        "cumulative_response_peak_points": 1.4531405879310224,
+        "increment_growth_ratio": 1.4364130395667838,
+        "increment_peak_points": 0.5365079362618146,
+        "iteration": 6
+      },
+      {
+        "counterfactual_reproduction_move_points": 1.9865357973686635,
+        "cumulative_response_peak_points": 2.1996016732140244,
+        "increment_growth_ratio": 1.404803632019685,
+        "increment_peak_points": 0.7536882974679828,
+        "iteration": 7
+      },
+      {
+        "counterfactual_reproduction_move_points": 2.952983558127702,
+        "cumulative_response_peak_points": 3.2268920179894436,
+        "increment_growth_ratio": 1.3763690648860238,
+        "increment_peak_points": 1.037353257201547,
+        "iteration": 8
+      },
+      {
+        "counterfactual_reproduction_move_points": 4.27273875203698,
+        "cumulative_response_peak_points": 4.6276399764212925,
+        "increment_growth_ratio": 1.3560016146904552,
+        "increment_peak_points": 1.4066526917697006,
+        "iteration": 9
+      },
+      {
+        "counterfactual_reproduction_move_points": 4.949828365368679,
+        "cumulative_response_peak_points": 6.4986445848506,
+        "increment_growth_ratio": 1.3372082983171392,
+        "increment_peak_points": 1.8809876522845848,
+        "iteration": 10
+      },
+      {
+        "counterfactual_reproduction_move_points": 3.3946835580899632,
+        "cumulative_response_peak_points": 8.972150331466844,
+        "increment_growth_ratio": 1.3217333021426356,
+        "increment_peak_points": 2.4861640209436278,
+        "iteration": 11
+      },
+      {
+        "counterfactual_reproduction_move_points": 1.0103074117533595,
+        "cumulative_response_peak_points": 12.225671961608821,
+        "increment_growth_ratio": 1.3086512405191588,
+        "increment_peak_points": 3.2535216301419783,
+        "iteration": 12
+      }
+    ],
+    "late_increment_growth_ratio_median": 1.3372082983171392,
+    "linearisation_root_residual_points": 2.5748057407133786e-08,
+    "relative_difference_from_measured_spectral_radius": 0.0632172205749695
+  },
+  "paired_coupled_map": {
+    "direct_external_peak_points": 0.09723915202112363,
+    "iteration_one_current_difference_a": 0.0,
+    "iteration_one_internal_difference_points": 0.0,
+    "iterations": [
+      {
+        "direct_external_peak_points": 0.09723915202112363,
+        "iteration": 1,
+        "map_decomposition_identity_error_wb": 0.0,
+        "plasma_current_difference_a": 0.0,
+        "plasma_feedback_peak_points": 0.0,
+        "reproduction_move_points": -0.025539986817858962,
+        "response_growth_ratio": null,
+        "response_increment_peak_points": 0.09723915202112363,
+        "response_peak_points": 0.09723915202112363,
+        "support": {
+          "axis_separation_mm": 0.3488544657468919,
+          "both_diverted": true,
+          "core_symmetric_difference_cells": 1,
+          "flux_span_difference_wb": 0.01866349082362717,
+          "left_core_cells": 1615,
+          "right_core_cells": 1614
+        }
+      },
+      {
+        "direct_external_peak_points": 0.09723915202112363,
+        "iteration": 2,
+        "map_decomposition_identity_error_wb": 0.0,
+        "plasma_current_difference_a": 9366.873945874968,
+        "plasma_feedback_peak_points": 0.09884026741508457,
+        "reproduction_move_points": -0.08523990359076938,
+        "response_growth_ratio": 1.7522169540357238,
+        "response_increment_peak_points": 0.09884026741508457,
+        "response_peak_points": 0.17038409076746994,
+        "support": {
+          "axis_separation_mm": 1.0115279365989527,
+          "both_diverted": true,
+          "core_symmetric_difference_cells": 1,
+          "flux_span_difference_wb": 0.058627547972875504,
+          "left_core_cells": 1623,
+          "right_core_cells": 1622
+        }
+      },
+      {
+        "direct_external_peak_points": 0.09723915202112363,
+        "iteration": 3,
+        "map_decomposition_identity_error_wb": 0.0,
+        "plasma_current_difference_a": 21809.884196182647,
+        "plasma_feedback_peak_points": 0.2604447733926754,
+        "reproduction_move_points": -0.20967719191803447,
+        "response_growth_ratio": 1.9006130829316674,
+        "response_increment_peak_points": 0.16490362315302703,
+        "response_peak_points": 0.3238342320360701,
+        "support": {
+          "axis_separation_mm": 1.984638071922937,
+          "both_diverted": true,
+          "core_symmetric_difference_cells": 3,
+          "flux_span_difference_wb": 0.1256920823535097,
+          "left_core_cells": 1630,
+          "right_core_cells": 1627
+        }
+      },
+      {
+        "direct_external_peak_points": 0.09723915202112363,
+        "iteration": 4,
+        "map_decomposition_identity_error_wb": 0.0,
+        "plasma_current_difference_a": 40115.34668356385,
+        "plasma_feedback_peak_points": 0.5157549338408308,
+        "reproduction_move_points": -0.4226215097597734,
+        "response_growth_ratio": 1.763283207511931,
+        "response_increment_peak_points": 0.25750888468025573,
+        "response_peak_points": 0.5710114633667246,
+        "support": {
+          "axis_separation_mm": 3.333400021951526,
+          "both_diverted": true,
+          "core_symmetric_difference_cells": 3,
+          "flux_span_difference_wb": 0.22804117217874875,
+          "left_core_cells": 1637,
+          "right_core_cells": 1634
+        }
+      },
+      {
+        "direct_external_peak_points": 0.09723915202112363,
+        "iteration": 5,
+        "map_decomposition_identity_error_wb": 0.0,
+        "plasma_current_difference_a": 68845.94359932179,
+        "plasma_feedback_peak_points": 0.8950359471725527,
+        "reproduction_move_points": -0.7591183276000706,
+        "response_growth_ratio": 1.6559204224076263,
+        "response_increment_peak_points": 0.3829740296894903,
+        "response_peak_points": 0.9455495436178234,
+        "support": {
+          "axis_separation_mm": 5.1843519110942795,
+          "both_diverted": true,
+          "core_symmetric_difference_cells": 7,
+          "flux_span_difference_wb": 0.3767157755885506,
+          "left_core_cells": 1644,
+          "right_core_cells": 1637
+        }
+      },
+      {
+        "direct_external_peak_points": 0.09723915202112363,
+        "iteration": 6,
+        "map_decomposition_identity_error_wb": 0.0,
+        "plasma_current_difference_a": 110482.23073793443,
+        "plasma_feedback_peak_points": 1.439372292282084,
+        "reproduction_move_points": -1.25731010792484,
+        "response_growth_ratio": 1.573233946776817,
+        "response_increment_peak_points": 0.551106371674098,
+        "response_peak_points": 1.4875706403788864,
+        "support": {
+          "axis_separation_mm": 7.707654358807612,
+          "both_diverted": true,
+          "core_symmetric_difference_cells": 15,
+          "flux_span_difference_wb": 0.585704697471499,
+          "left_core_cells": 1644,
+          "right_core_cells": 1629
+        }
+      },
+      {
+        "direct_external_peak_points": 0.09723915202112363,
+        "iteration": 7,
+        "map_decomposition_identity_error_wb": 0.0,
+        "plasma_current_difference_a": 168586.71157135753,
+        "plasma_feedback_peak_points": 2.2013839497033385,
+        "reproduction_move_points": -1.9279834965597509,
+        "response_growth_ratio": 1.5126921241125826,
+        "response_increment_peak_points": 0.7725269573498121,
+        "response_peak_points": 2.2502363917622525,
+        "support": {
+          "axis_separation_mm": 11.131759350734544,
+          "both_diverted": true,
+          "core_symmetric_difference_cells": 14,
+          "flux_span_difference_wb": 0.8723783937921468,
+          "left_core_cells": 1642,
+          "right_core_cells": 1628
+        }
+      },
+      {
+        "direct_external_peak_points": 0.09723915202112363,
+        "iteration": 8,
+        "map_decomposition_identity_error_wb": 0.0,
+        "plasma_current_difference_a": 247151.20824963803,
+        "plasma_feedback_peak_points": 3.256245893482472,
+        "reproduction_move_points": -2.8121955407577683,
+        "response_growth_ratio": 1.4671831855022865,
+        "response_increment_peak_points": 1.0603322066011496,
+        "response_peak_points": 3.301508997398913,
+        "support": {
+          "axis_separation_mm": 15.741530561543339,
+          "both_diverted": true,
+          "core_symmetric_difference_cells": 23,
+          "flux_span_difference_wb": 1.2580046579578976,
+          "left_core_cells": 1642,
+          "right_core_cells": 1619
+        }
+      }
+    ],
+    "maximum_map_decomposition_identity_error_wb": 0.0
+  },
+  "production_solves": [
+    {
+      "arm": "declared_passive_currents",
+      "deviations": {
+        "axis height": -0.04842909786295646,
+        "axis radius": -42.442668829347774,
+        "flux sup-norm": 6.816710829811937,
+        "inboard edge": -11.461880292825022,
+        "internal inductance": -0.8799306202994406,
+        "outboard edge": -97.84682644887077,
+        "plasma current": -1.1720412735123142,
+        "poloidal beta": 2.249235165578134
+      },
+      "elapsed_seconds": 39.28236932004802,
+      "first_measured_residual": 0.014697938434648823,
+      "measured_residuals": 20,
+      "minimum_measured_residual": 7.011371188032657e-11,
+      "terminal_relative_fixed_point_residual": 7.011371188032657e-11,
+      "trace_slots": 320
+    },
+    {
+      "arm": "passive_currents_zeroed",
+      "deviations": {
+        "axis height": 2.0588495045804622,
+        "axis radius": -46.34599908195369,
+        "flux sup-norm": 7.454474400318651,
+        "inboard edge": -11.461880292825022,
+        "internal inductance": -0.9351044776560125,
+        "outboard edge": -97.84682644887077,
+        "plasma current": -1.2779112321183783,
+        "poloidal beta": 2.114550234759549
+      },
+      "elapsed_seconds": 14.080497195012867,
+      "first_measured_residual": 0.014509923316229132,
+      "measured_residuals": 20,
+      "minimum_measured_residual": 2.520457455976594e-10,
+      "terminal_relative_fixed_point_residual": 2.520457455976594e-10,
+      "trace_slots": 320
+    }
+  ],
+  "receipt": {
+    "checkout_porcelain_empty_before_measurement": true,
+    "device_backend": "gpu",
+    "devices": [
+      "cuda:0"
+    ],
+    "kind": "passive_closure_iteration_trace",
+    "production_solve_count": 2,
+    "source_commit": "c52d883c2fc073ecdfc5b77a68d5608d25b9a4af",
+    "status": "complete"
+  },
+  "terminal_decomposition": {
+    "coupled_plasma_feedback_contribution_points": 0.6091903966523926,
+    "direct_external_contribution_points": 0.028573173854321787,
+    "direct_external_counterfactual_score_points": 7.42590122646433,
+    "direct_external_peak_points": 0.09723915202112363,
+    "passive_inclusive_score_on_own_support_points": 6.816710829811937,
+    "passive_inclusive_score_on_without_support_points": 6.816710829811937,
+    "root_response_over_direct_peak": 6.59985763535967,
+    "root_response_peak_points": 0.6417645599225125,
+    "sum_identity_error_points": 0.0,
+    "sum_of_contributions_points": 0.6377635705067144,
+    "support": {
+      "core_symmetric_difference_cells": 4,
+      "with_core_cells": 1585,
+      "without_core_cells": 1585
+    },
+    "support_mask_contribution_points": 0.0,
+    "total_reproduction_move_points": 0.6377635705067144,
+    "without_passive_score_points": 7.454474400318651
+  },
+  "verdict": {
+    "classification": "CLOSURE_PATH_ERROR",
+    "code_path": [
+      "nova/equilibrium/forward_operator.py:569 captures the external field once",
+      "nova/equilibrium/forward_operator.py:571-573 adds the state-dependent plasma image",
+      "nova/equilibrium/fixed_point.py:244-255 forms and solves the exact (I-J) action",
+      "tests/test_equilibrium_forward_reference.py:1635-1640 supplies the same stored-map seed",
+      "tests/test_equilibrium_forward_reference.py:1552-1557 scores the topology core support"
+    ],
+    "excluded_closure_path_candidates": {
+      "seed_or_basin_move": "excluded: seed bytes are identical and both terminal roots remain on the diverted branch with identical core support",
+      "source_normalisation_amplification": "excluded at iteration one: target_current is absent and the paired internal image plus plasma current are identical",
+      "support_or_mask_difference": "excluded by zero core-mask symmetric difference and zero score contribution"
+    },
+    "growth_consistent_with_unpinned_spectral_radius": true,
+    "iteration_one_arithmetic_correct": true,
+    "late_increment_growth_ratio_median": 1.3372082983171392,
+    "measured_unpinned_spectral_radius": 1.2577,
+    "mechanism": "iteration_one_closure_arithmetic_or_support_error",
+    "plasma_feedback_dominates_direct_contribution": true,
+    "repair_file_scope": [
+      "nova/equilibrium/source.py",
+      "nova/equilibrium/domain.py",
+      "nova/equilibrium/forward_operator.py"
+    ],
+    "repair_scope_occupancy": "The concurrent solver lane holds forward_operator.py and fixed_point.py; coordinate there rather than editing either here.",
+    "ruling": "The passive response is already inconsistent before expanding-map feedback, or its support differs; repair the named iteration-one path.",
+    "terminal_support_identical": false
+  }
+}

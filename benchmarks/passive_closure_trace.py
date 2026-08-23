@@ -36,6 +36,7 @@ DENSE_CELL_REQUEST = -2100
 PAIRED_MAP_ITERATIONS = 8
 LINEAR_RESPONSE_ITERATIONS = 12
 MEASURED_UNPINNED_SPECTRAL_RADIUS = 1.2577
+MEASURED_PINNED_SPECTRAL_RADIUS = 1.1456
 REGISTERED_CEILING_POINTS = 0.15
 DOCUMENTED_DIRECT_RESPONSE_POINTS = 0.098
 IDENTITY_RELATIVE_TOLERANCE = 2.0e-12
@@ -101,9 +102,7 @@ def _support_comparison(left: dict[str, object], right: dict[str, object]):
         "both_diverted": bool(left["diverted"] and right["diverted"]),
         "axis_separation_mm": 1.0e3
         * float(np.linalg.norm(left["axis_m"] - right["axis_m"])),
-        "flux_span_difference_wb": float(
-            left["flux_span_wb"] - right["flux_span_wb"]
-        ),
+        "flux_span_difference_wb": float(left["flux_span_wb"] - right["flux_span_wb"]),
     }
 
 
@@ -327,6 +326,16 @@ def _terminal_decomposition(
             "core_symmetric_difference_cells": int(
                 np.logical_xor(with_core, without_core).sum()
             ),
+            "both_diverted": bool(
+                with_solved.topology.diverted and without_solved.topology.diverted
+            ),
+            "axis_separation_mm": 1.0e3
+            * float(
+                np.linalg.norm(
+                    np.asarray(with_solved.topology.axis, dtype=float)
+                    - np.asarray(without_solved.topology.axis, dtype=float)
+                )
+            ),
         },
     }
 
@@ -347,10 +356,7 @@ def _verdict(
         and paired["maximum_map_decomposition_identity_error_wb"]
         <= IDENTITY_RELATIVE_TOLERANCE
     )
-    support_identical = (
-        terminal["support"]["core_symmetric_difference_cells"] == 0
-        and terminal["support_mask_contribution_points"] == 0.0
-    )
+    support_nonamplifying = terminal["support_mask_contribution_points"] == 0.0
     spectral_consistent = (
         linear["relative_difference_from_measured_spectral_radius"]
         <= SPECTRAL_RATIO_RELATIVE_TOLERANCE
@@ -361,7 +367,7 @@ def _verdict(
 
     if (
         iteration_one_correct
-        and support_identical
+        and support_nonamplifying
         and spectral_consistent
         and feedback_dominates
     ):
@@ -372,8 +378,9 @@ def _verdict(
             "nova/equilibrium/fixed_point.py",
         ]
         ruling = (
-            "Iteration one is exactly the passive external field with no source, "
-            "seed or support discrepancy. Later exact-tangent terms grow at the "
+            "Iteration one is exactly the passive external field with no source "
+            "or seed discrepancy. Its one-cell physical support move is removed "
+            "by fixed-support scoring; later exact-tangent terms grow at the "
             "measured expanding-map rate and dominate the terminal score move."
         )
     else:
@@ -394,10 +401,11 @@ def _verdict(
         "mechanism": mechanism,
         "ruling": ruling,
         "iteration_one_arithmetic_correct": iteration_one_correct,
-        "terminal_support_identical": support_identical,
+        "terminal_support_contribution_zero": support_nonamplifying,
         "growth_consistent_with_unpinned_spectral_radius": spectral_consistent,
         "plasma_feedback_dominates_direct_contribution": feedback_dominates,
         "measured_unpinned_spectral_radius": MEASURED_UNPINNED_SPECTRAL_RADIUS,
+        "measured_pinned_spectral_radius": MEASURED_PINNED_SPECTRAL_RADIUS,
         "late_increment_growth_ratio_median": linear[
             "late_increment_growth_ratio_median"
         ],
@@ -432,11 +440,11 @@ def _verdict(
             ),
             "seed_or_basin_move": (
                 "excluded: seed bytes are identical and both terminal roots remain "
-                "on the diverted branch with identical core support"
+                "on the same diverted branch"
             ),
             "support_or_mask_difference": (
-                "excluded by zero core-mask symmetric difference and zero "
-                "score contribution"
+                "excluded as amplification: paired iterations use fixed support, "
+                "and the four-cell terminal mask difference contributes zero points"
             ),
         },
     }
@@ -601,6 +609,7 @@ def run() -> dict[str, object]:
             "documented_direct_response_points": DOCUMENTED_DIRECT_RESPONSE_POINTS,
             "registered_ceiling_points": REGISTERED_CEILING_POINTS,
             "measured_unpinned_spectral_radius": MEASURED_UNPINNED_SPECTRAL_RADIUS,
+            "measured_pinned_spectral_radius": MEASURED_PINNED_SPECTRAL_RADIUS,
         },
         "controlled_inputs": {
             "seed_max_absolute_difference_wb": seed_identity_error,

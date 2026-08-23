@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="topology-preserving-continuation">
+  <meta name="plan-title" content="Topology-Preserving Continuation — reach the root without leaving the branch">
+  <meta name="plan-summary" content="Close the measured convergence frontier: topology admissibility caps the Newton step near one thirty-second, so an 89-iteration budget traverses under three step-equivalents. Advance along the topology-preserving manifold instead of backtracking into it, choose the seed by alignment rather than proximity, and condition ill-conditioned Krylov steps at any projection dimension.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="12.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-context" content="extended">
+  <meta name="plan-capability-tool-autonomy" content="autonomous">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="dual-basin-solve,efit-forward-parity">
+  <meta name="plan-blocks" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
+  <title>Topology-Preserving Continuation | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-23">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The frontier, measured</h2>
+
+    <p>The forward free-boundary solve no longer fails for unknown reasons. Over 2026-08-23 the
+    failure was decomposed until what remains is a single, quantified, well-posed obstacle, and
+    this plan exists to close it. Every number below is measured and banked; none is an
+    estimate.</p>
+
+    <p><strong>What was fixed, so the frontier is not confused with the debris in front of
+    it.</strong> The exact residual-Jacobian action was non-finite on the first Arnoldi vector —
+    root-caused to division by a zero singular-value gap inside the JAX SVD JVP, reached through
+    <code>jnp.linalg.lstsq</code> in the Null2D quadratic magnetic-null fit, because symmetric
+    fixed-grid stencils carry repeated singular values (commit <code>06b09f5b</code>). A finite
+    but exactly zero Krylov step was being reported as success and bypassing the existing
+    non-finite rail; it is now one of four named refusal conditions (<code>6143221d</code>).
+    Trial admission now refuses any candidate leaving the requested topology class, and on the
+    banked case all 89 promoted iterations hold diverted with a finite terminal X point where
+    the unqualified route crossed at iterations 31, 50 and 88 and terminated limited
+    (<code>257af9dc</code>). Branch <em>selection</em> was already closed by construction through
+    amplitude elimination. None of that is the frontier.</p>
+
+    <p><strong>The frontier is that the admissible step is too small to matter.</strong> Of 1,671
+    rejected trials across the five score-blind frames, <strong>1,669 were rejected for leaving
+    the topology class</strong> and only 2 for a non-finite state — zero Krylov-action refusals,
+    zero non-finite candidates. Probing below the production ladder found the largest admissible
+    fraction to be <strong>exactly 0.03125</strong> on all 85 probed refusal iterations, with
+    0.0625 inadmissible. Admission runs at 4 to 9 of 89 trials. An 89-iteration budget taking
+    steps capped near one thirty-second traverses roughly <strong>2.8 Newton-step-equivalents in
+    total</strong> — about an order of magnitude short of what convergence needs.</p>
+
+    <p><strong>Extending the backtracking ladder to reach that step was measured and is
+    null.</strong> Six fixed factors down to 0.03125, demonstrably exercised with the smallest
+    rung selected on three of five frames, moved admissions only to 7, 7, 10, 5 and 9 of 89 and
+    moved residuals by +4.5%, −1.4%, −7.5%, +0.14% and +2.8% — three worse, two better,
+    indistinguishable from noise. The frames sit at terminal residuals 0.0854 to 0.1644 against
+    unqualified plateaus of 0.0259 to 0.0847, so the topology guard currently converts a
+    confidently wrong answer into a correct-but-stalled one. That is a better failure and it is
+    not convergence.</p>
+
+    <p><strong>Why finer backtracking cannot be the answer, stated as mechanism rather than as a
+    measurement.</strong> Backtracking searches <em>into</em> the admissible region from outside
+    it. It can only ever return the largest scaled copy of a step that already points out of the
+    region, so where the admissible fraction is small every admissible step is small by
+    construction. Halving the factor again buys a smaller step, not a better direction. Closing
+    this needs a route that advances <em>along</em> the admissible set.</p>
+
+    <h2 id="s2">§2 — Advance along the manifold, do not backtrack into it</h2>
+
+    <p>The topology-preserving set is a manifold in state space: the states whose emergent
+    topology matches the requested class. The Newton step is computed without reference to it and
+    generally leaves it. Backtracking then retreats along that same departing direction until it
+    lands back inside — which is why the admissible fraction, not the Newton direction, sets the
+    step length. A predictor-corrector instead moves along the manifold's tangent and projects
+    back, so step length is limited by the manifold's curvature rather than by how quickly the
+    Newton direction exits it.</p>
+
+    <svg viewBox="0 0 720 300" width="100%" role="img"
+         aria-label="Backtracking retreats along a departing Newton direction and yields a tiny admissible step; a predictor-corrector advances along the manifold tangent and projects back, yielding a large one."
+         style="max-width:720px">
+      <path d="M60 232 C 220 214, 400 168, 660 104" fill="none" stroke="#1a1a1a" stroke-width="1.4"/>
+      <text x="60" y="256" font-family="system-ui" font-size="13" fill="#1a1a1a">topology-preserving manifold — states whose emergent class matches the request</text>
+
+      <circle cx="150" cy="220" r="4" fill="#1a1a1a"/>
+      <text x="128" y="208" font-family="system-ui" font-size="13" fill="#1a1a1a">x</text>
+      <text x="137" y="212" font-family="system-ui" font-size="10" fill="#1a1a1a">k</text>
+
+      <line x1="150" y1="220" x2="600" y2="48" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="4 3"/>
+      <circle cx="600" cy="48" r="3.5" fill="none" stroke="#1a1a1a" stroke-width="1.2"/>
+      <text x="560" y="38" font-family="system-ui" font-size="13" fill="#1a1a1a">full Newton step — refused</text>
+
+      <circle cx="375" cy="134" r="2.6" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+      <text x="366" y="126" font-family="system-ui" font-size="12" fill="#1a1a1a">½</text>
+      <circle cx="262" cy="177" r="2.6" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+      <text x="254" y="169" font-family="system-ui" font-size="12" fill="#1a1a1a">¼</text>
+      <circle cx="206" cy="198" r="2.6" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+      <text x="196" y="190" font-family="system-ui" font-size="12" fill="#1a1a1a">⅛</text>
+      <circle cx="164" cy="214" r="3.2" fill="#1a1a1a"/>
+      <text x="150" y="288" font-family="system-ui" font-size="13" fill="#1a1a1a">1/32 — the only admissible rung, and 2.8 step-equivalents over the whole budget</text>
+      <line x1="164" y1="217" x2="160" y2="278" stroke="#1a1a1a" stroke-width="0.8"/>
+
+      <path d="M150 220 C 300 203, 420 174, 540 145" fill="none" stroke="#b34700" stroke-width="1.8"/>
+      <polygon points="540,145 528,141 530,151" fill="#b34700"/>
+      <text x="300" y="196" font-family="system-ui" font-size="13" fill="#b34700">predictor — along the tangent</text>
+      <line x1="540" y1="145" x2="556" y2="129" stroke="#b34700" stroke-width="1.4"/>
+      <polygon points="558,127 548,129 554,135" fill="#b34700"/>
+      <text x="566" y="126" font-family="system-ui" font-size="13" fill="#b34700">corrector</text>
+      <circle cx="558" cy="127" r="4" fill="#b34700"/>
+    </svg>
+    <p style="font-size:13px"><strong>Why the step length differs.</strong> Both routes respect the
+    same admissibility test. Backtracking is limited by how fast the Newton direction leaves the
+    manifold; a predictor-corrector is limited by the manifold's curvature, which the measured
+    1/32 cap says nothing about.</p>
+
+    <p><strong>Deliverable.</strong> A topology-preserving predictor-corrector in the production
+    forward path, fixed-shape and safe under <code>jit</code> and <code>vmap</code> with no
+    data-dependent control flow, taking the admissibility predicate that already exists rather
+    than a second copy of it. It must reuse the landed machinery — the class predicate, the
+    action qualification, the terminal branch receipt — and any new component needs a stated
+    reason the existing one does not fit.</p>
+
+    <p><strong>Done when</strong> the five score-blind frames are re-measured with per-frame
+    terminal residual, admitted-advance count against the banked 7, 7, 10, 5 and 9 of 89, mean
+    advance length as a fraction of the Newton step against the banked 0.03125 cap, terminal
+    topology class and X-point finiteness; and the receipt states the achieved
+    Newton-step-equivalents traversed against the banked 2.8. A route that holds topology and
+    still stalls is a reportable negative and closes this section honestly; a route that loses
+    topology to gain residual does not close it at all.</p>
+
+    <h2 id="s3">§3 — Seed alignment as a selection criterion</h2>
+
+    <p>Seed direction is a measured lever on two things at once, and nothing currently chooses it
+    deliberately. An alternate same-shot seed on an identical case moved amplification bursts from
+    three to none and cut cumulative divergence growth from 5.379792627282051e9 to
+    <strong>0.0619</strong> — eleven orders. Independently, frames whose residuals improved under
+    warm-neighbour seeding show <strong>136× less</strong> cumulative growth than those that
+    worsened (medians 2.16e6 against 2.94e8), with one qualified outlier at shot 21985 slice 51
+    that is also the most-instrumented case and must be resolved as most-informative versus
+    instrumentation-perturbed before that split is cited as law.</p>
+
+    <p>This retro-explains a result that had been banked as noise: warm-neighbour seeding lifted
+    none of the five MAST stalls while improving three residuals and worsening two. On a strongly
+    non-normal map, transient growth depends on the <em>direction</em> of the initial error rather
+    than its magnitude, so a seeding change that helps some frames and hurts others by comparable
+    amounts is the predicted behaviour rather than an absent effect.</p>
+
+    <p><strong>The design consequence is that pooling by adjacency selects on the wrong
+    variable.</strong> Warm-starting has been treated throughout as distance reduction — start
+    nearer, converge in fewer steps. On this map a seed that is further away but aligned away from
+    the transient-growth directions can beat a nearer one. Because the same seed change also
+    governs whether a batched solve reproduces a per-slice solve, a catalog that seeds from
+    neighbours is choosing both its iteration count and its reproducibility on one variable it
+    does not know it is choosing.</p>
+
+    <p><strong>Done when</strong> a seed-alignment observable exists that can be computed
+    <em>without</em> a converged solve — otherwise it cannot select a seed — and is shown to rank
+    candidate seeds consistently with measured outcome on the frames where outcome is already
+    banked, quoting rank correlation against both cumulative growth and terminal residual. The
+    21985/51 outlier is adjudicated in the same receipt.</p>
+
+    <h2 id="s4">§4 — Step conditioning independent of Krylov dimension</h2>
+
+    <p>Conditioning ill-conditioned Krylov steps at the iteration they occur closed the
+    reproducibility half of the problem on the route it was calibrated for: bursts 3 to 0,
+    cumulative growth 5.379792627282051e9 to 2.217948717948718, six-case maximum flux difference
+    1.1646900802908533e-05 to <strong>3.5787553476218648e-12</strong>, with the one-map separation
+    unchanged at 2.220446049250313e-16 so single-application agreement was not traded away
+    (commit <code>c710c3f1</code>).</p>
+
+    <p><strong>But it is a fitted rule, not a method, and this is the weakness to remove.</strong>
+    Three constants come from one dataset: a trigger of 44.5 placed between one burst-local
+    minimum and one preceding quiet event, a baseline of 27.7817 taken as one quiet median, and an
+    exponent of 3 that is unexplained. A projected operator's condition scales with the projection
+    dimension, so an absolute threshold cannot transfer — and it did not: <strong>all seven DIII-D
+    carriers recorded zero conditioning interventions</strong>, because they run a 24-vector route
+    while the discriminator was calibrated at 12. The mechanism was inert exactly where the gate
+    lives.</p>
+
+    <p><strong>Done when</strong> the trigger is a ratio against a baseline the solve estimates
+    online from its own recent projected conditions, the damping scales from measured condition
+    relative to that baseline, the exponent is derived from a stated principle rather than
+    inherited, and engagement is demonstrated at three projection dimensions including 12 and 24 —
+    with a nonzero intervention count at 24 against the banked zero, and no dimension-specific or
+    dataset-fitted constant remaining anywhere in the path.</p>
+
+    <h2 id="s5">§5 — Method requirements binding on every comparative node here</h2>
+
+    <p>Two failures of measurement discipline occurred while this frontier was being characterised,
+    both caught, both cheap to prevent and expensive to miss. They are requirements on this plan's
+    nodes, not advice.</p>
+
+    <p><strong>State the production diff between the two trees, and refuse attribution where more
+    than one mechanism changed.</strong> A re-measurement against banked comparators was read as
+    evidence for the mechanism under test when a different production change had landed in between;
+    the true mover was an unrelated operator-order commit, confirmed by an independent harness
+    agreeing to four significant figures. Tree-pinning records <em>what</em> was measured, which is
+    necessary and not sufficient — it does not say whether a delta is attributable. Every
+    comparative receipt here names the production paths that changed between the trees it compares,
+    and declines attribution when more than one candidate mechanism sits in that diff.</p>
+
+    <p><strong>Never derive an acceptance criterion from an achieved value of the quantity it
+    scores.</strong> A convergence criterion was derived below a floor that was itself the best
+    residual the solve had ever reached, making it unpassable by construction including by the
+    measurement it came from; it was withdrawn. An earlier estimate on the same lane had collapsed
+    the same way when a Richardson term reduced algebraically to the residual it was fitted from.
+    A criterion must come from a quantity independent of the score — a discretisation-error
+    estimate from solution differences, an independently confirmed model, or a physical scale — and
+    <strong>must be passable by something</strong>. A bound nothing can clear is diagnostic about
+    the bound.</p>
+
+    <p><strong>A verdict string must not encode a causal claim its measurement cannot support.</strong>
+    A node returned a cost verdict from a bare ratio threshold on frames where the mechanism under
+    test had fired zero times. The rule was under-specified, not the worker wrong. Any verdict here
+    that names a cause states the evidence that the cause was active.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="continuation-parameter" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What parameterises advance along the topology-preserving manifold — arc
+        length in state space, the source amplitude already used by the banked source-domain
+        continuation, or the constrained plasma current? The banked negative matters here: scalar
+        source-strength homotopy converges to the dominating limited root, so a parameter that
+        reintroduces that path would repeat a measured failure.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="state-arclength">state-space arc length</button>
+      <button class="r-opt" data-value="source-amplitude">source amplitude</button>
+      <button class="r-opt" data-value="constrained-current">constrained plasma current</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="alignment-observable" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What observable measures seed alignment without a converged solve? It
+        must be computable from the seed and the operator alone, since a criterion needing the
+        answer cannot choose the starting point.</p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-tpc-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-08-23" data-recommends-skill="/reckon-ship topology-preserving-continuation" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Open on §4, then §2 — the dimension-general conditioning may already be part-landed</h4>
+    <div class="r-fu-body"><p>Sequencing matters here and the obvious order is wrong. START AT §4, not §2. A dimension-general conditioning node was in flight when this plan was authored, on <code>diiid-forward-onboarding</code> §5, against the same requirement §4 states. Read <code>docs/figures/diiid-forward-onboarding/dimension-general-conditioning.json</code> before dispatching anything: if it landed and demonstrates nonzero intervention at 24 vectors with no dataset-fitted constant remaining, §4 is already satisfied and collapses to a summary rather than a work item. If it landed partially or blocked, its manifest names exactly what remains. Dispatching §4 blind would redo it.</p><p>THEN §2, which is the plan's substance and its hardest node. Its decision <code>continuation-parameter</code> is open and should be locked before implementation, because one of its options reintroduces a measured negative: scalar source-strength homotopy converges to the dominating limited root, so a source-amplitude parameterisation would repeat a banked failure unless something new answers it. Consult <code>dual-basin-solve</code>'s banked continuation negative and <code>nova/equilibrium/continuation.py</code>, which is source-domain continuation and explicitly NOT a solve-state homotopy, before choosing.</p><p>§3 can run in parallel with §2 — its deliverable is an observable and a ranking study, not a change to the solve path, so it shares no write scope. Its <code>alignment-observable</code> decision is genuinely open and unanswered; treat producing a defensible candidate as part of the node rather than a prerequisite to it.</p><p>§5 is not a work item. It is binding on every comparative node in the other three sections, and a receipt that omits the production diff between the trees it compares, or derives a criterion from an achieved value of the quantity it scores, fails review on that ground alone.</p><p>CONSUMERS TO NOTIFY ON LANDING, because both are held on this work rather than merely interested: <code>mast-catalog-gpu-solve</code> cannot open its throughput ladder while the solve stalls, and <code>diiid-forward-onboarding</code>'s kill gate returns 0 of 5 at any candidate tolerance. Neither should be told this plan closed their blocker until §2 produces convergence rather than a held branch.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship topology-preserving-continuation</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>

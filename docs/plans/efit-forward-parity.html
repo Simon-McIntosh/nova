@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="efit-forward-parity">
   <meta name="plan-title" content="EFIT Forward Parity — the fixed-point free-boundary solve against a reference equilibrium">
   <meta name="plan-summary" content="Demonstrate that nova&#x27;s free-boundary Grad-Shafranov fixed point reproduces a reference EFIT equilibrium when given that reference&#x27;s own flux functions and conductor currents — a forward solve with no measurements, no whitening and no fitted coefficients">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="6.0">
   <meta name="plan-capability-version" content="1.0">
@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-23">
-<meta name="plan-version" content="52">
+<meta name="plan-version" content="54">
 <meta name="plan-commits" content="c1e180d5,71c1ec36,457caddd,252bdd77,d026b0dc,57a1bfb9,c3f9f83a,6700b088,783229ac,325f6a85,56b1518b,e4dc6155,d7bf1035,c7ea1772,19e0d865,9641608b,f771f90d,d2e27d60,c3828a88,c9152535,ed601260,c308025d,ede61ac7,a031c210,f8feb25f,aad1a445,8c39bf42,10ef9053,67d584c7,76d86fb1,f5598fee,71758d98,db136e54,67bf18e7,2af4037c,d7add809,dd6be953,e4334fc8,2f0adb98,b7645363,9391e008">
 <meta name="plan-artifacts" content="scripts/dina_profile_routes/reuse-report.md,scripts/constrained_parity_reuse/reuse-report.md,benchmarks/efit_forward_parity_slice.py,benchmarks/efit_parity_root_geometry.py,benchmarks/efit_parity_warm_neighbour.py,benchmarks/efit_parity_moment_definitions.py,benchmarks/efit_parity_boundary_volume.py,benchmarks/efit_parity_inductance_partition.py,benchmarks/efit_parity_field_instrument.py,benchmarks/efit_parity_tared_external_field.py,docs/figures/efit-forward-parity/passive-inclusive-frozen-six-scorecard.json,docs/figures/efit-forward-parity/converged-root-geometry-attribution.json,docs/figures/efit-forward-parity/warm-neighbour-stall-lift.json,docs/figures/efit-forward-parity/moment-definition-rescore.json,docs/figures/efit-forward-parity/boundary-enclosed-volume-reconciliation.json,docs/figures/efit-forward-parity/inductance-deficit-partition.json,docs/figures/efit-forward-parity/field-energy-instrument-control.json,docs/figures/efit-forward-parity/tared-external-field-solve.json,docs/figures/efit-forward-parity/tared-plasma-support-solve.json,docs/figures/efit-forward-parity/tared-plasma-support-solve.png,docs/evidence/archive/efit-forward-parity-landed.html">
-<meta name="plan-impl" content="0.93">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -228,69 +228,50 @@
       </p>
     </section>
 
-    <h2 id="s13">&sect;13 &mdash; Where the convergence criterion came from</h2>
+    <section id="s13" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">&#10003; landed 2026-08-23</span>
+        <h2>&sect;13 &mdash; Where the convergence criterion came from</h2>
+      </header>
+      <p class="landed-summary">
+        Traced: of five carried bounds, the fixed-point 1e-8, magnetic-axis and LCFS classify
+        <strong>INHERITED</strong>; x-point and topology are physically motivated with reachable
+        evidence. <code>fixed_point.py</code> contains the residual and <em>no</em> argument for 1e-8
+        &mdash; its registry basis reads &ldquo;the profile accelerator's existing strict convergence
+        criterion&rdquo;. Two scored bounds cite a stamp pinned to a digest that moved. The units
+        comparison was <strong>refused</strong> for want of a banked conversion, retracting an
+        orchestrator claim that three scales shared an order. And the derived replacement was
+        <strong>circular</strong> &mdash; a Richardson estimate with <em>p</em> fitted from the same two
+        residuals reduces to <code>R_fine</code> exactly (E_f/R_f = 0.99994&ndash;1.00029), so its 6-of-6
+        asserted only that a number is at most itself. <strong>Both halves hold: the gate is unjustified
+        and the 1-of-6 is not rescued.</strong> Continued as
+        <code>scoring-criteria-derivation</code> (S13). Full record:
+        <a href="/nova/evidence/archive/efit-forward-parity-landed#s13-criterion">&sect;13 landed</a>
+        (commits <code>8609d06d</code>, <code>354ec88d</code>).
+      </p>
+    </section>
 
-    <p><strong>The registered fixed-point criterion has no physical basis, and its own registry entry
-    says so.</strong> <code>parity_tolerances.py</code> records the bound as 1.0e-8 on a relative sup
-    norm <code>max|g(x)&minus;x| / max|g(x)|</code>, with basis <em>"the profile accelerator's existing
-    strict convergence criterion"</em> and evidence <code>nova/equilibrium/fixed_point.py</code>. That is
-    a solver's internal stopping tolerance, inherited from the accelerator and promoted to a
-    cross-code parity gate. Nothing in the registry connects it to the reference's accuracy, to the
-    discretisation error, or to any physical scale.</p>
-
-    <p><strong>This is the same class of error as the four already retracted here</strong> &mdash; an
-    instrument built for one purpose applied where it does not belong &mdash; and it is the most
-    consequential instance, because every downstream conclusion inherits it. The 1-of-6 convergence
-    verdict is a count against this gate. The mesh-refinement requirement is the cost of chasing this
-    gate: extrapolating each observed order to 1e-8 needed between 1.25 million and astronomically many
-    interior cells. If the target is indefensible then the requirement derived from it is not a
-    requirement at all, and the honest response is to discard both rather than to fund the second.</p>
-
-    <p><strong>What a defensible criterion looks like.</strong> A fixed point converged far below its own
-    discretisation error is precision without accuracy: it solves the discrete problem to eight digits
-    when the discrete problem differs from the continuous one in the third. The natural bound is therefore
-    the discretisation error itself, which the measured orders now make estimable. Two other physical
-    scales are available and measured: the reference's own boundary self-consistency, whose stored-LCFS
-    contour discrepancy runs to 3.456e-3 of span against a registered 6e-3 limit, and the flux agreement
-    actually achieved at 0.565&nbsp;percent RMS of span. All three sit near 1e-3, and the fine-mesh
-    residuals run 1.307e-3 to 5.300e-3 &mdash; the same order. If that comparison survives a units audit,
-    the solves are already as converged as the data and the mesh permit, and the reliability verdict is an
-    artifact of the gate rather than a statement about the solver.</p>
-
-    <p><em>Done-when:</em> the provenance of every registered bound this plan scores against is traced to
-    its origin and classified as physically motivated or inherited, with the quoted basis for each; the
-    fixed-point residual's normalisation is stated exactly and its comparability to the
-    fraction-of-span figures either established or refused with the reason; a discretisation-consistent
-    criterion is derived from the measured per-reference orders and stated as a formula with its value per
-    reference; the six references are re-scored against it beside the 1e-8 count; and the verdict states
-    whether the 1-of-6 reliability figure survives a defensible criterion, with the 1e-8 count retained
-    beside it so nothing is overwritten.</p>
-
-    <h2 id="s14">&sect;14 &mdash; Fixed boundary first, on the one reference that discriminates</h2>
-
-    <p><strong>Owner direction: run the double seed, on 21978/35 alone.</strong> That reference is the
-    single most diagnostic case in the set because it sits in <em>both</em> low strata &mdash; observed
-    mesh order 0.97, the weakest response to refinement of the six, and no closed axis-enclosing flux
-    surface at all. It is simultaneously the case where interior refinement helps least and the case with
-    no confined topology to refine, which is exactly the combination a fixed-boundary first pass
-    addresses.</p>
-
-    <p><strong>The distinction from the banked negative matters.</strong> Source-strength homotopy &mdash;
-    scaling the plasma source from zero &mdash; converged to the dominating limited root, and
-    <code>nova/equilibrium/continuation.py</code> is source-domain continuation. Homotopy in
-    <em>boundary-condition</em> space, fixed to free, is untried and is a different path through a
-    different space. A fixed-boundary solve cannot fail the way the free-boundary iterates fail, because
-    the boundary is imposed and the interior current must arrange itself inside a confined domain. What it
-    produces is precisely what the free pass lacks: a physically distributed current on a confined
-    support, and its moments.</p>
-
-    <p><em>Done-when:</em> a fixed-boundary solve on the reference's own declared boundary runs for
-    21978/35 and its interior current distribution is reported against the &Delta;*-implied distribution
-    on the same support; the free-boundary current-constrained solve is then seeded from that state and its
-    terminal residual reported against the banked cold figures of 1.035680e-2 coarse and 5.300e-3 fine;
-    the outcome is stated as whether boundary-condition homotopy enters the plasma basin where
-    source-strength homotopy did not; and the two homotopies are kept explicitly distinct in the record so
-    neither result is ever read as the other.</p>
+    <section id="s14" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">&#10003; landed 2026-08-23</span>
+        <h2>&sect;14 &mdash; Fixed boundary first, on the one reference that discriminates</h2>
+      </header>
+      <p class="landed-summary">
+        <strong>FIXED_BOUNDARY_NEWTON_STALLS</strong> on 21978/35 &mdash; coarse 2.075e-3, fine
+        4.512e-4, criterion untouched. Newton stalls <em>with the boundary imposed and confinement
+        guaranteed by construction</em>, so this stall survives removing free-boundary motion entirely:
+        not basin entry, not missing confinement, not the free boundary, but the interior discretised
+        problem. Picard retained beside it (0.5 constant stalled at 400 iterations; adaptive at 2,000,
+        terminal 7.659e-4). The current distribution corroborated the order split from an independent
+        measurement: against the &Delta;*-implied field, refinement moved the median &times;0.39 and the
+        <strong>sup &times;31.8</strong> &mdash; a local non-smooth feature sharpening rather than
+        truncation resolving. The seeded stage was <em>refused</em> rather than seeded from an
+        unqualified iterate, and boundary-condition homotopy is kept distinct from the banked
+        source-strength negative. Full record:
+        <a href="/nova/evidence/archive/efit-forward-parity-landed#s14-fixed-boundary">&sect;14 landed</a>
+        (commit <code>79acd984</code>).
+      </p>
+    </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -376,10 +357,11 @@
     <pre class="r-fu-prompt">/reckon-ship nova-test-lane-health</pre>
     <p class="r-fu-outcome">Re-homed to its own plan rather than pointed at a shipped one. This followup named nova-test-lane-health as owner, but that plan is shipped at impl 1.0 - so the work would have been invisible to roadmap's pending_work exactly as if it had never been written, which is the failure the owner named on 2026-08-23. The false-green suite now has its own plan, test-lane-marker-policy (sprint S13, active, ready), carrying the measurement unchanged: pytest tests/test_equilibrium_forward_solve.py collects 0 tests, 28 deselected, and exits 0, so only an explicit marker override selects the 28 this plan's record cites as its forward gate. That plan adds what this followup did not specify - a guard that makes a zero-collected run exit non-zero, so the mode cannot recur silently for the next suite that acquires a marker, and a single statement of the marker policy in the repository's own test guidance rather than per-suite rediscovery.</p>
     </article>
-<article class="r-fu" data-id="f-efp-cell-resolution-operator-scaling" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-23" data-recommends-skill="/reckon-ship efit-forward-parity" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-efp-cell-resolution-operator-scaling" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-23" data-recommends-skill="/reckon-ship efit-forward-parity" data-resolved-at="2026-08-23T09:19:20+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Owner directive: land the plasma-cell-resolution refinement and operator-scaling work; the DIII-D forward gate re-evaluation is sequenced behind it</h4>
     <div class="r-fu-body"><p><strong>Owner finding, 2026-08-23 (relayed by the sprint orchestrator per owner instruction):</strong> the DEFAULT PLASMA CELL RESOLUTION has a strong impact on the forward solve, along with OPERATOR SCALING. The owner directs that this refinement and operator work be sequenced in the solver lane, landed, and only then the DIII-D onboarding §5 kill gate re-evaluated — the gate itself is held unchanged (decision forward-gate-disposition on diiid-forward-onboarding).</p><p><strong>Fresh cross-machine corroboration for the resolution/scaling hypothesis, banked today:</strong> the DIII-D §5 gate re-ran on the strongest admissible inputs — 24 circuit-driven conductors, target-current elimination, cold-seed portfolio + selector — and 0/5 frames converge: relative residuals plateau at 0.0259–0.0847 against 1e-6 with every terminal candidate DIVERTED and the selector refusing solely on residual; diagnostic terminal R-squared ceiling 0.7103 against the 0.90155 bar (receipt docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json, commits fce611db/6746c0bb). The parallel circuit-arm receipts show the same plateau class: pinned success 1/5 (median pinned residual 3.51e-4), circuit diverted fixed-point success 1/5 with two frames reaching 3.5e-8/1.7e-10 — the plateau is frame-dependent, consistent with a resolution/scaling artefact rather than a uniform map property. This matches this plan's MAST two-promotion limit cycle and the 3.49e-2 accelerated-arm plateau.</p><p><strong>What the DIII-D lane needs from this work:</strong> once the refinement and operator-scaling work lands, the unchanged §5 gate benchmark (benchmarks/diiid_forward_gs_match.py, preregistered bar byte-pinned) is re-run as-is; diiid-pulse-replay (S12) unblocks behind that re-evaluation.</p></div>
     <pre class="r-fu-prompt">/reckon-ship efit-forward-parity</pre>
+    <p class="r-fu-outcome">Routed to real owners, and one of them had to be created for this to be an honest resolution. The directive named two pieces of work and neither belonged to this plan, whose declared scope - score the frozen six, state the parity verdict, hold or unblock the catalog on it - is complete. But two of the three owners did not exist as plans, so resolving this as-was would have pointed the owner's directive into a void: exactly the hiding failure the owner named separately today. ROUTED AS FOLLOWS. The plasma-cell-resolution default and the operator-scaling work now live in the NEW plan forward-operator-refinement (sprint S13, active), carrying the numbers this plan measured: nova resolves the plasma interior with 248 cells against the reference's ~2,141 over the same region, 8.6x coarser where the physics is, and matching it costs 0.44 GB of coupling against a single-device dense ceiling near N=76,600 - so the resolution half is nearly free and can land first. It also carries the cost asymmetry that decides the two axes against each other: mesh refinement is quadratic in interaction-matrix build compute, about 8.8 CPU-hours per nine-block build at reference-native resolution against roughly 2.4 minutes on device, while raising operator ORDER changes no mesh, leaves the interaction matrices identical and rebuilds nothing. The criterion that gates reading either result lives in the NEW plan scoring-criteria-derivation (S13), declared as forward-operator-refinement's prerequisite so no node there can target the inherited bound. The DIII-D forward gate re-evaluation stays held by its own plan's decision, unchanged, and is informed rather than blocked by this routing. WHAT THIS PLAN CONTRIBUTED, so the evidence is not orphaned: the resolution gap and its coupling cost; the dense-precomputed coupling form read from source rather than assumed; the observed mesh orders 0.97 to 3.39 and the two strata they separate; the extrapolation showing a fixed absolute criterion needs between 1.2e3 and 6.3e11 times the cells; and the imposed-boundary diagnostic showing refinement improves the bulk while worsening the extreme by a factor 31.8. All cited in the receiving plans rather than restated.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -418,6 +400,9 @@ CONSEQUENCE FOR THE SECTION-4 VERDICT, stated now rather than deferred: of the s
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260822T2310-hold-reason-final" data-who="reckon-ship" data-when="2026-08-22T23:10:00Z">
     <div class="r-comment-body">THE CATALOG HOLD'S REASON IS NOW FULLY ATTRIBUTED, which sharpens f-efp-005 materially and changes what the owning plan should build. Earlier today the hold moved from parity fidelity to convergence reliability at 1 of 6, with the cause unknown - the external-field boundary condition was still a live suspect, since the passive-inclusive repair had left 0.407 percent of span in the wall imbalance and the one-application diagnosis put the reference 0.135 percent from being a fixed point. The section-11 tare has now closed that question. Into a background validated against INDEPENDENT GROUND TRUTH to 0.026 percent of analytic span - the Solov'ev null, 38.4x inside its gate - the converged count is still 1 of 6. A better boundary condition does not buy convergence. So the external field is EXONERATED and the residual obstacle is the Grad-Shafranov fixed point or its discretisation. CONSEQUENCE FOR f-efp-005 AND FOR dual-basin-solve: a basin-entry or continuation driver is now justified on measured grounds rather than by elimination, because the alternative explanation has been tested and excluded rather than merely doubted. Two measured constraints should shape that driver. First, the reference sits 0.135 percent of span from being a fixed point with interior and exterior contributions balanced, so a root exists nearby and the obstacle is reaching it. Second, and this is the design-relevant one, only two of six terminals carry a closed axis-enclosing LCFS branch at all - on the other four a driver would be CONSTRUCTING confinement rather than refining it, which favours a moment-seeded cold start that builds a confined topology from prior information over any mechanism that continues an existing trajectory. THE HOLD'S EXIT CONDITION IS UNCHANGED and remains falsifiable: a convergence rate materially above 1 in 6 on the frozen six under a declared route, measured with the same receipt schema. What has changed is that the boundary condition can no longer be offered as the explanation for failing it.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260823T1600-plan-closure" data-who="reckon-ship" data-when="2026-08-23T16:00:00Z">
+    <div class="r-comment-body">PLAN CLOSES AT impl 1.0 ACROSS 28 EXECUTABLE NODES, and the closure differs from the one it reached yesterday. Yesterday's ship recorded a qualified reproduction with convergence unreliable at 1 of 6. That verdict stands as measured but its READING changed twice since, both times downward in confidence and both times for the same reason - the instrument, not the physics. First the tare control exonerated the external field: a background validated against analytic ground truth to 0.026 percent of span left the converged count at 1 of 6, so a better boundary condition buys nothing. Then the criterion that count is measured against was traced to an inherited solver stopping tolerance with no physical referent, and the first derived replacement proved algebraically circular. THE HONEST CLOSING STATEMENT IS THEREFORE NARROWER than yesterday's: on the one reference that converges, nova's current-constrained free-boundary fixed point reproduces the EFIT reference to a coherent two-to-three centimetre displacement, 0.565 percent of flux span, poloidal beta within four percent and poloidal field energy within 0.06 percent on a matched instrument - and the RELIABILITY figure beside it is a count against a gate nobody has justified rather than a measurement of the solver. FIVE OF THE ORIGINAL FAILING ROWS WERE INSTRUMENTS: the LCFS distance taken against an open grid-spanning contour branch (0.4469 to 0.0305 m, a 14.67x reduction); beta_p and l_i normalised by two conventions on two supports; the solved volume reported as a clipped 95-cell core at 0.413 of its own boundary-enclosed region; the surviving field-energy deficit as a 0.602 operator ratio, after which the equilibria agree to 0.06 percent; and finally the convergence criterion itself. That is the plan's most transferable result and it is not a physics result - on this lane a cross-code comparison is only meaningful once one side's instrument is applied to both sides' data, and every row that failed that test was bookkeeping. CONTINUATION, all in sprint S13 and all visible to the roadmap rather than buried as followups here: scoring-criteria-derivation owns the criterion and the digest-pinned bounds; forward-operator-refinement owns the owner-directed resolution default and operator scaling, with the criterion plan as its declared prerequisite; test-lane-marker-policy owns the false-green suite this campaign tripped over. The catalog hold stands on convergence reliability with its exit condition unchanged and its cause attributed to the operator's discretisation rather than to the boundary condition.</div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260820T1140" data-who="reckon-ship" data-when="2026-08-20T11:40:00+00:00">
     <div class="r-comment-body">Owner ruling 2026-08-20 adds a hard prerequisite: all further forward-model progress gates on agreement with the Solov'ev oracle. solovev-exact-recovery owns that gate set (pre-registered agreement gates with convergence clauses, Urankar-exact kernel defaults, hexagon-section enforcement, the cell-moment wiring conviction, and the accuracy-cost ladder with the ~1 ms GPU fixed-point target). This plan's entry now waits on that plan in the DAG. Calibration note this plan already carries: the DINA demonstration's axis 41.2 mm / Ip -1.12% deviations match the Solov'ev root drift (42 mm / -1.15%) - the same composition systematic - so the recovery work directly sharpens what a forward-parity deviation here will mean.</div>

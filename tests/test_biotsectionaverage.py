@@ -480,9 +480,17 @@ def test_hexagonal_target_rule_convergence_against_the_double_integral_arbiter()
         ]
     )
     expected = np.array(
-        [2.4280703e-2, 4.2623666e-5, 3.7520487e-6, 1.3980060e-7, 8.2972853e-9]
+        [
+            2.4280703427516537e-2,
+            4.2623666611785183e-5,
+            3.7520486706466016e-6,
+            1.3980087421039400e-7,
+            8.2973203863190292e-9,
+        ]
     )
-    np.testing.assert_allclose(error, expected, rtol=2.0e-7, atol=0.0)
+    # The production-path vector is banked at full fp64 precision; its 5e-13
+    # relative bound is four orders below the smallest recorded error.
+    np.testing.assert_allclose(error, expected, rtol=5.0e-13, atol=0.0)
     assert np.all(np.diff(error) < 0.0)
 
 

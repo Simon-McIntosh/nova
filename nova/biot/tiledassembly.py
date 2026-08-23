@@ -28,16 +28,15 @@ concurrently without coordination.
 
 *Backends.* :func:`tile_coupling` evaluates a tile with numpy, distributed over
 cores by a process pool. :func:`tile_evaluator` traces the fixed-node ring
-quadrature through JAX, so ``scan`` over quadrature blocks bounds the working set
-and ``vmap`` over the same blocks fills a device. Because the shapes are padded,
-the trace is compiled once for a whole build; numpy and JAX are pinned against
-each other in float64 by ``tests/test_biottiledbackend.py``.
+quadrature or the exact finite-section moment rows through JAX, so ``scan`` over
+blocks bounds the working set and ``vmap`` over the same blocks fills a device.
+Because the shapes are padded, the trace is compiled once for a whole build.
 
 The registry also exposes packed closed-ring and finite-arc kernels for numerical
-parity, differentiation and compile-resource diagnostics. Their large elliptic
-moment graphs are not product accelerator routes: section operators select the
-quadrature ring kernel, while finite arcs retain their geometry-specific host
-path. A diagnostic compile is keyed by every static shape, including edge count.
+parity, differentiation and compile-resource diagnostics. Section operators use
+the nine-row unpaired exact finite-section kernel when that policy is selected,
+while finite arcs retain their geometry-specific host path. Every compile is keyed
+by each static shape, including edge count.
 
 *The compile.* :func:`tile_evaluator` memoises on that complete executable
 identity, and geometry is an argument rather than a constant, so moving a section
@@ -61,18 +60,29 @@ import numpy as np
 import zarr
 
 from nova.biot.polygon import _BLOCK, _held_edge, _phi_rule, pad_batch
-from nova.biot.polygonanalytic import packed_analytic_greens
+from nova.biot.polygonanalytic import packed_analytic_greens, packed_analytic_moments
 from nova.biot.polygonarc import packed_arc_greens
 from nova.jax.config import Precision, resolve_precision
 
 COMPONENTS = ("Psi", "Br", "Bz")
+MOMENT_COMPONENTS = (
+    "Psi",
+    "PsiR",
+    "PsiZ",
+    "Br",
+    "BrR",
+    "BrZ",
+    "Bz",
+    "BzR",
+    "BzZ",
+)
 ARC_COMPONENTS = ("Ar", "Aphi", "Br", "Bphi", "Bz")
 
 # What a tile can be evaluated WITH: the fixed-node phi rule the operator is
 # validated against, or the closed-form reduction.  Only the traced backend carries
 # the second -- the host route to it keeps its own value-dependent shortcuts and is
 # nova.biot.polygonanalytic.polygon_analytic_greens.
-KERNELS = ("quadrature", "closed")
+KERNELS = ("quadrature", "closed", "moments")
 
 # Live (block x nodes) float64 temporaries inside one edge-limit of the
 # gradient kernel, counted from the expression tree.  Used to size the
@@ -365,6 +375,32 @@ def _fill_tile(plan: TilePlan, target_r, target_z, edge, weight, norm):
     )
 
 
+def _fill_moment_tile(
+    plan,
+    target_r,
+    target_z,
+    edge,
+    weight,
+    norm,
+    section_centre,
+    expansion_centre,
+    reflection_axis,
+    reflection_partner,
+):
+    """Grow one exact-moment tile and its per-section metadata to fixed shape."""
+    filled = _fill_tile(plan, target_r, target_z, edge, weight, norm)
+    n_source = np.size(norm)
+    columns = np.zeros(plan.source_tile, dtype=np.intp)
+    columns[:n_source] = np.arange(n_source)
+    return (
+        *filled,
+        np.ascontiguousarray(section_centre[:, columns]),
+        np.ascontiguousarray(expansion_centre[:, columns]),
+        np.ascontiguousarray(reflection_axis[columns]),
+        np.ascontiguousarray(reflection_partner[:, columns]),
+    )
+
+
 def _fill_arc_tile(
     plan: TilePlan,
     target_r,
@@ -457,7 +493,11 @@ class TileEvaluator:
         if self.geometry == "ring":
             n_source = np.size(geometry[4])
             edge_count = np.shape(geometry[2])[0]
-            filled = _fill_tile(plan, *geometry)
+            filled = (
+                _fill_moment_tile(plan, *geometry)
+                if self.kernel == "moments"
+                else _fill_tile(plan, *geometry)
+            )
         else:
             n_source = np.size(geometry[5])
             edge_count = np.shape(geometry[3])[0]
@@ -468,7 +508,13 @@ class TileEvaluator:
                 f"not {edge_count}"
             )
         dtype = jnp.float32 if self.precision is Precision.SINGLE else jnp.float64
-        arrays = tuple(jnp.asarray(value, dtype=dtype) for value in filled)
+        arrays = tuple(
+            jnp.asarray(
+                value,
+                dtype=(jnp.int32 if self.kernel == "moments" and index == 8 else dtype),
+            )
+            for index, value in enumerate(filled)
+        )
         if synchronize:
             jax.block_until_ready(arrays)
         return n_target, n_source, arrays
@@ -582,9 +628,9 @@ def tile_evaluator(
     closed-form reduction of :func:`nova.biot.polygonanalytic.packed_analytic_greens`
     instead. The packed arithmetic is traceable because its elliptic integrals use
     fixed-trip descents and its dead lanes are held before evaluation. It remains a
-    diagnostic kernel: the supported product accelerator route is the quadrature
-    ring, and finite product arcs stay on the host. Closed diagnostics pay for pole
-    families and residual quadratures that the host evaluation can skip.
+    three-row closed reduction. ``"moments"`` is the product exact-section route:
+    it carries the three uniform rows and their six first-moment companions through
+    one fixed-shape unpaired trace. Finite product arcs stay on the host.
 
     ``batched`` chooses how the quadrature blocks are combined: ``False`` walks
     them with ``scan``, holding one block's temporaries live; ``True`` maps them
@@ -708,13 +754,47 @@ def _warm_evaluator(
             )
         )
 
-    evaluate_block = one_block if kernel == "quadrature" else one_closed_block
+    def one_moment_block(
+        target_r,
+        target_z,
+        edge,
+        weight,
+        norm,
+        section_centre,
+        expansion_centre,
+        reflection_axis,
+        reflection_partner,
+        rows,
+        columns,
+    ):
+        """Return all nine exact finite-section rows for one pair block."""
+        return jnp.stack(
+            packed_analytic_moments(
+                jnp,
+                jnp.take(target_r, rows),
+                jnp.take(target_z, rows),
+                jnp.take(edge, columns, axis=2),
+                jnp.take(weight, columns, axis=1),
+                jnp.take(norm, columns),
+                jnp.take(section_centre, columns, axis=1),
+                jnp.take(expansion_centre, columns, axis=1),
+                jnp.take(reflection_axis, columns),
+                jnp.take(reflection_partner, columns, axis=1),
+            )
+        )
 
-    def over_blocks(target_r, target_z, edge, weight, norm, rows, columns):
+    evaluate_block = {
+        "quadrature": one_block,
+        "closed": one_closed_block,
+        "moments": one_moment_block,
+    }[kernel]
+
+    def over_blocks(*arguments):
         """Evaluate every block of the tile, mapped or walked."""
-        geometry = (target_r, target_z, edge, weight, norm)
+        geometry = arguments[:-2]
+        rows, columns = arguments[-2:]
         if batched:
-            return jax.vmap(evaluate_block, in_axes=(None,) * 5 + (0, 0))(
+            return jax.vmap(evaluate_block, in_axes=(None,) * len(geometry) + (0, 0))(
                 *geometry, rows, columns
             )
 
@@ -733,7 +813,7 @@ def _warm_evaluator(
             )
         compiled = jax.pmap(
             over_blocks,
-            in_axes=(None,) * 5 + (0, 0),
+            in_axes=(None,) * (9 if kernel == "moments" else 5) + (0, 0),
             devices=available[:devices],
         )
         mapped_kernel = compiled
@@ -754,6 +834,7 @@ def _warm_evaluator(
         devices=devices,
         precision=precision,
         edge_count=edge_count,
+        components=MOMENT_COMPONENTS if kernel == "moments" else COMPONENTS,
     )
 
 
@@ -1128,6 +1209,7 @@ def budget_from_environment(default: int = 512 << 20) -> int:
 __all__ = [
     "ARC_COMPONENTS",
     "KERNELS",
+    "MOMENT_COMPONENTS",
     "TileEvaluator",
     "TilePlan",
     "assemble",

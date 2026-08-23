@@ -1,8 +1,8 @@
 """Exact Biot-Savart coupling for toroidal polygonal cross-sections.
 
 Every production pair is integrated over the authored section. The closed-form
-Part V reduction is the default; the boundary-quadrature implementation remains
-an exact reference and compiled-device route. Approximate distance-banded and
+Part V reduction is the default compiled-device route; the boundary-quadrature
+implementation remains an exact host reference. Approximate distance-banded and
 point-filament comparators live in their dedicated study modules and cannot be
 selected through this production element.
 
@@ -25,6 +25,8 @@ from nova.biot.greens import section_centroid
 from nova.biot.matrix import Matrix
 from nova.biot.polygon import _N_NODES, _N_PANELS, polygon_greens
 from nova.biot.polygonanalytic import (
+    _horizontal_reflection,
+    _section_centroid,
     polygon_analytic_field_moments,
     polygon_analytic_flux_moments,
     polygon_analytic_greens,
@@ -37,15 +39,21 @@ class PolySectionPolicy:
     """Immutable exact-kernel policy for one polygon-section instance."""
 
     exact_kernel: Literal["closed_form", "quadrature"] = "closed_form"
-    backend: Literal["numpy", "jax"] = "numpy"
+    backend: Literal["numpy", "jax"] | None = None
     precision: Literal["float64"] = "float64"
-    device_eligibility: Literal["host", "axisymmetric_ring"] = "host"
+    device_eligibility: Literal["host", "axisymmetric_ring"] | None = None
     quadrature: tuple[int, int] | None = None
 
     def __post_init__(self):
         """Validate and resolve every setting that changes kernel values."""
         if self.exact_kernel not in {"closed_form", "quadrature"}:
             raise ValueError(f"unknown polygon-section kernel {self.exact_kernel!r}")
+        if self.backend is None:
+            object.__setattr__(
+                self,
+                "backend",
+                "jax" if self.exact_kernel == "closed_form" else "numpy",
+            )
         if self.backend not in {"numpy", "jax"}:
             raise ValueError(f"unsupported polygon-section backend {self.backend!r}")
         if self.precision != "float64":
@@ -53,14 +61,12 @@ class PolySectionPolicy:
                 f"unsupported polygon-section precision {self.precision!r}"
             )
         expected_device = "host" if self.backend == "numpy" else "axisymmetric_ring"
+        if self.device_eligibility is None:
+            object.__setattr__(self, "device_eligibility", expected_device)
         if self.device_eligibility != expected_device:
             raise ValueError(
                 f"the {self.backend!r} backend requires {expected_device!r} "
                 "device eligibility"
-            )
-        if self.backend == "jax" and self.exact_kernel != "quadrature":
-            raise ValueError(
-                "the tiled ring backend requires the compiled quadrature kernel"
             )
         if self.exact_kernel == "closed_form" and self.quadrature is not None:
             raise ValueError("closed-form routing does not accept a quadrature rule")
@@ -143,10 +149,11 @@ class PolySection(Matrix):
         vertices: np.ndarray,
         policy: PolySectionPolicy | Mapping | str | None = None,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Return ``(psi, Br, Bz)`` from the configured exact kernel.
+        """Return scalar-reference ``(psi, Br, Bz)`` from the exact kernel.
 
-        This is the single production selection point for the two exact
-        implementations.
+        Production assembly dispatches the default policy through
+        :class:`TiledPolySection`; this helper retains the independent NumPy
+        reference used for verification and direct section evaluation.
         """
         policy = PolySectionPolicy.resolve(policy)
         if policy.exact_kernel == "closed_form":
@@ -316,7 +323,7 @@ class PolySection(Matrix):
 
 @dataclass
 class TiledPolySection(PolySection):
-    """Evaluate complete-ring sections through the compiled quadrature tile kernel.
+    """Evaluate complete-ring sections through a compiled fixed-shape kernel.
 
     This is an explicit product adapter around the existing ring kernel. It keeps
     the ordinary :class:`Matrix` turn, target-quadrature and row-reduction contract;
@@ -364,8 +371,94 @@ class TiledPolySection(PolySection):
         )
 
     @cached_property
+    def _closed_coupling(self) -> tuple[np.ndarray, ...]:
+        """Return all nine exact rows from one fixed-shape traced evaluator."""
+        from nova.biot.polygon import pad_batch
+        from nova.biot.tiledassembly import TilePlan, tile_evaluator
+
+        target_r = np.hypot(
+            np.asarray(self.target.x, dtype=np.float64),
+            np.asarray(self.target.y, dtype=np.float64),
+        )
+        target_z = np.asarray(self.target.z, dtype=np.float64)
+        sections, owner, fraction = self._packed_sections
+        outputs = np.zeros((9, target_r.size, len(self.source)), dtype=np.float64)
+        if target_r.size == 0 or not sections:
+            return tuple(outputs)
+
+        edge, weight, norm = pad_batch(sections)
+        section_centre = np.column_stack(
+            [_section_centroid(vertices) for vertices in sections]
+        )
+        authored_centre = np.column_stack(
+            [
+                self._material_area_centroid(
+                    self._material_geometry(np.asarray(self.source["poly"])[column])
+                )
+                for column in owner
+            ]
+        )
+        reflection_axis = np.full(len(sections), np.nan, dtype=np.float64)
+        reflection_partner = np.repeat(
+            np.arange(edge.shape[0], dtype=np.intp)[:, None], len(sections), axis=1
+        )
+        for column, vertices in enumerate(sections):
+            reflection = _horizontal_reflection(vertices)
+            if reflection is None:
+                continue
+            axis, vertex_partner = reflection
+            reflection_axis[column] = axis
+            count = len(vertices)
+            for index in range(count):
+                reflection_partner[index, column] = vertex_partner[(index + 1) % count]
+
+        target_tile = min(self._tile_side, target_r.size)
+        source_tile = min(self._tile_side, len(sections))
+        plan = TilePlan(
+            target_tile=target_tile,
+            source_tile=source_tile,
+            block=target_tile * source_tile,
+            n_panels=16,
+            n_nodes=48,
+        )
+        evaluate = tile_evaluator(
+            plan,
+            batched=True,
+            kernel="moments",
+            precision=self.policy.precision,
+            edge_count=edge.shape[0],
+        )
+        for rows, columns in plan.tiles(target_r.size, len(sections)):
+            tile = evaluate(
+                target_r[rows],
+                target_z[rows],
+                edge[:, :, columns],
+                weight[:, columns],
+                norm[columns],
+                section_centre[:, columns],
+                authored_centre[:, columns],
+                reflection_axis[columns],
+                reflection_partner[:, columns],
+            )
+            tile_owner = owner[columns]
+            tile_fraction = fraction[columns]
+            for result, values in zip(outputs, tile, strict=True):
+                reduced = np.zeros(
+                    (rows.stop - rows.start, len(self.source)), dtype=np.float64
+                )
+                np.add.at(
+                    reduced.T,
+                    tile_owner,
+                    (values * tile_fraction[np.newaxis, :]).T,
+                )
+                result[rows] += reduced
+        return tuple(outputs)
+
+    @cached_property
     def _coupling(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Return packed tile results accumulated onto authored source columns."""
+        if self.policy.exact_kernel == "closed_form":
+            return tuple(self._closed_coupling[index] for index in (0, 3, 6))
         from nova.biot.polygon import pad_batch
         from nova.biot.polygonanalytic import polygon_analytic_greens
         from nova.biot.tiledassembly import TilePlan, tile_evaluator
@@ -440,6 +533,13 @@ class TiledPolySection(PolySection):
                 )
                 result[authored_rows] += reduced
         return tuple(components)
+
+    @cached_property
+    def _moment_coupling(self) -> tuple[np.ndarray, ...]:
+        """Return traced companions, retaining the host quadrature reference."""
+        if self.policy.exact_kernel == "closed_form":
+            return tuple(self._closed_coupling[index] for index in (1, 2, 4, 5, 7, 8))
+        return super()._moment_coupling
 
     @cached_property
     def Aphi(self):

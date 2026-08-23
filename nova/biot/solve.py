@@ -336,7 +336,11 @@ class Solve(GroupSet):
         )
         generator_kwargs = {"policy": batch.policy} if batch.policy is not None else {}
         generator_class = self.generator[batch.segment]
-        if batch.policy is not None and batch.policy.backend == "jax":
+        if (
+            generator_class is PolySection
+            and batch.policy is not None
+            and batch.policy.backend == "jax"
+        ):
             generator_class = TiledPolySection
         generator = generator_class(
             source,

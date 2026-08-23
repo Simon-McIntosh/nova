@@ -127,8 +127,14 @@ def test_hex_mesh_moment_attributes_match_direct_polygon_evaluation():
                 expected[name].append(row)
 
     for attribute in MOMENT_ATTRIBUTES:
-        np.testing.assert_array_equal(
-            solve.data[attribute], np.column_stack(expected[attribute])
+        # Across all nine rows the CPU-XLA versus scalar reference measurement
+        # peaks at 5.335e-8 relative in BzR; the 6e-8 bound covers that measured
+        # cross-codegen separation while retaining the direct polygon arbiter.
+        np.testing.assert_allclose(
+            solve.data[attribute],
+            np.column_stack(expected[attribute]),
+            rtol=6.0e-8,
+            atol=0.0,
         )
 
 
@@ -278,19 +284,23 @@ def test_policy_numeric_domains_have_one_canonical_cache_key():
         TargetQuadraturePolicy(order=True)
 
 
-def test_accelerator_policy_requires_the_exact_axisymmetric_ring_lane():
-    """Backend and geometry eligibility form one canonical executable identity."""
-    with pytest.raises(ValueError, match="requires 'axisymmetric_ring'"):
-        PolySectionPolicy(backend="jax")
-    with pytest.raises(ValueError, match="compiled quadrature"):
-        PolySectionPolicy(backend="jax", device_eligibility="axisymmetric_ring")
-    policy = PolySectionPolicy(
-        exact_kernel="quadrature",
-        quadrature=(2, 4),
+def test_accelerator_policy_selects_the_exact_closed_form_ring_lane():
+    """The production identity selects one traced exact-section graph."""
+    policy = PolySectionPolicy()
+    assert policy == PolySectionPolicy(
+        exact_kernel="closed_form",
         backend="jax",
         device_eligibility="axisymmetric_ring",
     )
     assert PolySectionPolicy.resolve(policy.key) == policy
+
+    host_reference = PolySectionPolicy(backend="numpy", device_eligibility="host")
+    assert host_reference.key != policy.key
+    quadrature_reference = PolySectionPolicy(exact_kernel="quadrature")
+    assert (
+        quadrature_reference.backend,
+        quadrature_reference.device_eligibility,
+    ) == ("numpy", "host")
 
 
 def test_coilset_factories_reject_routes_outside_the_cache_identity():
@@ -762,16 +772,16 @@ def plasma_cell(r0=6.2, z0=0.0, radius=0.06):
     return np.column_stack([r0 + radius * np.cos(angle), z0 + radius * np.sin(angle)])
 
 
-def test_the_shipped_default_is_the_closed_form_everywhere():
-    """Every target-source pair goes through the exact closed-form reduction."""
+def test_the_default_is_the_traced_closed_form_everywhere():
+    """The route identity is traced while the scalar reference remains exact."""
     from nova.biot.polygonanalytic import polygon_analytic_greens
 
     policy = PolySectionPolicy()
     assert policy.exact_kernel == "closed_form"
     assert (policy.backend, policy.precision, policy.device_eligibility) == (
-        "numpy",
+        "jax",
         "float64",
-        "host",
+        "axisymmetric_ring",
     )
     vertices = plasma_cell()
     target_r = np.array([6.2, 7.4, 8.9])

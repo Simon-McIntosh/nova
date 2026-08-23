@@ -180,6 +180,7 @@ from nova.biot.rangefunction import (
 
 __all__ = [
     "packed_analytic_greens",
+    "packed_analytic_moments",
     "polygon_analytic_field_moments",
     "polygon_analytic_flux",
     "polygon_analytic_flux_moments",
@@ -2209,4 +2210,220 @@ def packed_analytic_greens(
             norm / (4.0 * np.pi) * xp.sign(signed) * radial,
         ),
         xp.where(axis, axis_vertical, norm / (4.0 * np.pi) * vertical),
+    )
+
+
+def packed_analytic_moments(
+    xp,
+    target_r,
+    target_z,
+    edge,
+    weight,
+    norm,
+    section_centre,
+    expansion_centre,
+    reflection_axis,
+    reflection_partner,
+    *,
+    nodes: int = _NODES,
+):
+    """Return all nine exact section rows from one static packed reduction.
+
+    Rows are ``(Psi, PsiR, PsiZ, Br, BrR, BrZ, Bz, BzR, BzZ)``.  Every
+    primitive is the ordinary-fp64 branch used by the production reduction;
+    ``xp`` alone places the identical expression graph on NumPy, JAX CPU, or a
+    JAX accelerator.  Section and requested expansion centres are ``(2, pair)``
+    arrays.  ``reflection_partner`` maps every packed edge to its reflected edge,
+    or to itself when the section has no horizontal reflection.
+    """
+    signed = xp.asarray(target_r)
+    radius = xp.abs(signed)
+    height = xp.asarray(target_z) + xp.zeros_like(signed)
+    sides = edge.shape[0]
+    live, present, chain, _ = _packed_topology(xp, weight)
+    axis = radius == 0.0
+    evaluation_radius = xp.where(axis, xp.ones_like(radius), radius)
+
+    def corner(index: int):
+        present_here = present[index]
+        wrap = (~present_here) & live[index - 1]
+        corner_r = xp.where(present_here, edge[index][0], edge[0][0])
+        corner_z = xp.where(present_here, edge[index][1], edge[0][1])
+        active = present_here | wrap
+        return (
+            xp.where(active, corner_r, evaluation_radius + 1.0),
+            xp.where(active, corner_z, height + 1.0),
+        )
+
+    lower_r, lower_z = (
+        xp.stack([corner(index)[coordinate] for index in range(sides)], axis=0)
+        for coordinate in range(2)
+    )
+    corner_r = xp.stack((lower_r, xp.roll(lower_r, -1, axis=0)), axis=0)
+    corner_z = xp.stack((lower_z, xp.roll(lower_z, -1, axis=0)), axis=0)
+    held = [
+        _held_edge(xp, edge[index], live[index], evaluation_radius, height)
+        for index in range(sides)
+    ]
+    held_edge = tuple(
+        xp.stack([one_edge[coordinate] for one_edge in held], axis=0)
+        for coordinate in range(4)
+    )
+    endpoint_shape = (2, sides) + evaluation_radius.shape
+
+    def endpoint_edges(values):
+        repeated = xp.stack((values, values), axis=0)
+        return xp.broadcast_to(repeated, endpoint_shape).reshape(-1)
+
+    def endpoint_pairs(values):
+        repeated = xp.stack((values, values), axis=0)
+        return xp.broadcast_to(repeated[:, None], endpoint_shape).reshape(-1)
+
+    lane_radius = xp.broadcast_to(evaluation_radius, endpoint_shape).reshape(-1)
+    lane_height = xp.broadcast_to(height, endpoint_shape).reshape(-1)
+    centre_r = endpoint_pairs(section_centre[0])
+    centre_z = endpoint_pairs(section_centre[1])
+    vertex = _Vertex(
+        lane_radius,
+        lane_height,
+        corner_r.reshape(-1),
+        corner_z.reshape(-1),
+        nodes,
+        residual=True,
+        paired=False,
+        xp=xp,
+    )
+    part = _Edge(
+        lane_radius,
+        lane_height,
+        tuple(endpoint_edges(coordinate) for coordinate in held_edge),
+        nodes,
+        xp=xp,
+    )
+
+    def shaped(values):
+        return tuple(value.reshape(endpoint_shape) for value in values)
+
+    field_terms = shaped(part.terms(vertex, paired=False))
+    flux_terms = shaped(
+        part.flux_and_moment_terms(vertex, centre_r, lane_height - centre_z)
+    )
+    line_terms = shaped(
+        part.flux_line_moments(vertex, centre_r, lane_height - centre_z)
+    )
+    corner_field = shaped(vertex.arsinh_terms())
+    corner_flux = shaped(vertex.flux_moment_residuals(centre_r, lane_height - centre_z))
+    corner_line = shaped(
+        vertex.horizontal_flux_line_moments(centre_r, lane_height - centre_z)
+    )
+    slope = part.slope.reshape(endpoint_shape)[0]
+    plane_radius = part.plane_radius_value.reshape(endpoint_shape)[0]
+    corner_level = vertex.level.reshape(endpoint_shape)[0]
+
+    field_contour = [xp.zeros_like(radius) for _ in range(3)]
+    flux_contour = [xp.zeros_like(radius) for _ in range(3)]
+    boundary_vertical = [xp.zeros_like(radius) for _ in range(3)]
+    boundary_radial = [xp.zeros_like(radius) for _ in range(3)]
+    per_edge_flux = []
+    for index in range(sides):
+        edge_weight = weight[index]
+        for component in range(3):
+            field_contour[component] = (
+                field_contour[component]
+                + edge_weight
+                * (field_terms[component][0, index] - field_terms[component][1, index])
+                + chain[index] * corner_field[component][0, index]
+            )
+            flux_channel = field_terms[0] if component == 0 else flux_terms[component]
+            flux_difference = edge_weight * (
+                flux_channel[0, index] - flux_channel[1, index]
+            )
+            flux_contour[component] = (
+                flux_contour[component]
+                + flux_difference
+                + chain[index]
+                * (
+                    corner_field[0][0, index]
+                    if component == 0
+                    else corner_flux[component - 1][0, index]
+                )
+            )
+            line_difference = edge_weight * (
+                line_terms[component][1, index] - line_terms[component][0, index]
+            )
+            boundary_vertical[component] = (
+                boundary_vertical[component]
+                - slope[index] * line_difference
+                - chain[index] * corner_line[component][0, index]
+            )
+            boundary_radial[component] = (
+                boundary_radial[component]
+                + plane_radius[index] * line_difference
+                - corner_level[index] * chain[index] * corner_line[component][0, index]
+            )
+        per_edge_flux.append(
+            weight[index] * (field_terms[0][0, index] - field_terms[0][1, index])
+        )
+
+    edge_flux = xp.stack(per_edge_flux, axis=0)
+    partner_flux = xp.take_along_axis(edge_flux, reflection_partner, axis=0)
+    edge_index = xp.arange(sides).reshape((sides,) + (1,) * radius.ndim)
+    pair_weight = 0.5 * (1.0 + (reflection_partner == edge_index))
+    reflected_vertical = xp.sum(
+        pair_weight
+        * (reflection_axis - section_centre[1])
+        * (edge_flux + partner_flux),
+        axis=0,
+    )
+    symmetric = xp.isfinite(reflection_axis) & xp.all(live, axis=0)
+    on_reflection = symmetric & (height == reflection_axis)
+    flux_contour[2] = xp.where(on_reflection, reflected_vertical, flux_contour[2])
+
+    scale = 0.5 * norm * radius
+    uniform_flux = scale * flux_contour[0]
+    radial_flux = scale * flux_contour[1]
+    vertical_flux = scale * flux_contour[2]
+    sign = xp.sign(signed)
+    uniform_radial = norm / (4.0 * np.pi) * sign * field_contour[1]
+    uniform_vertical = norm / (4.0 * np.pi) * field_contour[2]
+    radial_central = -norm / (4.0 * np.pi) * sign * boundary_vertical[1]
+    vertical_central = (
+        sign
+        * (-scale * boundary_vertical[2] - uniform_flux)
+        / (2.0 * np.pi * evaluation_radius)
+    )
+    vertical_radial_central = (
+        4.0 * radial_flux
+        + section_centre[0] * uniform_flux
+        + scale * boundary_radial[1]
+    ) / (2.0 * np.pi * evaluation_radius**2)
+    vertical_vertical_central = (
+        4.0 * vertical_flux
+        - (height - section_centre[1]) * uniform_flux
+        + scale * boundary_radial[2]
+    ) / (2.0 * np.pi * evaluation_radius**2)
+    displacement_r = expansion_centre[0] - section_centre[0]
+    displacement_z = expansion_centre[1] - section_centre[1]
+    axis_vertical = _packed_axis_vertical_field(xp, height, edge, present, norm)
+    uniform_flux = xp.where(axis, 0.0, uniform_flux)
+    uniform_radial = xp.where(axis, 0.0, uniform_radial)
+    uniform_vertical = xp.where(axis, axis_vertical, uniform_vertical)
+    return (
+        uniform_flux,
+        xp.where(axis, 0.0, radial_flux - displacement_r * uniform_flux),
+        xp.where(axis, 0.0, vertical_flux - displacement_z * uniform_flux),
+        uniform_radial,
+        xp.where(axis, 0.0, radial_central - displacement_r * uniform_radial),
+        xp.where(axis, 0.0, vertical_central - displacement_z * uniform_radial),
+        uniform_vertical,
+        xp.where(
+            axis,
+            0.0,
+            vertical_radial_central - displacement_r * uniform_vertical,
+        ),
+        xp.where(
+            axis,
+            0.0,
+            vertical_vertical_central - displacement_z * uniform_vertical,
+        ),
     )

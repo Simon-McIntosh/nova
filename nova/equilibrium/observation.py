@@ -21,9 +21,15 @@ and topology-zero cells contribute exactly zero:
     \qquad
     l_i = \frac{2 \int B_p^2\, \mathrm{d}V}{\mu_0^2 R_{\mathrm{ax}} I_p^2}.
 
-The reference radius is pinned as the volume-averaged major radius of the
-clipped core rather than a machine constant or a boundary extremum, so it
-moves with the solved geometry and stays smooth in the flux map. Pressure is
+The forward-moment reference radius is pinned as the volume-averaged major
+radius of the clipped core rather than a machine constant or a boundary
+extremum, so it moves with the solved geometry and stays smooth in the flux
+map.  Its internal-inductance observation uses the same current-radius algebra
+as ``li_3``, but its explicitly reported ``major_radius`` remains this
+differentiable volume average.  It is therefore a forward-moment convention,
+not the IMAS egress value unless that radius coincides with the LCFS geometric
+radius.  The pulse-design egress reads the LCFS geometric-radius value from
+:class:`nova.biot.plasma.Plasma`. Pressure is
 asked of the declared closure at the node radius and the converged flux span
 — a static closure integrates it inward from the boundary primitive by the
 rule pinned in :mod:`nova.equilibrium.convention`, a rotating one returns its
@@ -363,14 +369,22 @@ def observe_moments(
     pressure_integral = jnp.sum(support_integrals.pressure_volume)
     field_integral = jnp.sum(support_integrals.field_volume)
 
-    reference = mu_0 * major_radius * plasma_current**2
-    safe_reference = jnp.where(
-        jnp.abs(reference) > 0.0, reference, jnp.ones_like(reference)
+    beta_reference = mu_0 * major_radius * plasma_current**2
+    safe_beta_reference = jnp.where(
+        jnp.abs(beta_reference) > 0.0,
+        beta_reference,
+        jnp.ones_like(beta_reference),
+    )
+    inductance_normaliser = 0.5 * mu_0**2 * plasma_current**2 * major_radius
+    safe_inductance_normaliser = jnp.where(
+        jnp.abs(inductance_normaliser) > 0.0,
+        inductance_normaliser,
+        jnp.ones_like(inductance_normaliser),
     )
     return IntegralObservation(
         plasma_current=plasma_current,
-        poloidal_beta=4.0 * pressure_integral / safe_reference,
-        internal_inductance=2.0 * field_integral / (mu_0 * safe_reference),
+        poloidal_beta=4.0 * pressure_integral / safe_beta_reference,
+        internal_inductance=field_integral / safe_inductance_normaliser,
         volume=volume,
         major_radius=major_radius,
         pressure_integral=pressure_integral,

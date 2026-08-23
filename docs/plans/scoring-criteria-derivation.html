@@ -19,8 +19,8 @@
 <meta name="plan-effort-hours" content="4.0">
 <meta name="plan-depends-on" content="efit-forward-parity">
 <meta name="plan-blocks" content="mast-catalog-gpu-solve">
-<meta name="plan-version" content="8">
-<meta name="plan-impl" content="0.75">
+<meta name="plan-version" content="10">
+<meta name="plan-impl" content="0.8">
 </head>
 <body>
 <main class="plan-doc">
@@ -80,17 +80,30 @@
   landed</a> (commit <code>dad444cb</code>, merged <code>ac3c1bf5</code>).</p>
 </section>
 
-<section id="s3">
-  <h2 id="s3h">§3 — Replace the digest pin and classify every bound</h2>
-  <p>The axis and LCFS bounds cite a stamp pinned to an artifact digest that moved; an
-  artifact digest is write-metadata, not an identity. Re-pin the citation to the artifact's
-  semantic identity so the bound is reproducible from its citation, then classify each of the
-  five carried bounds as <strong>supported</strong> (derivation reached),
-  <strong>merely contained</strong> (holds numerically but no derivation), or
-  <strong>reclassified</strong> (cannot be derived; stated plainly with what it is instead).</p>
-  <p><strong>Done when:</strong> the two re-pinned citations resolve to reproducible artifacts,
-  the five-bound classification table is banked, and every bound marked reclassified carries
-  its replacement reading in one sentence.</p>
+<section id="s3" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-08-23</span>
+    <h2 id="s3h">§3 — Replace the digest pin and classify every bound</h2></header>
+  <p class="landed-summary">Classified: x-point and topology SUPPORTED; axis and LCFS MERELY
+  CONTAINED, their citations re-pinned to the fail-closed machine-artifact semantic identity;
+  the fixed-point 1e-8 RECLASSIFIED as the profile accelerator's strict stopping policy, not
+  a derived bound. 2/2 semantic citations resolve and verify; 5 tests. Full record:
+  <a href="/nova/evidence/archive/scoring-criteria-derivation-landed#bound-classification">§3
+  landed</a> (commit <code>3c1874d5</code>, merged <code>26f99ae9</code>).</p>
+</section>
+
+<section id="s4">
+  <h2 id="s4h">§4 — The provenance receipt tracks the code it describes</h2>
+  <p>Surfaced by §3's compatibility probe: the banked parity provenance receipt
+  <code>docs/figures/efit-forward-parity/convergence-criterion-provenance.json</code> pins a
+  digest of <code>nova/equilibrium/forward.py</code> that has since changed, so
+  <code>tests/test_efit_parity_criterion_provenance.py::test_checked_receipt_matches_regeneration</code>
+  fails in the default lane (13/14 pass). The receipt's own maintenance path is
+  regeneration; the classifications and criterion values are semantics that must not move
+  when only the code digest does.</p>
+  <p><strong>Done when:</strong> the receipt is regenerated against the current tree, the
+  previously failing regeneration test passes with the full provenance test file's count
+  quoted, and the regenerated receipt's classification and criterion fields are shown
+  unchanged against the prior receipt (field-level diff quoted, digests aside).</p>
 </section>
 
 <section data-reckon="comments" id="comments" class="r-comments">
@@ -102,6 +115,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260823T1058" data-who="reckon-ship" data-when="2026-08-23 10:58">
     <div class="r-comment-body">frozen-six-derived-rescore landed — commit <code>dad444cb</code>, merged <code>ac3c1bf5</code>; gate PASSED; 8 tests added; zero solves. Registered physical convergence 0/6; derived physical convergence 4/6 (raw numeric matches 1/6 and 5/6). Per reference (residual vs derived τ): 21978/35 1.242e-2 &lt; 1.397e-2 PASS; 21983/35 6.148e-3 &lt; 1.294e-2 PASS; 21985/51 1.971e-3 &lt; 1.005e-2 PASS; 21986/46 3.589e-3 &lt; 1.264e-2 PASS; 21989/55 residual 0 on a zero-current vacuum collapse — INVALID_PHYSICAL_ROOT, visible but never counted; 22086/43 1.502e-2 &gt; 1.355e-2 FAIL. Catalog-hold implication as stated in the receipt: the hold REMAINS — four of six is not six of six — now standing on a justified criterion instead of an inherited one. No registered tolerance changed; the two-mesh qualification rides in the receipt. Receipt: docs/figures/scoring-criteria-derivation/derived-criterion-rescore.json (sha256 63d5b2c2…).</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260823T1115" data-who="reckon-ship" data-when="2026-08-23 11:15">
+    <div class="r-comment-body">bound-classification landed — commit <code>3c1874d5</code>, merged <code>26f99ae9</code>; gate PASSED; 5 tests added. Classification: x_point_distance_m 0.014 m SUPPORTED; topology_class_agreement_fraction 1.0 SUPPORTED; magnetic_axis_distance_m 0.00101344 m MERELY CONTAINED; lcfs_distance_m 0.00033047 m MERELY CONTAINED; fixed_point_defect 1e-8 RECLASSIFIED — replacement reading: the profile accelerator's strict stopping policy, not a derived physical or discretisation-accuracy bound. Axis and LCFS citations re-pinned to MachineArtifactManifest.semantic_identity (sha256:8df7a0a6…) with fail-closed resolution verified and the materialisation digest recorded as provenance only; the resolved artifact's 6 non-boundary gaps stated, not silently inferred complete. Receipt: docs/figures/scoring-criteria-derivation/bound-classification.json (sha256 959905c2…). Fold: the node's compatibility probe found docs/figures/efit-forward-parity/convergence-criterion-provenance.json stale against the changed nova/equilibrium/forward.py digest — test_checked_receipt_matches_regeneration fails 1/14 — folded as §4.</div>
 </div>
 </section>
 </main>

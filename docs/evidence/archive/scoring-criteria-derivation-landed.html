@@ -99,6 +99,36 @@
   (sha256 <code>63d5b2c2a1b6b7dc887ab1e874b861fe67b70efc46c6b90add7b5e876ae16c56</code>).</p>
 </section>
 
+<section id="bound-classification">
+  <h2 id="bound-classification-h">§3 — Bound classification and the semantic repin</h2>
+  <p><strong>bound-classification</strong> landed 2026-08-23 — commit <code>3c1874d5</code>,
+  merged <code>26f99ae9</code>, gate PASSED, 5 tests added.</p>
+  <table>
+    <thead><tr><th>Bound</th><th>Value</th><th>Classification</th></tr></thead>
+    <tbody>
+      <tr><td>x_point_distance_m</td><td>0.014 m</td><td>supported</td></tr>
+      <tr><td>topology_class_agreement_fraction</td><td>1.0</td><td>supported</td></tr>
+      <tr><td>magnetic_axis_distance_m</td><td>0.00101344 m</td><td>merely contained</td></tr>
+      <tr><td>lcfs_distance_m</td><td>0.00033047 m</td><td>merely contained</td></tr>
+      <tr><td>fixed_point_defect</td><td>1e-8</td><td>reclassified</td></tr>
+    </tbody>
+  </table>
+  <p>Replacement reading for the reclassified bound: read 1e-8 as the strict stopping policy
+  of the profile accelerator, not as a derived physical or discretisation-accuracy bound.
+  The axis and LCFS citations now pin
+  <code>MachineArtifactManifest.semantic_identity</code>
+  (sha256 <code>8df7a0a6c3f6162dbe0f226660bc069f37de8eb69f0f7c80bbfedc2bd4be220c</code>) with
+  fail-closed resolution verified (physical <code>b55c5bb005a2cb67</code>, registry
+  <code>2a26cc0a…</code>) and the materialisation digest recorded as provenance only; the
+  resolved artifact's six non-boundary gaps are stated rather than silently inferred
+  complete. Receipt:
+  <code>docs/figures/scoring-criteria-derivation/bound-classification.json</code>
+  (sha256 <code>959905c2340f8b1c9d8203204d6eb3161bf5478f6d5fdfaf60de4e83ffd5ca98</code>).
+  Byproduct fold: the node's compatibility probe found the banked parity provenance receipt
+  stale against the changed <code>nova/equilibrium/forward.py</code> digest (regeneration
+  test failing 1/14) — folded back into the plan as its receipt-refresh section.</p>
+</section>
+
 </main>
 </body>
 </html>

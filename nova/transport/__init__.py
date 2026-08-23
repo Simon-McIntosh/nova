@@ -28,6 +28,8 @@ from nova.equilibrium.flux_surface_extraction import (
     traced_flux_surface_geometry,
 )
 from nova.transport.coupled_window import (
+    CouplingFieldSpec,
+    CouplingState,
     EquilibriumSweepReceipt,
     ExchangeSweepResult,
     TransportSweepReceipt,
@@ -90,6 +92,8 @@ from nova.transport.torax_geometry import torax_geometry_from_fsa
 
 __all__ = [
     "AchievedBoundaryValues",
+    "CouplingFieldSpec",
+    "CouplingState",
     "CurrentDiffusion",
     "EnsembleForwardTransport",
     "EnsembleMemberReceipt",

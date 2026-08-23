@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import dataclasses
+import json
 from types import SimpleNamespace
 
 import jax
@@ -16,6 +17,7 @@ from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.topology import TopologyClass
 from nova.transport.coupled_window import (
     ConvergedNonConfinedError,
+    CouplingState,
     ExchangeSweepResult,
     TransportSweepReceipt,
     Waveform,
@@ -52,6 +54,64 @@ WINDOW_CONVERGENCE_TOLERANCE = 1.0e-10
 WEAK_COUPLING_AGREEMENT = 3.0e-3
 STRONG_COUPLING_DIVERGENCE = 0.75
 LEDGER_CLOSURE_TOLERANCE = 3.0e-12
+
+
+def test_coupling_state_round_trip_is_lossless_and_fail_closed():
+    """The exchanged state restores through its exact versioned payload."""
+    geometry = Waveform(
+        time=np.array([0.0, 1.0]),
+        radial_grid=np.array([[0.0, 0.4, 1.0], [0.0, 0.6, 1.0]]),
+        phi_boundary=np.array([1.5, 1.7]),
+        axis_reference=np.array([-0.2, -0.1]),
+        boundary_reference=np.array([0.6, 0.8]),
+        values={
+            "delta_lower_face": np.zeros((2, 3)),
+            "valid": np.ones(2, dtype=bool),
+        },
+    )
+    source = Waveform(
+        time=np.array([0.0, 0.5, 1.0]),
+        radial_grid=np.linspace(0.0, 1.0, 4),
+        phi_boundary=np.array([1.5, 1.6, 1.7]),
+        axis_reference=np.array([-0.2, -0.15, -0.1]),
+        boundary_reference=np.array([0.6, 0.7, 0.8]),
+        values={"p_prime": np.arange(12, dtype=np.float64).reshape(3, 4)},
+    )
+    state = CouplingState(geometry=geometry, source=source)
+    payload = json.loads(json.dumps(state.to_dict()))
+    restored = CouplingState.from_dict(payload)
+
+    assert restored.to_dict() == payload
+    assert restored.contract_version == state.contract_version
+    assert restored.field_specs()["geometry.delta_lower_face"].gate_role == (
+        "excluded-with-reason"
+    )
+    assert restored.field_specs()["source.p_prime"].gate_role == "gating"
+    assert restored.geometry.values["valid"].dtype == np.bool_
+    assert not restored.geometry.time.flags.writeable
+
+    malformed = copy.deepcopy(payload)
+    malformed["contract_version"] = "unsupported"
+    with pytest.raises(ValueError, match="unsupported coupling-state version"):
+        CouplingState.from_dict(malformed)
+    malformed = copy.deepcopy(payload)
+    malformed["unexpected"] = True
+    with pytest.raises(ValueError, match="payload keys differ"):
+        CouplingState.from_dict(malformed)
+    malformed = copy.deepcopy(payload)
+    malformed["geometry"]["values"]["valid"]["dtype"] = "object"
+    with pytest.raises(ValueError, match="non-numeric dtype"):
+        CouplingState.from_dict(malformed)
+
+    changing_static = dataclasses.replace(
+        geometry,
+        values={
+            **geometry.values,
+            "valid": np.array([True, False]),
+        },
+    )
+    with pytest.raises(ValueError, match="static coupling field"):
+        CouplingState(geometry=changing_static, source=source)
 
 
 def test_profile_time_interpolation_stays_on_normalised_radial_coordinates():
@@ -468,6 +528,7 @@ def test_converged_and_cap_one_windows_share_one_measured_coupling_axis():
     assert strong.convergence.contraction_estimate < 1.0
     assert weak.convergence.damping_applied == 1.0
     assert strong.convergence.damping_applied == 0.8
+    assert weak.contract_version == weak.convergence.contract_version == "1.0.0"
     assert set(weak.convergence.exit_residual) == {
         "geometry.axis_reference",
         "geometry.boundary_reference",

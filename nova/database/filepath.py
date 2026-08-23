@@ -39,8 +39,13 @@ def compute_provenance(
     if backend != "jax":
         raise ValueError(f"unsupported compute backend {backend!r}")
 
-    import jax
-    import jaxlib
+    try:
+        import jax
+        import jaxlib
+    except ModuleNotFoundError as error:
+        if error.name != "jax":
+            raise
+        return compute_provenance("numpy")
 
     resolved_platform = jax.default_backend() if platform is None else platform
     if device_kind is None:

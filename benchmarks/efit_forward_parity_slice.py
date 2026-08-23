@@ -114,6 +114,7 @@ PRESCRIBED_RESPONSE_INPUT_ARRAYS = (
     "fcoil_xmult",
 )
 GRID_STRIDE = 2
+REFERENCE_NATIVE_GRID_POINTS = 95
 FIXED_POINT_CRITERION = 1.0e-8
 NEWTON_STEPS = 12
 GMRES_ITERATIONS = 12
@@ -319,17 +320,62 @@ def _stored_map(
     return radius, height, TOTAL_FLUX_FACTOR * _live_flux_map(group, row, len(radius)).T
 
 
+def _benchmark_spatial_grid(
+    full_r: np.ndarray,
+    full_z: np.ndarray,
+    reference_full: np.ndarray,
+    grid_points: int | None,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]:
+    """Return the scored uniform grid or an explicit stored-grid intervention."""
+    if grid_points is None:
+        radius = full_r[::GRID_STRIDE]
+        height = full_z[::GRID_STRIDE]
+        reference = reference_full[::GRID_STRIDE, ::GRID_STRIDE]
+        selection = {
+            "mode": "stored_axis_stride_intervention",
+            "stored_axis_stride": GRID_STRIDE,
+        }
+    else:
+        if grid_points < 3:
+            raise ValueError(
+                "the benchmark grid requires at least three points per axis"
+            )
+        radius = np.linspace(full_r[0], full_r[-1], grid_points)
+        height = np.linspace(full_z[0], full_z[-1], grid_points)
+        if grid_points == len(full_r):
+            reference = reference_full.copy()
+            interpolation = "identity on the stored 65-point axes"
+        else:
+            reference = RectBivariateSpline(
+                full_r,
+                full_z,
+                reference_full,
+                kx=3,
+                ky=3,
+                s=0.0,
+            )(radius, height)
+            interpolation = "bicubic spline of the stored 65 by 65 flux map"
+        selection = {
+            "mode": "fixed_uniform_axis_count",
+            "axis_points": grid_points,
+            "reference_interpolation": interpolation,
+        }
+    return radius, height, reference, selection
+
+
 def build_profile(
     group: zarr.Group,
     shot: int,
     row: int,
     current_field: str,
+    *,
+    grid_points: int | None = None,
 ) -> tuple[ForwardProfile, np.ndarray, np.ndarray, dict[str, Any]]:
     """Build one prescribed-anchor forward profile and reference seed."""
     full_r, full_z, reference_full = _stored_map(group, row)
-    radius = full_r[::GRID_STRIDE]
-    height = full_z[::GRID_STRIDE]
-    reference = reference_full[::GRID_STRIDE, ::GRID_STRIDE]
+    radius, height, reference, grid_selection = _benchmark_spatial_grid(
+        full_r, full_z, reference_full, grid_points
+    )
     lattice = FluxLattice(radius, height)
     limiter = np.column_stack(
         [
@@ -426,6 +472,12 @@ def build_profile(
         "declared_axis_flux_wb": axis_flux,
         "declared_boundary_flux_wb": boundary_flux,
         "declared_support_nodes": int(np.count_nonzero(declared_support)),
+        "spatial_grid": {
+            **grid_selection,
+            "shape": [len(radius), len(height)],
+            "radial_step_m": float(np.diff(radius).mean()),
+            "vertical_step_m": float(np.diff(height).mean()),
+        },
         "gauge": "unchanged reference total-flux gauge; no re-zeroing or mixed-gauge constants",
     }
     return profile, seed, reference, provenance
@@ -2436,13 +2488,19 @@ def _composition_case_receipt(case: dict[str, Any]) -> tuple[dict[str, Any], dic
 
 
 def _mast_case_from_selection(
-    store: Path, selected: dict[str, Any], qualification: dict[str, Any]
+    store: Path,
+    selected: dict[str, Any],
+    qualification: dict[str, Any],
+    *,
+    grid_points: int | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Build one selected MAST prescribed-anchor reference state."""
     shot = int(selected["shot"])
     row = int(selected["slice_index"])
     group = zarr.open_group(str(store / f"{shot}.zarr"), mode="r")["efm"]
-    profile, seed, reference, provenance = build_profile(group, shot, row, "fcoil_c")
+    profile, seed, reference, provenance = build_profile(
+        group, shot, row, "fcoil_c", grid_points=grid_points
+    )
     axis = np.asarray(
         [group["magnetic_axis_r"][row], group["magnetic_axis_z"][row]],
         dtype=np.float64,
@@ -2474,8 +2532,15 @@ def _mast_case_from_selection(
                 "qualification_before_attribution": qualification,
             },
             "mesh": {
-                "kind": "33 by 33 rectangular benchmark lattice",
+                "kind": (
+                    f"{len(profile.lattice.radius)} by {len(profile.lattice.height)} "
+                    "rectangular benchmark lattice"
+                ),
                 "realised_cells": profile.lattice.node_count,
+                "stored_lcfs_interior_cells": provenance["declared_support_nodes"],
+                "radial_step_m": float(profile.lattice.radial_step),
+                "vertical_step_m": float(profile.lattice.vertical_step),
+                "selection": provenance["spatial_grid"],
                 "source_moments": "centroid current on prescribed reference support",
             },
         },
@@ -3784,7 +3849,10 @@ def run_current_constrained(
     figure_rows = []
     for selected_row, qualification in selected:
         mast_case, context = _mast_case_from_selection(
-            store, selected_row, qualification
+            store,
+            selected_row,
+            qualification,
+            grid_points=REFERENCE_NATIVE_GRID_POINTS,
         )
         passive_case, profile, policy = _passive_inclusive_case(
             mast_case, context, response_cache
@@ -3997,7 +4065,10 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
     figure_rows = []
     for selected_row, qualification in selected:
         mast_case, context = _mast_case_from_selection(
-            store, selected_row, qualification
+            store,
+            selected_row,
+            qualification,
+            grid_points=REFERENCE_NATIVE_GRID_POINTS,
         )
         passive_case, profile, policy = _passive_inclusive_case(
             mast_case, context, response_cache

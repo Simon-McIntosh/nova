@@ -107,3 +107,26 @@ def test_artifact_digest_detects_content_changes(tmp_path) -> None:
     artifact.write_text("second\n")
 
     assert parity._artifact_digests(tmp_path) != before
+
+
+def test_reference_native_grid_interpolates_the_stored_map() -> None:
+    assert parity.REFERENCE_NATIVE_GRID_POINTS == 95
+    radius = np.linspace(0.2, 1.8, 65)
+    height = np.linspace(-1.4, 1.4, 65)
+    reference = radius[:, None] ** 2 - 0.5 * height[None, :] ** 2
+
+    refined_r, refined_z, refined, selection = parity._benchmark_spatial_grid(
+        radius,
+        height,
+        reference,
+        parity.REFERENCE_NATIVE_GRID_POINTS,
+    )
+
+    assert refined.shape == (95, 95)
+    assert len(refined_r) == len(refined_z) == parity.REFERENCE_NATIVE_GRID_POINTS
+    assert selection["mode"] == "fixed_uniform_axis_count"
+    np.testing.assert_allclose(
+        refined,
+        refined_r[:, None] ** 2 - 0.5 * refined_z[None, :] ** 2,
+        atol=2.0e-14,
+    )

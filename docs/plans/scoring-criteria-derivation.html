@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="Scoring Criteria Derivation — every bound we score against, and whether it can be derived">
 <meta name="plan-summary" content="Replace the inherited bounds the forward-parity verdicts were scored against with derived ones, or reclassify the bounds whose derivation cannot be reached: the fixed-point criterion traced to a solver stopping tolerance, the axis and LCFS bounds pinned to an artifact digest that moved, and a first replacement attempt that was algebraically circular">
-<meta name="plan-status" content="active">
+<meta name="plan-status" content="shipped">
 <meta name="plan-roi" content="high">
 <meta name="plan-sprint" content="S13">
 <meta name="plan-owner" content="Simon McIntosh">
@@ -19,8 +19,8 @@
 <meta name="plan-effort-hours" content="4.0">
 <meta name="plan-depends-on" content="efit-forward-parity">
 <meta name="plan-blocks" content="mast-catalog-gpu-solve">
-<meta name="plan-version" content="10">
-<meta name="plan-impl" content="0.8">
+<meta name="plan-version" content="13">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
 <main class="plan-doc">
@@ -91,19 +91,14 @@
   landed</a> (commit <code>3c1874d5</code>, merged <code>26f99ae9</code>).</p>
 </section>
 
-<section id="s4">
-  <h2 id="s4h">§4 — The provenance receipt tracks the code it describes</h2>
-  <p>Surfaced by §3's compatibility probe: the banked parity provenance receipt
-  <code>docs/figures/efit-forward-parity/convergence-criterion-provenance.json</code> pins a
-  digest of <code>nova/equilibrium/forward.py</code> that has since changed, so
-  <code>tests/test_efit_parity_criterion_provenance.py::test_checked_receipt_matches_regeneration</code>
-  fails in the default lane (13/14 pass). The receipt's own maintenance path is
-  regeneration; the classifications and criterion values are semantics that must not move
-  when only the code digest does.</p>
-  <p><strong>Done when:</strong> the receipt is regenerated against the current tree, the
-  previously failing regeneration test passes with the full provenance test file's count
-  quoted, and the regenerated receipt's classification and criterion fields are shown
-  unchanged against the prior receipt (field-level diff quoted, digests aside).</p>
+<section id="s4" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-08-23</span>
+    <h2 id="s4h">§4 — The provenance receipt tracks the code it describes</h2></header>
+  <p class="landed-summary">Regenerated: of 8 source digests only the forward-solve module's
+  moved; 185/185 leaf values unchanged excluding source digests (classifications 25/25,
+  criteria 72/72, rescore 8/8); provenance tests 9/9 where 13/14 failed before. Full record:
+  <a href="/nova/evidence/archive/scoring-criteria-derivation-landed#receipt-refresh">§4
+  landed</a> (commit <code>4a98303d</code>, merged <code>602c2f08</code>).</p>
 </section>
 
 <section data-reckon="comments" id="comments" class="r-comments">
@@ -119,6 +114,17 @@
 <div class="r-comment" data-section="s3" data-id="c-20260823T1115" data-who="reckon-ship" data-when="2026-08-23 11:15">
     <div class="r-comment-body">bound-classification landed — commit <code>3c1874d5</code>, merged <code>26f99ae9</code>; gate PASSED; 5 tests added. Classification: x_point_distance_m 0.014 m SUPPORTED; topology_class_agreement_fraction 1.0 SUPPORTED; magnetic_axis_distance_m 0.00101344 m MERELY CONTAINED; lcfs_distance_m 0.00033047 m MERELY CONTAINED; fixed_point_defect 1e-8 RECLASSIFIED — replacement reading: the profile accelerator's strict stopping policy, not a derived physical or discretisation-accuracy bound. Axis and LCFS citations re-pinned to MachineArtifactManifest.semantic_identity (sha256:8df7a0a6…) with fail-closed resolution verified and the materialisation digest recorded as provenance only; the resolved artifact's 6 non-boundary gaps stated, not silently inferred complete. Receipt: docs/figures/scoring-criteria-derivation/bound-classification.json (sha256 959905c2…). Fold: the node's compatibility probe found docs/figures/efit-forward-parity/convergence-criterion-provenance.json stale against the changed nova/equilibrium/forward.py digest — test_checked_receipt_matches_regeneration fails 1/14 — folded as §4.</div>
 </div>
+<div class="r-comment" data-section="s4" data-id="c-20260823T1132" data-who="reckon-ship" data-when="2026-08-23 11:32">
+    <div class="r-comment-body">provenance-receipt-refresh landed — commit <code>4a98303d</code>, merged <code>602c2f08</code>; gate PASSED. Receipt regenerated: of 8 source digests only nova/equilibrium/forward.py moved (47985691… → 8098aa29…); classification fields 25/25, criterion fields 72/72, rescore fields 8/8 — 185/185 leaf values unchanged excluding source_digests; protected banked artifacts 23/23; provenance tests 9 collected / 9 passed. The plan closes at impl 1.0 across 5 executable nodes: reuse map, held-out criterion, frozen-six rescore (0/6 registered → 4/6 derived, hold stands), bound classification with the semantic repin, and this refresh.</div>
+</div>
+</section>
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-scd-successor" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-23 11:33" data-recommends-skill="/reckon-ship forward-operator-refinement" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Successor: forward-operator-refinement owns the frontier work</h4>
+    <div class="r-fu-body">Pointer, not work: the derived criterion, the 4/6 rescore and the bound classifications are inputs to forward-operator-refinement (declared dependent), which owns the resolution default, the operator-order measurement, the third-mesh criterion refresh, and the DIII-D gate notification. Its own lifecycle surfaces it to the roadmap.</div>
+    <pre class="r-fu-prompt">/reckon-ship forward-operator-refinement</pre>
+    </article>
 </section>
 </main>
 </body>

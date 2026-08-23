@@ -1,0 +1,3049 @@
+{
+  "artifact": "observable_route_discriminator",
+  "backend": {
+    "device": "NVIDIA H200 NVL",
+    "jax_version": "0.11.0",
+    "platform": "gpu",
+    "precision": "float64"
+  },
+  "cases": [
+    {
+      "observables": {
+        "conservation.divergence_j": {
+          "first_structurally_differing_operation": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 2.7755575615628914e-17,
+            "maximum_relative_difference": 1.3844156804038015e-16,
+            "operation": "conservation.field_function_gradient",
+            "qualification": "first non-identical value in production operation order"
+          },
+          "route_observable_difference": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 8.731149137020111e-11,
+            "maximum_relative_difference": 0.75
+          },
+          "shared_state_evaluation": {
+            "exactly_equal": false,
+            "jitted_vmap_forward_profile_observe": 2.0372681319713593e-10,
+            "maximum_absolute_difference": 8.731149137020111e-11,
+            "maximum_relative_difference": 0.75,
+            "scalar_forward_profile_observe": 1.1641532182693481e-10,
+            "shared_state_source": "eager terminal flux"
+          }
+        },
+        "moments.major_radius": {
+          "first_structurally_differing_operation": null,
+          "route_observable_difference": {
+            "exactly_equal": true,
+            "maximum_absolute_difference": 0.0,
+            "maximum_relative_difference": 0.0
+          },
+          "shared_state_evaluation": {
+            "exactly_equal": true,
+            "jitted_vmap_forward_profile_observe": 0.8225630058219203,
+            "maximum_absolute_difference": 0.0,
+            "maximum_relative_difference": 0.0,
+            "scalar_forward_profile_observe": 0.8225630058219203,
+            "shared_state_source": "eager terminal flux"
+          }
+        },
+        "moments.volume": {
+          "first_structurally_differing_operation": null,
+          "route_observable_difference": {
+            "exactly_equal": true,
+            "maximum_absolute_difference": 0.0,
+            "maximum_relative_difference": 0.0
+          },
+          "shared_state_evaluation": {
+            "exactly_equal": true,
+            "jitted_vmap_forward_profile_observe": 2.6880914809111305,
+            "maximum_absolute_difference": 0.0,
+            "maximum_relative_difference": 0.0,
+            "scalar_forward_profile_observe": 2.6880914809111305,
+            "shared_state_source": "eager terminal flux"
+          }
+        }
+      },
+      "shot": 21978,
+      "slice_index": 35,
+      "terminal_state_difference": {
+        "exactly_equal": false,
+        "maximum_absolute_difference": 4.565792188770956e-15,
+        "maximum_relative_difference": 3.8774023596328245e-15
+      },
+      "time_s": 0.1899999976158142
+    },
+    {
+      "observables": {
+        "conservation.divergence_j": {
+          "first_structurally_differing_operation": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 2.7755575615628914e-17,
+            "maximum_relative_difference": 1.2583590689000033e-16,
+            "operation": "conservation.field_function_gradient",
+            "qualification": "first non-identical value in production operation order"
+          },
+          "route_observable_difference": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 5.820766091346741e-11,
+            "maximum_relative_difference": 0.2
+          },
+          "shared_state_evaluation": {
+            "exactly_equal": false,
+            "jitted_vmap_forward_profile_observe": 2.473825588822365e-10,
+            "maximum_absolute_difference": 4.3655745685100555e-11,
+            "maximum_relative_difference": 0.15,
+            "scalar_forward_profile_observe": 2.9103830456733704e-10,
+            "shared_state_source": "eager terminal flux"
+          }
+        },
+        "moments.major_radius": {
+          "first_structurally_differing_operation": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 1.3877787807814457e-17,
+            "maximum_relative_difference": 1.9845541666349472e-16,
+            "operation": "cell_centered_measure.per_cell_radial_volume",
+            "qualification": "first non-identical value in production operation order"
+          },
+          "route_observable_difference": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 1.1102230246251565e-16,
+            "maximum_relative_difference": 1.3894787632543187e-16
+          },
+          "shared_state_evaluation": {
+            "exactly_equal": false,
+            "jitted_vmap_forward_profile_observe": 0.7990212257903726,
+            "maximum_absolute_difference": 1.1102230246251565e-16,
+            "maximum_relative_difference": 1.3894787632543187e-16,
+            "scalar_forward_profile_observe": 0.7990212257903725,
+            "shared_state_source": "eager terminal flux"
+          }
+        },
+        "moments.volume": {
+          "first_structurally_differing_operation": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 4.440892098500626e-16,
+            "maximum_relative_difference": 1.382234321449017e-16,
+            "operation": "observe_moments.volume_reduction",
+            "qualification": "first non-identical value in production operation order"
+          },
+          "route_observable_difference": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 4.440892098500626e-16,
+            "maximum_relative_difference": 1.382234321449017e-16
+          },
+          "shared_state_evaluation": {
+            "exactly_equal": false,
+            "jitted_vmap_forward_profile_observe": 3.2128359349702524,
+            "maximum_absolute_difference": 4.440892098500626e-16,
+            "maximum_relative_difference": 1.382234321449017e-16,
+            "scalar_forward_profile_observe": 3.212835934970253,
+            "shared_state_source": "eager terminal flux"
+          }
+        }
+      },
+      "shot": 21983,
+      "slice_index": 35,
+      "terminal_state_difference": {
+        "exactly_equal": false,
+        "maximum_absolute_difference": 3.812228310806631e-14,
+        "maximum_relative_difference": 3.0613293458458956e-14
+      },
+      "time_s": 0.1899999976158142
+    },
+    {
+      "observables": {
+        "conservation.divergence_j": {
+          "first_structurally_differing_operation": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 5.551115123125783e-17,
+            "maximum_relative_difference": 1.8093773353643e-16,
+            "operation": "conservation.field_function_gradient",
+            "qualification": "first non-identical value in production operation order"
+          },
+          "route_observable_difference": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 1.7462298274040222e-10,
+            "maximum_relative_difference": 1.0
+          },
+          "shared_state_evaluation": {
+            "exactly_equal": false,
+            "jitted_vmap_forward_profile_observe": 3.4924596548080444e-10,
+            "maximum_absolute_difference": 1.7462298274040222e-10,
+            "maximum_relative_difference": 1.0,
+            "scalar_forward_profile_observe": 1.7462298274040222e-10,
+            "shared_state_source": "eager terminal flux"
+          }
+        },
+        "moments.major_radius": {
+          "first_structurally_differing_operation": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 1.3877787807814457e-17,
+            "maximum_relative_difference": 2.1990713655763623e-16,
+            "operation": "cell_centered_measure.per_cell_radial_volume",
+            "qualification": "first non-identical value in production operation order"
+          },
+          "route_observable_difference": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 1.1102230246251565e-16,
+            "maximum_relative_difference": 1.3423949370740482e-16
+          },
+          "shared_state_evaluation": {
+            "exactly_equal": false,
+            "jitted_vmap_forward_profile_observe": 0.8270464927743654,
+            "maximum_absolute_difference": 1.1102230246251565e-16,
+            "maximum_relative_difference": 1.3423949370740482e-16,
+            "scalar_forward_profile_observe": 0.8270464927743655,
+            "shared_state_source": "eager terminal flux"
+          }
+        },
+        "moments.volume": {
+          "first_structurally_differing_operation": null,
+          "route_observable_difference": {
+            "exactly_equal": true,
+            "maximum_absolute_difference": 0.0,
+            "maximum_relative_difference": 0.0
+          },
+          "shared_state_evaluation": {
+            "exactly_equal": true,
+            "jitted_vmap_forward_profile_observe": 1.912298185326303,
+            "maximum_absolute_difference": 0.0,
+            "maximum_relative_difference": 0.0,
+            "scalar_forward_profile_observe": 1.912298185326303,
+            "shared_state_source": "eager terminal flux"
+          }
+        }
+      },
+      "shot": 21985,
+      "slice_index": 51,
+      "terminal_state_difference": {
+        "exactly_equal": false,
+        "maximum_absolute_difference": 2.7200464103316335e-15,
+        "maximum_relative_difference": 1.6835423365911458e-15
+      },
+      "time_s": 0.2750000059604645
+    },
+    {
+      "observables": {
+        "conservation.divergence_j": {
+          "first_structurally_differing_operation": null,
+          "route_observable_difference": {
+            "exactly_equal": true,
+            "maximum_absolute_difference": 0.0,
+            "maximum_relative_difference": 0.0
+          },
+          "shared_state_evaluation": {
+            "exactly_equal": true,
+            "jitted_vmap_forward_profile_observe": 0.0,
+            "maximum_absolute_difference": 0.0,
+            "maximum_relative_difference": 0.0,
+            "scalar_forward_profile_observe": 0.0,
+            "shared_state_source": "eager terminal flux"
+          }
+        },
+        "moments.major_radius": {
+          "first_structurally_differing_operation": null,
+          "route_observable_difference": {
+            "exactly_equal": true,
+            "maximum_absolute_difference": 0.0,
+            "maximum_relative_difference": 0.0
+          },
+          "shared_state_evaluation": {
+            "exactly_equal": true,
+            "jitted_vmap_forward_profile_observe": 0.8826889579572685,
+            "maximum_absolute_difference": 0.0,
+            "maximum_relative_difference": 0.0,
+            "scalar_forward_profile_observe": 0.8826889579572685,
+            "shared_state_source": "eager terminal flux"
+          }
+        },
+        "moments.volume": {
+          "first_structurally_differing_operation": null,
+          "route_observable_difference": {
+            "exactly_equal": true,
+            "maximum_absolute_difference": 0.0,
+            "maximum_relative_difference": 0.0
+          },
+          "shared_state_evaluation": {
+            "exactly_equal": true,
+            "jitted_vmap_forward_profile_observe": 1.8489407906781372,
+            "maximum_absolute_difference": 0.0,
+            "maximum_relative_difference": 0.0,
+            "scalar_forward_profile_observe": 1.8489407906781372,
+            "shared_state_source": "eager terminal flux"
+          }
+        }
+      },
+      "shot": 21986,
+      "slice_index": 46,
+      "terminal_state_difference": {
+        "exactly_equal": false,
+        "maximum_absolute_difference": 8.881784197001252e-16,
+        "maximum_relative_difference": 6.39130115536169e-16
+      },
+      "time_s": 0.25
+    },
+    {
+      "observables": {
+        "conservation.divergence_j": {
+          "first_structurally_differing_operation": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 2.7755575615628914e-17,
+            "maximum_relative_difference": 1.0662971671958359e-16,
+            "operation": "conservation.field_function_gradient",
+            "qualification": "first non-identical value in production operation order"
+          },
+          "route_observable_difference": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 2.9103830456733704e-11,
+            "maximum_relative_difference": 0.125
+          },
+          "shared_state_evaluation": {
+            "exactly_equal": false,
+            "jitted_vmap_forward_profile_observe": 2.0372681319713593e-10,
+            "maximum_absolute_difference": 2.9103830456733704e-11,
+            "maximum_relative_difference": 0.125,
+            "scalar_forward_profile_observe": 2.3283064365386963e-10,
+            "shared_state_source": "eager terminal flux"
+          }
+        },
+        "moments.major_radius": {
+          "first_structurally_differing_operation": null,
+          "route_observable_difference": {
+            "exactly_equal": true,
+            "maximum_absolute_difference": 0.0,
+            "maximum_relative_difference": 0.0
+          },
+          "shared_state_evaluation": {
+            "exactly_equal": true,
+            "jitted_vmap_forward_profile_observe": 0.8685520116198748,
+            "maximum_absolute_difference": 0.0,
+            "maximum_relative_difference": 0.0,
+            "scalar_forward_profile_observe": 0.8685520116198748,
+            "shared_state_source": "eager terminal flux"
+          }
+        },
+        "moments.volume": {
+          "first_structurally_differing_operation": null,
+          "route_observable_difference": {
+            "exactly_equal": true,
+            "maximum_absolute_difference": 0.0,
+            "maximum_relative_difference": 0.0
+          },
+          "shared_state_evaluation": {
+            "exactly_equal": true,
+            "jitted_vmap_forward_profile_observe": 2.0075574719972327,
+            "maximum_absolute_difference": 0.0,
+            "maximum_relative_difference": 0.0,
+            "scalar_forward_profile_observe": 2.0075574719972327,
+            "shared_state_source": "eager terminal flux"
+          }
+        }
+      },
+      "shot": 21989,
+      "slice_index": 55,
+      "terminal_state_difference": {
+        "exactly_equal": false,
+        "maximum_absolute_difference": 4.440892098500626e-16,
+        "maximum_relative_difference": 2.8041162387261414e-16
+      },
+      "time_s": 0.29499998688697815
+    },
+    {
+      "observables": {
+        "conservation.divergence_j": {
+          "first_structurally_differing_operation": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 5.551115123125783e-17,
+            "maximum_relative_difference": 1.998621194610553e-16,
+            "operation": "conservation.field_function_gradient",
+            "qualification": "first non-identical value in production operation order"
+          },
+          "route_observable_difference": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 5.820766091346741e-11,
+            "maximum_relative_difference": 0.2
+          },
+          "shared_state_evaluation": {
+            "exactly_equal": false,
+            "jitted_vmap_forward_profile_observe": 1.7462298274040222e-10,
+            "maximum_absolute_difference": 1.1641532182693481e-10,
+            "maximum_relative_difference": 0.4,
+            "scalar_forward_profile_observe": 2.9103830456733704e-10,
+            "shared_state_source": "eager terminal flux"
+          }
+        },
+        "moments.major_radius": {
+          "first_structurally_differing_operation": null,
+          "route_observable_difference": {
+            "exactly_equal": true,
+            "maximum_absolute_difference": 0.0,
+            "maximum_relative_difference": 0.0
+          },
+          "shared_state_evaluation": {
+            "exactly_equal": true,
+            "jitted_vmap_forward_profile_observe": 0.88174813682348,
+            "maximum_absolute_difference": 0.0,
+            "maximum_relative_difference": 0.0,
+            "scalar_forward_profile_observe": 0.88174813682348,
+            "shared_state_source": "eager terminal flux"
+          }
+        },
+        "moments.volume": {
+          "first_structurally_differing_operation": null,
+          "route_observable_difference": {
+            "exactly_equal": true,
+            "maximum_absolute_difference": 0.0,
+            "maximum_relative_difference": 0.0
+          },
+          "shared_state_evaluation": {
+            "exactly_equal": true,
+            "jitted_vmap_forward_profile_observe": 2.688270036670075,
+            "maximum_absolute_difference": 0.0,
+            "maximum_relative_difference": 0.0,
+            "scalar_forward_profile_observe": 2.688270036670075,
+            "shared_state_source": "eager terminal flux"
+          }
+        }
+      },
+      "shot": 22086,
+      "slice_index": 43,
+      "terminal_state_difference": {
+        "exactly_equal": false,
+        "maximum_absolute_difference": 4.715103307795232e-12,
+        "maximum_relative_difference": 3.4226047655318483e-12
+      },
+      "time_s": 0.22999998927116394
+    }
+  ],
+  "completed_utc": "2026-08-23T22:21:22.113537+00:00",
+  "cross_platform_observable_comparison": [
+    {
+      "observable": "conservation.divergence_j",
+      "platforms": {
+        "cpu": {
+          "correlation": {
+            "case_count": 6,
+            "interpretation": "finite correlation across all six cases",
+            "pearson_r": -0.07789278873643923,
+            "spearman_rho": -0.2
+          },
+          "first_structurally_differing_operation": "conservation.declared_field_function_squared",
+          "shared_state_evaluations": [
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 1.980619618684264e-10,
+              "maximum_absolute_difference": 2.3438979128024175e-11,
+              "maximum_relative_difference": 0.1342261984086539,
+              "scalar_forward_profile_observe": 1.7462298274040222e-10,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21978,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 2.250671139466022e-10,
+              "maximum_absolute_difference": 5.044413120619997e-11,
+              "maximum_relative_difference": 0.2888745250743492,
+              "scalar_forward_profile_observe": 1.7462298274040222e-10,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21983,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 2.123932664939489e-10,
+              "maximum_absolute_difference": 3.777028375354668e-11,
+              "maximum_relative_difference": 0.21629617797616416,
+              "scalar_forward_profile_observe": 1.7462298274040222e-10,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21985,
+              "slice_index": 51
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.0,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.0,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21986,
+              "slice_index": 46
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 2.6749084236041085e-10,
+              "maximum_absolute_difference": 9.286785962000862e-11,
+              "maximum_relative_difference": 0.5318192265566081,
+              "scalar_forward_profile_observe": 1.7462298274040222e-10,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21989,
+              "slice_index": 55
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 1.7331540997984394e-10,
+              "maximum_absolute_difference": 1.177228945874931e-10,
+              "maximum_relative_difference": 0.4044927857949906,
+              "scalar_forward_profile_observe": 2.9103830456733704e-10,
+              "shared_state_source": "eager terminal flux",
+              "shot": 22086,
+              "slice_index": 43
+            }
+          ],
+          "shared_state_maximum_absolute_difference": 1.177228945874931e-10,
+          "verdict": "COMPUTATION_DIFFERS"
+        },
+        "gpu": {
+          "correlation": {
+            "case_count": 6,
+            "interpretation": "finite correlation across all six cases",
+            "pearson_r": -0.07945587858543698,
+            "spearman_rho": 0.4058397249567139
+          },
+          "first_structurally_differing_operation": "conservation.field_function_gradient",
+          "shared_state_evaluations": [
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 2.0372681319713593e-10,
+              "maximum_absolute_difference": 8.731149137020111e-11,
+              "maximum_relative_difference": 0.75,
+              "scalar_forward_profile_observe": 1.1641532182693481e-10,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21978,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 2.473825588822365e-10,
+              "maximum_absolute_difference": 4.3655745685100555e-11,
+              "maximum_relative_difference": 0.15,
+              "scalar_forward_profile_observe": 2.9103830456733704e-10,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21983,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 3.4924596548080444e-10,
+              "maximum_absolute_difference": 1.7462298274040222e-10,
+              "maximum_relative_difference": 1.0,
+              "scalar_forward_profile_observe": 1.7462298274040222e-10,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21985,
+              "slice_index": 51
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.0,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.0,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21986,
+              "slice_index": 46
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 2.0372681319713593e-10,
+              "maximum_absolute_difference": 2.9103830456733704e-11,
+              "maximum_relative_difference": 0.125,
+              "scalar_forward_profile_observe": 2.3283064365386963e-10,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21989,
+              "slice_index": 55
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 1.7462298274040222e-10,
+              "maximum_absolute_difference": 1.1641532182693481e-10,
+              "maximum_relative_difference": 0.4,
+              "scalar_forward_profile_observe": 2.9103830456733704e-10,
+              "shared_state_source": "eager terminal flux",
+              "shot": 22086,
+              "slice_index": 43
+            }
+          ],
+          "shared_state_maximum_absolute_difference": 1.7462298274040222e-10,
+          "verdict": "COMPUTATION_DIFFERS"
+        }
+      }
+    },
+    {
+      "observable": "moments.major_radius",
+      "platforms": {
+        "cpu": {
+          "correlation": {
+            "case_count": 6,
+            "interpretation": "finite correlation across all six cases",
+            "pearson_r": 0.999746554160842,
+            "spearman_rho": 0.6546536707079772
+          },
+          "first_structurally_differing_operation": "cell_centered_measure.per_cell_radial_volume",
+          "shared_state_evaluations": [
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.8225630058219202,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.8225630058219202,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21978,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.7990212257903726,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.7990212257903726,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21983,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.8270464927743654,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.8270464927743654,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21985,
+              "slice_index": 51
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.8826889579572685,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.8826889579572685,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21986,
+              "slice_index": 46
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.868552011619875,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.868552011619875,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21989,
+              "slice_index": 55
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 0.88174813682348,
+              "maximum_absolute_difference": 2.220446049250313e-16,
+              "maximum_relative_difference": 2.5182316315966663e-16,
+              "scalar_forward_profile_observe": 0.8817481368234802,
+              "shared_state_source": "eager terminal flux",
+              "shot": 22086,
+              "slice_index": 43
+            }
+          ],
+          "shared_state_maximum_absolute_difference": 2.220446049250313e-16,
+          "verdict": "COMPUTATION_DIFFERS"
+        },
+        "gpu": {
+          "correlation": {
+            "case_count": 6,
+            "interpretation": "finite correlation across all six cases",
+            "pearson_r": -0.311366951789906,
+            "spearman_rho": 0.20701966780270628
+          },
+          "first_structurally_differing_operation": "cell_centered_measure.per_cell_radial_volume",
+          "shared_state_evaluations": [
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.8225630058219203,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.8225630058219203,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21978,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 0.7990212257903726,
+              "maximum_absolute_difference": 1.1102230246251565e-16,
+              "maximum_relative_difference": 1.3894787632543187e-16,
+              "scalar_forward_profile_observe": 0.7990212257903725,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21983,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 0.8270464927743654,
+              "maximum_absolute_difference": 1.1102230246251565e-16,
+              "maximum_relative_difference": 1.3423949370740482e-16,
+              "scalar_forward_profile_observe": 0.8270464927743655,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21985,
+              "slice_index": 51
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.8826889579572685,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.8826889579572685,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21986,
+              "slice_index": 46
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.8685520116198748,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.8685520116198748,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21989,
+              "slice_index": 55
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.88174813682348,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.88174813682348,
+              "shared_state_source": "eager terminal flux",
+              "shot": 22086,
+              "slice_index": 43
+            }
+          ],
+          "shared_state_maximum_absolute_difference": 1.1102230246251565e-16,
+          "verdict": "COMPUTATION_DIFFERS"
+        }
+      }
+    },
+    {
+      "exact_equality_bound_evidence": {
+        "cpu_shared_state_difference_is_exactly_zero": true,
+        "interpretation": "Exact equality is an execution-platform claim for this floating-point observable, not a discrete-type guarantee.",
+        "shared_state_difference_by_platform": {
+          "cpu": 0.0,
+          "gpu": 4.440892098500626e-16
+        }
+      },
+      "observable": "moments.volume",
+      "platforms": {
+        "cpu": {
+          "correlation": {
+            "case_count": 6,
+            "interpretation": "undefined because at least one six-case vector is constant",
+            "pearson_r": null,
+            "spearman_rho": null
+          },
+          "first_structurally_differing_operation": null,
+          "shared_state_evaluations": [
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 2.688091480911131,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 2.688091480911131,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21978,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 3.2128359349702524,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 3.2128359349702524,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21983,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 1.912298185326303,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 1.912298185326303,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21985,
+              "slice_index": 51
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 1.8489407906781372,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 1.8489407906781372,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21986,
+              "slice_index": 46
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 2.0075574719972322,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 2.0075574719972322,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21989,
+              "slice_index": 55
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 2.688270036670075,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 2.688270036670075,
+              "shared_state_source": "eager terminal flux",
+              "shot": 22086,
+              "slice_index": 43
+            }
+          ],
+          "shared_state_maximum_absolute_difference": 0.0,
+          "verdict": "STATE_INHERITED"
+        },
+        "gpu": {
+          "correlation": {
+            "case_count": 6,
+            "interpretation": "finite correlation across all six cases",
+            "pearson_r": -0.19184337989629888,
+            "spearman_rho": 0.39279220242478635
+          },
+          "first_structurally_differing_operation": "observe_moments.volume_reduction",
+          "shared_state_evaluations": [
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 2.6880914809111305,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 2.6880914809111305,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21978,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 3.2128359349702524,
+              "maximum_absolute_difference": 4.440892098500626e-16,
+              "maximum_relative_difference": 1.382234321449017e-16,
+              "scalar_forward_profile_observe": 3.212835934970253,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21983,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 1.912298185326303,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 1.912298185326303,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21985,
+              "slice_index": 51
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 1.8489407906781372,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 1.8489407906781372,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21986,
+              "slice_index": 46
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 2.0075574719972327,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 2.0075574719972327,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21989,
+              "slice_index": 55
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 2.688270036670075,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 2.688270036670075,
+              "shared_state_source": "eager terminal flux",
+              "shot": 22086,
+              "slice_index": 43
+            }
+          ],
+          "shared_state_maximum_absolute_difference": 4.440892098500626e-16,
+          "verdict": "COMPUTATION_DIFFERS"
+        }
+      }
+    }
+  ],
+  "evidence_sources": {
+    "conditioned_failures": {
+      "banked_case_observable_evaluation_pass_count": 407,
+      "banked_observable_pass_count": 66,
+      "path": "docs/figures/diiid-forward-onboarding/conditioned-convergence-and-observables.json",
+      "sha256": "57dfbad62ff379004c577a6f1375d979d2436167a048de2a71d7cad241391e9c"
+    },
+    "criterion": {
+      "path": "docs/figures/forward-operator-refinement/criterion-family.json",
+      "sha256": "076f83134de45a6a87369c9e7f7177ec8ac5dd290a19f72a0dcb96aa94ffac80"
+    }
+  },
+  "measurement_contract": {
+    "backend_alignment": {
+      "failing_evidence_platform": "gpu",
+      "matches": true,
+      "measurement_platform": "gpu",
+      "qualification": "Verdicts adjudicate the banked failures only when the measurement platform matches their source platform."
+    },
+    "case_count": 6,
+    "no_repair_attempted": true,
+    "scalar_path": "ForwardProfile.observe(shared_flux)",
+    "shared_terminal_state": "eager terminal flux for each frozen case",
+    "transformed_path": "jax.jit(jax.vmap(ForwardProfile.observe))(shared_flux[None])"
+  },
+  "observables": [
+    {
+      "difference_against_state_agreement": {
+        "cases": [
+          {
+            "route_observable_maximum_absolute_difference": 8.731149137020111e-11,
+            "shot": 21978,
+            "slice_index": 35,
+            "terminal_state_maximum_relative_difference": 3.8774023596328245e-15
+          },
+          {
+            "route_observable_maximum_absolute_difference": 5.820766091346741e-11,
+            "shot": 21983,
+            "slice_index": 35,
+            "terminal_state_maximum_relative_difference": 3.0613293458458956e-14
+          },
+          {
+            "route_observable_maximum_absolute_difference": 1.7462298274040222e-10,
+            "shot": 21985,
+            "slice_index": 51,
+            "terminal_state_maximum_relative_difference": 1.6835423365911458e-15
+          },
+          {
+            "route_observable_maximum_absolute_difference": 0.0,
+            "shot": 21986,
+            "slice_index": 46,
+            "terminal_state_maximum_relative_difference": 6.39130115536169e-16
+          },
+          {
+            "route_observable_maximum_absolute_difference": 2.9103830456733704e-11,
+            "shot": 21989,
+            "slice_index": 55,
+            "terminal_state_maximum_relative_difference": 2.8041162387261414e-16
+          },
+          {
+            "route_observable_maximum_absolute_difference": 5.820766091346741e-11,
+            "shot": 22086,
+            "slice_index": 43,
+            "terminal_state_maximum_relative_difference": 3.4226047655318483e-12
+          }
+        ],
+        "correlation": {
+          "case_count": 6,
+          "interpretation": "finite correlation across all six cases",
+          "pearson_r": -0.07945587858543698,
+          "spearman_rho": 0.4058397249567139
+        },
+        "observable_metric": "absolute difference between eager-solve and compiled-solve leaf",
+        "state_metric": "max(abs(compiled_flux - eager_flux)) / max(abs(eager_flux))"
+      },
+      "first_structurally_differing_operation": "conservation.field_function_gradient",
+      "localisation_by_differing_case": [
+        {
+          "exactly_equal": false,
+          "maximum_absolute_difference": 2.7755575615628914e-17,
+          "maximum_relative_difference": 1.3844156804038015e-16,
+          "operation": "conservation.field_function_gradient",
+          "qualification": "first non-identical value in production operation order",
+          "shot": 21978,
+          "slice_index": 35
+        },
+        {
+          "exactly_equal": false,
+          "maximum_absolute_difference": 2.7755575615628914e-17,
+          "maximum_relative_difference": 1.2583590689000033e-16,
+          "operation": "conservation.field_function_gradient",
+          "qualification": "first non-identical value in production operation order",
+          "shot": 21983,
+          "slice_index": 35
+        },
+        {
+          "exactly_equal": false,
+          "maximum_absolute_difference": 5.551115123125783e-17,
+          "maximum_relative_difference": 1.8093773353643e-16,
+          "operation": "conservation.field_function_gradient",
+          "qualification": "first non-identical value in production operation order",
+          "shot": 21985,
+          "slice_index": 51
+        },
+        {
+          "exactly_equal": false,
+          "maximum_absolute_difference": 2.7755575615628914e-17,
+          "maximum_relative_difference": 1.0662971671958359e-16,
+          "operation": "conservation.field_function_gradient",
+          "qualification": "first non-identical value in production operation order",
+          "shot": 21989,
+          "slice_index": 55
+        },
+        {
+          "exactly_equal": false,
+          "maximum_absolute_difference": 5.551115123125783e-17,
+          "maximum_relative_difference": 1.998621194610553e-16,
+          "operation": "conservation.field_function_gradient",
+          "qualification": "first non-identical value in production operation order",
+          "shot": 22086,
+          "slice_index": 43
+        }
+      ],
+      "observable": "conservation.divergence_j",
+      "shared_state_case_count": 6,
+      "shared_state_evaluations": [
+        {
+          "exactly_equal": false,
+          "jitted_vmap_forward_profile_observe": 2.0372681319713593e-10,
+          "maximum_absolute_difference": 8.731149137020111e-11,
+          "maximum_relative_difference": 0.75,
+          "scalar_forward_profile_observe": 1.1641532182693481e-10,
+          "shared_state_source": "eager terminal flux",
+          "shot": 21978,
+          "slice_index": 35
+        },
+        {
+          "exactly_equal": false,
+          "jitted_vmap_forward_profile_observe": 2.473825588822365e-10,
+          "maximum_absolute_difference": 4.3655745685100555e-11,
+          "maximum_relative_difference": 0.15,
+          "scalar_forward_profile_observe": 2.9103830456733704e-10,
+          "shared_state_source": "eager terminal flux",
+          "shot": 21983,
+          "slice_index": 35
+        },
+        {
+          "exactly_equal": false,
+          "jitted_vmap_forward_profile_observe": 3.4924596548080444e-10,
+          "maximum_absolute_difference": 1.7462298274040222e-10,
+          "maximum_relative_difference": 1.0,
+          "scalar_forward_profile_observe": 1.7462298274040222e-10,
+          "shared_state_source": "eager terminal flux",
+          "shot": 21985,
+          "slice_index": 51
+        },
+        {
+          "exactly_equal": true,
+          "jitted_vmap_forward_profile_observe": 0.0,
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "scalar_forward_profile_observe": 0.0,
+          "shared_state_source": "eager terminal flux",
+          "shot": 21986,
+          "slice_index": 46
+        },
+        {
+          "exactly_equal": false,
+          "jitted_vmap_forward_profile_observe": 2.0372681319713593e-10,
+          "maximum_absolute_difference": 2.9103830456733704e-11,
+          "maximum_relative_difference": 0.125,
+          "scalar_forward_profile_observe": 2.3283064365386963e-10,
+          "shared_state_source": "eager terminal flux",
+          "shot": 21989,
+          "slice_index": 55
+        },
+        {
+          "exactly_equal": false,
+          "jitted_vmap_forward_profile_observe": 1.7462298274040222e-10,
+          "maximum_absolute_difference": 1.1641532182693481e-10,
+          "maximum_relative_difference": 0.4,
+          "scalar_forward_profile_observe": 2.9103830456733704e-10,
+          "shared_state_source": "eager terminal flux",
+          "shot": 22086,
+          "slice_index": 43
+        }
+      ],
+      "shared_state_maximum_absolute_difference": 1.7462298274040222e-10,
+      "verdict": "COMPUTATION_DIFFERS",
+      "verdict_rule": "COMPUTATION_DIFFERS iff scalar observe and jitted vmap observe are not exactly equal on any shared terminal state; otherwise STATE_INHERITED"
+    },
+    {
+      "difference_against_state_agreement": {
+        "cases": [
+          {
+            "route_observable_maximum_absolute_difference": 0.0,
+            "shot": 21978,
+            "slice_index": 35,
+            "terminal_state_maximum_relative_difference": 3.8774023596328245e-15
+          },
+          {
+            "route_observable_maximum_absolute_difference": 1.1102230246251565e-16,
+            "shot": 21983,
+            "slice_index": 35,
+            "terminal_state_maximum_relative_difference": 3.0613293458458956e-14
+          },
+          {
+            "route_observable_maximum_absolute_difference": 1.1102230246251565e-16,
+            "shot": 21985,
+            "slice_index": 51,
+            "terminal_state_maximum_relative_difference": 1.6835423365911458e-15
+          },
+          {
+            "route_observable_maximum_absolute_difference": 0.0,
+            "shot": 21986,
+            "slice_index": 46,
+            "terminal_state_maximum_relative_difference": 6.39130115536169e-16
+          },
+          {
+            "route_observable_maximum_absolute_difference": 0.0,
+            "shot": 21989,
+            "slice_index": 55,
+            "terminal_state_maximum_relative_difference": 2.8041162387261414e-16
+          },
+          {
+            "route_observable_maximum_absolute_difference": 0.0,
+            "shot": 22086,
+            "slice_index": 43,
+            "terminal_state_maximum_relative_difference": 3.4226047655318483e-12
+          }
+        ],
+        "correlation": {
+          "case_count": 6,
+          "interpretation": "finite correlation across all six cases",
+          "pearson_r": -0.311366951789906,
+          "spearman_rho": 0.20701966780270628
+        },
+        "observable_metric": "absolute difference between eager-solve and compiled-solve leaf",
+        "state_metric": "max(abs(compiled_flux - eager_flux)) / max(abs(eager_flux))"
+      },
+      "first_structurally_differing_operation": "cell_centered_measure.per_cell_radial_volume",
+      "localisation_by_differing_case": [
+        {
+          "exactly_equal": false,
+          "maximum_absolute_difference": 1.3877787807814457e-17,
+          "maximum_relative_difference": 1.9845541666349472e-16,
+          "operation": "cell_centered_measure.per_cell_radial_volume",
+          "qualification": "first non-identical value in production operation order",
+          "shot": 21983,
+          "slice_index": 35
+        },
+        {
+          "exactly_equal": false,
+          "maximum_absolute_difference": 1.3877787807814457e-17,
+          "maximum_relative_difference": 2.1990713655763623e-16,
+          "operation": "cell_centered_measure.per_cell_radial_volume",
+          "qualification": "first non-identical value in production operation order",
+          "shot": 21985,
+          "slice_index": 51
+        }
+      ],
+      "observable": "moments.major_radius",
+      "shared_state_case_count": 6,
+      "shared_state_evaluations": [
+        {
+          "exactly_equal": true,
+          "jitted_vmap_forward_profile_observe": 0.8225630058219203,
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "scalar_forward_profile_observe": 0.8225630058219203,
+          "shared_state_source": "eager terminal flux",
+          "shot": 21978,
+          "slice_index": 35
+        },
+        {
+          "exactly_equal": false,
+          "jitted_vmap_forward_profile_observe": 0.7990212257903726,
+          "maximum_absolute_difference": 1.1102230246251565e-16,
+          "maximum_relative_difference": 1.3894787632543187e-16,
+          "scalar_forward_profile_observe": 0.7990212257903725,
+          "shared_state_source": "eager terminal flux",
+          "shot": 21983,
+          "slice_index": 35
+        },
+        {
+          "exactly_equal": false,
+          "jitted_vmap_forward_profile_observe": 0.8270464927743654,
+          "maximum_absolute_difference": 1.1102230246251565e-16,
+          "maximum_relative_difference": 1.3423949370740482e-16,
+          "scalar_forward_profile_observe": 0.8270464927743655,
+          "shared_state_source": "eager terminal flux",
+          "shot": 21985,
+          "slice_index": 51
+        },
+        {
+          "exactly_equal": true,
+          "jitted_vmap_forward_profile_observe": 0.8826889579572685,
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "scalar_forward_profile_observe": 0.8826889579572685,
+          "shared_state_source": "eager terminal flux",
+          "shot": 21986,
+          "slice_index": 46
+        },
+        {
+          "exactly_equal": true,
+          "jitted_vmap_forward_profile_observe": 0.8685520116198748,
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "scalar_forward_profile_observe": 0.8685520116198748,
+          "shared_state_source": "eager terminal flux",
+          "shot": 21989,
+          "slice_index": 55
+        },
+        {
+          "exactly_equal": true,
+          "jitted_vmap_forward_profile_observe": 0.88174813682348,
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "scalar_forward_profile_observe": 0.88174813682348,
+          "shared_state_source": "eager terminal flux",
+          "shot": 22086,
+          "slice_index": 43
+        }
+      ],
+      "shared_state_maximum_absolute_difference": 1.1102230246251565e-16,
+      "verdict": "COMPUTATION_DIFFERS",
+      "verdict_rule": "COMPUTATION_DIFFERS iff scalar observe and jitted vmap observe are not exactly equal on any shared terminal state; otherwise STATE_INHERITED"
+    },
+    {
+      "difference_against_state_agreement": {
+        "cases": [
+          {
+            "route_observable_maximum_absolute_difference": 0.0,
+            "shot": 21978,
+            "slice_index": 35,
+            "terminal_state_maximum_relative_difference": 3.8774023596328245e-15
+          },
+          {
+            "route_observable_maximum_absolute_difference": 4.440892098500626e-16,
+            "shot": 21983,
+            "slice_index": 35,
+            "terminal_state_maximum_relative_difference": 3.0613293458458956e-14
+          },
+          {
+            "route_observable_maximum_absolute_difference": 0.0,
+            "shot": 21985,
+            "slice_index": 51,
+            "terminal_state_maximum_relative_difference": 1.6835423365911458e-15
+          },
+          {
+            "route_observable_maximum_absolute_difference": 0.0,
+            "shot": 21986,
+            "slice_index": 46,
+            "terminal_state_maximum_relative_difference": 6.39130115536169e-16
+          },
+          {
+            "route_observable_maximum_absolute_difference": 0.0,
+            "shot": 21989,
+            "slice_index": 55,
+            "terminal_state_maximum_relative_difference": 2.8041162387261414e-16
+          },
+          {
+            "route_observable_maximum_absolute_difference": 0.0,
+            "shot": 22086,
+            "slice_index": 43,
+            "terminal_state_maximum_relative_difference": 3.4226047655318483e-12
+          }
+        ],
+        "correlation": {
+          "case_count": 6,
+          "interpretation": "finite correlation across all six cases",
+          "pearson_r": -0.19184337989629888,
+          "spearman_rho": 0.39279220242478635
+        },
+        "observable_metric": "absolute difference between eager-solve and compiled-solve leaf",
+        "state_metric": "max(abs(compiled_flux - eager_flux)) / max(abs(eager_flux))"
+      },
+      "first_structurally_differing_operation": "observe_moments.volume_reduction",
+      "localisation_by_differing_case": [
+        {
+          "exactly_equal": false,
+          "maximum_absolute_difference": 4.440892098500626e-16,
+          "maximum_relative_difference": 1.382234321449017e-16,
+          "operation": "observe_moments.volume_reduction",
+          "qualification": "first non-identical value in production operation order",
+          "shot": 21983,
+          "slice_index": 35
+        }
+      ],
+      "observable": "moments.volume",
+      "shared_state_case_count": 6,
+      "shared_state_evaluations": [
+        {
+          "exactly_equal": true,
+          "jitted_vmap_forward_profile_observe": 2.6880914809111305,
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "scalar_forward_profile_observe": 2.6880914809111305,
+          "shared_state_source": "eager terminal flux",
+          "shot": 21978,
+          "slice_index": 35
+        },
+        {
+          "exactly_equal": false,
+          "jitted_vmap_forward_profile_observe": 3.2128359349702524,
+          "maximum_absolute_difference": 4.440892098500626e-16,
+          "maximum_relative_difference": 1.382234321449017e-16,
+          "scalar_forward_profile_observe": 3.212835934970253,
+          "shared_state_source": "eager terminal flux",
+          "shot": 21983,
+          "slice_index": 35
+        },
+        {
+          "exactly_equal": true,
+          "jitted_vmap_forward_profile_observe": 1.912298185326303,
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "scalar_forward_profile_observe": 1.912298185326303,
+          "shared_state_source": "eager terminal flux",
+          "shot": 21985,
+          "slice_index": 51
+        },
+        {
+          "exactly_equal": true,
+          "jitted_vmap_forward_profile_observe": 1.8489407906781372,
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "scalar_forward_profile_observe": 1.8489407906781372,
+          "shared_state_source": "eager terminal flux",
+          "shot": 21986,
+          "slice_index": 46
+        },
+        {
+          "exactly_equal": true,
+          "jitted_vmap_forward_profile_observe": 2.0075574719972327,
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "scalar_forward_profile_observe": 2.0075574719972327,
+          "shared_state_source": "eager terminal flux",
+          "shot": 21989,
+          "slice_index": 55
+        },
+        {
+          "exactly_equal": true,
+          "jitted_vmap_forward_profile_observe": 2.688270036670075,
+          "maximum_absolute_difference": 0.0,
+          "maximum_relative_difference": 0.0,
+          "scalar_forward_profile_observe": 2.688270036670075,
+          "shared_state_source": "eager terminal flux",
+          "shot": 22086,
+          "slice_index": 43
+        }
+      ],
+      "shared_state_maximum_absolute_difference": 4.440892098500626e-16,
+      "verdict": "COMPUTATION_DIFFERS",
+      "verdict_rule": "COMPUTATION_DIFFERS iff scalar observe and jitted vmap observe are not exactly equal on any shared terminal state; otherwise STATE_INHERITED"
+    }
+  ],
+  "platform_measurements": {
+    "cpu": {
+      "backend": {
+        "device": "cpu",
+        "jax_version": "0.11.0",
+        "platform": "cpu",
+        "precision": "float64"
+      },
+      "cases": [
+        {
+          "observables": {
+            "conservation.divergence_j": {
+              "first_structurally_differing_operation": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 2.7755575615628914e-17,
+                "maximum_relative_difference": 1.3342037361769803e-16,
+                "operation": "conservation.declared_field_function_squared",
+                "qualification": "first non-identical value in production operation order"
+              },
+              "route_observable_difference": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 6.727115691835157e-12,
+                "maximum_relative_difference": 0.03852365585712055
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": false,
+                "jitted_vmap_forward_profile_observe": 1.980619618684264e-10,
+                "maximum_absolute_difference": 2.3438979128024175e-11,
+                "maximum_relative_difference": 0.1342261984086539,
+                "scalar_forward_profile_observe": 1.7462298274040222e-10,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.major_radius": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 0.8225630058219202,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 0.8225630058219202,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.volume": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 2.688091480911131,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 2.688091480911131,
+                "shared_state_source": "eager terminal flux"
+              }
+            }
+          },
+          "shot": 21978,
+          "slice_index": 35,
+          "terminal_state_difference": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 2.4216739724636227e-15,
+            "maximum_relative_difference": 2.0565553548812402e-15
+          },
+          "time_s": 0.1899999976158142
+        },
+        {
+          "observables": {
+            "conservation.divergence_j": {
+              "first_structurally_differing_operation": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 2.7755575615628914e-17,
+                "maximum_relative_difference": 1.2794705901010854e-16,
+                "operation": "conservation.declared_field_function_squared",
+                "qualification": "first non-identical value in production operation order"
+              },
+              "route_observable_difference": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 8.76271555825396e-12,
+                "maximum_relative_difference": 0.05018076899580152
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": false,
+                "jitted_vmap_forward_profile_observe": 2.250671139466022e-10,
+                "maximum_absolute_difference": 5.044413120619997e-11,
+                "maximum_relative_difference": 0.2888745250743492,
+                "scalar_forward_profile_observe": 1.7462298274040222e-10,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.major_radius": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 0.7990212257903726,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 0.7990212257903726,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.volume": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 3.2128359349702524,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 3.2128359349702524,
+                "shared_state_source": "eager terminal flux"
+              }
+            }
+          },
+          "shot": 21983,
+          "slice_index": 35,
+          "terminal_state_difference": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 1.149913497755506e-13,
+            "maximum_relative_difference": 9.234137225947716e-14
+          },
+          "time_s": 0.1899999976158142
+        },
+        {
+          "observables": {
+            "conservation.divergence_j": {
+              "first_structurally_differing_operation": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 2.7755575615628914e-17,
+                "maximum_relative_difference": 1.2119554788419857e-16,
+                "operation": "conservation.declared_field_function_squared",
+                "qualification": "first non-identical value in production operation order"
+              },
+              "route_observable_difference": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 3.777028375354668e-11,
+                "maximum_relative_difference": 0.21629617797616416
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": false,
+                "jitted_vmap_forward_profile_observe": 2.123932664939489e-10,
+                "maximum_absolute_difference": 3.777028375354668e-11,
+                "maximum_relative_difference": 0.21629617797616416,
+                "scalar_forward_profile_observe": 1.7462298274040222e-10,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.major_radius": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 0.8270464927743654,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 0.8270464927743654,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.volume": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 1.912298185326303,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 1.912298185326303,
+                "shared_state_source": "eager terminal flux"
+              }
+            }
+          },
+          "shot": 21985,
+          "slice_index": 51,
+          "terminal_state_difference": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 1.5681900222830336e-15,
+            "maximum_relative_difference": 9.70613694055099e-16
+          },
+          "time_s": 0.2750000059604645
+        },
+        {
+          "observables": {
+            "conservation.divergence_j": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 0.0,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 0.0,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.major_radius": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 0.8826889579572685,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 0.8826889579572685,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.volume": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 1.8489407906781372,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 1.8489407906781372,
+                "shared_state_source": "eager terminal flux"
+              }
+            }
+          },
+          "shot": 21986,
+          "slice_index": 46,
+          "terminal_state_difference": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 6.661338147750939e-16,
+            "maximum_relative_difference": 4.793475866521267e-16
+          },
+          "time_s": 0.25
+        },
+        {
+          "observables": {
+            "conservation.divergence_j": {
+              "first_structurally_differing_operation": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 2.7755575615628914e-17,
+                "maximum_relative_difference": 1.268700321280688e-16,
+                "operation": "conservation.declared_field_function_squared",
+                "qualification": "first non-identical value in production operation order"
+              },
+              "route_observable_difference": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 8.557085201678695e-11,
+                "maximum_relative_difference": 0.49003201453727413
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": false,
+                "jitted_vmap_forward_profile_observe": 2.6749084236041085e-10,
+                "maximum_absolute_difference": 9.286785962000862e-11,
+                "maximum_relative_difference": 0.5318192265566081,
+                "scalar_forward_profile_observe": 1.7462298274040222e-10,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.major_radius": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 0.868552011619875,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 0.868552011619875,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.volume": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 2.0075574719972322,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 2.0075574719972322,
+                "shared_state_source": "eager terminal flux"
+              }
+            }
+          },
+          "shot": 21989,
+          "slice_index": 55,
+          "terminal_state_difference": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 4.440892098500626e-16,
+            "maximum_relative_difference": 2.804116238726141e-16
+          },
+          "time_s": 0.29499998688697815
+        },
+        {
+          "observables": {
+            "conservation.divergence_j": {
+              "first_structurally_differing_operation": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 2.7755575615628914e-17,
+                "maximum_relative_difference": 1.2062709982402836e-16,
+                "operation": "conservation.declared_field_function_squared",
+                "qualification": "first non-identical value in production operation order"
+              },
+              "route_observable_difference": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 2.224476922740185e-11,
+                "maximum_relative_difference": 0.07643244507100651
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": false,
+                "jitted_vmap_forward_profile_observe": 1.7331540997984394e-10,
+                "maximum_absolute_difference": 1.177228945874931e-10,
+                "maximum_relative_difference": 0.4044927857949906,
+                "scalar_forward_profile_observe": 2.9103830456733704e-10,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.major_radius": {
+              "first_structurally_differing_operation": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 1.3877787807814457e-17,
+                "maximum_relative_difference": 1.7999607205670734e-16,
+                "operation": "cell_centered_measure.per_cell_radial_volume",
+                "qualification": "first non-identical value in production operation order"
+              },
+              "route_observable_difference": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 2.220446049250313e-16,
+                "maximum_relative_difference": 2.5182316315966663e-16
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": false,
+                "jitted_vmap_forward_profile_observe": 0.88174813682348,
+                "maximum_absolute_difference": 2.220446049250313e-16,
+                "maximum_relative_difference": 2.5182316315966663e-16,
+                "scalar_forward_profile_observe": 0.8817481368234802,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.volume": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 2.688270036670075,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 2.688270036670075,
+                "shared_state_source": "eager terminal flux"
+              }
+            }
+          },
+          "shot": 22086,
+          "slice_index": 43,
+          "terminal_state_difference": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 5.505623734691767e-12,
+            "maximum_relative_difference": 3.996428667938219e-12
+          },
+          "time_s": 0.22999998927116394
+        }
+      ],
+      "completed_utc": "2026-08-23T21:40:22.124491+00:00",
+      "observables": [
+        {
+          "difference_against_state_agreement": {
+            "cases": [
+              {
+                "route_observable_maximum_absolute_difference": 6.727115691835157e-12,
+                "shot": 21978,
+                "slice_index": 35,
+                "terminal_state_maximum_relative_difference": 2.0565553548812402e-15
+              },
+              {
+                "route_observable_maximum_absolute_difference": 8.76271555825396e-12,
+                "shot": 21983,
+                "slice_index": 35,
+                "terminal_state_maximum_relative_difference": 9.234137225947716e-14
+              },
+              {
+                "route_observable_maximum_absolute_difference": 3.777028375354668e-11,
+                "shot": 21985,
+                "slice_index": 51,
+                "terminal_state_maximum_relative_difference": 9.70613694055099e-16
+              },
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 21986,
+                "slice_index": 46,
+                "terminal_state_maximum_relative_difference": 4.793475866521267e-16
+              },
+              {
+                "route_observable_maximum_absolute_difference": 8.557085201678695e-11,
+                "shot": 21989,
+                "slice_index": 55,
+                "terminal_state_maximum_relative_difference": 2.804116238726141e-16
+              },
+              {
+                "route_observable_maximum_absolute_difference": 2.224476922740185e-11,
+                "shot": 22086,
+                "slice_index": 43,
+                "terminal_state_maximum_relative_difference": 3.996428667938219e-12
+              }
+            ],
+            "correlation": {
+              "case_count": 6,
+              "interpretation": "finite correlation across all six cases",
+              "pearson_r": -0.07789278873643923,
+              "spearman_rho": -0.2
+            },
+            "observable_metric": "absolute difference between eager-solve and compiled-solve leaf",
+            "state_metric": "max(abs(compiled_flux - eager_flux)) / max(abs(eager_flux))"
+          },
+          "first_structurally_differing_operation": "conservation.declared_field_function_squared",
+          "localisation_by_differing_case": [
+            {
+              "exactly_equal": false,
+              "maximum_absolute_difference": 2.7755575615628914e-17,
+              "maximum_relative_difference": 1.3342037361769803e-16,
+              "operation": "conservation.declared_field_function_squared",
+              "qualification": "first non-identical value in production operation order",
+              "shot": 21978,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": false,
+              "maximum_absolute_difference": 2.7755575615628914e-17,
+              "maximum_relative_difference": 1.2794705901010854e-16,
+              "operation": "conservation.declared_field_function_squared",
+              "qualification": "first non-identical value in production operation order",
+              "shot": 21983,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": false,
+              "maximum_absolute_difference": 2.7755575615628914e-17,
+              "maximum_relative_difference": 1.2119554788419857e-16,
+              "operation": "conservation.declared_field_function_squared",
+              "qualification": "first non-identical value in production operation order",
+              "shot": 21985,
+              "slice_index": 51
+            },
+            {
+              "exactly_equal": false,
+              "maximum_absolute_difference": 2.7755575615628914e-17,
+              "maximum_relative_difference": 1.268700321280688e-16,
+              "operation": "conservation.declared_field_function_squared",
+              "qualification": "first non-identical value in production operation order",
+              "shot": 21989,
+              "slice_index": 55
+            },
+            {
+              "exactly_equal": false,
+              "maximum_absolute_difference": 2.7755575615628914e-17,
+              "maximum_relative_difference": 1.2062709982402836e-16,
+              "operation": "conservation.declared_field_function_squared",
+              "qualification": "first non-identical value in production operation order",
+              "shot": 22086,
+              "slice_index": 43
+            }
+          ],
+          "observable": "conservation.divergence_j",
+          "shared_state_case_count": 6,
+          "shared_state_evaluations": [
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 1.980619618684264e-10,
+              "maximum_absolute_difference": 2.3438979128024175e-11,
+              "maximum_relative_difference": 0.1342261984086539,
+              "scalar_forward_profile_observe": 1.7462298274040222e-10,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21978,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 2.250671139466022e-10,
+              "maximum_absolute_difference": 5.044413120619997e-11,
+              "maximum_relative_difference": 0.2888745250743492,
+              "scalar_forward_profile_observe": 1.7462298274040222e-10,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21983,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 2.123932664939489e-10,
+              "maximum_absolute_difference": 3.777028375354668e-11,
+              "maximum_relative_difference": 0.21629617797616416,
+              "scalar_forward_profile_observe": 1.7462298274040222e-10,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21985,
+              "slice_index": 51
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.0,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.0,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21986,
+              "slice_index": 46
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 2.6749084236041085e-10,
+              "maximum_absolute_difference": 9.286785962000862e-11,
+              "maximum_relative_difference": 0.5318192265566081,
+              "scalar_forward_profile_observe": 1.7462298274040222e-10,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21989,
+              "slice_index": 55
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 1.7331540997984394e-10,
+              "maximum_absolute_difference": 1.177228945874931e-10,
+              "maximum_relative_difference": 0.4044927857949906,
+              "scalar_forward_profile_observe": 2.9103830456733704e-10,
+              "shared_state_source": "eager terminal flux",
+              "shot": 22086,
+              "slice_index": 43
+            }
+          ],
+          "shared_state_maximum_absolute_difference": 1.177228945874931e-10,
+          "verdict": "COMPUTATION_DIFFERS",
+          "verdict_rule": "COMPUTATION_DIFFERS iff scalar observe and jitted vmap observe are not exactly equal on any shared terminal state; otherwise STATE_INHERITED"
+        },
+        {
+          "difference_against_state_agreement": {
+            "cases": [
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 21978,
+                "slice_index": 35,
+                "terminal_state_maximum_relative_difference": 2.0565553548812402e-15
+              },
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 21983,
+                "slice_index": 35,
+                "terminal_state_maximum_relative_difference": 9.234137225947716e-14
+              },
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 21985,
+                "slice_index": 51,
+                "terminal_state_maximum_relative_difference": 9.70613694055099e-16
+              },
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 21986,
+                "slice_index": 46,
+                "terminal_state_maximum_relative_difference": 4.793475866521267e-16
+              },
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 21989,
+                "slice_index": 55,
+                "terminal_state_maximum_relative_difference": 2.804116238726141e-16
+              },
+              {
+                "route_observable_maximum_absolute_difference": 2.220446049250313e-16,
+                "shot": 22086,
+                "slice_index": 43,
+                "terminal_state_maximum_relative_difference": 3.996428667938219e-12
+              }
+            ],
+            "correlation": {
+              "case_count": 6,
+              "interpretation": "finite correlation across all six cases",
+              "pearson_r": 0.999746554160842,
+              "spearman_rho": 0.6546536707079772
+            },
+            "observable_metric": "absolute difference between eager-solve and compiled-solve leaf",
+            "state_metric": "max(abs(compiled_flux - eager_flux)) / max(abs(eager_flux))"
+          },
+          "first_structurally_differing_operation": "cell_centered_measure.per_cell_radial_volume",
+          "localisation_by_differing_case": [
+            {
+              "exactly_equal": false,
+              "maximum_absolute_difference": 1.3877787807814457e-17,
+              "maximum_relative_difference": 1.7999607205670734e-16,
+              "operation": "cell_centered_measure.per_cell_radial_volume",
+              "qualification": "first non-identical value in production operation order",
+              "shot": 22086,
+              "slice_index": 43
+            }
+          ],
+          "observable": "moments.major_radius",
+          "shared_state_case_count": 6,
+          "shared_state_evaluations": [
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.8225630058219202,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.8225630058219202,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21978,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.7990212257903726,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.7990212257903726,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21983,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.8270464927743654,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.8270464927743654,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21985,
+              "slice_index": 51
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.8826889579572685,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.8826889579572685,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21986,
+              "slice_index": 46
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.868552011619875,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.868552011619875,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21989,
+              "slice_index": 55
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 0.88174813682348,
+              "maximum_absolute_difference": 2.220446049250313e-16,
+              "maximum_relative_difference": 2.5182316315966663e-16,
+              "scalar_forward_profile_observe": 0.8817481368234802,
+              "shared_state_source": "eager terminal flux",
+              "shot": 22086,
+              "slice_index": 43
+            }
+          ],
+          "shared_state_maximum_absolute_difference": 2.220446049250313e-16,
+          "verdict": "COMPUTATION_DIFFERS",
+          "verdict_rule": "COMPUTATION_DIFFERS iff scalar observe and jitted vmap observe are not exactly equal on any shared terminal state; otherwise STATE_INHERITED"
+        },
+        {
+          "difference_against_state_agreement": {
+            "cases": [
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 21978,
+                "slice_index": 35,
+                "terminal_state_maximum_relative_difference": 2.0565553548812402e-15
+              },
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 21983,
+                "slice_index": 35,
+                "terminal_state_maximum_relative_difference": 9.234137225947716e-14
+              },
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 21985,
+                "slice_index": 51,
+                "terminal_state_maximum_relative_difference": 9.70613694055099e-16
+              },
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 21986,
+                "slice_index": 46,
+                "terminal_state_maximum_relative_difference": 4.793475866521267e-16
+              },
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 21989,
+                "slice_index": 55,
+                "terminal_state_maximum_relative_difference": 2.804116238726141e-16
+              },
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 22086,
+                "slice_index": 43,
+                "terminal_state_maximum_relative_difference": 3.996428667938219e-12
+              }
+            ],
+            "correlation": {
+              "case_count": 6,
+              "interpretation": "undefined because at least one six-case vector is constant",
+              "pearson_r": null,
+              "spearman_rho": null
+            },
+            "observable_metric": "absolute difference between eager-solve and compiled-solve leaf",
+            "state_metric": "max(abs(compiled_flux - eager_flux)) / max(abs(eager_flux))"
+          },
+          "first_structurally_differing_operation": null,
+          "localisation_by_differing_case": [],
+          "observable": "moments.volume",
+          "shared_state_case_count": 6,
+          "shared_state_evaluations": [
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 2.688091480911131,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 2.688091480911131,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21978,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 3.2128359349702524,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 3.2128359349702524,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21983,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 1.912298185326303,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 1.912298185326303,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21985,
+              "slice_index": 51
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 1.8489407906781372,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 1.8489407906781372,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21986,
+              "slice_index": 46
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 2.0075574719972322,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 2.0075574719972322,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21989,
+              "slice_index": 55
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 2.688270036670075,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 2.688270036670075,
+              "shared_state_source": "eager terminal flux",
+              "shot": 22086,
+              "slice_index": 43
+            }
+          ],
+          "shared_state_maximum_absolute_difference": 0.0,
+          "verdict": "STATE_INHERITED",
+          "verdict_rule": "COMPUTATION_DIFFERS iff scalar observe and jitted vmap observe are not exactly equal on any shared terminal state; otherwise STATE_INHERITED"
+        }
+      ],
+      "source_identity": {
+        "commit_sha": "0b9ab88a0974341b656668a70863855e1a091cc3",
+        "driver_sha256": "33a9ee6a7cb1d47ae49fcca1dc213ddfcbc848216c2b83af7757db6e9b955355",
+        "tree_sha": "2accd2b19967d8c0aaca0df667569004e0210d78"
+      },
+      "status": "provisional_backend_mismatch",
+      "verdict_counts": {
+        "COMPUTATION_DIFFERS": 2,
+        "STATE_INHERITED": 1
+      }
+    },
+    "gpu": {
+      "backend": {
+        "device": "NVIDIA H200 NVL",
+        "jax_version": "0.11.0",
+        "platform": "gpu",
+        "precision": "float64"
+      },
+      "cases": [
+        {
+          "observables": {
+            "conservation.divergence_j": {
+              "first_structurally_differing_operation": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 2.7755575615628914e-17,
+                "maximum_relative_difference": 1.3844156804038015e-16,
+                "operation": "conservation.field_function_gradient",
+                "qualification": "first non-identical value in production operation order"
+              },
+              "route_observable_difference": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 8.731149137020111e-11,
+                "maximum_relative_difference": 0.75
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": false,
+                "jitted_vmap_forward_profile_observe": 2.0372681319713593e-10,
+                "maximum_absolute_difference": 8.731149137020111e-11,
+                "maximum_relative_difference": 0.75,
+                "scalar_forward_profile_observe": 1.1641532182693481e-10,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.major_radius": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 0.8225630058219203,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 0.8225630058219203,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.volume": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 2.6880914809111305,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 2.6880914809111305,
+                "shared_state_source": "eager terminal flux"
+              }
+            }
+          },
+          "shot": 21978,
+          "slice_index": 35,
+          "terminal_state_difference": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 4.565792188770956e-15,
+            "maximum_relative_difference": 3.8774023596328245e-15
+          },
+          "time_s": 0.1899999976158142
+        },
+        {
+          "observables": {
+            "conservation.divergence_j": {
+              "first_structurally_differing_operation": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 2.7755575615628914e-17,
+                "maximum_relative_difference": 1.2583590689000033e-16,
+                "operation": "conservation.field_function_gradient",
+                "qualification": "first non-identical value in production operation order"
+              },
+              "route_observable_difference": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 5.820766091346741e-11,
+                "maximum_relative_difference": 0.2
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": false,
+                "jitted_vmap_forward_profile_observe": 2.473825588822365e-10,
+                "maximum_absolute_difference": 4.3655745685100555e-11,
+                "maximum_relative_difference": 0.15,
+                "scalar_forward_profile_observe": 2.9103830456733704e-10,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.major_radius": {
+              "first_structurally_differing_operation": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 1.3877787807814457e-17,
+                "maximum_relative_difference": 1.9845541666349472e-16,
+                "operation": "cell_centered_measure.per_cell_radial_volume",
+                "qualification": "first non-identical value in production operation order"
+              },
+              "route_observable_difference": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 1.1102230246251565e-16,
+                "maximum_relative_difference": 1.3894787632543187e-16
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": false,
+                "jitted_vmap_forward_profile_observe": 0.7990212257903726,
+                "maximum_absolute_difference": 1.1102230246251565e-16,
+                "maximum_relative_difference": 1.3894787632543187e-16,
+                "scalar_forward_profile_observe": 0.7990212257903725,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.volume": {
+              "first_structurally_differing_operation": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 4.440892098500626e-16,
+                "maximum_relative_difference": 1.382234321449017e-16,
+                "operation": "observe_moments.volume_reduction",
+                "qualification": "first non-identical value in production operation order"
+              },
+              "route_observable_difference": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 4.440892098500626e-16,
+                "maximum_relative_difference": 1.382234321449017e-16
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": false,
+                "jitted_vmap_forward_profile_observe": 3.2128359349702524,
+                "maximum_absolute_difference": 4.440892098500626e-16,
+                "maximum_relative_difference": 1.382234321449017e-16,
+                "scalar_forward_profile_observe": 3.212835934970253,
+                "shared_state_source": "eager terminal flux"
+              }
+            }
+          },
+          "shot": 21983,
+          "slice_index": 35,
+          "terminal_state_difference": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 3.812228310806631e-14,
+            "maximum_relative_difference": 3.0613293458458956e-14
+          },
+          "time_s": 0.1899999976158142
+        },
+        {
+          "observables": {
+            "conservation.divergence_j": {
+              "first_structurally_differing_operation": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 5.551115123125783e-17,
+                "maximum_relative_difference": 1.8093773353643e-16,
+                "operation": "conservation.field_function_gradient",
+                "qualification": "first non-identical value in production operation order"
+              },
+              "route_observable_difference": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 1.7462298274040222e-10,
+                "maximum_relative_difference": 1.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": false,
+                "jitted_vmap_forward_profile_observe": 3.4924596548080444e-10,
+                "maximum_absolute_difference": 1.7462298274040222e-10,
+                "maximum_relative_difference": 1.0,
+                "scalar_forward_profile_observe": 1.7462298274040222e-10,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.major_radius": {
+              "first_structurally_differing_operation": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 1.3877787807814457e-17,
+                "maximum_relative_difference": 2.1990713655763623e-16,
+                "operation": "cell_centered_measure.per_cell_radial_volume",
+                "qualification": "first non-identical value in production operation order"
+              },
+              "route_observable_difference": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 1.1102230246251565e-16,
+                "maximum_relative_difference": 1.3423949370740482e-16
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": false,
+                "jitted_vmap_forward_profile_observe": 0.8270464927743654,
+                "maximum_absolute_difference": 1.1102230246251565e-16,
+                "maximum_relative_difference": 1.3423949370740482e-16,
+                "scalar_forward_profile_observe": 0.8270464927743655,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.volume": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 1.912298185326303,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 1.912298185326303,
+                "shared_state_source": "eager terminal flux"
+              }
+            }
+          },
+          "shot": 21985,
+          "slice_index": 51,
+          "terminal_state_difference": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 2.7200464103316335e-15,
+            "maximum_relative_difference": 1.6835423365911458e-15
+          },
+          "time_s": 0.2750000059604645
+        },
+        {
+          "observables": {
+            "conservation.divergence_j": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 0.0,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 0.0,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.major_radius": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 0.8826889579572685,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 0.8826889579572685,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.volume": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 1.8489407906781372,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 1.8489407906781372,
+                "shared_state_source": "eager terminal flux"
+              }
+            }
+          },
+          "shot": 21986,
+          "slice_index": 46,
+          "terminal_state_difference": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 8.881784197001252e-16,
+            "maximum_relative_difference": 6.39130115536169e-16
+          },
+          "time_s": 0.25
+        },
+        {
+          "observables": {
+            "conservation.divergence_j": {
+              "first_structurally_differing_operation": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 2.7755575615628914e-17,
+                "maximum_relative_difference": 1.0662971671958359e-16,
+                "operation": "conservation.field_function_gradient",
+                "qualification": "first non-identical value in production operation order"
+              },
+              "route_observable_difference": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 2.9103830456733704e-11,
+                "maximum_relative_difference": 0.125
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": false,
+                "jitted_vmap_forward_profile_observe": 2.0372681319713593e-10,
+                "maximum_absolute_difference": 2.9103830456733704e-11,
+                "maximum_relative_difference": 0.125,
+                "scalar_forward_profile_observe": 2.3283064365386963e-10,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.major_radius": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 0.8685520116198748,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 0.8685520116198748,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.volume": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 2.0075574719972327,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 2.0075574719972327,
+                "shared_state_source": "eager terminal flux"
+              }
+            }
+          },
+          "shot": 21989,
+          "slice_index": 55,
+          "terminal_state_difference": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 4.440892098500626e-16,
+            "maximum_relative_difference": 2.8041162387261414e-16
+          },
+          "time_s": 0.29499998688697815
+        },
+        {
+          "observables": {
+            "conservation.divergence_j": {
+              "first_structurally_differing_operation": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 5.551115123125783e-17,
+                "maximum_relative_difference": 1.998621194610553e-16,
+                "operation": "conservation.field_function_gradient",
+                "qualification": "first non-identical value in production operation order"
+              },
+              "route_observable_difference": {
+                "exactly_equal": false,
+                "maximum_absolute_difference": 5.820766091346741e-11,
+                "maximum_relative_difference": 0.2
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": false,
+                "jitted_vmap_forward_profile_observe": 1.7462298274040222e-10,
+                "maximum_absolute_difference": 1.1641532182693481e-10,
+                "maximum_relative_difference": 0.4,
+                "scalar_forward_profile_observe": 2.9103830456733704e-10,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.major_radius": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 0.88174813682348,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 0.88174813682348,
+                "shared_state_source": "eager terminal flux"
+              }
+            },
+            "moments.volume": {
+              "first_structurally_differing_operation": null,
+              "route_observable_difference": {
+                "exactly_equal": true,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0
+              },
+              "shared_state_evaluation": {
+                "exactly_equal": true,
+                "jitted_vmap_forward_profile_observe": 2.688270036670075,
+                "maximum_absolute_difference": 0.0,
+                "maximum_relative_difference": 0.0,
+                "scalar_forward_profile_observe": 2.688270036670075,
+                "shared_state_source": "eager terminal flux"
+              }
+            }
+          },
+          "shot": 22086,
+          "slice_index": 43,
+          "terminal_state_difference": {
+            "exactly_equal": false,
+            "maximum_absolute_difference": 4.715103307795232e-12,
+            "maximum_relative_difference": 3.4226047655318483e-12
+          },
+          "time_s": 0.22999998927116394
+        }
+      ],
+      "completed_utc": "2026-08-23T22:21:22.113537+00:00",
+      "observables": [
+        {
+          "difference_against_state_agreement": {
+            "cases": [
+              {
+                "route_observable_maximum_absolute_difference": 8.731149137020111e-11,
+                "shot": 21978,
+                "slice_index": 35,
+                "terminal_state_maximum_relative_difference": 3.8774023596328245e-15
+              },
+              {
+                "route_observable_maximum_absolute_difference": 5.820766091346741e-11,
+                "shot": 21983,
+                "slice_index": 35,
+                "terminal_state_maximum_relative_difference": 3.0613293458458956e-14
+              },
+              {
+                "route_observable_maximum_absolute_difference": 1.7462298274040222e-10,
+                "shot": 21985,
+                "slice_index": 51,
+                "terminal_state_maximum_relative_difference": 1.6835423365911458e-15
+              },
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 21986,
+                "slice_index": 46,
+                "terminal_state_maximum_relative_difference": 6.39130115536169e-16
+              },
+              {
+                "route_observable_maximum_absolute_difference": 2.9103830456733704e-11,
+                "shot": 21989,
+                "slice_index": 55,
+                "terminal_state_maximum_relative_difference": 2.8041162387261414e-16
+              },
+              {
+                "route_observable_maximum_absolute_difference": 5.820766091346741e-11,
+                "shot": 22086,
+                "slice_index": 43,
+                "terminal_state_maximum_relative_difference": 3.4226047655318483e-12
+              }
+            ],
+            "correlation": {
+              "case_count": 6,
+              "interpretation": "finite correlation across all six cases",
+              "pearson_r": -0.07945587858543698,
+              "spearman_rho": 0.4058397249567139
+            },
+            "observable_metric": "absolute difference between eager-solve and compiled-solve leaf",
+            "state_metric": "max(abs(compiled_flux - eager_flux)) / max(abs(eager_flux))"
+          },
+          "first_structurally_differing_operation": "conservation.field_function_gradient",
+          "localisation_by_differing_case": [
+            {
+              "exactly_equal": false,
+              "maximum_absolute_difference": 2.7755575615628914e-17,
+              "maximum_relative_difference": 1.3844156804038015e-16,
+              "operation": "conservation.field_function_gradient",
+              "qualification": "first non-identical value in production operation order",
+              "shot": 21978,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": false,
+              "maximum_absolute_difference": 2.7755575615628914e-17,
+              "maximum_relative_difference": 1.2583590689000033e-16,
+              "operation": "conservation.field_function_gradient",
+              "qualification": "first non-identical value in production operation order",
+              "shot": 21983,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": false,
+              "maximum_absolute_difference": 5.551115123125783e-17,
+              "maximum_relative_difference": 1.8093773353643e-16,
+              "operation": "conservation.field_function_gradient",
+              "qualification": "first non-identical value in production operation order",
+              "shot": 21985,
+              "slice_index": 51
+            },
+            {
+              "exactly_equal": false,
+              "maximum_absolute_difference": 2.7755575615628914e-17,
+              "maximum_relative_difference": 1.0662971671958359e-16,
+              "operation": "conservation.field_function_gradient",
+              "qualification": "first non-identical value in production operation order",
+              "shot": 21989,
+              "slice_index": 55
+            },
+            {
+              "exactly_equal": false,
+              "maximum_absolute_difference": 5.551115123125783e-17,
+              "maximum_relative_difference": 1.998621194610553e-16,
+              "operation": "conservation.field_function_gradient",
+              "qualification": "first non-identical value in production operation order",
+              "shot": 22086,
+              "slice_index": 43
+            }
+          ],
+          "observable": "conservation.divergence_j",
+          "shared_state_case_count": 6,
+          "shared_state_evaluations": [
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 2.0372681319713593e-10,
+              "maximum_absolute_difference": 8.731149137020111e-11,
+              "maximum_relative_difference": 0.75,
+              "scalar_forward_profile_observe": 1.1641532182693481e-10,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21978,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 2.473825588822365e-10,
+              "maximum_absolute_difference": 4.3655745685100555e-11,
+              "maximum_relative_difference": 0.15,
+              "scalar_forward_profile_observe": 2.9103830456733704e-10,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21983,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 3.4924596548080444e-10,
+              "maximum_absolute_difference": 1.7462298274040222e-10,
+              "maximum_relative_difference": 1.0,
+              "scalar_forward_profile_observe": 1.7462298274040222e-10,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21985,
+              "slice_index": 51
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.0,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.0,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21986,
+              "slice_index": 46
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 2.0372681319713593e-10,
+              "maximum_absolute_difference": 2.9103830456733704e-11,
+              "maximum_relative_difference": 0.125,
+              "scalar_forward_profile_observe": 2.3283064365386963e-10,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21989,
+              "slice_index": 55
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 1.7462298274040222e-10,
+              "maximum_absolute_difference": 1.1641532182693481e-10,
+              "maximum_relative_difference": 0.4,
+              "scalar_forward_profile_observe": 2.9103830456733704e-10,
+              "shared_state_source": "eager terminal flux",
+              "shot": 22086,
+              "slice_index": 43
+            }
+          ],
+          "shared_state_maximum_absolute_difference": 1.7462298274040222e-10,
+          "verdict": "COMPUTATION_DIFFERS",
+          "verdict_rule": "COMPUTATION_DIFFERS iff scalar observe and jitted vmap observe are not exactly equal on any shared terminal state; otherwise STATE_INHERITED"
+        },
+        {
+          "difference_against_state_agreement": {
+            "cases": [
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 21978,
+                "slice_index": 35,
+                "terminal_state_maximum_relative_difference": 3.8774023596328245e-15
+              },
+              {
+                "route_observable_maximum_absolute_difference": 1.1102230246251565e-16,
+                "shot": 21983,
+                "slice_index": 35,
+                "terminal_state_maximum_relative_difference": 3.0613293458458956e-14
+              },
+              {
+                "route_observable_maximum_absolute_difference": 1.1102230246251565e-16,
+                "shot": 21985,
+                "slice_index": 51,
+                "terminal_state_maximum_relative_difference": 1.6835423365911458e-15
+              },
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 21986,
+                "slice_index": 46,
+                "terminal_state_maximum_relative_difference": 6.39130115536169e-16
+              },
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 21989,
+                "slice_index": 55,
+                "terminal_state_maximum_relative_difference": 2.8041162387261414e-16
+              },
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 22086,
+                "slice_index": 43,
+                "terminal_state_maximum_relative_difference": 3.4226047655318483e-12
+              }
+            ],
+            "correlation": {
+              "case_count": 6,
+              "interpretation": "finite correlation across all six cases",
+              "pearson_r": -0.311366951789906,
+              "spearman_rho": 0.20701966780270628
+            },
+            "observable_metric": "absolute difference between eager-solve and compiled-solve leaf",
+            "state_metric": "max(abs(compiled_flux - eager_flux)) / max(abs(eager_flux))"
+          },
+          "first_structurally_differing_operation": "cell_centered_measure.per_cell_radial_volume",
+          "localisation_by_differing_case": [
+            {
+              "exactly_equal": false,
+              "maximum_absolute_difference": 1.3877787807814457e-17,
+              "maximum_relative_difference": 1.9845541666349472e-16,
+              "operation": "cell_centered_measure.per_cell_radial_volume",
+              "qualification": "first non-identical value in production operation order",
+              "shot": 21983,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": false,
+              "maximum_absolute_difference": 1.3877787807814457e-17,
+              "maximum_relative_difference": 2.1990713655763623e-16,
+              "operation": "cell_centered_measure.per_cell_radial_volume",
+              "qualification": "first non-identical value in production operation order",
+              "shot": 21985,
+              "slice_index": 51
+            }
+          ],
+          "observable": "moments.major_radius",
+          "shared_state_case_count": 6,
+          "shared_state_evaluations": [
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.8225630058219203,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.8225630058219203,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21978,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 0.7990212257903726,
+              "maximum_absolute_difference": 1.1102230246251565e-16,
+              "maximum_relative_difference": 1.3894787632543187e-16,
+              "scalar_forward_profile_observe": 0.7990212257903725,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21983,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 0.8270464927743654,
+              "maximum_absolute_difference": 1.1102230246251565e-16,
+              "maximum_relative_difference": 1.3423949370740482e-16,
+              "scalar_forward_profile_observe": 0.8270464927743655,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21985,
+              "slice_index": 51
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.8826889579572685,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.8826889579572685,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21986,
+              "slice_index": 46
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.8685520116198748,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.8685520116198748,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21989,
+              "slice_index": 55
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 0.88174813682348,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 0.88174813682348,
+              "shared_state_source": "eager terminal flux",
+              "shot": 22086,
+              "slice_index": 43
+            }
+          ],
+          "shared_state_maximum_absolute_difference": 1.1102230246251565e-16,
+          "verdict": "COMPUTATION_DIFFERS",
+          "verdict_rule": "COMPUTATION_DIFFERS iff scalar observe and jitted vmap observe are not exactly equal on any shared terminal state; otherwise STATE_INHERITED"
+        },
+        {
+          "difference_against_state_agreement": {
+            "cases": [
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 21978,
+                "slice_index": 35,
+                "terminal_state_maximum_relative_difference": 3.8774023596328245e-15
+              },
+              {
+                "route_observable_maximum_absolute_difference": 4.440892098500626e-16,
+                "shot": 21983,
+                "slice_index": 35,
+                "terminal_state_maximum_relative_difference": 3.0613293458458956e-14
+              },
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 21985,
+                "slice_index": 51,
+                "terminal_state_maximum_relative_difference": 1.6835423365911458e-15
+              },
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 21986,
+                "slice_index": 46,
+                "terminal_state_maximum_relative_difference": 6.39130115536169e-16
+              },
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 21989,
+                "slice_index": 55,
+                "terminal_state_maximum_relative_difference": 2.8041162387261414e-16
+              },
+              {
+                "route_observable_maximum_absolute_difference": 0.0,
+                "shot": 22086,
+                "slice_index": 43,
+                "terminal_state_maximum_relative_difference": 3.4226047655318483e-12
+              }
+            ],
+            "correlation": {
+              "case_count": 6,
+              "interpretation": "finite correlation across all six cases",
+              "pearson_r": -0.19184337989629888,
+              "spearman_rho": 0.39279220242478635
+            },
+            "observable_metric": "absolute difference between eager-solve and compiled-solve leaf",
+            "state_metric": "max(abs(compiled_flux - eager_flux)) / max(abs(eager_flux))"
+          },
+          "first_structurally_differing_operation": "observe_moments.volume_reduction",
+          "localisation_by_differing_case": [
+            {
+              "exactly_equal": false,
+              "maximum_absolute_difference": 4.440892098500626e-16,
+              "maximum_relative_difference": 1.382234321449017e-16,
+              "operation": "observe_moments.volume_reduction",
+              "qualification": "first non-identical value in production operation order",
+              "shot": 21983,
+              "slice_index": 35
+            }
+          ],
+          "observable": "moments.volume",
+          "shared_state_case_count": 6,
+          "shared_state_evaluations": [
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 2.6880914809111305,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 2.6880914809111305,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21978,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": false,
+              "jitted_vmap_forward_profile_observe": 3.2128359349702524,
+              "maximum_absolute_difference": 4.440892098500626e-16,
+              "maximum_relative_difference": 1.382234321449017e-16,
+              "scalar_forward_profile_observe": 3.212835934970253,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21983,
+              "slice_index": 35
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 1.912298185326303,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 1.912298185326303,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21985,
+              "slice_index": 51
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 1.8489407906781372,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 1.8489407906781372,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21986,
+              "slice_index": 46
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 2.0075574719972327,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 2.0075574719972327,
+              "shared_state_source": "eager terminal flux",
+              "shot": 21989,
+              "slice_index": 55
+            },
+            {
+              "exactly_equal": true,
+              "jitted_vmap_forward_profile_observe": 2.688270036670075,
+              "maximum_absolute_difference": 0.0,
+              "maximum_relative_difference": 0.0,
+              "scalar_forward_profile_observe": 2.688270036670075,
+              "shared_state_source": "eager terminal flux",
+              "shot": 22086,
+              "slice_index": 43
+            }
+          ],
+          "shared_state_maximum_absolute_difference": 4.440892098500626e-16,
+          "verdict": "COMPUTATION_DIFFERS",
+          "verdict_rule": "COMPUTATION_DIFFERS iff scalar observe and jitted vmap observe are not exactly equal on any shared terminal state; otherwise STATE_INHERITED"
+        }
+      ],
+      "source_identity": {
+        "commit_sha": "f3f8481b5037c5ddf882c3f9cf7d226f7502d588",
+        "driver_sha256": "5e74601aa35b28113c9592b21ec53f1a448a5caa452be9493c4969739f25049c",
+        "tree_sha": "f55e519f4f715d365940665abb48a1377490da1c"
+      },
+      "status": "complete",
+      "verdict_counts": {
+        "COMPUTATION_DIFFERS": 3,
+        "STATE_INHERITED": 0
+      }
+    }
+  },
+  "source_identity": {
+    "commit_sha": "f3f8481b5037c5ddf882c3f9cf7d226f7502d588",
+    "driver_sha256": "5e74601aa35b28113c9592b21ec53f1a448a5caa452be9493c4969739f25049c",
+    "tree_sha": "f55e519f4f715d365940665abb48a1377490da1c"
+  },
+  "status": "complete",
+  "verdict_counts": {
+    "COMPUTATION_DIFFERS": 3,
+    "STATE_INHERITED": 0
+  }
+}

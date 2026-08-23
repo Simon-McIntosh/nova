@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T19:45:57",
+  "updated": "2026-08-23T22:15:22",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -28507,9 +28507,137 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T174559189168-conditioned-convergence-and-observables",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a75",
+        "node": "conditioned-convergence-and-observables",
+        "role": "implement",
+        "spec_level": "",
+        "member": "route-conditioning",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T17:46:03Z",
+        "completed_at": "2026-08-23T18:30:50Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2687,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2687,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "4630608f4d89582120daaafe4859d3c060c62ece",
+        "commits": [
+          "eb4c8c0853d57f8d3672659ae600a4bac7ac8267"
+        ],
+        "changed_lines": {
+          "added": 2238,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "Emitted verdict REPRODUCIBILITY_AT_CONVERGENCE_COST, but the verdict's causal reading is NOT supported by its own evidence and the orchestrator qualifies it: all seven DIII-D carriers recorded ZERO conditioning interventions because their 24-GMRES route sits outside the calibrated 12-vector damping route, so the residual ratios 1.2534, 0.9180, 0.9454, 0.9625 and 1.0071 cannot be attributed to conditioning at all. The verdict string followed mechanically from the orchestrator's own threshold rule and the rule was under-specified. Real findings: terminal-observable parity is 66 of 69 bounds and 407 of 414 case-observable evaluations, with state 14/14 and integrated-moment 9/9 clean and conservation 7/8, the three failures being conservation.divergence_j at bound ratio 3.925, moments.major_radius at 2.737 on 2 of 6 cases, and exact-equality moments.volume on 2 of 6. One-map separation passes sixteen-epsilon by 18.8x. Reference-native anchor displaced favourably to 7.322007721740656e-5 from 7.930534999195602e-5. SCOPE LIMIT NOW MEASURED, not merely declared: the conditioning repair does not reach the DIII-D production route.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T174559189168-conditioned-convergence-and-observables/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02fba-c15c-7700-baf5-05e9431831ff",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 19118848,
+            "cached_input_tokens_cumulative": 19118848,
+            "input_tokens": 19376699,
+            "input_tokens_cumulative": 19376699,
+            "output_tokens": 40829,
+            "output_tokens_cumulative": 40829,
+            "reasoning_output_tokens": 12294,
+            "reasoning_output_tokens_cumulative": 12294
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T174701657883-order-vs-mesh-adjudication",
+        "plan": "forward-operator-refinement",
+        "section": "\u00a73",
+        "node": "order-vs-mesh-adjudication",
+        "role": "implement",
+        "spec_level": "",
+        "member": "lane-health",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T17:47:05Z",
+        "completed_at": "2026-08-23T18:04:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1033,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1033,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "6fc916374de21c4192d467cf0931d7efbb529bba",
+        "commits": [
+          "d09c9f4801dd430b31f2bdbadd72b093f6c08a8e"
+        ],
+        "changed_lines": {
+          "added": 902,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T174701657883-order-vs-mesh-adjudication/manifest.md",
+        "scope_changed": false,
+        "session_id": "019ffa14-6e29-71a0-8ee1-703091b68cc6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8056576,
+            "cached_input_tokens_cumulative": 91694208,
+            "input_tokens": 8304359,
+            "input_tokens_cumulative": 94454038,
+            "output_tokens": 32602,
+            "output_tokens_cumulative": 295007,
+            "reasoning_output_tokens": 9028,
+            "reasoning_output_tokens_cumulative": 96453
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 668
+    "_version": 670
   }
 }

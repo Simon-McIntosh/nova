@@ -19,7 +19,8 @@
 <meta name="plan-effort-hours" content="6.0">
 <meta name="plan-depends-on" content="scoring-criteria-derivation">
 <meta name="plan-informs" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
+<meta name="plan-impl" content="0.14">
 </head>
 <body>
 <main class="plan-doc">
@@ -149,6 +150,11 @@
     <p class="r-dec-q">global-dplasma-default</p>
     <p class="r-dec-rat">Owner authorization 2026-08-23: the global default moves, and its first use is a live demonstration — a full biot interaction rebuild on GPU through the landed single-source kernel path with wall-clock reported. Supersedes the earlier in-flight ruling that retained -500 for want of exactly this authority. The demonstration starts only after the device-kernel-build lane is confirmed finished.</p>
     </div>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s5" data-id="c-20260823T1355" data-who="reckon-ship" data-when="2026-08-23 13:55">
+    <div class="r-comment-body">resolution-default-inventory landed — commit <code>33b237ef</code>, merged <code>70f6008d</code>; gate PASSED (28 rows, 28 cited owner definitions verified, naming checks 0 findings). Five direct alignment sites: Frame.dplasma −500→−2100 (demonstrated, 2,210 cells); SUITE_CELLS −500→−2100 pending the mesh-response adjudication; REGISTERED_GRID_STRIDE 2→1 restoring the solve rect lattice 33×33/1,089 → native 65×65/4,225 nodes (currently 0.493× the plasma-mesh scale; cost 3.88× target rows, ~15.1× dense lattice-lattice block); pseudo_wall points_per_side 33→65 (132→260 wall nodes, 1.97× wall-target blocks); Frame.dshell needs a machine-owned physical spacing, never a copied count. Extrapolate.ngrid=5000 / PulseDesign.nlevelset=6000 / Waveform.nlevelset=2500 already same-order but duplicate policy — consolidation follow-on. Generic Biot ngrid/nlevelset/nwall/nhex defaults safely None; dcoil/dshell are per-object controls. Alignment bundle applies only after the passive-closure mesh-response verdict. Artifact: docs/figures/forward-operator-refinement/resolution-default-inventory.md.</div>
+</div>
 </section>
 </main>
 </body>

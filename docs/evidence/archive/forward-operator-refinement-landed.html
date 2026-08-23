@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="forward-operator-refinement-landed">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="forward-operator-refinement">
+<title>forward-operator-refinement-landed</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="Forward Operator Refinement — cumulative execution evidence">
+<meta name="plan-summary" content="Landing record of the operator-refinement plan: the resolution defaults, the live GPU rebuild demonstration, the consistency inventory, the order work and the adjudication, each with commits, receipts and gate outcomes">
+</head>
+<body>
+<main class="plan-doc">
+
+<h1>Forward Operator Refinement — cumulative execution evidence</h1>
+
+<section id="resolution-inventory">
+  <h2 id="resolution-inventory-h">§5 — The resolution-default inventory</h2>
+  <p><strong>resolution-default-inventory</strong> landed 2026-08-23 — commit
+  <code>33b237ef</code>, merged <code>70f6008d</code>, gate PASSED. Twenty-eight
+  plasma-adjacent resolution defaults traced to their owning symbols (all 28 citations
+  verified to exist), each with consumers, implied scale beside the 2,210-cell plasma mesh,
+  a consistency verdict, and a proposed value with cost.</p>
+  <table>
+    <thead><tr><th>Direct alignment site</th><th>Current</th><th>Proposal</th><th>Cost</th></tr></thead>
+    <tbody>
+      <tr><td><code>Frame.dplasma</code></td><td>−500</td><td>−2100 (demonstrated: 2,210 cells)</td><td>62.7 s H200 cold rebuild</td></tr>
+      <tr><td><code>SUITE_CELLS</code> (reference suite pin)</td><td>−500</td><td>−2100, after the mesh-response adjudication</td><td>reference-fixture solve time</td></tr>
+      <tr><td><code>REGISTERED_GRID_STRIDE</code> (solve rect lattice)</td><td>2 → 33×33 / 1,089 nodes (0.493× plasma scale)</td><td>1 → native 65×65 / 4,225 nodes (1.91×)</td><td>3.88× target rows; ~15.1× dense lattice-lattice block</td></tr>
+      <tr><td><code>pseudo_wall</code> points per side</td><td>33 (132 wall nodes)</td><td>65 (260 nodes)</td><td>1.97× wall-target blocks</td></tr>
+      <tr><td><code>Frame.dshell</code></td><td>0 (input-vertex-dependent)</td><td>machine-owned physical spacing, never a copied count</td><td>policy decision</td></tr>
+    </tbody>
+  </table>
+  <p>Already same-order but under duplicate authorities: <code>Extrapolate.ngrid</code>
+  = 5000, <code>PulseDesign.nlevelset</code> = 6000, <code>Waveform.nlevelset</code> = 2500
+  — consolidation into consumer-owned policy is the recorded follow-on. Generic Biot
+  <code>ngrid/nlevelset/nwall/nhex</code> and coil-target defaults are safely
+  <code>None</code>; <code>dcoil</code>/<code>dshell</code> are per-object controls that
+  must never be copied numerically from the global plasma count. The alignment bundle
+  applies only after the concurrent passive-closure mesh-response verdict. Artifact:
+  <code>docs/figures/forward-operator-refinement/resolution-default-inventory.md</code>.</p>
+</section>
+
+</main>
+</body>
+</html>

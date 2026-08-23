@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T17:19:03",
+  "updated": "2026-08-23T17:22:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -339,6 +339,13 @@
         "role": "implement",
         "session_id": "019ff724-7bb4-7270-836c-b0c7c9e7f7cc",
         "created": "2026-08-12"
+      },
+      {
+        "id": "integration-verify",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "kernel-gradient",
@@ -27096,6 +27103,6 @@
       }
     ],
     "holds": [],
-    "_version": 642
+    "_version": 643
   }
 }

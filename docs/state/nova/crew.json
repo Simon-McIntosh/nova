@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T23:00:22",
+  "updated": "2026-08-23T23:08:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -28827,9 +28827,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T201359722013-dimension-general-conditioning",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a75",
+        "node": "dimension-general-conditioning",
+        "role": "implement",
+        "spec_level": "",
+        "member": "route-conditioning",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T20:14:05Z",
+        "completed_at": "2026-08-23T21:07:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3219,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3219,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "997d5758e3feae635529aa2553b3a6b459817840",
+        "commits": [
+          "6cdc60c46ef0b0e1c611ff2c5404ec561e4abbce"
+        ],
+        "changed_lines": {
+          "added": 517,
+          "removed": 23,
+          "files": 3
+        },
+        "tests_added": 10,
+        "gate": "passed",
+        "outcome": "Fitted rule replaced by a method. Both dataset constants (44.5, 27.781718445022726) and the dimension-12 gate are gone: the trigger is projected condition over an online largest-to-median spectral baseline exceeding mathematical e, damping is online_baseline/(e*projected_condition) with exponent 1 DERIVED from inverse-proportional condition-weighted step normalisation rather than the inherited cube, releasing below the fourth root of active-dtype precision. Fixed shapes, jit/vmap green at dimensions 8, 12 and 24, no per-dimension recalibration. THE DECISIVE RESULT: dimension 24 DIII-D now records 12 interventions against the banked ZERO - the mechanism fires where the fitted one was inert. Honest cost: at dimension 12 where the fit was tuned it is slightly worse (cumulative growth 7.0625 vs 2.2179, six-case flux 5.506e-12 vs 3.579e-12, still 18x inside the retired 1e-10, burst count still 0); at dimension 8 it is best (growth 2.0, flux 2.160e-13). DIII-D at 24 fires but does not fully tame: growth 541.33. Suites 72 passed across seven modules reproducing every unedited baseline.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T201359722013-dimension-general-conditioning/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03042-4920-7713-bd93-6097fa396dca",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 37214208,
+            "cached_input_tokens_cumulative": 37214208,
+            "input_tokens": 37561724,
+            "input_tokens_cumulative": 37561724,
+            "output_tokens": 58879,
+            "output_tokens_cumulative": 58879,
+            "reasoning_output_tokens": 18353,
+            "reasoning_output_tokens_cumulative": 18353
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 673
+    "_version": 674
   }
 }

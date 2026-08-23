@@ -1,0 +1,1137 @@
+{
+  "receipt": {
+    "kind": "derived_criterion_family",
+    "status": "complete",
+    "execution_mode": "banked-measurements-only",
+    "equilibrium_solves_run": 0,
+    "registered_consumer_count": 3,
+    "derived_bound_group_count": 3,
+    "coupled_configuration_count": 2,
+    "terminal_observable_bound_count": 69
+  },
+  "criterion_family": {
+    "coupled_response": {
+      "consumer": "tests/test_equilibrium_forward_reference.py",
+      "registered_reading_replaced_points": 0.15,
+      "formula": "B(c, k_c) = D_ref * G(c, k_c)",
+      "formula_terms": {
+        "D_ref": "max(documented direct response, measured direct external peak)",
+        "D_ref_points": 0.098,
+        "G(c, k_c)": "measured root-response peak divided by direct external peak for configuration c and its identified physical channel k_c"
+      },
+      "configuration_table": [
+        {
+          "configuration": "elongated_reference",
+          "boundary_elongation": 1.8176001064943421,
+          "channel_identity": "radial-dominant expanding axis-displacement channel",
+          "absolute_radial_over_vertical_motion": 2.4670438764522613,
+          "gain": 6.5998576353591725,
+          "derived_bound_points": 0.6467860482651989,
+          "measured_root_response_peak_points": 0.6417645599224641,
+          "mode_rate_reading": {
+            "kind": "expanding terminal Rayleigh quotient",
+            "value": 1.2604927025556618
+          },
+          "receipt_inputs": [
+            "docs/figures/forward-operator-refinement/passive-closure-trace.json",
+            "docs/figures/forward-operator-refinement/coupled-map-mode-identification.json"
+          ],
+          "measured_response_within_derived_bound": true,
+          "bound_headroom_points": 0.005021488342734859
+        },
+        {
+          "configuration": "stable_near_circular_control",
+          "boundary_elongation": 0.9785544678849224,
+          "channel_identity": "stable vertical free-boundary axis-displacement channel",
+          "absolute_radial_over_vertical_motion": 0.023440437152049475,
+          "gain": 106.99077030932676,
+          "derived_bound_points": 10.485095490314023,
+          "measured_root_response_peak_points": 10.403691778965449,
+          "mode_rate_reading": {
+            "kind": "leading eigenvalue",
+            "value": 0.9874290999339198,
+            "ritz_residual_l2": 6.40939267114005e-16,
+            "scalar_modal_factor": 79.5487987927197,
+            "measured_gain_over_scalar_modal_factor": 1.3449702815514866
+          },
+          "receipt_inputs": [
+            "docs/figures/forward-operator-refinement/passive-closure-stability-control.json",
+            "docs/figures/forward-operator-refinement/coupled-map-mode-identification.json"
+          ],
+          "measured_response_within_derived_bound": true,
+          "bound_headroom_points": 0.0814037113485746
+        }
+      ],
+      "domain_of_validity": "The relation is anchored only on the two measured carriers and their different identified channels. It is not an interpolation in elongation, and it must not be extrapolated to another configuration until that configuration's channel identity and gain are measured.",
+      "single_scalar_bound_allowed": false,
+      "receipt_inputs": [
+        "docs/figures/forward-operator-refinement/passive-closure-trace.json",
+        "docs/figures/forward-operator-refinement/passive-closure-stability-control.json",
+        "docs/figures/forward-operator-refinement/coupled-map-mode-identification.json",
+        "tests/test_equilibrium_forward_reference.py"
+      ]
+    },
+    "diiid_forward_gate": {
+      "consumer": "benchmarks/diiid_forward_gs_match.py",
+      "formula": "tau_DIII-D = max{t in T_declared : t <= E_disc,fine}, T_declared = {1e-6, 1e-5}",
+      "selected_relative_residual_bound": 1e-05,
+      "candidate_table": [
+        {
+          "candidate": 1e-06,
+          "candidate_over_fine_mesh_floor": 0.01260948977718944,
+          "fine_mesh_floor_over_candidate": 79.30534999195602,
+          "below_discretisation_floor": true,
+          "adjudication": "REJECTED_PRECISION_WITHOUT_ACCURACY"
+        },
+        {
+          "candidate": 1e-05,
+          "candidate_over_fine_mesh_floor": 0.1260948977718944,
+          "fine_mesh_floor_over_candidate": 7.930534999195601,
+          "below_discretisation_floor": true,
+          "adjudication": "SURVIVES_WITH_DERIVED_READING"
+        }
+      ],
+      "mesh_evidence": {
+        "coarse_relative_residual": 0.00029254381732921216,
+        "fine_relative_residual": 7.930534999195602e-05,
+        "fine_to_coarse_ratio": 0.27108879181237416,
+        "observed_order": 1.9255759546587183,
+        "classification": "DISCRETISATION_LIMITED",
+        "krylov_action_qualification": [
+          "ACCEPTED",
+          "ACCEPTED"
+        ]
+      },
+      "reference_accuracy_trace": {
+        "measured_label_representability_median_r_squared": 0.949,
+        "retained_fraction": 0.95,
+        "registered_median_interior_r_squared_bar": 0.90155,
+        "strict_gs_residual_attributed_to_irreducible_non_gs_content": 0.9968,
+        "normalisation_adjudication": "R-squared reference accuracy and fixed-point relative residual have different normalisations, so they are traced together but not numerically equated. Only the same-norm discretisation floor selects the residual bound."
+      },
+      "surviving_value_justification": "The 1e-5 candidate is the least over-solving declared candidate: it remains 7.93 times below the measured same-norm fine-mesh floor. The 1e-6 candidate is 79.3 times below that floor and cannot improve the independently limited reference accuracy.",
+      "receipt_inputs": [
+        "docs/figures/diiid-forward-onboarding/topology-qualified-mesh-convergence.json",
+        "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_preregistration.json",
+        "benchmarks/diiid_forward_gs_match.py"
+      ]
+    },
+    "terminal_compiled_parity": {
+      "consumer": "benchmarks/jitted_eager_parity_gate.py",
+      "one_map_bound": {
+        "formula": "delta_map = max|M_compiled(s)-M_eager(s)| / max(max|M_eager(s)|, tiny_float64) <= 16*epsilon_float64",
+        "relative_bound": 3.552713678800501e-15,
+        "float64_epsilon": 2.220446049250313e-16,
+        "banked_maximum_relative_difference": 3.8223723809183967e-16,
+        "bound_over_banked_maximum": 9.294525296739652,
+        "machine_precision_demonstrated": true,
+        "receipt_inputs": [
+          "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json",
+          "docs/figures/mast-catalog-gpu-solve/parity-divergence-attribution.json"
+        ]
+      },
+      "seed_alignment_criterion": {
+        "formula": "||s_compiled - s_eager||_2 = 0",
+        "equivalent_reading": "identical shape, dtype, values, branch construction, and solver budget before terminal parity is evaluated",
+        "numeric_tolerance": 0.0,
+        "conditional_terminal_parity": true,
+        "derivation": "The alternate real-LCFS direction has nonzero Euclidean separation 0.7665 and moves the burst set from [3, 8, 12] to empty while changing cumulative separation growth from 5.38e9 to 0.0619. The bank contains no calibrated nonzero safe radius, so exact seed identity is the only non-arbitrary alignment criterion.",
+        "direction_dependence_measurement": {
+          "seed_direction_l2": 0.7665327844967637,
+          "seed_direction_peak": 0.09379891335597912,
+          "baseline_burst_updates": [
+            3,
+            8,
+            12
+          ],
+          "alternate_burst_updates": [],
+          "baseline_cumulative_separation_growth": 5379792627.282051,
+          "alternate_cumulative_separation_growth": 0.061860940695296525
+        },
+        "receipt_inputs": [
+          "docs/figures/forward-operator-refinement/event-resolved-amplification.json"
+        ]
+      },
+      "terminal_observable_registration": {
+        "formula": "A_q = max_calibration delta_abs(q), R_q = max_calibration delta_rel(q); future aligned pairs require both bounds, while exact calibration leaves require equality",
+        "calibration_cohort": "six frozen MAST references",
+        "observable_count": 69,
+        "exact_equality_count": 35,
+        "dual_envelope_count": 34,
+        "bounds": [
+          {
+            "observable": "cell_current",
+            "dtype": "float64",
+            "shape": [
+              1089
+            ],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 0.09702486617788963,
+            "relative_bound": 9.194537100867235e-07,
+            "calibration_maximum_absolute_difference": 0.09702486617788963,
+            "calibration_maximum_relative_difference": 9.194537100867235e-07,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "conservation.checked_cells",
+            "dtype": "int64",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "conservation.divergence_b",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 9.83631031098047e-16,
+            "relative_bound": 0.8425616333270692,
+            "calibration_maximum_absolute_difference": 9.83631031098047e-16,
+            "calibration_maximum_relative_difference": 0.8425616333270692,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "conservation.divergence_b_scale",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 7.405174673014159e-06,
+            "relative_bound": 2.0299611498636115e-06,
+            "calibration_maximum_absolute_difference": 7.405174673014159e-06,
+            "calibration_maximum_relative_difference": 2.0299611498636115e-06,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "conservation.divergence_j",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 1.3703738919113413e-10,
+            "relative_bound": 0.15286615188530017,
+            "calibration_maximum_absolute_difference": 1.3703738919113413e-10,
+            "calibration_maximum_relative_difference": 0.15286615188530017,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "conservation.divergence_j_scale",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 4.0136000593192875,
+            "relative_bound": 7.80431655198555e-06,
+            "calibration_maximum_absolute_difference": 4.0136000593192875,
+            "calibration_maximum_relative_difference": 7.80431655198555e-06,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "conservation.force_residual",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 12.864408950321376,
+            "relative_bound": 4.686176355847326e-06,
+            "calibration_maximum_absolute_difference": 12.864408950321376,
+            "calibration_maximum_relative_difference": 4.686176355847326e-06,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "conservation.force_scale",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 0.4882344454526901,
+            "relative_bound": 1.5777761698537698e-06,
+            "calibration_maximum_absolute_difference": 0.4882344454526901,
+            "calibration_maximum_relative_difference": 1.5777761698537698e-06,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "conservation.grad_shafranov_residual",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 3.3233770521334804e-05,
+            "relative_bound": 3.144218945703662e-06,
+            "calibration_maximum_absolute_difference": 3.3233770521334804e-05,
+            "calibration_maximum_relative_difference": 3.144218945703662e-06,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "conservation.grad_shafranov_scale",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 4.1059904187790153e-07,
+            "relative_bound": 6.271190166203176e-08,
+            "calibration_maximum_absolute_difference": 4.1059904187790153e-07,
+            "calibration_maximum_relative_difference": 6.271190166203176e-08,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "continuation.common_sol.continuity",
+            "dtype": "int8",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "continuation.common_sol.decay_width",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "continuation.common_sol.domain",
+            "dtype": "int8",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "continuation.common_sol.form",
+            "dtype": "int8",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "continuation.common_sol.separatrix_diamagnetic_gradient",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "continuation.common_sol.separatrix_pressure_gradient",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "continuation.common_sol.support",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "continuation.common_sol.truncated_fraction",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "continuation.private_flux.continuity",
+            "dtype": "int8",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "continuation.private_flux.decay_width",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "continuation.private_flux.domain",
+            "dtype": "int8",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "continuation.private_flux.form",
+            "dtype": "int8",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "continuation.private_flux.separatrix_diamagnetic_gradient",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "continuation.private_flux.separatrix_pressure_gradient",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "continuation.private_flux.support",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "continuation.private_flux.truncated_fraction",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "domains.label",
+            "dtype": "int8",
+            "shape": [
+              1089
+            ],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "domains.psi_norm",
+            "dtype": "float64",
+            "shape": [
+              1089
+            ],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 9.498624947923417e-06,
+            "relative_bound": 4.163342056851591e-07,
+            "calibration_maximum_absolute_difference": 9.498624947923417e-06,
+            "calibration_maximum_relative_difference": 4.163342056851591e-07,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "finite.cell_current",
+            "dtype": "bool",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "finite.conservation",
+            "dtype": "bool",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "finite.flux",
+            "dtype": "bool",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "finite.moments",
+            "dtype": "bool",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "fixed_point.amplification_observation",
+            "dtype": "int64",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "fixed_point.krylov_action_qualification",
+            "dtype": "int32",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "fixed_point.residual",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 6.230462863854314e-06,
+            "relative_bound": 7.92623318976481e-05,
+            "calibration_maximum_absolute_difference": 6.230462863854314e-06,
+            "calibration_maximum_relative_difference": 7.92623318976481e-05,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "fixed_point.state",
+            "dtype": "float64",
+            "shape": [
+              1126
+            ],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 1.1646900802908533e-05,
+            "relative_bound": 2.090888477060583e-06,
+            "calibration_maximum_absolute_difference": 1.1646900802908533e-05,
+            "calibration_maximum_relative_difference": 2.090888477060583e-06,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "fixed_point.trace",
+            "dtype": "float64",
+            "shape": [
+              168
+            ],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 6.230462863854314e-06,
+            "relative_bound": 2.256045286418844e-06,
+            "calibration_maximum_absolute_difference": 6.230462863854314e-06,
+            "calibration_maximum_relative_difference": 2.256045286418844e-06,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "flux",
+            "dtype": "float64",
+            "shape": [
+              1126
+            ],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 1.1646900802908533e-05,
+            "relative_bound": 2.090888477060583e-06,
+            "calibration_maximum_absolute_difference": 1.1646900802908533e-05,
+            "calibration_maximum_relative_difference": 2.090888477060583e-06,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "ledger.common_sol",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 0.026452624995727092,
+            "relative_bound": 1.4309629289811192e-07,
+            "calibration_maximum_absolute_difference": 0.026452624995727092,
+            "calibration_maximum_relative_difference": 1.4309629289811192e-07,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "ledger.core",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 0.04917502362513915,
+            "relative_bound": 1.3935866734820125e-07,
+            "calibration_maximum_absolute_difference": 0.04917502362513915,
+            "calibration_maximum_relative_difference": 1.3935866734820125e-07,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "ledger.excluded_material",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "ledger.private_flux",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 0.022722398571204394,
+            "relative_bound": 6.751870019640946e-08,
+            "calibration_maximum_absolute_difference": 0.022722398571204394,
+            "calibration_maximum_relative_difference": 6.751870019640946e-08,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "ledger.total",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 3.4924596548080444e-10,
+            "relative_bound": 4.2919758999027704e-16,
+            "calibration_maximum_absolute_difference": 3.4924596548080444e-10,
+            "calibration_maximum_relative_difference": 4.2919758999027704e-16,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "moments.flux_span",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 3.962934280288266e-06,
+            "relative_bound": 1.7594357860269103e-06,
+            "calibration_maximum_absolute_difference": 3.962934280288266e-06,
+            "calibration_maximum_relative_difference": 1.7594357860269103e-06,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "moments.internal_inductance",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 1.1057762009603067e-05,
+            "relative_bound": 3.6858192494734793e-06,
+            "calibration_maximum_absolute_difference": 1.1057762009603067e-05,
+            "calibration_maximum_relative_difference": 3.6858192494734793e-06,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "moments.major_radius",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 1.1102230246251565e-16,
+            "relative_bound": 1.1742075037825516e-16,
+            "calibration_maximum_absolute_difference": 1.1102230246251565e-16,
+            "calibration_maximum_relative_difference": 1.1742075037825516e-16,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "moments.plasma_current",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 0.04917502362513915,
+            "relative_bound": 1.3935866734820125e-07,
+            "calibration_maximum_absolute_difference": 0.04917502362513915,
+            "calibration_maximum_relative_difference": 1.3935866734820125e-07,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "moments.poloidal_beta",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 0.7109836938907392,
+            "relative_bound": 1.6206594392513233e-06,
+            "calibration_maximum_absolute_difference": 0.7109836938907392,
+            "calibration_maximum_relative_difference": 1.6206594392513233e-06,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "moments.poloidal_field_integral",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 1.1057762009603067e-05,
+            "relative_bound": 3.6858192494734793e-06,
+            "calibration_maximum_absolute_difference": 1.1057762009603067e-05,
+            "calibration_maximum_relative_difference": 3.6858192494734793e-06,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "moments.pressure_integral",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 0.1777459234726848,
+            "relative_bound": 1.6206594392513233e-06,
+            "calibration_maximum_absolute_difference": 0.1777459234726848,
+            "calibration_maximum_relative_difference": 1.6206594392513233e-06,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "moments.volume",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "normalisation.amplitude",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 7.740287738755569e-06,
+            "relative_bound": 1.6331177287715452e-06,
+            "calibration_maximum_absolute_difference": 7.740287738755569e-06,
+            "calibration_maximum_relative_difference": 1.6331177287715452e-06,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "normalisation.policy",
+            "dtype": "int8",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "normalisation.rescaled",
+            "dtype": "bool",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "rotation.axis_mach_number",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "rotation.closure",
+            "dtype": "int8",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "rotation.maximum_centrifugal_factor",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "rotation.mean_particle_mass",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "rotation.minimum_centrifugal_factor",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "rotation.reference_radius",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "topology.axis",
+            "dtype": "float64",
+            "shape": [
+              2
+            ],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 1.2958139949947878e-07,
+            "relative_bound": 1.3215715032619567e-07,
+            "calibration_maximum_absolute_difference": 1.2958139949947878e-07,
+            "calibration_maximum_relative_difference": 1.3215715032619567e-07,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "topology.axis_flux",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 6.25219581751324e-06,
+            "relative_bound": 1.1377015040255536e-05,
+            "calibration_maximum_absolute_difference": 6.25219581751324e-06,
+            "calibration_maximum_relative_difference": 1.1377015040255536e-05,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "topology.boundary",
+            "dtype": "float64",
+            "shape": [
+              2
+            ],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 1.2211194944100612e-07,
+            "relative_bound": 1.149070623799812e-07,
+            "calibration_maximum_absolute_difference": 1.2211194944100612e-07,
+            "calibration_maximum_relative_difference": 1.149070623799812e-07,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "topology.boundary_flux",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 2.2892615372249736e-06,
+            "relative_bound": 4.656705251452418e-06,
+            "calibration_maximum_absolute_difference": 2.2892615372249736e-06,
+            "calibration_maximum_relative_difference": 4.656705251452418e-06,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "topology.diverted",
+            "dtype": "bool",
+            "shape": [],
+            "criterion_kind": "exact_equality",
+            "formula": "compiled(q) == eager(q)",
+            "calibration_maximum_absolute_difference": 0.0,
+            "calibration_maximum_relative_difference": 0.0,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "topology.wall_point",
+            "dtype": "float64",
+            "shape": [
+              2
+            ],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 1.2211194944100612e-07,
+            "relative_bound": 1.149070623799812e-07,
+            "calibration_maximum_absolute_difference": 1.2211194944100612e-07,
+            "calibration_maximum_relative_difference": 1.149070623799812e-07,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "topology.wall_point_flux",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 2.2892615372249736e-06,
+            "relative_bound": 4.656705251452418e-06,
+            "calibration_maximum_absolute_difference": 2.2892615372249736e-06,
+            "calibration_maximum_relative_difference": 4.656705251452418e-06,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "topology.x_point",
+            "dtype": "float64",
+            "shape": [
+              2
+            ],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 8.111818221578915e-07,
+            "relative_bound": 5.013061851856076e-07,
+            "calibration_maximum_absolute_difference": 8.111818221578915e-07,
+            "calibration_maximum_relative_difference": 5.013061851856076e-07,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          },
+          {
+            "observable": "topology.x_point_flux",
+            "dtype": "float64",
+            "shape": [],
+            "criterion_kind": "banked_dual_envelope",
+            "formula": "delta_abs(q) <= A_q and delta_rel(q) <= R_q",
+            "absolute_bound": 4.4432069171151944e-07,
+            "relative_bound": 7.093194148323502e-06,
+            "calibration_maximum_absolute_difference": 4.4432069171151944e-07,
+            "calibration_maximum_relative_difference": 7.093194148323502e-06,
+            "receipt_inputs": [
+              "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+            ]
+          }
+        ],
+        "calibration_limit": "These are frozen empirical envelopes for subsequent aligned-seed evaluations, not physics tolerances and not an independent verdict on the calibration cohort.",
+        "receipt_inputs": [
+          "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json"
+        ]
+      },
+      "terminal_parity_rule": "Terminal parity is evaluated only after exact seed alignment; the one-map representation bound and every terminal-observable bound are reported separately, never collapsed to one terminal-state scalar.",
+      "receipt_inputs": [
+        "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json",
+        "docs/figures/mast-catalog-gpu-solve/parity-divergence-attribution.json",
+        "docs/figures/forward-operator-refinement/event-resolved-amplification.json",
+        "benchmarks/jitted_eager_parity_gate.py"
+      ]
+    }
+  },
+  "inherited_constants_replaced": [
+    {
+      "consumer": "tests/test_equilibrium_forward_reference.py",
+      "inherited_reading": "PASSIVE_REPRODUCTION_MOVE_CEILING = 0.15 points",
+      "replacement_reading": "B(c, k_c) = 0.098 * G(c, k_c): 0.646786 points for the elongated radial-dominant channel and 10.4851 points for the stable vertical control channel"
+    },
+    {
+      "consumer": "benchmarks/diiid_forward_gs_match.py",
+      "inherited_reading": "GATE_RESIDUAL_TOLERANCE = 1e-6",
+      "replacement_reading": "rejected: 79.305 times below the measured fine-mesh floor"
+    },
+    {
+      "consumer": "benchmarks/diiid_forward_gs_match.py",
+      "inherited_reading": "REGISTERED_RESIDUAL_TOLERANCE = 1e-5",
+      "replacement_reading": "1e-5 survives numerically, re-derived as the largest declared candidate below the 7.930534999195602e-5 same-norm floor"
+    },
+    {
+      "consumer": "benchmarks/jitted_eager_parity_gate.py",
+      "inherited_reading": "atol = rtol = 1e-10 at terminal state",
+      "replacement_reading": "one-map relative bound 16*epsilon_float64 = 3.552713678800501e-15 plus 69 separately registered terminal observable bounds, conditional on exact seed alignment"
+    }
+  ],
+  "claim_bounds": {
+    "registered_source_constants_changed": false,
+    "new_equilibrium_solve": false,
+    "banked_measurements_only": true,
+    "coupled_relation_interpolates_between_configurations": false,
+    "diiid_reference_accuracy_equated_to_solver_residual": false,
+    "terminal_observable_envelopes_are_physics_tolerances": false,
+    "terminal_parity_without_seed_alignment_claimed": false
+  },
+  "sources": {
+    "docs/figures/forward-operator-refinement/passive-closure-trace.json": "319991320a1196d333aa94a5da8365a304b65f2bff54a84daa9eca378cb4cf82",
+    "docs/figures/forward-operator-refinement/passive-closure-stability-control.json": "5733321309d5049ff797dd353c3869d90ebf5868c28b349497c9bda7442cc36d",
+    "docs/figures/forward-operator-refinement/coupled-map-mode-identification.json": "b62bee532afe4ae2f33e81b6feccdcf8ec1d2b9a3262067fc5d0e2317a52b96a",
+    "docs/figures/diiid-forward-onboarding/topology-qualified-mesh-convergence.json": "b4d9dcb5248dded7cc0ce50982e46f59947c632dbd2353aaa7ed1d80d7806347",
+    "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_preregistration.json": "bf3d1cb3ef29d60ddb632454bfdda8914f397421a2a46e2fc16310653c1457f5",
+    "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json": "2e6bf51cb3134bce2c9da3c5a55a23a32df3d3544d3d17143ca969e1e00af6b1",
+    "docs/figures/mast-catalog-gpu-solve/parity-divergence-attribution.json": "2c2c856375b53f0d4bfdce81133dbcef39b314acad6c3a59f2b1b52849cca7f7",
+    "docs/figures/forward-operator-refinement/event-resolved-amplification.json": "bf26f40c41712de34e6b17c18a128172f68ac9929072266c3d0fac4393228e49",
+    "tests/test_equilibrium_forward_reference.py": "8df3bd2daab83bd681f7fbbd9b8b2e464e30a23088e4abc498811d315ca6cccb",
+    "benchmarks/diiid_forward_gs_match.py": "648496f0d17f1fd24d48feff47daa27136d5fc5ba8349cd220a996a4c1e5709c",
+    "benchmarks/jitted_eager_parity_gate.py": "438ad2cc872b5d697b714c79b7df79992633c3a21ddaf02d95f3c601ca540690"
+  }
+}

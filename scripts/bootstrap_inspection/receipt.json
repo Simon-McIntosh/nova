@@ -1,0 +1,79 @@
+{
+  "authority": {
+    "classification": "owner-authorised non-identical configuration",
+    "ruling_date": "2026-08-23"
+  },
+  "configuration_delta": {
+    "after": "sauter",
+    "all_other_fields_identical": true,
+    "banked_implicit_validated_model": "zeros",
+    "banked_selector_present_in_raw_dictionary": false,
+    "before": "zeros",
+    "changed_leaf_count": 1,
+    "changed_paths": [
+      "neoclassical.bootstrap_current.model_name"
+    ],
+    "explicit_sauter_validated_model": "sauter",
+    "explicit_zeros_validated_model": "zeros",
+    "source_dictionary_shapes_identical": true
+  },
+  "demonstration": {
+    "auxiliary_source_multiplier": 0.5,
+    "regime": "gentle",
+    "window_seconds": 0.0025
+  },
+  "fixture_preparation_seconds": 34.40159770101309,
+  "historical_reproduction": {
+    "absolute_difference": 1.5267509478888996e-12,
+    "banked_contraction": 0.23619506584727215,
+    "comparison_class": "cross-environment reproduction note",
+    "current_tree_same_config_contraction": 0.23619506586175637,
+    "current_tree_same_config_drift": 1.4484219379440333e-11,
+    "explicit_zeros_contraction": 0.2361950658487989,
+    "measured_backend_drift": 1.7e-09,
+    "passed": true,
+    "tolerance": 1e-09
+  },
+  "implicit_default": {
+    "bootstrap_fraction_maximum": 0.0,
+    "bootstrap_fraction_minimum": 0.0,
+    "contraction": 0.2361950658487989,
+    "facade_direct_maximum_separation": 0.0,
+    "iterations": 4,
+    "outcome_type": "WindowReceipt",
+    "wall_seconds": 91.09355756687
+  },
+  "profile_rows": 120,
+  "sauter": {
+    "bootstrap_fraction_maximum": 0.30852523791868824,
+    "bootstrap_fraction_minimum": 0.0,
+    "contraction": 0.2361657751479937,
+    "exit_all_field_norm": 0.032632660566478525,
+    "exit_gating_norm": 0.0012936510592181348,
+    "facade_direct_maximum_separation": 0.0,
+    "iterations": 4,
+    "outcome_type": "WindowReceipt",
+    "wall_seconds": 100.83381888596341
+  },
+  "selector_equivalence": {
+    "absolute_difference": 0.0,
+    "explicit_zeros_contraction": 0.2361950658487989,
+    "implicit_contraction": 0.2361950658487989,
+    "passed": true,
+    "same_environment": true,
+    "same_prepared_fixture": true,
+    "same_process": true,
+    "tolerance": 1e-12
+  },
+  "zeros": {
+    "banked_contraction": 0.23619506584727215,
+    "banked_contraction_absolute_difference": 1.5267509478888996e-12,
+    "bootstrap_fraction_maximum": 0.0,
+    "bootstrap_fraction_minimum": 0.0,
+    "contraction": 0.2361950658487989,
+    "facade_direct_maximum_separation": 0.0,
+    "iterations": 4,
+    "outcome_type": "WindowReceipt",
+    "wall_seconds": 93.06096678902395
+  }
+}

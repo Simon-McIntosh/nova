@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="238" viewBox="0 0 320 238" role="img" aria-labelledby="bootstrap_comparison_title bootstrap_comparison_desc">
+<title id="bootstrap_comparison_title">Zeros and Sauter bootstrap-current fractions</title>
+<desc id="bootstrap_comparison_desc">Owner-authorised non-identical Sauter inspection overlaid beside the banked zeros baseline for the identical gentle window. Circle markers show the direct TORAX replay.</desc>
+<style>
+.text{fill:#202124;font-family:system-ui,sans-serif}.muted{fill:#62666a;font-family:system-ui,sans-serif}.axis{stroke:#202124}.grid{stroke:#d4d6d8}.zero-curve{stroke:#8a8f94}.initial-curve{stroke:#62666a}.final-curve{stroke:#202124}.leader{stroke:#62666a}
+@media (prefers-color-scheme:dark){.text{fill:#f1f3f4}.muted{fill:#c2c7cc}.axis{stroke:#f1f3f4}.grid{stroke:#4b5055}.zero-curve{stroke:#a2a8ae}.initial-curve{stroke:#c2c7cc}.final-curve{stroke:#f1f3f4}.leader{stroke:#c2c7cc}}
+</style>
+<line x1="43.00" y1="202.00" x2="218.00" y2="202.00" class="grid" stroke-width="0.65"/>
+<text x="38.00" y="205.00" class="text" text-anchor="end" font-size="7.8">-0.0247</text>
+<line x1="43.00" y1="157.25" x2="218.00" y2="157.25" class="grid" stroke-width="0.65"/>
+<text x="38.00" y="160.25" class="text" text-anchor="end" font-size="7.8">0.0648</text>
+<line x1="43.00" y1="112.50" x2="218.00" y2="112.50" class="grid" stroke-width="0.65"/>
+<text x="38.00" y="115.50" class="text" text-anchor="end" font-size="7.8">0.154</text>
+<line x1="43.00" y1="67.75" x2="218.00" y2="67.75" class="grid" stroke-width="0.65"/>
+<text x="38.00" y="70.75" class="text" text-anchor="end" font-size="7.8">0.244</text>
+<line x1="43.00" y1="23.00" x2="218.00" y2="23.00" class="grid" stroke-width="0.65"/>
+<text x="38.00" y="26.00" class="text" text-anchor="end" font-size="7.8">0.333</text>
+<line x1="43.0" y1="23.0" x2="43.0" y2="202.0" class="axis" stroke-width="0.9"/>
+<line x1="43.0" y1="202.0" x2="218.0" y2="202.0" class="axis" stroke-width="0.9"/>
+<text x="43.00" y="216" class="text" text-anchor="middle" font-size="8">0</text>
+<text x="86.75" y="216" class="text" text-anchor="middle" font-size="8">0.25</text>
+<text x="130.50" y="216" class="text" text-anchor="middle" font-size="8">0.5</text>
+<text x="174.25" y="216" class="text" text-anchor="middle" font-size="8">0.75</text>
+<text x="218.00" y="216" class="text" text-anchor="middle" font-size="8">1</text>
+<polyline points="43.00,189.66 53.94,189.66 75.81,189.66 97.69,189.66 119.56,189.66 141.44,189.66 163.31,189.66 185.19,189.66 207.06,189.66 218.00,189.66" class="zero-curve" fill="none" stroke-width="1.8" stroke-dasharray="4 3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="43.00" cy="189.66" r="1.6" class="zero-curve" fill="none" stroke-width="0.8"/>
+<circle cx="75.81" cy="189.66" r="1.6" class="zero-curve" fill="none" stroke-width="0.8"/>
+<circle cx="119.56" cy="189.66" r="1.6" class="zero-curve" fill="none" stroke-width="0.8"/>
+<circle cx="163.31" cy="189.66" r="1.6" class="zero-curve" fill="none" stroke-width="0.8"/>
+<circle cx="218.00" cy="189.66" r="1.6" class="zero-curve" fill="none" stroke-width="0.8"/>
+<polyline points="43.00,189.66 53.94,180.02 75.81,117.36 97.69,134.08 119.56,116.06 141.44,100.57 163.31,87.36 185.19,94.83 207.06,137.01 218.00,189.66" class="initial-curve" fill="none" stroke-width="1.8" stroke-dasharray="none" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="43.00" cy="189.66" r="1.6" class="initial-curve" fill="none" stroke-width="0.8"/>
+<circle cx="75.81" cy="117.36" r="1.6" class="initial-curve" fill="none" stroke-width="0.8"/>
+<circle cx="119.56" cy="116.06" r="1.6" class="initial-curve" fill="none" stroke-width="0.8"/>
+<circle cx="163.31" cy="87.36" r="1.6" class="initial-curve" fill="none" stroke-width="0.8"/>
+<circle cx="218.00" cy="189.66" r="1.6" class="initial-curve" fill="none" stroke-width="0.8"/>
+<polyline points="43.00,189.66 53.94,187.87 75.81,156.52 97.69,152.61 119.56,140.81 141.44,128.99 163.31,115.47 185.19,90.85 207.06,35.34 218.00,75.13" class="final-curve" fill="none" stroke-width="1.8" stroke-dasharray="none" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="43.00" cy="189.66" r="1.6" class="final-curve" fill="none" stroke-width="0.8"/>
+<circle cx="75.81" cy="156.52" r="1.6" class="final-curve" fill="none" stroke-width="0.8"/>
+<circle cx="119.56" cy="140.81" r="1.6" class="final-curve" fill="none" stroke-width="0.8"/>
+<circle cx="163.31" cy="115.47" r="1.6" class="final-curve" fill="none" stroke-width="0.8"/>
+<circle cx="218.00" cy="75.13" r="1.6" class="final-curve" fill="none" stroke-width="0.8"/>
+<line x1="139.25" y1="189.66" x2="224" y2="188.00" class="leader" stroke-width="0.7"/>
+<text x="226" y="191.00" class="text" font-size="8.1" font-weight="600">zeros baseline</text>
+<line x1="158.50" y1="90.27" x2="224" y2="82.00" class="leader" stroke-width="0.7"/>
+<text x="226" y="85.00" class="text" font-size="8.1" font-weight="600">Sauter initial</text>
+<line x1="176.00" y1="101.19" x2="224" y2="110.00" class="leader" stroke-width="0.7"/>
+<text x="226" y="113.00" class="text" font-size="8.1" font-weight="600">Sauter final</text>
+<text x="130" y="232" class="text" text-anchor="middle" font-size="8.8">normalised radius ρ</text>
+<text x="10.5" y="112.5" class="text" text-anchor="middle" font-size="8.5" transform="rotate(-90 10.5 112.5)">j bootstrap / j total</text>
+<text x="226" y="134" class="muted" font-size="7.5">circles · direct TORAX</text>
+<text x="226" y="146" class="muted" font-size="7.5">line · Nova facade</text>
+<text x="226" y="36" class="muted" font-size="7.5">authorised non-identical</text>
+<text x="226" y="48" class="muted" font-size="7.5">zeros → Sauter</text>
+</svg>

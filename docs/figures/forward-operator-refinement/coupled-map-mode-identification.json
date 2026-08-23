@@ -1,0 +1,850 @@
+{
+  "comparators": {
+    "elongated_direct_external_peak_points": 0.09723915202112363,
+    "elongated_measured_late_growth": 1.3372082983171414,
+    "elongated_measured_unpinned_spectral_radius": 1.2577,
+    "stable_measured_late_growth": 0.9883689804610637,
+    "stable_measured_resolvent_gain": 106.99077030932676
+  },
+  "elongated_cross_carrier": {
+    "carrier": {
+      "boundary_elongation": 1.8176001064943421,
+      "direct_sample_rows": 5477,
+      "plasma_cells": 2214,
+      "requested_cells": -2100,
+      "state_rows": 7856,
+      "wall_nodes": 165
+    },
+    "elapsed_seconds": 63.08845683699474,
+    "late_vector_localisation": {
+      "axis_motion": {
+        "absolute_radial_over_vertical_motion": 2.4670438764522613,
+        "axis_displacement_direction_r_z": [
+          -0.9267592686242452,
+          -0.37565577064522
+        ],
+        "axis_displacement_magnitude_m": 4.47675143382456e-06,
+        "probe_peak_wb": 0.0008089369098146812,
+        "symmetric_axis_displacement_m": [
+          -4.14887088462379e-06,
+          -1.6817175098604586e-06
+        ]
+      },
+      "axis_neighbourhood_fraction": 0.0022322723522765196,
+      "axis_neighbourhood_radius_m": 0.23948894911933516,
+      "axis_translation_content_fraction": 0.1872631923618223,
+      "boundary_state_fraction": 0.009216220924275813,
+      "definitions": {
+        "axis_neighbourhood_fraction": "squared eigenvector norm on the thirteen grid cells nearest the solved axis",
+        "axis_translation_content_fraction": "squared projection onto radial and vertical translation derivatives",
+        "boundary_state_fraction": "squared eigenvector norm on wall rows",
+        "normalisation_content_fraction": "squared projection onto affine gauge and flux-span coordinate directions",
+        "passive_current_state_fraction": "fraction in dynamic passive-current coordinates; the flux map state has none",
+        "passive_drive_overlap_fraction": "squared projection onto the retained-minus-zeroed passive external field"
+      },
+      "direct_sample_rows": 5477,
+      "direct_sample_state_fraction": 0.6992444864211376,
+      "grid_rows": 2214,
+      "normalisation_amplitude": 1.0,
+      "normalisation_content_fraction": 0.8466837268961472,
+      "normalisation_policy": "absolute",
+      "normalisation_rescaled": false,
+      "passive_current_state_fraction": 0.0,
+      "passive_drive_overlap_fraction": 0.5258983337715919,
+      "state_rows": 7856,
+      "wall_rows": 165
+    },
+    "passive_driven_tangent": {
+      "iterations": [
+        {
+          "grid_peak_growth_ratio": null,
+          "grid_peak_wb": 0.07866033914896775,
+          "iteration": 1,
+          "state_l2_growth_ratio": null,
+          "state_l2_wb": 2.6359585867551885
+        },
+        {
+          "grid_peak_growth_ratio": 0.9986054072401087,
+          "grid_peak_wb": 0.0785506400095,
+          "iteration": 2,
+          "state_l2_growth_ratio": 1.5267973821712502,
+          "state_l2_wb": 4.02457466976965
+        },
+        {
+          "grid_peak_growth_ratio": 1.6627252604243683,
+          "grid_peak_wb": 0.1306081333662967,
+          "iteration": 3,
+          "state_l2_growth_ratio": 1.7633923131627591,
+          "state_l2_wb": 7.096904036421351
+        },
+        {
+          "grid_peak_growth_ratio": 1.5587195277683035,
+          "grid_peak_wb": 0.2035814479634136,
+          "iteration": 4,
+          "state_l2_growth_ratio": 1.5774738214825192,
+          "state_l2_wb": 11.195180331028304
+        },
+        {
+          "grid_peak_growth_ratio": 1.4841345124943155,
+          "grid_peak_wb": 0.3021422530260677,
+          "iteration": 5,
+          "state_l2_growth_ratio": 1.4856501730112979,
+          "state_l2_wb": 16.63212159568488
+        },
+        {
+          "grid_peak_growth_ratio": 1.436413039566834,
+          "grid_peak_wb": 0.43400107205074534,
+          "iteration": 6,
+          "state_l2_growth_ratio": 1.4318222180914795,
+          "state_l2_wb": 23.81424123470072
+        },
+        {
+          "grid_peak_growth_ratio": 1.4048036320197212,
+          "grid_peak_wb": 0.6096862823173398,
+          "iteration": 7,
+          "state_l2_growth_ratio": 1.3954994940380654,
+          "state_l2_wb": 33.23276159392529
+        },
+        {
+          "grid_peak_growth_ratio": 1.3763690648860627,
+          "grid_peak_wb": 0.839153338266977,
+          "iteration": 8,
+          "state_l2_growth_ratio": 1.368669695492107,
+          "state_l2_wb": 45.48467369111951
+        },
+        {
+          "grid_peak_growth_ratio": 1.356001614690489,
+          "grid_peak_wb": 1.137893281662935,
+          "iteration": 9,
+          "state_l2_growth_ratio": 1.3476907524029575,
+          "state_l2_wb": 61.29927410958786
+        },
+        {
+          "grid_peak_growth_ratio": 1.3372082983171705,
+          "grid_peak_wb": 1.521600338839034,
+          "iteration": 10,
+          "state_l2_growth_ratio": 1.3306406013050003,
+          "state_l2_wb": 81.56730296074203
+        },
+        {
+          "grid_peak_growth_ratio": 1.3217333021426663,
+          "grid_peak_wb": 2.0111498403951162,
+          "iteration": 11,
+          "state_l2_growth_ratio": 1.3163785513336257,
+          "state_l2_wb": 107.37344810765255
+        },
+        {
+          "grid_peak_growth_ratio": 1.3086512405191892,
+          "grid_peak_wb": 2.631893733503038,
+          "iteration": 12,
+          "state_l2_growth_ratio": 1.3041695061070953,
+          "state_l2_wb": 140.03317678757304
+        },
+        {
+          "grid_peak_growth_ratio": 1.2974319262344387,
+          "grid_peak_wb": 3.4147029563031954,
+          "iteration": 13,
+          "state_l2_growth_ratio": 1.293511982158545,
+          "state_l2_wb": 181.13459207445155
+        },
+        {
+          "grid_peak_growth_ratio": 1.2878991835365399,
+          "grid_peak_wb": 4.397793149442695,
+          "iteration": 14,
+          "state_l2_growth_ratio": 1.2840493898778385,
+          "state_l2_wb": 232.58576243897068
+        },
+        {
+          "grid_peak_growth_ratio": 1.2789421567308727,
+          "grid_peak_wb": 5.624523055404497,
+          "iteration": 15,
+          "state_l2_growth_ratio": 1.2755197696775669,
+          "state_l2_wb": 296.66773813643715
+        },
+        {
+          "grid_peak_growth_ratio": 1.2708131412321948,
+          "grid_peak_wb": 7.147717811971491,
+          "iteration": 16,
+          "state_l2_growth_ratio": 1.2677252807784403,
+          "state_l2_wb": 376.0931916269196
+        }
+      ],
+      "late_grid_peak_growth_median": 1.2878991835365399,
+      "late_l2_growth_median": 1.2840493898778385,
+      "terminal_rayleigh_quotient": 1.2604927025556618
+    },
+    "root_relative_core_map_residual": 2.574808595403112e-10
+  },
+  "mechanism_verdict": {
+    "absolute_source_policy_excludes_scalar_current_rescaling": true,
+    "classification": "PHYSICAL_NEAR_MARGINAL_MODE",
+    "discretisation_discriminator": "A carrier-local mesh mode would concentrate on boundary rows or fail to project onto a smooth physical template. The leading vector instead projects predominantly onto the analytic axis-translation subspace, moves the fitted axis vertically, and has low wall-row and affine normalisation content. The independent elongated carrier carries a different radial-dominant mode, so it is not used as false same-mode evidence.",
+    "elongated_axis_translation_content_fraction": 0.1872631923618223,
+    "mechanism": "vertical_free_boundary_axis_displacement_mode",
+    "passive_current_is_not_a_map_state_coordinate": true,
+    "repair_scope": "A physical near-marginal mode requires route qualification or screening in nova/equilibrium/forward_operator.py and fixed_point.py. An algebraic mode would instead require nova/equilibrium/source.py or domain.py. A carrier-specific mode would require mesh/coupling work in nova/biot/.",
+    "same_mode_carries_elongated_growth": false,
+    "stable_axis_translation_content_fraction": 0.5677970092650754,
+    "stable_normalisation_content_fraction": 0.009853676541683795,
+    "stable_passive_drive_to_leading_mode_fraction": 0.9999999934473602,
+    "stable_to_elongated_axis_motion_direction_alignment": 0.3972702870280392
+  },
+  "receipt": {
+    "checkout_porcelain_empty_before_measurement": true,
+    "device_backend": "gpu",
+    "devices": [
+      "cuda:0"
+    ],
+    "kind": "coupled_map_mode_identification",
+    "runtime_mitigations": {
+      "defaults": {
+        "XLA_FLAGS": "--xla_gpu_enable_command_buffer=",
+        "XLA_PYTHON_CLIENT_PREALLOCATE": "false"
+      },
+      "effective": {
+        "XLA_FLAGS": "--xla_gpu_enable_command_buffer=",
+        "XLA_PYTHON_CLIENT_PREALLOCATE": "false"
+      }
+    },
+    "source_commit": "f0e4ff2608da2642d1e0d5cb5576ee8c4996c1dc",
+    "status": "complete"
+  },
+  "solver_budget": {
+    "arnoldi_subspace": 36,
+    "dominant_eigenpairs": 6,
+    "passive_tangent_iterations": 16,
+    "stable_gmres_iterations": 30,
+    "stable_newton_steps": 10,
+    "stable_warmup": 8
+  },
+  "stable_control": {
+    "carrier": {
+      "boundary_elongation": 0.9785544678849224,
+      "construction": "analytic structured free-boundary carrier",
+      "lattice_shape": [
+        25,
+        25
+      ],
+      "plasma_cells": 625,
+      "state_rows": 686,
+      "vertical_decay_index": 0.5718216376850987,
+      "vertical_decay_index_stable": true,
+      "wall_nodes": 61
+    },
+    "dominant_eigenpairs": [
+      {
+        "eigenvalue": {
+          "imaginary": 0.0,
+          "magnitude": 0.9874290999339232,
+          "phase_radians": 0.0,
+          "real": 0.9874290999339232
+        },
+        "localisation": {
+          "axis_motion": {
+            "absolute_radial_over_vertical_motion": 0.023440437039220417,
+            "axis_displacement_direction_r_z": [
+              -0.023433999969769824,
+              -0.9997253861163158
+            ],
+            "axis_displacement_magnitude_m": 9.845725188554475e-07,
+            "probe_peak_wb": 3.5e-06,
+            "symmetric_axis_displacement_m": [
+              -2.3072472377094755e-08,
+              -9.843021415722759e-07
+            ]
+          },
+          "axis_neighbourhood_fraction": 0.012991446684026835,
+          "axis_neighbourhood_radius_m": 0.06999240355511734,
+          "axis_translation_content_fraction": 0.5677970092650754,
+          "boundary_state_fraction": 0.13406534323348418,
+          "definitions": {
+            "axis_neighbourhood_fraction": "squared eigenvector norm on the thirteen grid cells nearest the solved axis",
+            "axis_translation_content_fraction": "squared projection onto radial and vertical translation derivatives",
+            "boundary_state_fraction": "squared eigenvector norm on wall rows",
+            "normalisation_content_fraction": "squared projection onto affine gauge and flux-span coordinate directions",
+            "passive_current_state_fraction": "fraction in dynamic passive-current coordinates; the flux map state has none",
+            "passive_drive_overlap_fraction": "squared projection onto the retained-minus-zeroed passive external field"
+          },
+          "direct_sample_rows": 0,
+          "direct_sample_state_fraction": 0.0,
+          "grid_rows": 625,
+          "normalisation_amplitude": 1.0,
+          "normalisation_content_fraction": 0.009853676541683795,
+          "normalisation_policy": "absolute",
+          "normalisation_rescaled": false,
+          "passive_current_state_fraction": 0.0,
+          "passive_drive_overlap_fraction": 0.8511983944158931,
+          "state_rows": 686,
+          "wall_rows": 61
+        },
+        "rank": 1,
+        "ritz_residual_l2": 1.9806796716641523e-15
+      },
+      {
+        "eigenvalue": {
+          "imaginary": 0.0,
+          "magnitude": 0.5362420048445588,
+          "phase_radians": 0.0,
+          "real": 0.5362420048445588
+        },
+        "localisation": {
+          "axis_motion": {
+            "absolute_radial_over_vertical_motion": 61.565720653838994,
+            "axis_displacement_direction_r_z": [
+              -0.9998681117379763,
+              0.016240662841581283
+            ],
+            "axis_displacement_magnitude_m": 1.797742967569952e-07,
+            "probe_peak_wb": 3.5e-06,
+            "symmetric_axis_displacement_m": [
+              -1.7975058663743937e-07,
+              2.9196537412127382e-09
+            ]
+          },
+          "axis_neighbourhood_fraction": 0.04502656573519944,
+          "axis_neighbourhood_radius_m": 0.06999240355511734,
+          "axis_translation_content_fraction": 0.13739869377586086,
+          "boundary_state_fraction": 0.10634180277905111,
+          "definitions": {
+            "axis_neighbourhood_fraction": "squared eigenvector norm on the thirteen grid cells nearest the solved axis",
+            "axis_translation_content_fraction": "squared projection onto radial and vertical translation derivatives",
+            "boundary_state_fraction": "squared eigenvector norm on wall rows",
+            "normalisation_content_fraction": "squared projection onto affine gauge and flux-span coordinate directions",
+            "passive_current_state_fraction": "fraction in dynamic passive-current coordinates; the flux map state has none",
+            "passive_drive_overlap_fraction": "squared projection onto the retained-minus-zeroed passive external field"
+          },
+          "direct_sample_rows": 0,
+          "direct_sample_state_fraction": 0.0,
+          "grid_rows": 625,
+          "normalisation_amplitude": 1.0,
+          "normalisation_content_fraction": 0.9240272883712567,
+          "normalisation_policy": "absolute",
+          "normalisation_rescaled": false,
+          "passive_current_state_fraction": 0.0,
+          "passive_drive_overlap_fraction": 1.0736462084248009e-06,
+          "state_rows": 686,
+          "wall_rows": 61
+        },
+        "rank": 2,
+        "ritz_residual_l2": 2.0249029302440957e-15
+      },
+      {
+        "eigenvalue": {
+          "imaginary": 0.0,
+          "magnitude": 0.5085506238355207,
+          "phase_radians": 0.0,
+          "real": 0.5085506238355207
+        },
+        "localisation": {
+          "axis_motion": {
+            "absolute_radial_over_vertical_motion": 70.45562474443891,
+            "axis_displacement_direction_r_z": [
+              -0.9998992898939597,
+              0.01419190154825619
+            ],
+            "axis_displacement_magnitude_m": 1.7284399861986284e-07,
+            "probe_peak_wb": 3.5e-06,
+            "symmetric_axis_displacement_m": [
+              -1.728265914824334e-07,
+              2.452985011620022e-09
+            ]
+          },
+          "axis_neighbourhood_fraction": 0.045042561587579424,
+          "axis_neighbourhood_radius_m": 0.06999240355511734,
+          "axis_translation_content_fraction": 0.14173211519870338,
+          "boundary_state_fraction": 0.10639348235965994,
+          "definitions": {
+            "axis_neighbourhood_fraction": "squared eigenvector norm on the thirteen grid cells nearest the solved axis",
+            "axis_translation_content_fraction": "squared projection onto radial and vertical translation derivatives",
+            "boundary_state_fraction": "squared eigenvector norm on wall rows",
+            "normalisation_content_fraction": "squared projection onto affine gauge and flux-span coordinate directions",
+            "passive_current_state_fraction": "fraction in dynamic passive-current coordinates; the flux map state has none",
+            "passive_drive_overlap_fraction": "squared projection onto the retained-minus-zeroed passive external field"
+          },
+          "direct_sample_rows": 0,
+          "direct_sample_state_fraction": 0.0,
+          "grid_rows": 625,
+          "normalisation_amplitude": 1.0,
+          "normalisation_content_fraction": 0.9235153358415341,
+          "normalisation_policy": "absolute",
+          "normalisation_rescaled": false,
+          "passive_current_state_fraction": 0.0,
+          "passive_drive_overlap_fraction": 1.6413950960531234e-06,
+          "state_rows": 686,
+          "wall_rows": 61
+        },
+        "rank": 3,
+        "ritz_residual_l2": 3.019096709994347e-15
+      },
+      {
+        "eigenvalue": {
+          "imaginary": 0.0,
+          "magnitude": 0.39002165435010405,
+          "phase_radians": 0.0,
+          "real": 0.39002165435010405
+        },
+        "localisation": {
+          "axis_motion": {
+            "absolute_radial_over_vertical_motion": 5.253204897318467,
+            "axis_displacement_direction_r_z": [
+              -0.9823595430742551,
+              -0.1870019468640386
+            ],
+            "axis_displacement_magnitude_m": 9.768940478865874e-08,
+            "probe_peak_wb": 3.5e-06,
+            "symmetric_axis_displacement_m": [
+              -9.596611905138275e-08,
+              -1.8268108883468318e-08
+            ]
+          },
+          "axis_neighbourhood_fraction": 0.03939513218693549,
+          "axis_neighbourhood_radius_m": 0.06999240355511734,
+          "axis_translation_content_fraction": 0.12553096000075226,
+          "boundary_state_fraction": 0.11530529439616147,
+          "definitions": {
+            "axis_neighbourhood_fraction": "squared eigenvector norm on the thirteen grid cells nearest the solved axis",
+            "axis_translation_content_fraction": "squared projection onto radial and vertical translation derivatives",
+            "boundary_state_fraction": "squared eigenvector norm on wall rows",
+            "normalisation_content_fraction": "squared projection onto affine gauge and flux-span coordinate directions",
+            "passive_current_state_fraction": "fraction in dynamic passive-current coordinates; the flux map state has none",
+            "passive_drive_overlap_fraction": "squared projection onto the retained-minus-zeroed passive external field"
+          },
+          "direct_sample_rows": 0,
+          "direct_sample_state_fraction": 0.0,
+          "grid_rows": 625,
+          "normalisation_amplitude": 1.0,
+          "normalisation_content_fraction": 0.7397990873153243,
+          "normalisation_policy": "absolute",
+          "normalisation_rescaled": false,
+          "passive_current_state_fraction": 0.0,
+          "passive_drive_overlap_fraction": 0.000703717288656021,
+          "state_rows": 686,
+          "wall_rows": 61
+        },
+        "rank": 4,
+        "ritz_residual_l2": 3.609168371818425e-15
+      },
+      {
+        "eigenvalue": {
+          "imaginary": 0.0,
+          "magnitude": 0.2119637696878977,
+          "phase_radians": 0.0,
+          "real": 0.2119637696878977
+        },
+        "localisation": {
+          "axis_motion": {
+            "absolute_radial_over_vertical_motion": 1.5161578481303413,
+            "axis_displacement_direction_r_z": [
+              -0.8347774888721957,
+              -0.5505874536095343
+            ],
+            "axis_displacement_magnitude_m": 2.47411554018183e-07,
+            "probe_peak_wb": 3.5e-06,
+            "symmetric_axis_displacement_m": [
+              -2.065335957812664e-07,
+              -1.3622169752044912e-07
+            ]
+          },
+          "axis_neighbourhood_fraction": 0.029305680877370902,
+          "axis_neighbourhood_radius_m": 0.06999240355511734,
+          "axis_translation_content_fraction": 0.10968468105371594,
+          "boundary_state_fraction": 0.12881836799943602,
+          "definitions": {
+            "axis_neighbourhood_fraction": "squared eigenvector norm on the thirteen grid cells nearest the solved axis",
+            "axis_translation_content_fraction": "squared projection onto radial and vertical translation derivatives",
+            "boundary_state_fraction": "squared eigenvector norm on wall rows",
+            "normalisation_content_fraction": "squared projection onto affine gauge and flux-span coordinate directions",
+            "passive_current_state_fraction": "fraction in dynamic passive-current coordinates; the flux map state has none",
+            "passive_drive_overlap_fraction": "squared projection onto the retained-minus-zeroed passive external field"
+          },
+          "direct_sample_rows": 0,
+          "direct_sample_state_fraction": 0.0,
+          "grid_rows": 625,
+          "normalisation_amplitude": 1.0,
+          "normalisation_content_fraction": 0.4681476428650735,
+          "normalisation_policy": "absolute",
+          "normalisation_rescaled": false,
+          "passive_current_state_fraction": 0.0,
+          "passive_drive_overlap_fraction": 0.002924082306516245,
+          "state_rows": 686,
+          "wall_rows": 61
+        },
+        "rank": 5,
+        "ritz_residual_l2": 9.817759681062178e-16
+      },
+      {
+        "eigenvalue": {
+          "imaginary": 0.0,
+          "magnitude": 0.20508650975621243,
+          "phase_radians": 0.0,
+          "real": 0.20508650975621243
+        },
+        "localisation": {
+          "axis_motion": {
+            "absolute_radial_over_vertical_motion": 4.945174679964314,
+            "axis_displacement_direction_r_z": [
+              -0.980160499835063,
+              -0.19820543525110346
+            ],
+            "axis_displacement_magnitude_m": 4.223873750768226e-07,
+            "probe_peak_wb": 3.5e-06,
+            "symmetric_axis_displacement_m": [
+              -4.1400742067931873e-07,
+              -8.371947352167272e-08
+            ]
+          },
+          "axis_neighbourhood_fraction": 0.05239839404654527,
+          "axis_neighbourhood_radius_m": 0.06999240355511734,
+          "axis_translation_content_fraction": 0.22099904031145873,
+          "boundary_state_fraction": 0.10581817139346218,
+          "definitions": {
+            "axis_neighbourhood_fraction": "squared eigenvector norm on the thirteen grid cells nearest the solved axis",
+            "axis_translation_content_fraction": "squared projection onto radial and vertical translation derivatives",
+            "boundary_state_fraction": "squared eigenvector norm on wall rows",
+            "normalisation_content_fraction": "squared projection onto affine gauge and flux-span coordinate directions",
+            "passive_current_state_fraction": "fraction in dynamic passive-current coordinates; the flux map state has none",
+            "passive_drive_overlap_fraction": "squared projection onto the retained-minus-zeroed passive external field"
+          },
+          "direct_sample_rows": 0,
+          "direct_sample_state_fraction": 0.0,
+          "grid_rows": 625,
+          "normalisation_amplitude": 1.0,
+          "normalisation_content_fraction": 0.8828715070040354,
+          "normalisation_policy": "absolute",
+          "normalisation_rescaled": false,
+          "passive_current_state_fraction": 0.0,
+          "passive_drive_overlap_fraction": 0.00014218312069287758,
+          "state_rows": 686,
+          "wall_rows": 61
+        },
+        "rank": 6,
+        "ritz_residual_l2": 9.839461045787888e-16
+      }
+    ],
+    "elapsed_seconds": 18.843635101802647,
+    "leading_eigenvector_alignment_with_passive_driven_late_vector": 0.9999999934473602,
+    "passive_driven_tangent": {
+      "iterations": [
+        {
+          "grid_peak_growth_ratio": null,
+          "grid_peak_wb": 0.0003403370320747001,
+          "iteration": 1,
+          "state_l2_growth_ratio": null,
+          "state_l2_wb": 0.00457987687802177
+        },
+        {
+          "grid_peak_growth_ratio": 0.6215702717803393,
+          "grid_peak_wb": 0.0002115433815235854,
+          "iteration": 2,
+          "state_l2_growth_ratio": 0.5101710848277017,
+          "state_l2_wb": 0.002336520755237674
+        },
+        {
+          "grid_peak_growth_ratio": 0.9670268543629307,
+          "grid_peak_wb": 0.0002045681307960501,
+          "iteration": 3,
+          "state_l2_growth_ratio": 0.9622413940301927,
+          "state_l2_wb": 0.002248296988700378
+        },
+        {
+          "grid_peak_growth_ratio": 1.009252116286793,
+          "grid_peak_wb": 0.00020646081893074703,
+          "iteration": 4,
+          "state_l2_growth_ratio": 0.9848986806185169,
+          "state_l2_wb": 0.002214344737809587
+        },
+        {
+          "grid_peak_growth_ratio": 0.9993468512884321,
+          "grid_peak_wb": 0.00020632596931287317,
+          "iteration": 5,
+          "state_l2_growth_ratio": 0.9880726726346455,
+          "state_l2_wb": 0.0021879335232219818
+        },
+        {
+          "grid_peak_growth_ratio": 0.9944287563688908,
+          "grid_peak_wb": 0.0002051764770704064,
+          "iteration": 6,
+          "state_l2_growth_ratio": 0.9882701911002262,
+          "state_l2_wb": 0.002162269481109179
+        },
+        {
+          "grid_peak_growth_ratio": 0.9916902932024323,
+          "grid_peak_wb": 0.00020347152070419346,
+          "iteration": 7,
+          "state_l2_growth_ratio": 0.9880602565357683,
+          "state_l2_wb": 0.0021364525382041983
+        },
+        {
+          "grid_peak_growth_ratio": 0.9900298572547304,
+          "grid_peak_wb": 0.00020144288059817557,
+          "iteration": 8,
+          "state_l2_growth_ratio": 0.987848646912607,
+          "state_l2_wb": 0.002110491749058022
+        },
+        {
+          "grid_peak_growth_ratio": 0.9890014850883777,
+          "grid_peak_wb": 0.00019922730807207638,
+          "iteration": 9,
+          "state_l2_growth_ratio": 0.9876934909607508,
+          "state_l2_wb": 0.0020845189632709787
+        },
+        {
+          "grid_peak_growth_ratio": 0.9883689804610963,
+          "grid_peak_wb": 0.00019691009135920689,
+          "iteration": 10,
+          "state_l2_growth_ratio": 0.987590615479467,
+          "state_l2_wb": 0.0020586513659154064
+        },
+        {
+          "grid_peak_growth_ratio": 0.9879850427307045,
+          "grid_peak_wb": 0.00019454422502563295,
+          "iteration": 11,
+          "state_l2_growth_ratio": 0.9875257628783539,
+          "state_l2_wb": 0.002032971260626177
+        },
+        {
+          "grid_peak_growth_ratio": 0.9877549394657776,
+          "grid_peak_wb": 0.0001921620192136107,
+          "iteration": 12,
+          "state_l2_growth_ratio": 0.987486109807411,
+          "state_l2_wb": 0.002007530881506012
+        },
+        {
+          "grid_peak_growth_ratio": 0.9876185611531646,
+          "grid_peak_wb": 0.00018978277692403297,
+          "iteration": 13,
+          "state_l2_growth_ratio": 0.9874623554527214,
+          "state_l2_wb": 0.0019823611728960046
+        },
+        {
+          "grid_peak_growth_ratio": 0.9875385043007804,
+          "grid_peak_wb": 0.00018741779966560817,
+          "iteration": 14,
+          "state_l2_growth_ratio": 0.9874483326374409,
+          "state_l2_wb": 0.0019574792348613615
+        },
+        {
+          "grid_peak_growth_ratio": 0.9874918965660079,
+          "grid_peak_wb": 0.00018507355844201952,
+          "iteration": 15,
+          "state_l2_growth_ratio": 0.9874401458175567,
+          "state_l2_wb": 0.001932893581106342
+        },
+        {
+          "grid_peak_growth_ratio": 0.9874649556050213,
+          "grid_peak_wb": 0.00018275365317061212,
+          "iteration": 16,
+          "state_l2_growth_ratio": 0.9874354075375432,
+          "state_l2_wb": 0.0019086075609864423
+        }
+      ],
+      "late_grid_peak_growth_median": 0.9875385043007804,
+      "late_l2_growth_median": 0.9874483326374409,
+      "terminal_rayleigh_quotient": 0.9874326837531601
+    },
+    "root_relative_map_residual": 2.786282981082715e-16,
+    "solve": {
+      "arm": "passive_currents_zeroed",
+      "control_branch_qualification": {
+        "axis_displacement_limit_m": 0.05970042712403531,
+        "axis_displacement_m": 0.03587864162247006,
+        "axis_displacement_vector_m": [
+          0.035865037582321735,
+          -0.0009879290927442882
+        ],
+        "axis_finite": true,
+        "checks": {
+          "axis_displacement_within_control_scale": true,
+          "axis_finite": true,
+          "axis_inside_control_boundary": true,
+          "core_fraction_material": true,
+          "core_nonempty": true,
+          "flux_span_valid": true,
+          "root_residual_finite_and_below_reference_bound": true,
+          "state_finite": true,
+          "vacuum_decay_index_inside_open_stability_window": true
+        },
+        "core_cells": 100,
+        "core_fraction_of_carrier": 0.16,
+        "diverted": false,
+        "flux_span_valid": true,
+        "flux_span_wb": -0.4564432614173537,
+        "minimum_core_fraction": 0.1,
+        "qualified": true,
+        "reference_axis_m": [
+          1.0,
+          0.0
+        ],
+        "solved_axis_m": [
+          1.0358650375823217,
+          -0.0009879290927442882
+        ],
+        "state_finite": true,
+        "terminal_relative_fixed_point_residual": 2.786282981082716e-16,
+        "topology_branch": "limited_plasma",
+        "vertical_conditioning": {
+          "decay_index": 0.5718216376850987,
+          "definition": "n = -(R/Bz)*(dBz/dR)",
+          "evaluation_radius_m": 1.0358650375823217,
+          "lower_stability_margin": 0.5718216376850987,
+          "open_stability_window": [
+            0.0,
+            1.5
+          ],
+          "radial_sample_m": [
+            0.6,
+            0.6341666666666667,
+            0.6683333333333333,
+            0.7025,
+            0.7366666666666666,
+            0.7708333333333333,
+            0.8049999999999999,
+            0.8391666666666666,
+            0.8733333333333333,
+            0.9075,
+            0.9416666666666667,
+            0.9758333333333333,
+            1.01,
+            1.0441666666666667,
+            1.0783333333333331,
+            1.1124999999999998,
+            1.1466666666666665,
+            1.1808333333333332,
+            1.2149999999999999,
+            1.2491666666666665,
+            1.2833333333333332,
+            1.3175,
+            1.3516666666666666,
+            1.3858333333333333,
+            1.42
+          ],
+          "stability_margin": 0.5718216376850987,
+          "stable": true,
+          "upper_stability_margin": 0.9281783623149013,
+          "vertical_field_sample_t": [
+            -0.2554764625825416,
+            -0.23792777986376565,
+            -0.22121311923290402,
+            -0.2096070704967089,
+            -0.2001550231900586,
+            -0.19149457935507977,
+            -0.18318682108488638,
+            -0.1752724822003018,
+            -0.16797394134665966,
+            -0.16151111608170937,
+            -0.1560106450963548,
+            -0.15148587889272114,
+            -0.14785906441467897,
+            -0.14499008969389757,
+            -0.14266937145238293,
+            -0.14052614478384737,
+            -0.13779743916093884,
+            -0.13289718479305107,
+            -0.12271897431499079,
+            -0.10159986106713337,
+            -0.05986604396225314,
+            0.018127292617025084,
+            0.1565736068083267,
+            0.3916374384630224,
+            0.5300322346066058
+          ],
+          "vertical_field_t": -0.14568717742026702
+        }
+      },
+      "direct_branch_receipt": {
+        "axis_finite": true,
+        "core_cells": 100,
+        "core_fraction_of_carrier": 0.16,
+        "diverted": false,
+        "flux_span_valid": true,
+        "flux_span_wb": -0.4564432614173537,
+        "solved_axis_m": [
+          1.0358650375823217,
+          -0.0009879290927442882
+        ],
+        "state_finite": true,
+        "topology_branch": "limited_plasma"
+      },
+      "elapsed_seconds": 9.113221467938274,
+      "first_measured_residual": 1.1992163317958209,
+      "measured_residuals": 28,
+      "minimum_measured_residual": 1.044856117906018e-16,
+      "solver": {
+        "gmres_iterations": 30,
+        "newton_steps": 10,
+        "route": "newton_krylov",
+        "warmup": 8
+      },
+      "terminal_relative_fixed_point_residual": 2.786282981082716e-16,
+      "trace_slots": 328,
+      "vertical_conditioning": {
+        "decay_index": 0.5718216376850987,
+        "definition": "n = -(R/Bz)*(dBz/dR)",
+        "evaluation_radius_m": 1.0358650375823217,
+        "lower_stability_margin": 0.5718216376850987,
+        "open_stability_window": [
+          0.0,
+          1.5
+        ],
+        "radial_sample_m": [
+          0.6,
+          0.6341666666666667,
+          0.6683333333333333,
+          0.7025,
+          0.7366666666666666,
+          0.7708333333333333,
+          0.8049999999999999,
+          0.8391666666666666,
+          0.8733333333333333,
+          0.9075,
+          0.9416666666666667,
+          0.9758333333333333,
+          1.01,
+          1.0441666666666667,
+          1.0783333333333331,
+          1.1124999999999998,
+          1.1466666666666665,
+          1.1808333333333332,
+          1.2149999999999999,
+          1.2491666666666665,
+          1.2833333333333332,
+          1.3175,
+          1.3516666666666666,
+          1.3858333333333333,
+          1.42
+        ],
+        "stability_margin": 0.5718216376850987,
+        "stable": true,
+        "upper_stability_margin": 0.9281783623149013,
+        "vertical_field_sample_t": [
+          -0.2554764625825416,
+          -0.23792777986376565,
+          -0.22121311923290402,
+          -0.2096070704967089,
+          -0.2001550231900586,
+          -0.19149457935507977,
+          -0.18318682108488638,
+          -0.1752724822003018,
+          -0.16797394134665966,
+          -0.16151111608170937,
+          -0.1560106450963548,
+          -0.15148587889272114,
+          -0.14785906441467897,
+          -0.14499008969389757,
+          -0.14266937145238293,
+          -0.14052614478384737,
+          -0.13779743916093884,
+          -0.13289718479305107,
+          -0.12271897431499079,
+          -0.10159986106713337,
+          -0.05986604396225314,
+          0.018127292617025084,
+          0.1565736068083267,
+          0.3916374384630224,
+          0.5300322346066058
+        ],
+        "vertical_field_t": -0.14568717742026702
+      }
+    }
+  }
+}

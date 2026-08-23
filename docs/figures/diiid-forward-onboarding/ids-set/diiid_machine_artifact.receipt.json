@@ -1,10 +1,10 @@
 {
   "cache": {
     "digests_equal": true,
-    "directory": "/run/user/39486/reckon-diiid-artifact-publication-163102-cache",
-    "materialized_digest": "sha256:f0bc384f17ccc8ad2d70adf96b8228acfc8b3a5187ce112f9a09f633446d28ef",
-    "resolved_digest": "sha256:f0bc384f17ccc8ad2d70adf96b8228acfc8b3a5187ce112f9a09f633446d28ef",
-    "resolved_directory": "/run/user/39486/reckon-diiid-artifact-publication-163102-cache/sha256/f0bc384f17ccc8ad2d70adf96b8228acfc8b3a5187ce112f9a09f633446d28ef"
+    "directory": "/run/user/39486/reckon-artifact-repaired-ring-cache",
+    "materialized_digest": "sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e",
+    "resolved_digest": "sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e",
+    "resolved_directory": "/run/user/39486/reckon-artifact-repaired-ring-cache/sha256/c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e"
   },
   "data_dictionary_floor": {
     "declared_data_dictionary": "3.42.2",
@@ -24,25 +24,25 @@
     "files": [
       {
         "name": "diiid_machine_description.nc",
-        "sha256": "1e560b2ad2f2f224eed064ed3ccbeedbd88d4f4d2daca4966a855e37961c05ab",
-        "size": 213703
+        "sha256": "11a12df0c2bd70d6dd7a461d2da11181479b16c6cf89602f226ffa353b0879e0",
+        "size": 217799
       }
     ],
     "oci": {
       "artifact_type": "application/vnd.iter.nova.diii-d-machine-description.v1",
       "file_media_type": "application/vnd.iter.nova.diii-d-machine-description.ids.v1",
       "manifest_media_type": "application/vnd.oci.image.manifest.v1+json",
-      "tag": "dd-4.1.1-physical-0eaa06b66b8a27263599c2c9953f43e734d4769bba0ae2398922bec9ab8a62cd"
+      "tag": "dd-4.1.1-physical-993e2b368200bc74f58725ec41066f86022db84d91b9e835e4355fca425e8318"
     },
-    "physical_digest": "0eaa06b66b8a27263599c2c9953f43e734d4769bba0ae2398922bec9ab8a62cd",
-    "registry_digest": "3b64ad0cd92ca1d79512af2b90faa3edaee3b5f22a1be32a72e13af627d44b9a",
+    "physical_digest": "993e2b368200bc74f58725ec41066f86022db84d91b9e835e4355fca425e8318",
+    "registry_digest": "95334e370576798482b1d52c0d6c4ee79175ec0c14a45b91721ef9d6a0c3d962",
     "schema": "nova-diii-d-machine-artifact",
     "shot_ranges": [
       {
         "evidence": "observed",
         "first_shot": 200000,
         "last_shot": 200000,
-        "physical_digest": "0eaa06b66b8a27263599c2c9953f43e734d4769bba0ae2398922bec9ab8a62cd"
+        "physical_digest": "993e2b368200bc74f58725ec41066f86022db84d91b9e835e4355fca425e8318"
       }
     ],
     "unresolved_gaps": [
@@ -54,22 +54,22 @@
   "network_publication_attempted": false,
   "output": {
     "path": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc",
-    "sha256": "1e560b2ad2f2f224eed064ed3ccbeedbd88d4f4d2daca4966a855e37961c05ab",
-    "size_bytes": 213703
+    "sha256": "11a12df0c2bd70d6dd7a461d2da11181479b16c6cf89602f226ffa353b0879e0",
+    "size_bytes": 217799
   },
   "publication": {
     "artifact_type": "application/vnd.iter.nova.diii-d-machine-description.v1",
     "data_dictionary": "4.1.1",
     "data_dictionary_resolver": "publication_dd_version()",
     "file_media_type": "application/vnd.iter.nova.diii-d-machine-description.ids.v1",
-    "manifest_digest": "sha256:f0bc384f17ccc8ad2d70adf96b8228acfc8b3a5187ce112f9a09f633446d28ef",
+    "manifest_digest": "sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e",
     "manifest_media_type": "application/vnd.oci.image.manifest.v1+json",
     "manifest_path": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.manifest.json",
     "manifest_schema": "nova-diii-d-machine-artifact",
-    "oci_reference": "ghcr.io/registry-account/diii-d-machine-description:dd-4.1.1-physical-0eaa06b66b8a27263599c2c9953f43e734d4769bba0ae2398922bec9ab8a62cd",
-    "oci_tag": "dd-4.1.1-physical-0eaa06b66b8a27263599c2c9953f43e734d4769bba0ae2398922bec9ab8a62cd",
-    "physical_digest": "0eaa06b66b8a27263599c2c9953f43e734d4769bba0ae2398922bec9ab8a62cd",
-    "registry_digest": "3b64ad0cd92ca1d79512af2b90faa3edaee3b5f22a1be32a72e13af627d44b9a",
+    "oci_reference": "ghcr.io/registry-account/diii-d-machine-description:dd-4.1.1-physical-993e2b368200bc74f58725ec41066f86022db84d91b9e835e4355fca425e8318",
+    "oci_tag": "dd-4.1.1-physical-993e2b368200bc74f58725ec41066f86022db84d91b9e835e4355fca425e8318",
+    "physical_digest": "993e2b368200bc74f58725ec41066f86022db84d91b9e835e4355fca425e8318",
+    "registry_digest": "95334e370576798482b1d52c0d6c4ee79175ec0c14a45b91721ef9d6a0c3d962",
     "repository": "ghcr.io/registry-account/diii-d-machine-description"
   },
   "publication_recipe": {
@@ -78,7 +78,7 @@
     "path": "docs/figures/diiid-forward-onboarding/ids-set/PUBLISH.md"
   },
   "round_trip": {
-    "authored_leaf_count": 1549,
+    "authored_leaf_count": 1550,
     "exact_equal": true,
     "maximum_absolute_difference": 0.0
   },

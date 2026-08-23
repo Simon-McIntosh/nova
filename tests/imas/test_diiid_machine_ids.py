@@ -4,18 +4,23 @@ import json
 from pathlib import Path
 
 import imas
+import pytest
 
-from benchmarks.diiid_machine_ids_export import (
-    DEFAULT_OUTPUT,
-    SUPERSEDED_LEAF_COUNT,
-    SUPERSEDED_SHA256,
-    SUPERSEDED_SIZE_BYTES,
-    export_machine_ids,
+from benchmarks.diiid_ids_machine_description import (
+    VERBATIM_ARTIFACT_CONTENT_SHA256,
+    write_repaired_artifact_receipt,
 )
 from nova.imas.diiid_machine_ids import (
     IDS_NAMES,
+    SOURCE_PATH,
     latest_published_dd_version,
     round_trip_leaf_receipt,
+)
+from nova.scripts.diiid_machine_artifact import publish_diiid_machine_artifact
+
+
+DEFAULT_OUTPUT = Path(
+    "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc"
 )
 
 
@@ -43,52 +48,41 @@ def test_leaf_receipt_requires_exact_geometry_and_reports_zero_differences():
 
 
 def test_live_export_writes_exact_native_latest_dd(tmp_path: Path):
+    if not SOURCE_PATH.is_file():
+        pytest.skip("the authoritative DIII-D netCDF source is not mounted")
     output = tmp_path / "diiid_machine_description.nc"
-
-    receipt = export_machine_ids(output)
+    artifact_receipt_path = tmp_path / "artifact.receipt.json"
+    manifest_path = tmp_path / "diiid_machine_description.manifest.json"
+    recipe_path = tmp_path / "PUBLISH.md"
+    artifact_receipt = publish_diiid_machine_artifact(
+        repository="ghcr.io/test-account/diii-d-machine-description",
+        cache_directory=tmp_path / "cache",
+        source_path=SOURCE_PATH,
+        output=output,
+        receipt_path=artifact_receipt_path,
+        manifest_path=manifest_path,
+        recipe_path=recipe_path,
+    )
+    receipt = write_repaired_artifact_receipt(
+        source_path=SOURCE_PATH,
+        ids_path=output,
+        manifest_path=manifest_path,
+        artifact_receipt_path=artifact_receipt_path,
+        recipe_path=recipe_path,
+        receipt_path=tmp_path / "diiid_machine_description.receipt.json",
+    )
     written_dd = receipt["native_authoring"]["target_data_dictionary"]
 
     assert written_dd == latest_published_dd_version()
     assert written_dd.split(".")[0] == "4"
-    assert receipt["source"]["data_dictionary"] == "3.41.0"
-    assert receipt["source"]["autoconvert"] is False
+    assert receipt["native_authoring"]["source_data_dictionary"] == "3.41.0"
     assert receipt["native_authoring"]["cross_major_conversion_performed"] is False
-    assert receipt["content"] == {
-        "ids": ["wall", "pf_active", "magnetics"],
-        "wall_limiter_vertices": 82,
-        "pf_active_coils": 24,
-        "pf_active_elements": 140,
-        "b_field_pol_probe_positions": 76,
-        "flux_loop_positions": 44,
-        "magnetics_signal_arrays": 0,
-        "equilibrium_occurrences": 0,
-    }
-    assert receipt["round_trip"]["verdict"] == "exact"
-    assert receipt["round_trip"]["wall_outline_maximum_absolute_difference"] == 0.0
-    assert receipt["round_trip"]["element_vertex_maximum_absolute_difference"] == 0.0
-    major = receipt["round_trip"]["major_comparison"]
-    assert major["comparison_available"] is False
-    assert major["superseded_leaf_count"] == SUPERSEDED_LEAF_COUNT
-    assert major["published_leaf_count"] == receipt["round_trip"]["total_leaf_count"]
-    assert major["leaf_count_difference"] == (
-        major["published_leaf_count"] - SUPERSEDED_LEAF_COUNT
-    )
-    assert major["presence_differences"] == []
-    assert major["shape_differences"] == []
-    assert receipt["output"]["superseded"] == {
-        "data_dictionary": "3.41.0",
-        "size_bytes": SUPERSEDED_SIZE_BYTES,
-        "sha256": SUPERSEDED_SHA256,
-    }
-    assert receipt["output"]["size_bytes"] > 0
-    assert len(receipt["output"]["sha256"]) == 64
-    assert all(
-        properties["data_dictionary"] == written_dd
-        and properties["source"].endswith("DIII-D/200000.nc")
-        and properties["provenance"][0]["sources"][0]
-        == "IMAS netCDF source; Data Dictionary 3.41.0"
-        for properties in receipt["ids_properties"].values()
-    )
+    assert artifact_receipt["round_trip"]["exact_equal"] is True
+    assert artifact_receipt["round_trip"]["maximum_absolute_difference"] == 0.0
+    assert receipt["limiter"]["source_vertex_count"] == 82
+    assert receipt["limiter"]["repair"]["published_vertex_count"] == 84
+    assert receipt["artifact"]["content_sha256"] != VERBATIM_ARTIFACT_CONTENT_SHA256
+    assert all(receipt["identity_comparison"].values())
     assert [item["quantity"] for item in receipt["declared_absent"]] == [
         "pf_passive",
         "tf static conductor geometry",
@@ -110,19 +104,20 @@ def test_live_export_writes_exact_native_latest_dd(tmp_path: Path):
     assert versions == {name: written_dd for name in IDS_NAMES}
 
 
-def test_published_receipt_names_every_cross_major_schema_change():
+def test_published_receipt_records_repaired_identity_and_native_authoring():
     receipt_path = DEFAULT_OUTPUT.with_suffix(".receipt.json")
     receipt = json.loads(receipt_path.read_text())
-    major = receipt["round_trip"]["major_comparison"]
 
-    assert receipt["round_trip"]["total_leaf_count"] == 1549
-    assert major["comparison_available"] is True
-    assert major["superseded_leaf_count"] == SUPERSEDED_LEAF_COUNT
-    assert major["published_leaf_count"] == 1549
-    assert major["leaf_count_difference"] == -284
-    assert len(major["presence_differences"]) == 296
-    assert all(
-        {"ids", "path", "presence"} <= difference.keys()
-        for difference in major["presence_differences"]
+    assert receipt["artifact"]["round_trip"]["authored_leaf_count"] == 1550
+    assert receipt["artifact"]["round_trip"]["exact_equal"] is True
+    assert receipt["native_authoring"]["target_data_dictionary"] == (
+        latest_published_dd_version()
     )
-    assert major["shape_differences"] == []
+    assert receipt["native_authoring"]["cross_major_conversion_performed"] is False
+    assert receipt["limiter"]["authority"] == "repaired-ring-only"
+    assert receipt["limiter"]["source_chain_valid"] is False
+    assert receipt["limiter"]["repair"]["valid_material_relative_area_difference"] == (
+        pytest.approx(4.1593370133e-05, rel=1.0e-10)
+    )
+    assert all(receipt["identity_comparison"].values())
+    assert receipt["data_dictionary_floor"]["refused"] is True

@@ -1,0 +1,704 @@
+{
+  "comparators": {
+    "banked_leading_eigenvalue": 0.9874290999339198,
+    "banked_stable_late_growth": 0.9883689804610637,
+    "banked_stable_resolvent_gain": 106.99077030932676
+  },
+  "receipt": {
+    "checkout_porcelain_empty_before_measurement": true,
+    "device_backend": "gpu",
+    "devices": [
+      "cuda:0"
+    ],
+    "kind": "passive_representation_eigenvalue_response",
+    "runtime_mitigations": {
+      "defaults": {
+        "XLA_FLAGS": "--xla_gpu_enable_command_buffer=",
+        "XLA_PYTHON_CLIENT_PREALLOCATE": "false"
+      },
+      "effective": {
+        "XLA_FLAGS": "--xla_gpu_enable_command_buffer=",
+        "XLA_PYTHON_CLIENT_PREALLOCATE": "false"
+      }
+    },
+    "source_commit": "02ef69bb143d593720e8ff916440f9eb8a417285",
+    "status": "complete"
+  },
+  "response": {
+    "banked_baseline_leading_eigenvalue": 0.9874290999339198,
+    "carrier": {
+      "cell_current_representation": "centroid image pinned by the banked eigenvalue comparator",
+      "construction": "qualified analytic structured free-boundary control",
+      "lattice_shape": [
+        25,
+        25
+      ],
+      "plasma_cells": 625,
+      "state_rows": 686,
+      "vertical_decay_index": 0.5718216376851021,
+      "vertical_decay_index_stable": true,
+      "wall_nodes": 61
+    },
+    "elapsed_seconds": 14.362363992258906,
+    "representations": [
+      {
+        "dominant_eigenpairs": [
+          {
+            "eigenvalue": {
+              "imaginary": 0.0,
+              "magnitude": 0.9874290999339232,
+              "phase_radians": 0.0,
+              "real": 0.9874290999339232
+            },
+            "rank": 1,
+            "ritz_residual_l2": 1.4748643893817804e-15
+          },
+          {
+            "eigenvalue": {
+              "imaginary": 0.0,
+              "magnitude": 0.536242004844573,
+              "phase_radians": 0.0,
+              "real": 0.536242004844573
+            },
+            "rank": 2,
+            "ritz_residual_l2": 5.141948338198896e-16
+          },
+          {
+            "eigenvalue": {
+              "imaginary": 0.0,
+              "magnitude": 0.5085506238355093,
+              "phase_radians": 0.0,
+              "real": 0.5085506238355093
+            },
+            "rank": 3,
+            "ritz_residual_l2": 4.22525368840287e-16
+          },
+          {
+            "eigenvalue": {
+              "imaginary": 0.0,
+              "magnitude": 0.39002165435010433,
+              "phase_radians": 0.0,
+              "real": 0.39002165435010433
+            },
+            "rank": 4,
+            "ritz_residual_l2": 8.109651014822889e-16
+          },
+          {
+            "eigenvalue": {
+              "imaginary": 0.0,
+              "magnitude": 0.21196376968789848,
+              "phase_radians": 0.0,
+              "real": 0.21196376968789848
+            },
+            "rank": 5,
+            "ritz_residual_l2": 2.9506803002554505e-15
+          },
+          {
+            "eigenvalue": {
+              "imaginary": 0.0,
+              "magnitude": 0.20508650975621315,
+              "phase_radians": 0.0,
+              "real": 0.20508650975621315
+            },
+            "rank": 6,
+            "ritz_residual_l2": 5.949480365609606e-16
+          }
+        ],
+        "drive_overlap_with_baseline_fraction": 1.0000000000000004,
+        "leading_eigenvalue": {
+          "imaginary": 0.0,
+          "magnitude": 0.9874290999339232,
+          "phase_radians": 0.0,
+          "real": 0.9874290999339232
+        },
+        "leading_eigenvalue_absolute_movement_from_banked": 3.4416913763379853e-15,
+        "leading_eigenvector_alignment_with_driven_late_vector": 0.9999999934473606,
+        "leading_eigenvector_localisation": {
+          "axis_motion": {
+            "absolute_radial_over_vertical_motion": 0.023440437039217835,
+            "axis_displacement_direction_r_z": [
+              -0.023433999969767246,
+              -0.999725386116316
+            ],
+            "axis_displacement_magnitude_m": 9.845725188555557e-07,
+            "probe_peak_wb": 3.5e-06,
+            "symmetric_axis_displacement_m": [
+              -2.3072472377094755e-08,
+              -9.843021415723843e-07
+            ]
+          },
+          "axis_neighbourhood_fraction": 0.012991446684026818,
+          "axis_neighbourhood_radius_m": 0.06999240355511652,
+          "axis_translation_content_fraction": 0.5677970092650751,
+          "boundary_state_fraction": 0.13406534323348418,
+          "definitions": {
+            "axis_neighbourhood_fraction": "squared eigenvector norm on the thirteen grid cells nearest the solved axis",
+            "axis_translation_content_fraction": "squared projection onto radial and vertical translation derivatives",
+            "boundary_state_fraction": "squared eigenvector norm on wall rows",
+            "normalisation_content_fraction": "squared projection onto affine gauge and flux-span coordinate directions",
+            "passive_current_state_fraction": "fraction in dynamic passive-current coordinates; the flux map state has none",
+            "passive_drive_overlap_fraction": "squared projection onto the retained-minus-zeroed passive external field"
+          },
+          "direct_sample_rows": 0,
+          "direct_sample_state_fraction": 0.0,
+          "grid_rows": 625,
+          "normalisation_amplitude": 1.0,
+          "normalisation_content_fraction": 0.009853676541684125,
+          "normalisation_policy": "absolute",
+          "normalisation_rescaled": false,
+          "passive_current_state_fraction": 0.0,
+          "passive_drive_overlap_fraction": 0.8511983944159311,
+          "state_rows": 686,
+          "wall_rows": 61
+        },
+        "leading_ritz_residual_l2": 1.4748643893817804e-15,
+        "name": "baseline",
+        "passive_driven_late_grid_peak_growth_median": 0.9875385043007742,
+        "passive_representation": {
+          "boundary_expansion_factor": 1.08,
+          "conductor_count": 16,
+          "control_direct_external_peak_points": 0.09723915202112365,
+          "control_over_elongated_direct_peak": 1.0000000000000002,
+          "current_l1_a": 396.3914404405499,
+          "current_l2_a": 111.02879623738119,
+          "elongated_direct_external_peak_points": 0.09723915202112363,
+          "green_section_height_m": 0.05,
+          "green_section_width_m": 0.05,
+          "maximum_absolute_current_a": 38.787384165818224,
+          "source_to_grid_l2_wb_per_a": 0.00017039982775752697,
+          "source_to_grid_shape": [
+            625,
+            16
+          ],
+          "source_to_wall_l2_wb_per_a": 6.351469184228869e-05,
+          "source_to_wall_shape": [
+            61,
+            16
+          ],
+          "translation_mode_weighted_relative_l2_error": 0.01928717297520291
+        },
+        "root_relative_map_residual": 3.1345683537180552e-16,
+        "shared_without_passive_operator_object": true,
+        "shared_without_passive_profile_object": true,
+        "zero_passive_external_field_max_difference_wb": 0.0
+      },
+      {
+        "dominant_eigenpairs": [
+          {
+            "eigenvalue": {
+              "imaginary": 0.0,
+              "magnitude": 0.9874290999339236,
+              "phase_radians": 0.0,
+              "real": 0.9874290999339236
+            },
+            "rank": 1,
+            "ritz_residual_l2": 1.8628483911172185e-15
+          },
+          {
+            "eigenvalue": {
+              "imaginary": 0.0,
+              "magnitude": 0.536242004844569,
+              "phase_radians": 0.0,
+              "real": 0.536242004844569
+            },
+            "rank": 2,
+            "ritz_residual_l2": 4.401781774299877e-16
+          },
+          {
+            "eigenvalue": {
+              "imaginary": 0.0,
+              "magnitude": 0.5085506238355135,
+              "phase_radians": 0.0,
+              "real": 0.5085506238355135
+            },
+            "rank": 3,
+            "ritz_residual_l2": 3.875466978401743e-16
+          },
+          {
+            "eigenvalue": {
+              "imaginary": 0.0,
+              "magnitude": 0.3900216543501051,
+              "phase_radians": 0.0,
+              "real": 0.3900216543501051
+            },
+            "rank": 4,
+            "ritz_residual_l2": 1.6249871299581666e-15
+          },
+          {
+            "eigenvalue": {
+              "imaginary": 0.0,
+              "magnitude": 0.2119637696878977,
+              "phase_radians": 0.0,
+              "real": 0.2119637696878977
+            },
+            "rank": 5,
+            "ritz_residual_l2": 1.5400788266127245e-15
+          },
+          {
+            "eigenvalue": {
+              "imaginary": 0.0,
+              "magnitude": 0.20508650975621337,
+              "phase_radians": 0.0,
+              "real": 0.20508650975621337
+            },
+            "rank": 6,
+            "ritz_residual_l2": 1.788003425864478e-15
+          }
+        ],
+        "drive_overlap_with_baseline_fraction": 0.9996904875369057,
+        "leading_eigenvalue": {
+          "imaginary": 0.0,
+          "magnitude": 0.9874290999339236,
+          "phase_radians": 0.0,
+          "real": 0.9874290999339236
+        },
+        "leading_eigenvalue_absolute_movement_from_banked": 3.774758283725532e-15,
+        "leading_eigenvector_alignment_with_driven_late_vector": 0.9999999941052583,
+        "leading_eigenvector_localisation": {
+          "axis_motion": {
+            "absolute_radial_over_vertical_motion": 0.023440437039217835,
+            "axis_displacement_direction_r_z": [
+              -0.023433999969767246,
+              -0.999725386116316
+            ],
+            "axis_displacement_magnitude_m": 9.845725188555557e-07,
+            "probe_peak_wb": 3.5e-06,
+            "symmetric_axis_displacement_m": [
+              -2.3072472377094755e-08,
+              -9.843021415723843e-07
+            ]
+          },
+          "axis_neighbourhood_fraction": 0.012991446684026815,
+          "axis_neighbourhood_radius_m": 0.06999240355511652,
+          "axis_translation_content_fraction": 0.5677970092650754,
+          "boundary_state_fraction": 0.1340653432334842,
+          "definitions": {
+            "axis_neighbourhood_fraction": "squared eigenvector norm on the thirteen grid cells nearest the solved axis",
+            "axis_translation_content_fraction": "squared projection onto radial and vertical translation derivatives",
+            "boundary_state_fraction": "squared eigenvector norm on wall rows",
+            "normalisation_content_fraction": "squared projection onto affine gauge and flux-span coordinate directions",
+            "passive_current_state_fraction": "fraction in dynamic passive-current coordinates; the flux map state has none",
+            "passive_drive_overlap_fraction": "squared projection onto the retained-minus-zeroed passive external field"
+          },
+          "direct_sample_rows": 0,
+          "direct_sample_state_fraction": 0.0,
+          "grid_rows": 625,
+          "normalisation_amplitude": 1.0,
+          "normalisation_content_fraction": 0.009853676541684186,
+          "normalisation_policy": "absolute",
+          "normalisation_rescaled": false,
+          "passive_current_state_fraction": 0.0,
+          "passive_drive_overlap_fraction": 0.8514987398345509,
+          "state_rows": 686,
+          "wall_rows": 61
+        },
+        "leading_ritz_residual_l2": 1.8628483911172185e-15,
+        "name": "refined_conductor_count",
+        "passive_driven_late_grid_peak_growth_median": 0.9875329233173805,
+        "passive_representation": {
+          "boundary_expansion_factor": 1.08,
+          "conductor_count": 32,
+          "control_direct_external_peak_points": 0.09723915202112365,
+          "current_l1_a": 411.8939191804375,
+          "current_l2_a": 80.76178805169155,
+          "green_section_height_m": 0.05,
+          "green_section_width_m": 0.05,
+          "maximum_absolute_current_a": 19.923173427373808,
+          "shell_standoff_m": {
+            "maximum": 0.021957714896953643,
+            "mean": 0.019385646902168027,
+            "minimum": 0.01711381539212988
+          },
+          "source_to_grid_shape": [
+            625,
+            32
+          ],
+          "source_to_wall_shape": [
+            61,
+            32
+          ],
+          "translation_mode_weighted_relative_l2_error": 0.0025615779425682762
+        },
+        "root_relative_map_residual": 3.1345683537180552e-16,
+        "shared_without_passive_operator_object": true,
+        "shared_without_passive_profile_object": true,
+        "zero_passive_external_field_max_difference_wb": 0.0
+      },
+      {
+        "dominant_eigenpairs": [
+          {
+            "eigenvalue": {
+              "imaginary": 0.0,
+              "magnitude": 0.9874290999339224,
+              "phase_radians": 0.0,
+              "real": 0.9874290999339224
+            },
+            "rank": 1,
+            "ritz_residual_l2": 1.1182981870960016e-15
+          },
+          {
+            "eigenvalue": {
+              "imaginary": 0.0,
+              "magnitude": 0.5362420048445682,
+              "phase_radians": 0.0,
+              "real": 0.5362420048445682
+            },
+            "rank": 2,
+            "ritz_residual_l2": 1.4715760061958712e-15
+          },
+          {
+            "eigenvalue": {
+              "imaginary": 0.0,
+              "magnitude": 0.5085506238355126,
+              "phase_radians": 0.0,
+              "real": 0.5085506238355126
+            },
+            "rank": 3,
+            "ritz_residual_l2": 1.0186826669006216e-15
+          },
+          {
+            "eigenvalue": {
+              "imaginary": 0.0,
+              "magnitude": 0.39002165435010305,
+              "phase_radians": 0.0,
+              "real": 0.39002165435010305
+            },
+            "rank": 4,
+            "ritz_residual_l2": 1.1902491582871e-15
+          },
+          {
+            "eigenvalue": {
+              "imaginary": 0.0,
+              "magnitude": 0.21196376968789796,
+              "phase_radians": 0.0,
+              "real": 0.21196376968789796
+            },
+            "rank": 5,
+            "ritz_residual_l2": 8.481334098531523e-15
+          },
+          {
+            "eigenvalue": {
+              "imaginary": 0.0,
+              "magnitude": 0.20508650975621312,
+              "phase_radians": 0.0,
+              "real": 0.20508650975621312
+            },
+            "rank": 6,
+            "ritz_residual_l2": 1.5315940765472096e-15
+          }
+        ],
+        "drive_overlap_with_baseline_fraction": 0.9951826681188481,
+        "leading_eigenvalue": {
+          "imaginary": 0.0,
+          "magnitude": 0.9874290999339224,
+          "phase_radians": 0.0,
+          "real": 0.9874290999339224
+        },
+        "leading_eigenvalue_absolute_movement_from_banked": 2.55351295663786e-15,
+        "leading_eigenvector_alignment_with_driven_late_vector": 0.9999999937365422,
+        "leading_eigenvector_localisation": {
+          "axis_motion": {
+            "absolute_radial_over_vertical_motion": 0.023440437039217835,
+            "axis_displacement_direction_r_z": [
+              -0.023433999969767246,
+              -0.999725386116316
+            ],
+            "axis_displacement_magnitude_m": 9.845725188555557e-07,
+            "probe_peak_wb": 3.5e-06,
+            "symmetric_axis_displacement_m": [
+              -2.3072472377094755e-08,
+              -9.843021415723843e-07
+            ]
+          },
+          "axis_neighbourhood_fraction": 0.012991446684026816,
+          "axis_neighbourhood_radius_m": 0.06999240355511652,
+          "axis_translation_content_fraction": 0.5677970092650755,
+          "boundary_state_fraction": 0.1340653432334842,
+          "definitions": {
+            "axis_neighbourhood_fraction": "squared eigenvector norm on the thirteen grid cells nearest the solved axis",
+            "axis_translation_content_fraction": "squared projection onto radial and vertical translation derivatives",
+            "boundary_state_fraction": "squared eigenvector norm on wall rows",
+            "normalisation_content_fraction": "squared projection onto affine gauge and flux-span coordinate directions",
+            "passive_current_state_fraction": "fraction in dynamic passive-current coordinates; the flux map state has none",
+            "passive_drive_overlap_fraction": "squared projection onto the retained-minus-zeroed passive external field"
+          },
+          "direct_sample_rows": 0,
+          "direct_sample_state_fraction": 0.0,
+          "grid_rows": 625,
+          "normalisation_amplitude": 1.0,
+          "normalisation_content_fraction": 0.00985367654168413,
+          "normalisation_policy": "absolute",
+          "normalisation_rescaled": false,
+          "passive_current_state_fraction": 0.0,
+          "passive_drive_overlap_fraction": 0.824799947986353,
+          "state_rows": 686,
+          "wall_rows": 61
+        },
+        "leading_ritz_residual_l2": 1.1182981870960016e-15,
+        "name": "changed_shell_standoff",
+        "passive_driven_late_grid_peak_growth_median": 0.987536048851661,
+        "passive_representation": {
+          "boundary_expansion_factor": 1.16,
+          "conductor_count": 16,
+          "control_direct_external_peak_points": 0.09723915202112361,
+          "current_l1_a": 393.04898016304844,
+          "current_l2_a": 110.09861308039471,
+          "green_section_height_m": 0.05,
+          "green_section_width_m": 0.05,
+          "maximum_absolute_current_a": 38.075671068526376,
+          "shell_standoff_m": {
+            "maximum": 0.043915429793907224,
+            "mean": 0.038771293802786405,
+            "minimum": 0.034227630784259715
+          },
+          "source_to_grid_shape": [
+            625,
+            16
+          ],
+          "source_to_wall_shape": [
+            61,
+            16
+          ],
+          "translation_mode_weighted_relative_l2_error": 0.008298671844104653
+        },
+        "root_relative_map_residual": 3.1345683537180552e-16,
+        "shared_without_passive_operator_object": true,
+        "shared_without_passive_profile_object": true,
+        "zero_passive_external_field_max_difference_wb": 0.0
+      }
+    ],
+    "shape_sensitivity_incident": {
+      "attribution_boundary": "The rejected reconstruction also traversed the current construction-time cell-current representation. It corroborates amplification of representation-scale changes but is not used as a passive-only eigenvalue sensitivity estimate.",
+      "banked_byte_identical_map_terminal_relative_residual": 1.3931414905413574e-16,
+      "cpu_reproduction": 7.726885632464709e-06,
+      "gpu_reproduction": 7.726885632357845e-06,
+      "mechanism": "Reconstructing a semantically zero passive-current suffix changed the fixed source matrix representation and floating reduction path. The near-marginal nonlinear solve amplified that nominally null representation difference by more than ten orders in its terminal residual. The accepted comparison therefore reuses the original profile, arrays, shapes and reduction order byte-for-byte.",
+      "orders_of_magnitude": 10.744009257611811,
+      "reconstructed_semantically_zero_map_terminal_relative_residual": 7.726885632357845e-06,
+      "residual_amplification_factor": 55463753572.90719
+    },
+    "solve": {
+      "arm": "passive_currents_zeroed",
+      "control_branch_qualification": {
+        "axis_displacement_limit_m": 0.05970042712403531,
+        "axis_displacement_m": 0.03587864162246896,
+        "axis_displacement_vector_m": [
+          0.035865037582320625,
+          -0.0009879290927445644
+        ],
+        "axis_finite": true,
+        "checks": {
+          "axis_displacement_within_control_scale": true,
+          "axis_finite": true,
+          "axis_inside_control_boundary": true,
+          "core_fraction_material": true,
+          "core_nonempty": true,
+          "flux_span_valid": true,
+          "root_residual_finite_and_below_reference_bound": true,
+          "state_finite": true,
+          "vacuum_decay_index_inside_open_stability_window": true
+        },
+        "core_cells": 100,
+        "core_fraction_of_carrier": 0.16,
+        "diverted": false,
+        "flux_span_valid": true,
+        "flux_span_wb": -0.4564432614173535,
+        "minimum_core_fraction": 0.1,
+        "qualified": true,
+        "reference_axis_m": [
+          1.0,
+          0.0
+        ],
+        "solved_axis_m": [
+          1.0358650375823206,
+          -0.0009879290927445644
+        ],
+        "state_finite": true,
+        "terminal_relative_fixed_point_residual": 3.1345683537180552e-16,
+        "topology_branch": "limited_plasma",
+        "vertical_conditioning": {
+          "decay_index": 0.5718216376851021,
+          "definition": "n = -(R/Bz)*(dBz/dR)",
+          "evaluation_radius_m": 1.0358650375823206,
+          "lower_stability_margin": 0.5718216376851021,
+          "open_stability_window": [
+            0.0,
+            1.5
+          ],
+          "radial_sample_m": [
+            0.6,
+            0.6341666666666667,
+            0.6683333333333333,
+            0.7025,
+            0.7366666666666666,
+            0.7708333333333333,
+            0.8049999999999999,
+            0.8391666666666666,
+            0.8733333333333333,
+            0.9075,
+            0.9416666666666667,
+            0.9758333333333333,
+            1.01,
+            1.0441666666666667,
+            1.0783333333333331,
+            1.1124999999999998,
+            1.1466666666666665,
+            1.1808333333333332,
+            1.2149999999999999,
+            1.2491666666666665,
+            1.2833333333333332,
+            1.3175,
+            1.3516666666666666,
+            1.3858333333333333,
+            1.42
+          ],
+          "stability_margin": 0.5718216376851021,
+          "stable": true,
+          "upper_stability_margin": 0.9281783623148979,
+          "vertical_field_sample_t": [
+            -0.2554764625825416,
+            -0.23792777986376565,
+            -0.22121311923290402,
+            -0.2096070704967089,
+            -0.2001550231900586,
+            -0.19149457935507977,
+            -0.18318682108488638,
+            -0.1752724822003018,
+            -0.16797394134665966,
+            -0.16151111608170937,
+            -0.1560106450963548,
+            -0.15148587889272114,
+            -0.14785906441467897,
+            -0.14499008969389757,
+            -0.14266937145238293,
+            -0.14052614478384737,
+            -0.13779743916093884,
+            -0.13289718479305107,
+            -0.12271897431499079,
+            -0.10159986106713337,
+            -0.05986604396225314,
+            0.018127292617025084,
+            0.1565736068083267,
+            0.3916374384630224,
+            0.5300322346066058
+          ],
+          "vertical_field_t": -0.1456871774202671
+        }
+      },
+      "direct_branch_receipt": {
+        "axis_finite": true,
+        "core_cells": 100,
+        "core_fraction_of_carrier": 0.16,
+        "diverted": false,
+        "flux_span_valid": true,
+        "flux_span_wb": -0.4564432614173535,
+        "solved_axis_m": [
+          1.0358650375823206,
+          -0.0009879290927445644
+        ],
+        "state_finite": true,
+        "topology_branch": "limited_plasma"
+      },
+      "elapsed_seconds": 6.2081220066174865,
+      "first_measured_residual": 1.1992163317958209,
+      "measured_residuals": 28,
+      "minimum_measured_residual": 1.393141490541358e-16,
+      "solver": {
+        "gmres_iterations": 30,
+        "newton_steps": 10,
+        "route": "newton_krylov",
+        "warmup": 8
+      },
+      "terminal_relative_fixed_point_residual": 3.1345683537180552e-16,
+      "trace_slots": 328,
+      "vertical_conditioning": {
+        "decay_index": 0.5718216376851021,
+        "definition": "n = -(R/Bz)*(dBz/dR)",
+        "evaluation_radius_m": 1.0358650375823206,
+        "lower_stability_margin": 0.5718216376851021,
+        "open_stability_window": [
+          0.0,
+          1.5
+        ],
+        "radial_sample_m": [
+          0.6,
+          0.6341666666666667,
+          0.6683333333333333,
+          0.7025,
+          0.7366666666666666,
+          0.7708333333333333,
+          0.8049999999999999,
+          0.8391666666666666,
+          0.8733333333333333,
+          0.9075,
+          0.9416666666666667,
+          0.9758333333333333,
+          1.01,
+          1.0441666666666667,
+          1.0783333333333331,
+          1.1124999999999998,
+          1.1466666666666665,
+          1.1808333333333332,
+          1.2149999999999999,
+          1.2491666666666665,
+          1.2833333333333332,
+          1.3175,
+          1.3516666666666666,
+          1.3858333333333333,
+          1.42
+        ],
+        "stability_margin": 0.5718216376851021,
+        "stable": true,
+        "upper_stability_margin": 0.9281783623148979,
+        "vertical_field_sample_t": [
+          -0.2554764625825416,
+          -0.23792777986376565,
+          -0.22121311923290402,
+          -0.2096070704967089,
+          -0.2001550231900586,
+          -0.19149457935507977,
+          -0.18318682108488638,
+          -0.1752724822003018,
+          -0.16797394134665966,
+          -0.16151111608170937,
+          -0.1560106450963548,
+          -0.15148587889272114,
+          -0.14785906441467897,
+          -0.14499008969389757,
+          -0.14266937145238293,
+          -0.14052614478384737,
+          -0.13779743916093884,
+          -0.13289718479305107,
+          -0.12271897431499079,
+          -0.10159986106713337,
+          -0.05986604396225314,
+          0.018127292617025084,
+          0.1565736068083267,
+          0.3916374384630224,
+          0.5300322346066058
+        ],
+        "vertical_field_t": -0.1456871774202671
+      }
+    },
+    "verdict": {
+      "baseline_contraction_margin": 0.012570900066080193,
+      "classification": "INTRINSIC_MAP_PROPERTY",
+      "direction": "static within the declared contraction-margin threshold",
+      "material_movement_rule": "absolute eigenvalue movement at least ten percent of the banked contraction margin",
+      "material_movement_threshold": 0.0012570900066080195,
+      "maximum_additional_representation_movement": 3.774758283725532e-15,
+      "most_moved_representation": "refined_conductor_count",
+      "movement_fraction_of_baseline_contraction_margin": 3.002774872032343e-13,
+      "ruling": "The leading vertical-channel eigenvalue is static under both passive shell changes. The shell is a prescribed drive rather than a dynamic map coordinate, so representation work cannot move this pole.",
+      "zero_passive_map_identity": "All representations retain exactly the same active external field and zero the refitted passive-current suffix."
+    }
+  },
+  "solver_budget": {
+    "arnoldi_subspace": 36,
+    "dominant_eigenpairs": 6,
+    "passive_tangent_iterations": 16,
+    "stable_gmres_iterations": 30,
+    "stable_newton_steps": 10,
+    "stable_warmup": 8
+  }
+}

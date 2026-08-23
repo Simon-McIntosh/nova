@@ -1,21 +1,23 @@
-"""Identify the near-marginal eigenmode of the passive-control flux map.
+"""Measure passive-shell representation sensitivity of a near-marginal map.
 
-The benchmark linearises the exact coupled map at the qualified near-circular
-root, computes several dominant Ritz eigenpairs, and localises the leading
-right eigenvector against physical translation and algebraic flux-coordinate
-subspaces.  It then follows the passive-drive tangent on the independent
-elongated carrier so the mechanism is not inferred from one discretisation.
+The benchmark refits the vertical passive drive on a qualified near-circular
+control using several conductor representations.  It solves and linearises one
+byte-identical zero-passive-current map, recomputes the dominant
+Ritz pairs from each fitted drive, and localises the leading right eigenvector
+against physical translation and algebraic flux-coordinate subspaces.
 """
 
 from __future__ import annotations
 
 import argparse
+from copy import deepcopy
 from dataclasses import replace
 import json
 import math
 import os
 from pathlib import Path
 from time import perf_counter
+from unittest.mock import patch
 
 os.environ.setdefault("XLA_FLAGS", "--xla_gpu_enable_command_buffer=")
 os.environ.setdefault("XLA_PYTHON_CLIENT_PREALLOCATE", "false")
@@ -28,36 +30,45 @@ from scipy.sparse.linalg import LinearOperator, eigs
 
 from benchmarks.measurement_provenance import measurement_stamp
 from benchmarks.passive_closure_trace import (
+    PASSIVE_SHELL_EXPANSION,
     CONTROL_GMRES_ITERATIONS,
     CONTROL_NEWTON_STEPS,
     CONTROL_NEWTON_WARMUP,
     DENSE_CELL_REQUEST,
     ELONGATED_BOUNDARY_ELONGATION,
     ELONGATED_DIRECT_PEAK_POINTS,
-    MEASURED_UNPINNED_SPECTRAL_RADIUS,
     RUNTIME_MITIGATION_DEFAULTS,
+    _analytic_material_loop,
     _analytic_solovev,
     _build_analytic_control,
     _equilibrium_core,
     _require_control_branch,
     _solve_analytic_control,
+    _vertical_translation_mode,
 )
 from nova.jax.config import configure_dtypes
+from tests import test_equilibrium_forward_solve as forward_solve_suite
 from tests import test_equilibrium_forward_reference as reference
 
 
 DEFAULT_RECEIPT = Path(
-    "docs/figures/forward-operator-refinement/coupled-map-mode-identification.json"
+    "docs/figures/forward-operator-refinement/"
+    "passive-representation-eigenvalue-response.json"
 )
 DEFAULT_FIGURE = Path(
-    "docs/figures/forward-operator-refinement/coupled-map-mode-identification.png"
+    "docs/figures/forward-operator-refinement/"
+    "passive-representation-eigenvalue-response.png"
 )
+BASELINE_LEADING_EIGENVALUE = 0.9874290999339198
 STABLE_LATE_GROWTH = 0.9883689804610637
 STABLE_RESOLVENT_GAIN = 106.99077030932676
 ELONGATED_LATE_GROWTH = 1.3372082983171414
 EIGENPAIR_COUNT = 6
 ARNOLDI_SUBSPACE = 36
 TANGENT_ITERATIONS = 16
+REFINED_PASSIVE_CONDUCTORS = 32
+CHANGED_SHELL_EXPANSION = 1.16
+MATERIAL_MOVEMENT_FRACTION = 0.1
 
 
 def _strict_json(value):
@@ -436,6 +447,341 @@ def _stable_measurement() -> tuple[dict[str, object], object, object, np.ndarray
     return receipt, control, solved, vectors[:, 0]
 
 
+def _with_passive_representation(control, conductor_count: int, expansion: float):
+    """Return the control with one refitted wall-following passive shell."""
+    operator = control.with_passive.operator
+    grid_coordinate = np.asarray(control.with_passive.lattice.coordinate)
+    wall_coordinate = np.asarray(control.material_boundary)
+    axis = np.asarray(control.reference_axis)
+    boundary, _boundary_flux = _analytic_material_loop(conductor_count)
+    passive_coordinate = axis + expansion * (boundary - axis)
+    passive_to_grid = forward_solve_suite._green_block(
+        grid_coordinate, passive_coordinate
+    )
+    passive_to_wall = forward_solve_suite._green_block(
+        wall_coordinate, passive_coordinate
+    )
+
+    active_count = control.construction_receipt["active_fit"]["conductor_count"]
+    active_to_grid = np.asarray(operator.grid.source_target)[:, :active_count]
+    active_to_wall = np.asarray(operator.wall.source_target)[:, :active_count]
+    active_current = np.asarray(operator.external_current)[:active_count]
+    inside = np.asarray(operator.inside_material, dtype=bool)
+    weight = np.r_[inside.astype(float), np.ones(len(wall_coordinate))]
+    translation_target = np.r_[
+        _vertical_translation_mode(grid_coordinate[:, 0], grid_coordinate[:, 1]),
+        _vertical_translation_mode(wall_coordinate[:, 0], wall_coordinate[:, 1]),
+    ]
+    passive_matrix = np.r_[passive_to_grid, passive_to_wall]
+    passive_current = np.linalg.lstsq(
+        passive_matrix * weight[:, None],
+        translation_target * weight,
+        rcond=None,
+    )[0]
+    raw_fit = passive_matrix @ passive_current
+    fit_error = float(
+        np.linalg.norm((raw_fit - translation_target) * weight)
+        / np.linalg.norm(translation_target * weight)
+    )
+    passive_scale = (
+        ELONGATED_DIRECT_PEAK_POINTS
+        / 100.0
+        * control.reference_flux_span_wb
+        / np.max(np.abs(passive_to_grid @ passive_current))
+    )
+    passive_current *= passive_scale
+
+    source_to_grid = np.c_[active_to_grid, passive_to_grid]
+    source_to_wall = np.c_[active_to_wall, passive_to_wall]
+    with_current = np.r_[active_current, passive_current]
+
+    def represented_profile(current):
+        represented_operator = replace(
+            operator,
+            grid=replace(operator.grid, source_target=jnp.asarray(source_to_grid)),
+            wall=replace(operator.wall, source_target=jnp.asarray(source_to_wall)),
+            external_current=jnp.asarray(current),
+        )
+        return replace(control.with_passive, operator=represented_operator)
+
+    with_passive = represented_profile(with_current)
+    material_radius = np.linalg.norm(boundary - axis, axis=1)
+    shell_standoff = (expansion - 1.0) * material_radius
+    passive_image = passive_to_grid @ passive_current
+    construction = deepcopy(control.construction_receipt)
+    construction["passive_material_coupling"] = {
+        "conductor_count": conductor_count,
+        "boundary_expansion_factor": expansion,
+        "shell_standoff_m": {
+            "minimum": float(np.min(shell_standoff)),
+            "mean": float(np.mean(shell_standoff)),
+            "maximum": float(np.max(shell_standoff)),
+        },
+        "green_section_width_m": 0.05,
+        "green_section_height_m": 0.05,
+        "source_to_grid_shape": list(passive_to_grid.shape),
+        "source_to_wall_shape": list(passive_to_wall.shape),
+        "translation_mode_weighted_relative_l2_error": fit_error,
+        "current_l1_a": float(np.linalg.norm(passive_current, ord=1)),
+        "current_l2_a": float(np.linalg.norm(passive_current)),
+        "maximum_absolute_current_a": float(np.max(np.abs(passive_current))),
+        "control_direct_external_peak_points": float(
+            100.0 * np.max(np.abs(passive_image)) / control.reference_flux_span_wb
+        ),
+    }
+    return replace(
+        control,
+        with_passive=with_passive,
+        without_passive=control.without_passive,
+        construction_receipt=construction,
+    )
+
+
+def _build_qualified_control():
+    """Build every fitted control input on the qualified centroid image."""
+    profile_type = forward_solve_suite.ForwardProfile
+    from_lattice = profile_type.from_lattice.__func__
+
+    def centroid_from_lattice(profile_class, *args, **kwargs):
+        kwargs["cubic_cell_average"] = False
+        return from_lattice(profile_class, *args, **kwargs)
+
+    with patch.object(
+        profile_type,
+        "from_lattice",
+        classmethod(centroid_from_lattice),
+    ):
+        return _build_analytic_control()
+
+
+def _representation_response() -> dict[str, object]:
+    """Recompute the leading mode for distinct fitted passive shells."""
+    started = perf_counter()
+    base_control = _build_qualified_control()
+    specifications = (
+        ("baseline", 16, PASSIVE_SHELL_EXPANSION),
+        (
+            "refined_conductor_count",
+            REFINED_PASSIVE_CONDUCTORS,
+            PASSIVE_SHELL_EXPANSION,
+        ),
+        ("changed_shell_standoff", 16, CHANGED_SHELL_EXPANSION),
+    )
+    controls = [(specifications[0][0], base_control)]
+    controls.extend(
+        (name, _with_passive_representation(base_control, count, expansion))
+        for name, count, expansion in specifications[1:]
+    )
+    baseline_control = controls[0][1]
+    baseline_operator = baseline_control.without_passive.operator
+    baseline_external = np.asarray(baseline_operator.external())
+    if not all(
+        control.without_passive is baseline_control.without_passive
+        and control.without_passive.operator is baseline_operator
+        for _name, control in controls
+    ):
+        raise RuntimeError("passive representations do not share one control map")
+    solved, solve_receipt = _solve_analytic_control(
+        baseline_control.without_passive,
+        baseline_control.seed_flux,
+        "passive_currents_zeroed",
+    )
+    _require_control_branch(
+        baseline_control.reference_axis,
+        baseline_control.material_boundary,
+        solve_receipt,
+    )
+    root = solved.flux
+    mapped, tangent = jax.linearize(baseline_operator.flux_map(), root)
+    radial, vertical = _analytic_translation_templates(baseline_control)
+    drives = []
+    for _name, control in controls:
+        drives.append(
+            np.asarray(
+                control.with_passive.operator.external()
+                - control.without_passive.operator.external()
+            )
+        )
+    baseline_drive_basis = _orthonormal_basis(drives[0])
+    representations = []
+    for (name, control), drive in zip(controls, drives, strict=True):
+        operator = control.without_passive.operator
+        zero_external_difference = float(
+            np.max(np.abs(np.asarray(operator.external()) - baseline_external))
+        )
+        values, vectors, residuals = _dominant_eigenpairs(tangent, drive)
+        leading = values[0]
+        localisation = _localisation(
+            vectors[:, 0],
+            root,
+            drive,
+            operator,
+            control.without_passive.lattice.coordinate,
+            (radial, vertical),
+            control.reference_flux_span_wb,
+        )
+        driven = _driven_mode(tangent, drive, operator.grid.node_number)
+        passive = control.construction_receipt["passive_material_coupling"]
+        representations.append(
+            {
+                "name": name,
+                "passive_representation": passive,
+                "zero_passive_external_field_max_difference_wb": (
+                    zero_external_difference
+                ),
+                "root_relative_map_residual": float(
+                    np.max(np.abs(np.asarray(mapped - root)))
+                    / max(
+                        float(np.max(np.abs(np.asarray(root)))),
+                        np.finfo(float).tiny,
+                    )
+                ),
+                "shared_without_passive_profile_object": True,
+                "shared_without_passive_operator_object": True,
+                "drive_overlap_with_baseline_fraction": _projection_fraction(
+                    drive, baseline_drive_basis
+                ),
+                "leading_eigenvalue": _complex(leading),
+                "leading_eigenvalue_absolute_movement_from_banked": float(
+                    abs(leading - BASELINE_LEADING_EIGENVALUE)
+                ),
+                "leading_ritz_residual_l2": float(residuals[0]),
+                "dominant_eigenpairs": [
+                    {
+                        "rank": rank,
+                        "eigenvalue": _complex(value),
+                        "ritz_residual_l2": float(residual),
+                    }
+                    for rank, (value, residual) in enumerate(
+                        zip(values, residuals, strict=True), start=1
+                    )
+                ],
+                "leading_eigenvector_localisation": localisation,
+                "passive_driven_late_grid_peak_growth_median": driven[
+                    "late_grid_peak_growth_median"
+                ],
+                "leading_eigenvector_alignment_with_driven_late_vector": (
+                    _projection_fraction(
+                        driven["terminal_vector"], _orthonormal_basis(vectors[:, 0])
+                    )
+                ),
+            }
+        )
+
+    reproduced = representations[0]["leading_eigenvalue_absolute_movement_from_banked"]
+    if reproduced > 1.0e-8:
+        raise RuntimeError(
+            f"baseline leading eigenvalue did not reproduce: movement={reproduced:.3e}"
+        )
+    contraction_margin = 1.0 - BASELINE_LEADING_EIGENVALUE
+    material_threshold = MATERIAL_MOVEMENT_FRACTION * contraction_margin
+    additional = representations[1:]
+    maximum_movement = max(
+        row["leading_eigenvalue_absolute_movement_from_banked"] for row in additional
+    )
+    material = maximum_movement >= material_threshold
+    most_moved = max(
+        additional,
+        key=lambda row: row["leading_eigenvalue_absolute_movement_from_banked"],
+    )
+    movement = most_moved["leading_eigenvalue"]["real"] - BASELINE_LEADING_EIGENVALUE
+    if material:
+        direction = (
+            "toward unity with weaker damping"
+            if movement > 0.0
+            else "away from unity with stronger damping"
+        )
+        classification = "REPRESENTATION_IMPROVABLE_NEAR_MARGINALITY"
+        ruling = (
+            "The vertical-channel eigenvalue moves by a material fraction of its "
+            "baseline contraction margin when the passive shell representation "
+            f"changes, {direction}."
+        )
+    else:
+        direction = "static within the declared contraction-margin threshold"
+        classification = "INTRINSIC_MAP_PROPERTY"
+        ruling = (
+            "The leading vertical-channel eigenvalue is static under both passive "
+            "shell changes. The shell is a prescribed drive rather than a dynamic "
+            "map coordinate, so representation work cannot move this pole."
+        )
+
+    incident_widened_residual = 7.726885632357845e-6
+    incident_banked_residual = 1.3931414905413574e-16
+    return {
+        "carrier": {
+            "construction": "qualified analytic structured free-boundary control",
+            "cell_current_representation": (
+                "centroid image pinned by the banked eigenvalue comparator"
+            ),
+            "lattice_shape": list(baseline_control.without_passive.lattice.shape),
+            "plasma_cells": int(baseline_operator.grid.node_number),
+            "wall_nodes": int(baseline_operator.wall.node_number),
+            "state_rows": int(baseline_operator.node_number),
+            "vertical_decay_index": solve_receipt["vertical_conditioning"][
+                "decay_index"
+            ],
+            "vertical_decay_index_stable": solve_receipt["vertical_conditioning"][
+                "stable"
+            ],
+        },
+        "solve": solve_receipt,
+        "banked_baseline_leading_eigenvalue": BASELINE_LEADING_EIGENVALUE,
+        "representations": representations,
+        "shape_sensitivity_incident": {
+            "banked_byte_identical_map_terminal_relative_residual": (
+                incident_banked_residual
+            ),
+            "reconstructed_semantically_zero_map_terminal_relative_residual": (
+                incident_widened_residual
+            ),
+            "residual_amplification_factor": (
+                incident_widened_residual / incident_banked_residual
+            ),
+            "orders_of_magnitude": float(
+                np.log10(incident_widened_residual / incident_banked_residual)
+            ),
+            "cpu_reproduction": 7.726885632464709e-6,
+            "gpu_reproduction": incident_widened_residual,
+            "attribution_boundary": (
+                "The rejected reconstruction also traversed the current "
+                "construction-time cell-current representation. It corroborates "
+                "amplification of representation-scale changes but is not used as "
+                "a passive-only eigenvalue sensitivity estimate."
+            ),
+            "mechanism": (
+                "Reconstructing a semantically zero passive-current suffix changed "
+                "the fixed source matrix representation and floating reduction "
+                "path. The near-marginal nonlinear solve amplified that nominally "
+                "null representation difference by more than ten orders in its "
+                "terminal residual. The accepted comparison therefore reuses the "
+                "original profile, arrays, shapes and reduction order byte-for-byte."
+            ),
+        },
+        "verdict": {
+            "classification": classification,
+            "ruling": ruling,
+            "direction": direction,
+            "baseline_contraction_margin": contraction_margin,
+            "material_movement_rule": (
+                "absolute eigenvalue movement at least ten percent of the "
+                "banked contraction margin"
+            ),
+            "material_movement_threshold": material_threshold,
+            "maximum_additional_representation_movement": maximum_movement,
+            "movement_fraction_of_baseline_contraction_margin": (
+                maximum_movement / contraction_margin
+            ),
+            "most_moved_representation": most_moved["name"],
+            "zero_passive_map_identity": (
+                "All representations retain exactly the same active external "
+                "field and zero the refitted passive-current suffix."
+            ),
+        },
+        "elapsed_seconds": perf_counter() - started,
+    }
+
+
 def _elongated_measurement() -> dict[str, object]:
     """Measure whether the elongated passive drive approaches the same mode."""
     started = perf_counter()
@@ -576,15 +922,12 @@ def _mechanism(stable: dict[str, object], elongated: dict[str, object]):
 
 
 def run() -> dict[str, object]:
-    """Run the stable-root eigensystem and elongated-carrier discriminator."""
+    """Measure the vertical pole against passive shell representation."""
     source_commit = measurement_stamp(Path.cwd())
     configure_dtypes()
-    stable, _control, _solved, _leading = _stable_measurement()
-    elongated = _elongated_measurement()
-    mechanism = _mechanism(stable, elongated)
     return {
         "receipt": {
-            "kind": "coupled_map_mode_identification",
+            "kind": "passive_representation_eigenvalue_response",
             "status": "complete",
             "source_commit": source_commit,
             "checkout_porcelain_empty_before_measurement": True,
@@ -598,13 +941,9 @@ def run() -> dict[str, object]:
             },
         },
         "comparators": {
-            "stable_measured_late_growth": STABLE_LATE_GROWTH,
-            "stable_measured_resolvent_gain": STABLE_RESOLVENT_GAIN,
-            "elongated_measured_late_growth": ELONGATED_LATE_GROWTH,
-            "elongated_measured_unpinned_spectral_radius": (
-                MEASURED_UNPINNED_SPECTRAL_RADIUS
-            ),
-            "elongated_direct_external_peak_points": ELONGATED_DIRECT_PEAK_POINTS,
+            "banked_leading_eigenvalue": BASELINE_LEADING_EIGENVALUE,
+            "banked_stable_late_growth": STABLE_LATE_GROWTH,
+            "banked_stable_resolvent_gain": STABLE_RESOLVENT_GAIN,
         },
         "solver_budget": {
             "stable_warmup": CONTROL_NEWTON_WARMUP,
@@ -614,101 +953,91 @@ def run() -> dict[str, object]:
             "arnoldi_subspace": ARNOLDI_SUBSPACE,
             "passive_tangent_iterations": TANGENT_ITERATIONS,
         },
-        "stable_control": stable,
-        "elongated_cross_carrier": elongated,
-        "mechanism_verdict": mechanism,
+        "response": _representation_response(),
     }
 
 
 def _plot(receipt: dict[str, object], path: Path) -> None:
-    """Plot the eigenvalues, mode content and passive-driven growth."""
-    pairs = receipt["stable_control"]["dominant_eigenpairs"]
-    values = np.asarray(
+    """Plot eigenvalue movement, fit error and mode localisation."""
+    response = receipt["response"]
+    representations = response["representations"]
+    names = [
+        {
+            "baseline": "16 at 1.08x",
+            "refined_conductor_count": "32 at 1.08x",
+            "changed_shell_standoff": "16 at 1.16x",
+        }[row["name"]]
+        for row in representations
+    ]
+    eigenvalues = np.asarray(
+        [row["leading_eigenvalue"]["real"] for row in representations]
+    )
+    residuals = np.asarray([row["leading_ritz_residual_l2"] for row in representations])
+    fit_errors = np.asarray(
         [
-            complex(pair["eigenvalue"]["real"], pair["eigenvalue"]["imaginary"])
-            for pair in pairs
+            row["passive_representation"]["translation_mode_weighted_relative_l2_error"]
+            for row in representations
         ]
     )
-    stable_content = pairs[0]["localisation"]
-    elongated_content = receipt["elongated_cross_carrier"][
-        "late_vector_localisation"
-    ]
-    labels = [
-        "boundary",
-        "axis cells",
-        "passive drive",
-        "normalisation",
-        "translation",
-    ]
-    keys = [
+    localisation_keys = [
         "boundary_state_fraction",
-        "axis_neighbourhood_fraction",
         "passive_drive_overlap_fraction",
         "normalisation_content_fraction",
         "axis_translation_content_fraction",
     ]
-    stable_growth = receipt["stable_control"]["passive_driven_tangent"]["iterations"]
-    elongated_growth = receipt["elongated_cross_carrier"]["passive_driven_tangent"][
-        "iterations"
+    localisation_labels = [
+        "boundary",
+        "passive drive",
+        "normalisation",
+        "translation",
     ]
 
-    figure, axes = plt.subplots(1, 3, figsize=(13.2, 4.2), constrained_layout=True)
-    angle = np.linspace(0.0, 2.0 * np.pi, 300)
-    axes[0].plot(np.cos(angle), np.sin(angle), color="0.75", linewidth=1.0)
-    axes[0].scatter(
-        values.real, values.imag, c=np.arange(len(values)), cmap="viridis", s=55
+    figure, axes = plt.subplots(1, 3, figsize=(13.4, 4.2), constrained_layout=True)
+    position = np.arange(len(names))
+    movement = 1.0e15 * (eigenvalues - BASELINE_LEADING_EIGENVALUE)
+    axes[0].plot(position, movement, marker="o", linewidth=1.5, color="C0")
+    axes[0].axhline(0.0, color="0.35", linestyle="--", linewidth=1.0)
+    axes[0].text(
+        0.03,
+        0.97,
+        f"banked lambda = {BASELINE_LEADING_EIGENVALUE:.9f}",
+        transform=axes[0].transAxes,
+        va="top",
+        fontsize=8,
     )
-    for rank, value in enumerate(values, start=1):
-        axes[0].annotate(
-            str(rank),
-            (value.real, value.imag),
-            xytext=(4, 4),
-            textcoords="offset points",
+    axes[0].set_xticks(position, names)
+    axes[0].set_ylabel("lambda movement from banked [1e-15]")
+    axes[0].set_title("vertical-channel pole movement")
+    inset = axes[0].inset_axes([0.56, 0.1, 0.4, 0.32])
+    inset.semilogy(position, residuals, marker=".", color="C3")
+    inset.set_xticks([])
+    inset.set_ylabel("Ritz residual", fontsize=7)
+    inset.tick_params(labelsize=7)
+
+    axes[1].bar(position, fit_errors, color="C1")
+    axes[1].set_xticks(position, names)
+    axes[1].set_ylabel("weighted relative L2 error")
+    axes[1].set_title("vertical-drive fit")
+
+    width = 0.2
+    local_position = np.arange(len(localisation_keys))
+    for index, (name, row) in enumerate(zip(names, representations, strict=True)):
+        content = row["leading_eigenvector_localisation"]
+        axes[2].bar(
+            local_position + (index - 1) * width,
+            [content[key] for key in localisation_keys],
+            width,
+            label=name.replace("\n", ", "),
         )
-    axes[0].set_aspect("equal", adjustable="box")
-    axes[0].set_xlabel("Re eigenvalue")
-    axes[0].set_ylabel("Im eigenvalue")
-    axes[0].set_title("stable-root dominant spectrum")
-
-    position = np.arange(len(labels))
-    width = 0.38
-    axes[1].bar(
-        position - width / 2,
-        [stable_content[key] for key in keys],
-        width,
-        label="stable eigenmode",
+    axes[2].set_xticks(
+        local_position,
+        localisation_labels,
+        rotation=28,
+        ha="right",
     )
-    axes[1].bar(
-        position + width / 2,
-        [elongated_content[key] for key in keys],
-        width,
-        label="elongated late mode",
-    )
-    axes[1].set_xticks(position, labels, rotation=35, ha="right")
-    axes[1].set_ylabel("squared projection or state fraction")
-    axes[1].set_ylim(0.0, 1.0)
-    axes[1].legend(frameon=False, fontsize=8)
-    axes[1].set_title("mode localisation")
-
-    axes[2].plot(
-        [row["iteration"] for row in stable_growth[1:]],
-        [row["grid_peak_growth_ratio"] for row in stable_growth[1:]],
-        marker="o",
-        label="stable control",
-    )
-    axes[2].plot(
-        [row["iteration"] for row in elongated_growth[1:]],
-        [row["grid_peak_growth_ratio"] for row in elongated_growth[1:]],
-        marker="s",
-        label="elongated",
-    )
-    axes[2].axhline(STABLE_LATE_GROWTH, color="C0", linestyle="--", linewidth=1.0)
-    axes[2].axhline(ELONGATED_LATE_GROWTH, color="C1", linestyle="--", linewidth=1.0)
-    axes[2].set_xlabel("tangent iteration")
-    axes[2].set_ylabel("grid-peak increment growth")
-    axes[2].set_title(
-        receipt["mechanism_verdict"]["classification"].replace("_", " ").title()
-    )
+    axes[2].set_ylabel("squared projection or state fraction")
+    axes[2].set_ylim(0.0, 1.0)
+    axes[2].set_title("leading-mode localisation")
     axes[2].legend(frameon=False, fontsize=8)
     for axis in axes:
         axis.spines[["top", "right"]].set_visible(False)
@@ -729,14 +1058,13 @@ def main() -> None:
         encoding="utf-8",
     )
     _plot(receipt, arguments.figure)
-    leading = receipt["stable_control"]["dominant_eigenpairs"][0]
+    response = receipt["response"]
     print(
         json.dumps(
             {
-                "classification": receipt["mechanism_verdict"]["classification"],
-                "leading_eigenvalue": leading["eigenvalue"],
-                "same_mode_carries_elongated_growth": receipt["mechanism_verdict"][
-                    "same_mode_carries_elongated_growth"
+                "classification": response["verdict"]["classification"],
+                "maximum_eigenvalue_movement": response["verdict"][
+                    "maximum_additional_representation_movement"
                 ],
                 "receipt": str(arguments.receipt),
                 "figure": str(arguments.figure),

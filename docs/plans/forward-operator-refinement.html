@@ -19,7 +19,7 @@
 <meta name="plan-effort-hours" content="6.0">
 <meta name="plan-depends-on" content="scoring-criteria-derivation">
 <meta name="plan-informs" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
-<meta name="plan-version" content="23">
+<meta name="plan-version" content="25">
 <meta name="plan-impl" content="0.44">
 </head>
 <body>
@@ -205,14 +205,21 @@
   marginally-stabilised vertical mode. On that reading the 0.15 ceiling was calibrated on
   the DIRECT response (the documented 0.098 matches the measured 0.0972 direct peak) and is
   asserted on the CONVERGED COUPLED response, which differs by the resolvent gain by
-  construction &mdash; no correct implementation could satisfy it. The discriminator: the
-  same passive-closure measurement on a deliberately vertically-stable, near-circular
-  control. Gain collapsing toward the direct figure &rArr; PHYSICS &mdash; the repair is
-  re-deriving the reference bound on the coupled response (a derived, stability-aware
-  ceiling in the scoring-criteria tradition), and the amplification screen must NOT ship as
-  a refusal, or it flags healthy elongated equilibria catalog-wide. Gain surviving on the
-  circular control &rArr; the benign explanation is excluded and the anomalous-gain
-  investigation reopens. Until the control reports, the class-A verdict stands as a
+  construction &mdash; no correct implementation could satisfy it. The narrow statement,
+  kept narrow deliberately: vertical instability explains why the Picard iteration has
+  &rho; &gt; 1 and stalls while Newton converges on the same expanding map; the equilibrium
+  is stiff near a marginal vertical mode, Newton computes it correctly, and the large
+  passive-closure response would be a genuine sensitivity of that equilibrium &mdash;
+  nothing here implies the solver needs stabilising, and no lane acquires a stabilisation
+  mechanism on the strength of it. The discriminator is the
+  <strong>low-elongation contrast case</strong> (ledger node id
+  <code>vertical-stability-control</code> &mdash; a scientific control, not a feedback
+  controller): the same passive-closure measurement on a deliberately near-circular
+  configuration. Gain collapsing toward the direct figure &rArr; PHYSICS &mdash; the repair
+  is re-deriving the reference bound on the coupled response, and the amplification screen
+  must NOT ship as a refusal, or it flags healthy elongated equilibria catalog-wide. Gain
+  surviving at low elongation &rArr; the benign explanation is excluded and the
+  anomalous-gain investigation reopens. Until the control reports, the class-A verdict stands as a
   MECHANISM finding (the gain is real and located) with its defect-versus-physics reading
   explicitly open. The screen shipped as <em>observation, not refusal</em>: it reports
   through its own result field (not-applicable / contracting / sustained-growth), distinct
@@ -228,7 +235,11 @@
   one node derives the criterion family for both (stability-aware coupled bound here, the
   gate bound traced or re-derived beside it), leaving the two lanes one criterion family
   instead of two unrelated numbers. Deriving both in one pass is the scoring-criteria
-  pattern; inheriting either is what that plan exists to forbid.</p>
+  pattern; inheriting either is what that plan exists to forbid. The coupled bound is
+  necessarily <strong>configuration-dependent</strong> &mdash; the gain tracks how close
+  the vertical mode sits to marginal, so a single scalar ceiling would be right for one
+  elongation and wrong for the rest, repeating the 0.15 mistake; the contrast case supplies
+  the first two points on that gain-versus-elongation curve for free.</p>
   <p>The §3 floor receipts cite the route node's structured fields verbatim:
   <code>differencing_step</code>, <code>step_selection_rule</code>,
   <code>step_invariance.second_step</code>, <code>step_invariance.floor_delta</code>,

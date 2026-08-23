@@ -79,6 +79,21 @@ def _strict_json(value):
     return value
 
 
+def _diagnostic_json(value):
+    """Return printable values even when a rejected solve is non-finite."""
+    if isinstance(value, dict):
+        return {key: _diagnostic_json(item) for key, item in value.items()}
+    if isinstance(value, tuple | list):
+        return [_diagnostic_json(item) for item in value]
+    if isinstance(value, np.ndarray):
+        return _diagnostic_json(value.tolist())
+    if isinstance(value, np.generic):
+        return _diagnostic_json(value.item())
+    if isinstance(value, float) and not math.isfinite(value):
+        return str(value)
+    return value
+
+
 def _elongation(points: np.ndarray) -> float:
     """Return total vertical span divided by total radial span."""
     coordinate = np.asarray(points, dtype=float)
@@ -291,7 +306,7 @@ def _require_control_branch(case, solve_receipt: dict[str, object]) -> None:
     solve_receipt["control_branch_qualification"] = qualification
     print(
         "CONTROL_BRANCH_QUALIFICATION="
-        + json.dumps(_strict_json(qualification), sort_keys=True)
+        + json.dumps(_diagnostic_json(qualification), sort_keys=True)
     )
     if not qualification["qualified"]:
         failed = [

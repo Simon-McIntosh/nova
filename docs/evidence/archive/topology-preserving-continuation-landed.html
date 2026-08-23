@@ -18,6 +18,59 @@
 
 <h1>Topology-Preserving Continuation — cumulative execution evidence</h1>
 
+<section id="s2-parameter">
+  <h2 id="s2-parameter-h">§2 — Continuation coordinate adjudication</h2>
+
+  <p><strong>continuation-parameter-evidence</strong> landed 2026-08-23 — commit
+  <code>f1adace7</code>, merged <code>abae6290</code>, gate PASSED. Adjudicated 1 of 3 candidates
+  recommended, 2 of 3 explicitly rejected. No production solve ran, so the report declines every
+  performance and convergence attribution and says so. Artifact:
+  <code>scripts/continuation_parameter_choice/report.md</code>.</p>
+
+  <p><strong>Recommended — state-space arclength as a numerical gauge.</strong> Carry the last two
+  admitted corrected states and the previous oriented tangent at fixed shape; form the secant
+  <code>delta = x_now − x_prev</code>, normalise by a once-declared dimensionless RMS norm over the
+  axis-to-boundary flux span, orient it against the previous tangent with a <code>where</code>, and
+  predict <code>x_predict = x_now + ds·t</code>. Correct <em>normal</em> to the secant —
+  <code>d_normal = d_newton − t·(t·d_newton)</code> over a compile-time correction ladder — rather
+  than backtracking the predictor toward zero. It survives adjudication because the source
+  declaration and target current stay fixed, so the coordinate cannot trace the banked
+  source-strength curve under another name, and because the existing fail-closed predicate keeps
+  deciding admission. The arclength is explicitly a gauge: the Boolean topology class is not
+  differentiated and no second classifier is introduced.</p>
+
+  <p><strong>Rejected — source amplitude</strong>, directly refuted by the banked negative at
+  <code>docs/evidence/archive/dual-basin-solve-landed.html#s2-two-class-closed</code>: two bounded
+  composed-map campaigns, 21 rungs and 41 rungs at 5 Newton / 30 GMRES per rung, both terminated
+  <em>converged</em> on the dominating limited root, terminal parity error 5.06e-2 against a 1e-10
+  recovery floor. Doubling the rung count changed traversal, not the basin endpoint, so the failure
+  is path selection rather than budget.</p>
+
+  <p><strong>Rejected — constrained plasma current</strong>, and this refutation is the report's
+  most useful finding because the candidate looks independent and is not.
+  <code>ForwardFluxOperator.current_normalisation_amplitude</code> computes
+  <code>a(x, I) = I / Σ unscaled_cell_current(x)</code> and
+  <code>scaled_current_moments</code> multiplies every zeroth and first current moment by that one
+  common <code>a</code>. Target current therefore cannot move source shape, current centroid or
+  topology independently: where <code>a</code> is regular the current and the amplitude are two
+  coordinates on the same one-scalar source-scaling path, and where it is not the guarded
+  normalisation goes non-finite and is refused. The singularity creates no branch-selection
+  mechanism, so this candidate reintroduces the banked one under an implicit coordinate.</p>
+
+  <p><strong>Also settled: <code>nova/equilibrium/continuation.py</code> is not an implementation
+  seam here.</strong> It continues <code>p'</code> and <code>FF'</code> spatially from the confined
+  domain onto declared open-flux domains — no solve-state path, no homotopy parameter joining roots,
+  no predictor-corrector loop. The implementation contract the recommendation carries is six
+  non-negotiable properties: fixed source/current/conductor/topology inputs along the path; loop
+  carry holding <code>x_prev</code>, <code>x_now</code>, <code>t_prev</code>, arclength, step,
+  refusal state with no Python termination on traced values; the production predicate reused for
+  every predictor and corrector candidate; the existing Krylov-action qualification retained so a
+  refused or zero material step promotes nothing; fixed predictor and corrector budgets with
+  compile-time candidate axes; and a receipt exposing full residual, admitted-advance count, mean
+  advance over the Newton-step norm, total step-equivalents, terminal topology, finite X point,
+  secant degeneracies and every refusal reason.</p>
+</section>
+
 <section id="s4">
   <h2 id="s4-h">§4 — Step conditioning independent of Krylov dimension</h2>
 

@@ -25,11 +25,11 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-23">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 <meta name="plan-sprint" content="S14">
-<meta name="plan-commits" content="6cdc60c46ef0b0e1c611ff2c5404ec561e4abbce,b971557179559797f03d2438c3b5b041a102154e">
-<meta name="plan-artifacts" content="docs/figures/diiid-forward-onboarding/dimension-general-conditioning.json,docs/evidence/archive/topology-preserving-continuation-landed.html">
-<meta name="plan-impl" content="0.143">
+<meta name="plan-commits" content="6cdc60c46ef0b0e1c611ff2c5404ec561e4abbce,b971557179559797f03d2438c3b5b041a102154e,f1adace7cbfecea328cc085bad72f4e7664929f5,abae6290686c9f5b40408190ffcb4e63902061aa">
+<meta name="plan-artifacts" content="docs/figures/diiid-forward-onboarding/dimension-general-conditioning.json,scripts/continuation_parameter_choice/report.md,docs/evidence/archive/topology-preserving-continuation-landed.html">
+<meta name="plan-impl" content="0.286">
 </head>
 <body>
   <main class="plan-doc">
@@ -235,18 +235,18 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="continuation-parameter" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="continuation-parameter" data-choice="state-arclength" data-by="reckon-ship" data-when="2026-08-23T21:24:05+00:00">
     <p class="r-dec-q">What parameterises advance along the topology-preserving manifold — arc
         length in state space, the source amplitude already used by the banked source-domain
         continuation, or the constrained plasma current? The banked negative matters here: scalar
         source-strength homotopy converges to the dominating limited root, so a parameter that
         reintroduces that path would repeat a measured failure.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="state-arclength">state-space arc length</button>
+      <button class="r-opt chosen" data-value="state-arclength">state-space arc length</button>
       <button class="r-opt" data-value="source-amplitude">source amplitude</button>
       <button class="r-opt" data-value="constrained-current">constrained plasma current</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">State-space arclength is the only candidate whose predictor direction is built from states already admitted on the requested branch while the physical source stays fixed, so the coordinate cannot retrace the banked source-strength curve under another name. Source amplitude is directly refuted: two bounded composed-map campaigns (21 rungs; 41 rungs at 5 Newton / 30 GMRES per rung) both terminated CONVERGED on the dominating limited root at terminal parity error 5.06e-2 against a 1e-10 recovery floor, so doubling the rung count moved traversal and not the basin endpoint. Constrained plasma current is refuted because production eliminates it: ForwardFluxOperator.current_normalisation_amplitude computes a(x, I) = I / sum(unscaled_cell_current(x)) and scaled_current_moments multiplies every zeroth and first current moment by that one common amplitude, so target current cannot move source shape, centroid or topology independently, and where the normalisation is irregular it goes non-finite and is refused rather than selecting a branch. The arclength is a numerical gauge only; the Boolean topology class is never differentiated and no second classifier is added. Adjudicated by continuation-parameter-evidence, commit f1adace7, report scripts/continuation_parameter_choice/report.md; no production solve ran, so the report carries no performance attribution.</p>
     </div>
 <div class="r-dec" data-key="alignment-observable" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">What observable measures seed alignment without a converged solve? It
@@ -268,6 +268,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s4" data-id="c-20260823T2125-s4" data-who="reckon-ship" data-when="2026-08-23T21:25:00Z">
     <div class="r-comment-body">dimension-general-conditioning satisfied this section under diiid-forward-onboarding section 5 — commit 6cdc60c4, merged b9715571; gate PASSED; measures: 12 interventions at projection dimension 24 against the banked 0, engagement demonstrated at dimensions 8, 12 and 24 under jit/vmap, both dataset constants (44.5, 27.781718445022726) and the dimension-12 gate absent from nova/ (verified by grep at integration), cost at dimension 12 cumulative growth 7.0625 against the fitted 2.217948717948718 and six-case flux 5.505623734691767e-12 against 3.5787553476218648e-12 (18x inside the retired 1e-10, bursts 0), dimension 24 fires without taming at growth 541.3333333333334; 10 tests added, 72 suite passes across seven modules. Artifact: docs/figures/diiid-forward-onboarding/dimension-general-conditioning.json. Section collapsed to a landed summary. Currency repair in the same beat: the frontier section's banked numbers are annotated as pre-conditioning readings, because this mechanism now fires on the DIII-D route where it was inert, so the state model is three-valued and no later node may compare against them without a control on the current tree.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260823T2130-s2-parameter" data-who="reckon-ship" data-when="2026-08-23T21:30:00Z">
+    <div class="r-comment-body">continuation-parameter-evidence landed - commit f1adace7, merged abae6290; gate PASSED; measure: 1 of 3 candidate parameterisations recommended, 2 of 3 explicitly refuted, source amplitude on the banked 21-rung and 41-rung campaigns ending converged at the limited root with 5.06e-2 terminal parity error, constrained current on the production identity a(x, I) = I / sum(unscaled_cell_current(x)) applied as one common amplitude to every current moment. Decision continuation-parameter locked to state-arclength. Artifact: scripts/continuation_parameter_choice/report.md (210 lines). Method requirements honoured: the report names the tree it adjudicated against (bacbbd81) and declines every performance and convergence attribution because no candidate production solve ran. It also settles that nova/equilibrium/continuation.py is not an implementation seam for this work - it continues p-prime and FF-prime spatially onto open-flux domains with no solve-state path or homotopy parameter.</div>
 </div>
 </section>
 </main>

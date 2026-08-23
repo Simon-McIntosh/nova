@@ -19,7 +19,8 @@
 <meta name="plan-effort-hours" content="4.0">
 <meta name="plan-depends-on" content="efit-forward-parity">
 <meta name="plan-blocks" content="mast-catalog-gpu-solve">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.25">
 </head>
 <body>
 <main class="plan-doc">
@@ -63,7 +64,12 @@
   0.97&ndash;3.39, must be handled separately, never pooled), or a discretisation-consistent
   bound derived from the mesh scale and the measured order, extending the estimate already in
   <code>benchmarks/efit_parity_criterion_provenance.py</code>. The derivation must state its
-  own domain of validity per stratum.</p>
+  own domain of validity per stratum. The banked reuse map
+  (<code>docs/figures/scoring-criteria-derivation/reuse-map.md</code>) names the admissible
+  machinery: extend <code>efit_operator_consistency_order.py::_fit_power_order</code> per
+  stratum with the gated residual held out, and retain the frozen-six join and dual-count
+  receipt structure from <code>efit_parity_criterion_provenance.py</code>; new machinery
+  requires a fitness verdict against those candidates.</p>
   <p><strong>Done when:</strong> the formula is stated with its independence argument (no input
   is the gated residual), per-reference values are computed for the six frozen MAST references,
   the circular estimator's collapse is shown algebraically in the same receipt, and the receipt
@@ -96,6 +102,11 @@
   its replacement reading in one sentence.</p>
 </section>
 
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-20260823T0951" data-who="reckon-ship" data-when="2026-08-23 09:51">
+    <div class="r-comment-body">criteria-reuse-map landed — commit <code>2e00abb5</code>, merged <code>5ed1ca47</code>; gate PASSED (structural validation: artifact exists, 16 candidate rows, all 12 referenced source files resolve). The map banks the machinery the sprint's nodes extend: independent-order core <code>benchmarks/efit_operator_consistency_order.py::_fit_power_order</code> run per observed-order stratum with each gated target residual held out; <code>richardson_fine_error</code> reusable only when its order/residual pair is independent of the target; the frozen-six join, dual-count and protected-artifact audit retained from <code>efit_parity_criterion_provenance.py</code>; publication-grade semantic pin <code>nova.imas.machine_artifact.MachineArtifactManifest.semantic_identity</code> (+ ambix artifact_resolution.py fail-closed pattern) — <code>filepath.canonical_key</code> is NOT a publication pin; collection gating stays visible via the slow/full lane. Artifact: <code>docs/figures/scoring-criteria-derivation/reuse-map.md</code>.</div>
+</div>
+</section>
 </main>
 </body>
 </html>

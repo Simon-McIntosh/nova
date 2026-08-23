@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="scoring-criteria-derivation-landed">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="scoring-criteria-derivation">
+<title>scoring-criteria-derivation-landed</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="Scoring Criteria Derivation — cumulative execution evidence">
+<meta name="plan-summary" content="Landing record of the scoring-criteria-derivation plan: the reuse map, the derived criterion, the frozen-six re-score, and the bound classifications, each with commits, receipts and gate outcomes">
+</head>
+<body>
+<main class="plan-doc">
+
+<h1>Scoring Criteria Derivation — cumulative execution evidence</h1>
+
+<section id="reuse-map">
+  <h2 id="reuse-map-h">Reuse map — the machinery the sprint extends</h2>
+  <p><strong>criteria-reuse-map</strong> landed 2026-08-23 — commit <code>2e00abb5</code>,
+  merged <code>5ed1ca47</code>, gate PASSED. Sixteen candidates across ten nova source files
+  and two coupled imas-ambix files, each with path, symbol and a one-line fitness verdict;
+  structural validation confirmed all twelve referenced source files resolve. Artifact:
+  <code>docs/figures/scoring-criteria-derivation/reuse-map.md</code>.</p>
+  <p>Load-bearing verdicts: the independent-order core is
+  <code>benchmarks/efit_operator_consistency_order.py::_fit_power_order</code>, run separately
+  per observed-order stratum with each gated target residual held out;
+  <code>efit_parity_criterion_provenance.py::richardson_fine_error</code> is reusable only when
+  its order and residual pair are independent of the target, while its frozen-six join,
+  dual-count and protected-artifact audit are retained; the publication-grade artifact pin is
+  <code>nova.imas.machine_artifact.MachineArtifactManifest.semantic_identity</code> with the
+  imas-ambix <code>artifact_resolution.py</code> fail-closed resolution pattern —
+  <code>nova/database/filepath.py::canonical_key</code> is a typed cache identity, not a
+  publication pin; and the collection-gating precedent keeps solve-bearing tests visible in
+  the explicit slow/full lane rather than disabling them.</p>
+</section>
+
+</main>
+</body>
+</html>

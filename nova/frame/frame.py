@@ -1,6 +1,7 @@
 """Manage frame factroy methods."""
 
 from dataclasses import dataclass
+from typing import ClassVar
 
 from nova.frame import Coil, Ferritic, FirstWall, Shell, Turn, Winding
 from nova.frame.frameset import FrameSet, frame_factory
@@ -10,6 +11,12 @@ from nova.geometry.polyshape import PolyShape
 @dataclass
 class Frame(FrameSet):
     """Manage methods for frameset construction."""
+
+    #: Shell resolution is owned by each machine description as a positive
+    #: physical spacing in metres. The generic zero preserves authored shell
+    #: vertices; it is not an accuracy default and must never be derived from
+    #: the global plasma-cell count.
+    shell_spacing_policy: ClassVar[str] = "machine_owned_physical_spacing_m"
 
     delta: float = -1
     dcoil: float = -1

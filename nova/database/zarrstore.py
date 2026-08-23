@@ -11,29 +11,72 @@ rewrite the netCDF backend is forced into. netCDF remains available through
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 import gc
+from threading import RLock
 import warnings
 
+import numpy as np
+import pandas
 import xarray
 import zarr
+from xarray.backends.zarr import ZarrStore as XarrayZarrStore
 
 from nova.database.filepath import FilePath
 
 
+_zarr_string_encoding_lock = RLock()
+
+
+def _numpy_string_variable(variable: xarray.Variable) -> xarray.Variable:
+    """Convert a pandas string extension variable before xarray encodes it."""
+    dtype = variable.data.dtype
+    try:
+        np.dtype(dtype)
+    except TypeError:
+        is_extension_string = pandas.api.types.is_string_dtype(dtype)
+    else:
+        is_extension_string = False
+    if not is_extension_string:
+        return variable
+    values = np.asarray(variable.data)
+    if not pandas.isna(values).any():
+        values = values.astype(str)
+    return xarray.Variable(
+        variable.dims,
+        values,
+        attrs=variable.attrs,
+        encoding=variable.encoding,
+    )
+
+
 @contextmanager
 def suppress_unstable_string_spec():
-    """Silence zarr's warning that fixed-length string arrays lack a v3 spec.
+    """Prepare strings for zarr and silence its unsettled string-spec warning.
 
     Frame labels, links and serialised geometry persist as fixed-length
-    unicode, for which zarr v3 has no settled on-disk specification yet. The
-    store backs a cache that is rebuilt from source whenever its identity key
-    changes, so a future change to zarr's string encoding costs a rebuild, not
-    data loss -- the caveat the warning guards against does not apply here.
+    unicode. Pandas string extension arrays must first become ordinary NumPy
+    arrays because xarray's CF encoder asks NumPy to classify every dtype and
+    NumPy cannot classify ``StringDtype``. The conversion is confined to the
+    zarr write and retains the variable's dimensions, attributes and encoding.
+
+    Zarr v3 has no settled on-disk specification for fixed-length unicode. The
+    store is rebuilt from source whenever its identity key changes, so a future
+    change to zarr's string encoding costs a rebuild, not data loss.
     """
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore", message=".*does not have a Zarr V3 specification.*"
-        )
-        yield
+    with _zarr_string_encoding_lock:
+        encode_variable = XarrayZarrStore.encode_variable
+
+        def encode_numpy_string(store, variable):
+            return encode_variable(store, _numpy_string_variable(variable))
+
+        XarrayZarrStore.encode_variable = encode_numpy_string
+        try:
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore", message=".*does not have a Zarr V3 specification.*"
+                )
+                yield
+        finally:
+            XarrayZarrStore.encode_variable = encode_variable
 
 
 @dataclass

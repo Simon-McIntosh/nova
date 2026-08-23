@@ -14,7 +14,44 @@ os.environ.setdefault("MPLBACKEND", "Agg")
 
 _RETENTION_CHECK_INTERVAL = 100
 _LIVE_EXECUTABLE_CEILING = 1024
+_DEFAULT_FAST_MARKEXPR = "not slow"
 _completed_nodeids: set[str] = set()
+
+
+def _command_line_sets_markexpr(config) -> bool:
+    """Return whether this invocation supplied its own marker expression."""
+
+    arguments = config.invocation_params.args
+    return any(
+        argument == "-m" or argument.startswith(("-m=", "--markexpr="))
+        for argument in arguments
+    )
+
+
+def _explicit_test_paths(config) -> bool:
+    """Return whether collection targets came from command-line arguments."""
+
+    return config.args_source is config.ArgsSource.ARGS
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_configure(config):
+    """Let explicit collection paths override only the default fast-lane filter."""
+
+    if (
+        _explicit_test_paths(config)
+        and not _command_line_sets_markexpr(config)
+        and config.getoption("markexpr") == _DEFAULT_FAST_MARKEXPR
+    ):
+        config.option.markexpr = ""
+
+
+@pytest.hookimpl(trylast=True)
+def pytest_sessionfinish(session, exitstatus):
+    """Make every otherwise-successful empty collection fail loudly."""
+
+    if session.testscollected == 0 and exitstatus == pytest.ExitCode.OK:
+        session.exitstatus = pytest.ExitCode.NO_TESTS_COLLECTED
 
 
 @pytest.hookimpl(tryfirst=True)

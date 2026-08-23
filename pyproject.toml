@@ -261,9 +261,10 @@ lint.mccabe.max-complexity = 10
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-# Default invocation is the fast lane: everything except tests marked `slow`.
-# Run the whole suite with `pytest -m "slow or not slow"` (the command-line -m
-# overrides the one prepended here).
+# A path-free invocation is the fast lane: everything except tests marked
+# `slow`. Explicit test paths select their tests unless the command supplies
+# its own -m expression. Run the whole suite with
+# `pytest -m "slow or not slow"`.
 addopts = "-rfEs --doctest-modules -m 'not slow'"
 norecursedirs = ".git __pycache__"
 markers = [

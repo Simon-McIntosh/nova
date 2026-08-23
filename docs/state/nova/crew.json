@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T17:22:44",
+  "updated": "2026-08-23T17:34:15",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -27100,9 +27100,126 @@
           "utilisation_pct": null
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T151918770688-amplification-observation",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a75",
+        "node": "amplification-observation",
+        "role": "implement",
+        "spec_level": "",
+        "member": "krylov-guard",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T15:19:21Z",
+        "completed_at": "2026-08-23T15:32:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 815,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 815,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "93b1b4e528bcfcc9008e0b1c1e9459cfd7edbc69",
+        "commits": [
+          "7e33c4d000131ce0bb76b9b3c7ad2b71ce668d36"
+        ],
+        "changed_lines": {
+          "added": 396,
+          "removed": 13,
+          "files": 3
+        },
+        "tests_added": 7,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T151918770688-amplification-observation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02f34-75eb-7840-b6f2-84d7b59d9e69",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5516032,
+            "cached_input_tokens_cumulative": 5516032,
+            "input_tokens": 5669410,
+            "input_tokens_cumulative": 5669410,
+            "output_tokens": 21728,
+            "output_tokens_cumulative": 21728,
+            "reasoning_output_tokens": 8354,
+            "reasoning_output_tokens_cumulative": 8354
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T152244411612-stability-merge-verification",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a75",
+        "node": "stability-merge-verification",
+        "role": "test",
+        "spec_level": "",
+        "member": "integration-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T15:22:47Z",
+        "completed_at": "2026-08-23T15:34:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 685,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 685,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "ed01c71d129911118ca3c9282cc5e53079e4208c",
+        "commits": [
+          "b188a77811a2b1b5d5308f3f7ab0bd286929cc8d"
+        ],
+        "changed_lines": {
+          "added": 108,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T152244411612-stability-merge-verification/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02f37-9a52-7240-aa72-4f9c63cbe92f",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 643
+    "_version": 645
   }
 }

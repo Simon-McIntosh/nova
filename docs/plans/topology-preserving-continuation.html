@@ -24,12 +24,12 @@
   <title>Topology-Preserving Continuation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-23">
-<meta name="plan-version" content="6">
+<meta name="plan-modified" content="2026-08-24">
+<meta name="plan-version" content="7">
 <meta name="plan-sprint" content="S14">
-<meta name="plan-commits" content="6cdc60c46ef0b0e1c611ff2c5404ec561e4abbce,b971557179559797f03d2438c3b5b041a102154e,f1adace7cbfecea328cc085bad72f4e7664929f5,f0cec6dcd29b766f3c7b8c8813f4577a0419cd28,e9ec1ca86ae4eda2d91ab67ae7b780bb7935ec3e,2f0d439f,5e7265d36bb2ebd3ba83def966d2bb1fbfb440ab,31b9914b">
-<meta name="plan-artifacts" content="docs/figures/diiid-forward-onboarding/dimension-general-conditioning.json,docs/figures/topology-preserving-continuation/admissible-step-control.json,scripts/continuation_parameter_choice/report.md,scripts/continuation_manifold_reuse/report.md,nova/equilibrium/manifold_advance.py,docs/evidence/archive/topology-preserving-continuation-landed.html">
-<meta name="plan-impl" content="0.625">
+<meta name="plan-commits" content="6cdc60c46ef0b0e1c611ff2c5404ec561e4abbce,b971557179559797f03d2438c3b5b041a102154e,f1adace7cbfecea328cc085bad72f4e7664929f5,f0cec6dcd29b766f3c7b8c8813f4577a0419cd28,e9ec1ca86ae4eda2d91ab67ae7b780bb7935ec3e,5e7265d36bb2ebd3ba83def966d2bb1fbfb440ab,31b9914b,32526f7a7bab5e84c72c82b9706f4927a82d9b86,56ba6e29">
+<meta name="plan-artifacts" content="docs/figures/diiid-forward-onboarding/dimension-general-conditioning.json,docs/figures/topology-preserving-continuation/admissible-step-control.json,docs/figures/topology-preserving-continuation/seed-alignment-ranking.json,scripts/continuation_parameter_choice/report.md,scripts/continuation_manifold_reuse/report.md,nova/equilibrium/manifold_advance.py,nova/equilibrium/seed_alignment.py,docs/evidence/archive/topology-preserving-continuation-landed.html">
+<meta name="plan-impl" content="0.667">
 </head>
 <body>
   <main class="plan-doc">
@@ -261,6 +261,64 @@
     test had fired zero times. The rule was under-specified, not the worker wrong. Any verdict here
     that names a cause states the evidence that the cause was active.</p>
 
+    <h2 id="s6">§6 — Repair the conditioning shrinkage that reads as full admission</h2>
+
+    <p>Discovered by this plan's own control measurement and folded here because it is the same
+    plan's subject: the production step conditioning that satisfied §4's generality requirement is a
+    two-order regression on the route §2 must measure. Enabled, it fires on <strong>89 of 89</strong>
+    iterations of every frame and admits <strong>445 of 445</strong> factor-one advances, while
+    effective traversal collapses to <strong>1.15</strong> Newton-step-equivalents against
+    <strong>18.88</strong> with the intervention disabled, and terminal residuals worsen from the
+    0.087–0.155 range to <strong>3.75–6.35</strong>. Both arms hold topology: 5 of 5 diverted with
+    5 of 5 finite X points.</p>
+
+    <p><strong>The mechanism of the defect, which the numbers name precisely.</strong> The rule
+    shrinks the step <em>before</em> the admissibility predicate is consulted, so the predicate is
+    asked about a step small enough to be trivially inside the class. Full admission is therefore
+    what shrinkage looks like from the admission counter — an instrument reading its own damping as
+    success. This also invalidates admitted-advance count as a standalone quality measure anywhere
+    on this plan: a count must always be reported beside achieved traversal.</p>
+
+    <p><strong>Why the trigger firing every iteration is the thing to explain.</strong> §4's trigger
+    is projected condition over an online largest-to-median baseline exceeding <em>e</em>. On a
+    24-vector route whose projected conditions reach 4087, that ratio evidently exceeds <em>e</em>
+    on every update — so either the online baseline is tracking the condition it is meant to
+    normalise against (making the ratio scale-free in the wrong way), or the release condition at
+    the fourth root of dtype precision never engages because the residual never falls that far on a
+    non-converging route. Both are answerable from the banked per-update traces without a new solve.</p>
+
+    <p><strong>Done when</strong> the paired same-tree control is re-run with the repair in place and
+    reports, per frame, intervention count out of 89, admitted-advance count out of 89, achieved
+    Newton-step-equivalents, and terminal relative residual, each quoted beside the corresponding
+    conditioning-enabled and conditioning-disabled figures in
+    <code>docs/figures/topology-preserving-continuation/admissible-step-control.json</code>; with
+    residuals no worse than the disabled arm on every frame, dimension-generality retained — no
+    dataset-fitted or dimension-specific constant reintroduced — and engagement still demonstrated
+    at projection dimensions 8, 12 and 24. A repair that restores residuals by disabling the
+    mechanism is not a repair; if the mechanism cannot both engage and preserve traversal, that is a
+    reportable negative and §4's generality claim is restated as a trade rather than a win.</p>
+
+    <h2 id="s7">§7 — Give the alignment ranking enough power to decide</h2>
+
+    <p>§3's preregistered observable is locked and its five-frame result is a negative: Spearman
+    0.60 at p = 0.285 against cumulative growth, 0.00 at p = 1.0 against terminal residual. At
+    n = 5 a two-sided Spearman needs |ρ| ≈ 1 to clear p = 0.05, so the section's requirement is
+    close to unpassable on the banked corpus regardless of which observable is proposed — which by
+    §5's own standard is diagnostic about the sample, not about the candidate.</p>
+
+    <p><strong>The one thing this section must not do is propose a second observable against the
+    same five points.</strong> That is the p-hack §5 forbids, and the landed receipt explicitly
+    instructs against tuning the score after seeing the outcomes. The locked definition is carried
+    forward unchanged; only the corpus grows.</p>
+
+    <p><strong>Done when</strong> the outcome bank is enlarged by measuring cumulative growth and
+    terminal residual on additional frames drawn by a rule declared before any score is computed,
+    the locked q(s,F) is evaluated on the enlarged corpus with no change to its definition, and both
+    Spearman associations are re-reported with their sample counts and p-values beside the banked
+    n = 5 readings. A result that stays underpowered at the enlarged n is a reportable negative that
+    closes this section, provided the achieved power is stated; a result that reaches significance
+    against only one of the two outcomes closes it as a partial with the failing outcome named.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="continuation-parameter" data-choice="state-arclength" data-by="reckon-ship" data-when="2026-08-23T21:24:05+00:00">
@@ -276,11 +334,11 @@
       </p>
     <p class="r-dec-rat">State-space arclength is the only candidate whose predictor direction is built from states already admitted on the requested branch while the physical source stays fixed, so the coordinate cannot retrace the banked source-strength curve under another name. Source amplitude is directly refuted: two bounded composed-map campaigns (21 rungs; 41 rungs at 5 Newton / 30 GMRES per rung) both terminated CONVERGED on the dominating limited root at terminal parity error 5.06e-2 against a 1e-10 recovery floor, so doubling the rung count moved traversal and not the basin endpoint. Constrained plasma current is refuted because production eliminates it: ForwardFluxOperator.current_normalisation_amplitude computes a(x, I) = I / sum(unscaled_cell_current(x)) and scaled_current_moments multiplies every zeroth and first current moment by that one common amplitude, so target current cannot move source shape, centroid or topology independently, and where the normalisation is irregular it goes non-finite and is refused rather than selecting a branch. The arclength is a numerical gauge only; the Boolean topology class is never differentiated and no second classifier is added. Adjudicated by continuation-parameter-evidence, commit f1adace7, report scripts/continuation_parameter_choice/report.md; no production solve ran, so the report carries no performance attribution.</p>
     </div>
-<div class="r-dec" data-key="alignment-observable" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="alignment-observable" data-choice="seed-residual-action-amplification" data-by="reckon-ship" data-when="2026-08-23T22:02:49+00:00">
     <p class="r-dec-q">What observable measures seed alignment without a converged solve? It
         must be computable from the seed and the operator alone, since a criterion needing the
         answer cannot choose the starting point.</p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Preregistered as q(s,F) = ||F(s)-s||_2 / ||(I - J_F(s))(F(s)-s)||_2, computed from the cold moment seed, one fixed-point map evaluation and one tangent action, with no converged solve anywhere in the path - which was the section&#x27;s hard constraint, since a criterion needing the answer cannot choose the starting point. Larger q means the seed residual occupies a direction on which the local fixed-point action is weaker. The definition is LOCKED AS THE CANDIDATE, not promoted as a selector: on the five-frame banked-outcome corpus it scores Spearman 0.60 against cumulative growth at p = 0.28475697986529386 and Spearman 0.00 against terminal residual at p = 1.0, so it fails the section&#x27;s requirement of consistency against both outcomes and the verdict is HOLD_AS_SEED_SELECTOR. The definition is locked precisely so it cannot be tuned after seeing those outcomes; the defect is statistical power at n = 5, and the next node enlarges the outcome bank and re-tests this same definition unchanged. Receipt docs/figures/topology-preserving-continuation/seed-alignment-ranking.json, commit 32526f7a.</p>
     </div>
 </section>
 
@@ -308,6 +366,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260823T2205-mechanism" data-who="reckon-ship" data-when="2026-08-23T22:05:00Z">
     <div class="r-comment-body">manifold-advance-mechanism landed - commit 5e7265d3, merged 31b9914b; gate PASSED; 8 tests added, 31 focused and adjacent regression tests passing (8 new, 8 adjacent qualification, 15 fixed-point). Artifacts: nova/equilibrium/manifold_advance.py providing the fixed-shape secant and normal projector, plus per-nonlinear-update instrumentation in nova/equilibrium/fixed_point.py recording one qualification, an admissibility bit, predictor, corrector, advance and Newton lengths and cumulative Newton-step-equivalents - the receipt fields the reuse map found had no existing home. Production seam: ForwardProfile._solve_accelerated already forwards options to newton_krylov, so previous_admitted_state alongside the caller's existing admissibility_fn selects the mechanism with no second topology classifier. Predictor is the oriented secant between two admitted states; the bordered corrector removes its tangential component; both actions pass through _qualified_krylov_step and a failed status or zero step at material residual promotes zero advance. Gate suite: tangent sign orientation, named DEGENERATE_SECANT refusal, normal projection, fixed shapes, jit/vmap equality, predicate-controlled admission, Krylov refusal, zero-material-step refusal, ForwardProfile seam. No five-frame solve ran in this node, so it carries no convergence or performance attribution by design.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260824T0005-alignment" data-who="reckon-ship" data-when="2026-08-24T00:05:00Z">
+    <div class="r-comment-body">seed-alignment-observable landed - commit 32526f7a, merged 56ba6e29; gate PASSED; 4 tests added; verdict HOLD_AS_SEED_SELECTOR. Measure: preregistered score q(s,F) = ||F(s)-s||_2 / ||(I - J_F(s))(F(s)-s)||_2 on a fixed five-frame corpus declared before scores or outcomes were opened; Spearman against cumulative growth 0.60 at p = 0.28475697986529386, n = 5; Spearman against terminal residual 0.00 at p = 1.0, n = 5. The section requires consistency against BOTH outcomes, so this is a NEGATIVE and the section stays open. Scores were 0.9322689958968416 (21978/35), 0.9533225665401838 (21983/35), 1.0026929545189016 (21985/51), 0.9951411056094699 (21986/46), 1.065876598525219 (21989/55). No converged solve enters the observable, which the receipt states explicitly. THE OUTLIER SUB-DELIVERABLE DOES CLOSE: 21985/51 is most-informative and NOT instrumentation-perturbed - the replay reproduced the banked twelve-update trajectory with no production or test source change, and its real same-shot alternate seed moved burst updates from [3, 8, 12] to none and cumulative growth from 5379792627.282051 to 0.061860940695296525. Method requirements honoured: attribution is limited to rank association because the observable is measured on the current tree against outcomes banked on earlier trees in which multiple production mechanisms changed. The receipt's instruction not to tune the score after seeing the outcomes is honoured by locking the definition and folding a power node rather than trying a second observable on the same five points. Artifact: docs/figures/topology-preserving-continuation/seed-alignment-ranking.json.</div>
 </div>
 </section>
 </main>

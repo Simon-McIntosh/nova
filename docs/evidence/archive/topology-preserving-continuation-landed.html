@@ -56,6 +56,61 @@
   <em>preregister</em> the observable before scoring all available candidates.</p>
 </section>
 
+<section id="s3-alignment">
+  <h2 id="s3-alignment-h">§3 — The preregistered seed-alignment observable, and why it is held</h2>
+
+  <p><strong>seed-alignment-observable</strong> landed 2026-08-23 — commit <code>32526f7a</code>,
+  merged <code>56ba6e29</code>, gate PASSED, 4 tests added. Verdict
+  <strong><code>HOLD_AS_SEED_SELECTOR</code></strong>. Receipt
+  <code>docs/figures/topology-preserving-continuation/seed-alignment-ranking.json</code>.</p>
+
+  <p><strong>The observable, preregistered before any score or outcome was opened.</strong> For
+  seed <em>s</em>, fixed-point map <em>F</em>, residual <em>r</em> = F(s) − s and local action
+  <em>A</em> = I − J<sub>F</sub>(s), the score is
+  <strong>q(s,F) = ‖r‖₂ / ‖A r‖₂</strong> — larger means the seed residual occupies a direction on
+  which the local fixed-point action is weaker. It uses the cold moment seed, one map evaluation
+  and one tangent action; <em>no converged solve enters it</em>, which was §3's hard constraint
+  since a criterion needing the answer cannot choose the starting point. The receipt records
+  <code>recorded_before_observable_scores_and_outcome_access = true</code>, a fixed five-frame
+  corpus, and the association test as two-sided Spearman at n = 5, all declared in advance.</p>
+
+  <table>
+    <caption>Preregistered score against banked outcome, five-frame fixed corpus</caption>
+    <thead>
+      <tr><th scope="col">Frame</th><th scope="col">q(s,F)</th><th scope="col">Cumulative growth</th><th scope="col">Terminal residual</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>21978/35</td><td>0.9322689958968416</td><td>2,156,276.0</td><td>0.0010843246548355142</td></tr>
+      <tr><td>21983/35</td><td>0.9533225665401838</td><td>575,064.125</td><td>0.018280965423722807</td></tr>
+      <tr><td>21985/51</td><td>1.0026929545189016</td><td>52,452,978,116.0</td><td>0.002451587844592516</td></tr>
+      <tr><td>21986/46</td><td>0.9951411056094699</td><td>564,602,919.75</td><td>0.005320862474684456</td></tr>
+      <tr><td>21989/55</td><td>1.065876598525219</td><td>22,921,153.0</td><td>0.002289950466828694</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>The result is a negative and it is stated as one.</strong> Spearman against cumulative
+  growth is ρ = <strong>0.60</strong> at p = 0.28475697986529386, n = 5 — positive in the
+  predicted direction but underpowered. Spearman against terminal residual is ρ =
+  <strong>0.00</strong> at p = 1.0 — null. §3 requires consistency against <em>both</em> outcomes,
+  so this candidate does not meet it and the section stays open. The receipt's own instruction is
+  the right one and is honoured here: <em>do not tune this score after seeing these outcomes.</em>
+  Trying a second observable against the same five points is the p-hack §5 exists to prevent; the
+  defect is power, so the next node enlarges the outcome bank and re-tests the same definition.</p>
+
+  <p><strong>The outlier is adjudicated, and this part of §3 does close.</strong> 21985/51 is
+  <strong>most-informative, not instrumentation-perturbed</strong>. The replay reproduced the banked
+  twelve-update trajectory with no production or test source change; its <em>real</em> same-shot
+  alternate seed moved burst updates from [3, 8, 12] to none and cumulative growth from
+  5,379,792,627.282051 to <strong>0.061860940695296525</strong>. Being the only corpus frame
+  carrying a reproduced trajectory, iteration-local tangent diagnostics and a real alternate seed is
+  what makes it informative rather than perturbed.</p>
+
+  <p><strong>Attribution scope.</strong> The receipt claims rank association only. The observable is
+  measured on the current tree while the outcomes were banked on earlier trees, and multiple
+  production mechanisms changed between them, so no causal performance attribution is made — the
+  correlations rank the fixed corpus and nothing more.</p>
+</section>
+
 <section id="s2-control">
   <h2 id="s2-control-h">§2 — The admissible-step control, and the regression it found</h2>
 

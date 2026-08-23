@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="evidence">
   <meta name="plan-slug" content="mast-catalog-gpu-solve-landed">
   <meta name="plan-title" content="MAST Catalog GPU Solve — landed record">
-  <meta name="plan-summary" content="Cumulative execution evidence for the catalog throughput plan: the measured slice census that replaced the estimated denominator, and the entry-gate state that keeps the throughput ladder shut">
+  <meta name="plan-summary" content="Cumulative execution evidence for the catalog throughput plan: the measured slice census that replaced the estimated denominator, the parity gate whose failure retired its own requirement, and the entry-gate state that keeps the throughput ladder shut">
   <meta name="plan-evidence-for" content="mast-catalog-gpu-solve">
   <title>MAST Catalog GPU Solve — landed | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
@@ -74,7 +74,7 @@
     <code>scripts/mast_slice_census/report.md</code>.</p>
 
     <h2 id="entry-gate-state">Entry-gate state — the ladder stays shut</h2>
-    <p>The census is the only throughput-plan node that has landed, and deliberately so. The
+    <p>No throughput rung has been dispatched, and deliberately so. The
     plan is held at its entry gate under an owner directive that forward-solve stability and
     the multi-basin question be settled first, on the reasoning that a fast catalog of
     incorrect equilibria has no value. Recorded here so the gate's state is legible beside
@@ -95,28 +95,72 @@
     <p><strong>Not discharged: three live forward-solve defects.</strong> None is a basin
     problem and none is resolution alone.</p>
     <ul>
-      <li>The exact autodiff residual-Jacobian action is non-finite on the first Arnoldi
-      vector, returning a finite <em>zero</em> step. <strong>Now screened</strong> — commit
-      <code>6143221d</code>, see the DIII-D landed record — but screening makes the failure
-      visible rather than making the solve converge.</li>
-      <li>Topology-preserving trial admission is absent. The only route that converges
-      (7.75e-11 in 89 accepted iterations) crossed topology at iterations 31, 50 and 88 and
-      terminated on the wrong branch. Open.</li>
-      <li>A mesh-independent closure-path defect: the passive-closure reproduction move holds
-      at 0.6098 / 0.6392 / 0.6378 points across realised 566 / 1587 / 2214 cells against a
-      0.15 ceiling, all six solves converged at or below 2.5e-10. Refinement does not buy it
-      back. Owned by the operator-refinement lane and under trace.</li>
+      <li>The exact autodiff residual-Jacobian action was non-finite on the first Arnoldi vector, returning a finite <em>zero</em> step. <strong>FIXED and root-caused</strong> (commit <code>06b09f5b</code>): division by a zero singular-value gap in the JAX SVD JVP, reached through <code>jnp.linalg.lstsq</code> in the Null2D quadratic null fit, because symmetric fixed-grid stencils carry repeated singular values. Also screened (<code>6143221d</code>) so a future latent non-differentiable branch surfaces as a named refusal rather than a plausible answer.</li>
+      <li>Topology-preserving trial admission was absent. <strong>LANDED</strong> (<code>257af9dc</code>): on the banked case all 89 promoted iterations hold diverted with a finite terminal X point, where the unqualified route crossed topology at 31, 50 and 88 and ended limited. But on the five score-blind frames it converts a confidently wrong answer into a stalled correct one rather than into convergence: admission is 4 to 9 of 89 trials because topology caps the step near one thirty-second of the Newton step, so an 89-iteration budget traverses only about 2.8 Newton-step-equivalents. Extending the factor ladder to reach that step was measured and is NULL. The frontier needs a predictor-corrector advancing <em>along</em> the topology-preserving manifold, not finer backtracking into it.</li>
+      <li>The mesh-independent closure gain (0.6098 / 0.6392 / 0.6378 points across realised 566 / 1587 / 2214 cells against a 0.15 ceiling) is <strong>identified as a PHYSICAL near-marginal mode</strong>: the vertical free-boundary axis-displacement channel at eigenvalue 0.987429, Ritz residual 6.4e-16, 85 percent passive-drive overlap with axis motion, with constraint, normalisation and mesh-artifact classes measured out. Not a defect. The elongated case carries a <em>distinct</em> radial-dominant channel at 1.3372, so each configuration owns its own near-marginal mode and no scalar screen or ceiling can serve both.</li>
     </ul>
 
     <p><strong>Two consequences already recorded against the plan's own architecture.</strong>
     The batched Picard loop §2 specifies is not available: the map is non-contractive with
     spectral radius <strong>1.1456</strong> after current pinning and <strong>1.2577</strong>
     without, so the loop is Newton-only and the iteration distribution the first rung profiles
-    is a Newton-step distribution. And the default residual action changes under the locked
-    <code>solver-default-route</code> ruling to a finite-difference action, which costs one
-    extra map evaluation <em>per Krylov vector</em> where an exact tangent reuses a single
-    linearisation — so the 21.5&nbsp;ms per-slice budget above must be re-derived on the
-    differenced arm rather than inherited from an economy measured on the exact one.</p>
+    is a Newton-step distribution. And the default residual action was re-ruled twice: a finite-difference action first, then amended to the repaired exact autodiff tangent once the repair landed and the differenced arm proved blocked by <code>lax.custom_linear_solve</code>, which demands an exactly traced transposable map. The per-slice budget is therefore read on the exact arm, where one linearisation is reused across all Krylov vectors, and the differenced arm stands deferred unbuilt as robustness insurance not taken.</p>
+
+  
+    <h2 id="s3-parity-gate">Jitted-versus-eager parity gate, and the requirement it retired — 2026-08-23</h2>
+    <p>Commits <code>e00ec926</code> (gate) and <code>93ed6a32</code> (attribution). The gate was
+    stood up with its tolerance <em>written into the receipt before any case was scored</em> —
+    and it was not invented for the run, it is this plan's own existing 1e-10 jitted parity
+    floor carried unchanged.</p>
+
+    <p><strong>Result: the moment seed passes, the profile solve fails.</strong> Seed 4/4
+    quantities at max absolute difference <strong>4.440892098500626e-16</strong>, machine
+    precision. Profile solve 38/69 passing, <strong>31 failing</strong>, only 1 of 6 held-out
+    cases passing, flux diverging at <strong>1.1646900802908533e-05</strong> absolute and
+    2.090888477060583e-06 relative. Four quantities are declared <em>uncomparable</em> with the
+    reason stated — <code>ForwardProfile.moment_seed</code> has no traced counterpart for that
+    host-only polygon construction — rather than quietly dropped.</p>
+
+    <p><strong>Attributed <code>AMPLIFIED_REPRESENTATION_DIFFERENCE</code>, with both
+    alternatives measured out rather than argued away.</strong></p>
+    <ul>
+      <li><em>Not a regression.</em> A tree at <code>83dc40fb</code>, preceding all four of that
+      day's equilibrium commits and <strong>proven under test by distinct imported-module
+      digests</strong>, reproduces all six divergences <em>exactly</em>.</li>
+      <li><em>Not a semantic difference.</em> Every case's one-map separation is
+      <strong>2.220446049250313e-16</strong> absolute, 1.8900776655575514e-16 relative — pure
+      float64 rounding, no operation exceeding that band before iteration.</li>
+      <li><em>Amplification shown, not asserted.</em> Per-update flux separations for shot
+      21985 slice 51 run 2.16e-15 → 6.11e-15 → 5.31e-13 → 3.84e-12 → 2.37e-11 → 5.94e-11 →
+      3.22e-10 → 1.31e-08 → 1.06e-08 → 3.11e-08 → 8.08e-08 → 1.16e-05, cumulative
+      <strong>5.379792627282051e9</strong>.</li>
+    </ul>
+
+    <p><strong>Independent corroboration from the cluster structure:</strong> of the 38 passing
+    leaves, <strong>35 are exact categorical, policy and structural invariants and are
+    bit-identical</strong>; all 31 failures are continuous iterated quantities (14
+    state/domain/topology/solver-trace, 9 integrated-moment/current-ledger, 8
+    conservation/source-normalisation). Nothing categorical moves. Iteration is the only
+    difference between the machine-precision seed and the diverging solve.</p>
+
+    <p><strong>One measurement kept because it breaks the tidy story.</strong> This is
+    <em>not</em> geometric growth at the spectral radius: ρ = 1.1456 over twelve updates
+    predicts ~5.1×, the measurement is 5.4e9 — nine orders larger. Per-update ratios are
+    irregular (≈2.8, 87, 7.2, 6.2, 2.5, 5.4, 41, <strong>0.81</strong>, 2.9, 2.6, 144) with
+    three bursts and one <em>contracting</em> step. No single dominant eigenvalue produces that;
+    the map is strongly non-normal and its transient growth dominates its asymptote, so a
+    terminal eigenpair is necessary but insufficient to explain the trajectory that reached it.</p>
+
+    <p><strong>What this retires, and what it does not.</strong> §1's claim that the jitted stack
+    pins batched==per-slice at 1e-10 is struck for the solve half: on a non-contractive map that
+    is unmeetable by <em>any</em> implementation, not merely unmet. The
+    batched==per-slice <em>requirement</em> stands unchanged — a 1,341,435-slice catalog must not
+    disagree with a per-slice one on any physical observable. Retired is the belief that
+    agreement on the raw converged state at a fixed absolute depth expresses it. Successors: a
+    one-map bound (machine precision demonstrably attainable) plus separately registered
+    physically meaningful terminal-observable bounds, consuming the criterion derivation in
+    flight on <code>forward-operator-refinement</code> rather than authoring a fourth untraced
+    number.</p>
 
   </main>
 </body>

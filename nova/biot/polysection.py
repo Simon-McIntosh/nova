@@ -1,8 +1,8 @@
 """Exact Biot-Savart coupling for toroidal polygonal cross-sections.
 
 Every production pair is integrated over the authored section. The closed-form
-Part V reduction is the default; the boundary-quadrature implementation remains
-an exact reference and compiled-device route. Approximate distance-banded and
+Part V reduction is the default compiled-device route; the boundary-quadrature
+implementation remains an exact host reference. Approximate distance-banded and
 point-filament comparators live in their dedicated study modules and cannot be
 selected through this production element.
 
@@ -39,15 +39,21 @@ class PolySectionPolicy:
     """Immutable exact-kernel policy for one polygon-section instance."""
 
     exact_kernel: Literal["closed_form", "quadrature"] = "closed_form"
-    backend: Literal["numpy", "jax"] = "numpy"
+    backend: Literal["numpy", "jax"] | None = None
     precision: Literal["float64"] = "float64"
-    device_eligibility: Literal["host", "axisymmetric_ring"] = "host"
+    device_eligibility: Literal["host", "axisymmetric_ring"] | None = None
     quadrature: tuple[int, int] | None = None
 
     def __post_init__(self):
         """Validate and resolve every setting that changes kernel values."""
         if self.exact_kernel not in {"closed_form", "quadrature"}:
             raise ValueError(f"unknown polygon-section kernel {self.exact_kernel!r}")
+        if self.backend is None:
+            object.__setattr__(
+                self,
+                "backend",
+                "jax" if self.exact_kernel == "closed_form" else "numpy",
+            )
         if self.backend not in {"numpy", "jax"}:
             raise ValueError(f"unsupported polygon-section backend {self.backend!r}")
         if self.precision != "float64":
@@ -55,6 +61,8 @@ class PolySectionPolicy:
                 f"unsupported polygon-section precision {self.precision!r}"
             )
         expected_device = "host" if self.backend == "numpy" else "axisymmetric_ring"
+        if self.device_eligibility is None:
+            object.__setattr__(self, "device_eligibility", expected_device)
         if self.device_eligibility != expected_device:
             raise ValueError(
                 f"the {self.backend!r} backend requires {expected_device!r} "
@@ -141,10 +149,11 @@ class PolySection(Matrix):
         vertices: np.ndarray,
         policy: PolySectionPolicy | Mapping | str | None = None,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Return ``(psi, Br, Bz)`` from the configured exact kernel.
+        """Return scalar-reference ``(psi, Br, Bz)`` from the exact kernel.
 
-        This is the single production selection point for the two exact
-        implementations.
+        Production assembly dispatches the default policy through
+        :class:`TiledPolySection`; this helper retains the independent NumPy
+        reference used for verification and direct section evaluation.
         """
         policy = PolySectionPolicy.resolve(policy)
         if policy.exact_kernel == "closed_form":
@@ -314,7 +323,7 @@ class PolySection(Matrix):
 
 @dataclass
 class TiledPolySection(PolySection):
-    """Evaluate complete-ring sections through the compiled quadrature tile kernel.
+    """Evaluate complete-ring sections through a compiled fixed-shape kernel.
 
     This is an explicit product adapter around the existing ring kernel. It keeps
     the ordinary :class:`Matrix` turn, target-quadrature and row-reduction contract;

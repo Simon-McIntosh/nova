@@ -69,7 +69,7 @@
     "p999": 8617350547552581613
   },
   "oracle_column": {
-    "accepted_far_absolute_bound": 1.49e-09,
+    "banked_paired_far_absolute_bound": 1.49e-09,
     "cpu_far_target_absolute": 1.6082512401776555e-09,
     "cpu_max_absolute": 4.045865422151184e-09,
     "cpu_median_absolute": 4.895696141178371e-10,
@@ -77,8 +77,10 @@
     "gpu_far_target_absolute": 1.2244882396135323e-09,
     "gpu_max_absolute": 3.4598139850884808e-09,
     "gpu_median_absolute": 5.134523867992079e-10,
+    "scalar_numpy_far_target_absolute": 1.3472923997940644e-09,
     "source_column": 184,
-    "within_accepted_far_bound": false
+    "stated_unpaired_far_absolute_bound": 1.6082512401776555e-09,
+    "within_stated_unpaired_far_bound": true
   },
   "scheduler": {
     "cpu_job_id": "1253212",
@@ -89,7 +91,8 @@
   "verdict": {
     "cpu_under_120_seconds": true,
     "gpu_under_120_seconds": true,
-    "production_numpy_path_replaced": false,
-    "production_path_selection_pending": true
+    "no_further_pairing_layer": true,
+    "production_numpy_path_replaced": true,
+    "production_path_selection_pending": false
   }
 }

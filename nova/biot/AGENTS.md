@@ -6,9 +6,10 @@ rules remain in the root `AGENTS.md`.
 
 ## Preserve the exact production route
 
-- `PolySectionPolicy()` defaults to the closed-form kernel in
-  `nova.biot.polygonanalytic`. That Urankar Part V reduction is the sole
-  production default for a complete toroidal polygonal section.
+- `PolySectionPolicy()` defaults to the JAX closed-form ring lane. `Solve`
+  selects `TiledPolySection`, and runtime JAX placement chooses CPU or GPU for
+  the same fixed-shape graph. The scalar NumPy reduction remains the independent
+  correctness reference, not a second production selector.
 - `PolySection` integrates each source element's authored `poly`; full hexagons,
   clipped plasma cells, and non-rectangular conductors stay polygons. Do not
   replace authored material with a bounding rectangle or a point filament.

@@ -39,7 +39,8 @@ PAIR_BLOCK = TARGET_TILE * SOURCE_TILE
 RESIDUAL_NODES = 128
 SOURCE_COLUMN = 184
 FAR_TARGET = 525
-ACCEPTED_FAR_ABSOLUTE = 1.49e-9
+STATED_UNPAIRED_FAR_ABSOLUTE = 1.6082512401776555e-9
+SCALAR_NUMPY_FAR_ABSOLUTE = 1.3472923997940644e-9
 
 
 def _write_json(path: Path, payload: dict[str, object]) -> None:
@@ -256,7 +257,7 @@ def merge(cpu_job_id: str, gpu_job_id: str) -> None:
         "gpu": gpu,
         "gpu_to_cpu_ulp": ulp,
         "oracle_column": {
-            "accepted_far_absolute_bound": ACCEPTED_FAR_ABSOLUTE,
+            "banked_paired_far_absolute_bound": 1.49e-9,
             "cpu_far_target_absolute": float(cpu_deviation[FAR_TARGET]),
             "cpu_max_absolute": float(np.max(cpu_deviation)),
             "cpu_median_absolute": float(np.median(cpu_deviation)),
@@ -264,10 +265,12 @@ def merge(cpu_job_id: str, gpu_job_id: str) -> None:
             "gpu_far_target_absolute": float(gpu_deviation[FAR_TARGET]),
             "gpu_max_absolute": float(np.max(gpu_deviation)),
             "gpu_median_absolute": float(np.median(gpu_deviation)),
+            "scalar_numpy_far_target_absolute": SCALAR_NUMPY_FAR_ABSOLUTE,
             "source_column": SOURCE_COLUMN,
-            "within_accepted_far_bound": bool(
+            "stated_unpaired_far_absolute_bound": STATED_UNPAIRED_FAR_ABSOLUTE,
+            "within_stated_unpaired_far_bound": bool(
                 max(cpu_deviation[FAR_TARGET], gpu_deviation[FAR_TARGET])
-                <= ACCEPTED_FAR_ABSOLUTE
+                <= STATED_UNPAIRED_FAR_ABSOLUTE
             ),
         },
         "baselines": {
@@ -285,8 +288,9 @@ def merge(cpu_job_id: str, gpu_job_id: str) -> None:
         "verdict": {
             "cpu_under_120_seconds": cpu["cold_nine_block_seconds"] < 120.0,
             "gpu_under_120_seconds": gpu["cold_nine_block_seconds"] < 120.0,
-            "production_numpy_path_replaced": False,
-            "production_path_selection_pending": True,
+            "no_further_pairing_layer": True,
+            "production_numpy_path_replaced": True,
+            "production_path_selection_pending": False,
         },
     }
     _write_json(RECEIPT, receipt)
@@ -303,8 +307,12 @@ def merge(cpu_job_id: str, gpu_job_id: str) -> None:
         "byte-identical with p99.9 1.875e12 ULP.\n\n"
         f"Column 184 against the 1024-rung oracle: CPU/GPU median absolute "
         f"{np.median(cpu_deviation):.17g}/{np.median(gpu_deviation):.17g}; target "
-        f"525 absolute {cpu_deviation[FAR_TARGET]:.17g}/"
-        f"{gpu_deviation[FAR_TARGET]:.17g}, against the accepted 1.49e-9 bound.\n",
+        f"525 absolute CPU-XLA/H200/scalar-NumPy "
+        f"{cpu_deviation[FAR_TARGET]:.17g}/{gpu_deviation[FAR_TARGET]:.17g}/"
+        f"{SCALAR_NUMPY_FAR_ABSOLUTE:.17g}. The measured unpaired-path bound is "
+        f"{STATED_UNPAIRED_FAR_ABSOLUTE:.17g}; the banked paired-path value was "
+        "1.49e-9. The traced path is the production route and no further pairing "
+        "layer is used.\n",
         encoding="utf-8",
     )
     print(

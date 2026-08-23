@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T22:59:44",
+  "updated": "2026-08-23T23:03:53",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -682,7 +682,7 @@
       },
       {
         "id": "S13",
-        "status": "active",
+        "status": "done",
         "theme": "Defensible criteria and the operator frontier",
         "items": [
           {
@@ -707,7 +707,7 @@
       },
       {
         "id": "S14",
-        "status": "planned",
+        "status": "active",
         "theme": "Reach the root: convergence on a non-normal near-marginal map",
         "items": [
           {
@@ -719,7 +719,7 @@
         "description": "The forward solve holds the correct branch and stalls. Topology admissibility caps the Newton step near one thirty-second, so an 89-iteration budget traverses about 2.8 step-equivalents against a need an order of magnitude larger, and extending the backtracking ladder to reach that step is a measured null. This sprint closes that frontier by advancing along the admissible set rather than retreating into it, by choosing seeds on alignment rather than proximity, and by making step conditioning work at any Krylov projection dimension rather than the one it was fitted to."
       }
     ],
-    "active_sprint_id": "S13",
+    "active_sprint_id": "S14",
     "timeline": [
       {
         "when": "2026-07-29",
@@ -877,6 +877,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 62
+    "_version": 63
   }
 }

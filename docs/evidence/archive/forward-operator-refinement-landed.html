@@ -92,6 +92,40 @@
   (sha256 <code>31999132…</code>), per-iteration figure alongside.</p>
 </section>
 
+<section id="contrast-case">
+  <h2 id="contrast-case-h">§6 — The low-elongation contrast case: benign physics excluded</h2>
+  <p><strong>vertical-stability-control</strong> (a scientific control, not a feedback
+  controller) landed 2026-08-23 — commit <code>21d0ccfe</code>, merged
+  <code>7418a054</code>, gate PASSED, scope-changed: the vertically-compressed reference
+  geometry solved to an empty vacuum branch (0/2100 core cells, non-finite axis) and was
+  refused rather than forced; the pre-authorized analytic construction replaced it —
+  a Solov'ev-bootstrapped 625-cell free-boundary machine with a homogeneous vacuum term
+  (boundary elongation 0.9786 against the elongated 1.8176) and a 16-conductor passive
+  shell fit to the vertical-translation mode (0.0193 relative L2, real Green coupling).</p>
+  <table>
+    <thead><tr><th>Quantity</th><th>Elongated case</th><th>Near-circular control</th></tr></thead>
+    <tbody>
+      <tr><td>Boundary elongation</td><td>1.8176</td><td>0.9786</td></tr>
+      <tr><td>Decay index n at axis (both arms)</td><td>—</td><td>0.5723 / 0.5718 ∈ (0, 1.5): stable</td></tr>
+      <tr><td>Direct external peak</td><td>0.09723915202112363 pt</td><td>0.09723915202112085 pt (ratio 1.0)</td></tr>
+      <tr><td>Converged field response</td><td>0.6418 pt</td><td>10.4037 pt</td></tr>
+      <tr><td><strong>Field gain</strong></td><td><strong>6.60×</strong></td><td><strong>106.99×</strong></td></tr>
+      <tr><td>Late tangent increment growth</td><td>1.3372 (expanding)</td><td>0.98837 (near-marginal contracting)</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Verdict: ANOMALOUS_GAIN.</strong> The gain does not track vertical stability —
+  on a measurably stable configuration it grew sixteen-fold rather than collapsing toward
+  unit gain, so the benign vertical-mode explanation is excluded and the coupled map
+  carries a near-marginal mode independent of geometry (0.98837 late growth → resolvent
+  scale 1/(1−0.988) ≈ 86, consistent with the 107× measured). Both roots physically
+  qualified (residuals 1.76e-12 / 1.74e-16, 98/100 of 625 core cells, finite axes, valid
+  flux spans). Kept separate per the receipt: the terminal score move (−0.358 pt)
+  carries a +2.198-pt six-cell support-difference term — the FIELD gain drives the
+  verdict. The reopened investigation: identify the near-marginal mode's structure. Receipt:
+  <code>docs/figures/forward-operator-refinement/passive-closure-stability-control.json</code>
+  (sha256 <code>57333213…</code>), two-panel comparison figure alongside.</p>
+</section>
+
 <section id="gpu-rebuild">
   <h2 id="gpu-rebuild-h">§4 — The bumped default, demonstrated live on the H200</h2>
   <p><strong>global-dplasma-gpu-rebuild</strong> landed 2026-08-23 — commit

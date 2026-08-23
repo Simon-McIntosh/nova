@@ -1,0 +1,242 @@
+{
+  "source": {
+    "commit": "d6a5fbf10eca81a850938fcf259809a62972e521",
+    "tree": "a000157de0132e7742a599565f7e8a6452a92b5a"
+  },
+  "inputs": {
+    "mast": {
+      "path": "docs/figures/current-constrained-forward-solve/mast-constrained/current-constrained-frozen-six-scorecard.json",
+      "sha256": "a2220d93b5fe103aeacc01a5fe410ee1d0a8611d5e468c54fb88056e8ac083ab"
+    },
+    "diiid": {
+      "path": "docs/figures/current-constrained-forward-solve/cold-start/constrained_cold_start_receipt.json",
+      "sha256": "e5f555763d0b987b43e542c3fa539dc2cf6c6701e02f1d6c1c641448da25a722"
+    },
+    "adapters": [
+      "benchmarks.efit_parity_warm_neighbour",
+      "benchmarks.diiid_constrained_cold_start"
+    ]
+  },
+  "measurement": {
+    "rule": "a banked cold root remains eligible only when its all-domain current pin is inside the declared deterministic interval",
+    "isoflux_baseline_scored": false,
+    "isoflux_qualification": "banked cold-start receipts carry no trusted chord-pair pins; the differentiable isoflux map and interval admission are therefore proven in the focused synthetic Jacobian suite only",
+    "statistical_operations": []
+  },
+  "summary": {
+    "MAST": {
+      "attempts": 6,
+      "cold_converged": 1,
+      "pin_admissible_converged": 1,
+      "candidate_roots_rejected_by_current_pin": 0,
+      "basin_restriction_fraction": 0.0,
+      "maximum_scaled_current_pin_residual": 1.1102230246251564e-07
+    },
+    "DIII-D": {
+      "attempts": 5,
+      "cold_converged": 2,
+      "pin_admissible_converged": 2,
+      "candidate_roots_rejected_by_current_pin": 0,
+      "basin_restriction_fraction": 0.0,
+      "maximum_scaled_current_pin_residual": 1.8589150449861258e-06
+    }
+  },
+  "rows": [
+    {
+      "machine": "MAST",
+      "identity": "21978/35",
+      "public_entry_point": "ForwardProfile.solve(target_current=...)",
+      "cold_converged": false,
+      "pin_admissible": true,
+      "admissible_converged_root": false,
+      "scaled_current_pin_residual": 0.0,
+      "target_current_a": 801493.25,
+      "terminal_residual": 0.010762710781619054,
+      "pin_set": {
+        "class": "ConstraintPinSet",
+        "moment": "plasma_current",
+        "support": "all_domain",
+        "absolute_interval_a": 0.0008014932500000001
+      }
+    },
+    {
+      "machine": "MAST",
+      "identity": "21983/35",
+      "public_entry_point": "ForwardProfile.solve(target_current=...)",
+      "cold_converged": false,
+      "pin_admissible": true,
+      "admissible_converged_root": false,
+      "scaled_current_pin_residual": 0.0,
+      "target_current_a": 813718.375,
+      "terminal_residual": 0.001255977522269408,
+      "pin_set": {
+        "class": "ConstraintPinSet",
+        "moment": "plasma_current",
+        "support": "all_domain",
+        "absolute_interval_a": 0.0008137183750000001
+      }
+    },
+    {
+      "machine": "MAST",
+      "identity": "21985/51",
+      "public_entry_point": "ForwardProfile.solve(target_current=...)",
+      "cold_converged": false,
+      "pin_admissible": true,
+      "admissible_converged_root": false,
+      "scaled_current_pin_residual": 0.0,
+      "target_current_a": 934383.875,
+      "terminal_residual": 0.003231748447317234,
+      "pin_set": {
+        "class": "ConstraintPinSet",
+        "moment": "plasma_current",
+        "support": "all_domain",
+        "absolute_interval_a": 0.0009343838750000001
+      }
+    },
+    {
+      "machine": "MAST",
+      "identity": "21986/46",
+      "public_entry_point": "ForwardProfile.solve(target_current=...)",
+      "cold_converged": false,
+      "pin_admissible": true,
+      "admissible_converged_root": false,
+      "scaled_current_pin_residual": 1.1102230246251564e-07,
+      "target_current_a": 874260.4375,
+      "terminal_residual": 0.00020057602069277377,
+      "pin_set": {
+        "class": "ConstraintPinSet",
+        "moment": "plasma_current",
+        "support": "all_domain",
+        "absolute_interval_a": 0.0008742604375000001
+      }
+    },
+    {
+      "machine": "MAST",
+      "identity": "21989/55",
+      "public_entry_point": "ForwardProfile.solve(target_current=...)",
+      "cold_converged": false,
+      "pin_admissible": true,
+      "admissible_converged_root": false,
+      "scaled_current_pin_residual": 0.0,
+      "target_current_a": 928902.8125,
+      "terminal_residual": 0.002822970410097976,
+      "pin_set": {
+        "class": "ConstraintPinSet",
+        "moment": "plasma_current",
+        "support": "all_domain",
+        "absolute_interval_a": 0.0009289028125
+      }
+    },
+    {
+      "machine": "MAST",
+      "identity": "22086/43",
+      "public_entry_point": "ForwardProfile.solve(target_current=...)",
+      "cold_converged": true,
+      "pin_admissible": true,
+      "admissible_converged_root": true,
+      "scaled_current_pin_residual": 0.0,
+      "target_current_a": 933034.875,
+      "terminal_residual": 2.911868346631881e-16,
+      "pin_set": {
+        "class": "ConstraintPinSet",
+        "moment": "plasma_current",
+        "support": "all_domain",
+        "absolute_interval_a": 0.0009330348750000001
+      }
+    },
+    {
+      "machine": "DIII-D",
+      "identity": "d3d_shot_00f40d3919/54",
+      "public_entry_point": "nova.equilibrium.forward.ForwardProfile.solve",
+      "cold_converged": false,
+      "pin_admissible": true,
+      "admissible_converged_root": false,
+      "scaled_current_pin_residual": 1.8137065919537764e-06,
+      "target_current_a": 1283728.2760441303,
+      "terminal_residual": 0.16706673173533756,
+      "pin_set": {
+        "class": "ConstraintPinSet",
+        "moment": "plasma_current",
+        "support": "all_domain",
+        "absolute_interval_a": 0.00012837282760441303
+      }
+    },
+    {
+      "machine": "DIII-D",
+      "identity": "d3d_shot_0112bdc95d/96",
+      "public_entry_point": "nova.equilibrium.forward.ForwardProfile.solve",
+      "cold_converged": true,
+      "pin_admissible": true,
+      "admissible_converged_root": true,
+      "scaled_current_pin_residual": 1.8589150449861258e-06,
+      "target_current_a": 1252508.2535743713,
+      "terminal_residual": 1.1855872107574405e-07,
+      "pin_set": {
+        "class": "ConstraintPinSet",
+        "moment": "plasma_current",
+        "support": "all_domain",
+        "absolute_interval_a": 0.00012525082535743713
+      }
+    },
+    {
+      "machine": "DIII-D",
+      "identity": "d3d_shot_0112d94419/169",
+      "public_entry_point": "nova.equilibrium.forward.ForwardProfile.solve",
+      "cold_converged": false,
+      "pin_admissible": true,
+      "admissible_converged_root": false,
+      "scaled_current_pin_residual": 0.0,
+      "target_current_a": 685050.7490634918,
+      "terminal_residual": 0.43716509982663987,
+      "pin_set": {
+        "class": "ConstraintPinSet",
+        "moment": "plasma_current",
+        "support": "all_domain",
+        "absolute_interval_a": 6.850507490634919e-05
+      }
+    },
+    {
+      "machine": "DIII-D",
+      "identity": "d3d_shot_01177bc9fa/144",
+      "public_entry_point": "nova.equilibrium.forward.ForwardProfile.solve",
+      "cold_converged": true,
+      "pin_admissible": true,
+      "admissible_converged_root": true,
+      "scaled_current_pin_residual": 0.0,
+      "target_current_a": 979762.2680664062,
+      "terminal_residual": 5.545310448828357e-07,
+      "pin_set": {
+        "class": "ConstraintPinSet",
+        "moment": "plasma_current",
+        "support": "all_domain",
+        "absolute_interval_a": 9.797622680664063e-05
+      }
+    },
+    {
+      "machine": "DIII-D",
+      "identity": "d3d_shot_012c431151/125",
+      "public_entry_point": "nova.equilibrium.forward.ForwardProfile.solve",
+      "cold_converged": false,
+      "pin_admissible": true,
+      "admissible_converged_root": false,
+      "scaled_current_pin_residual": 0.0,
+      "target_current_a": 267807.6736629009,
+      "terminal_residual": 0.4782394255888326,
+      "pin_set": {
+        "class": "ConstraintPinSet",
+        "moment": "plasma_current",
+        "support": "all_domain",
+        "absolute_interval_a": 2.6780767366290093e-05
+      }
+    }
+  ],
+  "diiid_current_defaults_qualification": {
+    "status": "open owner finding",
+    "scope": "current-defaults baseline",
+    "finding": "DIII-D convergence at default plasma-cell resolution remains under investigation for resolution and operator-scaling impact"
+  },
+  "artifacts": {
+    "receipt": "docs/figures/ensemble-forward-seam/constraint-seam/constraint-seam-receipt.json",
+    "figure": "docs/figures/ensemble-forward-seam/constraint-seam/constraint-seam-basin-restriction.png"
+  }
+}

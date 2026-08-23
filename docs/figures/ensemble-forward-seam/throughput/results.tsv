@@ -1,0 +1,17 @@
+execution	jax_backend	mode	members_per_window	repeats	median_seconds	member_windows_per_second	batch_calls_per_second
+cpu	cpu	batch	1	9	0.00913372	109.484	109.484
+cpu	cpu	scalar-loop	1	9	0.00642701	155.593	155.593
+cpu	cpu	batch	2	9	0.0169255	118.165	59.0825
+cpu	cpu	scalar-loop	2	9	0.0126322	158.325	79.1625
+cpu	cpu	batch	4	9	0.0328323	121.831	30.4578
+cpu	cpu	scalar-loop	4	9	0.0252458	158.442	39.6105
+cpu	cpu	batch	8	9	0.0638923	125.211	15.6513
+cpu	cpu	scalar-loop	8	9	0.050542	158.284	19.7855
+h200	gpu	batch	1	9	0.00860989	116.145	116.145
+h200	gpu	scalar-loop	1	9	0.0059785	167.266	167.266
+h200	gpu	batch	2	9	0.0158913	125.855	62.9277
+h200	gpu	scalar-loop	2	9	0.0119112	167.91	83.9549
+h200	gpu	batch	4	9	0.030678	130.386	32.5966
+h200	gpu	scalar-loop	4	9	0.0236898	168.849	42.2123
+h200	gpu	batch	8	9	0.0596266	134.168	16.771
+h200	gpu	scalar-loop	8	9	0.0474376	168.642	21.0803

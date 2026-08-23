@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T18:16:12",
+  "updated": "2026-08-23T18:25:19",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -27604,9 +27604,137 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T154242560129-operator-order-floor-move",
+        "plan": "forward-operator-refinement",
+        "section": "\u00a72",
+        "node": "operator-order-floor-move",
+        "role": "implement",
+        "spec_level": "",
+        "member": "hex-stencil",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T15:42:46Z",
+        "completed_at": "2026-08-23T16:23:23Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2437,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2437,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "044adfdfc97d25d11562c1fd67b044ce1c52c419",
+        "commits": [
+          "862e712ae8c67db7955938da1cd1e4c785f2c386"
+        ],
+        "changed_lines": {
+          "added": 2658,
+          "removed": 9,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T154242560129-operator-order-floor-move/manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff707-8995-7c20-8341-70011e4a236e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 30311424,
+            "cached_input_tokens_cumulative": 166552704,
+            "input_tokens": 30838538,
+            "input_tokens_cumulative": 169309557,
+            "output_tokens": 40454,
+            "output_tokens_cumulative": 246376,
+            "reasoning_output_tokens": 12792,
+            "reasoning_output_tokens_cumulative": 82455
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T160100322239-parity-divergence-attribution",
+        "plan": "mast-catalog-gpu-solve",
+        "section": "\u00a73",
+        "node": "parity-divergence-attribution",
+        "role": "implement",
+        "spec_level": "",
+        "member": "parity-divergence",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T16:01:03Z",
+        "completed_at": "2026-08-23T16:24:55Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1432,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1432,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "f23441eb1630455803be45c945bf789a00edbd3d",
+        "commits": [
+          "93ed6a328b15c22f3eb964c40b6a9a53db870529"
+        ],
+        "changed_lines": {
+          "added": 1341,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "ATTRIBUTED AMPLIFIED_REPRESENTATION_DIFFERENCE, with both alternatives measured out rather than argued away. Regression rejected: a historical tree preceding all four of today's commits, proven used by distinct imported-module digests, reproduces all six divergences EXACTLY, so the divergence is pre-existing. Semantic difference rejected: every case's one-map separation is 2.220446049250313e-16 absolute and 1.8900776655575514e-16 relative, pure float64 roundoff, with no operation exceeding that band before iteration. Amplification measured per update, growing 2.16e-15 to 1.16e-05 across twelve updates for cumulative growth 5.379792627282051e9. Verdict on the requirement: a 1e-10 eager-versus-compiled TERMINAL fixed-point parity is not stable on this non-contractive map and must be replaced by a one-map bound plus separately registered physically meaningful terminal-observable bounds.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T160100322239-parity-divergence-attribution/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02f5a-a261-7663-b29e-33e5f4aadc05",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12071680,
+            "cached_input_tokens_cumulative": 12071680,
+            "input_tokens": 12273751,
+            "input_tokens_cumulative": 12273751,
+            "output_tokens": 32606,
+            "output_tokens_cumulative": 32606,
+            "reasoning_output_tokens": 12199,
+            "reasoning_output_tokens_cumulative": 12199
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 653
+    "_version": 655
   }
 }

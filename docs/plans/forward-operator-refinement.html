@@ -19,7 +19,7 @@
 <meta name="plan-effort-hours" content="6.0">
 <meta name="plan-depends-on" content="scoring-criteria-derivation">
 <meta name="plan-informs" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
-<meta name="plan-version" content="21">
+<meta name="plan-version" content="22">
 <meta name="plan-impl" content="0.44">
 </head>
 <body>
@@ -196,6 +196,25 @@
   repair is this plan's node, file-scoped against that lane's occupancy
   (forward_operator.py and fixed_point.py held; source, sol_closure, conductor_current,
   conservation, domain and wall_mask free).</p>
+  <p><strong>The classification is challenged on physics grounds and the challenge is
+  testable.</strong> The trace's own budget contains no error term &mdash; and on a
+  strongly elongated, vertically unstable configuration the passive conductors ARE the
+  vertical stabiliser on the resistive timescale, so zeroing them and measuring a large
+  coupled response may be measuring expected physics: the 6.60&times; gain corresponds to a
+  dominant resolvent eigenvalue near 0.85, a stiff-but-stable response of a
+  marginally-stabilised vertical mode. On that reading the 0.15 ceiling was calibrated on
+  the DIRECT response (the documented 0.098 matches the measured 0.0972 direct peak) and is
+  asserted on the CONVERGED COUPLED response, which differs by the resolvent gain by
+  construction &mdash; no correct implementation could satisfy it. The discriminator: the
+  same passive-closure measurement on a deliberately vertically-stable, near-circular
+  control. Gain collapsing toward the direct figure &rArr; PHYSICS &mdash; the repair is
+  re-deriving the reference bound on the coupled response (a derived, stability-aware
+  ceiling in the scoring-criteria tradition), and the amplification screen must NOT ship as
+  a refusal, or it flags healthy elongated equilibria catalog-wide. Gain surviving on the
+  circular control &rArr; the benign explanation is excluded and the anomalous-gain
+  investigation reopens. Until the control reports, the class-A verdict stands as a
+  MECHANISM finding (the gain is real and located) with its defect-versus-physics reading
+  explicitly open.</p>
   <p>The §3 floor receipts cite the route node's structured fields verbatim:
   <code>differencing_step</code>, <code>step_selection_rule</code>,
   <code>step_invariance.second_step</code>, <code>step_invariance.floor_delta</code>,

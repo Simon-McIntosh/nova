@@ -114,10 +114,16 @@ uv run ruff format <file1> <file2> ...
 # 3. Stage specific files (NEVER use git add -A)
 git add <file1> <file2> ...
 
-# 4. Commit with conventional format (use uv run to ensure pre-commit runs)
+# 4. Commit with conventional format (use uv run to ensure pre-commit runs).
+#    In the SHARED PRIMARY CHECKOUT, always pathspec-limit the commit: the
+#    index is shared, so a bare `git commit` sweeps whatever a concurrent
+#    session has staged - path-scoped `git add` alone does not protect you,
+#    and sweeping a peer's half-written plan edit publishes it live (the
+#    docs server serves this working tree). Private worktrees need no
+#    pathspec.
 uv run git commit -m 'type: brief description
 
-Detailed body explaining what changed and why.'
+Detailed body explaining what changed and why.' -- <file1> <file2> ...
 
 # 5. Fix pre-commit errors and repeat steps 3-4 until clean
 

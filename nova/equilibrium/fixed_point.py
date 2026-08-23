@@ -92,12 +92,26 @@ class KinkAwareResult(NamedTuple):
     ``trace`` records the residual at each relaxed warmup state and each
     accepted nonlinear state.  ``crossings`` identifies nonlinear steps whose
     unconstrained Newton proposal straddled the caller's detected surface.
+    ``candidate_admissibility`` records which of the four nonmonotone
+    backtracking factors had finite evaluations and passed the caller's
+    predicate.  ``accepted_factors`` is zero when no trial was selected.
+    ``krylov_action_qualification`` retains the first refused linear action.
     """
 
     state: jax.Array
     residual: jax.Array
     trace: jax.Array
     crossings: jax.Array
+    candidate_admissibility: jax.Array
+    accepted_factors: jax.Array
+    krylov_action_qualification: jax.Array | int
+
+
+class _QualifiedKrylovStep(NamedTuple):
+    """One linear solve and its fail-closed qualification."""
+
+    step: jax.Array
+    qualification: jax.Array
 
 
 def _solver_state(initial: jax.Array, precision: Precision | str) -> jax.Array:
@@ -112,6 +126,64 @@ def _relative_residual(mapped: jax.Array, state: jax.Array) -> jax.Array:
     return jnp.max(jnp.abs(mapped - state)) / jnp.maximum(
         jnp.max(jnp.abs(mapped)), 1.0e-30
     )
+
+
+def _qualified_krylov_step(
+    linear_action: Callable[[jax.Array], jax.Array],
+    residual_vector: jax.Array,
+    nonlinear_residual: jax.Array,
+    *,
+    gmres_iterations: int,
+) -> _QualifiedKrylovStep:
+    """Solve one Krylov system and apply the shared action qualification."""
+    probe_scale = jnp.maximum(jnp.max(jnp.abs(residual_vector)), 1.0e-300)
+    probe = jnp.where(
+        probe_scale > 1.0e-300,
+        residual_vector / probe_scale,
+        jnp.ones_like(residual_vector) / jnp.sqrt(residual_vector.size),
+    )
+    finite_linear_action = jnp.all(jnp.isfinite(linear_action(probe)))
+
+    step, info = jax.scipy.sparse.linalg.gmres(
+        linear_action,
+        residual_vector,
+        maxiter=gmres_iterations,
+        restart=gmres_iterations,
+        solve_method="batched",
+    )
+    achieved_linear_residual = residual_vector - linear_action(step)
+    finite_achieved_residual = jnp.all(jnp.isfinite(step)) & jnp.all(
+        jnp.isfinite(achieved_linear_residual)
+    )
+    successful_status = jnp.asarray(info) == 0
+    norm_step = jnp.max(jnp.abs(step))
+    material_residual_floor = jnp.sqrt(jnp.finfo(residual_vector.dtype).eps)
+    zero_step_at_material_residual = (norm_step == 0.0) & (
+        nonlinear_residual > material_residual_floor
+    )
+
+    qualification = jnp.asarray(KrylovActionQualification.ACCEPTED, dtype=jnp.int32)
+    qualification = jnp.where(
+        zero_step_at_material_residual,
+        KrylovActionQualification.ZERO_STEP_WITH_MATERIAL_NONLINEAR_RESIDUAL,
+        qualification,
+    )
+    qualification = jnp.where(
+        ~finite_achieved_residual,
+        KrylovActionQualification.NONFINITE_ACHIEVED_LINEAR_RESIDUAL,
+        qualification,
+    )
+    qualification = jnp.where(
+        ~successful_status,
+        KrylovActionQualification.NONSUCCESSFUL_GMRES_STATUS,
+        qualification,
+    )
+    qualification = jnp.where(
+        ~finite_linear_action,
+        KrylovActionQualification.NONFINITE_LINEAR_ACTION,
+        qualification,
+    )
+    return _QualifiedKrylovStep(step=step, qualification=qualification)
 
 
 def picard(
@@ -273,55 +345,15 @@ def newton_krylov(
         def linear_action(vector):
             return vector - tangent(vector)
 
-        probe_scale = jnp.maximum(jnp.max(jnp.abs(f)), 1.0e-300)
-        probe = jnp.where(
-            probe_scale > 1.0e-300,
-            f / probe_scale,
-            jnp.ones_like(f) / jnp.sqrt(f.size),
-        )
-        finite_linear_action = jnp.all(jnp.isfinite(linear_action(probe)))
-
-        step, info = jax.scipy.sparse.linalg.gmres(
+        qualified_step = _qualified_krylov_step(
             linear_action,
             f,
-            maxiter=gmres_iterations,
-            restart=gmres_iterations,
-            solve_method="batched",
+            nonlinear_residual,
+            gmres_iterations=gmres_iterations,
         )
-        achieved_linear_residual = f - linear_action(step)
-        finite_achieved_residual = jnp.all(jnp.isfinite(step)) & jnp.all(
-            jnp.isfinite(achieved_linear_residual)
-        )
-        successful_status = jnp.asarray(info) == 0
+        step = qualified_step.step
+        step_qualification = qualified_step.qualification
         norm_step = jnp.max(jnp.abs(step))
-        material_residual_floor = jnp.sqrt(jnp.finfo(initial.dtype).eps)
-        zero_step_at_material_residual = (norm_step == 0.0) & (
-            nonlinear_residual > material_residual_floor
-        )
-
-        step_qualification = jnp.asarray(
-            KrylovActionQualification.ACCEPTED, dtype=jnp.int32
-        )
-        step_qualification = jnp.where(
-            zero_step_at_material_residual,
-            KrylovActionQualification.ZERO_STEP_WITH_MATERIAL_NONLINEAR_RESIDUAL,
-            step_qualification,
-        )
-        step_qualification = jnp.where(
-            ~finite_achieved_residual,
-            KrylovActionQualification.NONFINITE_ACHIEVED_LINEAR_RESIDUAL,
-            step_qualification,
-        )
-        step_qualification = jnp.where(
-            ~successful_status,
-            KrylovActionQualification.NONSUCCESSFUL_GMRES_STATUS,
-            step_qualification,
-        )
-        step_qualification = jnp.where(
-            ~finite_linear_action,
-            KrylovActionQualification.NONFINITE_LINEAR_ACTION,
-            step_qualification,
-        )
         accepted = step_qualification == KrylovActionQualification.ACCEPTED
 
         cap = step_cap * jnp.max(jnp.abs(relaxation * f))
@@ -363,6 +395,7 @@ def kink_aware_newton_krylov(
     relaxation: float = 0.5,
     step_cap: float = 10.0,
     surface_fn: Callable[[jax.Array], jax.Array] | None = None,
+    admissibility_fn: Callable[[jax.Array], jax.Array] | None = None,
     nonmonotone_allowance: float = 0.05,
     hybrid_weight: float = 1.0 / 1.766,
     hybrid_schedule: Literal["fixed", "residual_release"] = "fixed",
@@ -375,7 +408,9 @@ def kink_aware_newton_krylov(
     The four policies alter only proposal acceptance; ``map_fn`` is never
     smoothed or modified.  ``clarke`` averages exact tangents immediately on
     either side of a detected crossing.  ``nonmonotone`` selects the longest
-    of four backtracking proposals admitted by the recent residual envelope.
+    of four backtracking proposals admitted by the recent residual envelope;
+    when ``admissibility_fn`` is supplied, a trial must also have a finite map
+    evaluation and make that predicate true before it can be selected.
     ``surface_restricted`` shortens a straddling proposal to just beyond the
     detected surface.  ``damped_hybrid`` blends the Newton and relaxed fixed-
     point proposals with an explicit weight.  Its optional residual-release
@@ -397,6 +432,8 @@ def kink_aware_newton_krylov(
         raise ValueError(f"unknown kink-aware strategy: {strategy!r}")
     if strategy in {"clarke", "surface_restricted"} and surface_fn is None:
         raise ValueError(f"{strategy!r} requires surface_fn")
+    if admissibility_fn is not None and strategy != "nonmonotone":
+        raise ValueError("admissibility_fn requires the nonmonotone strategy")
     if hybrid_schedule not in {"fixed", "residual_release"}:
         raise ValueError(f"unknown hybrid schedule: {hybrid_schedule!r}")
 
@@ -416,15 +453,13 @@ def kink_aware_newton_krylov(
         (initial, jnp.full(trace_length, jnp.nan, dtype=initial.dtype)),
     )
 
-    def krylov_step(tangent, residual_vector):
-        step, _info = jax.scipy.sparse.linalg.gmres(
+    def krylov_step(tangent, residual_vector, nonlinear_residual):
+        return _qualified_krylov_step(
             lambda vector: vector - tangent(vector),
             residual_vector,
-            maxiter=gmres_iterations,
-            restart=gmres_iterations,
-            solve_method="batched",
+            nonlinear_residual,
+            gmres_iterations=gmres_iterations,
         )
-        return step
 
     def bounded_step(step, residual_vector):
         fallback = relaxation * residual_vector
@@ -459,11 +494,23 @@ def kink_aware_newton_krylov(
         return 0.5 * (lower + upper)
 
     def newton_body(index, carry):
-        state, residual, trace, crossings, recent = carry
+        (
+            state,
+            residual,
+            trace,
+            crossings,
+            recent,
+            candidate_admissibility,
+            accepted_factors,
+            qualification,
+        ) = carry
         mapped, tangent = jax.linearize(map_fn, state)
         residual_vector = mapped - state
         current_residual = _relative_residual(mapped, state)
-        step = bounded_step(krylov_step(tangent, residual_vector), residual_vector)
+        qualified_step = krylov_step(tangent, residual_vector, current_residual)
+        step_qualification = qualified_step.qualification
+        action_accepted = step_qualification == KrylovActionQualification.ACCEPTED
+        step = bounded_step(qualified_step.step, residual_vector)
         proposal = state + step
 
         if surface_fn is None:
@@ -488,8 +535,15 @@ def kink_aware_newton_krylov(
                 def average_tangent(vector):
                     return 0.5 * (left_tangent(vector) + right_tangent(vector))
 
+                averaged = _qualified_krylov_step(
+                    lambda vector: vector - average_tangent(vector),
+                    residual_vector,
+                    current_residual,
+                    gmres_iterations=gmres_iterations,
+                )
                 return bounded_step(
-                    krylov_step(average_tangent, residual_vector), residual_vector
+                    averaged.step,
+                    residual_vector,
                 )
 
             step = jax.lax.cond(crossed, clarke_step, lambda _: step, operand=None)
@@ -504,21 +558,44 @@ def kink_aware_newton_krylov(
             accepted_residual = _relative_residual(promoted, proposal)
         elif strategy == "nonmonotone":
             factors = jnp.asarray((1.0, 0.5, 0.25, 0.125), dtype=initial.dtype)
-            candidates = state[None, :] + factors[:, None] * step[None, :]
+            trial_step = jnp.where(action_accepted, step, jnp.zeros_like(step))
+            candidates = state[None, :] + factors[:, None] * trial_step[None, :]
 
             def score(candidate):
                 candidate_mapped = map_fn(candidate)
                 return _relative_residual(candidate_mapped, candidate)
 
             scores = jax.lax.map(score, candidates)
+            if admissibility_fn is None:
+                caller_admitted = jnp.ones(factors.shape, dtype=jnp.bool_)
+            else:
+                caller_admitted = jax.lax.map(admissibility_fn, candidates).astype(
+                    jnp.bool_
+                )
+            finite_trials = jnp.all(jnp.isfinite(candidates), axis=1) & jnp.isfinite(
+                scores
+            )
+            candidate_admitted = finite_trials & caller_admitted & action_accepted
             envelope = jnp.max(
                 jnp.where(jnp.isfinite(recent), recent, current_residual)
             )
-            admitted = scores <= envelope * (1.0 + nonmonotone_allowance)
-            first = jnp.argmax(admitted)
-            selected = jnp.where(jnp.any(admitted), first, jnp.argmin(scores))
-            proposal = candidates[selected]
-            accepted_residual = scores[selected]
+            within_envelope = candidate_admitted & (
+                scores <= envelope * (1.0 + nonmonotone_allowance)
+            )
+            first = jnp.argmax(within_envelope)
+            best_admissible = jnp.argmin(jnp.where(candidate_admitted, scores, jnp.inf))
+            selected = jnp.where(jnp.any(within_envelope), first, best_admissible)
+            any_admissible = jnp.any(candidate_admitted)
+            proposal = jnp.where(any_admissible, candidates[selected], state)
+            accepted_residual = jnp.where(
+                any_admissible, scores[selected], current_residual
+            )
+            candidate_admissibility = candidate_admissibility.at[index].set(
+                candidate_admitted
+            )
+            accepted_factors = accepted_factors.at[index].set(
+                jnp.where(any_admissible, factors[selected], 0.0)
+            )
         else:
             if hybrid_schedule == "fixed":
                 weight = hybrid_weight
@@ -537,15 +614,42 @@ def kink_aware_newton_krylov(
             promoted = map_fn(proposal)
             accepted_residual = _relative_residual(promoted, proposal)
 
+        proposal = jnp.where(action_accepted, proposal, state)
+        accepted_residual = jnp.where(
+            action_accepted, accepted_residual, current_residual
+        )
+
         trace = trace.at[warmup + index].set(accepted_residual)
         crossings = crossings.at[index].set(crossed)
         recent = recent.at[jnp.mod(index, recent.size)].set(accepted_residual)
-        return proposal, accepted_residual, trace, crossings, recent
+        prior_failed = (qualification != KrylovActionQualification.NOT_APPLICABLE) & (
+            qualification != KrylovActionQualification.ACCEPTED
+        )
+        qualification = jnp.where(prior_failed, qualification, step_qualification)
+        return (
+            proposal,
+            accepted_residual,
+            trace,
+            crossings,
+            recent,
+            candidate_admissibility,
+            accepted_factors,
+            qualification,
+        )
 
     initial_residual = jnp.where(
         warmup > 0, trace[jnp.maximum(warmup - 1, 0)], jnp.asarray(jnp.inf)
     )
-    state, residual, trace, crossings, _recent = jax.lax.fori_loop(
+    (
+        state,
+        residual,
+        trace,
+        crossings,
+        _recent,
+        candidate_admissibility,
+        accepted_factors,
+        qualification,
+    ) = jax.lax.fori_loop(
         0,
         newton_steps,
         newton_body,
@@ -555,6 +659,17 @@ def kink_aware_newton_krylov(
             trace,
             jnp.zeros(newton_steps, dtype=jnp.bool_),
             jnp.full(4, jnp.nan, dtype=initial.dtype),
+            jnp.zeros((newton_steps, 4), dtype=jnp.bool_),
+            jnp.zeros(newton_steps, dtype=initial.dtype),
+            jnp.asarray(KrylovActionQualification.NOT_APPLICABLE, dtype=jnp.int32),
         ),
     )
-    return KinkAwareResult(state, residual, trace, crossings)
+    return KinkAwareResult(
+        state,
+        residual,
+        trace,
+        crossings,
+        candidate_admissibility,
+        accepted_factors,
+        qualification,
+    )

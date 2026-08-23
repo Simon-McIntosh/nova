@@ -20,6 +20,7 @@ from nova.biot import (
 from nova.biot.data import Data
 from nova.biot.flux import Flux
 from nova.database.netcdf import netCDF
+from nova.database.filepath import compute_provenance as resolve_compute_provenance
 from nova.frame.frameset import FrameSet, frame_factory
 from nova.jax.config import Precision
 
@@ -33,13 +34,18 @@ class BiotBase(FrameSet):
     force_attrs: list[str] = field(default_factory=lambda: ["Fr", "Fz", "Fc"])
     field_attrs: list[str] = field(default_factory=lambda: ["Br", "Bz", "Psi"])
     precision: Precision | str = Precision.AUTOMATIC
+    compute_provenance: str = ""
     _biot_attrs: dict[str, list[str] | Nbiot] = field(
         init=False, default_factory=dict, repr=False
     )
 
     def __post_init__(self):
         """Append biot attrs."""
-        self.append_biot_attrs(["field_attrs", "force_attrs", "precision"])
+        if self.compute_provenance == "":
+            self.compute_provenance = resolve_compute_provenance("jax")
+        self.append_biot_attrs(
+            ["field_attrs", "force_attrs", "precision", "compute_provenance"]
+        )
         super().__post_init__()
 
     def append_biot_attrs(self, attrs: list[str]):

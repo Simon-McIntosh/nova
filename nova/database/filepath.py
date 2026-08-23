@@ -7,6 +7,7 @@ from functools import wraps
 import os
 from pathlib import Path
 import sys
+from typing import Literal
 
 import appdirs
 import fsspec
@@ -15,6 +16,47 @@ import xxhash
 
 import nova
 from nova.definitions import root_dir
+
+
+def compute_provenance(
+    backend: Literal["jax", "numpy"],
+    *,
+    platform: str | None = None,
+    device_kind: str | None = None,
+) -> str:
+    """Return the code-generator identity for one cached numerical artifact.
+
+    NumPy is an explicitly host-built reference. JAX artifacts additionally
+    name the runtime platform, device family and jaxlib version because each
+    combination may select a different floating-point code generator. Optional
+    platform and device values make persisted identities independently
+    reconstructible without requiring the original device to be present.
+    """
+    if backend == "numpy":
+        if platform not in (None, "cpu") or device_kind not in (None, "host"):
+            raise ValueError("NumPy cache provenance is the host CPU lane")
+        return "numpy|platform=cpu|device=host"
+    if backend != "jax":
+        raise ValueError(f"unsupported compute backend {backend!r}")
+
+    try:
+        import jax
+        import jaxlib
+    except ModuleNotFoundError as error:
+        if error.name != "jax":
+            raise
+        return compute_provenance("numpy")
+
+    resolved_platform = jax.default_backend() if platform is None else platform
+    if device_kind is None:
+        kinds = sorted(
+            {device.device_kind for device in jax.devices(resolved_platform)}
+        )
+        device_kind = ",".join(kinds)
+    return (
+        f"jax|platform={resolved_platform}|device={device_kind}"
+        f"|jaxlib={jaxlib.__version__}"
+    )
 
 
 def stardot(func):

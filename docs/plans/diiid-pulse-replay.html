@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="diiid-pulse-replay">
   <meta name="plan-title" content="DIII-D Pulse Replay — the coupled forward against a real discharge">
-  <meta name="plan-summary" content="March the coupled transport–equilibrium forward through a segment of a real DIII-D discharge driven by the recorded closed-loop coil currents, initialize from an early labeled frame's extracted flux functions, and score the marched maps and scalars against the labeled frames as time traces — the first real-machine, real-feedback demonstration of the transport ladder, and the measurement of its open-loop drift horizon">
+  <meta name="plan-summary" content="March the coupled transport–equilibrium forward through a segment of a real DIII-D discharge driven by the recorded closed-loop coil currents, initialize from an early labeled frame&#x27;s extracted flux functions, and score the marched maps and scalars against the labeled frames as time traces — the first real-machine, real-feedback demonstration of the transport ladder, and the measurement of its open-loop drift horizon">
   <meta name="plan-status" content="pending">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="4.0">
@@ -22,8 +22,9 @@
   <title>DIII-D Pulse Replay | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-22">
+<meta name="plan-modified" content="2026-08-23">
 <meta name="plan-impl" content="0.0">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -102,7 +103,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-dpr-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship diiid-pulse-replay">
+<article class="r-fu" data-id="f-dpr-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship diiid-pulse-replay" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Land segment replay, then the drift-horizon measurement</h4>
     <div class="r-fu-body"><p>§2 first — shot and segment selection from the development split,
     initialization from the first labeled frame, the marched run with full receipts, and the
@@ -113,7 +114,9 @@
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
-<h2><span class="sec">§</span> Comments</h2>
+<div class="r-comment" data-section="s2" data-id="c-20260823T1130-cost-inputs-landed" data-who="reckon-ship" data-when="2026-08-23T11:30:00+00:00">
+    <div class="r-comment-body">COST INPUTS UPDATED while this plan waits on its prerequisite. (1) The device-kernel delivery is landed and reachable from origin/main (merge 80979f40; port commits d74317a0, 6d163e87, 6e98178f, b65b07df): device-placed exact Green-matrix builds, single source CPU/GPU, cold nine-block build 26.58 s on the H200 (0.391 s kernel) and 58.45 s CPU against the previous 5-13 min class, far-target absolute bounds 1.2-1.6e-9 with the NumPy quadrature retained as the independent reference. New-configuration cold builds are no longer a replay cost blocker, and cross-device cache artifacts will publish as distinct compute-provenance identities. (2) The batched-evaluator throughput budget (tree-stamped under docs/figures/ensemble-forward-seam/throughput/: batch-8 134.2 member-windows/s on the H200) supersedes this plan's provisional 5.25x estimate as the sizing basis; note the batch facade currently runs slower than the scalar loop, so a segment replay should march scalar windows. (3) Sequencing unchanged: blocked behind the owner-held forward-gate re-evaluation on diiid-forward-onboarding (decision forward-gate-disposition), triggered when the forward-operator-refinement evidence lands - that plan's notification obligation is contractual. (4) Test-lane note for the executing session: the repo-wide marker policy now excludes slow-marked tests by default; name test paths explicitly or select with -m.</div>
+</div>
 </section>
 
   </main>

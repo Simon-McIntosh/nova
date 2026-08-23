@@ -1,0 +1,264 @@
+{
+  "artifact": "factor_ladder_extension",
+  "cohort_counts": {
+    "extended_rung_exercised_frames": 5,
+    "finite_terminal_x_point": 5,
+    "frames": 5,
+    "krylov_action_accepted": 5,
+    "terminal_diverted": 5
+  },
+  "comparison_contract": {
+    "negative_means_lower_residual": true,
+    "positive_means_higher_residual": true,
+    "signed_relative_change": "(new - comparator) / comparator"
+  },
+  "convergence_gate": {
+    "reason": "Both the shipped hard-coded 1e-6 bound and the benchmark-registered 1e-5 bound remain untraced.",
+    "registered_bound": 1e-05,
+    "shipped_bound": 1e-06,
+    "verdict": "DECLINED"
+  },
+  "favourable_frame_remeasure": {
+    "frame": 0,
+    "rungs": [
+      {
+        "banked_full_step_admission_count_of_89": 85,
+        "banked_terminal_relative_residual": 0.00029254381732921216,
+        "finite_terminal_x_point": true,
+        "full_step_admission_count_of_89": 85,
+        "name": "coarse_carrier",
+        "terminal_relative_residual": 0.00029254381732921216,
+        "terminal_topology_class": "diverted"
+      },
+      {
+        "banked_full_step_admission_count_of_89": 87,
+        "banked_terminal_relative_residual": 7.930534999195602e-05,
+        "finite_terminal_x_point": true,
+        "full_step_admission_count_of_89": 87,
+        "name": "reference_native",
+        "terminal_relative_residual": 7.930534999195595e-05,
+        "terminal_topology_class": "diverted"
+      }
+    ],
+    "shot": "d3d_shot_00000c4a7b.parquet"
+  },
+  "frame_records": [
+    {
+      "admitted_promotion_count_of_89": 7,
+      "banked_admitted_promotion_count_of_89": 6,
+      "banked_repaired_terminal_relative_residual": 0.08540058568223574,
+      "banked_unqualified_plateau_relative_residual": 0.03951699657560261,
+      "finite_terminal_x_point": true,
+      "frame": 179,
+      "krylov_action_qualification": "ACCEPTED",
+      "runtime_seconds": 71.60296392347664,
+      "selected_candidates_were_admitted": true,
+      "selected_factor_by_admitted_step": [
+        0.25,
+        0.5,
+        0.5,
+        1.0,
+        1.0,
+        0.5,
+        0.0625
+      ],
+      "selected_factor_counts": {
+        "0.03125": 0,
+        "0.0625": 1,
+        "0.125": 0,
+        "0.25": 1,
+        "0.5": 3,
+        "1.0": 2
+      },
+      "shot": "d3d_shot_00000c4a7b.parquet",
+      "signed_relative_change_vs_banked_repaired": 0.045269732476257186,
+      "signed_relative_change_vs_unqualified_plateau": 1.258943115239141,
+      "target_current_a": 1279650.1007080078,
+      "terminal_relative_residual": 0.08926664734938623,
+      "terminal_topology_class": "diverted",
+      "terminal_x_point_rz_m": [
+        1.3035762066565137,
+        -1.5278715440737103
+      ],
+      "time_ms": 3740.0
+    },
+    {
+      "admitted_promotion_count_of_89": 7,
+      "banked_admitted_promotion_count_of_89": 6,
+      "banked_repaired_terminal_relative_residual": 0.10977362967104506,
+      "banked_unqualified_plateau_relative_residual": 0.08472159556298314,
+      "finite_terminal_x_point": true,
+      "frame": 44,
+      "krylov_action_qualification": "ACCEPTED",
+      "runtime_seconds": 44.61070368718356,
+      "selected_candidates_were_admitted": true,
+      "selected_factor_by_admitted_step": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.125,
+        0.0625
+      ],
+      "selected_factor_counts": {
+        "0.03125": 0,
+        "0.0625": 1,
+        "0.125": 1,
+        "0.25": 0,
+        "0.5": 1,
+        "1.0": 4
+      },
+      "shot": "d3d_shot_0003ff34e7.parquet",
+      "signed_relative_change_vs_banked_repaired": -0.013581642487044281,
+      "signed_relative_change_vs_unqualified_plateau": 0.2781006160093968,
+      "target_current_a": 1182769.0064013004,
+      "terminal_relative_residual": 0.10828272347834773,
+      "terminal_topology_class": "diverted",
+      "terminal_x_point_rz_m": [
+        1.3086951106783342,
+        1.5189209311335328
+      ],
+      "time_ms": 1080.0
+    },
+    {
+      "admitted_promotion_count_of_89": 10,
+      "banked_admitted_promotion_count_of_89": 9,
+      "banked_repaired_terminal_relative_residual": 0.16437432961354986,
+      "banked_unqualified_plateau_relative_residual": 0.02590839051236691,
+      "finite_terminal_x_point": true,
+      "frame": 144,
+      "krylov_action_qualification": "ACCEPTED",
+      "runtime_seconds": 44.4085890436545,
+      "selected_candidates_were_admitted": true,
+      "selected_factor_by_admitted_step": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.25,
+        0.125,
+        0.03125,
+        0.25,
+        0.125,
+        0.0625
+      ],
+      "selected_factor_counts": {
+        "0.03125": 1,
+        "0.0625": 1,
+        "0.125": 2,
+        "0.25": 2,
+        "0.5": 0,
+        "1.0": 4
+      },
+      "shot": "d3d_shot_001554e054.parquet",
+      "signed_relative_change_vs_banked_repaired": -0.07509971696872257,
+      "signed_relative_change_vs_unqualified_plateau": 4.867977939813746,
+      "target_current_a": 988842.2265648842,
+      "terminal_relative_residual": 0.15202986398264876,
+      "terminal_topology_class": "diverted",
+      "terminal_x_point_rz_m": [
+        1.2571238220305085,
+        -0.6734515348276122
+      ],
+      "time_ms": 3240.0
+    },
+    {
+      "admitted_promotion_count_of_89": 5,
+      "banked_admitted_promotion_count_of_89": 4,
+      "banked_repaired_terminal_relative_residual": 0.09035889068687517,
+      "banked_unqualified_plateau_relative_residual": 0.029674835000125376,
+      "finite_terminal_x_point": true,
+      "frame": 146,
+      "krylov_action_qualification": "ACCEPTED",
+      "runtime_seconds": 44.913390181958675,
+      "selected_candidates_were_admitted": true,
+      "selected_factor_by_admitted_step": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        0.03125
+      ],
+      "selected_factor_counts": {
+        "0.03125": 1,
+        "0.0625": 0,
+        "0.125": 0,
+        "0.25": 0,
+        "0.5": 2,
+        "1.0": 2
+      },
+      "shot": "d3d_shot_002495e835.parquet",
+      "signed_relative_change_vs_banked_repaired": 0.0014320339972169022,
+      "signed_relative_change_vs_unqualified_plateau": 2.049327407883052,
+      "target_current_a": 1623563.1957054138,
+      "terminal_relative_residual": 0.09048828769028958,
+      "terminal_topology_class": "diverted",
+      "terminal_x_point_rz_m": [
+        1.0574703393848317,
+        1.4609728773077992
+      ],
+      "time_ms": 3180.0
+    },
+    {
+      "admitted_promotion_count_of_89": 9,
+      "banked_admitted_promotion_count_of_89": 7,
+      "banked_repaired_terminal_relative_residual": 0.12204384813135218,
+      "banked_unqualified_plateau_relative_residual": 0.030823235945666667,
+      "finite_terminal_x_point": true,
+      "frame": 137,
+      "krylov_action_qualification": "ACCEPTED",
+      "runtime_seconds": 44.69651599507779,
+      "selected_candidates_were_admitted": true,
+      "selected_factor_by_admitted_step": [
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.0625,
+        0.03125
+      ],
+      "selected_factor_counts": {
+        "0.03125": 1,
+        "0.0625": 1,
+        "0.125": 0,
+        "0.25": 0,
+        "0.5": 2,
+        "1.0": 5
+      },
+      "shot": "d3d_shot_0040ca9bdc.parquet",
+      "signed_relative_change_vs_banked_repaired": 0.028401238685411705,
+      "signed_relative_change_vs_unqualified_plateau": 3.0719295278879333,
+      "target_current_a": 1629095.3674316406,
+      "terminal_relative_residual": 0.12551004459221685,
+      "terminal_topology_class": "diverted",
+      "terminal_x_point_rz_m": [
+        1.3082791467533739,
+        -1.5365779024168513
+      ],
+      "time_ms": 3000.0
+    }
+  ],
+  "solver_contract": {
+    "admission_predicate_changed": false,
+    "data_dependent_length": false,
+    "factor_count": 6,
+    "factor_ladder": [
+      1.0,
+      0.5,
+      0.25,
+      0.125,
+      0.0625,
+      0.03125
+    ],
+    "fixed_shape": true,
+    "gmres_iterations": 24,
+    "jit_and_vmap_contract_tested": true,
+    "newton_steps": 89,
+    "route": "topology-qualified nonmonotone Newton-Krylov"
+  },
+  "source_commit": "3fb4bfcba0c69c8f5ef4f65dbaae91a7ef690fc5"
+}

@@ -13,12 +13,17 @@ import argparse
 from dataclasses import asdict, replace
 import json
 import math
+import os
 from pathlib import Path
 from time import perf_counter
+
+os.environ.setdefault("XLA_FLAGS", "--xla_gpu_enable_command_buffer=")
+os.environ.setdefault("XLA_PYTHON_CLIENT_PREALLOCATE", "false")
 
 import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
+from matplotlib.path import Path as PolygonPath
 import numpy as np
 
 from benchmarks.measurement_provenance import measurement_stamp
@@ -51,6 +56,12 @@ CONTROL_BOUNDARY_ELONGATION = 1.05
 ELONGATED_DIRECT_PEAK_POINTS = 0.09723915202112363
 ELONGATED_REPRODUCTION_MOVE_POINTS = 0.6377635705066984
 ELONGATED_FIELD_GAIN = 6.5998576353591725
+CONTROL_MINIMUM_CORE_FRACTION = 0.1
+CONTROL_MAXIMUM_AXIS_DISPLACEMENT_FRACTION = 0.25
+RUNTIME_MITIGATION_DEFAULTS = {
+    "XLA_FLAGS": "--xla_gpu_enable_command_buffer=",
+    "XLA_PYTHON_CLIENT_PREALLOCATE": "false",
+}
 
 
 def _strict_json(value):
@@ -190,7 +201,7 @@ def _support_comparison(left: dict[str, object], right: dict[str, object]):
     }
 
 
-def _solve(case, machine, label: str):
+def _solve(case, machine, label: str, *, include_deviations: bool = True):
     """Run the production root and retain its convergence receipt."""
     started = perf_counter()
     solved = reference.solve(case, machine)
@@ -198,7 +209,17 @@ def _solve(case, machine, label: str):
     elapsed_seconds = perf_counter() - started
     trace = np.asarray(solved.fixed_point.trace, dtype=float)
     measured = trace[np.isfinite(trace)]
-    return solved, {
+    core = np.asarray(solved.masks.core, dtype=bool)
+    axis = np.asarray(solved.topology.axis, dtype=float)
+    flux = np.asarray(solved.flux, dtype=float)
+    flux_span = float(solved.topology.flux_span)
+    if core.any():
+        branch = (
+            "diverted_plasma" if bool(solved.topology.diverted) else "limited_plasma"
+        )
+    else:
+        branch = "vacuum_or_empty_core"
+    receipt = {
         "arm": label,
         "elapsed_seconds": elapsed_seconds,
         "terminal_relative_fixed_point_residual": residual,
@@ -206,8 +227,81 @@ def _solve(case, machine, label: str):
         "measured_residuals": int(measured.size),
         "first_measured_residual": float(measured[0]),
         "minimum_measured_residual": float(measured.min()),
-        "deviations": solved.deviations(),
+        "direct_branch_receipt": {
+            "state_finite": bool(np.isfinite(flux).all()),
+            "core_cells": int(core.sum()),
+            "core_fraction_of_carrier": float(core.mean()),
+            "topology_branch": branch,
+            "diverted": bool(solved.topology.diverted),
+            "solved_axis_m": axis,
+            "axis_finite": bool(np.isfinite(axis).all()),
+            "flux_span_wb": flux_span,
+            "flux_span_valid": bool(np.isfinite(flux_span) and flux_span > 0.0),
+        },
     }
+    if include_deviations:
+        receipt["deviations"] = solved.deviations()
+    return solved, receipt
+
+
+def _qualify_control_branch(
+    case, solve_receipt: dict[str, object]
+) -> dict[str, object]:
+    """Qualify one transformed control root without stored-midplane reporting."""
+    branch = solve_receipt["direct_branch_receipt"]
+    axis = np.asarray(branch["solved_axis_m"], dtype=float)
+    displacement = axis - np.asarray(case.axis, dtype=float)
+    displacement_m = float(np.linalg.norm(displacement))
+    vertical_half_span = 0.5 * float(np.ptp(np.asarray(case.boundary)[:, 1]))
+    displacement_limit = CONTROL_MAXIMUM_AXIS_DISPLACEMENT_FRACTION * vertical_half_span
+    axis_inside = bool(PolygonPath(np.asarray(case.boundary)).contains_point(axis))
+    residual = float(solve_receipt["terminal_relative_fixed_point_residual"])
+    checks = {
+        "root_residual_finite_and_below_reference_bound": bool(
+            np.isfinite(residual) and residual < reference.RESIDUAL_TOLERANCE
+        ),
+        "state_finite": bool(branch["state_finite"]),
+        "core_nonempty": int(branch["core_cells"]) > 0,
+        "core_fraction_material": (
+            float(branch["core_fraction_of_carrier"]) >= CONTROL_MINIMUM_CORE_FRACTION
+        ),
+        "axis_finite": bool(branch["axis_finite"]),
+        "axis_inside_control_boundary": axis_inside,
+        "axis_displacement_within_control_scale": (
+            displacement_m <= displacement_limit
+        ),
+        "flux_span_valid": bool(branch["flux_span_valid"]),
+    }
+    return {
+        **branch,
+        "terminal_relative_fixed_point_residual": residual,
+        "reference_axis_m": np.asarray(case.axis, dtype=float),
+        "axis_displacement_vector_m": displacement,
+        "axis_displacement_m": displacement_m,
+        "axis_displacement_limit_m": displacement_limit,
+        "minimum_core_fraction": CONTROL_MINIMUM_CORE_FRACTION,
+        "checks": checks,
+        "qualified": all(checks.values()),
+    }
+
+
+def _require_control_branch(case, solve_receipt: dict[str, object]) -> None:
+    """Stop before paired tracing when the transformed root is nonphysical."""
+    qualification = _qualify_control_branch(case, solve_receipt)
+    solve_receipt["control_branch_qualification"] = qualification
+    print(
+        "CONTROL_BRANCH_QUALIFICATION="
+        + json.dumps(_strict_json(qualification), sort_keys=True)
+    )
+    if not qualification["qualified"]:
+        failed = [
+            name for name, passed in qualification["checks"].items() if not passed
+        ]
+        raise RuntimeError(
+            "near-circular control branch is not physical; "
+            f"failed checks={failed}; use an analytic control with a stable "
+            "decay-index receipt"
+        )
 
 
 def _paired_map_trace(
@@ -803,6 +897,17 @@ def run() -> dict[str, object]:
             "device_backend": jax.default_backend(),
             "devices": [str(device) for device in jax.devices()],
             "production_solve_count": 2,
+            "runtime_mitigations": {
+                "defaults": RUNTIME_MITIGATION_DEFAULTS,
+                "effective": {
+                    name: os.environ.get(name) for name in RUNTIME_MITIGATION_DEFAULTS
+                },
+                "purpose": (
+                    "Disable CUDA command-buffer graphs and whole-device "
+                    "preallocation so the dense control can coexist with other "
+                    "accelerator work."
+                ),
+            },
         },
         "carrier": {
             "requested_cells": DENSE_CELL_REQUEST,
@@ -864,10 +969,20 @@ def run_stability_control() -> dict[str, object]:
         np.sum(np.asarray(with_operator.cell_current(seed_with)))
     )
 
-    with_solved, with_receipt = _solve(case, machine, "declared_passive_currents")
-    without_solved, without_receipt = _solve(
-        case, without_machine, "passive_currents_zeroed"
+    with_solved, with_receipt = _solve(
+        case,
+        machine,
+        "declared_passive_currents",
+        include_deviations=False,
     )
+    _require_control_branch(case, with_receipt)
+    without_solved, without_receipt = _solve(
+        case,
+        without_machine,
+        "passive_currents_zeroed",
+        include_deviations=False,
+    )
+    _require_control_branch(case, without_receipt)
     cell_count = len(machine.node)
     span = abs(float(case.flux_span))
     reference_flux = case.flux(machine.radius, machine.node[:, 1])
@@ -908,6 +1023,17 @@ def run_stability_control() -> dict[str, object]:
             "device_backend": jax.default_backend(),
             "devices": [str(device) for device in jax.devices()],
             "production_solve_count": 2,
+            "runtime_mitigations": {
+                "defaults": RUNTIME_MITIGATION_DEFAULTS,
+                "effective": {
+                    name: os.environ.get(name) for name in RUNTIME_MITIGATION_DEFAULTS
+                },
+                "purpose": (
+                    "Disable CUDA command-buffer graphs and whole-device "
+                    "preallocation so the dense control can coexist with other "
+                    "accelerator work."
+                ),
+            },
         },
         "carrier": {
             "requested_cells": DENSE_CELL_REQUEST,

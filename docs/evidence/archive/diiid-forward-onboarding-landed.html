@@ -1129,6 +1129,35 @@
     campaign holds no positive evidence of an omitted conductor anywhere. The banked origin and patch
     receipts were verified byte-identical before and after (<code>95e4205d…</code>,
     <code>be2e32e1…</code>).</p>
+
+    <h2 id="gate-rerun-circuit">§5 the gate re-measured on admissible currents — it fails on convergence now, not on currents — 2026-08-23</h2>
+    <p><strong>The kill gate's authority-required fence rested on "no admissible current source exists",
+    and the shipped circuit records retired that premise — so the gate was re-measured rather than left
+    on a stale exemption</strong> (commits <code>fce611db</code>, <code>6746c0bb</code>; receipt
+    <code>docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json</code>; SLURM debug
+    lane, exit 0; preregistration SHA-256 <code>bf3d1cb3…</code> byte-identical before and after).</p>
+    <ul>
+      <li><strong>Inputs, all inference-admissible:</strong> five polarity-screened development-split
+      frames at 0.989–1.629 MA recorded plasma current; all 24 conductors from shipped channels through
+      the fixed circuit wiring (<code>shipped_current_at</code> + <code>circuit_current_map</code>, zero
+      free parameters, no label-recovered prescriptions); plasma current by target-current elimination;
+      basin entry by the public cold-seed portfolio and branch selector.</li>
+      <li><strong>Result — measured FAIL, 0/5:</strong> relative residuals plateau at
+      <strong>0.0259–0.0847</strong> against the 1e-6 criterion; every terminal candidate holds
+      <em>diverted</em> topology and the selector refuses solely on residual. Diagnostic terminal R²
+      median <strong>0.6541</strong>, maximum <strong>0.7103</strong>, against the unchanged
+      <strong>0.90155</strong> bar. Pseudo-wall expansion 0.02→0.05 moves frame-1 R² by −0.0088 — the
+      wall is not the story.</li>
+      <li><strong>Attribution moved:</strong> the §9-era reading (85 % of the residual is boundary
+      field) is superseded — with the field completed the failure is a <em>solver-side residual
+      plateau</em> on the diverted branch, the third independent corroboration of the non-contractive
+      forward-map finding (MAST two-promotion limit cycle; the 3.49e-2 accelerated-arm plateau; now 5/5
+      target-current cold-portfolio plateaus). The solver thread stays with f-dfo-014.</li>
+    </ul>
+    <p><strong>Standing of §5:</strong> the fixed-boundary demonstration meets its ceiling-relative bar
+    (fractional RMS 0.0466/0.0483/0.0292 around the 0.0429 label-representability ceiling) while the
+    free-boundary production route fails on convergence. The pre-registered kill gate's re-scope-or-retire
+    ruling is the owner's, now on this sharper evidence.</p>
   </main>
 </body>
 </html>

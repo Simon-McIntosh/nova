@@ -72,8 +72,10 @@ def _public_observation_profile():
     )
 
     def integral_state(state, requested_class=None, target_current=None):
-        del requested_class, target_current
+        del requested_class
         current = 2.0 + 0.05 * jnp.asarray(state)[: lattice.node_count]
+        if target_current is not None:
+            current = current * target_current / jnp.sum(current)
         return SimpleNamespace(cell_current=current), None, masks, topology, None
 
     profile._integral_state = integral_state
@@ -234,9 +236,7 @@ def test_typed_pins_qualify_the_public_solve_without_statistical_state():
         np.asarray((0.0, 1.0)),
         coordinate[:2],
     )
-    moment = profile.current_moment_observation(
-        flux, support=MomentIntegralSupport.ALL_DOMAIN
-    )
+    target_current = 1000.0
     pins = ConstraintPinSet(
         isoflux=(
             IsofluxPin(
@@ -249,7 +249,7 @@ def test_typed_pins_qualify_the_public_solve_without_statistical_state():
         moments=(
             MomentPin(
                 "plasma_current",
-                float(moment.plasma_current),
+                target_current,
                 PinUncertainty(1.0, "A", "declared current interval"),
                 MomentIntegralSupport.ALL_DOMAIN,
             ),
@@ -258,11 +258,14 @@ def test_typed_pins_qualify_the_public_solve_without_statistical_state():
     equilibrium = SimpleNamespace(flux=jnp.asarray(flux))
     profile._solve_accelerated = lambda *args, **options: equilibrium
 
-    solved = profile.solve(flux, pins=pins)
+    solved = profile.solve(flux, pins=pins, target_current=target_current)
 
     assert solved is equilibrium
-    assert bool(profile.constraints_satisfied(flux, pins))
-    assert profile.constraint_jacobian(flux, pins).shape == (3, flux.size)
+    assert bool(profile.constraints_satisfied(flux, pins, target_current))
+    assert profile.constraint_jacobian(flux, pins, target_current).shape == (
+        3,
+        flux.size,
+    )
 
 
 def test_public_solve_refuses_a_root_outside_a_pin_interval():

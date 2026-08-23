@@ -818,7 +818,9 @@ class ForwardProfile:
             )
         )(jnp.asarray(flux))
 
-    def constraint_residual(self, flux, pins: ConstraintPinSet) -> jax.Array:
+    def constraint_residual(
+        self, flux, pins: ConstraintPinSet, target_current=None
+    ) -> jax.Array:
         """Return interval-scaled deterministic residuals for trusted pins.
 
         Each isoflux pair contributes one residual per endpoint against the
@@ -854,28 +856,34 @@ class ForwardProfile:
         for pin in pins.moments:
             if pin.support not in observations:
                 observations[pin.support] = self.current_moment_observation(
-                    state, support=pin.support
+                    state, support=pin.support, target_current=target_current
                 )
             observed = observations[pin.support].value(pin.name)
             residuals.append((observed - pin.target) / pin.uncertainty.absolute)
         return jnp.stack(residuals)
 
-    def constraint_jacobian(self, flux, pins: ConstraintPinSet) -> jax.Array:
+    def constraint_jacobian(
+        self, flux, pins: ConstraintPinSet, target_current=None
+    ) -> jax.Array:
         """Differentiate trusted-pin residuals with respect to solved flux."""
-        return jax.jacfwd(lambda state: self.constraint_residual(state, pins))(
-            jnp.asarray(flux)
-        )
+        return jax.jacfwd(
+            lambda state: self.constraint_residual(state, pins, target_current)
+        )(jnp.asarray(flux))
 
-    def constraints_satisfied(self, flux, pins: ConstraintPinSet) -> jax.Array:
+    def constraints_satisfied(
+        self, flux, pins: ConstraintPinSet, target_current=None
+    ) -> jax.Array:
         """Return whether every trusted pin lies inside its stated interval."""
-        residual = self.constraint_residual(flux, pins)
+        residual = self.constraint_residual(flux, pins, target_current)
         return jnp.all(jnp.isfinite(residual)) & jnp.all(jnp.abs(residual) <= 1.0)
 
-    def _require_constraints(self, flux, pins: ConstraintPinSet | None) -> None:
+    def _require_constraints(
+        self, flux, pins: ConstraintPinSet | None, target_current=None
+    ) -> None:
         """Refuse a candidate root outside any supplied trusted interval."""
         if pins is None:
             return
-        residual = np.asarray(self.constraint_residual(flux, pins))
+        residual = np.asarray(self.constraint_residual(flux, pins, target_current))
         if not np.all(np.isfinite(residual)) or np.any(np.abs(residual) > 1.0):
             worst = float(np.nanmax(np.abs(residual)))
             raise ConstraintViolationError(
@@ -1167,7 +1175,7 @@ class ForwardProfile:
                 target_current=target_current,
                 **options,
             )
-        self._require_constraints(equilibrium.flux, pins)
+        self._require_constraints(equilibrium.flux, pins, target_current)
         return equilibrium
 
     def _iteration_count(self, route: str, options: dict[str, object]) -> int:
@@ -1214,7 +1222,9 @@ class ForwardProfile:
             & equilibrium.finite.passed
         )
         if pins is not None:
-            converged = converged & self.constraints_satisfied(equilibrium.flux, pins)
+            converged = converged & self.constraints_satisfied(
+                equilibrium.flux, pins, target_current
+            )
         return ForwardBranchReceipt(
             equilibrium=equilibrium,
             requested_class=requested,

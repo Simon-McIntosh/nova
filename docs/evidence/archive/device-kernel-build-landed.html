@@ -209,6 +209,23 @@
   <code>scripts/device_kernel_port/nine-block-receipt.json</code> (<code>biot_suite_green=true</code>).
   Remaining plan work: cache-provenance integration and the jacfwd measure-only probe.</p>
 
+  <h2 id="s5-jacfwd-feasibility">§4/§5 — geometry jacfwd measured: eager mode is memory-cheap, the compiled route holds</h2>
+
+  <p><strong>Landed 2026-08-23, commit <code>2bc36ae8</code> (merge <code>593046af</code>); run
+  <code>jacfwd-feasibility-probe</code>, gate PASSED, 30 min wall; measure-only per the locked
+  <code>gradient-scope</code>.</strong> A 32-target H200 eager jacfwd through the ported exact
+  finite-section flux row (two shared geometry tangents, preallocation disabled) peaks at
+  <strong>0.00192&nbsp;GiB per target on device</strong> — 0.016% of the banked 12.2&nbsp;GiB
+  per-target antiderivative-differentiation failure — with host peak 0.0343&nbsp;GiB per target,
+  wall 1.46&nbsp;s first / 1.19&nbsp;s warm per target, and primal parity with the NumPy namespace at
+  3.56e-14 max relative. The <strong>compiled</strong> 32-target trace produced no derivative inside
+  20&nbsp;m&nbsp;26&nbsp;s at 16.4&nbsp;GiB host RSS (SLURM 1253223; eager corrective 1253292 clean):
+  whole-graph XLA lowering, not memory, is the blocking resource — the same mechanism family as the
+  exact-paired compile wall. Verdict: eager forward-mode geometry gradients are viable and cheap;
+  compiled-jacfwd adoption, graph reduction, or an alternative compiled gradient formulation belong to
+  <code>coil-geometry-inversion</code>. Receipt:
+  <code>scripts/device_kernel_port/jacfwd-probe-receipt.json</code>.</p>
+
 </main>
 </body>
 </html>

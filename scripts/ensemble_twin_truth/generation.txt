@@ -1,0 +1,48 @@
+{
+  "schema": "nova.ensemble-twin-truth-package",
+  "schema_version": "1.0.0",
+  "tree_sha": "bd3cca1f179fa063eac4d2061c2720906e32c1c7",
+  "window_count": 6,
+  "window_length_s": 0.05,
+  "member_count": 4,
+  "member_ids": [
+    "truth",
+    "pressure-high",
+    "field-high",
+    "current-low"
+  ],
+  "truth_member_id": "truth",
+  "counterfactual_member_ids": [
+    "pressure-high",
+    "field-high",
+    "current-low"
+  ],
+  "trajectory_rows": 24,
+  "observation_rows": 144,
+  "coupling_state_rows": 24,
+  "all_windows_converged": true,
+  "all_observations_supported": true,
+  "observation_contract": {
+    "thomson": {
+      "cocos": 17,
+      "units": [
+        "eV",
+        "m^-3"
+      ],
+      "support_receipt_per_row": true
+    },
+    "net_current": {
+      "unit": "A",
+      "source": "typed window plasma-current conservation ledger"
+    }
+  },
+  "known_prescription": "window-indexed p-prime, FF-prime, current, temperature and density scales declared in every trajectory row",
+  "joint_recovery_gate_run": false,
+  "joint_recovery_gate_owner": "ambix",
+  "joint_recovery_gate_note": "Not run in Nova; existing Ambix estimator consumes this deterministic package through the coupling-state seam.",
+  "artifacts_sha256": {
+    "trajectory.tsv": "31cf64c3dd4b18f9e421edbcb690f928fb170d5fb1b866842d6cb17dab79c4ff",
+    "observations.tsv": "365ef8a082b55c04bae5f81af824053a0201c3b49b0064e78a9868c4e9c501d7",
+    "coupling_states.jsonl": "ad8d4409e838cba8b2f9cb123f9193a66021af74cc65e8fb3289431fac02a8a3"
+  }
+}

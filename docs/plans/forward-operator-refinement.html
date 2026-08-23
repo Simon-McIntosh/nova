@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="Forward Operator Refinement — raise the order, or raise the resolution, on measured cost">
 <meta name="plan-summary" content="Land the owner-directed plasma-cell-resolution and operator-scaling work on the forward solve: fix a default that sits eight and a half times coarser than the reference it is scored against, and measure whether raising operator order beats refining the mesh, given that mesh refinement is quadratic in interaction-matrix build compute while operator order rebuilds nothing">
-<meta name="plan-status" content="active">
+<meta name="plan-status" content="shipped">
 <meta name="plan-roi" content="high">
 <meta name="plan-sprint" content="S13">
 <meta name="plan-owner" content="Simon McIntosh">
@@ -19,11 +19,38 @@
 <meta name="plan-effort-hours" content="6.0">
 <meta name="plan-depends-on" content="scoring-criteria-derivation">
 <meta name="plan-informs" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
-<meta name="plan-version" content="50">
-<meta name="plan-impl" content="0.97">
+<meta name="plan-version" content="52">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
 <main class="plan-doc">
+
+<section id="landed" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; shipped 2026-08-24</span>
+    <h2 id="landedh">Landed — 20 of 20 executable nodes</h2></header>
+  <p class="landed-summary"><strong>The owner directives are delivered and the adjudication
+  is decided.</strong> <code>Frame.dplasma</code> &minus;500 &rarr; &minus;2100 (2,210 cells),
+  demonstrated live: full 27-matrix biot interaction rebuild in <strong>62.73 s cold on the
+  H200</strong> (52% of the 120 s bar). The scored parity lane runs a fixed 95-point grid
+  (residual 3.73&times; lower than the 248-cell baseline, passing the held-out criterion at
+  0.199 of its bound). <strong>Ruling:</strong> mesh moves the floor (&minus;72.9%, at
+  3.24&times; build and 13.6&times; memory &mdash; i.e. batch capacity); raising operator
+  order moves it &minus;7.7% at zero rebuild and zero memory AND moves the near-marginal
+  vertical mode (&lambda; 0.9874 &rarr; 0.9740, independently replicated to four significant
+  figures) &mdash; order is the catalog-preferred axis, mesh owns the floor. The
+  closure-gain investigation ended mechanism-complete: per-configuration physical
+  near-marginal channels, amplified non-normally at ill-conditioned Krylov events,
+  direction-dependent; the cross-lane conditioning keyed to this plan's discriminator
+  removed every burst and landed six-case parity 28&times; inside the retired bound. The
+  criterion family is derived (terminal parity &rarr; 16&epsilon; one-map bound + 69
+  observable bounds + seed alignment; the DIII-D gate honestly holds
+  NO_DEFENSIBLE_DIIID_TOLERANCE_DERIVED with its reinstatement prerequisite named). Every
+  plasma-adjacent default is aligned or explicitly ruled. Full record:
+  <a href="/nova/evidence/archive/forward-operator-refinement-landed">cumulative
+  evidence</a>; per-node receipts under
+  <code>docs/figures/forward-operator-refinement/</code>. The sections below are retained
+  as the working record.</p>
+</section>
 
 <section id="s0">
   <h2 id="s0h">§0 — The owner directive and the measured asymmetry</h2>
@@ -375,6 +402,17 @@
 <div class="r-comment" data-section="s1" data-id="c-20260824T0035" data-who="reckon-ship" data-when="2026-08-24 00:35">
     <div class="r-comment-body">reference-assertion-rederivation landed — commit <code>4de38b49</code>, merged <code>4630608f</code>; gate PASSED. The three stale assertions replaced from intended semantics per the classification receipt: mixed-route now requires 60 finite samples on both routes with the &gt;10 non-contraction observation applied to Picard only (Anderson mixing is history-dependent and unconstrained); the early-window ordering is replaced by branch qualification (zero-core/non-diverted/zero-current terminal), &gt;10 transient-to-tail separation and &gt;10 final-fifteen contraction; the arithmetic residual-over-resolution (101.51) prints as a diagnostic with acceptance carried by the registered production contract. The passive-closure assertion is byte-for-byte unchanged and red at 0.6098 vs 0.15, its adjacent comment naming the resolvent-gain mechanism. Full module: 29 collected, 28 passed, exactly the one owned failure. With this the §1 suite story is complete: every reference expectation is either derived or an owned, visibly-red classified regression. Receipt: docs/figures/forward-operator-refinement/reference-assertion-rederivation.json.</div>
 </div>
+<div class="r-comment" data-section="landed" data-id="c-20260824T0400" data-who="reckon-ship" data-when="2026-08-24 04:00">
+    <div class="r-comment-body">parity-provenance-redigest landed (commit <code>1b6e40be</code>, merged <code>3ecabe8b</code>, scope-changed for the second pinned receipt) — the plan's final node. DRAIN LEDGER — forward-operator-refinement @ 2026-08-24T04:00: [pseudo-wall 33→65] foreign-owner → DIII-D gate owner (benchmarks/diiid_forward_gs_match.py), held by them for one coherent gate configuration, cost quote banked on their plan; [gate tolerance reinstatement] foreign-owner → catalog lane, requires the same-observable discretisation-error estimate, sequenced behind their dimension-general conditioning; [passive-closure restoration] foreign-owner → solver-lane topology-admission and expanding-map work, screened by their landed conditioning, reference row visibly red by the test-visibility policy; [21985/51 warm-split outlier resolution] foreign-owner → catalog lane warm-start economy entry condition; [scoring-plan successor pointer f-scd-successor] folded → resolved this beat, successor shipped. rows: 5, foldable-remaining: 0.</div>
+</div>
+</section>
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-for-successors" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-24 04:00" data-recommends-skill="/reckon-ship mast-catalog-gpu-solve" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Pointer: remaining obligations are catalog-lane-owned</h4>
+    <div class="r-fu-body">Pointer, not work: the DIII-D gate re-run (with the held wall bump, once a derived tolerance exists via the same-observable discretisation-error estimate), the passive-closure restoration behind the solver-lane topology and expanding-map work, and the warm-split outlier resolution all live in the catalog lane's active plans, whose lifecycles surface them to the roadmap.</div>
+    <pre class="r-fu-prompt">/reckon-ship mast-catalog-gpu-solve</pre>
+    </article>
 </section>
 </main>
 </body>

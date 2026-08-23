@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T09:36:52",
+  "updated": "2026-08-23T10:05:42",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -654,6 +654,13 @@
         "role": "implement",
         "session_id": "01a01f8b-c81b-70c3-a5d8-007c4d512626",
         "created": "2026-08-20"
+      },
+      {
+        "id": "tree-hygiene",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "vacuum-diagnosis",
@@ -24439,9 +24446,137 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T070713370686-sauter-bootstrap-inspection",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a76",
+        "node": "sauter-bootstrap-inspection",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "transport-ensemble",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T07:07:16Z",
+        "completed_at": "2026-08-23T08:03:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3350,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3350,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "3b7871afb37a30c00ed36fed6a37ad70b1b63e52",
+        "commits": [
+          "75ab99cc04225fe3c8cd8a95218259dabf222e70"
+        ],
+        "changed_lines": {
+          "added": 964,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T070713370686-sauter-bootstrap-inspection/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f8b-b375-7642-897c-7c1c78c8b1c3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11962368,
+            "cached_input_tokens_cumulative": 20903936,
+            "input_tokens": 12449389,
+            "input_tokens_cumulative": 21584778,
+            "output_tokens": 35934,
+            "output_tokens_cumulative": 66177,
+            "reasoning_output_tokens": 8767,
+            "reasoning_output_tokens_cumulative": 20965
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T073612356981-cluster-lead-settlement",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a710",
+        "node": "cluster-lead-settlement",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "tared-field",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T07:36:19Z",
+        "completed_at": "2026-08-23T08:04:55Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1716,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1716,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "125534111356be2fe1d23231b52c5115f52dfb0e",
+        "commits": [
+          "df50e99faf0e595b19cb9e7ccf7b349252db620e"
+        ],
+        "changed_lines": {
+          "added": 734,
+          "removed": 5,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T073612356981-cluster-lead-settlement/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02aec-6ef4-7772-8fe6-cda728b3e8f3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9949184,
+            "cached_input_tokens_cumulative": 40141824,
+            "input_tokens": 10310630,
+            "input_tokens_cumulative": 41186732,
+            "output_tokens": 30913,
+            "output_tokens_cumulative": 114542,
+            "reasoning_output_tokens": 8281,
+            "reasoning_output_tokens_cumulative": 32375
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 588
+    "_version": 591
   }
 }

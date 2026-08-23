@@ -1,0 +1,193 @@
+{
+  "schema": "nova.ensemble-window-throughput-publication",
+  "schema_version": "1.0.0",
+  "tree_sha": "87dd7358a5c36e04eccc5b27642060e0a84b61c1",
+  "workload": "affine coupled-window contract with full typed receipt assembly",
+  "workload_scope": "evaluator and receipt throughput; not a production equilibrium physics rate",
+  "cpu_receipt": {
+    "schema": "nova.ensemble-window-throughput",
+    "schema_version": "1.0.0",
+    "tree_sha": "87dd7358a5c36e04eccc5b27642060e0a84b61c1",
+    "execution": "cpu",
+    "jax_backend": "cpu",
+    "jax_device": "cpu:0",
+    "jax_gpu_devices": [],
+    "jax_cpu_devices": [
+      "cpu:0"
+    ],
+    "cuda_provenance_admitted": true,
+    "host": "98dci4-srv-1006.iter.org",
+    "python": "3.14.2",
+    "workload": "affine coupled-window contract with full typed receipt assembly",
+    "workload_scope": "evaluator and receipt throughput; not a production equilibrium physics rate",
+    "rows": [
+      {
+        "execution": "cpu",
+        "mode": "batch",
+        "members_per_window": 1,
+        "repeats": 9,
+        "median_seconds": 0.009133719140663743,
+        "member_windows_per_second": 109.48442628895314,
+        "batch_calls_per_second": 109.48442628895314
+      },
+      {
+        "execution": "cpu",
+        "mode": "scalar-loop",
+        "members_per_window": 1,
+        "repeats": 9,
+        "median_seconds": 0.006427010986953974,
+        "member_windows_per_second": 155.59332355738533,
+        "batch_calls_per_second": 155.59332355738533
+      },
+      {
+        "execution": "cpu",
+        "mode": "batch",
+        "members_per_window": 2,
+        "repeats": 9,
+        "median_seconds": 0.016925474163144827,
+        "member_windows_per_second": 118.16507949626572,
+        "batch_calls_per_second": 59.08253974813286
+      },
+      {
+        "execution": "cpu",
+        "mode": "scalar-loop",
+        "members_per_window": 2,
+        "repeats": 9,
+        "median_seconds": 0.01263224403373897,
+        "member_windows_per_second": 158.3249970993497,
+        "batch_calls_per_second": 79.16249854967485
+      },
+      {
+        "execution": "cpu",
+        "mode": "batch",
+        "members_per_window": 4,
+        "repeats": 9,
+        "median_seconds": 0.032832332188263535,
+        "member_windows_per_second": 121.83112600907062,
+        "batch_calls_per_second": 30.457781502267654
+      },
+      {
+        "execution": "cpu",
+        "mode": "scalar-loop",
+        "members_per_window": 4,
+        "repeats": 9,
+        "median_seconds": 0.02524582901969552,
+        "member_windows_per_second": 158.44201419883666,
+        "batch_calls_per_second": 39.610503549709165
+      },
+      {
+        "execution": "cpu",
+        "mode": "batch",
+        "members_per_window": 8,
+        "repeats": 9,
+        "median_seconds": 0.06389226391911507,
+        "member_windows_per_second": 125.21077684972417,
+        "batch_calls_per_second": 15.651347106215521
+      },
+      {
+        "execution": "cpu",
+        "mode": "scalar-loop",
+        "members_per_window": 8,
+        "repeats": 9,
+        "median_seconds": 0.05054201581515372,
+        "member_windows_per_second": 158.28414975093665,
+        "batch_calls_per_second": 19.78551871886708
+      }
+    ]
+  },
+  "h200_receipt": {
+    "schema": "nova.ensemble-window-throughput",
+    "schema_version": "1.0.0",
+    "tree_sha": "87dd7358a5c36e04eccc5b27642060e0a84b61c1",
+    "execution": "h200",
+    "jax_backend": "gpu",
+    "jax_device": "cuda:0",
+    "jax_gpu_devices": [
+      "cuda:0"
+    ],
+    "jax_cpu_devices": [
+      "cpu:0"
+    ],
+    "cuda_provenance_admitted": true,
+    "host": "98dci4-gpu-0003.iter.org",
+    "python": "3.14.2",
+    "workload": "affine coupled-window contract with full typed receipt assembly",
+    "workload_scope": "evaluator and receipt throughput; not a production equilibrium physics rate",
+    "rows": [
+      {
+        "execution": "h200",
+        "mode": "batch",
+        "members_per_window": 1,
+        "repeats": 9,
+        "median_seconds": 0.008609892800450325,
+        "member_windows_per_second": 116.14546466219612,
+        "batch_calls_per_second": 116.14546466219612
+      },
+      {
+        "execution": "h200",
+        "mode": "scalar-loop",
+        "members_per_window": 1,
+        "repeats": 9,
+        "median_seconds": 0.005978499539196491,
+        "member_windows_per_second": 167.26604952358994,
+        "batch_calls_per_second": 167.26604952358994
+      },
+      {
+        "execution": "h200",
+        "mode": "batch",
+        "members_per_window": 2,
+        "repeats": 9,
+        "median_seconds": 0.015891261398792267,
+        "member_windows_per_second": 125.85533330614017,
+        "batch_calls_per_second": 62.927666653070084
+      },
+      {
+        "execution": "h200",
+        "mode": "scalar-loop",
+        "members_per_window": 2,
+        "repeats": 9,
+        "median_seconds": 0.011911163106560707,
+        "member_windows_per_second": 167.90971478666037,
+        "batch_calls_per_second": 83.95485739333019
+      },
+      {
+        "execution": "h200",
+        "mode": "batch",
+        "members_per_window": 4,
+        "repeats": 9,
+        "median_seconds": 0.03067804127931595,
+        "member_windows_per_second": 130.38642081419061,
+        "batch_calls_per_second": 32.596605203547654
+      },
+      {
+        "execution": "h200",
+        "mode": "scalar-loop",
+        "members_per_window": 4,
+        "repeats": 9,
+        "median_seconds": 0.02368977665901184,
+        "member_windows_per_second": 168.84920687837544,
+        "batch_calls_per_second": 42.21230171959386
+      },
+      {
+        "execution": "h200",
+        "mode": "batch",
+        "members_per_window": 8,
+        "repeats": 9,
+        "median_seconds": 0.05962657555937767,
+        "member_windows_per_second": 134.1683624281491,
+        "batch_calls_per_second": 16.771045303518637
+      },
+      {
+        "execution": "h200",
+        "mode": "scalar-loop",
+        "members_per_window": 8,
+        "repeats": 9,
+        "median_seconds": 0.047437628731131554,
+        "member_windows_per_second": 168.64249360655535,
+        "batch_calls_per_second": 21.08031170081942
+      }
+    ]
+  },
+  "h200_evidence_admitted": true,
+  "results_sha256": "399075ebd1c60ee791ef5baf82abf47c8879cc384dd67b4a0de36a077657bb8b"
+}

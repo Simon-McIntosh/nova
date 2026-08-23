@@ -1115,6 +1115,15 @@ class WindowReceipt:
         """Return the coupling-state contract that produced this receipt."""
         return self.convergence.contract_version
 
+    @property
+    def coupling_state(self) -> CouplingState:
+        """Return the exact typed state carried across the window boundary."""
+        return CouplingState(
+            geometry=self.geometry_waveform,
+            source=self.source_waveform,
+            contract_version=self.contract_version,
+        )
+
 
 class WindowConvergenceError(RuntimeError):
     """The waveform iteration exhausted its licensed iterations."""

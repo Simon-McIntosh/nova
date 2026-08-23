@@ -404,9 +404,10 @@ def _transport_window_receipt(time):
 class _AffineWindow:
     """Analytic two-side map with a declared combined coupling strength."""
 
-    def __init__(self, config, coupling):
+    def __init__(self, config, coupling, *, source_offset=1.0):
         self.config = config
         self.coupling = coupling
+        self.source_offset = source_offset
         self.geometry_template = _exchange_waveform(
             config.equilibrium_grid, 5, "geometry", 0.0
         )
@@ -442,7 +443,7 @@ class _AffineWindow:
             "geometry",
             "source",
             gain=1.0,
-            offset=1.0,
+            offset=self.source_offset,
         )
         return ExchangeSweepResult(
             waveform=source,
@@ -549,6 +550,71 @@ def test_converged_and_cap_one_windows_share_one_measured_coupling_axis():
         strong_exchange.geometry_template.values["geometry"], 0.0
     )
     np.testing.assert_array_equal(strong_exchange.source_template.values["source"], 0.0)
+
+
+def test_restored_boundary_state_reproduces_the_continued_gating_trajectory():
+    """A serialized window boundary is an exact input to the next solve."""
+    config = WindowConfig(
+        length=1.0,
+        equilibrium_grid=np.array([0.0, 0.5, 1.0]),
+        transport_grid=np.array([0.0, 0.25, 0.75, 1.0]),
+        iteration_cap=180,
+        tolerance=WINDOW_CONVERGENCE_TOLERANCE,
+    )
+    first_exchange = _AffineWindow(config, coupling=0.2)
+    first_window = solve_window(
+        first_exchange.geometry_template,
+        first_exchange.source_template,
+        config,
+        first_exchange.equilibrium,
+        first_exchange.transport,
+    )
+    next_exchange = _AffineWindow(config, coupling=0.2, source_offset=1.125)
+    uninterrupted = solve_window(
+        first_window.coupling_state.geometry,
+        first_window.coupling_state.source,
+        config,
+        next_exchange.equilibrium,
+        next_exchange.transport,
+    )
+
+    serialized = json.loads(json.dumps(first_window.coupling_state.to_dict()))
+    restored = CouplingState.from_dict(serialized)
+    continued = solve_window(
+        restored.geometry,
+        restored.source,
+        config,
+        next_exchange.equilibrium,
+        next_exchange.transport,
+    )
+
+    assert uninterrupted.convergence.iterations_used > 1
+    assert continued.convergence.gating_norm_trace == (
+        uninterrupted.convergence.gating_norm_trace
+    )
+    assert continued.convergence.all_field_norm_trace == (
+        uninterrupted.convergence.all_field_norm_trace
+    )
+    assert continued.convergence.residual_trace == (
+        uninterrupted.convergence.residual_trace
+    )
+    assert continued.convergence.exit_residual == (
+        uninterrupted.convergence.exit_residual
+    )
+    assert continued.convergence.contraction_estimate == (
+        uninterrupted.convergence.contraction_estimate
+    )
+    assert continued.convergence.damping_backoffs == (
+        uninterrupted.convergence.damping_backoffs
+    )
+    np.testing.assert_array_equal(
+        continued.geometry_waveform.values["geometry"],
+        uninterrupted.geometry_waveform.values["geometry"],
+    )
+    np.testing.assert_array_equal(
+        continued.source_waveform.values["source"],
+        uninterrupted.source_waveform.values["source"],
+    )
 
 
 def test_window_receipt_closes_flux_and_boundary_current_ledgers():

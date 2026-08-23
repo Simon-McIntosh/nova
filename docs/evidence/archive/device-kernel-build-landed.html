@@ -226,6 +226,25 @@
   <code>coil-geometry-inversion</code>. Receipt:
   <code>scripts/device_kernel_port/jacfwd-probe-receipt.json</code>.</p>
 
+  <h2 id="s4-cache-provenance">§4 — compute provenance in cache identity: hard cross-device separation, fixtures published</h2>
+
+  <p><strong>Landed 2026-08-23, commits <code>aefd0c5f</code>/<code>699eee8f</code> (merge
+  <code>6169630c</code>); run <code>cache-provenance-integration</code>, gate PASSED, 48 min wall, two
+  tests added.</strong> The owning Biot cache identity carries <code>compute_provenance</code> — backend,
+  code-generator platform, device family, jaxlib version. The pinned store test proves the same
+  geometry/kernel hashes to <em>different</em> CPU/H200 groups, a CPU reader hard-misses the absent H200
+  group, and publishing the H200 group leaves the CPU value unchanged — receipt verdicts
+  <code>cpu_never_loads_device_artifact=true</code>, <code>device_never_loads_cpu_artifact=true</code>,
+  <code>h200_and_cpu_siblings_share_store=true</code>. Cold H200 builds of both recovery fixtures are
+  published beside their scalar-NumPy siblings in the shared Zarr stores: coarse
+  <strong>28.029&nbsp;s</strong> (kernel 1.145&nbsp;s, 1,241,403 pairs), fine
+  <strong>34.638&nbsp;s</strong> (kernel 3.524&nbsp;s, 4,359,952 pairs) — the minutes-class acceptance
+  target met against the 1,214&nbsp;s / 2,952&nbsp;s CPU baselines. The optional-JAX host fallback is
+  preserved, and the full biot selection stays at 2,618 selected / zero failures (SLURM 1253228). One
+  independent pre-existing defect surfaced and folded rather than walked past: xarray cannot encode
+  pandas <code>StringDtype</code> in the route-identity Zarr round-trip test — reconciled by its own
+  node. Receipt: <code>scripts/device_kernel_port/cache-provenance-receipt.json</code>.</p>
+
 </main>
 </body>
 </html>

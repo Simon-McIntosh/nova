@@ -1,3 +1,13 @@
+NEEDS-HELP: Four uncited tracked logs are debris outside the exclusive write fence.
+
+tried: Enumerated all 36 commits, classified all 74 unique paths, searched documentation/import/test references, verified 23/23 protected digests, and stopped before deletion.
+
+options: Extend the fence to the four named logs and continue; additionally rule the 20 definition-only historical routines retained or debris and extend scope to their module if removal is intended; or explicitly reclassify the logs as banked evidence with a durable documentation citation.
+
+leaning: Extend the fence to the four logs and remove them; they meet the brief's exact uncited-output definition of debris. Obtain a separate retained-evidence ruling for the historical routines because their parent module is live.
+
+cost-if-wrong: Removing evidence logs would require restoring and reclassifying four files; retaining actual debris leaves the tree-hygiene done-when unmet and forces the same audit to be repeated.
+
 # Parity tree hygiene audit
 
 Status: **blocked by the exclusive write fence; no deletion has been made.**

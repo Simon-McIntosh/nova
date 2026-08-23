@@ -19,7 +19,7 @@
 <meta name="plan-effort-hours" content="6.0">
 <meta name="plan-depends-on" content="scoring-criteria-derivation">
 <meta name="plan-informs" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
-<meta name="plan-version" content="26">
+<meta name="plan-version" content="27">
 <meta name="plan-impl" content="0.44">
 </head>
 <body>
@@ -298,6 +298,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260823T1638" data-who="reckon-ship" data-when="2026-08-23 16:38">
     <div class="r-comment-body">global-dplasma-gpu-rebuild landed — commit <code>2e5a7ba6</code>, merged <code>2f2575dc</code>; gate PASSED under the §6 green-except-classified clause. Frame.dplasma −500→−2100 (2,210 achieved cells, 103% of the reference-native floor). Live H200 demonstration: full biot interaction rebuild — nine blocks + 18 moment companions, 17.1M source-target pairs — cold in 62.729 s (+2.44 s publication), compile cache off, 52% of the 120 s bar, 2.36× the nine-block port comparator (27 matrices vs 9), published under compute-provenance group 6214088a with 27/27 float64 matrices reopening; implicit-mesh identity 0ae2a6e0→d3fc462b invalidated as designed, explicit and other-provenance siblings untouched. Suites at the new default: forward 35/35, constrained 9/9, solve 28/28; the single reference failure is the §6-classified expanding-map amplification (solver-lane owned, screened-not-fixed, stays red). Receipt: docs/figures/forward-operator-refinement/global-dplasma-gpu-rebuild.json.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260823T1745" data-who="reckon-ship" data-when="2026-08-23 17:45">
+    <div class="r-comment-body">UNIFIED FINDING with the catalog lane (their commit <code>121ee805</code>, H200): the topology-qualified route's convergence floor is DISCRETISATION_LIMITED — the catalog lane's convergence gap and this plan's resolution work are one finding. On the fixed DIII-D case (frame 0 at 160.0 ms, banked 24-conductor vector, zero fitted coefficients): stride-2 1,089 cells → terminal residual 2.9254e-4; stride-1 4,225 cells → 7.9305e-5; refinement ratio 1.9697, residual down 72.89%, observed order 1.9256, inside this plan's banked 0.97–3.39 strata — the qualified route behaves as the banked regime, not a new one. Both rungs held 89/89 iterations diverted, Krylov ACCEPTED, finite X points. Honest limit carried verbatim: the native floor is still 79.3× above the untraced 1e-6 — a classification, not a gate pass — which sharpens the one-pass criterion derivation as the binding follow-on. COST DECOMPOSITION that reweights this adjudication: coarse 67.88 s = 62.36 build + 4.72 solve; native 206.45 s = 201.92 build + 3.86 solve — the build is 52× the solve at reference-native and the solve wall is flat under 3.9× cells, so the §0 asymmetry is UNDERSTATED: refinement's cost is essentially all rebuild, the solve is nearly free, and if raising operator order moves this same floor at zero rebuild it wins on cost by a decisive margin. The §2 order node now has its exact target: move the 7.93e-5 floor on the 4,225-node carrier without rebuilding it.</div>
 </div>
 </section>
 </main>

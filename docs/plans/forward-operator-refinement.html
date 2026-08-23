@@ -19,8 +19,8 @@
 <meta name="plan-effort-hours" content="6.0">
 <meta name="plan-depends-on" content="scoring-criteria-derivation">
 <meta name="plan-informs" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
-<meta name="plan-version" content="36">
-<meta name="plan-impl" content="0.7">
+<meta name="plan-version" content="37">
+<meta name="plan-impl" content="0.75">
 </head>
 <body>
 <main class="plan-doc">
@@ -329,6 +329,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20260823T1940" data-who="reckon-ship" data-when="2026-08-23 19:40">
     <div class="r-comment-body">reference-native-resolution-default landed — commits <code>e436294a</code>+<code>99e8f85c</code>, merged <code>0388a3d6</code>; gate PASSED (green-except-classified), scope-changed twice (owner-ruled fence extensions). The verdict-producing parity lane now passes a fixed 95-point grid to the landed profile builder (2,161 cells on the control, clearing the ~2,141 floor; cohort 1789–2200), GRID_STRIDE retained only for explicit mesh-intervention instruments. Ladder banked: 248/996/2161 cells at residuals 1.036e-2 / 5.300e-3 / 2.773e-3; the 95-point control passes the held-out criterion at ratio 0.199 (2.773e-3 vs τ 1.397e-2); inherited 1e-8 recorded as an accelerator stopping policy only. Coupling at 95: 0.655 GB active / 1.964 GB resident; fresh L4 builds 50.98/117.01 s. Suites: 105/109 with the four reference failures proven STORE-INDEPENDENT (isolated vs shared data home: all four values bit-identical, no persistent store group loaded in either arm) and BASE-INDEPENDENT (reproduced from a base without this change) — pre-existing regressions un-hidden by the marker-policy fix, one owned by §6's mode chain, three routed to semantic classification on current HEAD. Receipt: docs/figures/forward-operator-refinement/reference-native-resolution-default.json.</div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20260823T2115" data-who="reckon-ship" data-when="2026-08-23 21:15">
+    <div class="r-comment-body">reference-failure-classification landed — commit <code>f2151a21</code>, merged <code>8249e5dc</code>; gate PASSED. On integrated HEAD (tree 6b76eb1e, suite-native cached carrier bitwise-validated): 4/4 failures reproduced, split ONE REGRESSION + THREE STALE. Regression: passive closure 0.6098 pt vs 0.15 — owned by the §6 map-gain chain (noncontractive_free_boundary_map_resolvent_gain). Stale 1 (mixed-route): Picard grows 928.9× while Anderson contracts 9.84e-12 → 5.86e-14 — intended semantics require 60 finite samples and Picard non-contraction, never Anderson amplification. Stale 2 (early-growth): the trace peaks at 0.412 then contracts to 1.85e-05 with a vacuum termination — intended semantics qualify branch and transient/tail, not first-fifteen-sample ordering. Stale 3 (arithmetic floor): 101.5 resolution units while the registered production contract passes (normalized residual 9.84e-12 &lt; 1e-6, finite, diverted) — residual-over-resolution retained as diagnostic, not a second acceptance bound. No assertion edited by the classifier; the re-derivation node executes the receipt's semantics-derived replacements. Receipt: docs/figures/forward-operator-refinement/reference-failure-classification.json.</div>
 </div>
 </section>
 </main>

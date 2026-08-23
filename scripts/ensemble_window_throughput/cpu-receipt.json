@@ -1,0 +1,86 @@
+{
+  "schema": "nova.ensemble-window-throughput",
+  "schema_version": "1.0.0",
+  "tree_sha": "5c448153a7820768ed878a3c0d819fc0e27842ab",
+  "execution": "cpu",
+  "jax_backend": "cpu",
+  "jax_device": "cpu:0",
+  "host": "98dci4-srv-1006.iter.org",
+  "python": "3.14.2",
+  "workload": "affine coupled-window contract with full typed receipt assembly",
+  "workload_scope": "evaluator and receipt throughput; not a production equilibrium physics rate",
+  "rows": [
+    {
+      "execution": "cpu",
+      "mode": "batch",
+      "members_per_window": 1,
+      "repeats": 9,
+      "median_seconds": 0.009443782968446612,
+      "member_windows_per_second": 105.88976931608667,
+      "batch_calls_per_second": 105.88976931608667
+    },
+    {
+      "execution": "cpu",
+      "mode": "scalar-loop",
+      "members_per_window": 1,
+      "repeats": 9,
+      "median_seconds": 0.006527567980811,
+      "member_windows_per_second": 153.19641295803982,
+      "batch_calls_per_second": 153.19641295803982
+    },
+    {
+      "execution": "cpu",
+      "mode": "batch",
+      "members_per_window": 2,
+      "repeats": 9,
+      "median_seconds": 0.017895854078233242,
+      "member_windows_per_second": 111.75772842451836,
+      "batch_calls_per_second": 55.87886421225918
+    },
+    {
+      "execution": "cpu",
+      "mode": "scalar-loop",
+      "members_per_window": 2,
+      "repeats": 9,
+      "median_seconds": 0.013025274965912104,
+      "member_windows_per_second": 153.54762223708255,
+      "batch_calls_per_second": 76.77381111854127
+    },
+    {
+      "execution": "cpu",
+      "mode": "batch",
+      "members_per_window": 4,
+      "repeats": 9,
+      "median_seconds": 0.03391175693832338,
+      "member_windows_per_second": 117.95319267223324,
+      "batch_calls_per_second": 29.48829816805831
+    },
+    {
+      "execution": "cpu",
+      "mode": "scalar-loop",
+      "members_per_window": 4,
+      "repeats": 9,
+      "median_seconds": 0.025938390055671334,
+      "member_windows_per_second": 154.211575638073,
+      "batch_calls_per_second": 38.55289390951825
+    },
+    {
+      "execution": "cpu",
+      "mode": "batch",
+      "members_per_window": 8,
+      "repeats": 9,
+      "median_seconds": 0.06557034002617002,
+      "member_windows_per_second": 122.00638271521989,
+      "batch_calls_per_second": 15.250797839402486
+    },
+    {
+      "execution": "cpu",
+      "mode": "scalar-loop",
+      "members_per_window": 8,
+      "repeats": 9,
+      "median_seconds": 0.052002985030412674,
+      "member_windows_per_second": 153.8373229021641,
+      "batch_calls_per_second": 19.22966536277051
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schema": "nova.ensemble-window-throughput-refusal",
+  "schema_version": "1.0.0",
+  "reason": "tree-stamp-mismatch-and-host-backend",
+  "same_tree_comparison_admitted": false,
+  "expected_tree_sha": "5c448153a7820768ed878a3c0d819fc0e27842ab",
+  "reported_tree_sha": "b37995e77093aabbde0e0f2c72e54eea06b4d4e2",
+  "reported_jax_backend": "cpu",
+  "reservation": "gpu_0003_grpA",
+  "partition": "betelgeuse",
+  "node": "98dci4-gpu-0003.iter.org",
+  "jobs": [1253201, 1253202],
+  "latest_job_state": "COMPLETED",
+  "latest_job_exit_code": "0:0",
+  "latest_job_elapsed": "00:00:23",
+  "evidence_rule": "Do not publish CPU and H200 rows unless both receipts identify the same committed tree and the requested accelerator backend is active."
+}

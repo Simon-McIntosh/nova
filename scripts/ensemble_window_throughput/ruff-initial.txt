@@ -1,0 +1,174 @@
+E501 Line too long (92 > 88)
+  --> nova/transport/window_batch.py:85:89
+   |
+83 |         except ValueError as error:
+84 |             raise KeyError(member_id) from error
+85 |         return MappingProxyType({name: value[index] for name, value in self.arrays.items()})
+   |                                                                                         ^^^^
+   |
+
+E501 Line too long (91 > 88)
+   --> nova/transport/window_batch.py:114:89
+    |
+112 |             time.size,
+113 |         ):
+114 |             raise ValueError("batched radial grids must have shape (member, time, radius)")
+    |                                                                                         ^^^
+115 |         expected_coordinates = (member_count, time.size)
+116 |         for name, coordinate in (
+    |
+
+E501 Line too long (89 > 88)
+   --> nova/transport/window_batch.py:158:89
+    |
+156 |                 time=first.time,
+157 |                 radial_grid=np.stack([waveform.radial_grid for waveform in waveforms]),
+158 |                 phi_boundary=np.stack([waveform.phi_boundary for waveform in waveforms]),
+    |                                                                                         ^
+159 |                 axis_reference=np.stack([waveform.axis_reference for waveform in waveforms]),
+160 |                 boundary_reference=np.stack(
+    |
+
+E501 Line too long (93 > 88)
+   --> nova/transport/window_batch.py:159:89
+    |
+157 |                 radial_grid=np.stack([waveform.radial_grid for waveform in waveforms]),
+158 |                 phi_boundary=np.stack([waveform.phi_boundary for waveform in waveforms]),
+159 |                 axis_reference=np.stack([waveform.axis_reference for waveform in waveforms]),
+    |                                                                                         ^^^^^
+160 |                 boundary_reference=np.stack(
+161 |                     [waveform.boundary_reference for waveform in waveforms]
+    |
+
+E501 Line too long (97 > 88)
+   --> nova/transport/window_batch.py:169:89
+    |
+167 |             )
+168 |         except ValueError as error:
+169 |             raise ValueError("all member waveform fields must have compatible shapes") from error
+    |                                                                                         ^^^^^^^^^
+170 |
+171 |     def member(self, member_id: str) -> Waveform:
+    |
+
+E501 Line too long (89 > 88)
+   --> nova/transport/window_batch.py:196:89
+    |
+194 |     def __post_init__(self) -> None:
+195 |         if self.geometry.member_ids != self.source.member_ids:
+196 |             raise ValueError("coupling-state sides must use identical member identities")
+    |                                                                                         ^
+197 |
+198 |     @property
+    |
+
+E501 Line too long (92 > 88)
+   --> nova/transport/window_batch.py:240:89
+    |
+238 |         ):
+239 |             if values.member_ids != member_ids:
+240 |                 raise ValueError(f"{name} member identities differ from the coupling state")
+    |                                                                                         ^^^^
+241 |
+242 |     @property
+    |
+
+E501 Line too long (93 > 88)
+   --> nova/transport/window_batch.py:277:89
+    |
+275 |         receipt = self.window.equilibrium_receipt
+276 |         if not isinstance(receipt, EquilibriumSweepReceipt) or not receipt.equilibria:
+277 |             raise TypeError("member topology and moments require an EquilibriumSweepReceipt")
+    |                                                                                         ^^^^^
+278 |         return receipt.equilibria[-1]
+    |
+
+E501 Line too long (89 > 88)
+   --> nova/transport/window_batch.py:348:89
+    |
+346 |     ) -> None:
+347 |         identities = ", ".join(refusal.member_id for refusal in refusals)
+348 |         super().__init__(f"window batch refused {len(refusals)} member(s): {identities}")
+    |                                                                                         ^
+349 |         self.admitted = admitted
+350 |         self.refusals = refusals
+    |
+
+E501 Line too long (93 > 88)
+   --> nova/transport/window_batch.py:399:89
+    |
+397 |             tuple(zip(member_ids, states, strict=True))
+398 |         )
+399 |         transported = transport_update(inputs, batched_state.geometry, config.transport_grid)
+    |                                                                                         ^^^^^
+400 |         if not isinstance(transported, BatchedExchangeSweepResult):
+401 |             raise TypeError("batch transport update must return BatchedExchangeSweepResult")
+    |
+
+E501 Line too long (92 > 88)
+   --> nova/transport/window_batch.py:401:89
+    |
+399 |         transported = transport_update(inputs, batched_state.geometry, config.transport_grid)
+400 |         if not isinstance(transported, BatchedExchangeSweepResult):
+401 |             raise TypeError("batch transport update must return BatchedExchangeSweepResult")
+    |                                                                                         ^^^^
+402 |         equilibrated = equilibrium_update(inputs, transported.waveform, config.equilibrium_grid)
+403 |         if not isinstance(equilibrated, BatchedExchangeSweepResult):
+    |
+
+E501 Line too long (96 > 88)
+   --> nova/transport/window_batch.py:402:89
+    |
+400 |         if not isinstance(transported, BatchedExchangeSweepResult):
+401 |             raise TypeError("batch transport update must return BatchedExchangeSweepResult")
+402 |         equilibrated = equilibrium_update(inputs, transported.waveform, config.equilibrium_grid)
+    |                                                                                         ^^^^^^^^
+403 |         if not isinstance(equilibrated, BatchedExchangeSweepResult):
+404 |             raise TypeError("batch equilibrium update must return BatchedExchangeSweepResult")
+    |
+
+E501 Line too long (94 > 88)
+   --> nova/transport/window_batch.py:404:89
+    |
+402 |         equilibrated = equilibrium_update(inputs, transported.waveform, config.equilibrium_grid)
+403 |         if not isinstance(equilibrated, BatchedExchangeSweepResult):
+404 |             raise TypeError("batch equilibrium update must return BatchedExchangeSweepResult")
+    |                                                                                         ^^^^^^
+405 |         if transported.waveform.member_ids != member_ids:
+406 |             raise ValueError("batch transport update changed member identities")
+    |
+
+E501 Line too long (92 > 88)
+   --> nova/transport/window_batch.py:415:89
+    |
+413 |             transport_receipt = transported.receipts[index]
+414 |             if not isinstance(transport_receipt, TransportSweepReceipt):
+415 |                 raise TypeError("each batch transport member needs a TransportSweepReceipt")
+    |                                                                                         ^^^^
+416 |             candidate = CouplingState(
+417 |                 geometry=equilibrated.waveform.member(member_id),
+    |
+
+E501 Line too long (93 > 88)
+   --> nova/transport/window_batch.py:484:89
+    |
+482 |                 and dampings[index] <= config.damping_floor
+483 |             )
+484 |             cap_needs_measurement = iteration >= config.iteration_cap and contraction is None
+    |                                                                                         ^^^^^
+485 |             if (
+486 |                 hard_ceiling_reached
+    |
+
+E501 Line too long (92 > 88)
+   --> tests/test_transport_window_batch.py:178:89
+    |
+177 |     assert batch.member_ids == tuple(member_id for member_id, _exchange in exchanges)
+178 |     maximum_iterations = max(member.convergence.iterations_used for member in batch.members)
+    |                                                                                         ^^^^
+179 |     assert operators.transport_calls == maximum_iterations
+180 |     assert operators.equilibrium_calls == maximum_iterations
+    |
+
+Found 16 errors.
+EXIT_MARKER=1

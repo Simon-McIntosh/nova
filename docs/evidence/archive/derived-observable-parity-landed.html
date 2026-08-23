@@ -139,6 +139,59 @@
   <code>provisional_backend_mismatch</code> rather than presented as a result.</p>
 </section>
 
+<section id="s3">
+  <h2 id="s3-h">§3 — Repairing what the discriminator convicted</h2>
+
+  <p><strong>observable-reduction-parity</strong> landed 2026-08-24 — commits <code>b12ac25d</code>
+  and <code>b2924f63</code>, merged <code>54c6f5de</code>, gate PASSED, scope extended mid-node. The
+  repaired discriminator run is complete on NVIDIA H200 NVL at float64, source commit
+  <code>b2924f63</code>.</p>
+
+  <table>
+    <caption>Shared-state difference on the H200 after repair, against the pre-repair figure</caption>
+    <thead>
+      <tr><th scope="col">Observable</th><th scope="col">After repair</th><th scope="col">Before</th><th scope="col">Verdict now</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>moments.volume</code></td><td><strong>0.0</strong></td><td>4.440892098500626e-16</td><td>STATE_INHERITED</td></tr>
+      <tr><td><code>moments.major_radius</code></td><td><strong>0.0</strong></td><td>1.1102230246251565e-16</td><td>STATE_INHERITED</td></tr>
+      <tr><td><code>conservation.divergence_j</code></td><td>8.731149137020111e-11</td><td>1.7462298274040222e-10</td><td>COMPUTATION_DIFFERS, at <code>conservation.field_function_gradient</code></td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Two of three are now bitwise equal, and the mechanism is a fixed reduction.</strong> A
+  fixed binary summation tree plus a cell-centred radial-volume reconstruction from invariant inputs
+  makes <code>moments.volume</code> and <code>moments.major_radius</code> identical between scalar
+  <code>ForwardProfile.observe</code> and <code>jax.jit(jax.vmap(ForwardProfile.observe))</code> for
+  all six held-out cases. Both reclassify as <code>STATE_INHERITED</code> at exactly zero — which is
+  the section's preferred outcome: a computation repaired, not a bound moved.</p>
+
+  <p><strong>The third was deliberately not repaired, and the reason is the more interesting
+  result.</strong> Two attempts were made on the fitted gradient. Fixed association left a
+  9.37916411e-13 scalar-versus-vmap difference. A sequential custom batching rule left
+  1.84741111e-12 <em>and moved the computed scalar itself</em>, from 0.028424246809095166 to
+  0.028424093086982793. <strong>A change that moves the answer is not a repair</strong>, so the
+  experiment was removed and the banked gradient source retained. The scope extension into
+  <code>stencil_mesh.py</code> and <code>forward.py</code> was granted for this attempt and correctly
+  spent proving it should not be taken.</p>
+
+  <p><strong>Where that leaves <code>conservation.divergence_j</code>.</strong> Its route difference
+  halved, from 1.7462298274040222e-10 to 8.731149137020111e-11, and it already <em>passes</em> its
+  absolute bound of 1.3703738919113413e-10 at 1.1641532182693481e-10. It fails only the relative
+  envelope — 0.6 against 0.15286615188530017 — which is relative normalisation of a near-zero
+  quantity. No bound was changed by this node; the relative-envelope question carries the
+  platform-matched negative evidence forward to the re-application.</p>
+
+  <p><strong>Regression coverage, stated honestly.</strong> The reference-lane selection collected
+  126 tests and passed 97 across <code>test_fixed_point.py</code>,
+  <code>test_equilibrium_forward_solve.py</code>, <code>test_equilibrium_forward.py</code> and
+  <code>test_equilibrium_stencil_mesh.py</code> before a 25-minute allocation expired inside
+  <code>test_equilibrium_forward_reference.py</code>. No failure and no moved bank value was reported
+  before the timeout, and the only production file that changed is
+  <code>nova/equilibrium/observation.py</code> — <code>conservation.py</code> is byte-identical to the
+  banked implementation. The remaining reference coverage is owed rather than assumed.</p>
+</section>
+
 <section id="s4">
   <h2 id="s4-h">§4 — Label parity as a re-runnable acceptance, and the instability it exposed</h2>
 

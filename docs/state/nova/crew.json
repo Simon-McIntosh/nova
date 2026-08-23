@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T18:59:30",
+  "updated": "2026-08-23T19:11:13",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -556,6 +556,13 @@
         "role": "implement",
         "session_id": "297a0335-c275-49a5-842c-7df6a50f5fe5",
         "created": "2026-08-22"
+      },
+      {
+        "id": "route-conditioning",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "saddle-partition",
@@ -28180,9 +28187,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T164615389576-passive-representation-eigenvalue-response",
+        "plan": "forward-operator-refinement",
+        "section": "\u00a76",
+        "node": "passive-representation-eigenvalue-response",
+        "role": "implement",
+        "spec_level": "",
+        "member": "biot-bench",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T16:46:18Z",
+        "completed_at": "2026-08-23T17:10:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1458,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1458,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "ede9a65e3c7f17822f26ce4246f14be3d9ea3609",
+        "commits": [
+          "75d63c4ef893fba42a152825084bcfd6e2402b81"
+        ],
+        "changed_lines": {
+          "added": 1137,
+          "removed": 105,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T164615389576-passive-representation-eigenvalue-response/manifest.md",
+        "scope_changed": true,
+        "session_id": "019fff4e-9a1b-7652-ac96-f324479b9f67",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11678720,
+            "cached_input_tokens_cumulative": 100472832,
+            "input_tokens": 12193248,
+            "input_tokens_cumulative": 103277647,
+            "output_tokens": 47349,
+            "output_tokens_cumulative": 297982,
+            "reasoning_output_tokens": 14791,
+            "reasoning_output_tokens_cumulative": 99174
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 662
+    "_version": 664
   }
 }

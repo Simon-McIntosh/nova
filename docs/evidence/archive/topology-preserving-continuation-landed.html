@@ -116,6 +116,53 @@
   diff. The control figures are quoted because the section required them, as context only.</p>
 </section>
 
+<section id="s7">
+  <h2 id="s7-h">§7 — The ranking, given enough power to decide: still negative</h2>
+
+  <p><strong>seed-alignment-power</strong> landed 2026-08-24 — commit <code>306fdfaf</code>, merged
+  <code>381275d6</code>, gate <strong>FAILED</strong>, verdict
+  <strong><code>UNDERPOWERED_NEGATIVE</code></strong> at n = 8. Receipt
+  <code>docs/figures/topology-preserving-continuation/seed-alignment-power.json</code>. This is the
+  reportable negative §7 authorised as an honest close, and the achieved power it required is
+  stated.</p>
+
+  <p><strong>The frame rule was recorded before any new outcome or added score, and the observable
+  was not touched.</strong> Retain the locked five, include the missing sixth frozen held-out
+  reference, then add the immediately following slice for the first two shots in sorted
+  frozen-cohort order — eight frames, three additions. The definition stayed exactly
+  <em>q(s,F) = ‖F(s) − s‖₂ / ‖(I − J<sub>F</sub>(s))(F(s) − s)‖₂</em> and the five locked scores
+  were carried verbatim, so nothing was tuned after outcomes were visible. That discipline is the
+  point of the section: the alternative — a second candidate scored against the same five points —
+  is the p-hack the method requirements forbid.</p>
+
+  <table>
+    <caption>Association and power, enlarged corpus against the banked five</caption>
+    <thead>
+      <tr><th scope="col">Outcome</th><th scope="col">Spearman ρ, n = 8</th><th scope="col">p</th><th scope="col">Banked ρ, n = 5</th><th scope="col">Banked p</th><th scope="col">Achieved power at banked effect</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>cumulative growth</td><td>0.523809523809524</td><td>0.1827207505397148</td><td>0.60</td><td>0.28475697986529386</td><td>0.34111253441146583</td></tr>
+      <tr><td>terminal residual</td><td>0.14285714285714288</td><td>0.735764859879812</td><td>0.00</td><td>1.0</td><td>0.05</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>The three added frames.</strong> 21978/36 — q = 0.911610494019064, growth 369.625,
+  terminal residual 2.1269469382856163e-07. 21983/36 — q = 0.9639191733138764, growth 60.75,
+  residual 0.006299788326640744. 22086/43 — q = 0.9668409291813004, growth 3.0, residual
+  2.911868346631881e-16. Observed-effect powers are 0.25533662540809166 and 0.061933304732192274 at
+  two-sided α = 0.05 by Fisher-z normal approximation.</p>
+
+  <p><strong>Verdict and what it settles.</strong> Neither outcome reaches positive significance, so
+  the locked observable is <em>not promoted</em> as a seed selector. Enlarging the corpus moved the
+  growth association slightly <em>down</em> (0.60 → 0.524) and the residual association slightly up
+  from nothing (0.00 → 0.143) — the pattern of noise, not of a signal emerging. §3's requirement of
+  consistency against both outcomes therefore stands unmet with the power now quantified rather than
+  merely suspected, and both sections close as negatives. Association only: no causal performance
+  attribution is made, because <code>fixed_point.py</code>, <code>manifold_advance.py</code> and
+  <code>seed_alignment.py</code> differ between the locked-score tree and the added-measurement
+  tree.</p>
+</section>
+
 <section id="s6">
   <h2 id="s6-h">§6 — The conditioning shrinkage, repaired</h2>
 

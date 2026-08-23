@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T00:29:20",
+  "updated": "2026-08-24T00:58:16",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -31,6 +31,13 @@
         "role": "implement",
         "session_id": "01a02472-80c7-73a1-8e6e-097ec66b508c",
         "created": "2026-08-21"
+      },
+      {
+        "id": "batch-acceptance",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "biot-bench",
@@ -584,6 +591,13 @@
         "role": "implement",
         "session_id": "01a00a54-cace-7fc1-bfda-2ef1b1f01fa8",
         "created": "2026-08-16"
+      },
+      {
+        "id": "reduction-parity",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a030ca-891d-7ec1-99dc-a5c0a6b551e4",
+        "created": "2026-08-23"
       },
       {
         "id": "registry",
@@ -29537,9 +29551,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T220351441389-seed-alignment-power",
+        "plan": "topology-preserving-continuation",
+        "section": "\u00a77",
+        "node": "seed-alignment-power",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "alignment-power",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T22:03:55Z",
+        "completed_at": "2026-08-23T22:57:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3229,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3229,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "f7bf288c8ac44d339f07146228644cd5d801c275",
+        "commits": [
+          "306fdfafc54b54016c02ab2ce28e8073e631a02d"
+        ],
+        "changed_lines": {
+          "added": 824,
+          "removed": 146,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "UNDERPOWERED_NEGATIVE at n=8. Frame rule recorded before any new outcome or added-frame score: retain the locked five, include the missing sixth frozen held-out reference, then add the immediately following slice for the first two shots in sorted frozen-cohort order - eight frames, three additions. Observable carried verbatim as q(s,F) = ||F(s)-s||_2 / ||(I - J_F(s))(F(s)-s)||_2 with the five locked scores reused unchanged, so nothing was tuned after seeing outcomes. Enlarged readings: growth Spearman 0.523809523809524 at two-sided p 0.1827207505397148 against the banked 0.60 at p 0.28475697986529386; terminal residual 0.14285714285714288 at p 0.735764859879812 against the banked 0.00 at p 1.0. Achieved Fisher-z power at the banked effects 0.34111253441146583 and 0.05; at the observed effects 0.25533662540809166 and 0.061933304732192274, two-sided alpha 0.05. Added rows: 21978/36 q=0.911610494019064 growth=369.625 residual=2.1269469382856163e-07; 21983/36 q=0.9639191733138764 growth=60.75 residual=0.006299788326640744; 22086/43 q=0.9668409291813004 growth=3.0 residual=2.911868346631881e-16. Neither outcome reaches positive significance, so the locked observable is NOT promoted. This is the reportable negative the section authorised as an honest close, with the achieved power stated as required. Association only: fixed_point.py, manifold_advance.py and seed_alignment.py differ between the locked-score tree and the added-measurement tree, so no causal performance attribution is made.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T220351441389-seed-alignment-power/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a030a6-d6c8-7ba0-883f-e0b57d138801",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 40508416,
+            "cached_input_tokens_cumulative": 40508416,
+            "input_tokens": 40864186,
+            "input_tokens_cumulative": 40864186,
+            "output_tokens": 53793,
+            "output_tokens_cumulative": 53793,
+            "reasoning_output_tokens": 16858,
+            "reasoning_output_tokens_cumulative": 16858
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 703
+    "_version": 707
   }
 }

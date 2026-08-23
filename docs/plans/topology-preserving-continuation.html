@@ -25,11 +25,11 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-24">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="10">
 <meta name="plan-sprint" content="S14">
-<meta name="plan-commits" content="6cdc60c46ef0b0e1c611ff2c5404ec561e4abbce,f1adace7cbfecea328cc085bad72f4e7664929f5,f0cec6dcd29b766f3c7b8c8813f4577a0419cd28,e9ec1ca86ae4eda2d91ab67ae7b780bb7935ec3e,5e7265d36bb2ebd3ba83def966d2bb1fbfb440ab,32526f7a7bab5e84c72c82b9706f4927a82d9b86,35c7c0358ec6b072d623688d6d13c861f04be232,6df3eb80efcf7c5f32b48ea8fabc38e6d0198b0e,d0357dfeb5e1d09ca4a834e42ccc081fb744969e,5c076c6b492aaa2453d76153a27c91da41af86e8,7c6ccfb4">
-<meta name="plan-artifacts" content="docs/figures/diiid-forward-onboarding/dimension-general-conditioning.json,docs/figures/topology-preserving-continuation/admissible-step-control.json,docs/figures/topology-preserving-continuation/manifold-advance.json,docs/figures/topology-preserving-continuation/conditioning-repair.json,docs/figures/topology-preserving-continuation/seed-alignment-ranking.json,scripts/continuation_parameter_choice/report.md,scripts/continuation_manifold_reuse/report.md,nova/equilibrium/manifold_advance.py,nova/equilibrium/seed_alignment.py,docs/evidence/archive/topology-preserving-continuation-landed.html">
-<meta name="plan-impl" content="0.889">
+<meta name="plan-commits" content="6cdc60c46ef0b0e1c611ff2c5404ec561e4abbce,f1adace7cbfecea328cc085bad72f4e7664929f5,f0cec6dcd29b766f3c7b8c8813f4577a0419cd28,e9ec1ca86ae4eda2d91ab67ae7b780bb7935ec3e,5e7265d36bb2ebd3ba83def966d2bb1fbfb440ab,32526f7a7bab5e84c72c82b9706f4927a82d9b86,35c7c0358ec6b072d623688d6d13c861f04be232,6df3eb80efcf7c5f32b48ea8fabc38e6d0198b0e,d0357dfeb5e1d09ca4a834e42ccc081fb744969e,5c076c6b492aaa2453d76153a27c91da41af86e8,306fdfafc54b54016c02ab2ce28e8073e631a02d,381275d6">
+<meta name="plan-artifacts" content="docs/figures/diiid-forward-onboarding/dimension-general-conditioning.json,docs/figures/topology-preserving-continuation/admissible-step-control.json,docs/figures/topology-preserving-continuation/manifold-advance.json,docs/figures/topology-preserving-continuation/conditioning-repair.json,docs/figures/topology-preserving-continuation/seed-alignment-ranking.json,docs/figures/topology-preserving-continuation/seed-alignment-power.json,scripts/continuation_parameter_choice/report.md,scripts/continuation_manifold_reuse/report.md,nova/equilibrium/manifold_advance.py,nova/equilibrium/seed_alignment.py,docs/evidence/archive/topology-preserving-continuation-landed.html">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -138,36 +138,28 @@
       <code>5c076c6b</code>).</p>
     </section>
 
-    <h2 id="s3">§3 — Seed alignment as a selection criterion</h2>
-
-    <p>Seed direction is a measured lever on two things at once, and nothing currently chooses it
-    deliberately. An alternate same-shot seed on an identical case moved amplification bursts from
-    three to none and cut cumulative divergence growth from 5.379792627282051e9 to
-    <strong>0.0619</strong> — eleven orders. Independently, frames whose residuals improved under
-    warm-neighbour seeding show <strong>136× less</strong> cumulative growth than those that
-    worsened (medians 2.16e6 against 2.94e8), with one qualified outlier at shot 21985 slice 51
-    that is also the most-instrumented case and must be resolved as most-informative versus
-    instrumentation-perturbed before that split is cited as law.</p>
-
-    <p>This retro-explains a result that had been banked as noise: warm-neighbour seeding lifted
-    none of the five MAST stalls while improving three residuals and worsening two. On a strongly
-    non-normal map, transient growth depends on the <em>direction</em> of the initial error rather
-    than its magnitude, so a seeding change that helps some frames and hurts others by comparable
-    amounts is the predicted behaviour rather than an absent effect.</p>
-
-    <p><strong>The design consequence is that pooling by adjacency selects on the wrong
-    variable.</strong> Warm-starting has been treated throughout as distance reduction — start
-    nearer, converge in fewer steps. On this map a seed that is further away but aligned away from
-    the transient-growth directions can beat a nearer one. Because the same seed change also
-    governs whether a batched solve reproduces a per-slice solve, a catalog that seeds from
-    neighbours is choosing both its iteration count and its reproducibility on one variable it
-    does not know it is choosing.</p>
-
-    <p><strong>Done when</strong> a seed-alignment observable exists that can be computed
-    <em>without</em> a converged solve — otherwise it cannot select a seed — and is shown to rank
-    candidate seeds consistently with measured outcome on the frames where outcome is already
-    banked, quoting rank correlation against both cumulative growth and terminal residual. The
-    21985/51 outlier is adjudicated in the same receipt.</p>
+    <section id="s3" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-24 — reportable negative</span>
+        <h2>§3 — Seed alignment as a selection criterion</h2></header>
+      <p class="landed-summary">Delivered as a preregistered observable and closed as a negative.
+      <em>q(s,F) = ‖F(s)−s‖₂ / ‖(I−J<sub>F</sub>(s))(F(s)−s)‖₂</em> is computable from the cold seed,
+      one map evaluation and one tangent action, with <strong>no converged solve</strong> anywhere in
+      it — the section's hard constraint. It does not rank both outcomes consistently: growth
+      Spearman 0.60 (p 0.285) at n = 5 and <strong>0.524 (p 0.183)</strong> at n = 8; terminal
+      residual 0.00 (p 1.0) then <strong>0.143 (p 0.736)</strong>; achieved power 0.341 and 0.05 at
+      the banked effects. Verdict <code>HOLD_AS_SEED_SELECTOR</code>, then
+      <code>UNDERPOWERED_NEGATIVE</code> — enlarging the corpus moved the growth association
+      <em>down</em>, the pattern of noise rather than of a signal emerging. <strong>The outlier
+      sub-deliverable does close:</strong> 21985/51 is most-informative and not
+      instrumentation-perturbed — the replay reproduced the banked twelve-update trajectory with no
+      source change, and its real same-shot alternate seed moved bursts [3, 8, 12] to none and growth
+      5.379792627e9 to <strong>0.0619</strong>. Nothing was tuned after outcomes were visible. Full
+      record:
+      <a href="/nova/evidence/archive/topology-preserving-continuation-landed#s3-alignment">§3
+      alignment</a> and
+      <a href="/nova/evidence/archive/topology-preserving-continuation-landed#s7">§7 power</a>
+      (commits <code>32526f7a</code>, <code>306fdfaf</code>).</p>
+    </section>
 
     <section id="s4" class="section-landed">
       <header><span class="badge badge-shipped">✓ landed 2026-08-23</span>
@@ -246,26 +238,22 @@
       (commits <code>35c7c035</code>, <code>6df3eb80</code>, merged <code>6748bec2</code>).</p>
     </section>
 
-    <h2 id="s7">§7 — Give the alignment ranking enough power to decide</h2>
-
-    <p>§3's preregistered observable is locked and its five-frame result is a negative: Spearman
-    0.60 at p = 0.285 against cumulative growth, 0.00 at p = 1.0 against terminal residual. At
-    n = 5 a two-sided Spearman needs |ρ| ≈ 1 to clear p = 0.05, so the section's requirement is
-    close to unpassable on the banked corpus regardless of which observable is proposed — which by
-    §5's own standard is diagnostic about the sample, not about the candidate.</p>
-
-    <p><strong>The one thing this section must not do is propose a second observable against the
-    same five points.</strong> That is the p-hack §5 forbids, and the landed receipt explicitly
-    instructs against tuning the score after seeing the outcomes. The locked definition is carried
-    forward unchanged; only the corpus grows.</p>
-
-    <p><strong>Done when</strong> the outcome bank is enlarged by measuring cumulative growth and
-    terminal residual on additional frames drawn by a rule declared before any score is computed,
-    the locked q(s,F) is evaluated on the enlarged corpus with no change to its definition, and both
-    Spearman associations are re-reported with their sample counts and p-values beside the banked
-    n = 5 readings. A result that stays underpowered at the enlarged n is a reportable negative that
-    closes this section, provided the achieved power is stated; a result that reaches significance
-    against only one of the two outcomes closes it as a partial with the failing outcome named.</p>
+    <section id="s7" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-24 — reportable negative</span>
+        <h2>§7 — Give the alignment ranking enough power to decide</h2></header>
+      <p class="landed-summary">Corpus enlarged from five frames to eight under a rule recorded
+      before any new outcome or score — keep the locked five, add the missing sixth frozen reference,
+      then the next slice for the first two shots in sorted order — with the observable definition
+      carried verbatim and the five locked scores reused unchanged. Result
+      <code>UNDERPOWERED_NEGATIVE</code>: growth Spearman <strong>0.524 at p 0.183</strong>,
+      terminal residual <strong>0.143 at p 0.736</strong>, achieved power <strong>0.341</strong> and
+      <strong>0.05</strong> at the banked effects (0.255 and 0.062 at the observed ones), two-sided
+      α = 0.05 by Fisher-z. Added frames 21978/36, 21983/36 and 22086/43, the last essentially
+      converged at residual 2.91e-16 and growth 3.0. The section's own gate authorises this close
+      because the achieved power is stated. Full record:
+      <a href="/nova/evidence/archive/topology-preserving-continuation-landed#s7">§7 power</a>
+      (commit <code>306fdfaf</code>, merged <code>381275d6</code>).</p>
+    </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -323,6 +311,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260824T0035-repair" data-who="reckon-ship" data-when="2026-08-24T00:35:00Z">
     <div class="r-comment-body">conditioning-shrinkage-repair landed - commits 35c7c035 (source) and 6df3eb80 (receipt), merged 6748bec2; gate PASS; 24 tests across five conditioning and admission modules; reserved-H200 paired replay SLURM job 1253367 completed in 00:04:47. Mechanism: the undamped fixed ladder is evaluated FIRST, conditioned damping is reached for only after every raw trial is physically refused, and the damped fallback is promoted only when it does not increase the current relative residual, so an admitted raw step is preserved exactly instead of being shrunk before the predicate sees it. Measures, repaired / same-tree disabled / pre-repair enabled: interventions 11 / 0 / 445 of 445; admitted advances 47 / 36 / 445; achieved Newton-step-equivalents 18.92998900409446 / 18.88321289494938 / 1.1517186421668293; terminal residuals at or below the disabled arm on 5 of 5 frames (0.10690242237460541 &lt;= 0.10704471039091447, 0.09970075362827917 &lt;= 0.10077482131394641, 0.15255853230708596 &lt;= 0.1553929757220097, 0.08646603357046066 &lt;= 0.08696912567989223, 0.12255579619151723 &lt;= 0.12290690751401612). Traversal is marginally ABOVE the disabled arm, so the mechanism now contributes rather than costing. Generality retained: engages at projection dimensions 8, 12 and 24 under compiled fixed-shape tests, both retired dataset-fitted constants and the projection-dimension gate still absent from nova/equilibrium/fixed_point.py. All repaired and disabled terminals diverted with finite X points. Attribution: causal same-tree pair on production source 35c7c035 whose only arm difference is the condition-ratio limit e against infinity; pre-repair figures quoted as context, not as cross-tree causal estimates. Artifact: docs/figures/topology-preserving-continuation/conditioning-repair.json, SHA-256 661f46ffe67f9cf7cf4236c1721f1d2bb4d75577941dadb4608699052404d9a4. Section collapsed.</div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20260824T0130-power" data-who="reckon-ship" data-when="2026-08-24T01:30:00Z">
+    <div class="r-comment-body">seed-alignment-power landed - commit 306fdfaf, merged 381275d6; gate FAILED with verdict UNDERPOWERED_NEGATIVE at n = 8, which this section authorised as an honest close because the achieved power is stated. Frame rule recorded before any new outcome or added-frame score: retain the locked five, include the missing sixth frozen held-out reference, then add the immediately following slice for the first two shots in sorted frozen-cohort order - eight frames, three additions. The observable definition was carried verbatim and the five locked scores reused unchanged, so nothing was tuned after outcomes became visible. Measures: growth Spearman 0.523809523809524 at two-sided p 0.1827207505397148 against the banked 0.60 at p 0.28475697986529386; terminal residual 0.14285714285714288 at p 0.735764859879812 against the banked 0.00 at p 1.0; achieved Fisher-z power 0.34111253441146583 and 0.05 at the banked effects, 0.25533662540809166 and 0.061933304732192274 at the observed ones, two-sided alpha 0.05. Added rows: 21978/36 q=0.911610494019064 growth=369.625 residual=2.1269469382856163e-07; 21983/36 q=0.9639191733138764 growth=60.75 residual=0.006299788326640744; 22086/43 q=0.9668409291813004 growth=3.0 residual=2.911868346631881e-16. Enlarging the corpus moved the growth association DOWN, from 0.60 to 0.524, which is the pattern of noise rather than of a signal emerging - so the locked observable is not promoted and the section closes negative. Association only: fixed_point.py, manifold_advance.py and seed_alignment.py differ between the locked-score tree and the added-measurement tree, so no causal performance attribution is made. Artifact: docs/figures/topology-preserving-continuation/seed-alignment-power.json. Sections 3 and 7 both collapsed.</div>
 </div>
 </section>
 </main>

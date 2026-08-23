@@ -363,7 +363,12 @@ def _thomson(member_receipt):
 
 def _write_tsv(path: Path, rows: list[dict[str, object]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=tuple(rows[0]))
+        writer = csv.DictWriter(
+            stream,
+            fieldnames=tuple(rows[0]),
+            delimiter="\t",
+            lineterminator="\n",
+        )
         writer.writeheader()
         writer.writerows(rows)
 

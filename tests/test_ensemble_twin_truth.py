@@ -11,7 +11,7 @@ from scripts.ensemble_twin_truth import generate
 
 def _rows(path):
     with path.open(encoding="utf-8", newline="") as stream:
-        return list(csv.DictReader(stream))
+        return list(csv.DictReader(stream, delimiter="\t"))
 
 
 def test_package_marches_six_member_batched_windows(tmp_path, monkeypatch):
@@ -27,6 +27,10 @@ def test_package_marches_six_member_batched_windows(tmp_path, monkeypatch):
     receipt = generate.generate_package(tmp_path, tree_sha="known-tree")
     trajectory = _rows(tmp_path / "trajectory.tsv")
 
+    assert (
+        "\t"
+        in (tmp_path / "trajectory.tsv").read_text(encoding="utf-8").splitlines()[0]
+    )
     assert receipt["window_count"] == 6
     assert receipt["member_count"] == 4
     assert receipt["trajectory_rows"] == 24

@@ -18,6 +18,11 @@ def test_dplasma():
     assert coilset.dplasma == -0.333
 
 
+def test_dplasma_default():
+    coilset = CoilSet()
+    assert coilset.dplasma == -2100
+
+
 def test_dshell():
     coilset = CoilSet(dshell=0.7)
     assert coilset.dshell == 0.7
@@ -254,7 +259,7 @@ def test_store_load_version():
 def test_plasma_array_attributes():
     coilset = CoilSet(dplasma=-5)
     coilset.firstwall.insert({"ellip": [2.5, 1.7, 1.6, 2.2]}, turn="hex")
-    _ = coilset.plasma
+    coilset.plasma
     assert all(
         [attr in coilset.subframe.metaframe.array for attr in ["Ic", "nturn", "area"]]
     )

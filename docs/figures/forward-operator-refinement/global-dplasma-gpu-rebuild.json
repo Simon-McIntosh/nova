@@ -1,0 +1,111 @@
+{
+  "cache": {
+    "compute_provenance_group": "6214088a94a6c4b0",
+    "current_default_frame_group": "d3fc462bc59101be",
+    "implicit_default_identity_changed": true,
+    "invalidation_scope": [
+      "implicit CoilSet frame identity",
+      "plasma cell carrier",
+      "plasma-to-grid interactions and moment companions",
+      "plasma-to-wall interactions and moment companions",
+      "plasma-to-sample interactions and moment companions"
+    ],
+    "old_default_frame_group": "0ae2a6e08f304a0e",
+    "semantic_identity": {
+      "achieved_cells": 2210,
+      "analytic_reference": "moderate-rotation-conventional",
+      "components": [
+        "Psi",
+        "PsiR",
+        "PsiZ",
+        "Br",
+        "BrR",
+        "BrZ",
+        "Bz",
+        "BzR",
+        "BzZ"
+      ],
+      "compute_provenance": "jax|platform=gpu|device=NVIDIA H200 NVL|jaxlib=0.11.0",
+      "dplasma": -2100,
+      "geometry_digest": "e0b56398e239f4461b4af2aac254d42d68646426212198c52962a3851d4724e0",
+      "kernel": "closed-form moments",
+      "kernel_merge": "80979f40",
+      "precision": "float64",
+      "routes": "jax-packed-analytic-moments",
+      "sample_nodes": 5427,
+      "schema": "global-default-exact-moment-interactions",
+      "tile": [
+        32,
+        32
+      ],
+      "wall_nodes": 121
+    },
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/global_default_exact_moment_interactions.zarr",
+    "unaffected_scope": [
+      "explicit dplasma instances",
+      "semantic identities for other discretisations",
+      "CPU and other compute-provenance sibling groups"
+    ]
+  },
+  "mesh": {
+    "achieved_cells": 2210,
+    "reference_native_interior_equivalent": 2141,
+    "requested_cells": -2100,
+    "sample_nodes": 5427,
+    "wall_nodes": 121
+  },
+  "operator": {
+    "base_block_count": 9,
+    "components": [
+      "Psi",
+      "PsiR",
+      "PsiZ",
+      "Br",
+      "BrR",
+      "BrZ",
+      "Bz",
+      "BzR",
+      "BzZ"
+    ],
+    "kernel": "jax packed closed-form analytic moments",
+    "kernel_path_merge": "80979f40",
+    "moment_companion_block_count": 18,
+    "pair_count": 17145180,
+    "precision": "float64",
+    "stored_matrix_count": 27,
+    "target_families": {
+      "plasma_to_grid": 2210,
+      "plasma_to_sample": 5427,
+      "plasma_to_wall": 121
+    }
+  },
+  "runtime": {
+    "compilation_cache_setting": "off",
+    "compute_provenance": "jax|platform=gpu|device=NVIDIA H200 NVL|jaxlib=0.11.0",
+    "device_identity": "NVIDIA H200 NVL",
+    "hostname": "98dci4-gpu-0003.iter.org",
+    "jax_version": "0.11.0",
+    "jaxlib_version": "0.11.0",
+    "platform": "gpu"
+  },
+  "timing": {
+    "bar_seconds": 120.0,
+    "carrier_geometry_seconds": 25.804195085540414,
+    "comparators_seconds": {
+      "H200 cold nine-block": 26.576,
+      "coarse provenance fixture": 28.029,
+      "fine provenance fixture": 34.638
+    },
+    "compile_seconds": 27.351889559067786,
+    "kernel_seconds": 14.829238280653954,
+    "matrix_build_seconds": 62.72940013837069,
+    "publication_seconds": 2.444584242068231
+  },
+  "verdict": {
+    "all_moment_companions_built": true,
+    "cold_semantic_group_published": true,
+    "exact_kernel_everywhere": true,
+    "reference_native_interior_met": true,
+    "under_120_seconds": true
+  }
+}

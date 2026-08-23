@@ -1,27 +1,19 @@
-NEEDS-HELP: Four uncited tracked logs are debris outside the exclusive write fence.
-
-tried: Enumerated all 36 commits, classified all 74 unique paths, searched documentation/import/test references, verified 23/23 protected digests, and stopped before deletion.
-
-options: Extend the fence to the four named logs and continue; additionally rule the 20 definition-only historical routines retained or debris and extend scope to their module if removal is intended; or explicitly reclassify the logs as banked evidence with a durable documentation citation.
-
-leaning: Extend the fence to the four logs and remove them; they meet the brief's exact uncited-output definition of debris. Obtain a separate retained-evidence ruling for the historical routines because their parent module is live.
-
-cost-if-wrong: Removing evidence logs would require restoring and reclassifying four files; retaining actual debris leaves the tree-hygiene done-when unmet and forces the same audit to be repeated.
-
 # Parity tree hygiene audit
 
-Status: **blocked by the exclusive write fence; no deletion has been made.**
+Status: **complete; every classified debris path was removed and both required
+suites are green.**
 
 The exact 36-commit set named by the execution brief contains 74 unique added or
 modified paths. All 74 are classified below: 23 live, 47 deliberately banked
-evidence, and 4 debris. The four debris paths are outside this node's exclusive
-write paths, so the done-when condition cannot be met without a scope extension.
+evidence, and 4 debris. The four debris paths were removed after an explicit
+scope extension; all cited receipts, reports, reproducers, and protected
+artifacts remain.
 
 ## Path-by-path classification
 
 | Path | Classification | One-line reason |
 |---|---|---|
-| `benchmarks/efit_forward_parity_slice.py` | live | Current frozen-six and constrained scorecard entry point; imported by later parity controls, although its definition-only historical routines need the scope ruling recorded below. |
+| `benchmarks/efit_forward_parity_slice.py` | live | Current frozen-six and constrained scorecard entry point, imported by later controls; its 20 definition-only historical routines are retained reproducers for digest-protected banked receipts. |
 | `benchmarks/efit_parity_boundary_volume.py` | live | Reconciles the two contour volumes and exports the shared protected-artifact verifier and polygon quadrature. |
 | `benchmarks/efit_parity_field_instrument.py` | live | Implements the same-support field-energy control consumed by its tests and the tared control. |
 | `benchmarks/efit_parity_inductance_partition.py` | live | Implements the disjoint current partition and boundary-moment calculation consumed by its tests and the tared control. |
@@ -77,16 +69,16 @@ write paths, so the done-when condition cannot be met without a scope extension.
 | `nova/equilibrium/forward_operator.py` | live | Production forward operator implements the prescribed field and current-moment paths covered by the forward-solve suite. |
 | `scripts/constrained_parity_reuse/reuse-report.md` | live | Cited reuse map consumed by the root-geometry receipt and later plan work. |
 | `scripts/dina_profile_routes/addendum.json` | deliberately-banked-evidence | Cited addendum receipt for the route-control measurements. |
-| `scripts/dina_profile_routes/measure.log` | debris | No import, test, plan, evidence, or other documentation reference names this run log. |
+| `scripts/dina_profile_routes/measure.log` | debris | Removed: no import, test, plan, evidence, or other documentation reference named this stale console capture. |
 | `scripts/dina_profile_routes/measure.py` | live | Cited re-runnable producer for the dual-route evidence receipt and figures. |
-| `scripts/dina_profile_routes/measure_controls.log` | debris | No import, test, plan, evidence, or other documentation reference names this control run log. |
+| `scripts/dina_profile_routes/measure_controls.log` | debris | Removed: no import, test, plan, evidence, or other documentation reference named this stale control capture. |
 | `scripts/dina_profile_routes/measure_controls.py` | live | Cited re-runnable producer for the route-control addendum. |
 | `scripts/dina_profile_routes/receipt.json` | deliberately-banked-evidence | Cited serialized dual-route receipt. |
 | `scripts/dina_profile_routes/report.html` | deliberately-banked-evidence | Cited rendered dual-route evidence report. |
 | `scripts/dina_profile_routes/reuse-report.md` | live | Plan-cited reuse map for the DINA profile-route work. |
-| `scripts/dina_profile_routes/verify.log` | debris | No import, test, plan, evidence, or other documentation reference names this verification log. |
+| `scripts/dina_profile_routes/verify.log` | debris | Removed: no import, test, plan, evidence, or other documentation reference named this stale verification capture. |
 | `scripts/dina_profile_routes/verify.py` | live | Cited re-runnable verifier for the dual-route receipt. |
-| `scripts/dina_profile_routes/verify_addendum.log` | debris | No import, test, plan, evidence, or other documentation reference names this addendum verification log. |
+| `scripts/dina_profile_routes/verify_addendum.log` | debris | Removed: no import, test, plan, evidence, or other documentation reference named this stale addendum verification capture. |
 | `tests/test_efit_parity_boundary_volume.py` | live | Regression tests for the contour-volume receipt and protected evidence. |
 | `tests/test_efit_parity_field_instrument.py` | live | Regression tests for the same-support field-energy control. |
 | `tests/test_efit_parity_inductance_partition.py` | live | Regression tests for the disjoint current partition. |
@@ -97,7 +89,7 @@ write paths, so the done-when condition cannot be met without a scope extension.
 | `tests/test_equilibrium_forward_solve.py` | live | Production forward-solve regression suite covering the prescribed field and current-moment changes. |
 
 Classification total: **74/74 paths** = **23 live + 47 deliberately-banked
-evidence + 4 debris**.
+evidence + 4 debris removed**.
 
 ## Protected evidence integrity
 
@@ -127,11 +119,13 @@ Twenty definition-only symbols are in the out-of-scope
 `_passive_inclusive_figure`, `_parity_metric_qualification`,
 `_extended_passive_figure`, and `_passive_polish_figure`.
 
-The file itself remains classified live because its current `run`/`main` path
-and many imported helpers are active. The isolated historical routines need
-either removal or an explicit banked-reproducer ruling, but this node has no
-write authority over that file. The remaining definition-only symbol is
-`adjudicate_banked_receipt` in `efit_parity_tared_external_field.py`; it
+The file and all 20 routines are retained. They reproduce banked receipts in a
+shipped constrained-arm benchmark whose 23 artifacts are digest-protected; a
+routine that reproduces cited banked evidence is evidence infrastructure even
+when no current entry point calls it. Deleting it would make the receipts
+unreproducible, while retention has no runtime cost. The remaining
+definition-only symbol, `adjudicate_banked_receipt` in
+`efit_parity_tared_external_field.py`, is retained for the same reason: it
 adjudicates the deliberately retained void receipt without re-running a solve
 and is not an all-cell tare implementation.
 
@@ -148,45 +142,78 @@ No constant `if True`/`if False` branches were found. The
 values across benchmarks and tests, so it is live rather than an always-one
 flag.
 
-## Duplicated helpers
+## Consolidated helpers
 
 Exact normalized-AST comparison across the six separately authored parity
-modules found two copied helper families:
+modules found and removed two copied helper families:
 
-- Relative difference is defined four times: `_relative_error` at
-  `efit_parity_moment_definitions.py:23`, and `_relative_deviation` at
-  `efit_parity_boundary_volume.py:44`,
-  `efit_parity_inductance_partition.py:59`, and
-  `efit_parity_field_instrument.py:56`. Call sites occur at moment lines
-  205-206, volume lines 91 and 229, partition lines 212-213, field lines
-  156, 159, and 326, plus the tared module's imported helper provenance at
-  line 956. The intended consolidation is one definition in
-  `efit_parity_moment_definitions.py`, imported under the mechanism-appropriate
-  local name by the other three modules.
-- `_source_digests` is byte-for-byte duplicated at
-  `efit_parity_inductance_partition.py:63` and
-  `efit_parity_field_instrument.py:60`, called at partition line 346 and field
-  line 348. The intended consolidation is the partition definition imported
-  by the field-instrument module.
+- Relative difference now has one definition, `_relative_error`, in
+  `efit_parity_moment_definitions.py`. That module is the natural owner because
+  it defines the scoring semantics and was already the helper source consumed
+  by the tare. Boundary volume, inductance partition, and field instrument
+  import it as `_relative_deviation`, preserving mechanism-appropriate local
+  call sites without copied arithmetic.
+- Source-receipt digests now have one definition, `_source_digests`, in
+  `efit_parity_inductance_partition.py`. That module is the natural owner
+  because it first binds the source receipts whose digests the downstream
+  field-instrument control consumes; the field module already imports its
+  partition sources and now imports their digest helper beside them.
 
-No consolidation was made because discovery of the out-of-scope debris is a
-binding stop condition and the complete post-deletion suites could not yet be
-produced.
+The post-change normalized-AST comparison reports **0 exact duplicate groups**
+across the six audited modules. No similarly named copy in
+`efit_forward_parity_slice.py` was found or changed.
 
-## Scope blocker and required continuation
+## Removed debris
 
-The debris paths that must be removed are:
+Commit `2f0adb98` removed exactly four uncited console captures:
 
 - `scripts/dina_profile_routes/measure.log`
 - `scripts/dina_profile_routes/measure_controls.log`
 - `scripts/dina_profile_routes/verify.log`
 - `scripts/dina_profile_routes/verify_addendum.log`
 
-None is in the exclusive write fence. The node therefore cannot remove every
-classified debris path, cannot truthfully run the required post-removal suites,
-and cannot satisfy the quantitative done-when condition. Extend the fence to
-those four logs and, if the definition-only historical routines are ruled
-debris rather than retained reproducers, to
-`benchmarks/efit_forward_parity_slice.py`; then remove/consolidate, run the
-seven-file parity suite and the cited 28-test forward-solve suite once each,
-and append their exact green counts here.
+The cited `reuse-report.md`, `receipt.json`, `addendum.json`, evidence report,
+measurement scripts, and verification script remain. Commit `b7645363`
+contains only the three-module helper consolidation.
+
+## Naming sweep
+
+The mandatory path, case-insensitive label-word, case-sensitive bare-id, and
+changelog-prose sweeps ran over the three modified benchmark modules and the
+audit report. The only source hits were hexadecimal plot colours `#24527a` and
+`#202020`, plus Ruff import-order code `E402`; these are colour data and tool
+codes, both explicit non-label cases. There were **0 naming violations and 0
+changelog-prose violations**, so no semantic name or comment rewrite was
+needed.
+
+## Post-removal validation
+
+- Seven-file parity suite:
+  `UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH="$PWD" JAX_PLATFORMS=cpu uv run --no-sync pytest tests/test_efit_parity_root_geometry.py tests/test_efit_parity_warm_neighbour.py tests/test_efit_parity_moment_definitions.py tests/test_efit_parity_boundary_volume.py tests/test_efit_parity_inductance_partition.py tests/test_efit_parity_field_instrument.py tests/test_efit_parity_tared_external_field.py`
+  — **55 passed in 162.12 s**, exit 0. Full log:
+  `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T080558417226-parity-tree-hygiene-audit/parity-suite.log`.
+- Forward-solve suite:
+  `UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH="$PWD" JAX_PLATFORMS=cpu uv run --no-sync pytest -m "slow or not slow" tests/test_equilibrium_forward_solve.py`
+  — **28 passed, 1 warning in 54.00 s**, exit 0. The warning is SciPy's
+  existing `invalid value encountered in scalar divide` warning in
+  `test_the_host_root_find_holds_the_equilibrium_it_is_seeded_on`. Full log:
+  `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T080558417226-parity-tree-hygiene-audit/forward-solve-suite-selected.log`.
+
+The first forward-solve preflight omitted the repository-documented marker
+override and therefore selected **0 of 28** tests (`28 deselected`, exit 5);
+no test executed in that preflight. Its preserved log is
+`forward-solve-suite.log`. The corrected command above is the one actual
+forward-solve suite execution.
+
+After both suites, a fresh integrity check again verified **23/23 protected
+digests matching** and the retained void-tare SHA-256 unchanged. No failed
+deletion needed restoration or reclassification.
+
+## Follow-on discriminator
+
+No node work remains. A future owner may re-test each of the 20 retained
+definition-only routines against one discriminator: whether it produces an
+artifact cited by a plan or evidence record. A cited producer stays evidence
+infrastructure; an uncited producer may then be reconsidered as debris. That
+future provenance audit is not part of this node and does not qualify the
+complete result above.

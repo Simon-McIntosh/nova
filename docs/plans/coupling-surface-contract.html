@@ -7,8 +7,8 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="coupling-surface-contract">
   <meta name="plan-title" content="Coupling Surface Contract — one typed state, four consumers">
-  <meta name="plan-summary" content="Replace the organically grown transport–equilibrium exchange dictionary with one typed coupling-state contract that declares every exchanged field's meaning, direction, time base, units, gate-versus-receipt role and differentiability class — the same surface the window exchange, the time-parallel boundary state, the ensemble-filter state vector and the learned-surrogate I/O schema all consume">
-  <meta name="plan-status" content="pending">
+  <meta name="plan-summary" content="Replace the organically grown transport–equilibrium exchange dictionary with one typed coupling-state contract that declares every exchanged field&#x27;s meaning, direction, time base, units, gate-versus-receipt role and differentiability class — the same surface the window exchange, the time-parallel boundary state, the ensemble-filter state vector and the learned-surrogate I/O schema all consume">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="2.0">
   <meta name="plan-capability-version" content="1.0">
@@ -22,8 +22,9 @@
   <title>Coupling Surface Contract | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-22">
+<meta name="plan-modified" content="2026-08-23">
 <meta name="plan-impl" content="0.0">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -135,7 +136,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-csc-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship coupling-surface-contract">
+<article class="r-fu" data-id="f-csc-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship coupling-surface-contract" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Land the contract, the window refactor, and the three consumer bindings</h4>
     <div class="r-fu-body"><p>§2 first (the type and the window refactor, gated on the banked
     gentle receipt reproducing), then §3's three bindings. The boundary round-trip binding is the
@@ -145,7 +146,9 @@
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
-<h2><span class="sec">§</span> Comments</h2>
+<div class="r-comment" data-section="s1" data-id="c-20260823T0740-reuse-map" data-who="reckon-ship" data-when="2026-08-23T07:40:00+00:00">
+    <div class="r-comment-body">sprint-reuse-map landed (run r-20260823T072023355763, gate passed, report-only, no commit) — the sprint prior-art scout covering this plan plus ensemble-forward-seam, diiid-pulse-replay and the onboarding §5 gate re-run. 11/11 capability areas, 45 cited paths existence-checked with 0 missing. Load-bearing for §2: the exchange to replace is the merged residual dict at nova/transport/coupled_window.py:971-974; the frozen receipt dataclasses at coupled_window.py:423-681 and ambix FluxFunctionState's validating to_dict/from_dict are the precedents to model (nova imports no ambix type); the gentle bank is scripts/window_demonstration/receipts.tsv (4 iterations, contraction 0.23619506584727215, flux closure exactly 0); the coupled-window suite is tests/test_transport_coupled_window.py plus public-surface and gradients modules. CouplingState, a durable window schema, and window batching are confirmed ABSENT on both sides — no competing authority exists. Currency corrections banked for the onboarding plan: only ONE standing tests/imas failure (18 pass/1 fail measured), the current-pinned receipt's true home is docs/figures/current-constrained-forward-solve/pinned-cohort/, and the lambda guard repair landed (2ad45206, public seam 9bf7841e) leaving one unguarded division in the excluded low-current diagnostic at benchmarks/diiid_current_pinned_forward.py:898-934.</div>
+</div>
 </section>
 
   </main>

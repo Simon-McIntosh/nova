@@ -15,7 +15,7 @@ from nova.biot.solve import Solve
 from nova.frame.coil import Coil
 from nova.frame.coilset import CoilSet
 
-from measure_exact_section_routes import baseline_elements, load_module
+from tests.measure_exact_section_routes import baseline_elements, load_module
 
 
 REFERENCE_PATH = Path("tests/test_equilibrium_forward_reference.py")

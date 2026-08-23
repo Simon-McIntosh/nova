@@ -1,6 +1,6 @@
 {
   "receipt": "MAST parity reference-native resolution default",
-  "status": "measurement_complete_validation_incomplete",
+  "status": "measurement_complete_validation_failed",
   "selection": {
     "shot": 21978,
     "slice_index": 35,
@@ -636,15 +636,44 @@
       "reading": "These are the carried reference-native projections. The fresh device build and actual resident parity arrays are reported separately and are not substituted by the projections."
     }
   },
+  "derived_held_out_criterion": {
+    "reference": "21978/35",
+    "criterion_source": "docs/figures/scoring-criteria-derivation/derived-convergence-criterion.json",
+    "criterion": 0.013970057337880022,
+    "criterion_unit": "relative sup norm of fixed-point defect",
+    "reference_native_residual": 0.0027730957751263396,
+    "residual_over_criterion": 0.19850353621019892,
+    "passes": true,
+    "verdict": "PASS_DERIVED_HELD_OUT_CRITERION",
+    "reading": "The 95-point control is judged against the independently derived held-out criterion, not the inherited 1e-8 accelerator stopping policy. Its 2.773e-3 residual is below tau=1.397e-2 for 21978/35."
+  },
   "forward_suite": {
-    "status": "interrupted at the node time fence during the CPU reference fixture",
+    "status": "completed with failures",
     "passed": false,
     "collected_count": 109,
-    "passed_count": 64,
-    "failed_count": 0,
-    "incomplete_count": 45,
-    "elapsed_seconds": 1723.59,
-    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T103512104725-reference-native-resolution-default/forward-suite.log"
+    "passed_count": 105,
+    "failed_count": 4,
+    "incomplete_count": 0,
+    "elapsed_seconds": 5527.99,
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T103512104725-reference-native-resolution-default/forward-suite-rerun.log",
+    "failures": [
+      {
+        "test": "tests/test_equilibrium_forward_reference.py::test_the_passive_closure_moves_the_reproduction_by_a_tenth_of_a_percent",
+        "assertion": "closed=0.609846272101997 is not below PASSIVE_REPRODUCTION_MOVE_CEILING=0.15"
+      },
+      {
+        "test": "tests/test_equilibrium_forward_reference.py::test_the_relaxed_routes_leave_the_equilibrium_on_a_bounded_budget",
+        "assertion": "anderson terminal/initial residual did not exceed DRIFT_GROWTH=10; terminal=5.2536766108893303e-14, initial=9.835738611382581e-12"
+      },
+      {
+        "test": "tests/test_equilibrium_forward_reference.py::test_the_relaxed_route_walks_down_the_vertical_instability",
+        "assertion": "early relaxed residual decreased from 0.014860439001616536 to 0.00844522423387956 instead of growing"
+      },
+      {
+        "test": "tests/test_equilibrium_forward_reference.py::test_the_published_solve_runs_on_the_production_mesh",
+        "assertion": "residual=8.164420250942099e-10 is not below 10 times flux resolution=8.043343768804334e-12"
+      }
+    ]
   },
   "figure": {
     "path": "docs/figures/forward-operator-refinement/reference-native-resolution-default.png",

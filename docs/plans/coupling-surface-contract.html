@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="coupling-surface-contract">
   <meta name="plan-title" content="Coupling Surface Contract — one typed state, four consumers">
   <meta name="plan-summary" content="Replace the organically grown transport–equilibrium exchange dictionary with one typed coupling-state contract that declares every exchanged field&#x27;s meaning, direction, time base, units, gate-versus-receipt role and differentiability class — the same surface the window exchange, the time-parallel boundary state, the ensemble-filter state vector and the learned-surrogate I/O schema all consume">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="2.0">
   <meta name="plan-capability-version" content="1.0">
@@ -23,9 +23,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-23">
-<meta name="plan-impl" content="0.5">
-<meta name="plan-version" content="3">
-<meta name="plan-commits" content="64abe618">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-version" content="5">
+<meta name="plan-commits" content="64abe618,6a64ba6c">
 <meta name="plan-artifacts" content="docs/evidence/archive/coupling-surface-contract-landed.html,scripts/coupling_surface/coupling_state.schema.json,scripts/coupling_surface/gentle_receipt_comparison.json">
 </head>
 <body>
@@ -95,17 +95,20 @@
       (commit <code>64abe618</code>).</p>
     </section>
 
-    <h2 id="s3">§3 — Consumer bindings</h2>
-
-    <p>Three thin bindings prove the contract carries its consumers, each a measure rather than a
-    promise: (a) the window exchange consumes it (the §2 gate); (b) a window-boundary
-    extract/restore round-trip — serialize the state at a window boundary, restore it, continue
-    the solve, and show the continued trajectory matches the uninterrupted one to receipt
-    precision, which is exactly the property both a time-parallel corrector and an ensemble-filter
-    analysis update require at that boundary; (c) the exported schema is read back and validated
-    field-for-field against the live exchange by a test, so schema drift fails visibly. The
-    ensemble and filter consumers themselves are separate plans; this plan owes them only the
-    surface.</p>
+    <section id="s3" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-23</span>
+        <h2>§3 — Consumer bindings</h2>
+      </header>
+      <p class="landed-summary">All three bindings proven: (a) the live window exchange consumes the
+      contract (§2 gate); (b) the boundary extract/restore round-trip is <strong>exact</strong> — a
+      window solved, its frozen state serialized through JSON and restored, and the continued solve
+      (under a changed source drive) matches the uninterrupted one with maximum gating-trace
+      difference 0 and bitwise-equal waveforms over 14 continued iterations; (c) schema read-back is
+      validated field-for-field by test, so drift fails visibly. Full record:
+      <a href="/nova/evidence/archive/coupling-surface-contract-landed#s3">§3 landed</a>
+      (commit <code>6a64ba6c</code>).</p>
+    </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -123,13 +126,14 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-csc-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship coupling-surface-contract" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-csc-001" data-status="resolved" data-written-by="reckon-create" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship coupling-surface-contract" data-resolved-at="2026-08-23T08:41:31+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Land the contract, the window refactor, and the three consumer bindings</h4>
     <div class="r-fu-body"><p>§2 first (the type and the window refactor, gated on the banked
     gentle receipt reproducing), then §3's three bindings. The boundary round-trip binding is the
     load-bearing one — it is the property the ensemble-forward and time-parallel work will build
     on without re-deriving.</p></div>
     <pre class="r-fu-prompt">/reckon-ship coupling-surface-contract</pre>
+    <p class="r-fu-outcome">done — no followup: this plan's chain closes here. The contract, the window refactor and all three consumer bindings are landed and merged (commits 64abe618, 6a64ba6c; both node gates passed). §2: frozen CouplingState/CouplingFieldSpec carried by solve_window with exact-key versioned fail-closed serialization, the banked gentle receipt reproduced exactly (4 iterations, contraction 0.23619506584727215, flux closure 0.0), and the 60-field schema exported at contract 1.0.0. §3: the load-bearing boundary extract/restore round-trip is EXACT (max gating-trace difference 0, bitwise-equal waveforms under a changed next-window drive), and schema read-back is pinned field-for-field by test. The consumer work is not this plan's continuation — it is owned by ensemble-forward-seam, whose own open followup f-efs-001 already carries it (§2 batch evaluator unblocked by this contract; §3 kernels landed), and the time-parallel and filter consumers bind the same surface when their plans activate.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -138,6 +142,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260823T0810-contract-landed" data-who="reckon-ship" data-when="2026-08-23T08:10:00+00:00">
     <div class="r-comment-body">coupling-state-contract landed — commit 64abe618; gate PASSED with all three measures: coupled-window suite 15/15 green with no loosened assertion; banked gentle receipt reproduced exactly (iterations 4, gating contraction 0.23619506584727215, gating trace 1.0/0.024544392673843753/0.0054674088266388095/0.0012913749878219105, flux closure 0.0); versioned schema exported at contract 1.0.0 with 60 fields (53 gating, 7 excluded-with-reason; 45 traced/10 host-boundary/5 static), sha256 58d0dd7a…. §3 binding (c) — exported schema validated field-for-field against the live exchange by test — was delivered with this node; §3's remaining load-bearing work is the extract/restore boundary round-trip (binding b). No receipted-class fields exist on the live surface: every exchanged field either gates or is excluded with its declared reason, faithfully reflecting the locked gate composition.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260823T0910-bindings-landed" data-who="reckon-ship" data-when="2026-08-23T09:10:00+00:00">
+    <div class="r-comment-body">boundary-roundtrip-binding landed — commit 6a64ba6c; gate passed. WindowReceipt.coupling_state exposes the frozen state at a converged boundary; the regression solves a window, round-trips the state through json.dumps/json.loads and CouplingState.from_dict, continues under a CHANGED source drive, and requires exact equality: 14-value gating and all-field norm traces, every residual-trace row, exit residuals, contraction estimate, damping receipts and final waveform arrays — observed maximum difference 0, waveforms bitwise equal, exit gating norm 7.28e-11. Suite 16 passed; no gate, tolerance or damping physics changed. Plan SHIPPED at impl 1.0.</div>
 </div>
 </section>
 

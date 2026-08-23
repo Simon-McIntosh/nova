@@ -43,6 +43,27 @@
       against the live exchange is pinned field-for-field by the public-surface test, which is §3's
       binding (c) delivered early.</li>
     </ul>
+
+    <h2 id="s3">§3 the boundary round-trip is exact, and the plan ships — 2026-08-23</h2>
+    <p><strong>The load-bearing binding — serialize the coupled state at a window boundary, restore
+    it, continue the solve — is proven to exact equality</strong> (commit <code>6a64ba6c</code>).
+    <code>WindowReceipt.coupling_state</code> exposes the frozen <code>CouplingState</code> carried
+    across a converged boundary; the regression solves one window, round-trips the state through
+    <code>json.dumps</code>/<code>json.loads</code> and <code>CouplingState.from_dict</code>, then
+    continues the solve under a <em>changed</em> source drive both ways.</p>
+    <ul>
+      <li>Maximum uninterrupted-versus-restored gating-trace difference over 14 continued iterations:
+      <strong>0</strong>; every residual-trace row, exit residual, contraction estimate and damping
+      receipt equal; final geometry and source waveform arrays <strong>bitwise equal</strong>; exit
+      gating norm 7.28e-11 (measurement log sha256 <code>ad0a0096…</code>).</li>
+      <li>This is exactly the property a time-parallel corrector and an ensemble-filter analysis
+      update require at the boundary — delivered once, on the contract, rather than re-derived per
+      consumer.</li>
+      <li>Suite 16 passed (26.76 s); ruff exits 0; no gate, tolerance, or damping physics changed.</li>
+    </ul>
+    <p><strong>Plan shipped at impl 1.0:</strong> §2 contract + refactor + schema, §3 bindings (a)
+    live exchange, (b) exact round-trip, (c) field-for-field schema read-back. The consumer work
+    continues in <code>ensemble-forward-seam</code>.</p>
   </main>
 </body>
 </html>

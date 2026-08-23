@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T10:25:44",
+  "updated": "2026-08-23T10:38:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -101,6 +101,13 @@
         "role": "implement",
         "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
         "created": "2026-08-16"
+      },
+      {
+        "id": "criterion-audit",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "dataset-census",
@@ -227,6 +234,13 @@
         "role": "implement",
         "session_id": "01a02a94-8bac-7490-921a-da8abdc8d538",
         "created": "2026-08-22"
+      },
+      {
+        "id": "fixed-boundary-seed",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "flood-fill",
@@ -24766,9 +24780,201 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T073540418770-receipt-restore-circuit-arm",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a75",
+        "node": "receipt-restore-circuit-arm",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "forward-slice",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T07:35:47Z",
+        "completed_at": "2026-08-23T08:22:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2801,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2801,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "125534111356be2fe1d23231b52c5115f52dfb0e",
+        "commits": [
+          "a60f1852178da8c0ba920241596c50de4ac96c3a"
+        ],
+        "changed_lines": {
+          "added": 11130,
+          "removed": 3245,
+          "files": 12
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T073540418770-receipt-restore-circuit-arm/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a024c1-c68c-70e3-8edf-4bf5cd7f1e5c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 32354816,
+            "cached_input_tokens_cumulative": 174651392,
+            "input_tokens": 32744429,
+            "input_tokens_cumulative": 178526059,
+            "output_tokens": 37082,
+            "output_tokens_cumulative": 415980,
+            "reasoning_output_tokens": 9321,
+            "reasoning_output_tokens_cumulative": 122432
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T081912419406-boundary-roundtrip-binding",
+        "plan": "coupling-surface-contract",
+        "section": "\u00a73",
+        "node": "boundary-roundtrip-binding",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "transport-window",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T08:19:16Z",
+        "completed_at": "2026-08-23T08:25:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 356,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 356,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "99f5c5497f3eba941c02d8e95e0cf60acb1124da",
+        "commits": [
+          "6a64ba6c38f5e4a820fc404b413b217c6f3e0277"
+        ],
+        "changed_lines": {
+          "added": 77,
+          "removed": 2,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T081912419406-boundary-roundtrip-binding/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f8b-c81b-70c3-a5d8-007c4d512626",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2961408,
+            "cached_input_tokens_cumulative": 156678400,
+            "input_tokens": 3042563,
+            "input_tokens_cumulative": 161334025,
+            "output_tokens": 11699,
+            "output_tokens_cumulative": 516900,
+            "reasoning_output_tokens": 3853,
+            "reasoning_output_tokens_cumulative": 167551
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T081935977482-thomson-magnetics-kernels",
+        "plan": "ensemble-forward-seam",
+        "section": "\u00a73",
+        "node": "thomson-magnetics-kernels",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "extraction-kernels",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T08:19:39Z",
+        "completed_at": "2026-08-23T08:33:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 807,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 807,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "99f5c5497f3eba941c02d8e95e0cf60acb1124da",
+        "commits": [
+          "072dc102a23ef5c8a05cde9d9a5252e9bedce076"
+        ],
+        "changed_lines": {
+          "added": 565,
+          "removed": 36,
+          "files": 4
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T081935977482-thomson-magnetics-kernels/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01023-bc16-7b41-bc10-ac6f27afa6d1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4013568,
+            "cached_input_tokens_cumulative": 9599488,
+            "input_tokens": 4335487,
+            "input_tokens_cumulative": 10109928,
+            "output_tokens": 28432,
+            "output_tokens_cumulative": 63460,
+            "reasoning_output_tokens": 8840,
+            "reasoning_output_tokens_cumulative": 20046
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 595
+    "_version": 600
   }
 }

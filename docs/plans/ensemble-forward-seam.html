@@ -7,8 +7,8 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="ensemble-forward-seam">
   <meta name="plan-title" content="Ensemble Forward Seam — batched coupled forwards, deterministic kernels, twin truth">
-  <meta name="plan-summary" content="Ship nova's side of the assimilation seam: a batched member-preserving ensemble coupled forward with typed convergence receipts and a published throughput budget, the missing deterministic Thomson synthesizer and observation-operator receipts, a differentiable observation/moment map with Jacobian for constraint work, and forward-only twin truth — so the existing ambix estimators run on real two-dimensional coupled physics; no estimator, likelihood, or innovation classifier is authored nova-side">
-  <meta name="plan-status" content="pending">
+  <meta name="plan-summary" content="Ship nova&#x27;s side of the assimilation seam: a batched member-preserving ensemble coupled forward with typed convergence receipts and a published throughput budget, the missing deterministic Thomson synthesizer and observation-operator receipts, a differentiable observation/moment map with Jacobian for constraint work, and forward-only twin truth — so the existing ambix estimators run on real two-dimensional coupled physics; no estimator, likelihood, or innovation classifier is authored nova-side">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="6.0">
   <meta name="plan-capability-version" content="1.0">
@@ -22,8 +22,11 @@
   <title>Ensemble Forward Seam | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-22">
-<meta name="plan-impl" content="0.0">
+<meta name="plan-modified" content="2026-08-23">
+<meta name="plan-impl" content="0.25">
+<meta name="plan-version" content="2">
+<meta name="plan-commits" content="072dc102">
+<meta name="plan-artifacts" content="docs/evidence/archive/ensemble-forward-seam-landed.html">
 </head>
 <body>
   <main class="plan-doc">
@@ -62,18 +65,20 @@
     publishes", so this section publishes windows-per-second and members-per-window, batched, CPU
     and H200, tree-stamped — the number that buys posterior sharpness.</p>
 
-    <h2 id="s3">§3 — Observation-operator receipts: the Thomson synthesizer and virtual magnetics</h2>
-
-    <p>The survey's one important deterministic hole, absent on <em>both</em> sides: no function
-    maps (solved flux map, T<sub>e</sub>(ψ<sub>N</sub>), n<sub>e</sub>(ψ<sub>N</sub>), chord
-    geometry) to predicted Thomson signals — ambix's four Thomson operators are measurement-side
-    only. That synthesizer is exactly the seam litmus's nova side: pure, geometry-bearing,
-    differentiable, receipted for units, COCOS, interpolation support and numerical error. Nova
-    accepts the T<sub>e</sub>/n<sub>e</sub> flux functions as explicit typed arrays without
-    claiming the durable state schema (an ambix contract decision, registered on their side).
-    Beside it, virtual-magnetics kernels (flux loops, probes) at declared sensor geometry — nearly
-    free through the biot operators — for machines that provide magnetics; the challenge machines
-    do not, so Thomson plus net current is the observation vector that matters first.</p>
+    <section id="s3" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-23</span>
+        <h2>§3 — Observation-operator receipts: the Thomson synthesizer and virtual magnetics</h2>
+      </header>
+      <p class="landed-summary"><code>nova/equilibrium/observation_kernels.py</code> maps (flux map,
+      T<sub>e</sub>/n<sub>e</sub> typed arrays, chord geometry) to predicted Thomson signals on the
+      landed chord sampler — differentiable end-to-end (gradient relative error 8.7e-09 vs 2e-08
+      gate) — and composes virtual flux-loop/probe kernels from the biot factories (error bounds
+      1.78e-15 Wb/T), every kernel receipted for units, COCOS 17, support and measured error; zero
+      statistical content by audit. Full record:
+      <a href="/nova/evidence/archive/ensemble-forward-seam-landed#s3">§3 landed</a>
+      (commit <code>072dc102</code>).</p>
+    </section>
 
     <h2 id="s4">§4 — The constraint seam: observation and moment maps with Jacobians</h2>
 
@@ -109,7 +114,7 @@
       <button class="r-opt" data-value="nova-demo-enkf">nova authors its own ensemble-Kalman demonstration beside the physics</button>
       </p>
     <p class="r-dec-rat">Owner challenge 2026-08-22 answered by the seam survey inventory rather
-    than doctrine: two tested estimator harnesses already exist ambix-side and the survey's scope
+    than doctrine: two tested estimator harnesses already exist ambix-side and the survey&#x27;s scope
     note bans a third; what has never existed is the two-dimensional coupled forward under them.
     The feasibility demonstration the owner wants is the joint twin gate of §5 — real physics
     under the real filter — which needs no new estimator anywhere.</p>
@@ -118,8 +123,8 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-efs-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship ensemble-forward-seam">
-    <h4 class="r-fu-title">Land §2 and §3 first; §4 follows the moment plan's confidence study; §5 closes jointly</h4>
+<article class="r-fu" data-id="f-efs-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship ensemble-forward-seam" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Land §2 and §3 first; §4 follows the moment plan&#x27;s confidence study; §5 closes jointly</h4>
     <div class="r-fu-body"><p>§2 (batched member/window evaluator plus the published throughput
     budget) and §3 (Thomson synthesizer plus virtual-magnetics receipts) are independent and
     dispatch in parallel once the coupling-surface contract lands. §4 waits on
@@ -129,10 +134,13 @@
     <pre class="r-fu-prompt">/reckon-ship ensemble-forward-seam</pre>
     </article>
 </section>
-  <section data-reckon="comments" id="comments" class="r-comments">
-<h2><span class="sec">§</span> Comments</h2>
-</section>
+  
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s3" data-id="c-20260823T0915-kernels-landed" data-who="reckon-ship" data-when="2026-08-23T09:15:00+00:00">
+    <div class="r-comment-body">thomson-magnetics-kernels landed — commit 072dc102; gate passed. The composite Thomson synthesizer exists: (flux map, Te/ne explicit typed arrays, chord geometry) → predicted signals, built ON sample_chord_psi_norm (its bilinear interpolation now JAX-differentiable through flux and coordinates), gradient relative error 8.7254e-09 against central finite differences at a 2e-08 gate. Virtual flux-loop and poloidal-probe kernels compose biot.point with the loop/probe factories, nova/biot untouched, numerical-error bounds 1.7764e-15 Wb/T. Receipts declare COCOS 17, units, pointwise support, measured envelopes; zero sigma/prior/likelihood/fit matches by audit. 8 tests passed. §2 (batch evaluator + throughput) unblocked by the shipped coupling-surface contract; §4's moment-pin inputs available from the shipped moment plan.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

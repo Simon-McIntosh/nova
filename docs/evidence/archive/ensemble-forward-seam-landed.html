@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="ensemble-forward-seam-landed">
+  <meta name="plan-title" content="Ensemble Forward Seam — landed record">
+  <meta name="plan-evidence-for" content="ensemble-forward-seam">
+  <title>Ensemble Forward Seam — landed record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Ensemble Forward Seam — cumulative execution evidence</h1>
+
+    <h2 id="s3">§3 the observation-operator kernels, receipted and differentiable — 2026-08-23</h2>
+    <p><strong>The survey's one important deterministic hole is closed:</strong>
+    <code>nova/equilibrium/observation_kernels.py</code> (commit <code>072dc102</code>) maps
+    (flux map, T<sub>e</sub>(ψ<sub>N</sub>), n<sub>e</sub>(ψ<sub>N</sub>) as explicit typed arrays,
+    chord geometry) to predicted Thomson signals, built on the landed
+    <code>sample_chord_psi_norm</code> — whose bilinear implementation now preserves JAX
+    differentiation through flux and coordinates — rather than beside it. Virtual flux-loop and
+    poloidal-probe kernels compose the existing biot factories (<code>biot.point</code> +
+    <code>poloidal_flux_loop</code>/<code>probe</code>) without modifying <code>nova/biot</code>.</p>
+    <ul>
+      <li><strong>Differentiability:</strong> combined flux-map/temperature/density directional
+      gradient relative error <strong>8.7254e-09</strong> against central finite differences
+      (gate 2.0e-08).</li>
+      <li><strong>Receipted accuracy:</strong> analytic Thomson maximum errors 7.380e-02 eV and
+      4.618e+15 m⁻³, inside the emitted bounds 1.022e-01 eV and 5.513e+15 m⁻³; virtual flux-loop and
+      probe numerical-error bounds both <strong>1.7764e-15</strong> (Wb, T) — cross-factory
+      disagreement plus an eight-epsilon float64 roundoff allowance.</li>
+      <li><strong>Seam litmus enforced:</strong> receipts declare COCOS 17, units, pointwise
+      interpolation support and measured error envelopes; a case-insensitive audit for sigma, prior,
+      likelihood or fit over the new kernel and test returned zero matches — nothing statistical is
+      authored nova-side.</li>
+      <li><strong>Tests:</strong> 8 passed (kernels + map-extraction) in 13.90 s; ruff exits 0.</li>
+    </ul>
+  </main>
+</body>
+</html>

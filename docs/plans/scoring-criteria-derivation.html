@@ -19,11 +19,82 @@
 <meta name="plan-effort-hours" content="4.0">
 <meta name="plan-depends-on" content="efit-forward-parity">
 <meta name="plan-blocks" content="mast-catalog-gpu-solve">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
 <main class="plan-doc">
 
+<section id="s0">
+  <h2 id="s0h">§0 — Provenance: what the trace found</h2>
+  <p>The forward-parity campaign closed with verdicts scored against five carried bounds.
+  Tracing them (efit-forward-parity §13, commits <code>8609d06d</code>, <code>354ec88d</code>)
+  classified the fixed-point <code>1e-8</code>, magnetic-axis and LCFS bounds as
+  <strong>INHERITED</strong>: <code>fixed_point.py</code> carries the residual and no argument
+  for <code>1e-8</code>, and its registry basis reads &ldquo;the profile accelerator's existing
+  strict convergence criterion&rdquo;. The x-point and topology bounds are physically motivated
+  with reachable evidence. The axis and LCFS bounds cite a stamp pinned to an artifact digest
+  that has since moved, so neither bound can be reproduced from its own citation. The first
+  derived replacement was <strong>algebraically circular</strong>: a Richardson estimate with
+  <em>p</em> fitted from the same two residuals reduces to <code>R_fine</code> exactly
+  (E_f/R_f = 0.99994&ndash;1.00029), so its 6-of-6 pass asserted only that a number is at most
+  itself. Both halves hold: the gate is unjustified AND the 1-of-6 convergence count is not
+  rescued. A units comparison across scales was <strong>refused</strong> for want of a banked
+  conversion; any cross-scale claim here needs that conversion banked first.</p>
+  <p>Existing machinery this plan extends rather than rebuilds:
+  <code>benchmarks/efit_parity_criterion_provenance.py</code> (the registered criterion, the
+  discretisation-consistent estimate, per-reference pass columns) and its receipt
+  <code>docs/figures/efit-forward-parity/convergence-criterion-provenance.json</code>. Carried
+  measurements that constrain any derivation: observed mesh orders span 0.97&ndash;3.39 in two
+  separate strata, and extrapolating a fixed absolute criterion to convergence needs between
+  1.2e3 and 6.3e11 times the cells. Downstream stakes: the GPU catalog hold
+  (mast-catalog-gpu-solve) stands on a reliability count scored against this criterion;
+  forward-operator-refinement declares this plan its prerequisite so no refinement node can
+  target the inherited bound; and the DIII-D forward-gate re-evaluation is sequenced behind a
+  non-circular criterion.</p>
+</section>
+
+<section id="s1">
+  <h2 id="s1h">§1 — Derive a criterion independent of the quantity it tests</h2>
+  <p>Derive and state, as a formula with per-reference values, a convergence criterion whose
+  inputs are quantities other than the residual it gates. The circular estimator is excluded
+  with its algebra shown: fitting the order from the same two residuals that form the estimate
+  collapses it to the fine residual identically. Admissible routes include an order measured
+  from three or more independent resolutions per stratum (the two observed order strata,
+  0.97&ndash;3.39, must be handled separately, never pooled), or a discretisation-consistent
+  bound derived from the mesh scale and the measured order, extending the estimate already in
+  <code>benchmarks/efit_parity_criterion_provenance.py</code>. The derivation must state its
+  own domain of validity per stratum.</p>
+  <p><strong>Done when:</strong> the formula is stated with its independence argument (no input
+  is the gated residual), per-reference values are computed for the six frozen MAST references,
+  the circular estimator's collapse is shown algebraically in the same receipt, and the receipt
+  is banked under <code>docs/figures/scoring-criteria-derivation/</code>.</p>
+</section>
+
+<section id="s2">
+  <h2 id="s2h">§2 — Re-score the frozen six beside the retained 1e-8 count</h2>
+  <p>Apply the derived criterion to the six frozen MAST references and report the new
+  convergence count beside the retained registered-1e-8 count &mdash; both counts stay on the
+  page; neither replaces the other silently. The banked verdict figures this reads:
+  0/6 converge at the registered 1e-8; the closest bounded residuals sit at 1.97e-3 to
+  1.50e-2 with one vacuum collapse (21989). The re-score changes what the count MEANS, not
+  what was measured.</p>
+  <p><strong>Done when:</strong> a per-reference table (reference, closest residual, registered
+  verdict, derived-criterion verdict) is banked with the receipt, and the catalog-hold
+  implication is stated in one sentence either way.</p>
+</section>
+
+<section id="s3">
+  <h2 id="s3h">§3 — Replace the digest pin and classify every bound</h2>
+  <p>The axis and LCFS bounds cite a stamp pinned to an artifact digest that moved; an
+  artifact digest is write-metadata, not an identity. Re-pin the citation to the artifact's
+  semantic identity so the bound is reproducible from its citation, then classify each of the
+  five carried bounds as <strong>supported</strong> (derivation reached),
+  <strong>merely contained</strong> (holds numerically but no derivation), or
+  <strong>reclassified</strong> (cannot be derived; stated plainly with what it is instead).</p>
+  <p><strong>Done when:</strong> the two re-pinned citations resolve to reproducible artifacts,
+  the five-bound classification table is banked, and every bound marked reclassified carries
+  its replacement reading in one sentence.</p>
+</section>
 
 </main>
 </body>

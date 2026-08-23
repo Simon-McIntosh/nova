@@ -38,6 +38,40 @@
   the explicit slow/full lane rather than disabling them.</p>
 </section>
 
+<section id="derived-criterion">
+  <h2 id="derived-criterion-h">§1 — The held-out convergence criterion</h2>
+  <p><strong>derived-convergence-criterion</strong> landed 2026-08-23 — commit
+  <code>1a9019b7</code>, merged <code>e732d9c9</code>, gate PASSED, 8 tests added, zero
+  equilibrium solves. Formula:
+  τ<sub>i</sub>(h<sub>i</sub>) = C<sub>(s,−i)</sub> · h<sub>i</sub><sup>p<sub>(s,−i)</sub></sup>,
+  with C and p fitted only from the <em>other</em> references in target i's pre-registered
+  topology stratum (closed-axis and confinement-construction strata never pooled), evaluated
+  at the 0.125 m limiting spacing of the frozen scorecard's 33×33 lattice. Every fit excludes
+  both the gated closest residual and the target's own mesh pair; a mutation regression
+  proves changing a gated residual leaves all six criteria unchanged.</p>
+  <table>
+    <thead><tr><th>Reference</th><th>Held-out criterion τ</th></tr></thead>
+    <tbody>
+      <tr><td>21978/35</td><td>1.3970057337880022e-02</td></tr>
+      <tr><td>21983/35</td><td>1.2942531111025984e-02</td></tr>
+      <tr><td>21985/51</td><td>1.0050357331518324e-02</td></tr>
+      <tr><td>21986/46</td><td>1.2643692655403044e-02</td></tr>
+      <tr><td>21989/55</td><td>1.0681769281476105e-02</td></tr>
+      <tr><td>22086/43</td><td>1.3545043662552303e-02</td></tr>
+    </tbody>
+  </table>
+  <p>The circular estimator is excluded by its own algebra: same-pair Richardson with
+  p = log(R_coarse/R_fine)/log(r) gives r<sup>p</sup> = R_coarse/R_fine and therefore
+  E_f = (R_coarse − R_fine)/(r<sup>p</sup> − 1) = R_fine identically; measured ratios span
+  0.9999999999999997 to 1.0000000000000002. Limits retained: only two distinct mesh spacings
+  exist; closed-axis leave-one-out fits have one peer pair and no error bar; no third-mesh
+  asymptotic confirmation exists (forward-operator-refinement's resolution raise is the
+  natural third mesh); 21978/35 and 22086/43 retain per-reference least-trustworthy
+  qualifications; no registered tolerance was changed and no reliability verdict claimed.
+  Receipt: <code>docs/figures/scoring-criteria-derivation/derived-convergence-criterion.json</code>
+  (sha256 <code>3e710eb2c038720de5a8fc9d6be13dfc3cb780aa251418d389f21724bf6bfb83</code>).</p>
+</section>
+
 </main>
 </body>
 </html>

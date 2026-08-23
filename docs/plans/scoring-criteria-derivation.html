@@ -19,8 +19,8 @@
 <meta name="plan-effort-hours" content="4.0">
 <meta name="plan-depends-on" content="efit-forward-parity">
 <meta name="plan-blocks" content="mast-catalog-gpu-solve">
-<meta name="plan-version" content="4">
-<meta name="plan-impl" content="0.25">
+<meta name="plan-version" content="6">
+<meta name="plan-impl" content="0.5">
 </head>
 <body>
 <main class="plan-doc">
@@ -54,26 +54,18 @@
   non-circular criterion.</p>
 </section>
 
-<section id="s1">
-  <h2 id="s1h">§1 — Derive a criterion independent of the quantity it tests</h2>
-  <p>Derive and state, as a formula with per-reference values, a convergence criterion whose
-  inputs are quantities other than the residual it gates. The circular estimator is excluded
-  with its algebra shown: fitting the order from the same two residuals that form the estimate
-  collapses it to the fine residual identically. Admissible routes include an order measured
-  from three or more independent resolutions per stratum (the two observed order strata,
-  0.97&ndash;3.39, must be handled separately, never pooled), or a discretisation-consistent
-  bound derived from the mesh scale and the measured order, extending the estimate already in
-  <code>benchmarks/efit_parity_criterion_provenance.py</code>. The derivation must state its
-  own domain of validity per stratum. The banked reuse map
-  (<code>docs/figures/scoring-criteria-derivation/reuse-map.md</code>) names the admissible
-  machinery: extend <code>efit_operator_consistency_order.py::_fit_power_order</code> per
-  stratum with the gated residual held out, and retain the frozen-six join and dual-count
-  receipt structure from <code>efit_parity_criterion_provenance.py</code>; new machinery
-  requires a fitness verdict against those candidates.</p>
-  <p><strong>Done when:</strong> the formula is stated with its independence argument (no input
-  is the gated residual), per-reference values are computed for the six frozen MAST references,
-  the circular estimator's collapse is shown algebraically in the same receipt, and the receipt
-  is banked under <code>docs/figures/scoring-criteria-derivation/</code>.</p>
+<section id="s1" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-08-23</span>
+    <h2 id="s1h">§1 — Derive a criterion independent of the quantity it tests</h2></header>
+  <p class="landed-summary">Derived: &tau;<sub>i</sub>(h) = C<sub>(s,&minus;i)</sub> &middot;
+  h<sup>p<sub>(s,&minus;i)</sub></sup> &mdash; leave-one-out per topology stratum, fitted only
+  from other references, evaluated at the frozen lattice's 0.125 m limiting spacing. 6/6
+  positive held-out criteria, 1.005e-2 to 1.397e-2; circular estimator excluded by its own
+  algebra (E_f = R_fine identically, measured 1.0 &plusmn; 3e-16); mutation regression proves
+  gated-residual independence; 8 tests, zero solves. Limits: two mesh spacings only &mdash; the
+  refinement plan's resolution raise is the natural third. Full record:
+  <a href="/nova/evidence/archive/scoring-criteria-derivation-landed#derived-criterion">§1
+  landed</a> (commit <code>1a9019b7</code>, merged <code>e732d9c9</code>).</p>
 </section>
 
 <section id="s2">
@@ -105,6 +97,9 @@
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-20260823T0951" data-who="reckon-ship" data-when="2026-08-23 09:51">
     <div class="r-comment-body">criteria-reuse-map landed — commit <code>2e00abb5</code>, merged <code>5ed1ca47</code>; gate PASSED (structural validation: artifact exists, 16 candidate rows, all 12 referenced source files resolve). The map banks the machinery the sprint's nodes extend: independent-order core <code>benchmarks/efit_operator_consistency_order.py::_fit_power_order</code> run per observed-order stratum with each gated target residual held out; <code>richardson_fine_error</code> reusable only when its order/residual pair is independent of the target; the frozen-six join, dual-count and protected-artifact audit retained from <code>efit_parity_criterion_provenance.py</code>; publication-grade semantic pin <code>nova.imas.machine_artifact.MachineArtifactManifest.semantic_identity</code> (+ ambix artifact_resolution.py fail-closed pattern) — <code>filepath.canonical_key</code> is NOT a publication pin; collection gating stays visible via the slow/full lane. Artifact: <code>docs/figures/scoring-criteria-derivation/reuse-map.md</code>.</div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20260823T1042" data-who="reckon-ship" data-when="2026-08-23 10:42">
+    <div class="r-comment-body">derived-convergence-criterion landed — commit <code>1a9019b7</code>, merged <code>e732d9c9</code>; gate PASSED; 8 tests added; zero equilibrium solves. Formula: τ_i(h_i) = C_(s,−i) · h_i^p_(s,−i), C and p fitted only from OTHER references in the target's pre-registered topology stratum (closed-axis and confinement-construction strata never pooled), evaluated at the 0.125 m limiting spacing of the frozen 33×33 lattice. 6/6 positive held-out criteria: 21978/35 1.397e-2; 21983/35 1.294e-2; 21985/51 1.005e-2; 21986/46 1.264e-2; 21989/55 1.068e-2; 22086/43 1.355e-2. Circular estimator excluded by its own algebra: same-pair Richardson gives r^p = R_coarse/R_fine hence E_f = R_fine identically, measured ratios 1.0 ± 3e-16. Mutation regression proves changing a gated residual leaves all six criteria unchanged. Limits kept visible: only two mesh spacings exist, closed-axis leave-one-out has one peer pair, no third-mesh asymptotic confirmation — forward-operator-refinement §1's resolution raise is the natural third mesh. Receipt: docs/figures/scoring-criteria-derivation/derived-convergence-criterion.json (sha256 3e710eb2…).</div>
 </div>
 </section>
 </main>

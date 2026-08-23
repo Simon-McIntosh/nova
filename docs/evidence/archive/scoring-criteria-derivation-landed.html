@@ -38,6 +38,113 @@
   the explicit slow/full lane rather than disabling them.</p>
 </section>
 
+<section id="derived-criterion">
+  <h2 id="derived-criterion-h">§1 — The held-out convergence criterion</h2>
+  <p><strong>derived-convergence-criterion</strong> landed 2026-08-23 — commit
+  <code>1a9019b7</code>, merged <code>e732d9c9</code>, gate PASSED, 8 tests added, zero
+  equilibrium solves. Formula:
+  τ<sub>i</sub>(h<sub>i</sub>) = C<sub>(s,−i)</sub> · h<sub>i</sub><sup>p<sub>(s,−i)</sub></sup>,
+  with C and p fitted only from the <em>other</em> references in target i's pre-registered
+  topology stratum (closed-axis and confinement-construction strata never pooled), evaluated
+  at the 0.125 m limiting spacing of the frozen scorecard's 33×33 lattice. Every fit excludes
+  both the gated closest residual and the target's own mesh pair; a mutation regression
+  proves changing a gated residual leaves all six criteria unchanged.</p>
+  <table>
+    <thead><tr><th>Reference</th><th>Held-out criterion τ</th></tr></thead>
+    <tbody>
+      <tr><td>21978/35</td><td>1.3970057337880022e-02</td></tr>
+      <tr><td>21983/35</td><td>1.2942531111025984e-02</td></tr>
+      <tr><td>21985/51</td><td>1.0050357331518324e-02</td></tr>
+      <tr><td>21986/46</td><td>1.2643692655403044e-02</td></tr>
+      <tr><td>21989/55</td><td>1.0681769281476105e-02</td></tr>
+      <tr><td>22086/43</td><td>1.3545043662552303e-02</td></tr>
+    </tbody>
+  </table>
+  <p>The circular estimator is excluded by its own algebra: same-pair Richardson with
+  p = log(R_coarse/R_fine)/log(r) gives r<sup>p</sup> = R_coarse/R_fine and therefore
+  E_f = (R_coarse − R_fine)/(r<sup>p</sup> − 1) = R_fine identically; measured ratios span
+  0.9999999999999997 to 1.0000000000000002. Limits retained: only two distinct mesh spacings
+  exist; closed-axis leave-one-out fits have one peer pair and no error bar; no third-mesh
+  asymptotic confirmation exists (forward-operator-refinement's resolution raise is the
+  natural third mesh); 21978/35 and 22086/43 retain per-reference least-trustworthy
+  qualifications; no registered tolerance was changed and no reliability verdict claimed.
+  Receipt: <code>docs/figures/scoring-criteria-derivation/derived-convergence-criterion.json</code>
+  (sha256 <code>3e710eb2c038720de5a8fc9d6be13dfc3cb780aa251418d389f21724bf6bfb83</code>).</p>
+</section>
+
+<section id="derived-rescore">
+  <h2 id="derived-rescore-h">§2 — The frozen six under the held-out criteria</h2>
+  <p><strong>frozen-six-derived-rescore</strong> landed 2026-08-23 — commit
+  <code>dad444cb</code>, merged <code>ac3c1bf5</code>, gate PASSED, 8 tests added, zero
+  solves. Registered physical convergence 0/6; derived physical convergence
+  <strong>4/6</strong> (raw numeric-threshold matches 1/6 and 5/6 — the vacuum zero is
+  visible but never counted).</p>
+  <table>
+    <thead><tr><th>Reference</th><th>Closest residual</th><th>Derived τ</th>
+      <th>Registered</th><th>Derived</th></tr></thead>
+    <tbody>
+      <tr><td>21978/35</td><td>1.2419e-02</td><td>1.3970e-02</td><td>FAIL</td><td>PASS</td></tr>
+      <tr><td>21983/35</td><td>6.1478e-03</td><td>1.2943e-02</td><td>FAIL</td><td>PASS</td></tr>
+      <tr><td>21985/51</td><td>1.9709e-03</td><td>1.0050e-02</td><td>FAIL</td><td>PASS</td></tr>
+      <tr><td>21986/46</td><td>3.5895e-03</td><td>1.2644e-02</td><td>FAIL</td><td>PASS</td></tr>
+      <tr><td>21989/55</td><td>0 (vacuum)</td><td>1.0682e-02</td><td>INVALID_PHYSICAL_ROOT</td><td>INVALID_PHYSICAL_ROOT</td></tr>
+      <tr><td>22086/43</td><td>1.5019e-02</td><td>1.3545e-02</td><td>FAIL</td><td>FAIL</td></tr>
+    </tbody>
+  </table>
+  <p>Catalog-hold implication as stated in the receipt: <strong>the hold remains</strong> —
+  only four of six frozen references pass the held-out criterion; 22086/43 exceeds its bound
+  and 21989/55 is an invalid vacuum root. No criterion or registered tolerance was changed;
+  the two-mesh / no-independent-asymptotic-confirmation qualification rides in the receipt.
+  Receipt: <code>docs/figures/scoring-criteria-derivation/derived-criterion-rescore.json</code>
+  (sha256 <code>63d5b2c2a1b6b7dc887ab1e874b861fe67b70efc46c6b90add7b5e876ae16c56</code>).</p>
+</section>
+
+<section id="bound-classification">
+  <h2 id="bound-classification-h">§3 — Bound classification and the semantic repin</h2>
+  <p><strong>bound-classification</strong> landed 2026-08-23 — commit <code>3c1874d5</code>,
+  merged <code>26f99ae9</code>, gate PASSED, 5 tests added.</p>
+  <table>
+    <thead><tr><th>Bound</th><th>Value</th><th>Classification</th></tr></thead>
+    <tbody>
+      <tr><td>x_point_distance_m</td><td>0.014 m</td><td>supported</td></tr>
+      <tr><td>topology_class_agreement_fraction</td><td>1.0</td><td>supported</td></tr>
+      <tr><td>magnetic_axis_distance_m</td><td>0.00101344 m</td><td>merely contained</td></tr>
+      <tr><td>lcfs_distance_m</td><td>0.00033047 m</td><td>merely contained</td></tr>
+      <tr><td>fixed_point_defect</td><td>1e-8</td><td>reclassified</td></tr>
+    </tbody>
+  </table>
+  <p>Replacement reading for the reclassified bound: read 1e-8 as the strict stopping policy
+  of the profile accelerator, not as a derived physical or discretisation-accuracy bound.
+  The axis and LCFS citations now pin
+  <code>MachineArtifactManifest.semantic_identity</code>
+  (sha256 <code>8df7a0a6c3f6162dbe0f226660bc069f37de8eb69f0f7c80bbfedc2bd4be220c</code>) with
+  fail-closed resolution verified (physical <code>b55c5bb005a2cb67</code>, registry
+  <code>2a26cc0a…</code>) and the materialisation digest recorded as provenance only; the
+  resolved artifact's six non-boundary gaps are stated rather than silently inferred
+  complete. Receipt:
+  <code>docs/figures/scoring-criteria-derivation/bound-classification.json</code>
+  (sha256 <code>959905c2340f8b1c9d8203204d6eb3161bf5478f6d5fdfaf60de4e83ffd5ca98</code>).
+  Byproduct fold: the node's compatibility probe found the banked parity provenance receipt
+  stale against the changed <code>nova/equilibrium/forward.py</code> digest (regeneration
+  test failing 1/14) — folded back into the plan as its receipt-refresh section.</p>
+</section>
+
+<section id="receipt-refresh">
+  <h2 id="receipt-refresh-h">§4 — The provenance receipt refreshed</h2>
+  <p><strong>provenance-receipt-refresh</strong> landed 2026-08-23 — commit
+  <code>4a98303d</code>, merged <code>602c2f08</code>, gate PASSED. The receipt was
+  regenerated against the current tree: of 8 source digests only
+  <code>nova/equilibrium/forward.py</code> moved
+  (<code>47985691…</code> → <code>8098aa29…</code>); classification fields 25/25, criterion
+  fields 72/72, rescore fields 8/8 — 185/185 leaf values unchanged excluding
+  source_digests; protected banked artifacts 23/23; provenance tests 9 collected / 9 passed
+  where the regeneration row previously failed. Regenerated receipt sha256
+  <code>fe9f0fc9cfeb9727964625ed51b15e1a87c56e09e01a2eec63d1fceff72569e4</code>;
+  field-comparison artifacts retained on the run record. With this the plan shipped at
+  impl 1.0 over five executable nodes; the successor pointer names
+  forward-operator-refinement.</p>
+</section>
+
 </main>
 </body>
 </html>

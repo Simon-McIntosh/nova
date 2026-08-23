@@ -1,0 +1,170 @@
+{
+  "receipt": {
+    "kind": "frozen_six_held_out_criterion_rescore",
+    "status": "complete",
+    "execution_mode": "banked-receipts-only-no-equilibrium-solves",
+    "equilibrium_solves_run": 0,
+    "reference_count": 6
+  },
+  "comparison_table": [
+    {
+      "reference": "21978/35",
+      "outcome_class": "bounded_non_convergence",
+      "physical_root_valid": true,
+      "closest_residual": 0.012418792579623236,
+      "registered_criterion": 1e-08,
+      "registered_numeric_threshold_met": false,
+      "registered_verdict": "FAIL",
+      "derived_criterion": 0.013970057337880022,
+      "derived_numeric_threshold_met": true,
+      "derived_verdict": "PASS",
+      "derived_margin": 0.0015512647582567856,
+      "derived_residual_over_criterion": 0.8889578817940491,
+      "criterion_stratum": "confinement-construction",
+      "criterion_qualification": {
+        "fit": "Peer references provide repeated samples at only two distinct mesh spacings; cross-reference scatter is measured, but there is no third-mesh confirmation of an asymptotic regime.",
+        "target": "LEAST-TRUSTWORTHY TARGET: its banked same-reference order is 0.966596902394278 and was measured outside a confirmed asymptotic regime; that pair is excluded from this fit."
+      }
+    },
+    {
+      "reference": "21983/35",
+      "outcome_class": "bounded_non_convergence",
+      "physical_root_valid": true,
+      "closest_residual": 0.006147786632132371,
+      "registered_criterion": 1e-08,
+      "registered_numeric_threshold_met": false,
+      "registered_verdict": "FAIL",
+      "derived_criterion": 0.012942531111025984,
+      "derived_numeric_threshold_met": true,
+      "derived_verdict": "PASS",
+      "derived_margin": 0.006794744478893612,
+      "derived_residual_over_criterion": 0.4750065176119188,
+      "criterion_stratum": "closed-axis",
+      "criterion_qualification": {
+        "fit": "EXACT-PAIR-ONLY: one peer at two mesh spacings determines the power law exactly; there is no fit error bar or third-mesh confirmation.",
+        "target": null
+      }
+    },
+    {
+      "reference": "21985/51",
+      "outcome_class": "bounded_non_convergence",
+      "physical_root_valid": true,
+      "closest_residual": 0.001970923362492926,
+      "registered_criterion": 1e-08,
+      "registered_numeric_threshold_met": false,
+      "registered_verdict": "FAIL",
+      "derived_criterion": 0.010050357331518324,
+      "derived_numeric_threshold_met": true,
+      "derived_verdict": "PASS",
+      "derived_margin": 0.008079433969025399,
+      "derived_residual_over_criterion": 0.19610480478261516,
+      "criterion_stratum": "closed-axis",
+      "criterion_qualification": {
+        "fit": "EXACT-PAIR-ONLY: one peer at two mesh spacings determines the power law exactly; there is no fit error bar or third-mesh confirmation.",
+        "target": null
+      }
+    },
+    {
+      "reference": "21986/46",
+      "outcome_class": "bounded_non_convergence",
+      "physical_root_valid": true,
+      "closest_residual": 0.003589451859931841,
+      "registered_criterion": 1e-08,
+      "registered_numeric_threshold_met": false,
+      "registered_verdict": "FAIL",
+      "derived_criterion": 0.012643692655403044,
+      "derived_numeric_threshold_met": true,
+      "derived_verdict": "PASS",
+      "derived_margin": 0.009054240795471203,
+      "derived_residual_over_criterion": 0.28389268529063433,
+      "criterion_stratum": "confinement-construction",
+      "criterion_qualification": {
+        "fit": "Peer references provide repeated samples at only two distinct mesh spacings; cross-reference scatter is measured, but there is no third-mesh confirmation of an asymptotic regime.",
+        "target": null
+      }
+    },
+    {
+      "reference": "21989/55",
+      "outcome_class": "vacuum_collapse",
+      "physical_root_valid": false,
+      "closest_residual": 0.0,
+      "registered_criterion": 1e-08,
+      "registered_numeric_threshold_met": true,
+      "registered_verdict": "INVALID_PHYSICAL_ROOT",
+      "derived_criterion": 0.010681769281476105,
+      "derived_numeric_threshold_met": true,
+      "derived_verdict": "INVALID_PHYSICAL_ROOT",
+      "derived_margin": 0.010681769281476105,
+      "derived_residual_over_criterion": 0.0,
+      "criterion_stratum": "confinement-construction",
+      "criterion_qualification": {
+        "fit": "Peer references provide repeated samples at only two distinct mesh spacings; cross-reference scatter is measured, but there is no third-mesh confirmation of an asymptotic regime.",
+        "target": null
+      }
+    },
+    {
+      "reference": "22086/43",
+      "outcome_class": "bounded_non_convergence",
+      "physical_root_valid": true,
+      "closest_residual": 0.015019257184910935,
+      "registered_criterion": 1e-08,
+      "registered_numeric_threshold_met": false,
+      "registered_verdict": "FAIL",
+      "derived_criterion": 0.013545043662552303,
+      "derived_numeric_threshold_met": false,
+      "derived_verdict": "FAIL",
+      "derived_margin": -0.0014742135223586323,
+      "derived_residual_over_criterion": 1.1088378567899606,
+      "criterion_stratum": "confinement-construction",
+      "criterion_qualification": {
+        "fit": "Peer references provide repeated samples at only two distinct mesh spacings; cross-reference scatter is measured, but there is no third-mesh confirmation of an asymptotic regime.",
+        "target": "LEAST-TRUSTWORTHY TARGET: its banked same-reference order is 1.6371714162964488 and was measured outside a confirmed asymptotic regime; that pair is excluded from this fit."
+      }
+    }
+  ],
+  "counts": {
+    "registered_1e8": {
+      "criterion": 1e-08,
+      "numeric_threshold_met_count": 1,
+      "invalid_physical_root_count": 1,
+      "physical_convergence_count": 0,
+      "display": "0 of 6"
+    },
+    "derived_held_out": {
+      "per_reference_criterion": true,
+      "numeric_threshold_met_count": 5,
+      "invalid_physical_root_count": 1,
+      "physical_convergence_count": 4,
+      "display": "4 of 6"
+    },
+    "both_counts_retained": true
+  },
+  "vacuum_collapse_policy": {
+    "reference": "21989/55",
+    "closest_residual": 0.0,
+    "numeric_thresholds_met": [
+      "registered_1e8",
+      "derived_held_out"
+    ],
+    "verdict_under_both": "INVALID_PHYSICAL_ROOT",
+    "counted_as_converged": false,
+    "reason": "The zero residual belongs to a zero-current vacuum collapse, not a converged plasma root."
+  },
+  "verdict": {
+    "code": "DERIVED_CRITERION_IMPROVES_COUNT_BUT_REMAINS_INCOMPLETE",
+    "statement": "The held-out criterion raises physical convergence from 0 of 6 to 4 of 6; one reference exceeds its criterion and one is an invalid vacuum root.",
+    "catalog_hold_remains": true,
+    "catalog_hold_implication": "The catalog hold remains because only four of six frozen references pass the held-out criterion: 22086/43 exceeds its bound and 21989/55 is an invalid vacuum root."
+  },
+  "claim_bounds": {
+    "new_equilibrium_solve": false,
+    "banked_residuals_only": true,
+    "registered_tolerance_changed": false,
+    "derived_criterion_changed": false,
+    "criterion_limit_retained": "The held-out criteria have only two distinct mesh spacings and no independent asymptotic confirmation."
+  },
+  "sources": {
+    "docs/figures/scoring-criteria-derivation/derived-convergence-criterion.json": "3e710eb2c038720de5a8fc9d6be13dfc3cb780aa251418d389f21724bf6bfb83",
+    "docs/figures/efit-forward-parity/passive-inclusive-frozen-six-scorecard.json": "e2a625b2a1a4ce7324bd437eee0c9631d6b056b9406e5a3ae2393b0dc27a0aa6"
+  }
+}

@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="Scoring Criteria Derivation — every bound we score against, and whether it can be derived">
 <meta name="plan-summary" content="Replace the inherited bounds the forward-parity verdicts were scored against with derived ones, or reclassify the bounds whose derivation cannot be reached: the fixed-point criterion traced to a solver stopping tolerance, the axis and LCFS bounds pinned to an artifact digest that moved, and a first replacement attempt that was algebraically circular">
-<meta name="plan-status" content="active">
+<meta name="plan-status" content="shipped">
 <meta name="plan-roi" content="high">
 <meta name="plan-sprint" content="S13">
 <meta name="plan-owner" content="Simon McIntosh">
@@ -19,8 +19,8 @@
 <meta name="plan-effort-hours" content="4.0">
 <meta name="plan-depends-on" content="efit-forward-parity">
 <meta name="plan-blocks" content="mast-catalog-gpu-solve">
-<meta name="plan-version" content="4">
-<meta name="plan-impl" content="0.25">
+<meta name="plan-version" content="13">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
 <main class="plan-doc">
@@ -54,58 +54,77 @@
   non-circular criterion.</p>
 </section>
 
-<section id="s1">
-  <h2 id="s1h">§1 — Derive a criterion independent of the quantity it tests</h2>
-  <p>Derive and state, as a formula with per-reference values, a convergence criterion whose
-  inputs are quantities other than the residual it gates. The circular estimator is excluded
-  with its algebra shown: fitting the order from the same two residuals that form the estimate
-  collapses it to the fine residual identically. Admissible routes include an order measured
-  from three or more independent resolutions per stratum (the two observed order strata,
-  0.97&ndash;3.39, must be handled separately, never pooled), or a discretisation-consistent
-  bound derived from the mesh scale and the measured order, extending the estimate already in
-  <code>benchmarks/efit_parity_criterion_provenance.py</code>. The derivation must state its
-  own domain of validity per stratum. The banked reuse map
-  (<code>docs/figures/scoring-criteria-derivation/reuse-map.md</code>) names the admissible
-  machinery: extend <code>efit_operator_consistency_order.py::_fit_power_order</code> per
-  stratum with the gated residual held out, and retain the frozen-six join and dual-count
-  receipt structure from <code>efit_parity_criterion_provenance.py</code>; new machinery
-  requires a fitness verdict against those candidates.</p>
-  <p><strong>Done when:</strong> the formula is stated with its independence argument (no input
-  is the gated residual), per-reference values are computed for the six frozen MAST references,
-  the circular estimator's collapse is shown algebraically in the same receipt, and the receipt
-  is banked under <code>docs/figures/scoring-criteria-derivation/</code>.</p>
+<section id="s1" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-08-23</span>
+    <h2 id="s1h">§1 — Derive a criterion independent of the quantity it tests</h2></header>
+  <p class="landed-summary">Derived: &tau;<sub>i</sub>(h) = C<sub>(s,&minus;i)</sub> &middot;
+  h<sup>p<sub>(s,&minus;i)</sub></sup> &mdash; leave-one-out per topology stratum, fitted only
+  from other references, evaluated at the frozen lattice's 0.125 m limiting spacing. 6/6
+  positive held-out criteria, 1.005e-2 to 1.397e-2; circular estimator excluded by its own
+  algebra (E_f = R_fine identically, measured 1.0 &plusmn; 3e-16); mutation regression proves
+  gated-residual independence; 8 tests, zero solves. Limits: two mesh spacings only &mdash; the
+  refinement plan's resolution raise is the natural third. Full record:
+  <a href="/nova/evidence/archive/scoring-criteria-derivation-landed#derived-criterion">§1
+  landed</a> (commit <code>1a9019b7</code>, merged <code>e732d9c9</code>).</p>
 </section>
 
-<section id="s2">
-  <h2 id="s2h">§2 — Re-score the frozen six beside the retained 1e-8 count</h2>
-  <p>Apply the derived criterion to the six frozen MAST references and report the new
-  convergence count beside the retained registered-1e-8 count &mdash; both counts stay on the
-  page; neither replaces the other silently. The banked verdict figures this reads:
-  0/6 converge at the registered 1e-8; the closest bounded residuals sit at 1.97e-3 to
-  1.50e-2 with one vacuum collapse (21989). The re-score changes what the count MEANS, not
-  what was measured.</p>
-  <p><strong>Done when:</strong> a per-reference table (reference, closest residual, registered
-  verdict, derived-criterion verdict) is banked with the receipt, and the catalog-hold
-  implication is stated in one sentence either way.</p>
+<section id="s2" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-08-23</span>
+    <h2 id="s2h">§2 — Re-score the frozen six beside the retained 1e-8 count</h2></header>
+  <p class="landed-summary">Re-scored: registered physical convergence 0/6, derived 4/6 &mdash;
+  21978, 21983, 21985, 21986 pass their held-out bounds; 22086 exceeds its bound
+  (1.502e-2 &gt; 1.355e-2); 21989 stays an invalid zero-current vacuum root, visible but never
+  counted. The catalog hold REMAINS, now on a justified criterion. Both counts stay on the
+  page. Full record:
+  <a href="/nova/evidence/archive/scoring-criteria-derivation-landed#derived-rescore">§2
+  landed</a> (commit <code>dad444cb</code>, merged <code>ac3c1bf5</code>).</p>
 </section>
 
-<section id="s3">
-  <h2 id="s3h">§3 — Replace the digest pin and classify every bound</h2>
-  <p>The axis and LCFS bounds cite a stamp pinned to an artifact digest that moved; an
-  artifact digest is write-metadata, not an identity. Re-pin the citation to the artifact's
-  semantic identity so the bound is reproducible from its citation, then classify each of the
-  five carried bounds as <strong>supported</strong> (derivation reached),
-  <strong>merely contained</strong> (holds numerically but no derivation), or
-  <strong>reclassified</strong> (cannot be derived; stated plainly with what it is instead).</p>
-  <p><strong>Done when:</strong> the two re-pinned citations resolve to reproducible artifacts,
-  the five-bound classification table is banked, and every bound marked reclassified carries
-  its replacement reading in one sentence.</p>
+<section id="s3" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-08-23</span>
+    <h2 id="s3h">§3 — Replace the digest pin and classify every bound</h2></header>
+  <p class="landed-summary">Classified: x-point and topology SUPPORTED; axis and LCFS MERELY
+  CONTAINED, their citations re-pinned to the fail-closed machine-artifact semantic identity;
+  the fixed-point 1e-8 RECLASSIFIED as the profile accelerator's strict stopping policy, not
+  a derived bound. 2/2 semantic citations resolve and verify; 5 tests. Full record:
+  <a href="/nova/evidence/archive/scoring-criteria-derivation-landed#bound-classification">§3
+  landed</a> (commit <code>3c1874d5</code>, merged <code>26f99ae9</code>).</p>
+</section>
+
+<section id="s4" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-08-23</span>
+    <h2 id="s4h">§4 — The provenance receipt tracks the code it describes</h2></header>
+  <p class="landed-summary">Regenerated: of 8 source digests only the forward-solve module's
+  moved; 185/185 leaf values unchanged excluding source digests (classifications 25/25,
+  criteria 72/72, rescore 8/8); provenance tests 9/9 where 13/14 failed before. Full record:
+  <a href="/nova/evidence/archive/scoring-criteria-derivation-landed#receipt-refresh">§4
+  landed</a> (commit <code>4a98303d</code>, merged <code>602c2f08</code>).</p>
 </section>
 
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-20260823T0951" data-who="reckon-ship" data-when="2026-08-23 09:51">
     <div class="r-comment-body">criteria-reuse-map landed — commit <code>2e00abb5</code>, merged <code>5ed1ca47</code>; gate PASSED (structural validation: artifact exists, 16 candidate rows, all 12 referenced source files resolve). The map banks the machinery the sprint's nodes extend: independent-order core <code>benchmarks/efit_operator_consistency_order.py::_fit_power_order</code> run per observed-order stratum with each gated target residual held out; <code>richardson_fine_error</code> reusable only when its order/residual pair is independent of the target; the frozen-six join, dual-count and protected-artifact audit retained from <code>efit_parity_criterion_provenance.py</code>; publication-grade semantic pin <code>nova.imas.machine_artifact.MachineArtifactManifest.semantic_identity</code> (+ ambix artifact_resolution.py fail-closed pattern) — <code>filepath.canonical_key</code> is NOT a publication pin; collection gating stays visible via the slow/full lane. Artifact: <code>docs/figures/scoring-criteria-derivation/reuse-map.md</code>.</div>
 </div>
+<div class="r-comment" data-section="s1" data-id="c-20260823T1042" data-who="reckon-ship" data-when="2026-08-23 10:42">
+    <div class="r-comment-body">derived-convergence-criterion landed — commit <code>1a9019b7</code>, merged <code>e732d9c9</code>; gate PASSED; 8 tests added; zero equilibrium solves. Formula: τ_i(h_i) = C_(s,−i) · h_i^p_(s,−i), C and p fitted only from OTHER references in the target's pre-registered topology stratum (closed-axis and confinement-construction strata never pooled), evaluated at the 0.125 m limiting spacing of the frozen 33×33 lattice. 6/6 positive held-out criteria: 21978/35 1.397e-2; 21983/35 1.294e-2; 21985/51 1.005e-2; 21986/46 1.264e-2; 21989/55 1.068e-2; 22086/43 1.355e-2. Circular estimator excluded by its own algebra: same-pair Richardson gives r^p = R_coarse/R_fine hence E_f = R_fine identically, measured ratios 1.0 ± 3e-16. Mutation regression proves changing a gated residual leaves all six criteria unchanged. Limits kept visible: only two mesh spacings exist, closed-axis leave-one-out has one peer pair, no third-mesh asymptotic confirmation — forward-operator-refinement §1's resolution raise is the natural third mesh. Receipt: docs/figures/scoring-criteria-derivation/derived-convergence-criterion.json (sha256 3e710eb2…).</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260823T1058" data-who="reckon-ship" data-when="2026-08-23 10:58">
+    <div class="r-comment-body">frozen-six-derived-rescore landed — commit <code>dad444cb</code>, merged <code>ac3c1bf5</code>; gate PASSED; 8 tests added; zero solves. Registered physical convergence 0/6; derived physical convergence 4/6 (raw numeric matches 1/6 and 5/6). Per reference (residual vs derived τ): 21978/35 1.242e-2 &lt; 1.397e-2 PASS; 21983/35 6.148e-3 &lt; 1.294e-2 PASS; 21985/51 1.971e-3 &lt; 1.005e-2 PASS; 21986/46 3.589e-3 &lt; 1.264e-2 PASS; 21989/55 residual 0 on a zero-current vacuum collapse — INVALID_PHYSICAL_ROOT, visible but never counted; 22086/43 1.502e-2 &gt; 1.355e-2 FAIL. Catalog-hold implication as stated in the receipt: the hold REMAINS — four of six is not six of six — now standing on a justified criterion instead of an inherited one. No registered tolerance changed; the two-mesh qualification rides in the receipt. Receipt: docs/figures/scoring-criteria-derivation/derived-criterion-rescore.json (sha256 63d5b2c2…).</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260823T1115" data-who="reckon-ship" data-when="2026-08-23 11:15">
+    <div class="r-comment-body">bound-classification landed — commit <code>3c1874d5</code>, merged <code>26f99ae9</code>; gate PASSED; 5 tests added. Classification: x_point_distance_m 0.014 m SUPPORTED; topology_class_agreement_fraction 1.0 SUPPORTED; magnetic_axis_distance_m 0.00101344 m MERELY CONTAINED; lcfs_distance_m 0.00033047 m MERELY CONTAINED; fixed_point_defect 1e-8 RECLASSIFIED — replacement reading: the profile accelerator's strict stopping policy, not a derived physical or discretisation-accuracy bound. Axis and LCFS citations re-pinned to MachineArtifactManifest.semantic_identity (sha256:8df7a0a6…) with fail-closed resolution verified and the materialisation digest recorded as provenance only; the resolved artifact's 6 non-boundary gaps stated, not silently inferred complete. Receipt: docs/figures/scoring-criteria-derivation/bound-classification.json (sha256 959905c2…). Fold: the node's compatibility probe found docs/figures/efit-forward-parity/convergence-criterion-provenance.json stale against the changed nova/equilibrium/forward.py digest — test_checked_receipt_matches_regeneration fails 1/14 — folded as §4.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260823T1132" data-who="reckon-ship" data-when="2026-08-23 11:32">
+    <div class="r-comment-body">provenance-receipt-refresh landed — commit <code>4a98303d</code>, merged <code>602c2f08</code>; gate PASSED. Receipt regenerated: of 8 source digests only nova/equilibrium/forward.py moved (47985691… → 8098aa29…); classification fields 25/25, criterion fields 72/72, rescore fields 8/8 — 185/185 leaf values unchanged excluding source_digests; protected banked artifacts 23/23; provenance tests 9 collected / 9 passed. The plan closes at impl 1.0 across 5 executable nodes: reuse map, held-out criterion, frozen-six rescore (0/6 registered → 4/6 derived, hold stands), bound classification with the semantic repin, and this refresh.</div>
+</div>
+</section>
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-scd-successor" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-23 11:33" data-recommends-skill="/reckon-ship forward-operator-refinement" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Successor: forward-operator-refinement owns the frontier work</h4>
+    <div class="r-fu-body">Pointer, not work: the derived criterion, the 4/6 rescore and the bound classifications are inputs to forward-operator-refinement (declared dependent), which owns the resolution default, the operator-order measurement, the third-mesh criterion refresh, and the DIII-D gate notification. Its own lifecycle surfaces it to the roadmap.</div>
+    <pre class="r-fu-prompt">/reckon-ship forward-operator-refinement</pre>
+    </article>
 </section>
 </main>
 </body>

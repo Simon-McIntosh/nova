@@ -1,0 +1,392 @@
+{
+  "receipt": {
+    "kind": "held_out_mesh_power_law_convergence_criterion",
+    "status": "complete",
+    "execution_mode": "banked-data-only-no-equilibrium-solves",
+    "equilibrium_solves_run": 0,
+    "reference_count": 6
+  },
+  "criterion": {
+    "formula": "tau_i(h_i) = C_(s,-i) * h_i**p_(s,-i)",
+    "fit_model": "R_j(h) = C_(s,-i) * h**p_(s,-i), j != i",
+    "target_mesh_spacing_m": 0.125,
+    "target_mesh_provenance": "The gated scorecard is constructed on the benchmark's 33 by 33 rectangular lattice. The banked mesh ladder identifies that coarse lattice by its common 0.125 m limiting spacing.",
+    "stratification": "pre-registered closed-axis and confinement-construction strata; never pooled",
+    "independence_argument": "For target i, C_(s,-i) and p_(s,-i) are fitted only from other references j in the same pre-registered stratum. The gated closest residual and target i's own mesh pair are excluded.",
+    "inputs": [
+      "peer-reference coarse and fine banked fixed-point residuals",
+      "peer-reference banked mesh spacings",
+      "pre-registered topology stratum",
+      "the target benchmark mesh spacing"
+    ],
+    "excluded_inputs": [
+      "the gated target closest residual",
+      "the target reference's own coarse/fine mesh pair"
+    ],
+    "registered_criterion_retained": 1e-08,
+    "registered_tolerance_changed": false,
+    "fitness_verdict": "Reuse _fit_power_order for the peer-only log-space power law. Do not reuse same-pair Richardson as a gate because its order and estimate contain the target fine residual."
+  },
+  "strata": {
+    "closed-axis": {
+      "frozen_references": [
+        "21983/35",
+        "21985/51"
+      ],
+      "mesh_order_reference_count": 2,
+      "banked_observed_order_range": [
+        2.7018908925836143,
+        3.307365058279396
+      ],
+      "domain_of_validity": "Only the pre-registered axis-enclosing branch stratum on the banked 0.125 m and 0.0625 m mesh spacings. Leave-one-out fits have one peer pair and therefore no error bar."
+    },
+    "confinement-construction": {
+      "frozen_references": [
+        "21978/35",
+        "21986/46",
+        "21989/55",
+        "22086/43"
+      ],
+      "mesh_order_reference_count": 3,
+      "banked_observed_order_range": [
+        0.966596902394278,
+        3.3869707663836386
+      ],
+      "domain_of_validity": "Only the pre-registered no-axis-enclosing-branch stratum on the banked 0.125 m and 0.0625 m mesh spacings. The order range is broad and two spacings do not establish an asymptotic regime."
+    }
+  },
+  "per_reference": [
+    {
+      "reference": "21978/35",
+      "stratum": "confinement-construction",
+      "derived_criterion": 0.013970057337880022,
+      "criterion_unit": "relative sup norm of fixed-point defect",
+      "gated_closest_residual_display_only": 0.012418792579623236,
+      "gated_outcome_display_only": "bounded_non_convergence",
+      "fit": {
+        "formula": "tau_i(h_i) = C_(s,-i) * h_i**p_(s,-i)",
+        "criterion": 0.013970057337880022,
+        "target_mesh_spacing_m": 0.125,
+        "held_out_target": "21978/35",
+        "fit_reference_count": 2,
+        "fit_sample_count": 4,
+        "fit_unique_mesh_spacing_count": 2,
+        "fit_references": [
+          "21989/55",
+          "22086/43"
+        ],
+        "fit_cell_sizes_m": [
+          0.125,
+          0.0625,
+          0.125,
+          0.0625
+        ],
+        "fit_residuals": [
+          0.017714765374879503,
+          0.001693384614199005,
+          0.011016939705021812,
+          0.0035417937581059262
+        ],
+        "observed_order": 2.512071091340043,
+        "coefficient": 2.593130885147205,
+        "order_standard_error": 0.6330183529765919,
+        "order_95_percent_interval": [
+          -0.21158705307619874,
+          5.235729235756285
+        ],
+        "log_residual_rms": 0.3102606977351752,
+        "fraction_residual_rms": 0.0024753228253538546,
+        "r_squared": 0.8873125913904285,
+        "target_residual_used_in_fit": false,
+        "target_mesh_pair_used_in_fit": false,
+        "uncertainty_qualification": "Peer references provide repeated samples at only two distinct mesh spacings; cross-reference scatter is measured, but there is no third-mesh confirmation of an asymptotic regime."
+      },
+      "target_qualification": "LEAST-TRUSTWORTHY TARGET: its banked same-reference order is 0.966596902394278 and was measured outside a confirmed asymptotic regime; that pair is excluded from this fit."
+    },
+    {
+      "reference": "21983/35",
+      "stratum": "closed-axis",
+      "derived_criterion": 0.012942531111025984,
+      "criterion_unit": "relative sup norm of fixed-point defect",
+      "gated_closest_residual_display_only": 0.006147786632132371,
+      "gated_outcome_display_only": "bounded_non_convergence",
+      "fit": {
+        "formula": "tau_i(h_i) = C_(s,-i) * h_i**p_(s,-i)",
+        "criterion": 0.012942531111025984,
+        "target_mesh_spacing_m": 0.125,
+        "held_out_target": "21983/35",
+        "fit_reference_count": 1,
+        "fit_sample_count": 2,
+        "fit_unique_mesh_spacing_count": 2,
+        "fit_references": [
+          "21985/51"
+        ],
+        "fit_cell_sizes_m": [
+          0.125,
+          0.0625
+        ],
+        "fit_residuals": [
+          0.01294253111102598,
+          0.0013073838879026022
+        ],
+        "observed_order": 3.3073650582793945,
+        "coefficient": 12.556467736081027,
+        "order_standard_error": 0.0,
+        "order_95_percent_interval": null,
+        "log_residual_rms": 8.881784197001252e-16,
+        "fraction_residual_rms": 6.226379661578552e-18,
+        "r_squared": 1.0,
+        "target_residual_used_in_fit": false,
+        "target_mesh_pair_used_in_fit": false,
+        "uncertainty_qualification": "EXACT-PAIR-ONLY: one peer at two mesh spacings determines the power law exactly; there is no fit error bar or third-mesh confirmation."
+      },
+      "target_qualification": null
+    },
+    {
+      "reference": "21985/51",
+      "stratum": "closed-axis",
+      "derived_criterion": 0.010050357331518324,
+      "criterion_unit": "relative sup norm of fixed-point defect",
+      "gated_closest_residual_display_only": 0.001970923362492926,
+      "gated_outcome_display_only": "bounded_non_convergence",
+      "fit": {
+        "formula": "tau_i(h_i) = C_(s,-i) * h_i**p_(s,-i)",
+        "criterion": 0.010050357331518324,
+        "target_mesh_spacing_m": 0.125,
+        "held_out_target": "21985/51",
+        "fit_reference_count": 1,
+        "fit_sample_count": 2,
+        "fit_unique_mesh_spacing_count": 2,
+        "fit_references": [
+          "21983/35"
+        ],
+        "fit_cell_sizes_m": [
+          0.125,
+          0.0625
+        ],
+        "fit_residuals": [
+          0.010050357331518338,
+          0.0015446543055689578
+        ],
+        "observed_order": 2.7018908925836134,
+        "coefficient": 2.7684208666307355,
+        "order_standard_error": 0.0,
+        "order_95_percent_interval": null,
+        "log_residual_rms": 6.280369834735101e-16,
+        "fraction_residual_rms": 8.587812036286677e-18,
+        "r_squared": 1.0,
+        "target_residual_used_in_fit": false,
+        "target_mesh_pair_used_in_fit": false,
+        "uncertainty_qualification": "EXACT-PAIR-ONLY: one peer at two mesh spacings determines the power law exactly; there is no fit error bar or third-mesh confirmation."
+      },
+      "target_qualification": null
+    },
+    {
+      "reference": "21986/46",
+      "stratum": "confinement-construction",
+      "derived_criterion": 0.012643692655403044,
+      "criterion_unit": "relative sup norm of fixed-point defect",
+      "gated_closest_residual_display_only": 0.003589451859931841,
+      "gated_outcome_display_only": "bounded_non_convergence",
+      "fit": {
+        "formula": "tau_i(h_i) = C_(s,-i) * h_i**p_(s,-i)",
+        "criterion": 0.012643692655403044,
+        "target_mesh_spacing_m": 0.125,
+        "held_out_target": "21986/46",
+        "fit_reference_count": 3,
+        "fit_sample_count": 6,
+        "fit_unique_mesh_spacing_count": 2,
+        "fit_references": [
+          "21978/35",
+          "21989/55",
+          "22086/43"
+        ],
+        "fit_cell_sizes_m": [
+          0.125,
+          0.0625,
+          0.125,
+          0.0625,
+          0.125,
+          0.0625
+        ],
+        "fit_residuals": [
+          0.010356795810607609,
+          0.005299693489256675,
+          0.017714765374879503,
+          0.001693384614199005,
+          0.011016939705021812,
+          0.0035417937581059262
+        ],
+        "observed_order": 1.9969130283581213,
+        "coefficient": 0.8040185916084015,
+        "order_standard_error": 0.5404640402608953,
+        "order_95_percent_interval": [
+          0.49634428924033536,
+          3.4974817674759073
+        ],
+        "log_residual_rms": 0.37462112570087647,
+        "fraction_residual_rms": 0.0025965028294873092,
+        "r_squared": 0.7733921069224319,
+        "target_residual_used_in_fit": false,
+        "target_mesh_pair_used_in_fit": false,
+        "uncertainty_qualification": "Peer references provide repeated samples at only two distinct mesh spacings; cross-reference scatter is measured, but there is no third-mesh confirmation of an asymptotic regime."
+      },
+      "target_qualification": null
+    },
+    {
+      "reference": "21989/55",
+      "stratum": "confinement-construction",
+      "derived_criterion": 0.010681769281476105,
+      "criterion_unit": "relative sup norm of fixed-point defect",
+      "gated_closest_residual_display_only": 0.0,
+      "gated_outcome_display_only": "vacuum_collapse",
+      "fit": {
+        "formula": "tau_i(h_i) = C_(s,-i) * h_i**p_(s,-i)",
+        "criterion": 0.010681769281476105,
+        "target_mesh_spacing_m": 0.125,
+        "held_out_target": "21989/55",
+        "fit_reference_count": 2,
+        "fit_sample_count": 4,
+        "fit_unique_mesh_spacing_count": 2,
+        "fit_references": [
+          "21978/35",
+          "22086/43"
+        ],
+        "fit_cell_sizes_m": [
+          0.125,
+          0.0625,
+          0.125,
+          0.0625
+        ],
+        "fit_residuals": [
+          0.010356795810607609,
+          0.005299693489256675,
+          0.011016939705021812,
+          0.0035417937581059262
+        ],
+        "observed_order": 1.3018841593453634,
+        "coefficient": 0.1600890921607884,
+        "order_standard_error": 0.294111512429082,
+        "order_95_percent_interval": [
+          0.03642445754163082,
+          2.567343861149096
+        ],
+        "log_residual_rms": 0.1441526025732294,
+        "fraction_residual_rms": 0.0006668268278142552,
+        "r_squared": 0.9073812026850172,
+        "target_residual_used_in_fit": false,
+        "target_mesh_pair_used_in_fit": false,
+        "uncertainty_qualification": "Peer references provide repeated samples at only two distinct mesh spacings; cross-reference scatter is measured, but there is no third-mesh confirmation of an asymptotic regime."
+      },
+      "target_qualification": null
+    },
+    {
+      "reference": "22086/43",
+      "stratum": "confinement-construction",
+      "derived_criterion": 0.013545043662552303,
+      "criterion_unit": "relative sup norm of fixed-point defect",
+      "gated_closest_residual_display_only": 0.015019257184910935,
+      "gated_outcome_display_only": "bounded_non_convergence",
+      "fit": {
+        "formula": "tau_i(h_i) = C_(s,-i) * h_i**p_(s,-i)",
+        "criterion": 0.013545043662552303,
+        "target_mesh_spacing_m": 0.125,
+        "held_out_target": "22086/43",
+        "fit_reference_count": 2,
+        "fit_sample_count": 4,
+        "fit_unique_mesh_spacing_count": 2,
+        "fit_references": [
+          "21978/35",
+          "21989/55"
+        ],
+        "fit_cell_sizes_m": [
+          0.125,
+          0.0625,
+          0.125,
+          0.0625
+        ],
+        "fit_residuals": [
+          0.010356795810607609,
+          0.005299693489256675,
+          0.017714765374879503,
+          0.001693384614199005
+        ],
+        "observed_order": 2.176783834388958,
+        "coefficient": 1.2520223858041424,
+        "order_standard_error": 0.9095286623958426,
+        "order_95_percent_interval": [
+          -1.7366021476538913,
+          6.090169816431807
+        ],
+        "log_residual_rms": 0.4457864390157899,
+        "fraction_residual_rms": 0.0029392111061201163,
+        "r_squared": 0.7411985394736974,
+        "target_residual_used_in_fit": false,
+        "target_mesh_pair_used_in_fit": false,
+        "uncertainty_qualification": "Peer references provide repeated samples at only two distinct mesh spacings; cross-reference scatter is measured, but there is no third-mesh confirmation of an asymptotic regime."
+      },
+      "target_qualification": "LEAST-TRUSTWORTHY TARGET: its banked same-reference order is 1.6371714162964488 and was measured outside a confirmed asymptotic regime; that pair is excluded from this fit."
+    }
+  ],
+  "excluded_circular_estimator": {
+    "order_formula": "p_i = log(R_coarse_i / R_fine_i) / log(r)",
+    "candidate_formula": "E_f_i = (R_coarse_i - R_fine_i) / (r**p_i - 1)",
+    "algebraic_collapse": [
+      "r**p_i = R_coarse_i / R_fine_i",
+      "E_f_i = (R_coarse_i - R_fine_i) / (R_coarse_i / R_fine_i - 1)",
+      "E_f_i = R_fine_i"
+    ],
+    "reason_excluded": "The target fine residual supplies both the fitted order and the estimate, so E_f_i <= E_f_i is not an independent test.",
+    "per_reference_numeric_check": [
+      {
+        "reference": "21978/35",
+        "same_pair_order": 0.966596902394278,
+        "richardson_estimate": 0.005299693489256675,
+        "fine_residual": 0.005299693489256675,
+        "estimate_over_fine_residual": 1.0
+      },
+      {
+        "reference": "21983/35",
+        "same_pair_order": 2.7018908925836143,
+        "richardson_estimate": 0.0015446543055689574,
+        "fine_residual": 0.0015446543055689578,
+        "estimate_over_fine_residual": 0.9999999999999997
+      },
+      {
+        "reference": "21985/51",
+        "same_pair_order": 3.307365058279396,
+        "richardson_estimate": 0.0013073838879026024,
+        "fine_residual": 0.0013073838879026022,
+        "estimate_over_fine_residual": 1.0000000000000002
+      },
+      {
+        "reference": "21989/55",
+        "same_pair_order": 3.3869707663836386,
+        "richardson_estimate": 0.0016933846141990048,
+        "fine_residual": 0.001693384614199005,
+        "estimate_over_fine_residual": 0.9999999999999999
+      },
+      {
+        "reference": "22086/43",
+        "same_pair_order": 1.6371714162964488,
+        "richardson_estimate": 0.0035417937581059254,
+        "fine_residual": 0.0035417937581059262,
+        "estimate_over_fine_residual": 0.9999999999999998
+      }
+    ]
+  },
+  "claim_bounds": {
+    "criterion_scope": "A leave-one-reference-out interpolation of banked mesh floors, not a production solver stopping tolerance.",
+    "new_equilibrium_solve": false,
+    "banked_residuals_only": true,
+    "third_mesh_available": false,
+    "independent_asymptotic_confirmation": false,
+    "new_reliability_verdict_claimed": false
+  },
+  "sources": {
+    "docs/figures/moment-conditioned-basin-entry/stall-mesh-sensitivity.json": "c23bc32012f02668dd1d567c184d3e23423ac5f557d4f0fe10a480298103eb1f",
+    "docs/figures/efit-forward-parity/tared-plasma-support-solve.json": "14ee0945438613f5c65ba79663de09eba0a75e9ee053eb5b1fbe814abaf9f7c2",
+    "docs/figures/efit-forward-parity/passive-inclusive-frozen-six-scorecard.json": "e2a625b2a1a4ce7324bd437eee0c9631d6b056b9406e5a3ae2393b0dc27a0aa6",
+    "benchmarks/efit_forward_parity_slice.py": "5e86a23cd8e0f249b4c2796e87e3b0326aa56684fe31518546e6522c666e112f"
+  }
+}

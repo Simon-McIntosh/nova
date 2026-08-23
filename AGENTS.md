@@ -145,6 +145,8 @@ the whole message. Verify before push:
 
 ### Testing
 
+Marker policy: `slow` marks the curated heavy numerical and integration tests—numerical sweeps, JAX JIT/vmap/grad kernels, signal-store round-trips, structural solves, reference-equilibrium reproductions, and pulse-scale integration—that the path-free default `pytest` lane excludes with `-m 'not slow'`; use `pytest -m "slow or not slow"` to select both fast and slow tests. An explicitly named test path or node ID clears only that inherited default filter and collects the named tests unless the command supplies its own `-m` or `--markexpr`, which is preserved. Any otherwise-successful session that collects zero tests is changed to pytest's nonzero `NO_TESTS_COLLECTED` exit status.
+
 ```bash
 # In a worktree, reuse the main checkout's environment (see One Environment
 # per Repository above); --no-sync because peers share that environment:

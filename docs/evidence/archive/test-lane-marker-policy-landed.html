@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="test-lane-marker-policy-landed">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="test-lane-marker-policy">
+<title>test-lane-marker-policy-landed</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="Test-Lane Marker Policy — cumulative execution evidence">
+<meta name="plan-summary" content="Landing record of the marker-policy plan: the explicit-path collection fix with its zero-collected guard, the policy statement, and the collection-clean lane, each with commits, measures and gate outcomes">
+</head>
+<body>
+<main class="plan-doc">
+
+<h1>Test-Lane Marker Policy — cumulative execution evidence</h1>
+
+<section id="s1">
+  <h2 id="s1-h">§1 — Explicit paths collect, and zero-collected fails loudly</h2>
+  <p><strong>explicit-path-collection</strong> landed 2026-08-23 — commit
+  <code>1ddaad0d</code>, merged <code>555c503b</code>, gate PASSED, 6 tests added.
+  <code>conftest.py</code> now removes only the inherited <code>not slow</code> expression
+  when collection targets came from explicit command-line paths, preserves user-supplied
+  marker expressions, and converts an otherwise-successful empty collection to
+  <code>NO_TESTS_COLLECTED</code>; <code>tests/test_collection_policy.py</code> pins those
+  rules with 6 passing cases.</p>
+  <table>
+    <thead><tr><th>Measure</th><th>Before</th><th>After</th></tr></thead>
+    <tbody>
+      <tr><td>plain <code>pytest tests/test_equilibrium_forward_solve.py</code></td>
+          <td>0 selected / 28 deselected, exit 5 (pytest 9.1.1)</td>
+          <td>28 collected / 28 passed, exit 0 (114.71 s)</td></tr>
+      <tr><td>deliberate zero-selection on the same file</td>
+          <td>silent</td><td>0 selected / 28 deselected, exit 5</td></tr>
+      <tr><td>repo-wide default lane (collect-only)</td>
+          <td>5745/6498 selected, 753 deselected</td>
+          <td>5751/6504 selected, 753 deselected (+6 = the policy tests)</td></tr>
+    </tbody>
+  </table>
+  <p>Qualifications kept visible: under pytest 9.1.1 the pre-change empty run already
+  exited 5, so the historical exit-0 record was version-bound — the enduring defect was the
+  silent zero-selection of an explicitly named path, and the guard now also covers
+  otherwise-successful empty sessions. Both repo-wide probes were interrupted by a
+  pre-existing collection error in <code>tests/measure_external_wall_correction.py</code>
+  (bare sibling import of <code>measure_exact_section_routes</code>), exit 2 — folded back
+  into the plan as its collection-clean section rather than left as a caveat. Full logs on
+  run <code>r-20260823T095247943054-explicit-path-collection</code>.</p>
+</section>
+
+<section id="s2">
+  <h2 id="s2-h">§2 — The policy stated once</h2>
+  <p><strong>marker-policy-statement</strong> landed 2026-08-23 — commit
+  <code>e83b5ee5</code>, merged <code>e2663039</code>, gate PASSED. One paragraph in the
+  AGENTS.md Testing section states the slow-marker meaning, the path-free default lane,
+  explicit-path selection semantics, and the zero-collected guard. Each claim maps to its
+  implementing lines: marker meaning → pyproject.toml:270–271; default lane →
+  pyproject.toml:264–268; explicit-path selection → conftest.py:21–27 and 41–46
+  (<code>_command_line_sets_markexpr</code> / <code>_explicit_test_paths</code>, user
+  <code>-m</code>/<code>--markexpr</code> preserved); zero-collected guard →
+  conftest.py:49–54 (<code>NO_TESTS_COLLECTED</code> on an otherwise-OK empty session).
+  The 6 policy tests pass beside the paragraph.</p>
+</section>
+
+<section id="s3">
+  <h2 id="s3-h">§3 — The default lane collects clean</h2>
+  <p><strong>lane-collection-repair</strong> landed 2026-08-23 — commit
+  <code>ef090c1d</code>, merged <code>ac3c1bf5</code>, gate PASSED. One-line fix:
+  <code>tests/measure_external_wall_correction.py</code> resolves
+  <code>baseline_elements</code>/<code>load_module</code> through the
+  <code>tests.measure_exact_section_routes</code> package path, so repository-root
+  collection and direct module execution resolve the same sibling deterministically.
+  Repo-wide default collect-only: 5751/6504 collected + 1 collection error + exit 2 →
+  <strong>5759/6512 collected, zero errors, exit 0</strong>, deselection unchanged at 753.
+  Both measure modules pass repository-root CLI import checks with exit 0; path-scoped
+  ruff clean. With this the plan closed shipped: implemented (§1), documented (§2), and the
+  lane it guards actually collects (§3).</p>
+</section>
+
+</main>
+</body>
+</html>

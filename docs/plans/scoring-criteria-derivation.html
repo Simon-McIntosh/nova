@@ -19,8 +19,8 @@
 <meta name="plan-effort-hours" content="4.0">
 <meta name="plan-depends-on" content="efit-forward-parity">
 <meta name="plan-blocks" content="mast-catalog-gpu-solve">
-<meta name="plan-version" content="6">
-<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="8">
+<meta name="plan-impl" content="0.75">
 </head>
 <body>
 <main class="plan-doc">
@@ -68,17 +68,16 @@
   landed</a> (commit <code>1a9019b7</code>, merged <code>e732d9c9</code>).</p>
 </section>
 
-<section id="s2">
-  <h2 id="s2h">§2 — Re-score the frozen six beside the retained 1e-8 count</h2>
-  <p>Apply the derived criterion to the six frozen MAST references and report the new
-  convergence count beside the retained registered-1e-8 count &mdash; both counts stay on the
-  page; neither replaces the other silently. The banked verdict figures this reads:
-  0/6 converge at the registered 1e-8; the closest bounded residuals sit at 1.97e-3 to
-  1.50e-2 with one vacuum collapse (21989). The re-score changes what the count MEANS, not
-  what was measured.</p>
-  <p><strong>Done when:</strong> a per-reference table (reference, closest residual, registered
-  verdict, derived-criterion verdict) is banked with the receipt, and the catalog-hold
-  implication is stated in one sentence either way.</p>
+<section id="s2" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-08-23</span>
+    <h2 id="s2h">§2 — Re-score the frozen six beside the retained 1e-8 count</h2></header>
+  <p class="landed-summary">Re-scored: registered physical convergence 0/6, derived 4/6 &mdash;
+  21978, 21983, 21985, 21986 pass their held-out bounds; 22086 exceeds its bound
+  (1.502e-2 &gt; 1.355e-2); 21989 stays an invalid zero-current vacuum root, visible but never
+  counted. The catalog hold REMAINS, now on a justified criterion. Both counts stay on the
+  page. Full record:
+  <a href="/nova/evidence/archive/scoring-criteria-derivation-landed#derived-rescore">§2
+  landed</a> (commit <code>dad444cb</code>, merged <code>ac3c1bf5</code>).</p>
 </section>
 
 <section id="s3">
@@ -100,6 +99,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20260823T1042" data-who="reckon-ship" data-when="2026-08-23 10:42">
     <div class="r-comment-body">derived-convergence-criterion landed — commit <code>1a9019b7</code>, merged <code>e732d9c9</code>; gate PASSED; 8 tests added; zero equilibrium solves. Formula: τ_i(h_i) = C_(s,−i) · h_i^p_(s,−i), C and p fitted only from OTHER references in the target's pre-registered topology stratum (closed-axis and confinement-construction strata never pooled), evaluated at the 0.125 m limiting spacing of the frozen 33×33 lattice. 6/6 positive held-out criteria: 21978/35 1.397e-2; 21983/35 1.294e-2; 21985/51 1.005e-2; 21986/46 1.264e-2; 21989/55 1.068e-2; 22086/43 1.355e-2. Circular estimator excluded by its own algebra: same-pair Richardson gives r^p = R_coarse/R_fine hence E_f = R_fine identically, measured ratios 1.0 ± 3e-16. Mutation regression proves changing a gated residual leaves all six criteria unchanged. Limits kept visible: only two mesh spacings exist, closed-axis leave-one-out has one peer pair, no third-mesh asymptotic confirmation — forward-operator-refinement §1's resolution raise is the natural third mesh. Receipt: docs/figures/scoring-criteria-derivation/derived-convergence-criterion.json (sha256 3e710eb2…).</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260823T1058" data-who="reckon-ship" data-when="2026-08-23 10:58">
+    <div class="r-comment-body">frozen-six-derived-rescore landed — commit <code>dad444cb</code>, merged <code>ac3c1bf5</code>; gate PASSED; 8 tests added; zero solves. Registered physical convergence 0/6; derived physical convergence 4/6 (raw numeric matches 1/6 and 5/6). Per reference (residual vs derived τ): 21978/35 1.242e-2 &lt; 1.397e-2 PASS; 21983/35 6.148e-3 &lt; 1.294e-2 PASS; 21985/51 1.971e-3 &lt; 1.005e-2 PASS; 21986/46 3.589e-3 &lt; 1.264e-2 PASS; 21989/55 residual 0 on a zero-current vacuum collapse — INVALID_PHYSICAL_ROOT, visible but never counted; 22086/43 1.502e-2 &gt; 1.355e-2 FAIL. Catalog-hold implication as stated in the receipt: the hold REMAINS — four of six is not six of six — now standing on a justified criterion instead of an inherited one. No registered tolerance changed; the two-mesh qualification rides in the receipt. Receipt: docs/figures/scoring-criteria-derivation/derived-criterion-rescore.json (sha256 63d5b2c2…).</div>
 </div>
 </section>
 </main>

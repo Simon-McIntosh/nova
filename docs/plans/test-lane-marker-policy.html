@@ -11,14 +11,14 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="Test-Lane Marker Policy — a suite that cannot run by default is worse than one that fails">
 <meta name="plan-summary" content="Fix the marker policy that makes the forward-solve suite collect zero of its twenty-eight tests and exit zero unless given an override, so the invocation any agent or CI step reaches for stops reporting a false green, and add a guard that fails loudly on a zero-collected run">
-<meta name="plan-status" content="active">
+<meta name="plan-status" content="shipped">
 <meta name="plan-roi" content="high">
 <meta name="plan-sprint" content="S13">
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-modified" content="2026-08-23">
 <meta name="plan-effort-hours" content="1.5">
-<meta name="plan-version" content="4">
-<meta name="plan-impl" content="0.33">
+<meta name="plan-version" content="9">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
 <main class="plan-doc">
@@ -56,37 +56,47 @@
   landed</a> (commit <code>1ddaad0d</code>, merged <code>555c503b</code>).</p>
 </section>
 
-<section id="s3">
-  <h2 id="s3h">§3 — The default lane collects clean</h2>
-  <p>Surfaced by this plan's own before/after collection probes: the repo-wide default
-  invocation is interrupted at collection &mdash;
-  <code>tests/measure_external_wall_correction.py</code> imports its sibling
-  <code>measure_exact_section_routes</code> by bare module name, which only resolves when
-  <code>tests/</code> itself is on <code>sys.path</code>, so the default rootdir run raises
-  a collection error and exits 2 before reporting a single result. A lane that cannot
-  complete collection defeats both the fast-lane guarantee and the new zero-collected
-  guard.</p>
-  <p><strong>Done when:</strong> the sibling import resolves under the default invocation,
-  the repo-wide default collect-only completes with zero collection errors and its exit
-  code and collected total are quoted beside the previously interrupted 5751/6504 exit-2
-  figures, and the touched measure modules still run their own focused checks with exit
-  codes quoted.</p>
+<section id="s3" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-08-23</span>
+    <h2 id="s3h">§3 — The default lane collects clean</h2></header>
+  <p class="landed-summary">Fixed by resolving the sibling import through the tests package
+  path: repo-wide default collect-only moves from 5751/6504 with one collection error and
+  exit 2 to 5759/6512 with zero errors and exit 0, deselection unchanged at 753; both
+  measure modules pass repository-root CLI import checks. Full record:
+  <a href="/nova/evidence/archive/test-lane-marker-policy-landed#s3">§3 landed</a>
+  (commit <code>ef090c1d</code>, merged <code>ac3c1bf5</code>).</p>
 </section>
 
-<section id="s2">
-  <h2 id="s2h">§2 — State the policy once</h2>
-  <p>Write the marker policy into the repository test guidance (the testing section of
-  <code>AGENTS.md</code>): what <code>slow</code> means, what the default lane runs, what an
-  explicit path selects, and the zero-collected guard &mdash; stated once, where both agents
-  and contributors already look.</p>
-  <p><strong>Done when:</strong> the policy paragraph exists in the test guidance, matches
-  the implemented behaviour exactly, and the plan's evidence record links the commit.</p>
+<section id="s2" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-08-23</span>
+    <h2 id="s2h">§2 — State the policy once</h2></header>
+  <p class="landed-summary">Stated: one paragraph in the AGENTS.md Testing section covering
+  the slow-marker meaning, the path-free default lane, explicit-path selection semantics,
+  and the zero-collected guard, each claim mapped in the run manifest to the conftest.py or
+  pyproject.toml lines implementing it. Full record:
+  <a href="/nova/evidence/archive/test-lane-marker-policy-landed#s2">§2 landed</a>
+  (commit <code>e83b5ee5</code>, merged <code>e2663039</code>).</p>
 </section>
 
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-20260823T1027" data-who="reckon-ship" data-when="2026-08-23 10:27">
     <div class="r-comment-body">explicit-path-collection landed — commit <code>1ddaad0d</code>, merged <code>555c503b</code>; gate PASSED; 6 tests added. Measures: plain per-file forward-solve invocation 28 collected / 28 passed exit 0 (was 0 selected / 28 deselected); deliberate zero-selection and otherwise-successful empty collections now exit 5 (NO_TESTS_COLLECTED), hook-pinned; repo-wide fast lane unchanged at 753 deselected before/after, selected/total rose exactly by the 6 new tests (5745/6498 → 5751/6504). Qualification kept visible: pytest 9.1.1 already exited 5 on the empty run pre-change, so the historical exit-0 was version-bound. Byproduct fold: both repo-wide probes hit a pre-existing collection ERROR in tests/measure_external_wall_correction.py (bare sibling import) interrupting the lane at exit 2 — folded as §3. Logs on the run record; no figure (exact count/exit-code comparison).</div>
 </div>
+<div class="r-comment" data-section="s2" data-id="c-20260823T1052" data-who="reckon-ship" data-when="2026-08-23 10:52">
+    <div class="r-comment-body">marker-policy-statement landed — commit <code>e83b5ee5</code>, merged <code>e2663039</code>; gate PASSED. One paragraph at AGENTS.md:148 (Testing section) states the slow-marker meaning, the path-free default lane, explicit-path selection semantics, and the zero-collected guard; the manifest maps each claim to the implementing lines (pyproject.toml:264-271; conftest.py:21-27, 41-46, 49-54). The 6 policy tests still pass beside it. §2 closes; §3 lane-collection-repair remains in flight.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260823T1100" data-who="reckon-ship" data-when="2026-08-23 11:00">
+    <div class="r-comment-body">lane-collection-repair landed — commit <code>ef090c1d</code>, merged <code>ac3c1bf5</code>; gate PASSED. One-line fix: the wall-correction measure module resolves its sibling through the tests package path. Repo-wide default collect-only: previously 5751/6504 collected, 1 collection error, exit 2 — now 5759/6512 collected, 753 deselected unchanged, zero errors, exit 0. Both measure modules pass repository-root CLI import checks (exit 0); path-scoped ruff clean. §3 closes and with it the plan: all three sections landed.</div>
+</div>
+</section>
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-tlmp-close" data-status="resolved" data-capability-version="1.0" data-capability-class="routine" data-written-by="reckon-ship" data-written-at="2026-08-23 11:02" data-recommends-skill="/reckon-ship test-lane-marker-policy" data-resolved-at="2026-08-23T10:19:32+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Close the marker-policy plan</h4>
+    <div class="r-fu-body">All three sections landed: explicit-path collection with the zero-collected guard, the policy paragraph in AGENTS.md, and the collection-clean default lane. No work remains on this plan.</div>
+    <pre class="r-fu-prompt">/reckon-ship test-lane-marker-policy</pre>
+    <p class="r-fu-outcome">done — no followup: the plan's declared scope is fully landed (commits 1ddaad0d, e83b5ee5, ef090c1d); the marker policy is implemented, documented and demonstrated, and the default lane collects clean. No successor work is owed by this plan.</p>
+    </article>
 </section>
 </main>
 </body>

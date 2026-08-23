@@ -72,6 +72,33 @@
   (sha256 <code>3e710eb2c038720de5a8fc9d6be13dfc3cb780aa251418d389f21724bf6bfb83</code>).</p>
 </section>
 
+<section id="derived-rescore">
+  <h2 id="derived-rescore-h">§2 — The frozen six under the held-out criteria</h2>
+  <p><strong>frozen-six-derived-rescore</strong> landed 2026-08-23 — commit
+  <code>dad444cb</code>, merged <code>ac3c1bf5</code>, gate PASSED, 8 tests added, zero
+  solves. Registered physical convergence 0/6; derived physical convergence
+  <strong>4/6</strong> (raw numeric-threshold matches 1/6 and 5/6 — the vacuum zero is
+  visible but never counted).</p>
+  <table>
+    <thead><tr><th>Reference</th><th>Closest residual</th><th>Derived τ</th>
+      <th>Registered</th><th>Derived</th></tr></thead>
+    <tbody>
+      <tr><td>21978/35</td><td>1.2419e-02</td><td>1.3970e-02</td><td>FAIL</td><td>PASS</td></tr>
+      <tr><td>21983/35</td><td>6.1478e-03</td><td>1.2943e-02</td><td>FAIL</td><td>PASS</td></tr>
+      <tr><td>21985/51</td><td>1.9709e-03</td><td>1.0050e-02</td><td>FAIL</td><td>PASS</td></tr>
+      <tr><td>21986/46</td><td>3.5895e-03</td><td>1.2644e-02</td><td>FAIL</td><td>PASS</td></tr>
+      <tr><td>21989/55</td><td>0 (vacuum)</td><td>1.0682e-02</td><td>INVALID_PHYSICAL_ROOT</td><td>INVALID_PHYSICAL_ROOT</td></tr>
+      <tr><td>22086/43</td><td>1.5019e-02</td><td>1.3545e-02</td><td>FAIL</td><td>FAIL</td></tr>
+    </tbody>
+  </table>
+  <p>Catalog-hold implication as stated in the receipt: <strong>the hold remains</strong> —
+  only four of six frozen references pass the held-out criterion; 22086/43 exceeds its bound
+  and 21989/55 is an invalid vacuum root. No criterion or registered tolerance was changed;
+  the two-mesh / no-independent-asymptotic-confirmation qualification rides in the receipt.
+  Receipt: <code>docs/figures/scoring-criteria-derivation/derived-criterion-rescore.json</code>
+  (sha256 <code>63d5b2c2a1b6b7dc887ab1e874b861fe67b70efc46c6b90add7b5e876ae16c56</code>).</p>
+</section>
+
 </main>
 </body>
 </html>

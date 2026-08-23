@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "verdict": "ALIGNED_WITH_OWNER_REROUTE_AND_CONSUMER_OWNED_GRID_POLICIES",
+  "plasma_reference": {
+    "requested_cells": -2100,
+    "realised_cells": 2214,
+    "cell_pitch_m": 0.11547025468347542
+  },
+  "wall_sampling": {
+    "status": "rerouted_to_owner",
+    "owner_symbol": "benchmarks.diiid_forward_gs_match.pseudo_wall",
+    "owner_path": "benchmarks/diiid_forward_gs_match.py:465-486",
+    "default_consuming_path": "benchmarks/diiid_forward_gs_match.py:621",
+    "current_points_per_side": 33,
+    "proposed_points_per_side": 65,
+    "current_wall_nodes": 132,
+    "proposed_wall_nodes": 260,
+    "wall_target_block_cost_ratio": 1.9696969696969697,
+    "cost_scope": [
+      "source_to_wall target rows",
+      "plasma_to_wall target rows"
+    ],
+    "unaffected_cost": "plasma-to-plasma coupling block",
+    "ruling": "The DIII-D onboarding lane owns the active source file, so this bundle records the required 33-to-65 change and its 1.97x wall-target cost without crossing that lane's write surface."
+  },
+  "reference_suite": {
+    "owner_symbol": "tests.test_equilibrium_forward_reference.SUITE_CELLS",
+    "owner_path": "tests/test_equilibrium_forward_reference.py",
+    "before_requested_cells": -500,
+    "before_realised_cells": 566,
+    "after_requested_cells": -2100,
+    "after_realised_cells": 2214,
+    "target_row_cost_ratio": 3.911660777385159,
+    "dense_pair_cost_ratio": 15.30109000114444,
+    "evidence_default_consolidated": true,
+    "evidence_default_rule": "EVIDENCE_CELLS aliases SUITE_CELLS instead of owning a second implicit carrier.",
+    "cache_policy": {
+      "semantic_key": "63bf04d86dc3223d",
+      "consumer": "benchmarks.efit_forward_parity_slice._dina_composition_case",
+      "rule": "The parity consumer derives the semantic cache group from the reference module's suite owner instead of pinning a duplicate key."
+    },
+    "module_timing": {
+      "command": "pytest -p no:cacheprovider tests/test_equilibrium_forward_reference.py",
+      "cache_state": "warm semantic carrier in both runs",
+      "before_wall_seconds": 315.55,
+      "after_wall_seconds": 914.61,
+      "wall_delta_seconds": 599.06,
+      "wall_ratio": 2.8984629995246395,
+      "wall_percent_increase": 189.84629995246396
+    },
+    "before_result": {
+      "collected": 29,
+      "passed": 28,
+      "failed": 1
+    },
+    "after_result": {
+      "collected": 29,
+      "passed": 28,
+      "failed": 1
+    },
+    "owned_red_row": "test_the_passive_closure_moves_the_reproduction_by_a_tenth_of_a_percent",
+    "red_row_unchanged": true,
+    "classification": "The mesh-independent coupled-map response remains deliberately visible; changing the carrier does not recategorise or hide it."
+  },
+  "shell_spacing": {
+    "owner_symbol": "nova.frame.frame.Frame.dshell",
+    "owner_path": "nova/frame/frame.py",
+    "generic_default": 0,
+    "policy_symbol": "nova.frame.frame.Frame.shell_spacing_policy",
+    "policy": "machine_owned_physical_spacing_m",
+    "rule": "A concrete machine description supplies a positive physical shell spacing in metres. Generic Frame.dshell=0 only preserves authored vertices; it is not an accuracy default, and no shell spacing is derived from a plasma-cell count.",
+    "consumers": [
+      {
+        "symbol": "nova.frame.frame.Frame.shell",
+        "path": "nova/frame/frame.py:75",
+        "role": "passes the machine-owned value into the shell constructor"
+      },
+      {
+        "symbol": "nova.frame.machinedata.MachineData.build_coilset",
+        "path": "nova/frame/machinedata.py:352-365",
+        "role": "meshes each machine-model shell segment using MachineData.dshell"
+      },
+      {
+        "symbol": "nova.imas.machine.PoloidalFieldPassive.build",
+        "path": "nova/imas/machine.py:970-994",
+        "role": "passes the selected machine's dshell into passive thick-line insertion"
+      },
+      {
+        "symbol": "nova.frame.vde.VDE.dshell",
+        "path": "nova/frame/vde.py:36",
+        "role": "declares a machine-specific 0.5 m spacing"
+      }
+    ],
+    "copied_plasma_count": false,
+    "global_unmeasured_spacing_introduced": false
+  },
+  "rectangular_target_authority": {
+    "verdict": "EXPLICIT_COEXISTENCE_CONSUMER_OWNED",
+    "shared_rule": "Generic Biot targets remain disabled at None. Each consumer that creates a rectangular target owns its requested count according to that output domain and its own convergence evidence; a stored-map axis count is not silently imposed on unrelated targets.",
+    "authorities": [
+      {
+        "symbol": "nova.biot.biot.Biot.ngrid",
+        "path": "nova/biot/biot.py:203",
+        "value": null,
+        "consumer_contract": "fail-closed generic rectangular target"
+      },
+      {
+        "symbol": "nova.biot.biot.Biot.nlevelset",
+        "path": "nova/biot/biot.py:90",
+        "value": null,
+        "consumer_contract": "fail-closed generic contour target"
+      },
+      {
+        "symbol": "nova.imas.extrapolate.Grid.ngrid",
+        "path": "nova/imas/extrapolate.py:78",
+        "value": 5000,
+        "consumer_contract": "geometry-generic equilibrium extrapolation domain, with IDS-native sizing available"
+      },
+      {
+        "symbol": "nova.imas.pulsedesign.PulseDesign.nlevelset",
+        "path": "nova/imas/pulsedesign.py:299",
+        "value": 6000,
+        "consumer_contract": "pulse-design contour extraction target"
+      },
+      {
+        "symbol": "nova.imas.waveform.Waveform.nlevelset",
+        "path": "nova/imas/waveform.py:34",
+        "value": 2500,
+        "consumer_contract": "waveform plasma-scale contour target"
+      }
+    ],
+    "reason_not_unified_at_4225": "Only a consumer judged on a stored 65 by 65 flux map owns the 4225-node identity. Extrapolation, pulse-design contouring and waveform contouring have different domains and outputs, so replacing their counts with one map-derived constant would exchange visible duplicate values for a hidden, scientifically false shared authority.",
+    "future_change_gate": "A consumer may change its count only with convergence evidence for its own output; generic Biot defaults remain None."
+  },
+  "verification": {
+    "routed_external_defect": "nova/imas/waveform.py and nova/imas/fuse.py import Ids from its former module; a separate owner node is repairing that pre-existing defect, which is excluded from this bundle.",
+    "reference_module_before_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T174656893022-alignment-bundle/reference-before.log",
+    "reference_module_after_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T174656893022-alignment-bundle/reference-after.log",
+    "policy_smoke_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T174656893022-alignment-bundle/policy-smoke.log",
+    "receipt_validation_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T174656893022-alignment-bundle/receipt-validation.log",
+    "focused_parity_criterion_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T174656893022-alignment-bundle/focused-parity-criterion-inscope.log",
+    "ruff_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T174656893022-alignment-bundle/ruff-after.log",
+    "source_sha256": {
+      "tests/test_equilibrium_forward_reference.py": "b5ca86a4ef9ee5addc414518a32493be1deb73faca466d979b3b0ec4ee604290",
+      "nova/frame/frame.py": "0aeb8f92ff49bbdabfaada055b19855139361568baba3719d357f45fe95904ca",
+      "benchmarks/efit_forward_parity_slice.py": "84ba8502afebba01ddbe5f0b4fd051998dafbe2d1dadda2590c0eb903553f166"
+    }
+  }
+}

@@ -75,11 +75,12 @@ The passive structure is in the machine, and is not the deviation floor.
     and silently models a different machine. Both are read through the
     parallelogram the entry itself declares.
 
-    What that is worth is measured twice over, on the suite mesh. Before any
+    What that is worth is measured twice over, on the reference-native suite
+    mesh. Before any
     solve, the flux the passive currents put on the plasma cells is a
     matrix-vector product, and it comes to 0.093 percent of the axis to
     boundary span. Through the coupled solve that direct input moves the
-    reproduction score by 0.610 percentage points, four times the registered
+    reproduction score by 0.638 percentage points, four times the registered
     0.15-point cross-source ceiling. The direct field still meets its own
     budget; noncontractive free-boundary feedback supplies the excess. The
     closure assertion therefore remains red under the map-gain chain rather
@@ -112,10 +113,11 @@ The route is a root find because the map does not contract.
     An elongated diverted column held at fixed conductor currents is
     axisymmetrically unstable, and that shows up here as an eigenvalue of the
     free-boundary map outside the unit circle: power iteration on the exact
-    tangent at the converged equilibrium measures 1.25 on the suite mesh and
-    1.40 at 1587 cells. A step relaxed by :math:`\beta` scales that mode by
-    :math:`(1-\beta) + \beta \lambda`, so no damping rescues a relaxed Picard
-    route. Seeded ON the converged state Picard drives the residual back up,
+    tangent at the converged equilibrium measures 1.25 and 1.40 on the banked
+    coarse and intermediate carriers. A step relaxed by :math:`\beta` scales
+    that mode by :math:`(1-\beta) + \beta \lambda`, so no damping rescues a
+    relaxed Picard route. Seeded ON the converged state Picard drives the
+    residual back up,
     while history-dependent Anderson mixing is required only to remain finite
     over the same fixed budget. Seeded on the stored map the Picard trace may
     contract and burst before the column reaches the wall and the source,
@@ -241,8 +243,10 @@ CANDIDATE_USERS = ("public", getpass.getuser())
 
 #: Target cell counts. The plasma grid is generated from a negative cell-count
 #: request, so the realised count follows the wall area and the hexagon pitch:
-#: -500 gives 566 cells at a 0.237 m pitch and -1500 gives 1587 at 0.137 m.
-#: The suite runs the coarser of the two and the evidence figure the finer.
+#: -500 gives 566 cells at a 0.237 m pitch, -1500 gives 1587 at 0.137 m,
+#: and -2100 gives 2214 at 0.115 m. The suite and its default evidence figure
+#: use the reference-native carrier; the other two remain banked intervention
+#: rungs rather than competing defaults.
 #: Refining does not reduce the deviation against the reference, it RAISES it —
 #: the solved flux map misses the stored one by 1.50 % of the span at 566 cells
 #: and 6.86 % at 1587 — which is what identifies the deviation as a
@@ -252,8 +256,8 @@ CANDIDATE_USERS = ("public", getpass.getuser())
 #: finer mesh resolves more of a disagreement that was always there, and the
 #: solve then slides further along the soft vertical and radial force balance
 #: before it comes to rest.
-SUITE_CELLS = -500
-EVIDENCE_CELLS = -1500
+SUITE_CELLS = -2100
+EVIDENCE_CELLS = SUITE_CELLS
 #: Poloidal field coil filaments per conductor, and wall nodes PER FIRST-WALL
 #: SEGMENT the limiter flux is searched on — the boundary sampler distributes
 #: the request per segment, not over the whole loop, so this multiplies the
@@ -327,19 +331,20 @@ BOUNDARY_PITCHES = 1.5
 #: by a percent or more.
 AREA_TOLERANCE = 1.0e-5
 #: Ceiling on the flux the passive structure alone puts on the plasma cells,
-#: as a fraction of the axis to boundary span. Measured 9.3e-4 on the suite
-#: mesh and 9.6e-4 at 1587 cells — a tenth of a percent, and insensitive to
-#: the mesh, because it is a property of the drive rather than of the solve.
+#: as a fraction of the axis to boundary span. The banked 566/1587/2214-cell
+#: ladder measures 9.3e-4/9.6e-4/9.7e-4 — a tenth of a percent, and insensitive
+#: to the mesh, because it is a property of the drive rather than of the solve.
 PASSIVE_FLUX_CEILING = 2.0e-3
 #: How far the stored map's own free-boundary residual has to exceed that
 #: contribution for the passive structure to be excluded as the deviation
-#: floor. Measured 10.3 on the suite mesh and 14.1 at 1587 cells, so the
-#: structure is an order too small and grows no closer under refinement; this
-#: pin keeps the claim at "an order" with room to spare.
+#: floor. The banked coarse and intermediate carriers measure 10.3 and 14.1,
+#: so the structure is an order too small and grows no closer under refinement;
+#: this pin keeps the claim at "an order" with room to spare.
 PASSIVE_SHORTFALL = 5.0
 #: Ceiling on the passive closure's change in flux-map reproduction deviation,
-#: in percentage points of the reference flux span. Measured 0.098 points on
-#: the suite mesh against 0.093 percent of span supplied by the passive drive.
+#: in percentage points of the reference flux span. The reference-native
+#: carrier measures a 0.097-point direct response against a 0.638-point coupled
+#: move, retaining the ceiling as a deliberately visible physics-owned row.
 PASSIVE_REPRODUCTION_MOVE_CEILING = 0.15
 #: Internal-inductance closure response measured on the evidence mesh, in
 #: percentage points. Unlike flux-map reproduction, l_i responds strongly to
@@ -354,8 +359,9 @@ PASSIVE_INTERNAL_INDUCTANCE_MOVE = 0.904734074
 #: along with the whole passive family.
 STABILISATION_ELEMENTS = ("VS3U", "VS3L")
 #: Ceiling on the flux the stabilisation pair alone puts on the plasma cells, as
-#: a fraction of the axis to boundary span. Measured 2.0e-5 on the suite mesh
-#: and 2.1e-5 at 1587 cells, a fiftieth of what the passive structure carries.
+#: a fraction of the axis to boundary span. The banked coarse and intermediate
+#: carriers measure 2.0e-5 and 2.1e-5, a fiftieth of what the passive structure
+#: carries.
 STABILISATION_FLUX_CEILING = 1.0e-4
 #: Turns per branch the pair is bounded at. The entry declares ONE, and the
 #: bound is written for four so that it also covers a reading in which each
@@ -381,8 +387,8 @@ QUADRATURE_TOLERANCE = 0.05
 #: so a map whose spectrum does not separate costs the same and cannot hang.
 POWER_ITERATIONS = 40
 #: How far the dominant eigenvalue has to clear one for non-contraction to be
-#: a measurement rather than a rounding artefact. Measured 1.249 on the suite
-#: mesh and 1.401 at 1587 cells.
+#: a measurement rather than a rounding artefact. The banked coarse and
+#: intermediate carriers measure 1.249 and 1.401.
 CONTRACTION_MARGIN = 1.05
 #: Residual growth the raw Picard map must show over the bounded budget when
 #: seeded on the equilibrium itself. History-dependent mixing is not required
@@ -1419,7 +1425,7 @@ def receipt_mesh(machine: HexMachine) -> StencilMesh:
     that the cluster determine a quadratic at all.
 
     The difference is not cosmetic. Restricted to the regular rings, 37 of the
-    383 core cells on the suite mesh carry no derivative, all of them at the
+    383 core cells on the banked coarse mesh carry no derivative, all of them at the
     plasma edge where the poloidal field is largest, and the internal
     inductance the receipt integrates falls 16 % short — 15 % of that from the
     missing cells and 1 % from the fit. Selecting on conditioning instead

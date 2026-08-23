@@ -130,7 +130,6 @@ CONTROL_PLASMA_CURRENT_A = 0.0
 ANDERSON_EVALUATIONS = NEWTON_STEPS * (GMRES_ITERATIONS + 2)
 DAMPED_HYBRID_WEIGHTS = (0.5, 0.55, 1.0 / 1.766, 0.6, 0.65)
 EXTENDED_PROMOTION_BUDGETS = (50, 100)
-DINA_CACHE_KEY = "746fbe1553c4b242"
 POWER_ITERATIONS = 40
 
 
@@ -2569,19 +2568,16 @@ def _dina_composition_case() -> dict[str, Any]:
     case = reference.reference_case()
     if isinstance(case, str):
         raise RuntimeError(case)
-    store = reference.ZarrStore(
-        filename=reference.MACHINE_CACHE_FILENAME,
-        dirname=".nova",
-        group=DINA_CACHE_KEY,
+    store, identity = reference._machine_cache_store(
+        case, reference.SUITE_CELLS, passive=True
     )
     store.load()
-    identity = json.loads(store.data.attrs["semantic_identity"])
-    machine = reference._machine_from_dataset(store.data, identity, DINA_CACHE_KEY)
+    machine = reference._machine_from_dataset(store.data, identity, store.group)
     arrays, bytes_verified = reference.assert_machine_arrays_bitwise_identical(
         machine, machine
     )
     requested = int(identity["discretisation"]["cells"])
-    if requested != reference.SUITE_CELLS or len(machine.node) != 566:
+    if requested != reference.SUITE_CELLS or len(machine.node) != 2214:
         raise RuntimeError("the banked DINA control is not the convergent suite mesh")
     operator = reference.forward_operator(case, machine)
     seed = reference.seed_flux(case, machine)
@@ -2606,7 +2602,7 @@ def _dina_composition_case() -> dict[str, Any]:
             "span_definition": "declared axis-to-boundary total-flux span",
             "plasma_current_a": float(case.plasma_current),
             "control_qualification": (
-                "this exact 566-cell production operator is the suite's "
+                "this exact 2214-cell production operator is the suite's "
                 "converged diverted DINA control; no solve is run here"
             ),
         },
@@ -2615,7 +2611,7 @@ def _dina_composition_case() -> dict[str, Any]:
             "requested_cells": requested,
             "realised_cells": len(machine.node),
             "source_moments": "clipped linear cell-current moments",
-            "cache_key": DINA_CACHE_KEY,
+            "cache_key": store.group,
             "cache_arrays_verified": arrays,
             "cache_bytes_verified": bytes_verified,
             "bitwise_stored_precision": True,

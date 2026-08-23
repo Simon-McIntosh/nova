@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T23:03:53",
+  "updated": "2026-08-23T23:08:45",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -714,6 +714,11 @@
             "slug": "topology-preserving-continuation",
             "why_now": "It is the project critical path and it blocks two held plans. The catalog throughput ladder cannot open while the solve stalls, and the DIII-D kill gate returns 0 of 5 at any candidate tolerance. The frontier is now quantified rather than mysterious, so the work is well posed for the first time: the obstacle is a step-length cap with a measured value, not an unattributed failure.",
             "done_when": "The five score-blind frames are re-measured on a route that advances along the topology-preserving manifold, quoting per-frame terminal residual, admitted-advance count against the banked 7, 7, 10, 5 and 9 of 89, mean advance length as a fraction of the Newton step against the banked 0.03125 cap, and achieved Newton-step-equivalents against the banked 2.8 - with terminal topology and X-point finiteness held. A route that holds topology and still stalls is a reportable negative that closes the section honestly; a route that gains residual by losing topology does not close it at all."
+          },
+          {
+            "slug": "derived-observable-parity",
+            "why_now": "It is runnable today on data that already exists, blocks nothing and is blocked by nothing, so it gives this sprint a parallel lane beside a long serial one. And it is the only item that guards the catalog's actual product: the ladder emits boundaries, moments and conservation diagnostics, and terminal flux agreement at 3.58e-12 does not make that store trustworthy if the moments it publishes differ between the routes that produced them.",
+            "done_when": "Each of the three failing observables carries a verdict of COMPUTATION_DIFFERS or STATE_INHERITED with the evidence that separated them, the convicted ones are repaired at the differing operation rather than by moving a bound, the 69 registered bounds are re-applied to the six held-out cases with the pass count quoted against the banked 66 of 69 and 407 of 414, and the observable check is expressed as a reusable acceptance demonstrated at more than one batch size with any batch-size dependence stated."
           }
         ],
         "description": "The forward solve holds the correct branch and stalls. Topology admissibility caps the Newton step near one thirty-second, so an 89-iteration budget traverses about 2.8 step-equivalents against a need an order of magnitude larger, and extending the backtracking ladder to reach that step is a measured null. This sprint closes that frontier by advancing along the admissible set rather than retreating into it, by choosing seeds on alignment rather than proximity, and by making step conditioning work at any Krylov projection dimension rather than the one it was fitted to."
@@ -877,6 +882,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 63
+    "_version": 64
   }
 }

@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="derived-observable-parity">
+  <meta name="plan-title" content="Derived-Observable Parity — the same quantity from two routes">
+  <meta name="plan-summary" content="Three registered terminal observables disagree between the compiled and eager routes by up to 3.9 times their bound while the terminal states agree to 3.6e-12. The disagreement is in the observable computation, not inherited from the state, and a labeled catalog emits exactly these quantities.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="5.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S14">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="equilibrium-metric-parity">
+  <meta name="plan-blocks" content="mast-catalog-gpu-solve">
+  <title>Derived-Observable Parity | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-23">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Three observables survived the fix that explained everything else</h2>
+
+    <p>Applying the 69 registered terminal-observable bounds to the six held-out cases returns
+    <strong>66 of 69 bounds passing and 407 of 414 case-observable evaluations passing</strong>.
+    The three that fail are the subject of this plan, and the reason they deserve their own plan
+    rather than a line in someone else's is that <em>they are not explained by the mechanism that
+    explained everything else on this map</em>.</p>
+
+    <table>
+      <caption>The three failing observables, and the conditioning severity of the case that failed them</caption>
+      <thead>
+        <tr><th scope="col">Case</th><th scope="col">Failing observable</th><th scope="col">Bound ratio</th><th scope="col">Max projected Krylov condition</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>21985/51</td><td><code>conservation.divergence_j</code></td><td>3.925</td><td>3405.76</td></tr>
+        <tr><td>21989/55</td><td><code>conservation.divergence_j</code>, <code>moments.major_radius</code></td><td>3.925, 2.737</td><td>173.01</td></tr>
+        <tr><td>21978/35</td><td><code>moments.volume</code> (exact equality)</td><td>—</td><td>3674.07</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The first argument that these are independent: they outlived the repair.</strong>
+    Iteration-local Krylov conditioning collapsed the compiled-versus-eager terminal flux
+    difference from 1.1646900802908533e-05 to <strong>3.5787553476218648e-12</strong> on these same
+    six cases — a 3.3-million-fold reduction. If two routes produce terminal states agreeing to
+    twelve decimal places and a derived quantity computed from those states still disagrees by
+    3.9 times its bound, that disagreement <em>cannot</em> have been inherited from the state. It
+    is in the computation of the observable.</p>
+
+    <p><strong>The second argument: they do not track amplification severity.</strong> If the
+    failures were residual fallout from the non-normal amplification, the worst-conditioned cases
+    would fail worst. They do not. Case 21989/55 carries a maximum projected Krylov condition of
+    <strong>173.01</strong> — by far the mildest of the three — and fails <em>two</em> observables,
+    while 21978/35 at 3674.07 fails one and 21985/51 at 3405.76 fails one. The ordering is absent,
+    which is what one expects if the cause is a property of the observable rather than of the
+    trajectory that reached it.</p>
+
+    <p><strong>The third argument, and the one that decides the priority: a labeled catalog emits
+    exactly these quantities.</strong> The throughput plan's product is not a flux map, it is a
+    store of boundaries, moments and conservation diagnostics across 1,341,435 slices. Terminal
+    flux agreement at 3.58e-12 does not make that store trustworthy if the moments it publishes
+    differ between the batched and per-slice routes that produced them. Every argument made about
+    batched-equals-per-slice reproducibility has so far been made about the state; the labels are
+    where it actually lands for a consumer.</p>
+
+    <p><strong>The honest caveat, stated because it bounds the first node rather than the
+    plan.</strong> These observables were measured on a route that does not yet converge — the
+    six held-out cases reach a reference-native terminal residual of 7.322007721740656e-5, above
+    any candidate criterion. A non-converged state's derived quantities may legitimately differ
+    between routes more than a converged one's. That is precisely why §2 exists and why it comes
+    first: the discriminator separates the two readings on data that already exists, before any
+    repair is attempted.</p>
+
+    <h2 id="s2">§2 — Separate a computation difference from a state difference</h2>
+
+    <p>The discriminating question is sharp and answerable without new physics: given two terminal
+    states that agree to a measured tolerance, does the observable's own evaluation path produce
+    different answers from the <em>same</em> input? Evaluate each failing observable on a single
+    shared terminal state through both routes' evaluation paths. If the answers differ, the
+    computation differs and the state is exonerated. If they agree, the disagreement is inherited
+    from the residual state difference and scales with it — testable by evaluating across cases
+    whose state agreement spans a range.</p>
+
+    <p><code>moments.volume</code> failing an <strong>exact-equality</strong> bound is the sharpest
+    probe in the set and should be attacked first. Exact equality cannot fail by accumulation of
+    rounding in a well-posed shared computation; it fails when the two routes evaluate structurally
+    different things — a different cell count, a different mask, a different clip, or a reduction
+    performed in a different association. Whatever explains it is likely to explain the other two,
+    because the other two are continuous quantities computed over the same support.</p>
+
+    <p><strong>Done when</strong> each of the three failing observables carries a verdict of
+    <code>COMPUTATION_DIFFERS</code> or <code>STATE_INHERITED</code>, with the evidence that
+    separated them quoted: for the first, the two evaluations of a single shared state and their
+    difference; for the second, the observable difference plotted against state agreement across
+    the six cases with a stated correlation. The receipt names the first structurally differing
+    operation for any observable reaching the first verdict. No repair is attempted in this
+    section.</p>
+
+    <h2 id="s3">§3 — Repair what the discriminator convicts</h2>
+
+    <p>Scope follows the verdict rather than preceding it, which is why this section carries no
+    predetermined mechanism. An observable convicted as <code>COMPUTATION_DIFFERS</code> is repaired
+    at the differing operation so both routes evaluate one definition — reusing the derived-quantity
+    chain that <a href="/nova/equilibrium-metric-parity">equilibrium-metric-parity</a> established
+    rather than authoring a second one. That plan proved every derived quantity agrees when computed
+    from the same flux map; this one is the complementary question of the same quantity computed
+    through two routes, so its machinery is the natural home and any new component needs a stated
+    reason the existing one does not fit.</p>
+
+    <p>An observable convicted as <code>STATE_INHERITED</code> is <em>not</em> repaired here. It is
+    recorded as a consumer of the convergence work and its bound is re-examined once the state
+    difference falls — because a bound written against a non-converged state may itself be the thing
+    that is wrong.</p>
+
+    <p><strong>Done when</strong> the 69 registered bounds are re-applied to the six held-out cases
+    and the pass count is quoted against the banked 66 of 69 and 407 of 414, with any remaining
+    failure carrying its verdict and its reason for remaining. A repair that moves a bound rather
+    than a computation is refused unless the bound's derivation is shown to be the defect.</p>
+
+    <h2 id="s4">§4 — Make label parity an acceptance condition, not an afterthought</h2>
+
+    <p>The throughput ladder's reproducibility argument is currently expressed on the state: a
+    one-map bound at sixteen epsilon and terminal agreement conditioned on seed alignment. Nothing
+    in it obliges the <em>labels</em> to agree, and the labels are the deliverable. This section
+    closes that by making the registered observable bounds part of what a throughput rung must
+    demonstrate.</p>
+
+    <p>It carries one measured constraint from the parity work that must not be forgotten here: a
+    <strong>semantically zero</strong> representation change — a matrix widening carrying no
+    numerical difference — was measured to move a reference root by 10.744 orders on this map. A
+    batched path differs from a per-slice path in layout, accumulation order and kernel selection,
+    all changes of that class. So label parity established at one batch size and device count says
+    nothing about another, and this section's contribution is an acceptance condition each rung
+    re-runs rather than a certificate issued once.</p>
+
+    <p><strong>Done when</strong> the observable-bound check is expressed as a reusable acceptance
+    the throughput rungs invoke, demonstrated at more than one batch size, with the per-batch pass
+    counts quoted and any batch-size dependence stated explicitly.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="exact-equality-bounds" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Should any terminal observable carry an exact-equality bound
+        across two execution routes at all? moments.volume does, and it fails. Exact
+        equality is the strongest possible statement and it is either exactly right — the quantity
+        is discrete and must be identical — or it is a category error on a floating-point pipeline
+        where layout and accumulation order legitimately differ. Answer it before repairing, since
+        the two readings imply opposite fixes.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="keep-exact">keep exact equality; a discrete quantity must be identical</button>
+      <button class="r-opt" data-value="tolerance-bound">replace with a derived tolerance bound</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-dop-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-23" data-recommends-skill="/reckon-ship derived-observable-parity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Run §2 first and let its verdict scope §3 — do not assume the repair</h4>
+    <div class="r-fu-body"><p>§2 BEFORE §3, and the ordering is the point rather than a formality. The three failures could be defects in how each observable is computed, or they could be inherited from a terminal state difference that has not yet fallen because the solve does not converge. Those two readings imply OPPOSITE fixes — repair the evaluation path, or leave it alone and re-examine the bound once convergence lands — so any repair attempted before the discriminator runs has an even chance of being the wrong one. §2 needs no new solve and no new physics: it evaluates each failing observable on a single shared terminal state through both routes' paths, on data already banked.</p><p>ATTACK <code>moments.volume</code> FIRST. It fails an EXACT-EQUALITY bound, which cannot fail by accumulated rounding in a shared computation — it fails when the two routes evaluate structurally different things, such as a different cell count, mask, clip, or reduction association. It is therefore the sharpest probe in the set, and whatever explains it will probably explain the two continuous quantities computed over the same support.</p><p>THE OPEN DECISION IS LOAD-BEARING AND SHOULD BE ANSWERED BEFORE THE REPAIR, not after. <code>exact-equality-bounds</code> asks whether any terminal observable should carry exact equality across two execution routes at all. If a discrete quantity must be identical, the failure is a genuine defect; if it is a category error on a pipeline where layout and accumulation order legitimately differ, the bound is the defect. Repairing under the wrong reading produces a plausible-looking change to working code.</p><p>ONE MEASURED CONSTRAINT THAT MUST REACH §4: a SEMANTICALLY ZERO representation change — a matrix widening carrying no numerical difference — was measured to move a reference root by 10.744 orders on this map. A batched path differs from a per-slice path in layout, accumulation order and kernel selection, all changes of exactly that class. So a label-parity result established at one batch size and device count says nothing about another, which is why §4's deliverable is a re-runnable acceptance rather than a certificate.</p><p>CONSUMER: <code>mast-catalog-gpu-solve</code>. Its product is a labelled store, so this plan guards what that store actually publishes. It is NOT wired as a hard dependency edge on that plan — the catalog is already held on <code>topology-preserving-continuation</code>, and one edge is enough to stop a premature throughput run. Tell that plan's owner when this lands rather than assuming the graph carries it.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship derived-observable-parity</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>

@@ -19,7 +19,7 @@
 <meta name="plan-effort-hours" content="6.0">
 <meta name="plan-depends-on" content="scoring-criteria-derivation">
 <meta name="plan-informs" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="10">
 <meta name="plan-impl" content="0.14">
 </head>
 <body>
@@ -137,7 +137,13 @@
   <h2 id="s3h">§3 — The adjudication: does order move what mesh moved</h2>
   <p>State whether raising operator order moves the convergence floors that mesh refinement
   moved &mdash; on the derived criterion, per stratum, in both the bulk and the extreme norm
-  (the 31.8&times; caution). The deliverable is a decision-grade statement for the solver
+  (the 31.8&times; caution). A measured constraint bounds what any resolution result can
+  claim: the coupled fixed-point map is not contractive &mdash; Picard spectral radius
+  1.1456 with current-pinning against 1.2577 without, both above one, while Newton converges
+  in 4 iterations to 1.59e-9 on the same expanding map &mdash; so no resolution bump
+  rehabilitates damped fixed-point routes, and the adjudication separates FLOOR movement
+  (discretisation) from route CONDITIONING (solver), crediting resolution only with the
+  first. The deliverable is a decision-grade statement for the solver
   lane: refine, raise order, or both, each with its measured cost.</p>
   <p><strong>Done when:</strong> the order-versus-mesh table (floor moved, criterion verdict,
   build cost, memory) is banked with a one-paragraph ruling, and the DIII-D forward-gate

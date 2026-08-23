@@ -12,6 +12,8 @@ import subprocess
 import time
 from pathlib import Path
 
+os.environ.setdefault("JAX_PLATFORMS", "cpu")
+
 import jax
 import numpy as np
 
@@ -85,7 +87,61 @@ def _loop_elapsed(config: WindowConfig, count: int) -> float:
     return time.perf_counter() - started
 
 
-def measure(output: Path, label: str) -> None:
+def _write_refusal(
+    output: Path,
+    *,
+    expected_tree: str,
+    actual_tree: str,
+    reason: str,
+) -> None:
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
+        json.dumps(
+            {
+                "schema": "nova.ensemble-window-throughput-refusal",
+                "schema_version": "1.0.0",
+                "reason": reason,
+                "same_tree_comparison_admitted": False,
+                "expected_tree_sha": expected_tree,
+                "reported_tree_sha": actual_tree,
+                "reported_jax_backend": jax.default_backend(),
+                "jax_devices": [str(device) for device in jax.devices()],
+                "reservation": os.environ.get("SLURM_JOB_RESERVATION", "unknown"),
+                "partition": os.environ.get("SLURM_JOB_PARTITION", "unknown"),
+                "node": platform.node(),
+                "job_id": os.environ.get("SLURM_JOB_ID", "unknown"),
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+def measure(output: Path, label: str, expected_tree: str) -> None:
+    actual_tree = _tree_sha()
+    if actual_tree != expected_tree:
+        _write_refusal(
+            output,
+            expected_tree=expected_tree,
+            actual_tree=actual_tree,
+            reason="runtime-tree-mismatch",
+        )
+        raise RuntimeError(
+            f"runtime tree {actual_tree} differs from expected tree {expected_tree}"
+        )
+    gpu_devices = jax.devices("gpu") if label == "h200" else []
+    cpu_devices = jax.devices("cpu")
+    if label == "h200" and (
+        not gpu_devices or not cpu_devices or jax.default_backend() != "gpu"
+    ):
+        _write_refusal(
+            output,
+            expected_tree=expected_tree,
+            actual_tree=actual_tree,
+            reason="cuda-provenance-unavailable",
+        )
+        raise RuntimeError("one CUDA device and the CPU platform are required")
     config = _config()
     _batch_elapsed(config, 1)
     _loop_elapsed(config, 1)
@@ -112,10 +168,13 @@ def measure(output: Path, label: str) -> None:
     payload = {
         "schema": "nova.ensemble-window-throughput",
         "schema_version": "1.0.0",
-        "tree_sha": _tree_sha(),
+        "tree_sha": actual_tree,
         "execution": label,
         "jax_backend": jax.default_backend(),
         "jax_device": str(device),
+        "jax_gpu_devices": [str(value) for value in gpu_devices],
+        "jax_cpu_devices": [str(value) for value in cpu_devices],
+        "cuda_provenance_admitted": label != "h200" or bool(gpu_devices),
         "host": platform.node(),
         "python": platform.python_version(),
         "workload": "affine coupled-window contract with full typed receipt assembly",
@@ -134,12 +193,26 @@ def _format(value: float) -> str:
 
 
 def publish(cpu_path: Path, gpu_path: Path, output_dir: Path) -> None:
-    receipts = [
-        json.loads(path.read_text(encoding="utf-8")) for path in (cpu_path, gpu_path)
-    ]
-    tree_shas = {receipt["tree_sha"] for receipt in receipts}
-    if len(tree_shas) != 1:
-        raise ValueError("CPU and H200 receipts must measure the same committed tree")
+    cpu = json.loads(cpu_path.read_text(encoding="utf-8"))
+    accelerator = json.loads(gpu_path.read_text(encoding="utf-8"))
+    refused = accelerator["schema"].endswith("refusal")
+    if refused:
+        if accelerator["expected_tree_sha"] != cpu["tree_sha"]:
+            raise ValueError("H200 refusal must name the measured CPU tree")
+        receipts = [cpu]
+    else:
+        receipts = [cpu, accelerator]
+        tree_shas = {receipt["tree_sha"] for receipt in receipts}
+        if len(tree_shas) != 1:
+            raise ValueError(
+                "CPU and H200 receipts must measure the same committed tree"
+            )
+        if (
+            accelerator["jax_backend"] != "gpu"
+            or not accelerator["cuda_provenance_admitted"]
+        ):
+            raise ValueError("H200 receipt lacks admitted CUDA provenance")
+    tree_sha = cpu["tree_sha"]
     rows = [row for receipt in receipts for row in receipt["rows"]]
     output_dir.mkdir(parents=True, exist_ok=True)
     header = (
@@ -163,18 +236,39 @@ def publish(cpu_path: Path, gpu_path: Path, output_dir: Path) -> None:
                     )
                 )
             )
+    if refused:
+        lines.append(
+            "\t".join(
+                (
+                    "h200",
+                    accelerator["reported_jax_backend"],
+                    "evidence-refusal",
+                    "8",
+                    "0",
+                    "NA",
+                    "NA",
+                    "NA",
+                )
+            )
+        )
     results = output_dir / "results.tsv"
     results.write_text("\n".join(lines) + "\n", encoding="utf-8")
     digest = hashlib.sha256(results.read_bytes()).hexdigest()
     batch_rows = [row for row in rows if row["mode"] == "batch"]
     best = max(batch_rows, key=lambda row: row["members_per_window"])
+    accelerator_summary = (
+        "The H200 row is a typed evidence refusal: "
+        f"`{accelerator['reason']}`. No accelerator rate is imputed."
+        if refused
+        else "The H200 row passed exact tree and CUDA device/backend provenance gates."
+    )
     report = output_dir / "report.md"
     report.write_text(
         "\n".join(
             (
                 "# Ensemble coupled-window evaluator throughput",
                 "",
-                f"Tree: `{next(iter(tree_shas))}`. Results SHA-256: `{digest}`.",
+                f"Tree: `{tree_sha}`. Results SHA-256: `{digest}`.",
                 "",
                 "This budget measures the affine coupled-window contract workload "
                 "with full typed receipt assembly. It isolates the public evaluator "
@@ -188,6 +282,8 @@ def publish(cpu_path: Path, gpu_path: Path, output_dir: Path) -> None:
                 "H200-node host-bound callback workload is not represented as device "
                 "acceleration.",
                 "",
+                accelerator_summary,
+                "",
                 "Each row is the median of nine independently completed calls after "
                 "one warmup. "
                 "`member_windows_per_second` counts admitted member windows; "
@@ -197,10 +293,28 @@ def publish(cpu_path: Path, gpu_path: Path, output_dir: Path) -> None:
         + "\n",
         encoding="utf-8",
     )
-    _write_svg(receipts, output_dir / "throughput.svg")
+    publication = {
+        "schema": "nova.ensemble-window-throughput-publication",
+        "schema_version": "1.0.0",
+        "tree_sha": tree_sha,
+        "workload": cpu["workload"],
+        "workload_scope": cpu["workload_scope"],
+        "cpu_receipt": cpu,
+        "h200_receipt": accelerator,
+        "h200_evidence_admitted": not refused,
+        "results_sha256": digest,
+    }
+    (output_dir / "receipt.json").write_text(
+        json.dumps(publication, indent=2) + "\n", encoding="utf-8"
+    )
+    _write_svg(
+        receipts,
+        output_dir / "throughput.svg",
+        refusal=accelerator if refused else None,
+    )
 
 
-def _write_svg(receipts: list[dict], path: Path) -> None:
+def _write_svg(receipts: list[dict], path: Path, *, refusal: dict | None) -> None:
     colours = {"cpu": "#2563eb", "h200": "#d97706"}
     points = []
     for receipt in receipts:
@@ -233,10 +347,10 @@ def _write_svg(receipts: list[dict], path: Path) -> None:
             (
                 '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" '
                 'role="img" aria-label="Coupled-window batch throughput">',
-                "<style>text{font-family:system-ui,sans-serif;font-size:14px;fill:#475569}"
-                ".title{font-size:20px;font-weight:650;fill:#0f172a}"
+                "<style>:root{color-scheme:light dark}text{font-family:system-ui,"
+                "sans-serif;font-size:14px;fill:currentColor}"
+                ".title{font-size:20px;font-weight:650}"
                 ".axis{stroke:#64748b;stroke-width:1}</style>",
-                '<rect width="760" height="420" fill="white"/>',
                 '<text x="40" y="35" class="title">Admitted member-window '
                 "throughput</text>",
                 '<line x1="90" y1="360" x2="650" y2="360" class="axis"/>',
@@ -246,6 +360,14 @@ def _write_svg(receipts: list[dict], path: Path) -> None:
                 "member windows / s</text>",
                 *polylines,
                 *labels,
+                *(
+                    (
+                        '<text x="420" y="105" fill="#d97706">'
+                        "H200: evidence refused; no rate imputed</text>",
+                    )
+                    if refusal is not None
+                    else ()
+                ),
                 "</svg>",
             )
         )
@@ -260,13 +382,14 @@ def main() -> None:
     measurement = subparsers.add_parser("measure")
     measurement.add_argument("--output", type=Path, required=True)
     measurement.add_argument("--label", choices=("cpu", "h200"), required=True)
+    measurement.add_argument("--expected-tree", required=True)
     publication = subparsers.add_parser("publish")
     publication.add_argument("--cpu", type=Path, required=True)
     publication.add_argument("--gpu", type=Path, required=True)
     publication.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "measure":
-        measure(args.output, args.label)
+        measure(args.output, args.label, args.expected_tree)
     else:
         publish(args.cpu, args.gpu, args.output_dir)
 

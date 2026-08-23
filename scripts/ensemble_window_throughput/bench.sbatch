@@ -15,6 +15,13 @@ trap 'code=$?; echo "EXIT_MARKER=${code}"' EXIT
 readonly ROOT="${SLURM_SUBMIT_DIR}"
 readonly ENVIRONMENT="/home/ITER/mcintos/Code/nova/.venv"
 readonly OUTPUT="${ENSEMBLE_WINDOW_OUTPUT:?set ENSEMBLE_WINDOW_OUTPUT}"
+readonly EXPECTED_TREE="${ENSEMBLE_WINDOW_EXPECTED_TREE:?set ENSEMBLE_WINDOW_EXPECTED_TREE}"
+
+runtime_tree="$(git -C "${ROOT}" rev-parse HEAD)"
+if [[ "${runtime_tree}" != "${EXPECTED_TREE}" ]]; then
+  echo "runtime tree ${runtime_tree} differs from expected tree ${EXPECTED_TREE}"
+  exit 42
+fi
 
 export TMPDIR=/tmp
 export UV_PROJECT_ENVIRONMENT="${ENVIRONMENT}"
@@ -24,4 +31,4 @@ srun --ntasks=1 --cpus-per-task=7 --cpu-bind=cores \
   env JAX_PLATFORMS=cuda,cpu UV_PROJECT_ENVIRONMENT="${ENVIRONMENT}" \
   PYTHONPATH="${ROOT}" uv run --no-sync python \
   "${ROOT}/scripts/ensemble_window_throughput/benchmark.py" measure \
-  --label h200 --output "${OUTPUT}"
+  --label h200 --output "${OUTPUT}" --expected-tree "${EXPECTED_TREE}"

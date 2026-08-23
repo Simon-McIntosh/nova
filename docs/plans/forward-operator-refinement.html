@@ -19,8 +19,8 @@
 <meta name="plan-effort-hours" content="6.0">
 <meta name="plan-depends-on" content="scoring-criteria-derivation">
 <meta name="plan-informs" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
-<meta name="plan-version" content="43">
-<meta name="plan-impl" content="0.9">
+<meta name="plan-version" content="44">
+<meta name="plan-impl" content="0.92">
 </head>
 <body>
 <main class="plan-doc">
@@ -353,6 +353,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20260823T2115" data-who="reckon-ship" data-when="2026-08-23 21:15">
     <div class="r-comment-body">reference-failure-classification landed — commit <code>f2151a21</code>, merged <code>8249e5dc</code>; gate PASSED. On integrated HEAD (tree 6b76eb1e, suite-native cached carrier bitwise-validated): 4/4 failures reproduced, split ONE REGRESSION + THREE STALE. Regression: passive closure 0.6098 pt vs 0.15 — owned by the §6 map-gain chain (noncontractive_free_boundary_map_resolvent_gain). Stale 1 (mixed-route): Picard grows 928.9× while Anderson contracts 9.84e-12 → 5.86e-14 — intended semantics require 60 finite samples and Picard non-contraction, never Anderson amplification. Stale 2 (early-growth): the trace peaks at 0.412 then contracts to 1.85e-05 with a vacuum termination — intended semantics qualify branch and transient/tail, not first-fifteen-sample ordering. Stale 3 (arithmetic floor): 101.5 resolution units while the registered production contract passes (normalized residual 9.84e-12 &lt; 1e-6, finite, diverted) — residual-over-resolution retained as diagnostic, not a second acceptance bound. No assertion edited by the classifier; the re-derivation node executes the receipt's semantics-derived replacements. Receipt: docs/figures/forward-operator-refinement/reference-failure-classification.json.</div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20260824T0035" data-who="reckon-ship" data-when="2026-08-24 00:35">
+    <div class="r-comment-body">reference-assertion-rederivation landed — commit <code>4de38b49</code>, merged <code>4630608f</code>; gate PASSED. The three stale assertions replaced from intended semantics per the classification receipt: mixed-route now requires 60 finite samples on both routes with the &gt;10 non-contraction observation applied to Picard only (Anderson mixing is history-dependent and unconstrained); the early-window ordering is replaced by branch qualification (zero-core/non-diverted/zero-current terminal), &gt;10 transient-to-tail separation and &gt;10 final-fifteen contraction; the arithmetic residual-over-resolution (101.51) prints as a diagnostic with acceptance carried by the registered production contract. The passive-closure assertion is byte-for-byte unchanged and red at 0.6098 vs 0.15, its adjacent comment naming the resolvent-gain mechanism. Full module: 29 collected, 28 passed, exactly the one owned failure. With this the §1 suite story is complete: every reference expectation is either derived or an owned, visibly-red classified regression. Receipt: docs/figures/forward-operator-refinement/reference-assertion-rederivation.json.</div>
 </div>
 </section>
 </main>

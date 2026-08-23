@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T19:43:58",
+  "updated": "2026-08-23T19:45:57",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -28379,9 +28379,137 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T170216597084-krylov-route-conditioning",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a75",
+        "node": "krylov-route-conditioning",
+        "role": "implement",
+        "spec_level": "",
+        "member": "route-conditioning",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T17:02:20Z",
+        "completed_at": "2026-08-23T17:44:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2540,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2540,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "77698dd59aa5e81d35df39efe82708b222e87706",
+        "commits": [
+          "3e54c3fb4b72a022038589e7fa552231b3b2b962"
+        ],
+        "changed_lines": {
+          "added": 1007,
+          "removed": 7,
+          "files": 3
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "The amplification is closed. Burst count 0 of 12 against a banked 3 at updates 3, 8 and 12. Cumulative separation growth 2.2179 against a banked 5379792627.28 - a reduction of 2.4 billion - landing within 36x of the alternate-seed control 0.0619 that proved low growth attainable, where the gap was previously nine orders. Six-case maximum flux absolute difference 3.5787553476218648e-12 against a banked 1.1646900802908533e-05, a 3.3-million-fold reduction, and 28x INSIDE the retired 1e-10 bound; the receipt correctly declines a verdict against a withdrawn bound. One-map difference unchanged at exactly 2.220446049250313e-16, so the single-map path was not perturbed. All regressions green. Two honest limits carried: the discriminator is calibrated only at Krylov dimension 12 so other dimensions report but are not conditioned, and the effect on the five-frame RESIDUALS is unmeasured - the mechanism shrinks steps at ill-conditioned iterations, which may trade convergence for reproducibility.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T170216597084-krylov-route-conditioning/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02f92-bbe8-7e81-a4bb-6353ae432adc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 28451328,
+            "cached_input_tokens_cumulative": 28451328,
+            "input_tokens": 28768013,
+            "input_tokens_cumulative": 28768013,
+            "output_tokens": 48586,
+            "output_tokens_cumulative": 48586,
+            "reasoning_output_tokens": 15982,
+            "reasoning_output_tokens_cumulative": 15982
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T164428948127-reference-assertion-rederivation",
+        "plan": "forward-operator-refinement",
+        "section": "\u00a71",
+        "node": "reference-assertion-rederivation",
+        "role": "implement",
+        "spec_level": "",
+        "member": "solve-convergence",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T16:44:32Z",
+        "completed_at": "2026-08-23T17:03:50Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1158,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1158,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "ebf3693e34550bf3650d5cee2d3da7d2ec22527d",
+        "commits": [
+          "4de38b493cf25a5a545be11377418e631415acdc"
+        ],
+        "changed_lines": {
+          "added": 212,
+          "removed": 101,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T164428948127-reference-assertion-rederivation/manifest.md",
+        "scope_changed": false,
+        "session_id": "019ffa72-15c7-78b1-bee8-5f074cebc901",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13819136,
+            "cached_input_tokens_cumulative": 213558400,
+            "input_tokens": 13985546,
+            "input_tokens_cumulative": 217159582,
+            "output_tokens": 28956,
+            "output_tokens_cumulative": 340170,
+            "reasoning_output_tokens": 8018,
+            "reasoning_output_tokens_cumulative": 85589
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 666
+    "_version": 668
   }
 }

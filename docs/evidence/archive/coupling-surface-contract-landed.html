@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-evidence-for" content="coupling-surface-contract">
+  <title>Coupling Surface Contract — landed record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Coupling Surface Contract — cumulative execution evidence</h1>
+
+    <h2 id="s2">§2 the typed contract, carried by the live exchange — 2026-08-23</h2>
+    <p><strong>The coupled-window exchange now constructs, residualizes, gates, blends and receipts a
+    frozen <code>CouplingState</code></strong> (commit <code>64abe618</code>; node
+    coupling-state-contract, gate passed). <code>CouplingState</code> and <code>CouplingFieldSpec</code>
+    are public frozen contracts over the geometry and source waveforms; serialization is exact-key and
+    exact-version — unsupported versions, missing or extra keys, nonnumeric channel dtypes and mutated
+    static fields are all rejected fail-closed. The window receipt is stamped with contract version
+    1.0.0.</p>
+    <ul>
+      <li><strong>No physics change, proven on the bank:</strong> the gentle demonstration window
+      reproduces its banked receipt exactly — iterations 4, gating contraction
+      <code>0.23619506584727215</code>, gating trace (1.0, 0.024544392673843753, 0.0054674088266388095,
+      0.0012913749878219105), flux closure exactly 0.0
+      (<code>scripts/coupling_surface/gentle_receipt_comparison.json</code>, all_equal=true, sha256
+      <code>13ec66a3…</code>). Gate membership and adaptive damping are unchanged; no assertion
+      tolerance was loosened.</li>
+      <li><strong>Suite:</strong> tests/test_transport_coupled_window.py + public-surface + gradients
+      modules — 15 passed in 56.25 s; path-scoped ruff clean.</li>
+      <li><strong>Schema artifact:</strong> <code>scripts/coupling_surface/coupling_state.schema.json</code>
+      (contract 1.0.0, sha256 <code>58d0dd7a…</code>) — 60 fields, each declaring name, physical meaning,
+      units, exchange direction, time base plus interpolation rule, gate role and exclusion reason,
+      differentiability class, and fail-closed serialization. The live surface carries 53 gating and 7
+      excluded-with-reason fields (45 traced / 10 host-boundary / 5 static); the shape channels'
+      exclusion is now a declared property rather than a solver constant. Exported-schema equality
+      against the live exchange is pinned field-for-field by the public-surface test, which is §3's
+      binding (c) delivered early.</li>
+    </ul>
+  </main>
+</body>
+</html>

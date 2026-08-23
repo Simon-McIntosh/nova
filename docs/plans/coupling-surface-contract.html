@@ -23,8 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-23">
-<meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="1">
+<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="3">
+<meta name="plan-commits" content="64abe618">
+<meta name="plan-artifacts" content="docs/evidence/archive/coupling-surface-contract-landed.html,scripts/coupling_surface/coupling_state.schema.json,scripts/coupling_surface/gentle_receipt_comparison.json">
 </head>
 <body>
   <main class="plan-doc">
@@ -77,36 +79,21 @@
       state; a field added for one is visible, typed and receipted for all.</figcaption>
     </figure>
 
-    <h2 id="s2">§2 — The contract</h2>
-
-    <p>A typed <code>CouplingState</code> in <code>nova/transport</code> declaring, per field:
-    physical meaning and units; exchange direction (equilibrium→transport, transport→equilibrium,
-    or bidirectional); the time base it is sampled on (equilibrium coarse samples versus transport
-    steps) and the interpolation rule between them; its stopping-gate role (gating, receipted, or
-    excluded-with-reason — the shape channels' exclusion becomes a declared property instead of a
-    solver constant); its differentiability class (traced, host-boundary, or static); and its
-    fail-closed serialization. The window exchange in <code>solve_window</code> is refactored to
-    construct, exchange and receipt this type, with the existing receipts (per-field exit
-    residuals, gating and all-field norms, damping events, ledger closures) unchanged in content
-    and provenance-stamped by the contract version. No physics changes; the gate composition and
-    adaptive damping stay exactly as the two locked owner decisions state them.</p>
-
-    <p><strong>The boundary the cross-repo survey fixed (2026-08-22):</strong> the per-slice,
-    per-member state at the seam is ambix's <code>FluxFunctionState</code> — tested, immutable,
-    COCOS-provenanced — and nova consumes it rather than recreating it. What ambix does NOT have,
-    in code or contract, is the time-dependent piece: its interface plan specifies "time-varying
-    coordinate maps, interpolation policy and convergence receipts containing iterations,
-    contraction estimate, exit residual and damping" in prose, with no matching type anywhere in
-    <code>imas_ambix</code>. The <code>CouplingState</code> is exactly that missing piece, defined
-    on nova's side of the litmus (deterministic, geometry-bearing, no sigma), and its exported
-    schema is the adapter contract the ambix consumer binds.</p>
-
-    <p><strong>Done when</strong> the coupled-window suite passes unchanged on the refactored
-    exchange, the gentle demonstration window reproduces its banked receipt (4 iterations, gating
-    contraction 0.236, flux closure exactly 0) bit-for-bit on the gating trajectory, and a schema
-    artifact (versioned field table: name, meaning, units, direction, time base, gate role,
-    differentiability) is exported under <code>scripts/coupling_surface/</code> for the ambix
-    consumers to read.</p>
+    <section id="s2" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-23</span>
+        <h2>§2 — The contract</h2>
+      </header>
+      <p class="landed-summary">Frozen public <code>CouplingState</code>/<code>CouplingFieldSpec</code>
+      now constructed, gated and receipted by <code>solve_window</code>, with exact-key versioned
+      fail-closed serialization; the banked gentle receipt reproduced <strong>exactly</strong>
+      (4 iterations, contraction 0.23619506584727215, flux closure 0.0) and the suite passed 15/15
+      with no loosened assertion. Versioned schema exported at contract 1.0.0
+      (<code>scripts/coupling_surface/coupling_state.schema.json</code>, 60 fields: 53 gating /
+      7 excluded-with-reason), pinned field-for-field against the live exchange by test.
+      Full record: <a href="/nova/evidence/archive/coupling-surface-contract-landed#s2">§2 landed</a>
+      (commit <code>64abe618</code>).</p>
+    </section>
 
     <h2 id="s3">§3 — Consumer bindings</h2>
 
@@ -148,6 +135,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-20260823T0740-reuse-map" data-who="reckon-ship" data-when="2026-08-23T07:40:00+00:00">
     <div class="r-comment-body">sprint-reuse-map landed (run r-20260823T072023355763, gate passed, report-only, no commit) — the sprint prior-art scout covering this plan plus ensemble-forward-seam, diiid-pulse-replay and the onboarding §5 gate re-run. 11/11 capability areas, 45 cited paths existence-checked with 0 missing. Load-bearing for §2: the exchange to replace is the merged residual dict at nova/transport/coupled_window.py:971-974; the frozen receipt dataclasses at coupled_window.py:423-681 and ambix FluxFunctionState's validating to_dict/from_dict are the precedents to model (nova imports no ambix type); the gentle bank is scripts/window_demonstration/receipts.tsv (4 iterations, contraction 0.23619506584727215, flux closure exactly 0); the coupled-window suite is tests/test_transport_coupled_window.py plus public-surface and gradients modules. CouplingState, a durable window schema, and window batching are confirmed ABSENT on both sides — no competing authority exists. Currency corrections banked for the onboarding plan: only ONE standing tests/imas failure (18 pass/1 fail measured), the current-pinned receipt's true home is docs/figures/current-constrained-forward-solve/pinned-cohort/, and the lambda guard repair landed (2ad45206, public seam 9bf7841e) leaving one unguarded division in the excluded low-current diagnostic at benchmarks/diiid_current_pinned_forward.py:898-934.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260823T0810-contract-landed" data-who="reckon-ship" data-when="2026-08-23T08:10:00+00:00">
+    <div class="r-comment-body">coupling-state-contract landed — commit 64abe618; gate PASSED with all three measures: coupled-window suite 15/15 green with no loosened assertion; banked gentle receipt reproduced exactly (iterations 4, gating contraction 0.23619506584727215, gating trace 1.0/0.024544392673843753/0.0054674088266388095/0.0012913749878219105, flux closure 0.0); versioned schema exported at contract 1.0.0 with 60 fields (53 gating, 7 excluded-with-reason; 45 traced/10 host-boundary/5 static), sha256 58d0dd7a…. §3 binding (c) — exported schema validated field-for-field against the live exchange by test — was delivered with this node; §3's remaining load-bearing work is the extract/restore boundary round-trip (binding b). No receipted-class fields exist on the live surface: every exchanged field either gates or is excluded with its declared reason, faithfully reflecting the locked gate composition.</div>
 </div>
 </section>
 

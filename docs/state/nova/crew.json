@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T10:05:42",
+  "updated": "2026-08-23T10:12:24",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -24574,9 +24574,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T073415586784-coupling-state-contract",
+        "plan": "coupling-surface-contract",
+        "section": "\u00a72",
+        "node": "coupling-state-contract",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "transport-window",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T07:34:27Z",
+        "completed_at": "2026-08-23T08:11:34Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2227,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2227,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "125534111356be2fe1d23231b52c5115f52dfb0e",
+        "commits": [
+          "64abe618b587c9270a0b4404a5c24dac74bfc1f1"
+        ],
+        "changed_lines": {
+          "added": 1466,
+          "removed": 38,
+          "files": 8
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T073415586784-coupling-state-contract/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f8b-c81b-70c3-a5d8-007c4d512626",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 29512448,
+            "cached_input_tokens_cumulative": 153716992,
+            "input_tokens": 29770737,
+            "input_tokens_cumulative": 158291462,
+            "output_tokens": 37767,
+            "output_tokens_cumulative": 505201,
+            "reasoning_output_tokens": 9441,
+            "reasoning_output_tokens_cumulative": 163698
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 591
+    "_version": 592
   }
 }

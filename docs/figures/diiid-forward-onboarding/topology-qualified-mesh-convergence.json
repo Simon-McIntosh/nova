@@ -1,0 +1,150 @@
+{
+  "artifact": "topology_qualified_mesh_convergence",
+  "case": {
+    "coefficients_fitted": 0,
+    "current_adjustments": 0,
+    "current_source": "docs/figures/diiid-forward-onboarding/diverted-root/host_large_budget_terminal_state.npz",
+    "frame": 0,
+    "poloidal_conductor_count": 24,
+    "shot": "d3d_shot_00000c4a7b.parquet",
+    "source_receipt": "docs/figures/diiid-forward-onboarding/diverted-root/host_large_budget_receipt.json",
+    "time_ms": 160.0,
+    "topology_admission_receipt": "docs/figures/diiid-forward-onboarding/topology-qualified-admission.json"
+  },
+  "comparators": {
+    "baseline_to_unqualified_reduction_factor": 119.33255099578777,
+    "topology_qualified_baseline": 0.00029254381732970964,
+    "unqualified_plateau": 0.03491
+  },
+  "mesh_sensitivity_context": {
+    "prior_observed_order_range": [
+      0.97,
+      3.39
+    ],
+    "prior_stall_floor_count": 5,
+    "prior_stall_floors_scaling_with_mesh": 5,
+    "topology_qualified_route_present_in_prior_study": false
+  },
+  "rungs": [
+    {
+      "achieved_interior_cell_count": 1089,
+      "grid_shape": [
+        33,
+        33
+      ],
+      "grid_stride": 2,
+      "name": "coarse_carrier",
+      "runtime": {
+        "device": "NVIDIA H200 NVL",
+        "hostname": "98dci4-gpu-0003.iter.org",
+        "platform": "gpu",
+        "profile_build_seconds": 62.36472687497735,
+        "solve_compile_and_execute_seconds": 4.722608922980726,
+        "wall_clock_seconds": 67.87730808742344
+      },
+      "seed": {
+        "kind": "convention-clean labelled map used only as a branch seed",
+        "rebuilt_seed_matches_banked_seed_bitwise": true
+      },
+      "solver": {
+        "accepted_factor_counts": {
+          "0.0": 0,
+          "0.125": 2,
+          "0.25": 1,
+          "0.5": 1,
+          "1.0": 85
+        },
+        "all_promoted_iterations_retained_diverted_class": true,
+        "gmres_iterations": 24,
+        "krylov_action_qualification": "ACCEPTED",
+        "meets_production_convergence_criterion": false,
+        "newton_steps": 89,
+        "production_convergence_criterion": 1e-06,
+        "promoted_iteration_count": 89,
+        "reported_result_residual": 0.00029254381732921216,
+        "route": "topology-qualified nonmonotone Newton-Krylov",
+        "selected_candidates_were_admitted": true,
+        "terminal_relative_residual": 0.00029254381732921216,
+        "unpromoted_iteration_count": 0
+      },
+      "state_dimension": 1221,
+      "terminal_topology": {
+        "class": "diverted",
+        "finite_x_point": true,
+        "x_point_rz_m": [
+          0.8771401197678903,
+          1.285580088216056
+        ]
+      },
+      "wall_node_count": 132
+    },
+    {
+      "achieved_interior_cell_count": 4225,
+      "grid_shape": [
+        65,
+        65
+      ],
+      "grid_stride": 1,
+      "name": "reference_native",
+      "runtime": {
+        "device": "NVIDIA H200 NVL",
+        "hostname": "98dci4-gpu-0003.iter.org",
+        "platform": "gpu",
+        "profile_build_seconds": 201.92414874676615,
+        "solve_compile_and_execute_seconds": 3.856600670143962,
+        "wall_clock_seconds": 206.4454134851694
+      },
+      "seed": {
+        "kind": "convention-clean labelled map used only as a branch seed",
+        "rebuilt_seed_matches_banked_seed_bitwise": false
+      },
+      "solver": {
+        "accepted_factor_counts": {
+          "0.0": 0,
+          "0.125": 0,
+          "0.25": 1,
+          "0.5": 1,
+          "1.0": 87
+        },
+        "all_promoted_iterations_retained_diverted_class": true,
+        "gmres_iterations": 24,
+        "krylov_action_qualification": "ACCEPTED",
+        "meets_production_convergence_criterion": false,
+        "newton_steps": 89,
+        "production_convergence_criterion": 1e-06,
+        "promoted_iteration_count": 89,
+        "reported_result_residual": 7.930534999195602e-05,
+        "route": "topology-qualified nonmonotone Newton-Krylov",
+        "selected_candidates_were_admitted": true,
+        "terminal_relative_residual": 7.930534999195602e-05,
+        "unpromoted_iteration_count": 0
+      },
+      "state_dimension": 4357,
+      "terminal_topology": {
+        "class": "diverted",
+        "finite_x_point": true,
+        "x_point_rz_m": [
+          1.1018610304204302,
+          1.5464232200723058
+        ]
+      },
+      "wall_node_count": 132
+    }
+  ],
+  "source_commit": "7a424c1236e8b69fd65e1575320ab5133ed37c90",
+  "verdict": {
+    "all_rungs_retained_diverted_class_on_every_promotion": true,
+    "all_terminal_x_points_finite": true,
+    "basis": "terminal residual falls by more than the declared five-percent mesh-flat tolerance",
+    "classification": "DISCRETISATION_LIMITED",
+    "finest_residual_to_production_criterion_ratio": 79.30534999195602,
+    "finest_rung_meets_production_convergence_criterion": false,
+    "fine_to_coarse_residual_ratio": 0.27108879181237416,
+    "mesh_flat_relative_tolerance": 0.05,
+    "mesh_refinement_ratio": 1.9696969696969697,
+    "observed_order": 1.9255759546587183,
+    "production_convergence_criterion": 1e-06,
+    "qualification": "The terminal floor is mesh-sensitive, but the finest residual remains above the unchanged production convergence criterion.",
+    "relative_residual_change": -0.7289112081876258
+  }
+}

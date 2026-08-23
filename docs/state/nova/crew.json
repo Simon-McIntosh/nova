@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T15:49:44",
+  "updated": "2026-08-23T16:05:18",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -360,6 +360,13 @@
         "role": "implement",
         "session_id": "01a0247d-26e8-7de2-96ad-893a24e6c3ff",
         "created": "2026-08-21"
+      },
+      {
+        "id": "krylov-guard",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "label-resolve",
@@ -26462,9 +26469,201 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T135014696207-forward-stability-reuse-map",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a75",
+        "node": "forward-stability-reuse-map",
+        "role": "implement",
+        "spec_level": "",
+        "member": "stability-scout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T13:50:18Z",
+        "completed_at": "2026-08-23T14:02:34Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 736,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 736,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "8fc755e849d9ffdc99e0d57f3ed67dc0e1705fe0",
+        "commits": [
+          "2275c1993f8fce285411ca48c518dbb34de8ebdc"
+        ],
+        "changed_lines": {
+          "added": 208,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T135014696207-forward-stability-reuse-map/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02ee2-edcf-7611-a10a-5cd5c189f273",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8958720,
+            "cached_input_tokens_cumulative": 8958720,
+            "input_tokens": 9235870,
+            "input_tokens_cumulative": 9235870,
+            "output_tokens": 22632,
+            "output_tokens_cumulative": 22632,
+            "reasoning_output_tokens": 7254,
+            "reasoning_output_tokens_cumulative": 7254
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T135019874601-mast-slice-census",
+        "plan": "mast-catalog-gpu-solve",
+        "section": "\u00a73",
+        "node": "mast-slice-census",
+        "role": "implement",
+        "spec_level": "",
+        "member": "catalog-census",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T13:50:25Z",
+        "completed_at": "2026-08-23T14:03:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 798,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 798,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "8fc755e849d9ffdc99e0d57f3ed67dc0e1705fe0",
+        "commits": [
+          "c0eb0e65bcdfaaa7c6e01161b9771d314fa7dbf6"
+        ],
+        "changed_lines": {
+          "added": 715,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T135019874601-mast-slice-census/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02ee3-0900-7012-900c-47b7f5b7c7ae",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5500160,
+            "cached_input_tokens_cumulative": 5500160,
+            "input_tokens": 5667014,
+            "input_tokens_cumulative": 5667014,
+            "output_tokens": 24928,
+            "output_tokens_cumulative": 24928,
+            "reasoning_output_tokens": 8717,
+            "reasoning_output_tokens_cumulative": 8717
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T133234217238-passive-closure-mesh-response",
+        "plan": "forward-operator-refinement",
+        "section": "\u00a75",
+        "node": "passive-closure-mesh-response",
+        "role": "implement",
+        "spec_level": "",
+        "member": "lane-health",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T13:32:38Z",
+        "completed_at": "2026-08-23T14:04:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1925,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1925,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "bf463d050fd88638d0dedc1a88c35fbe614e254f",
+        "commits": [
+          "adb4cb9ec782200542cf35fb71a8ec3e711f27ad"
+        ],
+        "changed_lines": {
+          "added": 585,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T133234217238-passive-closure-mesh-response/manifest.md",
+        "scope_changed": false,
+        "session_id": "019ffa14-6e29-71a0-8ee1-703091b68cc6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15990016,
+            "cached_input_tokens_cumulative": 36568576,
+            "input_tokens": 16228329,
+            "input_tokens_cumulative": 37379294,
+            "output_tokens": 24848,
+            "output_tokens_cumulative": 72523,
+            "reasoning_output_tokens": 5881,
+            "reasoning_output_tokens_cumulative": 20949
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 630
+    "_version": 634
   }
 }

@@ -1,4 +1,5 @@
 import numpy as np
+import pandas
 import pytest
 import xarray
 import zarr
@@ -348,6 +349,17 @@ def test_kernel_cache_separates_compute_provenance(tmp_path):
     ) == 1.0
 
 
+def test_zarr_store_encodes_pandas_string_dtype(tmp_path):
+    """The cache write boundary converts extension strings before CF coding."""
+    stored = pandas.array(["quadrature", "axisymmetric_ring"], dtype="str")
+    store = ZarrStore(filename="string_dtype", dirname=tmp_path)
+    store.data = xarray.Dataset({"route": ("source", stored)})
+    store.store()
+
+    loaded = ZarrStore(filename="string_dtype", dirname=tmp_path).load()
+    np.testing.assert_array_equal(loaded.data["route"], stored)
+
+
 def test_route_identity_round_trips_through_the_zarr_root_group(tmp_path):
     """A fresh CoilSet reconstructs source and target factories from stored routes."""
     coil_policy = PolySectionPolicy(exact_kernel="quadrature", quadrature=(4, 12))
@@ -414,7 +426,7 @@ def test_subframe_route_mutation_cannot_poison_the_root_cache_key(tmp_path):
     position = np.flatnonzero(np.asarray(coilset.subframe.segment) == "polysection")[0]
     label = coilset.subframe.index[position]
     coilset.subframe.loc[label, "polysection_policy"] = PolySectionPolicy(
-        arrangement="banded"
+        exact_kernel="quadrature"
     ).key
 
     with pytest.raises(ValueError, match="routes differ from the CoilSet cache"):

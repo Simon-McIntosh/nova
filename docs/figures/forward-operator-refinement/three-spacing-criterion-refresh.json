@@ -1,0 +1,541 @@
+{
+  "receipt": {
+    "kind": "three_spacing_held_out_criterion_refresh",
+    "status": "complete",
+    "execution_mode": "banked-data-only-no-equilibrium-solves",
+    "equilibrium_solves_run": 0,
+    "reference_count": 6,
+    "refreshed_reference_count": 3,
+    "retained_reference_count": 3
+  },
+  "criterion": {
+    "formula": "tau_i(h_i) = C_(s,-i) * h_i**p_(s,-i)",
+    "fit_model": "R_j(h) = C_(s,-i) * h**p_(s,-i), j != i",
+    "target_mesh_spacing_m": 0.125,
+    "independence_argument": "For target i, all fit levels belong to other references j in the same pre-registered topology stratum. The gated closest residual and every level in target i's mesh ladder are excluded.",
+    "registered_criterion_retained": 1e-08,
+    "registered_tolerance_changed": false
+  },
+  "banked_three_spacing_ladder": {
+    "reference": "21978/35",
+    "stratum": "confinement-construction",
+    "spacing_definition": "maximum absolute rectangular-axis step, matching the limiting mesh spacing used by the banked two-spacing pairs",
+    "levels": [
+      {
+        "mesh_spacing_m": 0.125,
+        "terminal_residual": 0.010356795810607609
+      },
+      {
+        "mesh_spacing_m": 0.0625,
+        "terminal_residual": 0.0052996934892569495
+      },
+      {
+        "mesh_spacing_m": 0.042553191489361764,
+        "terminal_residual": 0.0027730957751263396
+      }
+    ]
+  },
+  "strata": {
+    "closed-axis": {
+      "frozen_references": [
+        "21983/35",
+        "21985/51"
+      ],
+      "qualification_status": "RETAINED",
+      "targets_with_three_spacing_fit": [],
+      "targets_retaining_two_spacing_qualification": [
+        "21983/35",
+        "21985/51"
+      ],
+      "two_spacing_order_range": [
+        2.7018908925836134,
+        3.3073650582793945
+      ],
+      "refreshed_order_range": [
+        2.7018908925836134,
+        3.3073650582793945
+      ],
+      "qualification_reason": "No closed-axis peer has a banked 95-point rung."
+    },
+    "confinement-construction": {
+      "frozen_references": [
+        "21978/35",
+        "21986/46",
+        "21989/55",
+        "22086/43"
+      ],
+      "qualification_status": "PARTIALLY_LIFTED",
+      "targets_with_three_spacing_fit": [
+        "21986/46",
+        "21989/55",
+        "22086/43"
+      ],
+      "targets_retaining_two_spacing_qualification": [
+        "21978/35"
+      ],
+      "two_spacing_order_range": [
+        1.3018841593453634,
+        2.512071091340043
+      ],
+      "refreshed_order_range": [
+        1.2669210588657918,
+        2.512071091340043
+      ],
+      "qualification_reason": "The 21978/35 ladder lifts the qualification for the other three targets; its own criterion must exclude that ladder."
+    }
+  },
+  "per_reference": [
+    {
+      "reference": "21978/35",
+      "stratum": "confinement-construction",
+      "two_spacing_criterion": 0.013970057337880022,
+      "refreshed_criterion": 0.013970057337880022,
+      "refreshed_over_two_spacing": 1.0,
+      "criterion_unit": "relative sup norm of fixed-point defect",
+      "gated_closest_residual_display_only": 0.012418792579623236,
+      "fit": {
+        "formula": "tau_i(h_i) = C_(s,-i) * h_i**p_(s,-i)",
+        "criterion": 0.013970057337880022,
+        "target_mesh_spacing_m": 0.125,
+        "held_out_target": "21978/35",
+        "fit_reference_count": 2,
+        "fit_sample_count": 4,
+        "fit_unique_mesh_spacing_count": 2,
+        "fit_references": [
+          "21989/55",
+          "22086/43"
+        ],
+        "fit_cell_sizes_m": [
+          0.125,
+          0.0625,
+          0.125,
+          0.0625
+        ],
+        "fit_residuals": [
+          0.017714765374879503,
+          0.001693384614199005,
+          0.011016939705021812,
+          0.0035417937581059262
+        ],
+        "observed_order": 2.512071091340043,
+        "coefficient": 2.593130885147205,
+        "order_standard_error": 0.6330183529765919,
+        "order_95_percent_interval": [
+          -0.21158705307619874,
+          5.235729235756285
+        ],
+        "log_residual_rms": 0.3102606977351752,
+        "fraction_residual_rms": 0.0024753228253538546,
+        "r_squared": 0.8873125913904285,
+        "target_residual_used_in_fit": false,
+        "target_mesh_pair_used_in_fit": false,
+        "uncertainty_qualification": "Peer references provide repeated samples at only two distinct mesh spacings; cross-reference scatter is measured, but there is no third-mesh confirmation of an asymptotic regime.",
+        "fit_levels": [
+          {
+            "reference": "21989/55",
+            "mesh_spacing_m": 0.125,
+            "terminal_residual": 0.017714765374879503
+          },
+          {
+            "reference": "21989/55",
+            "mesh_spacing_m": 0.0625,
+            "terminal_residual": 0.001693384614199005
+          },
+          {
+            "reference": "22086/43",
+            "mesh_spacing_m": 0.125,
+            "terminal_residual": 0.011016939705021812
+          },
+          {
+            "reference": "22086/43",
+            "mesh_spacing_m": 0.0625,
+            "terminal_residual": 0.0035417937581059262
+          }
+        ]
+      },
+      "target_qualification": "LEAST-TRUSTWORTHY TARGET: its banked same-reference order is 0.966596902394278 and was measured outside a confirmed asymptotic regime; that pair is excluded from this fit.",
+      "third_spacing_used": false,
+      "qualification_status": "TWO_SPACING_QUALIFICATION_RETAINED",
+      "qualification_reason": "The only banked third rung belongs to this target and is held out with its mesh pair."
+    },
+    {
+      "reference": "21983/35",
+      "stratum": "closed-axis",
+      "two_spacing_criterion": 0.012942531111025984,
+      "refreshed_criterion": 0.012942531111025984,
+      "refreshed_over_two_spacing": 1.0,
+      "criterion_unit": "relative sup norm of fixed-point defect",
+      "gated_closest_residual_display_only": 0.006147786632132371,
+      "fit": {
+        "formula": "tau_i(h_i) = C_(s,-i) * h_i**p_(s,-i)",
+        "criterion": 0.012942531111025984,
+        "target_mesh_spacing_m": 0.125,
+        "held_out_target": "21983/35",
+        "fit_reference_count": 1,
+        "fit_sample_count": 2,
+        "fit_unique_mesh_spacing_count": 2,
+        "fit_references": [
+          "21985/51"
+        ],
+        "fit_cell_sizes_m": [
+          0.125,
+          0.0625
+        ],
+        "fit_residuals": [
+          0.01294253111102598,
+          0.0013073838879026022
+        ],
+        "observed_order": 3.3073650582793945,
+        "coefficient": 12.556467736081027,
+        "order_standard_error": 0.0,
+        "order_95_percent_interval": null,
+        "log_residual_rms": 8.881784197001252e-16,
+        "fraction_residual_rms": 6.226379661578552e-18,
+        "r_squared": 1.0,
+        "target_residual_used_in_fit": false,
+        "target_mesh_pair_used_in_fit": false,
+        "uncertainty_qualification": "EXACT-PAIR-ONLY: one peer at two mesh spacings determines the power law exactly; there is no fit error bar or third-mesh confirmation.",
+        "fit_levels": [
+          {
+            "reference": "21985/51",
+            "mesh_spacing_m": 0.125,
+            "terminal_residual": 0.01294253111102598
+          },
+          {
+            "reference": "21985/51",
+            "mesh_spacing_m": 0.0625,
+            "terminal_residual": 0.0013073838879026022
+          }
+        ]
+      },
+      "target_qualification": null,
+      "third_spacing_used": false,
+      "qualification_status": "TWO_SPACING_QUALIFICATION_RETAINED",
+      "qualification_reason": "No peer in this target's stratum has a third rung."
+    },
+    {
+      "reference": "21985/51",
+      "stratum": "closed-axis",
+      "two_spacing_criterion": 0.010050357331518324,
+      "refreshed_criterion": 0.010050357331518324,
+      "refreshed_over_two_spacing": 1.0,
+      "criterion_unit": "relative sup norm of fixed-point defect",
+      "gated_closest_residual_display_only": 0.001970923362492926,
+      "fit": {
+        "formula": "tau_i(h_i) = C_(s,-i) * h_i**p_(s,-i)",
+        "criterion": 0.010050357331518324,
+        "target_mesh_spacing_m": 0.125,
+        "held_out_target": "21985/51",
+        "fit_reference_count": 1,
+        "fit_sample_count": 2,
+        "fit_unique_mesh_spacing_count": 2,
+        "fit_references": [
+          "21983/35"
+        ],
+        "fit_cell_sizes_m": [
+          0.125,
+          0.0625
+        ],
+        "fit_residuals": [
+          0.010050357331518338,
+          0.0015446543055689578
+        ],
+        "observed_order": 2.7018908925836134,
+        "coefficient": 2.7684208666307355,
+        "order_standard_error": 0.0,
+        "order_95_percent_interval": null,
+        "log_residual_rms": 6.280369834735101e-16,
+        "fraction_residual_rms": 8.587812036286677e-18,
+        "r_squared": 1.0,
+        "target_residual_used_in_fit": false,
+        "target_mesh_pair_used_in_fit": false,
+        "uncertainty_qualification": "EXACT-PAIR-ONLY: one peer at two mesh spacings determines the power law exactly; there is no fit error bar or third-mesh confirmation.",
+        "fit_levels": [
+          {
+            "reference": "21983/35",
+            "mesh_spacing_m": 0.125,
+            "terminal_residual": 0.010050357331518338
+          },
+          {
+            "reference": "21983/35",
+            "mesh_spacing_m": 0.0625,
+            "terminal_residual": 0.0015446543055689578
+          }
+        ]
+      },
+      "target_qualification": null,
+      "third_spacing_used": false,
+      "qualification_status": "TWO_SPACING_QUALIFICATION_RETAINED",
+      "qualification_reason": "No peer in this target's stratum has a third rung."
+    },
+    {
+      "reference": "21986/46",
+      "stratum": "confinement-construction",
+      "two_spacing_criterion": 0.012643692655403044,
+      "refreshed_criterion": 0.01188975144741377,
+      "refreshed_over_two_spacing": 0.9403701728175833,
+      "criterion_unit": "relative sup norm of fixed-point defect",
+      "gated_closest_residual_display_only": 0.003589451859931841,
+      "fit": {
+        "formula": "tau_i(h_i) = C_(s,-i) * h_i**p_(s,-i)",
+        "criterion": 0.01188975144741377,
+        "target_mesh_spacing_m": 0.125,
+        "held_out_target": "21986/46",
+        "fit_reference_count": 3,
+        "fit_sample_count": 7,
+        "fit_unique_mesh_spacing_count": 3,
+        "fit_references": [
+          "21978/35",
+          "21989/55",
+          "22086/43"
+        ],
+        "fit_cell_sizes_m": [
+          0.125,
+          0.0625,
+          0.042553191489361764,
+          0.125,
+          0.0625,
+          0.125,
+          0.0625
+        ],
+        "fit_residuals": [
+          0.010356795810607609,
+          0.0052996934892569495,
+          0.0027730957751263396,
+          0.017714765374879503,
+          0.001693384614199005,
+          0.011016939705021812,
+          0.0035417937581059262
+        ],
+        "observed_order": 1.6595773287329416,
+        "coefficient": 0.3749043193981304,
+        "order_standard_error": 0.4227182399563244,
+        "order_95_percent_interval": [
+          0.572945499509061,
+          2.746209157956822
+        ],
+        "log_residual_rms": 0.38786966178604626,
+        "fraction_residual_rms": 0.0025171559452096064,
+        "r_squared": 0.7550605351949777,
+        "target_residual_used_in_fit": false,
+        "target_mesh_pair_used_in_fit": false,
+        "uncertainty_qualification": "THREE-SPACING FIT: a peer reference supplies a third distinct mesh spacing, so the two-spacing asymptotic qualification is lifted for this target; the fit still has no independent fourth-spacing check.",
+        "fit_levels": [
+          {
+            "reference": "21978/35",
+            "mesh_spacing_m": 0.125,
+            "terminal_residual": 0.010356795810607609
+          },
+          {
+            "reference": "21978/35",
+            "mesh_spacing_m": 0.0625,
+            "terminal_residual": 0.0052996934892569495
+          },
+          {
+            "reference": "21978/35",
+            "mesh_spacing_m": 0.042553191489361764,
+            "terminal_residual": 0.0027730957751263396
+          },
+          {
+            "reference": "21989/55",
+            "mesh_spacing_m": 0.125,
+            "terminal_residual": 0.017714765374879503
+          },
+          {
+            "reference": "21989/55",
+            "mesh_spacing_m": 0.0625,
+            "terminal_residual": 0.001693384614199005
+          },
+          {
+            "reference": "22086/43",
+            "mesh_spacing_m": 0.125,
+            "terminal_residual": 0.011016939705021812
+          },
+          {
+            "reference": "22086/43",
+            "mesh_spacing_m": 0.0625,
+            "terminal_residual": 0.0035417937581059262
+          }
+        ]
+      },
+      "target_qualification": null,
+      "third_spacing_used": true,
+      "qualification_status": "THREE_SPACING_QUALIFICATION_LIFTED",
+      "qualification_reason": "The banked 21978/35 control ladder is an independent peer input for this target."
+    },
+    {
+      "reference": "21989/55",
+      "stratum": "confinement-construction",
+      "two_spacing_criterion": 0.010681769281476105,
+      "refreshed_criterion": 0.010613918700193955,
+      "refreshed_over_two_spacing": 0.9936480016096384,
+      "criterion_unit": "relative sup norm of fixed-point defect",
+      "gated_closest_residual_display_only": 0.0,
+      "fit": {
+        "formula": "tau_i(h_i) = C_(s,-i) * h_i**p_(s,-i)",
+        "criterion": 0.010613918700193955,
+        "target_mesh_spacing_m": 0.125,
+        "held_out_target": "21989/55",
+        "fit_reference_count": 2,
+        "fit_sample_count": 5,
+        "fit_unique_mesh_spacing_count": 3,
+        "fit_references": [
+          "21978/35",
+          "22086/43"
+        ],
+        "fit_cell_sizes_m": [
+          0.125,
+          0.0625,
+          0.042553191489361764,
+          0.125,
+          0.0625
+        ],
+        "fit_residuals": [
+          0.010356795810607609,
+          0.0052996934892569495,
+          0.0027730957751263396,
+          0.011016939705021812,
+          0.0035417937581059262
+        ],
+        "observed_order": 1.2669210588657918,
+        "coefficient": 0.14791747317160903,
+        "order_standard_error": 0.17599550991024848,
+        "order_95_percent_interval": [
+          0.7068247986053993,
+          1.8270173191261843
+        ],
+        "log_residual_rms": 0.12989789305569294,
+        "fraction_residual_rms": 0.0005962918513225298,
+        "r_squared": 0.9452752712862671,
+        "target_residual_used_in_fit": false,
+        "target_mesh_pair_used_in_fit": false,
+        "uncertainty_qualification": "THREE-SPACING FIT: a peer reference supplies a third distinct mesh spacing, so the two-spacing asymptotic qualification is lifted for this target; the fit still has no independent fourth-spacing check.",
+        "fit_levels": [
+          {
+            "reference": "21978/35",
+            "mesh_spacing_m": 0.125,
+            "terminal_residual": 0.010356795810607609
+          },
+          {
+            "reference": "21978/35",
+            "mesh_spacing_m": 0.0625,
+            "terminal_residual": 0.0052996934892569495
+          },
+          {
+            "reference": "21978/35",
+            "mesh_spacing_m": 0.042553191489361764,
+            "terminal_residual": 0.0027730957751263396
+          },
+          {
+            "reference": "22086/43",
+            "mesh_spacing_m": 0.125,
+            "terminal_residual": 0.011016939705021812
+          },
+          {
+            "reference": "22086/43",
+            "mesh_spacing_m": 0.0625,
+            "terminal_residual": 0.0035417937581059262
+          }
+        ]
+      },
+      "target_qualification": null,
+      "third_spacing_used": true,
+      "qualification_status": "THREE_SPACING_QUALIFICATION_LIFTED",
+      "qualification_reason": "The banked 21978/35 control ladder is an independent peer input for this target."
+    },
+    {
+      "reference": "22086/43",
+      "stratum": "confinement-construction",
+      "two_spacing_criterion": 0.013545043662552303,
+      "refreshed_criterion": 0.012389584260990242,
+      "refreshed_over_two_spacing": 0.9146950404629159,
+      "criterion_unit": "relative sup norm of fixed-point defect",
+      "gated_closest_residual_display_only": 0.015019257184910935,
+      "fit": {
+        "formula": "tau_i(h_i) = C_(s,-i) * h_i**p_(s,-i)",
+        "criterion": 0.012389584260990242,
+        "target_mesh_spacing_m": 0.125,
+        "held_out_target": "22086/43",
+        "fit_reference_count": 2,
+        "fit_sample_count": 5,
+        "fit_unique_mesh_spacing_count": 3,
+        "fit_references": [
+          "21978/35",
+          "21989/55"
+        ],
+        "fit_cell_sizes_m": [
+          0.125,
+          0.0625,
+          0.042553191489361764,
+          0.125,
+          0.0625
+        ],
+        "fit_residuals": [
+          0.010356795810607609,
+          0.0052996934892569495,
+          0.0027730957751263396,
+          0.017714765374879503,
+          0.001693384614199005
+        ],
+        "observed_order": 1.6875586131496818,
+        "coefficient": 0.4140702414954279,
+        "order_standard_error": 0.6176625974527431,
+        "order_95_percent_interval": [
+          -0.2781194380257386,
+          3.653236664325102
+        ],
+        "log_residual_rms": 0.4558813464578377,
+        "fraction_residual_rms": 0.0028220113592710093,
+        "r_squared": 0.713323232535042,
+        "target_residual_used_in_fit": false,
+        "target_mesh_pair_used_in_fit": false,
+        "uncertainty_qualification": "THREE-SPACING FIT: a peer reference supplies a third distinct mesh spacing, so the two-spacing asymptotic qualification is lifted for this target; the fit still has no independent fourth-spacing check.",
+        "fit_levels": [
+          {
+            "reference": "21978/35",
+            "mesh_spacing_m": 0.125,
+            "terminal_residual": 0.010356795810607609
+          },
+          {
+            "reference": "21978/35",
+            "mesh_spacing_m": 0.0625,
+            "terminal_residual": 0.0052996934892569495
+          },
+          {
+            "reference": "21978/35",
+            "mesh_spacing_m": 0.042553191489361764,
+            "terminal_residual": 0.0027730957751263396
+          },
+          {
+            "reference": "21989/55",
+            "mesh_spacing_m": 0.125,
+            "terminal_residual": 0.017714765374879503
+          },
+          {
+            "reference": "21989/55",
+            "mesh_spacing_m": 0.0625,
+            "terminal_residual": 0.001693384614199005
+          }
+        ]
+      },
+      "target_qualification": "LEAST-TRUSTWORTHY TARGET: its banked same-reference order is 1.6371714162964488 and was measured outside a confirmed asymptotic regime; that pair is excluded from this fit.",
+      "third_spacing_used": true,
+      "qualification_status": "THREE_SPACING_QUALIFICATION_LIFTED",
+      "qualification_reason": "The banked 21978/35 control ladder is an independent peer input for this target."
+    }
+  ],
+  "claim_bounds": {
+    "new_equilibrium_solve": false,
+    "banked_residuals_only": true,
+    "blanket_asymptotic_confirmation": false,
+    "reason": "One banked third-spacing ladder can independently refresh only targets outside that ladder and inside its topology stratum.",
+    "new_reliability_verdict_claimed": false
+  },
+  "sources": {
+    "docs/figures/moment-conditioned-basin-entry/stall-mesh-sensitivity.json": "c23bc32012f02668dd1d567c184d3e23423ac5f557d4f0fe10a480298103eb1f",
+    "docs/figures/forward-operator-refinement/reference-native-resolution-default.json": "258414a6403705438ed4c046a304fedb69cfdd432a1b0569b12e60abafe3c376",
+    "docs/figures/efit-forward-parity/tared-plasma-support-solve.json": "14ee0945438613f5c65ba79663de09eba0a75e9ee053eb5b1fbe814abaf9f7c2",
+    "docs/figures/efit-forward-parity/passive-inclusive-frozen-six-scorecard.json": "e2a625b2a1a4ce7324bd437eee0c9631d6b056b9406e5a3ae2393b0dc27a0aa6",
+    "benchmarks/efit_forward_parity_slice.py": "a05e590e18c68e5561bd66cccac00d014518968b07b220f971552458f97aeb04"
+  }
+}

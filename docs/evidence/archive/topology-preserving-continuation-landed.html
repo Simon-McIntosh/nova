@@ -56,6 +56,66 @@
   <em>preregister</em> the observable before scoring all available candidates.</p>
 </section>
 
+<section id="s2-measurement">
+  <h2 id="s2-measurement-h">§2 — The manifold-advance measurement: a topology-preserving negative</h2>
+
+  <p><strong>manifold-advance-measurement</strong> landed 2026-08-24 — commits
+  <code>d0357dfe</code> (driver) and <code>5c076c6b</code> (receipt), merged <code>7c6ccfb4</code>,
+  gate <strong>FAILED</strong>, verdict
+  <strong><code>TOPOLOGY_HELD_RESIDUAL_REGRESSED_ON_FOUR_OF_FIVE</code></strong>. Reserved-H200 job
+  1253369, 4m54s. Receipt
+  <code>docs/figures/topology-preserving-continuation/manifold-advance.json</code> (SHA-256
+  <code>369d1c3cdaf3e1f559469d15c79352ce932d6f4115ebf66bce79710710cbc094</code>). This is the
+  reportable negative §2 authorised as an honest close, not a failure to deliver.</p>
+
+  <p><strong>The pairing is exact.</strong> Both arms share one source revision
+  (<code>d0357dfe</code>), the data, cold seed, score-blind admitted bootstrap, initial state,
+  physical topology predicate, 89-update budget, 24-vector Krylov route and an infinite conditioning
+  ratio limit — and both record <em>zero</em> conditioning interventions, so the predictor-corrector
+  is the only differing mechanism.</p>
+
+  <table>
+    <caption>Per frame: predictor-corrector / paired same-tree backtracking / quoted earlier-tree
+      conditioning-disabled control — residual; admitted of 89; mean advance ÷ Newton length;
+      step-equivalents</caption>
+    <thead>
+      <tr><th scope="col">Frame</th><th scope="col">Predictor-corrector</th><th scope="col">Paired backtracking</th><th scope="col">Earlier-tree control</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>d3d_shot_00000c4a7b f179</td><td>0.6053414769800181; 5; 1.251058239685544; 6.25529119842772</td><td>0.06939041260320641; 5; 0.63125; 3.15625</td><td>0.10704471039091447; 7; 0.45982142857142855; 3.21875</td></tr>
+      <tr><td>d3d_shot_0003ff34e7 f44</td><td><strong>0.07474799363761965</strong>; 1; 1.0025658915454334; 1.0025658915454334</td><td>0.18057463598193801; 3; 0.4583333333333333; 1.375</td><td>0.10077482131394641; 6; 0.6988823565435012; 4.193294139261007</td></tr>
+      <tr><td>d3d_shot_001554e054 f144</td><td>0.9561638413160874; 2; 1.761727895157795; 3.52345579031559</td><td>0.17411347942110977; 7; 0.35747239920807833; 2.5023067944565485</td><td>0.1553929757220097; 10; 0.3363460705103881; 3.3634607051038814</td></tr>
+      <tr><td>d3d_shot_002495e835 f146</td><td>1.454384689460721; 3; 1.122796451292925; 3.368389353878775</td><td>0.09463188678261902; 3; 0.699581823465819; 2.098745470397457</td><td>0.08696912567989223; 4; 0.7292883505683061; 2.9171534022732244</td></tr>
+      <tr><td>d3d_shot_0040ca9bdc f137</td><td>0.5087535410110327; 2; 1.3349647908481193; 2.6699295816962385</td><td>0.09914747975291827; 4; 0.8125; 3.25</td><td>0.12290690751401612; 9; 0.5767282942568076; 5.190554648311268</td></tr>
+      <tr><td><strong>cohort</strong></td><td><strong>13 admitted of 445; 16.819631815863758 equivalents; 0.0747–1.454</strong></td><td><strong>22 admitted of 445; 12.382302264854005 equivalents; 0.0694–0.1806</strong></td><td>18.88321289494938 equivalents; 0.0870–0.1554</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>The mechanism does exactly what it was built to do, and that is the finding.</strong>
+  Mean advance exceeds <em>one full Newton-step length</em> on every frame — 1.00 to 1.76 against
+  0.36 to 0.81 for backtracking — and total traversal is 16.82 step-equivalents against 12.38. So
+  advancing along the manifold genuinely lengthens the step, which is what §2 predicted. But it
+  <em>admits fewer</em> advances, 13 of 445 against 22, and terminal residual regresses on four of
+  five frames, with one improvement (f44 at 0.0747 against 0.1806). Topology holds throughout: 5 of 5
+  diverted with finite X points in both arms.</p>
+
+  <p><strong>Read with the control, the two results compose into one conclusion: step length was
+  never the binding constraint.</strong> The control had already shown that admitted steps are full
+  Newton steps and the 1/32 figure belongs to refusal iterations. This measurement lengthens the step
+  <em>past</em> one Newton unit and residual gets worse, not better — buying traversal at the cost of
+  admissions. A longer step along a tangent estimated from two admitted states leaves the corrector
+  more to remove, and the candidate is refused more often. Neither finer backtracking (measured null
+  earlier) nor longer manifold advance moves the residual, so the obstacle is not the length or the
+  direction of the step the route is willing to take.</p>
+
+  <p><strong>Attribution.</strong> Within-tree attribution to the predictor-corrector is legitimate
+  because the paired arms differ in nothing else. Attribution against the earlier-tree
+  conditioning-disabled control is <em>declined</em>: the trees differ in
+  <code>nova/equilibrium/fixed_point.py</code>, <code>nova/equilibrium/manifold_advance.py</code> and
+  <code>nova/equilibrium/seed_alignment.py</code>, so more than one candidate mechanism sits in that
+  diff. The control figures are quoted because the section required them, as context only.</p>
+</section>
+
 <section id="s6">
   <h2 id="s6-h">§6 — The conditioning shrinkage, repaired</h2>
 

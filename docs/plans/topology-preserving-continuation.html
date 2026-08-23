@@ -25,11 +25,11 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-24">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-sprint" content="S14">
-<meta name="plan-commits" content="6cdc60c46ef0b0e1c611ff2c5404ec561e4abbce,f1adace7cbfecea328cc085bad72f4e7664929f5,f0cec6dcd29b766f3c7b8c8813f4577a0419cd28,e9ec1ca86ae4eda2d91ab67ae7b780bb7935ec3e,5e7265d36bb2ebd3ba83def966d2bb1fbfb440ab,32526f7a7bab5e84c72c82b9706f4927a82d9b86,35c7c0358ec6b072d623688d6d13c861f04be232,6df3eb80efcf7c5f32b48ea8fabc38e6d0198b0e,6748bec2">
-<meta name="plan-artifacts" content="docs/figures/diiid-forward-onboarding/dimension-general-conditioning.json,docs/figures/topology-preserving-continuation/admissible-step-control.json,docs/figures/topology-preserving-continuation/seed-alignment-ranking.json,docs/figures/topology-preserving-continuation/conditioning-repair.json,scripts/continuation_parameter_choice/report.md,scripts/continuation_manifold_reuse/report.md,nova/equilibrium/manifold_advance.py,nova/equilibrium/seed_alignment.py,docs/evidence/archive/topology-preserving-continuation-landed.html">
-<meta name="plan-impl" content="0.778">
+<meta name="plan-commits" content="6cdc60c46ef0b0e1c611ff2c5404ec561e4abbce,f1adace7cbfecea328cc085bad72f4e7664929f5,f0cec6dcd29b766f3c7b8c8813f4577a0419cd28,e9ec1ca86ae4eda2d91ab67ae7b780bb7935ec3e,5e7265d36bb2ebd3ba83def966d2bb1fbfb440ab,32526f7a7bab5e84c72c82b9706f4927a82d9b86,35c7c0358ec6b072d623688d6d13c861f04be232,6df3eb80efcf7c5f32b48ea8fabc38e6d0198b0e,d0357dfeb5e1d09ca4a834e42ccc081fb744969e,5c076c6b492aaa2453d76153a27c91da41af86e8,7c6ccfb4">
+<meta name="plan-artifacts" content="docs/figures/diiid-forward-onboarding/dimension-general-conditioning.json,docs/figures/topology-preserving-continuation/admissible-step-control.json,docs/figures/topology-preserving-continuation/manifold-advance.json,docs/figures/topology-preserving-continuation/conditioning-repair.json,docs/figures/topology-preserving-continuation/seed-alignment-ranking.json,scripts/continuation_parameter_choice/report.md,scripts/continuation_manifold_reuse/report.md,nova/equilibrium/manifold_advance.py,nova/equilibrium/seed_alignment.py,docs/evidence/archive/topology-preserving-continuation-landed.html">
+<meta name="plan-impl" content="0.889">
 </head>
 <body>
   <main class="plan-doc">
@@ -109,67 +109,34 @@
     construction. Halving the factor again buys a smaller step, not a better direction. Closing
     this needs a route that advances <em>along</em> the admissible set.</p>
 
-    <h2 id="s2">§2 — Advance along the manifold, do not backtrack into it</h2>
-
-    <p>The topology-preserving set is a manifold in state space: the states whose emergent
-    topology matches the requested class. The Newton step is computed without reference to it and
-    generally leaves it. Backtracking then retreats along that same departing direction until it
-    lands back inside — which is why the admissible fraction, not the Newton direction, sets the
-    step length. A predictor-corrector instead moves along the manifold's tangent and projects
-    back, so step length is limited by the manifold's curvature rather than by how quickly the
-    Newton direction exits it.</p>
-
-    <svg viewBox="0 0 720 300" width="100%" role="img"
-         aria-label="Backtracking retreats along a departing Newton direction and yields a tiny admissible step; a predictor-corrector advances along the manifold tangent and projects back, yielding a large one."
-         style="max-width:720px">
-      <path d="M60 232 C 220 214, 400 168, 660 104" fill="none" stroke="#1a1a1a" stroke-width="1.4"/>
-      <text x="60" y="256" font-family="system-ui" font-size="13" fill="#1a1a1a">topology-preserving manifold — states whose emergent class matches the request</text>
-
-      <circle cx="150" cy="220" r="4" fill="#1a1a1a"/>
-      <text x="128" y="208" font-family="system-ui" font-size="13" fill="#1a1a1a">x</text>
-      <text x="137" y="212" font-family="system-ui" font-size="10" fill="#1a1a1a">k</text>
-
-      <line x1="150" y1="220" x2="600" y2="48" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="4 3"/>
-      <circle cx="600" cy="48" r="3.5" fill="none" stroke="#1a1a1a" stroke-width="1.2"/>
-      <text x="560" y="38" font-family="system-ui" font-size="13" fill="#1a1a1a">full Newton step — refused</text>
-
-      <circle cx="375" cy="134" r="2.6" fill="none" stroke="#1a1a1a" stroke-width="1"/>
-      <text x="366" y="126" font-family="system-ui" font-size="12" fill="#1a1a1a">½</text>
-      <circle cx="262" cy="177" r="2.6" fill="none" stroke="#1a1a1a" stroke-width="1"/>
-      <text x="254" y="169" font-family="system-ui" font-size="12" fill="#1a1a1a">¼</text>
-      <circle cx="206" cy="198" r="2.6" fill="none" stroke="#1a1a1a" stroke-width="1"/>
-      <text x="196" y="190" font-family="system-ui" font-size="12" fill="#1a1a1a">⅛</text>
-      <circle cx="164" cy="214" r="3.2" fill="#1a1a1a"/>
-      <text x="150" y="288" font-family="system-ui" font-size="13" fill="#1a1a1a">1/32 — the only admissible rung, and 2.8 step-equivalents over the whole budget</text>
-      <line x1="164" y1="217" x2="160" y2="278" stroke="#1a1a1a" stroke-width="0.8"/>
-
-      <path d="M150 220 C 300 203, 420 174, 540 145" fill="none" stroke="#b34700" stroke-width="1.8"/>
-      <polygon points="540,145 528,141 530,151" fill="#b34700"/>
-      <text x="300" y="196" font-family="system-ui" font-size="13" fill="#b34700">predictor — along the tangent</text>
-      <line x1="540" y1="145" x2="556" y2="129" stroke="#b34700" stroke-width="1.4"/>
-      <polygon points="558,127 548,129 554,135" fill="#b34700"/>
-      <text x="566" y="126" font-family="system-ui" font-size="13" fill="#b34700">corrector</text>
-      <circle cx="558" cy="127" r="4" fill="#b34700"/>
-    </svg>
-    <p style="font-size:13px"><strong>Why the step length differs.</strong> Both routes respect the
-    same admissibility test. Backtracking is limited by how fast the Newton direction leaves the
-    manifold; a predictor-corrector is limited by the manifold's curvature, which the measured
-    1/32 cap says nothing about.</p>
-
-    <p><strong>Deliverable.</strong> A topology-preserving predictor-corrector in the production
-    forward path, fixed-shape and safe under <code>jit</code> and <code>vmap</code> with no
-    data-dependent control flow, taking the admissibility predicate that already exists rather
-    than a second copy of it. It must reuse the landed machinery — the class predicate, the
-    action qualification, the terminal branch receipt — and any new component needs a stated
-    reason the existing one does not fit.</p>
-
-    <p><strong>Done when</strong> the five score-blind frames are re-measured with per-frame
-    terminal residual, admitted-advance count against the banked 7, 7, 10, 5 and 9 of 89, mean
-    advance length as a fraction of the Newton step against the banked 0.03125 cap, terminal
-    topology class and X-point finiteness; and the receipt states the achieved
-    Newton-step-equivalents traversed against the banked 2.8. A route that holds topology and
-    still stalls is a reportable negative and closes this section honestly; a route that loses
-    topology to gain residual does not close it at all.</p>
+    <section id="s2" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-24 — reportable negative</span>
+        <h2>§2 — Advance along the manifold, do not backtrack into it</h2></header>
+      <p class="landed-summary">Delivered and measured. State-space arclength locked as the
+      coordinate after both alternatives were refuted; the fixed-shape predictor-corrector landed
+      inside the existing solver shell with a named degenerate-secant refusal, jit/vmap agreement and
+      the production predicate reused (8 contract tests, 31 with adjacent regressions). Paired
+      same-tree measurement on the reserved H200, the predictor-corrector the only differing
+      mechanism: verdict
+      <strong><code>TOPOLOGY_HELD_RESIDUAL_REGRESSED_ON_FOUR_OF_FIVE</code></strong>. Mean advance
+      exceeds one full Newton-step length on every frame (1.00–1.76 against 0.36–0.81) and traversal
+      is <strong>16.82</strong> step-equivalents against 12.38 — the step really did lengthen — but
+      admissions fall to 13 of 445 against 22 and terminal residual regresses on four of five frames
+      (one improvement, f44 at 0.0747 against 0.1806). Topology holds: 5/5 diverted with finite X
+      points in both arms. <strong>The composed conclusion with the control: step length was never
+      the binding constraint.</strong> Admitted steps were already full Newton steps; lengthening
+      them past one Newton unit buys traversal and costs admissions. Neither finer backtracking
+      (measured null) nor longer manifold advance moves the residual. This is the reportable
+      topology-preserving negative the section authorised as an honest close — it does not close the
+      downstream convergence blocker. Full record:
+      <a href="/nova/evidence/archive/topology-preserving-continuation-landed#s2-measurement">§2
+      measurement</a>, with the
+      <a href="/nova/evidence/archive/topology-preserving-continuation-landed#s2-control">control</a>
+      and the
+      <a href="/nova/evidence/archive/topology-preserving-continuation-landed#s2-parameter">coordinate
+      adjudication</a> (commits <code>f1adace7</code>, <code>5e7265d3</code>, <code>e9ec1ca8</code>,
+      <code>5c076c6b</code>).</p>
+    </section>
 
     <h2 id="s3">§3 — Seed alignment as a selection criterion</h2>
 
@@ -348,11 +315,14 @@
 <div class="r-comment" data-section="s2" data-id="c-20260823T2205-mechanism" data-who="reckon-ship" data-when="2026-08-23T22:05:00Z">
     <div class="r-comment-body">manifold-advance-mechanism landed - commit 5e7265d3, merged 31b9914b; gate PASSED; 8 tests added, 31 focused and adjacent regression tests passing (8 new, 8 adjacent qualification, 15 fixed-point). Artifacts: nova/equilibrium/manifold_advance.py providing the fixed-shape secant and normal projector, plus per-nonlinear-update instrumentation in nova/equilibrium/fixed_point.py recording one qualification, an admissibility bit, predictor, corrector, advance and Newton lengths and cumulative Newton-step-equivalents - the receipt fields the reuse map found had no existing home. Production seam: ForwardProfile._solve_accelerated already forwards options to newton_krylov, so previous_admitted_state alongside the caller's existing admissibility_fn selects the mechanism with no second topology classifier. Predictor is the oriented secant between two admitted states; the bordered corrector removes its tangential component; both actions pass through _qualified_krylov_step and a failed status or zero step at material residual promotes zero advance. Gate suite: tangent sign orientation, named DEGENERATE_SECANT refusal, normal projection, fixed shapes, jit/vmap equality, predicate-controlled admission, Krylov refusal, zero-material-step refusal, ForwardProfile seam. No five-frame solve ran in this node, so it carries no convergence or performance attribution by design.</div>
 </div>
+<div class="r-comment" data-section="s2" data-id="c-20260824T0055-measurement" data-who="reckon-ship" data-when="2026-08-24T00:55:00Z">
+    <div class="r-comment-body">manifold-advance-measurement landed - commits d0357dfe (driver) and 5c076c6b (receipt), merged 7c6ccfb4; gate FAILED with verdict TOPOLOGY_HELD_RESIDUAL_REGRESSED_ON_FOUR_OF_FIVE, which is the reportable topology-preserving negative this section authorised as an honest close. Reserved-H200 job 1253369, 4m54s. Both arms share one source revision d0357dfe, data, cold seed, score-blind admitted bootstrap, initial state, physical topology predicate, 89-update budget, 24-vector route and an infinite conditioning ratio limit, with zero conditioning interventions in each, so the predictor-corrector is the only differing mechanism. Measures, predictor-corrector against paired backtracking: mean advance divided by Newton length 1.00 to 1.76 against 0.36 to 0.81; achieved Newton-step-equivalents 16.819631815863758 against 12.382302264854005; admitted advances 13 of 445 against 22 of 445; terminal residual regressed on four of five frames (0.6053414769800181 against 0.06939041260320641; 0.9561638413160874 against 0.17411347942110977; 1.454384689460721 against 0.09463188678261902; 0.5087535410110327 against 0.09914747975291827) with one improvement (0.07474799363761965 against 0.18057463598193801); terminals 5/5 diverted with 5/5 finite X points in both arms. COMPOSED CONCLUSION WITH THE CONTROL: step length was never the binding constraint. Admitted steps were already full Newton steps, and lengthening them past one Newton unit buys traversal while costing admissions - a longer tangent advance leaves the corrector more to remove and the candidate is refused more often. Neither finer backtracking, measured null earlier, nor longer manifold advance moves the residual. Attribution to the earlier-tree control is declined because three production paths differ; within-tree attribution to the predictor-corrector is legitimate because the paired arms differ in nothing else. THE DOWNSTREAM BLOCKER IS NOT CLOSED: this produced a held branch, not convergence, so mast-catalog-gpu-solve and the DIII-D kill gate remain held and must be told so explicitly rather than inheriting a satisfied prerequisite edge. Artifact: docs/figures/topology-preserving-continuation/manifold-advance.json, SHA-256 369d1c3cdaf3e1f559469d15c79352ce932d6f4115ebf66bce79710710cbc094. Section collapsed.</div>
+</div>
 <div class="r-comment" data-section="s3" data-id="c-20260824T0005-alignment" data-who="reckon-ship" data-when="2026-08-24T00:05:00Z">
     <div class="r-comment-body">seed-alignment-observable landed - commit 32526f7a, merged 56ba6e29; gate PASSED; 4 tests added; verdict HOLD_AS_SEED_SELECTOR. Measure: preregistered score q(s,F) = ||F(s)-s||_2 / ||(I - J_F(s))(F(s)-s)||_2 on a fixed five-frame corpus declared before scores or outcomes were opened; Spearman against cumulative growth 0.60 at p = 0.28475697986529386, n = 5; Spearman against terminal residual 0.00 at p = 1.0, n = 5. The section requires consistency against BOTH outcomes, so this is a NEGATIVE and the section stays open. Scores were 0.9322689958968416 (21978/35), 0.9533225665401838 (21983/35), 1.0026929545189016 (21985/51), 0.9951411056094699 (21986/46), 1.065876598525219 (21989/55). No converged solve enters the observable, which the receipt states explicitly. THE OUTLIER SUB-DELIVERABLE DOES CLOSE: 21985/51 is most-informative and NOT instrumentation-perturbed - the replay reproduced the banked twelve-update trajectory with no production or test source change, and its real same-shot alternate seed moved burst updates from [3, 8, 12] to none and cumulative growth from 5379792627.282051 to 0.061860940695296525. Method requirements honoured: attribution is limited to rank association because the observable is measured on the current tree against outcomes banked on earlier trees in which multiple production mechanisms changed. The receipt's instruction not to tune the score after seeing the outcomes is honoured by locking the definition and folding a power node rather than trying a second observable on the same five points. Artifact: docs/figures/topology-preserving-continuation/seed-alignment-ranking.json.</div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260824T0035-repair" data-who="reckon-ship" data-when="2026-08-24T00:35:00Z">
-    <div class="r-comment-body">conditioning-shrinkage-repair landed - commits 35c7c035 (source) and 6df3eb80 (receipt), merged 6748bec2; gate PASS; 24 tests across five conditioning and admission modules; reserved-H200 paired replay SLURM job 1253367 completed in 00:04:47. Mechanism: the undamped fixed ladder is evaluated FIRST, conditioned damping is reached for only after every raw trial is physically refused, and the damped fallback is promoted only when it does not increase the current relative residual, so an admitted raw step is preserved exactly instead of being shrunk before the predicate sees it. Measures, repaired / same-tree disabled / pre-repair enabled: interventions 11 / 0 / 445 of 445; admitted advances 47 / 36 / 445; achieved Newton-step-equivalents 18.92998900409446 / 18.88321289494938 / 1.1517186421668293; terminal residuals at or below the disabled arm on 5 of 5 frames (0.10690242237460541 <= 0.10704471039091447, 0.09970075362827917 <= 0.10077482131394641, 0.15255853230708596 <= 0.1553929757220097, 0.08646603357046066 <= 0.08696912567989223, 0.12255579619151723 <= 0.12290690751401612). Traversal is marginally ABOVE the disabled arm, so the mechanism now contributes rather than costing. Generality retained: engages at projection dimensions 8, 12 and 24 under compiled fixed-shape tests, both retired dataset-fitted constants and the projection-dimension gate still absent from nova/equilibrium/fixed_point.py. All repaired and disabled terminals diverted with finite X points. Attribution: causal same-tree pair on production source 35c7c035 whose only arm difference is the condition-ratio limit e against infinity; pre-repair figures quoted as context, not as cross-tree causal estimates. Artifact: docs/figures/topology-preserving-continuation/conditioning-repair.json, SHA-256 661f46ffe67f9cf7cf4236c1721f1d2bb4d75577941dadb4608699052404d9a4. Section collapsed.</div>
+    <div class="r-comment-body">conditioning-shrinkage-repair landed - commits 35c7c035 (source) and 6df3eb80 (receipt), merged 6748bec2; gate PASS; 24 tests across five conditioning and admission modules; reserved-H200 paired replay SLURM job 1253367 completed in 00:04:47. Mechanism: the undamped fixed ladder is evaluated FIRST, conditioned damping is reached for only after every raw trial is physically refused, and the damped fallback is promoted only when it does not increase the current relative residual, so an admitted raw step is preserved exactly instead of being shrunk before the predicate sees it. Measures, repaired / same-tree disabled / pre-repair enabled: interventions 11 / 0 / 445 of 445; admitted advances 47 / 36 / 445; achieved Newton-step-equivalents 18.92998900409446 / 18.88321289494938 / 1.1517186421668293; terminal residuals at or below the disabled arm on 5 of 5 frames (0.10690242237460541 &lt;= 0.10704471039091447, 0.09970075362827917 &lt;= 0.10077482131394641, 0.15255853230708596 &lt;= 0.1553929757220097, 0.08646603357046066 &lt;= 0.08696912567989223, 0.12255579619151723 &lt;= 0.12290690751401612). Traversal is marginally ABOVE the disabled arm, so the mechanism now contributes rather than costing. Generality retained: engages at projection dimensions 8, 12 and 24 under compiled fixed-shape tests, both retired dataset-fitted constants and the projection-dimension gate still absent from nova/equilibrium/fixed_point.py. All repaired and disabled terminals diverted with finite X points. Attribution: causal same-tree pair on production source 35c7c035 whose only arm difference is the condition-ratio limit e against infinity; pre-repair figures quoted as context, not as cross-tree causal estimates. Artifact: docs/figures/topology-preserving-continuation/conditioning-repair.json, SHA-256 661f46ffe67f9cf7cf4236c1721f1d2bb4d75577941dadb4608699052404d9a4. Section collapsed.</div>
 </div>
 </section>
 </main>

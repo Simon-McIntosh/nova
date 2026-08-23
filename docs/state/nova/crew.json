@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T00:25:49",
+  "updated": "2026-08-24T00:29:20",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -29473,9 +29473,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T220448089033-manifold-advance-measurement",
+        "plan": "topology-preserving-continuation",
+        "section": "\u00a72",
+        "node": "manifold-advance-measurement",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "manifold-measure",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T22:04:51Z",
+        "completed_at": "2026-08-23T22:27:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1362,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1362,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "f7bf288c8ac44d339f07146228644cd5d801c275",
+        "commits": [
+          "5c076c6b492aaa2453d76153a27c91da41af86e8"
+        ],
+        "changed_lines": {
+          "added": 4206,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "TOPOLOGY_HELD_RESIDUAL_REGRESSED_ON_FOUR_OF_FIVE. The predictor-corrector does mechanically what it was designed to do and it is not enough. Mean advance exceeds one Newton-step length on all five frames (1.00 to 1.76) against 0.36 to 0.81 for the paired backtracking arm, and total traversal is 16.819631815863758 Newton-step-equivalents against 12.382302264854005 - but it admits only 13 advances of 445 against 22, and terminal residual regresses on four of five frames: 0.6053414769800181 against 0.06939041260320641, 0.9561638413160874 against 0.17411347942110977, 1.454384689460721 against 0.09463188678261902, 0.5087535410110327 against 0.09914747975291827, with one improvement at 0.07474799363761965 against 0.18057463598193801. Topology holds in both arms, 5/5 diverted with 5/5 finite X points, so this is the reportable topology-preserving negative the section authorised as an honest close rather than a failure to deliver. Read with the control, it says step length was never the binding constraint: admitted steps were already full Newton steps, and lengthening them further buys traversal while costing admissions. Both arms share one source revision, data, seed, bootstrap, initial state, predicate, 89-update budget, 24-vector route and an infinite conditioning ratio, with zero conditioning interventions recorded in each, so the predictor-corrector is the only differing mechanism; attribution to the earlier-tree control is declined because three production paths differ.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T220448089033-manifold-advance-measurement/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a030a7-b2ee-7cf0-b5ff-679e56a7f772",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13768192,
+            "cached_input_tokens_cumulative": 13768192,
+            "input_tokens": 14164082,
+            "input_tokens_cumulative": 14164082,
+            "output_tokens": 37097,
+            "output_tokens_cumulative": 37097,
+            "reasoning_output_tokens": 11817,
+            "reasoning_output_tokens_cumulative": 11817
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 702
+    "_version": 703
   }
 }

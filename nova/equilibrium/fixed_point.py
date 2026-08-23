@@ -18,8 +18,9 @@ compare fairly:
 * :func:`newton_krylov` — exact-tangent Jacobian-free Newton–Krylov: each
   step linearises the map ONCE (``jax.linearize`` — exact tangents, no finite
   differences) and solves ``(I − J) s = f`` with a fixed-shape batched GMRES
-  (no early exit), at a cost of ``2 + gmres_iterations`` map evaluations per
-  step.
+  (no early exit).  Its trace stride remains ``2 + gmres_iterations``; an
+  initial action probe and the achieved linear residual qualify the solve
+  before its step can be promoted.
 
 All three are ``jit``-safe and ``vmap``-safe (fixed shapes, no data-dependent
 control flow); map a leading batch axis with ``jax.vmap`` over the initial
@@ -35,6 +36,7 @@ already carry.
 from __future__ import annotations
 
 from collections.abc import Callable
+from enum import IntEnum
 from typing import Literal, NamedTuple
 
 import jax
@@ -45,11 +47,23 @@ from nova.jax.config import Precision, resolve_precision
 __all__ = [
     "FixedPointResult",
     "KinkAwareResult",
+    "KrylovActionQualification",
     "anderson",
     "kink_aware_newton_krylov",
     "newton_krylov",
     "picard",
 ]
+
+
+class KrylovActionQualification(IntEnum):
+    """Host-readable reason a Newton--Krylov linear action was refused."""
+
+    NOT_APPLICABLE = 0
+    ACCEPTED = 1
+    NONFINITE_LINEAR_ACTION = 2
+    NONSUCCESSFUL_GMRES_STATUS = 3
+    NONFINITE_ACHIEVED_LINEAR_RESIDUAL = 4
+    ZERO_STEP_WITH_MATERIAL_NONLINEAR_RESIDUAL = 5
 
 
 class FixedPointResult(NamedTuple):
@@ -59,11 +73,17 @@ class FixedPointResult(NamedTuple):
     residual where the scheme measured one, NaN where the evaluation was a
     Newton tangent pass — so ladder plots of different schemes share one
     x-axis.  ``residual`` is the residual at the last measured evaluation.
+    ``krylov_action_qualification`` names the first refused linear-action
+    condition, reports ``ACCEPTED`` when every Newton action passed, and is
+    ``NOT_APPLICABLE`` for the non-Krylov schemes.
     """
 
     state: jax.Array
     residual: jax.Array
     trace: jax.Array
+    krylov_action_qualification: jax.Array | int = (
+        KrylovActionQualification.NOT_APPLICABLE
+    )
 
 
 class KinkAwareResult(NamedTuple):
@@ -216,11 +236,14 @@ def newton_krylov(
     Newton step linearises the map once with the exact ``jax.linearize``
     tangent and solves ``(I − J) s = f`` with a ``gmres_iterations``-step
     fixed-shape batched GMRES — no early exit, so the whole solve ``vmap``s
-    unchanged.  A non-finite Krylov step falls back to the relaxed Picard
-    step and any step is capped at ``step_cap`` × the relaxed step, bounding
-    excursions while the current-centroid pin holds the basin.  Cost per step
-    is ``2 + gmres_iterations`` map evaluations (one linearisation value, the
-    tangent passes, one promotion read), which is exactly the trace layout.
+    unchanged.  A step is refused when the initial linear action is non-finite,
+    GMRES reports a non-successful status, the achieved linear residual is
+    non-finite, or an exactly-zero step carries a material nonlinear residual.
+    A qualified step is capped at ``step_cap`` × the relaxed step, bounding
+    excursions while the current-centroid pin holds the basin.  The trace
+    retains its ``2 + gmres_iterations`` stride (one linearisation value,
+    tangent slots, and one promotion read); the qualification actions do not
+    add measured nonlinear-map entries.
     """
     initial = _solver_state(initial, precision)
     stride = 2 + gmres_iterations
@@ -240,38 +263,93 @@ def newton_krylov(
     )
 
     def newton_body(index, carry):
-        state, residual, trace = carry
+        state, residual, trace, qualification = carry
         mapped, tangent = jax.linearize(map_fn, state)
         f = mapped - state
         base = warmup + index * stride
-        trace = trace.at[base].set(_relative_residual(mapped, state))
+        nonlinear_residual = _relative_residual(mapped, state)
+        trace = trace.at[base].set(nonlinear_residual)
 
-        step, _info = jax.scipy.sparse.linalg.gmres(
-            lambda vector: vector - tangent(vector),
+        def linear_action(vector):
+            return vector - tangent(vector)
+
+        probe_scale = jnp.maximum(jnp.max(jnp.abs(f)), 1.0e-300)
+        probe = jnp.where(
+            probe_scale > 1.0e-300,
+            f / probe_scale,
+            jnp.ones_like(f) / jnp.sqrt(f.size),
+        )
+        finite_linear_action = jnp.all(jnp.isfinite(linear_action(probe)))
+
+        step, info = jax.scipy.sparse.linalg.gmres(
+            linear_action,
             f,
             maxiter=gmres_iterations,
             restart=gmres_iterations,
             solve_method="batched",
         )
-        step = jnp.where(jnp.all(jnp.isfinite(step)), step, relaxation * f)
-        cap = step_cap * jnp.max(jnp.abs(relaxation * f))
+        achieved_linear_residual = f - linear_action(step)
+        finite_achieved_residual = jnp.all(jnp.isfinite(step)) & jnp.all(
+            jnp.isfinite(achieved_linear_residual)
+        )
+        successful_status = jnp.asarray(info) == 0
         norm_step = jnp.max(jnp.abs(step))
+        material_residual_floor = jnp.sqrt(jnp.finfo(initial.dtype).eps)
+        zero_step_at_material_residual = (norm_step == 0.0) & (
+            nonlinear_residual > material_residual_floor
+        )
+
+        step_qualification = jnp.asarray(
+            KrylovActionQualification.ACCEPTED, dtype=jnp.int32
+        )
+        step_qualification = jnp.where(
+            zero_step_at_material_residual,
+            KrylovActionQualification.ZERO_STEP_WITH_MATERIAL_NONLINEAR_RESIDUAL,
+            step_qualification,
+        )
+        step_qualification = jnp.where(
+            ~finite_achieved_residual,
+            KrylovActionQualification.NONFINITE_ACHIEVED_LINEAR_RESIDUAL,
+            step_qualification,
+        )
+        step_qualification = jnp.where(
+            ~successful_status,
+            KrylovActionQualification.NONSUCCESSFUL_GMRES_STATUS,
+            step_qualification,
+        )
+        step_qualification = jnp.where(
+            ~finite_linear_action,
+            KrylovActionQualification.NONFINITE_LINEAR_ACTION,
+            step_qualification,
+        )
+        accepted = step_qualification == KrylovActionQualification.ACCEPTED
+
+        cap = step_cap * jnp.max(jnp.abs(relaxation * f))
         step = jnp.where(
             norm_step > cap, step * (cap / jnp.maximum(norm_step, 1.0e-300)), step
         )
-        state = state + step
+        state = jnp.where(accepted, state + step, state)
         promoted = map_fn(state)
         residual = _relative_residual(promoted, state)
         trace = trace.at[base + stride - 1].set(residual)
-        return state, residual, trace
+        prior_failed = (qualification != KrylovActionQualification.NOT_APPLICABLE) & (
+            qualification != KrylovActionQualification.ACCEPTED
+        )
+        qualification = jnp.where(prior_failed, qualification, step_qualification)
+        return state, residual, trace, qualification
 
-    state, residual, trace = jax.lax.fori_loop(
+    state, residual, trace, qualification = jax.lax.fori_loop(
         0,
         newton_steps,
         newton_body,
-        (state, trace[jnp.maximum(warmup - 1, 0)], trace),
+        (
+            state,
+            trace[jnp.maximum(warmup - 1, 0)],
+            trace,
+            jnp.asarray(KrylovActionQualification.NOT_APPLICABLE, dtype=jnp.int32),
+        ),
     )
-    return FixedPointResult(state, residual, trace)
+    return FixedPointResult(state, residual, trace, qualification)
 
 
 def kink_aware_newton_krylov(

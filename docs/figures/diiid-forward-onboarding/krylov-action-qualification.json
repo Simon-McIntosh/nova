@@ -1,0 +1,44 @@
+{
+  "artifact": "krylov_action_qualification",
+  "status": "passed",
+  "recorded_at": "2026-08-23",
+  "implementation": "nova/equilibrium/fixed_point.py",
+  "result_contract": {
+    "field": "krylov_action_qualification",
+    "accepted_code": "ACCEPTED",
+    "refusal_behavior": "The Newton state is not promoted and the material nonlinear residual remains visible.",
+    "material_nonlinear_residual_floor": "sqrt(machine epsilon)"
+  },
+  "diiid_plateau_case": {
+    "relative_nonlinear_residual": 0.03491124178554655,
+    "previous_gmres_status": 0,
+    "previous_step_norm": 0.0,
+    "observed_exact_linear_action_finite": false,
+    "qualification": "NONFINITE_LINEAR_ACTION",
+    "step_promoted": false
+  },
+  "focused_refusal_regressions": {
+    "passed": 4,
+    "total": 4,
+    "conditions": [
+      "NONFINITE_LINEAR_ACTION",
+      "NONSUCCESSFUL_GMRES_STATUS",
+      "NONFINITE_ACHIEVED_LINEAR_RESIDUAL",
+      "ZERO_STEP_WITH_MATERIAL_NONLINEAR_RESIDUAL"
+    ]
+  },
+  "unchanged_regressions": {
+    "tests/test_fixed_point.py": {
+      "passed": 15,
+      "total": 15,
+      "near_singular_step_cap": "passed",
+      "kink_aware_routes": "passed"
+    },
+    "tests/test_equilibrium_forward_solve.py": {
+      "passed": 28,
+      "total": 28,
+      "warnings": 1
+    }
+  },
+  "qualification_scope": "This receipt qualifies Newton-Krylov linear actions only; it does not establish basin entry, topology preservation, or DIII-D gate convergence."
+}

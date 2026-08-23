@@ -20,6 +20,7 @@ from nova.biot.flux import Flux
 from nova.biot.levelset import LevelSet
 from nova.biot.plasmagrid import PlasmaGrid
 from nova.biot.plasmawall import PlasmaWall
+from nova.equilibrium.internal_inductance import Li3Geometry, li_3_from_field_energy
 from nova.frame.plasmaloc import PlasmaLoc
 from nova.geometry.curve import LCFS
 from nova.geometry.polygon import Polygon
@@ -117,15 +118,19 @@ class Plasma(Plot, netCDF, Flux, PlasmaLoc):
 
     @property
     def li_3(self):
-        """Return normalized plasma inductance."""
+        """Return IMAS DD li_3 over the ionised LCFS support.
+
+        The field energy and current use the ionised plasma support, while the
+        normalising radius is the LCFS geometric major radius.
+        """
         filament_volume = self.aloc["ionize", "volume"]
-        volume = np.sum(filament_volume)
         poloidal_field = self.grid.bp[self.aloc["plasma", "ionize"]]
-        surface = np.sum(poloidal_field**2 * filament_volume) / volume
-        # boundary = (mu_0 * self.i_plasma / self.lcfs.length)**2
-        radius = self.lcfs.geometric_radius
-        boundary = (mu_0 * self.i_plasma) ** 2 * radius / (2 * volume)
-        return surface / boundary
+        field_energy = np.sum(poloidal_field**2 * filament_volume)
+        geometry = Li3Geometry(
+            plasma_current=self.i_plasma,
+            geometric_major_radius=self.lcfs.geometric_radius,
+        )
+        return li_3_from_field_energy(field_energy, geometry)
 
     @cached_property
     def psi_index(self):

@@ -17,7 +17,8 @@
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-modified" content="2026-08-23">
 <meta name="plan-effort-hours" content="1.5">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.33">
 </head>
 <body>
 <main class="plan-doc">
@@ -41,19 +42,35 @@
   intent &mdash; silently selects nothing and still exits 0.</p>
 </section>
 
-<section id="s1">
-  <h2 id="s1h">§1 — Explicit paths collect, and zero-collected fails loudly</h2>
-  <p>Make the plain per-file invocation select its tests: when the user names test paths
-  explicitly, the default marker exclusion must not empty the run (either lift the default
-  <code>-m</code> filter for explicitly named files, or an equivalent documented mechanism
-  &mdash; the repo-wide default lane keeps excluding <code>slow</code> either way). Add the
-  guard: a run that collects zero tests exits non-zero, repo-wide, so this defect class
-  cannot recur silently anywhere.</p>
-  <p><strong>Done when:</strong> <code>pytest tests/test_equilibrium_forward_solve.py</code>
-  collects and runs its 28 tests with the count quoted in the receipt; the repo-wide default
-  lane's collected count is quoted before and after and the fast lane's exclusion behaviour
-  is unchanged; and a zero-collected run demonstrably exits non-zero on the exact case that
-  previously exited 0, with both exit codes quoted.</p>
+<section id="s1" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-08-23</span>
+    <h2 id="s1h">§1 — Explicit paths collect, and zero-collected fails loudly</h2></header>
+  <p class="landed-summary">Explicitly named test paths now lift only the inherited fast-lane
+  marker filter, user marker expressions are preserved, and an otherwise-successful empty
+  collection returns the standard nonzero status &mdash; pinned by 6 policy tests.
+  <code>pytest tests/test_equilibrium_forward_solve.py</code>: 28 collected, 28 passed
+  (was 0 selected / 28 deselected); fast lane unchanged at 753 deselected before and after.
+  Qualification: under pytest 9.1.1 the pre-change empty run already exited 5, so the
+  historical exit-0 was version-bound; the enduring defect was the silent zero-selection.
+  Full record: <a href="/nova/evidence/archive/test-lane-marker-policy-landed#s1">§1
+  landed</a> (commit <code>1ddaad0d</code>, merged <code>555c503b</code>).</p>
+</section>
+
+<section id="s3">
+  <h2 id="s3h">§3 — The default lane collects clean</h2>
+  <p>Surfaced by this plan's own before/after collection probes: the repo-wide default
+  invocation is interrupted at collection &mdash;
+  <code>tests/measure_external_wall_correction.py</code> imports its sibling
+  <code>measure_exact_section_routes</code> by bare module name, which only resolves when
+  <code>tests/</code> itself is on <code>sys.path</code>, so the default rootdir run raises
+  a collection error and exits 2 before reporting a single result. A lane that cannot
+  complete collection defeats both the fast-lane guarantee and the new zero-collected
+  guard.</p>
+  <p><strong>Done when:</strong> the sibling import resolves under the default invocation,
+  the repo-wide default collect-only completes with zero collection errors and its exit
+  code and collected total are quoted beside the previously interrupted 5751/6504 exit-2
+  figures, and the touched measure modules still run their own focused checks with exit
+  codes quoted.</p>
 </section>
 
 <section id="s2">
@@ -66,6 +83,11 @@
   the implemented behaviour exactly, and the plan's evidence record links the commit.</p>
 </section>
 
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-20260823T1027" data-who="reckon-ship" data-when="2026-08-23 10:27">
+    <div class="r-comment-body">explicit-path-collection landed — commit <code>1ddaad0d</code>, merged <code>555c503b</code>; gate PASSED; 6 tests added. Measures: plain per-file forward-solve invocation 28 collected / 28 passed exit 0 (was 0 selected / 28 deselected); deliberate zero-selection and otherwise-successful empty collections now exit 5 (NO_TESTS_COLLECTED), hook-pinned; repo-wide fast lane unchanged at 753 deselected before/after, selected/total rose exactly by the 6 new tests (5745/6498 → 5751/6504). Qualification kept visible: pytest 9.1.1 already exited 5 on the empty run pre-change, so the historical exit-0 was version-bound. Byproduct fold: both repo-wide probes hit a pre-existing collection ERROR in tests/measure_external_wall_correction.py (bare sibling import) interrupting the lane at exit 2 — folded as §3. Logs on the run record; no figure (exact count/exit-code comparison).</div>
+</div>
+</section>
 </main>
 </body>
 </html>

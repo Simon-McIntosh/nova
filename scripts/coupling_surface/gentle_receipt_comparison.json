@@ -1,0 +1,33 @@
+{
+  "all_equal": true,
+  "banked": {
+    "contraction": 0.23619506584727215,
+    "flux_closure": 0.0,
+    "gating_trace": [
+      1.0,
+      0.024544392673843753,
+      0.0054674088266388095,
+      0.0012913749878219105
+    ],
+    "iterations": 4
+  },
+  "bitwise_equal": {
+    "contraction": true,
+    "flux_closure": true,
+    "gating_trace": true,
+    "iterations": true
+  },
+  "contract_version": "1.0.0",
+  "live": {
+    "contract_version": "1.0.0",
+    "contraction": 0.23619506584727215,
+    "flux_closure": 0.0,
+    "gating_trace": [
+      1.0,
+      0.024544392673843753,
+      0.0054674088266388095,
+      0.0012913749878219105
+    ],
+    "iterations": 4
+  }
+}

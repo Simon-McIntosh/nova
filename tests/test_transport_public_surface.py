@@ -1,12 +1,22 @@
 """Import contract for Nova's public deterministic transport surface."""
 
+import json
+from pathlib import Path
+
 import nova.transport as transport
-from nova.transport import CurrentDiffusion, ForwardTransport, solve_window
+from nova.transport import (
+    CouplingState,
+    CurrentDiffusion,
+    ForwardTransport,
+    solve_window,
+)
 
 
 EXPECTED_PUBLIC_NAMES = {
     "AchievedBoundaryValues",
     "CurrentDiffusion",
+    "CouplingFieldSpec",
+    "CouplingState",
     "EnsembleForwardTransport",
     "EnsembleMemberReceipt",
     "EnsembleTransportInput",
@@ -71,3 +81,35 @@ def test_all_ladder_entry_points_import_from_transport_package():
     assert CurrentDiffusion is transport.CurrentDiffusion
     assert ForwardTransport is transport.ForwardTransport
     assert solve_window is transport.solve_window
+
+
+def test_exported_coupling_schema_matches_the_live_contract_field_for_field():
+    """Consumer schema drift fails at the package boundary."""
+    path = (
+        Path(__file__).parents[1]
+        / "scripts"
+        / "coupling_surface"
+        / "coupling_state.schema.json"
+    )
+    exported = json.loads(path.read_text(encoding="utf-8"))
+    live = CouplingState.schema()
+
+    assert exported == live
+    assert exported["contract_version"] == "1.0.0"
+    assert len(exported["fields"]) == 60
+    assert all(
+        set(row)
+        == {
+            "name",
+            "physical_meaning",
+            "units",
+            "exchange_direction",
+            "time_base",
+            "interpolation_rule",
+            "gate_role",
+            "differentiability",
+            "fail_closed_serialization",
+            "exclusion_reason",
+        }
+        for row in exported["fields"]
+    )

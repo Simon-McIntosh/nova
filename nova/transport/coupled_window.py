@@ -53,6 +53,8 @@ from nova.transport.forward import (
 )
 
 __all__ = [
+    "CouplingFieldSpec",
+    "CouplingState",
     "ConvergedNonConfinedError",
     "EquilibriumBranchReceipt",
     "EquilibriumSweepReceipt",
@@ -73,17 +75,68 @@ __all__ = [
 ]
 
 
-_NON_GATING_WINDOW_FIELDS = frozenset(
-    {
-        "geometry.delta_lower_face",
-        "geometry.delta_upper_face",
-        "geometry.elongation_face",
-        "geometry.r_in_face",
-        "geometry.r_out_face",
-        "geometry.shape_axis_expansion_face",
-        "geometry.shape_boundary_cell_count_face",
-    }
+COUPLING_STATE_VERSION = "1.0.0"
+
+_DIRECTIONS = frozenset(
+    {"equilibrium-to-transport", "transport-to-equilibrium", "bidirectional"}
 )
+_TIME_BASES = frozenset({"equilibrium-coarse-samples", "transport-steps"})
+_GATE_ROLES = frozenset({"gating", "receipted", "excluded-with-reason"})
+_DIFFERENTIABILITY = frozenset({"traced", "host-boundary", "static"})
+
+
+@dataclass(frozen=True, slots=True)
+class CouplingFieldSpec:
+    """Declared semantics of one field crossing the coupling surface."""
+
+    name: str
+    physical_meaning: str
+    units: str
+    exchange_direction: str
+    time_base: str
+    interpolation_rule: str
+    gate_role: str
+    differentiability: str
+    fail_closed_serialization: str
+    exclusion_reason: str | None = None
+
+    def __post_init__(self) -> None:
+        for label in (
+            "name",
+            "physical_meaning",
+            "units",
+            "interpolation_rule",
+            "fail_closed_serialization",
+        ):
+            if not getattr(self, label):
+                raise ValueError(f"coupling field {label} cannot be empty")
+        if self.exchange_direction not in _DIRECTIONS:
+            raise ValueError("unsupported coupling-field exchange direction")
+        if self.time_base not in _TIME_BASES:
+            raise ValueError("unsupported coupling-field time base")
+        if self.gate_role not in _GATE_ROLES:
+            raise ValueError("unsupported coupling-field gate role")
+        if self.differentiability not in _DIFFERENTIABILITY:
+            raise ValueError("unsupported coupling-field differentiability class")
+        excluded = self.gate_role == "excluded-with-reason"
+        if excluded != bool(self.exclusion_reason):
+            raise ValueError(
+                "only an excluded coupling field may carry an exclusion reason"
+            )
+
+    def to_dict(self) -> dict[str, str | None]:
+        """Return the field-table row as a JSON-compatible mapping."""
+        return dataclasses.asdict(self)
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> CouplingFieldSpec:
+        """Restore and validate one exact field-table row."""
+        expected = {field.name for field in dataclasses.fields(cls)}
+        if set(payload) != expected:
+            raise ValueError(
+                "coupling field payload keys differ from the declared schema"
+            )
+        return cls(**payload)
 
 
 def implicit_window_state(
@@ -420,6 +473,380 @@ class Waveform:
         )
 
 
+_GEOMETRY_CHANNELS = (
+    "b2_cell",
+    "b2_face",
+    "clipped_vertex_capacity",
+    "clipped_vertex_count_max",
+    "clipped_vertex_count_required",
+    "delta_lower_face",
+    "delta_upper_face",
+    "elongation_face",
+    "f_cell",
+    "f_face",
+    "flux_sign",
+    "g2_face",
+    "g3_cell",
+    "g3_face",
+    "grad_psi2_face",
+    "grad_psi2_over_r2_face",
+    "grad_psi_face",
+    "gradient_moment_scale",
+    "int_dl_over_bp_face",
+    "inv_b2_face",
+    "inv_r_cell",
+    "inv_r_face",
+    "ip_amperes",
+    "ip_profile_face",
+    "psi_face",
+    "psi_n_cell",
+    "psi_n_face",
+    "q_face",
+    "r0",
+    "r_in_face",
+    "r_out_face",
+    "rho_cell",
+    "shape_axis_expansion_face",
+    "shape_boundary_cell_count_face",
+    "surface_arc_first_invalid_cell",
+    "surface_arc_first_invalid_level",
+    "surface_arc_invalid_count",
+    "surface_arc_max_coarea_weight",
+    "surface_arc_min_ordinate_derivative",
+    "surface_arc_valid",
+    "surface_cell_band_capacity",
+    "surface_cell_band_max_count",
+    "surface_cell_band_overflow",
+    "valid",
+    "volume",
+    "volume_face",
+    "vpr_cell",
+    "vpr_face",
+)
+_SOURCE_CHANNELS = (
+    "boundary_field_function",
+    "boundary_pressure",
+    "ff_prime",
+    "p_prime",
+)
+_EXCLUDED_SHAPE_FIELDS = frozenset(
+    {
+        "geometry.delta_lower_face",
+        "geometry.delta_upper_face",
+        "geometry.elongation_face",
+        "geometry.r_in_face",
+        "geometry.r_out_face",
+    }
+)
+_EXCLUDED_REPRESENTATION_FIELDS = frozenset(
+    {
+        "geometry.shape_axis_expansion_face",
+        "geometry.shape_boundary_cell_count_face",
+    }
+)
+_STATIC_GEOMETRY_FIELDS = frozenset(
+    {
+        "clipped_vertex_capacity",
+        "surface_arc_valid",
+        "surface_cell_band_capacity",
+        "surface_cell_band_overflow",
+        "valid",
+    }
+)
+_HOST_BOUNDARY_GEOMETRY_FIELDS = frozenset(
+    {
+        "clipped_vertex_count_max",
+        "clipped_vertex_count_required",
+        "shape_axis_expansion_face",
+        "shape_boundary_cell_count_face",
+        "surface_arc_first_invalid_cell",
+        "surface_arc_first_invalid_level",
+        "surface_arc_invalid_count",
+        "surface_arc_max_coarea_weight",
+        "surface_arc_min_ordinate_derivative",
+        "surface_cell_band_max_count",
+    }
+)
+
+
+def _channel_units(side: str, name: str) -> str:
+    """Return the declared SI unit of one production exchange channel."""
+    exact = {
+        "boundary_field_function": "T m",
+        "boundary_pressure": "Pa",
+        "ff_prime": "T^2 m^2/(Wb/rad)",
+        "p_prime": "Pa/(Wb/rad)",
+        "phi_boundary": "Wb",
+        "axis_reference": "Wb/rad",
+        "boundary_reference": "Wb/rad",
+        "b2_cell": "T^2",
+        "b2_face": "T^2",
+        "f_cell": "T m",
+        "f_face": "T m",
+        "grad_psi_face": "Wb/(rad m)",
+        "grad_psi2_face": "Wb^2/(rad^2 m^2)",
+        "grad_psi2_over_r2_face": "Wb^2/(rad^2 m^4)",
+        "int_dl_over_bp_face": "m/T",
+        "inv_b2_face": "T^-2",
+        "inv_r_cell": "m^-1",
+        "inv_r_face": "m^-1",
+        "ip_amperes": "A",
+        "ip_profile_face": "A",
+        "psi_face": "Wb/rad",
+        "r0": "m",
+        "r_in_face": "m",
+        "r_out_face": "m",
+        "volume": "m^3",
+        "volume_face": "m^3",
+        "vpr_cell": "m^3",
+        "vpr_face": "m^3",
+    }
+    if name in exact:
+        return exact[name]
+    if name in {"g2_face", "g3_cell", "g3_face"}:
+        return "SI-derived geometry metric"
+    if name == "surface_arc_min_ordinate_derivative":
+        return "m"
+    if name == "surface_arc_max_coarea_weight":
+        return "m^-1"
+    if name == "radial_grid" or name.startswith(("rho_", "psi_n_")):
+        return "1"
+    if side == "geometry":
+        return "1"
+    return "producer-declared SI"
+
+
+def _channel_interpolation(name: str, differentiability: str) -> str:
+    """Return the interpolation policy already implemented by Waveform."""
+    if differentiability == "static":
+        return "exact-and-unchanged-within-interval"
+    if name == "radial_grid":
+        return "linear-in-time"
+    if name.endswith("_face") or name in {"p_prime", "ff_prime"}:
+        return "normalised-radial-then-linear-in-time"
+    if name.endswith("_cell"):
+        return "cell-index-linear-in-time"
+    return "linear-in-time"
+
+
+def _field_spec(side: str, name: str) -> CouplingFieldSpec:
+    """Construct the canonical field-table row for one exchanged channel."""
+    full_name = f"{side}.{name}"
+    direction = (
+        "equilibrium-to-transport" if side == "geometry" else "transport-to-equilibrium"
+    )
+    time_base = (
+        "equilibrium-coarse-samples" if side == "geometry" else "transport-steps"
+    )
+    if side == "geometry" and name in _STATIC_GEOMETRY_FIELDS:
+        differentiability = "static"
+    elif side == "geometry" and name in _HOST_BOUNDARY_GEOMETRY_FIELDS:
+        differentiability = "host-boundary"
+    else:
+        differentiability = "traced"
+    exclusion_reason = None
+    gate_role = "gating"
+    if full_name in _EXCLUDED_SHAPE_FIELDS:
+        gate_role = "excluded-with-reason"
+        exclusion_reason = "physical shape is exchanged and receipted, not gated"
+    elif full_name in _EXCLUDED_REPRESENTATION_FIELDS:
+        gate_role = "excluded-with-reason"
+        exclusion_reason = "representation metadata is exchanged but not physical"
+    meaning = {
+        "radial_grid": "normalised radial coordinate carried by every sample",
+        "phi_boundary": "toroidal magnetic flux at the plasma boundary",
+        "axis_reference": "poloidal-flux reference at the magnetic axis",
+        "boundary_reference": "poloidal-flux reference at the plasma boundary",
+        "p_prime": "pressure derivative with respect to poloidal flux",
+        "ff_prime": "field-function product derivative with respect to flux",
+        "boundary_pressure": "pressure imposed at the plasma boundary",
+        "boundary_field_function": "field function imposed at the boundary",
+    }.get(name, f"{side} exchange channel {name.replace('_', ' ')}")
+    return CouplingFieldSpec(
+        name=full_name,
+        physical_meaning=meaning,
+        units=_channel_units(side, name),
+        exchange_direction=direction,
+        time_base=time_base,
+        interpolation_rule=_channel_interpolation(name, differentiability),
+        gate_role=gate_role,
+        differentiability=differentiability,
+        fail_closed_serialization={
+            "static": "required-exact-value",
+            "host-boundary": "required-host-value",
+            "traced": "required-array",
+        }[differentiability],
+        exclusion_reason=exclusion_reason,
+    )
+
+
+_COORDINATE_FIELDS = (
+    "radial_grid",
+    "phi_boundary",
+    "axis_reference",
+    "boundary_reference",
+)
+_COUPLING_FIELD_SPECS = tuple(
+    _field_spec(side, name)
+    for side, names in (
+        ("geometry", (*_COORDINATE_FIELDS, *_GEOMETRY_CHANNELS)),
+        ("source", (*_COORDINATE_FIELDS, *_SOURCE_CHANNELS)),
+    )
+    for name in names
+)
+_COUPLING_SPEC_BY_NAME = {spec.name: spec for spec in _COUPLING_FIELD_SPECS}
+
+
+def _waveform_to_dict(waveform: Waveform) -> dict[str, Any]:
+    """Return one waveform with channel dtypes preserved explicitly."""
+    return {
+        "time": waveform.time.tolist(),
+        "radial_grid": waveform.radial_grid.tolist(),
+        "phi_boundary": waveform.phi_boundary.tolist(),
+        "axis_reference": waveform.axis_reference.tolist(),
+        "boundary_reference": waveform.boundary_reference.tolist(),
+        "values": {
+            name: {"dtype": str(value.dtype), "data": value.tolist()}
+            for name, value in sorted(waveform.values.items())
+        },
+    }
+
+
+def _waveform_from_dict(payload: Mapping[str, Any]) -> Waveform:
+    """Restore and revalidate one exact serialized waveform."""
+    expected = {
+        "time",
+        "radial_grid",
+        "phi_boundary",
+        "axis_reference",
+        "boundary_reference",
+        "values",
+    }
+    if set(payload) != expected:
+        raise ValueError("coupling waveform payload keys differ from the schema")
+    values = payload["values"]
+    if not isinstance(values, Mapping):
+        raise TypeError("serialized waveform values must be a mapping")
+    restored: dict[str, np.ndarray] = {}
+    for name, channel in values.items():
+        if not isinstance(channel, Mapping) or set(channel) != {"dtype", "data"}:
+            raise ValueError(f"serialized channel {name} is incomplete")
+        dtype = np.dtype(channel["dtype"])
+        if dtype.kind not in "biuf":
+            raise ValueError(f"serialized channel {name} has a non-numeric dtype")
+        restored[str(name)] = np.asarray(channel["data"], dtype=dtype)
+    return Waveform(
+        time=payload["time"],
+        radial_grid=payload["radial_grid"],
+        phi_boundary=payload["phi_boundary"],
+        axis_reference=payload["axis_reference"],
+        boundary_reference=payload["boundary_reference"],
+        values=restored,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class CouplingState:
+    """Versioned geometry/source state exchanged by one coupled window."""
+
+    geometry: Waveform
+    source: Waveform
+    contract_version: str = COUPLING_STATE_VERSION
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.geometry, Waveform) or not isinstance(
+            self.source, Waveform
+        ):
+            raise TypeError("coupling state sides must be Waveform instances")
+        if self.contract_version != COUPLING_STATE_VERSION:
+            raise ValueError(
+                f"unsupported coupling-state version {self.contract_version!r}"
+            )
+        for name, spec in self.field_specs().items():
+            side, channel = name.split(".", maxsplit=1)
+            if channel in _COORDINATE_FIELDS or spec.differentiability != "static":
+                continue
+            values = getattr(self, side).values[channel]
+            if not np.all(values == values[0]):
+                raise ValueError(f"static coupling field {name} changes in time")
+
+    @classmethod
+    def schema(cls) -> dict[str, Any]:
+        """Return the versioned consumer schema and its complete field table."""
+        return {
+            "schema": "nova.transport.CouplingState",
+            "contract_version": COUPLING_STATE_VERSION,
+            "serialization": "fail-closed-exact-keys-and-version",
+            "fields": [spec.to_dict() for spec in _COUPLING_FIELD_SPECS],
+        }
+
+    def field_specs(self) -> Mapping[str, CouplingFieldSpec]:
+        """Return specifications for every field present in this state."""
+        resolved: dict[str, CouplingFieldSpec] = {}
+        for side, waveform in (("geometry", self.geometry), ("source", self.source)):
+            for name in (*_COORDINATE_FIELDS, *sorted(waveform.values)):
+                full_name = f"{side}.{name}"
+                resolved[full_name] = _COUPLING_SPEC_BY_NAME.get(
+                    full_name, _field_spec(side, name)
+                )
+        return MappingProxyType(resolved)
+
+    def residual(self, candidate: CouplingState) -> dict[str, float]:
+        """Return the receipted residual for every field in a candidate state."""
+        if not isinstance(candidate, CouplingState):
+            raise TypeError("coupling residual candidate must be a CouplingState")
+        if self.contract_version != candidate.contract_version:
+            raise ValueError("coupling-state versions differ within a window")
+        return {
+            **_waveform_residual("geometry", self.geometry, candidate.geometry),
+            **_waveform_residual("source", self.source, candidate.source),
+        }
+
+    def residual_norm(
+        self, residual: Mapping[str, float], *, include_excluded: bool
+    ) -> float:
+        """Return the declared gating norm or the all-field receipt norm."""
+        specs = self.field_specs()
+        if set(residual) != set(specs):
+            raise ValueError("coupling residual fields differ from the typed state")
+        return max(
+            (
+                value
+                for name, value in residual.items()
+                if include_excluded or specs[name].gate_role == "gating"
+            ),
+            default=0.0,
+        )
+
+    def blend(self, candidate: CouplingState, damping: float) -> CouplingState:
+        """Relax both sides without altering contract membership or metadata."""
+        if self.contract_version != candidate.contract_version:
+            raise ValueError("coupling-state versions differ within a window")
+        return CouplingState(
+            geometry=_blend_waveform(self.geometry, candidate.geometry, damping),
+            source=_blend_waveform(self.source, candidate.source, damping),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return a lossless JSON-compatible representation."""
+        return {
+            "contract_version": self.contract_version,
+            "geometry": _waveform_to_dict(self.geometry),
+            "source": _waveform_to_dict(self.source),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> CouplingState:
+        """Restore and revalidate a state from :meth:`to_dict` output."""
+        if set(payload) != {"contract_version", "geometry", "source"}:
+            raise ValueError("coupling-state payload keys differ from the schema")
+        return cls(
+            geometry=_waveform_from_dict(payload["geometry"]),
+            source=_waveform_from_dict(payload["source"]),
+            contract_version=str(payload["contract_version"]),
+        )
+
+
 @dataclass(frozen=True)
 class TransportSweepReceipt:
     """One transport pass through a geometry waveform."""
@@ -604,6 +1031,7 @@ class WindowConvergenceReceipt:
     iterations_past_cap: int = 0
     continuation_contractions: tuple[float, ...] = ()
     damping_backoffs: tuple[WindowDampingBackoffReceipt, ...] = ()
+    contract_version: str = COUPLING_STATE_VERSION
 
     def __post_init__(self) -> None:
         exit_residual = MappingProxyType(
@@ -640,6 +1068,8 @@ class WindowConvergenceReceipt:
             raise ValueError("the gating-norm trace must match the residual trace")
         if len(self.all_field_norm_trace) != len(trace):
             raise ValueError("the all-field-norm trace must match the residual trace")
+        if self.contract_version != COUPLING_STATE_VERSION:
+            raise ValueError("window receipt carries an unsupported coupling contract")
 
     @property
     def gating_norm(self) -> float:
@@ -679,6 +1109,11 @@ class WindowReceipt:
     transport_receipt: TransportSweepReceipt
     convergence: WindowConvergenceReceipt
     conservation: WindowConservationReceipt
+
+    @property
+    def contract_version(self) -> str:
+        """Return the coupling-state contract that produced this receipt."""
+        return self.convergence.contract_version
 
 
 class WindowConvergenceError(RuntimeError):
@@ -811,18 +1246,6 @@ def _blend_waveform(
     )
 
 
-def _residual_norm(residual: Mapping[str, float], *, include_shape: bool) -> float:
-    """Return the all-field or physically coupled stopping norm."""
-    return max(
-        (
-            value
-            for field, value in residual.items()
-            if include_shape or field not in _NON_GATING_WINDOW_FIELDS
-        ),
-        default=0.0,
-    )
-
-
 def _contraction_estimate(trace: Sequence[float]) -> float | None:
     """Estimate the final observed gating-norm contraction."""
     if len(trace) < 2:
@@ -939,8 +1362,7 @@ def solve_window(
         raise ValueError("initial window damping cannot be below its declared floor")
     _require_waveform_grid(initial_geometry, config.equilibrium_grid, "geometry")
     _require_waveform_grid(initial_source, config.transport_grid, "source")
-    geometry = initial_geometry
-    source = initial_source
+    state = CouplingState(geometry=initial_geometry, source=initial_source)
     residual_trace: list[Mapping[str, float]] = []
     gating_norm_trace: list[float] = []
     all_field_norm_trace: list[float] = []
@@ -949,7 +1371,7 @@ def solve_window(
     current_damping = float(damping)
 
     for iteration in range(1, config.effective_hard_iteration_ceiling + 1):
-        transported = transport_update(geometry, config.transport_grid)
+        transported = transport_update(state.geometry, config.transport_grid)
         if not isinstance(transported, ExchangeSweepResult):
             raise TypeError("transport update must return ExchangeSweepResult")
         if not isinstance(transported.receipt, TransportSweepReceipt):
@@ -968,13 +1390,16 @@ def solve_window(
         geometry_candidate = equilibrated.waveform
         _require_waveform_grid(geometry_candidate, config.equilibrium_grid, "geometry")
 
-        residual = {
-            **_waveform_residual("geometry", geometry, geometry_candidate),
-            **_waveform_residual("source", source, source_candidate),
-        }
+        candidate = CouplingState(
+            geometry=geometry_candidate,
+            source=source_candidate,
+        )
+        residual = state.residual(candidate)
         residual_trace.append(residual)
-        gating_norm_trace.append(_residual_norm(residual, include_shape=False))
-        all_field_norm_trace.append(_residual_norm(residual, include_shape=True))
+        gating_norm_trace.append(state.residual_norm(residual, include_excluded=False))
+        all_field_norm_trace.append(
+            state.residual_norm(residual, include_excluded=True)
+        )
         convergence = WindowConvergenceReceipt(
             iterations_used=iteration,
             contraction_estimate=_contraction_estimate(gating_norm_trace),
@@ -995,8 +1420,8 @@ def solve_window(
             ):
                 raise WindowConservationError(conservation)
             return WindowReceipt(
-                geometry_waveform=geometry_candidate,
-                source_waveform=source_candidate,
+                geometry_waveform=candidate.geometry,
+                source_waveform=candidate.source,
                 equilibrium_receipt=equilibrated.receipt,
                 transport_receipt=transported.receipt,
                 convergence=convergence,
@@ -1024,8 +1449,8 @@ def solve_window(
         ):
             error = WindowConvergenceError(
                 convergence,
-                geometry_candidate,
-                source_candidate,
+                candidate.geometry,
+                candidate.source,
                 equilibrated.receipt,
                 transported.receipt,
             )
@@ -1047,8 +1472,7 @@ def solve_window(
             if contraction is None:
                 raise AssertionError("a continuation needs a measured contraction")
             continuation_contractions.append(float(contraction))
-        geometry = _blend_waveform(geometry, geometry_candidate, current_damping)
-        source = _blend_waveform(source, source_candidate, current_damping)
+        state = state.blend(candidate, current_damping)
 
     raise AssertionError("unreachable window iteration state")
 

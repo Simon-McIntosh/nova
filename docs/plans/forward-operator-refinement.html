@@ -19,7 +19,7 @@
 <meta name="plan-effort-hours" content="6.0">
 <meta name="plan-depends-on" content="scoring-criteria-derivation">
 <meta name="plan-informs" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="7">
 </head>
 <body>
 <main class="plan-doc">
@@ -76,6 +76,32 @@
   receipt.</p>
 </section>
 
+<section id="s4">
+  <h2 id="s4h">§4 — The bumped global default, demonstrated as a live GPU build</h2>
+  <p>Owner-authorized (locked decision <code>global-dplasma-default</code>): raise the
+  global <code>Frame.dplasma</code> default (nova/frame/frame.py, currently &minus;500) so
+  the implicit plasma mesh resolves at least the reference-native interior cell count
+  (~2,141 over the scored region); the exact value and the achieved cohort counts are the
+  node's to report. The bump deliberately invalidates the semantic caches for every
+  implicit plasma mesh, and that cost is the demonstration: the first cold build at the new
+  default runs LIVE on GPU through the single-source traced path the device-kernel-build
+  plan landed, timing the <strong>full biot interaction rebuild</strong> (nine blocks plus
+  moment companions) end to end. Comparators, from the landed port's receipt
+  (<code>scripts/device_kernel_port/nine-block-receipt.json</code>, merge
+  <code>80979f40</code>): H200 cold nine-block build 26.576 s (25.345 s XLA compile +
+  0.391 s kernel &mdash; compile once per process/shape, kernel time recurring), CPU
+  58.452 s, both against the 120 s bar, biot suite green at 2,618 selected &mdash; beside
+  the older ~2.4 min device / ~8.8 CPU-hour projections. Sequencing is a hard gate: this section
+  starts only after the device-kernel-build lane's completion is confirmed by its
+  orchestrator, and its node must not share a fence with the in-flight resolution-default
+  node (both touch <code>nova/frame/frame.py</code>).</p>
+  <p><strong>Done when:</strong> the new default is committed with the achieved interior
+  cell counts quoted, the full biot interaction rebuild wall-clock on the GPU at the new
+  default is reported with device identity and the landed kernel-path commit cited, the
+  same receipt states the cache-invalidation scope actually observed, and the forward
+  suites pass at the new default with counts quoted.</p>
+</section>
+
 <section id="s3">
   <h2 id="s3h">§3 — The adjudication: does order move what mesh moved</h2>
   <p>State whether raising operator order moves the convergence floors that mesh refinement
@@ -87,6 +113,13 @@
   re-evaluation owner is notified that its prerequisite evidence exists. That re-run is <code>benchmarks/diiid_forward_gs_match.py</code> unchanged except applying its registered 1e-05 bound (the hard-coded 1e-6 is a pinned defect recorded on diiid-forward-onboarding); a pass ships that onboarding plan and unblocks diiid-pulse-replay.</p>
 </section>
 
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="global-dplasma-default" data-choice="authorized — bump Frame.dplasma to at least the reference-native interior equivalent" data-by="Simon McIntosh" data-when="2026-08-23T11:20:19+00:00">
+    <p class="r-dec-q">global-dplasma-default</p>
+    <p class="r-dec-rat">Owner authorization 2026-08-23: the global default moves, and its first use is a live demonstration — a full biot interaction rebuild on GPU through the landed single-source kernel path with wall-clock reported. Supersedes the earlier in-flight ruling that retained -500 for want of exactly this authority. The demonstration starts only after the device-kernel-build lane is confirmed finished.</p>
+    </div>
+</section>
 </main>
 </body>
 </html>

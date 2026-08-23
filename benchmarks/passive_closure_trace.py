@@ -10,7 +10,7 @@ test whether the measured expanding map supplies the terminal gain.
 from __future__ import annotations
 
 import argparse
-from dataclasses import asdict, replace
+from dataclasses import asdict, dataclass, replace
 import json
 import math
 import os
@@ -27,7 +27,12 @@ from matplotlib.path import Path as PolygonPath
 import numpy as np
 
 from benchmarks.measurement_provenance import measurement_stamp
+from nova.equilibrium.diagnostics import (
+    DECAY_INDEX_WINDOW,
+    vertical_conditioning_receipt,
+)
 from nova.jax.config import configure_dtypes
+from tests import test_equilibrium_forward_solve as forward_solve_suite
 from tests import test_equilibrium_forward_reference as reference
 
 
@@ -52,10 +57,16 @@ REGISTERED_CEILING_POINTS = 0.15
 DOCUMENTED_DIRECT_RESPONSE_POINTS = 0.098
 IDENTITY_RELATIVE_TOLERANCE = 2.0e-12
 SPECTRAL_RATIO_RELATIVE_TOLERANCE = 0.25
-CONTROL_BOUNDARY_ELONGATION = 1.05
 ELONGATED_DIRECT_PEAK_POINTS = 0.09723915202112363
 ELONGATED_REPRODUCTION_MOVE_POINTS = 0.6377635705066984
 ELONGATED_FIELD_GAIN = 6.5998576353591725
+ELONGATED_BOUNDARY_ELONGATION = 1.8176001064943421
+ELONGATED_WALL_ELONGATION = 2.087719298245614
+ANALYTIC_VACUUM_SHAPING = 0.3
+PASSIVE_SHELL_EXPANSION = 1.08
+CONTROL_NEWTON_STEPS = 10
+CONTROL_GMRES_ITERATIONS = 30
+CONTROL_NEWTON_WARMUP = 8
 CONTROL_MINIMUM_CORE_FRACTION = 0.1
 CONTROL_MAXIMUM_AXIS_DISPLACEMENT_FRACTION = 0.25
 RUNTIME_MITIGATION_DEFAULTS = {
@@ -100,72 +111,255 @@ def _elongation(points: np.ndarray) -> float:
     return float(np.ptp(coordinate[:, 1]) / np.ptp(coordinate[:, 0]))
 
 
-def _scale_points_height(
-    points: np.ndarray, axis_height: float, factor: float
-) -> np.ndarray:
-    """Return points compressed vertically about one magnetic-axis height."""
-    scaled = np.array(points, dtype=float, copy=True)
-    scaled[:, 1] = axis_height + factor * (scaled[:, 1] - axis_height)
-    return scaled
+@dataclass(frozen=True)
+class AnalyticControl:
+    """Free-boundary profiles and immutable reference data for the control."""
+
+    with_passive: forward_solve_suite.ForwardProfile
+    without_passive: forward_solve_suite.ForwardProfile
+    seed_flux: jax.Array
+    reference_grid_flux: np.ndarray
+    material_boundary: np.ndarray
+    reference_axis: np.ndarray
+    reference_flux_span_wb: float
+    construction_receipt: dict[str, object]
 
 
-def _scale_conductor_height(conductor, axis_height: float, factor: float):
-    """Return one conductor under the same vertical coordinate transform."""
-    if conductor.rectangle is not None:
-        radius, height, width, extent = conductor.rectangle
-        rectangle = (
-            radius,
-            axis_height + factor * (height - axis_height),
-            width,
-            factor * extent,
+def _analytic_solovev(radius, height):
+    """Return a near-circular Solov'ev seed with vacuum shaping."""
+    alpha, offset, beta = forward_solve_suite._terms()
+    axis_radius = forward_solve_suite.AXIS_RADIUS
+    radial = np.asarray(radius)
+    vertical = np.asarray(height)
+    homogeneous = (
+        radial**4 - 4.0 * radial**2 * vertical**2 - 2.0 * axis_radius**2 * radial**2
+    )
+    return (
+        alpha * radial**4
+        + offset * radial**2
+        + beta * vertical**2
+        + ANALYTIC_VACUUM_SHAPING * homogeneous
+    )
+
+
+def _analytic_material_loop(points: int) -> tuple[np.ndarray, float]:
+    """Return a closed material flux surface of the analytic seed."""
+    alpha, offset, beta = forward_solve_suite._terms()
+    axis_radius = forward_solve_suite.AXIS_RADIUS
+    axis_flux = float(_analytic_solovev(axis_radius, 0.0))
+    wall_flux = axis_flux - forward_solve_suite.SEED_SPAN
+    radial_quartic = alpha + ANALYTIC_VACUUM_SHAPING
+    radial_square = offset - 2.0 * ANALYTIC_VACUUM_SHAPING * axis_radius**2
+    inner, outer = np.sqrt(
+        np.sort(np.roots([radial_quartic, radial_square, -wall_flux]))
+    )
+    centre = 0.5 * (inner + outer)
+    half_width = 0.5 * (outer - inner)
+    angle = 2.0 * np.pi * np.arange(points) / points
+    radius = centre + half_width * np.cos(angle)
+    vertical_coefficient = beta - 4.0 * ANALYTIC_VACUUM_SHAPING * radius**2
+    radial_flux = radial_quartic * radius**4 + radial_square * radius**2
+    height_squared = np.clip(
+        (wall_flux - radial_flux) / vertical_coefficient,
+        0.0,
+        None,
+    )
+    height = np.sign(np.sin(angle)) * np.sqrt(height_squared)
+    return np.c_[radius, height], wall_flux
+
+
+def _vertical_translation_mode(radius, height) -> np.ndarray:
+    """Return minus the vertical derivative of the analytic seed."""
+    _alpha, _offset, beta = forward_solve_suite._terms()
+    radial = np.asarray(radius)
+    vertical = np.asarray(height)
+    return -(
+        2.0 * beta * vertical - 8.0 * ANALYTIC_VACUUM_SHAPING * radial**2 * vertical
+    )
+
+
+def _build_analytic_control() -> AnalyticControl:
+    """Bootstrap the stable control from the forward-solve suite machinery."""
+    lattice = forward_solve_suite.FluxLattice(
+        np.linspace(0.6, 1.42, 25),
+        np.linspace(-0.42, 0.42, 25),
+    )
+    coordinate = lattice.coordinate
+    wall, wall_flux = _analytic_material_loop(61)
+    seed_grid = _analytic_solovev(coordinate[:, 0], coordinate[:, 1])
+    seed_wall = _analytic_solovev(wall[:, 0], wall[:, 1])
+    seed = jnp.asarray(np.r_[seed_grid, seed_wall])
+    inside = seed_grid >= wall_flux
+
+    conductor_count = forward_solve_suite.CONDUCTORS
+    angle = 2.0 * np.pi * np.arange(conductor_count) / conductor_count
+    axis_radius = forward_solve_suite.AXIS_RADIUS
+    active_coordinate = np.c_[
+        axis_radius + 0.62 * np.cos(angle),
+        0.62 * np.sin(angle),
+    ]
+    passive_boundary, _passive_flux = _analytic_material_loop(64)
+    axis = np.asarray([axis_radius, 0.0])
+    passive_coordinate = axis + PASSIVE_SHELL_EXPANSION * (passive_boundary[::4] - axis)
+
+    plasma_to_grid = forward_solve_suite._green_block(coordinate, coordinate)
+    plasma_to_wall = forward_solve_suite._green_block(wall, coordinate)
+    active_to_grid = forward_solve_suite._green_block(coordinate, active_coordinate)
+    active_to_wall = forward_solve_suite._green_block(wall, active_coordinate)
+    passive_to_grid = forward_solve_suite._green_block(coordinate, passive_coordinate)
+    passive_to_wall = forward_solve_suite._green_block(wall, passive_coordinate)
+
+    def profile(current, source_to_grid, source_to_wall, source):
+        """Build one profile on the shared analytic carrier."""
+        return forward_solve_suite.ForwardProfile.from_lattice(
+            lattice,
+            source,
+            external_current=current,
+            source_to_grid=source_to_grid,
+            plasma_to_grid=plasma_to_grid,
+            source_to_wall=source_to_wall,
+            plasma_to_wall=plasma_to_wall,
+            wall_coordinate=wall,
+            polarity=1,
+            inside_material=inside,
+            newton_steps=CONTROL_NEWTON_STEPS,
         )
-        return replace(conductor, rectangle=rectangle)
-    return replace(
-        conductor,
-        polygon=_scale_points_height(conductor.polygon, axis_height, factor),
-    )
 
-
-def _stability_control_case(case):
-    """Return a source-strength-preserving near-circular geometry control."""
-    original_elongation = _elongation(case.boundary)
-    height_factor = CONTROL_BOUNDARY_ELONGATION / original_elongation
-    axis_height = float(case.axis[1])
-    source_multiplier = 1.0 / height_factor
-    control = replace(
-        case,
-        p_prime=np.asarray(case.p_prime) * source_multiplier,
-        ff_prime=np.asarray(case.ff_prime) * source_multiplier,
-        boundary=_scale_points_height(case.boundary, axis_height, height_factor),
-        separatrix=_scale_points_height(case.separatrix, axis_height, height_factor),
-        x_point=_scale_points_height(case.x_point, axis_height, height_factor),
-        wall=_scale_points_height(case.wall, axis_height, height_factor),
-        active=tuple(
-            _scale_conductor_height(item, axis_height, height_factor)
-            for item in case.active
+    flat = profile(
+        np.zeros(conductor_count),
+        active_to_grid,
+        active_to_wall,
+        forward_solve_suite.ForwardSource(
+            core=forward_solve_suite.DomainProfile(
+                p_prime=forward_solve_suite._flat_profile(forward_solve_suite.P_PRIME),
+                ff_prime=forward_solve_suite._flat_profile(
+                    forward_solve_suite.FF_PRIME
+                ),
+            ),
+            boundary_field_function=forward_solve_suite.BOUNDARY_FIELD_FUNCTION,
         ),
-        passive=tuple(
-            _scale_conductor_height(item, axis_height, height_factor)
-            for item in case.passive
-        ),
-        grid_height=axis_height
-        + height_factor * (np.asarray(case.grid_height) - axis_height),
     )
-    return control, {
-        "construction": (
-            "All reference, wall, active-conductor and passive-conductor heights "
-            "are compressed about the stored magnetic-axis height. Both absolute "
-            "source gradients are multiplied by the reciprocal compression to "
-            "preserve the area-integrated source strength to leading order; "
-            "currents, turns, radial geometry and flux span are unchanged."
+    cell_current = np.asarray(flat.operator.cell_current(seed))
+    active_target = np.r_[
+        seed_grid - plasma_to_grid @ cell_current,
+        seed_wall - plasma_to_wall @ cell_current,
+    ]
+    weight = np.r_[inside.astype(float), np.ones(len(wall))]
+    active_matrix = np.r_[active_to_grid, active_to_wall]
+    active_current = np.linalg.lstsq(
+        active_matrix * weight[:, None],
+        active_target * weight,
+        rcond=None,
+    )[0]
+    active_fit = active_matrix @ active_current
+
+    translation_target = np.r_[
+        _vertical_translation_mode(coordinate[:, 0], coordinate[:, 1]),
+        _vertical_translation_mode(wall[:, 0], wall[:, 1]),
+    ]
+    passive_matrix = np.r_[passive_to_grid, passive_to_wall]
+    passive_current = np.linalg.lstsq(
+        passive_matrix * weight[:, None],
+        translation_target * weight,
+        rcond=None,
+    )[0]
+    raw_passive_fit = passive_matrix @ passive_current
+    passive_scale = (
+        ELONGATED_DIRECT_PEAK_POINTS
+        / 100.0
+        * forward_solve_suite.SEED_SPAN
+        / np.max(np.abs(passive_to_grid @ passive_current))
+    )
+    passive_current *= passive_scale
+
+    source_to_grid = np.c_[active_to_grid, passive_to_grid]
+    source_to_wall = np.c_[active_to_wall, passive_to_wall]
+    with_current = np.r_[active_current, passive_current]
+    without_current = np.r_[active_current, np.zeros_like(passive_current)]
+    source = forward_solve_suite.ForwardSource(
+        core=forward_solve_suite.DomainProfile(
+            p_prime=forward_solve_suite._edge_vanishing_profile(
+                2.0 * forward_solve_suite.DRIVE * forward_solve_suite.P_PRIME
+            ),
+            ff_prime=forward_solve_suite._edge_vanishing_profile(
+                2.0 * forward_solve_suite.DRIVE * forward_solve_suite.FF_PRIME
+            ),
         ),
-        "elongated_boundary_elongation": original_elongation,
-        "control_boundary_elongation": _elongation(control.boundary),
-        "elongated_wall_elongation": _elongation(case.wall),
-        "control_wall_elongation": _elongation(control.wall),
-        "vertical_coordinate_factor": height_factor,
-        "source_gradient_multiplier": source_multiplier,
-    }
+        boundary_field_function=forward_solve_suite.BOUNDARY_FIELD_FUNCTION,
+    )
+    base = profile(with_current, source_to_grid, source_to_wall, source)
+    without = replace(
+        base,
+        operator=replace(base.operator, external_current=jnp.asarray(without_current)),
+    )
+    passive_image = passive_to_grid @ passive_current
+    control_direct_peak = (
+        100.0 * float(np.max(np.abs(passive_image))) / forward_solve_suite.SEED_SPAN
+    )
+    return AnalyticControl(
+        with_passive=base,
+        without_passive=without,
+        seed_flux=seed,
+        reference_grid_flux=np.asarray(seed_grid),
+        material_boundary=wall,
+        reference_axis=axis,
+        reference_flux_span_wb=forward_solve_suite.SEED_SPAN,
+        construction_receipt={
+            "construction": (
+                "The forward-solve suite's real free-boundary lattice, material "
+                "wall, Green couplings, tapered absolute source and fitted ring "
+                "are retained. A Grad-Shafranov-homogeneous vacuum term makes "
+                "the analytic seed near-circular and decay-index stable. A "
+                "separate wall-following material shell is fitted to the seed's "
+                "vertical-translation mode and scaled to the elongated passive "
+                "field magnitude."
+            ),
+            "prior_art": "tests/test_equilibrium_forward_solve.py",
+            "analytic_seed": ("suite Solovev seed + c*(R^4 - 4*R^2*Z^2 - 2*R0^2*R^2)"),
+            "vacuum_shaping_coefficient": ANALYTIC_VACUUM_SHAPING,
+            "reference_axis_m": axis,
+            "reference_flux_span_wb": forward_solve_suite.SEED_SPAN,
+            "elongated_boundary_elongation": ELONGATED_BOUNDARY_ELONGATION,
+            "control_boundary_elongation": _elongation(wall),
+            "elongated_wall_elongation": ELONGATED_WALL_ELONGATION,
+            "control_wall_elongation": _elongation(wall),
+            "lattice_shape": list(lattice.shape),
+            "lattice_cells": int(lattice.node_count),
+            "analytic_core_candidate_cells": int(inside.sum()),
+            "active_fit": {
+                "conductor_count": int(active_current.size),
+                "ring_radius_m": 0.62,
+                "current_l1_a": float(np.linalg.norm(active_current, ord=1)),
+                "current_l2_a": float(np.linalg.norm(active_current)),
+                "weighted_relative_l2_error": float(
+                    np.linalg.norm((active_fit - active_target) * weight)
+                    / np.linalg.norm(active_target * weight)
+                ),
+            },
+            "passive_material_coupling": {
+                "conductor_count": int(passive_current.size),
+                "boundary_expansion_factor": PASSIVE_SHELL_EXPANSION,
+                "green_section_width_m": 0.05,
+                "green_section_height_m": 0.05,
+                "source_to_grid_shape": list(passive_to_grid.shape),
+                "source_to_wall_shape": list(passive_to_wall.shape),
+                "source_to_grid_l2_wb_per_a": float(np.linalg.norm(passive_to_grid)),
+                "source_to_wall_l2_wb_per_a": float(np.linalg.norm(passive_to_wall)),
+                "translation_mode_weighted_relative_l2_error": float(
+                    np.linalg.norm((raw_passive_fit - translation_target) * weight)
+                    / np.linalg.norm(translation_target * weight)
+                ),
+                "current_l1_a": float(np.linalg.norm(passive_current, ord=1)),
+                "current_l2_a": float(np.linalg.norm(passive_current)),
+                "maximum_absolute_current_a": float(np.max(np.abs(passive_current))),
+                "control_direct_external_peak_points": control_direct_peak,
+                "elongated_direct_external_peak_points": (ELONGATED_DIRECT_PEAK_POINTS),
+                "control_over_elongated_direct_peak": (
+                    control_direct_peak / ELONGATED_DIRECT_PEAK_POINTS
+                ),
+            },
+        },
+    )
 
 
 def _grid(values, cell_count: int) -> np.ndarray:
@@ -251,7 +445,7 @@ def _solve(case, machine, label: str, *, include_deviations: bool = True):
             "solved_axis_m": axis,
             "axis_finite": bool(np.isfinite(axis).all()),
             "flux_span_wb": flux_span,
-            "flux_span_valid": bool(np.isfinite(flux_span) and flux_span > 0.0),
+            "flux_span_valid": bool(np.isfinite(flux_span) and abs(flux_span) > 0.0),
         },
     }
     if include_deviations:
@@ -259,21 +453,110 @@ def _solve(case, machine, label: str, *, include_deviations: bool = True):
     return solved, receipt
 
 
+def _equilibrium_core(solved) -> np.ndarray:
+    """Return the labelled core from either forward-equilibrium interface."""
+    domains = solved.masks if hasattr(solved, "masks") else solved.domains
+    return np.asarray(domains.core, dtype=bool)
+
+
+def _vertical_conditioning(profile, axis: np.ndarray) -> dict[str, object]:
+    """Measure the vacuum decay index at one solved magnetic axis."""
+    source_flux = (
+        np.asarray(profile.operator.grid.source_target)
+        @ np.asarray(profile.operator.external_current)
+    ).reshape(profile.lattice.shape)
+    radius = np.asarray(profile.lattice.radius, dtype=float)
+    height = np.asarray(profile.lattice.height, dtype=float)
+    vertical_index = int(np.argmin(np.abs(height - axis[1])))
+    vertical_field = np.gradient(source_flux[:, vertical_index], radius) / (
+        2.0 * np.pi * radius
+    )
+    receipt = asdict(
+        vertical_conditioning_receipt(radius, vertical_field, float(axis[0]))
+    )
+    return {
+        "definition": "n = -(R/Bz)*(dBz/dR)",
+        "open_stability_window": list(DECAY_INDEX_WINDOW),
+        "radial_sample_m": radius,
+        "vertical_field_sample_t": vertical_field,
+        **receipt,
+    }
+
+
+def _solve_analytic_control(profile, seed, label: str):
+    """Solve and qualify one analytic-control conductor state."""
+    started = perf_counter()
+    solved = profile.solve(
+        seed,
+        route="newton_krylov",
+        newton_steps=CONTROL_NEWTON_STEPS,
+        gmres_iterations=CONTROL_GMRES_ITERATIONS,
+        warmup=CONTROL_NEWTON_WARMUP,
+    )
+    elapsed_seconds = perf_counter() - started
+    residual = float(solved.fixed_point.residual)
+    trace = np.asarray(solved.fixed_point.trace, dtype=float)
+    measured = trace[np.isfinite(trace)]
+    core = _equilibrium_core(solved)
+    axis = np.asarray(solved.topology.axis, dtype=float)
+    flux = np.asarray(solved.flux, dtype=float)
+    flux_span = float(solved.topology.flux_span)
+    if core.any():
+        branch = (
+            "diverted_plasma" if bool(solved.topology.diverted) else "limited_plasma"
+        )
+    else:
+        branch = "vacuum_or_empty_core"
+    receipt = {
+        "arm": label,
+        "elapsed_seconds": elapsed_seconds,
+        "solver": {
+            "route": "newton_krylov",
+            "warmup": CONTROL_NEWTON_WARMUP,
+            "newton_steps": CONTROL_NEWTON_STEPS,
+            "gmres_iterations": CONTROL_GMRES_ITERATIONS,
+        },
+        "terminal_relative_fixed_point_residual": residual,
+        "trace_slots": int(trace.size),
+        "measured_residuals": int(measured.size),
+        "first_measured_residual": float(measured[0]),
+        "minimum_measured_residual": float(measured.min()),
+        "direct_branch_receipt": {
+            "state_finite": bool(
+                np.isfinite(flux).all() and bool(solved.finite.passed)
+            ),
+            "core_cells": int(core.sum()),
+            "core_fraction_of_carrier": float(core.mean()),
+            "topology_branch": branch,
+            "diverted": bool(solved.topology.diverted),
+            "solved_axis_m": axis,
+            "axis_finite": bool(np.isfinite(axis).all()),
+            "flux_span_wb": flux_span,
+            "flux_span_valid": bool(np.isfinite(flux_span) and abs(flux_span) > 0.0),
+        },
+        "vertical_conditioning": _vertical_conditioning(profile, axis),
+    }
+    return solved, receipt
+
+
 def _qualify_control_branch(
-    case, solve_receipt: dict[str, object]
+    reference_axis: np.ndarray,
+    boundary: np.ndarray,
+    solve_receipt: dict[str, object],
 ) -> dict[str, object]:
-    """Qualify one transformed control root without stored-midplane reporting."""
+    """Qualify one analytic control root without optional shape reporting."""
     branch = solve_receipt["direct_branch_receipt"]
     axis = np.asarray(branch["solved_axis_m"], dtype=float)
-    displacement = axis - np.asarray(case.axis, dtype=float)
+    displacement = axis - np.asarray(reference_axis, dtype=float)
     displacement_m = float(np.linalg.norm(displacement))
-    vertical_half_span = 0.5 * float(np.ptp(np.asarray(case.boundary)[:, 1]))
+    vertical_half_span = 0.5 * float(np.ptp(np.asarray(boundary)[:, 1]))
     displacement_limit = CONTROL_MAXIMUM_AXIS_DISPLACEMENT_FRACTION * vertical_half_span
-    axis_inside = bool(PolygonPath(np.asarray(case.boundary)).contains_point(axis))
+    axis_inside = bool(PolygonPath(np.asarray(boundary)).contains_point(axis))
     residual = float(solve_receipt["terminal_relative_fixed_point_residual"])
+    conditioning = solve_receipt["vertical_conditioning"]
     checks = {
         "root_residual_finite_and_below_reference_bound": bool(
-            np.isfinite(residual) and residual < reference.RESIDUAL_TOLERANCE
+            np.isfinite(residual) and residual < forward_solve_suite.RESIDUAL_TOLERANCE
         ),
         "state_finite": bool(branch["state_finite"]),
         "core_nonempty": int(branch["core_cells"]) > 0,
@@ -286,23 +569,33 @@ def _qualify_control_branch(
             displacement_m <= displacement_limit
         ),
         "flux_span_valid": bool(branch["flux_span_valid"]),
+        "vacuum_decay_index_inside_open_stability_window": bool(conditioning["stable"]),
     }
     return {
         **branch,
         "terminal_relative_fixed_point_residual": residual,
-        "reference_axis_m": np.asarray(case.axis, dtype=float),
+        "reference_axis_m": np.asarray(reference_axis, dtype=float),
         "axis_displacement_vector_m": displacement,
         "axis_displacement_m": displacement_m,
         "axis_displacement_limit_m": displacement_limit,
         "minimum_core_fraction": CONTROL_MINIMUM_CORE_FRACTION,
+        "vertical_conditioning": conditioning,
         "checks": checks,
         "qualified": all(checks.values()),
     }
 
 
-def _require_control_branch(case, solve_receipt: dict[str, object]) -> None:
-    """Stop before paired tracing when the transformed root is nonphysical."""
-    qualification = _qualify_control_branch(case, solve_receipt)
+def _require_control_branch(
+    reference_axis: np.ndarray,
+    boundary: np.ndarray,
+    solve_receipt: dict[str, object],
+) -> None:
+    """Stop before paired tracing when the analytic root is nonphysical."""
+    qualification = _qualify_control_branch(
+        reference_axis,
+        boundary,
+        solve_receipt,
+    )
     solve_receipt["control_branch_qualification"] = qualification
     print(
         "CONTROL_BRANCH_QUALIFICATION="
@@ -313,9 +606,8 @@ def _require_control_branch(case, solve_receipt: dict[str, object]) -> None:
             name for name, passed in qualification["checks"].items() if not passed
         ]
         raise RuntimeError(
-            "near-circular control branch is not physical; "
-            f"failed checks={failed}; use an analytic control with a stable "
-            "decay-index receipt"
+            "analytic near-circular control branch is not physical; "
+            f"failed checks={failed}"
         )
 
 
@@ -472,8 +764,8 @@ def _terminal_decomposition(
     span: float,
 ) -> dict[str, object]:
     """Decompose the terminal score into direct, feedback and support terms."""
-    with_core = np.asarray(with_solved.masks.core, dtype=bool)
-    without_core = np.asarray(without_solved.masks.core, dtype=bool)
+    with_core = _equilibrium_core(with_solved)
+    without_core = _equilibrium_core(without_solved)
     with_root = with_solved.flux
     without_root = without_solved.flux
     direct_counterfactual = without_root + external_delta
@@ -953,30 +1245,16 @@ def run() -> dict[str, object]:
 
 
 def run_stability_control() -> dict[str, object]:
-    """Repeat the passive trace on a low-elongation geometry control."""
+    """Repeat the passive trace on an analytic stable control."""
     source_commit = measurement_stamp(Path.cwd())
     configure_dtypes()
-    elongated_case = reference.require_reference()
-    case, shape_control = _stability_control_case(elongated_case)
-    machine_started = perf_counter()
-    machine = reference.cached_machine(case, DENSE_CELL_REQUEST, passive=True)
-    machine_seconds = perf_counter() - machine_started
-    cache = machine.cache_receipt
-    if cache is None:
-        raise RuntimeError("the stability-control carrier has no cache receipt")
-
-    without_current = machine.source_current.copy()
-    without_current[-machine.passive_columns :] = 0.0
-    without_machine = replace(
-        machine,
-        source_current=without_current,
-        passive_columns=0,
-        cache_receipt=None,
-    )
-    with_operator = reference.forward_operator(case, machine)
-    without_operator = reference.forward_operator(case, without_machine)
-    seed_with = reference.seed_flux(case, machine)
-    seed_without = reference.seed_flux(case, without_machine)
+    construction_started = perf_counter()
+    control = _build_analytic_control()
+    construction_seconds = perf_counter() - construction_started
+    with_operator = control.with_passive.operator
+    without_operator = control.without_passive.operator
+    seed_with = control.seed_flux
+    seed_without = control.seed_flux
     seed_identity_error = float(
         np.max(np.abs(np.asarray(seed_with) - np.asarray(seed_without)))
     )
@@ -984,24 +1262,30 @@ def run_stability_control() -> dict[str, object]:
         np.sum(np.asarray(with_operator.cell_current(seed_with)))
     )
 
-    with_solved, with_receipt = _solve(
-        case,
-        machine,
+    with_solved, with_receipt = _solve_analytic_control(
+        control.with_passive,
+        seed_with,
         "declared_passive_currents",
-        include_deviations=False,
     )
-    _require_control_branch(case, with_receipt)
-    without_solved, without_receipt = _solve(
-        case,
-        without_machine,
+    _require_control_branch(
+        control.reference_axis,
+        control.material_boundary,
+        with_receipt,
+    )
+    without_solved, without_receipt = _solve_analytic_control(
+        control.without_passive,
+        seed_without,
         "passive_currents_zeroed",
-        include_deviations=False,
     )
-    _require_control_branch(case, without_receipt)
-    cell_count = len(machine.node)
-    span = abs(float(case.flux_span))
-    reference_flux = case.flux(machine.radius, machine.node[:, 1])
-    without_core = np.asarray(without_solved.masks.core, dtype=bool)
+    _require_control_branch(
+        control.reference_axis,
+        control.material_boundary,
+        without_receipt,
+    )
+    cell_count = control.with_passive.operator.grid.node_number
+    span = control.reference_flux_span_wb
+    reference_flux = control.reference_grid_flux
+    without_core = _equilibrium_core(without_solved)
     external_delta = with_operator.external() - without_operator.external()
     paired = _paired_map_trace(
         with_operator,
@@ -1029,6 +1313,20 @@ def run_stability_control() -> dict[str, object]:
         cell_count,
         span,
     )
+    stability = {
+        "definition": "n = -(R/Bz)*(dBz/dR)",
+        "open_stability_window": list(DECAY_INDEX_WINDOW),
+        "passive_retained": with_receipt["vertical_conditioning"],
+        "passive_zeroed": without_receipt["vertical_conditioning"],
+        "both_arms_stable": bool(
+            with_receipt["vertical_conditioning"]["stable"]
+            and without_receipt["vertical_conditioning"]["stable"]
+        ),
+        "elongated_boundary_elongation": ELONGATED_BOUNDARY_ELONGATION,
+        "control_boundary_elongation": control.construction_receipt[
+            "control_boundary_elongation"
+        ],
+    }
     return {
         "receipt": {
             "kind": "passive_closure_vertical_stability_control",
@@ -1051,18 +1349,25 @@ def run_stability_control() -> dict[str, object]:
             },
         },
         "carrier": {
-            "requested_cells": DENSE_CELL_REQUEST,
+            "construction": "analytic structured free-boundary carrier",
+            "lattice_shape": control.construction_receipt["lattice_shape"],
             "realised_plasma_cells": cell_count,
-            "machine_request_seconds": machine_seconds,
-            "cache": asdict(cache),
-            "passive_columns": machine.passive_columns,
+            "construction_seconds": construction_seconds,
+            "passive_columns": control.construction_receipt[
+                "passive_material_coupling"
+            ]["conductor_count"],
             "reference_flux_span_wb": span,
         },
-        "shape_control": shape_control,
+        "shape_control": control.construction_receipt,
+        "vertical_stability": stability,
         "comparators": {
             "elongated_direct_external_peak_points": ELONGATED_DIRECT_PEAK_POINTS,
-            "elongated_reproduction_move_points": (ELONGATED_REPRODUCTION_MOVE_POINTS),
+            "elongated_coupled_reproduction_move_points": (
+                ELONGATED_REPRODUCTION_MOVE_POINTS
+            ),
             "elongated_field_gain": ELONGATED_FIELD_GAIN,
+            "elongated_boundary_elongation": ELONGATED_BOUNDARY_ELONGATION,
+            "elongated_wall_elongation": ELONGATED_WALL_ELONGATION,
             "documented_direct_response_points": DOCUMENTED_DIRECT_RESPONSE_POINTS,
             "registered_direct_response_ceiling_points": REGISTERED_CEILING_POINTS,
         },
@@ -1074,8 +1379,12 @@ def run_stability_control() -> dict[str, object]:
                 "declared passive-current columns retained or zeroed"
             ),
             "seed_plasma_current_a": seed_plasma_current,
-            "seed_plasma_current_over_elongated_reference": (
-                seed_plasma_current / float(elongated_case.plasma_current)
+            "passive_drive_matches_elongated_peak": bool(
+                abs(
+                    _peak_points(external_delta, cell_count, span)
+                    - ELONGATED_DIRECT_PEAK_POINTS
+                )
+                <= 1.0e-12
             ),
         },
         "production_solves": [with_receipt, without_receipt],

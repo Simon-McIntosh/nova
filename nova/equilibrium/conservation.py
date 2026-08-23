@@ -81,6 +81,7 @@ from nova.equilibrium.observation import (
     declared_body_force,
     declared_field_function_squared,
     declared_pressure,
+    layout_invariant_sum,
 )
 
 __all__ = [
@@ -266,7 +267,7 @@ def delta_star(mesh: FluxMesh, flux) -> jax.Array:
 
 def poloidal_field(mesh: FluxMesh, flux) -> tuple[jax.Array, jax.Array]:
     """Return the radial and vertical poloidal field [T] of one flux map."""
-    radial, vertical = mesh.gradient(flux)
+    radial, vertical = _layout_invariant_gradient(mesh, flux)
     scale = TOTAL_FLUX_FACTOR * jnp.asarray(mesh.node_radius)
     return -vertical / scale, radial / scale
 
@@ -274,7 +275,36 @@ def poloidal_field(mesh: FluxMesh, flux) -> tuple[jax.Array, jax.Array]:
 def _axisymmetric_divergence(mesh: FluxMesh, radial, vertical) -> jax.Array:
     """Return the divergence of one axisymmetric poloidal vector field."""
     radius = jnp.asarray(mesh.node_radius)
-    return mesh.gradient(radius * radial)[0] / radius + mesh.gradient(vertical)[1]
+    return (
+        _layout_invariant_gradient(mesh, radius * radial)[0] / radius
+        + _layout_invariant_gradient(mesh, vertical)[1]
+    )
+
+
+def _layout_invariant_gradient(mesh: FluxMesh, field) -> tuple[jax.Array, jax.Array]:
+    """Apply fitted ring derivatives with one association under transformations."""
+
+    value = jax.lax.optimization_barrier(jnp.asarray(field))
+    if not all(
+        hasattr(mesh, name)
+        for name in ("stencil", "radial_weight", "vertical_weight", "node_count")
+    ):
+        return mesh.gradient(value)
+    stencil = jnp.asarray(mesh.stencil)
+    gathered = value[stencil]
+    radial = layout_invariant_sum(
+        jnp.asarray(mesh.radial_weight, dtype=value.dtype) * gathered,
+        axis=1,
+    )
+    vertical = layout_invariant_sum(
+        jnp.asarray(mesh.vertical_weight, dtype=value.dtype) * gathered,
+        axis=1,
+    )
+    centre = stencil[:, 0]
+    return (
+        jnp.zeros(mesh.node_count, dtype=value.dtype).at[centre].set(radial),
+        jnp.zeros(mesh.node_count, dtype=value.dtype).at[centre].set(vertical),
+    )
 
 
 class ConservationLedger(NamedTuple):
@@ -355,18 +385,20 @@ def conservation_ledger(
     # branch is the toroidal-field direction and flips J entirely, so the
     # positive branch is taken and the divergence it is read for is unchanged
     field_function = jnp.sqrt(jnp.maximum(squared, 0.0))
-    function_radial, function_vertical = mesh.gradient(field_function)
+    function_radial, function_vertical = _layout_invariant_gradient(
+        mesh, field_function
+    )
     radial_current = -function_vertical / (mu_0 * radius)
     vertical_current = function_radial / (mu_0 * radius)
     divergence_j = _axisymmetric_divergence(mesh, radial_current, vertical_current)
 
     # the force components need only the SQUARED field function: both
     # J_R B_phi and J_Z B_phi reduce to gradients of F^2 over 2 mu_0 R^2
-    squared_radial, squared_vertical = mesh.gradient(squared)
+    squared_radial, squared_vertical = _layout_invariant_gradient(mesh, squared)
     diamagnetic_radial = squared_radial / (2.0 * mu_0 * radius**2)
     diamagnetic_vertical = squared_vertical / (2.0 * mu_0 * radius**2)
     cell_pressure = declared_pressure(source, masks, radius, flux_span)
-    pressure_radial, pressure_vertical = mesh.gradient(cell_pressure)
+    pressure_radial, pressure_vertical = _layout_invariant_gradient(mesh, cell_pressure)
     body_force = declared_body_force(source, masks, radius, cell_pressure)
 
     toroidal_current = -elliptic / (TOTAL_FLUX_FACTOR * mu_0 * radius)
@@ -380,12 +412,12 @@ def conservation_ledger(
     pressure_gradient = jnp.hypot(pressure_radial, pressure_vertical)
 
     field_scale = jnp.maximum(
-        _sup(mesh.gradient(radial_field)[1], checked),
-        _sup(mesh.gradient(vertical_field)[0], checked),
+        _sup(_layout_invariant_gradient(mesh, radial_field)[1], checked),
+        _sup(_layout_invariant_gradient(mesh, vertical_field)[0], checked),
     )
     current_scale = jnp.maximum(
-        _sup(mesh.gradient(radial_current)[1], checked),
-        _sup(mesh.gradient(vertical_current)[0], checked),
+        _sup(_layout_invariant_gradient(mesh, radial_current)[1], checked),
+        _sup(_layout_invariant_gradient(mesh, vertical_current)[0], checked),
     )
     return ConservationLedger(
         grad_shafranov_residual=_sup(elliptic - drive, checked),

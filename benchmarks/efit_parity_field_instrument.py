@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -34,7 +33,11 @@ from benchmarks.efit_parity_inductance_partition import (  # noqa: E402
     TARGET_SHOT,
     _boundary_moments,
     _cell_partition,
+    _source_digests,
     _terminal_observation,
+)
+from benchmarks.efit_parity_moment_definitions import (  # noqa: E402
+    _relative_error as _relative_deviation,
 )
 from benchmarks.efit_topology_boundary_score import _stored_lcfs  # noqa: E402
 from nova.equilibrium.conservation import poloidal_field  # noqa: E402
@@ -51,14 +54,6 @@ BANKED_STORED_BOUNDARY_AREA = 1.837030238598465
 BANKED_STORED_BOUNDARY_VOLUME = 8.792322015190356
 EXPECTED_REFERENCE_MAP_FIELD_ENERGY = 0.2989777277348594
 EXPECTED_REBASELINED_SOLVED_FIELD_ENERGY = 0.29880628232236717
-
-
-def _relative_deviation(observed: float, expected: float) -> float:
-    return observed / expected - 1.0
-
-
-def _source_digests(paths: tuple[Path, ...]) -> dict[str, str]:
-    return {str(path): hashlib.sha256(path.read_bytes()).hexdigest() for path in paths}
 
 
 def _field_magnitude(profile, flux: np.ndarray) -> np.ndarray:

@@ -23,9 +23,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-23">
-<meta name="plan-impl" content="0.75">
-<meta name="plan-version" content="6">
-<meta name="plan-commits" content="072dc102,d6a5fbf1,ba7c6ff4,060b2c5d,aef15cea,5c448153,2f5bae34,87dd7358,912fde52">
+<meta name="plan-impl" content="0.9">
+<meta name="plan-version" content="9">
+<meta name="plan-commits" content="072dc102,d6a5fbf1,ba7c6ff4,060b2c5d,aef15cea,5c448153,2f5bae34,87dd7358,912fde52,010f1d5f,bd3cca1f,11a9d70f">
 <meta name="plan-artifacts" content="docs/evidence/archive/ensemble-forward-seam-landed.html">
 </head>
 <body>
@@ -101,18 +101,24 @@
       (commits <code>d6a5fbf1</code>…<code>aef15cea</code>).</p>
     </section>
 
-    <h2 id="s5">§5 — Forward-only twin truth, and the joint feasibility gate</h2>
-
-    <p>Nova generates deterministic twin truth: a marched coupled trajectory with known flux
-    functions and drives, plus counterfactual forwards and synthetic observations through §3's
-    kernels, all receipted. The feasibility gate is joint and explicitly forward-only on nova's
-    side: the <em>existing</em> ambix estimator, pointed at nova's two-dimensional ensemble
-    forward through the §2 seam, recovers the windowed low-dimensional state (the ~12–16
-    parameters the entry names) from synthetic Thomson plus net current within stated coverage —
-    run from ambix, scored in ambix, with nova contributing truth, forwards and receipts. No
-    second production estimator is created beside <code>NovaEnsembleEstimator</code> and
-    <code>sequential_da</code>; if the ambix side prefers to wire its DIII-D windowed smoother
-    first, the twin consumes that instead — the nova deliverables are identical either way.</p>
+    <section id="s5" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ nova half landed 2026-08-23</span>
+        <h2>§5 — Forward-only twin truth, and the joint feasibility gate</h2>
+      </header>
+      <p class="landed-summary">The twin-truth package is banked
+      (<code>docs/figures/ensemble-forward-seam/twin-truth/</code>): 6 windows × 4 members,
+      24/24 converged receipted trajectory rows (max gating norm 7.09e-11, flux closure exactly 0),
+      144/144 supported synthetic Thomson + net-current observation rows (COCOS 17, units, support,
+      error receipts), 24/24 recoverable coupling states, counterfactual identities
+      (pressure-high, field-high, current-low), all tree-stamped — composed only from the public
+      batch/coupling-state/synthesizer seams, nova source unchanged. The joint recovery gate is
+      recorded <code>joint_recovery_gate_run=false</code>, owner <strong>ambix</strong>, per the
+      locked estimator-placement decision: their existing estimator consumes this package through
+      the coupling-state handoff and scores coverage on their side. Full record:
+      <a href="/nova/evidence/archive/ensemble-forward-seam-landed#s5">§5 landed</a>
+      (commits <code>010f1d5f</code>…<code>11a9d70f</code>).</p>
+    </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -132,7 +138,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-efs-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship ensemble-forward-seam" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-efs-001" data-status="resolved" data-written-by="reckon-create" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship ensemble-forward-seam" data-resolved-at="2026-08-23T09:31:31+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Land §2 and §3 first; §4 follows the moment plan&#x27;s confidence study; §5 closes jointly</h4>
     <div class="r-fu-body"><p>§2 (batched member/window evaluator plus the published throughput
     budget) and §3 (Thomson synthesizer plus virtual-magnetics receipts) are independent and
@@ -141,6 +147,12 @@
     coordinated with the ambix side and consumes whichever of their estimators they nominate;
     nova's deliverables are unchanged either way.</p></div>
     <pre class="r-fu-prompt">/reckon-ship ensemble-forward-seam</pre>
+    <p class="r-fu-outcome">done — executed as sequenced, all nova-side deliverables landed 2026-08-23: §2 batched member-preserving evaluator with bitwise scalar parity and the tree-stamped CPU+H200 throughput budget (batch-8 125.2/134.2 member-windows/s, honestly 21 % slower than the scalar loop on the qualified affine workload); §3 Thomson synthesizer + virtual magnetics with units/COCOS/support/error receipts and gradient error 8.7e-9; §4 constraint seam with Jacobians under 2e-8, typed fail-closed pins preserving the eliminated-solve current normalisation, and the banked zero-restriction baseline; §5 twin-truth package (6×4, 24/24 converged, 144/144 observation rows) with the joint gate recorded ambix-owned and not run. The remaining chain is the joint feasibility gate itself, carried by the new followup.</p>
+    </article>
+<article class="r-fu" data-id="f-efs-joint-gate" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-23" data-recommends-skill="/reckon-ship imas-ambix:flux-function-state-interface" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Run and score the joint twin feasibility gate from ambix over the banked nova package (foreign-owner)</h4>
+    <div class="r-fu-body"><p><strong>Exemption: foreign-owner.</strong> The concrete owner is the imas-ambix estimator lane — the locked estimator-placement decision assigns the filter run and its scoring to ambix's existing estimators, and the twin-truth receipt records joint_recovery_gate_run=false with owner ambix. Nova's half is complete and banked: docs/figures/ensemble-forward-seam/twin-truth/ carries the receipted marched truth, counterfactual forwards, synthetic Thomson + net-current observations, recoverable coupling states, and consumption.md describing the coupling-state handoff. The gate: the existing ambix estimator recovers the windowed low-dimensional state from synthetic Thomson plus net current within stated coverage, run and scored ambix-side. When its coverage lands, this plan records the outcome and ships.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship imas-ambix:flux-function-state-interface</pre>
     </article>
 </section>
   
@@ -154,6 +166,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260823T1035-batch-landed" data-who="reckon-ship" data-when="2026-08-23T10:35:00+00:00">
     <div class="r-comment-body">batch-window-evaluator landed — commits 5c448153, 2f5bae34, 87dd7358, 912fde52; gate passed after one orchestrator resume (the first two H200 jobs were inadmissible: a stale pre-amend tree stamp and a missing JAX_PLATFORMS=cuda,cpu; the corrected run added an exact committed-tree runtime guard and verified CUDA provenance — job 1253203, 27 s, jax_backend gpu, cuda:0). Focused gate 17/17; bitwise batch-of-one parity; typed WindowBatchError never returns a degraded batch. THE PUBLISHED NUMBER, honestly framed: batch-8 throughput 125.2107768 (CPU) / 134.1683624 (H200) member-windows/s versus scalar-loop 158.2841498 / 168.6424936 — the batch facade is 20.89 % (CPU) / 20.44 % (H200) SLOWER on the affine full-receipt workload, so batching currently buys API shape (member identity, one operator invocation per exchange, typed refusals), not speed; the H200-vs-CPU gain is also small (7.2 %) because the affine evaluator underfills the device. The ambix entry sizes ensembles against this budget as published. Receipt sha256 399075eb… under docs/figures/ensemble-forward-seam/throughput/.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260823T1100-sprint-drain-ledger" data-who="reckon-ship" data-when="2026-08-23T11:00:00+00:00">
+    <div class="r-comment-body">DRAIN LEDGER — sprint S12 @ 2026-08-23T11:00Z (this plan carried the sprint's last landing beat, so the ledger is committed here). f-csc-001: folded → coupling-state-contract + boundary-roundtrip-binding (resolved; plan shipped). f-efs-001: folded → batch-window-evaluator + thomson-magnetics-kernels + constraint-seam + twin-truth-package (resolved). f-efs-joint-gate: foreign-owner → imas-ambix estimator lane (locked estimator-placement). constraint-seam manifest follow-on (real isoflux re-score): foreign-owner → ambix evidence owner banking trusted chord-pair pins; the re-score path is recorded in the §4 comment. f-dpr-001 (diiid-pulse-replay): authority-required → owner ruling forward-gate-disposition holds the prerequisite gate; sequenced behind the parity lane's plasma-cell/operator work then the §5 re-evaluation. f-dfo-004: authority-required → same owner ruling (gate held, do not move). f-dfo-010: foreign-owner → IMAS Data Dictionary repository. f-dfo-011: foreign-owner → imas-ambix:magnetics-free-equilibrium-recovery. f-dfo-012: folded → artifact-repaired-ring (resolved). f-dfo-013: folded → cluster-lead-settlement (resolved). f-dfo-014: foreign-owner → parity/solver lane (reinforced by f-efp-cell-resolution-operator-scaling, owned by the live parity orchestrator; their forward-operator-refinement plan is in authorship). f-dfo-receipt-restore: folded → receipt-restore-circuit-arm (resolved). gate-rerun manifest follow-on (plateau investigation): foreign-owner → carried by f-dfo-014 / f-efp-cell-resolution-operator-scaling. artifact-node follow-on (orphaned export CLI): folded → retire-orphaned-export-cli (done). twin-truth follow-on (joint estimator run): carried by f-efs-joint-gate. --- rows: 15, foldable-remaining: 0.</div>
 </div>
 </section>
 </main>

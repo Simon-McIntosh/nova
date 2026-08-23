@@ -13,7 +13,7 @@ class Frame(FrameSet):
 
     delta: float = -1
     dcoil: float = -1
-    dplasma: float = -500
+    dplasma: float = -2100
     dshell: float = 0
     dwinding: float = 0
     tcoil: str = "rectangle"

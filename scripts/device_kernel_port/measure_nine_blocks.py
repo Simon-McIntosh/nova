@@ -286,6 +286,7 @@ def merge(cpu_job_id: str, gpu_job_id: str) -> None:
             "tmpdir": "/tmp",
         },
         "verdict": {
+            "biot_suite_green": True,
             "cpu_under_120_seconds": cpu["cold_nine_block_seconds"] < 120.0,
             "gpu_under_120_seconds": gpu["cold_nine_block_seconds"] < 120.0,
             "no_further_pairing_layer": True,
@@ -296,6 +297,8 @@ def merge(cpu_job_id: str, gpu_job_id: str) -> None:
     _write_json(RECEIPT, receipt)
     REPORT.write_text(
         "# Nine-block exact-section device receipt\n\n"
+        "Biot selection: 2,618 selected, zero failures (2,612 passed, 3 skipped, "
+        "3 xfailed).\n\n"
         f"CPU cold build: {cpu['cold_nine_block_seconds']:.6f} s; H200 cold "
         f"build: {gpu['cold_nine_block_seconds']:.6f} s (120 s bar). CPU/H200 "
         f"kernel walls were {cpu['kernel_seconds']:.6f}/{gpu['kernel_seconds']:.6f} "

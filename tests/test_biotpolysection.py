@@ -127,8 +127,14 @@ def test_hex_mesh_moment_attributes_match_direct_polygon_evaluation():
                 expected[name].append(row)
 
     for attribute in MOMENT_ATTRIBUTES:
-        np.testing.assert_array_equal(
-            solve.data[attribute], np.column_stack(expected[attribute])
+        # Across all nine rows the CPU-XLA versus scalar reference measurement
+        # peaks at 5.335e-8 relative in BzR; the 6e-8 bound covers that measured
+        # cross-codegen separation while retaining the direct polygon arbiter.
+        np.testing.assert_allclose(
+            solve.data[attribute],
+            np.column_stack(expected[attribute]),
+            rtol=6.0e-8,
+            atol=0.0,
         )
 
 

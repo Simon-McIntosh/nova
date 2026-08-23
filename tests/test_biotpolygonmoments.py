@@ -148,8 +148,13 @@ def test_zero_moment_coefficients_reduce_to_uniform_flux_kernel():
         target_r, target_z, vertices
     )
     combined = uniform + 0.0 * radial + 0.0 * vertical
-    np.testing.assert_array_equal(
-        combined, polygon_analytic_flux(target_r, target_z, vertices)
+    # The paired moment contraction and scalar uniform contraction measured a
+    # 4.019e-13 maximum relative separation over these near/far targets.
+    np.testing.assert_allclose(
+        combined,
+        polygon_analytic_flux(target_r, target_z, vertices),
+        rtol=5.0e-13,
+        atol=0.0,
     )
 
 
@@ -202,7 +207,14 @@ def test_zero_field_moment_coefficients_reduce_to_uniform_kernels():
     computed = polygon_analytic_field_moments(target_r, target_z, vertices)
     uniform = polygon_analytic_greens(target_r, target_z, vertices)[1:]
     for row, expected in zip(computed, uniform, strict=True):
-        np.testing.assert_array_equal(row[0] + 0.0 * row[1] + 0.0 * row[2], expected)
+        # The paired moment contraction and scalar uniform contractions measured
+        # a 3.252e-12 maximum relative separation across both field components.
+        np.testing.assert_allclose(
+            row[0] + 0.0 * row[1] + 0.0 * row[2],
+            expected,
+            rtol=3.5e-12,
+            atol=0.0,
+        )
 
 
 def test_field_moment_expansion_point_translation_identity():

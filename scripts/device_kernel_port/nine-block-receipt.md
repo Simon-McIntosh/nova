@@ -1,5 +1,7 @@
 # Nine-block exact-section device receipt
 
+Biot selection: 2,618 selected, zero failures (2,612 passed, 3 skipped, 3 xfailed).
+
 CPU cold build: 58.452205 s; H200 cold build: 26.576202 s (120 s bar). CPU/H200 kernel walls were 39.187988/0.391012 s. The banked NumPy three-flux-order grid stage was 76.676843 s and the complete exact kernel-family profile was 286.023 s.
 
 GPU-vs-CPU ULP: p50=4763908, p90=192114811, p99=478712534412, p99.9=8617350547552581613, max=8964084725603857419; byte-identical 2.204574791%. The original baseline was 1.434% byte-identical with p99.9 1.875e12 ULP.

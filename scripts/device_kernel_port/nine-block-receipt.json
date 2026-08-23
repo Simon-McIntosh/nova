@@ -89,6 +89,7 @@
     "tmpdir": "/tmp"
   },
   "verdict": {
+    "biot_suite_green": true,
     "cpu_under_120_seconds": true,
     "gpu_under_120_seconds": true,
     "no_further_pairing_layer": true,

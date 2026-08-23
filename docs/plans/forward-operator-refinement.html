@@ -19,7 +19,7 @@
 <meta name="plan-effort-hours" content="6.0">
 <meta name="plan-depends-on" content="scoring-criteria-derivation">
 <meta name="plan-informs" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="17">
 <meta name="plan-impl" content="0.22">
 </head>
 <body>
@@ -169,6 +169,15 @@
   iteration-resolved evidence, the mechanism or amplification rate is quoted with its code
   path or spectral-rate comparison, the arithmetic decomposition of the 0.64-point move is
   shown, and the repair node's file-level scope is stated in the same receipt.</p>
+  <p><strong>Repair routing, pre-agreed with the catalog lane:</strong> on
+  EXPANDING_MAP_AMPLIFICATION no repair node is cut here &mdash; the closure-move screening
+  becomes a fifth refusal condition on that lane's in-flight action-qualification node
+  (refusing a non-finite action, non-successful status, non-finite achieved linear
+  residual, zero step at material residual), landing as one commit; this plan then records
+  the screening spec it handed over and the verdict receipt. On CLOSURE_PATH_ERROR the
+  repair is this plan's node, file-scoped against that lane's occupancy
+  (forward_operator.py and fixed_point.py held; source, sol_closure, conductor_current,
+  conservation, domain and wall_mask free).</p>
 </section>
 
 <section id="s3">
@@ -186,7 +195,13 @@
   (<code>solver-default-route</code>); the floors here are measured on that incoming
   default once it lands &mdash; the warm-neighbour campaign already showed a route change
   reproduces zero banked terminal residuals, so measuring on the outgoing route would date
-  the receipts on arrival. The deliverable is a decision-grade statement for the solver
+  the receipts on arrival. One route-specific control is mandatory before any floor is
+  attributed: the finite-difference action carries a differencing step whose
+  truncation/round-off minimum can masquerade as a discretisation floor, so every floor
+  receipt cites the route's declared step and selection rule AND the step-invariance
+  control (one floor re-measured at a second step size, built inside the route's own
+  landing node) &mdash; a floor that moves with the step is a route artifact and is
+  attributed to neither order nor mesh. The deliverable is a decision-grade statement for the solver
   lane: refine, raise order, or both, each with its measured cost.</p>
   <p><strong>Done when:</strong> the order-versus-mesh table (floor moved, criterion verdict,
   build cost, memory) is banked with a one-paragraph ruling, and the DIII-D forward-gate

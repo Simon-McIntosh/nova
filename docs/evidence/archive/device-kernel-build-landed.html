@@ -112,6 +112,44 @@
   <code>port-go-threshold</code> the measured distribution is the deliverable the owner
   reviews at go/no-go. Receipt: <code>scripts/device_kernel_port/receipt.json</code>.</p>
 
+  <h2 id="s4-paired-path-and-ruling">§4/§5 — the exact-paired chain, the compile wall, and the owner ruling that released the port</h2>
+
+  <p><strong>Landed 2026-08-21 (commits <code>3067dc08</code>, <code>7578c8b6</code>/<code>e1a441f6</code>,
+  <code>38f43c5b</code>/<code>8a71abfb</code>, <code>2b8d503a</code>, <code>247ded2d</code>/<code>00161db3</code>/<code>57a8b1f4</code>);
+  ruling locked 2026-08-23.</strong> The owner's <code>far-field-section-fidelity</code> ruling removed the
+  centroid-filament branch from the default path (grep-verified) and one shared paired-fp64 rule was
+  extended through the complete elliptic descent, moment recurrences, contractions, quadrature, endpoint
+  differencing, contour accumulation and range-function assembly. <strong>Measured:</strong> the sliver
+  self target improved to 2.187e-5 against the 100-digit oracle (passes the 8.04e-5 gate; banked 4.63e-3);
+  the full 551-target column improved 38.3% to max relative 1.976e-3 with ONE far target 24.6× over gate —
+  max ABSOLUTE 1.49e-9, median 3.3e-10. The per-edge 100-digit localization receipt is definitive: every
+  primitive, coefficient, endpoint and edge difference sits at 1e-9-class or better; the breach is born
+  only when the contour closes (condition number 5.43e12), and assembly reformulations are bit-identical
+  no-ops — no additional pairing layer can recover it. The compile wall: the exact-paired XLA graph did
+  not finish compiling in 38:55 at 149.8&nbsp;GB CPU RSS (nor on the H200 at 58.9+&nbsp;GB); NumPy control
+  895&nbsp;s. <strong>Owner ruling <code>port-go-disposition</code> (2026-08-23):</strong> carry the far-target
+  error as an ABSOLUTE bound of 1.49e-9 (median 3.3e-10) — a relative gate on a 1e-9-absolute quantity has
+  no physical referent — then measure the UNPAIRED compile before any graph work, since production runs
+  <code>paired=False</code> at all three call sites. Declining refused: performance passes at 12.4&nbsp;s
+  projected against the 120&nbsp;s bar. Receipts:
+  <code>scripts/device_kernel_port/paired-primitive-investigation.json</code>,
+  <code>scripts/device_kernel_port/far-contour-localization.json</code>.</p>
+
+  <h2 id="s4-unpaired-compile">§4 — the unpaired compile: the wall exonerated for production</h2>
+
+  <p><strong>Landed 2026-08-23, commit <code>dedaf852</code> (merge <code>c46ac841</code>); node gate
+  PASSED; run <code>unpaired-compile-measurement</code>, 9 min wall.</strong> The
+  <code>paired=False</code> exact finite-section graph at the production fixed shape (32×32 pair tile,
+  11 edges, 128 residual nodes) compiles in <strong>4.857&nbsp;s at 1.05&nbsp;GiB</strong> peak RSS on CPU
+  (SLURM 1253204, vega_debug) and <strong>12.327&nbsp;s at 4.36&nbsp;GiB</strong> on the H200 (SLURM
+  1253205, <code>gpu_0003_grpA</code>), against the banked paired floor of ≥2,335&nbsp;s and
+  149.8&nbsp;GB — a ~480× compile-time and ~136× memory reduction on the CPU lane. Post-compile kernel
+  execution 0.0593&nbsp;s CPU / 0.0353&nbsp;s H200; production-NumPy spot-check deviations 1.79e-11 and
+  1.99e-11. <strong>Verdict in mechanism terms:</strong> paired-fp64 primitive expansion, not the exact
+  finite-section graph, caused the compile wall; the ordinary-fp64 graph is compile-feasible on both
+  lanes, so the full port proceeds directly and compiler-graph reduction stays unspent. Production source
+  unchanged. Receipt: <code>scripts/device_kernel_port/unpaired-compile-receipt.json</code>.</p>
+
 </main>
 </body>
 </html>

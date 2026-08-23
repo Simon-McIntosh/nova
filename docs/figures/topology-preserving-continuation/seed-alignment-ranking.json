@@ -1,0 +1,154 @@
+{
+  "schema": "nova-seed-alignment-ranking/1.0",
+  "status": "banked",
+  "completed_utc": "2026-08-23T21:56:18.304216+00:00",
+  "preregistration": {
+    "recorded_before_observable_scores_and_outcome_access": true,
+    "observable": {
+      "name": "seed residual-action amplification",
+      "definition": "For seed s, fixed-point map F, residual r = F(s) - s, and local action A = I - J_F(s), score q(s,F) = ||r||_2 / ||A r||_2.",
+      "interpretation": "Larger q means the seed residual occupies a direction on which the local fixed-point action is weaker, so larger values are ranked as predicting more cumulative growth and a larger terminal residual.",
+      "ranking_direction": "ascending is preferred; larger predicts worse outcome",
+      "inputs": [
+        "candidate seed",
+        "fixed-point map at that seed",
+        "map tangent"
+      ],
+      "outcome_exclusions": [
+        "converged solve",
+        "terminal state",
+        "terminal residual",
+        "cumulative growth",
+        "reference equilibrium"
+      ],
+      "singular_convention": "an exact fixed point scores zero; nonzero residual with zero action scores positive infinity"
+    },
+    "fixed_corpus": [
+      {
+        "shot": 21978,
+        "slice_index": 35
+      },
+      {
+        "shot": 21983,
+        "slice_index": 35
+      },
+      {
+        "shot": 21985,
+        "slice_index": 51
+      },
+      {
+        "shot": 21986,
+        "slice_index": 46
+      },
+      {
+        "shot": 21989,
+        "slice_index": 55
+      }
+    ],
+    "association_test": "two-sided Spearman rank correlation, n = 5"
+  },
+  "observable_execution": {
+    "converged_solve_enters_observable": false,
+    "statement": "No converged solve enters the observable: every score uses only the frame's cold moment seed, one fixed-point map evaluation, and one tangent action at that same seed. Outcomes are opened only after all five scores have been computed.",
+    "backend": "cpu",
+    "precision": "float64"
+  },
+  "ranking": {
+    "rows": [
+      {
+        "shot": 21978,
+        "slice_index": 35,
+        "time_s": 0.1899999976158142,
+        "seed_residual_action_amplification": 0.9322689958968416,
+        "cumulative_growth": 2156276.0,
+        "terminal_residual": 0.0010843246548355142
+      },
+      {
+        "shot": 21983,
+        "slice_index": 35,
+        "time_s": 0.1899999976158142,
+        "seed_residual_action_amplification": 0.9533225665401838,
+        "cumulative_growth": 575064.125,
+        "terminal_residual": 0.018280965423722807
+      },
+      {
+        "shot": 21985,
+        "slice_index": 51,
+        "time_s": 0.2750000059604645,
+        "seed_residual_action_amplification": 1.0026929545189016,
+        "cumulative_growth": 52452978116.0,
+        "terminal_residual": 0.002451587844592516
+      },
+      {
+        "shot": 21986,
+        "slice_index": 46,
+        "time_s": 0.25,
+        "seed_residual_action_amplification": 0.9951411056094699,
+        "cumulative_growth": 564602919.75,
+        "terminal_residual": 0.005320862474684456
+      },
+      {
+        "shot": 21989,
+        "slice_index": 55,
+        "time_s": 0.29499998688697815,
+        "seed_residual_action_amplification": 1.065876598525219,
+        "cumulative_growth": 22921153.0,
+        "terminal_residual": 0.002289950466828694
+      }
+    ],
+    "spearman_against_cumulative_growth": {
+      "statistic": 0.6,
+      "two_sided_pvalue": 0.28475697986529386,
+      "sample_count": 5
+    },
+    "spearman_against_terminal_residual": {
+      "statistic": 0.0,
+      "two_sided_pvalue": 1.0,
+      "sample_count": 5
+    }
+  },
+  "scientific_verdict": {
+    "status": "HOLD_AS_SEED_SELECTOR",
+    "reason": "The preregistered score has a positive but underpowered rank association with cumulative growth and a null rank association with terminal residual. It therefore does not consistently rank both banked outcomes and must not be promoted as a seed selector.",
+    "growth_spearman": 0.6,
+    "growth_two_sided_pvalue": 0.28475697986529386,
+    "residual_spearman": 0.0,
+    "residual_two_sided_pvalue": 1.0
+  },
+  "outlier_adjudication": {
+    "shot": 21985,
+    "slice_index": 51,
+    "classification": "most-informative",
+    "instrumentation_perturbed": false,
+    "basis": "This is the only corpus frame carrying a reproduced twelve-update trajectory, iteration-local tangent diagnostics, and a real same-shot alternate seed. The alternate moved three bursts to none and changed cumulative separation growth from 5.379792627e9 to 0.06186094. The instrumented replay reproduced the banked trajectory and changed no production or test source, so the extreme case is retained rather than treated as measurement perturbation.",
+    "banked_trajectory_reproduced": true,
+    "production_or_test_source_changed": false,
+    "baseline_burst_updates": [
+      3,
+      8,
+      12
+    ],
+    "alternate_burst_updates": [],
+    "baseline_cumulative_growth": 5379792627.282051,
+    "alternate_cumulative_growth": 0.061860940695296525
+  },
+  "comparison_scope": {
+    "claim": "rank association only; no causal performance attribution",
+    "qualification": "The observable is measured on the current tree and compared with outcomes banked on earlier trees. Multiple production mechanisms changed between those trees, so the correlations rank the fixed corpus but do not attribute outcome changes to this diagnostic."
+  },
+  "source_identity": {
+    "commit": "0b9ab88a0974341b656668a70863855e1a091cc3",
+    "tree": "2accd2b19967d8c0aaca0df667569004e0210d78"
+  },
+  "authority_inputs": {
+    "docs/figures/mast-catalog-gpu-solve/parity-divergence-attribution.json": {
+      "sha256": "2c2c856375b53f0d4bfdce81133dbcef39b314acad6c3a59f2b1b52849cca7f7"
+    },
+    "docs/figures/efit-forward-parity/warm-neighbour-stall-lift.json": {
+      "sha256": "c26665234861a467496a01f8254841ab202e7aca3d789c0e5e07c6c0c0982120"
+    },
+    "docs/figures/forward-operator-refinement/event-resolved-amplification.json": {
+      "sha256": "bf26f40c41712de34e6b17c18a128172f68ac9929072266c3d0fac4393228e49"
+    }
+  }
+}

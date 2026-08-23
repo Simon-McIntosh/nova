@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 410" role="img" aria-label="Six-window deterministic truth trajectory">
+<style>:root{color-scheme:light dark}text{font-family:system-ui,sans-serif;font-size:14px;fill:currentColor}.title{font-size:20px;font-weight:650}.axis{stroke:#64748b;stroke-width:1}</style>
+<text x="38" y="34" class="title">Known truth marched through six windows</text>
+<line x1="90" y1="350" x2="570" y2="350" class="axis"/>
+<line x1="90" y1="80" x2="90" y2="350" class="axis"/>
+<polyline points="90.0,308.3 180.0,277.0 270.0,245.7 360.0,214.3 450.0,183.0 540.0,151.7" fill="none" stroke="#2563eb" stroke-width="3"/>
+<polyline points="90.0,306.4 180.0,275.8 270.0,245.3 360.0,214.7 450.0,184.2 540.0,153.6" fill="none" stroke="#d97706" stroke-width="3"/>
+<text x="580" y="165" fill="#2563eb">net current (scaled)</text>
+<text x="580" y="105" fill="#d97706">mean Thomson Te</text>
+<text x="295" y="392">window</text>
+</svg>

@@ -17,11 +17,54 @@
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-modified" content="2026-08-23">
 <meta name="plan-effort-hours" content="1.5">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
 <main class="plan-doc">
 
+<section id="s0">
+  <h2 id="s0h">§0 — The defect, measured</h2>
+  <p>The root <code>conftest.py</code> marks curated heavy modules and node ids
+  <code>slow</code> at collection (<code>_SLOW_FILES</code> / <code>_SLOW_NODEIDS</code> in
+  <code>pytest_collection_modifyitems</code>), and the pyproject default
+  <code>addopts = "-rfEs --doctest-modules -m 'not slow'"</code> deselects them. For the
+  forward-solve suite that combination is total: <code>pytest
+  tests/test_equilibrium_forward_solve.py</code> reports &ldquo;no tests collected (28
+  deselected)&rdquo; and exits 0. The invocation any agent, contributor or CI step reaches
+  for &mdash; the plain per-file run &mdash; reports a false green on a suite of 28 tests.
+  It surfaced only because one parity worker quoted its collected count
+  (efit-forward-parity §12, routed out as the followup this plan absorbs); the repository
+  must not depend on a worker counting.</p>
+  <p>The fast-lane budget is the constraint the fix must respect: the slow marking exists so
+  the default repo-wide lane stays cheap. The defect is not that the suite is marked slow;
+  it is that an <em>explicit per-file invocation</em> &mdash; where the path names the
+  intent &mdash; silently selects nothing and still exits 0.</p>
+</section>
+
+<section id="s1">
+  <h2 id="s1h">§1 — Explicit paths collect, and zero-collected fails loudly</h2>
+  <p>Make the plain per-file invocation select its tests: when the user names test paths
+  explicitly, the default marker exclusion must not empty the run (either lift the default
+  <code>-m</code> filter for explicitly named files, or an equivalent documented mechanism
+  &mdash; the repo-wide default lane keeps excluding <code>slow</code> either way). Add the
+  guard: a run that collects zero tests exits non-zero, repo-wide, so this defect class
+  cannot recur silently anywhere.</p>
+  <p><strong>Done when:</strong> <code>pytest tests/test_equilibrium_forward_solve.py</code>
+  collects and runs its 28 tests with the count quoted in the receipt; the repo-wide default
+  lane's collected count is quoted before and after and the fast lane's exclusion behaviour
+  is unchanged; and a zero-collected run demonstrably exits non-zero on the exact case that
+  previously exited 0, with both exit codes quoted.</p>
+</section>
+
+<section id="s2">
+  <h2 id="s2h">§2 — State the policy once</h2>
+  <p>Write the marker policy into the repository test guidance (the testing section of
+  <code>AGENTS.md</code>): what <code>slow</code> means, what the default lane runs, what an
+  explicit path selects, and the zero-collected guard &mdash; stated once, where both agents
+  and contributors already look.</p>
+  <p><strong>Done when:</strong> the policy paragraph exists in the test guidance, matches
+  the implemented behaviour exactly, and the plan's evidence record links the commit.</p>
+</section>
 
 </main>
 </body>

@@ -1,0 +1,100 @@
+E501 Line too long (93 > 88)
+   --> scripts/ensemble_twin_truth/generate.py:401:89
+    |
+399 |                 '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 410" '
+400 |                 'role="img" aria-label="Six-window deterministic truth trajectory">',
+401 |                 "<style>:root{color-scheme:light dark}text{font-family:system-ui,sans-serif;"
+    |                                                                                         ^^^^^
+402 |                 "font-size:14px;fill:currentColor}.title{font-size:20px;font-weight:650}"
+403 |                 ".axis{stroke:#64748b;stroke-width:1}</style>",
+    |
+
+E501 Line too long (99 > 88)
+   --> scripts/ensemble_twin_truth/generate.py:404:89
+    |
+402 |                 "font-size:14px;fill:currentColor}.title{font-size:20px;font-weight:650}"
+403 |                 ".axis{stroke:#64748b;stroke-width:1}</style>",
+404 |                 '<text x="38" y="34" class="title">Known truth marched through six windows</text>',
+    |                                                                                         ^^^^^^^^^^^
+405 |                 '<line x1="90" y1="350" x2="570" y2="350" class="axis"/>',
+406 |                 '<line x1="90" y1="80" x2="90" y2="350" class="axis"/>',
+    |
+
+E501 Line too long (89 > 88)
+   --> scripts/ensemble_twin_truth/generate.py:588:89
+    |
+586 |                 "# Deterministic twin-truth package",
+587 |                 "",
+588 |                 "The package contains six marched windows for one known truth and three "
+    |                                                                                         ^
+589 |                 "member-preserving counterfactuals. `trajectory.tsv` carries prescribed "
+590 |                 "flux-function/drive scales and convergence/conservation receipts; "
+    |
+
+E501 Line too long (89 > 88)
+   --> scripts/ensemble_twin_truth/generate.py:589:89
+    |
+587 |                 "",
+588 |                 "The package contains six marched windows for one known truth and three "
+589 |                 "member-preserving counterfactuals. `trajectory.tsv` carries prescribed "
+    |                                                                                         ^
+590 |                 "flux-function/drive scales and convergence/conservation receipts; "
+591 |                 "`observations.tsv` carries Thomson, net-current, COCOS, unit, support and "
+    |
+
+E501 Line too long (92 > 88)
+   --> scripts/ensemble_twin_truth/generate.py:591:89
+    |
+589 |                 "member-preserving counterfactuals. `trajectory.tsv` carries prescribed "
+590 |                 "flux-function/drive scales and convergence/conservation receipts; "
+591 |                 "`observations.tsv` carries Thomson, net-current, COCOS, unit, support and "
+    |                                                                                         ^^^^
+592 |                 "error receipts per row; `coupling_states.jsonl` is the exact versioned "
+593 |                 "window-boundary handoff.",
+    |
+
+E501 Line too long (89 > 88)
+   --> scripts/ensemble_twin_truth/generate.py:592:89
+    |
+590 |                 "flux-function/drive scales and convergence/conservation receipts; "
+591 |                 "`observations.tsv` carries Thomson, net-current, COCOS, unit, support and "
+592 |                 "error receipts per row; `coupling_states.jsonl` is the exact versioned "
+    |                                                                                         ^
+593 |                 "window-boundary handoff.",
+594 |                 "",
+    |
+
+E501 Line too long (90 > 88)
+   --> scripts/ensemble_twin_truth/generate.py:595:89
+    |
+593 |                 "window-boundary handoff.",
+594 |                 "",
+595 |                 "Ambix should group by `member_id`, order by `window_index`, reconstruct "
+    |                                                                                         ^^
+596 |                 "each boundary with `CouplingState.from_dict`, and admit only rows whose "
+597 |                 "window receipt converged. The `truth` observation rows are deterministic "
+    |
+
+E501 Line too long (90 > 88)
+   --> scripts/ensemble_twin_truth/generate.py:596:89
+    |
+594 |                 "",
+595 |                 "Ambix should group by `member_id`, order by `window_index`, reconstruct "
+596 |                 "each boundary with `CouplingState.from_dict`, and admit only rows whose "
+    |                                                                                         ^^
+597 |                 "window receipt converged. The `truth` observation rows are deterministic "
+598 |                 "measurements; the other member rows are counterfactual predictions.",
+    |
+
+E501 Line too long (91 > 88)
+   --> scripts/ensemble_twin_truth/generate.py:597:89
+    |
+595 |                 "Ambix should group by `member_id`, order by `window_index`, reconstruct "
+596 |                 "each boundary with `CouplingState.from_dict`, and admit only rows whose "
+597 |                 "window receipt converged. The `truth` observation rows are deterministic "
+    |                                                                                         ^^^
+598 |                 "measurements; the other member rows are counterfactual predictions.",
+599 |                 "",
+    |
+
+Found 9 errors.

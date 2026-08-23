@@ -19,11 +19,69 @@
 <meta name="plan-effort-hours" content="6.0">
 <meta name="plan-depends-on" content="scoring-criteria-derivation">
 <meta name="plan-informs" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="3">
 </head>
 <body>
 <main class="plan-doc">
 
+<section id="s0">
+  <h2 id="s0h">§0 — The owner directive and the measured asymmetry</h2>
+  <p>The owner directed (2026-08-23) that plasma-cell-resolution refinement and operator
+  scaling be sequenced in the solver lane and landed, with the DIII-D forward-gate
+  re-evaluation held behind it. The numbers the parity campaign measured and this plan
+  carries: nova resolves the plasma interior with <strong>248 cells</strong> against the
+  reference's <strong>~2,141</strong> over the same region &mdash; 8.6&times; coarser where
+  the physics is &mdash; and matching it costs <strong>0.44 GB</strong> of coupling against
+  a single-device dense ceiling near N=76,600, so the resolution half is nearly free and
+  lands first. The cost asymmetry that decides the two axes against each other: mesh
+  refinement is <strong>quadratic</strong> in interaction-matrix build compute, about
+  8.8 CPU-hours per nine-block build at reference-native resolution against roughly
+  2.4 minutes on device, while raising operator <strong>order</strong> changes no mesh,
+  leaves the interaction matrices identical and rebuilds nothing.</p>
+  <p>Two carried cautions gate the reading. The observed mesh orders span 0.97&ndash;3.39 in
+  two strata, so any order claim is per-stratum. And the imposed-boundary diagnostic showed
+  refinement improving the bulk while worsening the extreme by a factor 31.8 &mdash; a
+  refinement verdict quoted only in the bulk norm would repeat that mistake. Every verdict
+  in this plan is judged against a criterion from
+  <code>scoring-criteria-derivation</code> (declared prerequisite), never against the
+  inherited 1e-8 bound.</p>
+</section>
+
+<section id="s1">
+  <h2 id="s1h">§1 — Raise the default interior resolution to reference-native</h2>
+  <p>Fix the default that sits 8.6&times; coarser than the reference it is scored against:
+  raise the default interior resolution to at least the reference-native equivalent
+  (~2,141 cells over the same region), measure the coupling memory and the interaction-matrix
+  build cost at the new default on CPU and on device, and hold the forward suites green at
+  the new default.</p>
+  <p><strong>Done when:</strong> the new default is in place with the measured coupling (GB)
+  and build cost (CPU wall and device wall) stated in the receipt, the forward suites pass
+  at the new default with counts quoted, and the residual/geometry rows re-measured at the
+  new default are banked beside the 248-cell baselines.</p>
+</section>
+
+<section id="s2">
+  <h2 id="s2h">§2 — Raise the operator order on a stated scheme</h2>
+  <p>Raise the operator order on a stated discretisation scheme, re-measure the observed
+  order on the same ladder that produced 0.97&ndash;3.39, report the two order strata
+  separately, and demonstrate build-compute independence from the mesh: the interaction
+  matrices are byte-identical before and after the order change, and the build time does
+  not move with the order.</p>
+  <p><strong>Done when:</strong> the scheme is named in the receipt, the re-measured
+  per-stratum orders are banked beside the carried ones, and the matrix-identity plus
+  build-time-invariance demonstration is quoted.</p>
+</section>
+
+<section id="s3">
+  <h2 id="s3h">§3 — The adjudication: does order move what mesh moved</h2>
+  <p>State whether raising operator order moves the convergence floors that mesh refinement
+  moved &mdash; on the derived criterion, per stratum, in both the bulk and the extreme norm
+  (the 31.8&times; caution). The deliverable is a decision-grade statement for the solver
+  lane: refine, raise order, or both, each with its measured cost.</p>
+  <p><strong>Done when:</strong> the order-versus-mesh table (floor moved, criterion verdict,
+  build cost, memory) is banked with a one-paragraph ruling, and the DIII-D forward-gate
+  re-evaluation owner is notified that its prerequisite evidence exists. That re-run is <code>benchmarks/diiid_forward_gs_match.py</code> unchanged except applying its registered 1e-05 bound (the hard-coded 1e-6 is a pinned defect recorded on diiid-forward-onboarding); a pass ships that onboarding plan and unblocks diiid-pulse-replay.</p>
+</section>
 
 </main>
 </body>

@@ -1,0 +1,473 @@
+{
+  "schema": "nova-event-resolved-amplification/1.0",
+  "status": "banked",
+  "completed_utc": "2026-08-23T16:56:02.049603+00:00",
+  "source_identity": {
+    "commit": "2625ab8051b369bc40f717648b447ab15c66e28a",
+    "tree": "576bde5d0236d1273ab8c4567a7b77710f497fb6",
+    "worktree_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s-20260823-s13-criteria/event-resolved-amplification"
+  },
+  "configuration": {
+    "shot": 21985,
+    "slice_index": 51,
+    "time_s": 0.2750000059604645,
+    "target_current_a": 934383.875,
+    "nonlinear_updates": 12,
+    "gmres_iterations": 12,
+    "warmup": 0,
+    "krylov_projection_dimension": 12,
+    "backend": "cpu",
+    "device": "cpu",
+    "precision": "float64"
+  },
+  "method": {
+    "operator": "At every eager production prefix state, Arnoldi projects the exact JAX tangent of that state's coupled flux map onto the same twelve-vector residual Krylov space used by GMRES.",
+    "operator_norm": "largest singular value of the projected coupled-map Jacobian V^T J_i V at each real trajectory state",
+    "krylov_condition": "singular-value condition number of the rectangular Arnoldi projection of I-J_i",
+    "active_mode": "right singular direction of the smallest projected I-J_i singular value, lifted into the state space",
+    "explicit_exclusion": "No terminal Jacobian power J_terminal^k is formed or used."
+  },
+  "authority_inputs": {
+    "docs/figures/mast-catalog-gpu-solve/parity-divergence-attribution.json": {
+      "sha256": "2c2c856375b53f0d4bfdce81133dbcef39b314acad6c3a59f2b1b52849cca7f7"
+    },
+    "docs/figures/efit-forward-parity/warm-neighbour-stall-lift.json": {
+      "sha256": "c26665234861a467496a01f8254841ab202e7aca3d789c0e5e07c6c0c0982120"
+    },
+    "docs/figures/forward-operator-refinement/coupled-map-mode-identification.json": {
+      "sha256": "b62bee532afe4ae2f33e81b6feccdcf8ec1d2b9a3262067fc5d0e2317a52b96a"
+    },
+    "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json": {
+      "sha256": "2e6bf51cb3134bce2c9da3c5a55a23a32df3d3544d3d17143ca969e1e00af6b1"
+    }
+  },
+  "trajectory": {
+    "banked_twelve_update_trajectory_reproduced": true,
+    "initial_separation": 2.1649348980190553e-15,
+    "terminal_separation": 1.1646900802908533e-05,
+    "cumulative_separation_growth": 5379792627.282051,
+    "product_of_per_iteration_operator_norms": 231.11749284507684,
+    "iterations": [
+      {
+        "nonlinear_update": 1,
+        "maximum_absolute_separation": 2.1649348980190553e-15,
+        "growth_from_preceding_update": null,
+        "eager_residual": 0.08780941113608023,
+        "compiled_residual": 0.08780941113608011,
+        "projected_coupled_map_operator_norm": 1.4568266329422832,
+        "projected_krylov_action_condition_number": 44.38341278719966,
+        "projected_krylov_action_largest_singular_value": 1.5179504568543614,
+        "projected_krylov_action_smallest_singular_value": 0.034200850307125184,
+        "incoming_separation_active_mode_overlap": 0.03373865894706104,
+        "residual_active_mode_overlap": 0.01109025145643504,
+        "nonlinear_residual_l2": 1.060501660974481,
+        "arnoldi_dimension": 12,
+        "cumulative_product_of_trajectory_operator_norms": 1.4568266329422832,
+        "burst": false
+      },
+      {
+        "nonlinear_update": 2,
+        "maximum_absolute_separation": 6.106226635438361e-15,
+        "growth_from_preceding_update": 2.8205128205128207,
+        "eager_residual": 0.22733121951914198,
+        "compiled_residual": 0.22733121951914118,
+        "projected_coupled_map_operator_norm": 1.9619112135885182,
+        "projected_krylov_action_condition_number": 39.132598994634435,
+        "projected_krylov_action_largest_singular_value": 1.9681708693767912,
+        "projected_krylov_action_smallest_singular_value": 0.05029491830191631,
+        "incoming_separation_active_mode_overlap": 0.167942563981282,
+        "residual_active_mode_overlap": 0.6724998936413636,
+        "nonlinear_residual_l2": 0.6053425068105979,
+        "arnoldi_dimension": 12,
+        "cumulative_product_of_trajectory_operator_norms": 2.8581645074238695,
+        "burst": false
+      },
+      {
+        "nonlinear_update": 3,
+        "maximum_absolute_separation": 5.309225281635577e-13,
+        "growth_from_preceding_update": 86.94772727272728,
+        "eager_residual": 0.9465124103518818,
+        "compiled_residual": 0.9465124103519879,
+        "projected_coupled_map_operator_norm": 1.2252013528170902,
+        "projected_krylov_action_condition_number": 389.266421869306,
+        "projected_krylov_action_largest_singular_value": 1.532107649390915,
+        "projected_krylov_action_smallest_singular_value": 0.003935884431114152,
+        "incoming_separation_active_mode_overlap": 0.8892252447266272,
+        "residual_active_mode_overlap": 0.19404127770864166,
+        "nonlinear_residual_l2": 2.1849659300510793,
+        "arnoldi_dimension": 12,
+        "cumulative_product_of_trajectory_operator_norms": 3.5018270210695173,
+        "burst": true
+      },
+      {
+        "nonlinear_update": 4,
+        "maximum_absolute_separation": 3.844702334276917e-12,
+        "growth_from_preceding_update": 7.241550565909507,
+        "eager_residual": 0.4101237358350124,
+        "compiled_residual": 0.4101237358364903,
+        "projected_coupled_map_operator_norm": 2.1473118833404703,
+        "projected_krylov_action_condition_number": 24.62580373765589,
+        "projected_krylov_action_largest_singular_value": 2.0415963203677228,
+        "projected_krylov_action_smallest_singular_value": 0.08290475885040334,
+        "incoming_separation_active_mode_overlap": 0.8850341877255744,
+        "residual_active_mode_overlap": 0.10529407149688685,
+        "nonlinear_residual_l2": 18.22284633383848,
+        "arnoldi_dimension": 12,
+        "cumulative_product_of_trajectory_operator_norms": 7.519514775745334,
+        "burst": false
+      },
+      {
+        "nonlinear_update": 5,
+        "maximum_absolute_separation": 2.3652746428126648e-11,
+        "growth_from_preceding_update": 6.152035807103667,
+        "eager_residual": 0.5837041490141831,
+        "compiled_residual": 0.583704149026883,
+        "projected_coupled_map_operator_norm": 1.5143140597991893,
+        "projected_krylov_action_condition_number": 30.937633152389562,
+        "projected_krylov_action_largest_singular_value": 1.563134166838339,
+        "projected_krylov_action_smallest_singular_value": 0.050525331370334825,
+        "incoming_separation_active_mode_overlap": 0.7808064394518905,
+        "residual_active_mode_overlap": 0.6996542264010541,
+        "nonlinear_residual_l2": 4.561128797382588,
+        "arnoldi_dimension": 12,
+        "cumulative_product_of_trajectory_operator_norms": 11.386906947778908,
+        "burst": false
+      },
+      {
+        "nonlinear_update": 6,
+        "maximum_absolute_separation": 5.939565506096756e-11,
+        "growth_from_preceding_update": 2.5111525733999858,
+        "eager_residual": 0.12071204641523818,
+        "compiled_residual": 0.12071204640960818,
+        "projected_coupled_map_operator_norm": 1.7113287845968526,
+        "projected_krylov_action_condition_number": 19.611755971086012,
+        "projected_krylov_action_largest_singular_value": 1.5362543986939365,
+        "projected_krylov_action_smallest_singular_value": 0.07833334256039418,
+        "incoming_separation_active_mode_overlap": 0.7670148049038809,
+        "residual_active_mode_overlap": 0.33109191418631384,
+        "nonlinear_residual_l2": 4.551679635290784,
+        "arnoldi_dimension": 12,
+        "cumulative_product_of_trajectory_operator_norms": 19.486741627259935,
+        "burst": false
+      },
+      {
+        "nonlinear_update": 7,
+        "maximum_absolute_separation": 3.222788147461131e-10,
+        "growth_from_preceding_update": 5.42596616562786,
+        "eager_residual": 0.6808889901628379,
+        "compiled_residual": 0.6808889901250331,
+        "projected_coupled_map_operator_norm": 1.1363488846104441,
+        "projected_krylov_action_condition_number": 127.92341631391729,
+        "projected_krylov_action_largest_singular_value": 1.352225591408012,
+        "projected_krylov_action_smallest_singular_value": 0.010570586921238266,
+        "incoming_separation_active_mode_overlap": 0.01124633485982026,
+        "residual_active_mode_overlap": 0.04714046895288731,
+        "nonlinear_residual_l2": 1.2818623912050522,
+        "arnoldi_dimension": 12,
+        "cumulative_product_of_trajectory_operator_norms": 22.143737112828738,
+        "burst": false
+      },
+      {
+        "nonlinear_update": 8,
+        "maximum_absolute_separation": 1.3114724861651439e-08,
+        "growth_from_preceding_update": 40.69372314150728,
+        "eager_residual": 1.2761444021505142,
+        "compiled_residual": 1.276144395481363,
+        "projected_coupled_map_operator_norm": 1.58599433322543,
+        "projected_krylov_action_condition_number": 44.91561113877085,
+        "projected_krylov_action_largest_singular_value": 1.6237099194701068,
+        "projected_krylov_action_smallest_singular_value": 0.036150235481679366,
+        "incoming_separation_active_mode_overlap": 0.5761697374933232,
+        "residual_active_mode_overlap": 0.23844134545705514,
+        "nonlinear_residual_l2": 9.87675788355805,
+        "arnoldi_dimension": 12,
+        "cumulative_product_of_trajectory_operator_norms": 35.11984157738002,
+        "burst": true
+      },
+      {
+        "nonlinear_update": 9,
+        "maximum_absolute_separation": 1.0630589408755498e-08,
+        "growth_from_preceding_update": 0.8105842494523264,
+        "eager_residual": 0.5933967168992745,
+        "compiled_residual": 0.5933967226855847,
+        "projected_coupled_map_operator_norm": 1.2076152626892485,
+        "projected_krylov_action_condition_number": 11.255224887510936,
+        "projected_krylov_action_largest_singular_value": 1.2431890283472633,
+        "projected_krylov_action_smallest_singular_value": 0.11045439258408202,
+        "incoming_separation_active_mode_overlap": 0.41788490572022197,
+        "residual_active_mode_overlap": 0.4247462919570638,
+        "nonlinear_residual_l2": 17.69946350621211,
+        "arnoldi_dimension": 12,
+        "cumulative_product_of_trajectory_operator_norms": 42.411256712072564,
+        "burst": false
+      },
+      {
+        "nonlinear_update": 10,
+        "maximum_absolute_separation": 3.1101399233790517e-08,
+        "growth_from_preceding_update": 2.925651442071028,
+        "eager_residual": 0.1686936429865421,
+        "compiled_residual": 0.1686936524830972,
+        "projected_coupled_map_operator_norm": 1.6452998696884322,
+        "projected_krylov_action_condition_number": 15.122550509213841,
+        "projected_krylov_action_largest_singular_value": 1.6192778278963174,
+        "projected_krylov_action_smallest_singular_value": 0.10707703220496613,
+        "incoming_separation_active_mode_overlap": 0.4249633544610239,
+        "residual_active_mode_overlap": 0.007019120004660988,
+        "nonlinear_residual_l2": 5.541075439445047,
+        "arnoldi_dimension": 12,
+        "cumulative_product_of_trajectory_operator_norms": 69.77923514169564,
+        "burst": false
+      },
+      {
+        "nonlinear_update": 11,
+        "maximum_absolute_separation": 8.079549429496069e-08,
+        "growth_from_preceding_update": 2.597808982406791,
+        "eager_residual": 0.8774577753160563,
+        "compiled_residual": 0.8774578214248157,
+        "projected_coupled_map_operator_norm": 1.9091591571129245,
+        "projected_krylov_action_condition_number": 122.25495492809306,
+        "projected_krylov_action_largest_singular_value": 1.795574731350374,
+        "projected_krylov_action_smallest_singular_value": 0.014687132578033184,
+        "incoming_separation_active_mode_overlap": 0.8627412589142595,
+        "residual_active_mode_overlap": 0.5496491372217504,
+        "nonlinear_residual_l2": 2.5440100006838606,
+        "arnoldi_dimension": 12,
+        "cumulative_product_of_trajectory_operator_norms": 133.21966574710422,
+        "burst": false
+      },
+      {
+        "nonlinear_update": 12,
+        "maximum_absolute_separation": 1.1646900802908533e-05,
+        "growth_from_preceding_update": 144.15285041006257,
+        "eager_residual": 2.7616745556310622,
+        "compiled_residual": 2.761680786093926,
+        "projected_coupled_map_operator_norm": 1.7348601766034728,
+        "projected_krylov_action_condition_number": 292.5439822400516,
+        "projected_krylov_action_largest_singular_value": 1.5648867088786773,
+        "projected_krylov_action_smallest_singular_value": 0.0053492356837974014,
+        "incoming_separation_active_mode_overlap": 0.039174706302093465,
+        "residual_active_mode_overlap": 0.026224159745859604,
+        "nonlinear_residual_l2": 8.288128312452349,
+        "arnoldi_dimension": 12,
+        "cumulative_product_of_trajectory_operator_norms": 231.11749284507684,
+        "burst": true
+      }
+    ]
+  },
+  "event_discrimination": {
+    "mechanism": "KRYLOV_CONDITIONED_NON_NORMAL_EVENT",
+    "discriminator": "Burst updates carry both a larger projected (I-J) condition and a positive rank correlation between condition and separation growth.",
+    "burst_growth_floor": 10.0,
+    "burst_updates": [
+      3,
+      8,
+      12
+    ],
+    "quiet_updates": [
+      2,
+      4,
+      5,
+      6,
+      7,
+      9,
+      10,
+      11
+    ],
+    "spearman_log_growth_vs_log_krylov_condition": 0.6636363636363638,
+    "spearman_log_growth_vs_active_mode_overlap": 0.1272727272727273,
+    "burst_median_krylov_condition": 292.5439822400516,
+    "quiet_median_krylov_condition": 27.781718445022726,
+    "burst_to_quiet_condition_ratio": 10.530089519803004,
+    "burst_median_active_mode_overlap": 0.5761697374933232,
+    "quiet_median_active_mode_overlap": 0.5959890796824524,
+    "burst_to_quiet_overlap_ratio": 0.9667454608401733
+  },
+  "predictions": {
+    "different_seed_direction": {
+      "prediction": "a different seed direction moves bursts to other updates",
+      "construction": "same 21985/51 profile and target current; moment seed uses the real LCFS at row 49",
+      "seed_direction_l2": 0.7665327844967637,
+      "seed_direction_peak": 0.09379891335597912,
+      "baseline_burst_updates": [
+        3,
+        8,
+        12
+      ],
+      "alternate_burst_updates": [],
+      "bursts_moved": true,
+      "supported": true,
+      "baseline_cumulative_separation_growth": 5379792627.282051,
+      "alternate_cumulative_separation_growth": 0.061860940695296525,
+      "alternate_trajectory": [
+        {
+          "nonlinear_update": 1,
+          "maximum_absolute_separation": 2.7144952952085077e-14,
+          "growth_from_preceding_update": null,
+          "eager_residual": 0.04787646835741759,
+          "compiled_residual": 0.047876468357412445
+        },
+        {
+          "nonlinear_update": 2,
+          "maximum_absolute_separation": 3.214095656289828e-14,
+          "growth_from_preceding_update": 1.1840490797546013,
+          "eager_residual": 0.00764268841792785,
+          "compiled_residual": 0.007642688417924408
+        },
+        {
+          "nonlinear_update": 3,
+          "maximum_absolute_separation": 5.648259637780484e-15,
+          "growth_from_preceding_update": 0.17573402417962003,
+          "eager_residual": 0.0008135091184837947,
+          "compiled_residual": 0.0008135091184834766
+        },
+        {
+          "nonlinear_update": 4,
+          "maximum_absolute_separation": 7.66053886991358e-15,
+          "growth_from_preceding_update": 1.3562653562653562,
+          "eager_residual": 0.00019636261668961932,
+          "compiled_residual": 0.0001963626166902875
+        },
+        {
+          "nonlinear_update": 5,
+          "maximum_absolute_separation": 6.661338147750939e-16,
+          "growth_from_preceding_update": 0.08695652173913043,
+          "eager_residual": 1.0154285073963382e-06,
+          "compiled_residual": 1.0154285073127714e-06
+        },
+        {
+          "nonlinear_update": 6,
+          "maximum_absolute_separation": 1.1102230246251565e-15,
+          "growth_from_preceding_update": 1.6666666666666667,
+          "eager_residual": 1.2839720918942216e-07,
+          "compiled_residual": 1.2839720943176633e-07
+        },
+        {
+          "nonlinear_update": 7,
+          "maximum_absolute_separation": 1.2628786905111156e-15,
+          "growth_from_preceding_update": 1.1375,
+          "eager_residual": 1.6270705493534433e-08,
+          "compiled_residual": 1.6270705602171438e-08
+        },
+        {
+          "nonlinear_update": 8,
+          "maximum_absolute_separation": 1.9567680809018384e-15,
+          "growth_from_preceding_update": 1.5494505494505495,
+          "eager_residual": 2.062416075069304e-09,
+          "compiled_residual": 2.0624159330055288e-09
+        },
+        {
+          "nonlinear_update": 9,
+          "maximum_absolute_separation": 1.1102230246251565e-15,
+          "growth_from_preceding_update": 0.5673758865248227,
+          "eager_residual": 2.6143349610453867e-10,
+          "compiled_residual": 2.614333122573011e-10
+        },
+        {
+          "nonlinear_update": 10,
+          "maximum_absolute_separation": 1.0824674490095276e-15,
+          "growth_from_preceding_update": 0.975,
+          "eager_residual": 3.313962613971308e-11,
+          "compiled_residual": 3.3139759846794905e-11
+        },
+        {
+          "nonlinear_update": 11,
+          "maximum_absolute_separation": 6.661338147750939e-16,
+          "growth_from_preceding_update": 0.6153846153846154,
+          "eager_residual": 4.200725529447662e-12,
+          "compiled_residual": 4.200884306607314e-12
+        },
+        {
+          "nonlinear_update": 12,
+          "maximum_absolute_separation": 1.6792123247455493e-15,
+          "growth_from_preceding_update": 2.5208333333333335,
+          "eager_residual": 5.325051666988892e-13,
+          "compiled_residual": 5.324048863875307e-13
+        }
+      ]
+    },
+    "warm_ladder_directionality": {
+      "prediction": "warm-improved frames have smaller cumulative representation-separation growth than warm-worsened frames",
+      "metric": "banked terminal eager/compiled separation divided by the banked one-map separation on the same frame",
+      "frames": [
+        {
+          "shot": 21978,
+          "slice_index": 35,
+          "warm_residual_over_cold": 0.7349943760736136,
+          "warm_improved": true,
+          "banked_one_map_to_terminal_separation_growth": 2156276.0
+        },
+        {
+          "shot": 21983,
+          "slice_index": 35,
+          "warm_residual_over_cold": 0.08179374397768024,
+          "warm_improved": true,
+          "banked_one_map_to_terminal_separation_growth": 575064.125
+        },
+        {
+          "shot": 21985,
+          "slice_index": 51,
+          "warm_residual_over_cold": 0.5314003945612997,
+          "warm_improved": true,
+          "banked_one_map_to_terminal_separation_growth": 52452978116.0
+        },
+        {
+          "shot": 21986,
+          "slice_index": 46,
+          "warm_residual_over_cold": 1.775851751145165,
+          "warm_improved": false,
+          "banked_one_map_to_terminal_separation_growth": 564602919.75
+        },
+        {
+          "shot": 21989,
+          "slice_index": 55,
+          "warm_residual_over_cold": 7.637762138021794,
+          "warm_improved": false,
+          "banked_one_map_to_terminal_separation_growth": 22921153.0
+        }
+      ],
+      "improved_count": 3,
+      "worsened_count": 2,
+      "improved_group_median_growth": 2156276.0,
+      "worsened_group_median_growth": 293762036.375,
+      "worsened_over_improved_median": 136.23582341731765,
+      "supported_by_group_median": true,
+      "qualification": "The group median tests the banked prediction; individual ordering is mixed and the improved 21985/51 frame remains the largest-growth outlier."
+    }
+  },
+  "failing_quantity_localisation": {
+    "landed_elongated_mode_localisation": {
+      "direct_sample_state_fraction": 0.6992444864211376,
+      "normalisation_content_fraction": 0.8466837268961472,
+      "axis_translation_content_fraction": 0.1872631923618223,
+      "boundary_state_fraction": 0.009216220924275813,
+      "axis_displacement_direction_r_z": [
+        -0.9267592686242452,
+        -0.37565577064522
+      ]
+    },
+    "prediction_rule": "A grid/direct-sample dominated continuous mode first changes state, domain, topology and trace leaves, then their integrated ledgers and derived conservation/normalisation leaves, while categorical policy and structural leaves remain exact.",
+    "predicted_failing_counts": {
+      "state_domain_topology_and_solver_trace": 14,
+      "integrated_moments_and_current_ledger": 9,
+      "conservation_and_source_normalisation": 8
+    },
+    "observed_failing_counts": {
+      "state_domain_topology_and_solver_trace": 14,
+      "integrated_moments_and_current_ledger": 9,
+      "conservation_and_source_normalisation": 8
+    },
+    "exact_14_9_8_match": true,
+    "predicted_exact_categorical_count": 35,
+    "observed_exact_categorical_count": 35,
+    "exact_categorical_match": true
+  },
+  "verdict": {
+    "mechanism": "KRYLOV_CONDITIONED_NON_NORMAL_EVENT",
+    "discriminating_measurement": "Burst updates carry both a larger projected (I-J) condition and a positive rank correlation between condition and separation growth.",
+    "against_frozen_non_normal_reading": "The real-path norm product is 231.117; burst updates are [3, 8, 12] and their median projected Krylov condition is 292.544 versus 27.7817 off-burst. This event-resolved evidence replaces, rather than raises to a power, the frozen terminal spectral-radius comparator."
+  },
+  "registered_gate_context": {
+    "failing_quantity_count": 31,
+    "production_or_test_source_changed": false
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T23:32:44",
+  "updated": "2026-08-24T01:26:41",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -716,7 +716,7 @@
       {
         "id": "S15",
         "status": "planned",
-        "theme": "Catalog throughput",
+        "theme": "Reach the root, then run the catalog",
         "items": [
           {
             "slug": "mast-catalog-gpu-solve",
@@ -727,9 +727,24 @@
               "class": "orchestrator",
               "requirements": {}
             }
+          },
+          {
+            "slug": "branch-root-existence",
+            "why_now": "Three stepping mechanisms have now been measured on this lane and all three moved residual by noise or made it worse, two of them built well and refuted cleanly - which is the evidence that the missing thing is not another stepping rule. Meanwhile one frame solved to 2.9e-16 while five plateau near 0.1 with topology held, so the solver is not incapable of converging on this map. The untested assumption underneath every mechanism so far is that a root exists below the plateau, and it is cheaper to test than another mechanism is to build.",
+            "done_when": "Each of the five score-blind frames carries ROOT_EXISTS_BELOW_PLATEAU with the exhibited admissible state's residual quoted against that frame's banked plateau, or PLATEAU_IS_THE_CONSTRAINED_MINIMUM with the sampled neighbourhood, its stated extent, and the lowest admissible residual found in it; and the frames that converge are separated from the frames that plateau by at least one measured property with its effect size, or the receipt names the candidate properties tested, found not to separate them, and the sample count each test had.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "context": "extended",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
           }
         ],
-        "description": "Open the campaign-scale GPU catalog once the forward solve reaches its root on the topology-preserving branch. Relocated out of the S8 slot, which scheduled it before the convergence prerequisite it is blocked on."
+        "description": "The convergence sprint closed both its hypotheses as honest negatives: neither a longer step along the topology-preserving manifold nor a seed-alignment selector moves the residual, and admitted steps were already full Newton steps. What remains is a question no stepping mechanism answers - whether a diverted-class root exists below the measured plateau at all. Answer that first; the GPU catalog runs behind it and is relocated here out of a sprint slot that scheduled it ahead of its own prerequisite."
       }
     ],
     "active_sprint_id": "S14",
@@ -890,6 +905,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 66
+    "_version": 67
   }
 }

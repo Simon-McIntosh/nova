@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T17:14:15",
+  "updated": "2026-08-23T17:19:03",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -26988,9 +26988,114 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T141442377666-finite-difference-residual-action",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a75",
+        "node": "finite-difference-residual-action",
+        "role": "implement",
+        "spec_level": "",
+        "member": "krylov-guard",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T14:14:45Z",
+        "completed_at": "2026-08-23T14:26:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 694,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 694,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "931efcb75ac82fa944b11d81b7165f6c8f7e2924",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "not-run",
+        "outcome": "Blocked then deferred by owner decision, and the block is itself the finding: jax.scipy.sparse.linalg.gmres wraps its operator in lax.custom_linear_solve, which requires an exactly traced transposable linear map and rejects a direction-normalised central finite-difference residual action during transposition. A direct scale-aware difference and a custom JVP declaring directional linearity failed identically, so a finite-difference arm needs a hand-rolled fixed-shape Arnoldi/GMRES loop that bypasses custom_linear_solve. The gate never ran because no receipt was produced. Superseded within the hour by the exact-tangent repair 06b09f5b, after which the owner amended solver-default-route to make the repaired autodiff arm the default and deferred this arm unbuilt. Partial uncommitted work remains in the worktree and is deliberately not integrated.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T141442377666-finite-difference-residual-action/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02ef9-50be-74b3-8b03-5e8e2cf1d1d3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4262656,
+            "cached_input_tokens_cumulative": 4262656,
+            "input_tokens": 4447139,
+            "input_tokens_cumulative": 4447139,
+            "output_tokens": 24931,
+            "output_tokens_cumulative": 24931,
+            "reasoning_output_tokens": 10404,
+            "reasoning_output_tokens_cumulative": 10404
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T151801271633-amplification-screen",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a75",
+        "node": "amplification-screen",
+        "role": "implement",
+        "spec_level": "",
+        "member": "krylov-guard",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T15:18:04Z",
+        "completed_at": "2026-08-23T15:18:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 55,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 55,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "93b1b4e528bcfcc9008e0b1c1e9459cfd7edbc69",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "not-run",
+        "outcome": "Stopped ~90 s in and re-dispatched with corrected wiring, before any code was written. The contract had specified the condition as a fifth REFUSAL in the qualification precedence; the operator-refinement lane then opened the defect-versus-physics question on the same gain and asked that a refusing screen be held until a vertical-stability control reports. A refusing screen on the physics branch would reject healthy elongated equilibria across the whole catalog, so the node is reshaped to advisory-only observation.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T151801271633-amplification-screen/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02f33-482e-7ff3-8851-fa3016cfac6d",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 640
+    "_version": 642
   }
 }

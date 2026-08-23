@@ -56,6 +56,100 @@
   <em>preregister</em> the observable before scoring all available candidates.</p>
 </section>
 
+<section id="s2-control">
+  <h2 id="s2-control-h">§2 — The admissible-step control, and the regression it found</h2>
+
+  <p><strong>admissible-step-control</strong> landed 2026-08-23 — commit <code>e9ec1ca8</code>,
+  merged <code>2f0d439f</code>, gate PASSED. Verdict
+  <strong><code>CONDITIONING_SHRINKAGE_MASQUERADES_AS_FULL_ADMISSION</code></strong>. Measured on
+  the reserved H200 in 4m56s; receipt
+  <code>docs/figures/topology-preserving-continuation/admissible-step-control.json</code>
+  (SHA-256 <code>2fd7fcb9673e763522b805b100293276026a9c60c809055641016e62770a11df</code>).</p>
+
+  <p><strong>The experiment is paired and it changes only one thing.</strong> Both arms share the
+  source tree <code>bacbbd81</code>, the inputs, seeds, topology predicate, 24-vector Krylov
+  route, six fixed backtracking factors and 89-step budget. <em>Only the condition-ratio limit
+  moves, from <em>e</em> to infinity</em> — so the difference between the arms is step
+  conditioning and nothing else. That is what makes the attribution below legitimate, and it is
+  why the node ran a control at all rather than comparing against banked numbers.</p>
+
+  <table>
+    <caption>Per frame: dimension-general conditioning enabled / same-tree conditioning disabled /
+      banked fixed-ladder comparator</caption>
+    <thead>
+      <tr><th scope="col">Frame</th><th scope="col">Terminal relative residual</th><th scope="col">Admitted advances of 89</th><th scope="col">Largest admitted factor</th><th scope="col">Newton-step-equivalents</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>d3d_shot_00000c4a7b f179</td><td>5.9969660129145375 / 0.10704471039091447 / 0.08926664734937723</td><td>89 / 7 / 7</td><td>1 / 1 / 1</td><td>0.1125996041838135 / 3.21875 / 3.8125</td></tr>
+      <tr><td>d3d_shot_0003ff34e7 f44</td><td>6.345010525309393 / 0.10077482131394641 / 0.10828272347834866</td><td>89 / 6 / 7</td><td>1 / 1 / 1</td><td>0.4048326525248699 / 4.193294139261007 / 4.6875</td></tr>
+      <tr><td>d3d_shot_001554e054 f144</td><td>3.7540271627429744 / 0.1553929757220097 / 0.1520298639826483</td><td>89 / 10 / 10</td><td>1 / 1 / 1</td><td>0.389171758027934 / 3.3634607051038814 / 4.84375</td></tr>
+      <tr><td>d3d_shot_002495e835 f146</td><td>4.27275196119138 / 0.08696912567989223 / 0.09048828769028952</td><td>89 / 4 / 5</td><td>1 / 1 / 1</td><td>0.17651307050110607 / 2.9171534022732244 / 3.03125</td></tr>
+      <tr><td>d3d_shot_0040ca9bdc f137</td><td>4.713585403867379 / 0.12290690751401612 / 0.1255100445922456</td><td>89 / 9 / 9</td><td>1 / 1 / 1</td><td>0.06860155692910576 / 5.190554648311268 / 6.09375</td></tr>
+      <tr><td><strong>cohort total / range</strong></td><td>3.754–6.345 / 0.0870–0.1554 / 0.0893–0.1520</td><td>445/445 admitted at factor 1 / 4–10 / 5–10</td><td>1</td><td><strong>1.1517186421668293 / 18.88321289494938 / 22.46875</strong></td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Why full admission is the symptom rather than the cure.</strong> Enabled, the
+  conditioning fires on every one of the 89 iterations of every frame and every trial is admitted
+  at factor one. Read from the admission counter alone that is a perfect result — 445 of 445 —
+  and it is the opposite. The mechanism shrinks the step <em>before</em> the admissibility
+  predicate sees it, so the predicate is asked about a step small enough to be trivially inside
+  the class. Traversal collapses to 1.15 step-equivalents against 18.88 with the intervention
+  disabled, and terminal residuals worsen by roughly two orders. Topology holds in both arms:
+  5 of 5 diverted with 5 of 5 finite X points, measured and control alike.</p>
+
+  <p><strong>Two corrections to the frontier as this plan stated it.</strong> The 0.03125 cap is
+  the largest fraction admissible on <em>refusal</em> iterations; the largest factor among
+  <em>admitted</em> trials is 1.0 on all five frames, so admitted steps are full Newton steps, not
+  capped ones. And the achieved traversal is 18.88 across the cohort with conditioning disabled,
+  not the 2.8 the plan quoted — 2.8 is 89 × 1/32, a hypothetical for a budget where every
+  iteration admits at the probed cap. The obstacle is therefore the <em>admission rate</em>: 4 to
+  10 of 89 iterations admit anything at all.</p>
+
+  <p><strong>Attribution declined where it must be.</strong> Historical comparison against the
+  banked tree is explicitly refused: banked source <code>5adc9aa1</code> and current source differ
+  in seven production paths — <code>nova/equilibrium/fixed_point.py</code>,
+  <code>forward.py</code>, <code>forward_operator.py</code>,
+  <code>nova/frame/frame.py</code>, <code>nova/imas/fuse.py</code>, <code>transient.py</code> and
+  <code>waveform.py</code> — so more than one candidate mechanism sits in that diff. The banked
+  per-frame figures are retained as <em>selected-factor proxies</em> because the historical receipt
+  did not trace conditioning or cap fractions. Within the current tree, attribution to conditioning
+  <em>is</em> legitimate, because the conditioning commit <code>6cdc60c4</code> changes only
+  <code>nova/equilibrium/fixed_point.py</code> in production and the two arms differ only in its
+  ratio limit.</p>
+</section>
+
+<section id="s2-mechanism">
+  <h2 id="s2-mechanism-h">§2 — The topology-preserving predictor-corrector</h2>
+
+  <p><strong>manifold-advance-mechanism</strong> landed 2026-08-23 — commit <code>5e7265d3</code>,
+  merged <code>31b9914b</code>, gate PASSED, 8 tests added. Artifacts:
+  <code>nova/equilibrium/manifold_advance.py</code> (the fixed-shape secant and normal projector)
+  and the instrumentation in <code>nova/equilibrium/fixed_point.py</code>. 31 focused and adjacent
+  regression tests pass: 8 new, 8 adjacent qualification, 15 fixed-point.</p>
+
+  <p><strong>How it enters production without a second authority.</strong>
+  <code>ForwardProfile._solve_accelerated()</code> already forwards options to
+  <code>newton_krylov</code>, so supplying <code>previous_admitted_state</code> alongside the
+  caller's existing <code>admissibility_fn</code> selects the mechanism — no second topology
+  classifier is introduced. The predictor uses the oriented secant between two admitted states as
+  the state-space arclength tangent; the bordered corrector removes its tangential component. Both
+  predictor and corrector actions pass through <code>_qualified_krylov_step</code>, and a failed
+  status or a zero step at material residual promotes zero advance.</p>
+
+  <p><strong>The contract suite, which is the gate.</strong> Eight tests cover tangent sign
+  orientation, the named <code>DEGENERATE_SECANT</code> refusal, normal projection, fixed shapes,
+  <code>jit</code>/<code>vmap</code> equality, predicate-controlled admission, Krylov refusal,
+  zero-material-step refusal, and the <code>ForwardProfile</code> production seam. Per-nonlinear-update
+  instrumentation now records one qualification, an admissibility bit, and predictor, corrector,
+  advance and Newton lengths, plus cumulative Newton-step-equivalents — the receipt fields the
+  reuse map found had no existing home.</p>
+
+  <p><strong>No numerical attribution.</strong> This node ran no five-frame solve, so the commit is
+  implementation evidence only and claims nothing about convergence or performance. That
+  measurement is a separate node against the control above.</p>
+</section>
+
 <section id="s2-parameter">
   <h2 id="s2-parameter-h">§2 — Continuation coordinate adjudication</h2>
 
@@ -185,6 +279,18 @@
   fires but does not fully tame: growth 541.3333333333334, and the conditioned DIII-D route is
   recorded as materially noisier even tamed. Seven suite modules reproduce every unedited
   baseline at 72 passed.</p>
+
+  <p><strong>Amended 2026-08-23 — the production cost of meeting this requirement, now
+  measured.</strong> This section's requirement was dimension-generality and it is met. The
+  paired control at <a href="#s2-control">§2 control</a> then measured what generality costs on the
+  production DIII-D route, and it is severe: the online rule fires on 89 of 89 iterations of every
+  frame, admits 445 of 445 factor-one advances, collapses effective traversal from 18.88 to
+  <strong>1.15</strong> Newton-step-equivalents, and worsens terminal residuals from the
+  0.087–0.155 range to <strong>3.75–6.35</strong> — roughly two orders. Topology stays formally
+  admissible because the shrinkage happens before the predicate is consulted. The gate verdict
+  above stands as recorded, because the gate measured generality; this amendment records that the
+  mechanism as shipped is a regression on this route and is owed a repair. The 541.33 cumulative
+  growth already noted at dimension 24 was the first sign of it.</p>
 
   <p><strong>Attribution, per the method requirements this plan binds on every comparative
   node.</strong> Because this mechanism fires on the DIII-D route where its predecessor was

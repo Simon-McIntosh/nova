@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T23:28:44",
+  "updated": "2026-08-23T23:57:52",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -425,6 +425,20 @@
         "created": "2026-08-20"
       },
       {
+        "id": "manifold-measure",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
+        "id": "manifold-mechanism",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a0308c-a29d-7aa0-a2b6-c9e63a0e239e",
+        "created": "2026-08-23"
+      },
+      {
         "id": "manifold-scout",
         "harness": "codex",
         "role": "implement",
@@ -456,7 +470,7 @@
         "id": "observable-discriminator",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a03087-0f40-77c0-8205-dba9c338ca42",
         "created": "2026-08-23"
       },
       {
@@ -610,7 +624,7 @@
         "id": "seed-alignment",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a03087-27df-7bc1-bfbe-b897d4523e19",
         "created": "2026-08-23"
       },
       {
@@ -29125,9 +29139,137 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T211829778352-admissible-step-control",
+        "plan": "topology-preserving-continuation",
+        "section": "\u00a72",
+        "node": "admissible-step-control",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "step-control",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T21:18:33Z",
+        "completed_at": "2026-08-23T21:46:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1671,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1671,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "bacbbd81ae98322ecbf2f507257c32b026aac6fd",
+        "commits": [
+          "e9ec1ca86ae4eda2d91ab67ae7b780bb7935ec3e"
+        ],
+        "changed_lines": {
+          "added": 8444,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T211829778352-admissible-step-control/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0307d-4e8b-7f43-b004-7ce422542e13",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9671424,
+            "cached_input_tokens_cumulative": 9671424,
+            "input_tokens": 9866243,
+            "input_tokens_cumulative": 9866243,
+            "output_tokens": 37857,
+            "output_tokens_cumulative": 37857,
+            "reasoning_output_tokens": 13496,
+            "reasoning_output_tokens_cumulative": 13496
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T213513840677-manifold-advance-mechanism",
+        "plan": "topology-preserving-continuation",
+        "section": "\u00a72",
+        "node": "manifold-advance-mechanism",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "manifold-mechanism",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T21:35:17Z",
+        "completed_at": "2026-08-23T21:48:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 819,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 819,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "679173f16fcafaa284eec9081975c38ae9cdfc5c",
+        "commits": [
+          "5e7265d36bb2ebd3ba83def966d2bb1fbfb440ab"
+        ],
+        "changed_lines": {
+          "added": 683,
+          "removed": 1,
+          "files": 3
+        },
+        "tests_added": 8,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T213513840677-manifold-advance-mechanism/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0308c-a29d-7aa0-a2b6-c9e63a0e239e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6064896,
+            "cached_input_tokens_cumulative": 6064896,
+            "input_tokens": 6239424,
+            "input_tokens_cumulative": 6239424,
+            "output_tokens": 29836,
+            "output_tokens_cumulative": 29836,
+            "reasoning_output_tokens": 12480,
+            "reasoning_output_tokens_cumulative": 12480
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 687
+    "_version": 694
   }
 }

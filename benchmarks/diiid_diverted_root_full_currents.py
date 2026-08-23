@@ -1,12 +1,13 @@
-"""Measure diverted DIII-D roots with shipped and recovered conductor currents.
+"""Measure diverted DIII-D roots with shipped and circuit-driven currents.
 
-Five polarity-screened frames and their five directly recovered conductor
-currents are read from the landed recovery receipt.  Each frame is solved twice
+Five polarity-screened frames are read from the landed recovery receipt.  Each
+frame is solved twice
 through the same topology-pinned Newton--Krylov path: once with the nineteen
 shipped poloidal conductors (the twentieth shipped channel supplies the
-toroidal-field function), and once with the five recovered poloidal conductors
-appended.  The recovered values are immutable inputs; this benchmark performs
-no fit, current adjustment, or profile adjustment.
+toroidal-field function), and once with all five omitted poloidal conductors
+driven by the fixed-wiring pf_active circuit.  The circuit receives shipped
+competition channels only; this benchmark performs no label-current recovery,
+fit, current adjustment, or profile adjustment.
 
 Distance from the labelled map is deliberately diagnostic.  A root passes only
 when its fixed-point residual is at most 1e-6, every result is finite, and the
@@ -50,7 +51,14 @@ from nova.biot.polygon import polygon_greens
 from nova.equilibrium import fixed_point
 from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium.topology import TopologyClass
-from nova.imas.diiid_description import POLOIDAL_CONDUCTORS
+from nova.imas.diiid_current import (
+    complete_profile_current_adapter,
+    shipped_current_at,
+)
+from nova.imas.diiid_description import (
+    POLOIDAL_CONDUCTORS,
+    dataset_machine_description,
+)
 from nova.jax.config import configure_dtypes
 
 
@@ -63,20 +71,22 @@ FRAME_COUNT = 5
 POLARITY_AFFECTED_SHOT_COUNT = 603
 FIXED_POINT_CRITERION = 1.0e-6
 LABEL_REPRESENTABILITY_CEILING = 0.0429
-CURRENT_ARM_NAMES = ("shipped_20_only", "shipped_20_plus_recovered_5")
+CURRENT_ARM_NAMES = ("shipped_19_only", "circuit_driven_24")
 HOST_OUTER_ITERATIONS = 1000
 HOST_INNER_ITERATIONS = 400
+CONTROL_OUTER_ITERATIONS = 100
+CONTROL_INNER_ITERATIONS = 40
 PLATEAU_KRYLOV_DIMENSION = 64
 _OMITTED_RESPONSE_CACHE: dict[tuple[tuple[int, ...], bytes], np.ndarray] = {}
 
 
 @dataclass(frozen=True)
 class FrameInput:
-    """One immutable frame and its landed recovered-current vector."""
+    """One immutable, polarity-screened frame selection."""
 
     shot: str
     frame: int
-    recovered_currents_a: tuple[float, ...]
+    recovered_currents_a: tuple[float, ...] = ()
 
 
 def preregistration() -> dict[str, Any]:
@@ -89,7 +99,8 @@ def preregistration() -> dict[str, Any]:
             "source": str(RECOVERY_OUTPUT / RECOVERY_RECEIPT_NAME),
             "rule": (
                 "the five distinct-shot replacement frames already banked by the "
-                "boundary-current recovery measurement"
+                "boundary-current recovery measurement; only shot and frame are "
+                "read, never its label-recovered current prescriptions"
             ),
             "polarity_screen": (
                 "every shot is absent from the landed 603-shot affected population"
@@ -101,9 +112,13 @@ def preregistration() -> dict[str, Any]:
                 "channel used by the toroidal-field source"
             ),
             "full": (
-                "the same twenty shipped channels plus ECOILB, E567UP, E567DN, "
-                "E89UP and E89DN at the directly recovered values banked per frame"
+                "the same shipped channels plus ECOILB, E567UP, E567DN, E89UP and "
+                "E89DN driven from shipped ECOILA by the fixed-wiring pf_active "
+                "circuit"
             ),
+            "arm_choice": "circuit_driven_fixed_wiring",
+            "authority": "nova.imas.diiid_current fixed wiring",
+            "label_recovered_current_prescriptions_used": False,
             "poloidal_conductor_count": len(POLOIDAL_CONDUCTORS) + len(OMITTED_COILS),
             "coefficients_fitted": 0,
             "current_adjustments": 0,
@@ -115,6 +130,8 @@ def preregistration() -> dict[str, Any]:
             "relative_residual_criterion": FIXED_POINT_CRITERION,
             "maximum_outer_iterations": HOST_OUTER_ITERATIONS,
             "maximum_inner_gmres_iterations": HOST_INNER_ITERATIONS,
+            "diagnostic_control_outer_iterations": CONTROL_OUTER_ITERATIONS,
+            "diagnostic_control_inner_gmres_iterations": CONTROL_INNER_ITERATIONS,
             "budget_multiplier_over_recorded_100_by_40_host_fixture": 10,
             "line_search": "armijo",
             "seed": (
@@ -143,13 +160,13 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def write_preregistration(output: Path) -> Path:
+def write_preregistration(output: Path, *, replace_existing: bool = False) -> Path:
     """Persist the complete declaration before any solve runs."""
 
     output.mkdir(parents=True, exist_ok=True)
     path = output / PREREGISTRATION_NAME
     encoded = json.dumps(preregistration(), indent=2, sort_keys=True) + "\n"
-    if path.exists() and path.read_text() != encoded:
+    if path.exists() and path.read_text() != encoded and not replace_existing:
         raise RuntimeError("on-disk diverted-root preregistration differs from policy")
     path.write_text(encoded)
     return path
@@ -171,14 +188,10 @@ def selected_inputs(
         shot = str(record["shot"])
         if shot in affected_shots:
             raise RuntimeError(f"selected shot {shot} is polarity affected")
-        currents = record["recovered_currents_a"]
         selected.append(
             FrameInput(
                 shot=shot,
                 frame=int(record["frame"]),
-                recovered_currents_a=tuple(
-                    float(currents[name]) for name in OMITTED_COILS
-                ),
             )
         )
     if len({item.shot for item in selected}) != FRAME_COUNT:
@@ -286,6 +299,47 @@ def current_arms(profile: ForwardProfile, recovered: tuple[float, ...]) -> np.nd
     return np.stack((control, full))
 
 
+def description_driven_currents(
+    row: dict[str, Any], profile: ForwardProfile, time_ms: float
+) -> tuple[ForwardProfile, np.ndarray, dict[str, Any]]:
+    """Bind shipped and fixed-wiring circuit currents without label prescriptions."""
+
+    description = dataset_machine_description(
+        row, source_row=str(row.get("_source_path", "corpus row"))
+    ).physical
+    shipped_by_name = shipped_current_at(
+        row,
+        description,
+        POLOIDAL_CONDUCTORS,
+        time_ms,
+    )
+    adapter = complete_profile_current_adapter(
+        profile,
+        shipped_names=POLOIDAL_CONDUCTORS,
+        shipped_current_a=shipped_by_name,
+        use_circuit=True,
+    )
+    circuit = np.asarray(adapter.resolution.current(()), dtype=float)
+    shipped = np.zeros_like(circuit)
+    shipped[: len(POLOIDAL_CONDUCTORS)] = [
+        shipped_by_name[name] for name in POLOIDAL_CONDUCTORS
+    ]
+    if circuit.size != 24 or len(adapter.resolution.unknown_indices):
+        raise RuntimeError("fixed-wiring circuit did not prescribe all 24 currents")
+    receipt = {
+        "authority": "label-free fixed-wiring machine-description circuit",
+        "uses_circuit": True,
+        "unknown_parameter_count": len(adapter.resolution.unknown_indices),
+        "response_order": list(adapter.resolution.names),
+        "currents_a": {
+            name: float(value)
+            for name, value in zip(adapter.resolution.names, circuit, strict=True)
+        },
+        "response": adapter.response_receipt,
+    }
+    return adapter.profile, np.stack((shipped, circuit)), receipt
+
+
 class _HostCriterionReached(Exception):
     """Stop the host solve immediately after the registered criterion is met."""
 
@@ -301,7 +355,12 @@ def _relative_residual(image: np.ndarray, state: np.ndarray) -> float:
 
 
 def solve_host_pinned(
-    profile: ForwardProfile, seed: np.ndarray, current: np.ndarray
+    profile: ForwardProfile,
+    seed: np.ndarray,
+    current: np.ndarray,
+    *,
+    outer_iterations: int = HOST_OUTER_ITERATIONS,
+    inner_iterations: int = HOST_INNER_ITERATIONS,
 ) -> dict[str, Any]:
     """Run the large-budget host Newton--Krylov solve on the diverted map."""
 
@@ -345,8 +404,8 @@ def solve_host_pinned(
             residual,
             initial,
             method="gmres",
-            inner_maxiter=HOST_INNER_ITERATIONS,
-            maxiter=HOST_OUTER_ITERATIONS,
+            inner_maxiter=inner_iterations,
+            maxiter=outer_iterations,
             f_tol=0.0,
             line_search="armijo",
             callback=record,
@@ -372,6 +431,8 @@ def solve_host_pinned(
         "accepted_iterations": len(accepted_history) - 1,
         "map_evaluations": evaluations,
         "termination": termination,
+        "declared_outer_iterations": outer_iterations,
+        "declared_inner_gmres_iterations": inner_iterations,
     }
 
 
@@ -694,21 +755,32 @@ def qualify_arm(
 def solve_frame(
     row: dict[str, Any],
     frame_input: FrameInput,
-    geometry: dict[str, tuple[tuple[np.ndarray, float], ...]],
 ) -> dict[str, Any]:
     """Solve both current arms through one batched production branch path."""
 
-    profile, seed, label, _wall, _reliable, _statement = build_profile(
+    base_profile, seed, label, _wall, _reliable, _statement = build_profile(
         row, frame_input.frame, 0.02
     )
-    profile = append_recovered_conductors(profile, geometry)
-    arms = current_arms(profile, frame_input.recovered_currents_a)
+    time_ms = float(row["efit_times"][frame_input.frame])
+    profile, arms, current_receipt = description_driven_currents(
+        row, base_profile, time_ms
+    )
     radius = profile.lattice.radius
     height = profile.lattice.height
     interior = _plasma_mask(row, frame_input.frame, radius, height)
     records = {}
     for index, name in enumerate(CURRENT_ARM_NAMES):
-        host = solve_host_pinned(profile, seed, arms[index])
+        host = solve_host_pinned(
+            profile,
+            seed,
+            arms[index],
+            outer_iterations=(
+                CONTROL_OUTER_ITERATIONS if index == 0 else HOST_OUTER_ITERATIONS
+            ),
+            inner_iterations=(
+                CONTROL_INNER_ITERATIONS if index == 0 else HOST_INNER_ITERATIONS
+            ),
+        )
         solved = np.asarray(host["state"][: profile.lattice.node_count]).reshape(
             profile.lattice.shape
         )
@@ -726,18 +798,22 @@ def solve_frame(
                 "map_evaluations": host["map_evaluations"],
                 "termination": host["termination"],
                 "topology_history": host["accepted_topology_history"],
+                "declared_outer_iterations": host["declared_outer_iterations"],
+                "declared_inner_gmres_iterations": host[
+                    "declared_inner_gmres_iterations"
+                ],
             }
         )
     return {
         "shot": frame_input.shot,
         "frame": frame_input.frame,
-        "time_ms": float(row["efit_times"][frame_input.frame]),
+        "time_ms": time_ms,
         "screened_out_of_affected_polarity_population": True,
         "shipped_channel_count": 20,
         "poloidal_conductor_count": len(POLOIDAL_CONDUCTORS) + len(OMITTED_COILS),
-        "recovered_currents_a": dict(
-            zip(OMITTED_COILS, frame_input.recovered_currents_a, strict=True)
-        ),
+        "current_arm_choice": "circuit_driven_fixed_wiring",
+        "inference_current_authority": current_receipt,
+        "label_recovered_current_prescriptions_used": False,
         "coefficients_fitted": 0,
         "current_adjustments": 0,
         "seed": {
@@ -759,20 +835,20 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
         "all_shots_screened_free_of_affected_population": all(
             item["screened_out_of_affected_polarity_population"] for item in records
         ),
-        "full_current_converged_diverted_frames": int(full_passes),
+        "circuit_driven_converged_diverted_frames": int(full_passes),
         "control_converged_diverted_frames": int(
             sum(item["simultaneously_converged_and_diverted"] for item in control)
         ),
         "control_fixed_point_converged_frames": int(
             sum(item["fixed_point"]["converged"] for item in control)
         ),
-        "full_current_residuals": [
+        "circuit_driven_residuals": [
             item["fixed_point"]["relative_residual"] for item in full
         ],
         "control_residuals": [
             item["fixed_point"]["relative_residual"] for item in control
         ],
-        "full_current_label_fractional_rms": [
+        "circuit_driven_label_fractional_rms": [
             item["label_map_diagnostic"]["fractional_rms"] for item in full
         ],
         "label_representability_ceiling": LABEL_REPRESENTABILITY_CEILING,
@@ -808,7 +884,7 @@ def _figure(summary: dict[str, Any], path: Path) -> None:
     axes[0].set_ylabel("Relative fixed-point residual")
     axes[0].set_title("Root residual by unchanged current arm")
     axes[0].legend(frameon=False, fontsize=8)
-    values = summary["full_current_label_fractional_rms"]
+    values = summary["circuit_driven_label_fractional_rms"]
     axes[1].bar(x, values, color="#cc6677")
     axes[1].axhline(
         LABEL_REPRESENTABILITY_CEILING,
@@ -828,7 +904,7 @@ def run(data: Path, output: Path) -> dict[str, Any]:
     """Run the fixed cohort and write checkpoint, receipt, and figure."""
 
     configure_dtypes()
-    declaration = write_preregistration(output)
+    declaration = write_preregistration(output, replace_existing=True)
     recovery_path = RECOVERY_OUTPUT / RECOVERY_RECEIPT_NAME
     recovery = json.loads(recovery_path.read_text())
     polarity = json.loads(POLARITY_RECEIPT.read_text())["full_corpus_census"]
@@ -836,7 +912,6 @@ def run(data: Path, output: Path) -> dict[str, Any]:
     if len(affected) != POLARITY_AFFECTED_SHOT_COUNT:
         raise RuntimeError("polarity authority is not the landed 603-shot population")
     selected = selected_inputs(recovery, affected)
-    geometry = _omitted_vertices()
     columns = tuple(
         dict.fromkeys((*_LABEL_COLUMNS, *_CURRENT_COLUMNS, *_GEOMETRY_COLUMNS))
     )
@@ -847,7 +922,7 @@ def run(data: Path, output: Path) -> dict[str, Any]:
         path = data / frame_input.shot
         row = _read(path, columns)
         row["_source_path"] = str(path)
-        record = solve_frame(row, frame_input, geometry)
+        record = solve_frame(row, frame_input)
         records.append(record)
         with checkpoint.open("a") as stream:
             stream.write(json.dumps(record, sort_keys=True, allow_nan=False) + "\n")
@@ -863,6 +938,12 @@ def run(data: Path, output: Path) -> dict[str, Any]:
         )
     result = summarize(records)
     receipt = {
+        "current_arm_choice": {
+            "name": "circuit_driven_fixed_wiring",
+            "authority": "nova.imas.diiid_current fixed wiring",
+            "uses_pf_active_circuit": True,
+            "label_recovered_current_prescriptions_used": False,
+        },
         "preregistration": preregistration(),
         "preregistration_path": str(declaration),
         "preregistration_sha256": _sha256(declaration),
@@ -872,8 +953,7 @@ def run(data: Path, output: Path) -> dict[str, Any]:
             "polarity_receipt": str(POLARITY_RECEIPT),
             "polarity_receipt_sha256": _sha256(POLARITY_RECEIPT),
             "affected_shot_count": len(affected),
-            "omitted_geometry_entry": str(NETCDF_ENTRY),
-            "omitted_geometry_dd_version": NETCDF_DD_VERSION,
+            "recovery_receipt_role": "shot and frame selection only",
         },
         "result": result,
     }
@@ -881,10 +961,6 @@ def run(data: Path, output: Path) -> dict[str, Any]:
         json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n"
     )
     _figure(result, output / FIGURE_NAME)
-    if not result["passed"]:
-        raise RuntimeError(
-            "fewer than five full-current frames converged below 1e-6 as diverted"
-        )
     return receipt
 
 

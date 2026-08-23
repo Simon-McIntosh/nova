@@ -11,7 +11,7 @@ import pytest
 
 from benchmarks import diiid_current_pinned_forward as pinned
 from nova.equilibrium.topology import TopologyClass
-from nova.imas.diiid_description import POLOIDAL_CONDUCTORS
+from nova.imas.diiid_description import CIRCUIT_DRIVEN_CONDUCTORS, POLOIDAL_CONDUCTORS
 
 
 def test_declaration_keeps_the_constraint_explicit_and_the_system_square() -> None:
@@ -35,6 +35,12 @@ def test_declaration_keeps_the_constraint_explicit_and_the_system_square() -> No
     assert "excluded" in declaration["selection"]["low_current_control_fixture"]["role"]
     assert declaration["shared_inputs"]["coefficients_fitted"] == 0
     assert declaration["shared_inputs"]["currents_adjusted"] == 0
+    assert declaration["shared_inputs"]["current_authority"] == (
+        "nova.imas.diiid_current fixed wiring"
+    )
+    assert not declaration["shared_inputs"][
+        "label_recovered_current_prescriptions_used"
+    ]
     assert declaration["arms"]["pinned_eliminated"]["unknowns_and_rows"].startswith(
         "N flux unknowns and N flux"
     )
@@ -48,7 +54,7 @@ def test_declaration_keeps_the_constraint_explicit_and_the_system_square() -> No
 def test_description_driven_arm_uses_the_fixed_circuit_without_free_currents(
     monkeypatch,
 ) -> None:
-    names = (*POLOIDAL_CONDUCTORS, *pinned.OMITTED_COILS)
+    names = (*POLOIDAL_CONDUCTORS, *CIRCUIT_DRIVEN_CONDUCTORS)
     values = np.arange(1.0, 25.0)
     captured = {}
 
@@ -153,6 +159,8 @@ def test_benchmark_has_no_local_amplitude_elimination_copy() -> None:
     assert "def _scaled_moments" not in source
     assert "safe_unscaled" not in source
     assert "target_current=target_current_a" in source
+    assert "attempted_amplitude = target / unscaled" not in source
+    assert "current_normalisation_amplitude(target, unscaled)" in source
 
 
 def test_power_iteration_receipt_is_strict_json_serializable() -> None:
@@ -237,27 +245,25 @@ def test_summary_requires_representative_current_and_diverted_convergence() -> N
     assert summary["current_pinning_removes_vacuum_root_and_orbiting_plateau"]
 
 
-def test_label_recovered_frame_102_remains_an_explicit_diagnostic_control() -> None:
+def test_committed_receipt_uses_only_circuit_driven_current_prescriptions() -> None:
     path = pinned.DEFAULT_OUTPUT / pinned.CHECKPOINT_NAME
     frame = json.loads(path.read_text().splitlines()[0])
-    diagnostic = {
-        "shot": frame["shot"],
-        "frame": frame["frame"],
-        "arms": frame["diagnostic_label_recovered"]["arms"],
-    }
-    eliminated = diagnostic["arms"]["pinned_eliminated"]
+    assert "diagnostic_label_recovered" not in frame
+    authority = frame["inference_current_authority"]
+    assert authority["uses_circuit"] is True
+    assert authority["unknown_parameter_count"] == 0
+    assert len(authority["currents_a"]) == 24
 
-    assert frame["diagnostic_label_recovered"]["uses_reconstruction_label"]
-    assert frame["diagnostic_label_recovered"]["frame_102_landed_control_reproduced"]
-    assert pinned.diagnostic_frame_102_reproduced(diagnostic)
-    assert eliminated["relative_residual"] == pytest.approx(
-        1.5899788903681545e-9,
-        rel=0.0,
-        abs=pinned.DIAGNOSTIC_RESIDUAL_ABSOLUTE_TOLERANCE,
+    receipt = json.loads((pinned.DEFAULT_OUTPUT / pinned.RECEIPT_NAME).read_text())
+    choice = receipt["current_arm_choice"]
+    assert choice["uses_pf_active_circuit"] is True
+    assert choice["label_recovered_current_prescriptions_used"] is False
+    assert receipt["authorities"]["recovery_bank_role"] == (
+        "shot and frame selection only"
     )
-    assert eliminated["relative_residual"] <= pinned.RELATIVE_RESIDUAL_CRITERION
-    assert eliminated["iterations"] == 4
-    assert eliminated["topology"] == "diverted"
+    low = receipt["result"]["low_current_control_fixture"]
+    assert low["current_normalisation_guard_triggered"] is True
+    assert "outside" in low["current_normalisation_guard_termination"]
 
 
 def test_cross_codegen_policy_qualifies_the_excluded_low_current_control() -> None:

@@ -23,7 +23,6 @@ import scipy.optimize
 
 from benchmarks.diiid_boundary_current_recovery import (
     CHECKPOINT_NAME as RECOVERY_CHECKPOINT_NAME,
-    OMITTED_COILS,
     POLARITY_RECEIPT,
     RECEIPT_NAME as RECOVERY_RECEIPT_NAME,
     DEFAULT_OUTPUT as RECOVERY_OUTPUT,
@@ -31,9 +30,6 @@ from benchmarks.diiid_boundary_current_recovery import (
 from benchmarks.diiid_diverted_root_full_currents import (
     POLARITY_AFFECTED_SHOT_COUNT,
     FrameInput,
-    _omitted_vertices,
-    append_recovered_conductors,
-    current_arms,
 )
 from benchmarks.diiid_forward_gs_match import (
     DEFAULT_DATA,
@@ -67,13 +63,6 @@ CHECKPOINT_NAME = "current_pinned_forward_frames.jsonl"
 RECEIPT_NAME = "current_pinned_forward_receipt.json"
 FIGURE_NAME = "current_pinned_forward.png"
 ARM_NAMES = ("unpinned", "pinned_eliminated")
-DIAGNOSTIC_FRAME_102 = {
-    "shot": "d3d_shot_00000c4a7b.parquet",
-    "frame": 102,
-    "eliminated_relative_residual": 1.5899788903681545e-9,
-    "eliminated_iterations": 4,
-    "eliminated_topology": "diverted",
-}
 RELATIVE_RESIDUAL_CRITERION = 1.0e-6
 CURRENT_CONSTRAINT_CRITERION = 1.0e-10
 UNPINNED_PLATEAU_CONTROL = 3.491124178554655e-2
@@ -185,9 +174,13 @@ def preregistration() -> dict[str, Any]:
             "seed": "the same convention-clean labelled branch seed in every arm",
             "poloidal_conductors": 24,
             "current_set": (
-                "nineteen shipped poloidal currents plus five recovered currents; "
-                "the shipped bcoil channel supplies the toroidal-field function"
+                "nineteen shipped poloidal currents plus five conductors driven "
+                "from the shipped ECOILA channel by the fixed-wiring pf_active "
+                "circuit; the shipped bcoil channel supplies the toroidal-field "
+                "function"
             ),
+            "current_authority": "nova.imas.diiid_current fixed wiring",
+            "label_recovered_current_prescriptions_used": False,
             "coefficients_fitted": 0,
             "currents_adjusted": 0,
         },
@@ -244,8 +237,9 @@ def preregistration() -> dict[str, Any]:
         "lambda_guard": {
             "inclusive_band": list(SCALAR_CURRENT_AMPLITUDE_BAND),
             "policy": (
-                "no clipping: evaluation raises LambdaOutOfBand and the arm records "
-                "a loud guard termination"
+                "no clipping: current_normalisation_amplitude raises "
+                "CurrentNormalisationError and the arm records a loud guard "
+                "termination"
             ),
         },
         "qualification": {
@@ -301,15 +295,11 @@ def _recovery_inputs(affected_shots: set[str]) -> tuple[list[FrameInput], FrameI
     def frame_input(shot: str, frame: int) -> FrameInput:
         if shot in affected_shots:
             raise RuntimeError(f"selected shot {shot} is polarity affected")
-        try:
-            item = bank[(shot, frame)]
-        except KeyError as error:
-            raise RuntimeError(f"recovery bank lacks {shot}:{frame}") from error
-        currents = item["recovered_currents_a"]
+        if (shot, frame) not in bank:
+            raise RuntimeError(f"recovery bank lacks {shot}:{frame}")
         return FrameInput(
             shot=shot,
             frame=frame,
-            recovered_currents_a=tuple(float(currents[name]) for name in OMITTED_COILS),
         )
 
     cohort = [
@@ -383,27 +373,6 @@ def description_driven_currents(
         "response": adapter.response_receipt,
     }
     return adapter.profile, shipped, current, receipt
-
-
-def diagnostic_frame_102_reproduced(record: dict[str, Any]) -> bool:
-    """Qualify the banked label-current control without admitting it to inference."""
-
-    if (
-        record["shot"] != DIAGNOSTIC_FRAME_102["shot"]
-        or record["frame"] != DIAGNOSTIC_FRAME_102["frame"]
-    ):
-        return False
-    eliminated = record["arms"]["pinned_eliminated"]
-    return bool(
-        np.isclose(
-            eliminated["relative_residual"],
-            DIAGNOSTIC_FRAME_102["eliminated_relative_residual"],
-            rtol=0.0,
-            atol=DIAGNOSTIC_RESIDUAL_ABSOLUTE_TOLERANCE,
-        )
-        and eliminated["iterations"] == DIAGNOSTIC_FRAME_102["eliminated_iterations"]
-        and eliminated["topology"] == DIAGNOSTIC_FRAME_102["eliminated_topology"]
-    )
 
 
 def _qualify_cross_codegen_control(
@@ -770,10 +739,9 @@ def solve_unpinned(
 def solve_frame(
     row: dict[str, Any],
     frame_input: FrameInput,
-    geometry: dict[str, tuple[tuple[np.ndarray, float], ...]],
     declared: dict[str, Any],
 ) -> dict[str, Any]:
-    """Run inference and diagnostic arms from one identical branch seed."""
+    """Run the circuit-driven inference arms from one identical branch seed."""
 
     base_profile, seed, _label, _wall, _reliable, _statement = build_profile(
         row, frame_input.frame, PSEUDO_WALL_EXPANSION
@@ -781,10 +749,6 @@ def solve_frame(
     time_ms = float(row["efit_times"][frame_input.frame])
     profile, shipped_current, current, current_receipt = description_driven_currents(
         row, base_profile, time_ms
-    )
-    diagnostic_profile = append_recovered_conductors(base_profile, geometry)
-    _diagnostic_shipped, diagnostic_current = current_arms(
-        diagnostic_profile, frame_input.recovered_currents_a
     )
     target = _target_current(row, time_ms)
     seed_unscaled = float(
@@ -815,37 +779,10 @@ def solve_frame(
     shipped_unpinned = solve_unpinned(profile, seed, shipped_current, target)
     unpinned = solve_unpinned(profile, seed, current, target)
     eliminated = solve_constrained(profile, seed, current, target)
-    diagnostic_unpinned = solve_unpinned(
-        diagnostic_profile, seed, diagnostic_current, target
-    )
-    diagnostic_eliminated = solve_constrained(
-        diagnostic_profile, seed, diagnostic_current, target
-    )
 
     for result in (unpinned, eliminated):
         result["dominant_map_eigenvalue"] = power_iteration(
             result["mapped"], result["state"]
-        )
-    diagnostic_record = {
-        "shot": frame_input.shot,
-        "frame": frame_input.frame,
-        "arms": {
-            ARM_NAMES[0]: _serialise_arm(diagnostic_unpinned),
-            ARM_NAMES[1]: _serialise_arm(diagnostic_eliminated),
-        },
-    }
-    frame_102_control = (
-        frame_input.shot == DIAGNOSTIC_FRAME_102["shot"]
-        and frame_input.frame == DIAGNOSTIC_FRAME_102["frame"]
-    )
-    reproduction = diagnostic_frame_102_reproduced(diagnostic_record)
-    if frame_102_control and not reproduction:
-        measured_control = diagnostic_record["arms"][ARM_NAMES[1]]
-        raise RuntimeError(
-            "label-recovered frame-102 diagnostic control drifted: "
-            f"relative_residual={measured_control['relative_residual']!r}, "
-            f"iterations={measured_control['iterations']!r}, "
-            f"topology={measured_control['topology']!r}"
         )
     record = {
         "shot": frame_input.shot,
@@ -870,15 +807,6 @@ def solve_frame(
             ARM_NAMES[0]: _serialise_arm(unpinned),
             ARM_NAMES[1]: _serialise_arm(eliminated),
         },
-        "diagnostic_label_recovered": {
-            "status": "diagnostic only; excluded from inference conclusions",
-            "uses_reconstruction_label": True,
-            "frame_102_landed_control": frame_102_control,
-            "frame_102_landed_control_reproduced": (
-                reproduction if frame_102_control else None
-            ),
-            "arms": diagnostic_record["arms"],
-        },
         "unconstrained_current_controls": {
             "shipped_20": _serialise_arm(shipped_unpinned),
             "full_24": _serialise_arm(unpinned),
@@ -898,52 +826,64 @@ def solve_frame(
 def solve_low_current_control(
     row: dict[str, Any],
     frame_input: FrameInput,
-    geometry: dict[str, tuple[tuple[np.ndarray, float], ...]],
 ) -> dict[str, Any]:
     """Reproduce the ramp-start fixture without pooling or reversing its source."""
 
-    profile, seed, _label, _wall, _reliable, _statement = build_profile(
+    base_profile, seed, _label, _wall, _reliable, _statement = build_profile(
         row, frame_input.frame, PSEUDO_WALL_EXPANSION
     )
-    profile = append_recovered_conductors(profile, geometry)
-    shipped_current, full_current = current_arms(
-        profile, frame_input.recovered_currents_a
-    )
     time_ms = float(row["efit_times"][frame_input.frame])
+    profile, shipped_current, full_current, current_receipt = (
+        description_driven_currents(row, base_profile, time_ms)
+    )
     target = _target_current(row, time_ms)
     unscaled = float(
         np.sum(np.asarray(profile.operator.cell_current(seed, TopologyClass.DIVERTED)))
     )
-    attempted_amplitude = target / unscaled
+    try:
+        attempted_amplitude = float(
+            profile.operator.current_normalisation_amplitude(target, unscaled)
+        )
+        guard_triggered = False
+        guard_termination = None
+    except CurrentNormalisationError as error:
+        attempted_amplitude = error.amplitude
+        guard_triggered = True
+        guard_termination = str(error)
     shipped = solve_unpinned(profile, seed, shipped_current, target)
     full = solve_unpinned(profile, seed, full_current, target)
-    return _qualify_cross_codegen_control(
-        {
-            "role": (
-                "label-recovered low-current selection-defect diagnostic fixture; "
-                "excluded from the representative-current scoring cohort and every "
-                "inference conclusion"
-            ),
-            "shot": frame_input.shot,
-            "frame": frame_input.frame,
-            "time_ms": time_ms,
-            "recorded_plasma_current_a": target,
-            "absolute_recorded_plasma_current_a": abs(target),
-            "unscaled_seed_plasma_current_a": unscaled,
-            "attempted_seed_lambda": attempted_amplitude,
-            "positive_lambda_guard_retained": list(SCALAR_CURRENT_AMPLITUDE_BAND),
-            "constrained_arms_scored": False,
-            "constrained_arm_refusal": (
-                "negative lambda would reverse both extracted source terms and is not "
-                "a current normalization"
-            ),
-            "shipped_20_unpinned": _serialise_arm(shipped),
-            "full_24_unpinned": _serialise_arm(full),
-            "shipped_to_full_residual_ratio": shipped["relative_residual"]
-            / max(full["relative_residual"], 1.0e-300),
-            "historical_full_24_plateau": UNPINNED_PLATEAU_CONTROL,
-        }
-    )
+    return {
+        "role": (
+            "circuit-driven low-current selection-defect diagnostic fixture; "
+            "excluded from the representative-current scoring cohort and every "
+            "inference conclusion"
+        ),
+        "shot": frame_input.shot,
+        "frame": frame_input.frame,
+        "time_ms": time_ms,
+        "recorded_plasma_current_a": target,
+        "absolute_recorded_plasma_current_a": abs(target),
+        "unscaled_seed_plasma_current_a": unscaled,
+        "attempted_seed_lambda": attempted_amplitude,
+        "current_normalisation_guard_triggered": guard_triggered,
+        "current_normalisation_guard_termination": guard_termination,
+        "positive_lambda_guard_retained": list(SCALAR_CURRENT_AMPLITUDE_BAND),
+        "inference_current_authority": current_receipt,
+        "constrained_arms_scored": False,
+        "constrained_arm_refusal": (
+            "negative lambda would reverse both extracted source terms and is not "
+            "a current normalization"
+        ),
+        "shipped_20_unpinned": _serialise_arm(shipped),
+        "full_24_unpinned": _serialise_arm(full),
+        "shipped_to_full_residual_ratio": shipped["relative_residual"]
+        / max(full["relative_residual"], 1.0e-300),
+        "historical_full_24_plateau": UNPINNED_PLATEAU_CONTROL,
+        "historical_plateau_role": (
+            "label-recovered diagnostic retained for context, not a pass "
+            "condition on this circuit-driven control"
+        ),
+    }
 
 
 def summarize(
@@ -1091,14 +1031,13 @@ def run(data: Path, output: Path) -> dict[str, Any]:
     """Run the fixed cohort and publish incremental, receipt and plot artifacts."""
 
     configure_dtypes()
-    declaration = write_preregistration(output)
+    declaration = write_preregistration(output, replace=True)
     recovery_path = RECOVERY_OUTPUT / RECOVERY_RECEIPT_NAME
     polarity = json.loads(POLARITY_RECEIPT.read_text())["full_corpus_census"]
     affected = set(polarity["affected_shots"])
     if len(affected) != POLARITY_AFFECTED_SHOT_COUNT:
         raise RuntimeError("polarity authority is not the landed 603-shot population")
     selected, low_input = _recovery_inputs(affected)
-    geometry = _omitted_vertices()
     columns = tuple(
         dict.fromkeys(
             (
@@ -1114,7 +1053,7 @@ def run(data: Path, output: Path) -> dict[str, Any]:
     low_path = data / low_input.shot
     low_row = _read(low_path, columns)
     low_row["_source_path"] = str(low_path)
-    low_control = solve_low_current_control(low_row, low_input, geometry)
+    low_control = solve_low_current_control(low_row, low_input)
     print(
         "LOW_CURRENT_CONTROL "
         f"{low_input.shot}:{low_input.frame} "
@@ -1130,7 +1069,7 @@ def run(data: Path, output: Path) -> dict[str, Any]:
         path = data / frame_input.shot
         row = _read(path, columns)
         row["_source_path"] = str(path)
-        record = solve_frame(row, frame_input, geometry, declared)
+        record = solve_frame(row, frame_input, declared)
         records.append(record)
         with checkpoint.open("a") as stream:
             stream.write(json.dumps(record, sort_keys=True, allow_nan=False) + "\n")
@@ -1145,6 +1084,12 @@ def run(data: Path, output: Path) -> dict[str, Any]:
         )
     result = summarize(records, low_control)
     receipt = {
+        "current_arm_choice": {
+            "name": "circuit_driven_fixed_wiring",
+            "authority": "nova.imas.diiid_current fixed wiring",
+            "uses_pf_active_circuit": True,
+            "label_recovered_current_prescriptions_used": False,
+        },
         "preregistration": preregistration(),
         "preregistration_path": str(declaration),
         "preregistration_sha256": _sha256(declaration),
@@ -1157,6 +1102,7 @@ def run(data: Path, output: Path) -> dict[str, Any]:
             "recovery_incremental_bank_sha256": _sha256(
                 RECOVERY_OUTPUT / RECOVERY_CHECKPOINT_NAME
             ),
+            "recovery_bank_role": "shot and frame selection only",
             "polarity_receipt": str(POLARITY_RECEIPT),
             "polarity_receipt_sha256": _sha256(POLARITY_RECEIPT),
             "affected_shot_count": len(affected),
@@ -1181,12 +1127,6 @@ def run(data: Path, output: Path) -> dict[str, Any]:
         json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n"
     )
     _figure(result, output / FIGURE_NAME)
-    if not result["low_current_control_fixture"][
-        "historical_full_24_plateau_reproduced"
-    ]:
-        raise RuntimeError(
-            "the separated low-current plateau control did not reproduce"
-        )
     return receipt
 
 

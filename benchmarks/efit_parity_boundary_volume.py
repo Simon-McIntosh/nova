@@ -20,6 +20,9 @@ from benchmarks.efit_forward_parity_slice import (  # noqa: E402
     _mast_case_from_selection,
     select_slices_by_shot,
 )
+from benchmarks.efit_parity_moment_definitions import (  # noqa: E402
+    _relative_error as _relative_deviation,
+)
 from benchmarks.efit_parity_root_geometry import (  # noqa: E402
     _assert_reference,
     _closed_axis_branch,
@@ -39,10 +42,6 @@ OUTPUT_RECEIPT = OUTPUT_DIRECTORY / "boundary-enclosed-volume-reconciliation.jso
 OUTPUT_FIGURE = OUTPUT_DIRECTORY / "boundary-enclosed-volume-reconciliation.png"
 TARGET_SHOT = 22086
 CENTROID_CONVENTION_TOLERANCE = 0.01
-
-
-def _relative_deviation(observed: float, expected: float) -> float:
-    return observed / expected - 1.0
 
 
 def _closed_polygon(points: np.ndarray) -> np.ndarray:

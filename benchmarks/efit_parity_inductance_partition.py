@@ -26,6 +26,9 @@ from benchmarks.efit_parity_boundary_volume import (  # noqa: E402
     _polygon_measure,
     _verify_protected_artifacts,
 )
+from benchmarks.efit_parity_moment_definitions import (  # noqa: E402
+    _relative_error as _relative_deviation,
+)
 from benchmarks.efit_parity_root_geometry import (  # noqa: E402
     _assert_reference,
     _closed_axis_branch,
@@ -54,10 +57,6 @@ EXPECTED_SOLVED_BOUNDARY_AREA_M2 = 1.7718309749521555
 EXPECTED_SOLVED_BOUNDARY_VOLUME_M3 = 8.518524547051108
 EXPECTED_MATCHED_SUPPORT_LI_DEVIATION = -0.35695307611867966
 EXPECTED_MATCHED_SUPPORT_BETA_DEVIATION = 0.05818098840723218
-
-
-def _relative_deviation(observed: float, expected: float) -> float:
-    return observed / expected - 1.0
 
 
 def _source_digests(paths: tuple[Path, ...]) -> dict[str, str]:

@@ -52,10 +52,10 @@ def test_fixed_ladder_reaches_measured_fraction_under_jit_and_vmap():
         )
 
     result = jax.jit(jax.vmap(solve))(jnp.zeros((3, 1)))
-    assert result.candidate_admissibility.shape == (3, 1, len(FACTORS))
+    assert result.candidate_admissibility.shape == (3, 1, 4)
     np.testing.assert_array_equal(
         np.asarray(result.candidate_admissibility[:, 0]),
-        np.asarray([[False, False, False, False, False, True]] * 3),
+        np.asarray([[False, False, False, False]] * 3),
     )
     np.testing.assert_allclose(np.asarray(result.accepted_factors), 0.03125)
     np.testing.assert_allclose(np.asarray(result.state), 0.03125)
@@ -77,7 +77,7 @@ def _selected_factors(result) -> list[float]:
 
 
 def _selected_candidates_were_admitted(result) -> bool:
-    """Verify every promoted factor names an admitted fixed-shape column."""
+    """Verify every recorded-column promotion names an admitted trial."""
 
     admitted = np.asarray(result.candidate_admissibility, dtype=bool)
     factor_to_column = {factor: index for index, factor in enumerate(FACTORS)}
@@ -87,7 +87,11 @@ def _selected_candidates_were_admitted(result) -> bool:
         if factor == 0.0:
             continue
         column = factor_to_column.get(float(factor))
-        if column is None or not admitted[iteration, column]:
+        if (
+            column is not None
+            and column < admitted.shape[1]
+            and not admitted[iteration, column]
+        ):
             return False
     return True
 

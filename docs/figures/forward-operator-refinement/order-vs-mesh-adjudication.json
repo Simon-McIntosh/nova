@@ -1,0 +1,314 @@
+{
+  "schema": "nova-order-vs-mesh-adjudication/1.0",
+  "status": "banked",
+  "completed_utc": "2026-08-23T18:02:26.496723+00:00",
+  "source_identity": {
+    "commit": "8fb14f738a04e49d5855554889f950958e10bf8c",
+    "tree": "0658d95def18045ee864357b41a36037b74a51fc",
+    "backend": "gpu",
+    "device": "NVIDIA L4",
+    "runtime_mitigations": {
+      "XLA_FLAGS": "--xla_gpu_enable_command_buffer=",
+      "XLA_PYTHON_CLIENT_PREALLOCATE": "false"
+    }
+  },
+  "authority_inputs": {
+    "docs/figures/diiid-forward-onboarding/topology-qualified-mesh-convergence.json": {
+      "sha256": "b4d9dcb5248dded7cc0ce50982e46f59947c632dbd2353aaa7ed1d80d7806347"
+    },
+    "docs/figures/forward-operator-refinement/operator-order-floor-receipt.json": {
+      "sha256": "1848a6a8135e4fa780e70efdaf38f9b18661b7cdabc82a8b73305cf2fea54a7f"
+    },
+    "docs/figures/forward-operator-refinement/reference-native-resolution-default.json": {
+      "sha256": "258414a6403705438ed4c046a304fedb69cfdd432a1b0569b12e60abafe3c376"
+    },
+    "docs/figures/forward-operator-refinement/criterion-family.json": {
+      "sha256": "076f83134de45a6a87369c9e7f7177ec8ac5dd290a19f72a0dcb96aa94ffac80"
+    },
+    "docs/figures/forward-operator-refinement/coupled-map-mode-identification.json": {
+      "sha256": "b62bee532afe4ae2f33e81b6feccdcf8ec1d2b9a3262067fc5d0e2317a52b96a"
+    }
+  },
+  "adjudication_table": [
+    {
+      "axis": "mesh_refinement",
+      "intervention": "33x33/1089 cells to 65x65/4225 cells",
+      "floor": {
+        "before": 0.00029254381732921216,
+        "after": 7.930534999195602e-05,
+        "relative_movement": -0.7289112081876258,
+        "percent_movement": -72.89112081876257,
+        "classification": "DISCRETISATION_LIMITED"
+      },
+      "criterion_verdict": "NO_DEFENSIBLE_DIIID_TOLERANCE_DERIVED",
+      "build_cost": {
+        "before_seconds": 62.36472687497735,
+        "after_seconds": 201.92414874676615,
+        "after_over_before": 3.237794164505262,
+        "rebuild": "full interaction-matrix rebuild at each mesh"
+      },
+      "memory": {
+        "scope": "four float64 interaction matrices quoted by the order receipt",
+        "before_bytes": 10871784,
+        "after_bytes": 148103144,
+        "after_over_before": 13.622708471765076,
+        "excludes": "derivative and moment-companion matrices"
+      },
+      "krylov_action_qualification": [
+        "ACCEPTED",
+        "ACCEPTED"
+      ],
+      "measurement_identity": {
+        "commit": "7a424c1236e8b69fd65e1575320ab5133ed37c90",
+        "tree": "336c9f9467b5cfe9871c0aceaae45981f5d70bf9",
+        "receipt_source_commit": "7a424c1236e8b69fd65e1575320ab5133ed37c90"
+      },
+      "step_invariance": {
+        "differencing_step": "not-applicable-on-exact-route",
+        "step_selection_rule": "not-applicable-on-exact-route",
+        "step_invariance.second_step": "not-applicable-on-exact-route",
+        "step_invariance.floor_delta": "not-applicable-on-exact-route",
+        "step_invariance.bound": "not-applicable-on-exact-route",
+        "step_invariance.verdict": "not-applicable-on-exact-route",
+        "reason": "the exact autodiff tangent has no differencing-step parameter"
+      }
+    },
+    {
+      "axis": "operator_order",
+      "intervention": "centroid current rule to degree-three-exact five-node cubic-cross cell average on the unchanged 65x65 carrier",
+      "floor": {
+        "before": 7.930534999195602e-05,
+        "after": 7.319575103197112e-05,
+        "relative_movement": -0.07703892562865688,
+        "percent_movement": -7.703892562865688,
+        "classification": "FLOOR_MOVED_MODESTLY"
+      },
+      "criterion_verdict": "NO_DEFENSIBLE_DIIID_TOLERANCE_DERIVED",
+      "build_cost": {
+        "before_seconds": 51.77598719391972,
+        "after_seconds": 51.77598719391972,
+        "relative_change": 0.0,
+        "rebuild": "none; all four matrices byte-identical"
+      },
+      "memory": {
+        "scope": "four float64 interaction matrices quoted by this receipt",
+        "before_bytes": 148103144,
+        "after_bytes": 148103144,
+        "relative_change": 0.0,
+        "excludes": "derivative and moment-companion matrices"
+      },
+      "krylov_action_qualification": "ACCEPTED",
+      "measurement_identity": {
+        "commit": "862e712ae8c67db7955938da1cd1e4c785f2c386",
+        "tree": "c839c0f5745af2630220ec924949e6984abcfdec"
+      },
+      "step_invariance": {
+        "differencing_step": "not-applicable-on-exact-route",
+        "step_selection_rule": "not-applicable-on-exact-route",
+        "step_invariance.second_step": "not-applicable-on-exact-route",
+        "step_invariance.floor_delta": "not-applicable-on-exact-route",
+        "step_invariance.bound": "not-applicable-on-exact-route",
+        "step_invariance.verdict": "not-applicable-on-exact-route",
+        "reason": "the exact autodiff tangent has no differencing-step parameter"
+      }
+    }
+  ],
+  "raised_order_lambda_check": {
+    "source_commit": "8fb14f738a04e49d5855554889f950958e10bf8c",
+    "source_tree": "0658d95def18045ee864357b41a36037b74a51fc",
+    "banked_leading_eigenvalue": 0.9874290999339198,
+    "centroid_control": {
+      "label": "centroid_cell_current",
+      "leading_eigenvalue": {
+        "real": 0.9874290999339219,
+        "imaginary": 0.0,
+        "magnitude": 0.9874290999339219
+      },
+      "leading_ritz_residual_l2": 1.5247767673331724e-15,
+      "root_relative_map_residual": 1.3931414905413571e-16,
+      "krylov_action_qualification": "ACCEPTED",
+      "physical_branch_qualified": true,
+      "direct_branch_receipt": {
+        "state_finite": true,
+        "core_cells": 100,
+        "core_fraction_of_carrier": 0.16,
+        "topology_branch": "limited_plasma",
+        "diverted": false,
+        "solved_axis_m": [
+          1.0358650375823215,
+          -0.000987929092745193
+        ],
+        "axis_finite": true,
+        "flux_span_wb": -0.45644326141735414,
+        "flux_span_valid": true
+      },
+      "solve_passes": [
+        {
+          "pass": 1,
+          "terminal_relative_fixed_point_residual": 1.3931414905413574e-16,
+          "elapsed_seconds": 8.808813730021939,
+          "solver": {
+            "route": "newton_krylov",
+            "warmup": 8,
+            "newton_steps": 10,
+            "gmres_iterations": 30
+          }
+        }
+      ],
+      "vertical_conditioning": {
+        "definition": "n = -(R/Bz)*(dBz/dR)",
+        "decay_index": 0.5718216376850994,
+        "open_stability_window": [
+          0.0,
+          1.5
+        ],
+        "stable": true
+      },
+      "cell_average": {
+        "enabled": false,
+        "stencil_shape": null,
+        "weights": null
+      },
+      "interaction_matrix_sha256": {
+        "plasma_to_grid": "cf124a94698e8aaefa479982b7cf9c0941360d89ee7a55aff89c697d934483e7",
+        "plasma_to_wall": "3e3a2f0f98d02ac75328aa7b185825994dab8bfaf44d27acad82c12af66ede41",
+        "source_to_grid": "0bcfeb9ec14e1cf23d3021e825f6fe5ab73cc779779f804dff08ef578942c869",
+        "source_to_wall": "b31a10b306ca74310d7f73a15b5b317a5888a65b7c61785b5038387d729b3879"
+      },
+      "elapsed_seconds": 11.27468234510161
+    },
+    "raised_order_control": {
+      "label": "cubic_cross_cell_average",
+      "leading_eigenvalue": {
+        "real": 0.9739924893160241,
+        "imaginary": 0.0,
+        "magnitude": 0.9739924893160241
+      },
+      "leading_ritz_residual_l2": 4.8371349806441685e-16,
+      "root_relative_map_residual": 4.9709046182611416e-08,
+      "krylov_action_qualification": "ACCEPTED",
+      "physical_branch_qualified": true,
+      "direct_branch_receipt": {
+        "state_finite": true,
+        "core_cells": 98,
+        "core_fraction_of_carrier": 0.1568,
+        "topology_branch": "limited_plasma",
+        "diverted": false,
+        "solved_axis_m": [
+          1.0368112107094434,
+          -0.007232120792574571
+        ],
+        "axis_finite": true,
+        "flux_span_wb": -0.4474343991757954,
+        "flux_span_valid": true
+      },
+      "solve_passes": [
+        {
+          "pass": 1,
+          "terminal_relative_fixed_point_residual": 7.726885632607212e-06,
+          "elapsed_seconds": 5.38840255793184,
+          "solver": {
+            "route": "newton_krylov",
+            "warmup": 8,
+            "newton_steps": 10,
+            "gmres_iterations": 30
+          }
+        },
+        {
+          "pass": 2,
+          "terminal_relative_fixed_point_residual": 7.479523999398357e-07,
+          "elapsed_seconds": 5.34378274413757,
+          "solver": {
+            "route": "newton_krylov",
+            "warmup": 8,
+            "newton_steps": 10,
+            "gmres_iterations": 30
+          }
+        },
+        {
+          "pass": 3,
+          "terminal_relative_fixed_point_residual": 1.9554095391290033e-07,
+          "elapsed_seconds": 5.4729044700507075,
+          "solver": {
+            "route": "newton_krylov",
+            "warmup": 8,
+            "newton_steps": 10,
+            "gmres_iterations": 30
+          }
+        },
+        {
+          "pass": 4,
+          "terminal_relative_fixed_point_residual": 4.9709046428491264e-08,
+          "elapsed_seconds": 5.329598210053518,
+          "solver": {
+            "route": "newton_krylov",
+            "warmup": 8,
+            "newton_steps": 10,
+            "gmres_iterations": 30
+          }
+        }
+      ],
+      "vertical_conditioning": {
+        "definition": "n = -(R/Bz)*(dBz/dR)",
+        "decay_index": 0.5662560147784781,
+        "open_stability_window": [
+          0.0,
+          1.5
+        ],
+        "stable": true
+      },
+      "cell_average": {
+        "enabled": true,
+        "stencil_shape": [
+          625,
+          5
+        ],
+        "weights": [
+          0.8333333333333334,
+          0.041666666666666664,
+          0.041666666666666664,
+          0.041666666666666664,
+          0.041666666666666664
+        ]
+      },
+      "interaction_matrix_sha256": {
+        "plasma_to_grid": "cf124a94698e8aaefa479982b7cf9c0941360d89ee7a55aff89c697d934483e7",
+        "plasma_to_wall": "3e3a2f0f98d02ac75328aa7b185825994dab8bfaf44d27acad82c12af66ede41",
+        "source_to_grid": "0bcfeb9ec14e1cf23d3021e825f6fe5ab73cc779779f804dff08ef578942c869",
+        "source_to_wall": "b31a10b306ca74310d7f73a15b5b317a5888a65b7c61785b5038387d729b3879"
+      },
+      "elapsed_seconds": 21.92504901997745
+    },
+    "centroid_movement_from_banked": 2.1094237467877974e-15,
+    "raised_order_movement_from_banked": -0.013436610617895695,
+    "paired_raised_minus_centroid_movement": -0.013436610617897804,
+    "absolute_paired_movement": 0.013436610617897804,
+    "baseline_contraction_margin": 0.012570900066080193,
+    "material_movement_threshold": 0.0012570900066080195,
+    "movement_fraction_of_contraction_margin": 1.0688662344992734,
+    "interaction_matrices_byte_identical": true,
+    "verdict": "ORDER_MOVES_NEAR_MARGINAL_MODE",
+    "interpretation": "The raised cell average materially moves the near-marginal pole; the intrinsic-map classification must be amended for operator order."
+  },
+  "non_contractivity_constraint": {
+    "pinned_picard_spectral_radius": 1.1455670310089587,
+    "unpinned_picard_spectral_radius": 1.2576631175347157,
+    "resolution_claim_boundary": "floor movement is credited to discretisation; Newton-Krylov conditioning and seed-direction sensitivity remain solver-route properties and no resolution intervention rehabilitates Picard"
+  },
+  "ruling": "Mesh refinement moves the achieved exact-route residual floor by 72.89%, versus 7.70% from raised order: mesh is the decisive floor lever, but it requires a full rebuild and multiplies the four quoted matrix bytes by 13.62, while order costs zero rebuild and zero added matrix memory. Neither result rehabilitates Picard or supplies a DIII-D tolerance: the map remains non-contractive and the banked floors are achieved solver residuals, not independent discretisation-error estimates. Use the raised order because its modest floor reduction is free on an existing carrier; use mesh when the larger floor movement justifies rebuild cost; treat route conditioning separately.",
+  "diiid_gate_owner_notification": {
+    "recipient": "owner of benchmarks/diiid_forward_gs_match.py",
+    "notification_written": true,
+    "adjudicated_state": "NO_DEFENSIBLE_DIIID_TOLERANCE_DERIVED",
+    "selected_relative_residual_bound": null,
+    "gate_rerun_authorised_now": false,
+    "reason": "No blessed number is available: both 1e-5 and 1e-6 are unpassable on the banked qualified DIII-D route, and selecting a bound below the achieved floor would be circular.",
+    "reinstatement_prerequisite": "a same-observable discretisation-error estimate from solution differences or an independently confirmed Richardson model",
+    "admissible_future_form": "tau(h) = q * E_disc(h), with 0 < q < 1"
+  },
+  "banked_memory_cross_check": {
+    "same_4225_cell_carrier_active_coupling_gb": 0.144498848,
+    "same_4225_cell_carrier_resident_coupling_gb": 0.432610048,
+    "qualification": "This independent same-size carrier includes derivative arrays and zero linear-moment companions; it is a memory cross-check, not substituted for the table's four-matrix DIII-D accounting."
+  }
+}

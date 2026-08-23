@@ -536,10 +536,28 @@ def _with_passive_representation(control, conductor_count: int, expansion: float
     )
 
 
+def _qualified_control_representation(control):
+    """Pin the current image used by the qualified eigenvalue comparator."""
+
+    def centroid_profile(profile):
+        operator = replace(
+            profile.operator,
+            cell_average_stencil=None,
+            cell_average_weight=None,
+        )
+        return replace(profile, operator=operator)
+
+    return replace(
+        control,
+        with_passive=centroid_profile(control.with_passive),
+        without_passive=centroid_profile(control.without_passive),
+    )
+
+
 def _representation_response() -> dict[str, object]:
     """Recompute the leading mode for distinct fitted passive shells."""
     started = perf_counter()
-    base_control = _build_analytic_control()
+    base_control = _qualified_control_representation(_build_analytic_control())
     specifications = (
         ("baseline", 16, PASSIVE_SHELL_EXPANSION),
         (
@@ -693,6 +711,9 @@ def _representation_response() -> dict[str, object]:
     return {
         "carrier": {
             "construction": "qualified analytic structured free-boundary control",
+            "cell_current_representation": (
+                "centroid image pinned by the banked eigenvalue comparator"
+            ),
             "lattice_shape": list(baseline_control.without_passive.lattice.shape),
             "plasma_cells": int(baseline_operator.grid.node_number),
             "wall_nodes": int(baseline_operator.wall.node_number),

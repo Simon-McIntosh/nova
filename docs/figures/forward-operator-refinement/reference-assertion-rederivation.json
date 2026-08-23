@@ -1,0 +1,141 @@
+{
+  "schema": "nova.reference_assertion_rederivation",
+  "schema_version": 1,
+  "source": {
+    "integrated_head": "ebf3693e34550bf3650d5cee2d3da7d2ec22527d",
+    "integrated_tree": "87fa45a1598b89af15c078533a26ab03452dffc3",
+    "test_source_sha256": "b69bf529ce000e7d1b5cbd9b71f8ceaeb54aca00924a263b106404bc878bfd47",
+    "test_patch_sha256": "cd1f4ee66a425e5ecd25002d8dc676666ab208d7b13f4d30e5979c58b0f5a687",
+    "classification_receipt": {
+      "path": "docs/figures/forward-operator-refinement/reference-failure-classification.json",
+      "sha256": "4cdc6be4a2d09648d53b171fb86034bf4713b822baa434419d51147a8e049588"
+    }
+  },
+  "assertion_replacements": [
+    {
+      "test": "test_the_relaxed_routes_leave_the_equilibrium_on_a_bounded_budget",
+      "classification": "stale assertion",
+      "removed_expectation": "Both Picard and Anderson terminal residuals exceed their initial residuals by the registered growth factor.",
+      "replacement": {
+        "both_routes": [
+          "trace contains exactly 60 fixed-budget samples",
+          "every trace sample is finite"
+        ],
+        "picard_only": "terminal-to-initial residual ratio exceeds the registered non-contraction observation factor of 10",
+        "anderson": "no amplification or terminal-direction prescription"
+      },
+      "semantic_justification": "The expanding direction is a property of the raw fixed-point map and therefore constrains Picard. Anderson applies history-dependent mixing and is not required to follow or amplify that direction.",
+      "classification_measurement": {
+        "picard_terminal_over_initial": 928.9476436619697,
+        "anderson_terminal_over_initial": 0.005961456140292511,
+        "anderson_terminal_relative_residual": 5.863573895635936e-14
+      },
+      "full_module_result": "passed"
+    },
+    {
+      "test": "test_the_relaxed_route_walks_down_the_vertical_instability",
+      "classification": "stale assertion",
+      "removed_expectation": "The last residual in the first fifteen samples must exceed the first residual.",
+      "replacement": {
+        "trace": [
+          "contains exactly 60 fixed-budget samples",
+          "contains only finite samples",
+          "has a transient maximum more than ten times the terminal tail residual",
+          "contracts by more than tenfold across the final fifteen samples"
+        ],
+        "terminal_branch": [
+          "zero core cells",
+          "non-diverted topology",
+          "zero plasma current"
+        ]
+      },
+      "semantic_justification": "A strongly non-normal coupled map may contract and burst before branch selection. The intended result is the nontrivial transient followed by contraction onto the zero-current vacuum branch, not the ordering of an arbitrary early window.",
+      "classification_measurement": {
+        "early_relative_residual": [
+          0.01486043900244241,
+          0.00844522423234772
+        ],
+        "trace_maximum": 0.412165241220058,
+        "tail_relative_residual": [
+          0.2965092952053771,
+          1.8461680129113397e-05
+        ],
+        "terminal_core_cells": 0,
+        "terminal_plasma_current_a": 0.0
+      },
+      "full_module_result": "passed"
+    },
+    {
+      "test": "test_the_published_solve_runs_on_the_production_mesh",
+      "classification": "stale assertion",
+      "removed_expectation": "Absolute residual amplitude must terminate within ten arithmetic-resolution units.",
+      "replacement": {
+        "acceptance": [
+          "registered normalised fixed-point residual below 1e-6",
+          "finite receipt",
+          "diverted topology",
+          "absolute plasma current above 1e7 A"
+        ],
+        "diagnostic_only": "residual amplitude divided by arithmetic flux resolution"
+      },
+      "semantic_justification": "Floating-point spacing is a lower resolvability floor rather than a termination guarantee for a fixed-budget Krylov solve. Production acceptance is the registered normalised residual plus physical receipt qualification.",
+      "full_module_diagnostic": {
+        "normalised_fixed_point_residual": 9.835808161038033e-12,
+        "registered_residual_ceiling": 1e-06,
+        "residual_amplitude_wb": 8.164477982539389e-10,
+        "arithmetic_resolution_wb": 8.043343768804334e-12,
+        "residual_over_resolution": 101.50601810909622,
+        "finite": true,
+        "diverted": true,
+        "plasma_current_a": -14819066.718115367
+      },
+      "full_module_result": "passed"
+    }
+  ],
+  "remaining_regression": {
+    "test": "test_the_passive_closure_moves_the_reproduction_by_a_tenth_of_a_percent",
+    "assertion_changed": false,
+    "result": "failed",
+    "owner": "map-gain chain",
+    "mechanism": "noncontractive_free_boundary_map_resolvent_gain",
+    "closure_move_percentage_points": 0.6098462721137325,
+    "registered_ceiling_percentage_points": 0.15,
+    "source_comment_cites_mechanism": true
+  },
+  "verification": {
+    "command": "pytest -q -p no:cacheprovider --capture=tee-sys tests/test_equilibrium_forward_reference.py",
+    "environment": {
+      "JAX_PLATFORMS": "cpu",
+      "project_environment": "/home/ITER/mcintos/Code/nova/.venv"
+    },
+    "exit_code": 1,
+    "expected_exit_code": 1,
+    "collected": 29,
+    "passed": 28,
+    "failed": 1,
+    "warnings": 1,
+    "elapsed_seconds": 286.22,
+    "sole_failure": "test_the_passive_closure_moves_the_reproduction_by_a_tenth_of_a_percent",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T164428948127-reference-assertion-rederivation/reference-module-rehydrated.log",
+    "log_sha256": "8752433e2a3defe8504867e79a53a8463878c7183bbc5c557782832a6b8e54af",
+    "carrier": {
+      "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr",
+      "key": "e81dd0f256c1e3d1",
+      "cache_hit": true,
+      "arrays_verified_bitwise": 31,
+      "bytes_verified_bitwise": 51411470,
+      "conductor_placement_frame": "rehydrated from the same reference entry without rebuilding or modifying any numerical carrier array"
+    },
+    "transport_discrimination": {
+      "initial_full_run": "27 passed, passive regression failed, placement test failed because the numerical cache intentionally restores coilset as null",
+      "isolated_placement_check": "passed after entry-derived placement-frame rehydration",
+      "final_full_run": "28 passed, sole passive regression failed"
+    }
+  },
+  "verdict": {
+    "complete": true,
+    "stale_assertions_replaced": 3,
+    "remaining_regressions": 1,
+    "assertions_relaxed_to_measured_values": false
+  }
+}

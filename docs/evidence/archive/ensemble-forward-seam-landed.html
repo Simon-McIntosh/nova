@@ -39,6 +39,40 @@
       authored nova-side.</li>
       <li><strong>Tests:</strong> 8 passed (kernels + map-extraction) in 13.90 s; ruff exits 0.</li>
     </ul>
+
+    <h2 id="s4">§4 the constraint seam, fail-closed and current-normalised — 2026-08-23</h2>
+    <p><strong>The deterministic consequence of a trusted pin is now a public seam</strong>
+    (commits <code>d6a5fbf1</code>, <code>ba7c6ff4</code>, <code>060b2c5d</code>,
+    <code>aef15cea</code>): <code>ForwardProfile.thomson_observation_map/jacobian</code> and
+    <code>current_moment_map/jacobian</code>, both Jacobians under the 2e-8
+    central-finite-difference gate, and a typed <code>ConstraintPinSet</code> —
+    <code>IsofluxPin</code>/<code>MomentPin</code> carrying absolute interval, unit, basis
+    statement and explicit support (all-domain vs confined-core, so the banked 0.4469 mixing
+    hazard cannot recur silently).</p>
+    <ul>
+      <li><strong>Fail-closed semantics:</strong> <code>solve</code> refuses interval-violating
+      roots (<code>ConstraintViolationError</code>); <code>solve_branch</code>/<code>solve_portfolio</code>
+      mark them non-converged; no likelihood, prior weighting, nuisance fit or posterior update is
+      authored anywhere (audited).</li>
+      <li><strong>The defect the worker caught itself:</strong> pins evaluated without the
+      eliminated solve's target current would use a different current normalisation than the
+      pinned solve — fixed by threading <code>target_current</code> through the constraint surface
+      (<code>060b2c5d</code>) and pinned by a focused regression.</li>
+      <li><strong>Basin-restriction baseline (receipt tree-stamped 060b2c5d/f5bdf5d7):</strong>
+      11-row replay — MAST 1/6 cold → 1/6 pin-admissible, DIII-D 2/5 cold → 2/5 pin-admissible,
+      zero converged roots rejected, restriction fraction <strong>0.0</strong> on both cohorts:
+      the pins are consistent with cold-start truth rather than restrictive at these baselines.
+      The DIII-D arm is a current-defaults baseline under the open resolution/operator-scaling
+      owner finding.</li>
+      <li><strong>Qualification:</strong> isoflux correctness is finite-difference tested on the
+      public synthetic map; scoring real isoflux admission waits on the ambix evidence owner
+      banking trusted chord-pair pins — that re-score runs through this same seam when pins
+      arrive.</li>
+      <li><strong>Integration note:</strong> the worker manifest quoted a wrong full SHA for its
+      tip (<code>aef15cea181f…</code>); the integrated tip is
+      <code>aef15cea21c05387b9cac7b3e28647cd17902406</code>, resolved by <code>git fsck</code> —
+      integrate <code>rev-parse HEAD</code>, never a manifest-quoted SHA.</li>
+    </ul>
   </main>
 </body>
 </html>

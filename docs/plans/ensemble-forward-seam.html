@@ -23,9 +23,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-23">
-<meta name="plan-impl" content="0.25">
-<meta name="plan-version" content="2">
-<meta name="plan-commits" content="072dc102">
+<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="4">
+<meta name="plan-commits" content="072dc102,d6a5fbf1,ba7c6ff4,060b2c5d,aef15cea">
 <meta name="plan-artifacts" content="docs/evidence/archive/ensemble-forward-seam-landed.html">
 </head>
 <body>
@@ -80,17 +80,23 @@
       (commit <code>072dc102</code>).</p>
     </section>
 
-    <h2 id="s4">§4 — The constraint seam: observation and moment maps with Jacobians</h2>
-
-    <p>The owner's question — can Thomson constrain the plasma the way the net current now does? —
-    splits along the seam: the isoflux <em>claim</em> and its confidence are ambix's (their
-    pedestal-foot detector and calibration own that); the deterministic consequence of a
-    <em>trusted</em> pin is nova's. This section exposes the differentiable Thomson observation
-    map and the current-moment map with Jacobians, and accepts typed, uncertainty-stated pin sets
-    (isoflux-class from ambix, moment-class from <code>moment-conditioned-basin-entry</code> §2)
-    into the solve's constraint machinery, measuring basin restriction on the same pre-registered
-    convergence baselines the moment plan uses (1/6 frozen MAST, 2/5 DIII-D cold). Any likelihood,
-    prior weighting, nuisance fit or posterior update stays ambix-side.</p>
+    <section id="s4" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-23</span>
+        <h2>§4 — The constraint seam: observation and moment maps with Jacobians</h2>
+      </header>
+      <p class="landed-summary"><code>ForwardProfile</code> exposes
+      <code>thomson_observation_map/jacobian</code> and <code>current_moment_map/jacobian</code>
+      (both Jacobians pass central-finite-difference gates below 2e-8); typed
+      <code>ConstraintPinSet</code> (IsofluxPin, MomentPin with interval, unit, basis and support)
+      feeds the solve fail-closed — interval-violating roots are refused, pin evaluation preserves
+      the eliminated solve's exact current normalisation, and nothing statistical is authored.
+      Baseline banked: pins admit exactly the cold-start converged roots (MAST 1/6→1/6, DIII-D
+      2/5→2/5, restriction fraction 0.0; the DIII-D arm is a current-defaults baseline under the
+      open resolution/operator-scaling finding). Full record:
+      <a href="/nova/evidence/archive/ensemble-forward-seam-landed#s4">§4 landed</a>
+      (commits <code>d6a5fbf1</code>…<code>aef15cea</code>).</p>
+    </section>
 
     <h2 id="s5">§5 — Forward-only twin truth, and the joint feasibility gate</h2>
 
@@ -139,6 +145,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s3" data-id="c-20260823T0915-kernels-landed" data-who="reckon-ship" data-when="2026-08-23T09:15:00+00:00">
     <div class="r-comment-body">thomson-magnetics-kernels landed — commit 072dc102; gate passed. The composite Thomson synthesizer exists: (flux map, Te/ne explicit typed arrays, chord geometry) → predicted signals, built ON sample_chord_psi_norm (its bilinear interpolation now JAX-differentiable through flux and coordinates), gradient relative error 8.7254e-09 against central finite differences at a 2e-08 gate. Virtual flux-loop and poloidal-probe kernels compose biot.point with the loop/probe factories, nova/biot untouched, numerical-error bounds 1.7764e-15 Wb/T. Receipts declare COCOS 17, units, pointwise support, measured envelopes; zero sigma/prior/likelihood/fit matches by audit. 8 tests passed. §2 (batch evaluator + throughput) unblocked by the shipped coupling-surface contract; §4's moment-pin inputs available from the shipped moment plan.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260823T1010-constraint-seam-landed" data-who="reckon-ship" data-when="2026-08-23T10:10:00+00:00">
+    <div class="r-comment-body">constraint-seam landed — commits d6a5fbf1, ba7c6ff4, 060b2c5d, aef15cea (integrated tip aef15cea21c0…, note the worker manifest quoted a wrong full SHA aef15cea181f… — integrate rev-parse HEAD, never a manifest-quoted SHA); gate passed. Public maps with Jacobians below the 2e-8 FD gate; typed pin sets with fail-closed refusal; the mid-flight normalisation defect the worker caught itself — pins evaluated without the eliminated solve's target current would use a different normalisation — fixed in 060b2c5d and pinned by a focused regression. Baseline receipt (tree-stamped 060b2c5d/f5bdf5d7): 11 rows, MAST 1/6→1/6 pin-admissible, DIII-D 2/5→2/5, zero converged roots rejected, basin-restriction fraction 0.0 on both cohorts — the pins are consistent with the cold-start truth rather than restrictive at these baselines. QUALIFICATION carried in the receipt: isoflux correctness is FD-tested on the public synthetic map; scoring real isoflux admission waits on the ambix evidence owner banking trusted chord-pair pins (their pedestal-foot calibration owns the claim) — that trigger-gated re-score runs through this same seam when ambix supplies pins.</div>
 </div>
 </section>
 </main>

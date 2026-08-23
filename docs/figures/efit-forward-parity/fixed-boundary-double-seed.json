@@ -1,0 +1,229 @@
+{
+  "receipt": {
+    "kind": "fixed_boundary_then_free_seed_measurement",
+    "status": "fixed_boundary_complete_free_seed_unavailable",
+    "reference": {
+      "shot": 21978,
+      "slice_index": 35
+    },
+    "single_reference_only": true
+  },
+  "selection_basis": {
+    "observed_mesh_order": 0.97,
+    "weakest_refinement_response_of_six": true,
+    "closed_axis_enclosing_flux_surface": false,
+    "reading": "the reference lies in both low strata, making boundary representation distinguishable from interior refinement"
+  },
+  "reading_declared_before_measurement": {
+    "materially_lower_seeded_residual": "boundary-condition homotopy enters the plasma basin where source-strength homotopy did not; the low mesh order is plausibly a boundary-representation limit",
+    "no_material_improvement": "the low order is interior and the fixed-boundary route adds nothing on this lane"
+  },
+  "homotopy_distinction": {
+    "banked_negative": "source-strength homotopy scales plasma source from zero and converged to the dominating limited root",
+    "this_measurement": "boundary-condition homotopy changes fixed to free at full source strength"
+  },
+  "picard_iteration_finding": {
+    "constant_relaxation": {
+      "iterations": 400,
+      "relaxation": 0.5,
+      "outcome": "stalled"
+    },
+    "adaptive_relaxation": {
+      "iterations": 2000,
+      "initial_relaxation": 0.2,
+      "minimum_relaxation": 1e-06,
+      "reduction_interval": 100,
+      "terminal_unrelaxed_relative_sup_residual": 0.0007659068,
+      "best_unrelaxed_relative_sup_residual": 0.0007645682,
+      "outcome": "stalled"
+    },
+    "reading": "Picard is too weak on the imposed-boundary residual; the result does not establish whether the fixed-boundary equation has a root"
+  },
+  "fixed_boundary_outcome": {
+    "converged_mesh_count": 0,
+    "measured_mesh_count": 2,
+    "verdict": "FIXED_BOUNDARY_NEWTON_STALLS",
+    "statement": "Newton-Krylov stalls on both meshes even with the reference boundary imposed and confinement guaranteed by construction. The difficulty therefore persists after removing free-boundary motion; this run cannot attribute it to the free boundary.",
+    "criterion_unchanged_after_observing_stalls": true
+  },
+  "banked_cold_residuals": {
+    "coarse": 0.0103568,
+    "fine": 0.0053
+  },
+  "qualification_before_solve": {
+    "typed_saddle_resolved": true,
+    "typed_saddle_candidate_count": 2,
+    "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 9.890979271575737e-09,
+    "declared_boundary_to_map_saddle_limit": 0.01,
+    "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0039565704776983734,
+    "stored_lcfs_contour_limit": 0.006,
+    "passes": true
+  },
+  "mesh_results": [
+    {
+      "mesh": {
+        "kind": "33 by 33 rectangular benchmark lattice",
+        "realised_cells": 1089,
+        "source_moments": "centroid current on prescribed reference support",
+        "stored_axis_stride": 2,
+        "radial_step_m": 0.060625000041909516,
+        "vertical_step_m": 0.125
+      },
+      "fixed_boundary_solve": {
+        "entry_point": "benchmark-local Newton-Krylov sparse Dirichlet constraint",
+        "nova_fixed_boundary_entry_point_available": false,
+        "diagnostic_solver_scope": "benchmark-local; no production solver was added to nova.equilibrium",
+        "constraint_surface": "FluxLattice interior stencil + delta_star_from_current_density + DeclaredAnchorOperator.normalised_current_moments",
+        "boundary_condition": "reference flux retained outside the declared-support unknowns; the support-edge neighbours are the discrete Dirichlet boundary",
+        "source": "reference prescribed p_prime and ff_prime",
+        "normalisation": "same prescribed anchors and scalar target current as free arm",
+        "target_current_a": 801493.25,
+        "route": "newton_krylov",
+        "nonlinear_promotions": 12,
+        "krylov_iterations_per_promotion": 12,
+        "line_search": "armijo",
+        "converged": false,
+        "solver_returned_without_no_convergence": false,
+        "criterion": 1e-08,
+        "iterations": 12,
+        "terminal_relative_sup_residual": 0.0020754184426670097,
+        "best_relative_sup_residual": 0.0020754184426670097,
+        "best_iteration_index": 11,
+        "relative_sup_residual_trace": [
+          0.010912742325156433,
+          0.0048207398242626764,
+          0.003897393241920677,
+          0.003408019895439207,
+          0.003080231285313817,
+          0.002837920928317861,
+          0.002648136116836508,
+          0.002493789306206806,
+          0.00236479997094885,
+          0.00225474276051435,
+          0.0021592938692754915,
+          0.0020754184426670097
+        ],
+        "distribution_state": "best recorded iterate",
+        "terminal_current_normalisation_amplitude": 0.9987294891380779,
+        "declared_support_node_count": 248,
+        "solved_interior_node_count": 248,
+        "current_distribution_comparison": {
+          "definition": "abs(fixed_cell_current - Delta-star-implied_cell_current) / max(abs(Delta-star-implied_cell_current), eps*support_sup)",
+          "cell_count": 248,
+          "denominator_floor_a": 1.208275598775158e-12,
+          "minimum": 5.838820085358602e-05,
+          "median": 0.008356614790037048,
+          "p90": 0.04945895648579051,
+          "supremum": 0.8537969653325034
+        },
+        "current_integrals_on_same_support_a": {
+          "fixed_boundary": 801493.25,
+          "delta_star_implied": 796715.8953699284,
+          "fixed_over_implied_minus_one": 0.005996308919948623,
+          "fixed_over_target_minus_one": 0.0
+        },
+        "production_surface_if_promoted": {
+          "owner_decision_required": true,
+          "proposed_entry_point": "ForwardProfile.solve_fixed_boundary",
+          "required_inputs": "initial total-flux state, imposed boundary flux, declared support, requested target current, nonlinear route and tolerance",
+          "required_receipt": "fixed-point residual history, finite-state qualification, exact current normalisation, terminal current moments and boundary closure"
+        }
+      }
+    },
+    {
+      "mesh": {
+        "kind": "65 by 65 rectangular benchmark lattice",
+        "realised_cells": 4225,
+        "source_moments": "centroid current on prescribed reference support",
+        "stored_axis_stride": 1,
+        "radial_step_m": 0.030312500020954758,
+        "vertical_step_m": 0.0625
+      },
+      "fixed_boundary_solve": {
+        "entry_point": "benchmark-local Newton-Krylov sparse Dirichlet constraint",
+        "nova_fixed_boundary_entry_point_available": false,
+        "diagnostic_solver_scope": "benchmark-local; no production solver was added to nova.equilibrium",
+        "constraint_surface": "FluxLattice interior stencil + delta_star_from_current_density + DeclaredAnchorOperator.normalised_current_moments",
+        "boundary_condition": "reference flux retained outside the declared-support unknowns; the support-edge neighbours are the discrete Dirichlet boundary",
+        "source": "reference prescribed p_prime and ff_prime",
+        "normalisation": "same prescribed anchors and scalar target current as free arm",
+        "target_current_a": 801493.25,
+        "route": "newton_krylov",
+        "nonlinear_promotions": 12,
+        "krylov_iterations_per_promotion": 12,
+        "line_search": "armijo",
+        "converged": false,
+        "solver_returned_without_no_convergence": false,
+        "criterion": 1e-08,
+        "iterations": 12,
+        "terminal_relative_sup_residual": 0.000451221663543222,
+        "best_relative_sup_residual": 0.000451221663543222,
+        "best_iteration_index": 11,
+        "relative_sup_residual_trace": [
+          0.00046630159042332364,
+          0.0004647738296900267,
+          0.0004632848331603129,
+          0.0004618287973120888,
+          0.00046040438478846257,
+          0.00045901033684318804,
+          0.0004576454659880047,
+          0.00045630865315278435,
+          0.000454998840607998,
+          0.00045371502765548244,
+          0.0004524562678640126,
+          0.000451221663543222
+        ],
+        "distribution_state": "best recorded iterate",
+        "terminal_current_normalisation_amplitude": 1.000121070293261,
+        "declared_support_node_count": 996,
+        "solved_interior_node_count": 996,
+        "current_distribution_comparison": {
+          "definition": "abs(fixed_cell_current - Delta-star-implied_cell_current) / max(abs(Delta-star-implied_cell_current), eps*support_sup)",
+          "cell_count": 996,
+          "denominator_floor_a": 3.046981368940465e-13,
+          "minimum": 4.860149729968923e-06,
+          "median": 0.0032529599583857602,
+          "p90": 0.036225056171221945,
+          "supremum": 27.122209099135794
+        },
+        "current_integrals_on_same_support_a": {
+          "fixed_boundary": 801493.25,
+          "delta_star_implied": 801283.2038650732,
+          "fixed_over_implied_minus_one": 0.00026213719932433044,
+          "fixed_over_target_minus_one": 0.0
+        },
+        "production_surface_if_promoted": {
+          "owner_decision_required": true,
+          "proposed_entry_point": "ForwardProfile.solve_fixed_boundary",
+          "required_inputs": "initial total-flux state, imposed boundary flux, declared support, requested target current, nonlinear route and tolerance",
+          "required_receipt": "fixed-point residual history, finite-state qualification, exact current normalisation, terminal current moments and boundary closure"
+        }
+      }
+    }
+  ],
+  "seeded_stage_eligible_meshes": [],
+  "seeded_stage": {
+    "status": "unrun_no_converged_fixed_boundary_state",
+    "passive_inclusive_circuit_background_built": false,
+    "reason": "No fixed-boundary state reached the unchanged criterion, so neither mesh supplied an admissible state and current-moment seed."
+  },
+  "protected_banked_artifacts": {
+    "before": {
+      "declared_count": 23,
+      "verified_digest_count": 23,
+      "all_digests_match": true,
+      "source_and_output_receipts_are_outside_protected_set": true
+    },
+    "after": {
+      "declared_count": 23,
+      "verified_digest_count": 23,
+      "all_digests_match": true,
+      "source_and_output_receipts_are_outside_protected_set": true
+    }
+  },
+  "figure": {
+    "path": "docs/figures/efit-forward-parity/fixed-boundary-double-seed.png",
+    "sha256": "c040ff102b5173e6f6e405313f24d0a3f7a4ce756cdef0e7647237548a166578",
+    "content": "fixed-boundary and Delta-star-implied current-density fields with their spatial difference"
+  }
+}

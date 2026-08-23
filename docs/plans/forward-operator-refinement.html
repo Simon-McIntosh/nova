@@ -19,7 +19,7 @@
 <meta name="plan-effort-hours" content="6.0">
 <meta name="plan-depends-on" content="scoring-criteria-derivation">
 <meta name="plan-informs" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 </head>
 <body>
 <main class="plan-doc">
@@ -100,6 +100,36 @@
   default is reported with device identity and the landed kernel-path commit cited, the
   same receipt states the cache-invalidation scope actually observed, and the forward
   suites pass at the new default with counts quoted.</p>
+</section>
+
+<section id="s5">
+  <h2 id="s5h">§5 — Resolution self-consistency: every plasma-adjacent default at the new scale</h2>
+  <p>Owner directive (2026-08-23): the plasma-cell default does not move alone. Every
+  plasma-cell-adjacent resolution default is bumped to a consistent scale &mdash; in
+  particular the rectangular contour/flux-map grid, which should sit at similar resolution
+  to the plasma mesh &mdash; and the full set is audited for self-consistency. Known
+  anchors: <code>Frame.dplasma</code> (&minus;500 &rarr; &minus;2100 in the demonstration
+  commit), the reference suite's own pinned <code>SUITE_CELLS = &minus;500</code>
+  (tests/test_equilibrium_forward_reference.py:265), and the rect contour-grid default
+  whose owner the inventory must trace (map-extraction and flux-surface machinery consume
+  stored 65&times;65 maps; the solve-side lattice and levelset grids have their own
+  defaults). The inventory states, per default: current value, owning symbol and consumer
+  paths, the scale it implies beside the 2,210-cell plasma mesh, and a proposed value with
+  its cost.</p>
+  <p>The <code>SUITE_CELLS</code> investigation rides in this section: the passive-closure
+  reproduction move measured 0.6098 points against a 0.15 ceiling at the pinned
+  &minus;500 carrier (6.2&times; the documented 0.098-point direct response), and both the
+  old-default and bumped-default workers reproduced the identical value, so the anomaly is
+  independent of the global default. Before any repair, measure the same passive-closure
+  move on a suite-cells ladder (&minus;500, an intermediate, and the reference-native
+  equivalent, all as explicit arguments): a move that collapses toward the documented
+  response at denser cells convicts the coarse carrier and the fix is the consistency bump
+  this section owns; a mesh-independent move convicts the closure path and routes to a
+  defect node with the mechanism named.</p>
+  <p><strong>Done when:</strong> the inventory table is banked with a consistency verdict
+  and proposed value per default; the passive-closure mesh-response ladder is banked with
+  its verdict (coarse-carrier artifact versus mesh-independent defect); and the follow-on
+  bump or defect node is named from those receipts rather than assumed.</p>
 </section>
 
 <section id="s3">

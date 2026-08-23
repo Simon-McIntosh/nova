@@ -101,15 +101,22 @@ from nova.equilibrium.moment import (
 )
 from nova.equilibrium.observation import (
     ClippedIntegralMeasure,
+    ConstraintPinSet,
+    ConstraintViolationError,
     CurrentLedger,
+    CurrentMomentObservation,
     IntegralObservation,
+    MomentIntegralSupport,
     MomentTargets,
     current_ledger,
     core_pressure,
     moment_residual,
+    observe_current_moments,
     observe_moments,
     reject_unsupported_enforcement,
 )
+from nova.equilibrium.observation_kernels import ThomsonSignals, synthesize_thomson
+from nova.equilibrium.map_extraction import sample_chord_psi_norm
 from nova.equilibrium.source import (
     ContinuationLedger,
     CurrentNormalisationError,
@@ -693,6 +700,189 @@ class ForwardProfile:
         )
         return observe_moments(support_integrals, topology.flux_span)
 
+    def thomson_observation(
+        self,
+        flux,
+        profile_psi_norm,
+        electron_temperature,
+        electron_density,
+        chord_coordinates,
+        **options,
+    ) -> ThomsonSignals:
+        """Compose a solved flux map with the deterministic Thomson kernel."""
+        if not isinstance(self.lattice, FluxLattice):
+            raise TypeError("Thomson observations require a structured FluxLattice")
+        state = jnp.asarray(flux)
+        grid_flux = state[: self.lattice.node_count].reshape(self.lattice.shape)
+        _masks, topology = self.operator.read(state)
+        return synthesize_thomson(
+            self.lattice.radius,
+            self.lattice.height,
+            grid_flux,
+            profile_psi_norm,
+            electron_temperature,
+            electron_density,
+            chord_coordinates,
+            axis_flux=topology.axis_flux,
+            boundary_flux=topology.boundary_flux,
+            **options,
+        )
+
+    def thomson_observation_map(
+        self,
+        flux,
+        profile_psi_norm,
+        electron_temperature,
+        electron_density,
+        chord_coordinates,
+        **options,
+    ) -> jax.Array:
+        """Return Thomson temperature and density on one fixed output axis."""
+        signals = self.thomson_observation(
+            flux,
+            profile_psi_norm,
+            electron_temperature,
+            electron_density,
+            chord_coordinates,
+            **options,
+        )
+        return jnp.concatenate(
+            (
+                signals.electron_temperature.reshape(-1),
+                signals.electron_density.reshape(-1),
+            )
+        )
+
+    def thomson_observation_jacobian(
+        self,
+        flux,
+        profile_psi_norm,
+        electron_temperature,
+        electron_density,
+        chord_coordinates,
+        **options,
+    ) -> jax.Array:
+        """Differentiate the public Thomson map with respect to solved flux."""
+        return jax.jacfwd(
+            lambda state: self.thomson_observation_map(
+                state,
+                profile_psi_norm,
+                electron_temperature,
+                electron_density,
+                chord_coordinates,
+                **options,
+            )
+        )(jnp.asarray(flux))
+
+    def current_moment_observation(
+        self,
+        flux,
+        *,
+        support: MomentIntegralSupport,
+        target_current=None,
+    ) -> CurrentMomentObservation:
+        """Return net current and centroid on one explicitly declared support."""
+        current, _integrals, masks, _topology, _amplitude = self._integral_state(
+            flux, target_current=target_current
+        )
+        return observe_current_moments(
+            current.cell_current,
+            self.operator.grid.coordinate,
+            core_mask=masks.core,
+            support=support,
+        )
+
+    def current_moment_map(
+        self,
+        flux,
+        *,
+        support: MomentIntegralSupport,
+        target_current=None,
+    ) -> jax.Array:
+        """Return current amplitude and centroid on one fixed output axis."""
+        return self.current_moment_observation(
+            flux, support=support, target_current=target_current
+        ).stack()
+
+    def current_moment_jacobian(
+        self,
+        flux,
+        *,
+        support: MomentIntegralSupport,
+        target_current=None,
+    ) -> jax.Array:
+        """Differentiate the support-declared current-moment map over flux."""
+        return jax.jacfwd(
+            lambda state: self.current_moment_map(
+                state, support=support, target_current=target_current
+            )
+        )(jnp.asarray(flux))
+
+    def constraint_residual(self, flux, pins: ConstraintPinSet) -> jax.Array:
+        """Return interval-scaled deterministic residuals for trusted pins.
+
+        Each isoflux pair contributes one residual per endpoint against the
+        shared target. Each current moment contributes one residual on its
+        declared support. The uncertainty intervals are acceptance scales,
+        not statistical weights.
+        """
+        if not isinstance(pins, ConstraintPinSet):
+            raise TypeError("pins must be a ConstraintPinSet")
+        if pins.isoflux and not isinstance(self.lattice, FluxLattice):
+            raise TypeError("isoflux constraints require a structured FluxLattice")
+        state = jnp.asarray(flux)
+        residuals = []
+        if pins.isoflux:
+            grid_flux = state[: self.lattice.node_count].reshape(self.lattice.shape)
+            _masks, topology = self.operator.read(state)
+            for pin in pins.isoflux:
+                coordinates = jnp.asarray(
+                    (pin.first_coordinate, pin.second_coordinate), dtype=state.dtype
+                )
+                sampled = sample_chord_psi_norm(
+                    self.lattice.radius,
+                    self.lattice.height,
+                    grid_flux,
+                    coordinates,
+                    axis_flux=topology.axis_flux,
+                    boundary_flux=topology.boundary_flux,
+                )
+                residuals.extend(
+                    (sampled.psi_norm - pin.psi_norm) / pin.uncertainty.absolute
+                )
+        observations: dict[MomentIntegralSupport, CurrentMomentObservation] = {}
+        for pin in pins.moments:
+            if pin.support not in observations:
+                observations[pin.support] = self.current_moment_observation(
+                    state, support=pin.support
+                )
+            observed = observations[pin.support].value(pin.name)
+            residuals.append((observed - pin.target) / pin.uncertainty.absolute)
+        return jnp.stack(residuals)
+
+    def constraint_jacobian(self, flux, pins: ConstraintPinSet) -> jax.Array:
+        """Differentiate trusted-pin residuals with respect to solved flux."""
+        return jax.jacfwd(lambda state: self.constraint_residual(state, pins))(
+            jnp.asarray(flux)
+        )
+
+    def constraints_satisfied(self, flux, pins: ConstraintPinSet) -> jax.Array:
+        """Return whether every trusted pin lies inside its stated interval."""
+        residual = self.constraint_residual(flux, pins)
+        return jnp.all(jnp.isfinite(residual)) & jnp.all(jnp.abs(residual) <= 1.0)
+
+    def _require_constraints(self, flux, pins: ConstraintPinSet | None) -> None:
+        """Refuse a candidate root outside any supplied trusted interval."""
+        if pins is None:
+            return
+        residual = np.asarray(self.constraint_residual(flux, pins))
+        if not np.all(np.isfinite(residual)) or np.any(np.abs(residual) > 1.0):
+            worst = float(np.nanmax(np.abs(residual)))
+            raise ConstraintViolationError(
+                "solved state violates a trusted constraint interval; "
+                f"maximum scaled residual {worst:.6g}"
+            )
+
     def _integral_state(self, flux, requested_class=None, target_current=None):
         """Return current and integral state for this construction's geometry."""
         if self.operator.use_linear_moments:
@@ -925,6 +1115,7 @@ class ForwardProfile:
         current=None,
         target_current=None,
         enforce: Sequence[str] = (),
+        pins: ConstraintPinSet | None = None,
         **options,
     ) -> ForwardEquilibrium:
         """Return the equilibrium the prescribed source supports.
@@ -956,25 +1147,28 @@ class ForwardProfile:
         """
         reject_unsupported_enforcement(enforce, self.source.closure_degrees)
         if route == "host":
-            return self._solve_host(
+            equilibrium = self._solve_host(
                 initial_flux, current, target_current=target_current, **options
             )
-        if route == "host_krylov":
-            return self._solve_host_krylov(
+        elif route == "host_krylov":
+            equilibrium = self._solve_host_krylov(
                 initial_flux, current, target_current=target_current, **options
             )
-        if route not in _ACCELERATED:
+        elif route not in _ACCELERATED:
             raise ValueError(
                 f"unknown solve route {route!r}; available: "
                 f"{', '.join((*_HOST, *_ACCELERATED))}"
             )
-        return self._solve_accelerated(
-            route,
-            initial_flux,
-            current,
-            target_current=target_current,
-            **options,
-        )
+        else:
+            equilibrium = self._solve_accelerated(
+                route,
+                initial_flux,
+                current,
+                target_current=target_current,
+                **options,
+            )
+        self._require_constraints(equilibrium.flux, pins)
+        return equilibrium
 
     def _iteration_count(self, route: str, options: dict[str, object]) -> int:
         """Return the fixed number of nonlinear state updates a route performs."""
@@ -995,6 +1189,7 @@ class ForwardProfile:
         route: str,
         tolerance: float,
         iterations: int,
+        pins: ConstraintPinSet | None = None,
         **options,
     ) -> ForwardBranchReceipt:
         """Solve one pinned branch and qualify it against an emergent terminal read."""
@@ -1018,6 +1213,8 @@ class ForwardProfile:
             & consistent
             & equilibrium.finite.passed
         )
+        if pins is not None:
+            converged = converged & self.constraints_satisfied(equilibrium.flux, pins)
         return ForwardBranchReceipt(
             equilibrium=equilibrium,
             requested_class=requested,
@@ -1037,6 +1234,7 @@ class ForwardProfile:
         current=None,
         target_current=None,
         enforce: Sequence[str] = (),
+        pins: ConstraintPinSet | None = None,
         tolerance: float = 1.0e-10,
         **options,
     ) -> ForwardBranchReceipt:
@@ -1056,6 +1254,7 @@ class ForwardProfile:
             route=route,
             tolerance=tolerance,
             iterations=self._iteration_count(route, options),
+            pins=pins,
             **options,
         )
 
@@ -1128,6 +1327,7 @@ class ForwardProfile:
         current=None,
         target_current=None,
         enforce: Sequence[str] = (),
+        pins: ConstraintPinSet | None = None,
         tolerance: float = 1.0e-10,
         **options,
     ) -> ForwardPortfolio:
@@ -1169,6 +1369,7 @@ class ForwardProfile:
                 route=route,
                 tolerance=tolerance,
                 iterations=iterations,
+                pins=pins,
                 **options,
             ),
             in_axes=(0, 0, current_axis, target_axis),

@@ -7,7 +7,7 @@ from scipy import optimize
 
 from nova.biot.biot import Nbiot
 from nova.graphics.plot import Animate
-from nova.imas.database import Ids
+from nova.imas.dataset import Ids
 from nova.imas.machine import Machine
 from nova.imas.pulseprofile import PulseProfile
 from nova.linalg.regression import MoorePenrose

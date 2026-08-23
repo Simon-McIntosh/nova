@@ -1,0 +1,57 @@
+{
+  "status": "passed",
+  "definition": {
+    "path": "nova/imas/dataset.py",
+    "line": 21,
+    "statement": "Ids = ImasIds | dict[str, int | str] | tuple[int | str]"
+  },
+  "repairs": [
+    {
+      "path": "nova/imas/waveform.py",
+      "import": "from nova.imas.dataset import Ids"
+    },
+    {
+      "path": "nova/imas/fuse.py",
+      "import": "from nova.imas.dataset import Ids"
+    },
+    {
+      "path": "nova/imas/transient.py",
+      "import": "from nova.imas.dataset import Ids"
+    }
+  ],
+  "verification": {
+    "imports": [
+      {
+        "module": "nova.imas.waveform",
+        "exit_code": 0,
+        "output": "waveform import ok; Ids is nova.imas.dataset.Ids: True"
+      },
+      {
+        "module": "nova.imas.fuse",
+        "exit_code": 0,
+        "output": "fuse import ok; Ids is nova.imas.dataset.Ids: True"
+      },
+      {
+        "module": "nova.imas.transient",
+        "exit_code": 0,
+        "output": "transient import ok; Ids is nova.imas.dataset.Ids: True"
+      }
+    ],
+    "focused_tests": {
+      "matching_test_files": 0,
+      "tests_run": 0,
+      "reason": "No focused test imports any assigned module; direct import checks exercise all three repaired import paths."
+    },
+    "ruff": {
+      "paths_checked": 3,
+      "exit_code": 0,
+      "output": "All checks passed!"
+    },
+    "stale_import_sweep": {
+      "pattern": "^from nova\\.imas\\.database import Ids$",
+      "search_root": "nova",
+      "matches": 0,
+      "output": "no matches: 0 files import Ids from nova.imas.database"
+    }
+  }
+}

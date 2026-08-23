@@ -17,6 +17,7 @@ import math
 import os
 from pathlib import Path
 from time import perf_counter
+from unittest.mock import patch
 
 os.environ.setdefault("XLA_FLAGS", "--xla_gpu_enable_command_buffer=")
 os.environ.setdefault("XLA_PYTHON_CLIENT_PREALLOCATE", "false")
@@ -536,28 +537,27 @@ def _with_passive_representation(control, conductor_count: int, expansion: float
     )
 
 
-def _qualified_control_representation(control):
-    """Pin the current image used by the qualified eigenvalue comparator."""
+def _build_qualified_control():
+    """Build every fitted control input on the qualified centroid image."""
+    profile_type = forward_solve_suite.ForwardProfile
+    from_lattice = profile_type.from_lattice.__func__
 
-    def centroid_profile(profile):
-        operator = replace(
-            profile.operator,
-            cell_average_stencil=None,
-            cell_average_weight=None,
-        )
-        return replace(profile, operator=operator)
+    def centroid_from_lattice(profile_class, *args, **kwargs):
+        kwargs["cubic_cell_average"] = False
+        return from_lattice(profile_class, *args, **kwargs)
 
-    return replace(
-        control,
-        with_passive=centroid_profile(control.with_passive),
-        without_passive=centroid_profile(control.without_passive),
-    )
+    with patch.object(
+        profile_type,
+        "from_lattice",
+        classmethod(centroid_from_lattice),
+    ):
+        return _build_analytic_control()
 
 
 def _representation_response() -> dict[str, object]:
     """Recompute the leading mode for distinct fitted passive shells."""
     started = perf_counter()
-    base_control = _qualified_control_representation(_build_analytic_control())
+    base_control = _build_qualified_control()
     specifications = (
         ("baseline", 16, PASSIVE_SHELL_EXPANSION),
         (

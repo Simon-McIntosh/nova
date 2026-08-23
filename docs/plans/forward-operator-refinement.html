@@ -19,7 +19,7 @@
 <meta name="plan-effort-hours" content="6.0">
 <meta name="plan-depends-on" content="scoring-criteria-derivation">
 <meta name="plan-informs" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
-<meta name="plan-version" content="27">
+<meta name="plan-version" content="28">
 <meta name="plan-impl" content="0.44">
 </head>
 <body>
@@ -258,18 +258,22 @@
   in 4 iterations to 1.59e-9 on the same expanding map &mdash; so no resolution bump
   rehabilitates damped fixed-point routes, and the adjudication separates FLOOR movement
   (discretisation) from route CONDITIONING (solver), crediting resolution only with the
-  first. Baseline route: the catalog lane has locked matrix-free Newton&ndash;Krylov with a
-  finite-difference residual action as the DEFAULT solve route
-  (<code>solver-default-route</code>); the floors here are measured on that incoming
-  default once it lands &mdash; the warm-neighbour campaign already showed a route change
-  reproduces zero banked terminal residuals, so measuring on the outgoing route would date
-  the receipts on arrival. One route-specific control is mandatory before any floor is
-  attributed: the finite-difference action carries a differencing step whose
-  truncation/round-off minimum can masquerade as a discretisation floor, so every floor
-  receipt cites the route's declared step and selection rule AND the step-invariance
-  control (one floor re-measured at a second step size, built inside the route's own
-  landing node) &mdash; a floor that moves with the step is a route artifact and is
-  attributed to neither order nor mesh. The deliverable is a decision-grade statement for the solver
+  first. Baseline route, as amended: <code>solver-default-route</code> now names the
+  REPAIRED EXACT AUTODIFF TANGENT as the default (the finite-difference arm was cancelled
+  unbuilt when the zero-gap SVD-JVP repair inverted its premise), and the baseline floor
+  already exists &mdash; 7.9305e-5 on the 4,225-node carrier, measured on that route with
+  the mesh receipt. The step-invariance receipt fields
+  (<code>differencing_step</code>, <code>step_selection_rule</code>,
+  <code>step_invariance.*</code>) are dropped as
+  <strong>not-applicable-on-exact-route</strong>, NOT as unmet: the failure they guarded
+  &mdash; a floor that is really the differencing step's truncation/round-off minimum
+  &mdash; is structurally impossible on a route with no step parameter; the names stay
+  pinned for any future differenced arm. The transposed control that replaces them on the
+  exact route: a latent non-differentiable branch can poison the tangent the way a bad step
+  poisons a difference, so every floor receipt cited here must show
+  <code>krylov_action_qualification</code> reading <code>ACCEPTED</code> throughout the run
+  whose floor is quoted &mdash; a field lookup, already satisfied by both mesh rungs (89/89
+  ACCEPTED). The deliverable is a decision-grade statement for the solver
   lane: refine, raise order, or both, each with its measured cost.</p>
   <p><strong>Done when:</strong> the order-versus-mesh table (floor moved, criterion verdict,
   build cost, memory) is banked with a one-paragraph ruling, and the DIII-D forward-gate

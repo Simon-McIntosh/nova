@@ -503,8 +503,9 @@ def _mechanism(stable: dict[str, object], elongated: dict[str, object]):
         or stable_content["passive_current_state_fraction"] != 0.0
     )
     physical = bool(
-        same_mode
-        and max(stable_translation, elongated_translation) >= 0.25
+        stable_translation >= 0.5
+        and leading_alignment >= 0.95
+        and stable_content["boundary_state_fraction"] < 0.25
         and not algebraic
     )
     if algebraic:
@@ -512,7 +513,7 @@ def _mechanism(stable: dict[str, object], elongated: dict[str, object]):
         mechanism = "affine_flux_coordinate_or_scalar_current_constraint"
     elif physical:
         classification = "PHYSICAL_NEAR_MARGINAL_MODE"
-        mechanism = "free_boundary_axis_displacement_mode"
+        mechanism = "vertical_free_boundary_axis_displacement_mode"
     else:
         classification = "DISCRETISATION_ARTIFACT"
         mechanism = "carrier_specific_flux_map_mode"
@@ -534,10 +535,13 @@ def _mechanism(stable: dict[str, object], elongated: dict[str, object]):
             stable_content["passive_current_state_fraction"] == 0.0
         ),
         "discretisation_discriminator": (
-            "The stable leading eigenvector is compared with the late passive-driven "
-            "mode on the independent elongated unstructured carrier; agreement in "
-            "axis-motion direction and the independently reproduced elongated growth "
-            "excludes a mode confined to the 625-cell structured control."
+            "A carrier-local mesh mode would concentrate on boundary rows or fail to "
+            "project onto a smooth physical template. The leading vector instead "
+            "projects predominantly onto the analytic axis-translation subspace, "
+            "moves the fitted axis vertically, and has low wall-row and affine "
+            "normalisation content. The independent elongated carrier carries a "
+            "different radial-dominant mode, so it is not used as false same-mode "
+            "evidence."
         ),
         "repair_scope": (
             "A physical near-marginal mode requires route qualification or screening "

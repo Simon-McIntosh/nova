@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="derived-observable-parity-landed">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="derived-observable-parity">
+<title>derived-observable-parity-landed</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="Derived-Observable Parity — cumulative execution evidence">
+<meta name="plan-summary" content="Landing record of the derived-observable-parity plan: the reuse map, the computation-versus-state discriminator, the repair its verdict scopes, and the re-runnable label-parity acceptance, each with commits, receipts and gate outcomes">
+</head>
+<body>
+<main class="plan-doc">
+
+<h1>Derived-Observable Parity — cumulative execution evidence</h1>
+
+<section id="reuse-map">
+  <h2 id="reuse-map-h">Reuse map — the machinery the discriminator consumes</h2>
+
+  <p><strong>observable-parity-reuse-map</strong> landed 2026-08-23 — commit <code>429506cf</code>,
+  merged <code>dff48306</code>, gate PASSED. 248 lines; all three failing observables carry
+  registration site, bound derivation, per-slice evaluation path, batched evaluation path,
+  shared-state entry, localisation seam and a fitness verdict; 7 explicit no-candidate findings.
+  Artifact: <code>scripts/observable_parity_reuse/report.md</code>.</p>
+
+  <p><strong>The single most consequential finding: both routes already share the label
+  spine.</strong> <code>ForwardProfile.solve</code> and <code>ForwardProfile.solve_batch</code>
+  terminate in the same <code>_solve_accelerated</code> → <code>_receipt</code> path, so there are
+  no route-specific derived-label definitions to reconcile. A repair that authored a second
+  batched volume, radius or divergence function would create exactly the duplicate authority the
+  plan forbids. What differs between the routes is layout, accumulation order and kernel
+  selection — not the definition.</p>
+
+  <p><strong>The discriminator therefore has a clean shared-state arm.</strong>
+  <code>ForwardProfile.observe</code> is the reusable no-iteration entry: evaluate one selected
+  shared terminal flux per case through scalar <code>observe</code>, then through
+  <code>jax.jit(jax.vmap(...))</code> of the same <code>observe</code>, and compare. Stable
+  observable paths come from <code>_named_tree</code>/<code>_leaves</code>; the committed
+  exact/dual-envelope rules from <code>_score_observable</code>. Intermediate receipts are taken
+  only after a terminal leaf differs.</p>
+
+  <p><strong>Seven no-candidate findings, two of which change the plan's scope.</strong> There is
+  no package-level terminal-observable registry — only the benchmark generator, the tests and the
+  committed JSON own the 69 registrations. There is no <code>observe_batch</code>, so the batch arm
+  must be a <code>vmap</code> of <code>observe</code>. <strong>Neither
+  <code>jitted-eager-parity-gate.json</code> nor
+  <code>conditioned-convergence-and-observables.json</code> retains the two raw route values for a
+  case, and neither retains terminal flux arrays</strong> — so the discriminator must <em>run</em>;
+  it cannot be reconstructed from the banked aggregates. Nor do the receipts retain clipped-support
+  moments, radial-volume numerators, eroded support masks, intermediate current or divergence
+  fields, or reduction indices, so localising a first differing operation needs a focused trace
+  around the shared spine. Finally, a heterogeneous six-profile <code>solve_batch</code> does not
+  exist: <code>solve_batch</code> batches dynamic arrays for <em>one</em> profile, and the shot-wide
+  MAST <code>vmap</code> belongs to another solver and emits no <code>ForwardEquilibrium</code>
+  labels. The existing <code>solve_batch</code> parity regression checks flux agreement and
+  aggregate finiteness, not these three labels.</p>
+
+  <p><strong>Per-observable fitness verdicts.</strong> <code>moments.volume</code> — STRONG TARGET,
+  BOUND QUALIFICATION REQUIRED: its exact equality is an empirical <em>zero-width float64
+  calibration envelope</em>, not a discrete-type guarantee, which is the fact the
+  <code>exact-equality-bounds</code> decision turns on. <code>moments.major_radius</code> —
+  STRONGEST SHARED-SUPPORT COMPANION: it shares the clipped volume support and differs by up to
+  2.220446049250313e-16 at 2.7365469397805193 bound utilisation, so it should be evaluated
+  alongside volume rather than separately. <code>conservation.divergence_j</code> — DIRECTLY
+  REUSABLE, BUT NOT THE MOMENT SUPPORT: it uses a distinct <em>eroded finite-difference</em>
+  support and fails mainly through relative difference 0.6 against a relative bound of
+  0.15286615188530017.</p>
+</section>
+
+</main>
+</body>
+</html>

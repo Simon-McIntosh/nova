@@ -25,11 +25,11 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-23">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-sprint" content="S14">
-<meta name="plan-commits" content="6cdc60c46ef0b0e1c611ff2c5404ec561e4abbce,b971557179559797f03d2438c3b5b041a102154e,f1adace7cbfecea328cc085bad72f4e7664929f5,abae6290686c9f5b40408190ffcb4e63902061aa">
-<meta name="plan-artifacts" content="docs/figures/diiid-forward-onboarding/dimension-general-conditioning.json,scripts/continuation_parameter_choice/report.md,docs/evidence/archive/topology-preserving-continuation-landed.html">
-<meta name="plan-impl" content="0.286">
+<meta name="plan-commits" content="6cdc60c46ef0b0e1c611ff2c5404ec561e4abbce,b971557179559797f03d2438c3b5b041a102154e,f1adace7cbfecea328cc085bad72f4e7664929f5,abae6290686c9f5b40408190ffcb4e63902061aa,f0cec6dcd29b766f3c7b8c8813f4577a0419cd28,f67a76e0">
+<meta name="plan-artifacts" content="docs/figures/diiid-forward-onboarding/dimension-general-conditioning.json,scripts/continuation_parameter_choice/report.md,scripts/continuation_manifold_reuse/report.md,docs/evidence/archive/topology-preserving-continuation-landed.html">
+<meta name="plan-impl" content="0.429">
 </head>
 <body>
   <main class="plan-doc">
@@ -271,6 +271,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260823T2130-s2-parameter" data-who="reckon-ship" data-when="2026-08-23T21:30:00Z">
     <div class="r-comment-body">continuation-parameter-evidence landed - commit f1adace7, merged abae6290; gate PASSED; measure: 1 of 3 candidate parameterisations recommended, 2 of 3 explicitly refuted, source amplitude on the banked 21-rung and 41-rung campaigns ending converged at the limited root with 5.06e-2 terminal parity error, constrained current on the production identity a(x, I) = I / sum(unscaled_cell_current(x)) applied as one common amplitude to every current moment. Decision continuation-parameter locked to state-arclength. Artifact: scripts/continuation_parameter_choice/report.md (210 lines). Method requirements honoured: the report names the tree it adjudicated against (bacbbd81) and declines every performance and convergence attribution because no candidate production solve ran. It also settles that nova/equilibrium/continuation.py is not an implementation seam for this work - it continues p-prime and FF-prime spatially onto open-flux domains with no solve-state path or homotopy parameter.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260823T2140-reuse-map" data-who="reckon-ship" data-when="2026-08-23T21:40:00Z">
+    <div class="r-comment-body">continuation-reuse-map landed - commit f0cec6dc, merged f67a76e0; gate PASSED; measure: 36 numbered candidates each carrying repo, path, symbol and a fitness verdict (36/36 field completeness), 12 searched capability families, 7 explicit no-candidate results. Artifact: scripts/continuation_manifold_reuse/report.md. Reuse boundary: implement inside the existing fixed-shape solver shell, call ForwardFluxOperator.read for the predicate, route every linear action through _qualified_krylov_step, return through ForwardBranchReceipt; source-domain continuation, adjacency ordering and the imas-ambix physical-space tangency penalty are named non-substitutes. The seven gaps authorise new machinery: no predictor-corrector or pseudo-arclength solve-state stepping exists in either repository, no state-space arclength coordinate or bordered system, no solve-state tangent basis for the admissibility boundary, no fixed-shape manifold projector, no seed-ranking API, no contract test for such a method, and no receipt field for mean advance fraction or achieved Newton-step-equivalents. Seed-alignment prototype: benchmarks/event_resolved_amplification.py::_arnoldi_event with _event_discrimination, whose bank carries growth 5.379792627e9 to 0.06186094 for the alternate direction, projected-condition-against-growth Spearman 0.6636 versus active-mode-overlap-against-growth Spearman 0.1273, and a qualified 136.24x warm-outcome median split with 21985/51 retained as an outlier; the observable must be preregistered before scoring.</div>
 </div>
 </section>
 </main>

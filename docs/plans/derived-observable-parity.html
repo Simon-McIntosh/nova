@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="derived-observable-parity">
   <meta name="plan-title" content="Derived-Observable Parity — the same quantity from two routes">
   <meta name="plan-summary" content="Three registered terminal observables disagree between the compiled and eager routes by up to 3.9 times their bound while the terminal states agree to 3.6e-12. The disagreement is in the observable computation, not inherited from the state, and a labeled catalog emits exactly these quantities.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="5.0">
   <meta name="plan-capability-version" content="1.0">
@@ -23,7 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-23">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
+<meta name="plan-commits" content="429506cfd767c0dd6365e4168d921f42a630b262,dff48306">
+<meta name="plan-artifacts" content="scripts/observable_parity_reuse/report.md,docs/evidence/archive/derived-observable-parity-landed.html">
+<meta name="plan-impl" content="0.2">
 </head>
 <body>
   <main class="plan-doc">
@@ -37,32 +40,85 @@
     explained everything else on this map</em>.</p>
 
     <table>
-      <caption>The three failing observables, and the conditioning severity of the case that failed them</caption>
+      <caption>The three failing observables — every failing case, from
+        <code>conditioned-convergence-and-observables.json</code></caption>
       <thead>
-        <tr><th scope="col">Case</th><th scope="col">Failing observable</th><th scope="col">Bound ratio</th><th scope="col">Max projected Krylov condition</th></tr>
+        <tr><th scope="col">Observable</th><th scope="col">Failing cases</th><th scope="col">Worst bound utilisation</th><th scope="col">What the difference actually is</th></tr>
       </thead>
       <tbody>
-        <tr><td>21985/51</td><td><code>conservation.divergence_j</code></td><td>3.925</td><td>3405.76</td></tr>
-        <tr><td>21989/55</td><td><code>conservation.divergence_j</code>, <code>moments.major_radius</code></td><td>3.925, 2.737</td><td>173.01</td></tr>
-        <tr><td>21978/35</td><td><code>moments.volume</code> (exact equality)</td><td>—</td><td>3674.07</td></tr>
+        <tr>
+          <td><code>conservation.divergence_j</code></td>
+          <td>21985/51, 21989/55, 22086/43</td>
+          <td>3.925 on 21985/51</td>
+          <td>absolute difference 1.164e-10 against an absolute bound of 1.370e-10 — it <em>passes</em>
+          on absolute and fails only on relative, 0.6 against 0.1529, on a near-zero quantity over an
+          eroded finite-difference support</td>
+        </tr>
+        <tr>
+          <td><code>moments.major_radius</code></td>
+          <td>21989/55, 22086/43</td>
+          <td>2.737 on 22086/43</td>
+          <td>absolute difference 2.220e-16 against an absolute bound of 1.110e-16 — a two-ULP
+          difference against a one-ULP bound, over the same clipped support volume uses</td>
+        </tr>
+        <tr>
+          <td><code>moments.volume</code></td>
+          <td>21978/35, 22086/43</td>
+          <td>exact equality, no ratio defined</td>
+          <td>absolute difference 4.441e-16, relative 2.151e-16 — two ULP against a zero-width bound</td>
+        </tr>
       </tbody>
     </table>
 
-    <p><strong>The first argument that these are independent: they outlived the repair.</strong>
-    Iteration-local Krylov conditioning collapsed the compiled-versus-eager terminal flux
-    difference from 1.1646900802908533e-05 to <strong>3.5787553476218648e-12</strong> on these same
-    six cases — a 3.3-million-fold reduction. If two routes produce terminal states agreeing to
-    twelve decimal places and a derived quantity computed from those states still disagrees by
-    3.9 times its bound, that disagreement <em>cannot</em> have been inherited from the state. It
-    is in the computation of the observable.</p>
+    <table>
+      <caption>Which cases fail, against the conditioning severity of each</caption>
+      <thead>
+        <tr><th scope="col">Case</th><th scope="col">Observables failed</th><th scope="col">Max projected Krylov condition</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>21978/35</td><td><code>moments.volume</code></td><td>3674.07</td></tr>
+        <tr><td>21983/35</td><td>none</td><td>582.48</td></tr>
+        <tr><td>21985/51</td><td><code>conservation.divergence_j</code></td><td>3405.76</td></tr>
+        <tr><td>21986/46</td><td>none</td><td>775.05</td></tr>
+        <tr><td>21989/55</td><td><code>conservation.divergence_j</code>, <code>moments.major_radius</code></td><td>173.01</td></tr>
+        <tr><td>22086/43</td><td>all three</td><td>1061.04</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Read the magnitudes before reading the ratios, because the ratios mislead.</strong>
+    Two of the three failures are at <em>float64 resolution</em>: volume and major radius each differ
+    by two units in the last place, against bounds that are respectively zero-width and one ULP wide.
+    Only <code>divergence_j</code> carries a large ratio, and it carries it on the relative envelope
+    of a quantity whose absolute difference is 1.16e-10 and <em>inside</em> its own absolute bound. A
+    reader who takes "3.9 times its bound" as the size of the disagreement will mis-scope the repair.
+    The registration itself says so: the 69 envelopes are declared frozen empirical envelopes for
+    subsequent aligned-seed evaluations, <em>not physics tolerances</em>, and
+    <code>criterion-family.json</code> records
+    <code>terminal_observable_envelopes_are_physics_tolerances = false</code>.</p>
+
+    <p><strong>The first argument that these are independent: they outlived the repair, and they
+    are the wrong size to be inherited from it.</strong> Iteration-local Krylov conditioning
+    collapsed the compiled-versus-eager terminal flux difference from 1.1646900802908533e-05 to
+    <strong>3.5787553476218648e-12</strong> on these same six cases — a 3.3-million-fold reduction.
+    The residual state disagreement is therefore 3.58e-12, yet volume and major radius disagree at
+    2.15e-16 and 3.21e-16 relative: <em>four orders smaller than the state difference they would
+    have inherited</em>. A quantity computed from two states differing at 3.58e-12 should differ near
+    3.58e-12, not near one ULP. So these two are not state-inherited at that scale; they are what two
+    evaluations of an effectively identical state look like when layout, accumulation order or kernel
+    selection differ. <code>divergence_j</code> is the one that could still be either: its absolute
+    difference is 1.16e-10 and its 3.925 utilisation comes entirely from relative normalisation of a
+    near-zero quantity. Which of the three readings applies to which observable is exactly what §2
+    measures, and this plan does not assert it in advance.</p>
 
     <p><strong>The second argument: they do not track amplification severity.</strong> If the
     failures were residual fallout from the non-normal amplification, the worst-conditioned cases
-    would fail worst. They do not. Case 21989/55 carries a maximum projected Krylov condition of
-    <strong>173.01</strong> — by far the mildest of the three — and fails <em>two</em> observables,
-    while 21978/35 at 3674.07 fails one and 21985/51 at 3405.76 fails one. The ordering is absent,
-    which is what one expects if the cause is a property of the observable rather than of the
-    trajectory that reached it.</p>
+    would fail worst. They do not, and the corrected per-case table makes the absence sharper than
+    the original reading did. The <em>mildest</em> case, 21989/55 at a maximum projected Krylov
+    condition of <strong>173.01</strong>, fails two observables. The <em>worst</em>, 21978/35 at
+    3674.07, fails one. The only case that fails all three, 22086/43, sits mid-range at 1061.04 —
+    below 21978/35 and 21985/51 — while 21986/46 at 775.05 and 21983/35 at 582.48 fail nothing at
+    all. There is no monotone relation in either direction, which is what one expects if the cause
+    is a property of the observable rather than of the trajectory that reached it.</p>
 
     <p><strong>The third argument, and the one that decides the priority: a labeled catalog emits
     exactly these quantities.</strong> The throughput plan's product is not a flux map, it is a
@@ -172,6 +228,14 @@
     </article>
 </section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-20260823T2145-currency" data-who="reckon-ship" data-when="2026-08-23T21:45:00Z">
+    <div class="r-comment-body">Currency repair before dispatch, from conditioned-convergence-and-observables.json. The original failing-case table omitted 22086/43 entirely - the case that fails ALL THREE observables (registered_observable_fail_count 3, pass 66) - and mis-attributed the two bound ratios. Corrected attribution: conservation.divergence_j fails on 21985/51, 21989/55 and 22086/43 with worst utilisation 3.925 on 21985/51; moments.major_radius fails on 21989/55 and 22086/43 with worst utilisation 2.737 on 22086/43; moments.volume fails on 21978/35 and 22086/43. Seven case-observable failures total, matching the banked count. Magnitudes reframe the scope: volume differs by 4.441e-16 absolute (2.151e-16 relative) against a zero-width bound and major_radius by 2.220e-16 against a one-ULP absolute bound of 1.110e-16, both FOUR ORDERS SMALLER than the 3.58e-12 residual state difference they would have inherited; only divergence_j carries a large ratio, and it passes its absolute bound of 1.370e-10 at 1.164e-10 and fails only the relative envelope, 0.6 against 0.1529, on a near-zero quantity. The severity argument survives and strengthens: mildest case 173.01 fails two, worst 3674.07 fails one, the all-three case sits mid-range at 1061.04 while 775.05 and 582.48 fail nothing. Also recorded: criterion-family.json sets terminal_observable_envelopes_are_physics_tolerances = false and the registration declares the 69 envelopes frozen empirical envelopes, not physics tolerances.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260823T2145-reuse-map" data-who="reckon-ship" data-when="2026-08-23T21:45:00Z">
+    <div class="r-comment-body">observable-parity-reuse-map landed - commit 429506cf, merged dff48306; gate PASSED; measure: 248 lines, 3 of 3 failing observables each carrying registration site, bound derivation, per-slice path, batched path, shared-state entry, localisation seam and fitness verdict; 7 explicit no-candidate findings. Artifact: scripts/observable_parity_reuse/report.md. Decisive finding: ForwardProfile.solve and solve_batch already terminate in the same _solve_accelerated to _receipt spine, so no route-specific label definitions exist to reconcile and a second batched volume, radius or divergence function would create the duplicate authority this plan forbids. Discriminator arm: scalar ForwardProfile.observe on one selected shared terminal flux per case against jax.jit(jax.vmap(observe)) of the same entry, stable paths from _named_tree/_leaves, committed rules from _score_observable. Scope-changing gaps: neither jitted-eager-parity-gate.json nor conditioned-convergence-and-observables.json retains raw route values or terminal flux arrays, so the discriminator must RUN rather than be reconstructed; no observe_batch exists; no heterogeneous six-profile solve_batch exists and should not be invented until the shared-state arm implicates layout. Bearing on the open decision: moments.volume exact equality is an empirical zero-width float64 calibration envelope, not a discrete-type guarantee.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

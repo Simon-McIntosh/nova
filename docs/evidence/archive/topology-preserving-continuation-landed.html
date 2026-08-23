@@ -18,6 +18,44 @@
 
 <h1>Topology-Preserving Continuation — cumulative execution evidence</h1>
 
+<section id="reuse-map">
+  <h2 id="reuse-map-h">Reuse map — the machinery this plan extends</h2>
+
+  <p><strong>continuation-reuse-map</strong> landed 2026-08-23 — commit <code>f0cec6dc</code>,
+  merged <code>f67a76e0</code>, gate PASSED. 36 numbered candidates with repo, path, symbol and a
+  one-line fitness verdict present 36/36; 12 searched capability families; 7 explicit
+  no-candidate results. Artifact: <code>scripts/continuation_manifold_reuse/report.md</code>.</p>
+
+  <p><strong>The reuse boundary.</strong> Implement inside the existing fixed-shape solver shell:
+  call <code>ForwardFluxOperator.read</code> for the predicate, route every linear action through
+  <code>_qualified_krylov_step</code>, keep the <code>kink_aware_newton_krylov</code> shell, and
+  return through <code>ForwardBranchReceipt</code>. Source-domain continuation, adjacency
+  ordering, and the imas-ambix physical-space tangency penalty are named explicit
+  <em>non-substitutes</em> — they act in different spaces and must not be conscripted.</p>
+
+  <p><strong>Seven capability gaps, which is why new machinery is authorised here.</strong> No
+  Nova or imas-ambix symbol implements predictor-corrector or pseudo-arclength solve-state
+  stepping — the only production globalization scales a Newton direction. There is no state-space
+  arclength coordinate, bordered continuation system or tangent normalisation; no symbol
+  differentiates the admissibility boundary into a solve-state tangent space; no fixed-shape JAX
+  routine projects a predicted state back onto the requested class while retaining material
+  advance; no production API scores or ranks seed candidates from seed-plus-operator inputs; no
+  test covers tangent prediction, corrector convergence, curvature-limited step size or
+  <code>jit</code>/<code>vmap</code> parity for such a method; and no receipt records mean advance
+  fraction, predictor/corrector lengths, or achieved Newton-step-equivalents, so those fields must
+  be added explicitly for the five-frame measure.</p>
+
+  <p><strong>The seed-alignment starting point, with its banked correlations.</strong> The closest
+  prototype is <code>benchmarks/event_resolved_amplification.py::_arnoldi_event</code> with
+  <code>_event_discrimination</code>. Its bank already carries the direction effect — cumulative
+  growth 5.379792627e9 to 0.06186094 for the alternate direction — and two ranking correlations
+  that differ sharply: projected condition against growth Spearman <strong>0.6636</strong>, active
+  mode overlap against growth Spearman <strong>0.1273</strong>. The qualified warm-outcome median
+  split is <strong>136.24×</strong> with 21985/51 retained as an outlier. The reuse verdict is to
+  prototype from that Arnoldi active direction and reuse its study shape, but to
+  <em>preregister</em> the observable before scoring all available candidates.</p>
+</section>
+
 <section id="s2-parameter">
   <h2 id="s2-parameter-h">§2 — Continuation coordinate adjudication</h2>
 

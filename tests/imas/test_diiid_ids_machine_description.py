@@ -30,8 +30,8 @@ def _source() -> dict:
         },
         "contour": {
             "kind": "limiter",
-            "r": [1.0, 2.0, 2.0, 1.0],
-            "z": [-1.0, -1.0, 1.0, 1.0],
+            "r": [1.0, 2.0, 2.0, 1.0, 1.0],
+            "z": [-1.0, -1.0, 1.0, 1.0, -1.0],
         },
         "pf_active": [
             {
@@ -111,7 +111,13 @@ def test_receipt_keeps_absence_cocos_and_content_doctrine_explicit():
 
     assert receipt["dd_versions"]["wall"] == "3.41.0"
     assert receipt["dd_versions"]["pf_passive"] is None
-    assert receipt["quantities"]["wall_limiter"]["vertex_count"] == 4
+    wall = receipt["quantities"]["wall_limiter"]
+    assert wall["status"] == "read_unmodified"
+    assert wall["vertex_count"] == 5
+    assert wall["provenance"]["authority"] == "repaired-ring-only"
+    assert wall["provenance"]["source_chain_valid"] is True
+    assert wall["provenance"]["repair"]["validity_component_count"] == 1
+    assert wall["provenance"]["repair"]["excluded_component_area_m2"] == 0.0
     assert receipt["quantities"]["tf"]["status"] == "cannot_reach"
     assert receipt["quantities"]["pf_passive"]["status"] == "cannot_reach"
     assert receipt["quantities"]["pf_passive"]["occurrence_present"] is False

@@ -9,6 +9,7 @@ equilibrium labels are outside this machine-description route.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -23,6 +24,18 @@ COMPETITION_RECEIPT = Path(
 )
 SOURCE_COCOS = 11
 TARGET_COCOS = 17
+VERBATIM_ARTIFACT_CONTENT_SHA256 = (
+    "1e560b2ad2f2f224eed064ed3ccbeedbd88d4f4d2daca4966a855e37961c05ab"
+)
+VERBATIM_ARTIFACT_PHYSICAL_DIGEST = (
+    "0eaa06b66b8a27263599c2c9953f43e734d4769bba0ae2398922bec9ab8a62cd"
+)
+VERBATIM_ARTIFACT_SEMANTIC_IDENTITY = (
+    "sha256:c6592e096c5b79a0c1d435f6e89fcea02dcf178f891e5f400f033fee34266570"
+)
+VERBATIM_ARTIFACT_OCI_TAG = (
+    "dd-4.1.1-physical-0eaa06b66b8a27263599c2c9953f43e734d4769bba0ae2398922bec9ab8a62cd"
+)
 
 
 def _text(value: Any) -> str:
@@ -165,6 +178,94 @@ def read_competition_grid(
     }
 
 
+def _sha256(path: Path) -> str:
+    """Return the lowercase SHA-256 of one regular file."""
+
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def write_repaired_artifact_receipt(
+    *,
+    source_path: Path,
+    ids_path: Path,
+    manifest_path: Path,
+    artifact_receipt_path: Path,
+    recipe_path: Path,
+    receipt_path: Path,
+) -> dict[str, Any]:
+    """Record the repaired ring and its distinct publication identities."""
+
+    from nova.imas.diiid_machine_ids import build_diiid_machine_ids
+    from nova.imas.machine_artifact import MachineArtifactManifest
+
+    bundle = build_diiid_machine_ids(source_path)
+    manifest = MachineArtifactManifest.from_bytes(manifest_path.read_bytes())
+    artifact_receipt = json.loads(artifact_receipt_path.read_text())
+    if len(manifest.files) != 1 or manifest.files[0].name != ids_path.name:
+        raise ValueError("manifest must describe exactly the DIII-D netCDF payload")
+    content_sha256 = _sha256(ids_path)
+    if content_sha256 != manifest.files[0].sha256:
+        raise ValueError("manifest content digest does not match the netCDF payload")
+    if artifact_receipt["output"]["sha256"] != content_sha256:
+        raise ValueError("artifact receipt content digest does not match the payload")
+    semantic_identity = manifest.semantic_identity()
+    comparison = {
+        "content_digest_distinct": (content_sha256 != VERBATIM_ARTIFACT_CONTENT_SHA256),
+        "physical_digest_distinct": (
+            manifest.physical_digest != VERBATIM_ARTIFACT_PHYSICAL_DIGEST
+        ),
+        "semantic_identity_distinct": (
+            semantic_identity != VERBATIM_ARTIFACT_SEMANTIC_IDENTITY
+        ),
+        "oci_tag_distinct": manifest.oci.tag != VERBATIM_ARTIFACT_OCI_TAG,
+    }
+    if not all(comparison.values()):
+        raise ValueError("repaired artifact collides with the verbatim DD4 artifact")
+    receipt = {
+        "measurement": "DIII-D repaired-ring machine-artifact publication identity",
+        "limiter": bundle.limiter_repair.as_dict(),
+        "artifact": {
+            "ids_path": str(ids_path),
+            "manifest_path": str(manifest_path),
+            "manifest_valid": True,
+            "data_dictionary": manifest.dd_version,
+            "content_sha256": content_sha256,
+            "physical_digest": manifest.physical_digest,
+            "semantic_identity": semantic_identity,
+            "manifest_digest": manifest.digest,
+            "oci_tag": manifest.oci.tag,
+            "round_trip": artifact_receipt["round_trip"],
+        },
+        "native_authoring": {
+            "source_data_dictionary": bundle.source_dd_version,
+            "target_data_dictionary": bundle.dd_version,
+            "target_resolver": "publication_dd_version()",
+            "cross_major_conversion_performed": False,
+        },
+        "declared_absent": [absence.as_dict() for absence in bundle.absent],
+        "data_dictionary_floor": artifact_receipt["data_dictionary_floor"],
+        "superseded_verbatim_artifact": {
+            "content_sha256": VERBATIM_ARTIFACT_CONTENT_SHA256,
+            "physical_digest": VERBATIM_ARTIFACT_PHYSICAL_DIGEST,
+            "semantic_identity": VERBATIM_ARTIFACT_SEMANTIC_IDENTITY,
+            "oci_tag": VERBATIM_ARTIFACT_OCI_TAG,
+        },
+        "identity_comparison": comparison,
+        "publication": {
+            "recipe_path": str(recipe_path),
+            "owner_run_command": True,
+            "network_publication_attempted": False,
+        },
+    }
+    receipt_path.parent.mkdir(parents=True, exist_ok=True)
+    receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+    return receipt
+
+
 def _element_receipt(section: Any, source: dict[str, Any]) -> dict[str, Any]:
     """Describe one element using only values exposed by the dataclass seam."""
     source_geometry = {1: "outline", 2: "rectangle"}[source["geometry_type"]]
@@ -196,6 +297,7 @@ def build_receipt(
     source: dict[str, Any], competition_grid: dict[str, Any]
 ) -> tuple[dict[str, Any], Any]:
     """Route the static entry through Nova and classify every quantity."""
+    from nova.imas.diiid_machine_ids import repair_limiter_ring
     from nova.imas.machine import StaticMachineDescription
     from nova.io.cocos import (
         B0_LIKE,
@@ -206,7 +308,15 @@ def build_receipt(
         convention_transform,
     )
 
-    machine = StaticMachineDescription.from_record(source)
+    source_contour = np.column_stack((source["contour"]["r"], source["contour"]["z"]))
+    repaired_contour, limiter_repair = repair_limiter_ring(source_contour)
+    machine_record = dict(source)
+    machine_record["contour"] = {
+        "kind": source["contour"]["kind"],
+        "r": repaired_contour[:, 0],
+        "z": repaired_contour[:, 1],
+    }
+    machine = StaticMachineDescription.from_record(machine_record)
     if len(machine.active_coils) != len(source["pf_active"]):
         raise ValueError("machine dataclass route did not preserve pf_active coils")
     coil_receipts = []
@@ -274,12 +384,24 @@ def build_receipt(
         },
         "quantities": {
             "wall_limiter": {
-                "status": "read_unmodified",
-                "change": None,
+                "status": (
+                    "read_unmodified"
+                    if limiter_repair.source_chain_valid
+                    else "read_after_named_change"
+                ),
+                "change": (
+                    None
+                    if limiter_repair.source_chain_valid
+                    else (
+                        "apply the declared validity repair and retain only the "
+                        "largest positive polygon as one canonical physical ring"
+                    )
+                ),
                 "kind": contour.kind if contour else None,
                 "vertex_count": len(contour.r) if contour else 0,
                 "r_extent_m": [min(contour.r), max(contour.r)] if contour else None,
                 "z_extent_m": [min(contour.z), max(contour.z)] if contour else None,
+                "provenance": limiter_repair.as_dict(),
             },
             "pf_active": {
                 "status": "read_after_named_change",

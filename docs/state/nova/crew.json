@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T18:14:27",
+  "updated": "2026-08-23T18:16:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -27540,9 +27540,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T155925164307-admission-rate-diagnosis",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a75",
+        "node": "admission-rate-diagnosis",
+        "role": "implement",
+        "spec_level": "",
+        "member": "step-ladder",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T15:59:29Z",
+        "completed_at": "2026-08-23T16:15:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 987,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 987,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "74a4b1d649836629015edb61903f55d6d2539649",
+        "commits": [
+          "40bc0440d3e37b8f67f0a5d354f2840a8e5eca9a"
+        ],
+        "changed_lines": {
+          "added": 12095,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "Verdict STEP_LADDER_TOO_COARSE, measured not inferred. Of 1,671 rejected trials, 1,669 left the topology class and only 2 were non-finite; zero Krylov-action and zero non-finite-candidate refusals. On all 85 probed refusal iterations the largest admissible fraction was exactly 0.03125 while 0.0625 stayed inadmissible, so the production ladder's smallest factor of 0.125 is four times too large to reach the admissible step and every such iteration records factor 0 and does nothing.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T155925164307-admission-rate-diagnosis/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02f59-3370-74b2-9b95-9a58572b24f5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10375424,
+            "cached_input_tokens_cumulative": 10375424,
+            "input_tokens": 10606472,
+            "input_tokens_cumulative": 10606472,
+            "output_tokens": 30085,
+            "output_tokens_cumulative": 30085,
+            "reasoning_output_tokens": 10150,
+            "reasoning_output_tokens_cumulative": 10150
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 652
+    "_version": 653
   }
 }

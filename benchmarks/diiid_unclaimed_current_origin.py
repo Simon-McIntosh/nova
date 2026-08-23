@@ -655,11 +655,12 @@ def settle_cluster_leads(
                 "declared fixed geometric feature"
             ),
             "surviving_lead_count": surviving,
+            "both_leads_survive": surviving == len(leads),
             "fixed_feature_coincidence_count": feature_coincidences,
             "discriminating_number": {
-                "name": "fixed_feature_coincidence_count",
-                "value": feature_coincidences,
-                "required_for_confirmation": 0,
+                "name": "factor_two_decimation_surviving_lead_count",
+                "value": surviving,
+                "required_for_confirmation": len(leads),
             },
         },
     }

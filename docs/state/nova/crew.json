@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T23:08:04",
+  "updated": "2026-08-23T23:28:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -376,6 +376,13 @@
         "created": "2026-08-23"
       },
       {
+        "id": "label-parity-scout",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a0307a-f5f8-7e11-960f-88cea4a67d62",
+        "created": "2026-08-23"
+      },
+      {
         "id": "label-resolve",
         "harness": "codex",
         "role": "implement",
@@ -418,6 +425,13 @@
         "created": "2026-08-20"
       },
       {
+        "id": "manifold-scout",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a0307a-e108-76c1-b636-2a43d42a4503",
+        "created": "2026-08-23"
+      },
+      {
         "id": "moment-blocks",
         "harness": "codex",
         "role": "implement",
@@ -439,11 +453,25 @@
         "created": "2026-08-22"
       },
       {
+        "id": "observable-discriminator",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
         "id": "packaging",
         "harness": "claude",
         "role": "implement",
         "session_id": "019ff724-5f93-7e50-8eac-d19fff817e40",
         "created": "2026-08-12"
+      },
+      {
+        "id": "parameter-adjudicator",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a0307b-034b-76b0-843d-bb05b5874a0f",
+        "created": "2026-08-23"
       },
       {
         "id": "parity-divergence",
@@ -579,6 +607,13 @@
         "created": "2026-08-22"
       },
       {
+        "id": "seed-alignment",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
         "id": "sol-closure",
         "harness": "codex",
         "role": "implement",
@@ -619,6 +654,13 @@
         "role": "implement",
         "session_id": "01a00738-4206-7582-b3b5-e5ed51fa5e91",
         "created": "2026-08-15"
+      },
+      {
+        "id": "step-control",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a0307d-4e8b-7f43-b004-7ce422542e13",
+        "created": "2026-08-23"
       },
       {
         "id": "step-ladder",
@@ -28891,9 +28933,201 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T211558795011-continuation-parameter-evidence",
+        "plan": "topology-preserving-continuation",
+        "section": "\u00a72",
+        "node": "continuation-parameter-evidence",
+        "role": "implement",
+        "spec_level": "open",
+        "member": "parameter-adjudicator",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T21:16:02Z",
+        "completed_at": "2026-08-23T21:22:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 376,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 376,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "bacbbd81ae98322ecbf2f507257c32b026aac6fd",
+        "commits": [
+          "f1adace7cbfecea328cc085bad72f4e7664929f5"
+        ],
+        "changed_lines": {
+          "added": 210,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T211558795011-continuation-parameter-evidence/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0307b-034b-76b0-843d-bb05b5874a0f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2574848,
+            "cached_input_tokens_cumulative": 2574848,
+            "input_tokens": 2714990,
+            "input_tokens_cumulative": 2714990,
+            "output_tokens": 13999,
+            "output_tokens_cumulative": 13999,
+            "reasoning_output_tokens": 5352,
+            "reasoning_output_tokens_cumulative": 5352
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T211550476912-continuation-reuse-map",
+        "plan": "topology-preserving-continuation",
+        "section": "\u00a72",
+        "node": "continuation-reuse-map",
+        "role": "implement",
+        "spec_level": "open",
+        "member": "manifold-scout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T21:15:54Z",
+        "completed_at": "2026-08-23T21:23:39Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 465,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 465,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "bacbbd81ae98322ecbf2f507257c32b026aac6fd",
+        "commits": [
+          "f0cec6dcd29b766f3c7b8c8813f4577a0419cd28"
+        ],
+        "changed_lines": {
+          "added": 124,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T211550476912-continuation-reuse-map/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0307a-e108-76c1-b636-2a43d42a4503",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6284032,
+            "cached_input_tokens_cumulative": 6284032,
+            "input_tokens": 6514889,
+            "input_tokens_cumulative": 6514889,
+            "output_tokens": 18728,
+            "output_tokens_cumulative": 18728,
+            "reasoning_output_tokens": 5066,
+            "reasoning_output_tokens_cumulative": 5066
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T211555648347-observable-parity-reuse-map",
+        "plan": "derived-observable-parity",
+        "section": "\u00a72",
+        "node": "observable-parity-reuse-map",
+        "role": "implement",
+        "spec_level": "open",
+        "member": "label-parity-scout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T21:15:59Z",
+        "completed_at": "2026-08-23T21:23:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 452,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 452,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "bacbbd81ae98322ecbf2f507257c32b026aac6fd",
+        "commits": [
+          "429506cfd767c0dd6365e4168d921f42a630b262"
+        ],
+        "changed_lines": {
+          "added": 248,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T211555648347-observable-parity-reuse-map/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0307a-f5f8-7e11-960f-88cea4a67d62",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5522432,
+            "cached_input_tokens_cumulative": 5522432,
+            "input_tokens": 5727127,
+            "input_tokens_cumulative": 5727127,
+            "output_tokens": 19600,
+            "output_tokens_cumulative": 19600,
+            "reasoning_output_tokens": 6923,
+            "reasoning_output_tokens_cumulative": 6923
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 674
+    "_version": 687
   }
 }

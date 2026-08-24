@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T08:33:37",
+  "updated": "2026-08-24T10:58:11",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -772,6 +772,20 @@
                 "risk": "elevated"
               }
             }
+          },
+          {
+            "slug": "curved-clip-global-surface",
+            "why_now": "Curved sagitta clips are already built and validated - a chord-to-hyperbola closed form at 1.57e-5 against a subcell raster, and a bicubic route with Green-theorem arc moments whose extremum converges at fourth order to six figures - and both were refuted on real spherical-tokamak fields for one architectural reason: the curve came from a LOCAL per-cell reconstruction that converges to a different surface than the reference readers use. The prescription left behind was to take the curve from the global C2 tensor B-spline instead. That spline landed on 2026-08-21 at commit 75e33479, so the named precondition is now satisfied and a twice-refuted question is retestable rather than closed. It needs its own plan because the module owner is shipped at implementation 1.0 and cannot carry work, while the plan supplying the surface is fenced out of writing the clip.",
+            "done_when": "The curved clip is re-measured with its curve taken from the global tensor spline rather than any per-cell reconstruction, gated on a real low-aspect-ratio equilibrium rather than the analytic oracle: STEP clipped-to-contour vpr and g1 quoted against the banked 16.46 and 18.14 per cent and 9.78 and 22.31 per cent against their 3.92 and 6.20 per cent gates; the four ITER coefficients against the banked 2.63, 0.90, 2.08 and 1.98 per cent; clipped-to-contour and clipped-to-TORAX agreement quoted beside the contour-to-TORAX baseline of 0.16 to 6.20 per cent so the outlier question is answered directly; and an explicit statement of whether the global-surface curve closes the gap the local reconstructions opened, with the fixed-shape padded capacities preserved rather than widened.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
           }
         ],
         "description": "The convergence sprint closed both its hypotheses as honest negatives: neither a longer step along the topology-preserving manifold nor a seed-alignment selector moves the residual, and admitted steps were already full Newton steps. What remains is a question no stepping mechanism answers - whether a diverted-class root exists below the measured plateau at all. Answer that first; the GPU catalog runs behind it and is relocated here out of a sprint slot that scheduled it ahead of its own prerequisite."
@@ -935,6 +949,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 71
+    "_version": 72
   }
 }

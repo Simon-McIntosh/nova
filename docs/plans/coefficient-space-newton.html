@@ -688,24 +688,23 @@
     was amplified, so coarsening carries its own risk there and the iso-accuracy ladder of §14 must
     include a low-aspect-ratio case rather than only the analytic oracle.</p>
 
-    <p><strong>Ownership fence, inherited and to be respected.</strong>
-    <code>separatrix_clip</code> is owned by the edge-current representation plan; the transport side
-    consumes <code>TracedClippedSupports</code>, <code>padded_polynomial_current_moments</code>, the
-    interpolant-over-support integration and the ramped edge-crossing blend as a read-only downstream
-    consumer, and does not write that module. This plan inherits the same fence: it may supply the
-    global surface, and it must not rewrite the clip from here.</p>
+    <p><strong>Ownership, resolved 2026-08-24 rather than left as a fence with a specification
+    behind it.</strong> An earlier draft of this section stated a done-when for the curved-clip
+    re-measurement <em>and</em> a fence saying this plan must not write the clip — which is
+    incoherent. The module's owner,
+    <a href="/nova/plasma-edge-current-representation">plasma-edge-current-representation</a>, is
+    shipped at implementation 1.0 in a closed sprint and cannot carry the work; a completed plan is a
+    record, not a container. So the re-measurement now has its own plan,
+    <a href="/nova/curved-clip-global-surface">curved-clip-global-surface</a>, which holds the write
+    authority and carries the gates.</p>
 
-    <p><strong>Done when</strong> the curved clip is re-measured with its curve taken from the global
-    C² carrier rather than from a per-cell reconstruction, and the gate is a real low-aspect-ratio
-    equilibrium rather than an analytic surface — because fourth order on a smooth analytic surface has
-    already twice failed to predict the real result. Report STEP clipped-to-contour <em>vpr</em> and
-    <em>g1</em> against the banked 16.46 % / 18.14 % and 9.78 % / 22.31 %, and against their 3.92 % and
-    6.20 % gates; the ITER coefficients against the banked 2.63 / 0.90 / 2.08 / 1.98 %; the
-    clipped-to-contour and clipped-to-TORAX agreement beside the contour-to-TORAX 0.16 % to 6.20 %
-    baseline, so the outlier question is answered directly; and an explicit statement of whether the
-    global-surface curve closes the gap the local reconstructions opened. A result showing the straight
-    chord's compensating errors still beat an exactly integrated global curve is a reportable negative
-    that closes the curvature question for good, and would be worth more than a third local attempt.</p>
+    <p><strong>What this plan owes it.</strong> The global C² surface, and nothing else.
+    <code>separatrix_clip</code> is not written from here, and the symbols the transport side consumes
+    read-only — <code>TracedClippedSupports</code>, <code>padded_polynomial_current_moments</code>,
+    the interpolant-over-support integration and the ramped edge-crossing blend — stay stable in name
+    and field shape. The obligation runs one way: if §2 and §9 make the tensor spline the carried
+    solution object, the clip plan gains a surface that cannot diverge from the converged solve, which
+    is strictly stronger than the fitted surface it can already use today.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>

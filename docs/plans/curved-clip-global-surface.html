@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="curved-clip-global-surface">
+  <meta name="plan-title" content="Curved Clip from the Global Surface — the one condition the prior refutation named">
+  <meta name="plan-summary" content="Curved sagitta clips are built and validated and were refuted twice, both times because the curve came from a local per-cell reconstruction that converges to a different surface than the reference readers use. The prescription left behind was to take the curve from the global C2 tensor spline. That spline landed on 2026-08-21, so the condition is now met and the refutation is retestable.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="mid">
+  <meta name="plan-effort-hours" content="8.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="plasma-edge-current-representation">
+  <meta name="plan-sprint" content="S15">
+  <title>Curved Clip from the Global Surface | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Why this is a plan and not a section on the plan that owns the clip</h2>
+
+    <p><code>plasma-edge-current-representation</code> owns <code>separatrix_clip</code> and it is
+    <em>shipped</em> at implementation 1.0 in a closed sprint. A finished plan is a record, not a
+    container: work appended to it renders on the page and appears in no open path, so it would be
+    hidden rather than tracked. The curved-clip question is live, has a named precondition that has
+    just been satisfied, and needs write authority over a module a completed plan owns — which is
+    three reasons it needs a plan of its own rather than a footnote on someone else's.</p>
+
+    <p>It is also not a section of <code>coefficient-space-newton</code>. That plan supplies the
+    global surface and inherits the standing fence that the clip module is not written from the
+    transport or solver side. A plan that specifies clip work while forbidding itself to do it is
+    incoherent, and an earlier draft of its §16 was exactly that. <strong>This plan takes the write
+    authority; that plan owes it the surface.</strong></p>
+
+    <h2 id="s2">§2 — What is already built, and what refuted it twice</h2>
+
+    <p><strong>The machinery exists and is validated.</strong> A chord-to-hyperbola closed form
+    agreeing with a subcell raster to <strong>1.57e-5</strong>; a later C¹ bicubic route with oriented
+    Green-theorem corrections for area and the first and mixed moments, the 12-node Gauss–Legendre
+    <code>_arc_rule</code> along in-cell arcs, fixed bisection for edge roots and constrained Newton
+    solves for extrema (commit <code>47808904</code>). The sagitta survives as the arc-fit leverage
+    measure in <code>nova/biot/arc.py</code>. Nothing here needs inventing.</p>
+
+    <p><strong>The original argument was sound and remains so.</strong> A chord confines a surface top
+    to an edge crossing while the surface is locally parabolic about its turning point, so the radial
+    error scales as the <em>square root</em> of the cell height and no amount of area accuracy touches
+    it. Clipping against the arc moves the extremum to second order while improving area only from
+    second to third — which matched the observed split between large triangularity errors and moderate
+    moment errors. Extremum error and area error are different classes and only one responds to better
+    moments.</p>
+
+    <p><strong>A monotonicity proof then corrected the specification.</strong> The section had
+    specified an arc turning point that cannot exist: for bilinear flux the level-set derivative has a
+    constant numerator, so every branch is monotone and its extrema are its endpoints. The square-root
+    extremum error therefore belongs to the <em>bilinear reconstruction</em> rather than to the chord.
+    The exact hyperbola correction was still validated to 1.6e-5 against a subcell raster — and
+    measured worse on every decisive spherical-tokamak field, moving away from both reference
+    routes.</p>
+
+    <p><strong>The bicubic escalation was excellent and lost anyway, and that is the finding.</strong></p>
+
+    <table>
+      <caption>The bicubic primitive against the bicubic outcome</caption>
+      <thead>
+        <tr><th scope="col">Measure</th><th scope="col">Result</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>extremum radial position under refinement</td><td>measured order <strong>3.999999</strong> then <strong>4.000001</strong> — fourth order to six figures</td></tr>
+        <tr><td>adjacent-cell C¹ mismatch</td><td>0, 1.73e−18, 0</td></tr>
+        <tr><td>arc residual</td><td>2.78e−17</td></tr>
+        <tr><td>corrected area against a 1,442,401-sample raster</td><td>within 1.43e−5</td></tr>
+        <tr><td>STEP clipped↔contour <em>vpr</em>, gate 3.92 %</td><td>16.46 % → <strong>18.14 %</strong></td></tr>
+        <tr><td>STEP clipped↔contour <em>g1</em>, gate 6.20 %</td><td>9.78 % → <strong>22.31 %</strong></td></tr>
+        <tr><td>ITER upper triangularity, gate 2 %</td><td>20.43 % → 20.22 %, no regression</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The mechanism is architectural, not a question of order.</strong> A local
+    centred-tangent Hermite bicubic cannot recover the global surface information that both reference
+    readers use. Fourth order on a smooth analytic surface and twenty per cent on a real EQDSK are
+    perfectly consistent once the reason is seen: <em>the two constructions converge to different
+    surfaces</em>, and both reference routes use the global one. A global spline solves a system in
+    which every cell's polynomial is informed by the whole grid and is C²; a local Hermite stencil is
+    C¹ and blind beyond its neighbours, and STEP's low aspect ratio amplifies the missing within-cell
+    gradient structure. The corroborating reading is “two against one”: on STEP, TORAX and Nova's own
+    contour extraction agree with each other markedly better than either agrees with the clipped
+    route, so the clipped route is the outlier rather than the arbiter.</p>
+
+    <h2 id="s3">§3 — The precondition is now met</h2>
+
+    <p>The prescription left behind is explicit and is recorded on the owning plan: if edge-current
+    accuracy ever wants curvature corrections, take the curve from the <em>global C² tensor
+    B-spline</em> and <strong>not from per-cell interpolants</strong>. At the time that spline was in
+    flight. <code>nova/linalg/tensor_spline.py</code> landed on 2026-08-21 at commit
+    <code>75e33479</code>, and <code>fit_tensor_spline</code> fits a global cubic tensor spline whose
+    evaluation already returns both second derivatives and the mixed term. <strong>The named condition
+    is satisfied, so the refutation is retestable rather than final.</strong></p>
+
+    <p><strong>Two strengths of surface authority are available and they are not the same.</strong>
+    The weaker one is available today: fit the global spline to the flux map and take the clip curve
+    from it. The stronger one arrives if <a href="/nova/coefficient-space-newton">coefficient-space-newton</a>
+    makes that spline the <em>carried solution object</em>, because then the curve the clip cuts
+    against and the surface the solver converges on are the same object and cannot diverge at all.
+    This plan does not wait for the stronger form — the weaker one directly tests the prescription,
+    and a negative there would close the question without the larger programme.</p>
+
+    <h2 id="s4">§4 — Re-measure, and gate on a real low-aspect-ratio equilibrium</h2>
+
+    <p><strong>The gate is not the analytic oracle, and that is the most important sentence in this
+    plan.</strong> Fourth order to six figures on a smooth analytic surface has now twice failed to
+    predict the real result. An analytic-surface result is therefore evidence about the primitive and
+    evidence about nothing else. STEP is the decisive case because its low aspect ratio is exactly
+    what amplified the local reconstruction's deficit.</p>
+
+    <p><strong>Done when</strong> the curved clip is re-measured with its curve taken from the global
+    tensor spline rather than from any per-cell reconstruction, reporting: STEP clipped-to-contour
+    <em>vpr</em> and <em>g1</em> against the banked 16.46 % and 18.14 %, and 9.78 % and 22.31 %,
+    against their 3.92 % and 6.20 % gates; the four ITER coefficients against the banked 2.63, 0.90,
+    2.08 and 1.98 %; the clipped-to-contour and clipped-to-TORAX agreements quoted beside the
+    contour-to-TORAX baseline of 0.16 % to 6.20 %, so the “which route is the outlier” question is
+    answered directly rather than assumed; and an explicit statement of whether the global-surface
+    curve closes the gap that the two local reconstructions opened. <strong>A result showing the
+    straight chord's compensating errors still beat an exactly integrated global curve is a reportable
+    negative that closes the curvature question for good</strong>, and is worth more than a third local
+    attempt.</p>
+
+    <h2 id="s5">§5 — Method requirements</h2>
+
+    <p><strong>An analytic-surface result never stands alone here.</strong> Every claim carries its
+    real-equilibrium counterpart, because the gap between them is the entire history of this
+    question.</p>
+
+    <p><strong>Name the production diff between compared trees and decline attribution when more than
+    one candidate mechanism sits in it.</strong></p>
+
+    <p><strong>Never derive an acceptance criterion from an achieved value of the quantity it
+    scores</strong>, and a criterion must be passable by something.</p>
+
+    <p><strong>Respect the fixed-shape traced contract.</strong> The clip traces once over a moving
+    separatrix with padded fixed capacities, and a hypothesis that those capacities were silently
+    truncating STEP cells was already tested and falsified — required vertex count 5 against capacity
+    8, three spare slots. Any change here keeps that property and does not quietly widen a capacity
+    constant, which is precisely the fix that would have reappeared on the next machine.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="surface-authority-strength" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Does the re-measurement take the weaker surface authority available today —
+        a global spline fitted to the flux map — or wait for the stronger one, where the spline is
+        the carried solution object and cannot diverge from the solve? The weaker form tests the
+        prescription immediately and a negative would close the question outright; the stronger form
+        removes a residual difference between the fitted surface and the converged one, but couples
+        this plan's schedule to a larger programme.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="fitted-surface-now">fitted global surface, now</button>
+      <button class="r-opt" data-value="carried-surface-later">wait for the carried surface</button>
+      <button class="r-opt" data-value="fitted-then-carried">fitted now, carried as a follow-on</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-ccg-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-24" data-recommends-skill="/reckon-ship curved-clip-global-surface" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Do not rebuild the curved clip, and do not gate on the analytic oracle</h4>
+    <div class="r-fu-body"><p>THE MACHINERY EXISTS AND REBUILDING IT WOULD WASTE THE PLAN. A chord-to-hyperbola closed form validated to 1.57e-5 against a subcell raster, a C1 bicubic route with oriented Green-theorem area and moment corrections, the 12-node Gauss-Legendre <code>_arc_rule</code> along in-cell arcs, fixed bisection for edge roots and constrained Newton extrema all landed at commit <code>47808904</code>. Read that work and the evidence anchors <code>bicubic-negative</code> and <code>clipped-cell-moments</code> in <code>docs/evidence/archive/flux-function-forward-transport-landed.html</code> before writing anything. The single change this plan makes is WHERE THE CURVE COMES FROM.</p><p>GATE ON STEP, NOT ON THE ORACLE. This is the trap that caught the previous programme twice. The bicubic reached fourth order to six figures on a smooth analytic surface and then moved STEP <em>vpr</em> from 16.46 to 18.14 per cent against a 3.92 per cent gate and <em>g1</em> from 9.78 to 22.31 against 6.20. An analytic-surface result is evidence about the primitive and about nothing else, because a local and a global construction converge to different surfaces and only the difference between them shows up on a low-aspect-ratio grid.</p><p>THE MONOTONICITY PROOF CONSTRAINS WHAT MAY BE CLAIMED. For bilinear flux the level-set derivative has a constant numerator, so every branch is monotone and its extrema are its endpoints - an arc turning point inside a cell cannot exist under that reconstruction, and the square-root extremum error belongs to the reconstruction rather than to the chord. Under a global C2 surface the reconstruction changes and that error class may not arise at all, but that is a PREDICTION. Measure it; do not assume the proof transfers unchanged to a different surface.</p><p>ANSWER THE OPEN DECISION BEFORE DISPATCH. The fitted global surface is available today and tests the prescription immediately; the carried surface from <code>coefficient-space-newton</code> removes a residual difference but couples this schedule to a larger programme. A negative on the fitted form would close the curvature question without needing the stronger one, which is an argument for taking it first.</p><p>OWNERSHIP: this plan holds write authority over <code>separatrix_clip</code> for this work. <code>plasma-edge-current-representation</code> owns that module and is shipped, so it cannot carry the work itself; <code>coefficient-space-newton</code> supplies the global surface and is fenced out of writing the clip. Keep <code>TracedClippedSupports</code>, <code>padded_polynomial_current_moments</code>, the interpolant-over-support integration and the ramped edge-crossing blend stable in name and field shape, because the transport side consumes them read-only.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship curved-clip-global-surface</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>

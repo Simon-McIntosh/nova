@@ -29,7 +29,7 @@
 <meta name="plan-commits" content="485f6fdaa88328b96633db85111093e332b4aa53,dbee3048d4767af04373155c50b6e9753bfc330c,975e4acec3016cd56295d458d07eaf2aa8233454,75d6eb010612c12486327fa8c794efe6c662b71c,bf9dafdbf258624fc42d3f2d7eef8e468495b328,d6be878b6eb1eac9ea3d85d87f16cd2b48787cef,fd2baeb113b3443314618b9e6e29819ba233ce6e,231659ea748322d8607a71cc82b2d4e522e8cc1c">
 <meta name="plan-artifacts" content="scripts/coefficient_basis_reuse/report.md,docs/figures/coefficient-space-newton/representation-degree.json,docs/figures/coefficient-space-newton/edge-current-jump.json,docs/figures/coefficient-space-newton/clipped-coupling-order.json,docs/figures/coefficient-space-newton/second-order-kernel.json,docs/figures/coefficient-space-newton/support-order-arms.json,docs/figures/coefficient-space-newton/carrier-arms.json,docs/figures/coefficient-space-newton/analytic-truth-rescore.json,nova/biot/second_moment_kernel.py,nova/equilibrium/coefficient_carrier.py,docs/evidence/archive/coefficient-space-newton-landed.html">
 <meta name="plan-impl" content="0.7">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 </head>
 <body>
   <main class="plan-doc">
@@ -705,6 +705,40 @@
     and field shape. The obligation runs one way: if §2 and §9 make the tensor spline the carried
     solution object, the clip plan gains a surface that cannot diverge from the converged solve, which
     is strictly stronger than the fitted surface it can already use today.</p>
+
+    <h2 id="s17">§17 — Both arms sit tens of per cent from closed-form truth while converging to
+      machine precision, and that is not yet attributed</h2>
+
+    <p><strong>The rescore that settled the accuracy axis raised a larger question than it
+    answered.</strong> Arms A and B converge to <strong>1.221e-15 to 2.494e-15</strong> against
+    their own discrete fixed points, and sit <strong>0.257918 to 0.450674</strong> in relative-sup
+    error against the closed form on the same carriers, supports, masks and denominator. A 26 to 45
+    per cent error against an analytic solution, reached by a solve that has converged to machine
+    precision, is either a genuine discretisation or setup error of that size or an artefact of the
+    comparison. The two readings are not close together in consequence: the first would mean the
+    discrete operator's fixed point is not the equilibrium anyone believes it is, and every accuracy
+    claim on this lane inherits the gap.</p>
+
+    <p><strong>The leading suspect is the flux gauge, and it is a suspect rather than a
+    finding.</strong> The standing rule on this repository is that ψ<sub>N</sub> is gauge-safe only
+    when its anchors come from the field being normalised, and a comparison that normalises the
+    analytic field by one pair of anchors and the discrete field by another would manufacture
+    exactly this shape of error while both fields converge perfectly on their own terms. Two prior
+    attributions on this plan — a Δ* stencil that is not in the residual path, and a clipped-source
+    coupling that turned out already second order — were each refuted by measurement after being
+    argued from plausibility. <strong>This one waits for a measurement rather than becoming a third
+    guess</strong>, and the node that measures it is not permitted to repair anything: an
+    attribution and a repair are separate results and merging them would leave neither auditable.</p>
+
+    <p><strong>Done when</strong> the 26 to 45 per cent analytic relative-sup error is attributed or
+    exonerated by measurement, reporting: the anchor pair used to normalise each field with its
+    provenance stated field by field, the same error recomputed under a single common gauge whose
+    anchors come from each field being normalised in turn, the error in absolute flux units beside
+    the relative figure so a normalisation artefact is separable from an amplitude error, and the
+    regional split this plan requires of every error. A verdict naming the comparison as the cause
+    must exhibit the corrected figure; a verdict naming a genuine discretisation error must exhibit
+    it surviving a common gauge, and it then becomes a finding about the operator rather than about
+    this plan. Either outcome is a result, and no repair is authored under this section.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>

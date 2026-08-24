@@ -21,7 +21,7 @@ from nova.imas.diiid_description import (
 )
 
 
-def _priors() -> dict[str, UnknownCurrentPrior]:
+def _circuit_bypass_priors() -> dict[str, UnknownCurrentPrior]:
     return {
         name: UnknownCurrentPrior(
             mean_a=10_000.0 + index * 1000.0,
@@ -30,7 +30,7 @@ def _priors() -> dict[str, UnknownCurrentPrior]:
             upper_a=40_000.0,
             provenance="declared demonstration prior",
         )
-        for index, name in enumerate(diiid_current.UNKNOWN_POLOIDAL_CONDUCTORS)
+        for index, name in enumerate(diiid_current.CIRCUIT_BYPASS_PRIOR_CONDUCTORS)
     }
 
 
@@ -69,7 +69,7 @@ def test_diiid_tiers_carry_fit_once_values_and_relation_uncertainty() -> None:
         assert "label flux" in declaration.relation.transfer_caveat
 
 
-def test_circuit_map_reconstructs_all_unshipped_currents_from_ecoila() -> None:
+def test_circuit_map_drives_all_registered_conductors_from_ecoila() -> None:
     shipped = _shipped()
 
     reconstructed = diiid_current.circuit_current_map(shipped)
@@ -127,11 +127,11 @@ def test_banked_circuit_receipt_matches_runtime_calibration() -> None:
     assert "1 of 60" in " ".join(receipt["caveats"])
 
 
-def test_circuit_opt_out_retains_three_free_current_slots() -> None:
+def test_circuit_bypass_exposes_three_prior_driven_diagnostic_slots() -> None:
     resolution = diiid_current.resolve_diiid_currents(
         POLOIDAL_CONDUCTORS,
         _shipped(),
-        _priors(),
+        _circuit_bypass_priors(),
         use_circuit=False,
     )
     by_name = {name: index for index, name in enumerate(resolution.names)}
@@ -141,7 +141,7 @@ def test_circuit_opt_out_retains_three_free_current_slots() -> None:
     assert resolution.template_a[by_name["E89DN"]] == pytest.approx(10_165.0)
     assert all(
         np.isnan(resolution.template_a[by_name[name]])
-        for name in diiid_current.UNKNOWN_POLOIDAL_CONDUCTORS
+        for name in diiid_current.CIRCUIT_BYPASS_PRIOR_CONDUCTORS
     )
 
 
@@ -232,13 +232,12 @@ def test_complete_adapter_preserves_response_order(monkeypatch) -> None:
         profile,
         shipped_names=POLOIDAL_CONDUCTORS,
         shipped_current_a=_shipped(),
-        unknown_priors=_priors(),
         active_coil_entry="unused.nc",
     )
 
     assert adapter.resolution.names == (
         *POLOIDAL_CONDUCTORS,
-        *diiid_current.OMITTED_POLOIDAL_CONDUCTORS,
+        *CIRCUIT_DRIVEN_CONDUCTORS,
     )
     np.testing.assert_array_equal(
         np.asarray(adapter.profile.operator.grid.source_target)[:, :shipped_count],
@@ -264,11 +263,11 @@ class RecordingProfile:
         return self.currents[-1]
 
 
-def test_outer_loop_drives_only_three_diiid_unknown_slots() -> None:
+def test_outer_loop_updates_only_three_circuit_bypass_prior_slots() -> None:
     resolution = diiid_current.resolve_diiid_currents(
         POLOIDAL_CONDUCTORS,
         _shipped(),
-        _priors(),
+        _circuit_bypass_priors(),
         use_circuit=False,
     )
     profile = RecordingProfile()

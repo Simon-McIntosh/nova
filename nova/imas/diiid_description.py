@@ -4,8 +4,9 @@ The challenge rows are the geometry registry input: every selection is keyed by
 the digest of the shipped conductor table, and every field in that table has a
 receipt.  The Green-function route consumes every fusion-coil channel on the
 dataset-wide kA.turn contract.  A fit-once ``pf_active`` calibration record
-routes the shipped ECOILA ampere-turns through the unshipped ohmic conductors;
-the toroidal bcoil has no axisymmetric poloidal-flux section.
+routes the shipped ECOILA ampere-turns through the circuit-driven ohmic
+conductors whose currents have no separate competition-row columns; the
+toroidal bcoil has no axisymmetric poloidal-flux section.
 """
 
 from __future__ import annotations
@@ -585,7 +586,7 @@ class PfActiveCircuitRecord:
             drive.validate()
 
     def currents(self, source_current_a_turn: float) -> dict[str, float]:
-        """Map one shipped ECOILA value to every unshipped conductor."""
+        """Map one shipped ECOILA value to every circuit-driven conductor."""
 
         if not math.isfinite(source_current_a_turn):
             raise DiiidDescriptionError("ohmic circuit source current must be finite")
@@ -811,6 +812,9 @@ class DiiidDatasetMachineDescription:
     :func:`section_vertices`.  Those same vertices author the outline records
     consumed by ``MachineSection``; this wrapper adds the dataset quantities
     that are not poloidal sections while retaining explicit source receipts.
+    The competition-row layer intentionally leaves ``machine.contour`` unset
+    because those rows carry no wall contour.  Nova's DIII-D machine-description
+    IDS separately retains the deterministic physical wall ring.
     """
 
     physical: DiiidDescription
@@ -826,7 +830,9 @@ class DiiidDatasetMachineDescription:
         self.physical.validate()
         if self.machine.contour is not None:
             raise DiiidDescriptionError(
-                "the competition dataset does not ship a wall contour"
+                "the competition dataset does not ship a wall contour; the "
+                "dataset-scoped description must leave machine.contour unset, while "
+                "the DIII-D machine-description IDS carries the physical wall ring"
             )
         if self.machine.passive_loop_count != 0:
             raise DiiidDescriptionError(
@@ -875,7 +881,7 @@ class DiiidDatasetMachineDescription:
 
     @property
     def provenance_complete(self) -> bool:
-        """Return whether every present and explicitly absent quantity is traced."""
+        """Return whether each competition-row quantity and external route is traced."""
         try:
             self.validate()
         except DiiidDescriptionError:
@@ -1003,7 +1009,11 @@ def dataset_machine_description(
         GeometryReceipt(
             fields=("wall_contour",),
             locator="competition dataset machine-geometry exclusions",
-            statement="wall contour explicitly absent and no external source selected",
+            statement=(
+                "wall contour absent only from the competition rows; the DIII-D "
+                "machine-description IDS separately retains a deterministic physical "
+                "wall ring"
+            ),
         ),
         GeometryReceipt(
             fields=("passive_structure",),

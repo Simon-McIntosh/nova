@@ -1,4 +1,4 @@
-"""Bind DIII-D conductor-current tiers to the complete response matrix."""
+"""Bind DIII-D conductor currents to the measured circuit and response matrix."""
 
 from __future__ import annotations
 
@@ -20,6 +20,7 @@ from nova.equilibrium.conductor_current import (
 from nova.equilibrium.forward import ForwardProfile
 
 from .diiid_description import (
+    CIRCUIT_DRIVEN_CONDUCTORS,
     DiiidDescription,
     PF_ACTIVE_CIRCUIT,
     PF_ACTIVE_SUPPLY,
@@ -28,15 +29,8 @@ from .diiid_description import (
 )
 
 
-OMITTED_POLOIDAL_CONDUCTORS = (
-    "ECOILB",
-    "E567UP",
-    "E567DN",
-    "E89UP",
-    "E89DN",
-)
-UNKNOWN_POLOIDAL_CONDUCTORS = ("ECOILB", "E567DN", "E89UP")
-KNOWABLE_RELATIONS = {
+CIRCUIT_BYPASS_PRIOR_CONDUCTORS = ("ECOILB", "E567DN", "E89UP")
+CIRCUIT_BYPASS_RELATIONS = {
     "E567UP": StaticCurrentRelation(
         source="ECOILA",
         scale=0.9929,
@@ -94,11 +88,11 @@ class DiiidCurrentAdapter:
 
 def current_declarations(
     shipped_names: Sequence[str],
-    unknown_priors: Mapping[str, UnknownCurrentPrior] | None = None,
+    circuit_bypass_priors: Mapping[str, UnknownCurrentPrior] | None = None,
     *,
     use_circuit: bool = True,
 ) -> tuple[ConductorCurrentDeclaration, ...]:
-    """Return all DIII-D declarations without inference-time label access."""
+    """Return the measured circuit declarations or an explicit diagnostic bypass."""
 
     names = tuple(str(name) for name in shipped_names)
     if set(names) != set(POLOIDAL_CONDUCTORS):
@@ -106,11 +100,11 @@ def current_declarations(
             "DIII-D shipped response must contain its 19 poloidal channels"
         )
     if not use_circuit and (
-        unknown_priors is None
-        or set(unknown_priors) != set(UNKNOWN_POLOIDAL_CONDUCTORS)
+        circuit_bypass_priors is None
+        or set(circuit_bypass_priors) != set(CIRCUIT_BYPASS_PRIOR_CONDUCTORS)
     ):
         raise ValueError(
-            "DIII-D unknown priors must name ECOILB, E567DN, and E89UP exactly"
+            "DIII-D circuit-bypass priors must name ECOILB, E567DN, and E89UP exactly"
         )
     declared = [
         ConductorCurrentDeclaration(
@@ -120,7 +114,7 @@ def current_declarations(
         )
         for name in names
     ]
-    for name in OMITTED_POLOIDAL_CONDUCTORS:
+    for name in CIRCUIT_DRIVEN_CONDUCTORS:
         if use_circuit:
             declared.append(
                 ConductorCurrentDeclaration(
@@ -130,30 +124,30 @@ def current_declarations(
                     provenance="fit-once machine-description circuit drive",
                 )
             )
-        elif name in KNOWABLE_RELATIONS:
+        elif name in CIRCUIT_BYPASS_RELATIONS:
             declared.append(
                 ConductorCurrentDeclaration(
                     name=name,
                     tier=CurrentTier.KNOWABLE,
-                    relation=KNOWABLE_RELATIONS[name],
+                    relation=CIRCUIT_BYPASS_RELATIONS[name],
                     provenance="independent fit-once ohmic relation",
                 )
             )
         else:
-            assert unknown_priors is not None
+            assert circuit_bypass_priors is not None
             declared.append(
                 ConductorCurrentDeclaration(
                     name=name,
                     tier=CurrentTier.UNKNOWN,
-                    prior=unknown_priors[name],
-                    provenance=unknown_priors[name].provenance,
+                    prior=circuit_bypass_priors[name],
+                    provenance=circuit_bypass_priors[name].provenance,
                 )
             )
     return tuple(declared)
 
 
 def circuit_current_map(shipped_current_a: Mapping[str, float]) -> dict[str, float]:
-    """Drive every unshipped conductor from shipped ECOILA ampere-turns."""
+    """Drive every circuit-represented conductor from shipped ECOILA ampere-turns."""
 
     try:
         source = float(shipped_current_a[PF_ACTIVE_CIRCUIT.source_conductor])
@@ -187,18 +181,18 @@ def shipped_current_at(
 def resolve_diiid_currents(
     shipped_names: Sequence[str],
     shipped_current_a: Mapping[str, float],
-    unknown_priors: Mapping[str, UnknownCurrentPrior] | None = None,
+    circuit_bypass_priors: Mapping[str, UnknownCurrentPrior] | None = None,
     *,
     use_circuit: bool = True,
 ) -> CurrentResolution:
-    """Resolve 24 ordered currents through the circuit or explicit free slots."""
+    """Resolve 24 currents with the measured circuit as the default authority."""
 
-    names = tuple(str(name) for name in shipped_names) + OMITTED_POLOIDAL_CONDUCTORS
+    names = tuple(str(name) for name in shipped_names) + CIRCUIT_DRIVEN_CONDUCTORS
     return resolve_conductor_currents(
         names,
         current_declarations(
             shipped_names,
-            unknown_priors,
+            circuit_bypass_priors,
             use_circuit=use_circuit,
         ),
         shipped_current_a,
@@ -210,12 +204,12 @@ def complete_profile_current_adapter(
     *,
     shipped_names: Sequence[str],
     shipped_current_a: Mapping[str, float],
-    unknown_priors: Mapping[str, UnknownCurrentPrior] | None = None,
+    circuit_bypass_priors: Mapping[str, UnknownCurrentPrior] | None = None,
     use_circuit: bool = True,
     active_coil_entry: str | Path = DEFAULT_ACTIVE_COIL_ENTRY,
     active_coil_dd_version: str = DEFAULT_ACTIVE_COIL_DD_VERSION,
 ) -> DiiidCurrentAdapter:
-    """Append exact omitted-coil columns and bind the ordered tier resolution."""
+    """Append circuit-driven columns and bind the ordered current resolution."""
 
     names = tuple(str(name) for name in shipped_names)
     if profile.operator.grid.source_target.shape[1] != len(names):
@@ -225,24 +219,24 @@ def complete_profile_current_adapter(
     resolution = resolve_diiid_currents(
         names,
         shipped_current_a,
-        unknown_priors,
+        circuit_bypass_priors,
         use_circuit=use_circuit,
     )
     grid_names, grid_response, grid_receipt = active_coil_response_from_imas(
         active_coil_entry,
         active_coil_dd_version,
-        OMITTED_POLOIDAL_CONDUCTORS,
+        CIRCUIT_DRIVEN_CONDUCTORS,
         np.asarray(profile.operator.grid.coordinate)[:, 0],
         np.asarray(profile.operator.grid.coordinate)[:, 1],
     )
     wall_names, wall_response, wall_receipt = active_coil_response_from_imas(
         active_coil_entry,
         active_coil_dd_version,
-        OMITTED_POLOIDAL_CONDUCTORS,
+        CIRCUIT_DRIVEN_CONDUCTORS,
         np.asarray(profile.operator.wall.coordinate)[:, 0],
         np.asarray(profile.operator.wall.coordinate)[:, 1],
     )
-    if grid_names != OMITTED_POLOIDAL_CONDUCTORS or wall_names != grid_names:
+    if grid_names != CIRCUIT_DRIVEN_CONDUCTORS or wall_names != grid_names:
         raise RuntimeError("active-coil response did not preserve requested order")
     grid = replace(
         profile.operator.grid,
@@ -270,7 +264,9 @@ def complete_profile_current_adapter(
             "shipped_count": len(names),
             "complete_count": len(resolution.names),
             "current_authority": (
-                "pf_active circuit" if use_circuit else "free-parameter opt-out"
+                "pf_active circuit"
+                if use_circuit
+                else "diagnostic prior-driven circuit bypass"
             ),
             "pf_active": {
                 "supply": PF_ACTIVE_SUPPLY.as_record(),

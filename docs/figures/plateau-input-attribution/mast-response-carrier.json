@@ -1,0 +1,81 @@
+{
+  "cache_only_reload": {
+    "direct_builder_import_guard": [
+      "nova.biot.greens",
+      "nova.biot.polygon",
+      "nova.imas.mast_vacuum_response"
+    ],
+    "direct_builder_modules_entered": [],
+    "reached_persisted_carrier": true,
+    "source_store_opened": false,
+    "warm_load_seconds": 0.0626469450071454
+  },
+  "carrier": {
+    "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+    "frozen_reference_count": 6,
+    "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+    "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+    "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+    "response_shape": [
+      1126,
+      101
+    ],
+    "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+    "size_bytes": 645864,
+    "stored_circuit_count": 101,
+    "warm_load_seconds": 0.0626469450071454
+  },
+  "cold_build": {
+    "direct_response_build_seconds": 475.00447567459196,
+    "frozen_references": [
+      {
+        "shot": 21978,
+        "slice_index": 35
+      },
+      {
+        "shot": 21983,
+        "slice_index": 35
+      },
+      {
+        "shot": 21985,
+        "slice_index": 51
+      },
+      {
+        "shot": 21986,
+        "slice_index": 46
+      },
+      {
+        "shot": 21989,
+        "slice_index": 55
+      },
+      {
+        "shot": 22086,
+        "slice_index": 43
+      }
+    ],
+    "machine_resolution_seconds": 17.919244821183383,
+    "publication_seconds": 0.02537372335791588,
+    "section_kernel_evaluations": 938,
+    "total_before_publication_seconds": 492.92372049577534,
+    "total_seconds": 492.94909421913326
+  },
+  "receipt": "persisted MAST frozen-reference response carrier",
+  "runtime": {
+    "advisory_lock": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz.lock",
+    "hostname": "98dci4-gpu-0003.iter.org",
+    "slurm_job_gpus": "0",
+    "slurm_job_id": "1254245",
+    "slurm_partition": "betelgeuse",
+    "slurm_reservation": "gpu_0003_grpA"
+  },
+  "verdict": {
+    "all_stored_circuits_carried": true,
+    "cache_only_reload_passes": true,
+    "carrier_persisted": true,
+    "direct_green_builder_entered_during_reload": false,
+    "passes": true,
+    "resolved_targets_match": true,
+    "response_shape_matches": true,
+    "semantic_identity_matches": true
+  }
+}

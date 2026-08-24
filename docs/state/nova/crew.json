@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T17:59:00",
+  "updated": "2026-08-24T22:41:52",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -831,6 +831,13 @@
         "created": "2026-08-23"
       },
       {
+        "id": "state-repetition",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-24"
+      },
+      {
         "id": "stencil-weights",
         "harness": "codex",
         "role": "implement",
@@ -997,6 +1004,13 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-22"
+      },
+      {
+        "id": "wall-surface",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-24"
       },
       {
         "id": "warm-neighbour",
@@ -30888,9 +30902,159 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260824T154750449117-mast-response-carrier-warm",
+        "plan": "plateau-input-attribution",
+        "section": "\u00a72",
+        "node": "mast-response-carrier-warm",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "cache-warm",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T15:47:53Z",
+        "completed_at": "2026-08-24T17:13:34Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 5141,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 5141,
+        "stalled": false,
+        "time_budget": "180m",
+        "base_sha": "00eb0a8e68785a11e62cd54614c4b3a074c17c96",
+        "commits": [
+          "29e24759c54be5da413752a0f17ffcca64b25f1d"
+        ],
+        "changed_lines": {
+          "added": 111,
+          "removed": 17,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T154750449117-mast-response-carrier-warm/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0326e-eb25-7000-9667-30416f243e24",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 69223424,
+            "cached_input_tokens_cumulative": 69223424,
+            "input_tokens": 70532902,
+            "input_tokens_cumulative": 70532902,
+            "output_tokens": 93758,
+            "output_tokens_cumulative": 93758,
+            "reasoning_output_tokens": 14276,
+            "reasoning_output_tokens_cumulative": 14276
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260824T160037588014-state-versus-label-reproducibility",
+        "plan": "same-device-label-determinism",
+        "section": "\u00a72",
+        "node": "state-versus-label-reproducibility",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "state-repetition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T16:00:41Z",
+        "completed_at": "2026-08-24T16:18:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1087,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1087,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "f1ecf6afb5fbe9a3268c9698e1b216dd39f603fc",
+        "commits": [
+          "e529e385f64ed252036bb8cdbaf6bbd9cdc1b415"
+        ],
+        "changed_lines": {
+          "added": 92096,
+          "removed": 14,
+          "files": 4
+        },
+        "tests_added": 9,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T160037588014-state-versus-label-reproducibility/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03480-a796-7403-90b5-b0f3c2f611e6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7393536,
+            "cached_input_tokens_cumulative": 7393536,
+            "input_tokens": 7596083,
+            "input_tokens_cumulative": 7596083,
+            "output_tokens": 35523,
+            "output_tokens_cumulative": 35523,
+            "reasoning_output_tokens": 10961,
+            "reasoning_output_tokens_cumulative": 10961
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 766
+    "_version": 770
   }
 }

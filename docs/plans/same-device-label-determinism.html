@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-24">
-<meta name="plan-version" content="2">
-<meta name="plan-commits" content="cef8f151582f8fef72dd5cee6dab5cac6fbd9710">
-<meta name="plan-artifacts" content="scripts/determinism_reuse/report.md">
-<meta name="plan-impl" content="0.25">
+<meta name="plan-version" content="4">
+<meta name="plan-commits" content="cef8f151582f8fef72dd5cee6dab5cac6fbd9710,e529e385f64ed252036bb8cdbaf6bbd9cdc1b415">
+<meta name="plan-artifacts" content="scripts/determinism_reuse/report.md,benchmarks/observable_batch_acceptance.py,docs/figures/same-device-label-determinism/state-label-reproducibility.json,docs/figures/same-device-label-determinism/state-label-reproducibility.npz,docs/evidence/archive/same-device-label-determinism-landed.html">
+<meta name="plan-impl" content="0.667">
 </head>
 <body>
   <main class="plan-doc">
@@ -105,27 +105,40 @@
     node here reports each flipping observable's <em>absolute</em> value beside its bound, so which
     fault is in play is visible rather than inferred.</p>
 
-    <h2 id="s2">§2 — Is the state reproducible, or only the labels?</h2>
-
-    <p>The first thing to separate is whether the terminal <em>state</em> repeats bitwise across
-    reruns and only the derived labels move, or whether the solve itself is nondeterministic and the
-    labels inherit that. The two imply completely different repairs, and the existing receipts cannot
-    answer it because none of them retains the raw terminal arrays across repetitions.</p>
-
-    <p>The measurement needs no new physics: run the same case twice in one allocation and compare
-    the terminal flux array bitwise, then compare each registered observable evaluated from those
-    two states. If the states are identical and the labels differ, the nondeterminism is in the
-    observation path. If the states differ, it is in the solve, and every label argument built on
-    top of a single solve becomes provisional.</p>
-
-    <p><strong>Done when</strong> each of the six held-out cases carries a verdict of
-    <code>STATE_REPRODUCIBLE</code> or <code>STATE_VARIES</code> across at least three repetitions in
-    one allocation, quoting the maximum bitwise-unequal element count and the maximum absolute and
-    relative difference of the terminal flux array between repetitions, alongside the same figures
-    for every registered observable. A case whose state repeats bitwise while its labels move
-    localises the problem to the observation path and names the first leaf that differs.</p>
+    <section id="s2" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-24</span>
+        <h2>§2 — Is the state reproducible, or only the labels?</h2></header>
+      <p class="landed-summary">Neither. Three repetitions of all six cases at both widths inside one
+      process, one H200 allocation and <em>one compiled executable</em> are bitwise identical:
+      <strong>12 of 12 <code>STATE_REPRODUCIBLE</code></strong>, maximum terminal-flux unequal element
+      count <strong>0</strong>, maximum absolute and relative difference <strong>0.0</strong>, and all
+      <strong>69</strong> registered observable leaves identical with <strong>0</strong> pass-status
+      changes — acceptance still failing, unchanged, at 67 of 69 bounds in every repetition. So the
+      movement is not in the solve and not in the observation path: it is a <strong>process or
+      executable boundary</strong> effect, which is what §3 now tests. Artifacts
+      <code>docs/figures/same-device-label-determinism/state-label-reproducibility.json</code> and its
+      1,511,597-byte lossless <code>.npz</code> (commit <code>e529e385</code>). Full record:
+      <a href="/nova/evidence/archive/same-device-label-determinism-landed#state-verdict">§2 landed</a>.</p>
+    </section>
 
     <h2 id="s3">§3 — Find the nondeterministic operation and decide what to do about it</h2>
+
+    <p><strong>§2 narrowed this from four candidates to one boundary, and the narrowing is by
+    elimination rather than by argument.</strong> Autotuned kernel selection, atomics-ordered
+    scatter and scheduling-dependent reduction order all predict movement <em>within</em> a compiled
+    executable across repeated invocations. None was observed: 69 leaves bitwise identical, three
+    times. The stencil scatter had already been shown to be a unique-index set that cannot race by
+    accumulation order. What survives is the one mechanism §2 held fixed by construction — the
+    executable itself. Each case and width callable was created once and reused, while the banked
+    movement was measured across <em>separate driver invocations</em>, and no acceptance driver calls
+    the persistent compilation cache, so those invocations may have compiled independently. XLA is
+    permitted to resolve reduction order differently between compilations, which is exactly a
+    per-executable constant rather than a per-call sample.</p>
+
+    <p>One corroborating detail: this measurement's own counts — 67 bounds with 411 and 412 case
+    evaluations at the two widths — sit <em>between</em> the two banked repetitions rather than
+    matching either. A third distinct compilation looks like that; a third sample of a within-run
+    random process would not have to.</p>
 
     <p>Scope follows §2's verdict rather than preceding it. The candidate mechanisms are known and
     each is testable: autotuned kernel selection choosing a different algorithm per process,
@@ -191,6 +204,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-20260824T1600-reusemap" data-who="reckon-ship" data-when="2026-08-24T16:00:00Z">
     <div class="r-comment-body">determinism-reuse-map landed - commit cef8f151, merged, gate PASSED, 179 lines, scope clean at one file. 7 direct-state sites, 8 repetition sites or receipts, 11 reduction/scatter/precision/executable-control sites, 6 explicit no-candidate findings. THE MEASUREMENT SPINE IS ALREADY THERE AND ONE THING IS NOT. ForwardEquilibrium.flux publishes the complete terminal flux array on every solve, _case_measurement in observable_batch_acceptance.py already holds scalar.flux and transformed.flux transiently at exactly the right case/route boundary, and _named_tree/_leaves already name all 69 registered leaves including the divergence_b canary. What is missing is narrow and decisive: RAW TERMINAL ARRAYS RETAINED ACROSS REPETITIONS IS ZERO. A scan of the acceptance, discriminator, conditioned-convergence and parity receipts found no scalar path holding a flux value and no JSON carrying both a repetition collection and a flux array - _repetition_snapshot deliberately discards terminal flux and raw observable values. So the state verdict cannot be recovered from banked evidence and must be run. THE MAP ALSO NARROWS SECTION 3'S CANDIDATE LIST BEFORE IT OPENS. Atomics-based scatter is UNFIT on the observation seam: StencilMesh._scatter places one derivative per unique centre with .at[centre].set and construction rejects repeated centre indices, with a test guarding it, and no segment sum or scatter-add exists on the equilibrium path. The canary is UNCONTROLLED rather than mis-controlled: conservation.divergence_b derives the poloidal field and its divergence then applies a masked jnp.max, and does not use layout_invariant_sum at all - which is why the repaired moment reductions made volume and major_radius bitwise equal without touching it. AND THE STRONGEST SURVIVING CANDIDATE IS EXECUTABLE IDENTITY, NOT ARITHMETIC: no acceptance driver calls the persistent compilation cache, so the two banked repetitions may have run SEPARATELY COMPILED EXECUTABLES inside one allocation, and XLA is free to resolve reduction order differently between compilations. Nothing pins deterministic GPU kernels, cuBLAS workspace determinism, an algorithm id or an autotune level on the acceptance route, and configure_dtypes holds float64 policy without pinning association. Only the selected moment reductions have an explicit association, so the complete route must not be described as reduction-fixed. RECOMMENDED SHAPE, ADOPTED: extend observable_batch_acceptance rather than author a second acceptance route - one frozen profile and seed per case, the solve callable created once per case and width, three invocations in one process on byte-identical copied inputs, every result blocked and every raw flux retained losslessly with repetition and case axes, then bitwise unequal-element count with maximum absolute and relative difference against repetition 1 for both the state and all 69 leaves, naming the first differing leaf. Cache-off and fixed-cache arms are named controls only.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260824T1935-state" data-who="reckon-ship" data-when="2026-08-24T19:35:00Z">
+    <div class="r-comment-body">state-versus-label-reproducibility landed - commit e529e385, merged, gate PASSED, 9 tests, scope clean at the four fenced paths. THE ANSWER IS NEITHER OF THE TWO OUTCOMES THIS SECTION ANTICIPATED. Six cases at both widths, three repetitions each: 12 of 12 STATE_REPRODUCIBLE, 0 of 12 STATE_VARIES, maximum terminal-flux bitwise-unequal element count 0, maximum absolute difference 0.0, maximum relative difference 0.0. ALL 69 registered observable leaves are bitwise identical in every case and width, first differing leaf null, pass-status changes 0. Repeated acceptance counts were identical in all three repetitions at width 1 (67 of 69 bounds, 411 of 414 case-bound evaluations) and width 4 (67 of 69, 412 of 414), with overall acceptance still FAILING. So the state does not vary AND the labels do not move - inside one executable. Measured on SLURM job 1254215, node 98dci4-gpu-0003, GPU UUID GPU-492a2dee-88e3-a142-6707-7ade0192889a, NVIDIA H200 NVL driver 595.58.03, JAX and jaxlib 0.11.0, float64, JAX_PLATFORMS=cuda, JAX_ENABLE_X64=true, NOVA_COMPILATION_CACHE=off and cache enabled false; each case and width callable was created once, compiled on first invocation, and repetitions 2 and 3 reused that executable on fresh host copies whose shape, dtype and byte digest matched repetition 1, every result blocked before retention. WHAT THAT ELIMINATES, AND WHAT IT LEAVES. Within one compiled executable nothing moves, so the banked movement across separate driver invocations cannot be an in-executable reduction order, an atomics race or a scheduling effect - it is a PROCESS OR EXECUTABLE BOUNDARY effect, which is exactly the candidate the reuse map ranked strongest on the independent ground that no acceptance driver calls the persistent compilation cache. Note also that this run's own counts, 411 and 412 case evaluations at 67 bounds, sit BETWEEN the two banked repetitions rather than matching either, which is what a third distinct compilation would look like. The 1511597-byte lossless companion retains terminal flux, scalar references and all 69 labels with repetition and case axes at sha256 abe8861b..., so the elimination is checkable rather than asserted. This node did not name the nondeterministic operation and did not touch the control-scope decision, both correctly fenced outside it.</div>
 </div>
 </section>
 </main>

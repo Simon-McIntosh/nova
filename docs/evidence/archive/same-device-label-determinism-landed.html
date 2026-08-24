@@ -96,6 +96,47 @@
     naming the first differing leaf. Cache-off and fixed-cache are named control arms, never
     evidence of a deterministic production route on their own.</p>
 
+    <h2 id="state-verdict">§2 verdict — everything repeats inside one executable</h2>
+
+    <p><strong>Node <code>state-versus-label-reproducibility</code>, commit <code>e529e385</code>,
+    gate PASSED, 9 tests, 2026-08-24.</strong> Six cases × two widths × three repetitions, on SLURM
+    job 1254215, node 98dci4-gpu-0003, GPU UUID
+    <code>GPU-492a2dee-88e3-a142-6707-7ade0192889a</code>, NVIDIA H200 NVL driver 595.58.03, JAX and
+    jaxlib 0.11.0, float64, <code>JAX_PLATFORMS=cuda</code>, <code>JAX_ENABLE_X64=true</code>,
+    <code>NOVA_COMPILATION_CACHE=off</code>.</p>
+
+    <table>
+      <caption>Reproducibility within one process, one allocation and one compiled executable</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Result</th></tr></thead>
+      <tbody>
+        <tr><td>Case/width pairs verdict</td><td><strong>12 of 12 STATE_REPRODUCIBLE</strong>, 0 of 12 STATE_VARIES</td></tr>
+        <tr><td>Terminal-flux bitwise-unequal element count</td><td>maximum <strong>0</strong></td></tr>
+        <tr><td>Terminal-flux absolute / relative difference</td><td>maximum <strong>0.0</strong> / <strong>0.0</strong></td></tr>
+        <tr><td>Registered observable leaves</td><td>all <strong>69</strong> bitwise identical, first differing leaf <code>null</code></td></tr>
+        <tr><td>Pass-status changes across repetitions</td><td><strong>0</strong></td></tr>
+        <tr><td>Acceptance counts, width 1 / width 4</td><td>67 of 69 bounds with 411 / 412 of 414 case evaluations, identical in all three</td></tr>
+        <tr><td>Overall acceptance</td><td>still <strong>failing</strong>, unchanged</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Both anticipated outcomes are eliminated.</strong> The section was written to
+    distinguish a varying state from a repeating state with moving labels. Neither happened: nothing
+    moves at all. Each case/width callable was created once, compiled on first invocation, and
+    repetitions 2 and 3 reused that executable on fresh host copies whose shape, dtype and byte
+    digest matched repetition 1, every result blocked before retention. So the banked movement,
+    measured across <em>separate driver invocations</em>, belongs to a process or executable
+    boundary — independently the candidate the reuse map ranked strongest, on the ground that no
+    acceptance driver calls the persistent compilation cache.</p>
+
+    <p>One corroborating detail: these counts — 411 and 412 case evaluations at 67 bounds — sit
+    <em>between</em> the two banked repetitions (410/412 at 67 and 68 bounds, 408/410 at 67 and 68)
+    rather than matching either. A third independent compilation looks like that. The
+    1,511,597-byte companion at
+    <code>docs/figures/same-device-label-determinism/state-label-reproducibility.npz</code>
+    (sha256 <code>abe8861b0926e79142409f2d741cf4cccc8ff01d91e9a222f2b70a2ba859064b</code>) retains
+    terminal flux, scalar references and all 69 labels with repetition and case axes, so the
+    elimination is checkable rather than asserted.</p>
+
   </main>
 </body>
 </html>

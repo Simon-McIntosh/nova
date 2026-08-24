@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="coefficient-space-newton-landed">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="coefficient-space-newton">
+<title>coefficient-space-newton-landed</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="Coefficient-Space Newton — cumulative execution evidence">
+<meta name="plan-summary" content="Landing record of the coefficient-space-newton plan: the basis reuse map, the measured representation degree, the edge-current jump sizing, and the join that attributes the separatrix-band fit error">
+</head>
+<body>
+<main class="plan-doc">
+
+<h1>Coefficient-Space Newton — cumulative execution evidence</h1>
+
+<section id="reuse-map">
+  <h2 id="reuse-map-h">Reuse map — the basis machinery this plan extends</h2>
+
+  <p><strong>coefficient-basis-reuse-map</strong> landed 2026-08-24 — commit <code>485f6fda</code>,
+  merged into main, gate PASSED. 30 numbered candidates, 10 explicit no-candidate lines, 4 semantic
+  machine-cache identities and 4 SHA-256 root-bank identities covering 62 archived arrays. Artifact:
+  <code>scripts/coefficient_basis_reuse/report.md</code>.</p>
+
+  <p><strong>The verdict on the parameterisation question: extend, do not fork.</strong>
+  <code>TensorBSpline</code> must be extended to carry a literal primary coarse control-coefficient
+  lattice — although <code>fit_tensor_spline</code> already permits a coarse <em>nodal-value</em>
+  state — and the recommendation is to re-parameterise the existing evaluator authority rather than
+  create a second one. <code>TensorBSpline.evaluate</code> already returns
+  <code>radial_derivative</code>, <code>radial_second_derivative</code>,
+  <code>mixed_derivative</code> and <code>vertical_second_derivative</code>, which is the complete
+  set Grad-Shafranov needs. The existing arbitrary-point route under <code>jit</code> and
+  <code>jit(vmap)</code> is already covered by
+  <code>tests/test_tensor_spline.py::test_jit_eager_and_vmap_keep_fixed_shapes</code>, so cell
+  coordinates are valid inputs today.</p>
+
+  <p><strong>Cache identities to consume rather than rebuild.</strong> Stored-reference groups
+  <code>746fbe1553c4b242</code> (coarse) and <code>f0f96aa214aa9459</code> (fine); analytic groups
+  <code>030667d40f96d904</code> (coarse) and <code>7c94be9b777c55ba</code> (fine). The map is explicit
+  that a consumer must not call <code>build_machine</code> or rebuild Green operators — the same rule
+  a concurrent node on another plan violated at a cost of 48 minutes.</p>
+</section>
+
+<section id="s4">
+  <h2 id="s4-h">§4 — The effective solution degree, measured with no solve</h2>
+
+  <p><strong>flux-representation-degree</strong> landed 2026-08-24 — commit <code>dbee3048</code>,
+  gate PASSED. Receipt
+  <code>docs/figures/coefficient-space-newton/representation-degree.json</code>. The driver path
+  enforces and the receipt declares <code>equilibrium_solves_run = 0</code> and
+  <code>forward_map_evaluations_run = 0</code>: it loads serialized bank arrays, stored-reference
+  interpolation and warm coordinate-only semantic caches, then runs sparse linear least squares only.</p>
+
+  <p><strong>The degree is low, and that is the plan's central premise confirmed.</strong> Nine rungs
+  at 4, 6, 8, 10, 12, 14, 16, 18 and 20 knots per axis — 16 to 400 coefficients — against carriers of
+  551, 566, 1,069 and 1,076 plasma cells. Every one of the eight targets falls below the hardest
+  banked production terminal residual, 0.08646603357046066, in closed-flux relative-sup error. The
+  region partition is declared: closed flux ψ<sub>N</sub> &lt; 0.95, separatrix band
+  0.95 ≤ ψ<sub>N</sub> ≤ 1.05, scrape-off layer ψ<sub>N</sub> &gt; 1.05.</p>
+
+  <table>
+    <caption>First knot count per axis at which closed-flux error falls below the production terminal residual</caption>
+    <thead>
+      <tr><th scope="col">Target family</th><th scope="col">Knots per axis</th><th scope="col">Coefficients</th><th scope="col">Cells replaced</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>closed-form oracle, map and root, coarse and fine</td><td><strong>4</strong></td><td><strong>16</strong></td><td>551 / 1,076</td></tr>
+      <tr><td>stored DINA, reference and root, coarse and fine</td><td><strong>6</strong></td><td><strong>36</strong></td><td>566 / 1,069</td></tr>
+    </tbody>
+  </table>
+
+  <p>At the terminal rung of 20 knots per axis, 400 coefficients, every regional relative-sup error is
+  at most <strong>1.1670983117499025e-3</strong> — an order below the derived convergence-criterion
+  band as well as far below the production residual. Terminal ranges across all eight targets:
+  closed flux 3.7762e-6 to 1.16710e-3, separatrix band 5.81862e-6 to 1.05279e-3, scrape-off layer
+  4.19054e-6 to 1.13882e-3. The banked converged roots register terminal residuals of 1.0264e-15 to
+  3.0408e-15, confirming they are machine-precision roots.</p>
+
+  <p><strong>The separatrix band is not universally binding.</strong>
+  <code>separatrix_band_is_universally_binding = false</code>, with
+  <code>separatrix_band_binding_targets_at_terminal_rung = 2</code> of 8. The other six bind in either
+  the closed-flux region or the scrape-off layer.</p>
+</section>
+
+<section id="s7">
+  <h2 id="s7-h">§7 — The curvature jump, sized</h2>
+
+  <p><strong>edge-current-jump-sizing</strong> landed 2026-08-24 — commit <code>975e4acec</code>,
+  gate PASSED, verdict <code>CURVATURE_JUMP_SUPPORT_REQUIRED_FOR_CASE_SET</code>, 2 of 4 cases
+  sufficient. Receipt <code>docs/figures/coefficient-space-newton/edge-current-jump.json</code>. No
+  equilibrium solve ran, verified by a static call audit as well as by declaration.</p>
+
+  <p><strong>Convention and threshold, both declared before measurement.</strong> Nova total-flux
+  convention: <em>j<sub>φ</sub></em> = −2π(R·p′ + FF′/(μ₀R)) and Δ*Φ = −2π·μ₀·R·<em>j<sub>φ</sub></em>.
+  Negligibility was preregistered as a numerical-zero check at 4096 binary64 epsilon —
+  9.09494701773e-13 of peak — <em>not</em> derived from any achieved value, which is the method
+  requirement this plan inherits.</p>
+
+  <table>
+    <caption>Boundary source and implied operator jump, by family</caption>
+    <thead>
+      <tr><th scope="col">Family</th><th scope="col">Boundary p′ (Pa/Wb)</th><th scope="col">|j<sub>φ</sub>| (A/m²)</th><th scope="col">|Δ*Φ jump| (Wb/m²)</th><th scope="col">Fraction of peak</th><th scope="col">Smooth basis</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>stored DINA, coarse and fine</td>
+        <td>0</td><td>0</td><td>0</td><td>0</td>
+        <td><strong>SUFFICIENT</strong></td>
+      </tr>
+      <tr>
+        <td>rotating oracle, coarse and fine</td>
+        <td>−77916.93 / −71420.91 / −67149.92 (min/median/max)</td>
+        <td>776798 / 937522 / 1215296</td>
+        <td>6.4736 / 11.8641 / 20.6305</td>
+        <td>0.3138 / 0.5751 / <strong>1.00</strong></td>
+        <td><strong>INSUFFICIENT</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>The stored reconstruction's profile tapers <em>exactly</em> to zero at the boundary, so it carries
+  no curvature discontinuity at all. The rotating closed-form oracle does not taper: at one poloidal
+  location its operator jump equals the full peak value, so the discontinuity there is O(1) rather
+  than a correction.</p>
+</section>
+
+<section id="join">
+  <h2 id="join-h">The join — attributing the separatrix-band fit error</h2>
+
+  <p>The two receipts were dispatched so that the band error measured in §4 could be attributed to the
+  jump sized in §7, or exonerated of it. Joined on target identity, the pattern is clean and sharper
+  than either receipt alone.</p>
+
+  <table>
+    <caption>Edge-current jump against separatrix-band binding, per target</caption>
+    <thead>
+      <tr><th scope="col">Target</th><th scope="col">Edge-current jump</th><th scope="col">Band binds at terminal rung</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>stored-dina-reference-coarse</td><td>zero</td><td>no</td></tr>
+      <tr><td>stored-dina-root-coarse</td><td>zero</td><td>no</td></tr>
+      <tr><td>stored-dina-reference-fine</td><td>zero</td><td>no</td></tr>
+      <tr><td>stored-dina-root-fine</td><td>zero</td><td>no</td></tr>
+      <tr><td>closed-form-oracle-map-coarse</td><td>large</td><td><strong>yes</strong></td></tr>
+      <tr><td>closed-form-oracle-root-coarse</td><td>large</td><td><strong>yes</strong></td></tr>
+      <tr><td>closed-form-oracle-map-fine</td><td>large</td><td>no</td></tr>
+      <tr><td>closed-form-oracle-root-fine</td><td>large</td><td>no</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>A zero edge current is sufficient for the band never to bind — four of four.</strong> A
+  large edge current is <em>necessary but not sufficient</em>: it binds on both coarse oracle carriers
+  and on neither fine one. So the curvature jump is real where the profiles do not taper, and whether
+  it becomes the <em>binding regional term</em> depends on resolution — refining the carrier moves the
+  band error below the closed-flux and scrape-off terms without removing the jump that causes it.</p>
+
+  <p><strong>What that means for the plan, stated as scope rather than as a win.</strong> The
+  experimental and stored-reference lane — which is what the DIII-D and MAST work reads — carries no
+  curvature discontinuity, so a globally smooth coefficient basis is sufficient there on this evidence.
+  The analytic oracle lane does carry one, at up to the full peak of the operator, and it is the
+  accuracy oracle. So curvature-jump support is required for the case set as a whole while not being
+  required for the lane the campaign's open questions live on. Any decision on boundary support should
+  be taken against that split rather than against the aggregate verdict.</p>
+
+  <p><strong>Two limits on this reading.</strong> Both receipts are solve-free fits and sizings, so
+  neither establishes anything about solver behaviour in a coefficient basis — that is §5, and it has
+  not run. And the band is a fixed ψ<sub>N</sub> window of [0.95, 1.05] rather than a fixed physical
+  width, so its cell content varies between coarse and fine carriers; the resolution dependence
+  reported above is consistent with that and is not independent of it.</p>
+</section>
+
+</main>
+</body>
+</html>

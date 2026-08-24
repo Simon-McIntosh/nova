@@ -8,10 +8,11 @@ then ``ForwardProfile`` pins the separately shipped plasma current.  There is
 no response fit; the only alignment applied when scoring flux is its physically
 arbitrary additive gauge.
 
-The competition data do not ship a machine wall.  The rectangular enclosing
-surface used by the topology read is therefore labelled a pseudo-wall.  It is
-derived only from the released EFIT-grid extent, and the first frame is solved
-again with one outward displacement to expose the resulting sensitivity.
+The competition rows do not ship a machine wall, but Nova's governed DIII-D
+machine description does.  The physical limiter ring is the default topology
+surface.  A rectangular surface derived from the released EFIT-grid extent is
+retained only as an explicitly selected pseudo-wall fallback and sensitivity
+control.
 """
 
 from __future__ import annotations
@@ -55,9 +56,14 @@ from nova.equilibrium.flux_surface_geometry import (
     SurfaceGeometryError,
 )
 from nova.equilibrium.forward import ForwardProfile, SaddleSeedGeometry
+from nova.equilibrium.fixed_point import (
+    KrylovActionQualification,
+    kink_aware_newton_krylov,
+)
 from nova.equilibrium.map_extraction import extract_flux_functions
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.topology import TopologyClass
+from nova.equilibrium.wall_mask import inside_polygon
 from nova.imas.diiid_description import (
     POLOIDAL_CONDUCTORS,
     dataset_machine_description,
@@ -69,6 +75,7 @@ from nova.imas.diiid_current import (
     complete_profile_current_adapter,
     shipped_current_at,
 )
+from nova.imas.machine_artifact import resolve_machine_artifact
 from nova.jax.config import configure_dtypes
 
 DEFAULT_DATA = Path("/work/projects/imas_gpu/sophelio/raw/data/diii_d_train")
@@ -77,6 +84,21 @@ PREREGISTRATION_NAME = "forward_gs_preregistration.json"
 RECEIPT_NAME = "forward_gs_receipt.json"
 FRAME_FIGURE_NAME = "frame_flux_comparison.png"
 COHORT_FIGURE_NAME = "cohort_match_summary.png"
+DEFAULT_WALL_TOPOLOGY_OUTPUT = Path(
+    "docs/figures/plateau-input-attribution/wall-topology-surface.json"
+)
+DEFAULT_MACHINE_ARTIFACT_CACHE = Path(
+    "/run/user/39486/reckon-artifact-repaired-ring-cache"
+)
+DEFAULT_MACHINE_ARTIFACT_DIGEST = (
+    "sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e"
+)
+QUALIFIED_PSEUDO_WALL_RECEIPT = Path(
+    "docs/figures/diiid-forward-onboarding/repaired-solve-five-frame-remeasure.json"
+)
+BANKED_PSEUDO_WALL_RECEIPT = DEFAULT_OUTPUT / RECEIPT_NAME
+PHYSICAL_WALL_OCCURRENCE = 0
+PHYSICAL_WALL_OUTLINE_PATH = "description_2d[0].limiter.unit[0].outline"
 
 LABEL_REPRESENTABILITY_MEDIAN_R2 = 0.949
 IRREDUCIBLE_LABEL_RESIDUAL_FRACTION = 0.9968
@@ -99,6 +121,10 @@ REGISTERED_ACCELERATED_RELAXATION = 0.5
 REGISTERED_ACCELERATED_STEP_CAP = 10.0
 REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION = 0.02
 PSEUDO_WALL_EXPANSIONS = (0.02, 0.05)
+RECTANGLE_SWEEP_EXPANSIONS = (0.0, 0.01, 0.02, 0.05)
+TOPOLOGY_SURFACE_NEWTON_STEPS = 89
+TOPOLOGY_SURFACE_GMRES_ITERATIONS = 24
+TOPOLOGY_SURFACE_FACTORS = (1.0, 0.5, 0.25, 0.125)
 TOROIDAL_FIELD_TURNS = 144
 TOROIDAL_FIELD_TURNS_SOURCE = "https://fusion.gat.com/pubs-ext/SOFT02/A24059.pdf"
 POLARITY_RECEIPT = Path(
@@ -140,10 +166,8 @@ _PLASMA_CURRENT_COLUMNS = (
     "magnetics_plasma_current",
     "magnetics_plasma_current_times",
 )
-_COUPLING_CACHE: dict[
-    tuple[str, float],
-    tuple[tuple[str, ...], np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray],
-] = {}
+_COUPLING_CACHE: dict[tuple[str, str, str], tuple[Any, ...]] = {}
+_PHYSICAL_WALL_CACHE: dict[tuple[str, str, int], tuple[np.ndarray, dict[str, Any]]] = {}
 
 
 @dataclass(frozen=True)
@@ -197,6 +221,20 @@ class FrameResult:
     seed_identity_detected: bool = False
     branch_selection: dict[str, Any] = field(default_factory=dict)
     conductor_current_receipt: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class ProfileBuild:
+    """One profile plus the topology-surface construction it consumed."""
+
+    profile: ForwardProfile
+    seed: np.ndarray
+    label: np.ndarray
+    wall: np.ndarray
+    reliable_flux_surfaces: int
+    wall_statement: str
+    surface_receipt: dict[str, Any]
+    seed_wall_flux_sha256: str
 
 
 def preregistration() -> dict[str, Any]:
@@ -486,6 +524,169 @@ def pseudo_wall(
     return np.vstack([lower, right, upper, left])
 
 
+def _array_sha256(values: np.ndarray) -> str:
+    """Return a dtype- and shape-qualified digest for one numerical array."""
+
+    array = np.ascontiguousarray(values)
+    identity = hashlib.sha256()
+    identity.update(array.dtype.str.encode("ascii"))
+    identity.update(json.dumps(array.shape).encode("ascii"))
+    identity.update(array.tobytes())
+    return identity.hexdigest()
+
+
+def _physical_wall_ring(
+    cache_directory: Path,
+    artifact_digest: str,
+    occurrence: int = PHYSICAL_WALL_OCCURRENCE,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Resolve and read the governed physical limiter ring through IMAS-Python."""
+
+    cache_key = (str(cache_directory), artifact_digest, occurrence)
+    cached = _PHYSICAL_WALL_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
+
+    import imas
+
+    artifact = resolve_machine_artifact(
+        cache_directory,
+        artifact_digest,
+        expected_dd_version="4.1.1",
+        allow_incomplete=True,
+    )
+    candidates: list[tuple[Path, list[int]]] = []
+    for item in artifact.manifest.files:
+        path = artifact.directory / item.name
+        with imas.DBEntry(
+            path,
+            "r",
+            dd_version=artifact.manifest.dd_version,
+        ) as entry:
+            occurrences = entry.list_all_occurrences("wall")
+        if occurrence in occurrences:
+            candidates.append((path, occurrences))
+    if len(candidates) != 1:
+        raise RuntimeError(
+            "the verified machine artifact must contain exactly one file with "
+            f"wall occurrence {occurrence}, found {len(candidates)}"
+        )
+
+    path, occurrences = candidates[0]
+    with imas.DBEntry(
+        path,
+        "r",
+        dd_version=artifact.manifest.dd_version,
+    ) as entry:
+        wall = entry.get("wall", occurrence, lazy=False, autoconvert=False)
+        written_dd_version = str(
+            wall.ids_properties.version_put.data_dictionary
+        ).strip()
+        if written_dd_version != artifact.manifest.dd_version:
+            raise RuntimeError(
+                "wall IDS dictionary version disagrees with the verified manifest: "
+                f"{written_dd_version!r} != {artifact.manifest.dd_version!r}"
+            )
+        if len(wall.description_2d) != 1:
+            raise RuntimeError("the governed wall must contain one 2-D description")
+        units = wall.description_2d[0].limiter.unit
+        if len(units) != 1:
+            raise RuntimeError("the governed wall must contain one limiter ring")
+        outline = units[0].outline
+        coordinate = np.column_stack(
+            (
+                np.asarray(outline.r, dtype=np.float64),
+                np.asarray(outline.z, dtype=np.float64),
+            )
+        )
+    if coordinate.ndim != 2 or coordinate.shape[1] != 2 or len(coordinate) < 4:
+        raise RuntimeError("the governed limiter ring is not an R-Z polygon")
+    if not np.all(np.isfinite(coordinate)):
+        raise RuntimeError("the governed limiter ring contains non-finite coordinates")
+    if not np.array_equal(coordinate[0], coordinate[-1]):
+        raise RuntimeError("the governed limiter ring is not explicitly closed")
+
+    receipt = {
+        "selector": "physical_ring",
+        "artifact_digest": artifact.digest,
+        "physical_digest": artifact.manifest.physical_digest,
+        "semantic_identity": artifact.manifest.semantic_identity(),
+        "dd_version": artifact.manifest.dd_version,
+        "occurrence": occurrence,
+        "available_occurrences": occurrences,
+        "outline_path": PHYSICAL_WALL_OUTLINE_PATH,
+        "artifact_file": path.name,
+        "wall_coordinate_rows": len(coordinate),
+        "wall_coordinate_sha256": _array_sha256(coordinate),
+    }
+    result = (coordinate, receipt)
+    _PHYSICAL_WALL_CACHE[cache_key] = result
+    return result
+
+
+def _topology_surface(
+    row: dict[str, Any],
+    lattice: FluxLattice,
+    expansion: float | None,
+    machine_artifact_cache: Path,
+    machine_artifact_digest: str,
+) -> tuple[np.ndarray, np.ndarray, str, str, dict[str, Any]]:
+    """Return one coherent topology surface and its material mask."""
+
+    if expansion is not None:
+        coordinate = pseudo_wall(*canonical_axes(row), expansion)
+        inside_material = np.ones(lattice.node_count, dtype=bool)
+        identity = f"pseudo-wall:{expansion:.17g}"
+        statement = (
+            "explicit pseudo-wall fallback derived from the competition row's "
+            "efit_grid extent"
+        )
+        receipt = {
+            "selector": "pseudo_wall",
+            "explicit_fallback": True,
+            "expansion": float(expansion),
+            "source": "competition row efit_grid extent",
+            "wall_coordinate_rows": len(coordinate),
+            "wall_coordinate_sha256": _array_sha256(coordinate),
+        }
+        return coordinate, inside_material, identity, statement, receipt
+
+    coordinate, receipt = _physical_wall_ring(
+        machine_artifact_cache,
+        machine_artifact_digest,
+    )
+    inside_material = np.asarray(
+        inside_polygon(
+            lattice.coordinate[:, 0],
+            lattice.coordinate[:, 1],
+            coordinate[:, 0],
+            coordinate[:, 1],
+        ),
+        dtype=bool,
+    )
+    if inside_material.shape != (lattice.node_count,):
+        raise RuntimeError("physical-wall material mask does not match the lattice")
+    if not np.any(inside_material) or np.all(inside_material):
+        raise RuntimeError("physical-wall material mask must cut the released grid")
+    statement = "governed physical limiter ring from the DIII-D machine description"
+    receipt = dict(receipt)
+    receipt.update(
+        {
+            "explicit_fallback": False,
+            "inside_material_true": int(np.count_nonzero(inside_material)),
+            "inside_material_false": int(np.count_nonzero(~inside_material)),
+            "inside_material_sha256": _array_sha256(inside_material),
+        }
+    )
+    return (
+        coordinate,
+        inside_material,
+        f"physical-ring:{receipt['physical_digest']}",
+        statement,
+        receipt,
+    )
+
+
 def _plasma_mask(
     row: dict[str, Any], frame: int, radius: np.ndarray, height: np.ndarray
 ) -> np.ndarray:
@@ -609,16 +810,33 @@ def _wall_source_response(description, names, wall: np.ndarray) -> np.ndarray:
     )
 
 
-def _couplings(row, machine, radius, height, expansion):
-    """Return geometry-only Green operators, cached across the cohort."""
+def _couplings(
+    row,
+    machine,
+    radius,
+    height,
+    expansion,
+    machine_artifact_cache,
+    machine_artifact_digest,
+):
+    """Return Green operators coherently derived from one topology surface."""
 
-    key = (machine.physical.physical_digest, float(expansion))
+    lattice = FluxLattice(radius, height)
+    coordinate = lattice.coordinate
+    wall, inside_material, surface_identity, statement, surface_receipt = (
+        _topology_surface(
+            row,
+            lattice,
+            expansion,
+            machine_artifact_cache,
+            machine_artifact_digest,
+        )
+    )
+    grid_identity = _array_sha256(coordinate)
+    key = (machine.physical.physical_digest, surface_identity, grid_identity)
     cached = _COUPLING_CACHE.get(key)
     if cached is not None:
         return cached
-    lattice = FluxLattice(radius, height)
-    coordinate = lattice.coordinate
-    wall = pseudo_wall(*canonical_axes(row), expansion)
     names, response = vacuum_response(machine.physical, radius, height)
     source_to_grid = np.stack([plane.T.ravel() for plane in response], axis=1)
     source_to_wall = _wall_source_response(machine.physical, names, wall)
@@ -626,24 +844,79 @@ def _couplings(row, machine, radius, height, expansion):
     vertical_extent = float(np.diff(height).mean())
     plasma_to_grid = _green_block(coordinate, coordinate, width, vertical_extent)
     plasma_to_wall = _green_block(wall, coordinate, width, vertical_extent)
+    grid_rows = lattice.node_count
+    wall_rows = len(wall)
+    same_grid_seam = (
+        inside_material.shape == (grid_rows,)
+        and source_to_grid.shape[0] == grid_rows
+        and plasma_to_grid.shape == (grid_rows, grid_rows)
+        and plasma_to_wall.shape[1] == grid_rows
+    )
+    same_wall_seam = (
+        source_to_wall.shape[0] == wall_rows and plasma_to_wall.shape[0] == wall_rows
+    )
+    if not same_grid_seam or not same_wall_seam:
+        raise RuntimeError(
+            "topology-surface targets do not share the labelled grid and wall seams"
+        )
     result = (
         names,
         wall,
+        inside_material,
         source_to_grid,
         source_to_wall,
         plasma_to_grid,
         plasma_to_wall,
+        statement,
+        {
+            **surface_receipt,
+            "coupling_cache_key": list(key),
+            "source_to_wall_rows": int(source_to_wall.shape[0]),
+            "source_to_wall_sha256": _array_sha256(source_to_wall),
+            "plasma_to_wall_rows": int(plasma_to_wall.shape[0]),
+            "plasma_to_wall_sha256": _array_sha256(plasma_to_wall),
+            "grid_seam": {
+                "axis_source": (
+                    "canonical efit_grid axes from the labelled frame at the "
+                    f"declared stride {REGISTERED_GRID_STRIDE}"
+                ),
+                "radial_axis_points": len(radius),
+                "vertical_axis_points": len(height),
+                "grid_node_count": grid_rows,
+                "grid_coordinate_sha256": grid_identity,
+                "inside_material_rows": int(inside_material.size),
+                "source_to_grid_target_rows": int(source_to_grid.shape[0]),
+                "plasma_to_grid_target_rows": int(plasma_to_grid.shape[0]),
+                "plasma_to_grid_source_rows": int(plasma_to_grid.shape[1]),
+                "plasma_to_wall_grid_source_rows": int(plasma_to_wall.shape[1]),
+                "wall_coordinate_rows": wall_rows,
+                "source_to_wall_target_rows": int(source_to_wall.shape[0]),
+                "plasma_to_wall_target_rows": int(plasma_to_wall.shape[0]),
+                "all_grid_rows_share_labelled_frame_grid": same_grid_seam,
+                "all_wall_target_rows_share_selected_surface": same_wall_seam,
+            },
+            "derived_inputs": {
+                "wall_coordinate": "selected topology surface coordinate",
+                "inside_material": "selected topology surface polygon",
+                "source_to_wall_green_rows": "selected topology surface coordinate",
+                "plasma_to_wall_green_rows": "selected topology surface coordinate",
+                "seed_wall_flux": "selected topology surface coordinate",
+            },
+        },
     )
     _COUPLING_CACHE[key] = result
     return result
 
 
-def build_profile(
+def _build_profile(
     row: dict[str, Any],
     frame: int,
-    expansion: float,
-) -> tuple[ForwardProfile, np.ndarray, np.ndarray, np.ndarray, int, str]:
-    """Build one prescribed-source production solve from a labelled frame."""
+    expansion: float | None = None,
+    *,
+    machine_artifact_cache: Path = DEFAULT_MACHINE_ARTIFACT_CACHE,
+    machine_artifact_digest: str = DEFAULT_MACHINE_ARTIFACT_DIGEST,
+) -> ProfileBuild:
+    """Build one prescribed-source solve with a coherent topology surface."""
 
     label_full, surfaces, p_prime, ff_prime = _label_state(row, frame)
     radius_full, height_full = canonical_axes(row)
@@ -651,16 +924,29 @@ def build_profile(
     height = height_full[::REGISTERED_GRID_STRIDE]
     label = label_full[::REGISTERED_GRID_STRIDE, ::REGISTERED_GRID_STRIDE]
     lattice = FluxLattice(radius, height)
+    if label.shape != lattice.shape or label.size != lattice.node_count:
+        raise RuntimeError("label state does not share the declared strided-grid seam")
     source_row = str(row.get("_source_path", "corpus row"))
     machine = dataset_machine_description(row, source_row=source_row)
     (
         names,
         wall,
+        inside_material,
         source_to_grid,
         source_to_wall,
         plasma_to_grid,
         plasma_to_wall,
-    ) = _couplings(row, machine, radius, height, expansion)
+        statement,
+        surface_receipt,
+    ) = _couplings(
+        row,
+        machine,
+        radius,
+        height,
+        expansion,
+        machine_artifact_cache,
+        machine_artifact_digest,
+    )
     source = ForwardSource(
         core=DomainProfile(
             p_prime=_profile_function(surfaces, p_prime),
@@ -683,17 +969,59 @@ def build_profile(
         plasma_to_wall=plasma_to_wall,
         wall_coordinate=wall,
         polarity=1,
-        inside_material=np.ones(lattice.node_count, dtype=bool),
+        inside_material=inside_material,
         evaluations=REGISTERED_PROFILE_EVALUATIONS,
         newton_steps=REGISTERED_ACCELERATED_NEWTON_STEPS,
     )
     spline = RectBivariateSpline(radius, height, label, kx=3, ky=3, s=0)
-    seed = np.r_[label.ravel(), spline.ev(wall[:, 0], wall[:, 1])]
-    statement = (
-        "rectangular enclosing control surface derived from efit_grid extent; "
-        "pseudo-wall standing in for the absent machine wall"
+    seed_wall_flux = np.asarray(spline.ev(wall[:, 0], wall[:, 1]), dtype=np.float64)
+    seed = np.r_[label.ravel(), seed_wall_flux]
+    return ProfileBuild(
+        profile=profile,
+        seed=seed,
+        label=label,
+        wall=wall,
+        reliable_flux_surfaces=int(np.size(surfaces)),
+        wall_statement=statement,
+        surface_receipt={
+            **surface_receipt,
+            "labelled_frame_grid": {
+                "label_shape": list(label.shape),
+                "label_node_count": int(label.size),
+                "lattice_shape": list(lattice.shape),
+                "lattice_node_count": lattice.node_count,
+                "label_and_lattice_identical": True,
+            },
+        },
+        seed_wall_flux_sha256=_array_sha256(seed_wall_flux),
     )
-    return profile, seed, label, wall, int(np.size(surfaces)), statement
+
+
+def build_profile(
+    row: dict[str, Any],
+    frame: int,
+    expansion: float | None = None,
+    *,
+    machine_artifact_cache: Path = DEFAULT_MACHINE_ARTIFACT_CACHE,
+    machine_artifact_digest: str = DEFAULT_MACHINE_ARTIFACT_DIGEST,
+) -> tuple[ForwardProfile, np.ndarray, np.ndarray, np.ndarray, int, str]:
+    """Build a physical-wall solve, or an explicitly expanded pseudo-wall."""
+
+    built = _build_profile(
+        row,
+        frame,
+        expansion,
+        machine_artifact_cache=machine_artifact_cache,
+        machine_artifact_digest=machine_artifact_digest,
+    )
+    return (
+        built.profile,
+        built.seed,
+        built.label,
+        built.wall,
+        built.reliable_flux_surfaces,
+        built.wall_statement,
+    )
 
 
 def _separatrix(
@@ -1260,6 +1588,515 @@ def cohort_figure(results: list[FrameResult], path: Path) -> None:
     plt.close(figure)
 
 
+def _wall_topology_comparator() -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Join the banked qualified solve and axis-displacement comparators."""
+
+    qualified = json.loads(QUALIFIED_PSEUDO_WALL_RECEIPT.read_text())
+    scored = json.loads(BANKED_PSEUDO_WALL_RECEIPT.read_text())
+    qualified_records = {
+        (record["shot"], int(record["frame"])): record
+        for record in qualified["frame_records"]
+    }
+    scored_records = {
+        (record["shot"], int(record["frame"])): record
+        for record in scored["result"]["frame_records"]
+    }
+    if qualified_records.keys() != scored_records.keys() or len(qualified_records) != 5:
+        raise RuntimeError("the banked pseudo-wall comparator cohort changed")
+
+    records = []
+    for record in qualified["frame_records"]:
+        key = (record["shot"], int(record["frame"]))
+        admitted = int(record["promoted_iteration_count"])
+        refused = int(record["unpromoted_iteration_count"])
+        if admitted + refused != TOPOLOGY_SURFACE_NEWTON_STEPS:
+            raise RuntimeError(f"the banked comparator for {key} is not 89 updates")
+        scored_record = scored_records[key]
+        records.append(
+            {
+                "shot": key[0],
+                "frame": key[1],
+                "admitted_advance_count_of_89": admitted,
+                "terminal_relative_residual": float(
+                    record["terminal_relative_residual"]
+                ),
+                "magnetic_axis_displacement_mm": float(
+                    scored_record["metrics"]["magnetic_axis_displacement_mm"]
+                ),
+            }
+        )
+    displacement = [item["magnetic_axis_displacement_mm"] for item in records]
+    distribution = _distribution(displacement)
+    expected = {
+        "minimum": 118.53997648848426,
+        "maximum": 251.09398873153137,
+        "mean": 164.59496196151277,
+        "median": 133.39328700897974,
+    }
+    if any(
+        not np.isclose(distribution[name], value, rtol=0.0, atol=1.0e-12)
+        for name, value in expected.items()
+    ):
+        raise RuntimeError("the banked magnetic-axis displacement comparator changed")
+    comparator = {
+        "surface_selector": "pseudo_wall",
+        "expansion": REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION,
+        "qualified_solve_receipt": str(QUALIFIED_PSEUDO_WALL_RECEIPT),
+        "qualified_solve_receipt_sha256": hashlib.sha256(
+            QUALIFIED_PSEUDO_WALL_RECEIPT.read_bytes()
+        ).hexdigest(),
+        "axis_displacement_receipt": str(BANKED_PSEUDO_WALL_RECEIPT),
+        "axis_displacement_receipt_sha256": hashlib.sha256(
+            BANKED_PSEUDO_WALL_RECEIPT.read_bytes()
+        ).hexdigest(),
+        "route_qualification": (
+            "admission count and terminal residual come from the banked 89-update "
+            "qualified solve; magnetic-axis displacement comes from the earlier "
+            "32-update scored solve and is a contextual, not causal, comparator"
+        ),
+        "magnetic_axis_displacement_mm": distribution,
+        "quoted_rounded_magnetic_axis_displacement_mm": {
+            "range": [118.5, 251.1],
+            "mean": 164.6,
+            "median": 133.4,
+        },
+        "frame_records": records,
+    }
+    return comparator, records
+
+
+def _wall_topology_row(path: Path) -> dict[str, Any]:
+    """Read the exact columns consumed by one topology-surface measurement."""
+
+    columns = tuple(
+        dict.fromkeys(
+            (
+                *_GEOMETRY_COLUMNS,
+                *_LABEL_COLUMNS,
+                *_CURRENT_COLUMNS,
+                *_PLASMA_CURRENT_COLUMNS,
+            )
+        )
+    )
+    row = _read(path, columns)
+    row["_source_path"] = str(path)
+    return row
+
+
+def _selected_surface_candidates_were_admitted(result) -> bool:
+    """Confirm every promoted factor retained in the receipt was admitted."""
+
+    admitted = np.asarray(result.candidate_admissibility, dtype=bool)
+    factors = np.asarray(result.accepted_factors, dtype=float)
+    factor_to_column = {
+        factor: index for index, factor in enumerate(TOPOLOGY_SURFACE_FACTORS)
+    }
+    for iteration, factor in enumerate(factors):
+        if factor == 0.0:
+            continue
+        column = factor_to_column.get(float(factor))
+        if column is not None and not admitted[iteration, column]:
+            return False
+    return True
+
+
+def _solve_wall_topology_frame(
+    row: dict[str, Any],
+    frame: int,
+    expansion: float | None,
+    machine_artifact_cache: Path,
+    machine_artifact_digest: str,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Run one 89-update topology-qualified surface arm."""
+
+    from time import perf_counter
+
+    started = perf_counter()
+    built = _build_profile(
+        row,
+        frame,
+        expansion,
+        machine_artifact_cache=machine_artifact_cache,
+        machine_artifact_digest=machine_artifact_digest,
+    )
+    time_ms = float(row["efit_times"][frame])
+    machine = dataset_machine_description(
+        row,
+        source_row=str(row.get("_source_path", "corpus row")),
+    )
+    shipped_current = shipped_current_at(
+        row,
+        machine.physical,
+        POLOIDAL_CONDUCTORS,
+        time_ms,
+    )
+    adapter = complete_profile_current_adapter(
+        built.profile,
+        shipped_names=POLOIDAL_CONDUCTORS,
+        shipped_current_a=shipped_current,
+        use_circuit=True,
+    )
+    profile = adapter.profile
+    current = np.asarray(adapter.resolution.current(()), dtype=float)
+    if len(current) != 24 or adapter.resolution.unknown_names:
+        raise RuntimeError("fixed wiring did not prescribe all 24 conductor currents")
+    target_current_a = _target_current(row, time_ms)
+    count = int(row["efit_lcfs_n"][frame])
+    contour = np.c_[
+        np.asarray(row["efit_lcfs_r"][frame][:count], dtype=float),
+        np.asarray(row["efit_lcfs_z"][frame][:count], dtype=float),
+    ]
+    labelled_axis = np.asarray(
+        (row["efit_r_axis"][frame], row["efit_z_axis"][frame]), dtype=float
+    )
+    saddle = contour[int(np.argmin(contour[:, 1]))]
+    cold = profile.cold_seed_portfolio(
+        target_current_a,
+        labelled_axis,
+        current=jnp.asarray(current),
+        diverted_geometry=SaddleSeedGeometry(tuple(labelled_axis), tuple(saddle)),
+    )
+    seed = cold.branches.flux[int(TopologyClass.DIVERTED)]
+    mapped = profile.flux_map(
+        jnp.asarray(current),
+        TopologyClass.DIVERTED,
+        target_current_a,
+    )
+
+    def remains_diverted(candidate):
+        _masks, topology = profile.operator.read(candidate)
+        return jnp.all(jnp.isfinite(candidate)) & topology.diverted
+
+    result = kink_aware_newton_krylov(
+        mapped,
+        seed,
+        strategy="nonmonotone",
+        newton_steps=TOPOLOGY_SURFACE_NEWTON_STEPS,
+        gmres_iterations=TOPOLOGY_SURFACE_GMRES_ITERATIONS,
+        warmup=0,
+        admissibility_fn=remains_diverted,
+    )
+    result.state.block_until_ready()
+    state = np.asarray(result.state, dtype=float)
+    image = np.asarray(mapped(result.state), dtype=float)
+    terminal_relative_residual = float(
+        np.max(np.abs(image - state)) / max(np.max(np.abs(image)), 1.0e-30)
+    )
+    _masks, topology = profile.operator.read(result.state)
+    terminal_axis = np.asarray(topology.axis, dtype=float)
+    if not np.all(np.isfinite(terminal_axis)):
+        raise RuntimeError("the terminal magnetic axis is not finite")
+    accepted_factors = np.asarray(result.accepted_factors, dtype=float)
+    if accepted_factors.shape != (TOPOLOGY_SURFACE_NEWTON_STEPS,):
+        raise RuntimeError("the topology-surface solve did not retain 89 updates")
+    promoted = accepted_factors > 0.0
+    selected_admitted = _selected_surface_candidates_were_admitted(result)
+    unrecorded_factor_count = int(
+        np.count_nonzero(
+            promoted & ~np.isin(accepted_factors, np.asarray(TOPOLOGY_SURFACE_FACTORS))
+        )
+    )
+    qualification = KrylovActionQualification(
+        int(result.krylov_action_qualification)
+    ).name
+    surface_receipt = dict(built.surface_receipt)
+    surface_receipt.update(
+        {
+            "seed_wall_flux_rows": len(built.wall),
+            "seed_wall_flux_sha256": built.seed_wall_flux_sha256,
+        }
+    )
+    record = {
+        "shot": Path(row["_source_path"]).name,
+        "frame": frame,
+        "time_ms": time_ms,
+        "surface_selector": surface_receipt["selector"],
+        "pseudo_wall_expansion": expansion,
+        "admitted_advance_count_of_89": int(np.count_nonzero(promoted)),
+        "refused_advance_count_of_89": int(np.count_nonzero(~promoted)),
+        "terminal_relative_residual": terminal_relative_residual,
+        "magnetic_axis_displacement_mm": 1000.0
+        * float(np.linalg.norm(terminal_axis - labelled_axis)),
+        "terminal_axis_rz_m": terminal_axis.tolist(),
+        "terminal_topology_class": (
+            "diverted" if bool(topology.diverted) else "limited"
+        ),
+        "recorded_selected_candidates_were_admitted": selected_admitted,
+        "unrecorded_selected_factor_count": unrecorded_factor_count,
+        "krylov_action_qualification": qualification,
+        "target_current_a": float(target_current_a),
+        "conductor_count": int(current.size),
+        "seed_wall_flux_sha256": built.seed_wall_flux_sha256,
+        "runtime_seconds": perf_counter() - started,
+    }
+    if not selected_admitted or not bool(topology.diverted):
+        raise RuntimeError(
+            f"topology qualification failed for {record['shot']} frame {frame}: "
+            f"recorded_candidates={selected_admitted}, "
+            f"terminal_diverted={bool(topology.diverted)}"
+        )
+    return record, surface_receipt
+
+
+def _surface_measure_delta(
+    measured: dict[str, Any], comparator: dict[str, Any]
+) -> dict[str, float]:
+    """Return measured minus comparator values for the three declared measures."""
+
+    return {
+        "admitted_advance_count_change": (
+            measured["admitted_advance_count_of_89"]
+            - comparator["admitted_advance_count_of_89"]
+        ),
+        "admitted_advance_count_ratio": (
+            measured["admitted_advance_count_of_89"]
+            / comparator["admitted_advance_count_of_89"]
+        ),
+        "terminal_relative_residual_change": (
+            measured["terminal_relative_residual"]
+            - comparator["terminal_relative_residual"]
+        ),
+        "terminal_relative_residual_ratio": (
+            measured["terminal_relative_residual"]
+            / comparator["terminal_relative_residual"]
+        ),
+        "magnetic_axis_displacement_mm_change": (
+            measured["magnetic_axis_displacement_mm"]
+            - comparator["magnetic_axis_displacement_mm"]
+        ),
+        "magnetic_axis_displacement_ratio": (
+            measured["magnetic_axis_displacement_mm"]
+            / comparator["magnetic_axis_displacement_mm"]
+        ),
+    }
+
+
+def _surface_geometry_authority(surface: dict[str, Any]) -> dict[str, Any]:
+    """Exclude only frame-state wall flux from geometry equality."""
+
+    return {
+        key: value for key, value in surface.items() if key != "seed_wall_flux_sha256"
+    }
+
+
+def run_wall_topology_surface(
+    data: Path,
+    output: Path,
+    machine_artifact_cache: Path = DEFAULT_MACHINE_ARTIFACT_CACHE,
+    machine_artifact_digest: str = DEFAULT_MACHINE_ARTIFACT_DIGEST,
+) -> dict[str, Any]:
+    """Measure the rectangle sweep, then the default physical-ring arm."""
+
+    configure_dtypes()
+    comparator, banked_records = _wall_topology_comparator()
+    banked_by_key = {
+        (record["shot"], record["frame"]): record for record in banked_records
+    }
+    cases = [(record["shot"], record["frame"]) for record in banked_records]
+    rows = {key: _wall_topology_row(data / key[0]) for key in cases}
+    rectangle_sweep = []
+    for expansion in RECTANGLE_SWEEP_EXPANSIONS:
+        records = []
+        surfaces = []
+        for shot, frame in cases:
+            record, surface = _solve_wall_topology_frame(
+                rows[(shot, frame)],
+                frame,
+                expansion,
+                machine_artifact_cache,
+                machine_artifact_digest,
+            )
+            record["change_from_banked_pseudo_wall"] = _surface_measure_delta(
+                record, banked_by_key[(shot, frame)]
+            )
+            records.append(record)
+            surfaces.append(surface)
+            print(
+                f"RECTANGLE expansion={expansion:.3f} {shot}:{frame} "
+                f"admitted={record['admitted_advance_count_of_89']}/89 "
+                f"residual={record['terminal_relative_residual']:.6e} "
+                f"axis_mm={record['magnetic_axis_displacement_mm']:.3f}",
+                flush=True,
+            )
+        geometry_authority = _surface_geometry_authority(surfaces[0])
+        if any(
+            _surface_geometry_authority(surface) != geometry_authority
+            for surface in surfaces[1:]
+        ):
+            raise RuntimeError("one rectangle expansion produced inconsistent surfaces")
+        rectangle_sweep.append(
+            {
+                "expansion": expansion,
+                "surface_geometry_authority": geometry_authority,
+                "cross_frame_equality_exclusion": ["seed_wall_flux_sha256"],
+                "cross_frame_geometry_equal": True,
+                "admitted_advance_count_of_89": _distribution(
+                    [record["admitted_advance_count_of_89"] for record in records]
+                ),
+                "terminal_relative_residual": _distribution(
+                    [record["terminal_relative_residual"] for record in records]
+                ),
+                "magnetic_axis_displacement_mm": _distribution(
+                    [record["magnetic_axis_displacement_mm"] for record in records]
+                ),
+                "frame_records": records,
+            }
+        )
+
+    rectangle_baseline = next(
+        item
+        for item in rectangle_sweep
+        if item["expansion"] == REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION
+    )
+    rectangle_baseline_by_key = {
+        (record["shot"], record["frame"]): record
+        for record in rectangle_baseline["frame_records"]
+    }
+    for item in rectangle_sweep:
+        for record in item["frame_records"]:
+            key = (record["shot"], record["frame"])
+            record["change_from_measured_rectangle_baseline"] = _surface_measure_delta(
+                record, rectangle_baseline_by_key[key]
+            )
+
+    physical_records = []
+    physical_surfaces = []
+    for shot, frame in cases:
+        record, surface = _solve_wall_topology_frame(
+            rows[(shot, frame)],
+            frame,
+            None,
+            machine_artifact_cache,
+            machine_artifact_digest,
+        )
+        key = (shot, frame)
+        record["change_from_banked_pseudo_wall"] = _surface_measure_delta(
+            record, banked_by_key[key]
+        )
+        record["change_from_measured_rectangle_baseline"] = _surface_measure_delta(
+            record, rectangle_baseline_by_key[key]
+        )
+        physical_records.append(record)
+        physical_surfaces.append(surface)
+        print(
+            f"PHYSICAL_RING {shot}:{frame} "
+            f"admitted={record['admitted_advance_count_of_89']}/89 "
+            f"residual={record['terminal_relative_residual']:.6e} "
+            f"axis_mm={record['magnetic_axis_displacement_mm']:.3f}",
+            flush=True,
+        )
+    physical_authority = _surface_geometry_authority(physical_surfaces[0])
+    if any(
+        _surface_geometry_authority(surface) != physical_authority
+        for surface in physical_surfaces[1:]
+    ):
+        raise RuntimeError("physical-ring authority changed across the cohort")
+
+    banked_axis_distribution = comparator["magnetic_axis_displacement_mm"]
+    physical_axis_distribution = _distribution(
+        [record["magnetic_axis_displacement_mm"] for record in physical_records]
+    )
+    physical_axis_mean_ratio = (
+        physical_axis_distribution["mean"] / banked_axis_distribution["mean"]
+    )
+    physical_axis_comparison = {
+        "verdict": "WORSE" if physical_axis_mean_ratio > 1.0 else "IMPROVED",
+        "mean_ratio_to_banked_pseudo_wall": physical_axis_mean_ratio,
+        "mean_change_from_banked_pseudo_wall_mm": (
+            physical_axis_distribution["mean"] - banked_axis_distribution["mean"]
+        ),
+        "banked_pseudo_wall_mm": banked_axis_distribution,
+        "physical_ring_mm": physical_axis_distribution,
+        "statement": (
+            "The physical ring moves the magnetic axis farther from the labelled "
+            "reconstruction than the banked pseudo-wall baseline; this measured "
+            "negative is retained without tuning."
+            if physical_axis_mean_ratio > 1.0
+            else "The physical ring moves the magnetic axis closer to the labelled "
+            "reconstruction than the banked pseudo-wall baseline."
+        ),
+    }
+
+    source_commit = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], text=True
+    ).strip()
+    receipt = {
+        "artifact": "wall_topology_surface",
+        "source_commit": source_commit,
+        "driver_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "measurement_contract": {
+            "cohort": "five banked score-blind DIII-D frames",
+            "frame_count": len(cases),
+            "one_input_per_arm": True,
+            "held_inputs": (
+                "profiles, 24-conductor circuit currents, target plasma current, "
+                "cold-seed construction, solver route and 89-update budget"
+            ),
+            "solver_route": "topology-qualified nonmonotone Newton-Krylov",
+            "newton_updates": TOPOLOGY_SURFACE_NEWTON_STEPS,
+            "gmres_iterations": TOPOLOGY_SURFACE_GMRES_ITERATIONS,
+            "candidate_factors": list(TOPOLOGY_SURFACE_FACTORS),
+            "default_surface_selector": "physical_ring",
+            "fallback_surface_selector": "pseudo_wall",
+            "grid_seam_requirement": (
+                "label state, material mask, grid Green targets and plasma Green "
+                "sources use the same canonical efit_grid axes at the declared "
+                "stride; both wall Green target counts equal the selected wall rows"
+            ),
+        },
+        "banked_pseudo_wall_comparator": comparator,
+        "rectangle_expansion_sweep": {
+            "surface_selector": "pseudo_wall",
+            "explicit_fallback": True,
+            "expansions": list(RECTANGLE_SWEEP_EXPANSIONS),
+            "frame_count_per_expansion": len(cases),
+            "arms": rectangle_sweep,
+            "legacy_receipts_kept_separate": {
+                "baseline_expansion": REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION,
+                "sensitivity_expansions": list(PSEUDO_WALL_EXPANSIONS),
+                "preregistration_path": str(DEFAULT_OUTPUT / PREREGISTRATION_NAME),
+                "receipt_path": str(BANKED_PSEUDO_WALL_RECEIPT),
+            },
+        },
+        "physical_ring_arm": {
+            "surface_selector": "physical_ring",
+            "default_selection": True,
+            "one_input_change": (
+                "replace the complete pseudo-wall geometry input with the governed "
+                "physical limiter ring"
+            ),
+            "surface_authority": physical_authority,
+            "cross_frame_equality_exclusion": ["seed_wall_flux_sha256"],
+            "cross_frame_geometry_equal": True,
+            "grid_seam_verified": bool(
+                physical_authority["grid_seam"][
+                    "all_grid_rows_share_labelled_frame_grid"
+                ]
+                and physical_authority["grid_seam"][
+                    "all_wall_target_rows_share_selected_surface"
+                ]
+                and physical_authority["labelled_frame_grid"][
+                    "label_and_lattice_identical"
+                ]
+            ),
+            "axis_displacement_comparison": physical_axis_comparison,
+            "frame_records": physical_records,
+            "magnetic_axis_displacement_mm": physical_axis_distribution,
+            "terminal_relative_residual": _distribution(
+                [record["terminal_relative_residual"] for record in physical_records]
+            ),
+            "admitted_advance_count_of_89": _distribution(
+                [record["admitted_advance_count_of_89"] for record in physical_records]
+            ),
+        },
+    }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
+        json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    )
+    return receipt
+
+
 def run(
     data: Path, output: Path, frames: int = EXECUTION_FRAME_COUNT
 ) -> dict[str, Any]:
@@ -1407,7 +2244,57 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--frames", type=int, default=EXECUTION_FRAME_COUNT)
     parser.add_argument("--preregister-only", action="store_true")
+    parser.add_argument("--wall-topology-surface", action="store_true")
+    parser.add_argument(
+        "--machine-artifact-cache",
+        type=Path,
+        default=DEFAULT_MACHINE_ARTIFACT_CACHE,
+    )
+    parser.add_argument(
+        "--machine-artifact-digest",
+        default=DEFAULT_MACHINE_ARTIFACT_DIGEST,
+    )
     arguments = parser.parse_args()
+    if arguments.wall_topology_surface:
+        if arguments.preregister_only:
+            raise ValueError(
+                "wall-topology measurement and pseudo-wall preregistration are separate"
+            )
+        output = (
+            DEFAULT_WALL_TOPOLOGY_OUTPUT
+            if arguments.output == DEFAULT_OUTPUT
+            else arguments.output
+        )
+        receipt = run_wall_topology_surface(
+            arguments.data,
+            output,
+            arguments.machine_artifact_cache,
+            arguments.machine_artifact_digest,
+        )
+        print(
+            json.dumps(
+                {
+                    "output": str(output),
+                    "rectangle_expansions": receipt["rectangle_expansion_sweep"][
+                        "expansions"
+                    ],
+                    "physical_ring": {
+                        "admitted_advance_count_of_89": receipt["physical_ring_arm"][
+                            "admitted_advance_count_of_89"
+                        ],
+                        "terminal_relative_residual": receipt["physical_ring_arm"][
+                            "terminal_relative_residual"
+                        ],
+                        "magnetic_axis_displacement_mm": receipt["physical_ring_arm"][
+                            "magnetic_axis_displacement_mm"
+                        ],
+                    },
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return
     path = arguments.output / PREREGISTRATION_NAME
     preregistration_hash = require_preregistration(path)
     print(f"PREREGISTRATION_VERIFIED {path} {preregistration_hash}", flush=True)

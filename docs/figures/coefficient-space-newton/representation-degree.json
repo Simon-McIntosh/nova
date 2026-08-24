@@ -1,0 +1,2420 @@
+{
+  "artifact": "docs/figures/coefficient-space-newton/representation-degree.json",
+  "conclusion": {
+    "separatrix_band_binding_targets_at_terminal_rung": 2,
+    "separatrix_band_is_universally_binding": false,
+    "statement": "The separatrix band is the binding terminal-rung relative-sup term for 2 of 8 banked targets.",
+    "target_count": 8
+  },
+  "coverage": {
+    "banked_converged_roots": 4,
+    "banked_flux_maps": 4,
+    "rungs_per_target": 9,
+    "targets": 8
+  },
+  "driver": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s-20260824-coefficient-basis/flux-representation-degree/benchmarks/flux_representation_degree.py",
+  "driver_sha256": "a6f03af5eb4ba18824fef2f020e38bbbeb4691e3ab32bd8493891b8f4386356b",
+  "execution": {
+    "declaration": "No equilibrium solve was run. The driver loads serialized root arrays, stored reference interpolation, and warm coordinate-only machine caches, then performs only sparse linear least-squares fits.",
+    "equilibrium_solves_run": 0,
+    "forward_map_evaluations_run": 0,
+    "mode": "banked-field fitting only"
+  },
+  "fit_contract": {
+    "basis": "tensor-product open-uniform cubic B-spline",
+    "degree_threshold_metric": "closed-flux relative sup error",
+    "fit": "unweighted sparse least squares on all banked plasma cells",
+    "knot_count_convention": "per-axis coefficient count; a 12 by 12 rung has 144 coefficients; the complete clamped knot vector has knot_count + degree + 1 entries",
+    "knot_count_ladder_per_axis": [
+      4,
+      6,
+      8,
+      10,
+      12,
+      14,
+      16,
+      18,
+      20
+    ],
+    "region_partition": {
+      "closed_flux": "psi_N < 0.95",
+      "scrape_off_layer": "psi_N > 1.05",
+      "separatrix_band": "0.95 <= psi_N <= 1.05"
+    },
+    "regional_metrics": [
+      "relative_sup_error",
+      "relative_rms_error"
+    ],
+    "relative_error_denominator": "full target-map flux span",
+    "separatrix_band": {
+      "coordinate": "target-local normalized flux psi_N",
+      "half_width": 0.05,
+      "lower_inclusive": 0.95,
+      "upper_inclusive": 1.05
+    },
+    "spline_degree": 3
+  },
+  "production_terminal_residual": {
+    "comparison_threshold": 0.08646603357046066,
+    "frame_count": 5,
+    "range": [
+      0.08646603357046066,
+      0.15255853230708596
+    ],
+    "source": "docs/figures/topology-preserving-continuation/conditioning-repair.json",
+    "source_sha256": "661f46ffe67f9cf7cf4236c1721f1d2bb4d75577941dadb4608699052404d9a4",
+    "threshold_policy": "minimum terminal relative residual in the five-frame repaired production receipt, making the representation comparison use the hardest reached production floor"
+  },
+  "schema": "nova.flux-representation-degree",
+  "source_commit": "de4b05373e810c317dbf9994c295b31c44ac60ed",
+  "targets": [
+    {
+      "banked_terminal_residual": null,
+      "carrier": "coarse",
+      "cell_count": 566,
+      "coordinate_sha256": "7b28bf5db3781cc44ec7e9baafb51f3c3a181ccb8feda27b61b21684fd16cc11",
+      "first_knot_count_closed_flux_below_production_terminal_residual": 6,
+      "flux_sha256": "b47d40ddbfafed0f69cce053d088920868a99ef019218bce10cf134e8371d95f",
+      "identity": "stored-dina-reference-coarse",
+      "kind": "banked_flux_map",
+      "psi_norm_sha256": "5199d577a548f79fe2e822716e5371a3f9009bb39e86e88e9e7826379848a2ac",
+      "rungs": [
+        {
+          "binding_region_by_relative_sup_error": "separatrix_band",
+          "cell_count_replaced": 566,
+          "cells_per_coefficient": 35.375,
+          "coefficient_count": 16,
+          "coefficient_lattice": [
+            4,
+            4
+          ],
+          "knot_count_per_axis": 4,
+          "least_squares_iterations": 28,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 338,
+              "relative_rms_error": 0.06200581060652887,
+              "relative_sup_error": 0.13077920883513916
+            },
+            "scrape_off_layer": {
+              "cell_count": 114,
+              "relative_rms_error": 0.05449971611423313,
+              "relative_sup_error": 0.1631021649203482
+            },
+            "separatrix_band": {
+              "cell_count": 114,
+              "relative_rms_error": 0.04861718613320712,
+              "relative_sup_error": 0.23224283839146884
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 566,
+          "cells_per_coefficient": 15.722222222222221,
+          "coefficient_count": 36,
+          "coefficient_lattice": [
+            6,
+            6
+          ],
+          "knot_count_per_axis": 6,
+          "least_squares_iterations": 126,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 338,
+              "relative_rms_error": 0.016296352506894533,
+              "relative_sup_error": 0.035031964247636056
+            },
+            "scrape_off_layer": {
+              "cell_count": 114,
+              "relative_rms_error": 0.009164257868326595,
+              "relative_sup_error": 0.037445810399528635
+            },
+            "separatrix_band": {
+              "cell_count": 114,
+              "relative_rms_error": 0.010842442652150992,
+              "relative_sup_error": 0.03671395228142106
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 566,
+          "cells_per_coefficient": 8.84375,
+          "coefficient_count": 64,
+          "coefficient_lattice": [
+            8,
+            8
+          ],
+          "knot_count_per_axis": 8,
+          "least_squares_iterations": 454,
+          "least_squares_stop_code": 3,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 338,
+              "relative_rms_error": 0.004993537919381915,
+              "relative_sup_error": 0.01248425426176153
+            },
+            "scrape_off_layer": {
+              "cell_count": 114,
+              "relative_rms_error": 0.002292777023843928,
+              "relative_sup_error": 0.01016135079101135
+            },
+            "separatrix_band": {
+              "cell_count": 114,
+              "relative_rms_error": 0.002971282355051874,
+              "relative_sup_error": 0.008522530509631861
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 566,
+          "cells_per_coefficient": 5.66,
+          "coefficient_count": 100,
+          "coefficient_lattice": [
+            10,
+            10
+          ],
+          "knot_count_per_axis": 10,
+          "least_squares_iterations": 1603,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 338,
+              "relative_rms_error": 0.002762688283290784,
+              "relative_sup_error": 0.007616244755584531
+            },
+            "scrape_off_layer": {
+              "cell_count": 114,
+              "relative_rms_error": 0.0012480158969076051,
+              "relative_sup_error": 0.005233390045232163
+            },
+            "separatrix_band": {
+              "cell_count": 114,
+              "relative_rms_error": 0.00151736954904607,
+              "relative_sup_error": 0.004228480689931986
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 566,
+          "cells_per_coefficient": 3.9305555555555554,
+          "coefficient_count": 144,
+          "coefficient_lattice": [
+            12,
+            12
+          ],
+          "knot_count_per_axis": 12,
+          "least_squares_iterations": 2000,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 338,
+              "relative_rms_error": 0.0008987832048027721,
+              "relative_sup_error": 0.002801549131338534
+            },
+            "scrape_off_layer": {
+              "cell_count": 114,
+              "relative_rms_error": 0.0004560846098599845,
+              "relative_sup_error": 0.0015029584776382703
+            },
+            "separatrix_band": {
+              "cell_count": 114,
+              "relative_rms_error": 0.0006372210528468874,
+              "relative_sup_error": 0.00275850420857392
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 566,
+          "cells_per_coefficient": 2.8877551020408165,
+          "coefficient_count": 196,
+          "coefficient_lattice": [
+            14,
+            14
+          ],
+          "knot_count_per_axis": 14,
+          "least_squares_iterations": 2000,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 338,
+              "relative_rms_error": 0.0006946413948966032,
+              "relative_sup_error": 0.0028821845453738124
+            },
+            "scrape_off_layer": {
+              "cell_count": 114,
+              "relative_rms_error": 0.00038048071653256797,
+              "relative_sup_error": 0.0016335881037644409
+            },
+            "separatrix_band": {
+              "cell_count": 114,
+              "relative_rms_error": 0.0005530206050936016,
+              "relative_sup_error": 0.0018975048804536405
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 566,
+          "cells_per_coefficient": 2.2109375,
+          "coefficient_count": 256,
+          "coefficient_lattice": [
+            16,
+            16
+          ],
+          "knot_count_per_axis": 16,
+          "least_squares_iterations": 2048,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 338,
+              "relative_rms_error": 0.0005723991792237001,
+              "relative_sup_error": 0.0018838244623680161
+            },
+            "scrape_off_layer": {
+              "cell_count": 114,
+              "relative_rms_error": 0.00017715933628220044,
+              "relative_sup_error": 0.0007816436000614328
+            },
+            "separatrix_band": {
+              "cell_count": 114,
+              "relative_rms_error": 0.00029592926997777555,
+              "relative_sup_error": 0.0010131973843715743
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 566,
+          "cells_per_coefficient": 1.7469135802469136,
+          "coefficient_count": 324,
+          "coefficient_lattice": [
+            18,
+            18
+          ],
+          "knot_count_per_axis": 18,
+          "least_squares_iterations": 2592,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 338,
+              "relative_rms_error": 0.00034983316629993213,
+              "relative_sup_error": 0.0014332723365561063
+            },
+            "scrape_off_layer": {
+              "cell_count": 114,
+              "relative_rms_error": 8.74199641688087e-05,
+              "relative_sup_error": 0.0004923062084293539
+            },
+            "separatrix_band": {
+              "cell_count": 114,
+              "relative_rms_error": 0.0001735744955206075,
+              "relative_sup_error": 0.000638122046191329
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 566,
+          "cells_per_coefficient": 1.415,
+          "coefficient_count": 400,
+          "coefficient_lattice": [
+            20,
+            20
+          ],
+          "knot_count_per_axis": 20,
+          "least_squares_iterations": 3200,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 338,
+              "relative_rms_error": 0.0002951696283708334,
+              "relative_sup_error": 0.0010981509791093682
+            },
+            "scrape_off_layer": {
+              "cell_count": 114,
+              "relative_rms_error": 5.8085893375828004e-05,
+              "relative_sup_error": 0.00032611425916193547
+            },
+            "separatrix_band": {
+              "cell_count": 114,
+              "relative_rms_error": 0.0001732632010156954,
+              "relative_sup_error": 0.000656203653165882
+            }
+          }
+        }
+      ],
+      "separatrix_band_binding_at_terminal_rung": false,
+      "separatrix_binding_statement": "The separatrix-band relative sup error is not the binding regional term at the terminal rung.",
+      "source": {
+        "bank": "scripts/root_gate_attribution/coarse-terminal-root.npz",
+        "bank_sha256": "1b24fdc7c7f917b3a4a6a4a720541c3bb7ef69a98706f9d866dd6d77b1a804ad",
+        "map_authority": "DINA pulse 135011 run 7 data-dictionary 3.39.0 time-slice 353 sampled through ReferenceCase.flux",
+        "plasma_cell_coordinates": "support_centroids_m",
+        "scorecard": "scripts/root_gate_attribution/results.json",
+        "scorecard_sha256": "25a70e0495b9bab4fb75b904c4f0a6654e70a3fcc82c6e48392c0b4a67b54a81"
+      }
+    },
+    {
+      "banked_terminal_residual": 1.625101639852996e-15,
+      "carrier": "coarse",
+      "cell_count": 566,
+      "coordinate_sha256": "7b28bf5db3781cc44ec7e9baafb51f3c3a181ccb8feda27b61b21684fd16cc11",
+      "first_knot_count_closed_flux_below_production_terminal_residual": 6,
+      "flux_sha256": "be990229a5de1e67ec24521011f4579f6165046d291099c8c2b9df3e70ee03b6",
+      "identity": "stored-dina-root-coarse",
+      "kind": "banked_converged_root",
+      "psi_norm_sha256": "45cf2a44fb41dab45462bd6813e4a549be02856f709cdc272814b603d2dd255a",
+      "rungs": [
+        {
+          "binding_region_by_relative_sup_error": "separatrix_band",
+          "cell_count_replaced": 566,
+          "cells_per_coefficient": 35.375,
+          "coefficient_count": 16,
+          "coefficient_lattice": [
+            4,
+            4
+          ],
+          "knot_count_per_axis": 4,
+          "least_squares_iterations": 28,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 339,
+              "relative_rms_error": 0.06165868478866489,
+              "relative_sup_error": 0.13026045879380255
+            },
+            "scrape_off_layer": {
+              "cell_count": 114,
+              "relative_rms_error": 0.05384124026042756,
+              "relative_sup_error": 0.16188268423336202
+            },
+            "separatrix_band": {
+              "cell_count": 113,
+              "relative_rms_error": 0.047965480385371344,
+              "relative_sup_error": 0.2285945013697014
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 566,
+          "cells_per_coefficient": 15.722222222222221,
+          "coefficient_count": 36,
+          "coefficient_lattice": [
+            6,
+            6
+          ],
+          "knot_count_per_axis": 6,
+          "least_squares_iterations": 132,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 339,
+              "relative_rms_error": 0.016224080443912395,
+              "relative_sup_error": 0.03460678873146877
+            },
+            "scrape_off_layer": {
+              "cell_count": 114,
+              "relative_rms_error": 0.009101932597225615,
+              "relative_sup_error": 0.03667984191464633
+            },
+            "separatrix_band": {
+              "cell_count": 113,
+              "relative_rms_error": 0.01081262061399544,
+              "relative_sup_error": 0.03661163341216925
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 566,
+          "cells_per_coefficient": 8.84375,
+          "coefficient_count": 64,
+          "coefficient_lattice": [
+            8,
+            8
+          ],
+          "knot_count_per_axis": 8,
+          "least_squares_iterations": 434,
+          "least_squares_stop_code": 3,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 339,
+              "relative_rms_error": 0.004955823750890212,
+              "relative_sup_error": 0.012329856045281445
+            },
+            "scrape_off_layer": {
+              "cell_count": 114,
+              "relative_rms_error": 0.002223765599520245,
+              "relative_sup_error": 0.009816257904455332
+            },
+            "separatrix_band": {
+              "cell_count": 113,
+              "relative_rms_error": 0.002921501407345996,
+              "relative_sup_error": 0.007783197852993289
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 566,
+          "cells_per_coefficient": 5.66,
+          "coefficient_count": 100,
+          "coefficient_lattice": [
+            10,
+            10
+          ],
+          "knot_count_per_axis": 10,
+          "least_squares_iterations": 1542,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 339,
+              "relative_rms_error": 0.002720068236962828,
+              "relative_sup_error": 0.007191641079245957
+            },
+            "scrape_off_layer": {
+              "cell_count": 114,
+              "relative_rms_error": 0.001218246557167081,
+              "relative_sup_error": 0.00489786570204607
+            },
+            "separatrix_band": {
+              "cell_count": 113,
+              "relative_rms_error": 0.0014936181123266284,
+              "relative_sup_error": 0.004129285734691319
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "separatrix_band",
+          "cell_count_replaced": 566,
+          "cells_per_coefficient": 3.9305555555555554,
+          "coefficient_count": 144,
+          "coefficient_lattice": [
+            12,
+            12
+          ],
+          "knot_count_per_axis": 12,
+          "least_squares_iterations": 2000,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 339,
+              "relative_rms_error": 0.0008897052139451305,
+              "relative_sup_error": 0.002662505476311057
+            },
+            "scrape_off_layer": {
+              "cell_count": 114,
+              "relative_rms_error": 0.0004578620357485241,
+              "relative_sup_error": 0.0015133646789336028
+            },
+            "separatrix_band": {
+              "cell_count": 113,
+              "relative_rms_error": 0.0006270670417722985,
+              "relative_sup_error": 0.002730366444545157
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 566,
+          "cells_per_coefficient": 2.8877551020408165,
+          "coefficient_count": 196,
+          "coefficient_lattice": [
+            14,
+            14
+          ],
+          "knot_count_per_axis": 14,
+          "least_squares_iterations": 2000,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 339,
+              "relative_rms_error": 0.0006576619413847384,
+              "relative_sup_error": 0.0026445207287692837
+            },
+            "scrape_off_layer": {
+              "cell_count": 114,
+              "relative_rms_error": 0.0003582227919895581,
+              "relative_sup_error": 0.0015494106908285799
+            },
+            "separatrix_band": {
+              "cell_count": 113,
+              "relative_rms_error": 0.0005233671121110849,
+              "relative_sup_error": 0.0018623913514321658
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 566,
+          "cells_per_coefficient": 2.2109375,
+          "coefficient_count": 256,
+          "coefficient_lattice": [
+            16,
+            16
+          ],
+          "knot_count_per_axis": 16,
+          "least_squares_iterations": 2048,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 339,
+              "relative_rms_error": 0.0005401653689543073,
+              "relative_sup_error": 0.0018551622460919633
+            },
+            "scrape_off_layer": {
+              "cell_count": 114,
+              "relative_rms_error": 0.00017297585693441187,
+              "relative_sup_error": 0.0008443780593644968
+            },
+            "separatrix_band": {
+              "cell_count": 113,
+              "relative_rms_error": 0.0002728669460432476,
+              "relative_sup_error": 0.0008876327366583365
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 566,
+          "cells_per_coefficient": 1.7469135802469136,
+          "coefficient_count": 324,
+          "coefficient_lattice": [
+            18,
+            18
+          ],
+          "knot_count_per_axis": 18,
+          "least_squares_iterations": 2592,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 339,
+              "relative_rms_error": 0.00032260481123437264,
+              "relative_sup_error": 0.001350569797523972
+            },
+            "scrape_off_layer": {
+              "cell_count": 114,
+              "relative_rms_error": 8.183342408156233e-05,
+              "relative_sup_error": 0.00045273863835067094
+            },
+            "separatrix_band": {
+              "cell_count": 113,
+              "relative_rms_error": 0.0001523405527999285,
+              "relative_sup_error": 0.0006146874743057228
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 566,
+          "cells_per_coefficient": 1.415,
+          "coefficient_count": 400,
+          "coefficient_lattice": [
+            20,
+            20
+          ],
+          "knot_count_per_axis": 20,
+          "least_squares_iterations": 3200,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 339,
+              "relative_rms_error": 0.00027317876143772836,
+              "relative_sup_error": 0.001027293114788912
+            },
+            "scrape_off_layer": {
+              "cell_count": 114,
+              "relative_rms_error": 5.26903173886369e-05,
+              "relative_sup_error": 0.00022825732048228648
+            },
+            "separatrix_band": {
+              "cell_count": 113,
+              "relative_rms_error": 0.00015519690405307835,
+              "relative_sup_error": 0.0006258280958017749
+            }
+          }
+        }
+      ],
+      "separatrix_band_binding_at_terminal_rung": false,
+      "separatrix_binding_statement": "The separatrix-band relative sup error is not the binding regional term at the terminal rung.",
+      "source": {
+        "bank": "scripts/root_gate_attribution/coarse-terminal-root.npz",
+        "bank_sha256": "1b24fdc7c7f917b3a4a6a4a720541c3bb7ef69a98706f9d866dd6d77b1a804ad",
+        "field_array": "state[:cell_count]",
+        "plasma_cell_coordinates": "support_centroids_m",
+        "scorecard": "scripts/root_gate_attribution/results.json",
+        "scorecard_sha256": "25a70e0495b9bab4fb75b904c4f0a6654e70a3fcc82c6e48392c0b4a67b54a81"
+      }
+    },
+    {
+      "banked_terminal_residual": null,
+      "carrier": "fine",
+      "cell_count": 1069,
+      "coordinate_sha256": "c56f8f2323f4e7620620ee1fd75ed898e18352555dd345ad30534af40d0fc5f9",
+      "first_knot_count_closed_flux_below_production_terminal_residual": 6,
+      "flux_sha256": "0b17c59b8bdc29d8cfb54b88e97af06ccbb561c2968a7b27e46b2bbe8f432452",
+      "identity": "stored-dina-reference-fine",
+      "kind": "banked_flux_map",
+      "psi_norm_sha256": "235f6d9518a93b533abffb41fd25a720da34b5d87e889f94e5197641b591f9ed",
+      "rungs": [
+        {
+          "binding_region_by_relative_sup_error": "separatrix_band",
+          "cell_count_replaced": 1069,
+          "cells_per_coefficient": 66.8125,
+          "coefficient_count": 16,
+          "coefficient_lattice": [
+            4,
+            4
+          ],
+          "knot_count_per_axis": 4,
+          "least_squares_iterations": 30,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 680,
+              "relative_rms_error": 0.06110094539416058,
+              "relative_sup_error": 0.1285344199338166
+            },
+            "scrape_off_layer": {
+              "cell_count": 172,
+              "relative_rms_error": 0.06179832050401105,
+              "relative_sup_error": 0.19005799609557278
+            },
+            "separatrix_band": {
+              "cell_count": 217,
+              "relative_rms_error": 0.050353728528774,
+              "relative_sup_error": 0.2872033976721725
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "separatrix_band",
+          "cell_count_replaced": 1069,
+          "cells_per_coefficient": 29.694444444444443,
+          "coefficient_count": 36,
+          "coefficient_lattice": [
+            6,
+            6
+          ],
+          "knot_count_per_axis": 6,
+          "least_squares_iterations": 135,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 680,
+              "relative_rms_error": 0.016296478716374893,
+              "relative_sup_error": 0.03506281474652603
+            },
+            "scrape_off_layer": {
+              "cell_count": 172,
+              "relative_rms_error": 0.010495470863194446,
+              "relative_sup_error": 0.04261912928787787
+            },
+            "separatrix_band": {
+              "cell_count": 217,
+              "relative_rms_error": 0.010995661243792,
+              "relative_sup_error": 0.050010579459534084
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 1069,
+          "cells_per_coefficient": 16.703125,
+          "coefficient_count": 64,
+          "coefficient_lattice": [
+            8,
+            8
+          ],
+          "knot_count_per_axis": 8,
+          "least_squares_iterations": 437,
+          "least_squares_stop_code": 3,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 680,
+              "relative_rms_error": 0.004978383166011645,
+              "relative_sup_error": 0.012602242014078757
+            },
+            "scrape_off_layer": {
+              "cell_count": 172,
+              "relative_rms_error": 0.0025490084573911486,
+              "relative_sup_error": 0.01089790560481822
+            },
+            "separatrix_band": {
+              "cell_count": 217,
+              "relative_rms_error": 0.00291146908078754,
+              "relative_sup_error": 0.008256133365936827
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 1069,
+          "cells_per_coefficient": 10.69,
+          "coefficient_count": 100,
+          "coefficient_lattice": [
+            10,
+            10
+          ],
+          "knot_count_per_axis": 10,
+          "least_squares_iterations": 1244,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 680,
+              "relative_rms_error": 0.002900962050291494,
+              "relative_sup_error": 0.007350253016471417
+            },
+            "scrape_off_layer": {
+              "cell_count": 172,
+              "relative_rms_error": 0.0014966274875518272,
+              "relative_sup_error": 0.011047717990021626
+            },
+            "separatrix_band": {
+              "cell_count": 217,
+              "relative_rms_error": 0.0017191535140678388,
+              "relative_sup_error": 0.005253856964539236
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "separatrix_band",
+          "cell_count_replaced": 1069,
+          "cells_per_coefficient": 7.423611111111111,
+          "coefficient_count": 144,
+          "coefficient_lattice": [
+            12,
+            12
+          ],
+          "knot_count_per_axis": 12,
+          "least_squares_iterations": 2000,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 680,
+              "relative_rms_error": 0.0009128247829237338,
+              "relative_sup_error": 0.0027541392840723148
+            },
+            "scrape_off_layer": {
+              "cell_count": 172,
+              "relative_rms_error": 0.0006228829460240958,
+              "relative_sup_error": 0.002827846592886801
+            },
+            "separatrix_band": {
+              "cell_count": 217,
+              "relative_rms_error": 0.00067957051671213,
+              "relative_sup_error": 0.0030272863563709823
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 1069,
+          "cells_per_coefficient": 5.454081632653061,
+          "coefficient_count": 196,
+          "coefficient_lattice": [
+            14,
+            14
+          ],
+          "knot_count_per_axis": 14,
+          "least_squares_iterations": 2000,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 680,
+              "relative_rms_error": 0.0007187656696526075,
+              "relative_sup_error": 0.003119082926680331
+            },
+            "scrape_off_layer": {
+              "cell_count": 172,
+              "relative_rms_error": 0.00044980102112598816,
+              "relative_sup_error": 0.001681240988180591
+            },
+            "separatrix_band": {
+              "cell_count": 217,
+              "relative_rms_error": 0.00065089817420325,
+              "relative_sup_error": 0.0023470383946392697
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 1069,
+          "cells_per_coefficient": 4.17578125,
+          "coefficient_count": 256,
+          "coefficient_lattice": [
+            16,
+            16
+          ],
+          "knot_count_per_axis": 16,
+          "least_squares_iterations": 2048,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 680,
+              "relative_rms_error": 0.0005666873584079682,
+              "relative_sup_error": 0.0019789150170830094
+            },
+            "scrape_off_layer": {
+              "cell_count": 172,
+              "relative_rms_error": 0.00022892918842684997,
+              "relative_sup_error": 0.0008770215489374517
+            },
+            "separatrix_band": {
+              "cell_count": 217,
+              "relative_rms_error": 0.00028956395910192863,
+              "relative_sup_error": 0.0010164769669573088
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 1069,
+          "cells_per_coefficient": 3.299382716049383,
+          "coefficient_count": 324,
+          "coefficient_lattice": [
+            18,
+            18
+          ],
+          "knot_count_per_axis": 18,
+          "least_squares_iterations": 2592,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 680,
+              "relative_rms_error": 0.0003653230968272077,
+              "relative_sup_error": 0.0015136325904857382
+            },
+            "scrape_off_layer": {
+              "cell_count": 172,
+              "relative_rms_error": 0.0001371432923633252,
+              "relative_sup_error": 0.0005376143264676601
+            },
+            "separatrix_band": {
+              "cell_count": 217,
+              "relative_rms_error": 0.00022185291070759146,
+              "relative_sup_error": 0.0006744294013404049
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 1069,
+          "cells_per_coefficient": 2.6725,
+          "coefficient_count": 400,
+          "coefficient_lattice": [
+            20,
+            20
+          ],
+          "knot_count_per_axis": 20,
+          "least_squares_iterations": 3200,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 680,
+              "relative_rms_error": 0.0003251708536200445,
+              "relative_sup_error": 0.0011670983117499025
+            },
+            "scrape_off_layer": {
+              "cell_count": 172,
+              "relative_rms_error": 0.00010616024504578739,
+              "relative_sup_error": 0.0004013536646316966
+            },
+            "separatrix_band": {
+              "cell_count": 217,
+              "relative_rms_error": 0.00021693614826363424,
+              "relative_sup_error": 0.000701462197700068
+            }
+          }
+        }
+      ],
+      "separatrix_band_binding_at_terminal_rung": false,
+      "separatrix_binding_statement": "The separatrix-band relative sup error is not the binding regional term at the terminal rung.",
+      "source": {
+        "bank": "scripts/root_gate_attribution/fine-terminal-root.npz",
+        "bank_sha256": "a583cef5ec17c8dd8c3186cd5ff95ff4bca8a96128a9b08825fe68a637a9152a",
+        "map_authority": "DINA pulse 135011 run 7 data-dictionary 3.39.0 time-slice 353 sampled through ReferenceCase.flux",
+        "plasma_cell_coordinates": "support_centroids_m",
+        "scorecard": "scripts/root_gate_attribution/results.json",
+        "scorecard_sha256": "25a70e0495b9bab4fb75b904c4f0a6654e70a3fcc82c6e48392c0b4a67b54a81"
+      }
+    },
+    {
+      "banked_terminal_residual": 1.0264068138122435e-15,
+      "carrier": "fine",
+      "cell_count": 1069,
+      "coordinate_sha256": "c56f8f2323f4e7620620ee1fd75ed898e18352555dd345ad30534af40d0fc5f9",
+      "first_knot_count_closed_flux_below_production_terminal_residual": 6,
+      "flux_sha256": "9d894b1df5db7db3301f136ba56e5d20a16cfac9ff31a3f8087a5adbc8d8231a",
+      "identity": "stored-dina-root-fine",
+      "kind": "banked_converged_root",
+      "psi_norm_sha256": "de4cdf2bac622ded6197751e3e69813af1d156ffdf19efd25f7799753918f3f2",
+      "rungs": [
+        {
+          "binding_region_by_relative_sup_error": "separatrix_band",
+          "cell_count_replaced": 1069,
+          "cells_per_coefficient": 66.8125,
+          "coefficient_count": 16,
+          "coefficient_lattice": [
+            4,
+            4
+          ],
+          "knot_count_per_axis": 4,
+          "least_squares_iterations": 28,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 672,
+              "relative_rms_error": 0.06105428829626793,
+              "relative_sup_error": 0.12770755599581757
+            },
+            "scrape_off_layer": {
+              "cell_count": 176,
+              "relative_rms_error": 0.06013557086389865,
+              "relative_sup_error": 0.1879925951695331
+            },
+            "separatrix_band": {
+              "cell_count": 221,
+              "relative_rms_error": 0.04919663042250694,
+              "relative_sup_error": 0.2821654124508169
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "separatrix_band",
+          "cell_count_replaced": 1069,
+          "cells_per_coefficient": 29.694444444444443,
+          "coefficient_count": 36,
+          "coefficient_lattice": [
+            6,
+            6
+          ],
+          "knot_count_per_axis": 6,
+          "least_squares_iterations": 136,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 672,
+              "relative_rms_error": 0.016254037904477322,
+              "relative_sup_error": 0.03478257013307266
+            },
+            "scrape_off_layer": {
+              "cell_count": 176,
+              "relative_rms_error": 0.010326448595854885,
+              "relative_sup_error": 0.04162359918120229
+            },
+            "separatrix_band": {
+              "cell_count": 221,
+              "relative_rms_error": 0.01107487455212791,
+              "relative_sup_error": 0.04979630624033332
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 1069,
+          "cells_per_coefficient": 16.703125,
+          "coefficient_count": 64,
+          "coefficient_lattice": [
+            8,
+            8
+          ],
+          "knot_count_per_axis": 8,
+          "least_squares_iterations": 429,
+          "least_squares_stop_code": 3,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 672,
+              "relative_rms_error": 0.004958448968196991,
+              "relative_sup_error": 0.012415879480881919
+            },
+            "scrape_off_layer": {
+              "cell_count": 176,
+              "relative_rms_error": 0.0025442549167577705,
+              "relative_sup_error": 0.010539047074343841
+            },
+            "separatrix_band": {
+              "cell_count": 221,
+              "relative_rms_error": 0.002817167206323888,
+              "relative_sup_error": 0.008134696105181955
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 1069,
+          "cells_per_coefficient": 10.69,
+          "coefficient_count": 100,
+          "coefficient_lattice": [
+            10,
+            10
+          ],
+          "knot_count_per_axis": 10,
+          "least_squares_iterations": 1251,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 672,
+              "relative_rms_error": 0.002880621529327427,
+              "relative_sup_error": 0.007166736298879676
+            },
+            "scrape_off_layer": {
+              "cell_count": 176,
+              "relative_rms_error": 0.0014590407021543444,
+              "relative_sup_error": 0.010559302848897603
+            },
+            "separatrix_band": {
+              "cell_count": 221,
+              "relative_rms_error": 0.0016324629572904202,
+              "relative_sup_error": 0.005152970293476325
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "separatrix_band",
+          "cell_count_replaced": 1069,
+          "cells_per_coefficient": 7.423611111111111,
+          "coefficient_count": 144,
+          "coefficient_lattice": [
+            12,
+            12
+          ],
+          "knot_count_per_axis": 12,
+          "least_squares_iterations": 2000,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 672,
+              "relative_rms_error": 0.0009135171115165935,
+              "relative_sup_error": 0.002675682011711397
+            },
+            "scrape_off_layer": {
+              "cell_count": 176,
+              "relative_rms_error": 0.000642094280549406,
+              "relative_sup_error": 0.0024460894533969582
+            },
+            "separatrix_band": {
+              "cell_count": 221,
+              "relative_rms_error": 0.0006514216228133864,
+              "relative_sup_error": 0.002832450758252989
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 1069,
+          "cells_per_coefficient": 5.454081632653061,
+          "coefficient_count": 196,
+          "coefficient_lattice": [
+            14,
+            14
+          ],
+          "knot_count_per_axis": 14,
+          "least_squares_iterations": 2000,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 672,
+              "relative_rms_error": 0.000692878629280385,
+              "relative_sup_error": 0.0029768257594809462
+            },
+            "scrape_off_layer": {
+              "cell_count": 176,
+              "relative_rms_error": 0.0004248649668208199,
+              "relative_sup_error": 0.0015085794728884698
+            },
+            "separatrix_band": {
+              "cell_count": 221,
+              "relative_rms_error": 0.0006086857612714688,
+              "relative_sup_error": 0.002098389899357691
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 1069,
+          "cells_per_coefficient": 4.17578125,
+          "coefficient_count": 256,
+          "coefficient_lattice": [
+            16,
+            16
+          ],
+          "knot_count_per_axis": 16,
+          "least_squares_iterations": 2048,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 672,
+              "relative_rms_error": 0.0005424219271914012,
+              "relative_sup_error": 0.0018744354243671194
+            },
+            "scrape_off_layer": {
+              "cell_count": 176,
+              "relative_rms_error": 0.00021964747752089924,
+              "relative_sup_error": 0.0009033768635189481
+            },
+            "separatrix_band": {
+              "cell_count": 221,
+              "relative_rms_error": 0.00027675036033089477,
+              "relative_sup_error": 0.0011191126381382567
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 1069,
+          "cells_per_coefficient": 3.299382716049383,
+          "coefficient_count": 324,
+          "coefficient_lattice": [
+            18,
+            18
+          ],
+          "knot_count_per_axis": 18,
+          "least_squares_iterations": 2592,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 672,
+              "relative_rms_error": 0.0003423743026763895,
+              "relative_sup_error": 0.0014679045674703044
+            },
+            "scrape_off_layer": {
+              "cell_count": 176,
+              "relative_rms_error": 0.00013733436050242077,
+              "relative_sup_error": 0.0005625685692996526
+            },
+            "separatrix_band": {
+              "cell_count": 221,
+              "relative_rms_error": 0.0001907728331792736,
+              "relative_sup_error": 0.0005863654603708912
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 1069,
+          "cells_per_coefficient": 2.6725,
+          "coefficient_count": 400,
+          "coefficient_lattice": [
+            20,
+            20
+          ],
+          "knot_count_per_axis": 20,
+          "least_squares_iterations": 3200,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 672,
+              "relative_rms_error": 0.0003077362656677401,
+              "relative_sup_error": 0.0011035380040062001
+            },
+            "scrape_off_layer": {
+              "cell_count": 176,
+              "relative_rms_error": 0.00011296175434381113,
+              "relative_sup_error": 0.00044068880660946006
+            },
+            "separatrix_band": {
+              "cell_count": 221,
+              "relative_rms_error": 0.0001909709267209401,
+              "relative_sup_error": 0.0005636432606823207
+            }
+          }
+        }
+      ],
+      "separatrix_band_binding_at_terminal_rung": false,
+      "separatrix_binding_statement": "The separatrix-band relative sup error is not the binding regional term at the terminal rung.",
+      "source": {
+        "bank": "scripts/root_gate_attribution/fine-terminal-root.npz",
+        "bank_sha256": "a583cef5ec17c8dd8c3186cd5ff95ff4bca8a96128a9b08825fe68a637a9152a",
+        "field_array": "state[:cell_count]",
+        "plasma_cell_coordinates": "support_centroids_m",
+        "scorecard": "scripts/root_gate_attribution/results.json",
+        "scorecard_sha256": "25a70e0495b9bab4fb75b904c4f0a6654e70a3fcc82c6e48392c0b4a67b54a81"
+      }
+    },
+    {
+      "banked_terminal_residual": null,
+      "carrier": "coarse",
+      "cell_count": 551,
+      "coordinate_sha256": "f5ef3841251238dc12e91e1f38a81e986c27feeabe9e730129958cc3716e3ca2",
+      "first_knot_count_closed_flux_below_production_terminal_residual": 4,
+      "flux_sha256": "4bab0236b37ad2df87949c3a4923224d63e8516613fea61f1c5ebadeadb9724e",
+      "identity": "closed-form-oracle-map-coarse",
+      "kind": "banked_flux_map",
+      "psi_norm_sha256": "ef6470e869b80e84f75894b14142265f1dca0b05d78647ead038fa02fc0cff06",
+      "rungs": [
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 551,
+          "cells_per_coefficient": 34.4375,
+          "coefficient_count": 16,
+          "coefficient_lattice": [
+            4,
+            4
+          ],
+          "knot_count_per_axis": 4,
+          "least_squares_iterations": 28,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 426,
+              "relative_rms_error": 0.0025827981046890264,
+              "relative_sup_error": 0.0059429389766140935
+            },
+            "scrape_off_layer": {
+              "cell_count": 67,
+              "relative_rms_error": 0.0028155213787439625,
+              "relative_sup_error": 0.0064639806763297095
+            },
+            "separatrix_band": {
+              "cell_count": 58,
+              "relative_rms_error": 0.0020225924246017294,
+              "relative_sup_error": 0.005847014916185403
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 551,
+          "cells_per_coefficient": 15.305555555555555,
+          "coefficient_count": 36,
+          "coefficient_lattice": [
+            6,
+            6
+          ],
+          "knot_count_per_axis": 6,
+          "least_squares_iterations": 97,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 426,
+              "relative_rms_error": 0.00014855224401593112,
+              "relative_sup_error": 0.00029016137339606883
+            },
+            "scrape_off_layer": {
+              "cell_count": 67,
+              "relative_rms_error": 9.399720554415726e-05,
+              "relative_sup_error": 0.000255180492568046
+            },
+            "separatrix_band": {
+              "cell_count": 58,
+              "relative_rms_error": 8.446211316063096e-05,
+              "relative_sup_error": 0.000185450049906148
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 551,
+          "cells_per_coefficient": 8.609375,
+          "coefficient_count": 64,
+          "coefficient_lattice": [
+            8,
+            8
+          ],
+          "knot_count_per_axis": 8,
+          "least_squares_iterations": 597,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 426,
+              "relative_rms_error": 2.175688678284049e-05,
+              "relative_sup_error": 4.067504511228337e-05
+            },
+            "scrape_off_layer": {
+              "cell_count": 67,
+              "relative_rms_error": 1.3191349684243216e-05,
+              "relative_sup_error": 3.292309775616627e-05
+            },
+            "separatrix_band": {
+              "cell_count": 58,
+              "relative_rms_error": 1.299379525482032e-05,
+              "relative_sup_error": 2.986639308957418e-05
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 551,
+          "cells_per_coefficient": 5.51,
+          "coefficient_count": 100,
+          "coefficient_lattice": [
+            10,
+            10
+          ],
+          "knot_count_per_axis": 10,
+          "least_squares_iterations": 1857,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 426,
+              "relative_rms_error": 5.784591987754801e-06,
+              "relative_sup_error": 1.036260072533889e-05
+            },
+            "scrape_off_layer": {
+              "cell_count": 67,
+              "relative_rms_error": 3.6707236441958718e-06,
+              "relative_sup_error": 8.57833079960218e-06
+            },
+            "separatrix_band": {
+              "cell_count": 58,
+              "relative_rms_error": 4.10118907761141e-06,
+              "relative_sup_error": 9.654523307930312e-06
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 551,
+          "cells_per_coefficient": 3.826388888888889,
+          "coefficient_count": 144,
+          "coefficient_lattice": [
+            12,
+            12
+          ],
+          "knot_count_per_axis": 12,
+          "least_squares_iterations": 2000,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 426,
+              "relative_rms_error": 1.9847387183100262e-06,
+              "relative_sup_error": 3.4601851784839355e-06
+            },
+            "scrape_off_layer": {
+              "cell_count": 67,
+              "relative_rms_error": 1.2190144903384908e-06,
+              "relative_sup_error": 3.5887648883527087e-06
+            },
+            "separatrix_band": {
+              "cell_count": 58,
+              "relative_rms_error": 1.4509135536580456e-06,
+              "relative_sup_error": 3.2002392457638385e-06
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "separatrix_band",
+          "cell_count_replaced": 551,
+          "cells_per_coefficient": 2.811224489795918,
+          "coefficient_count": 196,
+          "coefficient_lattice": [
+            14,
+            14
+          ],
+          "knot_count_per_axis": 14,
+          "least_squares_iterations": 2000,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 426,
+              "relative_rms_error": 9.404695167894052e-07,
+              "relative_sup_error": 1.987880624605131e-06
+            },
+            "scrape_off_layer": {
+              "cell_count": 67,
+              "relative_rms_error": 6.087954377880004e-07,
+              "relative_sup_error": 2.0700844619134464e-06
+            },
+            "separatrix_band": {
+              "cell_count": 58,
+              "relative_rms_error": 7.236247351859097e-07,
+              "relative_sup_error": 2.1352204383349805e-06
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 551,
+          "cells_per_coefficient": 2.15234375,
+          "coefficient_count": 256,
+          "coefficient_lattice": [
+            16,
+            16
+          ],
+          "knot_count_per_axis": 16,
+          "least_squares_iterations": 2048,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 426,
+              "relative_rms_error": 6.465989567732614e-07,
+              "relative_sup_error": 3.4911846910892745e-06
+            },
+            "scrape_off_layer": {
+              "cell_count": 67,
+              "relative_rms_error": 2.7040213526507413e-06,
+              "relative_sup_error": 7.241896463432548e-06
+            },
+            "separatrix_band": {
+              "cell_count": 58,
+              "relative_rms_error": 2.5666094445152714e-06,
+              "relative_sup_error": 6.978524175183444e-06
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 551,
+          "cells_per_coefficient": 1.7006172839506173,
+          "coefficient_count": 324,
+          "coefficient_lattice": [
+            18,
+            18
+          ],
+          "knot_count_per_axis": 18,
+          "least_squares_iterations": 2592,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 426,
+              "relative_rms_error": 9.592568488104551e-07,
+              "relative_sup_error": 8.641938412829312e-06
+            },
+            "scrape_off_layer": {
+              "cell_count": 67,
+              "relative_rms_error": 3.7070634049747345e-06,
+              "relative_sup_error": 1.4048328682372985e-05
+            },
+            "separatrix_band": {
+              "cell_count": 58,
+              "relative_rms_error": 2.158976785054458e-06,
+              "relative_sup_error": 7.795021139267956e-06
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "separatrix_band",
+          "cell_count_replaced": 551,
+          "cells_per_coefficient": 1.3775,
+          "coefficient_count": 400,
+          "coefficient_lattice": [
+            20,
+            20
+          ],
+          "knot_count_per_axis": 20,
+          "least_squares_iterations": 3200,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 426,
+              "relative_rms_error": 6.144660700998493e-07,
+              "relative_sup_error": 4.4808609651078945e-06
+            },
+            "scrape_off_layer": {
+              "cell_count": 67,
+              "relative_rms_error": 1.1744691240658218e-06,
+              "relative_sup_error": 4.190543476661027e-06
+            },
+            "separatrix_band": {
+              "cell_count": 58,
+              "relative_rms_error": 1.2116930976947142e-06,
+              "relative_sup_error": 5.818616738620863e-06
+            }
+          }
+        }
+      ],
+      "separatrix_band_binding_at_terminal_rung": true,
+      "separatrix_binding_statement": "The separatrix-band relative sup error is the binding regional term at the terminal rung.",
+      "source": {
+        "bank": "scripts/oracle_rebaseline/root-coarse.npz",
+        "bank_sha256": "79f4a3f507680b7531bf3a3dc6a1195acf321027f0c3f4d4ab103bc70e1a1e0c",
+        "field_array": "oracle_state[:cell_count]",
+        "plasma_cell_coordinates": "warm semantic machine cache 030667d40f96d904",
+        "requested_cells": -500,
+        "scorecard": "scripts/oracle_rebaseline/results.json",
+        "scorecard_sha256": "4d07594d3e08e072a817d1b31acde6a4f7bddd12d9bbc3a0e795efccbe71548d"
+      }
+    },
+    {
+      "banked_terminal_residual": 2.7110550053242652e-15,
+      "carrier": "coarse",
+      "cell_count": 551,
+      "coordinate_sha256": "f5ef3841251238dc12e91e1f38a81e986c27feeabe9e730129958cc3716e3ca2",
+      "first_knot_count_closed_flux_below_production_terminal_residual": 4,
+      "flux_sha256": "112940d8bc320899df4de93feb0a73923ceef87d29b5acfa9fb74f4e352fde38",
+      "identity": "closed-form-oracle-root-coarse",
+      "kind": "banked_converged_root",
+      "psi_norm_sha256": "a4005ff73f0411a140d79b10b355a4faefd436b4e594416646da05dbddc3d7db",
+      "rungs": [
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 551,
+          "cells_per_coefficient": 34.4375,
+          "coefficient_count": 16,
+          "coefficient_lattice": [
+            4,
+            4
+          ],
+          "knot_count_per_axis": 4,
+          "least_squares_iterations": 27,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 415,
+              "relative_rms_error": 0.0027272946947522556,
+              "relative_sup_error": 0.007559217345429418
+            },
+            "scrape_off_layer": {
+              "cell_count": 81,
+              "relative_rms_error": 0.006135968005021126,
+              "relative_sup_error": 0.013980862597272653
+            },
+            "separatrix_band": {
+              "cell_count": 55,
+              "relative_rms_error": 0.0052494188170764036,
+              "relative_sup_error": 0.009750359405085497
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 551,
+          "cells_per_coefficient": 15.305555555555555,
+          "coefficient_count": 36,
+          "coefficient_lattice": [
+            6,
+            6
+          ],
+          "knot_count_per_axis": 6,
+          "least_squares_iterations": 97,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 415,
+              "relative_rms_error": 0.0015337877477601292,
+              "relative_sup_error": 0.004746363919848307
+            },
+            "scrape_off_layer": {
+              "cell_count": 81,
+              "relative_rms_error": 0.004097430034308788,
+              "relative_sup_error": 0.007697532616762343
+            },
+            "separatrix_band": {
+              "cell_count": 55,
+              "relative_rms_error": 0.003031130742190932,
+              "relative_sup_error": 0.006748792876783178
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 551,
+          "cells_per_coefficient": 8.609375,
+          "coefficient_count": 64,
+          "coefficient_lattice": [
+            8,
+            8
+          ],
+          "knot_count_per_axis": 8,
+          "least_squares_iterations": 588,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 415,
+              "relative_rms_error": 0.0008714200572301273,
+              "relative_sup_error": 0.002802271288657414
+            },
+            "scrape_off_layer": {
+              "cell_count": 81,
+              "relative_rms_error": 0.0019187329762068775,
+              "relative_sup_error": 0.004087670436669593
+            },
+            "separatrix_band": {
+              "cell_count": 55,
+              "relative_rms_error": 0.0016502830040494355,
+              "relative_sup_error": 0.003989584786807635
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "separatrix_band",
+          "cell_count_replaced": 551,
+          "cells_per_coefficient": 5.51,
+          "coefficient_count": 100,
+          "coefficient_lattice": [
+            10,
+            10
+          ],
+          "knot_count_per_axis": 10,
+          "least_squares_iterations": 1813,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 415,
+              "relative_rms_error": 0.0005020888579034697,
+              "relative_sup_error": 0.0019269373257151774
+            },
+            "scrape_off_layer": {
+              "cell_count": 81,
+              "relative_rms_error": 0.0008488977502574017,
+              "relative_sup_error": 0.002392546959568435
+            },
+            "separatrix_band": {
+              "cell_count": 55,
+              "relative_rms_error": 0.0008684457837312508,
+              "relative_sup_error": 0.002638327955469405
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "separatrix_band",
+          "cell_count_replaced": 551,
+          "cells_per_coefficient": 3.826388888888889,
+          "coefficient_count": 144,
+          "coefficient_lattice": [
+            12,
+            12
+          ],
+          "knot_count_per_axis": 12,
+          "least_squares_iterations": 2000,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 415,
+              "relative_rms_error": 0.00028633201514413967,
+              "relative_sup_error": 0.0014313626204829758
+            },
+            "scrape_off_layer": {
+              "cell_count": 81,
+              "relative_rms_error": 0.0004506133702949126,
+              "relative_sup_error": 0.0012738382564428303
+            },
+            "separatrix_band": {
+              "cell_count": 55,
+              "relative_rms_error": 0.0004743309164561129,
+              "relative_sup_error": 0.0015395822572900077
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "separatrix_band",
+          "cell_count_replaced": 551,
+          "cells_per_coefficient": 2.811224489795918,
+          "coefficient_count": 196,
+          "coefficient_lattice": [
+            14,
+            14
+          ],
+          "knot_count_per_axis": 14,
+          "least_squares_iterations": 2000,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 415,
+              "relative_rms_error": 0.0001986875914977951,
+              "relative_sup_error": 0.0010209733177360106
+            },
+            "scrape_off_layer": {
+              "cell_count": 81,
+              "relative_rms_error": 0.00031110988282763153,
+              "relative_sup_error": 0.0010083911952179993
+            },
+            "separatrix_band": {
+              "cell_count": 55,
+              "relative_rms_error": 0.00035539245907077223,
+              "relative_sup_error": 0.0012090696282783813
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "separatrix_band",
+          "cell_count_replaced": 551,
+          "cells_per_coefficient": 2.15234375,
+          "coefficient_count": 256,
+          "coefficient_lattice": [
+            16,
+            16
+          ],
+          "knot_count_per_axis": 16,
+          "least_squares_iterations": 2048,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 415,
+              "relative_rms_error": 0.00013526646257852577,
+              "relative_sup_error": 0.0009009251561878841
+            },
+            "scrape_off_layer": {
+              "cell_count": 81,
+              "relative_rms_error": 0.00023027648640662517,
+              "relative_sup_error": 0.0009452790549517578
+            },
+            "separatrix_band": {
+              "cell_count": 55,
+              "relative_rms_error": 0.0002624880686163973,
+              "relative_sup_error": 0.0010188406099677814
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 551,
+          "cells_per_coefficient": 1.7006172839506173,
+          "coefficient_count": 324,
+          "coefficient_lattice": [
+            18,
+            18
+          ],
+          "knot_count_per_axis": 18,
+          "least_squares_iterations": 2592,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 415,
+              "relative_rms_error": 9.272042370965488e-05,
+              "relative_sup_error": 0.0008873837328000045
+            },
+            "scrape_off_layer": {
+              "cell_count": 81,
+              "relative_rms_error": 0.00011993534648051208,
+              "relative_sup_error": 0.0007107422787926024
+            },
+            "separatrix_band": {
+              "cell_count": 55,
+              "relative_rms_error": 0.00019727300357935375,
+              "relative_sup_error": 0.0008621711127355957
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "separatrix_band",
+          "cell_count_replaced": 551,
+          "cells_per_coefficient": 1.3775,
+          "coefficient_count": 400,
+          "coefficient_lattice": [
+            20,
+            20
+          ],
+          "knot_count_per_axis": 20,
+          "least_squares_iterations": 3200,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 415,
+              "relative_rms_error": 7.742961916773712e-05,
+              "relative_sup_error": 0.0007764134701909968
+            },
+            "scrape_off_layer": {
+              "cell_count": 81,
+              "relative_rms_error": 8.886766888538747e-05,
+              "relative_sup_error": 0.0005929267264300816
+            },
+            "separatrix_band": {
+              "cell_count": 55,
+              "relative_rms_error": 0.00014776406175005715,
+              "relative_sup_error": 0.0008794252792861974
+            }
+          }
+        }
+      ],
+      "separatrix_band_binding_at_terminal_rung": true,
+      "separatrix_binding_statement": "The separatrix-band relative sup error is the binding regional term at the terminal rung.",
+      "source": {
+        "bank": "scripts/oracle_rebaseline/root-coarse.npz",
+        "bank_sha256": "79f4a3f507680b7531bf3a3dc6a1195acf321027f0c3f4d4ab103bc70e1a1e0c",
+        "field_array": "root_state[:cell_count]",
+        "plasma_cell_coordinates": "warm semantic machine cache 030667d40f96d904",
+        "requested_cells": -500,
+        "scorecard": "scripts/oracle_rebaseline/results.json",
+        "scorecard_sha256": "4d07594d3e08e072a817d1b31acde6a4f7bddd12d9bbc3a0e795efccbe71548d"
+      }
+    },
+    {
+      "banked_terminal_residual": null,
+      "carrier": "fine",
+      "cell_count": 1076,
+      "coordinate_sha256": "793851693f771a4a336d3f6001c6f7baacc9615e7df414fe4cb79978ddb75566",
+      "first_knot_count_closed_flux_below_production_terminal_residual": 4,
+      "flux_sha256": "d1cfe4a3f596e451d8da4efcf9b8ecfaad284a7e9fbfeba1fb0260ea4311851e",
+      "identity": "closed-form-oracle-map-fine",
+      "kind": "banked_flux_map",
+      "psi_norm_sha256": "30e404a7d51e34ed39236cd5f5b9620a197596c8e7f0851694a96c580663f428",
+      "rungs": [
+        {
+          "binding_region_by_relative_sup_error": "separatrix_band",
+          "cell_count_replaced": 1076,
+          "cells_per_coefficient": 67.25,
+          "coefficient_count": 16,
+          "coefficient_lattice": [
+            4,
+            4
+          ],
+          "knot_count_per_axis": 4,
+          "least_squares_iterations": 28,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 844,
+              "relative_rms_error": 0.002565703701054241,
+              "relative_sup_error": 0.005580176902889638
+            },
+            "scrape_off_layer": {
+              "cell_count": 121,
+              "relative_rms_error": 0.003082077789024433,
+              "relative_sup_error": 0.008311413158826327
+            },
+            "separatrix_band": {
+              "cell_count": 111,
+              "relative_rms_error": 0.0027683452503029955,
+              "relative_sup_error": 0.008333476708164218
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 1076,
+          "cells_per_coefficient": 29.88888888888889,
+          "coefficient_count": 36,
+          "coefficient_lattice": [
+            6,
+            6
+          ],
+          "knot_count_per_axis": 6,
+          "least_squares_iterations": 107,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 844,
+              "relative_rms_error": 0.00017055363090809713,
+              "relative_sup_error": 0.00033338644626176986
+            },
+            "scrape_off_layer": {
+              "cell_count": 121,
+              "relative_rms_error": 0.00010955884188858053,
+              "relative_sup_error": 0.00029002741431007826
+            },
+            "separatrix_band": {
+              "cell_count": 111,
+              "relative_rms_error": 9.868429913950213e-05,
+              "relative_sup_error": 0.0002058199638854041
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 1076,
+          "cells_per_coefficient": 16.8125,
+          "coefficient_count": 64,
+          "coefficient_lattice": [
+            8,
+            8
+          ],
+          "knot_count_per_axis": 8,
+          "least_squares_iterations": 696,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 844,
+              "relative_rms_error": 2.4686660460781877e-05,
+              "relative_sup_error": 4.557155333487116e-05
+            },
+            "scrape_off_layer": {
+              "cell_count": 121,
+              "relative_rms_error": 1.5227967012751687e-05,
+              "relative_sup_error": 3.622976380346276e-05
+            },
+            "separatrix_band": {
+              "cell_count": 111,
+              "relative_rms_error": 1.3939750825094097e-05,
+              "relative_sup_error": 3.3596946252287045e-05
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 1076,
+          "cells_per_coefficient": 10.76,
+          "coefficient_count": 100,
+          "coefficient_lattice": [
+            10,
+            10
+          ],
+          "knot_count_per_axis": 10,
+          "least_squares_iterations": 1776,
+          "least_squares_stop_code": 3,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 844,
+              "relative_rms_error": 6.721539410205067e-06,
+              "relative_sup_error": 1.2412753644326383e-05
+            },
+            "scrape_off_layer": {
+              "cell_count": 121,
+              "relative_rms_error": 4.337257843378373e-06,
+              "relative_sup_error": 9.803779136137099e-06
+            },
+            "separatrix_band": {
+              "cell_count": 111,
+              "relative_rms_error": 4.522950876546942e-06,
+              "relative_sup_error": 1.0904561125496361e-05
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "closed_flux",
+          "cell_count_replaced": 1076,
+          "cells_per_coefficient": 7.472222222222222,
+          "coefficient_count": 144,
+          "coefficient_lattice": [
+            12,
+            12
+          ],
+          "knot_count_per_axis": 12,
+          "least_squares_iterations": 2000,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 844,
+              "relative_rms_error": 2.504688120065749e-06,
+              "relative_sup_error": 4.7629184763963965e-06
+            },
+            "scrape_off_layer": {
+              "cell_count": 121,
+              "relative_rms_error": 1.6476846419567212e-06,
+              "relative_sup_error": 4.396347392125082e-06
+            },
+            "separatrix_band": {
+              "cell_count": 111,
+              "relative_rms_error": 1.6561780762155178e-06,
+              "relative_sup_error": 4.153976310132043e-06
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 1076,
+          "cells_per_coefficient": 5.489795918367347,
+          "coefficient_count": 196,
+          "coefficient_lattice": [
+            14,
+            14
+          ],
+          "knot_count_per_axis": 14,
+          "least_squares_iterations": 2000,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 844,
+              "relative_rms_error": 1.2216227510402253e-06,
+              "relative_sup_error": 4.8779807779528966e-06
+            },
+            "scrape_off_layer": {
+              "cell_count": 121,
+              "relative_rms_error": 4.492455889660623e-06,
+              "relative_sup_error": 2.1437297177882635e-05
+            },
+            "separatrix_band": {
+              "cell_count": 111,
+              "relative_rms_error": 1.9077853231068833e-06,
+              "relative_sup_error": 8.1100768840081e-06
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 1076,
+          "cells_per_coefficient": 4.203125,
+          "coefficient_count": 256,
+          "coefficient_lattice": [
+            16,
+            16
+          ],
+          "knot_count_per_axis": 16,
+          "least_squares_iterations": 2048,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 844,
+              "relative_rms_error": 1.2860492611026165e-06,
+              "relative_sup_error": 1.4474437299112724e-05
+            },
+            "scrape_off_layer": {
+              "cell_count": 121,
+              "relative_rms_error": 4.985748926074054e-06,
+              "relative_sup_error": 3.554168303517728e-05
+            },
+            "separatrix_band": {
+              "cell_count": 111,
+              "relative_rms_error": 5.248816748564375e-06,
+              "relative_sup_error": 2.922525400585762e-05
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 1076,
+          "cells_per_coefficient": 3.3209876543209877,
+          "coefficient_count": 324,
+          "coefficient_lattice": [
+            18,
+            18
+          ],
+          "knot_count_per_axis": 18,
+          "least_squares_iterations": 2592,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 844,
+              "relative_rms_error": 6.556977156354881e-07,
+              "relative_sup_error": 4.792942163117335e-06
+            },
+            "scrape_off_layer": {
+              "cell_count": 121,
+              "relative_rms_error": 7.3629812626023764e-06,
+              "relative_sup_error": 3.24598985879536e-05
+            },
+            "separatrix_band": {
+              "cell_count": 111,
+              "relative_rms_error": 2.4699740723552037e-06,
+              "relative_sup_error": 1.1221687784629849e-05
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 1076,
+          "cells_per_coefficient": 2.69,
+          "coefficient_count": 400,
+          "coefficient_lattice": [
+            20,
+            20
+          ],
+          "knot_count_per_axis": 20,
+          "least_squares_iterations": 3200,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 844,
+              "relative_rms_error": 5.435136673889004e-07,
+              "relative_sup_error": 3.7762003652670736e-06
+            },
+            "scrape_off_layer": {
+              "cell_count": 121,
+              "relative_rms_error": 4.502516962299411e-06,
+              "relative_sup_error": 1.692368821208549e-05
+            },
+            "separatrix_band": {
+              "cell_count": 111,
+              "relative_rms_error": 2.151917229495759e-06,
+              "relative_sup_error": 8.60232915695259e-06
+            }
+          }
+        }
+      ],
+      "separatrix_band_binding_at_terminal_rung": false,
+      "separatrix_binding_statement": "The separatrix-band relative sup error is not the binding regional term at the terminal rung.",
+      "source": {
+        "bank": "scripts/oracle_rebaseline/root-fine.npz",
+        "bank_sha256": "512f8a4bce44b2701a76b587bf0740cd17c1b037839dbcfbde86863115b251de",
+        "field_array": "oracle_state[:cell_count]",
+        "plasma_cell_coordinates": "warm semantic machine cache 7c94be9b777c55ba",
+        "requested_cells": -1000,
+        "scorecard": "scripts/oracle_rebaseline/results.json",
+        "scorecard_sha256": "4d07594d3e08e072a817d1b31acde6a4f7bddd12d9bbc3a0e795efccbe71548d"
+      }
+    },
+    {
+      "banked_terminal_residual": 3.040818052789354e-15,
+      "carrier": "fine",
+      "cell_count": 1076,
+      "coordinate_sha256": "793851693f771a4a336d3f6001c6f7baacc9615e7df414fe4cb79978ddb75566",
+      "first_knot_count_closed_flux_below_production_terminal_residual": 4,
+      "flux_sha256": "f01d472c48aed0d47345794ef57356323ea4cd1bb55853945fc7ce5ae8517dbe",
+      "identity": "closed-form-oracle-root-fine",
+      "kind": "banked_converged_root",
+      "psi_norm_sha256": "46d54c9404493db0adb8b2dccfa183ea75718e2fa2b64eaf55263304f6abd784",
+      "rungs": [
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 1076,
+          "cells_per_coefficient": 67.25,
+          "coefficient_count": 16,
+          "coefficient_lattice": [
+            4,
+            4
+          ],
+          "knot_count_per_axis": 4,
+          "least_squares_iterations": 27,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 826,
+              "relative_rms_error": 0.002624812091829904,
+              "relative_sup_error": 0.006975246910408131
+            },
+            "scrape_off_layer": {
+              "cell_count": 151,
+              "relative_rms_error": 0.006425637351241323,
+              "relative_sup_error": 0.015239380107182827
+            },
+            "separatrix_band": {
+              "cell_count": 99,
+              "relative_rms_error": 0.0053718202021693865,
+              "relative_sup_error": 0.010177160757570601
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 1076,
+          "cells_per_coefficient": 29.88888888888889,
+          "coefficient_count": 36,
+          "coefficient_lattice": [
+            6,
+            6
+          ],
+          "knot_count_per_axis": 6,
+          "least_squares_iterations": 96,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 826,
+              "relative_rms_error": 0.001579493271814884,
+              "relative_sup_error": 0.005106402125173782
+            },
+            "scrape_off_layer": {
+              "cell_count": 151,
+              "relative_rms_error": 0.0046054687950610376,
+              "relative_sup_error": 0.009771202457307076
+            },
+            "separatrix_band": {
+              "cell_count": 99,
+              "relative_rms_error": 0.0029380168033847917,
+              "relative_sup_error": 0.006461930350985271
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 1076,
+          "cells_per_coefficient": 16.8125,
+          "coefficient_count": 64,
+          "coefficient_lattice": [
+            8,
+            8
+          ],
+          "knot_count_per_axis": 8,
+          "least_squares_iterations": 674,
+          "least_squares_stop_code": 2,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 826,
+              "relative_rms_error": 0.0008892715128494834,
+              "relative_sup_error": 0.0026742275413540076
+            },
+            "scrape_off_layer": {
+              "cell_count": 151,
+              "relative_rms_error": 0.0022608821188086405,
+              "relative_sup_error": 0.00512283247009436
+            },
+            "separatrix_band": {
+              "cell_count": 99,
+              "relative_rms_error": 0.0013383042839985064,
+              "relative_sup_error": 0.004150928095399724
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 1076,
+          "cells_per_coefficient": 10.76,
+          "coefficient_count": 100,
+          "coefficient_lattice": [
+            10,
+            10
+          ],
+          "knot_count_per_axis": 10,
+          "least_squares_iterations": 1567,
+          "least_squares_stop_code": 3,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 826,
+              "relative_rms_error": 0.00048365316666346364,
+              "relative_sup_error": 0.0019515288460625931
+            },
+            "scrape_off_layer": {
+              "cell_count": 151,
+              "relative_rms_error": 0.0009792668515251136,
+              "relative_sup_error": 0.0027808131574230555
+            },
+            "separatrix_band": {
+              "cell_count": 99,
+              "relative_rms_error": 0.0008045220958216647,
+              "relative_sup_error": 0.002717276451508899
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "separatrix_band",
+          "cell_count_replaced": 1076,
+          "cells_per_coefficient": 7.472222222222222,
+          "coefficient_count": 144,
+          "coefficient_lattice": [
+            12,
+            12
+          ],
+          "knot_count_per_axis": 12,
+          "least_squares_iterations": 2000,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 826,
+              "relative_rms_error": 0.00027586310448272455,
+              "relative_sup_error": 0.0016029113692990653
+            },
+            "scrape_off_layer": {
+              "cell_count": 151,
+              "relative_rms_error": 0.0005454471504519083,
+              "relative_sup_error": 0.0014777060328980327
+            },
+            "separatrix_band": {
+              "cell_count": 99,
+              "relative_rms_error": 0.0005403288059974171,
+              "relative_sup_error": 0.0018809155942049961
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 1076,
+          "cells_per_coefficient": 5.489795918367347,
+          "coefficient_count": 196,
+          "coefficient_lattice": [
+            14,
+            14
+          ],
+          "knot_count_per_axis": 14,
+          "least_squares_iterations": 2000,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 826,
+              "relative_rms_error": 0.00019460073270766636,
+              "relative_sup_error": 0.0012339786091183403
+            },
+            "scrape_off_layer": {
+              "cell_count": 151,
+              "relative_rms_error": 0.0005047074122860363,
+              "relative_sup_error": 0.0013473149215791984
+            },
+            "separatrix_band": {
+              "cell_count": 99,
+              "relative_rms_error": 0.00037862504202025577,
+              "relative_sup_error": 0.0012066459496107853
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 1076,
+          "cells_per_coefficient": 4.203125,
+          "coefficient_count": 256,
+          "coefficient_lattice": [
+            16,
+            16
+          ],
+          "knot_count_per_axis": 16,
+          "least_squares_iterations": 2048,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 826,
+              "relative_rms_error": 0.00017188415046092196,
+              "relative_sup_error": 0.0009498620649927248
+            },
+            "scrape_off_layer": {
+              "cell_count": 151,
+              "relative_rms_error": 0.0004513608265071846,
+              "relative_sup_error": 0.0016819557264935792
+            },
+            "separatrix_band": {
+              "cell_count": 99,
+              "relative_rms_error": 0.0003390370166063396,
+              "relative_sup_error": 0.0009953326368329755
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 1076,
+          "cells_per_coefficient": 3.3209876543209877,
+          "coefficient_count": 324,
+          "coefficient_lattice": [
+            18,
+            18
+          ],
+          "knot_count_per_axis": 18,
+          "least_squares_iterations": 2592,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 826,
+              "relative_rms_error": 0.00014179315252867535,
+              "relative_sup_error": 0.0008982209372477573
+            },
+            "scrape_off_layer": {
+              "cell_count": 151,
+              "relative_rms_error": 0.00041083306779511234,
+              "relative_sup_error": 0.0014383999898675843
+            },
+            "separatrix_band": {
+              "cell_count": 99,
+              "relative_rms_error": 0.0002847255394542838,
+              "relative_sup_error": 0.001018929210451899
+            }
+          }
+        },
+        {
+          "binding_region_by_relative_sup_error": "scrape_off_layer",
+          "cell_count_replaced": 1076,
+          "cells_per_coefficient": 2.69,
+          "coefficient_count": 400,
+          "coefficient_lattice": [
+            20,
+            20
+          ],
+          "knot_count_per_axis": 20,
+          "least_squares_iterations": 3200,
+          "least_squares_stop_code": 7,
+          "regional_relative_fit_error": {
+            "closed_flux": {
+              "cell_count": 826,
+              "relative_rms_error": 0.00012356876696812392,
+              "relative_sup_error": 0.0007609870643784778
+            },
+            "scrape_off_layer": {
+              "cell_count": 151,
+              "relative_rms_error": 0.00031617671354382645,
+              "relative_sup_error": 0.0011388217253631779
+            },
+            "separatrix_band": {
+              "cell_count": 99,
+              "relative_rms_error": 0.0002714446386656346,
+              "relative_sup_error": 0.0010527907448756998
+            }
+          }
+        }
+      ],
+      "separatrix_band_binding_at_terminal_rung": false,
+      "separatrix_binding_statement": "The separatrix-band relative sup error is not the binding regional term at the terminal rung.",
+      "source": {
+        "bank": "scripts/oracle_rebaseline/root-fine.npz",
+        "bank_sha256": "512f8a4bce44b2701a76b587bf0740cd17c1b037839dbcfbde86863115b251de",
+        "field_array": "root_state[:cell_count]",
+        "plasma_cell_coordinates": "warm semantic machine cache 7c94be9b777c55ba",
+        "requested_cells": -1000,
+        "scorecard": "scripts/oracle_rebaseline/results.json",
+        "scorecard_sha256": "4d07594d3e08e072a817d1b31acde6a4f7bddd12d9bbc3a0e795efccbe71548d"
+      }
+    }
+  ]
+}

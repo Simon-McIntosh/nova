@@ -413,6 +413,15 @@
     admits exact second-order members, only arms A and C are buildable, and the matrix cannot be
     completed. This is why the prototype waits on that result rather than starting alongside it.</p>
 
+    <p><strong>The first pass of this matrix is measured and its carrier verdict is PROVISIONAL,
+    2026-08-24.</strong> Arms C and D were run with the iterate carrying the <em>total</em> flux, so
+    the carrier was fitting a coil field spread across the whole domain in addition to the plasma
+    hump, and both arms converged essentially to the resulting projection floor. §13 gives the exact
+    change of variables that removes the external part at zero cost to the residual. <strong>The
+    matrix must be re-evaluated after that shift lands</strong>, because the measurement as taken
+    scored the carrier on a harder object than the design intends and cannot rank it. The exact-value
+    arms A and B are unaffected by the shift and their readings stand.</p>
+
     <p><strong>Done when</strong> all four arms are measured on a common frame set at one source
     revision, with the three axes reported per arm against arm A, the interaction stated explicitly —
     whether B and C combine additively in D, sub-additively, or interfere — and the receipt naming
@@ -510,6 +519,162 @@
     total-flux normalisation, and the knot count at which the plasma-only floor first reaches the
     baseline's terminal residual on the same carrier. A shift that lowers the floor without lowering
     the terminal residual is a reportable result and locates the constraint elsewhere.</p>
+
+    <h2 id="s14">§14 — Higher order should buy fewer cells, and the first pass priced it wrong</h2>
+
+    <p><strong>The support-order arm was measured at fixed cell count, which is the wrong
+    comparison.</strong> Arm B was scored against arm A on the same carrier with the same 551 or 1,069
+    plasma cells, and came out 11.6 to 20.7 per cent slower per iterate with 40 to 51 per cent more
+    peak memory. That prices the second order as a pure surcharge. But the point of raising order is
+    that a richer in-cell representation should reach a given accuracy with <em>fewer</em> cells, and
+    the rescoring already shows arm B is more accurate at equal cell count in all six carrier-region
+    comparisons. Spending that accuracy back as coarser cells is the trade the first pass never
+    made.</p>
+
+    <p><strong>Why the net can be a saving rather than a cost.</strong> The per-cell surcharge is
+    bounded and known: exactly 2.0× stored coupling and 1.98× contraction for six columns against
+    three. Cell count enters the cost more than linearly — the refinement study measured 4.2× cells
+    costing 3.24× interaction build and 13.6× memory, so memory in particular grows faster than cell
+    count. If second-order support lets the cell count fall by more than a factor of two at fixed
+    accuracy, the 2× per-cell surcharge is repaid outright, and the memory position improves rather
+    than degrades. That matters directly to the catalog, whose binding constraint on refinement was
+    the 13.6× memory as batch capacity rather than the build time.</p>
+
+    <p><strong>What is not yet known, and must not be assumed.</strong> Whether the second-order
+    support raises the <em>order</em> of the field error or only improves its constant. The rescoring
+    measured margins of 6.066e-6 to 3.169e-4 at two carrier resolutions — enough to establish that B
+    is more accurate, not enough to establish an order. If it raises the order, the cell reduction at
+    fixed accuracy is large; if it only improves the constant, the reduction is a modest fixed factor
+    and may not repay 2×. That distinction decides whether p-refinement of the source is a lever or a
+    curiosity, and it is measurable from a ladder rather than argued.</p>
+
+    <p><strong>Done when</strong> an iso-accuracy comparison replaces the fixed-cell one: for a
+    declared target accuracy against analytic truth, the cell count each support order requires to
+    reach it, on a ladder of at least four cell counts per order so the field-error order of each is
+    fitted with its uncertainty rather than inferred from two points; the interaction-build time, peak
+    device memory and per-iterate cost at each order's iso-accuracy cell count, quoted against each
+    other and against the banked 3.24× build and 13.6× memory that h-refinement charges; and an
+    explicit statement of whether second-order support raises the field-error order or only its
+    constant. A finding that it only improves the constant, with the implied cell reduction failing to
+    repay the 2× per-cell surcharge, closes this as a curiosity and is as useful as the opposite.</p>
+
+    <h2 id="s15">§15 — Contour extraction that matches the representation's fidelity</h2>
+
+    <p><strong>The contour is currently the least accurate object in the chain, and raising the cell
+    support order widens that gap.</strong> Marching squares — and its triangular counterpart —
+    classifies cell corners against the level and then interpolates the crossing <em>linearly</em>
+    along each edge, emitting straight segments. The result is C⁰: crossings are continuous but the
+    tangent jumps at every cell edge. With first-order cell data that roughly matches what is known.
+    With second-order in-cell information it does not: the solution carries curvature the contour
+    discards.</p>
+
+    <p><strong>Three separable improvements, in increasing order of what they need and give.</strong>
+    First, the crossing <em>position</em>: root-find along the edge on the higher-order edge
+    restriction rather than interpolating linearly, which raises the accuracy of where the contour
+    sits without changing its continuity. Second, the crossing <em>tangent</em>: a level set's tangent
+    is perpendicular to the gradient, and the gradient is available exactly — from
+    <code>TensorSplineEvaluation</code> for a carrier, or from the second-order cell data — so a cubic
+    Hermite through two accurate crossings with gradient-derived end tangents gives a
+    <strong>C¹</strong> contour. Third, the <em>curvature</em>: level-set curvature follows from the
+    gradient together with the Hessian, and <code>TensorSplineEvaluation</code> already returns
+    <code>radial_second_derivative</code>, <code>mixed_derivative</code> and
+    <code>vertical_second_derivative</code>, so a quintic Hermite matching curvature at both ends
+    gives <strong>C²</strong>. The machinery for all three already exists; none of it needs a new
+    kernel.</p>
+
+    <p><strong>A benefit beyond drawing, and it lands where the physics is hardest.</strong> Marching
+    squares has genuinely ambiguous cells — the saddle configuration with diagonal corners on opposite
+    sides of the level — and resolves them by an arbitrary tie-break. Higher-order in-cell data
+    <em>resolves</em> that ambiguity rather than breaking the tie, by evaluating the interior rather
+    than guessing it. The ambiguous saddle case is precisely the X-point neighbourhood, so this is an
+    improvement exactly where the topology read is most consequential and where the admissibility
+    predicate spends its time. It also bears on the smooth topology margin of §6: a margin computed
+    from a C⁰ boundary inherits that boundary's tangent discontinuities.</p>
+
+    <p><strong>Two constraints that must be respected rather than discovered.</strong> The separatrix
+    clip's exactness is polygon exactness — it conserves patch area to 2.2e-16 m² because it integrates
+    straight-edged shapes with exact edge antiderivatives, and §16 confirms from the source that the
+    clip is polygonal with linearly interpolated crossings. A curved boundary breaks those formulas, so
+    <em>the drawn and reported contour and the clip integration are separate questions</em> and this
+    section improves the former without silently changing the latter; §16 owns the question of whether
+    the clip itself should follow, and prefers subdivision over curvature precisely because it keeps
+    the exact formulas.
+    And the extraction must keep the padded fixed-shape traced form that already lets the clip trace
+    once over a moving separatrix; a higher-order variant that reintroduces data-dependent shapes
+    would trade a real property for a cosmetic one.</p>
+
+    <p><strong>Done when</strong> a higher-order extraction is demonstrated against the existing
+    linear one on a case with closed-form truth: the crossing-position error of each at a declared set
+    of cell counts, with the fitted order of each and its uncertainty; the tangent and, where
+    implemented, curvature continuity across cell edges reported as the measured jump rather than
+    asserted; the resolved-versus-tie-broken outcome on every ambiguous saddle cell encountered, with
+    the count of such cells stated; and a passing contract test showing fixed shapes and
+    <code>jit</code>/<code>vmap</code> agreement, with an explicit statement that the clip integration
+    path is unchanged. A higher-order contour that is more accurate in position but no smoother, or
+    smoother but not more accurate, is reported as exactly that.</p>
+
+    <h2 id="s16">§16 — The clip is polygonal, and that sets a floor on useful cell fineness</h2>
+
+    <p><strong>Checked, not assumed: the clip is straight-edged.</strong>
+    <code>nova/equilibrium/separatrix_clip.py</code> describes itself as “conservative
+    <em>polygonal</em> supports cut by a moving separatrix”, and a flux crossing is interpolated once
+    per undirected atomic edge — a linear interpolation, the same construction marching squares uses.
+    The clipped region is a polygon with straight edges between crossings.</p>
+
+    <p><strong>But the moment machinery above it is already arbitrary-degree.</strong> The clip
+    carries area, first <em>and second</em> area moments about each cell's fixed geometric centroid,
+    and <code>padded_polynomial_current_moments</code> with
+    <code>complete_polynomial_powers(degree)</code> and a <code>monomial_moment(a, b)</code> forms
+    moments of any cellwise polynomial density <em>with no quadrature</em>. So the source-side half of
+    higher-order in-cell current already exists and is exact. What needed Gauss quadrature in §10 was
+    the other half — the coupling kernel weights, ∫ G(target) · R<sup>a</sup>Z<sup>b</sup> dA — which
+    is a different integral over the same region. The two are complementary and only one of them is
+    approximate.</p>
+
+    <p><strong>The fine-cell floor, which is an independent argument for raising order rather than
+    refining.</strong> The clip conserves patch area to an <em>absolute</em> 2.2e-16 to 4.4e-16 m².
+    Cell area falls as h², so that fixed absolute error becomes a <em>relative</em> error growing as
+    h<sup>−2</sup>: refine far enough and the clip's exactness degrades even though nothing about it
+    changed. Sliver cells compound it — a barely-clipped cell has a tiny area whose moments about a
+    fixed centroid are poorly scaled — and their number grows with the cut-cell count, which scales as
+    the perimeter over h. So h-refinement runs into the clip, while p-refinement does not. Taken with
+    §14's cost argument, that is two independent reasons pointing the same way.</p>
+
+    <p><strong>Should the clip become curved? Subdivision first, conic arcs only if it fails.</strong>
+    A curved boundary breaks polygon exactness, because the edge antiderivatives that make the moments
+    exact assume straight edges. Two routes preserve or replace that:</p>
+
+    <ul>
+      <li><strong>Subdivide the crossing.</strong> Instead of one straight chord per cut cell, place
+      several points on the true level set using the higher-order edge restriction and join them with
+      straight segments. The boundary becomes geometrically higher-order accurate while every edge
+      stays straight, so the exact moment formulas are untouched and the padded fixed-shape contract
+      survives as a larger fixed capacity. This is the cheap path and it should be measured first.</li>
+      <li><strong>Integrate over conic arcs.</strong> Level sets of a locally quadratic flux are
+      conics — elliptical near the magnetic axis, hyperbolic near the X point — so exact moments over
+      a conic-bounded region are obtainable in closed form. Substantially more work than subdivision,
+      and only worth it if subdivision leaves a measured deficit.</li>
+    </ul>
+
+    <p><strong>Trace it through to the display, because a clip nobody can see is a clip nobody can
+    debug.</strong> The natural graphic is not another flux-contour plot: it is the clipped plasma
+    cells drawn <em>as they are actually integrated</em> — each cut cell showing its own clipped
+    polygon and fill fraction, with the X-point neighbourhood given its own treatment, since that is
+    where marching-squares ambiguity lives and where sliver cells concentrate. That makes visible, in
+    one figure, three things currently only inferable from numbers: which cells are cut and how
+    thinly, whether the boundary polygon tracks the level set or chords across it, and what the clip
+    is doing where the separatrix crosses itself. If subdivision or conic arcs land, the same figure
+    shows the improvement directly.</p>
+
+    <p><strong>Done when</strong> the clipped-boundary geometric error against the true level set is
+    measured for the shipped single-chord clip and for at least one subdivision level, on a ladder of
+    cell counts with the fitted order and uncertainty of each; the clip's area-conservation error is
+    reported as a <em>relative</em> figure across that ladder so the fine-cell floor is quantified
+    rather than asserted, together with the cell count at which it crosses a declared tolerance; the
+    sliver-cell count and the smallest retained area fraction are reported at each rung; and a figure
+    is produced showing the clipped cells with their own polygons and fill fractions, with the X-point
+    neighbourhood inset. A result showing the single-chord clip already sufficient at the cell counts
+    this campaign uses closes the geometric half of this section and leaves only the display work.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>

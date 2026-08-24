@@ -568,6 +568,13 @@
     With second-order in-cell information it does not: the solution carries curvature the contour
     discards.</p>
 
+    <p><strong>Take the curve from the global surface, not from per-cell data — the same lesson §16
+    records from two measured failures.</strong> A higher-order contour driven by a local centred-tangent
+    reconstruction would repeat exactly the mistake that cost the curved-clip programme twice: it
+    converges to a different surface from the one the reference readers use, and on a low-aspect-ratio
+    grid that difference reached twenty per cent. Driven by the global C² carrier the contour inherits
+    the surface both reference routes already agree with.</p>
+
     <p><strong>Three separable improvements, in increasing order of what they need and give.</strong>
     First, the crossing <em>position</em>: root-find along the edge on the higher-order edge
     restriction rather than interpolating linearly, which raises the accuracy of where the contour
@@ -613,68 +620,92 @@
     path is unchanged. A higher-order contour that is more accurate in position but no smoother, or
     smoother but not more accurate, is reported as exactly that.</p>
 
-    <h2 id="s16">§16 — The clip is polygonal, and that sets a floor on useful cell fineness</h2>
+    <h2 id="s16">§16 — Curved clips are already built and already refuted, for a reason this plan removes</h2>
 
-    <p><strong>Checked, not assumed: the clip is straight-edged.</strong>
-    <code>nova/equilibrium/separatrix_clip.py</code> describes itself as “conservative
-    <em>polygonal</em> supports cut by a moving separatrix”, and a flux crossing is interpolated once
-    per undirected atomic edge — a linear interpolation, the same construction marching squares uses.
-    The clipped region is a polygon with straight edges between crossings.</p>
+    <p><strong>An earlier draft of this section proposed subdividing the crossing chord as the cheap
+    first step. That is withdrawn: subdivision is mesh refinement wearing a different name, and this
+    campaign went past it years of work ago.</strong> A prior programme built curved cell clips,
+    measured them twice, and left behind a precise prescription. Reading it changes what this plan
+    should do.</p>
 
-    <p><strong>But the moment machinery above it is already arbitrary-degree.</strong> The clip
-    carries area, first <em>and second</em> area moments about each cell's fixed geometric centroid,
-    and <code>padded_polynomial_current_moments</code> with
-    <code>complete_polynomial_powers(degree)</code> and a <code>monomial_moment(a, b)</code> forms
-    moments of any cellwise polynomial density <em>with no quadrature</em>. So the source-side half of
-    higher-order in-cell current already exists and is exact. What needed Gauss quadrature in §10 was
-    the other half — the coupling kernel weights, ∫ G(target) · R<sup>a</sup>Z<sup>b</sup> dA — which
-    is a different integral over the same region. The two are complementary and only one of them is
-    approximate.</p>
+    <p><strong>What exists.</strong> Curved sagitta clip corrections are implemented and validated:
+    a chord-to-hyperbola closed form agreeing with a subcell raster to <strong>1.57e-5</strong>, and a
+    later C¹ bicubic route with Green-theorem arc moments, the existing 12-node Gauss–Legendre
+    <code>_arc_rule</code> along in-cell arcs, fixed bisection for edge roots and constrained Newton
+    solves for extrema (commit <code>47808904</code>). The sagitta itself survives in
+    <code>nova/biot/arc.py</code> as the leverage measure for arc fits. None of this is speculative
+    infrastructure to be written.</p>
 
-    <p><strong>The fine-cell floor, which is an independent argument for raising order rather than
-    refining.</strong> The clip conserves patch area to an <em>absolute</em> 2.2e-16 to 4.4e-16 m².
-    Cell area falls as h², so that fixed absolute error becomes a <em>relative</em> error growing as
-    h<sup>−2</sup>: refine far enough and the clip's exactness degrades even though nothing about it
-    changed. Sliver cells compound it — a barely-clipped cell has a tiny area whose moments about a
-    fixed centroid are poorly scaled — and their number grows with the cut-cell count, which scales as
-    the perimeter over h. So h-refinement runs into the clip, while p-refinement does not. Taken with
-    §14's cost argument, that is two independent reasons pointing the same way.</p>
+    <p><strong>The original argument, and it is a good one.</strong> A chord confines a surface top to
+    an edge crossing, while the surface is locally parabolic about its own turning point, so the
+    radial error scales as the <em>square root</em> of the cell height — and no amount of area accuracy
+    touches it. Clipping against the arc moves the extremum to second order while improving area only
+    from second to third, which matched the observed split between large triangularity errors and
+    moderate moment errors. Extremum error and area error are different error classes, and only one of
+    them responds to better moments.</p>
 
-    <p><strong>Should the clip become curved? Subdivision first, conic arcs only if it fails.</strong>
-    A curved boundary breaks polygon exactness, because the edge antiderivatives that make the moments
-    exact assume straight edges. Two routes preserve or replace that:</p>
+    <p><strong>Then a monotonicity proof corrected the specification.</strong> The section had
+    specified an arc turning point that cannot exist: for bilinear flux the level-set derivative has a
+    constant numerator, so every branch is monotone and its extrema are its endpoints. The
+    square-root extremum error therefore belongs to the <em>bilinear reconstruction</em>, not to the
+    chord. The exact hyperbola correction was nonetheless validated to 1.6e-5 against a subcell raster
+    — and measured <em>worse on every decisive spherical-tokamak field</em>, moving away from both
+    reference routes.</p>
 
-    <ul>
-      <li><strong>Subdivide the crossing.</strong> Instead of one straight chord per cut cell, place
-      several points on the true level set using the higher-order edge restriction and join them with
-      straight segments. The boundary becomes geometrically higher-order accurate while every edge
-      stays straight, so the exact moment formulas are untouched and the padded fixed-shape contract
-      survives as a larger fixed capacity. This is the cheap path and it should be measured first.</li>
-      <li><strong>Integrate over conic arcs.</strong> Level sets of a locally quadratic flux are
-      conics — elliptical near the magnetic axis, hyperbolic near the X point — so exact moments over
-      a conic-bounded region are obtainable in closed form. Substantially more work than subdivision,
-      and only worth it if subdivision leaves a measured deficit.</li>
-    </ul>
+    <p><strong>The bicubic escalation was excellent and still failed, which is the finding.</strong>
+    Its primitive is superb: extremum radial position converging at measured order
+    <strong>3.999999 then 4.000001</strong> — fourth order to six figures — adjacent-cell C¹ mismatches
+    of 0, 1.73e-18 and 0, arc residual 2.78e-17, corrected area within 1.43e-5 of a 1,442,401-sample
+    raster. On a real equilibrium it lost: STEP clipped-to-contour <em>vpr</em> moved 16.46 % → 18.14 %
+    against a 3.92 % gate, and <em>g1</em> 9.78 % → 22.31 % against 6.20 %.</p>
 
-    <p><strong>Trace it through to the display, because a clip nobody can see is a clip nobody can
-    debug.</strong> The natural graphic is not another flux-contour plot: it is the clipped plasma
-    cells drawn <em>as they are actually integrated</em> — each cut cell showing its own clipped
-    polygon and fill fraction, with the X-point neighbourhood given its own treatment, since that is
-    where marching-squares ambiguity lives and where sliver cells concentrate. That makes visible, in
-    one figure, three things currently only inferable from numbers: which cells are cut and how
-    thinly, whether the boundary polygon tracks the level set or chords across it, and what the clip
-    is doing where the separatrix crosses itself. If subdivision or conic arcs land, the same figure
-    shows the improvement directly.</p>
+    <p><strong>And the mechanism is architectural, not a question of order.</strong> A local
+    centred-tangent Hermite bicubic cannot recover the global surface information both reference
+    readers use. Fourth order on a smooth analytic surface and twenty per cent on a real EQDSK are
+    consistent once the reason is seen: <em>the two constructions converge to different surfaces</em>,
+    and both reference routes use the global one. A global spline solves a system in which every
+    cell's polynomial is informed by the whole grid and is C²; a local Hermite stencil is C¹ and blind
+    beyond its neighbours, and STEP's low aspect ratio amplifies the missing within-cell gradient
+    structure. Corroborating this, the “two against one” reading on STEP: TORAX and Nova's own contour
+    extraction agree with each other far better than either agrees with the clipped route, so the
+    clipped route is the outlier.</p>
 
-    <p><strong>Done when</strong> the clipped-boundary geometric error against the true level set is
-    measured for the shipped single-chord clip and for at least one subdivision level, on a ladder of
-    cell counts with the fitted order and uncertainty of each; the clip's area-conservation error is
-    reported as a <em>relative</em> figure across that ladder so the fine-cell floor is quantified
-    rather than asserted, together with the cell count at which it crosses a declared tolerance; the
-    sliver-cell count and the smallest retained area fraction are reported at each rung; and a figure
-    is produced showing the clipped cells with their own polygons and fill fractions, with the X-point
-    neighbourhood inset. A result showing the single-chord clip already sufficient at the cell counts
-    this campaign uses closes the geometric half of this section and leaves only the display work.</p>
+    <p><strong>The prescription left behind is the thing this plan satisfies.</strong> The edge-current
+    plan records it explicitly: if edge-current accuracy ever wants curvature corrections, take the
+    curve from the <em>incoming global C² tensor B-spline</em> in
+    <code>nova/linalg/tensor_spline.py</code> — then in flight — and <strong>not from per-cell
+    interpolants</strong>. That spline has since landed, and §2 and §9 of this plan make it the
+    <em>carried solution object</em>. So the precondition is not merely met, it is exceeded: if the
+    carrier is the global C² spline, then the curve the clip cuts against and the surface the solver
+    converges on are <em>the same object</em>, and the divergence that killed both previous attempts
+    cannot arise by construction.</p>
+
+    <p><strong>The independent fine-cell argument still stands and is unaffected by any of this.</strong>
+    The clip conserves patch area to an <em>absolute</em> 2.2e-16 to 4.4e-16 m², while cell area falls
+    as h², so relative exactness degrades as h<sup>−2</sup> under refinement, and sliver cells multiply
+    as the cut-cell count grows with perimeter over h. h-refinement runs into the clip; p-refinement
+    does not. Note however that STEP's low aspect ratio is precisely where within-cell structure loss
+    was amplified, so coarsening carries its own risk there and the iso-accuracy ladder of §14 must
+    include a low-aspect-ratio case rather than only the analytic oracle.</p>
+
+    <p><strong>Ownership fence, inherited and to be respected.</strong>
+    <code>separatrix_clip</code> is owned by the edge-current representation plan; the transport side
+    consumes <code>TracedClippedSupports</code>, <code>padded_polynomial_current_moments</code>, the
+    interpolant-over-support integration and the ramped edge-crossing blend as a read-only downstream
+    consumer, and does not write that module. This plan inherits the same fence: it may supply the
+    global surface, and it must not rewrite the clip from here.</p>
+
+    <p><strong>Done when</strong> the curved clip is re-measured with its curve taken from the global
+    C² carrier rather than from a per-cell reconstruction, and the gate is a real low-aspect-ratio
+    equilibrium rather than an analytic surface — because fourth order on a smooth analytic surface has
+    already twice failed to predict the real result. Report STEP clipped-to-contour <em>vpr</em> and
+    <em>g1</em> against the banked 16.46 % / 18.14 % and 9.78 % / 22.31 %, and against their 3.92 % and
+    6.20 % gates; the ITER coefficients against the banked 2.63 / 0.90 / 2.08 / 1.98 %; the
+    clipped-to-contour and clipped-to-TORAX agreement beside the contour-to-TORAX 0.16 % to 6.20 %
+    baseline, so the outlier question is answered directly; and an explicit statement of whether the
+    global-surface curve closes the gap the local reconstructions opened. A result showing the straight
+    chord's compensating errors still beat an exactly integrated global curve is a reportable negative
+    that closes the curvature question for good, and would be worth more than a third local attempt.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>

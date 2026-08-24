@@ -1,9 +1,10 @@
 """Fixed-shape coefficient carriers for exact-output fixed-point maps.
 
-The carrier compresses an iterate; it is not a physics field.  A caller expands
-the carrier, evaluates its ordinary exact-output map, and projects that output
-back to the coefficient space.  Residuals and admissibility always use the
-exact output and the expanded iterate, never the projected coefficients.
+The carrier compresses an iterate; it is not a physics field.  A caller may
+subtract a known external field so coefficients represent only the plasma
+flux, then restore that field before evaluating the ordinary exact-output map.
+Residuals and admissibility always use total-field values, never projected
+coefficients.
 """
 
 from __future__ import annotations
@@ -171,16 +172,33 @@ def exact_fixed_point_map(exact_map: Callable[[jax.Array], jax.Array]):
     return mapped
 
 
+def _known_external(external, carrier: CoefficientCarrier) -> jax.Array:
+    """Return a validated known field, or zeros for an unshifted carrier."""
+    if external is None:
+        return jnp.zeros(carrier.exact_size, dtype=carrier.expansion.dtype)
+    values = jnp.asarray(external)
+    if values.shape != (carrier.exact_size,):
+        raise ValueError(f"external must have shape ({carrier.exact_size},)")
+    return values
+
+
 def coefficient_fixed_point_map(
-    exact_map: Callable[[jax.Array], jax.Array], carrier: CoefficientCarrier
+    exact_map: Callable[[jax.Array], jax.Array],
+    carrier: CoefficientCarrier,
+    *,
+    external=None,
 ):
-    """Return the projected map while retaining an exact-output evaluator."""
+    """Return a projected plasma-only map and its exact total-field output."""
+    known_external = _known_external(external, carrier)
+
+    def exact_state(coefficients):
+        return known_external + carrier.expand(coefficients)
 
     def mapped(coefficients):
-        return carrier.project(exact_map(carrier.expand(coefficients)))
+        return carrier.project(exact_map(exact_state(coefficients)) - known_external)
 
     def exact_output(coefficients):
-        return exact_map(carrier.expand(coefficients))
+        return exact_map(exact_state(coefficients))
 
     return mapped, exact_output
 
@@ -190,6 +208,7 @@ def select_fixed_point_map(
     exact_map: Callable[[jax.Array], jax.Array],
     *,
     carrier: CoefficientCarrier | None = None,
+    external=None,
 ):
     """Select the exact-value or coefficient state explicitly at the call site."""
     selected = IterateRoute(route)
@@ -197,7 +216,7 @@ def select_fixed_point_map(
         return exact_fixed_point_map(exact_map)
     if carrier is None:
         raise ValueError("the coefficient route requires a carrier")
-    return coefficient_fixed_point_map(exact_map, carrier)[0]
+    return coefficient_fixed_point_map(exact_map, carrier, external=external)[0]
 
 
 def dense_newton(
@@ -208,6 +227,7 @@ def dense_newton(
     steps: int,
     admissible: Callable[[jax.Array], jax.Array | bool] | None = None,
     factors: tuple[float, ...] = (1.0, 0.5, 0.25, 0.125, 0.0625),
+    external=None,
 ) -> DenseNewtonResult:
     """Drive coefficient residuals with dense direct steps and exact admission."""
     from time import perf_counter
@@ -223,6 +243,7 @@ def dense_newton(
         raise ValueError(
             f"initial_coefficients must have shape ({carrier.coefficient_count},)"
         )
+    known_external = _known_external(external, carrier)
     qualifies = (
         admissible
         if admissible is not None
@@ -230,11 +251,11 @@ def dense_newton(
     )
 
     def coefficient_residual(value):
-        exact = exact_map(carrier.expand(value))
-        return carrier.project(exact) - value
+        exact = exact_map(known_external + carrier.expand(value))
+        return carrier.project(exact - known_external) - value
 
     def evaluated(value):
-        state = carrier.expand(value)
+        state = known_external + carrier.expand(value)
         output = exact_map(state)
         return state, output, relative_exact_residual(output, state)
 

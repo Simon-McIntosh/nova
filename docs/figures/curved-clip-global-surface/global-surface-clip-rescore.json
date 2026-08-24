@@ -1,0 +1,165 @@
+{
+  "capacity_receipt": {
+    "passes": true,
+    "unwidened_capacity": 8
+  },
+  "machines": {
+    "ITER": {
+      "clipped_vertices": {
+        "capacity": 8,
+        "capacity_is_unwidened": true,
+        "required": 5,
+        "required_within_capacity": true,
+        "unwidened_capacity": 8,
+        "used": 5,
+        "used_no_greater_than_required": true
+      },
+      "fields": {
+        "g0_face": {
+          "banked_clipped_to_contour_percent": {
+            "local_bicubic": 1.03,
+            "straight_chord": 0.9
+          },
+          "pairings_percent": {
+            "clipped_to_contour": 1.0539726519999546,
+            "clipped_to_torax": 0.8915209368583101,
+            "contour_to_torax": 0.22995951515726865
+          }
+        },
+        "g1_face": {
+          "banked_clipped_to_contour_percent": {
+            "local_bicubic": 2.36,
+            "straight_chord": 2.08
+          },
+          "pairings_percent": {
+            "clipped_to_contour": 2.3289576116986934,
+            "clipped_to_torax": 2.024575120042654,
+            "contour_to_torax": 0.3944402871470254
+          }
+        },
+        "g2_face": {
+          "banked_clipped_to_contour_percent": {
+            "local_bicubic": 2.31,
+            "straight_chord": 1.98
+          },
+          "pairings_percent": {
+            "clipped_to_contour": 2.3862472866368876,
+            "clipped_to_torax": 1.8866356854785948,
+            "contour_to_torax": 0.6672889997275735
+          }
+        },
+        "g2g3_over_rhon_face": {
+          "banked_clipped_to_contour_percent": {
+            "local_bicubic": 2.96,
+            "straight_chord": 2.63
+          },
+          "pairings_percent": {
+            "clipped_to_contour": 3.110311777523843,
+            "clipped_to_torax": 2.6252185347576336,
+            "contour_to_torax": 0.7793707635754462
+          }
+        }
+      },
+      "source": {
+        "cocos": 17,
+        "filename": "iterhybrid_cocos17.eqdsk"
+      }
+    },
+    "STEP": {
+      "clipped_vertices": {
+        "capacity": 8,
+        "capacity_is_unwidened": true,
+        "required": 5,
+        "required_within_capacity": true,
+        "unwidened_capacity": 8,
+        "used": 5,
+        "used_no_greater_than_required": true
+      },
+      "fields": {
+        "g1_face": {
+          "banked_clipped_to_contour_percent": {
+            "local_bicubic": 22.31,
+            "straight_chord": 9.78
+          },
+          "clipped_to_contour_passes_gate": true,
+          "contour_to_torax_gate_percent": 6.2,
+          "pairings_percent": {
+            "clipped_to_contour": 3.8848139324140116,
+            "clipped_to_torax": 8.09616706546742,
+            "contour_to_torax": 6.220674402579855
+          }
+        },
+        "vpr_face": {
+          "banked_clipped_to_contour_percent": {
+            "local_bicubic": 18.14,
+            "straight_chord": 16.46
+          },
+          "clipped_to_contour_passes_gate": true,
+          "contour_to_torax_gate_percent": 3.92,
+          "pairings_percent": {
+            "clipped_to_contour": 2.3493687190333064,
+            "clipped_to_torax": 1.841215442157503,
+            "contour_to_torax": 3.93215431967738
+          }
+        }
+      },
+      "source": {
+        "cocos": 1,
+        "filename": "STEP_SPP_001_ECHD_ftop.eqdsk"
+      }
+    }
+  },
+  "measurement": "global_surface_clip_three_way_rescore",
+  "method": {
+    "attribution": "The historical banks are quoted independently. Causal attribution across 47808904..current is declined because more than the curve producer changed in that tree range.",
+    "banked_routes": {
+      "local_bicubic": "47808904",
+      "straight_chord": "47808904 first parent"
+    },
+    "current_route": "shipped global tensor-spline surface clip",
+    "pairing_definition": "sup(abs(actual[2:] - expected[2:])) / max(sup(abs(expected[2:])), 1e-12)",
+    "pairings_composed_directly": true,
+    "percentage_subtraction_used": false
+  },
+  "provenance": {
+    "benchmark_sha256": "ef77cf651e2986da8c2af4796d34c6a87ed2b2820c19cd6b75844fa7596b9e36",
+    "flux_surface_extraction_sha256": "81fbbd6fa38dbe9c1516146b5eb829a94c2a95c2fc6f7812477a2b73153d0dc2",
+    "jax": "0.11.0",
+    "jax_backend": "cpu",
+    "measured_at_utc": "2026-08-24T16:13:35.358261+00:00",
+    "python": "3.14.2",
+    "reference_helpers_sha256": "2add08a6589fb5d7c6f87f28fde9523b2b079577ef2fb736c6ae752f2cfdc552",
+    "source_revision": "f1ecf6afb5fbe9a3268c9698e1b216dd39f603fc",
+    "tensor_spline_sha256": "5a6ce392a161e5834000a0cd1c4b7434a93908ca69014139d66abd74be5c793f"
+  },
+  "route_verification": {
+    "calls": {
+      "TensorBSpline.cell_coefficients": 4,
+      "_clipped_surface_geometry": 0,
+      "_surface_clips": 2,
+      "_tensor_bicubic_coefficients": 0,
+      "fit_tensor_spline": 4
+    },
+    "checks": {
+      "cell_coefficients_reached": true,
+      "clipped_surface_geometry_not_reached": true,
+      "fit_tensor_spline_reached": true,
+      "surface_clips_reached": true,
+      "tensor_bicubic_coefficients_not_reached": true
+    },
+    "expected_calls": {
+      "TensorBSpline.cell_coefficients": 4,
+      "_clipped_surface_geometry": 0,
+      "_surface_clips": 2,
+      "_tensor_bicubic_coefficients": 0,
+      "fit_tensor_spline": 4
+    },
+    "passes": true
+  },
+  "schema_version": 1,
+  "verdict": {
+    "measurement_valid": true,
+    "statement": "Yes. The shipped global-surface clip puts STEP vpr_face at 2.349369% against 3.92% and g1_face at 3.884814% against 6.20%; both direct clipped-to-contour scores are below the contour-to-TORAX gates.",
+    "step_gap_closed": true
+  }
+}

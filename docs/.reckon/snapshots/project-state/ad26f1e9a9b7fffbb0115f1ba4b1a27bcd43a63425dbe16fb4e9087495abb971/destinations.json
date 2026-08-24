@@ -1,0 +1,130 @@
+[
+  {
+    "type": "blocker",
+    "id": "B1",
+    "path": "blockers/B1.html",
+    "existed": false
+  },
+  {
+    "type": "blocker",
+    "id": "B2",
+    "path": "blockers/B2.html",
+    "existed": false
+  },
+  {
+    "type": "blocker",
+    "id": "B3",
+    "path": "blockers/B3.html",
+    "existed": false
+  },
+  {
+    "type": "blocker",
+    "id": "B4",
+    "path": "blockers/B4.html",
+    "existed": false
+  },
+  {
+    "type": "project",
+    "id": "project",
+    "path": "state/nova/project.json",
+    "existed": true,
+    "snapshot": ".reckon/snapshots/project-state/ad26f1e9a9b7fffbb0115f1ba4b1a27bcd43a63425dbe16fb4e9087495abb971/destinations/state/nova/project.json",
+    "sha256": "b35779b2e9d0f5c8682e65b4e6437486f38a98a7364e7735fb9effbc79f18acc"
+  },
+  {
+    "type": "sprint",
+    "id": "S1",
+    "path": "sprints/S1.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S10",
+    "path": "sprints/S10.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S11",
+    "path": "sprints/S11.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S12",
+    "path": "sprints/S12.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S13",
+    "path": "sprints/S13.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S14",
+    "path": "sprints/S14.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S15",
+    "path": "sprints/S15.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S2",
+    "path": "sprints/S2.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S3",
+    "path": "sprints/S3.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S4",
+    "path": "sprints/S4.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S5",
+    "path": "sprints/S5.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S6",
+    "path": "sprints/S6.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S7",
+    "path": "sprints/S7.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S8",
+    "path": "sprints/S8.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S9",
+    "path": "sprints/S9.html",
+    "existed": false
+  },
+  {
+    "type": "timeline",
+    "id": "timeline",
+    "path": "state/nova/timeline.html",
+    "existed": false
+  }
+]

@@ -1,0 +1,954 @@
+{
+  "updated": "2026-08-24T10:58:11",
+  "project": "nova",
+  "doc": "index",
+  "data": {
+    "sprints": [
+      {
+        "id": "S1",
+        "status": "done",
+        "theme": "Converge Nova 2.0",
+        "items": [
+          {
+            "slug": "nova-spine-refactor",
+            "why_now": "All migration work depends on the final API/branch convergence.",
+            "done_when": "Ambix adoption contract is frozen, assembly extracted, plan/code branches converge and the main suite passes.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
+          },
+          {
+            "slug": "polybow-arc-section",
+            "why_now": "The pin refit exposed a real correctness item: XLA CPU codegen breaks a root/difference cancellation in the elliptic descent that GPU-less serving nodes compile through; the hollowness normalisation still folds in opposite directions across two layers. Stabilise before downstream ports consume the arc element.",
+            "done_when": "Descent swept and codegen-pinned on both backends; traced-parity item re-triaged; hollowness one direction with both layers agreeing; disc/ellipse corner-count decision locked on measurement. GPU wall-clock re-quote and arc banding may roll to S2.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
+          },
+          {
+            "slug": "coil-conductor-fidelity",
+            "why_now": "One rung from shipped: the feeder run is 46% of PF1's residual and costs seconds per coil to measure; the mesh-default recommendation unblocks the reconstruction lane's convergence discipline.",
+            "done_when": "Feeder rung tabulated for all twelve coils with the circuit boundary established or explicitly undetermined; reconstruction mesh default recommended with its convergence ladder; plan shipped.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
+          },
+          {
+            "slug": "nova-heritage-recovery",
+            "why_now": "The repair is merged but its evidence record is missing; reconstruction is cheap and the plan is at 0.7 with one followup between it and shipped.",
+            "done_when": "Damage inventory, FrequencyResponse oracle check, hermeticity proof and test counts recorded; galleries import-checked; salvage register written; plan shipped.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {}
+            }
+          }
+        ],
+        "starts": "2026-07-29",
+        "ends": "2026-07-29",
+        "description": "Closed 2026-07-29. All four items shipped: trunk convergence (nova-spine-refactor), CPU/GPU arc correctness with measured 64-corner default and two performance refinements deferred to S2 (polybow-arc-section), 0.06 m conductor reference mesh plus all twelve feeder decompositions with circuit boundary explicitly undetermined (coil-conductor-fidelity), and a fully evidenced offline heritage recovery with import-checked galleries and inverse-design salvage register (nova-heritage-recovery). Final sun_debug gate: 3,841 passed, 118 resource-gated skips in 647.00 s. Closeout records live under docs/archive/ and plan artifacts."
+      },
+      {
+        "id": "S2",
+        "status": "done",
+        "theme": "Complete the axisymmetric physics spine and MAST machine data",
+        "items": [
+          {
+            "slug": "nova-3d-native",
+            "why_now": "MAST passive and non-axisymmetric work needs the exact native 3D coupling substrate.",
+            "done_when": "Exact flux-coupling operators and remaining numerical gates ship with evidence.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
+          }
+        ],
+        "starts": "2026-08-06",
+        "ends": "2026-08-04",
+        "description": "Closed 2026-08-04; implementation 95.5% at close. All four item done_when gates met: nova-3d-native shipped (S1 carryover); the MAST registry gained five-state evidence provenance, a seeded then vacuum-refined content-addressed DD 4.1.1 artifact (fitted turns for 11 of 13 coils, held-out variance 0.9889; electrical drive map covering all 21 driven columns), and DD round trips with provenance (nova ac42194c/ee107ed4/28872e4f); the Ambix axisymmetric cutover landed identity seams, a hardened frozen six-shot gate (15 registered tolerances incl. a new raw-magnetics residual; stamp mislabelling fixed), the artifact reader, and PASSES 15/15 under the owner-adjudicated source-cutover budget with every reproduction metric improved (imas-ambix cfa2d2c..ae728ad); zero-import donors retired with census proof. The three plans that executed here (physics-spine-adoption, mast-catalog-geometry-recovery, mast-machine-description) moved to S5 with their follow-on work: registry digest-change corrections, the vacuum-floor calibration ladder, solve-input ingest maps, and deep-donor importer migration. Records: docs/research/mast-provisional-artifact-landed.html and docs/research/mast-cutover-parity-evidence.html."
+      },
+      {
+        "id": "S5",
+        "status": "done",
+        "theme": "Recover the vacuum floor",
+        "items": [
+          {
+            "slug": "mast-catalog-geometry-recovery",
+            "why_now": "Two proven registry defects (obr probe axes radial-not-\u03c0/2; transposed case-plate extents) corrupt sensor projection and case inductance in every downstream fit; the correction is one deliberate physical-digest change and the whole floor ladder consumes it.",
+            "done_when": "Both corrections landed as one digest change with the old\u2192new mapping test-pinned, artifact republished, nova and ambix suites green at the new pin; plan shipped.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "context": "extended",
+                "tool_autonomy": "autonomous",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
+          },
+          {
+            "slug": "mast-vacuum-floor-recovery",
+            "why_now": "Both machine descriptions misfit the measured magnetics at ~0.74\u03c3 \u2014 static coil/sensor calibration error that bounds every reconstruction the GPU catalog will produce; the archive contains the designed calibration experiments (sustained single-coil pulses, the eight-vacuum-shot matrix) to remove it.",
+            "done_when": "Artifact path \u2264 incumbent absolute residual on both hard-read arms scored under the untouched same-source budget; per-channel noise envelope quantified with the remaining gap decomposed; all six S2 physical gaps re-dispositioned; plan shipped.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "context": "extended",
+                "tool_autonomy": "autonomous",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
+          },
+          {
+            "slug": "mast-machine-description",
+            "why_now": "The solve-input ingest maps are the last open stage, and the floor-recovered calibration flows through the same nova.io path the catalog solve consumes.",
+            "done_when": "A MAST shot's solve inputs load through nova.io against the refined artifact with round-trip tests passing on a pilot set spanning both field polarities; plan shipped.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
+          },
+          {
+            "slug": "physics-spine-adoption",
+            "why_now": "With the cutover gate passed, the deep-donor importer migration (geometry 77, operator 71 external importers) is unblocked and each floor-ladder pin bump is a natural migration checkpoint.",
+            "done_when": "Importer tranches migrated leaf-first with per-tranche gates under the registered budget classes; every retirement carries zero-import proof; plan shipped or the surviving-donor ladder explicitly re-scoped.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
+          }
+        ],
+        "starts": "2026-08-05",
+        "ends": "2026-08-05",
+        "description": "Closed 2026-08-05; implementation 99.2% at close; 3 of 4 plans shipped. Item accounting, without gloss: mast-catalog-geometry-recovery SHIPPED (both registry defects fixed at the builder root in one digest change 76cf833561e602a7 -> ca06c8f64481114f; probe axes upgraded fitted -> measured-in-source; coupled ambix pin bump green). mast-machine-description SHIPPED (139 solve-input rows through nova.io; 7-shot two-polarity pilot round-trips exact; TF summary rides as a triggered followup). physics-spine-adoption item complete via its explicit re-scope clause: the donor ladder has no migratable rung (measured census: six of eight donors are physics kernels; zero product route to the artifact path); residues shipped; the artifact-wiring design rung is the plan's open followup. mast-vacuum-floor-recovery SHIPPED on the honest-failure branch: the <=-incumbent clause of this item's done_when WAS NOT MET (artifact - incumbent = +0.023 sigma both arms; SAME_SOURCE fails; SOURCE_CUTOVER passes 15/15; the qualified status stands); everything else delivered: 387 uT noise envelope quantified (residual 91-253x per-channel floors), gap decomposed per channel (obr17 the largest ABSOLUTE share on both arms; the +0.023 is an outboard-vertical trade at obv06/obv14), all six S2 gaps re-dispositioned. Major discoveries: ten turn counts are PUBLISHED archive integers; 19 channels carry discrete unnormalised acquisition scales (1/2, 1/sqrt2, sqrt2, 2), now divided out on the read path - closing the P5-lower 4.5% shift at 0.37% and falsifying the campaign-geometry term; turn counts are operator-inert (drive weight supersedes); the gate gained a committed artifact arm reproducing the out-of-tree stamps to float equality, plus a committed per-channel decomposition. Records: docs/research/mast-registry-corrections-landed, mast-solve-input-maps-landed, mast-calibration-cohort-landed, mast-winding-lattice-landed, mast-sensor-adjudication-landed, mast-block-scale-normalisation-landed, mast-passive-calibration-landed, mast-vacuum-floor-closure-landed (all .html)."
+      },
+      {
+        "id": "S4",
+        "status": "done",
+        "theme": "Relocated to S8 - H200 production catalog",
+        "items": [],
+        "starts": "2026-09-05",
+        "ends": "2026-09-19",
+        "description": "Relocated: the H200 catalog item moved to S8 so the sprint sequence respects the spine-proof gate (S7 spine parity and the S6 corrected-read guarantee precede the production run). This slot intentionally holds no items."
+      },
+      {
+        "id": "S6",
+        "status": "done",
+        "theme": "Close the P4/P5 misfit source and promote the calibration machinery",
+        "items": [
+          {
+            "slug": "mast-flux-loop-calibration",
+            "why_now": "Rank: 26 loop channels in genuine Wb are fittable against the exact vacuum flux; the fit exists but discards its result.",
+            "done_when": "Per-loop gains promoted or excluded with cause; P4 loop positions reconciled; inversion identifiability delta reported; gate decision packet delivered.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "mast-misfit-toroidal-harmonics",
+            "why_now": "Filament maps explain 43-60% and disagree on location; the source-free harmonic map is the honest contour map and sharper localizer.",
+            "done_when": "Synthetic recovery validated; per-group misfit flux maps with confidence bands; source fits ranked; non-axisymmetric residue quantified.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "mast-p4p5-circuit-provenance",
+            "why_now": "The description's own 17.3 mm / 3% P4 asymmetry is unexplained at the coil the misfit localises to; the symmetry test is the cheapest decisive measurement.",
+            "done_when": "Symmetry-test verdict with explained fractions; P4 geometry and loop provenance adjudicated; pack-total channels unblocked with validation green.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "diagnostic-correction-schema",
+            "why_now": "Corrections are pulse-range functions (19 stepping channels; obr05 flips; obv03 steps mid-life) - constants cannot represent them.",
+            "done_when": "Schema + generated models landed; MAST instance reproduces read-path behaviour to float equality; in-code constants deleted.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "nova-calibrate-package",
+            "why_now": "The calibration ladder is portable physics living as cache scripts and mast_-prefixed modules; the next machine should cost an adapter, not a re-derivation.",
+            "done_when": "nova/calibrate landed with synthetic-truth unit tests green; banked results reproduce through the package; constants served from schema documents.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "vacuum-signature-extraction",
+            "why_now": "Every pulse carries vacuum windows; offsets, integrator drift and closure are extractable archive-wide, turning 17111 shots into a calibration instrument.",
+            "done_when": "Window classifier + instrument-term extraction tested; MAST sweep banked with drift series and transition catalogue; portability demonstrated on a non-MAST source.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "coil-geometry-inversion",
+            "why_now": "Geometry Jacobians are verified exact through the traced kernel (jacfwd vs FD at the FD floor); the Kirk copper-in-case question is now a gradient optimisation.",
+            "done_when": "Kernel family refactored with autograd regressions; identifiability spectrum published; synthetic recovery ladder banked; MAST P4/P5 solve on both problem classes with verdict recorded.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "mast-corrected-read-layer",
+            "why_now": "The correction engine and document are shipped but the guarantee is not: only acquisition_scale is wired, application is opt-out, and 9+ direct zarr doors bypass the layer; the GPU catalog's ingest must inherit corrected reads by construction.",
+            "done_when": "Every sensor read passes through the read_shot_waveforms door with a guard test enforcing it; the full promoted chain applies in stage order with the gains' vacuum-floor shift banked; the acquisition sweep promotes into the YAML document; raw access exists only as the explicit named object.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          }
+        ],
+        "description": "Two arms. Source closure: recover the flux loops (per-loop gains; the 2-pi convention is measured), build toroidal-harmonic contour maps of the surviving misfit, and resolve the P4/P5 provenance candidates (the description's own 17.3 mm / 3% member asymmetry first). Infrastructure: promote the diagnostic-calibration ladder to a unit-tested machine-agnostic nova/calibrate package, give every correction a versioned pulse-range-scoped schema (LinkML candidate), harvest the vacuum windows every pulse carries (offsets, integrator drift, closure) across the whole archive, and solve coil positions and shapes from vacuum measurements by autodiff through the traced Green's kernels (geometry Jacobians verified exact 2026-08-07).",
+        "summary": "Closed 2026-08-16 at 8/8 plans shipped, 100 percent implementation, empty ready set, no wiring findings. Source-closure arm: no 2-pi flux convention exists and 18 loops entered as published, lifting current-space rank 10/13 to 13/13; static P4/P5 geometry excluded twice by independent functionals (bounded negative, no registry correction); the circuit-basis test then reframed the anomaly table - P2 collapses to one link-board freedom (outer central ratio 1.4772 left for the 12:8 ampere-turn adjudication), P3 and P6 stay real in every basis, and all 13 P4-lower survivor shots are lower-only member surveys whose candidates now include the survey supply's own cabling. Harmonic maps published as gridded solve targets; residue recorded as a lower bound pending the saddle loops owned by S3. Infrastructure arm: nova/calibrate complete at nine capabilities; corrections document at 160 records under set_version 1.1.0 with honest recorded-versus-promoted pins; registry cut over to 44 unique loop positions (join 39 to 43, physical digest b55c5bb005a2cb67) with the OCI republication retired as describing a channel that does not exist; the 17,111-pulse archive swept into a million banked instrument-term fits with the transition question closed on its measured structural bound; portability demonstrated on TCV 77549 with unchanged kernels. Feeds S7 (spine-efit-parity via the corrected read layer) and S8 (mast-catalog-gpu-solve). Machine-description packaging moves to imas-ambix S22 with nova S11 retiring the bespoke layer behind an equivalence gate."
+      },
+      {
+        "id": "S7",
+        "status": "done",
+        "theme": "Prove the physics spine against EFIT",
+        "items": [
+          {
+            "slug": "spine-boundary-accelerator",
+            "why_now": "The boundary-push kernel is code-identical in nova but its behaviour pins, both accelerators and the profile-damping guard never ported; the batched corpus objective stalled in ambix on exactly this work and nova owns all physics solves.",
+            "done_when": "Termination/continuity/Lipschitz/no-flip pins green; NK+Anderson promoted with both decisions locked on a re-measured ladder; three read-wall removals equivalence-checked with speedup recorded; hex stencil generalisation tested.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "spine-efit-parity",
+            "why_now": "No assembled-chain demonstration exists: measured magnetics in, GS-balanced flux maps out, scored against firewalled EFIT \u2014 the proof required before the ML-assisted step and before the GPU catalog.",
+            "done_when": "Frozen six-shot gate plus pre-registered held-out extension scored against pre-registered tolerances; CurrentDiffusion flux-ledger consistency recorded; verdict written and the GPU catalog unblocked or explicitly held.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "nova-jax-hygiene",
+            "why_now": "The boundary and accelerator work lands into the same nova/jax surface the audit found cluttered; the sweep (dead copies incl. the stale fieldnull/plasmaloc twins, centralized jax config, misfiled numpy modules) is cheap and clears the ground first.",
+            "done_when": "Dead files deleted with zero-importer proof; one helper owns the jax globals; nova/jax holds only JAX code; duplicate math single-homed; divergence parity tests green.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "nova-jax-dissolution",
+            "why_now": "The hygiene sweep clears the ground but leaves the organising fault: nova/jax is the package's only technology-organised directory and holds a subset of the traced code, which is what let the numpy modules drift in. Two owner decisions are already locked (one file per concept, traced path default), so the pattern conversion can start as soon as the sweep closes.",
+            "done_when": "Entry-point naming locked; the biot operator pair converted end-to-end as the reviewed pattern with parity green and consumers rewired; remaining pairs merged and unpaired modules rehomed; the directory reduced to its two library-support modules.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "biot-element-conditioning",
+            "why_now": "Three accuracy losses are already measured and one raises a warning in ordinary runs: the K-E bracket loses digits at small k^2 on BOTH special-function routes, so the arrangement owns it rather than the library; the B_R bracket forms inf+(-inf) at the coincident limit and masks the NaN; and a 4.3e-4 self-inductance residual common to every source route is the target rule, not any element. The arc reduction already had this treatment; nothing else has. Sequenced after the directory reorg so the audit sweeps files in their final homes.",
+            "done_when": "The two seeded bracket faults fixed by rearrangement with tests pinning the regimes that exposed them and the greens warning gone; every element in the Solve registry carries a recorded worst-regime accuracy figure against an independent arbiter with a test holding it; no element computes a NaN it then selects away; the source-route default and the target-side integration rule both locked on the audit's numbers.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "flux-function-forward-equilibrium",
+            "why_now": "Transport and Ambix can now own profile evolution, allowing Nova to prove a prescribed-source free-boundary solve that is force-balanced without recreating profile regression.",
+            "done_when": "ForwardProfile consumes absolute typed sources, exposes explicit current closure and integral moments, solves static/rotation/topology-qualified SOL equilibria, and banks field/force/current plus CPU/GPU parity receipts.",
+            "status": "active",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "context": "extended",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
+          },
+          {
+            "slug": "nova-runtime-dependencies",
+            "why_now": "The equilibrium package imports JAX unconditionally in sixteen modules while the extra that would declare it pins the CUDA build, so the plain runtime was duplicated inside the test extra and a worker lost a cycle to the resulting environment gap.",
+            "done_when": "The jax extra carries the portable runtime, a gpu extra carries the CUDA build, test resolves it transitively with no second pin, and both compositions have their resolved distributions counted.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "nova-test-lane-health",
+            "why_now": "Two full-lane attempts parked at 62 and 76 percent with the main thread stuck starting a thread in the catalog scan, so no monolithic pass count can be obtained and every full-suite-green claim in the repo is sharded, partial, or stale.",
+            "done_when": "The thread-starvation mechanism is named, a single-worker scan no longer needs to start a thread, and one monolithic run reaches a final summary with counts banked.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "efit-map-inversion",
+            "why_now": "The parity chain fitted magnetics instead of being given the reference's sources, so nothing yet proves nova can even read a stored EFIT equilibrium correctly; every quantity needed has a known-good answer in the file, and the LCFS-masked prototype already closes plasma current to -2.7e-04 against -42.9% unmasked.",
+            "done_when": "Store contents and conventions declared with a COCOS decision locked; topology, axis, LCFS and x-point extracted from the given flux map and scored against the stored geometry per frozen shot; current density and flux functions recovered on the stored-LCFS interior with plasma-current closure and per-bin agreement against stored profiles; the additional-term question separated into physical or numerical by measurement.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "efit-flux-decomposition",
+            "why_now": "The stored-LCFS mask quantified 10.08 MA of absolute current outside a 0.925 MA plasma, and a superseded unmasked probe put the external term at 1.27 and the residual at 1.22 of the flux span; a free-boundary forward solve takes the external field as its boundary condition, so this either validates that field or names the vacuum-field defect.",
+            "done_when": "The plasma-coupling round trip meets its 1e-6 flux-span bound or the operator defect is named; the external term is reconstructed from the experimental conductor currents through the existing described-response path; the residual is reported unbounded as sup-norm and RMS fractions; delta_star of the residual is quantified and localised against the named conductors with interpolation error reported separately; a verdict states whether the external field can serve as a free-boundary boundary condition.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "equilibrium-metric-parity",
+            "why_now": "Given one flux map two codes should compute the same q, volumes and flux-surface averages, and that comparison isolates the derived-quantity chain with no solver in the loop. It also collapses an ambiguity in the forward gate, where an I_p or l_i disagreement could be either a different field or a different way of measuring the same field. Nova already carries fifteen profile columns and six scalars in FluxSurfaceGeometry, validated only against its own analytic fixtures, so this is the first time an outside code checks its conventions - and the same record is the geometry input for training one-dimensional transport equations in the competition entry.",
+            "done_when": "Every derived quantity the reference store carries is enumerated with units, shape and flux coordinate and paired against nova's record or marked absent-in-nova or unpairable with a reason; each paired quantity compared from the SAME stored map on the stored-LCFS interior and reported as a signed relative difference profile with median and interquartile range per frozen shot, separating convention artefacts from genuine numerical disagreement; whatever the reference computes and nova does not is implemented into the record with a convention-pinned definition, a tolerance and a test, cross-checked against analytic equilibria and internal consistency rather than against the reference alone.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "context": "extended",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "plasma-edge-current-representation",
+            "status": "active",
+            "why_now": "The edge-current attribution measured the centroid-inside source rule at four to eight times the whole composition error with boundary cells at 100% per-cell error invisible to net-current closure, and the method ladder selected fixed linear-moment blocks over a conservative clip at 1.24e-4 of span with zero per-step Green evaluations; efit-forward-parity consumes this representation, and H-mode current gradients concentrate in exactly the cells the separatrix crosses.",
+            "done_when": "Nine exact Part V blocks (flux and both field components, each with radial and vertical moment companions) landed TDD with closed-form pins; any-intersection cell inclusion and machine-precision patch-area conservation against the same-crossing LCFS shoelace area asserted in production tests; interior degree-3 stencil and gradient moments wired into the moment vectors; coarse-mesh steep-edge-gradient demonstration banked for flux and both fields against converged references with the production rule beside it, retracing once with a moving separatrix.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
+          },
+          {
+            "slug": "sol-current-demonstration",
+            "why_now": "Owner commission 2026-08-16: with the linear edge-current representation wired through the solve, a short proof of principle shows SOL current operating - finite continuous j across the separatrix on an Eich-scaled width, maintained along the common SOL to the divertor target, zero in the private region - before any EFIT-facing work consumes the SOL machinery.",
+            "done_when": "Two forward solutions at identical net plasma current (confined control vs SOL-carrying) with FSA j profiles and matched-level contour overlays banked; the psi_N support-limit ladder (1.05, 1.10, ...) measured; private-flux-zero, net-current-identity and strike-point-continuity assertions green.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "moment-map-root-finding",
+            "why_now": "Owner commission 2026-08-16: the moment representation is validated at cell level and value-continuous, yet the free-boundary solve cycles on derivative kinks - the whole forward chain (held routing merge, SOL demonstration, fcoil_c primary, efit-forward-parity) waits on this convergence question, and the owner requires the kink UNDERSTOOD before it is fixed.",
+            "done_when": "The kink census names the dominant surface class along real solver trajectories with the limited-diverted question answered explicitly; kink-aware root finding is measured against the unchanged 1e-6 residual and physics gates, with C1 smoothing of the convicted surface held as the owner-gated alternative; the analytic-validation verdict and the held-lineage merge posture are adjudicated on the outcome.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
+          },
+          {
+            "slug": "boundary-ring-source-completion",
+            "why_now": "The moment-map exclusion chain ended in a localized root cause: 96 boundary-ring supports lacking a degree-3 stencil carry 84% of the 10.9 Wb analytic-seed flux shift, with a falsifiable one-step repair prediction. The whole held forward chain (lineage merge, SOL demonstration, EFIT parity) waits on this analytic verdict.",
+            "done_when": "The ring-quadrature prediction gate is adjudicated on the banked coarse fixture; the production ring evaluation lands on the lineage with the interior bitwise-preserved and all pins green at zero smoothing; the analytic-seed defect beats legacy on both fixtures; the fine continuation from fraction 0 either reaches fraction 1 at 1e-6 with full physics gates green and the lineage merges, or the bracket is banked with its surface class named for owner adjudication.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "solovev-exact-recovery",
+            "why_now": "The owner gated all further forward-model progress on the Solov'ev agreement gates; the recovery ran in S7 and one packaging node remains between it and shipped.",
+            "done_when": "Registered gate harness green two-tier (reduced closed-form fixture always-on, warm-cached fixtures slow-lane) with the owner-locked bounds; the accuracy-cost operating point recorded; plan shipped.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          }
+        ],
+        "starts": "2026-08-10",
+        "ends": "2026-08-28",
+        "description": "Make the differentiable boundary push the pinned, accelerated core of the spine, then prove the assembled chain \u2014 corrected reads, moment seed, accelerated ReconstructProfile, topology labels, CurrentDiffusion flux-ledger consistency \u2014 reconstructs MAST equilibria comparably to the firewalled EFIT referee. The parity verdict is the gate the GPU catalog stands on: a catalog of fast wrong equilibria is worthless. Carries the capability recovered from the superseded ambix batched-newton-accelerator plan (exact-tangent NK 62% conversion vs Picard 10/19%; read-wall removals; coupled-KKT profile state) into nova, which owns all physics solves.",
+        "summary": "Closed 2026-08-21 at 16/16 plans shipped, 100 percent implementation, empty ready set, no wiring findings. The spine is proven against its references: the Solov'ev closed-form oracle stands with the discrete map exact at the analytic state (4.6e-15 Wb) and the recovery gates locked at round-off floors in a two-tier registered harness (reduced 136-cell always-on fixture, warm-cached carriers slow-lane, all 14 bounds byte-for-value); the faithful moment route, exact Part V kernels and hexagon sections are production defaults. The EFIT flux decomposition delivered both verdicts on the native 65x65 grid across 18 slices: the external field is FIT as a free-boundary boundary condition (fcoil_c cancellation 95.1-98.2 percent under locked convergence-order criteria) and the P4-lower localisation RETRACTS (16/18 residual peaks in the solenoid conductor), reported into the toroidal-harmonics verdict as a measured cross-instrument disagreement. The SOL current demonstration shipped: two converged solutions at exactly identical net current prove finite continuous j from the separatrix to the divertor target on an Eich-scaled closure with zero private-flux current and a machine-precision four-crossing saddle partition. The DINA reference's flux functions were banked by two routes (affine map extraction beside declared profiles_1d, unreconciled; rotation bounded out at 99.77 percent two-function variance explained; the stored map consistent with two-function force balance at 4.78 percent weighted residual). The first forward parity slice proved the prescribed-anchor inputs and wiring sound after a convicted gradient-sign repair, and measured the standard Newton path escaping the plasma basin to the vacuum root - basin reachability, the failure mode dual-basin-solve was commissioned for, so efit-forward-parity relocated to S8 to ride beside that machinery. Feeds S8 (dual-basin-solve via the locked recovery gates; efit-forward-parity; mast-catalog-gpu-solve) and S9/S10 (the forward-transport and DIII-D lanes via flux-function-forward-equilibrium)."
+      },
+      {
+        "id": "S10",
+        "status": "planned",
+        "theme": "Second-machine forwards \u2014 DIII-D onboarding and the response-kernel library (Sophelio challenge)",
+        "items": [
+          {
+            "slug": "diiid-forward-onboarding",
+            "status": "active",
+            "why_now": "Blocks the imas-ambix entry plan and carries both entry kill gates; the first true second-machine onboarding is also the machine-portability claim's first real test.",
+            "done_when": "Vacuum kill gate passed on the shipped grid; limiter mode and passive forwards land with receipts; extraction round-trips prescribed flux functions and re-solves train labels at the grid-resolution floor; batched-solve budget table published from the H200 node.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
+          }
+        ],
+        "description": "Nova's side of the magnetics-free challenge entry, deadline 2026-10-18: onboard DIII-D entirely from its shipped description through the registry route, add the limiter-topology forward mode and passive circuit forwards, harden the response-kernel library (chord sampling, label-map extraction with conditioning-aware uncertainty), and publish the measured batched-solve budget with vertical-conditioning receipts. Two kill gates protect the entry premise: the vacuum flux starter-kit check and the extraction round-trip on labeled maps.",
+        "starts": "2026-08-17",
+        "ends": "2026-09-20"
+      },
+      {
+        "id": "S8",
+        "status": "done",
+        "theme": "H200 production catalog",
+        "items": [
+          {
+            "slug": "efit-forward-parity",
+            "why_now": "This is the demonstration the sprint's theme actually names and the one nova owes as a forward physics model: the free-boundary Grad-Shafranov fixed point given a reference's own flux functions and conductor currents. It has never been run, and the frozen-six reconstruction gate it replaces cannot answer it because that gate fitted magnetics.",
+            "done_when": "The frozen six scored from both seeding conditions on flux-map sup-norm and RMS, axis, LCFS, x-point, topology class, I_p, beta_p, l_i and the fixed-point defect, with no measurement anywhere in the path; pass/fail against the carried-over registered tolerances; verdict on whether the free-boundary fixed point reproduces the reference; the GPU catalog unblocked or held on that verdict rather than on the reconstruction result.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "context": "extended",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
+          },
+          {
+            "slug": "dual-basin-solve",
+            "why_now": "The parity slice measured the failure mode this plan was commissioned for: a reference-seeded solve with correct inputs escapes to the vacuum root at promotion 4 while a damped first step holds the plasma basin without converging - basin-aware solving is now the critical path to the parity verdict and the GPU catalog.",
+            "done_when": "Both basins solved where they exist with hysteresis selection and topology-pinned branches; the parity slice benchmark re-run unchanged reaches the plasma root; warm-start economy measured.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "device-kernel-build",
+            "why_now": "All three framing decisions are owner-locked (2026-08-21) and the entry input is banked \u2014 builds are 97.2/99.0% exact-kernel work with device contraction estimates of 0.12\u20130.15 ms per moment block; the H200 port serves the same sprint's GPU-catalog economics and the per-gradient-step rebuild consumer no cache can amortise.",
+            "done_when": "One-block H200 prototype reports the element-wise ULP distribution, byte-identical fraction, projected full fine-fixture build time and CPU-lane cost; the port-go-threshold ruling decides the full port; the \u00a75 gates are measured or the decline is banked with the prototype.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "coil-circuit-discovery",
+            "why_now": "The five unshipped DIII-D ohmic conductor currents leave a hole every forward solve inherits; all machinery to fill it by measurement is landed, and the 2.20x versus 1.04x current disagreement must be adjudicated before any corpus discovery spends compute.",
+            "done_when": "The adjudication names which current estimate stands; relations are promoted only on the locked admissibility tests; the forward seam accepts known/knowable/unknown tier declarations with unknown-tier currents as reported free parameters.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "context": "extended",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
+          },
+          "current-constrained-forward-solve"
+        ],
+        "starts": "2026-09-01",
+        "ends": "2026-09-19",
+        "description": "Run the GPU catalog only after the spine parity verdict (S7) and the corrected-read guarantee (S6) land. Relocated from the S4 slot so the sprint sequence respects the spine-proof gate."
+      },
+      {
+        "id": "S9",
+        "status": "done",
+        "theme": "Transport forward model",
+        "items": [
+          {
+            "slug": "flux-function-forward-transport",
+            "why_now": "The seam plans place both deterministic physics forwards with Nova; the current-diffusion rung is landed and verified against TORAX while the multi-channel capability, geometry adapter and coupled window solve are unbuilt \u2014 and the TORAX imas-python pin blocks every consumer upgrade until resolved.",
+            "done_when": "Dependency gate resolved with TORAX \u22651.4.3 and imas-python \u22652.2 co-resolving; FSA record completed and the jnp geometry adapter validated on a shaped equilibrium against TORAX's own reader; COCOS round-trips banked; ForwardTransport fa\u00e7ade ships typed receipts with no silent fallback; the coupled window solve converges with receipts, its implicit-function gradients check against finite differences, and evolved states drive ForwardProfile through the typed seam.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "context": "extended",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
+          }
+        ],
+        "description": "Promote the transport forward solve to a public Nova capability beside ForwardProfile: a declared-fidelity ladder from the landed native current-diffusion rung to an embedded TORAX multi-channel step, the jnp FSA geometry adapter, COCOS boundary tests, and the coupled equilibrium\u2013transport solve as a windowed waveform exchange \u2014 Nova owns the converged window fixed point with typed convergence receipts and implicit-function gradients; staggered co-simulation is the contract's one-iteration point. Sequenced after the S7 spine-parity gate that hardens ForwardProfile; grounded in the transport-forward-contract research record (capability-gap inventory, embed-not-reimplement verdict, imas-python pin gate, window-coupling selection).",
+        "starts": "2026-08-17",
+        "ends": "2026-09-13"
+      },
+      {
+        "id": "S3",
+        "status": "planned",
+        "theme": "MAST 3D fields, passive structures and circuits",
+        "items": [
+          {
+            "slug": "mast-nonaxisymmetric-physics",
+            "why_now": "This closes the remaining Ambix-owned 3D/passive physics boundary before production labeling.",
+            "done_when": "Versioned geometry, circuits, vacuum taring and held-out ramp evidence ship in Nova.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
+          }
+        ],
+        "starts": "2026-08-21",
+        "ends": "2026-09-04",
+        "description": "Move MAST-specific non-axisymmetric geometry, drive semantics, passive screening and vacuum taring into Nova after the native 3D substrate ships."
+      },
+      {
+        "id": "S11",
+        "status": "planned",
+        "theme": "Retire the bespoke machine-description packaging",
+        "items": [
+          {
+            "slug": "machine-description-retirement",
+            "why_now": "The producer replaces all three surfaces generically, and maintaining a second implementation of description packaging inside the solver is the cost of not retiring them; the consumer coupling that would break is already visible and fixable in the same beat.",
+            "done_when": "Description equivalence demonstrated numerically through the producer first \u2014 the same 44 unique loop positions and the same 43-of-46 solve-input join \u2014 then every surface in the removal inventory deleted, the consumer's geometry source and identity constant migrated in coordination, the outward republication followup retired with its reason recorded, and the full suite green at its accepted failure set with no new failure.",
+            "status": "pending",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "verification": "strict"
+              }
+            }
+          }
+        ],
+        "starts": "2026-09-14",
+        "ends": "2026-09-27",
+        "description": "Nova is a physics solver; producing and packaging machine description is not its job. Once the map-driven producer in imas-ambix serves MAST descriptions, remove the three surfaces that grew here only because nothing else carried the geometry: the nova-machine-geometry-registry schema with its physical and registry digests, the content-addressed artifact caches and the OCI reference helper nothing publishes through, and the machine-specific solve-input IDS builder. The geometry itself is kept and migrates into the MAST map. The digest scheme goes because it answers 'is this the same machine' as a single global question, which a machine whose geometry changes across and within campaigns cannot satisfy \u2014 which is why it needed a coordinated cutover every time the description moved."
+      },
+      {
+        "id": "S12",
+        "status": "planned",
+        "theme": "Assimilation-ready forwards \u2014 pulse replay, moment-conditioned reachability, and the coupling seam",
+        "items": [
+          {
+            "slug": "coupling-surface-contract",
+            "why_now": "Every downstream consumer \u2014 window exchange, time-parallel boundary, ensemble-filter state, learned-surrogate schema \u2014 binds this surface; typing it before the ambix assimilator hardens its interface is the cheap ordering, and the gate-composition study measured what the implicit surface costs.",
+            "done_when": "Coupled-window suite green on the refactored exchange; banked gentle receipt (4 iterations, gating contraction 0.236, flux closure 0) reproduced; versioned schema artifact exported under scripts/coupling_surface/ and validated field-for-field against the live exchange by a test."
+          },
+          {
+            "slug": "moment-conditioned-basin-entry",
+            "why_now": "The full-catalog GPU solve holds on convergence reliability at 1 of 6 frozen references; moment conditioning is the owner-selected basin-entry driver, with the prediction-confidence study gate-independent and the driver sections sequenced behind the in-flight tared-external-field control.",
+            "done_when": "\u00a72 per-moment prediction errors banked on the frozen six plus the DIII-D score-blind frames with every moment declaring its current support; stall-attribution decision consumed; \u00a7\u00a73-4 convergence counts measured against the pre-registered 1/6 and 2/5-cold baselines through the public constrained seam."
+          },
+          {
+            "slug": "equilibrium-metric-parity",
+            "why_now": "The 0.602 field-energy instrument ratio blocks every internal-inductance comparison, gates the moment plan's inductance rung, and the challenge referee derives internal inductance from submitted maps inside the Consistency term worth 20 percent of the DIII-D score.",
+            "done_when": "f-emp-003 resolved: the 0.29897773 vs 0.49662131 ratio explained with a stated conversion, and a referee-matched inductance instrument banked with receipts on the six frozen shots."
+          },
+          {
+            "slug": "diiid-pulse-replay",
+            "why_now": "No pulse has ever been replayed through the coupled forward; the recorded closed-loop coil currents supply the machine's real feedback, and the open-loop drift horizon this measures is the forecast-skill floor any assimilator must beat.",
+            "done_when": "One ~100 ms diverted flat-top segment marched end-to-end with full receipts (or typed confinement loss banked as a finding); time-trace figures of marched vs labeled q95, betaN, boundary metrics and per-frame psi RMS, every row tree-stamped; drift horizon reported against a pre-registered tolerance band."
+          },
+          {
+            "slug": "ensemble-forward-seam",
+            "why_now": "The seam survey fixed the split by inventory: two tested estimator harnesses exist ambix-side running on 1-D radial physics only; the 2-D batched ensemble coupled forward, the Thomson synthesizer, and the window receipt contract are absent on both sides and are nova's half of the locked authority seam. The published throughput budget is what buys the entry's posterior sharpness.",
+            "done_when": "Batched member-preserving window evaluator green with typed per-member receipts and refused-unconverged semantics; windows-per-second throughput budget published tree-stamped (CPU + H200); Thomson synthesizer and virtual-magnetics kernels receipted for units/COCOS/support; joint twin gate run from ambix over nova 2-D forwards with stated coverage."
+          }
+        ]
+      },
+      {
+        "id": "S13",
+        "status": "done",
+        "theme": "Defensible criteria and the operator frontier",
+        "items": [
+          {
+            "slug": "scoring-criteria-derivation",
+            "why_now": "The forward-parity verdicts and a held GPU catalog are all scored against bounds traced to inherited solver defaults and an unreachable digest pin, and the first replacement attempt was algebraically circular. Until a criterion is derived independently of the residual it judges, no reliability figure on this lane means what it appears to mean.",
+            "done_when": "A criterion independent of the quantity it tests is derived and stated as a formula with per-reference values; the six MAST references are re-scored beside the retained 1e-8 count; the circular estimator is excluded with its algebra shown; the digest pin is replaced by a semantic identity; and each bound is stated as supported, merely contained, or reclassified."
+          },
+          {
+            "slug": "test-lane-marker-policy",
+            "why_now": "The forward-solve suite collects 0 of 28 tests and exits 0 unless given a marker override, so the invocation any agent, contributor or CI step reaches for reports a false green. It surfaced only because one worker counted collected tests; the repository should not depend on that.",
+            "done_when": "The plain per-file invocation selects its 28 tests with the count quoted, or a documented default marker expression makes it do so; the policy is stated once in the repository test guidance; and a zero-collected run exits non-zero, demonstrated on a case that previously exited 0."
+          },
+          {
+            "slug": "forward-operator-refinement",
+            "why_now": "The owner directed on 2026-08-23 that plasma-cell-resolution refinement and operator scaling be sequenced in the solver lane and landed, with the DIII-D forward gate re-evaluation held behind it. Until today that directive was tracked only as a followup pointer on a parity plan and as a handoff on a shipped one, so it had no home that the roadmap would surface. Its resolution half is also the cheapest correction available anywhere in the campaign: the default sits 8.6x coarser than the reference it is scored against, and matching it costs 0.44 GB of coupling.",
+            "done_when": "The default interior resolution is raised to at least the reference-native equivalent with its measured coupling and build cost stated and the forward suites green at the new default; the operator order is raised on a stated scheme with the observed order re-measured, the two order strata reported separately, and the build-compute independence from mesh demonstrated; and the result states whether raising order moves the floors that mesh refinement moved, judged against a criterion from scoring-criteria-derivation rather than the inherited bound."
+          }
+        ],
+        "starts": "2026-08-23",
+        "ends": "2026-09-20",
+        "description": "The parity campaign closed its physics questions and left an instrument question behind: the criteria its verdicts were scored against. Tracing them found the fixed-point bound to be an inherited solver stopping tolerance with no physical referent, two geometry bounds pinned to an artifact digest that has since moved, and a forward suite that reports a false green when invoked without its marker override. None is a physics defect and all three change what earlier verdicts mean, so they are grouped as one sprint rather than scattered as caveats. The purpose is to replace inherited bounds with derived ones, or to state plainly that a bound cannot be derived and reclassify it. The mesh-versus-operator question rides alongside: mesh refinement is quadratic in interaction-matrix build compute while raising operator order costs nothing to rebuild, so frontier work is sequenced behind a criterion that can tell convergence from precision without accuracy."
+      },
+      {
+        "id": "S14",
+        "status": "done",
+        "theme": "Reach the root: convergence on a non-normal near-marginal map",
+        "items": [
+          {
+            "slug": "topology-preserving-continuation",
+            "why_now": "It is the project critical path and it blocks two held plans. The catalog throughput ladder cannot open while the solve stalls, and the DIII-D kill gate returns 0 of 5 at any candidate tolerance. The frontier is now quantified rather than mysterious, so the work is well posed for the first time: the obstacle is a step-length cap with a measured value, not an unattributed failure.",
+            "done_when": "The five score-blind frames are re-measured on a route that advances along the topology-preserving manifold, quoting per-frame terminal residual, admitted-advance count against the banked 7, 7, 10, 5 and 9 of 89, mean advance length as a fraction of the Newton step against the banked 0.03125 cap, and achieved Newton-step-equivalents against the banked 2.8 - with terminal topology and X-point finiteness held. A route that holds topology and still stalls is a reportable negative that closes the section honestly; a route that gains residual by losing topology does not close it at all."
+          },
+          {
+            "slug": "derived-observable-parity",
+            "why_now": "It is runnable today on data that already exists, blocks nothing and is blocked by nothing, so it gives this sprint a parallel lane beside a long serial one. And it is the only item that guards the catalog's actual product: the ladder emits boundaries, moments and conservation diagnostics, and terminal flux agreement at 3.58e-12 does not make that store trustworthy if the moments it publishes differ between the routes that produced them.",
+            "done_when": "Each of the three failing observables carries a verdict of COMPUTATION_DIFFERS or STATE_INHERITED with the evidence that separated them, the convicted ones are repaired at the differing operation rather than by moving a bound, the 69 registered bounds are re-applied to the six held-out cases with the pass count quoted against the banked 66 of 69 and 407 of 414, and the observable check is expressed as a reusable acceptance demonstrated at more than one batch size with any batch-size dependence stated."
+          }
+        ],
+        "description": "The forward solve holds the correct branch and stalls. Topology admissibility caps the Newton step near one thirty-second, so an 89-iteration budget traverses about 2.8 step-equivalents against a need an order of magnitude larger, and extending the backtracking ladder to reach that step is a measured null. This sprint closes that frontier by advancing along the admissible set rather than retreating into it, by choosing seeds on alignment rather than proximity, and by making step conditioning work at any Krylov projection dimension rather than the one it was fitted to."
+      },
+      {
+        "id": "S15",
+        "status": "active",
+        "theme": "Reach the root, then run the catalog",
+        "items": [
+          {
+            "slug": "mast-catalog-gpu-solve",
+            "why_now": "The validated production substrate is ready for campaign-scale GPU execution and label-store release.",
+            "done_when": "H200 solve meets science, provenance and throughput gates; versioned label store and optional IMAS egress are published.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
+          },
+          {
+            "slug": "plateau-input-attribution",
+            "why_now": "Existence is settled twice over and re-asking it would waste a sprint: the corpus is EFIT reconstructions of physical diverted DIII-D discharges, so the continuum problem with the true wall, currents and profiles has a diverted solution, and frame 22086/43 in the same corpus family already solves to 2.9e-16 on the shipped operator. So a solve stalling at 0.087 to 0.155 is solving a different problem, and four substitutions between the two are documented rather than hypothetical - a pseudo-wall rectangle standing in for the absent machine wall AND serving as the surface the refusing topology predicate reads, three unknown-tier ohmic conductor currents, flux functions differentiated out of a reconstructed map behind a reliability mask, and a default discretisation measured 8.6x coarser than its reference. The magnetic axis lands a mean 164.6 mm from the reconstruction's, which is tens of percent of a minor radius and not an iteration budget.",
+            "done_when": "Each of the four documented substitutions carries a per-frame verdict on the five score-blind frames - MOVES_THE_PLATEAU with the residual reached quoted against that frame's value in conditioning-repair.json, or NOT_IMPLICATED with the explored range stated - the receipt names the substitution accounting for the largest share of the gap, and the converged frame 22086/43 is placed against the five plateauing frames on every substitution measured with the differing values quoted or the compared properties named as not separating them.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "context": "extended",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
+          },
+          {
+            "slug": "same-device-label-determinism",
+            "why_now": "Two back-to-back invocations of one driver on one H200, on byte-identical inputs and the same seed, returned different registered-bound verdicts - bound totals moved at both batch widths and ten individual case verdicts flipped, with conservation.divergence_b failing both widths in one run and passing both in the next. The fixed-reduction repair that was expected to explain it improved the counts and left the movement intact, so the cause is not the moment reduction association. Until a route agrees with itself on a rerun, no acceptance check the throughput ladder invokes certifies anything, because the verdict is a sample rather than a value.",
+            "done_when": "Each of the six held-out cases carries STATE_REPRODUCIBLE or STATE_VARIES across at least three repetitions in one allocation, with the maximum bitwise-unequal element count and the maximum absolute and relative terminal-flux difference quoted alongside the same figures per registered observable; the nondeterministic operation is named and its control applied; three consecutive acceptance-driver runs in one allocation return identical bound counts, identical case counts and identical per-case verdicts; and the control's throughput cost is quoted as a per-slice figure against the unconstrained route.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "context": "extended",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
+          },
+          {
+            "slug": "coefficient-space-newton",
+            "why_now": "The campaign has built and refuted three stepping mechanisms on a ten-thousand-dimensional flux iterate whose projected Krylov condition reaches 4087, and the representation degree of the thing being solved for is now measured: 16 coefficients for the closed-form carriers and 36 for the stored ones already beat the hardest banked production residual in closed-flux error, against 551 to 1076 plasma cells. At that size the Jacobian can be formed explicitly and solved directly, which retires Arnoldi, GMRES, the projected condition number, step conditioning and non-normal amplification from the path at once. The second-order cell support that pairs with it is buildable, verified and priced at 2.0x memory against the 13.6x that mesh refinement charges.",
+            "done_when": "All four arms of the solution matrix are measured on a common frame set at one source revision - exact-value and coefficient-carrier iterates crossed with first and second order in-cell current support - each scored against the shipped baseline on convergence, speed and accuracy, with the interaction between the two levers stated explicitly and any trade reported as a trade; the exact-value route is demonstrated to remain selectable at the call site rather than replaced; and the matrix is benchmarked on the reserved H200 with a batchability assessment across up to six cards quoting per-card scaling, the one-time build separated from the per-slice execute, and the throughput against the banked 46.577604167 slices per second per device.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "context": "extended",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
+          },
+          {
+            "slug": "curved-clip-global-surface",
+            "why_now": "Curved sagitta clips are already built and validated - a chord-to-hyperbola closed form at 1.57e-5 against a subcell raster, and a bicubic route with Green-theorem arc moments whose extremum converges at fourth order to six figures - and both were refuted on real spherical-tokamak fields for one architectural reason: the curve came from a LOCAL per-cell reconstruction that converges to a different surface than the reference readers use. The prescription left behind was to take the curve from the global C2 tensor B-spline instead. That spline landed on 2026-08-21 at commit 75e33479, so the named precondition is now satisfied and a twice-refuted question is retestable rather than closed. It needs its own plan because the module owner is shipped at implementation 1.0 and cannot carry work, while the plan supplying the surface is fenced out of writing the clip.",
+            "done_when": "The curved clip is re-measured with its curve taken from the global tensor spline rather than any per-cell reconstruction, gated on a real low-aspect-ratio equilibrium rather than the analytic oracle: STEP clipped-to-contour vpr and g1 quoted against the banked 16.46 and 18.14 per cent and 9.78 and 22.31 per cent against their 3.92 and 6.20 per cent gates; the four ITER coefficients against the banked 2.63, 0.90, 2.08 and 1.98 per cent; clipped-to-contour and clipped-to-TORAX agreement quoted beside the contour-to-TORAX baseline of 0.16 to 6.20 per cent so the outlier question is answered directly; and an explicit statement of whether the global-surface curve closes the gap the local reconstructions opened, with the fixed-shape padded capacities preserved rather than widened.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
+          }
+        ],
+        "description": "The convergence sprint closed both its hypotheses as honest negatives: neither a longer step along the topology-preserving manifold nor a seed-alignment selector moves the residual, and admitted steps were already full Newton steps. What remains is a question no stepping mechanism answers - whether a diverted-class root exists below the measured plateau at all. Answer that first; the GPU catalog runs behind it and is relocated here out of a sprint slot that scheduled it ahead of its own prerequisite."
+      }
+    ],
+    "active_sprint_id": "S15",
+    "timeline": [
+      {
+        "when": "2026-07-29",
+        "who": "codex",
+        "what": "Dependency-ordered Ambix-to-Nova physics transition sprints S1-S4 defined"
+      },
+      {
+        "when": "2026-07-29",
+        "who": "reckon-sprint",
+        "what": "S1 rebalanced: polybow correctness close-out, conductor-fidelity feeder rung and heritage evidence added beside the convergence item; blockers B1-B4 recorded; cross-project dependencies qualified project:slug under the new schema."
+      },
+      {
+        "when": "2026-07-29",
+        "who": "reckon-ship",
+        "what": "S1 closed: all four plans shipped; final full suite 3,841 passed and 118 resource-gated skips on sun_debug."
+      },
+      {
+        "when": "2026-07-30",
+        "who": "reckon-sprint",
+        "what": "S2 catalog geometry recovery added ahead of MAST DDv4 authoring; physical geometry and diagnostic pose are identity, while EFIT/AMM subdivisions are evidence only."
+      },
+      {
+        "when": "2026-08-04",
+        "who": "reckon-ship",
+        "what": "S2 execution: provisional and refined MAST artifact with evidence states and fitted turns landed (nova ac42194c/ee107ed4/28872e4f); ambix cutover mechanics, magnetics-residual gate, artifact reader and drive-map consumption landed (imas-ambix cfa2d2c..27dff421). Frozen six-shot after-path parity passes 13/15 with every reproduction metric improved; the single sensor-misfit failure (2.2% vs a same-source 1% budget) is attributed to irreducible cross-source differences on a structurally non-neutral benchmark. Donor retirement and sprint closure gated on the budget adjudication; registry corrections and the solenoid stratum re-fit queued."
+      },
+      {
+        "when": "2026-08-04",
+        "who": "reckon-sprint",
+        "what": "S2 closed (all item gates met; qualified cross-source parity pass recorded). S5 'Recover the vacuum floor' created ahead of S3/S4: registry digest-change corrections, the mast-vacuum-floor-recovery calibration ladder (dedicated cohort + noise envelope, turns closure, sensor/lattice adjudication, passive R/L on exact biot inductance, monotone residual ladder targeting artifact \u2264 incumbent under the same-source budget), plus ingest maps and deep-donor migration. The three S2 carryover plans moved to S5."
+      },
+      {
+        "when": "2026-08-04",
+        "who": "reckon-ship",
+        "what": "S5 started: registry digest-change corrections and deep-donor importer migration dispatched as the first parallel wave; ingest maps and the vacuum-floor ladder queued behind the digest change."
+      },
+      {
+        "when": "2026-08-05",
+        "who": "reckon-ship",
+        "what": "S5 closed: 18 worker nodes across nova and imas-ambix (two-worker cap held throughout). Geometry corrections, solve-input maps, and the full vacuum-floor ladder executed; the ladder closed on its honest-failure branch (+0.023 sigma above the incumbent, qualified cutover status stands) with the gap decomposed onto six channels at 91-253x their measured noise floors. The acquisition-scale discovery (19 stepping channels) and the committed artifact-arm bench path are the sprint's durable infrastructure gains."
+      },
+      {
+        "when": "2026-08-07",
+        "who": "reckon-sprint",
+        "what": "S6 'Close the P4/P5 misfit source' proposed: flux-loop calibration, toroidal-harmonic misfit maps, P4/P5 provenance. Grounded in the new source-localization record (first misfit maps; differential-circuit hypothesis excluded as recorded superposition; description asymmetry and disjoint P4 loop sets surfaced by the data survey)."
+      },
+      {
+        "when": "2026-08-07",
+        "who": "reckon-sprint",
+        "what": "S6 widened with four infrastructure plans: diagnostic-correction-schema, nova-calibrate-package, vacuum-signature-extraction, coil-geometry-inversion. Grounding: Edlington 2001 retrieved in-repo (analogue integrators; 180-degree pair summing before integration; cans galvanically tied to vessel via supports and feeder-bar bellows); traced polygon Green's kernel verified autograd-able w.r.t. coil geometry (values 8e-12, jacfwd at the FD floor, jacrev consistent 1e-12)."
+      },
+      {
+        "when": "2026-08-07",
+        "who": "reckon-ship",
+        "what": "S6 started (Session A of two): diagnostic-correction-schema implementation and the P4/P5 symmetry-elimination scan dispatched as the first two-worker wave; nova-calibrate-package migration and the coil-geometry-inversion kernel autograd audit queued behind them; read-path equivalence with constant deletion and provenance geometry/pack-total work queued third. Flux loops, toroidal harmonics, vacuum-signature extraction and inversion beyond the kernel audit are Session B."
+      },
+      {
+        "when": "2026-08-07",
+        "who": "reckon-ship",
+        "what": "S6 Session A executed: 8 worker nodes, two-worker cap held, all commits merged to main. diagnostic-correction-schema SHIPPED (LinkML schema + generated models + MAST instance; read-path cutover proven by 3395 float-equal reads before four constants and the 4394-line JSON table were deleted; promoted gains held OUT of the arithmetic, test-pinned). nova-calibrate-package first slice (5 of 9 capabilities, arrays-only kernels, synthetic-truth lane, banked pins). coil-geometry-inversion kernel audit landed: eight kernel classes geometry-traceable with three-part autograd regressions; two elliptic derivative repairs (forward-mode NaN; Carlson degenerate slope 3e-9 to 3e-15). mast-p4p5-circuit-provenance: symmetry verdict = geometry error EXCLUDED (at least 85 percent of surviving power needs current the coils do not carry; 23-cell lattice removes 15 percent on P5-lower; 5-turn row resolves to described side); provenance adjudicated - the 17.3 mm asymmetry was a closed-ring vertex-mean artifact, centroids consistent with as-built per Kirk Table 1, NO correction warranted; FL_P4L loop positions found to be a bit-copy of FL_P3L (feeds flux-loop calibration); pack-total identity confirmed at 4578 pairs and stated as mechanism (six channels explained, serving needs a two-channel source-map row - owner call). Evidence backfill: all eleven landed records carry plan-evidence-for. Records: mast-p4p5-symmetry-verdict, mast-p4p5-provenance-note, calibration-foundations-landed (all docs/research/*.html). Session B remains: flux loops, toroidal harmonics, vacuum-signature extraction, inversion geometry solve, p4p5 feeder hunt."
+      },
+      {
+        "when": "2026-08-08",
+        "who": "reckon-ship",
+        "what": "Owner decisions locked from the library/read-path audits: ambix provider split by tier (JAX owns the spine, latent physics-by-content migrates onto it, torch confined to the ML training tier \u2014 no thin-wrapper layer); nova biot response is a hygiene sweep with NO backend switch (numerics already single-source via the xp namespace; new plan nova-jax-hygiene); the five promoted gains ENTER the applied chain behind a single-door corrected reader (new plan mast-corrected-read-layer added to S6, blocks mast-catalog-gpu-solve); \u00a74 artifact wiring proceeds with packaged pinned digest + env override, machine selection first."
+      },
+      {
+        "when": "2026-08-08",
+        "who": "reckon-sprint",
+        "what": "Spine-proof gate inserted ahead of the GPU catalog on owner direction. Nova owns all physics solves: the differentiable boundary-push capability maturing in ambix ports into nova (ambix batched-newton-accelerator superseded by nova spine-boundary-accelerator), and an EFIT-comparable assembled-chain reconstruction (spine-efit-parity, firewalled efm referee) must pass before the catalog run. New sprint S7 carries both plans; the catalog item moved from the S4 slot to S8 to keep the sprint sequence dependency-consistent. Port audit banked as boundary-push-port-audit: kernel byte-identical, 43 behaviour tests and both accelerators unported, hex stencil machinery already native to nova."
+      },
+      {
+        "when": "2026-08-10",
+        "who": "reckon-sprint",
+        "what": "S9 'Transport forward model' created: flux-function-forward-transport promotes the transport solve to a public Nova capability beside ForwardProfile \u2014 TORAX-embedded fidelity ladder over the landed current-diffusion rung, FSA geometry adapter, COCOS boundary tests, coupled equilibrium\u2013transport loop. Grounded in transport-forward-contract (capability-gap inventory; embed verdict; the TORAX imas-python==2.1.0 pin is the gate). The flux-function seam plans in both repos were extended to cover transport authority in the same session."
+      },
+      {
+        "when": "2026-08-10",
+        "who": "reckon-sprint",
+        "what": "Coupling contract locked after the ambix-side brainstorm: the coupled equilibrium\u2013transport rung is windowed waveform exchange (staggered co-simulation = its one-iteration point) with window length, sample grids, iteration cap and tolerance as declared knobs. Nova owns the converged window fixed point and surrenders convergence behaviour as typed receipts; gradients cross the window by the implicit-function adjoint; single-sweep waveform primitives stay public. Assigning principle: innovation purity \u2014 an unconverged seam would confound the assimilation innovation with splitting error. transport-engine=torax-embedded-ladder and loop-differentiability=picard-fixed-point-first locked on flux-function-forward-transport; S9 item done_when updated to the window contract."
+      },
+      {
+        "when": "2026-08-11",
+        "who": "Simon McIntosh",
+        "what": "Sprint S10 created for the Sophelio-challenge forward stack (diiid-forward-onboarding). Premise correction recorded on coil-geometry-inversion: the challenge dataset ships conductor geometry and Thomson chords; wall and passive structure remain externally sourced."
+      },
+      {
+        "when": "2026-08-13",
+        "who": "Simon McIntosh (via reckon-create)",
+        "what": "S11 created \u2014 retire nova's bespoke machine-description packaging once imas-ambix S22 serves the same descriptions. Investigation closed the outward-republication question negatively: the artifact tooling writes a local content-addressed cache, oci_artifact_reference takes its repository from the caller with only a test placeholder in-repo, and the account holds no machine-description package, so f-flc-004 is retired rather than executed. The geometry landed this session (44 unique loop positions, join 39 to 43) is kept and migrates to the MAST map; only the wrapper is removed."
+      },
+      {
+        "when": "2026-08-13",
+        "who": "reckon-ship",
+        "what": "S7 executed: 15 worker nodes across 6 waves, all commits merged to main, every session worktree reclaimed. THE SPRINT'S CENTRAL QUESTION IS ANSWERED AND THE ANSWER IS NEGATIVE. The frozen six-shot gate scored end to end for the first time - 45,000 corrected slices, every source index exactly once, 180 atomic partitions, 9,573 slices scored - and returned FAIL on ten of twelve registered metrics with converged_fraction and fixed_point_defect at exactly ZERO. No scored slice on any of the six shots reached the solver's convergence criterion, which subordinates the geometry failures: a position measured on an unconverged flux map is a consequence, not an independent finding. The only two passes are the two metrics that do not require the fixed point to close - the CurrentDiffusion flux ledger at fraction 1 and throughput at 1. Mechanism: the assembled chain reads, seeds, batches, labels and transports correctly, and the GS fit does not converge on real measured magnetics. THE GPU CATALOG (S8) IS EXPLICITLY HELD - the pre-registered meaning of this result under the locked qualified-magnetics bar, whose magnetics allowance never applies because the strict metrics fail on their own. No tolerance was changed, no proxy substituted, and no partition dropped, including through a compute incident that cost 105 of 180 partitions. nova-test-lane-health SHIPPED at 100%: the whole suite now completes in ONE process for the first time in the repository's history - 50 failed, 5655 passed, 141 skipped, 4 xfailed in 2012.90 s, all 5,842 tests - after the starvation owner was named by measurement as retained JAX/XLA CPU compilation (212 of 226 retained threads native-only against 14 Python-managed as the excluding control; 4,221 live executables) and bounded to max 933 of a 1,024 ceiling; the 50 failures then classified 47 regression / 3 pre-existing / 0 suite-order, the 47 traced to one commit adding a required ShotWaveforms field without updating test constructors, and repaired to leave exactly 3. spine-efit-parity and flux-function-forward-equilibrium both stand at 99% with only trigger-deferred work and one active node. Other durable gains: a typed UnsupportedSlice contract that made the 7,500-slice support tally obtainable (4,182 of 7,500 physically supported - more than half a MAST record carries no seedable plasma, which retroactively explains four zero-score attempts as slice selection); the scorecard registry separated into twelve fields so the registered j-phi reproduction and the accelerator fixed-point defect stop being compared as one quantity, with every prior bound byte-identical; the l_i baseline settled as a passive-configuration IMPROVEMENT of 7.688559x rather than a drift, with the asymmetry recorded (passives move l_i by 0.9 pp and I_p by 0.03 pp); and verified reads of the shared machine artifact made concurrency-safe by canonicalizing the four HDF5 superblock consistency-flag bytes, 0/20 to 20/20 trials, narrowness proven against all 2,044 other bytes and published digests unchanged. NOT DONE, with reasons recorded rather than left silent: the pre-registered held-out extension is deliberately unspent because it guards against overfitting a PASS and there is none to generalise; the H200 performance program is deferred on the same logic that holds the catalog; and the convergence failure itself has no owning plan, since spine-boundary-accelerator is shipped and its locking evidence was synthetic self-consistent magnetics - the very case the section-6 measurement identified as the predicted failure mode."
+      },
+      {
+        "when": "2026-08-13",
+        "who": "reckon-ship",
+        "what": "S7 scope corrected on owner direction after a premise error was caught. The frozen-six parity gate was driving ReconstructProfile.least_squares_map through newton_krylov - a whitened least-squares fit to measured magnetics with a hard measured-current equality - so it inferred the flux functions rather than being given them and scored a fitted state against EFIT. That is an inverse solve, outside the forward class nova's own locked matrix assigns it, and its converged_fraction=0 is a fit failing to converge rather than the Grad-Shafranov fixed point failing. The intended demonstration - the free-boundary fixed point given a reference's own flux functions and conductor currents, with no measurement in the path - has never been run. Three plans added to carry it: efit-map-inversion (read the reference correctly), efit-flux-decomposition (validate the external field that is the free-boundary condition), efit-forward-parity (the demonstration itself, replacing the reconstruction gate as the parity claim and inheriting the mast-catalog-gpu-solve block). Evidence already landed from three probe nodes: efm DOES store pprime [time,65] Pa-rad/Wb and ffprime [time,65] T-rad on a 65-point uniform psi_norm, with 397 forward-usable rows exactly matching the usable geometry count, so a forward solve can be driven from stored values; no COCOS is declared in the file, derived digits are compatible with source COCOS 3 with sigma_RphiZ undeterminable. Owner direction to mask the plasma current with the given LCFS is locked as a decision and was decisive - unmasked, 1421 cells closed plasma current at -42.88%; masked to the stored 151-vertex boundary, 938 cells close at -0.0275%, a factor of about 1560, with derived current density correlating 0.999920 against the stored field. The mask also isolates the exterior signal as a measurable diagnostic: -9.605 MA signed and 10.080 MA absolute outside the plasma. The R^4 rotation term is resolved above its own standard error in 11 of 24 bins, so two terms do not suffice everywhere and the physical-versus-numerical separation is its own section."
+      },
+      {
+        "when": "2026-08-16",
+        "who": "Simon McIntosh (via reckon-ship)",
+        "what": "S7 progress recorded from the plan ledger: the sprint grew from 6 to 14 items through the forward-equilibrium decomposition and 8 are complete at 83.9 percent implementation. Landed by parallel sessions: spine-boundary-accelerator and efit-map-inversion shipped; spine-efit-parity at 99 percent on the corrected read layer; flux-function-forward-equilibrium at 100 percent awaiting closure; plasma-edge-current-representation at 91 percent with a source-moment node live; efit-flux-decomposition at 85 percent. The S6-to-S7 gate mast-corrected-read-layer shipped, so the critical path now runs efit-flux-decomposition to efit-forward-parity to mast-catalog-gpu-solve. Status corrected planned-to-active to match the ledger: more than half the sprint's work has executed."
+      },
+      {
+        "when": "2026-08-16",
+        "who": "Simon McIntosh (via reckon-ship)",
+        "what": "S6 closed: 8/8 shipped. Both sprint questions closed on measurement - the misfit source is current- or sensor-side with the P4-lower survivor reclassified as a separately-driven survey configuration, and the calibration machinery is a tested machine-agnostic package whose portability is demonstrated on TCV. Continuations: S7 and S8 fed directly; the saddle-loop residue split owned by S3; machine-description packaging owned by imas-ambix S22 and nova S11."
+      },
+      {
+        "when": "2026-08-21",
+        "who": "reckon-ship",
+        "what": "S8 membership repaired: device-kernel-build appended to the sprint items \u2014 the plan has declared sprint S8 since the 2026-08-21 owner interview but the index items list never carried it (roadmap wiring finding plan-sprint-missing-item)."
+      },
+      {
+        "when": "2026-08-21",
+        "who": "reckon-ship",
+        "what": "Owner rescope: the S8 H200 throughput work (mast-catalog-gpu-solve) now includes a capabilities demo on the DIII-D competition dataset, recorded as ladder stage L2b - batched end-to-end solves on the second onboarded machine with side-by-side solved/labeled maps, receipts beside the MAST ladder numbers, same code path as the MAST ladder."
+      },
+      {
+        "when": "2026-08-21",
+        "who": "reckon-ship",
+        "what": "S8 session drain ledger at 2026-08-21T22:20Z - dual-basin-solve SHIPPED (impl 1.0). Rows: (1) device-kernel-build go/no-go with remaining port, cache-provenance and jacfwd nodes: authority-required - the locked port-go-threshold assigns the ruling to the owner; the three-axis package (performance 12.4 s projected vs 120 s bar; parity self 2.19e-5 pass, far 1.49e-9 absolute; compile wall 39 min at 150 GB unfinished) is banked in the plan. (2) efit-forward-parity verdict consequence: authority-required - the frozen-six verdict is FAIL (0/6 converged at 1e-8, five DINA-class closest approaches), the catalog is held per the plan clause, and commissioning the follow-on diagnosis (0.41 percent boundary residual, +1.86 percent plasma-field term, refinement) is the owner call. (3) mast-catalog-gpu-solve including the DIII-D competition-dataset L2b demo: authority-required - held on the negative parity verdict per the plan own gate clause. rows: 3, foldable-remaining: 0."
+      }
+    ],
+    "blockers": [
+      {
+        "id": "B1",
+        "summary": "develop/main diverged 6 days (269 code commits on develop vs 126 docs/data commits on main since e31fb6df) \u2014 reckon state serves from main while all code lands on develop. The \u00a711 forward-deletion merge (develop\u2192main, assembly tree drops from the working tree, no history rewrite) is UNBLOCKED: the sole precondition (norma extraction sign-off, CI 228/13 green) is recorded.",
+        "origin": "nova-spine-refactor#s11",
+        "owner": "Simon McIntosh",
+        "next": "/reckon-ship nova-spine-refactor \u00a711 \u2014 merge develop\u2192main, verify lanes green locally (no CI), retire the two-branch exception, set the plan shipped."
+      },
+      {
+        "id": "B2",
+        "summary": "CS geometry-revision conflict, upstream of nova: the 111004/1 conductor centreline packs sit on the OLDER itergeom outline revision (CS3U 202 mm higher / 19 mm inside, worth -2.14e-02 H \u2014 forty times the winding effect) while the machine inductance table matches the SHIPPED revision, and the stored CS section is half the documented cable-space radius. No solenoid winding comparison is readable until the ITER machine-description provenance (DET-07879-A chain) is reconciled.",
+        "origin": "external: ITER_MACHINE_DESCRIPTION 111004/1 vs itergeom revisions",
+        "owner": "Simon McIntosh",
+        "next": "Raise with the machine-description provider; until then CS stays off the conductor-fidelity ladder (recorded in coil-conductor-fidelity \u00a73/\u00a74)."
+      },
+      {
+        "id": "B3",
+        "summary": "The machine-description inductance table's circuit boundary is undetermined: terminal-to-terminal vs pack-only decides whether PF1's +3.335e-04 H feeder rung belongs on the comparison ladder (46% of the remaining residual) or in the hardware record. A documentation hunt, not a computation.",
+        "origin": "coil-conductor-fidelity#s4 (f-ccf-06 item 3)",
+        "owner": "Simon McIntosh",
+        "next": "Establish from DDD / DET-07879-A / pf_active 111001/104 metadata which circuit the table describes; if undetermined, tabulate both readings per coil."
+      },
+      {
+        "id": "B4",
+        "summary": "norma still ships a top-level nova/ package (nine of ten entries collide with nova-stella; pip lets the later install silently overwrite the earlier). Any environment installing both norma and nova 2.0 is exposed until the namespace rename lands. External to nova: the work is norma:norma-standalone-package (rename \u2192 registry re-home \u2192 wheel-boundary co-installation gate).",
+        "origin": "external: norma:norma-standalone-package",
+        "owner": "Simon McIntosh",
+        "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
+      }
+    ],
+    "_version": 72
+  }
+}

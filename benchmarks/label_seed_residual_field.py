@@ -22,7 +22,6 @@ from benchmarks.efit_forward_parity_slice import (
     FROZEN_SCORECARD_RECEIPT_NAME,
     GMRES_ITERATIONS,
     NEWTON_STEPS,
-    REFERENCE_NATIVE_GRID_POINTS,
     _baseline_by_shot,
     _mast_case_from_selection,
     _passive_inclusive_case,
@@ -426,7 +425,6 @@ def run(
             store,
             selected_row,
             qualification,
-            grid_points=REFERENCE_NATIVE_GRID_POINTS,
         )
         passive_case, profile, policy = _passive_inclusive_case(
             case, context, response_cache

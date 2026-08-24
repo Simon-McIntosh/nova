@@ -1,0 +1,351 @@
+{
+  "schema": "nova.clipped-coupling-order.v1",
+  "generated_utc": "2026-08-24T06:10:15.108091+00:00",
+  "measurement": "flux-field convergence under clipped-source coupling",
+  "source": {
+    "shape": "ellipse",
+    "centre_m": [
+      1.65,
+      0.0
+    ],
+    "semi_axes_m": [
+      0.48,
+      0.64
+    ],
+    "current_density_a_per_m2": 1000000.0,
+    "density_model": "uniform inside the LCFS and zero outside",
+    "separatrix_model": "linear interpolation of the analytic ellipse level on shared parent-cell edges"
+  },
+  "mesh_ladder": {
+    "declared_spacings_m": [
+      0.24,
+      0.16,
+      0.12,
+      0.08,
+      0.06,
+      0.04
+    ],
+    "rungs": [
+      {
+        "spacing_m": 0.24,
+        "parent_cell_count": 63,
+        "included_cell_count": 31,
+        "cut_cell_count": 20,
+        "clipped_area_m2": 0.902784375,
+        "area_error_fraction": -0.06456643341551226
+      },
+      {
+        "spacing_m": 0.16,
+        "parent_cell_count": 99,
+        "included_cell_count": 51,
+        "cut_cell_count": 28,
+        "clipped_area_m2": 0.9361703703703704,
+        "area_error_fraction": -0.029973033719955015
+      },
+      {
+        "spacing_m": 0.12,
+        "parent_cell_count": 165,
+        "included_cell_count": 87,
+        "cut_cell_count": 36,
+        "clipped_area_m2": 0.9486089843749999,
+        "area_error_fraction": -0.017084577313386994
+      },
+      {
+        "spacing_m": 0.08,
+        "parent_cell_count": 285,
+        "included_cell_count": 177,
+        "cut_cell_count": 56,
+        "clipped_area_m2": 0.9578600448082011,
+        "area_error_fraction": -0.007498952334312601
+      },
+      {
+        "spacing_m": 0.06,
+        "parent_cell_count": 475,
+        "included_cell_count": 311,
+        "cut_cell_count": 76,
+        "clipped_area_m2": 0.9611562704542636,
+        "area_error_fraction": -0.0040835187072480305
+      },
+      {
+        "spacing_m": 0.04,
+        "parent_cell_count": 945,
+        "included_cell_count": 661,
+        "cut_cell_count": 112,
+        "clipped_area_m2": 0.9632996960631479,
+        "area_error_fraction": -0.001862576123890595
+      }
+    ]
+  },
+  "targets": {
+    "angle_count_per_ring": 16,
+    "separatrix_band": {
+      "definition": "analytic psi_N in [0.96, 1.04]",
+      "sampled_psi_N": [
+        0.96,
+        1.0,
+        1.04
+      ],
+      "target_count": 48
+    },
+    "closed_flux_region": {
+      "definition": "analytic psi_N in {0.2, 0.5, 0.8}",
+      "sampled_psi_N": [
+        0.2,
+        0.5,
+        0.8
+      ],
+      "target_count": 48
+    }
+  },
+  "reference": {
+    "method": "exact polygon flux kernel on one 2048-edge ellipse approximation",
+    "polygon_vertices": 2048,
+    "area_m2": 0.9650957492051435,
+    "analytic_ellipse_area_m2": 0.9650972631827843,
+    "area_error_fraction": -1.5687306332392355e-06
+  },
+  "arms": {
+    "shipped_clipped_moments": {
+      "method": "exact clipped zeroth and first current moments contracted against uniform and two linear response blocks of the fixed parent cell",
+      "regions": {
+        "separatrix_band": {
+          "target_count": 48,
+          "errors_by_spacing": [
+            {
+              "spacing_m": 0.24,
+              "relative_rms": 0.06442179165512427,
+              "relative_sup": 0.06387153013064502,
+              "absolute_rms_wb": 0.16231592045556484,
+              "absolute_sup_wb": 0.21136932960508759
+            },
+            {
+              "spacing_m": 0.16,
+              "relative_rms": 0.02962785620568152,
+              "relative_sup": 0.029517734510812195,
+              "absolute_rms_wb": 0.07464978274580149,
+              "absolute_sup_wb": 0.09768270373748011
+            },
+            {
+              "spacing_m": 0.12,
+              "relative_rms": 0.01720184788689536,
+              "relative_sup": 0.016876597809830435,
+              "absolute_rms_wb": 0.04334144862417747,
+              "absolute_sup_wb": 0.05584953355246203
+            },
+            {
+              "spacing_m": 0.08,
+              "relative_rms": 0.007487504913608615,
+              "relative_sup": 0.007469077236896832,
+              "absolute_rms_wb": 0.018865374910312288,
+              "absolute_sup_wb": 0.024717332512659507
+            },
+            {
+              "spacing_m": 0.06,
+              "relative_rms": 0.004130238226702492,
+              "relative_sup": 0.004116526801972169,
+              "absolute_rms_wb": 0.010406469647055359,
+              "absolute_sup_wb": 0.013622775415814914
+            },
+            {
+              "spacing_m": 0.04,
+              "relative_rms": 0.0018708751456253895,
+              "relative_sup": 0.0018546557540646345,
+              "absolute_rms_wb": 0.004713821418462042,
+              "absolute_sup_wb": 0.006137591233261741
+            }
+          ],
+          "relative_rms_order_fit": {
+            "order": 1.9855477643041355,
+            "order_standard_error": 0.01519084432959908,
+            "log_fit_residual_rms": 0.018264487220649113,
+            "log_fit_residual_max_abs": 0.032954844468517486,
+            "r_squared": 0.999765921530523,
+            "prefactor": 1.1209664487818183,
+            "points": 6
+          }
+        },
+        "closed_flux_region": {
+          "target_count": 48,
+          "errors_by_spacing": [
+            {
+              "spacing_m": 0.24,
+              "relative_rms": 0.05594468566627331,
+              "relative_sup": 0.059410459182216845,
+              "absolute_rms_wb": 0.16562144519796565,
+              "absolute_sup_wb": 0.2140873643164256
+            },
+            {
+              "spacing_m": 0.16,
+              "relative_rms": 0.025719045496249208,
+              "relative_sup": 0.027048846725961806,
+              "absolute_rms_wb": 0.0761399484771611,
+              "absolute_sup_wb": 0.09747132715468876
+            },
+            {
+              "spacing_m": 0.12,
+              "relative_rms": 0.014580753368783537,
+              "relative_sup": 0.015231363001506064,
+              "absolute_rms_wb": 0.043165591445424235,
+              "absolute_sup_wb": 0.05488667155286375
+            },
+            {
+              "spacing_m": 0.08,
+              "relative_rms": 0.006360560279699637,
+              "relative_sup": 0.006654715847635223,
+              "absolute_rms_wb": 0.018830120738844512,
+              "absolute_sup_wb": 0.023980467340360523
+            },
+            {
+              "spacing_m": 0.06,
+              "relative_rms": 0.003456376486068874,
+              "relative_sup": 0.003645113654405748,
+              "absolute_rms_wb": 0.01023242980013916,
+              "absolute_sup_wb": 0.013135275937054658
+            },
+            {
+              "spacing_m": 0.04,
+              "relative_rms": 0.0015721235171201745,
+              "relative_sup": 0.0016431020771384651,
+              "absolute_rms_wb": 0.004654193080793777,
+              "absolute_sup_wb": 0.005920967416166878
+            }
+          ],
+          "relative_rms_order_fit": {
+            "order": 2.0072158203339687,
+            "order_standard_error": 0.014968470787840684,
+            "log_fit_residual_rms": 0.01799711967848006,
+            "log_fit_residual_max_abs": 0.0244215786138966,
+            "r_squared": 0.9997776023877626,
+            "prefactor": 1.0040176304850899,
+            "points": 6
+          }
+        }
+      }
+    },
+    "exact_clipped_polygon": {
+      "method": "uniform current integrated directly over each clipped support with polygon_analytic_flux_moments",
+      "regions": {
+        "separatrix_band": {
+          "target_count": 48,
+          "errors_by_spacing": [
+            {
+              "spacing_m": 0.24,
+              "relative_rms": 0.06557367851796007,
+              "relative_sup": 0.06618590399114503,
+              "absolute_rms_wb": 0.16521819267740542,
+              "absolute_sup_wb": 0.2190282607493521
+            },
+            {
+              "spacing_m": 0.16,
+              "relative_rms": 0.03042679489264461,
+              "relative_sup": 0.030064836307065464,
+              "absolute_rms_wb": 0.07666277345950605,
+              "absolute_sup_wb": 0.09949322150123585
+            },
+            {
+              "spacing_m": 0.12,
+              "relative_rms": 0.01728816985735141,
+              "relative_sup": 0.01703506096387074,
+              "absolute_rms_wb": 0.04355894381842977,
+              "absolute_sup_wb": 0.05637393386928702
+            },
+            {
+              "spacing_m": 0.08,
+              "relative_rms": 0.007578349509624674,
+              "relative_sup": 0.0074707231595983435,
+              "absolute_rms_wb": 0.0190942652258704,
+              "absolute_sup_wb": 0.024722779345971446
+            },
+            {
+              "spacing_m": 0.06,
+              "relative_rms": 0.004131294100606491,
+              "relative_sup": 0.004104264322534228,
+              "absolute_rms_wb": 0.010409130006853019,
+              "absolute_sup_wb": 0.013582195331812041
+            },
+            {
+              "spacing_m": 0.04,
+              "relative_rms": 0.0018847347869084404,
+              "relative_sup": 0.0018502949635634028,
+              "absolute_rms_wb": 0.004748741906921686,
+              "absolute_sup_wb": 0.006123160118758797
+            }
+          ],
+          "relative_rms_order_fit": {
+            "order": 1.9951209481481313,
+            "order_standard_error": 0.015716023006952674,
+            "log_fit_residual_rms": 0.018895928043354743,
+            "log_fit_residual_max_abs": 0.025246334852748298,
+            "r_squared": 0.9997518586925594,
+            "prefactor": 1.15943772268536,
+            "points": 6
+          }
+        },
+        "closed_flux_region": {
+          "target_count": 48,
+          "errors_by_spacing": [
+            {
+              "spacing_m": 0.24,
+              "relative_rms": 0.055465761079978575,
+              "relative_sup": 0.059283878489954506,
+              "absolute_rms_wb": 0.16420361290204138,
+              "absolute_sup_wb": 0.21363122701075898
+            },
+            {
+              "spacing_m": 0.16,
+              "relative_rms": 0.025473562189736024,
+              "relative_sup": 0.026848324415937676,
+              "absolute_rms_wb": 0.0754132074201245,
+              "absolute_sup_wb": 0.09674873902070313
+            },
+            {
+              "spacing_m": 0.12,
+              "relative_rms": 0.014472936327925812,
+              "relative_sup": 0.015192968062189735,
+              "absolute_rms_wb": 0.04284640448582015,
+              "absolute_sup_wb": 0.054748314242139884
+            },
+            {
+              "spacing_m": 0.08,
+              "relative_rms": 0.0063395516506507986,
+              "relative_sup": 0.006649688111572534,
+              "absolute_rms_wb": 0.018767925742782642,
+              "absolute_sup_wb": 0.023962349743274824
+            },
+            {
+              "spacing_m": 0.06,
+              "relative_rms": 0.0034549268235330986,
+              "relative_sup": 0.0036421571556622093,
+              "absolute_rms_wb": 0.01022813814667172,
+              "absolute_sup_wb": 0.013124622105518569
+            },
+            {
+              "spacing_m": 0.04,
+              "relative_rms": 0.0015717217860001251,
+              "relative_sup": 0.001641794081117806,
+              "absolute_rms_wb": 0.004653003775895711,
+              "absolute_sup_wb": 0.005916254013435207
+            }
+          ],
+          "relative_rms_order_fit": {
+            "order": 2.0013105808974534,
+            "order_standard_error": 0.01398026222416197,
+            "log_fit_residual_rms": 0.016808961713667935,
+            "log_fit_residual_max_abs": 0.022804828256201226,
+            "r_squared": 0.9998048462590647,
+            "prefactor": 0.9854661138164934,
+            "points": 6
+          }
+        }
+      }
+    }
+  },
+  "banked_order_adjudication": {
+    "banked_observed_order": 0.97,
+    "shipped_band_order_difference": 1.0155477643041355,
+    "declared_shipped_fit_uncertainty": 0.018264487220649113,
+    "repair_order_gain": 0.009573183843995858,
+    "repaired_order_accounts_for_banked_0_97": false,
+    "statement": "The exact clipped-polygon arm does not both reproduce the banked 0.97 in the shipped control and raise its order by more than 0.5. This study leaves a residual deficit that another term must explain."
+  }
+}

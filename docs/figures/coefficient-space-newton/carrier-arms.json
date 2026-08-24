@@ -1,0 +1,273 @@
+{
+  "artifact": "docs/figures/coefficient-space-newton/carrier-arms.json",
+  "schema": "carrier-arm-comparison-1",
+  "source_revision": "3b0b4ed62071f2e9c24703806de348088dd5eea1",
+  "measurement_scope": {
+    "frame_set": [
+      "closed-form-oracle-coarse"
+    ],
+    "common_warm_cache": {
+      "semantic_key": "030667d40f96d904",
+      "hit": true,
+      "load_seconds": 0.15852747671306133,
+      "realised_plasma_cells": 551,
+      "state_values": 2253
+    },
+    "platform": "cpu",
+    "precision": "float64",
+    "exact_output_contract": "all residual, topology, domain and profile reads use the ordinary Green output; coefficients are only projected iterate state",
+    "banked_root": "scripts/oracle_rebaseline/root-coarse.npz",
+    "banked_root_sha256": "79f4a3f507680b7531bf3a3dc6a1195acf321027f0c3f4d4ab103bc70e1a1e0c"
+  },
+  "build_costs_seconds": {
+    "warm_machine_load": 0.15852747671306133,
+    "coefficient_carrier": 5.8336792308837175,
+    "quadratic_support_operator": 16.025398133322597
+  },
+  "evidence_inputs": {
+    "representation_degree_receipt": "docs/figures/coefficient-space-newton/representation-degree.json",
+    "representation_degree_sha256": "04591e9f840adb82c6f2fcc470511038ac2a515c8b68756cf34ae3b3255e4663",
+    "second_order_kernel_receipt": "docs/figures/coefficient-space-newton/second-order-kernel.json",
+    "second_order_kernel_sha256": "0e8b44be107ec5a6c76a85aede7dda1cfc6b84453faf57f13dda2a863ad3968c",
+    "root_receipt": "scripts/oracle_rebaseline/results.json",
+    "root_receipt_sha256": "4d07594d3e08e072a817d1b31acde6a4f7bddd12d9bbc3a0e795efccbe71548d"
+  },
+  "exact_value_route_retained": {
+    "route": "exact_values",
+    "call_site_selection": true,
+    "coefficient_route": "coefficient_carrier"
+  },
+  "arms": {
+    "A": {
+      "iterate": "exact psi values",
+      "support_order": "monopole plus two first moments",
+      "terminal_exact_field_residual": 2.7110550053242652e-15,
+      "admitted_advance_count": 10,
+      "newton_step_equivalents": 6.0,
+      "terminal_topology": {
+        "class": "limited",
+        "axis_m": [
+          1.6245046337882394,
+          -9.519414654482995e-05
+        ],
+        "x_point_m": null,
+        "x_point_finite": false
+      },
+      "timing": {
+        "banked_full_solve_seconds": 70.67800685949624,
+        "per_iterate": {
+          "compile_and_warm_seconds": 1.237820791080594,
+          "median_seconds": 0.023481104522943497,
+          "minimum_seconds": 0.023368146270513535,
+          "repeats": 3
+        },
+        "batched_frames": {
+          "compile_and_warm_seconds": 1.5897669922560453,
+          "median_seconds": 0.10170771554112434,
+          "minimum_seconds": 0.10120218805968761,
+          "repeats": 3
+        },
+        "batch_size": 4,
+        "one_time_build_seconds": 0.0,
+        "jacobian_formation_seconds": 0.0,
+        "linear_solve_seconds": 7.067800685949623,
+        "linear_solve_qualification": "upper bound per Newton step from the banked full solve; includes map evaluations and admission beside thirty-GMRES work"
+      },
+      "peak_device_memory_bytes": 3611725824,
+      "peak_device_memory_qualification": "shared CPU-allocation cgroup high-water mark after all three warm arms; an upper bound rather than an isolated-arm counter",
+      "accuracy_against_banked_root": {
+        "closed_flux": {
+          "count": 415,
+          "relative_sup": 0.0
+        },
+        "separatrix_band": {
+          "count": 55,
+          "relative_sup": 0.0
+        },
+        "scrape_off_layer": {
+          "count": 81,
+          "relative_sup": 0.0
+        }
+      },
+      "projection_floor": null
+    },
+    "C": {
+      "iterate": "six-by-six spline knot values",
+      "coefficient_count": 36,
+      "support_order": "monopole plus two first moments",
+      "terminal_exact_field_residual": 0.026019345673404647,
+      "admitted_advance_count": 1,
+      "newton_step_equivalents": 1.0,
+      "terminal_topology": {
+        "class": "limited",
+        "axis_m": [
+          1.623636134317158,
+          0.00020383223702950237
+        ],
+        "x_point_m": null,
+        "x_point_finite": false
+      },
+      "timing": {
+        "full_solve_seconds": 23.97243221104145,
+        "per_iterate": {
+          "compile_and_warm_seconds": 1.2875443026423454,
+          "median_seconds": 0.024143515154719353,
+          "minimum_seconds": 0.024129610508680344,
+          "repeats": 3
+        },
+        "batched_frames": {
+          "compile_and_warm_seconds": 1.554208442568779,
+          "median_seconds": 0.09368273802101612,
+          "minimum_seconds": 0.09361636824905872,
+          "repeats": 3
+        },
+        "batch_size": 4,
+        "one_time_build_seconds": 5.8336792308837175,
+        "jacobian_formation_seconds": 18.968847274780273,
+        "linear_solve_seconds": 0.4079671036452055
+      },
+      "peak_device_memory_bytes": 3611725824,
+      "peak_device_memory_qualification": "shared CPU-allocation cgroup high-water mark after all three warm arms; an upper bound rather than an isolated-arm counter",
+      "accuracy_against_banked_root": {
+        "closed_flux": {
+          "count": 415,
+          "relative_sup": 0.02131290872317176
+        },
+        "separatrix_band": {
+          "count": 55,
+          "relative_sup": 0.07198306238825847
+        },
+        "scrape_off_layer": {
+          "count": 81,
+          "relative_sup": 0.03246373650438369
+        }
+      },
+      "projection_floor": {
+        "closed_flux": {
+          "count": 415,
+          "relative_sup": 0.01525476830559581
+        },
+        "separatrix_band": {
+          "count": 55,
+          "relative_sup": 0.04808881037725249
+        },
+        "scrape_off_layer": {
+          "count": 81,
+          "relative_sup": 0.021969766027799164
+        }
+      },
+      "residual_trace": [
+        0.033551800329506484,
+        0.026019345673404647
+      ],
+      "verdict_against_A": {
+        "convergence": {
+          "improves": false,
+          "statement": "does not beat the banked exact-value terminal residual"
+        },
+        "speed": {
+          "improves": false,
+          "single_frame_improves": false,
+          "batched_frame_improves": true,
+          "statement": "improves warm per-batched-frame wall time but not the single-frame wall time"
+        },
+        "accuracy": {
+          "improves": false,
+          "statement": "cannot improve on the banked root's zero self-error; worst regional relative-sup error is 0.0719831"
+        }
+      }
+    },
+    "D": {
+      "iterate": "six-by-six spline knot values",
+      "coefficient_count": 36,
+      "support_order": "adds three quadratic moments",
+      "terminal_exact_field_residual": 0.02604899997326775,
+      "admitted_advance_count": 1,
+      "newton_step_equivalents": 1.0,
+      "terminal_topology": {
+        "class": "limited",
+        "axis_m": [
+          1.6236364786332877,
+          0.00019957390877332816
+        ],
+        "x_point_m": null,
+        "x_point_finite": false
+      },
+      "timing": {
+        "full_solve_seconds": 12.647778699174523,
+        "per_iterate": {
+          "compile_and_warm_seconds": 2.2610230278223753,
+          "median_seconds": 0.07412464171648026,
+          "minimum_seconds": 0.07399929128587246,
+          "repeats": 3
+        },
+        "batched_frames": {
+          "compile_and_warm_seconds": 2.3305328153073788,
+          "median_seconds": 0.1694045253098011,
+          "minimum_seconds": 0.16904251277446747,
+          "repeats": 3
+        },
+        "batch_size": 4,
+        "one_time_build_seconds": 5.8336792308837175,
+        "jacobian_formation_seconds": 10.909883562475443,
+        "linear_solve_seconds": 0.2986893802881241,
+        "support_operator_one_time_build_seconds": 16.025398133322597
+      },
+      "peak_device_memory_bytes": 3611725824,
+      "peak_device_memory_qualification": "shared CPU-allocation cgroup high-water mark after all three warm arms; an upper bound rather than an isolated-arm counter",
+      "accuracy_against_banked_root": {
+        "closed_flux": {
+          "count": 415,
+          "relative_sup": 0.020828029157143328
+        },
+        "separatrix_band": {
+          "count": 55,
+          "relative_sup": 0.07111433380381033
+        },
+        "scrape_off_layer": {
+          "count": 81,
+          "relative_sup": 0.03279962949605418
+        }
+      },
+      "projection_floor": {
+        "closed_flux": {
+          "count": 415,
+          "relative_sup": 0.01525476830559581
+        },
+        "separatrix_band": {
+          "count": 55,
+          "relative_sup": 0.04808881037725249
+        },
+        "scrape_off_layer": {
+          "count": 81,
+          "relative_sup": 0.021969766027799164
+        }
+      },
+      "residual_trace": [
+        0.033717701647859824,
+        0.02604899997326775
+      ],
+      "support_operator_qualification": "six fixed density functions; degree-fifteen moving-support moments; order-4 parent-cell weighted Green build",
+      "verdict_against_A": {
+        "convergence": {
+          "improves": false,
+          "statement": "does not beat the banked exact-value terminal residual"
+        },
+        "speed": {
+          "improves": false,
+          "single_frame_improves": false,
+          "batched_frame_improves": false,
+          "statement": "does not beat exact-value warm single or batched wall time"
+        },
+        "accuracy": {
+          "improves": false,
+          "statement": "cannot improve on the banked root's zero self-error; worst regional relative-sup error is 0.0711143"
+        }
+      }
+    }
+  },
+  "interaction": {
+    "statement": "Only the carrier lever and its combination with quadratic support are present in this receipt; the independently measured exact-value support-order arm is required before additive interaction can be adjudicated.",
+    "classification": "pending independent support-order receipt"
+  }
+}

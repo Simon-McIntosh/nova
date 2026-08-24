@@ -326,6 +326,79 @@
   <code>analytic-truth-rescore</code>.</p>
 </section>
 
+<section id="s11-rescore">
+  <h2 id="s11-rescore-h">§11 — The accuracy axis, rescored against analytic truth</h2>
+
+  <p><strong>analytic-truth-rescore</strong> landed 2026-08-24 — commit <code>231659ea</code>, merged,
+  gate PASSED. Receipt
+  <code>docs/figures/coefficient-space-newton/analytic-truth-rescore.json</code>: four rows covering
+  integrated arms A and B on coarse and fine closed-form carriers, each carrying analytic <em>and</em>
+  banked-root relative-sup plus relative-RMS errors in all three regions, on identical plasma-cell
+  supports with identical ψ<sub>N</sub> region masks and the same full analytic grid-field span
+  denominator, so the two reference columns compare directly.</p>
+
+  <p><strong>The verdict reverses, and that reversal was the point.</strong> Arm B is closer to
+  analytic truth in <strong>all six</strong> carrier-region comparisons by relative sup, by margins
+  from <strong>6.066e-6 to 3.169e-4</strong>. Relative RMS agrees in five of six; the fine scrape-off
+  layer is metric-dependent, with A better by an RMS margin of 1.534e-5 and B better by a sup margin
+  of 6.066e-6. So the second-order support lever <em>does</em> improve accuracy. The earlier
+  support-order receipt's finding of no improvement was an artefact of the reference it was given, and
+  that dispatch defect was mine.</p>
+
+  <p><strong>The receipt demonstrates the circularity rather than asserting it.</strong> Arm A's
+  banked-root self-error is 1.221e-15 to 2.494e-15 — it is being compared against its own fixed point
+  — while its <em>analytic</em> error is 0.258 to 0.451. A reference that a candidate reproduces to
+  machine precision by construction cannot rank that candidate against anything.</p>
+
+  <p><strong>An open question is surfaced and deliberately not concluded.</strong> Both arms sit at
+  <strong>0.257918 to 0.450674</strong> analytic relative-sup error while converging to machine
+  precision on their own discrete fixed points. A 26 to 45 per cent sup error against a closed form is
+  either a genuine and very large discretisation or setup error, or a comparison artefact. The
+  <strong>flux gauge is the leading suspect</strong>, given this repository's standing rule that
+  <code>psi_norm</code> is gauge-safe only when its axis and boundary anchors come from the same field
+  being normalised, and its warning against combining a Nova-gauge amplitude with a reference
+  constant. It is recorded for attribution rather than attributed: two earlier attributions on this
+  lane were raised and refuted by measurement, and a third guess would be worth less than the
+  measurement that settles it.</p>
+
+  <p><strong>Scope limit, correctly observed by the node.</strong> Measured at source revision
+  <code>162f208b</code>, where only the exact-value arms were integrated; the concurrent
+  coefficient-carrier commit was excluded as non-authoritative in-flight input. The C and D terminal
+  states therefore still owe the same rescoring now that <code>fd2baeb1</code> is integrated.</p>
+
+  <p><strong>Revised matrix reading.</strong> Arm B ties convergence at machine precision,
+  <em>wins</em> accuracy against the closed form, and loses 11.6–20.7 % per iterate with 40–51 % more
+  peak device memory. That is a trade rather than a loss, which is why the device benchmark of §12
+  matters before any judgement: the memory ratios above were measured on a shared CPU allocation and
+  need not hold on the reserved H200.</p>
+</section>
+
+<section id="carrier-blocked">
+  <h2 id="carrier-blocked-h">Carried blocker — the MAST response carrier</h2>
+
+  <p><strong>mast-response-carrier-warm</strong> is <strong>blocked</strong> on compute, not on
+  design. Its builder is preserved at commit <code>b5e3b93e</code>, merged as <code>0ff8b0ee</code>: a
+  content-addressed fail-closed NPZ builder with a fresh-process cache-only import guard. The carrier
+  itself is absent — no persisted 1126 × 101, 101-circuit object exists — so semantic identity
+  <code>1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994</code> and target digest
+  <code>5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9</code> have not been
+  demonstrated by a cache-only reload.</p>
+
+  <p><strong>Three attempts, each rejected for a stated reason, and publication is atomic so nothing
+  partial survives.</strong> Job 1253402 rejected at 1:56 for ambiguous same-process verification;
+  job 1253403 rejected at 3:18 on float64 warnings; job 1253405 ran <em>cleanly</em> with
+  <code>configure_dtypes</code> and <code>JAX_ENABLE_X64</code> for <strong>40:15</strong> and had not
+  published when the 55-minute node fence cancelled it. The node's own leaning is the reserved H200
+  lane with float64 enabled, since the builder is JAX-backed and the valid CPU debug run showed that
+  lane may not finish inside 45 minutes.</p>
+
+  <p><strong>What it blocks.</strong> <code>label-seed-residual-field</code> on
+  <a href="/nova/plateau-input-attribution">plateau-input-attribution</a> §2, whose implementation is
+  already committed at <code>7b578ae2</code> and which measured the forbidden cold cost at 48:07
+  before refusing to pay it twice. The redispatch needs compute authority beyond a node fence rather
+  than a fourth attempt at the same wall.</p>
+</section>
+
 </main>
 </body>
 </html>

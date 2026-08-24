@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T09:51:31",
+  "updated": "2026-08-24T10:29:06",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -15,7 +15,7 @@
         "id": "analytic-rescore",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a03283-ecee-7252-9157-42dba56eddc2",
         "created": "2026-08-24"
       },
       {
@@ -30545,9 +30545,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260824T064456693943-analytic-truth-rescore",
+        "plan": "coefficient-space-newton",
+        "section": "\u00a711",
+        "node": "analytic-truth-rescore",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "analytic-rescore",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T06:45:01Z",
+        "completed_at": "2026-08-24T07:14:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1757,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1757,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "162f208b2db57fa918f16d14a616d453a4da347d",
+        "commits": [
+          "231659ea748322d8607a71cc82b2d4e522e8cc1c"
+        ],
+        "changed_lines": {
+          "added": 1001,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "VERDICT REVERSED on the accuracy axis, and the reversal was the point of the node. Four rows covering integrated arms A and B on coarse and fine closed-form carriers, each with analytic and banked-root relative-sup plus relative-RMS errors in all three regions, using identical plasma-cell supports, analytic psi_N region masks and the same full analytic grid-field span denominator so the columns compare directly. ARM B IS CLOSER TO ANALYTIC TRUTH IN ALL SIX carrier-region comparisons by relative sup, margins 6.066e-6 to 3.169e-4; relative RMS agrees in 5 of 6, with fine scrape-off metric-dependent (A better by RMS margin 1.534e-5, B better by sup margin 6.066e-6). So the second-order support lever DOES improve accuracy, and the earlier support-order receipt finding of no improvement was an artefact of scoring against the banked converged root, which is arm A own fixed point - demonstrated here by the contrast between A near-zero self-error of 1.221e-15 to 2.494e-15 and its 0.258 to 0.451 analytic error. AN OPEN QUESTION IS SURFACED AND NOT CONCLUDED: both arms sit 0.257918 to 0.450674 in analytic relative-sup error while converging to machine precision on their own discrete fixed points. A 26 to 45 percent sup error against the closed form is either a genuine and very large discretisation or setup error, or a comparison artefact - the flux gauge is the leading suspect given the repository standing warning against combining a Nova-gauge amplitude with a reference constant. It is recorded for attribution rather than attributed, since two prior attributions on this lane were refuted by measurement. Measured at source revision 162f208b with only exact-value arms integrated; the concurrent carrier commit was correctly excluded as non-authoritative in-flight input.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T064456693943-analytic-truth-rescore/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03283-ecee-7252-9157-42dba56eddc2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12326400,
+            "cached_input_tokens_cumulative": 12326400,
+            "input_tokens": 12543216,
+            "input_tokens_cumulative": 12543216,
+            "output_tokens": 28441,
+            "output_tokens_cumulative": 28441,
+            "reasoning_output_tokens": 10153,
+            "reasoning_output_tokens_cumulative": 10153
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 748
+    "_version": 750
   }
 }

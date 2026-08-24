@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="same-device-label-determinism">
   <meta name="plan-title" content="Same-Device Label Determinism — a route that disagrees with itself">
   <meta name="plan-summary" content="Two back-to-back runs of one driver on one H200, on identical inputs, return different registered-bound verdicts: bound totals move at both batch widths and ten individual case verdicts change. Establish whether a single route is reproducible against itself before any labelled store certifies its own output.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="8.0">
   <meta name="plan-capability-version" content="1.0">
@@ -25,7 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-24">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
+<meta name="plan-commits" content="cef8f151582f8fef72dd5cee6dab5cac6fbd9710">
+<meta name="plan-artifacts" content="scripts/determinism_reuse/report.md">
+<meta name="plan-impl" content="0.25">
 </head>
 <body>
   <main class="plan-doc">
@@ -185,6 +188,11 @@
     </article>
 </section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-20260824T1600-reusemap" data-who="reckon-ship" data-when="2026-08-24T16:00:00Z">
+    <div class="r-comment-body">determinism-reuse-map landed - commit cef8f151, merged, gate PASSED, 179 lines, scope clean at one file. 7 direct-state sites, 8 repetition sites or receipts, 11 reduction/scatter/precision/executable-control sites, 6 explicit no-candidate findings. THE MEASUREMENT SPINE IS ALREADY THERE AND ONE THING IS NOT. ForwardEquilibrium.flux publishes the complete terminal flux array on every solve, _case_measurement in observable_batch_acceptance.py already holds scalar.flux and transformed.flux transiently at exactly the right case/route boundary, and _named_tree/_leaves already name all 69 registered leaves including the divergence_b canary. What is missing is narrow and decisive: RAW TERMINAL ARRAYS RETAINED ACROSS REPETITIONS IS ZERO. A scan of the acceptance, discriminator, conditioned-convergence and parity receipts found no scalar path holding a flux value and no JSON carrying both a repetition collection and a flux array - _repetition_snapshot deliberately discards terminal flux and raw observable values. So the state verdict cannot be recovered from banked evidence and must be run. THE MAP ALSO NARROWS SECTION 3'S CANDIDATE LIST BEFORE IT OPENS. Atomics-based scatter is UNFIT on the observation seam: StencilMesh._scatter places one derivative per unique centre with .at[centre].set and construction rejects repeated centre indices, with a test guarding it, and no segment sum or scatter-add exists on the equilibrium path. The canary is UNCONTROLLED rather than mis-controlled: conservation.divergence_b derives the poloidal field and its divergence then applies a masked jnp.max, and does not use layout_invariant_sum at all - which is why the repaired moment reductions made volume and major_radius bitwise equal without touching it. AND THE STRONGEST SURVIVING CANDIDATE IS EXECUTABLE IDENTITY, NOT ARITHMETIC: no acceptance driver calls the persistent compilation cache, so the two banked repetitions may have run SEPARATELY COMPILED EXECUTABLES inside one allocation, and XLA is free to resolve reduction order differently between compilations. Nothing pins deterministic GPU kernels, cuBLAS workspace determinism, an algorithm id or an autotune level on the acceptance route, and configure_dtypes holds float64 policy without pinning association. Only the selected moment reductions have an explicit association, so the complete route must not be described as reduction-fixed. RECOMMENDED SHAPE, ADOPTED: extend observable_batch_acceptance rather than author a second acceptance route - one frozen profile and seed per case, the solve callable created once per case and width, three invocations in one process on byte-identical copied inputs, every result blocked and every raw flux retained losslessly with repetition and case axes, then bitwise unequal-element count with maximum absolute and relative difference against repetition 1 for both the state and all 69 leaves, naming the first differing leaf. Cache-off and fixed-cache arms are named controls only.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

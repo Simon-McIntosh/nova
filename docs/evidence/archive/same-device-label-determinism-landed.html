@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="same-device-label-determinism-landed">
+  <meta name="plan-evidence-for" content="same-device-label-determinism">
+  <meta name="plan-title" content="Same-Device Label Determinism — execution record">
+  <meta name="plan-summary" content="Cumulative execution evidence for the same-device determinism lane: the reuse map's inventory and the candidates it narrowed before section 3 opened, then the state-versus-label verdict and the control that follows from it.">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Same-Device Label Determinism — execution record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h1>Same-Device Label Determinism — execution record</h1>
+
+    <p>Execution evidence for <a href="/nova/same-device-label-determinism">same-device-label-determinism</a>.
+    One anchor per material result, updated as each node lands.</p>
+
+    <h2 id="reuse-map">Reuse map — the spine exists, cross-repetition state does not</h2>
+
+    <p><strong>Node <code>determinism-reuse-map</code>, commit <code>cef8f151</code>, gate PASSED,
+    2026-08-24.</strong> 179 lines at <code>scripts/determinism_reuse/report.md</code>; scope clean at
+    one file. Inventory: 7 direct terminal-state sites, 8 repetition sites or receipts, 11 reduction,
+    scatter, precision or executable-control sites, and 6 explicit no-candidate findings.</p>
+
+    <p><strong>The gap is narrow and decisive.</strong> <code>ForwardEquilibrium.flux</code> publishes
+    the complete terminal flux array on every solve; <code>_case_measurement</code> in
+    <code>benchmarks/observable_batch_acceptance.py</code> already holds both routes' flux transiently
+    at exactly the right case boundary; <code>_named_tree</code> and <code>_leaves</code> already name
+    every one of the 69 registered leaves including the canary. But <strong>raw terminal arrays
+    retained across repetitions is zero</strong> — a scan of the acceptance, discriminator,
+    conditioned-convergence and parity receipts found no scalar path holding a flux value and no JSON
+    carrying both a repetition collection and a flux array, because
+    <code>_repetition_snapshot</code> deliberately discards terminal flux and raw observable values.
+    The state verdict therefore cannot be recovered from banked evidence; it has to be run.</p>
+
+    <h3 id="narrowed-candidates">Candidates narrowed before §3 opened</h3>
+
+    <p>Three of the mechanisms §3 lists as testable are now differently placed, and one is stronger
+    than the section assumed.</p>
+
+    <table>
+      <caption>Candidate mechanisms for the run-to-run movement, after the map</caption>
+      <thead>
+        <tr><th scope="col">Mechanism</th><th scope="col">Standing after the map</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Atomics-based scatter or segment-sum reduction whose order depends on scheduling</td>
+          <td><strong>Unfit on the observation seam.</strong> <code>StencilMesh._scatter</code> places
+          one derivative per unique centre with <code>.at[centre].set</code>, construction rejects
+          repeated centre indices, and a test guards that property. No segment sum or scatter-add
+          exists on the equilibrium path. This does not exclude a nondeterministic library kernel
+          elsewhere.</td>
+        </tr>
+        <tr>
+          <td>Reduction association inside the canary</td>
+          <td><strong>Uncontrolled rather than mis-controlled.</strong>
+          <code>conservation.divergence_b</code> derives the poloidal field and its divergence and
+          then applies a masked <code>jnp.max</code>; it does not use
+          <code>layout_invariant_sum</code> at all. That is why repairing the moment reductions made
+          <code>moments.volume</code> and <code>moments.major_radius</code> bitwise equal without
+          touching the movement.</td>
+        </tr>
+        <tr>
+          <td>Reduction-order freedom XLA may resolve differently between compilations</td>
+          <td><strong>Strongest surviving candidate, and it is about executable identity rather than
+          arithmetic.</strong> No acceptance driver calls the persistent compilation cache, so the two
+          banked repetitions may have run separately compiled executables <em>inside one
+          allocation</em>. Nothing on the acceptance route pins deterministic GPU kernels, cuBLAS
+          workspace determinism, an algorithm id or an autotune level, and
+          <code>configure_dtypes</code> holds float64 policy without pinning association.</td>
+        </tr>
+        <tr>
+          <td>Whole-route reduction fixing</td>
+          <td><strong>Not claimable.</strong> Only the selected moment reductions have an explicit
+          association; the fixed-point ladder and flux operator still carry backend reductions, dense
+          products, Gram solves and norms. The complete route must not be described as
+          reduction-fixed.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><strong>The recommended measurement shape was adopted rather than reinvented:</strong> extend
+    the existing acceptance driver rather than author a second acceptance route — one frozen profile
+    and seed per case, the solve callable created once per case and width, three invocations in one
+    process on byte-identical copied inputs, every result blocked and every raw flux retained
+    losslessly with repetition and case axes, then bitwise unequal-element count with maximum
+    absolute and relative difference against repetition 1 for both the state and all 69 leaves,
+    naming the first differing leaf. Cache-off and fixed-cache are named control arms, never
+    evidence of a deterministic production route on their own.</p>
+
+  </main>
+</body>
+</html>

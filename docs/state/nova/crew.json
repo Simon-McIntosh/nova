@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T17:52:30",
+  "updated": "2026-08-24T17:56:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -149,6 +149,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a0325b-5d04-7a71-849b-95e82562d06c",
+        "created": "2026-08-24"
+      },
+      {
+        "id": "clip-rescore",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-24"
       },
       {
@@ -30726,9 +30733,89 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260824T154346041338-determinism-reuse-map",
+        "plan": "same-device-label-determinism",
+        "section": "\u00a72",
+        "node": "determinism-reuse-map",
+        "role": "implement",
+        "spec_level": "open",
+        "member": "determinism-scout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T15:43:50Z",
+        "completed_at": "2026-08-24T15:54:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 629,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 629,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "5acde3e08b61e1176000953a63b80593e949375a",
+        "commits": [
+          "cef8f151"
+        ],
+        "changed_lines": {
+          "added": 179,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T154346041338-determinism-reuse-map/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03471-3d19-7a82-b151-befaa1228da1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7547648,
+            "cached_input_tokens_cumulative": 7547648,
+            "input_tokens": 7772983,
+            "input_tokens_cumulative": 7772983,
+            "output_tokens": 23065,
+            "output_tokens_cumulative": 23065,
+            "reasoning_output_tokens": 7459,
+            "reasoning_output_tokens_cumulative": 7459
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "watch_override": {
+          "arming_line": "reckon crew watch --project nova",
+          "requested": true,
+          "watcher_live": false
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 763
+    "_version": 765
   }
 }

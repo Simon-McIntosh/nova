@@ -324,6 +324,30 @@
   again on a bare rerun. The acceptance is therefore correctly shaped as a per-rung re-run.</p>
 </section>
 
+<section id="drain">
+  <h2 id="drain-h">Followup drain ledger</h2>
+  <p>Every open followup and every landed manifest's <code>follow_ons</code> entry for this plan,
+  each disposed from the closed set. A row marked <em>folded</em> names the node that took it.</p>
+<pre>DRAIN LEDGER — derived-observable-parity @ 2026-08-24T03:05Z
+
+  f-dop-001  driving followup                       resolved (outcome recorded)
+  reuse map: compose observe with jitted vmap,
+    reuse the criterion registration                folded -> observable-computation-discriminator
+  reuse map: no heterogeneous six-profile batch;
+    do not invent one yet                           folded -> observable-batch-acceptance
+                                                             (honoured: not invented)
+  acceptance: regenerate from integrated source
+    and investigate the run-to-run instability      folded -> integrated-acceptance-regeneration
+  reduction: decide the relative-only
+    divergence_j failure on this evidence           folded -> integrated-acceptance-regeneration
+  acceptance regeneration: reference-lane
+    bank-value verification                         folded -> reference-lane-verification
+  discriminator / reference verification            no follow_ons emitted
+  f-dop-002  pointer to the successor               foreign-owner -> same-device-label-determinism
+  ---
+  rows: 8   foldable-remaining: 0</pre>
+</section>
+
 </main>
 </body>
 </html>

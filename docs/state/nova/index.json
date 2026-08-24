@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T02:55:24",
+  "updated": "2026-08-24T02:57:40",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -697,7 +697,7 @@
       },
       {
         "id": "S14",
-        "status": "active",
+        "status": "done",
         "theme": "Reach the root: convergence on a non-normal near-marginal map",
         "items": [
           {
@@ -715,7 +715,7 @@
       },
       {
         "id": "S15",
-        "status": "planned",
+        "status": "active",
         "theme": "Reach the root, then run the catalog",
         "items": [
           {
@@ -762,7 +762,7 @@
         "description": "The convergence sprint closed both its hypotheses as honest negatives: neither a longer step along the topology-preserving manifold nor a seed-alignment selector moves the residual, and admitted steps were already full Newton steps. What remains is a question no stepping mechanism answers - whether a diverted-class root exists below the measured plateau at all. Answer that first; the GPU catalog runs behind it and is relocated here out of a sprint slot that scheduled it ahead of its own prerequisite."
       }
     ],
-    "active_sprint_id": "S14",
+    "active_sprint_id": "S15",
     "timeline": [
       {
         "when": "2026-07-29",
@@ -920,6 +920,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 68
+    "_version": 69
   }
 }

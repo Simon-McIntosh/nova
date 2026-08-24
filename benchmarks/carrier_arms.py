@@ -1,4 +1,4 @@
-"""Measure exact-value and coefficient-carrier equilibrium iterations.
+"""Measure exact-value and plasma-only coefficient-carrier iterations.
 
 The closed-form coarse fixture supplies one warm semantic machine, one banked
 root, and one ordinary production map.  The exact-value route is the banked
@@ -37,7 +37,8 @@ from nova.equilibrium.topology import boundary_mode
 from nova.jax.config import configure_dtypes
 
 
-OUTPUT = Path("docs/figures/coefficient-space-newton/carrier-arms.json")
+OUTPUT = Path("docs/figures/coefficient-space-newton/plasma-only-carrier.json")
+TOTAL_CARRIER_RECEIPT = Path("docs/figures/coefficient-space-newton/carrier-arms.json")
 FIXTURE_MODULE = Path("scripts/analytic_oracle_fixtures/measure.py")
 ROOT_BANK = Path("scripts/oracle_rebaseline/root-coarse.npz")
 ROOT_RECEIPT = Path("scripts/oracle_rebaseline/results.json")
@@ -46,6 +47,7 @@ DEGREE_RECEIPT = Path(
 )
 SUPPORT_RECEIPT = Path("docs/figures/coefficient-space-newton/second-order-kernel.json")
 KNOTS_PER_AXIS = 6
+KNOT_SCAN = tuple(range(4, 21, 2))
 NEWTON_STEPS = 4
 BATCH_SIZE = 4
 SEPARATRIX_HALF_WIDTH = 0.05
@@ -285,7 +287,61 @@ def _topology(operator, state):
     }
 
 
-def _solve_arm(exact_map, operator, carrier, initial):
+def _residual_normalisations(exact_output, exact_state, external):
+    output = np.asarray(exact_output)
+    state = np.asarray(exact_state)
+    known_external = np.asarray(external)
+    absolute_sup = float(np.max(np.abs(output - state)))
+    total_peak = float(np.max(np.abs(output)))
+    plasma_peak = float(np.max(np.abs(output - known_external)))
+    return {
+        "absolute_sup_wb": absolute_sup,
+        "total_flux_peak_wb": total_peak,
+        "plasma_flux_peak_wb": plasma_peak,
+        "normalised_by_total_flux_peak": absolute_sup / total_peak,
+        "normalised_by_plasma_flux_peak": absolute_sup / plasma_peak,
+        "reported_terminal_residual_normalisation": "total_flux_peak",
+    }
+
+
+def _projection_ladder(
+    coordinate, plasma_flux, grid_count, psi_norm, terminal_residual
+):
+    rows = []
+    first_reaching = None
+    for knots in KNOT_SCAN:
+        candidate = CoefficientCarrier.from_coordinates(
+            coordinate,
+            radial_knots=knots,
+            vertical_knots=knots,
+        )
+        represented = np.asarray(candidate.expand(candidate.project(plasma_flux)))
+        regional = _regional_error(
+            plasma_flux[:grid_count], represented[:grid_count], psi_norm
+        )
+        worst = max(
+            value["relative_sup"]
+            for value in regional.values()
+            if value["relative_sup"] is not None
+        )
+        row = {
+            "knots_per_axis": knots,
+            "coefficient_count": candidate.coefficient_count,
+            "regional_projection_floor": regional,
+            "worst_regional_relative_sup": worst,
+        }
+        rows.append(row)
+        if first_reaching is None and worst <= terminal_residual:
+            first_reaching = {
+                "knots_per_axis": knots,
+                "coefficient_count": candidate.coefficient_count,
+                "worst_regional_relative_sup": worst,
+            }
+            break
+    return rows, first_reaching
+
+
+def _solve_arm(exact_map, operator, carrier, initial, external):
     def admissible(output):
         _masks, topology = operator.read(output)
         return jnp.all(jnp.isfinite(topology.axis)) & (~topology.diverted)
@@ -297,6 +353,7 @@ def _solve_arm(exact_map, operator, carrier, initial):
         initial,
         steps=NEWTON_STEPS,
         admissible=admissible,
+        external=external,
     )
     result.exact_output.block_until_ready()
     wall_seconds = perf_counter() - started
@@ -326,6 +383,7 @@ def measure() -> dict[str, object]:
     exact_internal = fixture._internal_flux_image(zero_exterior, exact_coefficients)
     operator = fixture.forward_operator(case, machine, exact_analytic - exact_internal)
     first_support_map = operator.flux_map()
+    known_external = np.asarray(operator.external(), dtype=np.float64)
 
     with np.load(ROOT_BANK, allow_pickle=False) as bank:
         root = np.asarray(bank["root_state"], dtype=np.float64)
@@ -334,6 +392,10 @@ def measure() -> dict[str, object]:
     root_receipt = json.loads(ROOT_RECEIPT.read_text(encoding="utf-8"))["fixtures"][
         "coarse"
     ]
+    total_carrier_receipt = json.loads(
+        TOTAL_CARRIER_RECEIPT.read_text(encoding="utf-8")
+    )
+    total_carrier_arm = total_carrier_receipt["arms"]["C"]
 
     carrier_started = perf_counter()
     carrier = CoefficientCarrier.from_coordinates(
@@ -343,7 +405,9 @@ def measure() -> dict[str, object]:
     )
     carrier_seconds = perf_counter() - carrier_started
     initial_exact = root + 0.02 * (seed - root)
-    initial_coefficients = carrier.project(initial_exact)
+    initial_plasma = initial_exact - known_external
+    root_plasma = root - known_external
+    initial_coefficients = carrier.project(initial_plasma)
 
     support_started = perf_counter()
     support_geometry = _support_geometry(machine, coordinate)
@@ -351,18 +415,40 @@ def measure() -> dict[str, object]:
     second_support_map = _quadratic_support_map(operator, support_geometry)
 
     first_result, first_wall = _solve_arm(
-        first_support_map, operator, carrier, initial_coefficients
+        first_support_map,
+        operator,
+        carrier,
+        initial_coefficients,
+        known_external,
     )
     second_result, second_wall = _solve_arm(
-        second_support_map, operator, carrier, initial_coefficients
+        second_support_map,
+        operator,
+        carrier,
+        initial_coefficients,
+        known_external,
     )
 
-    exact_route = select_fixed_point_map(IterateRoute.EXACT_VALUES, first_support_map)
-    first_coefficient_map = coefficient_fixed_point_map(first_support_map, carrier)[0]
-    second_coefficient_map = coefficient_fixed_point_map(second_support_map, carrier)[0]
+    exact_route = select_fixed_point_map(
+        IterateRoute.EXACT_VALUES,
+        first_support_map,
+        carrier=carrier,
+        external=known_external,
+    )
+    np.testing.assert_array_equal(
+        np.asarray(exact_route(jnp.asarray(root))),
+        np.asarray(first_support_map(jnp.asarray(root))),
+    )
+    first_coefficient_map = coefficient_fixed_point_map(
+        first_support_map, carrier, external=known_external
+    )[0]
+    second_coefficient_map = coefficient_fixed_point_map(
+        second_support_map, carrier, external=known_external
+    )[0]
     exact_per_frame = _timed(exact_route, jnp.asarray(root))
-    first_per_frame = _timed(first_coefficient_map, carrier.project(root))
-    second_per_frame = _timed(second_coefficient_map, carrier.project(root))
+    root_coefficients = carrier.project(root_plasma)
+    first_per_frame = _timed(first_coefficient_map, root_coefficients)
+    second_per_frame = _timed(second_coefficient_map, root_coefficients)
 
     exact_batch = jax.vmap(exact_route)
     first_batch = jax.vmap(first_coefficient_map)
@@ -371,22 +457,34 @@ def measure() -> dict[str, object]:
         exact_batch, jnp.broadcast_to(jnp.asarray(root), (BATCH_SIZE, root.size))
     )
     coefficient_batch = jnp.broadcast_to(
-        carrier.project(root), (BATCH_SIZE, carrier.coefficient_count)
+        root_coefficients, (BATCH_SIZE, carrier.coefficient_count)
     )
     first_per_batch = _timed(first_batch, coefficient_batch)
     second_per_batch = _timed(second_batch, coefficient_batch)
     allocation_peak_memory = _cgroup_peak_memory()
 
-    represented_root = np.asarray(carrier.expand(carrier.project(root)))
+    represented_plasma = np.asarray(carrier.expand(root_coefficients))
     grid_count = len(machine.node)
     projection_floor = _regional_error(
-        root[:grid_count], represented_root[:grid_count], root_psi_norm
+        root_plasma[:grid_count], represented_plasma[:grid_count], root_psi_norm
+    )
+    banked_total_projection_floor = total_carrier_arm["projection_floor"]
+    banked_total_carrier_residual = float(
+        total_carrier_arm["terminal_exact_field_residual"]
+    )
+    projection_ladder, first_reaching_banked_carrier = _projection_ladder(
+        coordinate,
+        root_plasma,
+        grid_count,
+        root_psi_norm,
+        banked_total_carrier_residual,
     )
 
     banked_residual = float(
         root_receipt["metric"]["fixed_point_residual"]["recovery_value"]
     )
     banked_history = root_receipt["direct_attempt"]
+    baseline_output = np.asarray(first_support_map(jnp.asarray(root)))
     baseline = {
         "iterate": "exact psi values",
         "support_order": "monopole plus two first moments",
@@ -418,15 +516,24 @@ def measure() -> dict[str, object]:
             for name, value in projection_floor.items()
         },
         "projection_floor": None,
+        "terminal_residual_normalisations": _residual_normalisations(
+            baseline_output, root, known_external
+        ),
     }
 
     def carrier_record(result, wall, per_frame, per_batch, order):
         exact_output = np.asarray(result.exact_output)
+        residual_normalisations = _residual_normalisations(
+            exact_output, result.exact_state, known_external
+        )
         return {
-            "iterate": "six-by-six spline knot values",
+            "iterate": "six-by-six plasma-only spline knot values",
             "coefficient_count": carrier.coefficient_count,
             "support_order": order,
-            "terminal_exact_field_residual": float(result.exact_residual),
+            "terminal_exact_field_residual": residual_normalisations[
+                "normalised_by_total_flux_peak"
+            ],
+            "terminal_residual_normalisations": residual_normalisations,
             "admitted_advance_count": result.admitted_advances,
             "newton_step_equivalents": result.newton_step_equivalents,
             "terminal_topology": _topology(operator, exact_output),
@@ -448,6 +555,7 @@ def measure() -> dict[str, object]:
                 root[:grid_count], exact_output[:grid_count], root_psi_norm
             ),
             "projection_floor": projection_floor,
+            "banked_total_flux_projection_floor": banked_total_projection_floor,
             "residual_trace": np.asarray(result.trace).tolist(),
         }
 
@@ -524,7 +632,7 @@ def measure() -> dict[str, object]:
 
     return {
         "artifact": str(OUTPUT),
-        "schema": "carrier-arm-comparison-1",
+        "schema": "plasma-only-carrier-comparison-1",
         "source_revision": source_revision,
         "measurement_scope": {
             "frame_set": ["closed-form-oracle-coarse"],
@@ -539,7 +647,11 @@ def measure() -> dict[str, object]:
             "precision": "float64",
             "exact_output_contract": (
                 "all residual, topology, domain and profile reads use the ordinary "
-                "Green output; coefficients are only projected iterate state"
+                "total-flux Green output; coefficients carry only plasma flux"
+            ),
+            "carrier_state_contract": (
+                "u = psi_total - psi_external; u_next = "
+                "map(u + psi_external) - psi_external"
             ),
             "banked_root": str(ROOT_BANK),
             "banked_root_sha256": _sha256(ROOT_BANK),
@@ -556,11 +668,41 @@ def measure() -> dict[str, object]:
             "second_order_kernel_sha256": _sha256(SUPPORT_RECEIPT),
             "root_receipt": str(ROOT_RECEIPT),
             "root_receipt_sha256": _sha256(ROOT_RECEIPT),
+            "banked_total_carrier_receipt": str(TOTAL_CARRIER_RECEIPT),
+            "banked_total_carrier_receipt_sha256": _sha256(TOTAL_CARRIER_RECEIPT),
         },
         "exact_value_route_retained": {
             "route": IterateRoute.EXACT_VALUES.value,
             "call_site_selection": True,
             "coefficient_route": IterateRoute.COEFFICIENT_CARRIER.value,
+            "asserted_equal_to_direct_map": True,
+            "global_switch_introduced": False,
+        },
+        "normalisation_contract": {
+            "reported_terminal_residual": (
+                "absolute residual sup divided by total-flux output peak"
+            ),
+            "secondary_terminal_residual": (
+                "absolute residual sup divided by plasma-only output peak"
+            ),
+            "both_denominators_reported_per_arm": True,
+        },
+        "projection_floor_comparison": {
+            "unchanged_knots_per_axis": KNOTS_PER_AXIS,
+            "coefficient_count": carrier.coefficient_count,
+            "plasma_only": projection_floor,
+            "banked_total_flux": banked_total_projection_floor,
+        },
+        "knot_threshold": {
+            "criterion": (
+                "worst regional plasma-only projection floor no greater than "
+                "the banked total-flux carrier terminal residual"
+            ),
+            "banked_total_flux_carrier_terminal_residual": (
+                banked_total_carrier_residual
+            ),
+            "first_reaching": first_reaching_banked_carrier,
+            "ladder": projection_ladder,
         },
         "arms": arms,
         "interaction": {

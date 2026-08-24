@@ -269,6 +269,24 @@ def _field_receipt(
     full_squared = grid_squared + wall_squared
 
     operator = profile.operator
+    prescribed = operator.prescribed_current_field
+    if prescribed is None:
+        raise RuntimeError("the labelled map has no prescribed current response")
+    circuit_response = np.asarray(prescribed.response, dtype=np.float64)
+    if circuit_response.shape != (residual.size, 101):
+        raise RuntimeError("the labelled map has the wrong circuit-response shape")
+    response_squared = np.sum(circuit_response**2, axis=0)
+    fitted_amplitude = np.divide(
+        circuit_response.T @ residual,
+        response_squared,
+        out=np.zeros(circuit_response.shape[1], dtype=np.float64),
+        where=response_squared > 0.0,
+    )
+    projection_squared = fitted_amplitude**2 * response_squared
+    best_circuit = int(np.argmax(projection_squared))
+    circuit_fraction = float(
+        projection_squared[best_circuit] / max(full_squared, np.finfo(float).tiny)
+    )
     normalized_flux = (state[:grid_count] - float(operator.declared_axis_flux)) / (
         float(operator.declared_boundary_flux) - float(operator.declared_axis_flux)
     )
@@ -282,7 +300,8 @@ def _field_receipt(
         "wall": float(
             (boundary_squared + wall_squared) / max(full_squared, np.finfo(float).tiny)
         ),
-        "profile_extraction": float(
+        "conductor_current_wiring": circuit_fraction,
+        "profiles": float(
             core_squared / max(full_squared, np.finfo(float).tiny) * profile_fraction
         ),
         "discretisation": float(
@@ -342,16 +361,27 @@ def _field_receipt(
             "method": "twelve fixed normalized-flux bins over the closed-flux core",
             "explained_core_variance_fraction": profile_fraction,
         },
+        "single_circuit_green_pattern": {
+            "method": (
+                "least-squares projection of the full residual onto each of 101 "
+                "single-circuit response columns"
+            ),
+            "best_response_column_zero_based": best_circuit,
+            "best_stored_circuit_one_based": best_circuit + 1,
+            "equivalent_current_correction_a": float(fitted_amplitude[best_circuit]),
+            "fraction_of_full_squared_magnitude_explained": circuit_fraction,
+        },
         "stencil_pattern": oscillation,
         "wall_state_fraction_of_full_squared_magnitude": float(
             wall_squared / max(full_squared, np.finfo(float).tiny)
         ),
         "candidate_pattern_scores": {
             "method": (
-                "wall is boundary-band plus wall-state energy; profile extraction "
-                "is closed-core energy explained by labelled flux; discretisation "
-                "is neighbour-difference energy. Scores describe patterns and are "
-                "not acceptance criteria."
+                "wall is boundary-band plus wall-state energy; conductor wiring "
+                "is the best single-circuit projection; profiles are closed-core "
+                "energy explained by labelled flux; discretisation is neighbour-"
+                "difference energy. Scores describe patterns and are not "
+                "acceptance criteria."
             ),
             "scores": candidate_scores,
             "most_implicated_candidate": implicated,
@@ -510,7 +540,12 @@ def run(
         )
     mean_scores = {
         name: float(np.mean([row[name] for row in candidate_rows]))
-        for name in ("wall", "profile_extraction", "discretisation")
+        for name in (
+            "wall",
+            "conductor_current_wiring",
+            "profiles",
+            "discretisation",
+        )
     }
     implicated = max(mean_scores, key=mean_scores.get)
     verdict = {
@@ -518,9 +553,11 @@ def run(
         "cohort_mean_pattern_scores": mean_scores,
         "statement": (
             f"The one-application residual structure most strongly implicates "
-            f"{implicated.replace('_', ' ')} among wall, profile extraction and "
-            "discretisation; this is a spatial attribution, not proof that changing "
-            "that input produces a converged parity root."
+            f"{implicated.replace('_', ' ')} among wall, conductor-current wiring, "
+            "profiles and discretisation; this is a spatial attribution, not proof "
+            "that changing that input produces a converged parity root. The current "
+            "production circuit is closed, so its score diagnoses a wiring-shaped "
+            "residual and does not authorise fitted currents."
         ),
         "qualification": (
             "The scores are commensurate fractions of full residual energy after "

@@ -167,6 +167,93 @@
     better-conditioned Jacobian is a real result on its own. Reaching a lower terminal residual is a
     different result. A receipt that reports one as though it established the other fails review.</p>
 
+    <h2 id="s7">§7 — A support that carries a curvature jump, and the quantity that decides which</h2>
+
+    <p><strong>First, the jump has a known size, and it may be zero.</strong> The curvature
+    discontinuity in ψ across the boundary is not free-floating: Δ*ψ jumps by exactly
+    −μ₀·R·J<sub>φ</sub>(ψ<sub>b</sub>⁻), the edge current density. If p′ and FF′ taper to zero at the
+    boundary there is <em>no</em> curvature jump and a globally smooth basis is entirely adequate. So
+    the first measurement is not a basis study at all: evaluate the edge current density these cases
+    actually carry. That sizes the problem before any support is chosen, and it is nearly free because
+    the profiles are banked.</p>
+
+    <p><strong>Second, and this is the strongest option: do not represent the jump — generate
+    it.</strong> Nova is a Green's-function code. If the unknown is the plasma current rather than the
+    flux, then ψ = ψ<sub>coils</sub> + <em>G</em>·J<sub>φ</sub>, and the Green operator maps a
+    <em>jump</em> in J<sub>φ</sub> to a <em>curvature jump</em> in ψ exactly, because it is a smoothing
+    operator of order two. The discontinuity is produced by construction and never approximated. Two
+    further consequences follow: Δ* is never discretised, so the observed convergence order of 0.97 —
+    a property of the stencil — cannot arise at all; and the fixed operator is a single dense
+    contraction, which is the ideal <code>vmap</code> target.</p>
+
+    <p><strong>And the hard geometric part of that route is already built.</strong>
+    <code>nova/equilibrium/separatrix_clip.py</code> carries atomic shared-edge crossings with
+    canonical exact-zero corners, conserving patch area to 2.2e-16–4.4e-16 m² on every grid; its
+    clipped zeroth and first moments about fixed centroids move <em>continuously at first order</em>
+    under boundary motion, ε-doubling ratio 1.99998, where a centroid rule jumps by a factor of a
+    million; and its padded <code>jit</code> contraction <strong>traces once over a moving
+    separatrix</strong> with x64 enforced at the entry point. The moving-support problem is therefore
+    solved already — on the current side, not the flux side. That is a strong argument for putting the
+    unknown where the machinery is.</p>
+
+    <table>
+      <caption>Supports that can carry a curvature jump, ranked by fit to this codebase</caption>
+      <thead>
+        <tr><th scope="col">Support</th><th scope="col">How the jump is handled</th><th scope="col">Cost and risk here</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Current-moment unknown with Green evaluation</strong></td>
+          <td>Exact by construction: the jump lives in J<sub>φ</sub>, and the order-two smoothing
+          operator turns it into the right curvature jump in ψ.</td>
+          <td>Native to the architecture; the moving-support clip and the response cache both exist.
+          The nonlinearity moves to the support mask, which is where it is already handled.</td>
+        </tr>
+        <tr>
+          <td><strong>Level-set enrichment on a smooth basis</strong></td>
+          <td>Add functions of the form max(φ, 0)² with φ = ψ − ψ<sub>b</sub>: continuous in value and
+          gradient, discontinuous in second derivative, along the <em>actual</em> curve rather than
+          along knot lines. The enrichment coefficient must vary along the interface, since the jump
+          magnitude varies poloidally with the local edge current.</td>
+          <td>Small added degree count, only where the interface crosses support. Keeps ψ as the
+          unknown. Fixed shapes are maintainable by masking a fixed superset rather than resizing.</td>
+        </tr>
+        <tr>
+          <td><strong>Reduced continuity by knot multiplicity</strong></td>
+          <td>A cubic B-spline knot of multiplicity two is C¹ — the correct continuity class — but
+          only along axis-aligned knot lines, and the separatrix is a curve.</td>
+          <td>Cheapest of all and worth running as a control: if axis-aligned C¹ lines already remove
+          most of the band error, the geometry mismatch is not the binding term.</td>
+        </tr>
+        <tr>
+          <td><strong>Hierarchical or T-splines</strong></td>
+          <td>Local refinement clusters degrees of freedom near the interface at logarithmic rather
+          than global cost; the jump is resolved rather than represented.</td>
+          <td>Traced only if the refinement pattern is fixed. A pattern that follows a moving boundary
+          breaks the fixed-shape contract.</td>
+        </tr>
+        <tr>
+          <td><strong>Flux-aligned coordinates</strong></td>
+          <td>Ideal geometry — the separatrix becomes a coordinate line, so knot multiplicity there
+          gives the exact jump with the exact shape.</td>
+          <td>The map depends on the solution, and it is singular at the X point where the poloidal
+          angle is undefined. Not a first move for diverted configurations.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><strong>One conflation to avoid, because it changes the ranking.</strong> The X point is
+    <em>not</em> a smoothness problem for ψ: ψ is analytic there, a quadratic saddle. What is singular
+    at the X point is the flux-coordinate map and anything dividing by |∇ψ|. So the X point argues
+    against flux-aligned coordinates and says nothing against a spline or an enrichment.</p>
+
+    <p><strong>Done when</strong> the edge current density carried by each banked case is reported at
+    the boundary with the implied Δ*ψ jump magnitude, stated as a fraction of the peak Δ*ψ, so the
+    curvature discontinuity is sized rather than assumed; and the separatrix-band fit error from §4 is
+    quoted beside it, so the measured band error can be attributed to the jump or exonerated of it. A
+    case set whose edge current is negligible closes this section by making a smooth basis sufficient,
+    which is a result and not a disappointment.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="coefficient-parameterisation" data-choice="" data-by="" data-when="">
@@ -183,11 +270,14 @@
     <p class="r-dec-rat"></p>
     </div>
 <div class="r-dec" data-key="boundary-knot-treatment" data-choice="" data-by="" data-when="">
-    <p class="r-dec-q">If the separatrix band carries the binding fit error, is the treatment a
-        knot line placed on the moving boundary, repeated knots reducing continuity across it, or an
-        accepted and stated error floor? A moving knot line makes the basis depend on the iterate,
-        which threatens the fixed-shape traced contract the whole approach depends on. Answer only
-        after the regional split in section 4 is measured.</p>
+    <p class="r-dec-q">If the separatrix band carries the binding fit error, which support
+        carries the curvature jump: a level-set enrichment of the form max(&psi; &minus;
+        &psi;<sub>b</sub>, 0)&sup2; that follows the actual curve, repeated knots giving the right
+        continuity class along axis-aligned lines only, an accepted and stated error floor, or moving
+        the unknown to the current side so the Green operator generates the jump exactly? A knot line
+        that follows the moving boundary makes the basis depend on the iterate and threatens the
+        fixed-shape traced contract the whole approach depends on. Answer only after the regional
+        split in section 4 and the edge-current sizing in section 7 are both measured.</p>
     <p class="r-dec-rat"></p>
     </div>
 </section>

@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-24">
-<meta name="plan-version" content="3">
-<meta name="plan-commits" content="7f2c046aa18659101e7960599b4308fc353ef906">
-<meta name="plan-artifacts" content="scripts/clip_surface_reuse/report.md">
-<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="6">
+<meta name="plan-commits" content="7f2c046aa18659101e7960599b4308fc353ef906,fcca3ed4e1105897818fffa8ca1636502b76e94a">
+<meta name="plan-artifacts" content="scripts/clip_surface_reuse/report.md,benchmarks/global_surface_clip_rescore.py,docs/figures/curved-clip-global-surface/global-surface-clip-rescore.json,docs/evidence/archive/curved-clip-global-surface-landed.html">
+<meta name="plan-impl" content="0.667">
 </head>
 <body>
   <main class="plan-doc">
@@ -132,25 +132,47 @@
     the characterisation constants have moved with later extraction changes, so the historical numbers
     must be quoted independently rather than read off the current constants.</p>
 
-    <h2 id="s4">§4 — Re-measure, and gate on a real low-aspect-ratio equilibrium</h2>
+    <section id="s4" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-24 — gap closed</span>
+        <h2>§4 — Re-measure, and gate on a real low-aspect-ratio equilibrium</h2></header>
+      <p class="landed-summary"><strong>The global-surface curve closes both STEP gaps.</strong>
+      Clipped-to-contour <em>vpr_face</em> <strong>2.349 %</strong> against a 3.92 % gate and
+      <em>g1_face</em> <strong>3.885 %</strong> against 6.20 %, where the straight chord banked 16.46
+      and 9.78 and the local bicubic banked 18.14 and 22.31. The four ITER coefficients land at
+      2.625, 0.892, 2.025 and 1.887 % — at or below the straight-chord bank of 2.63, 0.90, 2.08 and
+      1.98. <strong>The two-against-one reading inverts:</strong> on STEP <em>g1</em> the clipped
+      route now agrees with the contour reader (3.885 %) better than the two reference readers agree
+      with each other (6.221 %), so the clipped route is no longer the outlier. Route instrumentation
+      recorded <code>_tensor_bicubic_coefficients</code> 0 calls and
+      <code>_clipped_surface_geometry</code> 0; support capacity stayed at 8 against a requirement of
+      5. Artifact <code>docs/figures/curved-clip-global-surface/global-surface-clip-rescore.json</code>
+      (commit <code>fcca3ed4</code>). Full record:
+      <a href="/nova/evidence/archive/curved-clip-global-surface-landed#rescore">§4 landed</a>.</p>
+    </section>
 
-    <p><strong>The gate is not the analytic oracle, and that is the most important sentence in this
-    plan.</strong> Fourth order to six figures on a smooth analytic surface has now twice failed to
-    predict the real result. An analytic-surface result is therefore evidence about the primitive and
-    evidence about nothing else. STEP is the decisive case because its low aspect ratio is exactly
-    what amplified the local reconstruction's deficit.</p>
+    <h2 id="s6">§6 — A gate closed in a benchmark receipt is not regression-protected</h2>
 
-    <p><strong>Done when</strong> the curved clip is re-measured with its curve taken from the global
-    tensor spline rather than from any per-cell reconstruction, reporting: STEP clipped-to-contour
-    <em>vpr</em> and <em>g1</em> against the banked 16.46 % and 18.14 %, and 9.78 % and 22.31 %,
-    against their 3.92 % and 6.20 % gates; the four ITER coefficients against the banked 2.63, 0.90,
-    2.08 and 1.98 %; the clipped-to-contour and clipped-to-TORAX agreements quoted beside the
-    contour-to-TORAX baseline of 0.16 % to 6.20 %, so the “which route is the outlier” question is
-    answered directly rather than assumed; and an explicit statement of whether the global-surface
-    curve closes the gap that the two local reconstructions opened. <strong>A result showing the
-    straight chord's compensating errors still beat an exactly integrated global curve is a reportable
-    negative that closes the curvature question for good</strong>, and is worth more than a third local
-    attempt.</p>
+    <p><strong>The re-score closed both STEP gates through a one-off driver, and nothing in the test
+    suite holds them closed.</strong> The characterisation harness that produced the historical banks
+    lives in <code>tests/test_transport_geometry_reference.py</code>, and the reuse map recorded that
+    its constants "have moved with later extraction-service changes" — which is why the historical
+    figures had to be quoted from <code>47808904</code> and its parent rather than read off the tree.
+    That leaves an open question the re-score did not answer: whether those constants currently agree
+    with what the production path measures. If they do not, the suite is either failing or
+    characterising something other than the shipped route, and in both cases a future regression in
+    the curve source would land silently.</p>
+
+    <p>This is deliberately not a re-derivation. The measured values are the ones already banked by
+    §4 through the production path, so the work is to confirm the suite sees the same numbers and to
+    make the closed gates a standing assertion rather than a receipt someone has to remember.</p>
+
+    <p><strong>Done when</strong> the characterisation tests are executed and their outcome reported
+    with the command and count; every constant that disagrees with the §4 production measurement is
+    reconciled to the measured value with the previous constant and the difference quoted per field;
+    and the STEP clipped-to-contour gates are asserted as bounds — <em>vpr_face</em> below 3.92 % and
+    <em>g1_face</em> below 6.20 % — so a regression in the curve source fails a test rather than
+    surviving until someone re-reads a receipt. A suite that already agrees with the measurement is
+    the good outcome and is reported as such, with the assertion still added.</p>
 
     <h2 id="s5">§5 — Method requirements</h2>
 
@@ -200,6 +222,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-20260824T1552-reusemap" data-who="reckon-ship" data-when="2026-08-24T15:52:00Z">
     <div class="r-comment-body">clip-surface-reuse-map landed - commit 7f2c046a, merged, gate PASSED, 140 lines, scope clean at one file. IT CORRECTS THIS PLAN'S PREMISE IN THE PLAN'S OWN FAVOUR: the production path ALREADY takes the curve from the global tensor spline. extract_flux_surface_geometry reaches _surface_clips, which fits fit_tensor_spline over the complete map and passes each fixed 4x4 Bernstein block from TensorBSpline.cell_coefficients into the landed bicubic root, arc, Green-moment and constrained-extremum machinery, with the rejected centred-tangent _tensor_bicubic_coefficients surviving only behind the isolated legacy _clipped_surface_geometry route. The implementation was centralised out of nova/transport/current_diffusion.py into nova/equilibrium/flux_surface_extraction.py since 47808904. So the plan builds nothing and re-scores what already ships. 7 reusable capability groups, 4 global spline entry points, 7 measurement symbols, 6 fixed-shape contracts, 5 explicit no-candidate lines. THE MAP ALSO COMPLETED THE BANK: alongside the straight-chord STEP vpr 16.46 and g1 9.78 per cent and the local-bicubic 18.14 and 22.31, it recovered the ITER pair the plan quoted only one side of - straight 2.63 / 0.90 / 2.08 / 1.98 against local-bicubic 2.96 / 1.03 / 2.36 / 2.31 per cent, with the underlying constants 1.646e-1 and 9.776e-2 at 47808904's parent against 1.8137e-1 and 2.2306e-1 at 47808904, and ITER 2.628e-2 / 9.047e-3 / 2.082e-2 / 1.984e-2 against 2.9602e-2 / 1.0296e-2 / 2.3632e-2 / 2.3136e-2. It warns that current characterisation constants have moved with later extraction changes, so the historical numbers must be quoted independently rather than read off the tree. ONE GAP NAMED: no test reports contour-to-TORAX directly, so the third pairing must be composed in the harness from _contour_geometry, _torax_geometry and _relative_error, and explicitly NOT estimated by subtracting percentages, because the sup-norm locations and referee scales differ. Arc._fit_leverage is recorded as a circular-fit conditioning diagnostic and refused as a separatrix curve authority.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260824T1945-rescore" data-who="reckon-ship" data-when="2026-08-24T19:45:00Z">
+    <div class="r-comment-body">global-surface-clip-rescore landed - commit fcca3ed4, merged, gate PASSED, scope clean at the two fenced paths. THE VERDICT IS YES: the shipped global-surface curve closes both STEP gaps. STEP clipped-to-contour vpr_face 2.349369 per cent against the 3.92 gate and g1_face 3.884814 against 6.20, where the straight chord banked 16.46 and 9.78 and the local bicubic banked 18.14 and 22.31 - a sevenfold and roughly sixfold improvement on the better of the two prior curve sources. ITER clipped-to-TORAX lands at 2.625219 / 0.891521 / 2.024575 / 1.886636 per cent against the straight-chord bank 2.63 / 0.90 / 2.08 / 1.98 and the local-bicubic 2.96 / 1.03 / 2.36 / 2.31, so it is at or slightly below the best prior on all four. THE THREE-WAY PAIRINGS INVERT THE TWO-AGAINST-ONE READING, which is the finding beyond the gates. STEP (clipped-to-contour, clipped-to-TORAX, contour-to-TORAX) is vpr_face (2.349369, 1.841215, 3.932154) and g1_face (3.884814, 8.096167, 6.220674) per cent. On g1 the clipped route now agrees with the contour reader BETTER than the two reference readers agree with each other, so the clipped route is no longer the outlier that argument rested on. ITER pairings are g2g3_over_rhon_face (3.110312, 2.625219, 0.779371), g0_face (1.053973, 0.891521, 0.229960), g1_face (2.328958, 2.024575, 0.394440) and g2_face (2.386247, 1.886636, 0.667289). All composed directly from all three readers, never by subtracting percentages. ROUTE AND CAPACITY BOTH PASS: instrumentation observed _surface_clips 2 calls, fit_tensor_spline 4, TensorBSpline.cell_coefficients 4, _tensor_bicubic_coefficients 0 and _clipped_surface_geometry 0, and both machines required 5 vertices, used 5 and retained capacity 8 unwidened. The worker's measure log records it correctly REJECTING the superseded _clipped_surface_geometry helper before routing through production. Causal attribution across 47808904 to current is DECLINED because more than the curve producer changed in that range - the method requirement honoured rather than waived. One caveat carried forward unresolved: TORAX warned that STEP's maximum normalised-radius spacing 0.0894 exceeds 0.0200 and can create artifacts in differentiated quantities such as j_total, and no j_total result is reported here.</div>
 </div>
 </section>
 </main>

@@ -87,6 +87,79 @@
     capacity must not be widened, which is the repair that would otherwise reappear on the next
     machine.</p>
 
+    <h2 id="rescore">§4 re-score — the global-surface curve closes both STEP gaps</h2>
+
+    <p><strong>Node <code>global-surface-clip-rescore</code>, commit <code>fcca3ed4</code>, gate
+    PASSED, 2026-08-24.</strong> Measured through the production path with route instrumentation:
+    <code>_surface_clips</code> 2 calls, <code>fit_tensor_spline</code> 4,
+    <code>TensorBSpline.cell_coefficients</code> 4, <code>_tensor_bicubic_coefficients</code>
+    <strong>0</strong>, <code>_clipped_surface_geometry</code> <strong>0</strong>. Both machines
+    required 5 clip vertices, used 5, and retained capacity 8 unwidened.</p>
+
+    <table>
+      <caption>Global-surface curve against the two superseded sources, clipped-to-contour on STEP and
+        clipped-to-TORAX on ITER</caption>
+      <thead>
+        <tr>
+          <th scope="col">Field</th>
+          <th scope="col">Straight chord</th>
+          <th scope="col">Local bicubic</th>
+          <th scope="col">Global surface</th>
+          <th scope="col">Gate</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>STEP <em>vpr_face</em></td><td>16.46 %</td><td>18.14 %</td><td><strong>2.349369 %</strong></td><td>3.92 % — pass</td></tr>
+        <tr><td>STEP <em>g1_face</em></td><td>9.78 %</td><td>22.31 %</td><td><strong>3.884814 %</strong></td><td>6.20 % — pass</td></tr>
+        <tr><td>ITER <em>g2g3_over_rhon_face</em></td><td>2.63 %</td><td>2.96 %</td><td><strong>2.625219 %</strong></td><td>no regression</td></tr>
+        <tr><td>ITER <em>g0_face</em></td><td>0.90 %</td><td>1.03 %</td><td><strong>0.891521 %</strong></td><td>no regression</td></tr>
+        <tr><td>ITER <em>g1_face</em></td><td>2.08 %</td><td>2.36 %</td><td><strong>2.024575 %</strong></td><td>no regression</td></tr>
+        <tr><td>ITER <em>g2_face</em></td><td>1.98 %</td><td>2.31 %</td><td><strong>1.886636 %</strong></td><td>no regression</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="outlier-inversion">The two-against-one reading inverts</h3>
+
+    <p>This is the finding beyond the gates. The refutation's corroborating argument was that TORAX
+    and Nova's own contour extraction agreed with each other far better than either agreed with the
+    clipped route, making the clipped route the outlier. With the curve taken from the global surface
+    that ordering reverses on the decisive field.</p>
+
+    <table>
+      <caption>All three pairings composed directly from the three readers — never by subtracting
+        percentages, whose sup-norm locations and referee scales differ</caption>
+      <thead>
+        <tr>
+          <th scope="col">Field</th>
+          <th scope="col">clipped ↔ contour</th>
+          <th scope="col">clipped ↔ TORAX</th>
+          <th scope="col">contour ↔ TORAX</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>STEP <em>vpr_face</em></td><td>2.349369 %</td><td>1.841215 %</td><td>3.932154 %</td></tr>
+        <tr><td>STEP <em>g1_face</em></td><td><strong>3.884814 %</strong></td><td>8.096167 %</td><td><strong>6.220674 %</strong></td></tr>
+        <tr><td>ITER <em>g2g3_over_rhon_face</em></td><td>3.110312 %</td><td>2.625219 %</td><td>0.779371 %</td></tr>
+        <tr><td>ITER <em>g0_face</em></td><td>1.053973 %</td><td>0.891521 %</td><td>0.229960 %</td></tr>
+        <tr><td>ITER <em>g1_face</em></td><td>2.328958 %</td><td>2.024575 %</td><td>0.394440 %</td></tr>
+        <tr><td>ITER <em>g2_face</em></td><td>2.386247 %</td><td>1.886636 %</td><td>0.667289 %</td></tr>
+      </tbody>
+    </table>
+
+    <p>On STEP <em>g1_face</em> the clipped route agrees with the contour reader to 3.885 % while the
+    two independent reference readers agree with each other only to 6.221 %. The clipped route is no
+    longer the outlier, so the argument that rested on that ordering no longer holds on this field.
+    On STEP <em>vpr_face</em> the clipped route is closer to both referees than they are to each
+    other. On ITER, where aspect ratio never amplified the difference, the two referees remain the
+    closest pair — as expected.</p>
+
+    <p><strong>Two things this record deliberately does not claim.</strong> Causal attribution across
+    <code>47808904..current</code> is declined, because more than the curve producer changed in that
+    tree range — the standing method requirement, honoured rather than waived. And TORAX emitted its
+    standing warning that STEP's maximum normalised-radius spacing of 0.0894 exceeds 0.0200 and can
+    create artifacts in differentiated quantities such as <em>j_total</em>; no <em>j_total</em> result
+    is reported here, and that caveat is carried forward unresolved.</p>
+
   </main>
 </body>
 </html>

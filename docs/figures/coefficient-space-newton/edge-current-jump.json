@@ -1,0 +1,358 @@
+{
+  "receipt": "solve-free plasma-edge current and curvature-jump sizing",
+  "execution_contract": {
+    "equilibrium_solve_run": false,
+    "solve_call_audit": {
+      "passed": true,
+      "forbidden_call_names": [
+        "fixed_point",
+        "newton_krylov",
+        "solve",
+        "solve_branch"
+      ],
+      "calls_found": []
+    },
+    "source_evaluation_only": true,
+    "case_count": 4
+  },
+  "convention": {
+    "flux": "total poloidal flux Phi in Wb",
+    "profile_coordinate": "normalized flux psi_N with the source evaluated at psi_N = 1 from inside the plasma",
+    "toroidal_current_density": "j_phi = -2*pi*(R*p_prime + FF_prime/(mu_0*R))",
+    "operator": "Delta_star(Phi) = -2*pi*mu_0*R*j_phi = 4*pi^2*(mu_0*R^2*p_prime + FF_prime)",
+    "vacuum_operator": 0.0
+  },
+  "negligibility_criterion": {
+    "quantity": "maximum absolute boundary jump divided by peak absolute plasma operator",
+    "limit": 9.094947017729282e-13,
+    "basis": "4096 binary64 epsilon; a numerical-zero test fixed by arithmetic precision, not by an achieved source value"
+  },
+  "cases": [
+    {
+      "identity": "stored-dina-coarse",
+      "family": "stored_dina_reference",
+      "carrier": "coarse",
+      "inputs": {
+        "source": "DINA pulse 135011 run 7 data-dictionary 3.39.0 time-slice 353",
+        "source_module": "tests/test_equilibrium_forward_reference.py",
+        "carrier_bank": "scripts/root_gate_attribution/coarse-terminal-root.npz",
+        "carrier_bank_sha256": "1b24fdc7c7f917b3a4a6a4a720541c3bb7ef69a98706f9d866dd6d77b1a804ad",
+        "pressure_profile": "ReferenceCase.p_prime",
+        "diamagnetic_profile": "ReferenceCase.ff_prime",
+        "boundary": "ReferenceCase.boundary"
+      },
+      "equilibrium_solve_run": false,
+      "plasma_operator_normalisation": {
+        "sample_count": 467,
+        "carrier_centroid_count": 378,
+        "boundary_limit_count": 89,
+        "peak_absolute_delta_star_total_flux_wb_per_m2": 82.60263029471066,
+        "sampling": "banked plasma-carrier centroids inside the case boundary plus the source limit approached from inside the boundary"
+      },
+      "boundary_evaluation": {
+        "normalised_flux": 1.0,
+        "sample_count": 89,
+        "major_radius_m": {
+          "minimum": 4.24518263866924,
+          "median": 6.369716484198533,
+          "maximum": 8.200026068072455
+        },
+        "declared_pressure_gradient_at_reference_radius_pa_per_wb": 0.0,
+        "effective_pressure_gradient_at_fixed_radius_pa_per_wb": {
+          "minimum": 0.0,
+          "median": 0.0,
+          "maximum": 0.0
+        },
+        "diamagnetic_gradient_t2_m2_per_wb": {
+          "minimum": -0.0,
+          "median": 0.0,
+          "maximum": -0.0
+        }
+      },
+      "toroidal_current_density_on_boundary_a_per_m2": {
+        "signed": {
+          "minimum": -0.0,
+          "median": 0.0,
+          "maximum": -0.0
+        },
+        "absolute": {
+          "minimum": 0.0,
+          "median": 0.0,
+          "maximum": 0.0
+        }
+      },
+      "delta_star_total_flux_jump_on_boundary_wb_per_m2": {
+        "signed_inside_minus_vacuum": {
+          "minimum": 0.0,
+          "median": 0.0,
+          "maximum": 0.0
+        },
+        "absolute": {
+          "minimum": 0.0,
+          "median": 0.0,
+          "maximum": 0.0
+        },
+        "absolute_fraction_of_peak_plasma_operator": {
+          "minimum": 0.0,
+          "median": 0.0,
+          "maximum": 0.0
+        }
+      },
+      "smooth_global_basis_verdict": {
+        "suffices": true,
+        "verdict": "SUFFICIENT_EDGE_SOURCE_NUMERICALLY_ZERO",
+        "maximum_jump_fraction": 0.0,
+        "negligible_fraction_limit": 9.094947017729282e-13,
+        "statement": "The boundary source is zero to the declared binary64 numerical-zero criterion, so this case does not require a curvature-jump support."
+      }
+    },
+    {
+      "identity": "stored-dina-fine",
+      "family": "stored_dina_reference",
+      "carrier": "fine",
+      "inputs": {
+        "source": "DINA pulse 135011 run 7 data-dictionary 3.39.0 time-slice 353",
+        "source_module": "tests/test_equilibrium_forward_reference.py",
+        "carrier_bank": "scripts/root_gate_attribution/fine-terminal-root.npz",
+        "carrier_bank_sha256": "a583cef5ec17c8dd8c3186cd5ff95ff4bca8a96128a9b08825fe68a637a9152a",
+        "pressure_profile": "ReferenceCase.p_prime",
+        "diamagnetic_profile": "ReferenceCase.ff_prime",
+        "boundary": "ReferenceCase.boundary"
+      },
+      "equilibrium_solve_run": false,
+      "plasma_operator_normalisation": {
+        "sample_count": 848,
+        "carrier_centroid_count": 759,
+        "boundary_limit_count": 89,
+        "peak_absolute_delta_star_total_flux_wb_per_m2": 82.681108941579,
+        "sampling": "banked plasma-carrier centroids inside the case boundary plus the source limit approached from inside the boundary"
+      },
+      "boundary_evaluation": {
+        "normalised_flux": 1.0,
+        "sample_count": 89,
+        "major_radius_m": {
+          "minimum": 4.24518263866924,
+          "median": 6.369716484198533,
+          "maximum": 8.200026068072455
+        },
+        "declared_pressure_gradient_at_reference_radius_pa_per_wb": 0.0,
+        "effective_pressure_gradient_at_fixed_radius_pa_per_wb": {
+          "minimum": 0.0,
+          "median": 0.0,
+          "maximum": 0.0
+        },
+        "diamagnetic_gradient_t2_m2_per_wb": {
+          "minimum": -0.0,
+          "median": 0.0,
+          "maximum": -0.0
+        }
+      },
+      "toroidal_current_density_on_boundary_a_per_m2": {
+        "signed": {
+          "minimum": -0.0,
+          "median": 0.0,
+          "maximum": -0.0
+        },
+        "absolute": {
+          "minimum": 0.0,
+          "median": 0.0,
+          "maximum": 0.0
+        }
+      },
+      "delta_star_total_flux_jump_on_boundary_wb_per_m2": {
+        "signed_inside_minus_vacuum": {
+          "minimum": 0.0,
+          "median": 0.0,
+          "maximum": 0.0
+        },
+        "absolute": {
+          "minimum": 0.0,
+          "median": 0.0,
+          "maximum": 0.0
+        },
+        "absolute_fraction_of_peak_plasma_operator": {
+          "minimum": 0.0,
+          "median": 0.0,
+          "maximum": 0.0
+        }
+      },
+      "smooth_global_basis_verdict": {
+        "suffices": true,
+        "verdict": "SUFFICIENT_EDGE_SOURCE_NUMERICALLY_ZERO",
+        "maximum_jump_fraction": 0.0,
+        "negligible_fraction_limit": 9.094947017729282e-13,
+        "statement": "The boundary source is zero to the declared binary64 numerical-zero criterion, so this case does not require a curvature-jump support."
+      }
+    },
+    {
+      "identity": "closed-form-oracle-coarse",
+      "family": "closed_form_rotating_oracle",
+      "carrier": "coarse",
+      "inputs": {
+        "source": "moderate-rotation-conventional",
+        "source_module": "scripts/analytic_oracle_fixtures/measure.py",
+        "carrier_bank": "scripts/oracle_rebaseline/root-coarse.npz",
+        "carrier_bank_sha256": "79f4a3f507680b7531bf3a3dc6a1195acf321027f0c3f4d4ab103bc70e1a1e0c",
+        "carrier_cache_key": "030667d40f96d904",
+        "pressure_profile": "analytic_profile(case).p_prime",
+        "effective_pressure_gradient": "RotatingDomainProfile.pressure_gradient at fixed radius",
+        "diamagnetic_profile": "analytic_profile(case).ff_prime",
+        "boundary": "RotatingEquilibrium._surface_nodes at zero flux"
+      },
+      "equilibrium_solve_run": false,
+      "plasma_operator_normalisation": {
+        "sample_count": 4552,
+        "carrier_centroid_count": 456,
+        "boundary_limit_count": 4096,
+        "peak_absolute_delta_star_total_flux_wb_per_m2": 20.63052566458839,
+        "sampling": "banked plasma-carrier centroids inside the case boundary plus the source limit approached from inside the boundary"
+      },
+      "boundary_evaluation": {
+        "normalised_flux": 1.0,
+        "sample_count": 4096,
+        "major_radius_m": {
+          "minimum": 1.0554752446513125,
+          "median": 1.6027375418405552,
+          "maximum": 2.149999839029798
+        },
+        "declared_pressure_gradient_at_reference_radius_pa_per_wb": -72400.04058623493,
+        "effective_pressure_gradient_at_fixed_radius_pa_per_wb": {
+          "minimum": -77916.92923223822,
+          "median": -71420.90531435484,
+          "maximum": -67149.92255622936
+        },
+        "diamagnetic_gradient_t2_m2_per_wb": {
+          "minimum": -0.06997315389737607,
+          "median": -0.06997315389737607,
+          "maximum": -0.06997315389737607
+        }
+      },
+      "toroidal_current_density_on_boundary_a_per_m2": {
+        "signed": {
+          "minimum": 776798.2689609589,
+          "median": 937522.3676218572,
+          "maximum": 1215296.1838819128
+        },
+        "absolute": {
+          "minimum": 776798.2689609589,
+          "median": 937522.3676218572,
+          "maximum": 1215296.1838819128
+        }
+      },
+      "delta_star_total_flux_jump_on_boundary_wb_per_m2": {
+        "signed_inside_minus_vacuum": {
+          "minimum": -20.63052566458839,
+          "median": -11.864072747456964,
+          "maximum": -6.473602564788312
+        },
+        "absolute": {
+          "minimum": 6.473602564788312,
+          "median": 11.864072747456964,
+          "maximum": 20.63052566458839
+        },
+        "absolute_fraction_of_peak_plasma_operator": {
+          "minimum": 0.31378757235934296,
+          "median": 0.5750737009974133,
+          "maximum": 1.0
+        }
+      },
+      "smooth_global_basis_verdict": {
+        "suffices": false,
+        "verdict": "INSUFFICIENT_MATERIAL_CURVATURE_JUMP",
+        "maximum_jump_fraction": 1.0,
+        "negligible_fraction_limit": 9.094947017729282e-13,
+        "statement": "The boundary jump exceeds the declared binary64 numerical-zero criterion, so a globally smooth basis alone is not sufficient for this case."
+      }
+    },
+    {
+      "identity": "closed-form-oracle-fine",
+      "family": "closed_form_rotating_oracle",
+      "carrier": "fine",
+      "inputs": {
+        "source": "moderate-rotation-conventional",
+        "source_module": "scripts/analytic_oracle_fixtures/measure.py",
+        "carrier_bank": "scripts/oracle_rebaseline/root-fine.npz",
+        "carrier_bank_sha256": "512f8a4bce44b2701a76b587bf0740cd17c1b037839dbcfbde86863115b251de",
+        "carrier_cache_key": "7c94be9b777c55ba",
+        "pressure_profile": "analytic_profile(case).p_prime",
+        "effective_pressure_gradient": "RotatingDomainProfile.pressure_gradient at fixed radius",
+        "diamagnetic_profile": "analytic_profile(case).ff_prime",
+        "boundary": "RotatingEquilibrium._surface_nodes at zero flux"
+      },
+      "equilibrium_solve_run": false,
+      "plasma_operator_normalisation": {
+        "sample_count": 5003,
+        "carrier_centroid_count": 907,
+        "boundary_limit_count": 4096,
+        "peak_absolute_delta_star_total_flux_wb_per_m2": 20.63052566458839,
+        "sampling": "banked plasma-carrier centroids inside the case boundary plus the source limit approached from inside the boundary"
+      },
+      "boundary_evaluation": {
+        "normalised_flux": 1.0,
+        "sample_count": 4096,
+        "major_radius_m": {
+          "minimum": 1.0554752446513125,
+          "median": 1.6027375418405552,
+          "maximum": 2.149999839029798
+        },
+        "declared_pressure_gradient_at_reference_radius_pa_per_wb": -72400.04058623493,
+        "effective_pressure_gradient_at_fixed_radius_pa_per_wb": {
+          "minimum": -77916.92923223822,
+          "median": -71420.90531435484,
+          "maximum": -67149.92255622936
+        },
+        "diamagnetic_gradient_t2_m2_per_wb": {
+          "minimum": -0.06997315389737607,
+          "median": -0.06997315389737607,
+          "maximum": -0.06997315389737607
+        }
+      },
+      "toroidal_current_density_on_boundary_a_per_m2": {
+        "signed": {
+          "minimum": 776798.2689609589,
+          "median": 937522.3676218572,
+          "maximum": 1215296.1838819128
+        },
+        "absolute": {
+          "minimum": 776798.2689609589,
+          "median": 937522.3676218572,
+          "maximum": 1215296.1838819128
+        }
+      },
+      "delta_star_total_flux_jump_on_boundary_wb_per_m2": {
+        "signed_inside_minus_vacuum": {
+          "minimum": -20.63052566458839,
+          "median": -11.864072747456964,
+          "maximum": -6.473602564788312
+        },
+        "absolute": {
+          "minimum": 6.473602564788312,
+          "median": 11.864072747456964,
+          "maximum": 20.63052566458839
+        },
+        "absolute_fraction_of_peak_plasma_operator": {
+          "minimum": 0.31378757235934296,
+          "median": 0.5750737009974133,
+          "maximum": 1.0
+        }
+      },
+      "smooth_global_basis_verdict": {
+        "suffices": false,
+        "verdict": "INSUFFICIENT_MATERIAL_CURVATURE_JUMP",
+        "maximum_jump_fraction": 1.0,
+        "negligible_fraction_limit": 9.094947017729282e-13,
+        "statement": "The boundary jump exceeds the declared binary64 numerical-zero criterion, so a globally smooth basis alone is not sufficient for this case."
+      }
+    }
+  ],
+  "aggregate": {
+    "case_count": 4,
+    "smooth_basis_sufficient_count": 2,
+    "smooth_basis_insufficient_count": 2,
+    "maximum_jump_fraction_across_cases": 1.0,
+    "globally_smooth_basis_suffices_for_all_banked_cases": false,
+    "verdict": "CURVATURE_JUMP_SUPPORT_REQUIRED_FOR_CASE_SET",
+    "statement": "At least one banked case carries a material edge source, so a globally smooth basis alone does not cover the full case set.",
+    "equilibrium_solve_run": false
+  }
+}

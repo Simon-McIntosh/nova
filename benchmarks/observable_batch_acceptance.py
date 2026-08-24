@@ -13,7 +13,10 @@ import hashlib
 import json
 import os
 from pathlib import Path
+from statistics import median
 import subprocess
+import sys
+import time
 from typing import Any
 
 os.environ.setdefault("JAX_PLATFORMS", "cpu")
@@ -39,6 +42,9 @@ DEFAULT_STATE_OUTPUT = (
     HERE / "docs/figures/same-device-label-determinism/state-label-reproducibility.json"
 )
 DEFAULT_STATE_ARRAY_OUTPUT = DEFAULT_STATE_OUTPUT.with_suffix(".npz")
+DEFAULT_EXECUTABLE_BOUNDARY_OUTPUT = (
+    HERE / "docs/figures/same-device-label-determinism/executable-boundary-arms.json"
+)
 BANKED_ACCEPTANCE_SOURCE = (
     HERE / "docs/figures/derived-observable-parity/batch-acceptance.json"
 )
@@ -64,6 +70,7 @@ BANKED_ACCEPTANCE_COUNTS = {
         "case_observable_evaluation_pass_count": 408,
     },
 }
+_CACHE_EVENTS = {"hits": 0, "saved_seconds": 0.0}
 
 
 def _git(*arguments: str) -> str:
@@ -100,6 +107,39 @@ def _utc_now() -> str:
     """Return the current UTC timestamp."""
 
     return datetime.now(UTC).isoformat()
+
+
+def _watch_compilation_cache() -> None:
+    """Count persistent-cache reuse before the measured graph is compiled."""
+
+    import jax.monitoring as monitoring
+
+    def hit(event: str, **_kwargs: Any) -> None:
+        if event == "/jax/compilation_cache/cache_hits":
+            _CACHE_EVENTS["hits"] += 1
+
+    def saved(event: str, duration_secs: float, **_kwargs: Any) -> None:
+        if event == "/jax/compilation_cache/compile_time_saved_sec":
+            _CACHE_EVENTS["saved_seconds"] += duration_secs
+
+    monitoring.register_event_listener(hit)
+    monitoring.register_event_duration_secs_listener(saved)
+
+
+def _configure_compilation_cache(request: str) -> None:
+    """Select an explicit cache-off or persistent-cache process route."""
+
+    from nova.biot.tiledassembly import compilation_cache
+
+    _watch_compilation_cache()
+    os.environ["NOVA_COMPILATION_CACHE"] = request
+    if request.strip().lower() == "off":
+        if jax.config.jax_compilation_cache_dir is not None:
+            raise RuntimeError("cache-off process inherited a compilation cache")
+        return
+    directory = compilation_cache(request, min_compile_seconds=0.0)
+    if directory is None:
+        raise RuntimeError("persistent compilation cache was not configured")
 
 
 def _array_sha256(value: Any) -> str:
@@ -190,6 +230,48 @@ def _repeat_reference(value: Any, batch_size: int) -> np.ndarray:
 
     array = np.asarray(value)
     return np.broadcast_to(array, (batch_size, *array.shape)).copy()
+
+
+def _maximum_absolute_finite_value(value: Any) -> float | None:
+    """Return the largest finite magnitude without inventing a NaN JSON value."""
+
+    array = np.asarray(value).astype(np.float64)
+    finite = np.isfinite(array)
+    if not np.any(finite):
+        return None
+    return float(np.max(np.abs(array[finite])))
+
+
+def _retain_absolute_values(
+    result: dict[str, Any],
+    reference: dict[str, np.ndarray],
+    candidate: dict[str, np.ndarray],
+) -> None:
+    """Attach the absolute scored values to every observable and case verdict."""
+
+    case_count = result["case_count"]
+    batch_size = result["batch_size"]
+    for row in result["per_observable"]:
+        name = row["observable"]
+        candidate_values = np.asarray(candidate[name]).reshape(
+            case_count, batch_size, -1
+        )
+        reference_values = np.asarray(reference[name]).reshape(
+            case_count, batch_size, -1
+        )
+        row["maximum_absolute_candidate_value"] = _maximum_absolute_finite_value(
+            candidate_values
+        )
+        row["maximum_absolute_reference_value"] = _maximum_absolute_finite_value(
+            reference_values
+        )
+        for case_index, case in enumerate(row["cases"]):
+            case["maximum_absolute_candidate_value"] = _maximum_absolute_finite_value(
+                candidate_values[case_index]
+            )
+            case["maximum_absolute_reference_value"] = _maximum_absolute_finite_value(
+                reference_values[case_index]
+            )
 
 
 def _case_measurement(
@@ -997,8 +1079,489 @@ def _runtime_identity() -> dict[str, Any]:
             "directory": str(cache_directory) if cache_directory else None,
             "enabled": cache_directory is not None,
             "nova_setting": os.environ.get("NOVA_COMPILATION_CACHE"),
+            "cache_hits": int(_CACHE_EVENTS["hits"]),
+            "compile_seconds_saved": float(_CACHE_EVENTS["saved_seconds"]),
         },
     }
+
+
+def _compact_process_invocation(
+    receipt: dict[str, Any],
+    invocation: int,
+    elapsed_seconds: float,
+    receipt_path: Path,
+    log_path: Path,
+) -> dict[str, Any]:
+    """Retain every verdict while discarding duplicated acceptance decoration."""
+
+    candidate_slice_count = len(receipt["cases"]) * sum(
+        result["batch_size"] for result in receipt["batch_results"]
+    )
+    batch_results = []
+    for result in receipt["batch_results"]:
+        per_observable = {}
+        for row in result["per_observable"]:
+            bounds = {"criterion_kind": row["criterion_kind"]}
+            if row["criterion_kind"] == "banked_dual_envelope":
+                bounds.update(
+                    absolute_bound=row["absolute_bound"],
+                    relative_bound=row["relative_bound"],
+                )
+            per_observable[row["observable"]] = {
+                "passes": row["passes"],
+                "case_pass_count": row["case_pass_count"],
+                "maximum_absolute_candidate_value": row[
+                    "maximum_absolute_candidate_value"
+                ],
+                "maximum_absolute_difference": row["maximum_absolute_difference"],
+                "bounds": bounds,
+                "cases": {
+                    case["case_id"]: {
+                        "passes": case["passes"],
+                        "maximum_absolute_candidate_value": case[
+                            "maximum_absolute_candidate_value"
+                        ],
+                        "maximum_absolute_difference": max(
+                            member["maximum_absolute_difference"]
+                            for member in case["members"]
+                        ),
+                    }
+                    for case in row["cases"]
+                },
+            }
+        batch_results.append(
+            {
+                "batch_size": result["batch_size"],
+                "registered_bound_count": result["registered_bound_count"],
+                "observable_pass_count": result["observable_pass_count"],
+                "case_observable_evaluation_count": (
+                    result["case_observable_evaluation_pass_count"]
+                    + result["case_observable_evaluation_fail_count"]
+                ),
+                "case_observable_evaluation_pass_count": result[
+                    "case_observable_evaluation_pass_count"
+                ],
+                "per_observable": per_observable,
+            }
+        )
+    return {
+        "invocation": invocation,
+        "elapsed_seconds": elapsed_seconds,
+        "candidate_slice_count": candidate_slice_count,
+        "elapsed_seconds_per_candidate_slice": (
+            elapsed_seconds / candidate_slice_count
+        ),
+        "completed_utc": receipt["completed_utc"],
+        "source_identity": receipt["source_identity"],
+        "backend": receipt["backend"],
+        "allocation": receipt["allocation"],
+        "environment_flags": receipt["environment_flags"],
+        "compilation_cache": receipt["compilation_cache"],
+        "receipt_path": str(receipt_path),
+        "receipt_sha256": _sha256(receipt_path),
+        "log_path": str(log_path),
+        "batch_results": batch_results,
+    }
+
+
+def _process_arm_summary(
+    name: str, invocations: list[dict[str, Any]]
+) -> dict[str, Any]:
+    """Compare aggregate and per-case verdicts across fresh processes."""
+
+    sizes = {
+        result["batch_size"]
+        for invocation in invocations
+        for result in invocation["batch_results"]
+    }
+    batch_summaries = []
+    pass_status_changes = []
+    for size in sorted(sizes):
+        results = [
+            next(
+                result
+                for result in invocation["batch_results"]
+                if result["batch_size"] == size
+            )
+            for invocation in invocations
+        ]
+        names = set.intersection(*(set(result["per_observable"]) for result in results))
+        if any(set(result["per_observable"]) != names for result in results):
+            raise RuntimeError("process invocations cover different observables")
+        changing_observables = []
+        changing_cases = []
+        for observable in sorted(names):
+            rows = [result["per_observable"][observable] for result in results]
+            if len({row["passes"] for row in rows}) > 1:
+                changing_observables.append(observable)
+            case_ids = set.intersection(*(set(row["cases"]) for row in rows))
+            if any(set(row["cases"]) != case_ids for row in rows):
+                raise RuntimeError("process invocations cover different cases")
+            for case_id in sorted(case_ids):
+                cases = [row["cases"][case_id] for row in rows]
+                statuses = [case["passes"] for case in cases]
+                if len(set(statuses)) == 1:
+                    continue
+                bounds = rows[0]["bounds"]
+                changing_cases.append({"observable": observable, "case_id": case_id})
+                pass_status_changes.append(
+                    {
+                        "batch_size": size,
+                        "observable": observable,
+                        "case_id": case_id,
+                        "passes_by_invocation": statuses,
+                        "absolute_value_by_invocation": [
+                            case["maximum_absolute_candidate_value"] for case in cases
+                        ],
+                        "absolute_difference_by_invocation": [
+                            case["maximum_absolute_difference"] for case in cases
+                        ],
+                        "bound": bounds,
+                    }
+                )
+        observable_counts = [result["observable_pass_count"] for result in results]
+        case_counts = [
+            result["case_observable_evaluation_pass_count"] for result in results
+        ]
+        batch_summaries.append(
+            {
+                "batch_size": size,
+                "registered_bound_count": results[0]["registered_bound_count"],
+                "case_observable_evaluation_count": results[0][
+                    "case_observable_evaluation_count"
+                ],
+                "observable_pass_count_by_invocation": observable_counts,
+                "case_observable_evaluation_pass_count_by_invocation": case_counts,
+                "aggregate_counts_identical": (
+                    len(set(observable_counts)) == 1 and len(set(case_counts)) == 1
+                ),
+                "pass_status_changing_observables": changing_observables,
+                "pass_status_changing_observable_count": len(changing_observables),
+                "case_pass_status_changes": changing_cases,
+                "case_pass_status_change_count": len(changing_cases),
+            }
+        )
+    return {
+        "name": name,
+        "process_invocation_count": len(invocations),
+        "invocations": invocations,
+        "batch_summaries": batch_summaries,
+        "aggregate_counts_identical": all(
+            row["aggregate_counts_identical"] for row in batch_summaries
+        ),
+        "all_per_case_verdicts_identical": not pass_status_changes,
+        "pass_status_changes": pass_status_changes,
+        "pass_status_change_count": len(pass_status_changes),
+    }
+
+
+def _within_executable_control() -> dict[str, Any]:
+    """Retain the banked same-executable receipt as the boundary control."""
+
+    receipt = _read_json(DEFAULT_STATE_OUTPUT)
+    acceptance_counts = []
+    for repeated in receipt["acceptance_repetitions"]:
+        acceptance_counts.append(
+            {
+                "repetition": repeated["repetition"],
+                "batch_results": [
+                    {
+                        "batch_size": result["batch_size"],
+                        "registered_bound_count": result["registered_bound_count"],
+                        "observable_pass_count": result["observable_pass_count"],
+                        "case_observable_evaluation_count": (
+                            result["case_observable_evaluation_pass_count"]
+                            + result["case_observable_evaluation_fail_count"]
+                        ),
+                        "case_observable_evaluation_pass_count": result[
+                            "case_observable_evaluation_pass_count"
+                        ],
+                    }
+                    for result in repeated["batch_results"]
+                ],
+            }
+        )
+    return {
+        "artifact": receipt["artifact"],
+        "path": str(DEFAULT_STATE_OUTPUT.relative_to(HERE)),
+        "sha256": _sha256(DEFAULT_STATE_OUTPUT),
+        "array_artifact": receipt["array_artifact"],
+        "source_identity": receipt["source_identity"],
+        "backend": receipt["backend"],
+        "allocation": receipt["allocation"],
+        "measurement_contract": receipt["measurement_contract"],
+        "acceptance_counts": acceptance_counts,
+        "state_reproducible_case_width_count": receipt[
+            "state_reproducible_case_width_count"
+        ],
+        "state_varies_case_width_count": receipt["state_varies_case_width_count"],
+        "label_movement_case_width_count": receipt["label_movement_case_width_count"],
+        "pass_status_change_count": receipt["pass_status_change_count"],
+        "receipt_retained_losslessly_at_path": True,
+    }
+
+
+def _run_process_invocation(
+    *,
+    store: Path,
+    scratch: Path,
+    arm: str,
+    invocation: int,
+    cache_request: str,
+    batch_sizes: tuple[int, ...],
+) -> dict[str, Any]:
+    """Run one acceptance measurement in a fresh Python process."""
+
+    receipt_path = scratch / f"{arm}-invocation-{invocation}.json"
+    log_path = scratch / f"{arm}-invocation-{invocation}.log"
+    command = [
+        sys.executable,
+        str(Path(__file__).resolve()),
+        "--store",
+        str(store),
+        "--output",
+        str(receipt_path),
+        "--batch-sizes",
+        *(str(size) for size in batch_sizes),
+        "--compilation-cache",
+        cache_request,
+    ]
+    environment = dict(os.environ)
+    environment.pop("JAX_COMPILATION_CACHE_DIR", None)
+    environment["NOVA_COMPILATION_CACHE"] = cache_request
+    environment["PYTHONPATH"] = str(HERE)
+    started = time.perf_counter()
+    with log_path.open("w", encoding="utf-8") as log:
+        completed = subprocess.run(
+            command,
+            cwd=HERE,
+            env=environment,
+            stdout=log,
+            stderr=subprocess.STDOUT,
+            text=True,
+            check=False,
+        )
+    elapsed_seconds = time.perf_counter() - started
+    if completed.returncode != 0:
+        raise RuntimeError(f"{arm} invocation {invocation} failed; inspect {log_path}")
+    receipt = _read_json(receipt_path)
+    return _compact_process_invocation(
+        receipt, invocation, elapsed_seconds, receipt_path, log_path
+    )
+
+
+def _mechanism_verdict(
+    cache_off: dict[str, Any], persistent: dict[str, Any]
+) -> dict[str, Any]:
+    """Name only the executable-boundary mechanism established by both arms."""
+
+    cache_off_moves = not (
+        cache_off["aggregate_counts_identical"]
+        and cache_off["all_per_case_verdicts_identical"]
+    )
+    persistent_moves = not (
+        persistent["aggregate_counts_identical"]
+        and persistent["all_per_case_verdicts_identical"]
+    )
+    warm_hits = [
+        invocation["compilation_cache"]["cache_hits"]
+        for invocation in persistent["invocations"][1:]
+    ]
+    persistent_reuse_confirmed = bool(warm_hits) and all(hits > 0 for hits in warm_hits)
+    if cache_off_moves and not persistent_moves and persistent_reuse_confirmed:
+        return {
+            "verdict": "PERSISTENT_EXECUTABLE_REUSE_CONTROLS_PROCESS_VARIATION",
+            "named_mechanism": (
+                "independent process compilation selected a different executable "
+                "for the acceptance graph; reusing JAX's persistent compilation "
+                "cache removed the cross-process verdict movement"
+            ),
+            "established_by_arm_difference": True,
+            "cache_off_reproduces_banked_movement": True,
+            "persistent_cache_reproduces_banked_movement": False,
+            "persistent_cache_reuse_confirmed": True,
+            "warm_invocation_cache_hits": warm_hits,
+        }
+    if not cache_off_moves and not persistent_moves:
+        statement = (
+            "Neither arm reproduces the banked movement: cache-off and fixed "
+            "persistent-cache invocations both retain identical counts and "
+            "per-case verdicts, so their difference names no mechanism."
+        )
+    elif cache_off_moves and persistent_moves:
+        statement = (
+            "Both arms reproduce cross-process movement, so a fixed persistent "
+            "compilation cache is not a sufficient control and the arm difference "
+            "names no mechanism."
+        )
+    else:
+        statement = (
+            "Only the persistent-cache arm moves; this is opposite to the proposed "
+            "control and the arm difference names no mechanism."
+        )
+    return {
+        "verdict": "MECHANISM_NOT_ESTABLISHED",
+        "named_mechanism": None,
+        "statement": statement,
+        "established_by_arm_difference": False,
+        "cache_off_reproduces_banked_movement": cache_off_moves,
+        "persistent_cache_reproduces_banked_movement": persistent_moves,
+        "persistent_cache_reuse_confirmed": persistent_reuse_confirmed,
+        "warm_invocation_cache_hits": warm_hits,
+    }
+
+
+def measure_executable_boundary(
+    store: Path,
+    output: Path,
+    scratch: Path,
+    batch_sizes: tuple[int, ...] = DEFAULT_BATCH_SIZES,
+    invocations: int = DEFAULT_REPETITIONS,
+) -> dict[str, Any]:
+    """Compare fresh-process acceptance with and without executable reuse."""
+
+    batch_sizes = tuple(sorted(set(batch_sizes)))
+    if set(batch_sizes) != set(DEFAULT_BATCH_SIZES):
+        raise ValueError("executable-boundary measurement requires both widths")
+    if invocations < 3:
+        raise ValueError("executable-boundary measurement requires three processes")
+    scratch.mkdir(parents=True, exist_ok=True)
+    persistent_cache = scratch / "persistent-compilation-cache"
+    occupied = [
+        path
+        for path in scratch.iterdir()
+        if path.name.startswith(("cache-off-", "persistent-cache-"))
+        or path == persistent_cache
+    ]
+    if occupied:
+        raise RuntimeError(
+            "executable-boundary scratch must be fresh; found "
+            + ", ".join(str(path) for path in sorted(occupied))
+        )
+
+    cache_off_invocations = [
+        _run_process_invocation(
+            store=store,
+            scratch=scratch,
+            arm="cache-off",
+            invocation=invocation,
+            cache_request="off",
+            batch_sizes=batch_sizes,
+        )
+        for invocation in range(1, invocations + 1)
+    ]
+    persistent_invocations = [
+        _run_process_invocation(
+            store=store,
+            scratch=scratch,
+            arm="persistent-cache",
+            invocation=invocation,
+            cache_request=str(persistent_cache),
+            batch_sizes=batch_sizes,
+        )
+        for invocation in range(1, invocations + 1)
+    ]
+    cache_off = _process_arm_summary("cache_off", cache_off_invocations)
+    persistent = _process_arm_summary(
+        "fixed_persistent_compilation_cache", persistent_invocations
+    )
+    mechanism = _mechanism_verdict(cache_off, persistent)
+    cache_off_per_slice = [
+        row["elapsed_seconds_per_candidate_slice"] for row in cache_off_invocations
+    ]
+    persistent_per_slice = [
+        row["elapsed_seconds_per_candidate_slice"] for row in persistent_invocations
+    ]
+    warm_persistent_per_slice = persistent_per_slice[1:]
+    unconstrained_per_slice = median(cache_off_per_slice)
+    controlled_per_slice = median(warm_persistent_per_slice)
+    allocation_ids = {
+        row["allocation"]["slurm_job_id"]
+        for row in cache_off_invocations + persistent_invocations
+    }
+    device_kinds = {
+        row["backend"]["device_kind"]
+        for row in cache_off_invocations + persistent_invocations
+    }
+    backend_matches = len(device_kinds) == 1 and all(
+        "H200" in device for device in device_kinds
+    )
+    one_allocation = len(allocation_ids) == 1 and None not in allocation_ids
+    first_observable = next(
+        iter(cache_off_invocations[0]["batch_results"][0]["per_observable"].values())
+    )
+    receipt = {
+        "artifact": "executable_boundary_arms",
+        "status": (
+            "complete"
+            if backend_matches and one_allocation
+            else "provisional_backend_or_allocation_mismatch"
+        ),
+        "completed_utc": _utc_now(),
+        "source_identity": {
+            "commit_sha": _git("rev-parse", "HEAD"),
+            "tree_sha": _git("rev-parse", "HEAD^{tree}"),
+            "driver_sha256": _sha256(Path(__file__)),
+            "acceptance_sha256": _sha256(
+                HERE / "nova/equilibrium/observable_acceptance.py"
+            ),
+            "criterion_sha256": _sha256(CRITERION_SOURCE),
+        },
+        "measurement_contract": {
+            "process_invocations_per_arm": invocations,
+            "process_count": 2 * invocations,
+            "allocation_count": len(allocation_ids),
+            "slurm_job_ids": sorted(allocation_ids),
+            "batch_sizes": list(batch_sizes),
+            "case_count": len(first_observable["cases"]),
+            "registered_bound_count": cache_off_invocations[0]["batch_results"][0][
+                "registered_bound_count"
+            ],
+            "cache_off": "NOVA_COMPILATION_CACHE=off in every fresh process",
+            "fixed_persistent_compilation_cache": str(persistent_cache),
+            "cache_storage_threshold_seconds": 0.0,
+            "per_case_verdict_retention": "all cases, observables and invocations",
+            "changing_observable_value_rule": (
+                "maximum absolute candidate value for the case beside the "
+                "registered absolute and relative bounds"
+            ),
+        },
+        "within_executable_control": _within_executable_control(),
+        "arms": {"cache_off": cache_off, "persistent_cache": persistent},
+        "mechanism": mechanism,
+        "throughput_cost": {
+            "denominator": (
+                "six cases times the sum of batch widths, 30 candidate slices; "
+                "process startup, scalar references and compilation are included"
+            ),
+            "unconstrained_route": "cache_off",
+            "controlled_route": "persistent_cache_warm_invocations_2_and_3",
+            "cache_off_seconds_per_candidate_slice_by_invocation": (
+                cache_off_per_slice
+            ),
+            "persistent_cache_seconds_per_candidate_slice_by_invocation": (
+                persistent_per_slice
+            ),
+            "unconstrained_median_seconds_per_candidate_slice": (
+                unconstrained_per_slice
+            ),
+            "controlled_median_seconds_per_candidate_slice": controlled_per_slice,
+            "control_cost_seconds_per_candidate_slice": (
+                controlled_per_slice - unconstrained_per_slice
+            ),
+            "control_cost_fraction": (
+                controlled_per_slice / unconstrained_per_slice - 1.0
+            ),
+            "control_cost_percent": 100.0
+            * (controlled_per_slice / unconstrained_per_slice - 1.0),
+            "qualification": (
+                "negative cost denotes measured time saved; this cold-driver "
+                "figure is not steady-state solve-only throughput"
+            ),
+        },
+    }
+    _write_json(output, receipt)
+    return receipt
 
 
 def measure_state_label_reproducibility(
@@ -1175,15 +1738,15 @@ def measure(
     batch_results = []
     for batch_size in batch_sizes:
         reference, candidate = _stack_inputs(cases, registered_names, batch_size)
-        batch_results.append(
-            evaluate_observable_bound_acceptance(
-                reference=reference,
-                candidate=candidate,
-                registration=bounds,
-                case_ids=case_ids,
-                batch_size=batch_size,
-            )
+        result = evaluate_observable_bound_acceptance(
+            reference=reference,
+            candidate=candidate,
+            registration=bounds,
+            case_ids=case_ids,
+            batch_size=batch_size,
         )
+        _retain_absolute_values(result, reference, candidate)
+        batch_results.append(result)
     if {row["acceptance_entry_point"] for row in batch_results} != {
         ACCEPTANCE_ENTRY_POINT
     }:
@@ -1199,6 +1762,8 @@ def measure(
     source_platform = conditioned["backend"]["platform"]
     measured_platform = jax.default_backend()
     backend_matches = source_platform == measured_platform
+    runtime = _runtime_identity()
+    runtime["backend"]["matches_banked_failure_platform"] = backend_matches
     receipt = {
         "artifact": "observable_batch_acceptance",
         "status": "complete" if backend_matches else "provisional_backend_mismatch",
@@ -1211,13 +1776,7 @@ def measure(
                 HERE / "nova/equilibrium/observable_acceptance.py"
             ),
         },
-        "backend": {
-            "platform": measured_platform,
-            "device": jax.devices()[0].device_kind,
-            "jax_version": jax.__version__,
-            "precision": "float64",
-            "matches_banked_failure_platform": backend_matches,
-        },
+        **runtime,
         "measurement_contract": {
             "acceptance_entry_point": ACCEPTANCE_ENTRY_POINT,
             "throughput_rung_call": (
@@ -1344,12 +1903,52 @@ def parser() -> argparse.ArgumentParser:
         default=DEFAULT_REPETITIONS,
         help="same-process repetitions for the state and label measurement",
     )
+    result.add_argument(
+        "--compilation-cache",
+        help="use 'off' or one fixed persistent-cache directory in this process",
+    )
+    result.add_argument(
+        "--executable-boundary-output",
+        type=Path,
+        help="write the two-arm fresh-process determinism receipt",
+    )
+    result.add_argument(
+        "--scratch",
+        type=Path,
+        help="retain child receipts, logs and the fixed compilation cache here",
+    )
+    result.add_argument(
+        "--process-invocations",
+        type=int,
+        default=DEFAULT_REPETITIONS,
+        help="fresh acceptance-driver invocations per executable-boundary arm",
+    )
     return result
 
 
 if __name__ == "__main__":
     arguments = parser().parse_args()
-    if arguments.state_output is None:
+    if arguments.executable_boundary_output is not None:
+        if (
+            arguments.state_output is not None
+            or arguments.compilation_cache is not None
+        ):
+            raise SystemExit(
+                "--executable-boundary-output cannot be combined with "
+                "--state-output or --compilation-cache"
+            )
+        if arguments.scratch is None:
+            raise SystemExit("--executable-boundary-output requires --scratch")
+        result = measure_executable_boundary(
+            arguments.store,
+            arguments.executable_boundary_output,
+            arguments.scratch,
+            tuple(arguments.batch_sizes),
+            arguments.process_invocations,
+        )
+    elif arguments.state_output is None:
+        if arguments.compilation_cache is not None:
+            _configure_compilation_cache(arguments.compilation_cache)
         result = measure(
             arguments.store,
             arguments.output,
@@ -1368,7 +1967,11 @@ if __name__ == "__main__":
             {
                 "status": result["status"],
                 "artifact": result["artifact"],
-                "output": str(arguments.state_output or arguments.output),
+                "output": str(
+                    arguments.executable_boundary_output
+                    or arguments.state_output
+                    or arguments.output
+                ),
                 **(
                     {
                         "verdict": result["verdict"],
@@ -1396,6 +1999,19 @@ if __name__ == "__main__":
                             "label_movement_case_width_count"
                         ],
                         "first_differing_leaf": result["first_differing_leaf"],
+                    }
+                    if result["artifact"] == "state_label_reproducibility"
+                    else {
+                        "mechanism_verdict": result["mechanism"]["verdict"],
+                        "cache_off_counts_identical": result["arms"]["cache_off"][
+                            "aggregate_counts_identical"
+                        ],
+                        "persistent_cache_counts_identical": result["arms"][
+                            "persistent_cache"
+                        ]["aggregate_counts_identical"],
+                        "control_cost_seconds_per_candidate_slice": result[
+                            "throughput_cost"
+                        ]["control_cost_seconds_per_candidate_slice"],
                     }
                 ),
             },

@@ -16,7 +16,7 @@
       },
       "fields": {
         "g0_face": {
-          "banked_clipped_to_contour_percent": {
+          "banked_clipped_to_torax_percent": {
             "local_bicubic": 1.03,
             "straight_chord": 0.9
           },
@@ -27,7 +27,7 @@
           }
         },
         "g1_face": {
-          "banked_clipped_to_contour_percent": {
+          "banked_clipped_to_torax_percent": {
             "local_bicubic": 2.36,
             "straight_chord": 2.08
           },
@@ -38,7 +38,7 @@
           }
         },
         "g2_face": {
-          "banked_clipped_to_contour_percent": {
+          "banked_clipped_to_torax_percent": {
             "local_bicubic": 2.31,
             "straight_chord": 1.98
           },
@@ -49,7 +49,7 @@
           }
         },
         "g2g3_over_rhon_face": {
-          "banked_clipped_to_contour_percent": {
+          "banked_clipped_to_torax_percent": {
             "local_bicubic": 2.96,
             "straight_chord": 2.63
           },
@@ -122,14 +122,14 @@
     "percentage_subtraction_used": false
   },
   "provenance": {
-    "benchmark_sha256": "ef77cf651e2986da8c2af4796d34c6a87ed2b2820c19cd6b75844fa7596b9e36",
+    "benchmark_sha256": "b36abb1dfa139497abaca2a8fd31b8160bb6a9340174f1f34e7ea3aea9436c06",
     "flux_surface_extraction_sha256": "81fbbd6fa38dbe9c1516146b5eb829a94c2a95c2fc6f7812477a2b73153d0dc2",
     "jax": "0.11.0",
     "jax_backend": "cpu",
-    "measured_at_utc": "2026-08-24T16:13:35.358261+00:00",
+    "measured_at_utc": "2026-08-24T16:20:50.299024+00:00",
     "python": "3.14.2",
     "reference_helpers_sha256": "2add08a6589fb5d7c6f87f28fde9523b2b079577ef2fb736c6ae752f2cfdc552",
-    "source_revision": "f1ecf6afb5fbe9a3268c9698e1b216dd39f603fc",
+    "source_revision": "73ce0a24f55978a5cdd6ca1761a4a79fb50fe802",
     "tensor_spline_sha256": "5a6ce392a161e5834000a0cd1c4b7434a93908ca69014139d66abd74be5c793f"
   },
   "route_verification": {

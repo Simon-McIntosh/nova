@@ -241,9 +241,14 @@ def _measure_machine(machine: str, filename: str, cocos: int) -> dict[str, Any]:
             "clipped_to_torax": 100.0 * _relative_error(clipped_values, torax_values),
             "contour_to_torax": 100.0 * _relative_error(contour_values, torax_values),
         }
+        bank_pairing = (
+            "banked_clipped_to_contour_percent"
+            if machine == "STEP"
+            else "banked_clipped_to_torax_percent"
+        )
         row: dict[str, Any] = {
             "pairings_percent": pairings,
-            "banked_clipped_to_contour_percent": {
+            bank_pairing: {
                 "straight_chord": STRAIGHT_CHORD_PERCENT[machine][field],
                 "local_bicubic": LOCAL_BICUBIC_PERCENT[machine][field],
             },
@@ -433,7 +438,12 @@ def check(receipt: Path) -> dict[str, Any]:
                 raise ValueError(f"{machine} {field} lacks a direct three-way score")
             if not all(np.isfinite(float(value)) for value in pairings.values()):
                 raise ValueError(f"{machine} {field} has a non-finite score")
-            banked = row["banked_clipped_to_contour_percent"]
+            bank_pairing = (
+                "banked_clipped_to_contour_percent"
+                if machine == "STEP"
+                else "banked_clipped_to_torax_percent"
+            )
+            banked = row[bank_pairing]
             if banked["straight_chord"] != STRAIGHT_CHORD_PERCENT[machine][field]:
                 raise ValueError(f"{machine} {field} straight-chord bank changed")
             if banked["local_bicubic"] != LOCAL_BICUBIC_PERCENT[machine][field]:

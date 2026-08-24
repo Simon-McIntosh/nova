@@ -31,7 +31,12 @@ from nova.jax.config import configure_dtypes
 
 
 HERE = Path(__file__).resolve().parents[1]
-DEFAULT_OUTPUT = HERE / "docs/figures/derived-observable-parity/batch-acceptance.json"
+DEFAULT_OUTPUT = (
+    HERE / "docs/figures/derived-observable-parity/integrated-acceptance.json"
+)
+BANKED_ACCEPTANCE_SOURCE = (
+    HERE / "docs/figures/derived-observable-parity/batch-acceptance.json"
+)
 CRITERION_SOURCE = (
     HERE / "docs/figures/forward-operator-refinement/criterion-family.json"
 )
@@ -43,6 +48,16 @@ DEFAULT_BATCH_SIZES = (1, 4)
 ACCEPTANCE_ENTRY_POINT = (
     "nova.equilibrium.observable_acceptance.evaluate_observable_bound_acceptance"
 )
+BANKED_ACCEPTANCE_COUNTS = {
+    1: {
+        "observable_pass_count": 65,
+        "case_observable_evaluation_pass_count": 407,
+    },
+    4: {
+        "observable_pass_count": 66,
+        "case_observable_evaluation_pass_count": 408,
+    },
+}
 
 
 def _git(*arguments: str) -> str:
@@ -272,6 +287,10 @@ def _repetition_snapshot(receipt: dict[str, Any]) -> dict[str, Any]:
 def _repetition_stability(repetitions: list[dict[str, Any]]) -> dict[str, Any]:
     """Report run-to-run verdict stability separately from batch dependence."""
 
+    source_identities = [repetition["source_identity"] for repetition in repetitions]
+    if any(identity != source_identities[0] for identity in source_identities[1:]):
+        raise RuntimeError("repeated measurements do not share one source identity")
+
     sizes = {
         result["batch_size"]
         for repetition in repetitions
@@ -299,14 +318,43 @@ def _repetition_stability(repetitions: list[dict[str, Any]]) -> dict[str, Any]:
             for name in names
             if len({rows[name]["passes"] for rows in by_repetition}) > 1
         )
+        changing_cases = []
+        for name in sorted(names):
+            case_ids = set.intersection(
+                *(set(rows[name]["case_pass_status"]) for rows in by_repetition)
+            )
+            if any(
+                set(rows[name]["case_pass_status"]) != case_ids
+                for rows in by_repetition
+            ):
+                raise RuntimeError(
+                    f"repeated measurements cover different cases for {name}"
+                )
+            for case_id in sorted(case_ids):
+                statuses = {
+                    rows[name]["case_pass_status"][case_id] for rows in by_repetition
+                }
+                if len(statuses) > 1:
+                    changing_cases.append({"observable": name, "case_id": case_id})
         pass_counts = [result["observable_pass_count"] for result in results]
+        case_pass_counts = [
+            result["case_observable_evaluation_pass_count"] for result in results
+        ]
         summaries.append(
             {
                 "batch_size": size,
                 "observable_pass_count_by_repetition": pass_counts,
                 "observable_pass_count_is_stable": len(set(pass_counts)) == 1,
+                "case_observable_evaluation_pass_count_by_repetition": (
+                    case_pass_counts
+                ),
+                "case_observable_evaluation_pass_count_is_stable": (
+                    len(set(case_pass_counts)) == 1
+                ),
                 "pass_status_changing_observables": changing,
                 "pass_status_changing_observable_count": len(changing),
+                "case_pass_status_changes": changing_cases,
+                "case_pass_status_change_count": len(changing_cases),
             }
         )
     return {
@@ -316,11 +364,152 @@ def _repetition_stability(repetitions: list[dict[str, Any]]) -> dict[str, Any]:
         "all_observable_pass_counts_stable": all(
             row["observable_pass_count_is_stable"] for row in summaries
         ),
+        "all_case_observable_evaluation_pass_counts_stable": all(
+            row["case_observable_evaluation_pass_count_is_stable"] for row in summaries
+        ),
+        "all_aggregate_counts_stable": all(
+            row["observable_pass_count_is_stable"]
+            and row["case_observable_evaluation_pass_count_is_stable"]
+            for row in summaries
+        ),
         "qualification": (
             "run-to-run variation is reported independently from batch-size "
             "variation and prevents interpreting one device run as a certificate"
         ),
     }
+
+
+def _failure_verdict(observable: str) -> tuple[str, str]:
+    """Return the integrated discriminator verdict and reason for one failure."""
+
+    if observable in {"moments.major_radius", "moments.volume"}:
+        return (
+            "STATE_INHERITED",
+            "The integrated shared-state discriminator is bitwise equal for this "
+            "observable on all six held-out H200 cases. Any remaining scalar-solve "
+            "versus batched-solve difference is inherited from their terminal "
+            "states, so neither the repaired computation nor its registered bound "
+            "is moved by this acceptance run.",
+        )
+    if observable == "conservation.divergence_j":
+        return (
+            "COMPUTATION_DIFFERS_REPAIR_REFUSED",
+            "The integrated shared-state discriminator still localises a route "
+            "difference to the fitted field-function gradient. Fixed-association "
+            "experiments moved the scalar answer while retaining a route difference, "
+            "so that change was refused; the registered bound remains unchanged.",
+        )
+    if observable == "conservation.divergence_b":
+        return (
+            "UNADJUDICATED_ACCEPTANCE_FAILURE",
+            "This observable was not one of the three discriminator failures and "
+            "appeared only in the reusable acceptance measurements. It remains a "
+            "registered acceptance failure with no computation-path conviction "
+            "authorising a repair or bound change.",
+        )
+    return (
+        "UNADJUDICATED_ACCEPTANCE_FAILURE",
+        "The registered bound fails in the integrated acceptance measurement, but "
+        "the discriminator evidence does not identify an authorised computation or "
+        "bound change for this observable.",
+    )
+
+
+def _remaining_failures(
+    results: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Retain one reasoned verdict for every bound failing at any measured width."""
+
+    rows_by_observable: dict[str, list[tuple[int, dict[str, Any]]]] = {}
+    for result in results:
+        for row in result["per_observable"]:
+            if not row["passes"]:
+                rows_by_observable.setdefault(row["observable"], []).append(
+                    (result["batch_size"], row)
+                )
+
+    failures = []
+    for observable, rows in sorted(rows_by_observable.items()):
+        verdict, reason = _failure_verdict(observable)
+        failures.append(
+            {
+                "observable": observable,
+                "verdict": verdict,
+                "reason": reason,
+                "batch_results": [
+                    {
+                        "batch_size": batch_size,
+                        "case_pass_count": row["case_pass_count"],
+                        "case_fail_count": row["case_fail_count"],
+                        "failing_case_ids": [
+                            case["case_id"]
+                            for case in row["cases"]
+                            if not case["passes"]
+                        ],
+                        "maximum_absolute_difference": row[
+                            "maximum_absolute_difference"
+                        ],
+                        "maximum_relative_difference": row[
+                            "maximum_relative_difference"
+                        ],
+                        "maximum_bound_ratio": row["maximum_bound_ratio"],
+                    }
+                    for batch_size, row in rows
+                ],
+            }
+        )
+    return failures
+
+
+def _repeated_remaining_failures(
+    repetitions: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Adjudicate the union of failures retained across repeated runs."""
+
+    occurrences: dict[str, list[dict[str, Any]]] = {}
+    for repetition_index, repetition in enumerate(repetitions, start=1):
+        for result in repetition["batch_results"]:
+            for row in result["per_observable"]:
+                if row["passes"]:
+                    continue
+                occurrences.setdefault(row["observable"], []).append(
+                    {
+                        "repetition": repetition_index,
+                        "batch_size": result["batch_size"],
+                        "case_pass_count": row["case_pass_count"],
+                        "case_fail_count": len(row["case_pass_status"])
+                        - row["case_pass_count"],
+                        "failing_case_ids": sorted(
+                            case_id
+                            for case_id, passes in row["case_pass_status"].items()
+                            if not passes
+                        ),
+                        "maximum_absolute_difference": row[
+                            "maximum_absolute_difference"
+                        ],
+                        "maximum_relative_difference": row[
+                            "maximum_relative_difference"
+                        ],
+                        "maximum_bound_ratio": row["maximum_bound_ratio"],
+                    }
+                )
+
+    failures = []
+    latest_repetition = len(repetitions)
+    for observable, rows in sorted(occurrences.items()):
+        verdict, reason = _failure_verdict(observable)
+        failures.append(
+            {
+                "observable": observable,
+                "verdict": verdict,
+                "reason": reason,
+                "failed_in_latest_repetition": any(
+                    row["repetition"] == latest_repetition for row in rows
+                ),
+                "occurrences": rows,
+            }
+        )
+    return failures
 
 
 def measure(
@@ -377,6 +566,11 @@ def measure(
         ACCEPTANCE_ENTRY_POINT
     }:
         raise RuntimeError("throughput rungs invoked different acceptance entries")
+    measured_sizes = {result["batch_size"] for result in batch_results}
+    if measured_sizes != set(BANKED_ACCEPTANCE_COUNTS):
+        raise RuntimeError(
+            "integrated acceptance must measure the two banked batch widths"
+        )
 
     dependence = _batch_dependence(batch_results)
     conditioned = _read_json(CONDITIONED_SOURCE)
@@ -431,6 +625,10 @@ def measure(
                 "sha256": _sha256(CONDITIONED_SOURCE),
                 "platform": source_platform,
             },
+            "banked_acceptance": {
+                "path": str(BANKED_ACCEPTANCE_SOURCE.relative_to(HERE)),
+                "sha256": _sha256(BANKED_ACCEPTANCE_SOURCE),
+            },
         },
         "cases": [
             {
@@ -442,6 +640,30 @@ def measure(
             for case in cases
         ],
         "batch_results": batch_results,
+        "banked_acceptance_comparison": [
+            {
+                "batch_size": result["batch_size"],
+                "registered_bound_count": result["registered_bound_count"],
+                "case_observable_evaluation_count": (
+                    result["case_observable_evaluation_pass_count"]
+                    + result["case_observable_evaluation_fail_count"]
+                ),
+                "integrated_observable_pass_count": result["observable_pass_count"],
+                "banked_observable_pass_count": BANKED_ACCEPTANCE_COUNTS[
+                    result["batch_size"]
+                ]["observable_pass_count"],
+                "integrated_case_observable_evaluation_pass_count": result[
+                    "case_observable_evaluation_pass_count"
+                ],
+                "banked_case_observable_evaluation_pass_count": (
+                    BANKED_ACCEPTANCE_COUNTS[result["batch_size"]][
+                        "case_observable_evaluation_pass_count"
+                    ]
+                ),
+            }
+            for result in batch_results
+        ],
+        "remaining_failures": _remaining_failures(batch_results),
         "per_observable_batch_dependence": dependence,
         "batch_dependent_bound_count": sum(
             row["pass_status_depends_on_batch_size"] for row in dependence
@@ -458,9 +680,15 @@ def measure(
         repetitions.extend(previous_receipt.get("measurement_repetitions", []))
         if not repetitions:
             repetitions.append(_repetition_snapshot(previous_receipt))
+        repetitions = [
+            repetition
+            for repetition in repetitions
+            if repetition["source_identity"] == receipt["source_identity"]
+        ]
     repetitions.append(_repetition_snapshot(receipt))
     receipt["measurement_repetitions"] = repetitions
     receipt["repetition_stability"] = _repetition_stability(repetitions)
+    receipt["remaining_failures"] = _repeated_remaining_failures(repetitions)
     _write_json(output, receipt)
     return receipt
 

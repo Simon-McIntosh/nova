@@ -108,6 +108,23 @@
   earlier) nor longer manifold advance moves the residual, so the obstacle is not the length or the
   direction of the step the route is willing to take.</p>
 
+  <p><strong>What this does not license, added 2026-08-24 after the owner's challenge.</strong> The
+  negative above is about the step, not about the target. These frames are EFIT reconstructions of
+  physical diverted DIII-D discharges, so a diverted solution demonstrably existed; and frame
+  22086/43 in the same corpus family solves to 2.911868346631881e-16 on the shipped operator, so the
+  discrete operator reaches machine precision elsewhere. A stall at 0.087–0.155 therefore cannot be
+  read as the constrained problem having no better answer — it says the problem being solved differs
+  from the one the plasma satisfied. Four substitutions between them are documented rather than
+  hypothetical: the pseudo-wall rectangle derived from the <code>efit_grid</code> extent, which
+  stands in for the absent machine wall <em>and is the surface the refusing topology predicate
+  reads</em>; three unknown-tier ohmic conductor currents; flux functions differentiated out of a
+  reconstructed map behind a reliability mask; and a default discretisation measured 8.6× coarser
+  than its reference. The decisive corroboration is banked in
+  <code>forward_gs_receipt.json</code>: the magnetic axis lands <strong>118.5 to 251.1 mm</strong>
+  from the reconstruction's, mean 164.6 and median 133.4 — tens of percent of a minor radius, which
+  is a different equilibrium rather than a truncated iteration. That attribution is owned by
+  <a href="/nova/plateau-input-attribution">plateau-input-attribution</a>.</p>
+
   <p><strong>Attribution.</strong> Within-tree attribution to the predictor-corrector is legitimate
   because the paired arms differ in nothing else. Attribution against the earlier-tree
   conditioning-disabled control is <em>declined</em>: the trees differ in

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="plateau-input-attribution">
+  <meta name="plan-title" content="Plateau Input Attribution — the physical root exists, so which substituted input moved it?">
+  <meta name="plan-summary" content="The frames are EFIT reconstructions of physical diverted discharges and one corpus frame already solves to 2.9e-16, so existence is settled twice over. Four documented input substitutions stand between that root and the solve, one of them the pseudo-wall the topology predicate reads against, and the magnetic axis lands a mean 165 mm away. Attribute the plateau to a named substitution rather than searching for a root.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="10.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-context" content="extended">
+  <meta name="plan-capability-tool-autonomy" content="autonomous">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="topology-preserving-continuation">
+  <meta name="plan-blocks" content="mast-catalog-gpu-solve,diiid-forward-onboarding">
+  <meta name="plan-sprint" content="S15">
+  <title>Plateau Input Attribution | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Existence is settled, twice, and that changes the question</h2>
+
+    <p>An earlier framing of this work asked whether a diverted-class root exists below the measured
+    plateau. That question is already answered and asking it again would waste the plan. It is
+    answered from two independent directions.</p>
+
+    <p><strong>From the physics.</strong> These frames are EFIT reconstructions of real DIII-D
+    discharges — the corpus ships <code>efit_psirz</code>, <code>efit_q95</code>,
+    <code>efit_r_axis</code> and <code>efit_z_axis</code>, and the solve's own control surface is
+    derived from the released EFIT grid. A physical diverted plasma existed at each of these time
+    slices. So the continuum free-boundary problem, with the machine's true wall, true conductor
+    currents and true flux functions, has a diverted solution. There is no question of the physics
+    admitting no answer.</p>
+
+    <p><strong>From the solver.</strong> Nova's discrete operator is not incapable of finding one
+    either. Frame 22086/43 in this same corpus family solved to a terminal relative residual of
+    <strong>2.911868346631881e-16</strong> with cumulative growth 3.0. Machine precision, on the
+    shipped operator.</p>
+
+    <p><strong>So the plateau is not evidence about existence. It is evidence about inputs.</strong>
+    If a root exists physically and the operator can reach machine precision elsewhere, then a solve
+    that stalls at 0.087–0.155 while holding topology is solving a <em>different problem</em> from the
+    one the physical plasma satisfied. The productive question is which of the differences between
+    those two problems is responsible — and the differences are not hypothetical. Four of them are
+    documented in the driver and its receipts.</p>
+
+    <table>
+      <caption>Documented substitutions between the physical problem and the one Nova is handed</caption>
+      <thead>
+        <tr><th scope="col">Substitution</th><th scope="col">What the record says</th><th scope="col">Why it can move the root</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Pseudo-wall</strong></td>
+          <td>“rectangular enclosing control surface derived from <code>efit_grid</code> extent;
+          pseudo-wall standing in for the absent machine wall”. Baseline expansion 0.02, sensitivity
+          expansions 0.02 and 0.05 probed on the <em>first preregistered frame only</em>.</td>
+          <td>This is the surface the topology predicate reads against, so it <em>is</em> the
+          constraint that refuses roughly 85 of 89 Newton updates. Diverted-versus-limited against a
+          rectangle is not the same classification as against the machine wall.</td>
+        </tr>
+        <tr>
+          <td><strong>Three unknown-tier conductor currents</strong></td>
+          <td><code>ECOILB</code>, <code>E567DN</code> and <code>E89UP</code> are unknown-tier free
+          parameters guarded against zero-fill, label-read and rejected-scale prescription;
+          <code>E567UP</code> and <code>E89DN</code> are knowable only through a fit-once ohmic
+          relation carrying a different-pulse caveat.</td>
+          <td>The physical plasma sat in the field of the actual currents. A conductor set with three
+          free members defines a different operator, and its fixed point need not be diverted at all.</td>
+        </tr>
+        <tr>
+          <td><strong>Differentiated flux functions</strong></td>
+          <td>Each frame “supplies its own deterministically extracted p-prime and FF-prime
+          functions”, with a reliability mask discarding part of the extraction.</td>
+          <td>Differentiating a reconstructed, smoothed map amplifies its truncation. The profiles
+          driving the forward solve are not the profiles the plasma had.</td>
+        </tr>
+        <tr>
+          <td><strong>Discretisation</strong></td>
+          <td>The refinement work measured the shipped default sitting 8.6× coarser than the
+          reference it is scored against.</td>
+          <td>A discrete operator's fixed point is not the continuum one, and its residual floor is
+          set by discretisation error rather than by the physics.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><strong>And one measured number says the answer is far away, not nearby.</strong> The forward
+    solve places the magnetic axis <strong>118.5 to 251.1 mm</strong> from the reconstruction's axis,
+    mean 164.6 mm and median 133.4 mm. On DIII-D that is tens of percent of a minor radius. A solve
+    a few iterations short of convergence does not sit 165 mm off the axis it is reproducing; a solve
+    of a different problem does. This is the single strongest argument that the plateau is an input
+    defect rather than an iteration budget.</p>
+
+    <svg viewBox="0 0 720 250" width="100%" role="img"
+         aria-label="Schematic: a plasma boundary with an X point inside a machine wall, both inside the larger rectangular EFIT-grid pseudo-wall that the topology predicate actually reads against."
+         style="max-width:720px">
+      <rect x="70" y="30" width="330" height="190" fill="none" stroke="#b34700" stroke-width="1.4"/>
+      <text x="78" y="24" font-family="system-ui" font-size="13" fill="#b34700">pseudo-wall — the EFIT-grid rectangle the predicate reads against</text>
+
+      <path d="M175 60 C 130 90, 128 160, 175 190 C 225 205, 300 195, 320 150 C 335 110, 300 65, 235 55 Z"
+            fill="none" stroke="#1a1a1a" stroke-width="1"/>
+      <text x="330" y="90" font-family="system-ui" font-size="13" fill="#1a1a1a">machine wall</text>
+      <line x1="326" y1="94" x2="316" y2="112" stroke="#1a1a1a" stroke-width="0.8"/>
+
+      <path d="M200 95 C 172 118, 172 158, 205 172 C 240 182, 282 168, 292 140 C 300 112, 268 92, 232 90 Z"
+            fill="none" stroke="#1a1a1a" stroke-width="1.6"/>
+      <text x="243" y="136" font-family="system-ui" font-size="13" fill="#1a1a1a" text-anchor="middle">plasma</text>
+
+      <circle cx="205" cy="176" r="3.5" fill="#1a1a1a"/>
+      <text x="150" y="196" font-family="system-ui" font-size="13" fill="#1a1a1a">X point</text>
+      <line x1="184" y1="192" x2="201" y2="180" stroke="#1a1a1a" stroke-width="0.8"/>
+
+      <text x="430" y="60" font-family="system-ui" font-size="13" fill="#1a1a1a">Diverted against the machine wall</text>
+      <text x="430" y="80" font-family="system-ui" font-size="13" fill="#1a1a1a">and diverted against the rectangle are</text>
+      <text x="430" y="100" font-family="system-ui" font-size="13" fill="#1a1a1a">different predicates. The rectangle is</text>
+      <text x="430" y="120" font-family="system-ui" font-size="13" fill="#1a1a1a">larger and the wrong shape, so a state</text>
+      <text x="430" y="140" font-family="system-ui" font-size="13" fill="#1a1a1a">the machine would call diverted can be</text>
+      <text x="430" y="160" font-family="system-ui" font-size="13" fill="#1a1a1a">refused, and one it would not can be</text>
+      <text x="430" y="180" font-family="system-ui" font-size="13" fill="#1a1a1a">admitted. This predicate refuses about</text>
+      <text x="430" y="200" font-family="system-ui" font-size="13" fill="#1a1a1a">85 of every 89 Newton updates.</text>
+    </svg>
+    <p style="font-size:13px"><strong>Schematic, not measured geometry</strong> — the wall and plasma
+    shapes are illustrative. What is measured is the pseudo-wall's provenance and expansion, and that
+    the topology read uses it.</p>
+
+    <h2 id="s2">§2 — Attribute the plateau to a named substitution</h2>
+
+    <p>Each of the four substitutions has a control that can be applied and measured, and each
+    control is a change of <em>input</em> rather than of solver mechanism — which matters, because
+    three solver mechanisms have already been measured on this lane and all three moved residual by
+    noise or made it worse. The experiment is a paired same-tree measurement per substitution, of
+    exactly the shape the predecessor's control established: change one input, hold everything else,
+    and quote the plateau against the unchanged arm.</p>
+
+    <p>The pseudo-wall is the natural first target, for three reasons: it is the surface the refusing
+    predicate reads, its sensitivity was already flagged as worth exposing but has only ever been
+    probed on one frame at two expansions, and a wall is the one substitution whose correct value
+    might simply be obtainable — DIII-D's wall is a known machine geometry even though the
+    competition corpus does not ship it. The three unknown-tier currents are the natural second: they
+    are already guarded as free parameters, so freeing them into an outer loop and reporting the
+    residual reached is a measurement the existing machinery supports.</p>
+
+    <p><strong>Done when</strong> each of the four substitutions carries a per-frame verdict on the
+    five score-blind frames — <code>MOVES_THE_PLATEAU</code> with the residual reached quoted against
+    that frame's value in
+    <code>docs/figures/topology-preserving-continuation/conditioning-repair.json</code>, or
+    <code>NOT_IMPLICATED</code> with the range of the substitution that was explored — and the
+    receipt states which single substitution accounts for the largest share of the gap. A result in
+    which no single substitution moves the plateau is a reportable negative that closes this section,
+    provided the explored range of each is stated, because a bound nothing can clear is diagnostic
+    about the bound.</p>
+
+    <h2 id="s3">§3 — Explain the frame that converges</h2>
+
+    <p>Frame 22086/43 reaching 2.911868346631881e-16 is the plan's control group of one, and it is
+    the cheapest available cross-check on §2's verdict. If §2 names the pseudo-wall, then that frame
+    should differ in wall treatment or in how far its boundary sits from the grid edge. If §2 names
+    the unknown currents, that frame's conductor set should be complete or its free members should
+    matter less. A substitution that explains the plateau on five frames but cannot explain why the
+    sixth converges has not been established.</p>
+
+    <p><strong>Done when</strong> the converged frame is placed against the five plateauing ones on
+    every substitution §2 measured, with the differing values quoted, and the receipt either names
+    the property that separates them or states which properties were compared and found not to
+    separate them. A null result carries its sample count, because the predecessor plan's alignment
+    negative was dominated by power at n = 8 and that lesson transfers directly.</p>
+
+    <h2 id="s4">§4 — Method requirements carried forward, unchanged</h2>
+
+    <p>These bind every comparative node here. Each was learned from a measured failure on the
+    predecessor lane rather than invented.</p>
+
+    <p><strong>Name the production diff between compared trees, and decline attribution when more
+    than one candidate mechanism sits in it.</strong> The predecessor's control declined historical
+    attribution because seven production paths differed between the banked and current trees.</p>
+
+    <p><strong>Never derive an acceptance criterion from an achieved value of the quantity it
+    scores</strong>, and a criterion must be passable by something.</p>
+
+    <p><strong>Report an admission or intervention count only beside achieved traversal.</strong> A
+    conditioning rule was measured admitting 445 of 445 trials — an apparently perfect record — while
+    collapsing traversal to 1.15 step-equivalents, because it shrank the step before the predicate
+    saw it.</p>
+
+    <p><strong>Change one input per arm.</strong> This section's whole method is attribution, and an
+    arm that moves two substitutions at once cannot attribute anything.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="wall-substitution-route" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">How is the pseudo-wall arm run — by expanding and contracting the existing
+        rectangle over a stated range, or by sourcing DIII-D's real wall geometry and using it as
+        the topology surface? The rectangle sweep is available immediately and bounds the
+        sensitivity; the real wall answers the physical question but introduces a geometry the
+        competition corpus deliberately does not ship, so its provenance must be stated and it may
+        cross a corpus boundary the challenge intends to hold.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="rectangle-sweep">sweep the existing rectangle</button>
+      <button class="r-opt" data-value="real-wall-geometry">source the real wall geometry</button>
+      <button class="r-opt" data-value="sweep-then-wall">sweep first, then the real wall if implicated</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="free-current-reporting" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">If freeing the three unknown-tier currents lowers the residual, is the
+        result a solve or a fit? Three free conductor currents are three fitted parameters, and a
+        residual improvement bought with them is not evidence that the forward map reproduces the
+        reference. Decide in advance what the arm is allowed to claim.</p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-pia-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-24" data-recommends-skill="/reckon-ship plateau-input-attribution" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Do not re-open existence, and start at the pseudo-wall</h4>
+    <div class="r-fu-body"><p>EXISTENCE IS SETTLED AND RE-ASKING IT IS THE ONE WAY TO WASTE THIS PLAN. The corpus is EFIT reconstructions of physical diverted DIII-D discharges, so the continuum problem with the true wall, currents and profiles has a diverted solution; and frame 22086/43 in the same corpus family solved to 2.911868346631881e-16, so the shipped discrete operator can reach machine precision. An earlier framing of this work proposed exhibiting or excluding a lower-residual admissible state. That framing was withdrawn precisely because both halves of it are already answered, and the surviving question is attribution over inputs.</p><p>START AT THE PSEUDO-WALL, because it is not merely one candidate among four - it is the surface the refusing predicate actually reads. The receipt records it as a rectangular enclosing control surface derived from the <code>efit_grid</code> extent, standing in for the absent machine wall, at baseline expansion 0.02 with sensitivity expansions 0.02 and 0.05 probed on the first preregistered frame ONLY. That predicate refuses roughly 85 of every 89 Newton updates. A one-frame two-point sensitivity probe is not enough evidence to leave it unexamined while three solver mechanisms were built and refuted against it.</p><p>THE NUMBER TO CARRY INTO EVERY ARM is the magnetic axis displacement: 118.5 to 251.1 mm, mean 164.6, median 133.4, banked in <code>docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json</code>. It is the reason to disbelieve any account of the plateau that treats it as a nearly-converged solve. Tens of percent of a minor radius is a different equilibrium, not a truncated iteration.</p><p>ONE INPUT PER ARM, and hold everything else. The predecessor lane produced its best evidence from paired same-tree controls that moved exactly one thing - the conditioning ratio limit from e to infinity - and produced its worst from comparisons across trees in which seven production paths differed. Attribution is this plan's entire product, so an arm that moves two substitutions attributes nothing.</p><p>ANSWER THE SECOND DECISION BEFORE RUNNING THE CURRENT ARM, not after. Three unknown-tier conductor currents freed into an outer loop are three fitted parameters, and a residual bought with them is not evidence that the forward map reproduces the reference. Decide in advance what that arm may claim, or it will produce a number that reads like convergence and is not.</p><p>CONSUMERS: <code>mast-catalog-gpu-solve</code> and <code>diiid-forward-onboarding</code> are held on convergence and the predecessor plan closed its own hypotheses without closing that hold. Do not report the hold released on a substitution verdict alone - a named input defect explains the plateau but does not by itself produce a converged diverted solve.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship plateau-input-attribution</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>

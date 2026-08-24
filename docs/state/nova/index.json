@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T02:57:40",
+  "updated": "2026-08-24T05:49:46",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -729,9 +729,9 @@
             }
           },
           {
-            "slug": "branch-root-existence",
-            "why_now": "Three stepping mechanisms have now been measured on this lane and all three moved residual by noise or made it worse, two of them built well and refuted cleanly - which is the evidence that the missing thing is not another stepping rule. Meanwhile one frame solved to 2.9e-16 while five plateau near 0.1 with topology held, so the solver is not incapable of converging on this map. The untested assumption underneath every mechanism so far is that a root exists below the plateau, and it is cheaper to test than another mechanism is to build.",
-            "done_when": "Each of the five score-blind frames carries ROOT_EXISTS_BELOW_PLATEAU with the exhibited admissible state's residual quoted against that frame's banked plateau, or PLATEAU_IS_THE_CONSTRAINED_MINIMUM with the sampled neighbourhood, its stated extent, and the lowest admissible residual found in it; and the frames that converge are separated from the frames that plateau by at least one measured property with its effect size, or the receipt names the candidate properties tested, found not to separate them, and the sample count each test had.",
+            "slug": "plateau-input-attribution",
+            "why_now": "Existence is settled twice over and re-asking it would waste a sprint: the corpus is EFIT reconstructions of physical diverted DIII-D discharges, so the continuum problem with the true wall, currents and profiles has a diverted solution, and frame 22086/43 in the same corpus family already solves to 2.9e-16 on the shipped operator. So a solve stalling at 0.087 to 0.155 is solving a different problem, and four substitutions between the two are documented rather than hypothetical - a pseudo-wall rectangle standing in for the absent machine wall AND serving as the surface the refusing topology predicate reads, three unknown-tier ohmic conductor currents, flux functions differentiated out of a reconstructed map behind a reliability mask, and a default discretisation measured 8.6x coarser than its reference. The magnetic axis lands a mean 164.6 mm from the reconstruction's, which is tens of percent of a minor radius and not an iteration budget.",
+            "done_when": "Each of the four documented substitutions carries a per-frame verdict on the five score-blind frames - MOVES_THE_PLATEAU with the residual reached quoted against that frame's value in conditioning-repair.json, or NOT_IMPLICATED with the explored range stated - the receipt names the substitution accounting for the largest share of the gap, and the converged frame 22086/43 is placed against the five plateauing frames on every substitution measured with the differing values quoted or the compared properties named as not separating them.",
             "capability": {
               "version": "1.0",
               "class": "orchestrator",
@@ -920,6 +920,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 69
+    "_version": 70
   }
 }

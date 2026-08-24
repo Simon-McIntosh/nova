@@ -218,6 +218,61 @@
   reported above is consistent with that and is not independent of it.</p>
 </section>
 
+<section id="s10">
+  <h2 id="s10-h">§10 — The second-order cell support: buildable, verified, priced</h2>
+
+  <p><strong>second-order-kernel-extension</strong> landed 2026-08-24 — commit
+  <code>bf9dafdb</code>, gate PASSED, 4 tests. Artifacts
+  <code>nova/biot/second_moment_kernel.py</code> and
+  <code>docs/figures/coefficient-space-newton/second-order-kernel.json</code>.</p>
+
+  <p><strong>The closed forms did not close, and the receipt says so precisely.</strong> No exact
+  quadratic weighted-edge endpoint primitive was obtained for the RR, RZ or ZZ weights, so each is
+  explicitly routed through a fixed tensor-Gauss triangle quadrature. The node was careful to record
+  this as an implementation result and <em>not</em> as a proof that a higher-harmonic symbolic
+  reduction cannot close — a distinction worth preserving, because the two invite different future
+  work.</p>
+
+  <table>
+    <caption>Second-order weight accuracy against the shipped first-order family</caption>
+    <thead>
+      <tr><th scope="col">Weight</th><th scope="col">Richardson-scaled relative error</th><th scope="col">Shipped comparator</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>RR</td><td>4.579e-11</td><td>G₀ 4.2e-12</td></tr>
+      <tr><td>RZ</td><td>7.050e-09</td><td>G_R 7.7e-10</td></tr>
+      <tr><td>ZZ</td><td>1.620e-10</td><td>G_Z 3.9e-09</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>The centroid-shift mechanism is verified, which is what makes the update affordable.</strong>
+  The claim was that an effective centroid displacement can be synthesised from fixed precomputed
+  columns, because the first- and second-moment columns are the position derivatives of the monopole
+  column. Measured: a directly displaced exact traced monopole agrees with the Taylor combination of
+  its retained value, gradient and Hessian with a <em>cubic</em> remainder — fitted residual order
+  <strong>2.99495</strong>, maximum relative residual <strong>1.529e-06</strong> over displacements
+  from 0.005 to 0.08 of cell pitch. A second-order Taylor leaving a third-order remainder is exactly
+  the expected signature. So nothing is re-integrated when the boundary moves.</p>
+
+  <table>
+    <caption>Cost of six columns per cell, against the banked refinement comparator</caption>
+    <thead>
+      <tr><th scope="col">Quantity</th><th scope="col">Three columns</th><th scope="col">Six columns</th><th scope="col">Ratio</th><th scope="col">Mesh refinement charges</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>stored coupling memory</td><td>12,582,912 B</td><td>25,165,824 B</td><td><strong>2.00×</strong></td><td>13.6×</td></tr>
+      <tr><td>median contraction, 2,048 cells × 256 targets</td><td>0.399916 ms</td><td>0.792449 ms</td><td><strong>1.98×</strong></td><td>3.24× build</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>The fixed-shape property holds, which was the reason for raising order on every cell
+  rather than only on cut ones.</strong> Every tested cell carried shape (targets, 6), and
+  <code>jit(vmap)</code> agreed with the host lane at rtol 8e-12. So p-refinement of the source
+  occupies a roughly sevenfold better memory position than h-refinement of the mesh, at a fixed shape,
+  with no per-iterate rebuild — but what accuracy or convergence it buys on a real solve is not
+  established by this node and is the subject of the solution matrix.</p>
+</section>
+
 </main>
 </body>
 </html>

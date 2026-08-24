@@ -335,57 +335,86 @@
     The carrier also compresses the <em>smoother</em> of the two available objects: <em>G</em> gains
     two orders, so the flux is smoother than the source that produces it, and §4 measured the flux.</p>
 
-    <h2 id="s10">§10 — Order raising on every cell, not refinement on some</h2>
+    <section id="s10" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-24</span>
+        <h2>§10 — Order raising on every cell, not refinement on some</h2></header>
+      <p class="landed-summary">Buildable, verified, and priced. The three second-order weights do
+      <strong>not</strong> close symbolically — no exact quadratic weighted-edge endpoint primitive was
+      obtained for RR, RZ or ZZ — so each routes through a fixed tensor-Gauss triangle quadrature,
+      stated as an implementation result rather than a proof that no reduction closes. Accuracy is
+      nonetheless in the same band as the existing first-order family: Richardson-scaled relative
+      errors <strong>4.579e-11 / 7.050e-09 / 1.620e-10</strong> against the shipped G₀ 4.2e-12, G_R
+      7.7e-10, G_Z 3.9e-09. <strong>The centroid-shift identity is verified numerically:</strong> a
+      directly displaced exact monopole matches the Taylor combination of its own value, gradient and
+      Hessian columns with a cubic remainder — fitted order <strong>2.99495</strong>, maximum relative
+      residual <strong>1.529e-06</strong> over displacements 0.005–0.08 of cell pitch — so the
+      effective source moves with no interaction re-integrated. Cost is exactly as predicted:
+      <strong>2.0× coupling memory</strong> (12,582,912 → 25,165,824 bytes) and
+      <strong>1.98× contraction</strong> (0.400 → 0.792 ms median at 2,048 cells × 256 targets),
+      against the 3.24× build and 13.6× memory that mesh refinement charges — a roughly sevenfold
+      better memory position. Shapes fixed at six columns per cell, <code>jit(vmap)</code> agreeing
+      with the host lane at rtol 8e-12. 4 tests. Artifacts
+      <code>nova/biot/second_moment_kernel.py</code> and
+      <code>docs/figures/coefficient-space-newton/second-order-kernel.json</code> (commit
+      <code>bf9dafdb</code>).</p>
+    </section>
 
-    <p><strong>Second order on cut cells alone breaks the property the whole approach depends on.</strong>
-    Which cells are cut depends on the iterate, so a representation that is richer only there has a
-    shape that changes as the boundary moves — the one thing a traced, batched GPU path cannot have.
-    Raising the order on <em>every</em> cell keeps the shape fixed: each cell carries six coefficients
-    rather than three, one monopole, two first moments and three second moments, against a coupling
-    tensor that is precomputed once and never rebuilt. The cut cells then need no special treatment at
-    all; they are ordinary cells whose higher moments happen to carry the partial fill.</p>
+    <h2 id="s11">§11 — Two independent levers, one solution matrix</h2>
 
-    <p><strong>Cost, against the banked alternative.</strong> Mesh refinement is the measured
-    comparator on this lane: −500 to −2100 cells moved the residual floor −72.9% at 3.24× interaction
-    build and <strong>13.6× memory</strong>, that memory being batch capacity. Going from three to six
-    coupling columns per cell is roughly <strong>2× the plasma coupling</strong> at unchanged cell
-    count. So order raising occupies a memory position around seven times better than refinement for
-    whatever accuracy it buys, and it rebuilds nothing per iterate. The repository has already
-    measured this lever favourably once in a different place: raising operator order moved the floor
-    −7.7% at <em>zero</em> rebuild and zero memory, where refinement paid 3.24× and 13.6× for −72.9%.
-    This is the same lever applied to the cell support rather than to the operator — p-refinement of
-    the source instead of h-refinement of the mesh.</p>
+    <p><strong>They are separate ideas and were entangled in the first two drafts of this plan.</strong>
+    Carrying the iterate in a coefficient basis and raising the order of the in-cell current support
+    are orthogonal changes: either can be made without the other, they act on different objects, and
+    they could plausibly help, do nothing, or interfere. Assessing them together as a single proposal
+    would make any result uninterpretable. So they are assessed separately and in combination, as a
+    two-by-two factorial.</p>
 
-    <p><strong>Moving the centroid without recalculating a single Biot interaction.</strong> This is
-    the mechanism that makes the update affordable, and it falls out of what the moment columns
-    already are. The coupling of a monopole at a displaced position is its Taylor series in the
-    displacement, and the coefficients of that series are exactly the first- and second-moment
-    coupling columns — the first-moment column <em>is</em> the position derivative of the monopole
-    column, and the second-moment columns are its second derivatives. So an effective centroid shift δ
-    is synthesised as coupling(c) + δ·(first-moment columns) + ½δδ:(second-moment columns), from
-    <em>fixed precomputed columns</em>, exact to the order retained. Nothing is re-integrated when the
-    boundary moves; only the coefficients change. That answers the affordability constraint directly:
-    the geometry of the coupling stays frozen and the partial fill is expressed in the coefficients.</p>
+    <table>
+      <caption>The solution matrix — every arm measured against the shipped baseline</caption>
+      <thead>
+        <tr><th scope="col">Arm</th><th scope="col">Iterate carrier</th><th scope="col">In-cell current support</th><th scope="col">Role</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>A</strong></td><td>exact ψ values</td><td>first order (monopole + two first moments)</td><td>the shipped baseline; every other arm is scored against it</td></tr>
+        <tr><td><strong>B</strong></td><td>exact ψ values</td><td>second order (adds three second moments)</td><td>isolates the support-order lever alone</td></tr>
+        <tr><td><strong>C</strong></td><td>spline coefficients</td><td>first order</td><td>isolates the carrier lever alone</td></tr>
+        <tr><td><strong>D</strong></td><td>spline coefficients</td><td>second order</td><td>tests whether the two combine, cancel or interfere</td></tr>
+      </tbody>
+    </table>
 
-    <p><strong>Whether the kernels extend is the open technical question.</strong> Nova's flux kernel
-    is built from explicit weighted edge antiderivatives, and the existing family is Richardson-pinned
-    at G₀ 4.2e-12, G_R 7.7e-10 and G_Z 3.9e-09 — that is, the monopole and the two first-moment
-    weights already exist as exact closed forms. Second order needs three more members of the same
-    family, the RR, RZ and ZZ weights. The construction is identical in form; whether the closed forms
-    continue to close, or whether some member requires quadrature, is not something to assume. The
-    adjacent evidence is encouraging rather than conclusive: the moment side already carries
-    degree-three-exact shared-node weights to 2.7e-15 with the quartic non-exactness pinned.</p>
+    <p><strong>The exact-ψ route is retained, not replaced.</strong> Arm A must remain a first-class
+    production path after this work, and the carrier must be an explicitly selected option at the call
+    site rather than a global switch or a wrapper — the repository's standing preference, and the only
+    arrangement in which a factorial stays runnable afterwards. An implementation that makes the
+    spline carrier the only route fails this section regardless of how it measures, because it
+    destroys the baseline the comparison depends on.</p>
 
-    <p><strong>Done when</strong> it is established whether the weighted-edge-antiderivative family
-    admits exact second-order members, with each new weight's accuracy pinned the way G₀, G_R and G_Z
-    are; the coupling memory and per-evaluation cost of six columns per cell is measured against the
-    banked three-column cost at fixed cell count and quoted beside the 3.24× build and 13.6× memory
-    that refinement charges; the Taylor centroid-shift identity is verified numerically against a
-    directly re-integrated displaced source, so the claim that no Biot recalculation is needed is
-    demonstrated rather than argued; and the fixed-shape traced contract is shown to hold with all
-    cells carrying six coefficients under <code>jit</code> and <code>vmap</code>. A finding that some
-    second-order weight does not close in exact form is a reportable result that scopes the approach
-    rather than ending it, provided the quadrature cost is stated.</p>
+    <p><strong>Nothing is accepted on plausibility.</strong> Each of arms B, C and D is scored against
+    arm A on three axes, and an arm that does not improve on all the axes it claims must say so:</p>
+
+    <ul>
+      <li><strong>Convergence</strong> — terminal residual on the exact field, admitted-advance count,
+      achieved Newton-step-equivalents, terminal topology class and X-point finiteness, on the same
+      frames and the same source revision.</li>
+      <li><strong>Speed</strong> — wall clock per frame and per batched frame, peak device memory,
+      Jacobian formation and solve cost, and the per-iterate cost separated from any one-time build so
+      that a build is never reported as throughput.</li>
+      <li><strong>Accuracy</strong> — error against the banked converged roots, split by region as
+      every measurement on this plan is, plus the projection floor for the carrier arms since a
+      coefficient iterate cannot beat its own representation error.</li>
+    </ul>
+
+    <p><strong>Prerequisite, and it is a hard one.</strong> Arms B and D require the second-order
+    weighted kernels to exist. Until §10 reports whether the weighted edge-antiderivative family
+    admits exact second-order members, only arms A and C are buildable, and the matrix cannot be
+    completed. This is why the prototype waits on that result rather than starting alongside it.</p>
+
+    <p><strong>Done when</strong> all four arms are measured on a common frame set at one source
+    revision, with the three axes reported per arm against arm A, the interaction stated explicitly —
+    whether B and C combine additively in D, sub-additively, or interfere — and the receipt naming
+    which arms improve on which axes and which do not. An arm that improves accuracy while costing
+    speed, or convergence while costing accuracy, is a legitimate outcome and must be reported as a
+    trade rather than summarised as a win. A matrix in which no arm beats A on any axis closes this
+    plan honestly, and arm A remaining the production path is then the result.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -400,6 +429,11 @@
       <button class="r-opt" data-value="reparameterise">re-parameterise the existing class</button>
       <button class="r-opt" data-value="sibling-shared-basis">sibling sharing the Bernstein basis</button>
       </p>
+    <p class="r-dec-rat">Reuse map verdict 2026-08-24: re-parameterise the existing evaluator
+        authority rather than fork it, since <code>fit_tensor_spline</code> already permits a coarse
+        nodal-value state and <code>TensorBSpline.evaluate</code> already returns the full
+        second-derivative set. Whichever is chosen, the exact-ψ route stays a first-class path and the
+        carrier is selected explicitly at the call site — see §11.</p>
     <p class="r-dec-rat"></p>
     </div>
 <div class="r-dec" data-key="boundary-knot-treatment" data-choice="" data-by="" data-when="">

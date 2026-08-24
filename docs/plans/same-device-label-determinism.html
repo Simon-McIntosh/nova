@@ -24,6 +24,8 @@
   <title>Same-Device Label Determinism | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-24">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -77,6 +79,28 @@
     verdict on a rerun cannot certify anything: the acceptance check that a throughput rung invokes
     would pass or fail by luck of the run. Terminal flux agreement at 3.58e-12 does not help here,
     because the disagreement is downstream of the state.</p>
+
+    <p><strong>The movement is one or two units in the last place, and that is a lead rather than a
+    reassurance.</strong> Read from the receipt's own remaining-failure entries, the flipping
+    observable moves by a maximum absolute difference of <strong>1.3877787807814457e-16</strong> at
+    width 1 and <strong>2.7755575615628914e-16</strong> at width 4 — one and two units in the last
+    place of a binary64 number near unity. It nonetheless carries a maximum relative difference of
+    2.5 and 4.5 and a maximum bound ratio of 2.967 and 5.341, because both observables whose
+    verdicts move, <code>conservation.divergence_b</code> and
+    <code>conservation.divergence_j</code>, are divergence residuals that are identically zero in
+    exact arithmetic. <strong>Their computed value is roundoff, so a bound on them is a bound on
+    roundoff</strong>, and a last-bit change crosses it.</p>
+
+    <p><strong>That makes two candidate faults, not one, and they must not be merged.</strong> A
+    genuinely nondeterministic operation is one fault, and §3 owns it. A criterion that scores a
+    quantity whose exact value is zero against a threshold at the same scale as its own rounding
+    error is a different fault, and it is the plan's own standing rule turned on this lane: a
+    criterion must be passable by something, and one that is passable only when the last bit falls
+    the right way is not. The two faults imply opposite repairs — deterministic kernels at a
+    measured throughput cost, or an absolute floor on a residual that has no meaningful relative
+    scale — so an arm that fixes one while reporting the other's symptom would close nothing. Every
+    node here reports each flipping observable's <em>absolute</em> value beside its bound, so which
+    fault is in play is visible rather than inferred.</p>
 
     <h2 id="s2">§2 — Is the state reproducible, or only the labels?</h2>
 

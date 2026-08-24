@@ -29,7 +29,7 @@
 <meta name="plan-commits" content="c20392dc7d74aa5171e865b8dd44ef1c07f7582a,7ef46a9da7068c9ddeebcae1b8303d83277ed8c3">
 <meta name="plan-artifacts" content="scripts/stale_assertion_sweep/report.md,nova/imas/AGENTS.md,docs/evidence/archive/plateau-input-attribution-landed.html">
 <meta name="plan-impl" content="0.286">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="3">
 </head>
 <body>
   <main class="plan-doc">
@@ -207,6 +207,24 @@
     implicates none of them is a reportable negative that closes this section, provided the norms and
     the regional split are stated.</p>
 
+    <p><strong>The measurement needs a warm response carrier, and the lane that can build one is
+    now named.</strong> The residual-field driver is implemented and retained, but its MAST setup
+    reaches the direct Green-operator builder that <code>nova/equilibrium/AGENTS.md</code> forbids,
+    so it must load a persisted carrier fail-closed instead. The required object is one response of
+    shape 1126 × 101 over 101 stored circuits at semantic identity
+    <code>1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994</code>, resolved-target
+    digest <code>5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9</code>; all six
+    banked rows carry that one identity, and no MAST forward carrier exists in the user-data cache.
+    Two cold attempts have now been lost to a wall rather than to the physics — 48:07 CPU-saturated
+    inside <code>polygon_greens</code> for the first response, then a clean float64 build cancelled
+    at 40:15 by a one-hour debug-partition cap. <strong>Build it on the reserved H200 lane, which
+    has no partition time limit</strong> (<code>betelgeuse</code>, <code>--reservation=gpu_0003_grpA</code>,
+    six of eight cards and fifteen reservation CPUs free), and give the job hours rather than
+    minutes. Publish atomically with a plain replace: GPFS returns <code>EINVAL</code> for
+    <code>renameat2</code> with <code>RENAME_NOREPLACE</code> on both <code>/home</code> and
+    <code>/work</code>, so a no-clobber rename would fail at the last step of a build that costs
+    the better part of an hour.</p>
+
     <h2 id="s3">§3 — Explain the frame that converges</h2>
 
     <p>Frame 22086/43 reaching 2.911868346631881e-16 is the plan's control group of one, and it is
@@ -304,7 +322,7 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="wall-substitution-route" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="wall-substitution-route" data-choice="sweep-then-wall" data-by="reckon-ship" data-when="2026-08-24T15:45:46+00:00">
     <p class="r-dec-q">How is the pseudo-wall arm run — by expanding and contracting the existing
         rectangle over a stated range, or by sourcing DIII-D&#x27;s real wall geometry and using it as
         the topology surface? The rectangle sweep is available immediately and bounds the
@@ -314,16 +332,16 @@
     <p class="r-dec-opts">
       <button class="r-opt" data-value="rectangle-sweep">sweep the existing rectangle</button>
       <button class="r-opt" data-value="real-wall-geometry">source the real wall geometry</button>
-      <button class="r-opt" data-value="sweep-then-wall">sweep first, then the real wall if implicated</button>
+      <button class="r-opt chosen" data-value="sweep-then-wall">sweep first, then the real wall if implicated</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Deduced from the plan rather than left open. Both halves are already mandated: §1 records the wall as an unwired default rather than a physics unknown, so wiring Nova&#x27;s own machine-description limiter ring is work and not a corpus crossing — the refusal it replaces scopes the absence to the competition rows, not to Nova; and §5&#x27;s done-when already requires the real ring to become the DIII-D forward path&#x27;s default topology surface with the pseudo-wall retained as an explicitly selected fallback. The sweep is not thereby redundant: the only existing sensitivity evidence is a two-point expansion probe on one frame, against a predicate that refuses roughly 85 of every 89 Newton updates, so the rectangle sweep bounds the sensitivity that probe cannot. Sweep to bound it, then substitute the real ring, one input per arm.</p>
     </div>
-<div class="r-dec" data-key="free-current-reporting" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="free-current-reporting" data-choice="no-free-current-arm-exists" data-by="reckon-ship" data-when="2026-08-24T15:45:46+00:00">
     <p class="r-dec-q">If freeing the three unknown-tier currents lowers the residual, is the
         result a solve or a fit? Three free conductor currents are three fitted parameters, and a
         residual improvement bought with them is not evidence that the forward map reproduces the
         reference. Decide in advance what the arm is allowed to claim.</p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Moot, and recorded as such rather than answered. The decision governs an arm that no longer exists: §1&#x27;s conductor-current candidate is withdrawn, all five formerly-omitted conductors are driven from ECOILA through a closed series circuit at integer-snapped gains, and the landed stale-assertion correction measured free_current_count_with_circuit == 0 with current authority the pf_active circuit and unknown_names == (). There are no three unknown-tier currents to free, so no solve-versus-fit claim needs pre-declaring. The three free parameters the question presumes came from a landed summary describing the superseded tier resolver. Should a future arm ever introduce fitted conductor currents, it reopens this question rather than inheriting an answer.</p>
     </div>
 </section>
 

@@ -22,6 +22,8 @@
   <title>Curved Clip from the Global Surface | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-24">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -153,19 +155,19 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="surface-authority-strength" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="surface-authority-strength" data-choice="fitted-surface-now" data-by="reckon-ship" data-when="2026-08-24T15:45:55+00:00">
     <p class="r-dec-q">Does the re-measurement take the weaker surface authority available today —
         a global spline fitted to the flux map — or wait for the stronger one, where the spline is
         the carried solution object and cannot diverge from the solve? The weaker form tests the
         prescription immediately and a negative would close the question outright; the stronger form
         removes a residual difference between the fitted surface and the converged one, but couples
-        this plan's schedule to a larger programme.</p>
+        this plan&#x27;s schedule to a larger programme.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="fitted-surface-now">fitted global surface, now</button>
+      <button class="r-opt chosen" data-value="fitted-surface-now">fitted global surface, now</button>
       <button class="r-opt" data-value="carried-surface-later">wait for the carried surface</button>
       <button class="r-opt" data-value="fitted-then-carried">fitted now, carried as a follow-on</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Deduced from §3, which already states that this plan does not wait for the stronger form, and from §4, where a negative closes the curvature question outright. Waiting would couple an eight-hour re-measurement to a larger programme in order to remove a residual difference between a fitted surface and a converged one — a refinement that only matters if the fitted form first shows the global surface closing the gap the two local reconstructions opened. fit_tensor_spline supplies a global cubic tensor spline today whose evaluation returns both second derivatives and the mixed term, which is the whole content of the prescription the prior refutation left behind. The carried-surface form is deliberately NOT committed here: it becomes a question only on a non-negative fitted result, and a reportable negative retires it along with the rest of the curvature question.</p>
     </div>
 </section>
 

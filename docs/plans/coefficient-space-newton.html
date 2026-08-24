@@ -29,7 +29,7 @@
 <meta name="plan-commits" content="485f6fdaa88328b96633db85111093e332b4aa53,dbee3048d4767af04373155c50b6e9753bfc330c,975e4acec3016cd56295d458d07eaf2aa8233454,75d6eb010612c12486327fa8c794efe6c662b71c,bf9dafdbf258624fc42d3f2d7eef8e468495b328,d6be878b6eb1eac9ea3d85d87f16cd2b48787cef,fd2baeb113b3443314618b9e6e29819ba233ce6e,231659ea748322d8607a71cc82b2d4e522e8cc1c">
 <meta name="plan-artifacts" content="scripts/coefficient_basis_reuse/report.md,docs/figures/coefficient-space-newton/representation-degree.json,docs/figures/coefficient-space-newton/edge-current-jump.json,docs/figures/coefficient-space-newton/clipped-coupling-order.json,docs/figures/coefficient-space-newton/second-order-kernel.json,docs/figures/coefficient-space-newton/support-order-arms.json,docs/figures/coefficient-space-newton/carrier-arms.json,docs/figures/coefficient-space-newton/analytic-truth-rescore.json,nova/biot/second_moment_kernel.py,nova/equilibrium/coefficient_carrier.py,docs/evidence/archive/coefficient-space-newton-landed.html">
 <meta name="plan-impl" content="0.7">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 </head>
 <body>
   <main class="plan-doc">
@@ -708,23 +708,19 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="coefficient-parameterisation" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="coefficient-parameterisation" data-choice="reparameterise" data-by="reckon-ship" data-when="2026-08-24T15:46:04+00:00">
     <p class="r-dec-q">Is the coarse-knot coefficient state a re-parameterisation of the existing TensorBSpline , or a sibling construction that reuses its Bernstein evaluation
         while owning its own knot lattice? The existing class is parameterised by sampled cell
         values with one block per cell, so it cannot express a coarse-knot state as it stands. A
         re-parameterisation keeps one authority for spline evaluation; a sibling risks two. Decide
         from what the reuse map finds rather than in advance.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="reparameterise">re-parameterise the existing class</button>
+      <button class="r-opt chosen" data-value="reparameterise">re-parameterise the existing class</button>
       <button class="r-opt" data-value="sibling-shared-basis">sibling sharing the Bernstein basis</button>
       </p>
-    <p class="r-dec-rat">Reuse map verdict 2026-08-24: re-parameterise the existing evaluator
-        authority rather than fork it, since fit_tensor_spline already permits a coarse
-        nodal-value state and TensorBSpline.evaluate already returns the full
-        second-derivative set. Whichever is chosen, the exact-ψ route stays a first-class path and the
-        carrier is selected explicitly at the call site — see §11.</p>
+    <p class="r-dec-rat">The reuse map answered this, as the decision asked it to. Commit 485f6fda found fit_tensor_spline already permits a coarse nodal-value state and TensorBSpline.evaluate already returns the full second-derivative set, so re-parameterising keeps one authority for spline evaluation where a sibling would create two. The exact-value route stays a first-class production path with the carrier selected explicitly at the call site, and nova/equilibrium/coefficient_carrier.py at fd2baeb1 is built that way — IterateRoute.EXACT_VALUES was asserted still selectable when the matrix was measured.</p>
     </div>
-<div class="r-dec" data-key="boundary-knot-treatment" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="boundary-knot-treatment" data-choice="green-generated-jump-with-stated-band-floor" data-by="reckon-ship" data-when="2026-08-24T15:46:04+00:00">
     <p class="r-dec-q">If the separatrix band carries the binding fit error, which support
         carries the curvature jump: a level-set enrichment of the form max(ψ −
         ψ b , 0)² that follows the actual curve, repeated knots giving the right
@@ -733,7 +729,7 @@
         that follows the moving boundary makes the basis depend on the iterate and threatens the
         fixed-shape traced contract the whole approach depends on. Answer only after the regional
         split in section 4 and the edge-current sizing in section 7 are both measured.</p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Both preconditions the decision named are now measured, and together they retire the enrichment question rather than choosing among enrichments. The §4 regional split found the separatrix band binding for only 2 of 8 targets, and the §7 sizing found the two facts that join: a zero edge current is sufficient for the band never to bind, 4 of 4 — stored DINA tapers to exactly zero — while a large one is necessary but not sufficient, binding on both coarse oracle carriers and neither fine one. So the experimental lane carries no curvature discontinuity at all, and where the analytic oracle carries one at up to full peak, refinement moves the band error below the other regional terms without removing the jump. §9 then removes the remaining need: the carrier feeds G and is never read for physics, so the jump lives in the source support the separatrix clip already carries exactly and G converts it into the right curvature jump by construction. Nothing smooth is asked to represent a discontinuity, no basis function follows the moving boundary, and the fixed-shape traced contract is untouched. The residual band error is reported as a stated floor, never enriched around.</p>
     </div>
 </section>
 

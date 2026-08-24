@@ -1,0 +1,938 @@
+{
+  "cases": {
+    "analytic_oracle": {
+      "cost_comparison": {
+        "banked_h_refinement": {
+          "interaction_build_ratio": 3.24,
+          "peak_memory_ratio": 13.6
+        },
+        "economic_statement": "Second-order support does not reduce the measured iso-accuracy cell count, so its six-column surcharge is not repaid.",
+        "relative_to_banked_h_refinement": {
+          "build_ratio_divided_by_banked_charge": 0.31293618228120734,
+          "memory_ratio_divided_by_banked_charge": 0.07352941176470588
+        },
+        "second_order_reduces_iso_accuracy_cell_count": false,
+        "second_over_first_cell_count": 1.0,
+        "second_over_first_coupling_resident_memory": 2.0,
+        "second_over_first_interaction_build": 1.0139132305911118,
+        "second_over_first_peak_device_memory": 1.0,
+        "second_over_first_per_iterate_support_contraction": 1.1692404484099748,
+        "six_column_surcharge_repaid": false
+      },
+      "fitted_orders": {
+        "first": {
+          "confidence_95_lower": 1.8684671586676582,
+          "confidence_95_upper": 2.2014412278703404,
+          "error_coefficient": 3.4325901183331515,
+          "field_error_order": 2.0349541932689994,
+          "interpretation": "point estimate is within the physically interpretable range",
+          "one_sigma_uncertainty": 0.06476628454045283,
+          "point_estimate_above_three": false,
+          "r_squared": 0.9949607645449117,
+          "rungs": 7
+        },
+        "second": {
+          "confidence_95_lower": 1.860194384576549,
+          "confidence_95_upper": 2.2096607143817217,
+          "error_coefficient": 3.4305124726602387,
+          "field_error_order": 2.0349275494791352,
+          "interpretation": "point estimate is within the physically interpretable range",
+          "one_sigma_uncertainty": 0.0679741693029327,
+          "point_estimate_above_three": false,
+          "r_squared": 0.9944519073582528,
+          "rungs": 7
+        }
+      },
+      "geometry": {
+        "boundary_midplane_radii_m": [
+          1.0658485538018603,
+          2.15498651048179
+        ],
+        "geometric_aspect_ratio": 3.1217349272854102,
+        "major_radius_m": 1.7
+      },
+      "iso_accuracy": {
+        "first": {
+          "achieved_relative_sup_error": 0.002084037129221461,
+          "carrier_cell_count": 3354,
+          "pitch_m": 0.02694609380077107,
+          "requested_cells": 3000,
+          "selection": "coarsest measured ladder rung meeting the declared target"
+        },
+        "second": {
+          "achieved_relative_sup_error": 0.00207935390407056,
+          "carrier_cell_count": 3354,
+          "pitch_m": 0.02694609380077107,
+          "requested_cells": 3000,
+          "selection": "coarsest measured ladder rung meeting the declared target"
+        }
+      },
+      "iso_accuracy_costs": {
+        "first": {
+          "carrier_cell_count": 3354,
+          "case": "analytic_oracle",
+          "columns_per_cell": 3,
+          "contraction_compile_seconds": 0.04778551496565342,
+          "coupling_resident_bytes": 3863808,
+          "device": "cpu:0",
+          "device_platform": "cpu",
+          "execution_lane": {
+            "cpus_per_task": "8",
+            "exclusive_node_requested": true,
+            "job_cpus_per_node": "36",
+            "job_id": "1254329",
+            "memory_per_node_mib": "32768",
+            "node_list": "98dci4-clu-3141",
+            "node_name": "98dci4-clu-3141",
+            "partition": "sun_debug",
+            "scheduler": "slurm",
+            "tmpdir": "/tmp"
+          },
+          "interaction_build": {
+            "compilation_seconds": 0.6583719570189714,
+            "execution_seconds": 1.9168730825185776,
+            "total_seconds": 2.575245039537549
+          },
+          "order": "first",
+          "peak_device_memory_bytes": 816807936,
+          "peak_memory_measurement": "process_maximum_resident_set_size",
+          "per_iterate_support_contraction": {
+            "excludes_common_topology_and_profile_evaluation": true,
+            "maximum_seconds": 0.0002439599484205246,
+            "median_seconds": 0.00016283243894577026,
+            "minimum_seconds": 0.0001602601259946823,
+            "repeats": 11
+          },
+          "requested_cells": 3000
+        },
+        "second": {
+          "carrier_cell_count": 3354,
+          "case": "analytic_oracle",
+          "columns_per_cell": 6,
+          "contraction_compile_seconds": 0.03878716379404068,
+          "coupling_resident_bytes": 7727616,
+          "device": "cpu:0",
+          "device_platform": "cpu",
+          "execution_lane": {
+            "cpus_per_task": "8",
+            "exclusive_node_requested": true,
+            "job_cpus_per_node": "36",
+            "job_id": "1254329",
+            "memory_per_node_mib": "32768",
+            "node_list": "98dci4-clu-3141",
+            "node_name": "98dci4-clu-3141",
+            "partition": "sun_debug",
+            "scheduler": "slurm",
+            "tmpdir": "/tmp"
+          },
+          "interaction_build": {
+            "compilation_seconds": 0.6623221244663,
+            "execution_seconds": 1.9487528931349516,
+            "total_seconds": 2.6110750176012516
+          },
+          "order": "second",
+          "peak_device_memory_bytes": 816807936,
+          "peak_memory_measurement": "process_maximum_resident_set_size",
+          "per_iterate_support_contraction": {
+            "excludes_common_topology_and_profile_evaluation": true,
+            "maximum_seconds": 0.0003140680491924286,
+            "median_seconds": 0.00019039027392864227,
+            "minimum_seconds": 0.00018803589046001434,
+            "repeats": 11
+          },
+          "requested_cells": 3000
+        }
+      },
+      "ladder": [
+        {
+          "boundary_cell_count": 58,
+          "carrier_cell_count": 286,
+          "orders": {
+            "first": {
+              "columns_per_cell": 3,
+              "coupling_resident_bytes": 329472,
+              "error": {
+                "normalisation_wb": 1.3812146953272917,
+                "relative_rms_error": 0.02671212399653337,
+                "relative_sup_error": 0.04091117732665476
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.8565831128507853,
+                "execution_seconds": 0.1762304063886404,
+                "total_seconds": 1.0328135192394257
+              }
+            },
+            "second": {
+              "columns_per_cell": 6,
+              "coupling_resident_bytes": 658944,
+              "error": {
+                "normalisation_wb": 1.3812146953272917,
+                "relative_rms_error": 0.02702938007356077,
+                "relative_sup_error": 0.041033672444504114
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.3781935404986143,
+                "execution_seconds": 0.17564106360077858,
+                "total_seconds": 0.5538346040993929
+              }
+            }
+          },
+          "patch_area_relative_residual": 0.0,
+          "pitch_m": 0.11000696728843685,
+          "requested_cells": 180,
+          "supported_cell_count": 170
+        },
+        {
+          "boundary_cell_count": 78,
+          "carrier_cell_count": 476,
+          "orders": {
+            "first": {
+              "columns_per_cell": 3,
+              "coupling_resident_bytes": 548352,
+              "error": {
+                "normalisation_wb": 1.3812146953272917,
+                "relative_rms_error": 0.012917892562544756,
+                "relative_sup_error": 0.01807212125267203
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 0.2861328125,
+                "total_seconds": 0.2861328125
+              }
+            },
+            "second": {
+              "columns_per_cell": 6,
+              "coupling_resident_bytes": 1096704,
+              "error": {
+                "normalisation_wb": 1.3812146953272917,
+                "relative_rms_error": 0.01299894865631516,
+                "relative_sup_error": 0.017904432843850446
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 0.2827979028224945,
+                "total_seconds": 0.2827979028224945
+              }
+            }
+          },
+          "patch_area_relative_residual": 1.3230298876552646e-16,
+          "pitch_m": 0.08250522546632764,
+          "requested_cells": 320,
+          "supported_cell_count": 290
+        },
+        {
+          "boundary_cell_count": 100,
+          "carrier_cell_count": 720,
+          "orders": {
+            "first": {
+              "columns_per_cell": 3,
+              "coupling_resident_bytes": 829440,
+              "error": {
+                "normalisation_wb": 1.3812146953272917,
+                "relative_rms_error": 0.008530738335573012,
+                "relative_sup_error": 0.01282925706457563
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 0.437859496101737,
+                "total_seconds": 0.437859496101737
+              }
+            },
+            "second": {
+              "columns_per_cell": 6,
+              "coupling_resident_bytes": 1658880,
+              "error": {
+                "normalisation_wb": 1.3812146953272917,
+                "relative_rms_error": 0.008544626774457624,
+                "relative_sup_error": 0.012856805882000508
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 0.43581405840814114,
+                "total_seconds": 0.43581405840814114
+              }
+            }
+          },
+          "patch_area_relative_residual": 1.320818775921528e-16,
+          "pitch_m": 0.062368088127776,
+          "requested_cells": 560,
+          "supported_cell_count": 484
+        },
+        {
+          "boundary_cell_count": 132,
+          "carrier_cell_count": 1196,
+          "orders": {
+            "first": {
+              "columns_per_cell": 3,
+              "coupling_resident_bytes": 1377792,
+              "error": {
+                "normalisation_wb": 1.3812146953272917,
+                "relative_rms_error": 0.004898293609914193,
+                "relative_sup_error": 0.007287904101666106
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 0.720931526273489,
+                "total_seconds": 0.720931526273489
+              }
+            },
+            "second": {
+              "columns_per_cell": 6,
+              "coupling_resident_bytes": 2755584,
+              "error": {
+                "normalisation_wb": 1.3812146953272917,
+                "relative_rms_error": 0.004903983787929479,
+                "relative_sup_error": 0.0073076689085284354
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 0.7153355721384287,
+                "total_seconds": 0.7153355721384287
+              }
+            }
+          },
+          "patch_area_relative_residual": 6.595922700211064e-16,
+          "pitch_m": 0.0471458431236158,
+          "requested_cells": 980,
+          "supported_cell_count": 828
+        },
+        {
+          "boundary_cell_count": 176,
+          "carrier_cell_count": 2040,
+          "orders": {
+            "first": {
+              "columns_per_cell": 3,
+              "coupling_resident_bytes": 2350080,
+              "error": {
+                "normalisation_wb": 1.3812146953272917,
+                "relative_rms_error": 0.0027521219836431437,
+                "relative_sup_error": 0.0041030200019317176
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 1.207199651747942,
+                "total_seconds": 1.207199651747942
+              }
+            },
+            "second": {
+              "columns_per_cell": 6,
+              "coupling_resident_bytes": 4700160,
+              "error": {
+                "normalisation_wb": 1.3812146953272917,
+                "relative_rms_error": 0.0027530498932472835,
+                "relative_sup_error": 0.004109035283488584
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 1.2058871686458588,
+                "total_seconds": 1.2058871686458588
+              }
+            }
+          },
+          "patch_area_relative_residual": 1.3182241495149782e-16,
+          "pitch_m": 0.03558706906323624,
+          "requested_cells": 1720,
+          "supported_cell_count": 1422
+        },
+        {
+          "boundary_cell_count": 230,
+          "carrier_cell_count": 3354,
+          "orders": {
+            "first": {
+              "columns_per_cell": 3,
+              "coupling_resident_bytes": 3863808,
+              "error": {
+                "normalisation_wb": 1.3812146953272917,
+                "relative_rms_error": 0.0014821851348997093,
+                "relative_sup_error": 0.002084037129221461
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 2.008915638551116,
+                "total_seconds": 2.008915638551116
+              }
+            },
+            "second": {
+              "columns_per_cell": 6,
+              "coupling_resident_bytes": 7727616,
+              "error": {
+                "normalisation_wb": 1.3812146953272917,
+                "relative_rms_error": 0.0014822319462219089,
+                "relative_sup_error": 0.00207935390407056
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 1.9768232610076666,
+                "total_seconds": 1.9768232610076666
+              }
+            }
+          },
+          "patch_area_relative_residual": 1.317669272779522e-16,
+          "pitch_m": 0.02694609380077107,
+          "requested_cells": 3000,
+          "supported_cell_count": 2438
+        },
+        {
+          "boundary_cell_count": 300,
+          "carrier_cell_count": 5600,
+          "orders": {
+            "first": {
+              "columns_per_cell": 3,
+              "coupling_resident_bytes": 6451200,
+              "error": {
+                "normalisation_wb": 1.3812146953272917,
+                "relative_rms_error": 0.0008742507450435099,
+                "relative_sup_error": 0.0012347677048200046
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 3.2242776714265347,
+                "total_seconds": 3.2242776714265347
+              }
+            },
+            "second": {
+              "columns_per_cell": 6,
+              "coupling_resident_bytes": 12902400,
+              "error": {
+                "normalisation_wb": 1.3812146953272917,
+                "relative_rms_error": 0.0008742702129467935,
+                "relative_sup_error": 0.0012330340992986251
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 3.240465572103858,
+                "total_seconds": 3.240465572103858
+              }
+            }
+          },
+          "patch_area_relative_residual": 0.0,
+          "pitch_m": 0.020467027485877504,
+          "requested_cells": 5200,
+          "supported_cell_count": 4176
+        }
+      ],
+      "order_verdict": {
+        "above_three_point_estimate_present": false,
+        "classification": "no_resolved_order_or_constant_improvement",
+        "difference_confidence_95_lower": -0.20922455026839087,
+        "difference_confidence_95_upper": 0.20917126268866254,
+        "difference_one_sigma_uncertainty": 0.09388907979950947,
+        "first_order_better_or_equal_rungs": 4,
+        "geometric_mean_first_over_second_error_at_shared_rungs": 1.0005242516822577,
+        "second_minus_first_field_error_order": -2.6643789864166934e-05,
+        "second_order_better_rungs": 3,
+        "second_order_systematically_improves_error_constant": false,
+        "statement": "The fitted order difference includes zero at 95% confidence and the rung-by-rung errors are mixed; neither a higher order nor a systematically smaller error constant is resolved."
+      },
+      "reference_convergence": {
+        "difference": {
+          "normalisation_wb": 1.3812146953272917,
+          "relative_rms_error": 8.425902548879519e-06,
+          "relative_sup_error": 2.332729740809077e-05
+        },
+        "nested_orders": [
+          [
+            48,
+            96
+          ],
+          [
+            72,
+            144
+          ]
+        ]
+      }
+    },
+    "low_aspect_ratio": {
+      "cost_comparison": {
+        "banked_h_refinement": {
+          "interaction_build_ratio": 3.24,
+          "peak_memory_ratio": 13.6
+        },
+        "economic_statement": "Second-order support does not reduce the measured iso-accuracy cell count, so its six-column surcharge is not repaid.",
+        "relative_to_banked_h_refinement": {
+          "build_ratio_divided_by_banked_charge": 0.2908782453408211,
+          "memory_ratio_divided_by_banked_charge": 0.07352941176470588
+        },
+        "second_order_reduces_iso_accuracy_cell_count": false,
+        "second_over_first_cell_count": 1.0,
+        "second_over_first_coupling_resident_memory": 2.0,
+        "second_over_first_interaction_build": 0.9424455149042604,
+        "second_over_first_peak_device_memory": 1.0,
+        "second_over_first_per_iterate_support_contraction": 2.3658929314493515,
+        "six_column_surcharge_repaid": false
+      },
+      "fitted_orders": {
+        "first": {
+          "confidence_95_lower": 1.7822376655202772,
+          "confidence_95_upper": 2.25040976037719,
+          "error_coefficient": 4.516765144496612,
+          "field_error_order": 2.0163237129487337,
+          "interpretation": "point estimate is within the physically interpretable range",
+          "one_sigma_uncertainty": 0.09106344882053188,
+          "point_estimate_above_three": false,
+          "r_squared": 0.9899044276807655,
+          "rungs": 7
+        },
+        "second": {
+          "confidence_95_lower": 1.7816221131744145,
+          "confidence_95_upper": 2.255579609802929,
+          "error_coefficient": 4.556713836203702,
+          "field_error_order": 2.0186008614886717,
+          "interpretation": "point estimate is within the physically interpretable range",
+          "one_sigma_uncertainty": 0.09218875860281495,
+          "point_estimate_above_three": false,
+          "r_squared": 0.9896790562920342,
+          "rungs": 7
+        }
+      },
+      "geometry": {
+        "boundary_midplane_radii_m": [
+          0.2397915761656362,
+          1.25
+        ],
+        "geometric_aspect_ratio": 1.7818105229888008,
+        "major_radius_m": 0.9
+      },
+      "iso_accuracy": {
+        "first": {
+          "achieved_relative_sup_error": 0.003430974443859538,
+          "carrier_cell_count": 1998,
+          "pitch_m": 0.02968157203485356,
+          "requested_cells": 1720,
+          "selection": "coarsest measured ladder rung meeting the declared target"
+        },
+        "second": {
+          "achieved_relative_sup_error": 0.003417198684192286,
+          "carrier_cell_count": 1998,
+          "pitch_m": 0.02968157203485356,
+          "requested_cells": 1720,
+          "selection": "coarsest measured ladder rung meeting the declared target"
+        }
+      },
+      "iso_accuracy_costs": {
+        "first": {
+          "carrier_cell_count": 1998,
+          "case": "low_aspect_ratio",
+          "columns_per_cell": 3,
+          "contraction_compile_seconds": 0.04582325555384159,
+          "coupling_resident_bytes": 2301696,
+          "device": "cpu:0",
+          "device_platform": "cpu",
+          "execution_lane": {
+            "cpus_per_task": "8",
+            "exclusive_node_requested": true,
+            "job_cpus_per_node": "36",
+            "job_id": "1254329",
+            "memory_per_node_mib": "32768",
+            "node_list": "98dci4-clu-3141",
+            "node_name": "98dci4-clu-3141",
+            "partition": "sun_debug",
+            "scheduler": "slurm",
+            "tmpdir": "/tmp"
+          },
+          "interaction_build": {
+            "compilation_seconds": 0.7244310025125742,
+            "execution_seconds": 1.1535786520689726,
+            "total_seconds": 1.8780096545815468
+          },
+          "order": "first",
+          "peak_device_memory_bytes": 825778176,
+          "peak_memory_measurement": "process_maximum_resident_set_size",
+          "per_iterate_support_contraction": {
+            "excludes_common_topology_and_profile_evaluation": true,
+            "maximum_seconds": 0.00016585364937782288,
+            "median_seconds": 0.00010295398533344269,
+            "minimum_seconds": 0.00010157935321331024,
+            "repeats": 11
+          },
+          "requested_cells": 1720
+        },
+        "second": {
+          "carrier_cell_count": 1998,
+          "case": "low_aspect_ratio",
+          "columns_per_cell": 6,
+          "contraction_compile_seconds": 0.0369200874119997,
+          "coupling_resident_bytes": 4603392,
+          "device": "cpu:0",
+          "device_platform": "cpu",
+          "execution_lane": {
+            "cpus_per_task": "8",
+            "exclusive_node_requested": true,
+            "job_cpus_per_node": "36",
+            "job_id": "1254329",
+            "memory_per_node_mib": "32768",
+            "node_list": "98dci4-clu-3141",
+            "node_name": "98dci4-clu-3141",
+            "partition": "sun_debug",
+            "scheduler": "slurm",
+            "tmpdir": "/tmp"
+          },
+          "interaction_build": {
+            "compilation_seconds": 0.6447092406451702,
+            "execution_seconds": 1.1252125352621078,
+            "total_seconds": 1.769921775907278
+          },
+          "order": "second",
+          "peak_device_memory_bytes": 825778176,
+          "peak_memory_measurement": "process_maximum_resident_set_size",
+          "per_iterate_support_contraction": {
+            "excludes_common_topology_and_profile_evaluation": true,
+            "maximum_seconds": 0.00034906715154647827,
+            "median_seconds": 0.00024357810616493225,
+            "minimum_seconds": 0.00014093518257141113,
+            "repeats": 11
+          },
+          "requested_cells": 1720
+        }
+      },
+      "ladder": [
+        {
+          "boundary_cell_count": 56,
+          "carrier_cell_count": 280,
+          "orders": {
+            "first": {
+              "columns_per_cell": 3,
+              "coupling_resident_bytes": 322560,
+              "error": {
+                "normalisation_wb": 0.22950488855663298,
+                "relative_rms_error": 0.02472937513125059,
+                "relative_sup_error": 0.042691629663049985
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 0.1652368362993002,
+                "total_seconds": 0.1652368362993002
+              }
+            },
+            "second": {
+              "columns_per_cell": 6,
+              "coupling_resident_bytes": 645120,
+              "error": {
+                "normalisation_wb": 0.22950488855663298,
+                "relative_rms_error": 0.024952734772542833,
+                "relative_sup_error": 0.042886173754054686
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 0.16229277849197388,
+                "total_seconds": 0.16229277849197388
+              }
+            }
+          },
+          "patch_area_relative_residual": 0.0,
+          "pitch_m": 0.09175185846593535,
+          "requested_cells": 180,
+          "supported_cell_count": 160
+        },
+        {
+          "boundary_cell_count": 72,
+          "carrier_cell_count": 432,
+          "orders": {
+            "first": {
+              "columns_per_cell": 3,
+              "coupling_resident_bytes": 497664,
+              "error": {
+                "normalisation_wb": 0.22950488855663298,
+                "relative_rms_error": 0.011684384325817226,
+                "relative_sup_error": 0.01778353471156803
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 0.2591101657599211,
+                "total_seconds": 0.2591101657599211
+              }
+            },
+            "second": {
+              "columns_per_cell": 6,
+              "coupling_resident_bytes": 995328,
+              "error": {
+                "normalisation_wb": 0.22950488855663298,
+                "relative_rms_error": 0.011740896867352482,
+                "relative_sup_error": 0.017833894075054032
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 0.2533433102071285,
+                "total_seconds": 0.2533433102071285
+              }
+            }
+          },
+          "patch_area_relative_residual": 0.0,
+          "pitch_m": 0.06881389384945151,
+          "requested_cells": 320,
+          "supported_cell_count": 272
+        },
+        {
+          "boundary_cell_count": 98,
+          "carrier_cell_count": 736,
+          "orders": {
+            "first": {
+              "columns_per_cell": 3,
+              "coupling_resident_bytes": 847872,
+              "error": {
+                "normalisation_wb": 0.22950488855663298,
+                "relative_rms_error": 0.006737334107385721,
+                "relative_sup_error": 0.010384445155411258
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 0.42672221921384335,
+                "total_seconds": 0.42672221921384335
+              }
+            },
+            "second": {
+              "columns_per_cell": 6,
+              "coupling_resident_bytes": 1695744,
+              "error": {
+                "normalisation_wb": 0.22950488855663298,
+                "relative_rms_error": 0.006736104752560087,
+                "relative_sup_error": 0.01039130652435307
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 0.4234843887388706,
+                "total_seconds": 0.4234843887388706
+              }
+            }
+          },
+          "patch_area_relative_residual": 0.0,
+          "pitch_m": 0.05201841424904169,
+          "requested_cells": 560,
+          "supported_cell_count": 464
+        },
+        {
+          "boundary_cell_count": 128,
+          "carrier_cell_count": 1176,
+          "orders": {
+            "first": {
+              "columns_per_cell": 3,
+              "coupling_resident_bytes": 1354752,
+              "error": {
+                "normalisation_wb": 0.22950488855663298,
+                "relative_rms_error": 0.004418400901308229,
+                "relative_sup_error": 0.007285752724713085
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 0.6835424769669771,
+                "total_seconds": 0.6835424769669771
+              }
+            },
+            "second": {
+              "columns_per_cell": 6,
+              "coupling_resident_bytes": 2709504,
+              "error": {
+                "normalisation_wb": 0.22950488855663298,
+                "relative_rms_error": 0.004419225625689368,
+                "relative_sup_error": 0.007310719569004817
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 0.6772721856832504,
+                "total_seconds": 0.6772721856832504
+              }
+            }
+          },
+          "patch_area_relative_residual": 3.981428992897471e-16,
+          "pitch_m": 0.03932222505682943,
+          "requested_cells": 980,
+          "supported_cell_count": 788
+        },
+        {
+          "boundary_cell_count": 170,
+          "carrier_cell_count": 1998,
+          "orders": {
+            "first": {
+              "columns_per_cell": 3,
+              "coupling_resident_bytes": 2301696,
+              "error": {
+                "normalisation_wb": 0.22950488855663298,
+                "relative_rms_error": 0.002228475228846897,
+                "relative_sup_error": 0.003430974443859538
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 1.1599946450442076,
+                "total_seconds": 1.1599946450442076
+              }
+            },
+            "second": {
+              "columns_per_cell": 6,
+              "coupling_resident_bytes": 4603392,
+              "error": {
+                "normalisation_wb": 0.22950488855663298,
+                "relative_rms_error": 0.0022294962631899296,
+                "relative_sup_error": 0.003417198684192286
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 1.1622082125395536,
+                "total_seconds": 1.1622082125395536
+              }
+            }
+          },
+          "patch_area_relative_residual": 1.9893012702384187e-16,
+          "pitch_m": 0.02968157203485356,
+          "requested_cells": 1720,
+          "supported_cell_count": 1354
+        },
+        {
+          "boundary_cell_count": 224,
+          "carrier_cell_count": 3360,
+          "orders": {
+            "first": {
+              "columns_per_cell": 3,
+              "coupling_resident_bytes": 3870720,
+              "error": {
+                "normalisation_wb": 0.22950488855663298,
+                "relative_rms_error": 0.0014536287847947001,
+                "relative_sup_error": 0.002433265922216881
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 1.9434723388403654,
+                "total_seconds": 1.9434723388403654
+              }
+            },
+            "second": {
+              "columns_per_cell": 6,
+              "coupling_resident_bytes": 7741440,
+              "error": {
+                "normalisation_wb": 0.22950488855663298,
+                "relative_rms_error": 0.001453554620820709,
+                "relative_sup_error": 0.0024375414972225224
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 1.9375702440738678,
+                "total_seconds": 1.9375702440738678
+              }
+            }
+          },
+          "patch_area_relative_residual": 1.9887203164172453e-16,
+          "pitch_m": 0.022474523619360254,
+          "requested_cells": 3000,
+          "supported_cell_count": 2328
+        },
+        {
+          "boundary_cell_count": 292,
+          "carrier_cell_count": 5580,
+          "orders": {
+            "first": {
+              "columns_per_cell": 3,
+              "coupling_resident_bytes": 6428160,
+              "error": {
+                "normalisation_wb": 0.22950488855663298,
+                "relative_rms_error": 0.0007700173376723522,
+                "relative_sup_error": 0.0011953369674563472
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 3.2155857793986797,
+                "total_seconds": 3.2155857793986797
+              }
+            },
+            "second": {
+              "columns_per_cell": 6,
+              "coupling_resident_bytes": 12856320,
+              "error": {
+                "normalisation_wb": 0.22950488855663298,
+                "relative_rms_error": 0.0007700921916361463,
+                "relative_sup_error": 0.0011964088838184997
+              },
+              "interaction_build": {
+                "compilation_seconds": 0.0,
+                "execution_seconds": 3.2145707178860903,
+                "total_seconds": 3.2145707178860903
+              }
+            }
+          },
+          "patch_area_relative_residual": 1.9882719588284402e-16,
+          "pitch_m": 0.017070626119333365,
+          "requested_cells": 5200,
+          "supported_cell_count": 3980
+        }
+      ],
+      "order_verdict": {
+        "above_three_point_estimate_present": false,
+        "classification": "no_resolved_order_or_constant_improvement",
+        "difference_confidence_95_lower": -0.2864480287481586,
+        "difference_confidence_95_upper": 0.2910023258280346,
+        "difference_one_sigma_uncertainty": 0.12958132166256722,
+        "first_order_better_or_equal_rungs": 6,
+        "geometric_mean_first_over_second_error_at_shared_rungs": 0.9985603789531806,
+        "second_minus_first_field_error_order": 0.00227714853993799,
+        "second_order_better_rungs": 1,
+        "second_order_systematically_improves_error_constant": false,
+        "statement": "The fitted order difference includes zero at 95% confidence and the rung-by-rung errors are mixed; neither a higher order nor a systematically smaller error constant is resolved."
+      },
+      "reference_convergence": {
+        "difference": {
+          "normalisation_wb": 0.22950488855663298,
+          "relative_rms_error": 2.837319074467307e-06,
+          "relative_sup_error": 7.757726158995743e-06
+        },
+        "nested_orders": [
+          [
+            48,
+            96
+          ],
+          [
+            72,
+            144
+          ]
+        ]
+      }
+    }
+  },
+  "comparison_contract": {
+    "accuracy_truth": "closed-form Solov'ev total flux; an independently converged plasma integral supplies the common homogeneous complement",
+    "cell_price": "all carrier cells whose interaction columns are stored, including boundary and exterior padding cells",
+    "cost_lane_requirement": "fresh processes on an exclusively allocated SLURM CPU compute node, matching the CPU lane of the banked refinement comparator",
+    "cost_scope": "interaction build, stored coupling, isolated accelerator peak, and warmed support contraction; topology and profile evaluation common to both orders are excluded from the contraction timing",
+    "only_differing_mechanism": "three versus six in-cell polynomial current-support columns",
+    "shared_interaction_quadrature_order": 8,
+    "shared_moment_quadrature_order": 10,
+    "support_orders": {
+      "first": "constant plus radial and vertical linear terms",
+      "second": "first-order terms plus radial-squared, mixed, and vertical-squared terms"
+    },
+    "target_construction": {
+      "choice": "declared construction constant; not fitted to results",
+      "clearance_minor_radius_fraction": 0.12,
+      "finite_and_exterior_asserted": true,
+      "reason": "physical-coordinate offsets remain finite near the symmetry axis where scaled flux-coordinate radii can become imaginary"
+    },
+    "target_surface": "fixed physical R-Z offset along the ray from the LCFS geometric centre through each exact boundary point"
+  },
+  "declared_target": {
+    "normalisation": "closed-form axis-to-boundary total-flux span; this is independent of the exterior target contour's sampled variation",
+    "quantity": "exterior poloidal-flux field relative sup error",
+    "selection_rule": "coarsest measured rung at or below the threshold",
+    "threshold": 0.004
+  },
+  "ladder_contract": {
+    "actual_rungs_per_order": 7,
+    "minimum_rungs_per_order": 4,
+    "order_fit": "ordinary least squares of log relative-sup error against log cell pitch; uncertainty is the slope standard error and a two-sided Student-t 95% interval",
+    "requested_cells": [
+      180,
+      320,
+      560,
+      980,
+      1720,
+      3000,
+      5200
+    ]
+  },
+  "overall_verdict": {
+    "banked_comparator": {
+      "h_refinement_interaction_build_ratio": 3.24,
+      "h_refinement_peak_memory_ratio": 13.6
+    },
+    "classification": "no_resolved_order_or_constant_improvement",
+    "statement": "Both supports retain second-order field convergence and the rung-by-rung errors are mixed on at least one case; neither an order raise nor a systematic constant improvement is resolved, so the cell and cost comparison determines whether the extra columns have any practical value."
+  },
+  "schema": "nova.support-order-iso-accuracy",
+  "source_revision": "ad37abcee4a039754b0972b5f62438e70a2ea1cc"
+}

@@ -1,0 +1,387 @@
+{
+  "arms": {
+    "A": [
+      {
+        "accuracy_against_banked_converged_root": {
+          "normalisation": "full banked grid-root flux span",
+          "region_partition": {
+            "closed_flux_region": "banked psi_N < 0.95",
+            "scrape_off_layer": "banked psi_N > 1.05",
+            "separatrix_band": "0.95 <= banked psi_N <= 1.05"
+          },
+          "regions": {
+            "closed_flux_region": {
+              "cell_count": 415,
+              "relative_rms_error": 6.784245380153962e-16,
+              "relative_sup_error": 2.683324452495186e-15
+            },
+            "scrape_off_layer": {
+              "cell_count": 81,
+              "relative_rms_error": 1.015245542398059e-15,
+              "relative_sup_error": 2.4822537346779355e-15
+            },
+            "separatrix_band": {
+              "cell_count": 55,
+              "relative_rms_error": 7.741877346822316e-16,
+              "relative_sup_error": 1.9270127677105024e-15
+            }
+          }
+        },
+        "carrier": {
+          "banked_root": "scripts/oracle_rebaseline/root-coarse.npz",
+          "banked_root_sha256": "79f4a3f507680b7531bf3a3dc6a1195acf321027f0c3f4d4ab103bc70e1a1e0c",
+          "cache_hit": true,
+          "name": "coarse",
+          "realised_cells": 551,
+          "requested_cells": -500,
+          "semantic_cache_key": "030667d40f96d904",
+          "state_dimension": 2253
+        },
+        "convergence": {
+          "accepted_factors": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "achieved_newton_step_equivalents": 10.0,
+          "admitted_advance_count": 10,
+          "gmres_iterations": 18,
+          "newton_steps": 10,
+          "terminal_exact_field_relative_residual": 1.7350752034075281e-15,
+          "terminal_topology_class": "limited",
+          "terminal_x_point_finite": false,
+          "terminal_x_point_rz_m": null
+        },
+        "label": "A",
+        "speed": {
+          "compiled_solve_wall_clock_seconds_per_frame": 1.4007995990104973,
+          "one_time_build_seconds": {
+            "map_compile": 2.474786307197064,
+            "solver_compile": 13.6020039729774,
+            "support_response": 0.0,
+            "total": 16.253359764115885,
+            "warm_carrier_load_and_operator": 0.1765694839414209
+          },
+          "peak_device_memory_bytes": 355549440,
+          "peak_device_memory_gib": 0.3311312198638916,
+          "warmed_map_wall_clock_seconds_per_iterate": {
+            "device": "cuda:0",
+            "maximum_seconds": 0.0021296320483088493,
+            "median_seconds": 0.002128666965290904,
+            "minimum_seconds": 0.002119721844792366,
+            "repeats": 7,
+            "synchronisation": "every device call blocked to completion"
+          }
+        },
+        "support": {
+          "columns_per_cell": 3,
+          "iterate_carrier": "exact_flux_values",
+          "order": "first"
+        }
+      },
+      {
+        "accuracy_against_banked_converged_root": {
+          "normalisation": "full banked grid-root flux span",
+          "region_partition": {
+            "closed_flux_region": "banked psi_N < 0.95",
+            "scrape_off_layer": "banked psi_N > 1.05",
+            "separatrix_band": "0.95 <= banked psi_N <= 1.05"
+          },
+          "regions": {
+            "closed_flux_region": {
+              "cell_count": 826,
+              "relative_rms_error": 7.267659192852875e-16,
+              "relative_sup_error": 3.1110734432654353e-15
+            },
+            "scrape_off_layer": {
+              "cell_count": 151,
+              "relative_rms_error": 9.331526846135653e-16,
+              "relative_sup_error": 2.5396517904207636e-15
+            },
+            "separatrix_band": {
+              "cell_count": 99,
+              "relative_rms_error": 7.067535224048688e-16,
+              "relative_sup_error": 2.444414848279985e-15
+            }
+          }
+        },
+        "carrier": {
+          "banked_root": "scripts/oracle_rebaseline/root-fine.npz",
+          "banked_root_sha256": "512f8a4bce44b2701a76b587bf0740cd17c1b037839dbcfbde86863115b251de",
+          "cache_hit": true,
+          "name": "fine",
+          "realised_cells": 1076,
+          "requested_cells": -1000,
+          "semantic_cache_key": "7c94be9b777c55ba",
+          "state_dimension": 4052
+        },
+        "convergence": {
+          "accepted_factors": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "achieved_newton_step_equivalents": 10.0,
+          "admitted_advance_count": 10,
+          "gmres_iterations": 18,
+          "newton_steps": 10,
+          "terminal_exact_field_relative_residual": 1.5204090263946757e-15,
+          "terminal_topology_class": "limited",
+          "terminal_x_point_finite": false,
+          "terminal_x_point_rz_m": null
+        },
+        "label": "A",
+        "speed": {
+          "compiled_solve_wall_clock_seconds_per_frame": 1.9011175169143826,
+          "one_time_build_seconds": {
+            "map_compile": 2.5814182399772108,
+            "solver_compile": 13.260703644016758,
+            "support_response": 0.0,
+            "total": 16.10516593209468,
+            "warm_carrier_load_and_operator": 0.2630440481007099
+          },
+          "peak_device_memory_bytes": 724097792,
+          "peak_device_memory_gib": 0.6743686199188232,
+          "warmed_map_wall_clock_seconds_per_iterate": {
+            "device": "cuda:0",
+            "maximum_seconds": 0.0029896399937570095,
+            "median_seconds": 0.0029692112002521753,
+            "minimum_seconds": 0.0029572590719908476,
+            "repeats": 7,
+            "synchronisation": "every device call blocked to completion"
+          }
+        },
+        "support": {
+          "columns_per_cell": 3,
+          "iterate_carrier": "exact_flux_values",
+          "order": "first"
+        }
+      }
+    ],
+    "B": [
+      {
+        "accuracy_against_banked_converged_root": {
+          "normalisation": "full banked grid-root flux span",
+          "region_partition": {
+            "closed_flux_region": "banked psi_N < 0.95",
+            "scrape_off_layer": "banked psi_N > 1.05",
+            "separatrix_band": "0.95 <= banked psi_N <= 1.05"
+          },
+          "regions": {
+            "closed_flux_region": {
+              "cell_count": 415,
+              "relative_rms_error": 0.00025395747523561634,
+              "relative_sup_error": 0.0007926871031428014
+            },
+            "scrape_off_layer": {
+              "cell_count": 81,
+              "relative_rms_error": 0.000314509946097561,
+              "relative_sup_error": 0.0005686233016405028
+            },
+            "separatrix_band": {
+              "cell_count": 55,
+              "relative_rms_error": 0.00031013499992874744,
+              "relative_sup_error": 0.0007735819605006333
+            }
+          }
+        },
+        "carrier": {
+          "banked_root": "scripts/oracle_rebaseline/root-coarse.npz",
+          "banked_root_sha256": "79f4a3f507680b7531bf3a3dc6a1195acf321027f0c3f4d4ab103bc70e1a1e0c",
+          "cache_hit": true,
+          "name": "coarse",
+          "realised_cells": 551,
+          "requested_cells": -500,
+          "semantic_cache_key": "030667d40f96d904",
+          "state_dimension": 2253
+        },
+        "convergence": {
+          "accepted_factors": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "achieved_newton_step_equivalents": 10.0,
+          "admitted_advance_count": 10,
+          "gmres_iterations": 18,
+          "newton_steps": 10,
+          "terminal_exact_field_relative_residual": 2.0597882944173428e-15,
+          "terminal_topology_class": "limited",
+          "terminal_x_point_finite": false,
+          "terminal_x_point_rz_m": null
+        },
+        "label": "B",
+        "speed": {
+          "compiled_solve_wall_clock_seconds_per_frame": 1.9035554660949856,
+          "one_time_build_seconds": {
+            "map_compile": 2.5653132968582213,
+            "solver_compile": 12.398280003108084,
+            "support_response": 4.912638743873686,
+            "total": 20.076511514838785,
+            "warm_carrier_load_and_operator": 0.20027947099879384
+          },
+          "peak_device_memory_bytes": 498671616,
+          "peak_device_memory_gib": 0.46442413330078125,
+          "warmed_map_wall_clock_seconds_per_iterate": {
+            "device": "cuda:0",
+            "maximum_seconds": 0.0024924150202423334,
+            "median_seconds": 0.0023765680380165577,
+            "minimum_seconds": 0.002256338018923998,
+            "repeats": 7,
+            "synchronisation": "every device call blocked to completion"
+          }
+        },
+        "support": {
+          "columns_per_cell": 6,
+          "iterate_carrier": "exact_flux_values",
+          "order": "second"
+        }
+      },
+      {
+        "accuracy_against_banked_converged_root": {
+          "normalisation": "full banked grid-root flux span",
+          "region_partition": {
+            "closed_flux_region": "banked psi_N < 0.95",
+            "scrape_off_layer": "banked psi_N > 1.05",
+            "separatrix_band": "0.95 <= banked psi_N <= 1.05"
+          },
+          "regions": {
+            "closed_flux_region": {
+              "cell_count": 826,
+              "relative_rms_error": 3.939445415007967e-05,
+              "relative_sup_error": 0.0003025958570545076
+            },
+            "scrape_off_layer": {
+              "cell_count": 151,
+              "relative_rms_error": 5.414864366541821e-05,
+              "relative_sup_error": 0.00011646572524380714
+            },
+            "separatrix_band": {
+              "cell_count": 99,
+              "relative_rms_error": 9.012585347057759e-05,
+              "relative_sup_error": 0.00027994174990908396
+            }
+          }
+        },
+        "carrier": {
+          "banked_root": "scripts/oracle_rebaseline/root-fine.npz",
+          "banked_root_sha256": "512f8a4bce44b2701a76b587bf0740cd17c1b037839dbcfbde86863115b251de",
+          "cache_hit": true,
+          "name": "fine",
+          "realised_cells": 1076,
+          "requested_cells": -1000,
+          "semantic_cache_key": "7c94be9b777c55ba",
+          "state_dimension": 4052
+        },
+        "convergence": {
+          "accepted_factors": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "achieved_newton_step_equivalents": 10.0,
+          "admitted_advance_count": 10,
+          "gmres_iterations": 18,
+          "newton_steps": 10,
+          "terminal_exact_field_relative_residual": 1.6288997306334511e-15,
+          "terminal_topology_class": "limited",
+          "terminal_x_point_finite": false,
+          "terminal_x_point_rz_m": null
+        },
+        "label": "B",
+        "speed": {
+          "compiled_solve_wall_clock_seconds_per_frame": 3.33806782704778,
+          "one_time_build_seconds": {
+            "map_compile": 3.512408114038408,
+            "solver_compile": 13.45916647510603,
+            "support_response": 10.785766090964898,
+            "total": 28.008249420206994,
+            "warm_carrier_load_and_operator": 0.25090874009765685
+          },
+          "peak_device_memory_bytes": 1090616576,
+          "peak_device_memory_gib": 1.0157158374786377,
+          "warmed_map_wall_clock_seconds_per_iterate": {
+            "device": "cuda:0",
+            "maximum_seconds": 0.0037055108696222305,
+            "median_seconds": 0.0035841509234160185,
+            "minimum_seconds": 0.003512126859277487,
+            "repeats": 7,
+            "synchronisation": "every device call blocked to completion"
+          }
+        },
+        "support": {
+          "columns_per_cell": 6,
+          "iterate_carrier": "exact_flux_values",
+          "order": "second"
+        }
+      }
+    ]
+  },
+  "comparison_contract": {
+    "all_cache_hits": true,
+    "common_banked_accuracy_root": "banked converged root_state for each carrier",
+    "common_carrier_set": [
+      "coarse",
+      "fine"
+    ],
+    "common_exterior": "exact field minus the shipped first-order exact-state current image",
+    "common_initial_state": "banked seed_state for each carrier",
+    "common_solver": {
+      "gmres_iterations": 18,
+      "newton_steps": 10,
+      "nonmonotone_allowance": 0.05,
+      "route": "topology-qualified nonmonotone Newton-Krylov"
+    },
+    "common_source": "moderate-rotation-conventional analytic source",
+    "only_differing_mechanism": "three first-order current-support columns versus six columns including RR, RZ and ZZ",
+    "warm_cache_required": true
+  },
+  "overall_statement": "Arm B is not an unqualified win; the per-axis verdicts retain every measured trade or loss.",
+  "per_axis_verdict": {
+    "accuracy": {
+      "arm_B_improves_on_arm_A": false,
+      "basis": "every carrier-region relative-sup error against its banked converged root must fall",
+      "classification": "does_not_improve"
+    },
+    "convergence": {
+      "arm_B_improves_on_arm_A": false,
+      "basis": "all carrier residuals must fall strictly while terminal topology class and X-point finiteness remain unchanged",
+      "classification": "does_not_improve"
+    },
+    "speed": {
+      "arm_B_improves_on_arm_A": false,
+      "basis": "all warmed per-iterate medians must fall and no carrier may use more peak device memory",
+      "classification": "does_not_improve"
+    }
+  },
+  "schema": "nova.support-order-arms",
+  "source_revision": "3b0b4ed62071f2e9c24703806de348088dd5eea1"
+}

@@ -56,42 +56,55 @@
     documented in the driver and its receipts.</p>
 
     <table>
-      <caption>Documented substitutions between the physical problem and the one Nova is handed</caption>
+      <caption>Candidate substitutions, corrected 2026-08-24 against the code rather than against
+        landed prose</caption>
       <thead>
-        <tr><th scope="col">Substitution</th><th scope="col">What the record says</th><th scope="col">Why it can move the root</th></tr>
+        <tr><th scope="col">Candidate</th><th scope="col">Status in the tree</th><th scope="col">Standing</th></tr>
       </thead>
       <tbody>
         <tr>
-          <td><strong>Pseudo-wall</strong></td>
-          <td>“rectangular enclosing control surface derived from <code>efit_grid</code> extent;
-          pseudo-wall standing in for the absent machine wall”. Baseline expansion 0.02, sensitivity
-          expansions 0.02 and 0.05 probed on the <em>first preregistered frame only</em>.</td>
-          <td>This is the surface the topology predicate reads against, so it <em>is</em> the
-          constraint that refuses roughly 85 of 89 Newton updates. Diverted-versus-limited against a
-          rectangle is not the same classification as against the machine wall.</td>
+          <td><strong>Wall</strong></td>
+          <td>A real wall exists. <code>nova/imas/diiid_machine_ids.py</code> builds a static IDS set
+          including a <code>wall</code> IDS at
+          <code>description_2d[0].limiter.unit[0].outline</code>, described as retaining one
+          deterministic physical wall ring. The refusal in
+          <code>diiid_description.py</code> — “the competition dataset does not ship a wall contour” —
+          validates the <em>competition dataset</em>, not Nova's machine description.</td>
+          <td><strong>Not a physics unknown; an unwired default.</strong> The forward driver still
+          reads topology against a rectangle derived from the grid extent. Wiring the real ring is
+          work, not a finding.</td>
         </tr>
         <tr>
-          <td><strong>Three unknown-tier conductor currents</strong></td>
-          <td><code>ECOILB</code>, <code>E567DN</code> and <code>E89UP</code> are unknown-tier free
-          parameters guarded against zero-fill, label-read and rejected-scale prescription;
-          <code>E567UP</code> and <code>E89DN</code> are knowable only through a fit-once ohmic
-          relation carrying a different-pulse caveat.</td>
-          <td>The physical plasma sat in the field of the actual currents. A conductor set with three
-          free members defines a different operator, and its fixed point need not be diverted at all.</td>
+          <td><strong>Conductor currents</strong></td>
+          <td><strong>Withdrawn.</strong> All five formerly-omitted conductors are driven from ECOILA
+          through a closed series circuit — <code>CIRCUIT_DRIVEN_CONDUCTORS</code> covers ECOILB,
+          E567UP, E567DN, E89UP and E89DN — and <code>_CIRCUIT_WIRING</code> snaps each fitted ratio
+          to an exact integer through <code>min((1.0, 2.0), key=|ratio − fitted|)</code>. ECOILB
+          fitted 2.0009180770924457, CI (1.9412, 2.0607), snapped to <strong>2.0</strong>,
+          <code>snapped-exact</code>, snap distance 9.18e-4. E567UP fitted 1.0231285862990276 snapped
+          to <strong>1.0</strong>.</td>
+          <td><strong>There are no free current parameters.</strong> An earlier draft of this plan
+          claimed three, taken from a landed summary describing the superseded tier resolver rather
+          than from the shipped circuit.</td>
         </tr>
         <tr>
-          <td><strong>Differentiated flux functions</strong></td>
-          <td>Each frame “supplies its own deterministically extracted p-prime and FF-prime
-          functions”, with a reliability mask discarding part of the extraction.</td>
-          <td>Differentiating a reconstructed, smoothed map amplifies its truncation. The profiles
-          driving the forward solve are not the profiles the plasma had.</td>
+          <td><strong>Profiles</strong></td>
+          <td>A declared affine map, not a fit: <code>p_prime = −efm/pprime / (2π)</code>,
+          <code>ff_prime = −efm/ffprime / (2π)</code>, on <code>efm/psi_norm</code> at 65 uniform
+          points, gradients with respect to negated total poloidal flux.</td>
+          <td><strong>Bounded and worth quantifying.</strong> The error is interpolation and
+          differentiation of a 65-point profile, not a free scale. It carries some weight and it is
+          measurable.</td>
         </tr>
         <tr>
           <td><strong>Discretisation</strong></td>
-          <td>The refinement work measured the shipped default sitting 8.6× coarser than the
-          reference it is scored against.</td>
-          <td>A discrete operator's fixed point is not the continuum one, and its residual floor is
-          set by discretisation error rather than by the physics.</td>
+          <td>Measured on this lane: <code>Frame.dplasma</code> −500 → −2100 (2,210 cells) moves the
+          residual floor <strong>−72.9%</strong> at 3.24× interaction-matrix build and 13.6× memory;
+          raising operator order moves it <strong>−7.7%</strong> at zero rebuild and zero memory. The
+          scored parity lane runs a fixed 95-point grid, 3.73× below the 248-cell baseline. Observed
+          convergence order on the double-seed reference is <strong>0.97</strong>.</td>
+          <td><strong>The largest measured lever, with an order deficit that is itself a
+          diagnostic.</strong> See §5.</td>
         </tr>
       </tbody>
     </table>
@@ -135,32 +148,54 @@
     shapes are illustrative. What is measured is the pseudo-wall's provenance and expansion, and that
     the topology read uses it.</p>
 
-    <h2 id="s2">§2 — Attribute the plateau to a named substitution</h2>
+    <h2 id="s2">§2 — Evaluate the residual as a field, at the labelled state</h2>
 
-    <p>Each of the four substitutions has a control that can be applied and measured, and each
-    control is a change of <em>input</em> rather than of solver mechanism — which matters, because
-    three solver mechanisms have already been measured on this lane and all three moved residual by
-    noise or made it worse. The experiment is a paired same-tree measurement per substitution, of
-    exactly the shape the predecessor's control established: change one input, hold everything else,
-    and quote the plateau against the unchanged arm.</p>
+    <p><strong>What the solve currently reports is not a field residual.</strong>
+    <code>nova/equilibrium/fixed_point.py::_relative_residual</code> is
+    <code>max|g − x| / max(|g|)</code> — the sup norm of <em>F</em>(ψ) − ψ over the whole flux state,
+    divided by the global peak of the mapped state, reduced to one scalar per iteration. So the field
+    residual <em>is</em> computed and then discarded. Three consequences follow and all three matter
+    here: every trace of where the residual lives is thrown away; a sup norm is set by a single worst
+    cell, so “one bad cell at the X point” and “broadly wrong everywhere” are indistinguishable; and
+    normalising by the global peak makes a residual concentrated where ψ is small invisible.</p>
 
-    <p>The pseudo-wall is the natural first target, for three reasons: it is the surface the refusing
-    predicate reads, its sensitivity was already flagged as worth exposing but has only ever been
-    probed on one frame at two expansions, and a wall is the one substitution whose correct value
-    might simply be obtainable — DIII-D's wall is a known machine geometry even though the
-    competition corpus does not ship it. The three unknown-tier currents are the natural second: they
-    are already guarded as free parameters, so freeing them into an outer loop and reporting the
-    residual reached is a measurement the existing machinery supports.</p>
+    <p><strong>Nobody has looked at that field, and it is the cheapest measurement on this lane.</strong>
+    One map evaluation, no solve: apply the forward map once to the labelled state and keep
+    <em>F</em>(ψ<sub>label</sub>) − ψ<sub>label</sub> as a map rather than a number. Its spatial
+    structure separates the candidates that prose cannot:</p>
 
-    <p><strong>Done when</strong> each of the four substitutions carries a per-frame verdict on the
-    five score-blind frames — <code>MOVES_THE_PLATEAU</code> with the residual reached quoted against
-    that frame's value in
-    <code>docs/figures/topology-preserving-continuation/conditioning-repair.json</code>, or
-    <code>NOT_IMPLICATED</code> with the range of the substitution that was explored — and the
-    receipt states which single substitution accounts for the largest share of the gap. A result in
-    which no single substitution moves the plateau is a reportable negative that closes this section,
-    provided the explored range of each is stated, because a bound nothing can clear is diagnostic
-    about the bound.</p>
+    <ul>
+      <li>concentrated at the boundary or the X point → boundary representation, or the wall</li>
+      <li>proportional to a single coil's Green's function → a current wiring error</li>
+      <li>smooth in ψ across the core → a profile or convention scale error</li>
+      <li>oscillating on the stencil scale → discretisation</li>
+    </ul>
+
+    <p><strong>The prior evidence on this question is stale and must be re-run, not cited.</strong>
+    <code>docs/figures/efit-forward-parity/reference-seeded-forward-slice.json</code> reports a
+    label-seeded solve on MAST 21985/51 converging in 5 Newton iterations to
+    <code>fixed_point_defect = 0.0</code> against a 1e-8 criterion — and landing on the
+    <em>vacuum</em> branch, plasma current below 1% of <code>efm/plasma_current_c</code>, flux map
+    0.6479 of the reference span away. That receipt was authored at <code>57a1bfb9</code> on
+    <strong>2026-08-21</strong>. The current-normalisation amplitude that pins the declared plasma
+    current arrived at <code>cf812416</code> on <strong>2026-08-22</strong>, one day later. With
+    <code>a(x, I) = I / Σ unscaled_cell_current(x)</code> renormalising every current moment, a
+    collapse to a current-free root is unreachable by construction. <strong>So we do not currently
+    know what a label-seeded solve does on the shipped map.</strong> The same staleness applies to the
+    eight-route reference-seeded survey recorded in <code>efit-forward-parity</code>'s landed prose,
+    whose “collapse to vacuum” conclusion is quoted in this plan's own history as though it were
+    current.</p>
+
+    <p><strong>Done when</strong> a receipt carries, for each of the six frozen MAST references on the
+    current-pinned map: the one-application residual <em>F</em>(ψ<sub>label</sub>) −
+    ψ<sub>label</sub> banked as a field with its sup, L2 and per-region norms rather than a sup alone;
+    the fraction of that residual falling inside the closed-flux region, in the scrape-off layer, and
+    within one stencil width of the boundary; the terminal branch classification and plasma-current
+    fraction of a label-seeded Newton solve run on the same tree, quoted against the stale
+    2026-08-21 vacuum reading and against the pinning commit that supersedes it; and a statement of
+    which of the four candidates in §1 the residual's structure implicates. A residual whose structure
+    implicates none of them is a reportable negative that closes this section, provided the norms and
+    the regional split are stated.</p>
 
     <h2 id="s3">§3 — Explain the frame that converges</h2>
 
@@ -196,6 +231,66 @@
 
     <p><strong>Change one input per arm.</strong> This section's whole method is attribution, and an
     arm that moves two substitutions at once cannot attribute anything.</p>
+
+    <h2 id="s5">§5 — Correct the assertions that route readers back down navigated paths</h2>
+
+    <p>This plan was drafted twice from landed prose and code comments that asserted conditions the
+    tree no longer holds, and both drafts were wrong in the same way. That is a defect in the record,
+    not in the reading. Three classes of false assertion are already identified and each one cost a
+    wrong turn.</p>
+
+    <p><strong>Superseded stage descriptions presented as current state.</strong>
+    <code>coil-circuit-discovery</code>'s landed prose describes ECOILB, E567DN and E89UP as
+    unknown-tier free parameters. That describes its tier-resolver stage; the same plan then shipped a
+    closed series circuit driving all five from ECOILA at integer-snapped gains. A reader who stops at
+    the prose concludes there are three free currents, which is what happened.</p>
+
+    <p><strong>Dataset-scoped refusals read as physical absences.</strong>
+    <code>diiid_description.py</code> raises “the competition dataset does not ship a wall contour”,
+    which is true of the dataset and false of Nova, whose machine description carries a deterministic
+    physical wall ring. The forward driver's docstring then justifies a pseudo-wall on that basis. The
+    naming compounds it: <code>OMITTED_POLOIDAL_CONDUCTORS</code> and
+    <code>UNKNOWN_POLOIDAL_CONDUCTORS</code> both describe conductors that are now wired.</p>
+
+    <p><strong>Conclusions banked before the mechanism that invalidates them.</strong> The
+    reference-seeded vacuum-escape survey predates current pinning by one day. Nothing in its receipt
+    or in the landed prose quoting it says so, because a receipt records the tree it measured and not
+    the trees that came after.</p>
+
+    <p><strong>Done when</strong> every false assertion in the DIII-D description, current and forward
+    driver paths is replaced by the measured reality with a report naming each one and the evidence
+    that it was false; the real wall ring is the default topology surface for the DIII-D forward path
+    with the pseudo-wall retained only as an explicitly selected fallback; the affected landed prose
+    carries a dated supersession note naming the commit that invalidated it; and
+    <code>nova/imas/AGENTS.md</code> states how to find and load a machine-description IDS through the
+    machine class, and how to check whether a receipt predates a mechanism, in terms generic to IMAS
+    rather than specific to this corpus.</p>
+
+    <h2 id="s6">§6 — A smooth transition between diverted and limited</h2>
+
+    <p>The admissibility predicate is Boolean: a candidate is in the requested topology class or it is
+    refused. Measured consequence — it refuses roughly 85 of every 89 Newton updates, and the two
+    mechanisms built to step around that refusal were both refuted. A hard classifier is the wrong
+    object here for a reason that is physical rather than numerical: diverted and limited are not two
+    disjoint species but the two sides of one continuous configuration, separated by whether the
+    critical flux surface touches a material surface, and a plasma passes smoothly between them as the
+    X point moves toward and away from the wall.</p>
+
+    <p>A discontinuous predicate over a continuous transition creates its own difficulty. It has no
+    derivative for a continuation method to follow, so a step that would land marginally on the wrong
+    side is refused entirely rather than reduced; and near the transition an arbitrarily small state
+    change flips the verdict, which is precisely where a free-boundary solve spends its time. Making
+    the transition smooth — a signed margin between the critical surface and the material surface, or
+    a continuous penalty on that margin, in place of a Boolean — gives the step something to descend
+    and makes admission a matter of degree.</p>
+
+    <p><strong>Done when</strong> a continuous topology margin exists whose sign reproduces the
+    existing Boolean classification on every case the current predicate classifies, its zero set is
+    demonstrated to lie where the classifier flips, and the five score-blind frames are re-measured
+    with the margin in place quoting admitted-advance count out of 89, achieved Newton-step-equivalents
+    and terminal residual against the banked values — with the requested class still held at the
+    terminal state, since a smooth margin that reaches a lower residual by ending in the wrong class
+    closes nothing.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>

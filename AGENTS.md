@@ -69,7 +69,7 @@ uv run --no-sync git commit -m 'type: description'
 
 | Module          | Purpose                                                                                                                                                                                                                        |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `nova.imas`     | IMAS data model interface (IDS access, database connections)                                                                                                                                                                   |
+| `nova.imas`     | IMAS data model interface (IDS access, database connections). Locating a machine description, opening its static IDSs at the manifest DD pin, and auditing receipt staleness: [`nova/imas/AGENTS.md`](nova/imas/AGENTS.md).      |
 | `nova.assembly` | ITER TF coil assembly analysis (Monte Carlo, fiducials, deformations). See [nova/assembly/README.md](nova/assembly/README.md) for detailed documentation on coordinate systems, gap calculations, and installed sector layout. |
 | `nova.biot`     | Biot-Savart integral calculations. Section routes and FrameSpace access: [`nova/biot/AGENTS.md`](nova/biot/AGENTS.md).                                                                                                         |
 | `nova.equilibrium` | Forward equilibrium construction and solves. Reference-lane, cache, gauge, and CPU-measurement guidance: [`nova/equilibrium/AGENTS.md`](nova/equilibrium/AGENTS.md).                                                         |

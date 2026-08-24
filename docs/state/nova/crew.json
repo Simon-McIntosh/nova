@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T02:53:23",
+  "updated": "2026-08-24T06:53:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -10,6 +10,13 @@
         "role": "implement",
         "session_id": "01a030a6-d6c8-7ba0-883f-e0b57d138801",
         "created": "2026-08-23"
+      },
+      {
+        "id": "assertion-sweep",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03215-6d8c-73b2-8575-c1290ebf8ee8",
+        "created": "2026-08-24"
       },
       {
         "id": "basin-branches",
@@ -348,6 +355,13 @@
         "created": "2026-08-12"
       },
       {
+        "id": "imas-guidance",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03215-85ea-7163-a13a-693384e01e72",
+        "created": "2026-08-24"
+      },
+      {
         "id": "inductance-support",
         "harness": "codex",
         "role": "implement",
@@ -619,6 +633,13 @@
         "role": "implement",
         "session_id": "019ff73b-a1b5-73a2-9252-011b64d1ab64",
         "created": "2026-08-12"
+      },
+      {
+        "id": "residual-field",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03215-b044-7533-9492-9f7584058755",
+        "created": "2026-08-24"
       },
       {
         "id": "ring-quadrature",
@@ -29885,9 +29906,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260824T044422176027-imas-machine-description-guidance",
+        "plan": "plateau-input-attribution",
+        "section": "\u00a75",
+        "node": "imas-machine-description-guidance",
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "imas-guidance",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T04:44:26Z",
+        "completed_at": "2026-08-24T04:53:39Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 553,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 553,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "de1f7bad4707d7fc02dca3d3f176fa4e2d142dca",
+        "commits": [
+          "7ef46a9da7068c9ddeebcae1b8303d83277ed8c3"
+        ],
+        "changed_lines": {
+          "added": 257,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T044422176027-imas-machine-description-guidance/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03215-85ea-7163-a13a-693384e01e72",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4678144,
+            "cached_input_tokens_cumulative": 4678144,
+            "input_tokens": 4837209,
+            "input_tokens_cumulative": 4837209,
+            "output_tokens": 22179,
+            "output_tokens_cumulative": 22179,
+            "reasoning_output_tokens": 9099,
+            "reasoning_output_tokens_cumulative": 9099
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 716
+    "_version": 723
   }
 }

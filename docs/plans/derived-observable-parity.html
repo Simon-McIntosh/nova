@@ -136,30 +136,27 @@
     first: the discriminator separates the two readings on data that already exists, before any
     repair is attempted.</p>
 
-    <h2 id="s2">§2 — Separate a computation difference from a state difference</h2>
-
-    <p>The discriminating question is sharp and answerable without new physics: given two terminal
-    states that agree to a measured tolerance, does the observable's own evaluation path produce
-    different answers from the <em>same</em> input? Evaluate each failing observable on a single
-    shared terminal state through both routes' evaluation paths. If the answers differ, the
-    computation differs and the state is exonerated. If they agree, the disagreement is inherited
-    from the residual state difference and scales with it — testable by evaluating across cases
-    whose state agreement spans a range.</p>
-
-    <p><code>moments.volume</code> failing an <strong>exact-equality</strong> bound is the sharpest
-    probe in the set and should be attacked first. Exact equality cannot fail by accumulation of
-    rounding in a well-posed shared computation; it fails when the two routes evaluate structurally
-    different things — a different cell count, a different mask, a different clip, or a reduction
-    performed in a different association. Whatever explains it is likely to explain the other two,
-    because the other two are continuous quantities computed over the same support.</p>
-
-    <p><strong>Done when</strong> each of the three failing observables carries a verdict of
-    <code>COMPUTATION_DIFFERS</code> or <code>STATE_INHERITED</code>, with the evidence that
-    separated them quoted: for the first, the two evaluations of a single shared state and their
-    difference; for the second, the observable difference plotted against state agreement across
-    the six cases with a stated correlation. The receipt names the first structurally differing
-    operation for any observable reaching the first verdict. No repair is attempted in this
-    section.</p>
+    <section id="s2" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-24</span>
+        <h2>§2 — Separate a computation difference from a state difference</h2></header>
+      <p class="landed-summary">Discriminated on the platform the failures were banked on. Each
+      observable was evaluated twice from <strong>one shared terminal state</strong> — scalar
+      <code>ForwardProfile.observe</code> against a jitted <code>vmap</code> of the same entry — so
+      the state is exonerated by construction. All three returned
+      <strong><code>COMPUTATION_DIFFERS</code></strong> with their first differing operation named:
+      <code>conservation.divergence_j</code> at 1.746e-10 in
+      <code>conservation.field_function_gradient</code>, <code>moments.major_radius</code> at
+      1.110e-16 in <code>cell_centered_measure.per_cell_radial_volume</code>, and
+      <code>moments.volume</code> at 4.441e-16 in <code>observe_moments.volume_reduction</code>.
+      <strong>The decision-bearing result is the cross-platform contrast:</strong>
+      <code>moments.volume</code> is <em>exactly</em> equal on CPU — a constant-zero difference
+      vector over all six cases — and two ULP apart on the H200, so its zero-width envelope is a
+      claim about an execution platform, not a discrete-type guarantee. That locked
+      <code>exact-equality-bounds</code> to a derived tolerance on measurement rather than argument.
+      No repair or bound change was attempted here, by design. Full record:
+      <a href="/nova/evidence/archive/derived-observable-parity-landed#s2">§2 landed</a> (commit
+      <code>82605bff</code>, merged <code>a5f281ae</code>, 5 tests).</p>
+    </section>
 
     <h2 id="s3">§3 — Repair what the discriminator convicts</h2>
 

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T01:37:08",
+  "updated": "2026-08-24T02:53:23",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -355,6 +355,13 @@
         "created": "2026-08-22"
       },
       {
+        "id": "integrated-acceptance",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a030fd-970e-7c00-b67e-b5cf196b7dc4",
+        "created": "2026-08-23"
+      },
+      {
         "id": "integration-gate",
         "harness": "claude",
         "role": "implement",
@@ -598,6 +605,13 @@
         "role": "implement",
         "session_id": "01a030ca-891d-7ec1-99dc-a5c0a6b551e4",
         "created": "2026-08-23"
+      },
+      {
+        "id": "reference-verify",
+        "harness": "codex",
+        "role": "test",
+        "session_id": "01a03130-e9b6-7212-8626-f37a2825731b",
+        "created": "2026-08-24"
       },
       {
         "id": "registry",
@@ -29743,9 +29757,137 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T233836874286-integrated-acceptance-regeneration",
+        "plan": "derived-observable-parity",
+        "section": "\u00a73",
+        "node": "integrated-acceptance-regeneration",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "integrated-acceptance",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T23:38:40Z",
+        "completed_at": "2026-08-24T00:45:01Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3981,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3981,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "dfe53e54786002ece530edfaa6a76c6e5b9c6739",
+        "commits": [
+          "845cbdd87289a5bcbc7add2e8e149285a9612d03"
+        ],
+        "changed_lines": {
+          "added": 29078,
+          "removed": 1,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "Re-application complete on exact source, acceptance still FAILING, and the instability finding is stronger than the provisional reading. Formatted-driver H200 job 1253388 on betelgeuse with reservation gpu_0003_grpA, one NVIDIA H200 NVL, float64, two back-to-back invocations in 00:06:02; driver SHA-256 c3f82799913c3a39f6cd9571659af7eabc604f0727d54f74478af1fae5ae0714 matches the committed formatted driver exactly. Repetition 1: width 1 = 67/69 bounds and 410/414 case-bound evaluations, width 4 = 67/69 and 408/414. Repetition 2: width 1 = 68/69 and 412/414, width 4 = 68/69 and 410/414. Banked comparison: width 1 = 65/69 and 407/414, width 4 = 66/69 and 408/414 - so both repetitions improve the bound count at both widths, and case counts improve at width 1 in both and at width 4 in repetition 2. THE MEASURED NEGATIVE: bound totals changed 67 to 68 at BOTH widths between repetitions, case-bound totals changed 410 to 412 at width 1 and 408 to 410 at width 4, four individual case verdicts changed at width 1 and six at width 4. Aggregate stability is therefore FALSE and the reduction repair did NOT confine the instability to individual case verdicts, which corrects the provisional pre-format reading. conservation.divergence_b is UNADJUDICATED_ACCEPTANCE_FAILURE - never a discriminator target, failed both widths in repetition 1 and passed both in repetition 2, which is the instability made concrete on one observable, and no computation or bound change is authorised for it. conservation.divergence_j is COMPUTATION_DIFFERS_REPAIR_REFUSED - fails both widths in both repetitions, localising to the fitted field-function gradient where fixed association moved the scalar answer. Repaired moments.major_radius and moments.volume pass every retained integrated measurement. The reference-module requirement was reassigned to reference-lane-verification and deliberately not retried here.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T233836874286-integrated-acceptance-regeneration/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a030fd-970e-7c00-b67e-b5cf196b7dc4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 19188224,
+            "cached_input_tokens_cumulative": 19188224,
+            "input_tokens": 19746060,
+            "input_tokens_cumulative": 19746060,
+            "output_tokens": 45446,
+            "output_tokens_cumulative": 45446,
+            "reasoning_output_tokens": 14009,
+            "reasoning_output_tokens_cumulative": 14009
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260824T003439810189-reference-lane-verification",
+        "plan": "derived-observable-parity",
+        "section": "\u00a73",
+        "node": "reference-lane-verification",
+        "role": "test",
+        "spec_level": "exact",
+        "member": "reference-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T00:34:43Z",
+        "completed_at": "2026-08-24T00:53:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1119,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1119,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "5c25cb1ffcd2de39285af91746fa2d89173def9d",
+        "commits": [
+          "94389a4e721c6b10ce36d83e4ae4884f933f6309"
+        ],
+        "changed_lines": {
+          "added": 12867,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T003439810189-reference-lane-verification/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03130-e9b6-7212-8626-f37a2825731b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8240896,
+            "cached_input_tokens_cumulative": 8240896,
+            "input_tokens": 8436586,
+            "input_tokens_cumulative": 8436586,
+            "output_tokens": 29701,
+            "output_tokens_cumulative": 29701,
+            "reasoning_output_tokens": 10133,
+            "reasoning_output_tokens_cumulative": 10133
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 710
+    "_version": 716
   }
 }

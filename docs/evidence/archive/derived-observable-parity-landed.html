@@ -192,6 +192,85 @@
   banked implementation. The remaining reference coverage is owed rather than assumed.</p>
 </section>
 
+<section id="s3-reapplication">
+  <h2 id="s3-reapplication-h">§3 — The bounds re-applied, and the banks checked</h2>
+
+  <p><strong>integrated-acceptance-regeneration</strong> landed 2026-08-24 — commit
+  <code>845cbdd8</code>, merged <code>8ba1b6c0</code>, gate <strong>FAILED</strong>
+  (re-application complete, acceptance still failing). H200 job 1253388 on
+  <code>betelgeuse</code>, reservation <code>gpu_0003_grpA</code>, two back-to-back invocations in
+  00:06:02; driver SHA-256
+  <code>c3f82799913c3a39f6cd9571659af7eabc604f0727d54f74478af1fae5ae0714</code> matches the
+  committed formatted driver exactly.</p>
+
+  <table>
+    <caption>Registered bounds re-applied from the repaired source, both repetitions retained</caption>
+    <thead>
+      <tr><th scope="col">Run</th><th scope="col">Width 1 bounds / cases</th><th scope="col">Width 4 bounds / cases</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>repetition 1</td><td>67 of 69 / 410 of 414</td><td>67 of 69 / 408 of 414</td></tr>
+      <tr><td>repetition 2</td><td>68 of 69 / 412 of 414</td><td>68 of 69 / 410 of 414</td></tr>
+      <tr><td>banked, pre-repair</td><td>65 of 69 / 407 of 414</td><td>66 of 69 / 408 of 414</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>The repair improved the counts, and the instability was not confined by it.</strong>
+  Both repetitions beat the banked bound count at both widths. But between the two repetitions
+  <em>bound totals themselves</em> moved, 67 to 68 at both widths; case totals moved 410 to 412 at
+  width 1 and 408 to 410 at width 4; four individual case verdicts changed at width 1 and six at
+  width 4. Aggregate stability is false on exact source — which is a stronger statement than the
+  earlier provisional reading, where the totals had appeared to settle. The clearest single instance
+  is <code>conservation.divergence_b</code>: it failed <em>both</em> widths in repetition 1 and
+  passed <em>both</em> in repetition 2.</p>
+
+  <p><strong>The two remaining failures each carry a verdict and a reason.</strong>
+  <code>conservation.divergence_b</code> is <code>UNADJUDICATED_ACCEPTANCE_FAILURE</code> — it was
+  never one of the three shared-state discriminator targets, so no computation or bound change is
+  authorised for it. <code>conservation.divergence_j</code> is
+  <code>COMPUTATION_DIFFERS_REPAIR_REFUSED</code> — it fails both widths in both repetitions and
+  localises to the fitted field-function gradient, where fixed association moved the scalar answer
+  and the experiment was correctly abandoned. The repaired <code>moments.major_radius</code> and
+  <code>moments.volume</code> pass every retained integrated measurement.</p>
+
+  <h3 id="s3-banks">The reference banks, checked without a solve</h3>
+
+  <p><strong>reference-lane-verification</strong> landed 2026-08-24 — commit <code>94389a4e</code>,
+  merged <code>18495c53</code>, gate PASSED. Receipt
+  <code>docs/figures/derived-observable-parity/reference-lane-verification.json</code> (SHA-256
+  <code>09346d9b422375b47044984c402a5dd3c6f2907a262a382fd74d2380a27ab4eb</code>). The stored-reference
+  module could not complete inside any node fence from a cold fixture cache — the documented builds
+  are 1,246 s coarse and 3,335 s fine — so the question was answered a different way: each immutable
+  banked root was evaluated through <code>ForwardProfile.observe</code> at the pre-repair revision
+  <code>7d342307</code> and at the repaired revision, with <em>no solve executed at all</em>.</p>
+
+  <p><strong>Explicit answer: yes, banked values moved — at float64 resolution.</strong> Seven of 78
+  named receipt leaves moved, in 19 of 312 root-observable comparisons: maximum <em>relative</em>
+  difference <strong>5.427391769515079e-16</strong>, maximum absolute difference
+  2.9802322387695312e-08. The moved leaves are
+  <code>moments.internal_inductance</code>, <code>moments.major_radius</code>,
+  <code>moments.plasma_current</code>, <code>moments.poloidal_beta</code>,
+  <code>moments.poloidal_field_integral</code>, <code>moments.pressure_integral</code> and
+  <code>moments.volume</code>. The other 71 leaves are exactly equal on all four roots. Per-root
+  moved counts: stored DINA coarse 2 of 78, stored DINA fine 5, analytic oracle coarse 7, analytic
+  oracle fine 5.</p>
+
+  <p><strong>Why that is the right cost and not a regression.</strong> Replacing a free reduction
+  association with a fixed binary tree necessarily changes the last bits of every sum it touches; a
+  relative move of 5.4e-16 is that footprint and nothing more. The 97 solver and stencil tests
+  covering those paths all pass — <code>test_fixed_point.py</code>,
+  <code>test_equilibrium_forward_solve.py</code>, <code>test_equilibrium_forward.py</code> and
+  <code>test_equilibrium_stencil_mesh.py</code>, 97 collected and 97 passed in 128.76 s. No bank was
+  overwritten: the NPZ roots are immutable and were read, not rewritten. Recording <em>which</em>
+  leaves moved matters because any future bitwise comparison against pre-repair values will differ,
+  and that must not be mistaken for a new defect.</p>
+
+  <p><strong>One incidental finding worth keeping.</strong> The stored-reference banks had to be
+  reconstructed with their authored −500/−1000 cell requests and 3/6 wall nodes per segment, because
+  the suite default resolution was raised later while the banks remained immutable. A bank and a
+  current default are not interchangeable inputs.</p>
+</section>
+
 <section id="s4">
   <h2 id="s4-h">§4 — Label parity as a re-runnable acceptance, and the instability it exposed</h2>
 

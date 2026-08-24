@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T01:26:41",
+  "updated": "2026-08-24T02:55:24",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -742,6 +742,21 @@
                 "risk": "elevated"
               }
             }
+          },
+          {
+            "slug": "same-device-label-determinism",
+            "why_now": "Two back-to-back invocations of one driver on one H200, on byte-identical inputs and the same seed, returned different registered-bound verdicts - bound totals moved at both batch widths and ten individual case verdicts flipped, with conservation.divergence_b failing both widths in one run and passing both in the next. The fixed-reduction repair that was expected to explain it improved the counts and left the movement intact, so the cause is not the moment reduction association. Until a route agrees with itself on a rerun, no acceptance check the throughput ladder invokes certifies anything, because the verdict is a sample rather than a value.",
+            "done_when": "Each of the six held-out cases carries STATE_REPRODUCIBLE or STATE_VARIES across at least three repetitions in one allocation, with the maximum bitwise-unequal element count and the maximum absolute and relative terminal-flux difference quoted alongside the same figures per registered observable; the nondeterministic operation is named and its control applied; three consecutive acceptance-driver runs in one allocation return identical bound counts, identical case counts and identical per-case verdicts; and the control's throughput cost is quoted as a per-slice figure against the unconstrained route.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "context": "extended",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
           }
         ],
         "description": "The convergence sprint closed both its hypotheses as honest negatives: neither a longer step along the topology-preserving manifold nor a seed-alignment selector moves the residual, and admitted steps were already full Newton steps. What remains is a question no stepping mechanism answers - whether a diverted-class root exists below the measured plateau at all. Answer that first; the GPU catalog runs behind it and is relocated here out of a sprint slot that scheduled it ahead of its own prerequisite."
@@ -905,6 +920,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 67
+    "_version": 68
   }
 }

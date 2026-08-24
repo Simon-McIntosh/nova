@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="same-device-label-determinism">
+  <meta name="plan-title" content="Same-Device Label Determinism — a route that disagrees with itself">
+  <meta name="plan-summary" content="Two back-to-back runs of one driver on one H200, on identical inputs, return different registered-bound verdicts: bound totals move at both batch widths and ten individual case verdicts change. Establish whether a single route is reproducible against itself before any labelled store certifies its own output.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="8.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-context" content="extended">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="derived-observable-parity">
+  <meta name="plan-blocks" content="mast-catalog-gpu-solve">
+  <meta name="plan-sprint" content="S15">
+  <title>Same-Device Label Determinism | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The measurement, and why it outranks everything else on this lane</h2>
+
+    <p>Every reproducibility argument made about this solve so far has compared <em>two</em> things:
+    a compiled route against an eager one, a batched route against a per-slice one, one platform
+    against another. This plan exists because a comparison of <em>one</em> route against itself
+    failed. Two back-to-back invocations of the same driver, in one SLURM allocation, on one NVIDIA
+    H200 NVL, at float64, on byte-identical inputs and the exact same seed, returned different
+    registered-bound verdicts.</p>
+
+    <table>
+      <caption>Registered-bound outcome of two consecutive runs, one device, identical inputs
+        (receipt <code>integrated-acceptance.json</code>, driver SHA-256
+        <code>c3f82799913c3a39f6cd9571659af7eabc604f0727d54f74478af1fae5ae0714</code>)</caption>
+      <thead>
+        <tr><th scope="col">Run</th><th scope="col">Width 1 bounds / cases</th><th scope="col">Width 4 bounds / cases</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>repetition 1</td><td>67 of 69 / 410 of 414</td><td>67 of 69 / 408 of 414</td></tr>
+        <tr><td>repetition 2</td><td>68 of 69 / 412 of 414</td><td>68 of 69 / 410 of 414</td></tr>
+        <tr><td>change between them</td><td>+1 bound, +2 cases, 4 case verdicts flipped</td><td>+1 bound, +2 cases, 6 case verdicts flipped</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The cleanest single instance.</strong>
+    <code>conservation.divergence_b</code> failed <em>both</em> batch widths in the first repetition
+    and passed <em>both</em> in the second. Nothing about the input, the seed, the device, the
+    driver or the source changed between them.</p>
+
+    <p><strong>This is not the batch-size dependence already characterised, and it is worse.</strong>
+    Batch-size dependence is a property that can be measured once and stated: three bounds change
+    status between widths 1 and 4, and every one of the 69 receipt rows carries
+    <code>pass_status_depends_on_batch_size</code> so a reader cannot mistake silence for
+    independence. Run-to-run variation on one device has no such shape. It means a verdict is a
+    sample rather than a value, and no number of passing runs establishes that the next one passes.</p>
+
+    <p><strong>It survived the repair that was expected to explain it.</strong> A fixed binary
+    summation tree and a cell-centred radial-volume reconstruction made
+    <code>moments.volume</code> and <code>moments.major_radius</code> bitwise equal between the
+    scalar observation entry and a jitted <code>vmap</code> of it, on all six held-out cases. That
+    repair improved the pass counts — 65 to 67 and 66 to 68 bounds at the two widths — and did
+    <em>not</em> remove the run-to-run movement. So the cause is not the reduction association in
+    Nova's own moment code, which is the hypothesis this plan starts by having already excluded.</p>
+
+    <p><strong>Why it blocks the labelled catalog specifically.</strong> The throughput product is a
+    store of boundaries, moments and conservation diagnostics across 1,341,435 slices, and its value
+    rests on a consumer being able to trust a published label. A route that returns a different
+    verdict on a rerun cannot certify anything: the acceptance check that a throughput rung invokes
+    would pass or fail by luck of the run. Terminal flux agreement at 3.58e-12 does not help here,
+    because the disagreement is downstream of the state.</p>
+
+    <h2 id="s2">§2 — Is the state reproducible, or only the labels?</h2>
+
+    <p>The first thing to separate is whether the terminal <em>state</em> repeats bitwise across
+    reruns and only the derived labels move, or whether the solve itself is nondeterministic and the
+    labels inherit that. The two imply completely different repairs, and the existing receipts cannot
+    answer it because none of them retains the raw terminal arrays across repetitions.</p>
+
+    <p>The measurement needs no new physics: run the same case twice in one allocation and compare
+    the terminal flux array bitwise, then compare each registered observable evaluated from those
+    two states. If the states are identical and the labels differ, the nondeterminism is in the
+    observation path. If the states differ, it is in the solve, and every label argument built on
+    top of a single solve becomes provisional.</p>
+
+    <p><strong>Done when</strong> each of the six held-out cases carries a verdict of
+    <code>STATE_REPRODUCIBLE</code> or <code>STATE_VARIES</code> across at least three repetitions in
+    one allocation, quoting the maximum bitwise-unequal element count and the maximum absolute and
+    relative difference of the terminal flux array between repetitions, alongside the same figures
+    for every registered observable. A case whose state repeats bitwise while its labels move
+    localises the problem to the observation path and names the first leaf that differs.</p>
+
+    <h2 id="s3">§3 — Find the nondeterministic operation and decide what to do about it</h2>
+
+    <p>Scope follows §2's verdict rather than preceding it. The candidate mechanisms are known and
+    each is testable: autotuned kernel selection choosing a different algorithm per process,
+    atomics-based scatter or segment-sum reductions whose order depends on scheduling, and
+    reduction-order freedom that XLA is permitted to resolve differently between compilations. Each
+    has a documented control — deterministic-kernel settings, a fixed compilation cache, or an
+    explicitly ordered reduction — and each control has a cost that must be measured rather than
+    assumed, because the catalog's whole premise is throughput.</p>
+
+    <p><strong>Done when</strong> the nondeterministic operation is named, the control that makes it
+    reproducible is applied, three consecutive runs of the acceptance driver in one allocation return
+    identical bound and case counts with identical per-case verdicts, and the throughput cost of the
+    control is quoted as a per-slice figure against the unconstrained route. A control that makes the
+    route reproducible at a cost the catalog cannot afford is a legitimate outcome, provided both
+    numbers are stated and the trade is put to the owner rather than decided inside this plan.</p>
+
+    <h2 id="s4">§4 — Method requirements binding on every node here</h2>
+
+    <p><strong>Retain every repetition; never collapse them into a best or latest run.</strong> This
+    plan exists because a worker kept a repetition it could have discarded. A receipt that reports
+    only the most recent run of a nondeterministic process is not evidence, and a summary that
+    averages verdicts hides the very property under study.</p>
+
+    <p><strong>Name the production diff between compared trees and decline attribution when more
+    than one mechanism sits in it.</strong> Inherited from the predecessor lane, where a
+    re-measurement was read as evidence for one mechanism while an unrelated operator-order commit
+    was the true mover.</p>
+
+    <p><strong>Report a pass count only with its repetition count beside it.</strong> The direct
+    analogue of the lesson that an admission count means nothing without achieved traversal: on this
+    lane, "67 of 69" is meaningless without "in which of how many runs".</p>
+
+    <p><strong>Never derive an acceptance criterion from an achieved value of the quantity it
+    scores</strong>, and a criterion must be passable by something.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="determinism-control-scope" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">If a deterministic control is found, does it apply to the whole
+        production forward path or only to the acceptance-measurement driver? Applying it
+        everywhere makes every published label reproducible and pays its throughput cost on all
+        1,341,435 slices; applying it only to the measurement makes the acceptance check
+        trustworthy while leaving the production route free to vary, which certifies a route
+        different from the one that produced the store. Answer it only after the cost is measured,
+        never before.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="production-wide">production-wide determinism</button>
+      <button class="r-opt" data-value="measurement-only">measurement driver only</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-sdd-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-24" data-recommends-skill="/reckon-ship same-device-label-determinism" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">§2 before §3 — separate state from labels before hunting a kernel</h4>
+    <div class="r-fu-body"><p>ONE HYPOTHESIS IS ALREADY EXCLUDED and starting from it would waste the plan. The reduction association in Nova's own moment code is NOT the cause: a fixed binary summation tree plus a cell-centred radial-volume reconstruction made <code>moments.volume</code> and <code>moments.major_radius</code> bitwise equal between the scalar observation entry and a jitted <code>vmap</code> of it on all six cases, improved the bound counts from 65 and 66 to 67 and 68 at the two widths, and left the run-to-run movement intact. Read <code>docs/figures/derived-observable-parity/integrated-acceptance.json</code> and the landed record at <code>docs/evidence/archive/derived-observable-parity-landed.html</code> before dispatching anything.</p><p>§2 IS CHEAP AND IT SPLITS THE PROBLEM IN HALF. Nobody has yet compared the terminal flux array bitwise across two runs of the same case in one allocation, because no existing receipt retains the raw terminal arrays across repetitions. If the state repeats and only the labels move, the search is confined to the observation path. If the state itself varies, then every single-run label argument on this lane becomes provisional and that is a much larger finding, so it is worth an hour to know which world we are in.</p><p>THE CLEANEST TARGET TO INSTRUMENT is <code>conservation.divergence_b</code>. It failed both batch widths in one repetition and passed both in the next, so it flips on the coarsest possible signal and needs no subtle statistics to detect. Use it as the canary while building the repetition harness, then widen to all 69.</p><p>DO NOT DECIDE THE CONTROL SCOPE BEFORE THE COST IS MEASURED. The open decision asks whether a deterministic control applies production-wide or only to the measurement driver, and the honest answer depends entirely on the per-slice throughput cost across 1,341,435 slices. A measurement-only control certifies a route that is not the one which produced the store, which is close to certifying nothing - but a production-wide control that halves throughput is a real trade and belongs to the owner, not to this plan.</p><p>CONSUMER: <code>mast-catalog-gpu-solve</code>, which is held on this and on <code>branch-root-existence</code>. Do not report either hold released until the acceptance driver returns identical counts and identical per-case verdicts across three consecutive runs.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship same-device-label-determinism</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>

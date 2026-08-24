@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="derived-observable-parity">
   <meta name="plan-title" content="Derived-Observable Parity — the same quantity from two routes">
   <meta name="plan-summary" content="Three registered terminal observables disagree between the compiled and eager routes by up to 3.9 times their bound while the terminal states agree to 3.6e-12. The disagreement is in the observable computation, not inherited from the state, and a labeled catalog emits exactly these quantities.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="5.0">
   <meta name="plan-capability-version" content="1.0">
@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-24">
-<meta name="plan-version" content="5">
-<meta name="plan-commits" content="429506cfd767c0dd6365e4168d921f42a630b262,82605bffc6540080fae1d49ebb30b310a69d7f73,d63685c97261c316092a95f9b9c441fcbbfc3f5b,b12ac25d7192aad33853823c3e4b1f44ccaa8d98,b2924f633b9b48041e2d619013f247ab8561e6de,54c6f5de">
-<meta name="plan-artifacts" content="scripts/observable_parity_reuse/report.md,docs/figures/derived-observable-parity/computation-discriminator.json,docs/figures/derived-observable-parity/batch-acceptance.json,benchmarks/observable_route_discriminator.py,nova/equilibrium/observable_acceptance.py,docs/evidence/archive/derived-observable-parity-landed.html">
-<meta name="plan-impl" content="0.8">
+<meta name="plan-version" content="7">
+<meta name="plan-commits" content="429506cfd767c0dd6365e4168d921f42a630b262,82605bffc6540080fae1d49ebb30b310a69d7f73,d63685c97261c316092a95f9b9c441fcbbfc3f5b,b2924f633b9b48041e2d619013f247ab8561e6de,845cbdd87289a5bcbc7add2e8e149285a9612d03,94389a4e721c6b10ce36d83e4ae4884f933f6309,18495c53">
+<meta name="plan-artifacts" content="scripts/observable_parity_reuse/report.md,docs/figures/derived-observable-parity/computation-discriminator.json,docs/figures/derived-observable-parity/batch-acceptance.json,docs/figures/derived-observable-parity/integrated-acceptance.json,docs/figures/derived-observable-parity/reference-lane-verification.json,benchmarks/observable_route_discriminator.py,nova/equilibrium/observable_acceptance.py,docs/evidence/archive/derived-observable-parity-landed.html">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -158,46 +158,55 @@
       <code>82605bff</code>, merged <code>a5f281ae</code>, 5 tests).</p>
     </section>
 
-    <h2 id="s3">§3 — Repair what the discriminator convicts</h2>
+    <section id="s3" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-24</span>
+        <h2>§3 — Repair what the discriminator convicts</h2></header>
+      <p class="landed-summary">Repaired the computation, not the bound. A fixed binary summation
+      tree plus a cell-centred radial-volume reconstruction makes <code>moments.volume</code> and
+      <code>moments.major_radius</code> <strong>bitwise equal</strong> — shared-state difference
+      exactly 0.0 on all six H200 cases, from 4.441e-16 and 1.110e-16 — so both reclassify
+      <code>STATE_INHERITED</code>. <code>conservation.divergence_j</code> was deliberately left
+      banked: fixed association still left 9.379e-13, and a custom batching rule
+      <em>moved the computed scalar itself</em> from 0.0284242468091 to 0.0284240930870, so the
+      experiment was refused — a change that moves the answer is not a repair. Its route difference
+      nonetheless halved to 8.731e-11 and it already passes its absolute bound of 1.370e-10, failing
+      only relative normalisation of a near-zero quantity. Re-applying the 69 bounds from the
+      repaired source gives <strong>67–68 of 69</strong> against the banked 65 and 66, with two
+      remaining failures each carrying a verdict:
+      <code>divergence_b UNADJUDICATED_ACCEPTANCE_FAILURE</code> (never a discriminator target) and
+      <code>divergence_j COMPUTATION_DIFFERS_REPAIR_REFUSED</code>. Banked-value check, run without a
+      solve: 7 of 78 leaves moved at a maximum <em>relative</em> 5.427e-16 — the unavoidable
+      footprint of fixing a reduction's association — with 97 of 97 solver and stencil tests passing.
+      Full record:
+      <a href="/nova/evidence/archive/derived-observable-parity-landed#s3">§3 repair</a> and
+      <a href="/nova/evidence/archive/derived-observable-parity-landed#s3-reapplication">§3
+      re-application</a> (commits <code>b2924f63</code>, <code>845cbdd8</code>,
+      <code>94389a4e</code>).</p>
+    </section>
 
-    <p>Scope follows the verdict rather than preceding it, which is why this section carries no
-    predetermined mechanism. An observable convicted as <code>COMPUTATION_DIFFERS</code> is repaired
-    at the differing operation so both routes evaluate one definition — reusing the derived-quantity
-    chain that <a href="/nova/equilibrium-metric-parity">equilibrium-metric-parity</a> established
-    rather than authoring a second one. That plan proved every derived quantity agrees when computed
-    from the same flux map; this one is the complementary question of the same quantity computed
-    through two routes, so its machinery is the natural home and any new component needs a stated
-    reason the existing one does not fit.</p>
-
-    <p>An observable convicted as <code>STATE_INHERITED</code> is <em>not</em> repaired here. It is
-    recorded as a consumer of the convergence work and its bound is re-examined once the state
-    difference falls — because a bound written against a non-converged state may itself be the thing
-    that is wrong.</p>
-
-    <p><strong>Done when</strong> the 69 registered bounds are re-applied to the six held-out cases
-    and the pass count is quoted against the banked 66 of 69 and 407 of 414, with any remaining
-    failure carrying its verdict and its reason for remaining. A repair that moves a bound rather
-    than a computation is refused unless the bound's derivation is shown to be the defect.</p>
-
-    <h2 id="s4">§4 — Make label parity an acceptance condition, not an afterthought</h2>
-
-    <p>The throughput ladder's reproducibility argument is currently expressed on the state: a
-    one-map bound at sixteen epsilon and terminal agreement conditioned on seed alignment. Nothing
-    in it obliges the <em>labels</em> to agree, and the labels are the deliverable. This section
-    closes that by making the registered observable bounds part of what a throughput rung must
-    demonstrate.</p>
-
-    <p>It carries one measured constraint from the parity work that must not be forgotten here: a
-    <strong>semantically zero</strong> representation change — a matrix widening carrying no
-    numerical difference — was measured to move a reference root by 10.744 orders on this map. A
-    batched path differs from a per-slice path in layout, accumulation order and kernel selection,
-    all changes of that class. So label parity established at one batch size and device count says
-    nothing about another, and this section's contribution is an acceptance condition each rung
-    re-runs rather than a certificate issued once.</p>
-
-    <p><strong>Done when</strong> the observable-bound check is expressed as a reusable acceptance
-    the throughput rungs invoke, demonstrated at more than one batch size, with the per-batch pass
-    counts quoted and any batch-size dependence stated explicitly.</p>
+    <section id="s4" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-24 — acceptance failing</span>
+        <h2>§4 — Make label parity an acceptance condition, not an afterthought</h2></header>
+      <p class="landed-summary">The acceptance exists in the shape this section asked for:
+      <code>nova.equilibrium.observable_acceptance.evaluate_observable_bound_acceptance</code>
+      validates registered shapes and dtypes, applies the exact or dual absolute-relative envelope to
+      every case <em>and every batch member</em>, and fails a bound if any member fails — so a
+      throughput rung re-runs it rather than inheriting a certificate. Demonstrated at widths 1 and 4
+      over all six held-out cases on the H200. It <strong>fails</strong>: 67–68 of 69 bounds, with
+      batch-size dependence stated on every one of the 69 rows via
+      <code>pass_status_depends_on_batch_size</code>, and a fourth observable
+      (<code>conservation.divergence_b</code>) surfacing only at width 1.
+      <strong>The larger finding, and the reason this section is worth more failing than passing:
+      two back-to-back runs on one device with identical inputs disagree.</strong> Bound totals moved
+      67→68 at both widths, case totals 410→412 and 408→410, four then six case verdicts flipped, and
+      <code>divergence_b</code> failed both widths in one repetition and passed both in the next. The
+      fixed-reduction repair improved the counts and did not remove the movement, so a verdict here is
+      a sample rather than a value. That is now its own plan,
+      <a href="/nova/same-device-label-determinism">same-device-label-determinism</a>, because a route
+      that disagrees with itself cannot certify a label store. Full record:
+      <a href="/nova/evidence/archive/derived-observable-parity-landed#s4">§4 landed</a> (commits
+      <code>d63685c9</code>, <code>845cbdd8</code>).</p>
+    </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -218,10 +227,16 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-dop-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-23" data-recommends-skill="/reckon-ship derived-observable-parity" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-dop-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-23" data-recommends-skill="/reckon-ship derived-observable-parity" data-resolved-at="2026-08-24T00:56:38+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Run §2 first and let its verdict scope §3 — do not assume the repair</h4>
     <div class="r-fu-body"><p>§2 BEFORE §3, and the ordering is the point rather than a formality. The three failures could be defects in how each observable is computed, or they could be inherited from a terminal state difference that has not yet fallen because the solve does not converge. Those two readings imply OPPOSITE fixes — repair the evaluation path, or leave it alone and re-examine the bound once convergence lands — so any repair attempted before the discriminator runs has an even chance of being the wrong one. §2 needs no new solve and no new physics: it evaluates each failing observable on a single shared terminal state through both routes' paths, on data already banked.</p><p>ATTACK <code>moments.volume</code> FIRST. It fails an EXACT-EQUALITY bound, which cannot fail by accumulated rounding in a shared computation — it fails when the two routes evaluate structurally different things, such as a different cell count, mask, clip, or reduction association. It is therefore the sharpest probe in the set, and whatever explains it will probably explain the two continuous quantities computed over the same support.</p><p>THE OPEN DECISION IS LOAD-BEARING AND SHOULD BE ANSWERED BEFORE THE REPAIR, not after. <code>exact-equality-bounds</code> asks whether any terminal observable should carry exact equality across two execution routes at all. If a discrete quantity must be identical, the failure is a genuine defect; if it is a category error on a pipeline where layout and accumulation order legitimately differ, the bound is the defect. Repairing under the wrong reading produces a plausible-looking change to working code.</p><p>ONE MEASURED CONSTRAINT THAT MUST REACH §4: a SEMANTICALLY ZERO representation change — a matrix widening carrying no numerical difference — was measured to move a reference root by 10.744 orders on this map. A batched path differs from a per-slice path in layout, accumulation order and kernel selection, all changes of exactly that class. So a label-parity result established at one batch size and device count says nothing about another, which is why §4's deliverable is a re-runnable acceptance rather than a certificate.</p><p>CONSUMER: <code>mast-catalog-gpu-solve</code>. Its product is a labelled store, so this plan guards what that store actually publishes. It is NOT wired as a hard dependency edge on that plan — the catalog is already held on <code>topology-preserving-continuation</code>, and one edge is enough to stop a premature throughput run. Tell that plan's owner when this lands rather than assuming the graph carries it.</p></div>
     <pre class="r-fu-prompt">/reckon-ship derived-observable-parity</pre>
+    <p class="r-fu-outcome">Executed in the order this followup insisted on, and the ordering earned its keep. Section 2 ran first and its verdict scoped section 3 rather than the reverse: all three observables returned COMPUTATION_DIFFERS from ONE shared terminal state, each with its first differing operation named, so the state was exonerated by construction. moments.volume was attacked first as instructed, and it was the sharpest probe exactly as predicted - but the reason was not the one anticipated. It is bitwise equal between the two evaluation paths on CPU and two units in the last place apart on the H200, which showed its exact-equality bound to be a claim about an execution platform rather than a discrete-type guarantee. THE LOAD-BEARING DECISION WAS ANSWERED BEFORE THE REPAIR, on that measurement: exact-equality-bounds locked to a derived tolerance. Had it been repaired under the other reading, the change would have been a plausible-looking edit to working code, which is precisely what this followup warned against. Section 3 then repaired the computation rather than the bound - the volume and major-radius moments are now bitwise equal, difference exactly 0.0 on all six cases - and refused the divergence_j repair when the candidate batching rule moved the computed scalar itself. THE CONSTRAINT THIS FOLLOWUP INSISTED MUST REACH SECTION 4 DID REACH IT, and was demonstrated rather than argued: label parity at one batch size says nothing about another, measured as three bounds changing status between widths with the dependence stated on all 69 rows, and a fourth observable failing only at width 1. Then it went further than the constraint predicted - two back-to-back runs on ONE device with identical inputs disagree, bound totals moving at both widths with ten case verdicts flipping, and the fixed-reduction repair did not remove it. That is now its own plan, same-device-label-determinism, because a route that disagrees with itself cannot certify a label store at any batch size. CONSUMER TOLD, as instructed rather than assumed: mast-catalog-gpu-solve now depends explicitly on same-device-label-determinism, so it is held on a truthful blocker instead of inheriting a satisfied edge.</p>
+    </article>
+<article class="r-fu" data-id="f-dop-002" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-24" data-recommends-skill="/reckon-ship same-device-label-determinism" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Pointer only — the reproducibility question moved to same-device-label-determinism</h4>
+    <div class="r-fu-body"><p>This plan is a record and carries no remaining work. Its four sections closed: the discriminator assigned all three verdicts on the platform the failures were banked on, the repair made two of the three observables bitwise equal and correctly refused the third, the bounds were re-applied from the repaired source at 67 to 68 of 69 against the banked 65 and 66, and the acceptance exists as a re-runnable check rather than a certificate.</p><p>What did not close is reproducibility, and it is a different question from the one this plan asked. This plan compared two routes; the open problem is one route compared against itself. <code>same-device-label-determinism</code>, in sprint S15, carries it - the repetition evidence, the excluded reduction-association hypothesis, the open <code>determinism-control-scope</code> decision, and the consumer instruction. Nothing here should be executed from where it sits.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship same-device-label-determinism</pre>
     </article>
 </section>
 
@@ -240,6 +255,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260824T0210-reduction" data-who="reckon-ship" data-when="2026-08-24T02:10:00Z">
     <div class="r-comment-body">observable-reduction-parity landed - commits b12ac25d and b2924f63, merged 54c6f5de; gate PASSED; 1 test added; scope extended mid-node into nova/equilibrium/stencil_mesh.py and nova/equilibrium/forward.py on request, so this node is marked scope-changed and excluded from estimate calibration. TWO OF THREE ARE NOW BITWISE EQUAL: a fixed binary summation tree plus a cell-centred radial-volume reconstruction from invariant inputs makes moments.volume and moments.major_radius identical between scalar ForwardProfile.observe and jax.jit(jax.vmap(ForwardProfile.observe)) for all six held-out H200 cases - shared-state maximum difference exactly 0.0 for both, down from 4.440892098500626e-16 and 1.1102230246251565e-16, and both reclassify STATE_INHERITED. That is the section's preferred outcome: a computation repaired rather than a bound moved. THE THIRD WAS DELIBERATELY NOT REPAIRED and the reason matters: fixed association on the fitted gradient still left a 9.37916411e-13 scalar-versus-vmap difference, and a sequential custom batching rule left 1.84741111e-12 while MOVING THE COMPUTED SCALAR ITSELF from 0.028424246809095166 to 0.028424093086982793. A change that moves the answer is not a repair, so the experiment was removed and the banked gradient source retained byte-identical. conservation.divergence_j's route difference nonetheless halved from 1.7462298274040222e-10 to 8.731149137020111e-11 and it already PASSES its absolute bound of 1.3703738919113413e-10 at 1.1641532182693481e-10, failing only the relative envelope, 0.6 against 0.15286615188530017. No bound was changed. Regression coverage stated honestly: the reference-lane selection collected 126 and passed 97 across test_fixed_point, test_equilibrium_forward_solve, test_equilibrium_forward and test_equilibrium_stencil_mesh before a 25-minute allocation expired inside test_equilibrium_forward_reference; no failure and no moved bank value was reported before the timeout, and the only changed production file is nova/equilibrium/observation.py. The remaining reference coverage is owed to the re-application node rather than assumed.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260824T0250-reapplication" data-who="reckon-ship" data-when="2026-08-24T02:50:00Z">
+    <div class="r-comment-body">integrated-acceptance-regeneration landed - commit 845cbdd8, merged 8ba1b6c0; gate FAILED as re-application-complete but acceptance-failing. H200 job 1253388, reservation gpu_0003_grpA, two back-to-back invocations in 00:06:02, driver SHA-256 c3f82799913c3a39f6cd9571659af7eabc604f0727d54f74478af1fae5ae0714 matching the committed formatted driver exactly. Re-applied bounds: repetition 1 width 1 = 67/69 and 410/414, width 4 = 67/69 and 408/414; repetition 2 width 1 = 68/69 and 412/414, width 4 = 68/69 and 410/414; banked 65/69 with 407/414 and 66/69 with 408/414. Both repetitions improve the bound count at both widths. Remaining failures with verdicts: conservation.divergence_b UNADJUDICATED_ACCEPTANCE_FAILURE (never a discriminator target, no change authorised), conservation.divergence_j COMPUTATION_DIFFERS_REPAIR_REFUSED (fitted field-function gradient, where fixed association moved the scalar answer). Repaired moments.major_radius and moments.volume pass every retained integrated measurement. MEASURED NEGATIVE, stated more strongly than the provisional pre-format reading: bound totals moved 67 to 68 at BOTH widths, case totals 410 to 412 and 408 to 410, four case verdicts changed at width 1 and six at width 4, so aggregate stability is false and the reduction repair did not confine the instability to case verdicts. reference-lane-verification landed - commit 94389a4e, merged 18495c53; gate PASSED. The stored-reference module cannot complete inside any node fence from a cold cache (1,246 s coarse, 3,335 s fine documented), so the question was answered with no solve at all: each immutable banked root evaluated through ForwardProfile.observe at pre-repair 7d342307 and at the repaired revision. Explicit answer, banked values DID move: 7 of 78 leaves in 19 of 312 root-observable comparisons, maximum relative 5.427391769515079e-16, maximum absolute 2.9802322387695312e-08 - internal_inductance, major_radius, plasma_current, poloidal_beta, poloidal_field_integral, pressure_integral, volume - with the other 71 exactly equal on all four roots. Per-root moved counts 2, 5, 7 and 5 of 78. That footprint is the unavoidable cost of replacing a free reduction association with a fixed one, and 97 of 97 solver and stencil tests pass in 128.76 s. No bank was overwritten; the NPZ roots were read. Incidental finding retained: the stored-reference banks had to be reconstructed with their authored cell requests and wall nodes because the suite default resolution was raised later while the banks stayed immutable.</div>
 </div>
 </section>
 </main>

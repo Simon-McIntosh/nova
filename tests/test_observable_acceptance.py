@@ -325,3 +325,46 @@ def test_committed_receipt_covers_two_real_batch_sizes_and_all_bounds():
     assert receipt["repetition_stability"]["repetition_count"] == len(
         receipt["measurement_repetitions"]
     )
+
+
+def test_committed_state_receipt_retains_all_h200_repetitions_losslessly():
+    receipt = json.loads(
+        batch_acceptance.DEFAULT_STATE_OUTPUT.read_text(encoding="utf-8")
+    )
+
+    assert receipt["status"] == "complete"
+    assert receipt["backend"]["platform"] == "gpu"
+    assert "H200" in receipt["backend"]["device_kind"]
+    assert receipt["backend"]["precision"] == "float64"
+    assert receipt["allocation"]["slurm_job_id"]
+    assert receipt["measurement_contract"]["case_count"] == 6
+    assert receipt["measurement_contract"]["registered_observable_count"] == 69
+    assert receipt["measurement_contract"]["batch_sizes"] == [1, 4]
+    assert receipt["measurement_contract"]["repetition_count"] >= 3
+    assert len(receipt["case_results"]) == 12
+    assert all(len(row["observables"]) == 69 for row in receipt["case_results"])
+    assert all(
+        row["state_verdict"] in {"STATE_REPRODUCIBLE", "STATE_VARIES"}
+        for row in receipt["case_results"]
+    )
+    assert all(row["state"]["comparison_count"] >= 2 for row in receipt["case_results"])
+    assert len(receipt["acceptance_repetitions"]) >= 3
+    for change in receipt["pass_status_changes"]:
+        assert "maximum_absolute_value_by_repetition" in change
+        if change["criterion_kind"] == "banked_dual_envelope":
+            assert "absolute_bound" in change
+            assert "relative_bound" in change
+
+    array_path = batch_acceptance.HERE / receipt["array_artifact"]["path"]
+    with np.load(array_path, allow_pickle=False) as arrays:
+        assert arrays["case_ids"].shape == (6,)
+        assert arrays["repetitions"].shape[0] >= 3
+        manifest = receipt["array_artifact"]["manifest"]
+        for batch_size in (1, 4):
+            flux = arrays[manifest["terminal_flux"][str(batch_size)]["key"]]
+            assert flux.shape[:3] == (
+                receipt["measurement_contract"]["repetition_count"],
+                6,
+                batch_size,
+            )
+        assert len(manifest["observables"]) == 69

@@ -26,10 +26,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-24">
-<meta name="plan-commits" content="485f6fdaa88328b96633db85111093e332b4aa53,dbee3048d4767af04373155c50b6e9753bfc330c,975e4acec3016cd56295d458d07eaf2aa8233454,75d6eb010612c12486327fa8c794efe6c662b71c,bf9dafdbf258624fc42d3f2d7eef8e468495b328,d6be878b6eb1eac9ea3d85d87f16cd2b48787cef,fd2baeb113b3443314618b9e6e29819ba233ce6e,231659ea748322d8607a71cc82b2d4e522e8cc1c">
-<meta name="plan-artifacts" content="scripts/coefficient_basis_reuse/report.md,docs/figures/coefficient-space-newton/representation-degree.json,docs/figures/coefficient-space-newton/edge-current-jump.json,docs/figures/coefficient-space-newton/clipped-coupling-order.json,docs/figures/coefficient-space-newton/second-order-kernel.json,docs/figures/coefficient-space-newton/support-order-arms.json,docs/figures/coefficient-space-newton/carrier-arms.json,docs/figures/coefficient-space-newton/analytic-truth-rescore.json,nova/biot/second_moment_kernel.py,nova/equilibrium/coefficient_carrier.py,docs/evidence/archive/coefficient-space-newton-landed.html">
-<meta name="plan-impl" content="0.7">
-<meta name="plan-version" content="4">
+<meta name="plan-commits" content="485f6fdaa88328b96633db85111093e332b4aa53,dbee3048d4767af04373155c50b6e9753bfc330c,975e4acec3016cd56295d458d07eaf2aa8233454,75d6eb010612c12486327fa8c794efe6c662b71c,bf9dafdbf258624fc42d3f2d7eef8e468495b328,d6be878b6eb1eac9ea3d85d87f16cd2b48787cef,fd2baeb113b3443314618b9e6e29819ba233ce6e,231659ea748322d8607a71cc82b2d4e522e8cc1c,df676ca4329ead0f850aeeace59abc9c4f7a6a95">
+<meta name="plan-artifacts" content="scripts/coefficient_basis_reuse/report.md,docs/figures/coefficient-space-newton/representation-degree.json,docs/figures/coefficient-space-newton/edge-current-jump.json,docs/figures/coefficient-space-newton/clipped-coupling-order.json,docs/figures/coefficient-space-newton/second-order-kernel.json,docs/figures/coefficient-space-newton/support-order-arms.json,docs/figures/coefficient-space-newton/carrier-arms.json,docs/figures/coefficient-space-newton/analytic-truth-rescore.json,docs/figures/coefficient-space-newton/plasma-only-carrier.json,nova/biot/second_moment_kernel.py,nova/equilibrium/coefficient_carrier.py,docs/evidence/archive/coefficient-space-newton-landed.html">
+<meta name="plan-impl" content="0.75">
+<meta name="plan-version" content="6">
 </head>
 <body>
   <main class="plan-doc">
@@ -413,14 +413,16 @@
     admits exact second-order members, only arms A and C are buildable, and the matrix cannot be
     completed. This is why the prototype waits on that result rather than starting alongside it.</p>
 
-    <p><strong>The first pass of this matrix is measured and its carrier verdict is PROVISIONAL,
-    2026-08-24.</strong> Arms C and D were run with the iterate carrying the <em>total</em> flux, so
-    the carrier was fitting a coil field spread across the whole domain in addition to the plasma
-    hump, and both arms converged essentially to the resulting projection floor. §13 gives the exact
-    change of variables that removes the external part at zero cost to the residual. <strong>The
-    matrix must be re-evaluated after that shift lands</strong>, because the measurement as taken
-    scored the carrier on a harder object than the design intends and cannot rank it. The exact-value
-    arms A and B are unaffected by the shift and their readings stand.</p>
+    <p><strong>The first pass of this matrix is measured, and the shift that was expected to rescue
+    the carrier arms has now landed and did not.</strong> Arms C and D were first run with the
+    iterate carrying the <em>total</em> flux, so the carrier was fitting a coil field across the whole
+    domain in addition to the plasma hump, and both arms terminated near the resulting projection
+    floor — which read as the explanation. §13's change of variables removes the external part
+    exactly, and it lowered those floors by four to thirteen times. <strong>The terminal residual got
+    worse.</strong> So the projection floor was never the binding constraint, the provisional verdict
+    resolves against the floor account rather than in the carrier's favour, and §18 carries the
+    narrowed question. The exact-value arms A and B are unaffected by the shift and their readings
+    stand.</p>
 
     <p><strong>Done when</strong> all four arms are measured on a common frame set at one source
     revision, with the three axes reported per arm against arm A, the interaction stated explicitly —
@@ -468,57 +470,64 @@
     convergence. A ladder shorter than the cards nominally present is recorded with the number
     actually granted, since a silently truncated ladder reads as full coverage.</p>
 
-    <h2 id="s13">§13 — Subtract the known external field from the iterate</h2>
+    <section id="s13" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-24 — floor account refuted</span>
+        <h2>§13 — Subtract the known external field from the iterate</h2></header>
+      <p class="landed-summary">The exact change of variables <em>u</em> = ψ − ψ<sub>ext</sub> landed
+      and did what it was designed to do: at 6 knots per axis the regional projection floors fall from
+      the banked total-flux <strong>1.525e-2 / 4.809e-2 / 2.197e-2</strong> to
+      <strong>3.822e-3 / 3.570e-3 / 3.607e-3</strong> — 3.99× closed-flux, <strong>13.47×</strong>
+      separatrix band, 6.09× scrape-off, the band improving most exactly as the localised-hump
+      argument requires, and the first floor below the banked same-carrier residual now arrives at
+      <strong>4 knots, 16 coefficients</strong>. <strong>But the terminal residual worsened,</strong>
+      2.602e-2 → 3.848e-2 under an unchanged total-flux normalisation (8.265e-3 plasma-normalised,
+      both stated). So the carrier does <em>not</em> converge to its representation error and the
+      projection floor was never the binding constraint — §18 carries the narrowed question.
+      <code>IterateRoute.EXACT_VALUES</code> asserted byte-for-byte equal to the direct map at the
+      call site, no global switch. Artifact
+      <code>docs/figures/coefficient-space-newton/plasma-only-carrier.json</code> (commit
+      <code>df676ca4</code>). Full record:
+      <a href="/nova/evidence/archive/coefficient-space-newton-landed#plasma-only-shift">§13 landed</a>.</p>
+    </section>
 
-    <p><strong>Confirmed against the code: it is not subtracted.</strong>
-    <code>ForwardFluxOperator.flux_map</code> forms <code>mapped(psi) = external + internal(psi)</code>
-    and <code>residual</code> returns <code>psi − self(psi)</code>, where
-    <code>external</code> is documented as “the flux map of every conductor but the plasma” and
-    <code>internal</code> as “the flux map generated by the plasma current”. So the iterate carries
-    the <em>total</em> flux. The external part is evaluated once and captured — the cost is amortised
-    — but its value sits inside the object being iterated and therefore inside the object a carrier
-    must represent.</p>
+    <h2 id="s18">§18 — The carrier is not floored, it is stalled, so ask about the advance</h2>
 
-    <p><strong>The change of variables is exact and costs nothing.</strong> With
-    <em>u</em> = ψ − ψ<sub>ext</sub>, the fixed point ψ = ext + int(ψ) becomes
-    <em>u</em> = int(<em>u</em> + ext). The residual vector is <em>identical</em> in value, so
-    convergence, admission and topology are untouched: topology reads still take the total flux, which
-    is one addition away. Nothing about the physics or the iteration changes. What changes is what the
-    carrier has to represent.</p>
+    <p><strong>The floor account is refuted by its own remedy.</strong> §11 read the carrier arms as
+    converging to their projection floor, which was a coherent story: a coefficient iterate cannot
+    beat its own representation error, and the total flux is a harder object to fit than the plasma
+    hump. §13 removed the coil field exactly, dropped the floors by four to thirteen times, and the
+    terminal residual moved the wrong way. A quantity that gets worse when its stated cause is
+    removed by more than an order of magnitude was not caused by it.</p>
 
-    <p><strong>And that is exactly the binding constraint the measured carrier arms hit.</strong> Both
-    carrier arms converged essentially to their own projection floor — 1.525e-2 in the closed-flux
-    region, 4.809e-2 in the separatrix band — because a coefficient iterate cannot beat its own
-    representation error. The representation error is set by how hard the carried object is to fit,
-    and the total flux is much harder than the plasma flux alone: the coil field has amplitude and
-    structure across the whole domain, while the plasma flux is a single localised hump that decays
-    away from the plasma. <strong>The representation-degree study in §4 measured the total flux,</strong>
-    so its 16-and-36-coefficient figures are for the harder object and the floors for a
-    plasma-only iterate should be materially lower at the same knot count.</p>
+    <p><strong>The surviving asymmetry is in the advance, and it was visible in the first pass.</strong>
+    Arm A takes <strong>10</strong> admitted advances and 6.0 Newton-step-equivalents to reach
+    2.711e-15. Arm C takes <strong>1</strong>. Arm D also takes 1. A route that makes a single
+    admitted advance has not converged to anything — it has stopped, and where it stops is then set
+    by wherever one step from the seed lands rather than by any property of the representation. That
+    also explains why arms C and D agree to three digits (2.6019e-2 against 2.6049e-2) despite
+    different in-cell support: two routes that both stop after one advance report the same place
+    because neither of them moved.</p>
 
-    <p><strong>One comparability trap to avoid when this is implemented.</strong>
-    <code>_relative_residual</code> is <code>max|g − x| / max|g|</code>. If the iterate becomes
-    plasma-only, the denominator becomes the plasma-flux peak rather than the total-flux peak, so the
-    same absolute error would report a <em>larger</em> relative residual purely from the change of
-    variables. The normalisation must stay on the total-flux peak, or both figures must be reported,
-    or the shift will manufacture an apparent regression.</p>
+    <p>Three mechanisms can stop an advance and they are distinguishable rather than a matter of
+    taste. The projected step may be refused by the topology predicate, which the plateau lane has
+    measured refusing roughly 85 of every 89 updates. The projection back onto the coefficient space
+    may be destroying the step direction, since projecting a Newton step is not the same as taking a
+    Newton step in the projected space. Or the Jacobian formed in coefficient space may be
+    ill-conditioned or wrongly scaled, in which case the dense solve returns a direction that the
+    line search cannot use. The first is observable from the admission record, the second from the
+    angle between the step before and after projection, and the third from the dense condition number
+    the plan already wants quoted against the banked projected Krylov 4087.40844825275.</p>
 
-    <p><strong>The passive-structure extension, recorded now because it changes the decomposition
-    rather than merely enlarging it.</strong> Today <code>external</code> includes
-    <code>self.wall.external(conductor)</code> — the passive contribution driven by <em>known</em>
-    conductor currents. When passive currents become unknown induced quantities they leave the known
-    external part, and the temptation will be to fold them into the same two-dimensional carrier. That
-    would be the wrong shape: passive currents live in <em>known conductor geometry</em>, so they are
-    naturally a small coefficient vector driven through their own Green columns, not a field to fit. The
-    clean arrangement keeps the spline for the plasma bump alone and carries passive currents as their
-    own coefficients — which also preserves the single-bump property that makes the carrier compact.</p>
-
-    <p><strong>Done when</strong> the carrier arms are re-measured with the iterate shifted to
-    plasma-only, reporting the projection floor per region at the same knot count beside the banked
-    total-flux floors of 1.525e-2, 4.809e-2 and 2.197e-2, the terminal residual under an unchanged
-    total-flux normalisation, and the knot count at which the plasma-only floor first reaches the
-    baseline's terminal residual on the same carrier. A shift that lowers the floor without lowering
-    the terminal residual is a reportable result and locates the constraint elsewhere.</p>
+    <p><strong>Done when</strong> the carrier arm's single advance is explained by measurement rather
+    than by argument, reporting for at least one frame: the admitted and refused advance counts with
+    the refusal reason recorded per rejected candidate; the angle and norm ratio between the Newton
+    step in the exact-value space and the same step after projection onto the coefficient space, so a
+    projection that destroys the direction is separated from a step that was never useful; the dense
+    coefficient-space Jacobian condition number quoted against the banked projected Krylov
+    4087.40844825275 on the same frame; and a named verdict assigning the stall to admission,
+    projection or conditioning, or stating which of the three were excluded and by what figure. A
+    verdict that the carrier stalls for a reason no change of representation can fix closes the
+    carrier question honestly, and arm A remaining the production path is then the result.</p>
 
     <h2 id="s14">§14 — Higher order should buy fewer cells, and the first pass priced it wrong</h2>
 
@@ -791,6 +800,9 @@
 </div>
 <div class="r-comment" data-section="s11" data-id="c-20260824T1035-rescore" data-who="reckon-ship" data-when="2026-08-24T10:35:00Z">
     <div class="r-comment-body">analytic-truth-rescore landed - commit 231659ea, merged, gate PASSED, and it REVERSES the arm B accuracy verdict. Four rows, arms A and B on coarse and fine closed-form carriers, analytic and banked-root errors side by side in all three regions on identical supports, masks and denominator. Arm B is closer to analytic truth in ALL SIX carrier-region comparisons by relative sup, margins 6.066e-6 to 3.169e-4; relative RMS agrees in 5 of 6 with the fine scrape-off metric-dependent (A better by RMS 1.534e-5, B better by sup 6.066e-6). So the second-order support lever DOES improve accuracy, and the earlier no-improvement finding was an artefact of the reference I specified - the banked converged root is arm A own fixed point, demonstrated here by the contrast between A self-error 1.221e-15 to 2.494e-15 and A analytic error 0.258 to 0.451. REVISED MATRIX READING: arm B ties convergence, WINS accuracy, loses speed and memory - a trade, not a loss, which is why the section 12 device benchmark matters before judgement since those memory ratios came from a shared CPU allocation. OPEN QUESTION RECORDED NOT ATTRIBUTED: both arms sit 0.257918 to 0.450674 in analytic relative-sup error while converging to machine precision on their own discrete fixed points. A 26 to 45 percent sup error against a closed form is either a genuine large discretisation or setup error or a comparison artefact, with the flux gauge the leading suspect given the standing rule that psi_norm is gauge-safe only when its anchors come from the field being normalised. Two prior attributions on this lane were refuted by measurement, so this one waits for a measurement rather than a third guess. Scope limit correctly observed: measured at revision 162f208b where only the exact-value arms were integrated, so arms C and D still owe the same rescoring now that fd2baeb1 is in.</div>
+</div>
+<div class="r-comment" data-section="s13" data-id="c-20260824T1955-plasmaonly" data-who="reckon-ship" data-when="2026-08-24T19:55:00Z">
+    <div class="r-comment-body">plasma-only-carrier-shift landed - commit df676ca4, merged, gate PASSED, 5 tests, scope clean at the three fenced paths. THE SHIFT WORKS AND THE EXPLANATION IT WAS BUILT ON IS REFUTED. At 6 knots per axis and 36 coefficients the plasma-only regional projection floors are 3.8223649516099328e-3 closed flux, 3.5702815088892747e-3 separatrix band and 3.6065855262073353e-3 scrape-off, against the banked total-flux 1.525476830559581e-2, 4.808881037725249e-2 and 2.1969766027799164e-2 - improvements of about 3.99x, 13.47x and 6.09x, with the separatrix band improving MOST exactly as the localised-hump argument requires, and the first plasma-only floor below the banked same-carrier terminal residual now arriving at 4 knots per axis and 16 coefficients with worst regional floor 5.622747463336225e-3. BUT THE TERMINAL RESIDUAL WORSENED. Arm C is 3.8364148194535375e-2 Wb absolute, 3.847988208719086e-2 normalised on the stated total-flux peak 9.969923532407599e-1 Wb and 8.265349619249284e-3 on the stated plasma-flux peak 4.641563873497692 Wb; arm D gives 3.846704280493841e-2 and 8.262211007358059e-3. Against the banked total-carrier 2.6019345673404647e-2 under the same normalisation that is a REGRESSION, and both normalisations are reported so the change of variables cannot manufacture the move. SO THE PROJECTION FLOOR WAS NEVER THE BINDING CONSTRAINT: a quantity that gets worse when its stated cause is removed by four to thirteen times was not caused by it, and section 13's own done-when named this outcome in advance as locating the constraint elsewhere. Section 18 now carries the narrowed question - the carrier makes 1 admitted advance against arm A's 10, so it is stalled rather than floored, and arms C and D agreeing to three digits despite different in-cell support is what two routes that both stop after one advance look like. IterateRoute.EXACT_VALUES was asserted byte-for-byte equal to the direct map at the call site, call-site selection remains true and global_switch_introduced is false. Measured on SLURM job 1254212 in 00:01:38 with MaxRSS 3405684K after the identical login-lane attempt was OOM-killed at exit 137, which is the repository's stated reason for the CPU debug lane.</div>
 </div>
 </section>
 </main>

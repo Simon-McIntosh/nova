@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T22:43:46",
+  "updated": "2026-08-24T22:45:51",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -31127,9 +31127,84 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260824T154925583718-plasma-only-carrier-shift",
+        "plan": "coefficient-space-newton",
+        "section": "\u00a713",
+        "node": "plasma-only-carrier-shift",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "carrier-shift",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T15:49:28Z",
+        "completed_at": "2026-08-24T16:03:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 850,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 850,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "ad37abcee4a039754b0972b5f62438e70a2ea1cc",
+        "commits": [
+          "df676ca4329ead0f850aeeace59abc9c4f7a6a95"
+        ],
+        "changed_lines": {
+          "added": 590,
+          "removed": 30,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T154925583718-plasma-only-carrier-shift/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03476-64a7-7972-8496-1c742f9a80f8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6876928,
+            "cached_input_tokens_cumulative": 6876928,
+            "input_tokens": 7048640,
+            "input_tokens_cumulative": 7048640,
+            "output_tokens": 24641,
+            "output_tokens_cumulative": 24641,
+            "reasoning_output_tokens": 8972,
+            "reasoning_output_tokens_cumulative": 8972
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 771
+    "_version": 772
   }
 }

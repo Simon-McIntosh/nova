@@ -399,6 +399,56 @@
   than a fourth attempt at the same wall.</p>
 </section>
 
+<section id="plasma-only-shift">
+<h2>§13 — the plasma-only shift lowers the floor and refutes the floor account</h2>
+
+<p><strong>Node <code>plasma-only-carrier-shift</code>, commit <code>df676ca4</code>, gate PASSED,
+5 tests, 2026-08-24.</strong> Measured at revision <code>bf80d684</code> on SLURM job 1254212 in
+00:01:38, MaxRSS 3,405,684 K, after the identical login-lane attempt was OOM-killed at exit 137.
+Receipt sha256 <code>97040d14f27dc986e622d7689abfcda65404d3cf85ac21d9737222f634cc6411</code>.</p>
+
+<table>
+  <caption>Regional projection floor at 6 knots per axis, 36 coefficients — total-flux iterate
+    against plasma-only iterate</caption>
+  <thead><tr><th scope="col">Region</th><th scope="col">Total flux (banked)</th><th scope="col">Plasma only</th><th scope="col">Improvement</th></tr></thead>
+  <tbody>
+    <tr><td>Closed flux</td><td>1.525476830559581e&minus;2</td><td><strong>3.8223649516099328e&minus;3</strong></td><td>3.99&times;</td></tr>
+    <tr><td>Separatrix band</td><td>4.808881037725249e&minus;2</td><td><strong>3.5702815088892747e&minus;3</strong></td><td><strong>13.47&times;</strong></td></tr>
+    <tr><td>Scrape-off</td><td>2.1969766027799164e&minus;2</td><td><strong>3.6065855262073353e&minus;3</strong></td><td>6.09&times;</td></tr>
+  </tbody>
+</table>
+
+<p>The change of variables did exactly what §13 predicted for the object it carries. The separatrix
+band improves most — 13.47&times; against 3.99&times; in the core — which is the signature the
+localised-hump argument requires, since removing a domain-wide coil field helps most where the
+carried field was smallest. The first plasma-only floor below the banked same-carrier terminal
+residual now arrives at <strong>4 knots per axis, 16 coefficients</strong>, worst regional floor
+5.622747463336225e&minus;3.</p>
+
+<p><strong>And the terminal residual moved the wrong way.</strong> Arm C terminates at
+3.8364148194535375e&minus;2 Wb absolute — <strong>3.847988208719086e&minus;2</strong> normalised on
+the stated total-flux peak 9.969923532407599e&minus;1 Wb, and 8.265349619249284e&minus;3 on the
+stated plasma-flux peak 4.641563873497692 Wb. Arm D gives 3.846704280493841e&minus;2 and
+8.262211007358059e&minus;3. Against the banked total-carrier
+<strong>2.6019345673404647e&minus;2</strong> under the same normalisation, that is a regression. Both
+normalisations are reported, so the comparability trap §13 named — a plasma-flux denominator
+manufacturing an apparent move — is excluded by construction rather than by assurance.</p>
+
+<p><strong>The consequence is a refutation, and it is the plan's third.</strong> §11 explained the
+carrier arms as converging to their own projection floor. That floor has now fallen by four to
+thirteen times and the residual got worse, so it was not the cause: a quantity that degrades when
+its stated cause is removed by more than an order of magnitude was never governed by it. §13's own
+done-when named this outcome in advance as locating the constraint elsewhere, and §18 now carries the
+narrowed question — arm C makes <strong>1</strong> admitted advance against arm A's
+<strong>10</strong>, so the carrier is stalled rather than floored, and arms C and D agreeing to three
+digits (2.6019e&minus;2 against 2.6049e&minus;2) despite different in-cell support is what two routes
+that both stop after one advance look like.</p>
+
+<p><code>IterateRoute.EXACT_VALUES</code> was asserted byte-for-byte equal to the direct map at the
+call site; call-site selection remains true and <code>global_switch_introduced</code> is false, so
+arm A survives as a first-class production path and the factorial stays runnable.</p>
+</section>
+
 </main>
 </body>
 </html>

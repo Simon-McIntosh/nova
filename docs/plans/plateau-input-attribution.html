@@ -104,7 +104,12 @@
           scored parity lane runs a fixed 95-point grid, 3.73× below the 248-cell baseline. Observed
           convergence order on the double-seed reference is <strong>0.97</strong>.</td>
           <td><strong>The largest measured lever, with an order deficit that is itself a
-          diagnostic.</strong> See §5.</td>
+          diagnostic.</strong> Corrected 2026-08-24: the deficit is <em>not</em> a Δ* stencil losing
+          order at cut cells — there is no Δ* stencil in the residual path, which maps cell currents
+          to flux through precomputed coupling operators. The live candidate is a source-representation
+          order, since a separatrix-cut cell couples as a monopole plus a dipole at its parent centroid
+          rather than as the exact clipped polygon. Owned by
+          <a href="/nova/coefficient-space-newton">coefficient-space-newton</a> §8.</td>
         </tr>
       </tbody>
     </table>

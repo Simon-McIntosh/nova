@@ -112,27 +112,37 @@
     <p>Three mitigations are available if the boundary error is material, and they are cheap to
     distinguish: place a knot line on or near the separatrix so the representation has a break where
     the physics does; use repeated knots to reduce continuity across that line deliberately; or
-    accept a measured boundary error and state it as a floor. The order deficit already measured on
-    this lane — observed convergence order 0.97 against a nominal 2 — is plausibly the same
-    geometric feature seen through the existing discretisation, so a representation that handles the
-    kink explicitly may improve both. That is a hypothesis this plan can test, not a claim.</p>
+    accept a measured boundary error and state it as a floor.</p>
 
-    <h2 id="s4">§4 — What the effective degree actually is, measured before anything is built</h2>
+    <p><strong>Correction, 2026-08-24 — the order deficit is not a stencil deficit, and an earlier
+    version of this plan said it was.</strong> There is no Δ* stencil in the residual path.
+    <code>ForwardFluxOperator</code> maps a trial flux to cell currents and back to flux through
+    <em>precomputed coupling operators</em>, its residual being <code>psi − g(psi)</code>, and the
+    stencils in that module are a quadratic least-squares null fit and a cell-average stencil, not
+    Δ*. So the observed convergence order of 0.97 cannot be a second-order Δ* stencil losing order at
+    cut cells, and that attribution is withdrawn. The live candidate is a
+    <em>source-representation</em> order instead, and §8 measures it.</p>
 
-    <p>The central claim — that the effective solution degree is low — is testable with no solve at
-    all, on data already banked. Fit tensor-product splines of increasing knot count to the stored
-    reference flux maps and to the banked converged roots, and report the fit error against knot
-    count. If a modest lattice reproduces a banked root to well below the residual the solver is
-    fighting, the case is made before a line of solver code is written. If the error stalls at a
-    level comparable to the plateau, the compression is not available at this order and the plan
-    should say so and stop.</p>
-
-    <p><strong>Done when</strong> a receipt reports, for each banked flux map and converged root and
-    for each knot count in a declared ladder, the relative fit error split into the closed-flux
-    region, a stated separatrix band and the scrape-off layer; the coefficient count at each rung
-    beside the cell count it replaces; the knot count at which the closed-flux error first falls
-    below the terminal residual the production solve currently reaches; and an explicit statement of
-    whether the boundary-band error is the binding term. No solve is run in this section.</p>
+    <section id="s4" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-24</span>
+        <h2>§4 — What the effective degree actually is, measured before anything is built</h2></header>
+      <p class="landed-summary">Measured with <strong>zero solves and zero forward-map
+      evaluations</strong>, enforced on the driver path and declared in the receipt. Nine rungs from
+      4 to 20 knots per axis — 16 to 400 coefficients against 551 to 1,076 plasma cells — on four
+      banked reference maps and four banked converged roots, every error split into closed-flux
+      region, separatrix band (ψ<sub>N</sub> ∈ [0.95, 1.05]) and scrape-off layer.
+      <strong>The effective solution degree is low.</strong> All eight targets fall below the hardest
+      banked production terminal residual of 0.08646603357046066 in closed-flux relative-sup error:
+      the four closed-form carriers first cross at <strong>4 knots per axis, 16 coefficients</strong>,
+      and the four stored-reference carriers at <strong>6 knots per axis, 36 coefficients</strong> —
+      roughly thirty-fold compression on the cell count. At the terminal rung every regional error is
+      at most <strong>1.167e-3</strong>, an order below the derived convergence criterion band as
+      well. <strong>The separatrix band binds for only 2 of 8 targets</strong>, so the curvature-jump
+      concern is real but not universal; the other six bind in the closed-flux region or the
+      scrape-off layer. Artifact
+      <code>docs/figures/coefficient-space-newton/representation-degree.json</code> (commit
+      <code>dbee3048</code>).</p>
+    </section>
 
     <h2 id="s5">§5 — Prototype the coefficient-space Newton step</h2>
 
@@ -253,6 +263,40 @@
     quoted beside it, so the measured band error can be attributed to the jump or exonerated of it. A
     case set whose edge current is negligible closes this section by making a smooth basis sufficient,
     which is a result and not a disappointment.</p>
+
+    <h2 id="s8">§8 — The order of the clipped-source coupling</h2>
+
+    <p>This section exists because the order deficit was misattributed twice and the correct candidate
+    is now specific enough to measure. The plasma reaches flux through coupling operators precomputed
+    for three basis functions per cell — a cell current and two first-moment directions, with
+    <code>coupling_current_moments</code> converting physical first moments into that fixed linear
+    basis against the cell's second-moment tensor. Where a cell is cut by the separatrix, the clip
+    supplies <em>clipped zeroth and first moments about fixed centroids</em>; the coupling operator
+    itself is unchanged, because it belongs to the parent cell.</p>
+
+    <p><strong>So a partially filled cell contributes as a monopole plus a dipole sitting at the
+    parent centroid, not as the exact clipped polygon.</strong> That is first-order accurate in the
+    near field, and it predicts both measured symptoms at once: an observed convergence order near
+    one, and a curvature jump smeared across the boundary cell instead of landing on the separatrix.
+    The exactness of the polygon kernels is not in question — they integrate whatever shape they are
+    given exactly. The question is which shape they are given.</p>
+
+    <p>Two repairs are available and the machinery for both is adjacent. Integrate the
+    <em>clipped</em> polygon directly with the existing exact kernels rather than expanding about the
+    parent centroid, which places the jump on the piecewise-linear separatrix by construction. Or
+    carry second moments in clipped cells, for which <code>StencilMesh</code> already holds
+    degree-three-exact shared-node weights with 5/72·pitch² second moments and the quartic
+    non-exactness pinned. The first is exact and costs a per-frame integration over cut cells only;
+    the second is cheaper per evaluation and remains an expansion.</p>
+
+    <p><strong>Done when</strong> a refinement study reports the observed convergence order of the
+    flux field in the separatrix band under the shipped clipped-moment coupling, and again under at
+    least one of the two repairs, each from a declared mesh ladder with the fit residual of the order
+    estimate stated so the exponent carries an uncertainty rather than resting on a single two-point
+    value; and the receipt states whether the repaired order accounts for the banked 0.97 or leaves a
+    residual deficit some other term must explain. A repair that raises the order without moving the
+    separatrix-band error is a reportable result and must be stated as such rather than merged with a
+    convergence claim.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>

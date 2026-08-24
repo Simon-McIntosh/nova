@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="coefficient-space-newton">
+  <meta name="plan-title" content="Coefficient-Space Newton — solve for a smooth basis, not for every cell">
+  <meta name="plan-summary" content="The flux map is smooth in value and gradient, so the Newton unknown need not be one value per cell. Carry a tensor-product spline coefficient set as the state, keep cell-resolution source evaluation and current moments, and the effective solution degree becomes the knot count. If that degree is order one hundred rather than order ten thousand, the dense Jacobian is affordable and the entire Krylov conditioning apparatus becomes unnecessary.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="12.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-context" content="extended">
+  <meta name="plan-capability-tool-autonomy" content="autonomous">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="topology-preserving-continuation">
+  <meta name="plan-blocks" content="mast-catalog-gpu-solve">
+  <meta name="plan-sprint" content="S15">
+  <title>Coefficient-Space Newton | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The unknown is far larger than the solution it represents</h2>
+
+    <p>The forward solve iterates a flat one-dimensional flux vector carrying one unknown per grid
+    node, and the fixed-point residual is measured on that vector. But the thing being solved for is
+    an elliptic PDE solution: smooth in value and in gradient, analytic wherever the source is
+    analytic. A representation with one degree of freedom per cell is not describing a
+    ten-thousand-dimensional object — it is describing a smooth surface with ten thousand numbers
+    because that is the discretisation it inherited, not because the solution needs them.</p>
+
+    <p><strong>Carry the coefficients as the state instead.</strong> Let the unknown be the
+    coefficient set of a tensor-product spline on a knot lattice coarser than the cell lattice.
+    Evaluate that spline, and its derivatives, at the existing cell points; form the source there at
+    full cell resolution exactly as now; project the resulting map back onto the coefficient set. The
+    fixed point becomes a condition on coefficients. <strong>The spline order and knot count become
+    the effective solution degree</strong>, and the plasma cell resolution and the current moments are
+    untouched — fine quadrature over a coarse unknown, which is the standard and correct separation.</p>
+
+    <p><strong>Why this is worth doing now rather than as a tidying exercise.</strong> Every mechanism
+    this campaign has built and refuted was fighting a consequence of the large unknown. The projected
+    Krylov condition reaches 4087 on the production route. Cumulative non-normal amplification reached
+    5.379792627e9 before conditioning, and the conditioning built to tame it was itself a two-order
+    regression until repaired. A 24-vector Krylov subspace is a vanishing fraction of a
+    ten-thousand-dimensional space, which is why the projected operator is ill-conditioned and why
+    step damping was ever needed.</p>
+
+    <p><strong>At order one hundred unknowns the entire apparatus becomes unnecessary.</strong> A
+    12×12 cubic knot lattice is 144 coefficients. At that size the Jacobian can be formed
+    <em>explicitly</em> — 144 forward-mode tangents, a 144×144 dense matrix — and solved directly. No
+    Arnoldi, no GMRES, no projected condition number, no step conditioning, no non-normal
+    amplification to damp, and a Newton step that is exact to machine precision rather than to a
+    Krylov tolerance. That is not an optimisation of the current route; it retires several of its
+    hardest components.</p>
+
+    <h2 id="s2">§2 — The machinery mostly exists, and one thing about it must change</h2>
+
+    <p><code>nova/linalg/tensor_spline.py</code> already provides a traced tensor-product cubic spline
+    with not-a-knot end conditions as a <code>Pytree</code>. Its
+    <code>TensorSplineEvaluation</code> returns value, radial and vertical first derivatives, both
+    second derivatives and the mixed derivative — which is exactly the set Δ*ψ requires, since
+    Δ*ψ = ∂²ψ/∂R² − (1/R)·∂ψ/∂R + ∂²ψ/∂Z². The fit is two batched tridiagonal solves and the
+    per-cell Bernstein blocks are a linear function of the sampled values, so the whole construction
+    is already differentiable and already traced. The Bernstein basis is also the right conditioning
+    choice: this repository has banked the lesson that a monomial contraction loses four decades by
+    degree six, while a well-conditioned basis does not.</p>
+
+    <p><strong>What must change is the parameterisation.</strong> The existing class is parameterised
+    <em>by the sampled grid values</em>, one Bernstein block per cell, so its degree-of-freedom count
+    is still the cell count. The compression this plan proposes requires the coefficients on a
+    <em>coarse knot lattice</em> to be the primary object, with evaluation and differentiation at the
+    fine cell points. Whether that is a re-parameterisation of the existing class or a sibling
+    construction sharing its Bernstein evaluation is a design question the reuse map answers, not one
+    to guess.</p>
+
+    <p><strong>Traced-JAX and GPU-batch compatibility is favourable, and for a structural
+    reason.</strong> The map from coefficients to cell-point values and derivatives is a
+    <em>fixed linear operator</em> — a tensor product of two one-dimensional matrices, applied by
+    <code>einsum</code>. Fixed shapes, no data-dependent control flow, no gather that depends on the
+    iterate. It is a better <code>vmap</code> target than the present state, not a worse one: the
+    basis matrices are shared across frames and only the coefficient block varies, so batching a
+    catalog rung means stacking a 144-wide axis rather than a ten-thousand-wide one. Memory per
+    batched frame falls with it, which bears directly on the 13.6× memory cost measured for cell
+    refinement.</p>
+
+    <h2 id="s3">§3 — The separatrix kink is the real risk, and it must be measured by region</h2>
+
+    <p>This is the one place the smoothness argument is not free, and it deserves stating precisely
+    rather than discovering late. Δ*ψ = −μ₀·R·J<sub>φ</sub>, and the toroidal current density
+    <em>jumps</em> to zero across the plasma boundary. So ψ is continuous with continuous gradient
+    there, but its second derivatives are discontinuous: the solution is C¹ and not C² across the
+    separatrix. A globally smooth spline cannot represent a curvature jump without error, and that
+    error concentrates exactly where it hurts most — at the boundary the topology predicate reads,
+    which already refuses roughly 85 of every 89 Newton updates.</p>
+
+    <p>This is also why a single global error norm would be the wrong measurement. A spline can fit a
+    flux map to six digits in the core while carrying its entire error in a thin band at the
+    separatrix, and a sup or L2 norm over the whole domain can report either as the headline
+    depending on which region dominates. Every fit result in this plan is therefore reported split
+    by region: inside the closed-flux surface, within a stated band of the separatrix, and in the
+    scrape-off layer.</p>
+
+    <p>Three mitigations are available if the boundary error is material, and they are cheap to
+    distinguish: place a knot line on or near the separatrix so the representation has a break where
+    the physics does; use repeated knots to reduce continuity across that line deliberately; or
+    accept a measured boundary error and state it as a floor. The order deficit already measured on
+    this lane — observed convergence order 0.97 against a nominal 2 — is plausibly the same
+    geometric feature seen through the existing discretisation, so a representation that handles the
+    kink explicitly may improve both. That is a hypothesis this plan can test, not a claim.</p>
+
+    <h2 id="s4">§4 — What the effective degree actually is, measured before anything is built</h2>
+
+    <p>The central claim — that the effective solution degree is low — is testable with no solve at
+    all, on data already banked. Fit tensor-product splines of increasing knot count to the stored
+    reference flux maps and to the banked converged roots, and report the fit error against knot
+    count. If a modest lattice reproduces a banked root to well below the residual the solver is
+    fighting, the case is made before a line of solver code is written. If the error stalls at a
+    level comparable to the plateau, the compression is not available at this order and the plan
+    should say so and stop.</p>
+
+    <p><strong>Done when</strong> a receipt reports, for each banked flux map and converged root and
+    for each knot count in a declared ladder, the relative fit error split into the closed-flux
+    region, a stated separatrix band and the scrape-off layer; the coefficient count at each rung
+    beside the cell count it replaces; the knot count at which the closed-flux error first falls
+    below the terminal residual the production solve currently reaches; and an explicit statement of
+    whether the boundary-band error is the binding term. No solve is run in this section.</p>
+
+    <h2 id="s5">§5 — Prototype the coefficient-space Newton step</h2>
+
+    <p>Only after §4 reports a usable degree. Build the smallest thing that answers the conditioning
+    question: coefficients as state, evaluation and Δ* at cell points through the traced spline,
+    source and current moments at full cell resolution exactly as the production path forms them,
+    projection back to coefficients, and an <em>explicitly formed dense Jacobian</em> with a direct
+    solve. One frame is enough to measure what matters.</p>
+
+    <p><strong>Done when</strong> a receipt reports the dense Jacobian's condition number beside the
+    banked projected Krylov condition of 4087.40844825275 on the same frame; the Newton step's
+    achieved linear residual against the Krylov route's; the terminal fixed-point residual and
+    terminal topology class; wall-clock and peak memory for one frame and for a batch under
+    <code>vmap</code>; and a contract test asserting fixed shapes, absence of data-dependent Python
+    or JAX control flow, and <code>jit</code>/<code>vmap</code> agreement. A prototype that conditions
+    well and does not reach a lower residual is a reportable result, provided both numbers are stated
+    — the conditioning claim and the convergence claim are separate and must not be merged.</p>
+
+    <h2 id="s6">§6 — Method requirements carried forward</h2>
+
+    <p><strong>Report a fit or residual norm only with its regional split.</strong> This lane has
+    already lost time to a sup norm that discarded every trace of where the residual lived; a global
+    fit error would repeat the mistake in a new place.</p>
+
+    <p><strong>Name the production diff between compared trees and decline attribution when more than
+    one candidate mechanism sits in it.</strong></p>
+
+    <p><strong>Never derive an acceptance criterion from an achieved value of the quantity it
+    scores</strong>, and a criterion must be passable by something.</p>
+
+    <p><strong>Keep the conditioning claim and the convergence claim separate.</strong> A
+    better-conditioned Jacobian is a real result on its own. Reaching a lower terminal residual is a
+    different result. A receipt that reports one as though it established the other fails review.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="coefficient-parameterisation" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Is the coarse-knot coefficient state a re-parameterisation of the existing
+        <code>TensorBSpline</code>, or a sibling construction that reuses its Bernstein evaluation
+        while owning its own knot lattice? The existing class is parameterised by sampled cell
+        values with one block per cell, so it cannot express a coarse-knot state as it stands. A
+        re-parameterisation keeps one authority for spline evaluation; a sibling risks two. Decide
+        from what the reuse map finds rather than in advance.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="reparameterise">re-parameterise the existing class</button>
+      <button class="r-opt" data-value="sibling-shared-basis">sibling sharing the Bernstein basis</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="boundary-knot-treatment" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">If the separatrix band carries the binding fit error, is the treatment a
+        knot line placed on the moving boundary, repeated knots reducing continuity across it, or an
+        accepted and stated error floor? A moving knot line makes the basis depend on the iterate,
+        which threatens the fixed-shape traced contract the whole approach depends on. Answer only
+        after the regional split in section 4 is measured.</p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-csn-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-24" data-recommends-skill="/reckon-ship coefficient-space-newton" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Measure the degree before building anything, and split every error by region</h4>
+    <div class="r-fu-body"><p>SECTION 4 BEFORE SECTION 5, and the ordering carries the whole risk of the plan. The central claim is that the effective solution degree is low. That is answerable with no solve, on banked maps, by fitting spline lattices of increasing knot count and reporting the error. If a modest lattice reproduces a banked converged root well below the residual the production solve is fighting, the prototype is justified; if the error stalls near the plateau, the compression is not available at this order and the honest outcome is to say so and stop. Building the solver first would spend the expensive part of the plan on an unmeasured premise.</p><p>THE MACHINERY IS MOSTLY THERE AND ONE THING IS NOT. <code>nova/linalg/tensor_spline.py</code> is already a traced <code>Pytree</code> tensor-product cubic spline with not-a-knot ends, and its <code>TensorSplineEvaluation</code> already returns both second derivatives and the mixed term, which is exactly what Δ* needs. What it does not do is carry a coarse-knot coefficient set as its primary object: it is parameterised by sampled cell values with one Bernstein block per cell, so its degree-of-freedom count is still the cell count. That gap is the plan, and the open <code>coefficient-parameterisation</code> decision is about how to close it without creating a second authority for spline evaluation.</p><p>EVERY ERROR IS REPORTED BY REGION, never as a single global norm. A spline can fit a flux map to six digits in the core while carrying all its error in a thin band at the separatrix, and that band is exactly where the topology predicate reads. The physical reason is not subtle: the toroidal current density jumps to zero across the plasma boundary, so ψ is C¹ but not C² there, and a globally smooth basis cannot represent a curvature jump without error. Closed-flux region, separatrix band, scrape-off layer — three numbers, every time.</p><p>THE PAYOFF TO MEASURE IS CONDITIONING, and it is separate from convergence. At order one hundred unknowns the Jacobian can be formed explicitly and solved directly, which removes Arnoldi, GMRES, the projected condition number, step conditioning and non-normal amplification from the path altogether. Quote the dense condition number against the banked projected Krylov condition of 4087.40844825275 on the same frame. Then quote the terminal residual separately. A receipt that lets a conditioning win read as a convergence win fails review.</p><p>WATCH THE FIXED-SHAPE CONTRACT if the boundary treatment tempts you toward a knot line that follows the moving separatrix. A basis that depends on the iterate threatens exactly the traced, batchable property that makes this approach attractive for the catalog. That tension is the second open decision and it should be answered from the section 4 measurement, not in advance.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship coefficient-space-newton</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>

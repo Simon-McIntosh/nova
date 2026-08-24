@@ -298,6 +298,76 @@
     separatrix-band error is a reportable result and must be stated as such rather than merged with a
     convergence claim.</p>
 
+    <h2 id="s9">§9 — The carrier need not represent the jump</h2>
+
+    <p><strong>The iterated object and the answer are different objects, and only the answer has a
+    kink.</strong> Writing the map as ψ = ψ<sub>ext</sub> + <em>G</em>·s, the converged spline carries
+    <em>s</em>, and the flux is what <em>G</em> returns. The jump lives in the source support, which
+    the separatrix clip already carries exactly; <em>G</em> converts a jumping source into a kinked
+    flux by construction. So nothing smooth is ever asked to represent a discontinuity: the smooth
+    basis carries a smooth factor, the clip carries the support, and the kink appears only in the
+    output. The C² objection in §3 applies to a basis that <em>is</em> the answer, not to a carrier.</p>
+
+    <p><strong>One consistency requirement follows and it must not be skipped.</strong> The topology
+    read — axis, X point, separatrix — is taken from the carrier, while the exact flux is the Green
+    output. A fixed point of the smooth-carrier map is therefore not automatically a fixed point of
+    the exact-flux map: the two can disagree about where ψ<sub>b</sub> lies, and the profiles are
+    evaluated against that. Either the residual is measured on the Green output rather than on the
+    carrier, or the two must be shown to agree to the tolerance the topology read needs. Whichever is
+    chosen, the receipt states which object the reported residual belongs to.</p>
+
+    <h2 id="s10">§10 — Order raising on every cell, not refinement on some</h2>
+
+    <p><strong>Second order on cut cells alone breaks the property the whole approach depends on.</strong>
+    Which cells are cut depends on the iterate, so a representation that is richer only there has a
+    shape that changes as the boundary moves — the one thing a traced, batched GPU path cannot have.
+    Raising the order on <em>every</em> cell keeps the shape fixed: each cell carries six coefficients
+    rather than three, one monopole, two first moments and three second moments, against a coupling
+    tensor that is precomputed once and never rebuilt. The cut cells then need no special treatment at
+    all; they are ordinary cells whose higher moments happen to carry the partial fill.</p>
+
+    <p><strong>Cost, against the banked alternative.</strong> Mesh refinement is the measured
+    comparator on this lane: −500 to −2100 cells moved the residual floor −72.9% at 3.24× interaction
+    build and <strong>13.6× memory</strong>, that memory being batch capacity. Going from three to six
+    coupling columns per cell is roughly <strong>2× the plasma coupling</strong> at unchanged cell
+    count. So order raising occupies a memory position around seven times better than refinement for
+    whatever accuracy it buys, and it rebuilds nothing per iterate. The repository has already
+    measured this lever favourably once in a different place: raising operator order moved the floor
+    −7.7% at <em>zero</em> rebuild and zero memory, where refinement paid 3.24× and 13.6× for −72.9%.
+    This is the same lever applied to the cell support rather than to the operator — p-refinement of
+    the source instead of h-refinement of the mesh.</p>
+
+    <p><strong>Moving the centroid without recalculating a single Biot interaction.</strong> This is
+    the mechanism that makes the update affordable, and it falls out of what the moment columns
+    already are. The coupling of a monopole at a displaced position is its Taylor series in the
+    displacement, and the coefficients of that series are exactly the first- and second-moment
+    coupling columns — the first-moment column <em>is</em> the position derivative of the monopole
+    column, and the second-moment columns are its second derivatives. So an effective centroid shift δ
+    is synthesised as coupling(c) + δ·(first-moment columns) + ½δδ:(second-moment columns), from
+    <em>fixed precomputed columns</em>, exact to the order retained. Nothing is re-integrated when the
+    boundary moves; only the coefficients change. That answers the affordability constraint directly:
+    the geometry of the coupling stays frozen and the partial fill is expressed in the coefficients.</p>
+
+    <p><strong>Whether the kernels extend is the open technical question.</strong> Nova's flux kernel
+    is built from explicit weighted edge antiderivatives, and the existing family is Richardson-pinned
+    at G₀ 4.2e-12, G_R 7.7e-10 and G_Z 3.9e-09 — that is, the monopole and the two first-moment
+    weights already exist as exact closed forms. Second order needs three more members of the same
+    family, the RR, RZ and ZZ weights. The construction is identical in form; whether the closed forms
+    continue to close, or whether some member requires quadrature, is not something to assume. The
+    adjacent evidence is encouraging rather than conclusive: the moment side already carries
+    degree-three-exact shared-node weights to 2.7e-15 with the quartic non-exactness pinned.</p>
+
+    <p><strong>Done when</strong> it is established whether the weighted-edge-antiderivative family
+    admits exact second-order members, with each new weight's accuracy pinned the way G₀, G_R and G_Z
+    are; the coupling memory and per-evaluation cost of six columns per cell is measured against the
+    banked three-column cost at fixed cell count and quoted beside the 3.24× build and 13.6× memory
+    that refinement charges; the Taylor centroid-shift identity is verified numerically against a
+    directly re-integrated displaced source, so the claim that no Biot recalculation is needed is
+    demonstrated rather than argued; and the fixed-shape traced contract is shown to hold with all
+    cells carrying six coefficients under <code>jit</code> and <code>vmap</code>. A finding that some
+    second-order weight does not close in exact form is a reportable result that scopes the approach
+    rather than ending it, provided the quadrature cost is stated.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="coefficient-parameterisation" data-choice="" data-by="" data-when="">

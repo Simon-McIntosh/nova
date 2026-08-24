@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 from contextlib import contextmanager
+import fcntl
 import hashlib
 import importlib.abc
 import json
@@ -112,6 +113,16 @@ def _guard_direct_builders() -> Iterator[_DirectBuilderImportGuard]:
         sys.meta_path.remove(guard)
 
 
+@contextmanager
+def _carrier_build_lock(path: Path) -> Iterator[Path]:
+    """Serialize cache misses through a persistent advisory lock."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lock_path = path.with_suffix(f"{path.suffix}.lock")
+    with lock_path.open("a+b") as stream:
+        fcntl.flock(stream, fcntl.LOCK_EX)
+        yield lock_path
+
+
 def load_carrier(
     path: Path,
     *,
@@ -180,7 +191,6 @@ def _cold_response() -> tuple[dict[str, Any], dict[str, Any]]:
     """Build the exact shared response through the frozen scoring seam."""
     from benchmarks.efit_forward_parity_slice import (
         DECOMPOSITION_BANK,
-        REFERENCE_NATIVE_GRID_POINTS,
         _mast_case_from_selection,
         _passive_inclusive_case,
         select_slices_by_shot,
@@ -200,7 +210,6 @@ def _cold_response() -> tuple[dict[str, Any], dict[str, Any]]:
         SHOT_STORE,
         first_row,
         qualification,
-        grid_points=REFERENCE_NATIVE_GRID_POINTS,
     )
     machine_seconds = perf_counter() - machine_started
     targets = np.vstack((mast_case["grid_coordinate"], mast_case["wall_coordinate"]))
@@ -293,21 +302,21 @@ def _cache_only_subprocess(carrier: Path) -> dict[str, Any]:
 
 def build(carrier: Path, receipt: Path) -> dict[str, Any]:
     """Build, publish and immediately verify one content-addressed carrier."""
-    if carrier.exists():
-        raise FileExistsError(
-            f"cold publication refuses to replace existing carrier {carrier}"
-        )
-    arrays, cold = _cold_response()
-    carrier.parent.mkdir(parents=True, exist_ok=True)
-    temporary = carrier.with_name(f".{carrier.name}.{os.getpid()}.building.npz")
-    publication_started = perf_counter()
-    try:
-        np.savez_compressed(temporary, **arrays)
-        temporary.replace(carrier)
-    finally:
-        if temporary.exists():
-            temporary.unlink()
-    publication_seconds = perf_counter() - publication_started
+    with _carrier_build_lock(carrier) as lock_path:
+        if carrier.exists():
+            raise FileExistsError(
+                f"cold publication refuses to replace existing carrier {carrier}"
+            )
+        arrays, cold = _cold_response()
+        temporary = carrier.with_name(f".{carrier.name}.{os.getpid()}.building.npz")
+        publication_started = perf_counter()
+        try:
+            np.savez_compressed(temporary, **arrays)
+            temporary.replace(carrier)
+        finally:
+            if temporary.exists():
+                temporary.unlink()
+        publication_seconds = perf_counter() - publication_started
     warm = _cache_only_subprocess(carrier)
     entered = warm.pop("direct_builder_modules_entered")
     report = {
@@ -346,6 +355,10 @@ def build(carrier: Path, receipt: Path) -> dict[str, Any]:
         "runtime": {
             "hostname": socket.gethostname(),
             "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
+            "slurm_partition": os.environ.get("SLURM_JOB_PARTITION"),
+            "slurm_reservation": os.environ.get("SLURM_JOB_RESERVATION"),
+            "slurm_job_gpus": os.environ.get("SLURM_JOB_GPUS"),
+            "advisory_lock": str(lock_path),
         },
     }
     if not report["verdict"]["passes"]:

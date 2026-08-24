@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T08:03:20",
+  "updated": "2026-08-24T08:12:47",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -120,7 +120,7 @@
         "id": "clip-order",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a0325b-5d04-7a71-849b-95e82562d06c",
         "created": "2026-08-24"
       },
       {
@@ -423,6 +423,13 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "kernel-order",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-24"
       },
       {
         "id": "kernel-port-scout",
@@ -30254,9 +30261,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260824T060039486038-clipped-coupling-order",
+        "plan": "coefficient-space-newton",
+        "section": "\u00a78",
+        "node": "clipped-coupling-order",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clip-order",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T06:00:43Z",
+        "completed_at": "2026-08-24T06:12:15Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 692,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 692,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "9ba3456308b86610b06af8a01fba7a2199086cc0",
+        "commits": [
+          "75d6eb01"
+        ],
+        "changed_lines": {
+          "added": 750,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Hypothesis REFUTED, cleanly and with uncertainty. Six spacings 0.24 m to 0.04 m, both arms sharing the identical piecewise-linear ellipse clip, conserved uniform current, 48 separatrix-band targets at analytic psi_N 0.96/1.00/1.04 and 48 closed-flux targets at 0.2/0.5/0.8, with only the coupling representation differing. Separatrix-band relative-RMS order: shipped clipped-moment 1.98555 +/- 0.01519 (log-fit RMS 0.01826), exact-clipped-polygon 1.99512 +/- 0.01572 (log-fit RMS 0.01890). Closed-flux order: shipped 2.00722 +/- 0.01497, exact-clipped 2.00131 +/- 0.01398. Finest band errors 1.87088e-3 shipped against 1.88473e-3 exact-clipped, so the repair does not reduce the error either. The shipped coupling is already second order and is NOT compatible with the banked 0.97; the repair gains 0.00957 in band order, which is inside the uncertainty. Clipped-moment coupling therefore does not account for the banked 0.97 and a residual deficit remains for another term. This is the second attribution of that figure to be refuted by measurement, after the Delta-star stencil attribution was withdrawn on the ground that no such stencil is in the residual path.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T060039486038-clipped-coupling-order/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0325b-5d04-7a71-849b-95e82562d06c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3080960,
+            "cached_input_tokens_cumulative": 3080960,
+            "input_tokens": 3213933,
+            "input_tokens_cumulative": 3213933,
+            "output_tokens": 17930,
+            "output_tokens_cumulative": 17930,
+            "reasoning_output_tokens": 5920,
+            "reasoning_output_tokens_cumulative": 5920
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 734
+    "_version": 737
   }
 }

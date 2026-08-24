@@ -114,14 +114,35 @@
     the physics does; use repeated knots to reduce continuity across that line deliberately; or
     accept a measured boundary error and state it as a floor.</p>
 
-    <p><strong>Correction, 2026-08-24 — the order deficit is not a stencil deficit, and an earlier
-    version of this plan said it was.</strong> There is no Δ* stencil in the residual path.
-    <code>ForwardFluxOperator</code> maps a trial flux to cell currents and back to flux through
-    <em>precomputed coupling operators</em>, its residual being <code>psi − g(psi)</code>, and the
-    stencils in that module are a quadratic least-squares null fit and a cell-average stencil, not
-    Δ*. So the observed convergence order of 0.97 cannot be a second-order Δ* stencil losing order at
-    cut cells, and that attribution is withdrawn. The live candidate is a
-    <em>source-representation</em> order instead, and §8 measures it.</p>
+    <p><strong>Resolved 2026-08-24, and there is no order deficit to explain.</strong> Two
+    hypotheses were raised here and both are now refuted by measurement, which turns out to be because
+    the figure they were explaining does not mean what it was taken to mean.</p>
+
+    <p>First, the deficit was attributed to a second-order Δ* stencil losing order at cut cells.
+    <strong>Withdrawn:</strong> there is no Δ* stencil in the residual path.
+    <code>ForwardFluxOperator</code> maps a trial flux to cell currents and back through precomputed
+    coupling operators; the stencils in that module are a quadratic least-squares null fit and a
+    cell-average stencil.</p>
+
+    <p>Second, it was attributed to the clipped-source coupling being first order, since a
+    separatrix-cut cell couples as a monopole plus a dipole at its parent centroid rather than as the
+    exact clipped polygon. <strong>Refuted by direct controlled measurement</strong> over six spacings
+    from 0.24 m to 0.04 m, both arms sharing one clip, current and target set: the shipped
+    clipped-moment coupling is already second order in the separatrix band at
+    <strong>1.98555 ± 0.01519</strong>, the exact-clipped-polygon repair gains 0.00957 — inside the
+    uncertainty — and does not reduce the finest band error; closed-flux order is 2.00722 ± 0.01497
+    and 2.00131 ± 0.01398.</p>
+
+    <p><strong>The figure itself is the artefact.</strong> The 0.97 is one of six per-reference values
+    computed as log(coarse residual / fine residual) / log(coarse spacing / fine spacing) — a
+    <em>two-point</em> estimator applied once per reference. Its siblings are 1.637, 2.702, 3.307 and
+    3.387. Orders above three are not physical for a second-order method; they are what a two-point
+    estimator on noisy residuals produces. And the receipt that carried 0.97 into this campaign
+    selected that reference precisely because it was <code>weakest_refinement_response_of_six</code>.
+    So the campaign has been explaining <em>the minimum of a noise-dominated scatter running to
+    3.39</em>, quoted as though it were the method's order. The controlled ladder measures 1.99 to
+    2.01 with an uncertainty of ±0.015. <strong>The order deficit is retired as a finding, and no
+    further node should hunt its cause.</strong></p>
 
     <section id="s4" class="section-landed">
       <header><span class="badge badge-shipped">✓ landed 2026-08-24</span>
@@ -264,39 +285,23 @@
     case set whose edge current is negligible closes this section by making a smooth basis sufficient,
     which is a result and not a disappointment.</p>
 
-    <h2 id="s8">§8 — The order of the clipped-source coupling</h2>
-
-    <p>This section exists because the order deficit was misattributed twice and the correct candidate
-    is now specific enough to measure. The plasma reaches flux through coupling operators precomputed
-    for three basis functions per cell — a cell current and two first-moment directions, with
-    <code>coupling_current_moments</code> converting physical first moments into that fixed linear
-    basis against the cell's second-moment tensor. Where a cell is cut by the separatrix, the clip
-    supplies <em>clipped zeroth and first moments about fixed centroids</em>; the coupling operator
-    itself is unchanged, because it belongs to the parent cell.</p>
-
-    <p><strong>So a partially filled cell contributes as a monopole plus a dipole sitting at the
-    parent centroid, not as the exact clipped polygon.</strong> That is first-order accurate in the
-    near field, and it predicts both measured symptoms at once: an observed convergence order near
-    one, and a curvature jump smeared across the boundary cell instead of landing on the separatrix.
-    The exactness of the polygon kernels is not in question — they integrate whatever shape they are
-    given exactly. The question is which shape they are given.</p>
-
-    <p>Two repairs are available and the machinery for both is adjacent. Integrate the
-    <em>clipped</em> polygon directly with the existing exact kernels rather than expanding about the
-    parent centroid, which places the jump on the piecewise-linear separatrix by construction. Or
-    carry second moments in clipped cells, for which <code>StencilMesh</code> already holds
-    degree-three-exact shared-node weights with 5/72·pitch² second moments and the quartic
-    non-exactness pinned. The first is exact and costs a per-frame integration over cut cells only;
-    the second is cheaper per evaluation and remains an expansion.</p>
-
-    <p><strong>Done when</strong> a refinement study reports the observed convergence order of the
-    flux field in the separatrix band under the shipped clipped-moment coupling, and again under at
-    least one of the two repairs, each from a declared mesh ladder with the fit residual of the order
-    estimate stated so the exponent carries an uncertainty rather than resting on a single two-point
-    value; and the receipt states whether the repaired order accounts for the banked 0.97 or leaves a
-    residual deficit some other term must explain. A repair that raises the order without moving the
-    separatrix-band error is a reportable result and must be stated as such rather than merged with a
-    convergence claim.</p>
+    <section id="s8" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-24 — hypothesis refuted</span>
+        <h2>§8 — The order of the clipped-source coupling</h2></header>
+      <p class="landed-summary">Measured and refuted. Six spacings 0.24 m → 0.04 m, both arms sharing
+      the identical piecewise-linear ellipse clip, conserved uniform current, 48 separatrix-band
+      targets at analytic ψ<sub>N</sub> 0.96/1.00/1.04 and 48 closed-flux targets at 0.2/0.5/0.8, with
+      only the coupling representation differing. Separatrix-band relative-RMS order: shipped
+      clipped-moment <strong>1.98555 ± 0.01519</strong>, exact-clipped-polygon
+      <strong>1.99512 ± 0.01572</strong>. Closed-flux: 2.00722 ± 0.01497 and 2.00131 ± 0.01398.
+      Finest band error 1.87088e-3 shipped against 1.88473e-3 repaired — the repair gains 0.00957 in
+      order, inside its own uncertainty, and reduces no error. <strong>The shipped coupling is already
+      second order</strong>, so clipped-moment representation does not account for the banked 0.97.
+      Combined with the provenance of that figure — the minimum of a six-reference two-point scatter
+      running to 3.39 — the order deficit is retired rather than reattributed. Artifact
+      <code>docs/figures/coefficient-space-newton/clipped-coupling-order.json</code> (commit
+      <code>75d6eb01</code>).</p>
+    </section>
 
     <h2 id="s9">§9 — The carrier need not represent the jump</h2>
 
@@ -308,13 +313,27 @@
     basis carries a smooth factor, the clip carries the support, and the kink appears only in the
     output. The C² objection in §3 applies to a basis that <em>is</em> the answer, not to a carrier.</p>
 
-    <p><strong>One consistency requirement follows and it must not be skipped.</strong> The topology
-    read — axis, X point, separatrix — is taken from the carrier, while the exact flux is the Green
-    output. A fixed point of the smooth-carrier map is therefore not automatically a fixed point of
-    the exact-flux map: the two can disagree about where ψ<sub>b</sub> lies, and the profiles are
-    evaluated against that. Either the residual is measured on the Green output rather than on the
-    carrier, or the two must be shown to agree to the tolerance the topology read needs. Whichever is
-    chosen, the receipt states which object the reported residual belongs to.</p>
+    <p><strong>And the topology read takes the exact map, not the carrier — which removes the
+    consistency worry rather than managing it.</strong> An earlier version of this section warned that
+    a fixed point of the smooth-carrier map need not be a fixed point of the exact-flux map, because
+    the carrier and the output could disagree about where ψ<sub>b</sub> lies. That worry was
+    self-inflicted: there is no reason to read topology from the carrier. ψ = ψ<sub>ext</sub> +
+    <em>G</em>·s is one dense contraction against a precomputed operator, so the exact flux is cheap
+    to evaluate at every cell point on every iterate. <strong>Every physics read — axis, X point,
+    ψ<sub>b</sub>, the separatrix, the domain labels, the profile arguments — takes the exact Green
+    output. The carrier is never read for physics; it is only ever fed to <em>G</em>.</strong> With
+    that rule the two objects cannot disagree, because only one of them is ever consulted.</p>
+
+    <p><strong>What the carrier is then for, and what floors it.</strong> Its job is to compress the
+    iterate, and the loop closes by projecting the exact output back onto the coefficient space — a
+    fixed least-squares operator, one more matmul. The residual worth reporting is the one on the
+    exact field, since that is the physics; the projection then sets a floor on what any coefficient
+    iteration can reach, and §4 has already measured that floor. Sizing follows directly: 36
+    coefficients put the closed-flux representation error just below the current production residual,
+    while reaching the 1e-3 range wants the 20-knot rung at 400 coefficients — still a 2.5-fold
+    compression on 1,069 cells, and a 400×400 dense Jacobian is 160,000 entries, which is nothing.
+    The carrier also compresses the <em>smoother</em> of the two available objects: <em>G</em> gains
+    two orders, so the flux is smoother than the source that produces it, and §4 measured the flux.</p>
 
     <h2 id="s10">§10 — Order raising on every cell, not refinement on some</h2>
 

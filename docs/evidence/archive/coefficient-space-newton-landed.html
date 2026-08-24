@@ -128,6 +128,51 @@
   than a correction.</p>
 </section>
 
+<section id="s8">
+  <h2 id="s8-h">§8 — The clipped-coupling order, and the retirement of the order deficit</h2>
+
+  <p><strong>clipped-coupling-order</strong> landed 2026-08-24 — commit <code>75d6eb01</code>, gate
+  PASSED with its hypothesis <strong>refuted</strong>. Receipt
+  <code>docs/figures/coefficient-space-newton/clipped-coupling-order.json</code>. Six spacings from
+  0.24 m to 0.04 m; both arms shared the identical piecewise-linear ellipse clip, conserved uniform
+  current, 48 separatrix-band targets at analytic ψ<sub>N</sub> 0.96/1.00/1.04 and 48 closed-flux
+  targets at 0.2/0.5/0.8, so only the coupling representation differed.</p>
+
+  <table>
+    <caption>Observed convergence order with fitted uncertainty, by arm and region</caption>
+    <thead>
+      <tr><th scope="col">Arm</th><th scope="col">Separatrix band</th><th scope="col">Closed flux</th><th scope="col">Finest band error</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>shipped clipped-moment</td><td><strong>1.98555 ± 0.01519</strong> (log-fit RMS 0.01826)</td><td>2.00722 ± 0.01497</td><td>1.87088e-3</td></tr>
+      <tr><td>exact clipped polygon</td><td>1.99512 ± 0.01572 (log-fit RMS 0.01890)</td><td>2.00131 ± 0.01398</td><td>1.88473e-3</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>The shipped coupling is already second order.</strong> The repair gains 0.00957 in band
+  order — inside its own uncertainty — and reduces no error. So the monopole-plus-dipole clipped
+  representation does not account for the banked 0.97, and that hypothesis is refuted rather than
+  qualified.</p>
+
+  <p><strong>The figure being explained was the artefact.</strong> Tracing its provenance,
+  0.966596902394278 is one of six per-reference values computed as
+  log(coarse residual / fine residual) / log(coarse spacing / fine spacing) — a <em>two-point</em>
+  estimator, once per reference. Its siblings: 21983 → 2.7019, 21985 → 3.3074, 21989 → 3.3870,
+  22086 → 1.6372, and 21978 → 0.9666. Orders above three are not physical for a second-order method;
+  they are what a two-point estimator on noisy residuals produces. And the receipt that carried 0.97
+  into this campaign selected reference 21978 precisely because it was
+  <code>weakest_refinement_response_of_six</code>. The campaign was therefore explaining the minimum
+  of a noise-dominated scatter running to 3.39, quoted as though it were the method's order, while the
+  controlled ladder measures 1.99–2.01 at ±0.015.</p>
+
+  <p><strong>The order deficit is retired as a finding.</strong> Two attributions were raised and both
+  refuted — a Δ* stencil that is not in the residual path, and a clipped-source coupling that is
+  already second order. The correct disposition is not a third attribution but the withdrawal of the
+  premise. The node's own follow-on proposed isolating the remaining responsible term; that hunt is
+  declined on this evidence, and the reason is recorded here so it is not re-opened by someone reading
+  only the follow-on.</p>
+</section>
+
 <section id="join">
   <h2 id="join-h">The join — attributing the separatrix-band fit error</h2>
 

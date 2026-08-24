@@ -103,13 +103,13 @@
           raising operator order moves it <strong>−7.7%</strong> at zero rebuild and zero memory. The
           scored parity lane runs a fixed 95-point grid, 3.73× below the 248-cell baseline. Observed
           convergence order on the double-seed reference is <strong>0.97</strong>.</td>
-          <td><strong>The largest measured lever, with an order deficit that is itself a
-          diagnostic.</strong> Corrected 2026-08-24: the deficit is <em>not</em> a Δ* stencil losing
-          order at cut cells — there is no Δ* stencil in the residual path, which maps cell currents
-          to flux through precomputed coupling operators. The live candidate is a source-representation
-          order, since a separatrix-cut cell couples as a monopole plus a dipole at its parent centroid
-          rather than as the exact clipped polygon. Owned by
-          <a href="/nova/coefficient-space-newton">coefficient-space-newton</a> §8.</td>
+          <td><strong>A large measured lever. The order deficit is retired, 2026-08-24.</strong>
+          There is no Δ* stencil in the residual path to lose order at cut cells, and a controlled
+          six-spacing measurement found the shipped clipped-source coupling already second order at
+          1.98555 ± 0.01519 in the separatrix band. The 0.97 is the minimum of a six-reference
+          two-point scatter whose siblings reach 3.39, quoted from the receipt that selected that
+          reference as the weakest refinement response of six. It is an estimator artefact, not a
+          property of the method, and it should not be cited as one.</td>
         </tr>
       </tbody>
     </table>

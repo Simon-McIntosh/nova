@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T08:24:25",
+  "updated": "2026-08-24T09:51:31",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -10,6 +10,13 @@
         "role": "implement",
         "session_id": "01a030a6-d6c8-7ba0-883f-e0b57d138801",
         "created": "2026-08-23"
+      },
+      {
+        "id": "analytic-rescore",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-24"
       },
       {
         "id": "assertion-sweep",
@@ -64,7 +71,7 @@
         "id": "cache-warm",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a0326e-eb25-7000-9667-30416f243e24",
         "created": "2026-08-24"
       },
       {
@@ -78,7 +85,7 @@
         "id": "carrier-arm",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a03271-869c-71a0-9cff-1b99da9b95f2",
         "created": "2026-08-24"
       },
       {
@@ -806,7 +813,7 @@
         "id": "support-order-arm",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a03271-588c-7630-a8fb-19c0eb492405",
         "created": "2026-08-24"
       },
       {
@@ -30410,9 +30417,137 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260824T062440282717-support-order-arms",
+        "plan": "coefficient-space-newton",
+        "section": "\u00a711",
+        "node": "support-order-arms",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "support-order-arm",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T06:24:43Z",
+        "completed_at": "2026-08-24T06:44:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1164,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1164,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "3b0b4ed62071f2e9c24703806de348088dd5eea1",
+        "commits": [
+          "d6be878b6eb1eac9ea3d85d87f16cd2b48787cef"
+        ],
+        "changed_lines": {
+          "added": 1141,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Contract met as written; two of three axes are usable and the third is invalidated by MY dispatch specification, not by the work. Common warm-cache coarse/fine carriers at revision 3b0b4ed6, semantic cache keys 030667d40f96d904 and 53f98d761605582a with all hits true, identical seed, root, exterior field, topology-qualified nonmonotone Newton-Krylov budget of 10 steps and 18 GMRES iterations; only the support columns differ, three shipped against six including RR, RZ and ZZ. CONVERGENCE: a tie at machine precision - A 1.7350752034075281e-15 / 1.5204090263946757e-15 against B 2.0597882944173428e-15 / 1.6288997306334511e-15, every run admitting 10 of 10 advances at 10.0 Newton-step-equivalents, all terminating limited with no finite X point as expected for this analytic source. SPEED: a loss - per-iterate A 2.128667 / 2.969211 ms against B 2.376568 / 3.584151 ms, ratios 1.11646 / 1.20711; peak memory A 0.331131 / 0.674369 GiB against B 0.464424 / 1.015716 GiB, ratios 1.40254 / 1.50617, notably BELOW the 2.0x coupling-memory ratio the kernel node measured because coupling is only part of peak; B one-time quadratic response build 4.912639 / 10.785766 s reported separately as required. ACCURACY: NOT ESTABLISHED. The axis scored both arms against the banked converged root, which is arm A own fixed point, so A reproduces it at 1.927013e-15 to 3.111073e-15 by construction while B reads 7.926871e-4 to 1.164657e-4 for converging to a different discrete fixed point. That measures disagreement with A rather than accuracy, and it is the same circularity class as deriving a criterion from an achieved value of what it scores. The analytic lane carries closed-form truth, which is what both arms should have been scored against; a corrective re-scoring is dispatched.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T062440282717-support-order-arms/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03271-588c-7630-a8fb-19c0eb492405",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9605120,
+            "cached_input_tokens_cumulative": 9605120,
+            "input_tokens": 9834728,
+            "input_tokens_cumulative": 9834728,
+            "output_tokens": 31851,
+            "output_tokens_cumulative": 31851,
+            "reasoning_output_tokens": 9714,
+            "reasoning_output_tokens_cumulative": 9714
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260824T062451690416-carrier-arms",
+        "plan": "coefficient-space-newton",
+        "section": "\u00a711",
+        "node": "carrier-arms",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "carrier-arm",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T06:24:55Z",
+        "completed_at": "2026-08-24T06:57:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1944,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1944,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "3b0b4ed62071f2e9c24703806de348088dd5eea1",
+        "commits": [
+          "fd2baeb113b3443314618b9e6e29819ba233ce6e"
+        ],
+        "changed_lines": {
+          "added": 1275,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 5,
+        "gate": "failed",
+        "outcome": "Both carrier arms LOSE, and their own receipt names the binding constraint. Warm cache 030667d40f96d904, 551 plasma cells, 2253 exact-output values, revision 3b0b4ed6. Arm A: residual 2.7110550053242652e-15, 10 advances, 6.0 Newton-step-equivalents, 23.4811 ms/frame, 25.4269 ms/batched-frame, matrix-free so zero Jacobian formation. Arm C: residual 2.6019345673404647e-2, 1 advance, 1.0 equivalent, 24.1435 ms/frame, 23.4207 ms/batched-frame, worst regional root error 7.198306238825847e-2. Arm D: residual 2.604899997326775e-2, 1 advance, 74.1246 ms/frame, 42.3511 ms/batched-frame, worst regional 7.111433380381033e-2. THE EXPLANATION IS THE PROJECTION FLOOR: arm C floors are 1.525476830559581e-2 closed-flux, 4.808881037725249e-2 separatrix band, 2.1969766027799164e-2 scrape-off, and it converged essentially TO that floor. A coefficient iterate cannot beat its own representation error, so on a carrier where the baseline reaches machine precision no practical knot count competes. ONE AXIS IMPROVES, the predicted one: arm C batched-frame wall 23.4207 against 25.4269 ms, so the carrier does batch better. Design rules honoured: residual, admission and topology come from the exact Green output rather than projected coefficients, and IterateRoute.EXACT_VALUES remains selectable and is asserted at the call site. Cumulative dense Jacobian formation 18.969 s for C and 10.910 s for D with dense solves of 0.408 and 0.299 s; carrier build 5.825 s and quadratic-support build 14.501 s excluded from warm throughput. Memory is a shared-allocation upper bound of 3611725824 bytes, not isolated per arm.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T062451690416-carrier-arms/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03271-869c-71a0-9cff-1b99da9b95f2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13529856,
+            "cached_input_tokens_cumulative": 13529856,
+            "input_tokens": 13790612,
+            "input_tokens_cumulative": 13790612,
+            "output_tokens": 48363,
+            "output_tokens_cumulative": 48363,
+            "reasoning_output_tokens": 17493,
+            "reasoning_output_tokens_cumulative": 17493
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 742
+    "_version": 748
   }
 }

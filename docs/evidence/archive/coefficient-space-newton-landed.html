@@ -273,6 +273,59 @@
   established by this node and is the subject of the solution matrix.</p>
 </section>
 
+<section id="s11">
+  <h2 id="s11-h">§11 — The solution matrix, measured</h2>
+
+  <p><strong>support-order-arms</strong> commit <code>d6be878b</code> and
+  <strong>carrier-arms</strong> commit <code>fd2baeb1</code>, both landed 2026-08-24 at production
+  revision <code>3b0b4ed6</code> on warm semantic caches, with only the named mechanism differing per
+  arm. Residual, admission and topology are taken from the <em>exact Green output</em> rather than
+  from projected coefficients, and <code>IterateRoute.EXACT_VALUES</code> is asserted still selectable
+  at the call site, so the baseline survives the work as §11 required.</p>
+
+  <table>
+    <caption>The matrix on the closed-form oracle carrier — every arm against baseline A</caption>
+    <thead>
+      <tr><th scope="col">Arm</th><th scope="col">Terminal residual</th><th scope="col">Advances</th><th scope="col">ms / frame</th><th scope="col">ms / batched frame</th><th scope="col">Verdict</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>A</strong> exact ψ, 1st order</td><td>2.7110550053242652e-15</td><td>10</td><td>23.4811</td><td>25.4269</td><td>baseline</td></tr>
+      <tr><td><strong>B</strong> exact ψ, 2nd order</td><td>2.0597882944173428e-15</td><td>10 of 10</td><td>+11.6 % / +20.7 %</td><td>—</td><td>tie on convergence, loses on speed and memory (+40–51 % peak)</td></tr>
+      <tr><td><strong>C</strong> carrier, 1st order</td><td>2.6019345673404647e-2</td><td>1</td><td>24.1435</td><td><strong>23.4207</strong></td><td>loses on convergence and accuracy; <strong>wins on batched wall</strong></td></tr>
+      <tr><td><strong>D</strong> carrier, 2nd order</td><td>2.604899997326775e-2</td><td>1</td><td>74.1246</td><td>42.3511</td><td>loses on every axis</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>The interaction is not additive; it is dominated.</strong> The carrier lever sets the
+  achievable residual and the support-order lever cannot recover it — D is no better than C on
+  convergence (2.605e-2 against 2.602e-2) while being three times slower per frame. So the two levers
+  do not compose: whichever constrains the representation wins, and adding the second-order support on
+  top of a carrier buys nothing while costing throughput.</p>
+
+  <p><strong>Why the carrier arms lose, stated by their own receipt: the projection floor.</strong>
+  Arm C's floors are 1.525476830559581e-2 closed-flux, 4.808881037725249e-2 separatrix band and
+  2.1969766027799164e-2 scrape-off, and it converged essentially <em>to</em> that floor. A coefficient
+  iterate cannot beat its own representation error. That is a structural result, not a tuning
+  shortfall.</p>
+
+  <p><strong>Two reasons this measurement understates the carrier, both identified and both
+  fixable.</strong> First, <em>the lane</em>: on this analytic carrier the baseline already reaches
+  2.7e-15, and §4 showed the representation error reaches only 1.167e-3 even at 400 coefficients — so
+  no practical knot count can compete where the baseline is at machine precision. The carrier was
+  proposed to help on <em>stalling</em> cases at 0.087–0.155, and it has not been tested on one.
+  Second, <em>the carried object</em>: the iterate is total flux, not plasma flux, so the carrier is
+  fitting a coil field spread across the whole domain in addition to the plasma hump. §13 records the
+  exact change of variables that removes the external part at zero cost to the residual.</p>
+
+  <p><strong>The accuracy axis of the support-order arms is not usable, and that is a dispatch
+  defect.</strong> It scored both arms against the banked converged root, which is baseline A's own
+  fixed point — so A reproduces it at 1.9e-15 to 3.1e-15 by construction while B reads 7.9e-4 for
+  having a different discrete fixed point. That measures disagreement with A, not accuracy, and it is
+  the same circularity class as deriving a criterion from an achieved value of what it scores. The
+  analytic lane carries closed-form truth; a rescoring against it is dispatched as
+  <code>analytic-truth-rescore</code>.</p>
+</section>
+
 </main>
 </body>
 </html>

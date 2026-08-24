@@ -1,0 +1,560 @@
+{
+  "arms": {
+    "A": [
+      {
+        "carrier": {
+          "analytic_field_array": "oracle_state[:cell_count]",
+          "analytic_partition_array": "oracle_grid_psi_norm",
+          "banked_root": "scripts/oracle_rebaseline/root-coarse.npz",
+          "banked_root_sha256": "79f4a3f507680b7531bf3a3dc6a1195acf321027f0c3f4d4ab103bc70e1a1e0c",
+          "cache_hit": true,
+          "name": "coarse",
+          "realised_cells": 551,
+          "requested_cells": -500,
+          "semantic_cache_key": "030667d40f96d904",
+          "state_dimension": 2253
+        },
+        "common_comparison": {
+          "normalisation": "full analytic grid-field flux span",
+          "normalisation_wb": 1.6364328840564049,
+          "region_partition": {
+            "closed_flux_region": "analytic psi_N < 0.95",
+            "scrape_off_layer": "analytic psi_N > 1.05",
+            "separatrix_band": "0.95 <= analytic psi_N <= 1.05"
+          },
+          "regions": {
+            "closed_flux_region": {
+              "against_analytic_closed_form": {
+                "cell_count": 426,
+                "relative_rms_error": 0.24187032987593454,
+                "relative_sup_error": 0.4501378909021413
+              },
+              "against_banked_converged_root": {
+                "cell_count": 426,
+                "relative_rms_error": 7.293395292939061e-16,
+                "relative_sup_error": 2.306699113970765e-15
+              }
+            },
+            "scrape_off_layer": {
+              "against_analytic_closed_form": {
+                "cell_count": 67,
+                "relative_rms_error": 0.09137079138087377,
+                "relative_sup_error": 0.2612570773052768
+              },
+              "against_banked_converged_root": {
+                "cell_count": 67,
+                "relative_rms_error": 5.441630005932472e-16,
+                "relative_sup_error": 1.2211936485727577e-15
+              }
+            },
+            "separatrix_band": {
+              "against_analytic_closed_form": {
+                "cell_count": 58,
+                "relative_rms_error": 0.23774972203269037,
+                "relative_sup_error": 0.4321593285441544
+              },
+              "against_banked_converged_root": {
+                "cell_count": 58,
+                "relative_rms_error": 6.63092743376696e-16,
+                "relative_sup_error": 1.6282581980970104e-15
+              }
+            }
+          },
+          "supports": "the carrier plasma-cell centroids"
+        },
+        "label": "A",
+        "terminal_reproduction": {
+          "banked_receipt_regional_error": {
+            "normalisation": "full banked grid-root flux span",
+            "region_partition": {
+              "closed_flux_region": "banked psi_N < 0.95",
+              "scrape_off_layer": "banked psi_N > 1.05",
+              "separatrix_band": "0.95 <= banked psi_N <= 1.05"
+            },
+            "regions": {
+              "closed_flux_region": {
+                "cell_count": 415,
+                "relative_rms_error": 6.824496884340883e-16,
+                "relative_sup_error": 1.894351534359477e-15
+              },
+              "scrape_off_layer": {
+                "cell_count": 81,
+                "relative_rms_error": 6.637646160841751e-16,
+                "relative_sup_error": 2.220963867869732e-15
+              },
+              "separatrix_band": {
+                "cell_count": 55,
+                "relative_rms_error": 6.486135503793233e-16,
+                "relative_sup_error": 1.600400434200248e-15
+              }
+            }
+          },
+          "terminal_exact_field_relative_residual": 2.1688440042594083e-15
+        }
+      },
+      {
+        "carrier": {
+          "analytic_field_array": "oracle_state[:cell_count]",
+          "analytic_partition_array": "oracle_grid_psi_norm",
+          "banked_root": "scripts/oracle_rebaseline/root-fine.npz",
+          "banked_root_sha256": "512f8a4bce44b2701a76b587bf0740cd17c1b037839dbcfbde86863115b251de",
+          "cache_hit": true,
+          "name": "fine",
+          "realised_cells": 1076,
+          "requested_cells": -1000,
+          "semantic_cache_key": "7c94be9b777c55ba",
+          "state_dimension": 4052
+        },
+        "common_comparison": {
+          "normalisation": "full analytic grid-field flux span",
+          "normalisation_wb": 1.6360910184801212,
+          "region_partition": {
+            "closed_flux_region": "analytic psi_N < 0.95",
+            "scrape_off_layer": "analytic psi_N > 1.05",
+            "separatrix_band": "0.95 <= analytic psi_N <= 1.05"
+          },
+          "regions": {
+            "closed_flux_region": {
+              "against_analytic_closed_form": {
+                "cell_count": 844,
+                "relative_rms_error": 0.240725241261875,
+                "relative_sup_error": 0.45067410659678714
+              },
+              "against_banked_converged_root": {
+                "cell_count": 844,
+                "relative_rms_error": 7.573823734466894e-16,
+                "relative_sup_error": 2.493791341320186e-15
+              }
+            },
+            "scrape_off_layer": {
+              "against_analytic_closed_form": {
+                "cell_count": 121,
+                "relative_rms_error": 0.09227331874112658,
+                "relative_sup_error": 0.2579240984498478
+              },
+              "against_banked_converged_root": {
+                "cell_count": 121,
+                "relative_rms_error": 7.366255292554787e-16,
+                "relative_sup_error": 2.1036063015217894e-15
+              }
+            },
+            "separatrix_band": {
+              "against_analytic_closed_form": {
+                "cell_count": 111,
+                "relative_rms_error": 0.24630542353258625,
+                "relative_sup_error": 0.44769506787353824
+              },
+              "against_banked_converged_root": {
+                "cell_count": 111,
+                "relative_rms_error": 8.413223687867081e-16,
+                "relative_sup_error": 2.0357480337307638e-15
+              }
+            }
+          },
+          "supports": "the carrier plasma-cell centroids"
+        },
+        "label": "A",
+        "terminal_reproduction": {
+          "banked_receipt_regional_error": {
+            "normalisation": "full banked grid-root flux span",
+            "region_partition": {
+              "closed_flux_region": "banked psi_N < 0.95",
+              "scrape_off_layer": "banked psi_N > 1.05",
+              "separatrix_band": "0.95 <= banked psi_N <= 1.05"
+            },
+            "regions": {
+              "closed_flux_region": {
+                "cell_count": 826,
+                "relative_rms_error": 6.818575936379612e-16,
+                "relative_sup_error": 2.3333050824490768e-15
+              },
+              "scrape_off_layer": {
+                "cell_count": 151,
+                "relative_rms_error": 8.683456948981244e-16,
+                "relative_sup_error": 1.968230137576092e-15
+              },
+              "separatrix_band": {
+                "cell_count": 99,
+                "relative_rms_error": 7.261603278723074e-16,
+                "relative_sup_error": 2.1904496692379087e-15
+              }
+            }
+          },
+          "terminal_exact_field_relative_residual": 2.063412250107058e-15
+        }
+      }
+    ],
+    "B": [
+      {
+        "carrier": {
+          "analytic_field_array": "oracle_state[:cell_count]",
+          "analytic_partition_array": "oracle_grid_psi_norm",
+          "banked_root": "scripts/oracle_rebaseline/root-coarse.npz",
+          "banked_root_sha256": "79f4a3f507680b7531bf3a3dc6a1195acf321027f0c3f4d4ab103bc70e1a1e0c",
+          "cache_hit": true,
+          "name": "coarse",
+          "realised_cells": 551,
+          "requested_cells": -500,
+          "semantic_cache_key": "030667d40f96d904",
+          "state_dimension": 2253
+        },
+        "common_comparison": {
+          "normalisation": "full analytic grid-field flux span",
+          "normalisation_wb": 1.6364328840564049,
+          "region_partition": {
+            "closed_flux_region": "analytic psi_N < 0.95",
+            "scrape_off_layer": "analytic psi_N > 1.05",
+            "separatrix_band": "0.95 <= analytic psi_N <= 1.05"
+          },
+          "regions": {
+            "closed_flux_region": {
+              "against_analytic_closed_form": {
+                "cell_count": 426,
+                "relative_rms_error": 0.24167164833086738,
+                "relative_sup_error": 0.45003470862562545
+              },
+              "against_banked_converged_root": {
+                "cell_count": 426,
+                "relative_rms_error": 0.00027007299784932476,
+                "relative_sup_error": 0.0008232869813527044
+              }
+            },
+            "scrape_off_layer": {
+              "against_analytic_closed_form": {
+                "cell_count": 67,
+                "relative_rms_error": 0.09115054016970775,
+                "relative_sup_error": 0.2609401349346372
+              },
+              "against_banked_converged_root": {
+                "cell_count": 67,
+                "relative_rms_error": 0.00028340334182502813,
+                "relative_sup_error": 0.0005284632400959389
+              }
+            },
+            "separatrix_band": {
+              "against_analytic_closed_form": {
+                "cell_count": 58,
+                "relative_rms_error": 0.23747249776452706,
+                "relative_sup_error": 0.4319926780433182
+              },
+              "against_banked_converged_root": {
+                "cell_count": 58,
+                "relative_rms_error": 0.00034157825262721736,
+                "relative_sup_error": 0.0006376766625718539
+              }
+            }
+          },
+          "supports": "the carrier plasma-cell centroids"
+        },
+        "label": "B",
+        "terminal_reproduction": {
+          "banked_receipt_regional_error": {
+            "normalisation": "full banked grid-root flux span",
+            "region_partition": {
+              "closed_flux_region": "banked psi_N < 0.95",
+              "scrape_off_layer": "banked psi_N > 1.05",
+              "separatrix_band": "0.95 <= banked psi_N <= 1.05"
+            },
+            "regions": {
+              "closed_flux_region": {
+                "cell_count": 415,
+                "relative_rms_error": 0.00025395747523589574,
+                "relative_sup_error": 0.0007926871031412173
+              },
+              "scrape_off_layer": {
+                "cell_count": 81,
+                "relative_rms_error": 0.0003145099460978713,
+                "relative_sup_error": 0.0005686233016406335
+              },
+              "separatrix_band": {
+                "cell_count": 55,
+                "relative_rms_error": 0.0003101349999289571,
+                "relative_sup_error": 0.0007735819605015315
+              }
+            }
+          },
+          "terminal_exact_field_relative_residual": 2.4121205026729323e-15
+        }
+      },
+      {
+        "carrier": {
+          "analytic_field_array": "oracle_state[:cell_count]",
+          "analytic_partition_array": "oracle_grid_psi_norm",
+          "banked_root": "scripts/oracle_rebaseline/root-fine.npz",
+          "banked_root_sha256": "512f8a4bce44b2701a76b587bf0740cd17c1b037839dbcfbde86863115b251de",
+          "cache_hit": true,
+          "name": "fine",
+          "realised_cells": 1076,
+          "requested_cells": -1000,
+          "semantic_cache_key": "7c94be9b777c55ba",
+          "state_dimension": 4052
+        },
+        "common_comparison": {
+          "normalisation": "full analytic grid-field flux span",
+          "normalisation_wb": 1.6360910184801212,
+          "region_partition": {
+            "closed_flux_region": "analytic psi_N < 0.95",
+            "scrape_off_layer": "analytic psi_N > 1.05",
+            "separatrix_band": "0.95 <= analytic psi_N <= 1.05"
+          },
+          "regions": {
+            "closed_flux_region": {
+              "against_analytic_closed_form": {
+                "cell_count": 844,
+                "relative_rms_error": 0.24070126657467308,
+                "relative_sup_error": 0.450569059502799
+              },
+              "against_banked_converged_root": {
+                "cell_count": 844,
+                "relative_rms_error": 5.0809852962098854e-05,
+                "relative_sup_error": 0.0003234085992098794
+              }
+            },
+            "scrape_off_layer": {
+              "against_analytic_closed_form": {
+                "cell_count": 121,
+                "relative_rms_error": 0.0922886568720724,
+                "relative_sup_error": 0.2579180329327117
+              },
+              "against_banked_converged_root": {
+                "cell_count": 121,
+                "relative_rms_error": 5.5709525785715827e-05,
+                "relative_sup_error": 0.0001955366284908339
+              }
+            },
+            "separatrix_band": {
+              "against_analytic_closed_form": {
+                "cell_count": 111,
+                "relative_rms_error": 0.2462824480842538,
+                "relative_sup_error": 0.4475855612197356
+              },
+              "against_banked_converged_root": {
+                "cell_count": 111,
+                "relative_rms_error": 5.4868074079888285e-05,
+                "relative_sup_error": 0.00016505561187999204
+              }
+            }
+          },
+          "supports": "the carrier plasma-cell centroids"
+        },
+        "label": "B",
+        "terminal_reproduction": {
+          "banked_receipt_regional_error": {
+            "normalisation": "full banked grid-root flux span",
+            "region_partition": {
+              "closed_flux_region": "banked psi_N < 0.95",
+              "scrape_off_layer": "banked psi_N > 1.05",
+              "separatrix_band": "0.95 <= banked psi_N <= 1.05"
+            },
+            "regions": {
+              "closed_flux_region": {
+                "cell_count": 826,
+                "relative_rms_error": 3.939445415035023e-05,
+                "relative_sup_error": 0.00030259585705541233
+              },
+              "scrape_off_layer": {
+                "cell_count": 151,
+                "relative_rms_error": 5.414864366561246e-05,
+                "relative_sup_error": 0.00011646572524320398
+              },
+              "separatrix_band": {
+                "cell_count": 99,
+                "relative_rms_error": 9.012585347073989e-05,
+                "relative_sup_error": 0.0002799417499092109
+              }
+            }
+          },
+          "terminal_exact_field_relative_residual": 3.637876065081374e-15
+        }
+      }
+    ]
+  },
+  "availability": {
+    "basis": "arms present in the integrated support-order matrix receipt at this source revision",
+    "measured_arms": [
+      "A",
+      "B"
+    ],
+    "not_measured": {
+      "coefficient_carrier_arms": "not integrated at this source revision; concurrent in-flight work is not evidence input"
+    }
+  },
+  "closer_to_analytic_truth": {
+    "across_carriers": {
+      "closed_flux_region": {
+        "relative_rms_error": {
+          "classification": "consistent",
+          "closer_arms_by_carrier": {
+            "coarse": "B",
+            "fine": "B"
+          }
+        },
+        "relative_sup_error": {
+          "classification": "consistent",
+          "closer_arms_by_carrier": {
+            "coarse": "B",
+            "fine": "B"
+          }
+        },
+        "statement": "Relative-sup closer arms: coarse=B, fine=B. Relative-RMS closer arms: coarse=B, fine=B."
+      },
+      "scrape_off_layer": {
+        "relative_rms_error": {
+          "classification": "carrier_dependent",
+          "closer_arms_by_carrier": {
+            "coarse": "B",
+            "fine": "A"
+          }
+        },
+        "relative_sup_error": {
+          "classification": "consistent",
+          "closer_arms_by_carrier": {
+            "coarse": "B",
+            "fine": "B"
+          }
+        },
+        "statement": "Relative-sup closer arms: coarse=B, fine=B. Relative-RMS closer arms: coarse=B, fine=A."
+      },
+      "separatrix_band": {
+        "relative_rms_error": {
+          "classification": "consistent",
+          "closer_arms_by_carrier": {
+            "coarse": "B",
+            "fine": "B"
+          }
+        },
+        "relative_sup_error": {
+          "classification": "consistent",
+          "closer_arms_by_carrier": {
+            "coarse": "B",
+            "fine": "B"
+          }
+        },
+        "statement": "Relative-sup closer arms: coarse=B, fine=B. Relative-RMS closer arms: coarse=B, fine=B."
+      }
+    },
+    "by_carrier": {
+      "coarse": {
+        "closed_flux_region": {
+          "classification": "metrics_agree",
+          "relative_rms_error": {
+            "closer_arm": "B",
+            "margin_to_next_arm": 0.00019868154506716418,
+            "relative_error": 0.24167164833086738
+          },
+          "relative_sup_error": {
+            "closer_arm": "B",
+            "margin_to_next_arm": 0.00010318227651584522,
+            "relative_error": 0.45003470862562545
+          },
+          "statement": "Arm B is closer to analytic truth by both relative-sup and relative-RMS error in closed_flux_region on the coarse carrier."
+        },
+        "scrape_off_layer": {
+          "classification": "metrics_agree",
+          "relative_rms_error": {
+            "closer_arm": "B",
+            "margin_to_next_arm": 0.00022025121116601987,
+            "relative_error": 0.09115054016970775
+          },
+          "relative_sup_error": {
+            "closer_arm": "B",
+            "margin_to_next_arm": 0.00031694237063961683,
+            "relative_error": 0.2609401349346372
+          },
+          "statement": "Arm B is closer to analytic truth by both relative-sup and relative-RMS error in scrape_off_layer on the coarse carrier."
+        },
+        "separatrix_band": {
+          "classification": "metrics_agree",
+          "relative_rms_error": {
+            "closer_arm": "B",
+            "margin_to_next_arm": 0.00027722426816331747,
+            "relative_error": 0.23747249776452706
+          },
+          "relative_sup_error": {
+            "closer_arm": "B",
+            "margin_to_next_arm": 0.00016665050083619626,
+            "relative_error": 0.4319926780433182
+          },
+          "statement": "Arm B is closer to analytic truth by both relative-sup and relative-RMS error in separatrix_band on the coarse carrier."
+        }
+      },
+      "fine": {
+        "closed_flux_region": {
+          "classification": "metrics_agree",
+          "relative_rms_error": {
+            "closer_arm": "B",
+            "margin_to_next_arm": 2.3974687201916423e-05,
+            "relative_error": 0.24070126657467308
+          },
+          "relative_sup_error": {
+            "closer_arm": "B",
+            "margin_to_next_arm": 0.00010504709398811984,
+            "relative_error": 0.450569059502799
+          },
+          "statement": "Arm B is closer to analytic truth by both relative-sup and relative-RMS error in closed_flux_region on the fine carrier."
+        },
+        "scrape_off_layer": {
+          "classification": "metric_dependent",
+          "relative_rms_error": {
+            "closer_arm": "A",
+            "margin_to_next_arm": 1.5338130945813377e-05,
+            "relative_error": 0.09227331874112658
+          },
+          "relative_sup_error": {
+            "closer_arm": "B",
+            "margin_to_next_arm": 6.065517136111254e-06,
+            "relative_error": 0.2579180329327117
+          },
+          "statement": "The analytic-truth ranking in scrape_off_layer on the fine carrier is metric-dependent: arm B is closer by relative-sup error, while arm A is closer by relative-RMS error."
+        },
+        "separatrix_band": {
+          "classification": "metrics_agree",
+          "relative_rms_error": {
+            "closer_arm": "B",
+            "margin_to_next_arm": 2.2975448332435144e-05,
+            "relative_error": 0.2462824480842538
+          },
+          "relative_sup_error": {
+            "closer_arm": "B",
+            "margin_to_next_arm": 0.00010950665380266011,
+            "relative_error": 0.4475855612197356
+          },
+          "statement": "Arm B is closer to analytic truth by both relative-sup and relative-RMS error in separatrix_band on the fine carrier."
+        }
+      }
+    },
+    "ranking_metrics": [
+      "relative_sup_error",
+      "relative_rms_error"
+    ]
+  },
+  "comparison_contract": {
+    "analytic_authority": "moderate-rotation-conventional closed-form total flux evaluated on each carrier's plasma-cell centroids",
+    "carriers": [
+      "coarse",
+      "fine"
+    ],
+    "common_normalisation": "full analytic grid-field flux span",
+    "common_region_partition": "analytic normalized flux",
+    "common_supports": true,
+    "terminal_state_provenance": "fresh reproduction of each source arm with the source benchmark's solver, seed, exterior, support and iteration budget"
+  },
+  "evidence_inputs": {
+    "matrix_receipt": "docs/figures/coefficient-space-newton/support-order-arms.json",
+    "matrix_receipt_sha256": "1988964548db65d98e24aaafc80afbbc224dd5534851756b3b170e976412eff3",
+    "matrix_receipt_source_revision": "3b0b4ed62071f2e9c24703806de348088dd5eea1",
+    "root_banks": {
+      "coarse": {
+        "path": "scripts/oracle_rebaseline/root-coarse.npz",
+        "sha256": "79f4a3f507680b7531bf3a3dc6a1195acf321027f0c3f4d4ab103bc70e1a1e0c"
+      },
+      "fine": {
+        "path": "scripts/oracle_rebaseline/root-fine.npz",
+        "sha256": "512f8a4bce44b2701a76b587bf0740cd17c1b037839dbcfbde86863115b251de"
+      }
+    }
+  },
+  "reference_warning": "The banked converged-root reference is the baseline arm's own fixed point. It therefore cannot rank arms on accuracy; only the independent analytic closed form can support that ranking.",
+  "schema": "nova.analytic-truth-rescore",
+  "source_revision": "162f208b2db57fa918f16d14a616d453a4da347d"
+}

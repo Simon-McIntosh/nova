@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="coefficient-space-newton">
   <meta name="plan-title" content="Coefficient-Space Newton — solve for a smooth basis, not for every cell">
   <meta name="plan-summary" content="The flux map is smooth in value and gradient, so the Newton unknown need not be one value per cell. Carry a tensor-product spline coefficient set as the state, keep cell-resolution source evaluation and current moments, and the effective solution degree becomes the knot count. If that degree is order one hundred rather than order ten thousand, the dense Jacobian is affordable and the entire Krylov conditioning apparatus becomes unnecessary.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="12.0">
   <meta name="plan-capability-version" content="1.0">
@@ -25,6 +25,11 @@
   <title>Coefficient-Space Newton | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-24">
+<meta name="plan-commits" content="485f6fdaa88328b96633db85111093e332b4aa53,dbee3048d4767af04373155c50b6e9753bfc330c,975e4acec3016cd56295d458d07eaf2aa8233454,75d6eb010612c12486327fa8c794efe6c662b71c,bf9dafdbf258624fc42d3f2d7eef8e468495b328">
+<meta name="plan-artifacts" content="scripts/coefficient_basis_reuse/report.md,docs/figures/coefficient-space-newton/representation-degree.json,docs/figures/coefficient-space-newton/edge-current-jump.json,docs/figures/coefficient-space-newton/clipped-coupling-order.json,docs/figures/coefficient-space-newton/second-order-kernel.json,nova/biot/second_moment_kernel.py,docs/evidence/archive/coefficient-space-newton-landed.html">
+<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -416,11 +421,48 @@
     trade rather than summarised as a win. A matrix in which no arm beats A on any axis closes this
     plan honestly, and arm A remaining the production path is then the result.</p>
 
+    <h2 id="s12">§12 — Benchmark the matrix on the H200, and assess batchability across cards</h2>
+
+    <p><strong>The matrix's speed axis is not credible on a CPU lane.</strong> The consumer this work
+    ultimately serves is a catalog rung on the reserved H200, so the authoritative timing must be
+    measured there, on the device and dtype the product runs. Until that is done, any speed claim from
+    a host-lane arm is indicative only and the receipt must say so.</p>
+
+    <p><strong>Separate the one-time build from the per-slice execute, because conflating them has
+    already misled this campaign once.</strong> The throughput plan records the lesson explicitly: a
+    one-time interaction build of roughly 202 s measured 52 times the solve, and only the execute
+    multiplies by the 1,341,435 slices, so an end-to-end wall clock would measure the build and report
+    it as throughput. Every arm reports build and execute separately, and the throughput figure is the
+    execute alone, quoted against the banked <strong>46.577604167 slices per second per device</strong>.</p>
+
+    <p><strong>Batchability is the property that decides whether an arm is usable at campaign scale,
+    and it is not the same as single-frame speed.</strong> An arm can be slower per frame and still win
+    if it batches wider — which is precisely the coefficient carrier's expected shape, since it stacks
+    a coefficient axis of order one hundred rather than a state axis of order ten thousand, and the
+    second-order support doubles the coupling rather than multiplying it by 13.6 as refinement does. So
+    the assessment sweeps batch width to saturation on one card, then scales across cards.</p>
+
+    <p>The reservation constraint is a fact of the lane rather than a detail: work on
+    <code>betelgeuse</code> must name <code>--reservation=gpu_0003_grpA</code>, which reserves CPUs
+    15-29 and 47-61 while making the cards requestable through it. Card availability is expected to be
+    around six rather than the full complement, so the ladder is declared from what the reservation
+    actually grants at run time rather than assumed, and a short ladder is a reportable constraint
+    rather than a failure.</p>
+
+    <p><strong>Done when</strong> each matrix arm carries, on the reserved H200 at the production
+    dtype: the one-time build cost and the per-slice execute cost reported separately, with the
+    execute converted to slices per second per device and quoted against the banked 46.577604167; the
+    batch width at which one card saturates, with peak device memory at that width; a card ladder from
+    one card to the largest the reservation grants, reporting throughput and scaling efficiency at
+    each rung together with the sharding arrangement used; and an explicit statement of which arm is
+    preferred at campaign scale and whether that differs from the arm preferred on single-frame
+    convergence. A ladder shorter than the cards nominally present is recorded with the number
+    actually granted, since a silently truncated ladder reads as full coverage.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="coefficient-parameterisation" data-choice="" data-by="" data-when="">
-    <p class="r-dec-q">Is the coarse-knot coefficient state a re-parameterisation of the existing
-        <code>TensorBSpline</code>, or a sibling construction that reuses its Bernstein evaluation
+    <p class="r-dec-q">Is the coarse-knot coefficient state a re-parameterisation of the existing TensorBSpline , or a sibling construction that reuses its Bernstein evaluation
         while owning its own knot lattice? The existing class is parameterised by sampled cell
         values with one block per cell, so it cannot express a coarse-knot state as it stands. A
         re-parameterisation keeps one authority for spline evaluation; a sibling risks two. Decide
@@ -430,16 +472,15 @@
       <button class="r-opt" data-value="sibling-shared-basis">sibling sharing the Bernstein basis</button>
       </p>
     <p class="r-dec-rat">Reuse map verdict 2026-08-24: re-parameterise the existing evaluator
-        authority rather than fork it, since <code>fit_tensor_spline</code> already permits a coarse
-        nodal-value state and <code>TensorBSpline.evaluate</code> already returns the full
+        authority rather than fork it, since fit_tensor_spline already permits a coarse
+        nodal-value state and TensorBSpline.evaluate already returns the full
         second-derivative set. Whichever is chosen, the exact-ψ route stays a first-class path and the
         carrier is selected explicitly at the call site — see §11.</p>
-    <p class="r-dec-rat"></p>
     </div>
 <div class="r-dec" data-key="boundary-knot-treatment" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">If the separatrix band carries the binding fit error, which support
-        carries the curvature jump: a level-set enrichment of the form max(&psi; &minus;
-        &psi;<sub>b</sub>, 0)&sup2; that follows the actual curve, repeated knots giving the right
+        carries the curvature jump: a level-set enrichment of the form max(ψ −
+        ψ b , 0)² that follows the actual curve, repeated knots giving the right
         continuity class along axis-aligned lines only, an accepted and stated error floor, or moving
         the unknown to the current side so the Green operator generates the jump exactly? A knot line
         that follows the moving boundary makes the basis depend on the iterate and threatens the
@@ -458,6 +499,17 @@
     </article>
 </section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s4" data-id="c-20260824T0640-degree" data-who="reckon-ship" data-when="2026-08-24T06:40:00Z">
+    <div class="r-comment-body">Five nodes landed and are recorded here in one beat, since the landing writes were owed. coefficient-basis-reuse-map - commit 485f6fda, gate PASSED: 30 candidates, 10 no-candidate lines, 4 semantic cache identities and 4 root-bank digests; verdict is to re-parameterise TensorBSpline rather than fork it, since fit_tensor_spline already permits a coarse nodal-value state and evaluate already returns the full second-derivative set; explicit instruction not to rebuild Green operators. flux-representation-degree - commit dbee3048, gate PASSED, zero solves and zero forward-map evaluations enforced on the driver path: nine rungs 4 to 20 knots per axis, 16 to 400 coefficients against 551 to 1076 cells; all eight targets fall below the hardest banked production residual 0.08646603357046066 in closed-flux error at 4 knots per axis for the closed-form carriers and 6 for the stored ones; terminal regional errors at most 1.1670983117499025e-3; separatrix band binding for only 2 of 8 targets. edge-current-jump-sizing - commit 975e4acec, gate PASSED, verdict CURVATURE_JUMP_SUPPORT_REQUIRED_FOR_CASE_SET at 2 of 4 sufficient: stored DINA tapers to exactly zero so its jump and fraction of peak are zero, while the rotating oracle carries boundary current density 776798 to 1215296 A/m2 and an operator jump reaching 1.00 of peak; negligibility preregistered at 4096 binary64 epsilon rather than derived from an achieved value. THE JOIN of those two, made by the orchestrator as the sizing node requested: a zero edge current is sufficient for the band never to bind, 4 of 4, while a large one is necessary but not sufficient - it binds on both coarse oracle carriers and neither fine one, so refining moves the band error below the other regional terms without removing the jump. The experimental lane therefore carries no discontinuity while the analytic oracle carries one at up to full peak.</div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-20260824T0640-order" data-who="reckon-ship" data-when="2026-08-24T06:40:00Z">
+    <div class="r-comment-body">clipped-coupling-order landed - commit 75d6eb01, gate PASSED with its hypothesis REFUTED. Six spacings 0.24 m to 0.04 m, both arms sharing one clip, current and target set with only the coupling representation differing: separatrix-band order shipped 1.98555 +/- 0.01519 against exact-clipped-polygon 1.99512 +/- 0.01572, closed-flux 2.00722 +/- 0.01497 against 2.00131 +/- 0.01398, finest band error 1.87088e-3 against 1.88473e-3. The shipped clipped-moment coupling is already second order, the repair gains 0.00957 inside its own uncertainty and reduces no error. THE ORDER DEFICIT IS RETIRED RATHER THAN REATTRIBUTED. Two attributions were raised and both refuted: a Delta-star stencil, withdrawn because none is in the residual path, and this clipped-source order. Tracing the figure explains why - 0.966596902394278 is one of six per-reference two-point estimates whose siblings are 1.6372, 2.7019, 3.3074 and 3.3870, taken from the receipt that selected reference 21978 as weakest_refinement_response_of_six. Orders above three are not physical for a second-order method. The node's follow-on proposing a hunt for a third cause is DECLINED, with the reason recorded in the evidence so it is not re-opened from the follow-on alone.</div>
+</div>
+<div class="r-comment" data-section="s10" data-id="c-20260824T0640-kernel" data-who="reckon-ship" data-when="2026-08-24T06:40:00Z">
+    <div class="r-comment-body">second-order-kernel-extension landed - commit bf9dafdb, gate PASSED, 4 tests. The three second-order weights do NOT close symbolically: no exact quadratic weighted-edge endpoint primitive was obtained for RR, RZ or ZZ, so each routes through a fixed tensor-Gauss triangle quadrature, recorded as an implementation result rather than a proof that no higher-harmonic symbolic reduction closes. Accuracy nonetheless lands in the shipped band: Richardson-scaled relative errors 4.579e-11, 7.050e-09 and 1.620e-10 against the existing G0 4.2e-12, G_R 7.7e-10 and G_Z 3.9e-09. THE CENTROID-SHIFT IDENTITY IS VERIFIED NUMERICALLY: a directly displaced exact traced monopole agrees with the Taylor combination of its retained value, gradient and Hessian columns to a cubic remainder, fitted residual order 2.99495, maximum relative residual 1.529e-06 over displacements 0.005 to 0.08 of cell pitch - so the effective source moves with no interaction re-integrated, which is what makes the update affordable. Cost as predicted: coupling memory 12582912 to 25165824 bytes, exactly 2.00x, and median contraction 0.399916 to 0.792449 ms, 1.98x, at 2048 cells by 256 targets, against the banked refinement comparator of 3.24x build and 13.6x memory. Fixed shapes hold at six columns per cell with jit(vmap) agreeing to rtol 8e-12.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

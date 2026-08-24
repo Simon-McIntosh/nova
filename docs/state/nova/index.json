@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T05:49:46",
+  "updated": "2026-08-24T08:33:37",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -757,6 +757,21 @@
                 "risk": "elevated"
               }
             }
+          },
+          {
+            "slug": "coefficient-space-newton",
+            "why_now": "The campaign has built and refuted three stepping mechanisms on a ten-thousand-dimensional flux iterate whose projected Krylov condition reaches 4087, and the representation degree of the thing being solved for is now measured: 16 coefficients for the closed-form carriers and 36 for the stored ones already beat the hardest banked production residual in closed-flux error, against 551 to 1076 plasma cells. At that size the Jacobian can be formed explicitly and solved directly, which retires Arnoldi, GMRES, the projected condition number, step conditioning and non-normal amplification from the path at once. The second-order cell support that pairs with it is buildable, verified and priced at 2.0x memory against the 13.6x that mesh refinement charges.",
+            "done_when": "All four arms of the solution matrix are measured on a common frame set at one source revision - exact-value and coefficient-carrier iterates crossed with first and second order in-cell current support - each scored against the shipped baseline on convergence, speed and accuracy, with the interaction between the two levers stated explicitly and any trade reported as a trade; the exact-value route is demonstrated to remain selectable at the call site rather than replaced; and the matrix is benchmarked on the reserved H200 with a batchability assessment across up to six cards quoting per-card scaling, the one-time build separated from the per-slice execute, and the throughput against the banked 46.577604167 slices per second per device.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "context": "extended",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
           }
         ],
         "description": "The convergence sprint closed both its hypotheses as honest negatives: neither a longer step along the topology-preserving manifold nor a seed-alignment selector moves the residual, and admitted steps were already full Newton steps. What remains is a question no stepping mechanism answers - whether a diverted-class root exists below the measured plateau at all. Answer that first; the GPU catalog runs behind it and is relocated here out of a sprint slot that scheduled it ahead of its own prerequisite."
@@ -920,6 +935,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 70
+    "_version": 71
   }
 }

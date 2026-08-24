@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="plateau-input-attribution-landed">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="plateau-input-attribution">
+<title>plateau-input-attribution-landed</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="Plateau Input Attribution — cumulative execution evidence">
+<meta name="plan-summary" content="Landing record of the plateau-input-attribution plan: the stale-assertion correction, the IMAS machine-description guidance, and the blocked residual-field measurement with the cache gap it exposed">
+</head>
+<body>
+<main class="plan-doc">
+
+<h1>Plateau Input Attribution — cumulative execution evidence</h1>
+
+<section id="s5-assertions">
+  <h2 id="s5-assertions-h">§5 — The assertions that routed two sessions down navigated paths</h2>
+
+  <p><strong>stale-assertion-correction</strong> landed 2026-08-24 — commit <code>c20392dc</code>,
+  gate PASSED, scope extended mid-node, 26 of 26 touched-module tests passing in 15.46 s. Artifact:
+  <code>scripts/stale_assertion_sweep/report.md</code>, 20 corrected assertion entries.</p>
+
+  <p><strong>Two names asserting a state of ignorance the tree no longer holds are gone, without
+  aliases.</strong> <code>OMITTED_POLOIDAL_CONDUCTORS</code> and
+  <code>UNKNOWN_POLOIDAL_CONDUCTORS</code> are replaced by <code>CIRCUIT_DRIVEN_CONDUCTORS</code>,
+  which production already declares, constructs and validates against; the optional diagnostic route
+  is named <code>CIRCUIT_BYPASS_PRIOR_CONDUCTORS</code> for what it is. A compatibility alias was
+  explicitly refused, because an alias would have left the false assertion in the shipped tree —
+  which is the defect being corrected. With the default <code>use_circuit=True</code> the resolution
+  records <code>unknown_names == ()</code>, <code>current_authority = "pf_active circuit"</code> and
+  <code>free_current_count_with_circuit == 0</code>: 19 competition-row currents plus 5
+  circuit-driven currents make the 24 response currents, with <strong>no free current parameters
+  anywhere in the production path</strong>.</p>
+
+  <table>
+    <caption>The circuit gains, as the tree actually holds them</caption>
+    <thead>
+      <tr><th scope="col">Conductor</th><th scope="col">Integer base</th><th scope="col">Status</th><th scope="col">Effective gain</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>ECOILB</td><td>2.0</td><td><code>snapped-exact</code></td><td>2.0</td></tr>
+      <tr><td>E567UP</td><td>1.0</td><td><code>snapped-exact</code></td><td>1.0</td></tr>
+      <tr><td>E567DN</td><td>1.0</td><td><code>snapped-exact</code></td><td>1.0</td></tr>
+      <tr><td>E89UP</td><td>1.0</td><td><code>integer-plus-systematic</code></td><td>1.0456947569496173</td></tr>
+      <tr><td>E89DN</td><td>1.0</td><td><code>integer-plus-systematic</code></td><td>1.0456240764323717</td></tr>
+    </tbody>
+  </table>
+
+  <p>Three gains are exact integers. The two end-loop conductors carry an integer base plus a measured
+  systematic of about 4.57 %, which the report deliberately declines to word into an exact-integer
+  result. Worth noting that the two agree to four decimal places across independent conductors, which
+  argues the systematic is a shared physical effect rather than fit noise.</p>
+
+  <p><strong>The wall refusal keeps its behaviour and gains its scope.</strong> The message, class
+  docstring, provenance docstring and receipt now say the absence is a property of the competition
+  rows, and each names the deterministic physical limiter ring the DIII-D machine-description IDS
+  carries at <code>bundle.ids[wall].description_2d[0].limiter.unit[0].outline</code>. The validation
+  itself is unchanged, because the check is correct about its own subject — it was wrongly
+  <em>scoped</em>, not wrong. <code>DiiidMachineIds.validate</code> checks simple-polygon validity,
+  provenance digest and vertex count.</p>
+
+  <p><strong>Consumer handoff recorded for the node that follows:</strong> the forward driver should
+  load the machine-description IDS wall outline rather than
+  <code>DiiidDatasetMachineDescription.machine.contour</code>, retain IDS, source and DD provenance,
+  select the real ring explicitly for topology, and keep the EFIT-grid rectangle only as an
+  explicitly chosen pseudo-wall fallback.</p>
+</section>
+
+<section id="s5-guidance">
+  <h2 id="s5-guidance-h">§5 — IMAS machine-description guidance</h2>
+
+  <p><strong>imas-machine-description-guidance</strong> landed 2026-08-24 — commit
+  <code>7ef46a9d</code>, gate PASSED. Artifact: <code>nova/imas/AGENTS.md</code>, 257 lines, indexed
+  from the root <code>AGENTS.md</code> module map alongside the biot and equilibrium sub-scopes.</p>
+
+  <p><strong>It is generic to IMAS rather than to this corpus, by construction.</strong> One runnable
+  load-and-inspect recipe accepting any IMAS entry URI or netCDF path plus its manifest DD pin; four
+  quoted accessor families covering the wall limiter outline, <code>pf_active</code> coil elements
+  with <code>turns_with_sign</code> and geometry, <code>b_field_pol_probe</code> position and angles,
+  and <code>flux_loop</code> positions. Runtime descriptions are located from the artifact manifest
+  through <code>nova.imas.machine_artifact.resolve_machine_artifact</code>, with
+  <code>manifest.dd_version</code> as the exact open pin and <code>autoconvert=False</code> required.
+  Occurrences are listed before dereferencing, and a missing occurrence is stated to be evidence
+  about that entry rather than about the machine.</p>
+
+  <p><strong>Verified rather than asserted.</strong> The documented recipe was executed against the
+  DIII-D machine description at DD 4.1.1: <strong>84 wall vertices, 24 active coils, 140 active
+  elements, 76 poloidal probes, 44 flux loops</strong>. So the real limiter ring is not merely
+  claimed to exist — it was opened and counted.</p>
+
+  <p><strong>The two disciplines it encodes are the two this session lost time to.</strong> First, a
+  dataset-scoped absence is not a machine-description absence, worked through the DIII-D wall as the
+  example. Second, a banked receipt is only evidence about the tree it measured, so a staleness audit
+  compares its author date <em>and its ancestry</em> against the commit introducing any mechanism it
+  would be cited against — demonstrated on receipt <code>57a1bfb9</code> (2026-08-21) against
+  mechanism <code>cf812416</code> (2026-08-22), with <code>git merge-base</code> confirming the
+  receipt is the ancestor.</p>
+</section>
+
+<section id="s2-residual">
+  <h2 id="s2-residual-h">§2 — The residual field, and the cache gap that blocks it</h2>
+
+  <p><strong>label-seed-residual-field</strong> is <strong>blocked</strong>, deliberately and
+  usefully. Implementation commit <code>7b578ae2</code> is in place and retains everything the
+  measurement asks for — the one-application current-pinned residual field, full-state sup and L2
+  norms, the closed-flux, scrape-off-layer and one-stencil-boundary fractions, terminal branch and
+  label-current fraction, the superseded 2026-08-21 vacuum evidence, <code>cf812416</code> pinning
+  provenance, and the three-candidate pattern verdict. No receipt was written, so no partial or
+  fabricated metric was banked.</p>
+
+  <p><strong>What it established instead is a real infrastructure gap, and it corrected an
+  orchestrator instruction in doing so.</strong> It was advised to route through
+  <code>reference._machine_cache_store</code> as <code>efit_forward_parity_slice.py</code> does. It
+  checked: that use is the <em>DINA composition control</em> only. Both MAST frozen-six drivers
+  initialise <code>response_cache = None</code>, and <code>_passive_inclusive_case</code> constructs
+  938 section kernels on that miss. The Nova user-data cache holds analytic-oracle, DINA solovev,
+  exact-moment and ITER-description carriers but <strong>no MAST forward carrier</strong>. So the
+  cache it was told to use does not exist for this lane.</p>
+
+  <p><strong>The required identity is now named, which is what makes the warming node possible.</strong>
+  Response identity <code>1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994</code>,
+  resolved-target digest
+  <code>5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9</code>, response shape
+  1126 × 101, 101 stored circuits, with all six banked rows carrying that one identity. Measured
+  forbidden cold cost before interruption: <strong>48:07 CPU-saturated, still inside
+  <code>polygon_greens</code> for the first response</strong>. The node refused a second cold
+  rebuild rather than violating the <code>cached_machine</code> rule in
+  <code>nova/equilibrium/AGENTS.md</code> — the right call, and the reason the cost is now known
+  rather than paid twice.</p>
+</section>
+
+</main>
+</body>
+</html>

@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="plateau-input-attribution">
   <meta name="plan-title" content="Plateau Input Attribution — the physical root exists, so which substituted input moved it?">
   <meta name="plan-summary" content="The frames are EFIT reconstructions of physical diverted discharges and one corpus frame already solves to 2.9e-16, so existence is settled twice over. Four documented input substitutions stand between that root and the solve, one of them the pseudo-wall the topology predicate reads against, and the magnetic axis lands a mean 165 mm away. Attribute the plateau to a named substitution rather than searching for a root.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="10.0">
   <meta name="plan-capability-version" content="1.0">
@@ -25,6 +25,11 @@
   <title>Plateau Input Attribution | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-24">
+<meta name="plan-commits" content="c20392dc7d74aa5171e865b8dd44ef1c07f7582a,7ef46a9da7068c9ddeebcae1b8303d83277ed8c3">
+<meta name="plan-artifacts" content="scripts/stale_assertion_sweep/report.md,nova/imas/AGENTS.md,docs/evidence/archive/plateau-input-attribution-landed.html">
+<meta name="plan-impl" content="0.286">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -301,7 +306,7 @@
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="wall-substitution-route" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">How is the pseudo-wall arm run — by expanding and contracting the existing
-        rectangle over a stated range, or by sourcing DIII-D's real wall geometry and using it as
+        rectangle over a stated range, or by sourcing DIII-D&#x27;s real wall geometry and using it as
         the topology surface? The rectangle sweep is available immediately and bounds the
         sensitivity; the real wall answers the physical question but introduces a geometry the
         competition corpus deliberately does not ship, so its provenance must be stated and it may
@@ -331,6 +336,14 @@
     </article>
 </section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s5" data-id="c-20260824T0645-assertions" data-who="reckon-ship" data-when="2026-08-24T06:45:00Z">
+    <div class="r-comment-body">Two nodes landed and are recorded here in one beat, since the landing writes were owed. stale-assertion-correction - commit c20392dc, merged, gate PASSED, scope extended mid-node to the test file so the rename could be atomic, 26 of 26 touched-module tests passing in 15.46 s, 20 corrected assertion entries in scripts/stale_assertion_sweep/report.md. OMITTED_POLOIDAL_CONDUCTORS and UNKNOWN_POLOIDAL_CONDUCTORS are removed WITHOUT aliases, because an alias would leave the false assertion in the shipped tree, which is the defect being corrected; production now uses CIRCUIT_DRIVEN_CONDUCTORS and the diagnostic route is named CIRCUIT_BYPASS_PRIOR_CONDUCTORS. With the default use_circuit=True the resolution records unknown_names == (), current_authority = pf_active circuit, and free_current_count_with_circuit == 0 - so 19 competition-row plus 5 circuit-driven equals 24 response currents with NO free current parameters. Gains: ECOILB 2.0, E567UP 1.0 and E567DN 1.0 all snapped-exact; E89UP 1.0456947569496173 and E89DN 1.0456240764323717 as integer-plus-systematic, a shared systematic of about 4.57 percent agreeing to four decimals across independent conductors. The wall refusal keeps its behaviour and gains its scope: message, class docstring, provenance docstring and receipt now scope the absence to the competition rows and each names the deterministic physical limiter ring at bundle.ids[wall].description_2d[0].limiter.unit[0].outline. imas-machine-description-guidance - commit 7ef46a9d, gate PASSED: nova/imas/AGENTS.md, 257 lines, indexed from the root module map beside the biot and equilibrium sub-scopes, carrying one runnable load-and-inspect recipe through the machine classes with four quoted accessor families, the dataset-versus-description distinction worked through the DIII-D wall, and a runnable receipt-staleness audit comparing author date AND ancestry. Verified by execution against the DIII-D description at DD 4.1.1: 84 wall vertices, 24 active coils, 140 active elements, 76 poloidal probes, 44 flux loops.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260824T0645-residual" data-who="reckon-ship" data-when="2026-08-24T06:45:00Z">
+    <div class="r-comment-body">label-seed-residual-field is BLOCKED, deliberately and usefully, with implementation commit 7b578ae2 in place and no receipt written so no partial metric was banked. It corrected an orchestrator instruction in the process: it was advised to route through reference._machine_cache_store as efit_forward_parity_slice.py does, checked, and found that use is the DINA composition control only - both MAST frozen-six drivers initialise response_cache to None and _passive_inclusive_case constructs 938 section kernels on that miss, while the Nova user-data cache holds analytic-oracle, DINA solovev, exact-moment and ITER-description carriers but no MAST forward carrier. So the cache it was told to use does not exist for this lane. The required identity is now named, which is what makes a warming node possible: response identity 1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994, resolved-target digest 5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9, response shape 1126 by 101, 101 stored circuits, all six banked rows on that one identity. Measured forbidden cold cost before interruption: 48:07 CPU-saturated, still inside polygon_greens for the first response. It refused a second cold rebuild rather than violate the cached_machine rule in nova/equilibrium/AGENTS.md, which is why the cost is known rather than paid twice. mast-response-carrier-warm is dispatched against that identity.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

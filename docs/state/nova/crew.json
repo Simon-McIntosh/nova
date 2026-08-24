@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T08:23:34",
+  "updated": "2026-08-24T08:24:25",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -73,6 +73,13 @@
         "role": "implement",
         "session_id": "019fff44-ad0c-79d1-989e-0b3ae0bbf251",
         "created": "2026-08-12"
+      },
+      {
+        "id": "carrier-arm",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-24"
       },
       {
         "id": "catalog-census",
@@ -794,6 +801,13 @@
         "role": "implement",
         "session_id": "01a00a54-6e81-7761-85eb-33e193da78cc",
         "created": "2026-08-16"
+      },
+      {
+        "id": "support-order-arm",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-24"
       },
       {
         "id": "support-tare",
@@ -30399,6 +30413,6 @@
       }
     ],
     "holds": [],
-    "_version": 740
+    "_version": 742
   }
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T10:29:06",
+  "updated": "2026-08-24T17:52:30",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -89,6 +89,13 @@
         "created": "2026-08-24"
       },
       {
+        "id": "carrier-shift",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03476-64a7-7972-8496-1c742f9a80f8",
+        "created": "2026-08-24"
+      },
+      {
         "id": "catalog-census",
         "harness": "codex",
         "role": "implement",
@@ -142,6 +149,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a0325b-5d04-7a71-849b-95e82562d06c",
+        "created": "2026-08-24"
+      },
+      {
+        "id": "clip-surface-scout",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03471-92b4-71b1-80bf-7473d45df689",
         "created": "2026-08-24"
       },
       {
@@ -205,6 +219,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a0324b-9bc9-7ab3-ae12-f16189a03d4d",
+        "created": "2026-08-24"
+      },
+      {
+        "id": "determinism-scout",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03471-3d19-7a82-b151-befaa1228da1",
         "created": "2026-08-24"
       },
       {
@@ -362,6 +383,13 @@
         "created": "2026-08-12"
       },
       {
+        "id": "gauge-attribution",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03476-c7c6-7a33-a138-f8f0de18d785",
+        "created": "2026-08-24"
+      },
+      {
         "id": "geo-research",
         "harness": "codex",
         "role": "implement",
@@ -437,6 +465,13 @@
         "role": "test",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "iso-accuracy",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03476-a4d8-7470-96c5-770047c78ef6",
+        "created": "2026-08-24"
       },
       {
         "id": "kernel-gradient",
@@ -542,6 +577,13 @@
         "role": "implement",
         "session_id": "01a0307a-e108-76c1-b636-2a43d42a4503",
         "created": "2026-08-23"
+      },
+      {
+        "id": "margin-scout",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03471-cd31-7711-826a-67684761accd",
+        "created": "2026-08-24"
       },
       {
         "id": "moment-blocks",
@@ -30609,9 +30651,84 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260824T154408318193-clip-surface-reuse-map",
+        "plan": "curved-clip-global-surface",
+        "section": "\u00a72",
+        "node": "clip-surface-reuse-map",
+        "role": "implement",
+        "spec_level": "open",
+        "member": "clip-surface-scout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T15:44:12Z",
+        "completed_at": "2026-08-24T15:51:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 440,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 440,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "5acde3e08b61e1176000953a63b80593e949375a",
+        "commits": [
+          "7f2c046a"
+        ],
+        "changed_lines": {
+          "added": 140,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T154408318193-clip-surface-reuse-map/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03471-92b4-71b1-80bf-7473d45df689",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2989312,
+            "cached_input_tokens_cumulative": 2989312,
+            "input_tokens": 3168953,
+            "input_tokens_cumulative": 3168953,
+            "output_tokens": 17522,
+            "output_tokens_cumulative": 17522,
+            "reasoning_output_tokens": 5579,
+            "reasoning_output_tokens_cumulative": 5579
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 750
+    "_version": 763
   }
 }

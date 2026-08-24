@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="curved-clip-global-surface-landed">
+  <meta name="plan-evidence-for" content="curved-clip-global-surface">
+  <meta name="plan-title" content="Curved Clip from the Global Surface — execution record">
+  <meta name="plan-summary" content="Cumulative execution evidence for the curved-clip re-measurement: what the reuse map found already shipping, the completed two-sided bank of banked percentages, and the re-scored result.">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Curved Clip from the Global Surface — execution record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h1>Curved Clip from the Global Surface — execution record</h1>
+
+    <p>Execution evidence for <a href="/nova/curved-clip-global-surface">curved-clip-global-surface</a>.
+    One anchor per material result, updated as each node lands.</p>
+
+    <h2 id="reuse-map">Reuse map — the global-surface composition already ships</h2>
+
+    <p><strong>Node <code>clip-surface-reuse-map</code>, commit <code>7f2c046a</code>, gate PASSED,
+    2026-08-24.</strong> 140 lines at <code>scripts/clip_surface_reuse/report.md</code>; scope clean
+    at one file; required-string validation and <code>git diff --check</code> both pass.</p>
+
+    <p><strong>The finding corrects the plan's premise in the plan's favour.</strong> The plan was
+    drafted to take the clip curve from the global C² tensor spline instead of a per-cell
+    reconstruction. That composition is <em>already in production</em>:
+    <code>extract_flux_surface_geometry</code> reaches <code>_surface_clips</code>, which fits the
+    complete flux map with <code>fit_tensor_spline</code> and passes each fixed 4×4 Bernstein block
+    from <code>TensorBSpline.cell_coefficients</code> into the landed bicubic root, arc,
+    Green-theorem-moment and constrained-extremum machinery. The rejected centred-tangent producer
+    <code>_tensor_bicubic_coefficients</code> survives only behind the isolated legacy
+    <code>_clipped_surface_geometry</code> route, and the implementation has been centralised out of
+    <code>nova/transport/current_diffusion.py</code> into
+    <code>nova/equilibrium/flux_surface_extraction.py</code> since <code>47808904</code>. So the plan
+    authors no clip representation: it re-scores a curve source that already ships, against banks
+    taken from two superseded ones.</p>
+
+    <p>Inventory: 7 reusable capability groups, 4 global-spline entry points, 7 measurement harness
+    symbols, 6 fixed-shape consumer contracts, and 5 explicit no-candidate lines. Two of those
+    no-candidate lines are load-bearing. <code>Arc._fit_leverage</code> — the surviving sagitta —
+    is a three-point circular-fit conditioning diagnostic and is refused as a separatrix curve
+    authority. And no current test reports the <em>contour-to-TORAX</em> pairing directly, so the
+    measurement harness must compose it from <code>_contour_geometry</code>,
+    <code>_torax_geometry</code> and <code>_relative_error</code>, and must not estimate it by
+    subtracting percentage errors, because the sup-norm locations and the referee scales differ
+    between pairings.</p>
+
+    <h3 id="banked-percentages">The completed two-sided bank</h3>
+
+    <p>The plan quoted only one side of the ITER comparison. The map recovered both, from
+    <code>tests/test_transport_geometry_reference.py</code> at <code>47808904</code> and its parent.
+    <strong>Current characterisation constants have moved with later extraction changes, so these
+    historical figures must be quoted independently rather than read off the present tree.</strong></p>
+
+    <table>
+      <caption>Banked relative errors for the two superseded curve sources, to be quoted beside the
+        global-surface re-score</caption>
+      <thead>
+        <tr>
+          <th scope="col">Comparison</th>
+          <th scope="col">Straight polygonal clip</th>
+          <th scope="col">Local bicubic clip at <code>47808904</code></th>
+          <th scope="col">Gate or interpretation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>STEP clipped↔contour <em>vpr_face</em></td><td>16.46 % (1.646e−1)</td><td>18.14 % (1.8137e−1)</td><td>gate 3.92 %</td></tr>
+        <tr><td>STEP clipped↔contour <em>g1_face</em></td><td>9.78 % (9.776e−2)</td><td>22.31 % (2.2306e−1)</td><td>gate 6.20 %</td></tr>
+        <tr><td>ITER clipped↔TORAX <em>g2g3_over_rhon_face</em></td><td>2.63 % (2.628e−2)</td><td>2.96 % (2.9602e−2)</td><td>no regression in the bicubic characterisation</td></tr>
+        <tr><td>ITER clipped↔TORAX <em>g0_face</em></td><td>0.90 % (9.047e−3)</td><td>1.03 % (1.0296e−2)</td><td>no regression in the bicubic characterisation</td></tr>
+        <tr><td>ITER clipped↔TORAX <em>g1_face</em></td><td>2.08 % (2.082e−2)</td><td>2.36 % (2.3632e−2)</td><td>no regression in the bicubic characterisation</td></tr>
+        <tr><td>ITER clipped↔TORAX <em>g2_face</em></td><td>1.98 % (1.984e−2)</td><td>2.31 % (2.3136e−2)</td><td>no regression in the bicubic characterisation</td></tr>
+      </tbody>
+    </table>
+
+    <p>The fixed-shape contract is recorded as read-only for this work:
+    <code>TracedClippedSupports</code> keeps its field order and shapes,
+    <code>padded_polynomial_current_moments</code> is unchanged, and
+    <code>_SUPPORT_CAPACITY</code> stays at 8 against a banked STEP requirement of 5 vertices — the
+    capacity must not be widened, which is the repair that would otherwise reappear on the next
+    machine.</p>
+
+  </main>
+</body>
+</html>

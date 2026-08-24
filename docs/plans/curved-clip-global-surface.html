@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="curved-clip-global-surface">
   <meta name="plan-title" content="Curved Clip from the Global Surface — the one condition the prior refutation named">
   <meta name="plan-summary" content="Curved sagitta clips are built and validated and were refuted twice, both times because the curve came from a local per-cell reconstruction that converges to a different surface than the reference readers use. The prescription left behind was to take the curve from the global C2 tensor spline. That spline landed on 2026-08-21, so the condition is now met and the refutation is retestable.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort-hours" content="8.0">
   <meta name="plan-capability-version" content="1.0">
@@ -23,7 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-24">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="3">
+<meta name="plan-commits" content="7f2c046aa18659101e7960599b4308fc353ef906">
+<meta name="plan-artifacts" content="scripts/clip_surface_reuse/report.md">
+<meta name="plan-impl" content="0.5">
 </head>
 <body>
   <main class="plan-doc">
@@ -115,6 +118,20 @@
     This plan does not wait for the stronger form — the weaker one directly tests the prescription,
     and a negative there would close the question without the larger programme.</p>
 
+    <p><strong>Stronger than met: the composition already ships, and nobody has re-scored it.</strong>
+    The reuse map found that the production extraction path already does exactly what the
+    prescription asked. <code>extract_flux_surface_geometry</code> reaches
+    <code>_surface_clips</code>, which fits the complete flux map with
+    <code>fit_tensor_spline</code> and passes each fixed 4×4 Bernstein block from
+    <code>TensorBSpline.cell_coefficients</code> into the landed bicubic root, arc, Green-moment and
+    constrained-extremum machinery. The rejected centred-tangent producer,
+    <code>_tensor_bicubic_coefficients</code>, survives only behind the isolated legacy
+    <code>_clipped_surface_geometry</code> route. <strong>So this plan builds nothing: it re-scores a
+    curve source that is already in production against banks taken from two superseded ones.</strong>
+    The banked local-bicubic figures at <code>47808904</code> were measured on the local producer, and
+    the characterisation constants have moved with later extraction changes, so the historical numbers
+    must be quoted independently rather than read off the current constants.</p>
+
     <h2 id="s4">§4 — Re-measure, and gate on a real low-aspect-ratio equilibrium</h2>
 
     <p><strong>The gate is not the analytic oracle, and that is the most important sentence in this
@@ -180,6 +197,11 @@
     </article>
 </section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-20260824T1552-reusemap" data-who="reckon-ship" data-when="2026-08-24T15:52:00Z">
+    <div class="r-comment-body">clip-surface-reuse-map landed - commit 7f2c046a, merged, gate PASSED, 140 lines, scope clean at one file. IT CORRECTS THIS PLAN'S PREMISE IN THE PLAN'S OWN FAVOUR: the production path ALREADY takes the curve from the global tensor spline. extract_flux_surface_geometry reaches _surface_clips, which fits fit_tensor_spline over the complete map and passes each fixed 4x4 Bernstein block from TensorBSpline.cell_coefficients into the landed bicubic root, arc, Green-moment and constrained-extremum machinery, with the rejected centred-tangent _tensor_bicubic_coefficients surviving only behind the isolated legacy _clipped_surface_geometry route. The implementation was centralised out of nova/transport/current_diffusion.py into nova/equilibrium/flux_surface_extraction.py since 47808904. So the plan builds nothing and re-scores what already ships. 7 reusable capability groups, 4 global spline entry points, 7 measurement symbols, 6 fixed-shape contracts, 5 explicit no-candidate lines. THE MAP ALSO COMPLETED THE BANK: alongside the straight-chord STEP vpr 16.46 and g1 9.78 per cent and the local-bicubic 18.14 and 22.31, it recovered the ITER pair the plan quoted only one side of - straight 2.63 / 0.90 / 2.08 / 1.98 against local-bicubic 2.96 / 1.03 / 2.36 / 2.31 per cent, with the underlying constants 1.646e-1 and 9.776e-2 at 47808904's parent against 1.8137e-1 and 2.2306e-1 at 47808904, and ITER 2.628e-2 / 9.047e-3 / 2.082e-2 / 1.984e-2 against 2.9602e-2 / 1.0296e-2 / 2.3632e-2 / 2.3136e-2. It warns that current characterisation constants have moved with later extraction changes, so the historical numbers must be quoted independently rather than read off the tree. ONE GAP NAMED: no test reports contour-to-TORAX directly, so the third pairing must be composed in the harness from _contour_geometry, _torax_geometry and _relative_error, and explicitly NOT estimated by subtracting percentages, because the sup-norm locations and referee scales differ. Arc._fit_leverage is recorded as a circular-fit conditioning diagnostic and refused as a separatrix curve authority.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

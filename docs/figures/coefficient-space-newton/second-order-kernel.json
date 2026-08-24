@@ -1,0 +1,86 @@
+{
+  "outcome": {
+    "exact_second_order_weighted_edge_members_obtained": false,
+    "statement": "The existing closed weighted-edge reduction exposes constant and linear source-coordinate weights, but no quadratic endpoint primitives. No RR, RZ, or ZZ closed form was obtained in this extension; all three are evaluated by one fixed tensor-Gauss triangle rule and are explicitly reported as quadrature rows.",
+    "qualification": "This is an implementation result, not a proof that a higher-harmonic symbolic reduction cannot close. It establishes that the present weighted-edge-antiderivative family does not yet provide exact second-order members."
+  },
+  "weighted_second_order_members": {
+    "RR": {
+      "weight": "(R - R_c)^2",
+      "closed_form_obtained": false,
+      "evaluation": "quadrature",
+      "richardson_relative_error": 4.57916861849067e-11
+    },
+    "RZ": {
+      "weight": "(R - R_c)(Z - Z_c)",
+      "closed_form_obtained": false,
+      "evaluation": "quadrature",
+      "richardson_relative_error": 7.050415393364041e-09
+    },
+    "ZZ": {
+      "weight": "(Z - Z_c)^2",
+      "closed_form_obtained": false,
+      "evaluation": "quadrature",
+      "richardson_relative_error": 1.620304345203798e-10
+    }
+  },
+  "accuracy_pin": {
+    "method": "Conservative midpoint subdivision on the same rectangular cell at levels 6 and 7, followed by the second-order Richardson extrapolate (4 fine - coarse) / 3; errors are maximum absolute differences divided by the maximum absolute extrapolated value for each weight.",
+    "production_rule": "Order-10 tensor Gauss-Legendre rule under a Duffy triangle mapping.",
+    "cell": {
+      "centre_m": [3.0, 0.0],
+      "pitch_m": 0.16,
+      "shape": "rectangle"
+    },
+    "targets_m": {
+      "R": [2.72, 3.31, 4.2, 6.0],
+      "Z": [0.13, -0.21, 0.7, -1.4]
+    },
+    "existing_first_order_context": {
+      "G0": 4.2e-12,
+      "GR": 7.7e-10,
+      "GZ": 3.9e-09
+    }
+  },
+  "centroid_shift_identity": {
+    "statement": "A directly evaluated displaced source monopole was compared with the undisplaced value plus its source-position gradient and one-half its Hessian contraction. The gradient and Hessian columns were differentiated from the same exact traced filament kernel used for the direct evaluation.",
+    "cell_pitch_m": 0.12,
+    "displacement_direction_RZ": [0.8, -0.6],
+    "displacement_fraction_of_cell_pitch": [0.005, 0.01, 0.02, 0.04, 0.08],
+    "relative_residual": [
+      3.777310354600376e-10,
+      3.0164165967156516e-09,
+      2.4044649774262066e-08,
+      1.909797842021301e-07,
+      1.5285474799767777e-06
+    ],
+    "maximum_relative_residual": 1.5285474799767777e-06,
+    "fitted_residual_order": 2.9949469271896545,
+    "verdict": "pass: the residual is cubic in displacement, as required after retaining value, first moments, and second moments"
+  },
+  "cost": {
+    "cell_count": 2048,
+    "target_count": 256,
+    "three_column_coupling_bytes": 12582912,
+    "six_column_coupling_bytes": 25165824,
+    "coupling_memory_ratio_six_over_three": 2.0,
+    "three_column_contraction_milliseconds": 0.399916,
+    "six_column_contraction_milliseconds": 0.792449,
+    "per_evaluation_cost_ratio_six_over_three": 1.9815386231108532,
+    "measurement": "Median of 21 NumPy contractions after one warm evaluation; identical 256-target by 2048-cell count and float64 storage in both cases.",
+    "refinement_comparator": {
+      "interaction_build_ratio": 3.24,
+      "memory_ratio": 13.6,
+      "statement": "Six fixed columns use 2.0x coupling memory and 1.982x contraction time at unchanged cell count, versus the banked refinement charge of 3.24x interaction build and 13.6x memory."
+    }
+  },
+  "fixed_shape": {
+    "columns_per_cell": 6,
+    "quadrature_order": 8,
+    "data_dependent_cell_selection": false,
+    "jit_vmap_agreement": true,
+    "agreement_relative_tolerance": 8e-12,
+    "tested_shape": [3, 4, 6],
+    "statement": "Three cells were evaluated together under jit(vmap); every cell retained six coefficients and agreed with the host path."
+  }
+}

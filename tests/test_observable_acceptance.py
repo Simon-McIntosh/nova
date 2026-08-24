@@ -236,6 +236,67 @@ def test_batch_dependence_is_explicit_for_every_observable():
     }
 
 
+def test_repetition_difference_counts_bit_patterns_against_first_run():
+    baseline = np.array([0.0, 1.0, 2.0], dtype=np.float64)
+    signed_zero = baseline.copy()
+    signed_zero[0] = -0.0
+    next_float = baseline.copy()
+    next_float[1] = np.nextafter(1.0, 2.0)
+
+    result = batch_acceptance._repetition_difference(
+        np.stack([baseline, signed_zero, next_float])
+    )
+
+    assert result["reference_repetition"] == 1
+    assert result["comparison_count"] == 2
+    assert result["maximum_bitwise_unequal_element_count"] == 1
+    assert result["maximum_absolute_difference"] == np.nextafter(1.0, 2.0) - 1.0
+    assert result["maximum_relative_difference"] == (np.nextafter(1.0, 2.0) - 1.0) / 2.0
+    assert [row["bitwise_unequal_element_count"] for row in result["comparisons"]] == [
+        1,
+        1,
+    ]
+
+
+def test_lossless_repetition_arrays_put_repetition_before_case(tmp_path):
+    cases = []
+    for case_index in range(2):
+        batches = {}
+        for batch_size in (1, 4):
+            values = np.arange(3 * batch_size * 2, dtype=np.float64).reshape(
+                3, batch_size, 2
+            )
+            values += 100.0 * case_index + 10.0 * batch_size
+            batches[batch_size] = {
+                "flux": values.copy(),
+                "observables": {"label": values.copy()},
+            }
+        cases.append(
+            {
+                "case_id": f"case-{case_index}",
+                "reference": {"label": np.array([case_index, case_index + 1])},
+                "batches": batches,
+            }
+        )
+    output = tmp_path / "repetitions.npz"
+
+    manifest = batch_acceptance._write_repetition_arrays(
+        output, cases, {"label"}, (1, 4)
+    )
+
+    with np.load(output, allow_pickle=False) as arrays:
+        flux = arrays[manifest["terminal_flux"]["4"]["key"]]
+        labels = arrays[manifest["observables"]["label"]["4"]["key"]]
+        assert flux.shape == (3, 2, 4, 2)
+        assert np.array_equal(flux, labels)
+        assert arrays["case_ids"].tolist() == ["case-0", "case-1"]
+        assert arrays["repetitions"].tolist() == [1, 2, 3]
+    assert manifest["terminal_flux"]["4"]["axis_order"][:2] == [
+        "repetition",
+        "case",
+    ]
+
+
 def test_committed_receipt_covers_two_real_batch_sizes_and_all_bounds():
     receipt = json.loads(batch_acceptance.DEFAULT_OUTPUT.read_text(encoding="utf-8"))
     results = receipt["batch_results"]
@@ -264,3 +325,46 @@ def test_committed_receipt_covers_two_real_batch_sizes_and_all_bounds():
     assert receipt["repetition_stability"]["repetition_count"] == len(
         receipt["measurement_repetitions"]
     )
+
+
+def test_committed_state_receipt_retains_all_h200_repetitions_losslessly():
+    receipt = json.loads(
+        batch_acceptance.DEFAULT_STATE_OUTPUT.read_text(encoding="utf-8")
+    )
+
+    assert receipt["status"] == "complete"
+    assert receipt["backend"]["platform"] == "gpu"
+    assert "H200" in receipt["backend"]["device_kind"]
+    assert receipt["backend"]["precision"] == "float64"
+    assert receipt["allocation"]["slurm_job_id"]
+    assert receipt["measurement_contract"]["case_count"] == 6
+    assert receipt["measurement_contract"]["registered_observable_count"] == 69
+    assert receipt["measurement_contract"]["batch_sizes"] == [1, 4]
+    assert receipt["measurement_contract"]["repetition_count"] >= 3
+    assert len(receipt["case_results"]) == 12
+    assert all(len(row["observables"]) == 69 for row in receipt["case_results"])
+    assert all(
+        row["state_verdict"] in {"STATE_REPRODUCIBLE", "STATE_VARIES"}
+        for row in receipt["case_results"]
+    )
+    assert all(row["state"]["comparison_count"] >= 2 for row in receipt["case_results"])
+    assert len(receipt["acceptance_repetitions"]) >= 3
+    for change in receipt["pass_status_changes"]:
+        assert "maximum_absolute_value_by_repetition" in change
+        if change["criterion_kind"] == "banked_dual_envelope":
+            assert "absolute_bound" in change
+            assert "relative_bound" in change
+
+    array_path = batch_acceptance.HERE / receipt["array_artifact"]["path"]
+    with np.load(array_path, allow_pickle=False) as arrays:
+        assert arrays["case_ids"].shape == (6,)
+        assert arrays["repetitions"].shape[0] >= 3
+        manifest = receipt["array_artifact"]["manifest"]
+        for batch_size in (1, 4):
+            flux = arrays[manifest["terminal_flux"][str(batch_size)]["key"]]
+            assert flux.shape[:3] == (
+                receipt["measurement_contract"]["repetition_count"],
+                6,
+                batch_size,
+            )
+        assert len(manifest["observables"]) == 69

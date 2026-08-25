@@ -1,0 +1,459 @@
+{
+  "arms": {
+    "mixed_arm": {
+      "candidate_count": 5,
+      "candidate_table": [
+        {
+          "coordinate_m": [
+            0.17538427808307588,
+            0.022013545800514473
+          ],
+          "finite_fields_valid": true,
+          "fitted_as_saddle": true,
+          "fitted_null_type": 0.0,
+          "flux_wb": -0.12530565851631342,
+          "in_vessel_selector_eligible": false,
+          "index": 0,
+          "inside_operator_wall_polygon": false,
+          "normalized_flux_operand": 0.46845102019330365,
+          "production_selector_eligible": true,
+          "selected_after_vessel_filter": false,
+          "selected_by_production": false
+        },
+        {
+          "coordinate_m": [
+            0.4654222108295216,
+            -1.8192616189296464
+          ],
+          "finite_fields_valid": true,
+          "fitted_as_saddle": true,
+          "fitted_null_type": 0.0,
+          "flux_wb": -0.0169366214025433,
+          "in_vessel_selector_eligible": false,
+          "index": 1,
+          "inside_operator_wall_polygon": false,
+          "normalized_flux_operand": 0.3500795369876293,
+          "production_selector_eligible": true,
+          "selected_after_vessel_filter": false,
+          "selected_by_production": false
+        },
+        {
+          "coordinate_m": [
+            0.46252017254143946,
+            1.8036925839708253
+          ],
+          "finite_fields_valid": true,
+          "fitted_as_saddle": true,
+          "fitted_null_type": 0.0,
+          "flux_wb": -0.015207047473228714,
+          "in_vessel_selector_eligible": false,
+          "index": 2,
+          "inside_operator_wall_polygon": false,
+          "normalized_flux_operand": 0.34819032364053737,
+          "production_selector_eligible": true,
+          "selected_after_vessel_filter": false,
+          "selected_by_production": true
+        },
+        {
+          "coordinate_m": [
+            0.5271348763700971,
+            -1.1934503726049983
+          ],
+          "finite_fields_valid": true,
+          "fitted_as_saddle": true,
+          "fitted_null_type": 0.0,
+          "flux_wb": -0.11435284864509407,
+          "in_vessel_selector_eligible": true,
+          "index": 3,
+          "inside_operator_wall_polygon": true,
+          "normalized_flux_operand": 0.4564872675914893,
+          "production_selector_eligible": true,
+          "selected_after_vessel_filter": false,
+          "selected_by_production": false
+        },
+        {
+          "coordinate_m": [
+            0.5526016041428223,
+            1.2740427974363968
+          ],
+          "finite_fields_valid": true,
+          "fitted_as_saddle": true,
+          "fitted_null_type": 0.0,
+          "flux_wb": -0.09466841630521576,
+          "in_vessel_selector_eligible": true,
+          "index": 4,
+          "inside_operator_wall_polygon": true,
+          "normalized_flux_operand": 0.43498596505904236,
+          "production_selector_eligible": true,
+          "selected_after_vessel_filter": true,
+          "selected_by_production": false
+        }
+      ],
+      "components_at_in_vessel_selected_level": {
+        "axis_component_label": 3,
+        "axis_to_classified_cell_distance_m": 0.044146600884222224,
+        "boundary_flux_wb": -0.09466841630521576,
+        "classification_offset_fraction_of_flux_range": 0.0002,
+        "classification_offset_wb": 0.000274767340947834,
+        "confined_component_count": 5,
+        "private_component_area_m2": 0.2121875001466833,
+        "private_component_count": 4,
+        "wall_component_label": 4,
+        "wall_in_axis_component": false,
+        "wall_in_private_component": true,
+        "wall_to_classified_cell_distance_m": 0.02760257858142401
+      },
+      "components_at_production_selected_level": {
+        "axis_component_label": 1,
+        "axis_to_classified_cell_distance_m": 0.044146600884222224,
+        "boundary_flux_wb": -0.015207047473228714,
+        "classification_offset_fraction_of_flux_range": 0.0002,
+        "classification_offset_wb": 0.000274767340947834,
+        "confined_component_count": 1,
+        "private_component_area_m2": 0.0,
+        "private_component_count": 0,
+        "wall_component_label": 1,
+        "wall_in_axis_component": true,
+        "wall_in_private_component": false,
+        "wall_to_classified_cell_distance_m": 0.8323286579047656
+      },
+      "connectivity_admission": {
+        "admitted_candidate_count": 3,
+        "candidate_count_before_capacity": 3,
+        "candidates": [
+          {
+            "admitted": true,
+            "boundary_snr": 8.229456718693498,
+            "class_margin": 12.431702403283033,
+            "confidence": 0.7769814002051896,
+            "coordinate_m": [
+              0.5617421912862784,
+              1.2762901895928163
+            ],
+            "fitted_null_type": 0.0,
+            "flux_wb": -0.0948642933923858,
+            "resolved": false,
+            "root_support_cell": 0.7238401174545288,
+            "state": "unresolved"
+          },
+          {
+            "admitted": true,
+            "boundary_snr": 10.869755786959594,
+            "class_margin": 11.891208603125099,
+            "confidence": 0.7432005376953187,
+            "coordinate_m": [
+              0.5314867497159467,
+              -1.2010794305137487
+            ],
+            "fitted_null_type": 0.0,
+            "flux_wb": -0.11436201207983765,
+            "resolved": false,
+            "root_support_cell": 0.7771011590957642,
+            "state": "unresolved"
+          },
+          {
+            "admitted": true,
+            "boundary_snr": 3.5727382234522596,
+            "class_margin": 1.8772519853984106,
+            "confidence": 0.11732824908740067,
+            "coordinate_m": [
+              0.1754866150036265,
+              0.015194236198942132
+            ],
+            "fitted_null_type": 0.0,
+            "flux_wb": -0.12527551993584116,
+            "resolved": false,
+            "root_support_cell": 0.1215539500117302,
+            "state": "unresolved"
+          }
+        ],
+        "discarded_score_upper_bound": null,
+        "overflow": false,
+        "retained_candidate_count": 3
+      },
+      "in_vessel_height_band_m": [
+        -1.1934503726049983,
+        1.2740427974363968
+      ],
+      "in_vessel_selection": {
+        "coordinate_m": [
+          0.5526016041428223,
+          1.2740427974363968
+        ],
+        "flux_wb": -0.09466841630521576,
+        "index": 4,
+        "normalized_flux_operand": 0.43498596505904236
+      },
+      "in_vessel_shadow_verdict": "SHADOWED",
+      "production_height_band_m": [
+        -1.8192616189296464,
+        1.8036925839708253
+      ],
+      "production_selection": {
+        "coordinate_m": [
+          0.46252017254143946,
+          1.8036925839708253
+        ],
+        "index": 2,
+        "inside_operator_wall_polygon": false,
+        "lower_than_selected_in_vessel_by": 0.08679564141850499,
+        "normalized_flux_operand": 0.34819032364053737,
+        "rule": "argmin(normalized_flux_operand) over finite typed saddles"
+      },
+      "production_shadow_verdict": "ADMITTED",
+      "selection_status": "selected_typed_saddle_with_connectivity_support",
+      "verdict_flips_to_shadowed": true,
+      "wall_coordinate_m": [
+        0.2800000011920929,
+        1.6409891353985715
+      ],
+      "wall_flux_wb": -0.022286549422085092,
+      "wall_inside_in_vessel_height_band": false,
+      "wall_inside_production_height_band": true,
+      "wall_normalized_flux_before_shadow": 0.3559232625718283
+    },
+    "pure_arm": {
+      "candidate_count": 5,
+      "candidate_table": [
+        {
+          "coordinate_m": [
+            0.17548220509210422,
+            -0.014056671317487899
+          ],
+          "finite_fields_valid": true,
+          "fitted_as_saddle": true,
+          "fitted_null_type": 0.0,
+          "flux_wb": -0.12537884562411505,
+          "in_vessel_selector_eligible": false,
+          "index": 0,
+          "inside_operator_wall_polygon": false,
+          "normalized_flux_operand": 0.472456667871076,
+          "production_selector_eligible": true,
+          "selected_after_vessel_filter": false,
+          "selected_by_production": false
+        },
+        {
+          "coordinate_m": [
+            0.4500099684729799,
+            -1.817467111402243
+          ],
+          "finite_fields_valid": true,
+          "fitted_as_saddle": true,
+          "fitted_null_type": 0.0,
+          "flux_wb": -0.015153877800157861,
+          "in_vessel_selector_eligible": false,
+          "index": 1,
+          "inside_operator_wall_polygon": false,
+          "normalized_flux_operand": 0.3511402755578827,
+          "production_selector_eligible": true,
+          "selected_after_vessel_filter": false,
+          "selected_by_production": true
+        },
+        {
+          "coordinate_m": [
+            0.5423736361132946,
+            -1.223072499546232
+          ],
+          "finite_fields_valid": true,
+          "fitted_as_saddle": true,
+          "fitted_null_type": 0.0,
+          "flux_wb": -0.10603566260343686,
+          "in_vessel_selector_eligible": true,
+          "index": 2,
+          "inside_operator_wall_polygon": true,
+          "normalized_flux_operand": 0.45116707054798694,
+          "production_selector_eligible": true,
+          "selected_after_vessel_filter": false,
+          "selected_by_production": false
+        },
+        {
+          "coordinate_m": [
+            0.5444663022219217,
+            1.2491324433637334
+          ],
+          "finite_fields_valid": true,
+          "fitted_as_saddle": true,
+          "fitted_null_type": 0.0,
+          "flux_wb": -0.10235202822469194,
+          "in_vessel_selector_eligible": true,
+          "index": 3,
+          "inside_operator_wall_polygon": true,
+          "normalized_flux_operand": 0.44711276921996196,
+          "production_selector_eligible": true,
+          "selected_after_vessel_filter": true,
+          "selected_by_production": false
+        },
+        {
+          "coordinate_m": [
+            1.6873632281353028,
+            -0.7941951070191566
+          ],
+          "finite_fields_valid": true,
+          "fitted_as_saddle": true,
+          "fitted_null_type": 0.0,
+          "flux_wb": -0.7024012340384884,
+          "in_vessel_selector_eligible": false,
+          "index": 4,
+          "inside_operator_wall_polygon": false,
+          "normalized_flux_operand": 1.1075421283465663,
+          "production_selector_eligible": true,
+          "selected_after_vessel_filter": false,
+          "selected_by_production": false
+        }
+      ],
+      "components_at_in_vessel_selected_level": {
+        "axis_component_label": 3,
+        "axis_to_classified_cell_distance_m": 0.016499409968033483,
+        "boundary_flux_wb": -0.10235202822469194,
+        "classification_offset_fraction_of_flux_range": 0.0002,
+        "classification_offset_wb": 0.0002726608159676388,
+        "confined_component_count": 5,
+        "private_component_area_m2": 0.2879687501990702,
+        "private_component_count": 4,
+        "wall_component_label": 2,
+        "wall_in_axis_component": false,
+        "wall_in_private_component": true,
+        "wall_to_classified_cell_distance_m": 0.025991247758499588
+      },
+      "components_at_production_selected_level": {
+        "axis_component_label": 1,
+        "axis_to_classified_cell_distance_m": 0.016499409968033483,
+        "boundary_flux_wb": -0.015153877800157861,
+        "classification_offset_fraction_of_flux_range": 0.0002,
+        "classification_offset_wb": 0.0002726608159676388,
+        "confined_component_count": 1,
+        "private_component_area_m2": 0.0,
+        "private_component_count": 0,
+        "wall_component_label": 1,
+        "wall_in_axis_component": true,
+        "wall_in_private_component": false,
+        "wall_to_classified_cell_distance_m": 0.9267087705882354
+      },
+      "connectivity_admission": {
+        "admitted_candidate_count": 3,
+        "candidate_count_before_capacity": 3,
+        "candidates": [
+          {
+            "admitted": true,
+            "boundary_snr": 8.479789720598022,
+            "class_margin": 11.888741160674002,
+            "confidence": 0.7430463225421251,
+            "coordinate_m": [
+              0.5433794148102175,
+              -1.2322901519279064
+            ],
+            "fitted_null_type": 0.0,
+            "flux_wb": -0.10609784313268009,
+            "resolved": false,
+            "root_support_cell": 0.9732688069343567,
+            "state": "unresolved"
+          },
+          {
+            "admitted": true,
+            "boundary_snr": 6.6685707875490525,
+            "class_margin": 11.83088512513242,
+            "confidence": 0.7394303203207763,
+            "coordinate_m": [
+              0.5482534441255474,
+              1.2493801738643762
+            ],
+            "fitted_null_type": 0.0,
+            "flux_wb": -0.10235479897030685,
+            "resolved": false,
+            "root_support_cell": 0.053665079176425934,
+            "state": "unresolved"
+          },
+          {
+            "admitted": true,
+            "boundary_snr": 3.750812496358817,
+            "class_margin": 1.9029555424778364,
+            "confidence": 0.11893472140486477,
+            "coordinate_m": [
+              0.17523888258731696,
+              -0.030933946667911646
+            ],
+            "fitted_null_type": 0.0,
+            "flux_wb": -0.12519909882075544,
+            "resolved": false,
+            "root_support_cell": 0.7525280714035034,
+            "state": "unresolved"
+          }
+        ],
+        "discarded_score_upper_bound": null,
+        "overflow": false,
+        "retained_candidate_count": 3
+      },
+      "in_vessel_height_band_m": [
+        -1.223072499546232,
+        1.2491324433637334
+      ],
+      "in_vessel_selection": {
+        "coordinate_m": [
+          0.5444663022219217,
+          1.2491324433637334
+        ],
+        "flux_wb": -0.10235202822469194,
+        "index": 3,
+        "normalized_flux_operand": 0.44711276921996196
+      },
+      "in_vessel_shadow_verdict": "SHADOWED",
+      "production_height_band_m": [
+        -1.817467111402243,
+        1.2491324433637334
+      ],
+      "production_selection": {
+        "coordinate_m": [
+          0.4500099684729799,
+          -1.817467111402243
+        ],
+        "index": 1,
+        "inside_operator_wall_polygon": false,
+        "lower_than_selected_in_vessel_by": 0.09597249366207927,
+        "normalized_flux_operand": 0.3511402755578827,
+        "rule": "argmin(normalized_flux_operand) over finite typed saddles"
+      },
+      "production_shadow_verdict": "ADMITTED",
+      "selection_status": "selected_typed_saddle_with_connectivity_support",
+      "verdict_flips_to_shadowed": true,
+      "wall_coordinate_m": [
+        0.2800000011920929,
+        -1.638011343762036
+      ],
+      "wall_flux_wb": -0.021725563574233234,
+      "wall_inside_in_vessel_height_band": false,
+      "wall_inside_production_height_band": true,
+      "wall_normalized_flux_before_shadow": 0.3583732394250173
+    }
+  },
+  "artifact": "MAST terminal typed-saddle vessel-containment diagnosis",
+  "operator_wall_coordinate": {
+    "containment_method": "matplotlib.path.Path.contains_points over operator.wall.coordinate with a 1e-12 m boundary radius",
+    "first_equals_last": true,
+    "node_count": 37,
+    "radial_extent_m": [
+      0.19524440169334412,
+      1.899999976158142
+    ],
+    "vertical_extent_m": [
+      -1.8250000476837158,
+      1.8250000476837158
+    ]
+  },
+  "response_carrier_direct_builder_entries": 0,
+  "shot": 21983,
+  "slice_index": 35,
+  "source_audit": {
+    "separate_connectivity_detector": "nova/equilibrium/connectivity_boundary.py xpoint_candidates does receive inside_limiter, but that connectivity-local table does not replace the supplied typed candidates used by the class selector",
+    "typed_candidate_producer": "nova/equilibrium/forward_operator.py _FixedDesignNull2D receives only sampled flux and fixed grid stencils; it has no vessel mask",
+    "typed_selector": "nova/equilibrium/connectivity_boundary.py selects supplied typed candidates with argmin(normalized level); no wall polygon or inside_material operand participates",
+    "typed_selector_polygon_containment_found": false
+  },
+  "summary": {
+    "arms_where_admission_flips_to_shadowed": 2,
+    "arms_where_detector_produced_but_selector_passed_over_pinch": 2,
+    "arms_with_genuine_in_vessel_pinch_candidate": 2,
+    "arms_with_zero_private_region_at_production_level": 2,
+    "conclusion": "Both detectors produced genuine in-vessel pinch saddles, but the uncontained normalized-level argmin selected a lower-level out-of-vessel saddle. Filtering the typed table by the operator wall polygon narrows both height bands and flips both wall extrema from ADMITTED to SHADOWED. The banked CORRECT_ADMISSION control was therefore admitted only because a spurious out-of-vessel saddle widened the height band.",
+    "zero_private_region_explanation": "At the spuriously low out-of-vessel saddle level, the inward-offset confined mask has only the magnetic-axis component. With no other nonzero component label, private_component_count is 0 and its summed cell area is exactly 0.0 m2."
+  }
+}

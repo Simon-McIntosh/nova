@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T16:24:35",
+  "updated": "2026-08-25T16:41:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -35843,9 +35843,102 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T143100619425-plan-summary-rewrite",
+        "plan": "mast-catalog-gpu-solve",
+        "section": "\u00a71",
+        "node": "plan-summary-rewrite",
+        "node_definition": {
+          "done_when": "Enumerate the violators yourself rather than trusting a count: run reckon audit-doc over every plan and doc under docs/ including the flat-layout docs/mast-catalog-gpu-solve.html, and report how many carry a summary-too-long finding. As of dispatch it was 49 of 52 files in docs/plans plus any others you find. For each, read the existing summary and enough of the plan - title, first section, and the landed-summary card if one exists - to compress it faithfully, then write a replacement of AT MOST 160 characters. FAITHFULNESS IS THE CONSTRAINT THAT MATTERS: do not truncate, do not drop the plan claim in favour of a category label, and do not invent a claim the plan does not make. Where a summary asserts a measured result, keep the result and drop the elaboration; where it asserts several things, keep the one the plan is actually about. Preserve any explicit retraction or withdrawal - several summaries were corrected today and a rewrite must not quietly restore a withdrawn claim. Write through the reckon MCP edit_plan with a per-plan expected_version if that tool is available to you. If it is not, edit ONLY the plan-summary meta content in place and leave every other meta untouched, plan-version included, since the server owns it. Change no prose, no status, no impl, no followups. VERIFY: after the rewrite every touched file passes reckon audit-doc with zero summary-too-long findings AND no new findings of any severity - quote the before and after finding counts. DELIVER A REVIEW TABLE in the manifest with one row per plan: slug, old character count, new character count, and the new summary text in full, so 49 rewrites can be audited without opening 49 files. Work in alphabetical slug order. If the time fence approaches, commit what is complete, and state exactly which slugs remain so a second node finishes the set - a partial set reported honestly is wanted over a rushed full pass.",
+          "estimated_hours": 5.0,
+          "goal": "Rewrite every reckon plan summary that exceeds the 160-character limit into a compliant summary that preserves the plan substantive claim, since the limit was tightened deliberately because the existing summaries were unreadable.",
+          "id": "plan-summary-rewrite",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/plan-summary-rewrite.md",
+          "plan": "mast-catalog-gpu-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/plans",
+            "docs/mast-catalog-gpu-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "doc-pins",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T14:31:10Z",
+        "completed_at": "2026-08-25T14:40:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 558,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 558,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "fa44f564f573a5d3b1ce75f803d8663eb49d9054",
+        "commits": [
+          "31194e40beab12b218e2af245935776894deb285"
+        ],
+        "changed_lines": {
+          "added": 50,
+          "removed": 50,
+          "files": 50
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/plan-summary-rewrite.md",
+        "scope_changed": false,
+        "session_id": "01a03955-1050-7dd3-99b9-23998d3ca4a2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2910464,
+            "cached_input_tokens_cumulative": 2910464,
+            "input_tokens": 3040450,
+            "input_tokens_cumulative": 3040450,
+            "output_tokens": 17864,
+            "output_tokens_cumulative": 17864,
+            "reasoning_output_tokens": 5302,
+            "reasoning_output_tokens_cumulative": 5302
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 863
+    "_version": 864
   }
 }

@@ -55,7 +55,11 @@ def _validate_registration(
         raise ValueError("observable registration contains duplicate names")
     for name, row in by_name.items():
         kind = row.get("criterion_kind")
-        if kind not in {"exact_equality", "banked_dual_envelope"}:
+        if kind not in {
+            "exact_equality",
+            "banked_absolute_envelope",
+            "banked_dual_envelope",
+        }:
             raise ValueError(f"{name} has unsupported criterion kind {kind!r}")
         if (
             kind == "banked_dual_envelope"
@@ -66,6 +70,17 @@ def _validate_registration(
             <= row.keys()
         ):
             raise ValueError(f"{name} has an incomplete dual envelope")
+        if (
+            row.get("has_nonzero_continuum_value") is False
+            and "absolute_bound" in row
+            and "relative_bound" in row
+        ):
+            raise ValueError(
+                f"{name} has no nonzero continuum value and cannot carry a "
+                "relative criterion alongside its absolute bound"
+            )
+        if kind == "banked_absolute_envelope" and "absolute_bound" not in row:
+            raise ValueError(f"{name} has an incomplete absolute envelope")
     return by_name
 
 
@@ -113,6 +128,10 @@ def _observable_result(
             if registration["criterion_kind"] == "exact_equality":
                 passes = bool(np.array_equal(member_left, member_right, equal_nan=True))
                 ratio = 0.0 if passes else float("inf")
+            elif registration["criterion_kind"] == "banked_absolute_envelope":
+                absolute_bound = float(registration["absolute_bound"])
+                ratio = _bound_ratio(absolute, absolute_bound)
+                passes = bool(absolute <= absolute_bound)
             else:
                 absolute_bound = float(registration["absolute_bound"])
                 relative_bound = float(registration["relative_bound"])
@@ -157,7 +176,9 @@ def _observable_result(
         "maximum_bound_ratio": maximum_ratio if np.isfinite(maximum_ratio) else None,
         "cases": case_rows,
     }
-    if registration["criterion_kind"] == "banked_dual_envelope":
+    if registration["criterion_kind"] == "banked_absolute_envelope":
+        result.update(absolute_bound=float(registration["absolute_bound"]))
+    elif registration["criterion_kind"] == "banked_dual_envelope":
         result.update(
             absolute_bound=float(registration["absolute_bound"]),
             relative_bound=float(registration["relative_bound"]),

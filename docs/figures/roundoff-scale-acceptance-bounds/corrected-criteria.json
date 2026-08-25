@@ -1,0 +1,124 @@
+{
+  "artifact": "corrected_zero_reference_acceptance_criteria",
+  "status": "complete",
+  "registration_rule": {
+    "rule": "A bound whose scored quantity has no nonzero continuum value carries no relative criterion when an absolute criterion is present.",
+    "enforced_by": "nova.equilibrium.observable_acceptance._validate_registration",
+    "zero_reference_criterion_kind": "banked_absolute_envelope"
+  },
+  "corrected_criteria": [
+    {
+      "observable": "conservation.divergence_b",
+      "has_nonzero_continuum_value": false,
+      "criterion_kind": "banked_absolute_envelope",
+      "absolute_bound": 9.83631031098047e-16,
+      "derivation": {
+        "kind": "existing_absolute_registration_already_satisfied",
+        "steps": [
+          "The continuum identity is zero, so there is no nonzero reference for a relative criterion.",
+          "The existing independently registered absolute bound is 9.83631031098047e-16.",
+          "The banked 21978/35 width-1 exemplar values are 2.220446049250313e-16, 6.106226635438361e-16 and 5.551115123125783e-16.",
+          "All three values are below 9.83631031098047e-16, so the absolute registration is retained unchanged and the relative registration is removed."
+        ],
+        "banked_exemplar": {
+          "case_id": "21978/35",
+          "batch_size": 1,
+          "values": [
+            2.220446049250313e-16,
+            6.106226635438361e-16,
+            5.551115123125783e-16
+          ],
+          "all_below_absolute_bound": true,
+          "verdicts_before_correction": [true, false, false]
+        },
+        "uses_achieved_residual_to_choose_bound": false
+      }
+    },
+    {
+      "observable": "conservation.divergence_j",
+      "has_nonzero_continuum_value": false,
+      "criterion_kind": "banked_absolute_envelope",
+      "absolute_bound": 0.0009042140976404076,
+      "derivation": {
+        "kind": "second_order_non_commuting_ring_mesh_truncation",
+        "operator": "least-squares quadratic derivative on the production ring mesh",
+        "discretisation_order": 2,
+        "steps": [
+          "The continuum divergence identity is zero, but the least-squares ring derivative operators do not commute, so their discrete residual is truncation rather than a relative error against a nonzero reference.",
+          "The independent stencil contract measures divergence_j = 7.315873469501451e-05 at 91 nodes over 3.2 m, giving reference pitch h_ref = 3.2 / (91 - 1) = 0.035555555555555556 m.",
+          "The frozen MAST acceptance cohort uses the stored 65-point axes at stride 2, giving 33 by 33 nodes and spacings 0.060624998062849045 m and 0.125 m; the conservative production pitch is h = 0.125 m.",
+          "For second-order truncation, T(h) = T(h_ref) * (h / h_ref)^2.",
+          "Therefore T(0.125) = 7.315873469501451e-05 * (0.125 / 0.035555555555555556)^2 = 0.0009042140976404076."
+        ],
+        "reference_measurement": {
+          "source": "tests/test_equilibrium_stencil_mesh.py::test_the_divergence_floor_is_truncation_and_falls_with_the_mesh",
+          "node_count_per_axis": 91,
+          "extent_m": 3.2,
+          "pitch_m": 0.035555555555555556,
+          "relative_divergence_j": 7.315873469501451e-05
+        },
+        "production_mesh": {
+          "axis_node_count": [33, 33],
+          "radial_spacing_m": 0.060624998062849045,
+          "vertical_spacing_m": 0.125,
+          "conservative_pitch_m": 0.125
+        },
+        "current_too_tight_absolute_bound": 1.3703738919113413e-10,
+        "largest_observed_acceptance_difference": 1.4551915228366852e-10,
+        "maximum_observable_magnitude": 4.656612873077393e-10,
+        "uses_achieved_residual_to_choose_bound": false,
+        "observations_used_only_after_registration_for_rescore": true
+      }
+    }
+  ],
+  "frozen_cohort_rescore": {
+    "source": "docs/figures/derived-observable-parity/integrated-acceptance.json",
+    "case_count": 6,
+    "registered_widths": [1, 4],
+    "registered_bound_count": 69,
+    "banked_pass_count": 67,
+    "results": [
+      {
+        "batch_size": 1,
+        "observable_pass_count": 69,
+        "observable_fail_count": 0,
+        "case_observable_evaluation_pass_count": 414,
+        "case_observable_evaluation_fail_count": 0,
+        "member_observable_evaluation_pass_count": 414,
+        "member_observable_evaluation_fail_count": 0,
+        "passes": true
+      },
+      {
+        "batch_size": 4,
+        "observable_pass_count": 69,
+        "observable_fail_count": 0,
+        "case_observable_evaluation_pass_count": 414,
+        "case_observable_evaluation_fail_count": 0,
+        "member_observable_evaluation_pass_count": 1656,
+        "member_observable_evaluation_fail_count": 0,
+        "passes": true
+      }
+    ],
+    "changed_verdicts": [
+      {
+        "observable": "conservation.divergence_b",
+        "before": "failed in banked invocations when the relative envelope was crossed despite satisfying the absolute envelope",
+        "after": "passes at both registered widths under its unchanged absolute envelope",
+        "reason": "The scored continuum identity has no nonzero value, so the relative criterion was invalid and was removed."
+      },
+      {
+        "observable": "conservation.divergence_j",
+        "before": "failed under the relative envelope and the too-tight 1.3703738919113413e-10 absolute envelope",
+        "after": "passes at both registered widths under the independently derived 0.0009042140976404076 absolute truncation envelope",
+        "reason": "The non-commuting ring-mesh stencil has a second-order truncation floor derived from its independent stencil measurement and the frozen cohort mesh."
+      }
+    ]
+  },
+  "evidence_sources": [
+    "docs/figures/roundoff-scale-acceptance-bounds/bound-classification.json",
+    "docs/figures/derived-observable-parity/integrated-acceptance.json",
+    "docs/figures/same-device-label-determinism/executable-boundary-arms.json",
+    "tests/test_equilibrium_stencil_mesh.py",
+    "benchmarks/efit_forward_parity_slice.py"
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T12:57:44",
+  "updated": "2026-08-25T14:02:41",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -35002,9 +35002,195 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T115218500421-reeb-component-labelling",
+        "plan": "primary-xpoint-evidence",
+        "section": "\u00a72",
+        "node": "reeb-component-labelling",
+        "node_definition": {
+          "done_when": "The production shadow test is a bounding-box test in one coordinate: connectivity_boundary.py takes x_height_min and x_height_max over the typed saddle heights and sets class_wall_shadowed when the wall point Z falls outside that band, using no connectivity at all. So a wall extremum inside the band but in private flux is admitted, and one outside the band but genuinely limiting is shadowed. Deliver a device kernel labelling all components plus a private mask derived from it: a cell is private when confined at the binding level but not carrying the axis component label. Extend the existing flood_fill_core_with_steps structure rather than writing a new algorithm - it fills row segments then column segments with associative scans that double their reach inside a lax.while_loop to a fixpoint, so propagating a minimum integer label instead of a boolean keeps the cost structure and the batchability. The module docstring already names this as design intent, calling the kernel the GPU inner loop for a batched corpus labeller meant to replace scipy.ndimage.label, so read that host path first and reuse its semantics. Three concrete measures. ONE: the derived private mask reproduces the vertical rule verdict on all four banked rejected terminals of 21978/35 and 22086/43 and on the admitted control 21983/35, quoting each verdict. TWO: exhibit at least one constructed configuration where the two criteria return DIFFERENT verdicts, and state which coordinate and which component made them differ - either a wall point inside the height band sitting in a component disconnected from the axis, or a wall point outside the band sitting in the axis component. If after honest effort no such configuration can be constructed, report that as the finding and say what it implies about the height band being an adequate proxy. THREE: quote fixpoint iteration count and wall-clock milliseconds for the labelling kernel against the existing boolean kernel at the production grid size, both measured in the same process. Do NOT switch production over here: land the kernel, the mask and the comparison, leaving the cutover to a separate decision.",
+          "estimated_hours": 4.0,
+          "goal": "Replace the vertical private-flux shadow with a topological criterion by extending the flood-fill kernel to label EVERY connected component of the confined cell map rather than only the axis component, so a private mask follows from connectivity instead of from a one-coordinate height band.",
+          "id": "reeb-component-labelling",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/reeb-component-labelling.md",
+          "plan": "primary-xpoint-evidence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/flux_surface_connectivity.py",
+            "tests/test_flux_surface_connectivity.py",
+            "docs/figures/primary-xpoint-evidence/reeb-component-labelling.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "flood-fill",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T11:52:28Z",
+        "completed_at": "2026-08-25T12:01:14Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 526,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 526,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "e34aa3618ebf69e4d6d01a1ab0fece15091879a9",
+        "commits": [
+          "7a7bd3651c9ff84135eed6544d10ce1d8f72f440"
+        ],
+        "changed_lines": {
+          "added": 266,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/reeb-component-labelling.md",
+        "scope_changed": false,
+        "session_id": "01a038c3-c3f9-7860-8384-341594b1f3b3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3375616,
+            "cached_input_tokens_cumulative": 3375616,
+            "input_tokens": 3507216,
+            "input_tokens_cumulative": 3507216,
+            "output_tokens": 15263,
+            "output_tokens_cumulative": 15263,
+            "reasoning_output_tokens": 4393,
+            "reasoning_output_tokens_cumulative": 4393
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T115318655533-production-feature-inventory",
+        "plan": "mast-catalog-gpu-solve",
+        "section": "\u00a71",
+        "node": "production-feature-inventory",
+        "node_definition": {
+          "done_when": "For each of the four capabilities below, state one of: IN PRODUCTION with the call path from ForwardProfile.solve_branch or solve_portfolio down to the implementing function; IMPLEMENTED BUT UNREACHED, with the module and the reason nothing production calls it; or ABSENT. A grep hit is not evidence of reach - trace the path. ONE: quadratic current representation, specifically whether the zeroth, first and second current moments are carried on BOTH the quadrature maps and the current support, or whether one side is lower order than the other; nova/biot/momentchannel.py and nova/biot/gradedresidual.py are starting points and nova/equilibrium/moment.py and source.py are likely consumers. TWO: curvature-aware cell clipping using a sagitta correction; sagitta appears in nova/biot/arc.py, so say whether any CELL CLIPPING path uses it or whether the arc usage is unrelated to clipping, and if clipping is straight-chord say so plainly and quote where the chord assumption enters. THREE: the order and refinement of wall elements used for limited solutions, and whether that resolution has ever been matched to the plasma mesh resolution; the expectation to test is that supporting a limited solution needs wall resolution equivalent to the plasma mesh, so report the actual wall element count and order against the production grid, and whether any convergence or refinement study exists for it - if none exists say so, since that is the answer. FOUR: whether the forward solve warm-starts from a neighbouring slice or always cold-starts, because the catalog is 1,341,435 consecutive time slices where adjacent states are nearly identical, and a warm start is the obvious iteration saving. Read nova/transport/coupled_window.py around its solve_portfolio call and say what seed it passes. Change no production code: this node produces the inventory only.",
+          "estimated_hours": 3.0,
+          "goal": "Establish which of four named modelling capabilities are actually reached by the production forward solve, as opposed to merely existing somewhere in the tree, by tracing each from the production entry point and quoting the call path.",
+          "id": "production-feature-inventory",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/production-feature-inventory.md",
+          "plan": "mast-catalog-gpu-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/mast-catalog-gpu-solve/production-feature-inventory.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "catalog-census",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T11:53:28Z",
+        "completed_at": "2026-08-25T12:01:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 500,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 500,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "e34aa3618ebf69e4d6d01a1ab0fece15091879a9",
+        "commits": [
+          "d2e639e51e944c24957590f6ccaeb82c5ac5d18f"
+        ],
+        "changed_lines": {
+          "added": 256,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/production-feature-inventory.md",
+        "scope_changed": false,
+        "session_id": "01a038c4-aca2-7810-ad20-fecece79554a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5550336,
+            "cached_input_tokens_cumulative": 5550336,
+            "input_tokens": 5781707,
+            "input_tokens_cumulative": 5781707,
+            "output_tokens": 20252,
+            "output_tokens_cumulative": 20252,
+            "reasoning_output_tokens": 6044,
+            "reasoning_output_tokens_cumulative": 6044
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 853
+    "_version": 855
   }
 }

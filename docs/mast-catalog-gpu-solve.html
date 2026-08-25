@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S15">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="34">
+<meta name="plan-version" content="36">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -146,6 +146,46 @@
     committed — and the L2b DIII-D competition-dataset demo record published with its receipts and
     side-by-side figures.</p>
 
+    <h2 id="feature-inventory">§ Production capability inventory</h2>
+
+    <p><strong>Traced 2026-08-25, node <code>production-feature-inventory</code></strong>, commit
+    <code>d2e639e5</code>, gate PASSED. Each capability was followed from the production entry point down
+    to the implementing function, because a grep hit is not reach — the sagitta case below is exactly
+    that trap.</p>
+
+    <table>
+      <caption>Four modelling capabilities against the production forward solve</caption>
+      <thead><tr><th scope="col">Capability</th><th scope="col">Verdict</th><th scope="col">Evidence</th></tr></thead>
+      <tbody>
+        <tr><td>Quadratic current representation (m0, m1, m2)</td><td><strong>ABSENT</strong></td><td><code>CellCurrentMoments</code> and <code>FluxTarget</code> carry the zeroth plus two first moments only — <strong>0 of 3</strong> second-moment channels on <em>both</em> the quadrature maps and the current support. <code>MomentGeometry.second_moment</code> is fixed geometry for first-moment coefficient conversion, not a second current moment.</td></tr>
+        <tr><td>Curvature-aware (sagitta) cell clipping</td><td><strong>ABSENT</strong></td><td><code>_traced_clip</code> linearly interpolates each crossing on a straight atomic edge. The <code>Arc</code> sagitta is unrelated circle-fit conditioning.</td></tr>
+        <tr><td>Wall elements supporting limited solutions</td><td>In production, <strong>uncoupled</strong></td><td>Piecewise-linear geometry with a three-sample quadratic flux extremum. Counts are 121 wall / 2210 plasma, 165 / 2214, and <strong>MAST 37 / 9025</strong>. Sampling is not tied to plasma resolution and <strong>no isolated wall-refinement convergence receipt exists</strong>; the 165-to-330 Solovev comparison is confounded by simultaneous plasma-carrier and source-treatment changes.</td></tr>
+        <tr><td>Neighbour-slice warm start</td><td><strong>In production</strong></td><td><code>equilibrium_sweep</code> passes the previous selected flux after the first cold portfolio, so an uninterrupted campaign is 1 cold plus 1,341,434 warm, with extra cold starts at shard boundaries. Reachability is not proof of iteration saving and none has been measured.</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The warm-start finding tempers the throughput hope rather than raising it.</strong> The
+    H200 measurement seeded from perturbations of 1e&minus;6 to 1e&minus;4 of flux span — <em>tighter</em>
+    than a neighbouring slice — so 42.77 ms/slice is already a warm-ish cost and adding a warm start
+    cannot deliver the order of magnitude, because it is already there. That relocates the acceleration
+    target onto iteration count and map cost.</p>
+
+    <p><strong>The concrete suspect is that the Newton budget is a fixed count rather than a
+    convergence-tested loop.</strong> <code>PerturbedSeedPolicy</code> carries
+    <code>newton_steps = 10</code> with <code>gmres_iterations = 30</code>, and the contrast lane's
+    entry point is named a fixed ladder; the recovery failures confirm the ladder runs to its end,
+    terminating after all ten steps at residual 1.29980506. If typical warm slices converge in two or
+    three, a fixed ten by thirty spends three to five times the map applications needed.
+    <code>lax.while_loop</code> is vmappable, so a convergence predicate is available — at the cost of a
+    batch running to its slowest lane, which is why the saving must be measured rather than assumed.</p>
+
+    <p><strong>Wall resolution is the correctness item, not a performance one.</strong> Supporting a
+    limited solution means resolving where the boundary touches material, and 37 wall segments against a
+    9025-cell plasma grid is roughly 2.6&times; under-resolved on a linear basis. No study has ever
+    tested the natural expectation that wall resolution should match plasma resolution, so the limited
+    branch's geometric fidelity is currently unquantified.</p>
+
+
     <h2 id="s4">§4 — Compute constraints (SDCC)</h2>
     <ul>
       <li>The H200 node (98dci4-gpu-0003, partition <code>betelgeuse</code>) requires
@@ -262,6 +302,16 @@ Done-when
     <div class="r-fu-body"><p>L0 closed with its census passed and its parity gate retired rather than met, so the ladder's entry condition is now a re-derived parity requirement plus two verdicts this plan does not own. THREE ENTRY ITEMS, none of them a throughput measurement. (1) RE-DERIVE THE PARITY REQUIREMENT in the two successor forms the attribution named: a ONE-MAP bound, where the moment seed already demonstrates 4.44e-16 is attainable, plus separately registered PHYSICALLY MEANINGFUL TERMINAL-OBSERVABLE bounds. This plan must CONSUME the one-pass criterion derivation in flight on <code>forward-operator-refinement</code> rather than authoring a fourth untraced number - that derivation already has three registered consumers, this being the third. (2) The order-versus-mesh adjudication on that same lane, which owns the convergence floor this plan is scored against. (3) The convergence frontier itself, which is now well posed and NOT a backtracking problem: topology admissibility caps the step near one thirty-second of the Newton step, so an 89-iteration budget traverses about 2.8 Newton-step-equivalents, roughly an order of magnitude short, and closing it needs a predictor-corrector or continuation advancing along the topology-preserving manifold. ONLY THEN L1, and it must be restated before dispatch on three measured facts from this session. Its gate targets were written against an estimate 2.7 to 5.4 times too demanding and must be restated against 46.577604167 slices/s per device. Its cost model must separate the one-time per-campaign interaction build of about 202 s, the one-time per-shape compile, and the per-slice EXECUTE, since the build measured 52 times the solve and only execute multiplies by 1,341,435 - measuring end-to-end wall clock would measure the build and report it as throughput. And it must record iteration count AGAINST CONFIGURATION, because each configuration owns its own near-marginal channel (vertical at 0.987 on a near-circular control, radial-dominant at 1.3372 on an elongated one), which is a mechanism for a heavy iteration tail rather than an assumption of one and is the evidence the open convergence-policy decision should be taken on. Section 2's batched Picard loop is already struck - the map is non-contractive - and its warm-start economy needs re-deriving as an alignment rather than a distance criterion, since transient growth on a non-normal map depends on seed direction and pooling by adjacency selects the wrong variable.</p></div>
     <pre class="r-fu-prompt">/reckon-ship mast-catalog-gpu-solve</pre>
     </article>
+<article class="r-fu" data-id="f-20260825T120420484558" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship mast-catalog-gpu-solve" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Measure the wall-resolution ladder that limited solutions depend on</h4>
+    <div class="r-fu-body">Production carries 37 wall segments against 9025 plasma cells on MAST, and 121 against 2210 and 165 against 2214 elsewhere, with wall sampling not coupled to plasma resolution and NO isolated wall-refinement convergence receipt anywhere. The natural expectation - that supporting a limited solution needs wall resolution equivalent to the plasma mesh, since the limited branch is defined by where the boundary touches material - has never been tested. On a linear basis 37 segments against a 95-by-95-equivalent grid is roughly 2.6 times under-resolved. Run an ISOLATED ladder: hold the plasma carrier, the source treatment and the seed fixed, vary only wall element count and order, and report the limited-branch boundary flux, contact location and terminal residual at each rung. Isolation is the whole point, because the one existing comparison that looks like a study - 165 to 330 on Solovev - is confounded by simultaneous plasma-carrier and source-treatment changes and therefore says nothing about wall resolution. Report the count at which the limited solution stops moving, and state whether it lands at, below, or above plasma-equivalent resolution. This is a correctness question rather than a performance one: the limited branch's geometric fidelity is currently unquantified, and the dual-branch work selects between a limited and a diverted root using a margin whose wall operand comes from this geometry.</div>
+    <pre class="r-fu-prompt">/reckon-ship mast-catalog-gpu-solve</pre>
+    </article>
+<article class="r-fu" data-id="f-20260825T120420484600" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship mast-catalog-gpu-solve" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Cut the fixed Newton ladder to a convergence-tested loop and measure it</h4>
+    <div class="r-fu-body">The Newton budget is a fixed count, not a convergence test. PerturbedSeedPolicy carries newton_steps 10 with gmres_iterations 30, the contrast lane's entry point is named a fixed ladder, and the recovery failures confirm it runs to the end, terminating after all ten steps at residual 1.29980506. Production already warm-starts from the neighbouring slice - equilibrium_sweep passes the previous selected flux, so an uninterrupted campaign is 1 cold plus 1341434 warm - and the H200 measurement seeded even tighter, at 1e-6 to 1e-4 of flux span. So typical slices are likely converging well before step ten and paying for the remainder anyway. If they converge in two or three, a fixed ten by thirty spends three to five times the map applications needed, which is the leading candidate for the order-of-magnitude acceleration the catalog wants: per-slice cost is FLAT with batch width, 41.72 ms at width 4 against 42.77 at width 16, so the device is already saturated and more batching is not the lever. Measure the actual step-to-convergence distribution over a representative warm sequence FIRST, because if slices really need ten steps there is no saving here and the effort belongs elsewhere. Then, if the distribution supports it, replace the ladder with lax.while_loop under a convergence predicate and measure the realised per-slice cost - noting that a vmapped while_loop runs every lane to the slowest, so the saving is set by the batch maximum rather than the median, and a long tail can erase it.</div>
+    <pre class="r-fu-prompt">/reckon-ship mast-catalog-gpu-solve</pre>
+    </article>
 </section>
 
   <section data-reckon="research" id="research" class="r-research-list">
@@ -307,6 +357,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20260823T2050-graph-tells-the-truth" data-who="reckon-ship" data-when="2026-08-23T20:50:00Z">
     <div class="r-comment-body">DEPENDENCY EDGE ADDED SO THE GRAPH STOPS DISAGREEING WITH THE PLAN. Throughout this session every comment here has said the throughput ladder is HELD, while roadmap has listed this plan in ready_now with all prerequisites satisfied. Both statements were defensible in isolation - the three declared prerequisites really are shipped - and together they were a lie by omission, because a fresh session reading the roadmap would have picked this up as ready and dispatched L1 into a solve that does not converge. The hold lived only in prose that roadmap does not read. Adding topology-preserving-continuation to depends_on makes the graph carry it: this plan now reads BLOCKED, which is what it has actually been all day. WHY THAT PLAN AND NOT A GATE RESOURCE: the hold is not a policy choice awaiting authorisation, it is an unmet technical prerequisite with a measured deficit - topology admissibility caps the Newton step near one thirty-second, so an 89-iteration budget traverses about 2.8 step-equivalents against a need roughly an order of magnitude larger. That is a dependency, and dependencies belong in the DAG rather than in an explicit blocker resource, which is for authority and coordination holds. THE EDGE IS COARSER THAN THE TRUTH AND THAT IS ACCEPTED DELIBERATELY: not every item on this plan waits on convergence. Restating the rung gates against the measured 46.577604167 slices/s per device, re-deriving the warm-start economy as an alignment criterion rather than a distance one, and pricing mesh refinement against batch capacity are all analysis this plan could do now. But L1 through L3 - every rung that produces an equilibrium - cannot, and a plan-level edge cannot express a section-level hold. Given the choice between a graph that invites a premature throughput run and one that under-reports available analysis, the second is the safer error, and f-mcg-02 already names the analysis explicitly for anyone who reads past the readiness flag. Remove the edge when the continuation plan lands a route that converges rather than merely holds its branch.</div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260825T115318655533-production-feature-inventory" data-who="catalog-census" data-when="2026-08-25T12:01:48Z">
+    <div class="r-comment-body"><p>Four verdicts, traced from the production entry points rather than grepped. QUADRATIC CURRENT: ABSENT. CellCurrentMoments and FluxTarget carry only the zeroth plus two first moments - 0 of 3 second-moment channels on BOTH the quadrature maps and the current support - and MomentGeometry.second_moment is fixed geometry for first-moment coefficient conversion rather than a second current moment. SAGITTA-AWARE CLIPPING: ABSENT. _traced_clip linearly interpolates each crossing on a straight atomic edge; the Arc sagitta is unrelated circle-fit conditioning. WALL ELEMENTS: IN PRODUCTION with piecewise-linear geometry and a three-sample quadratic flux extremum, but sampling is NOT coupled to plasma resolution and no isolated wall-refinement convergence receipt exists - production counts are 121 wall against 2210 plasma, 165 against 2214, and MAST 37 against 9025, and the 165-to-330 Solovev comparison that might look like a study is confounded by simultaneous plasma-carrier and source-treatment changes. NEIGHBOUR WARM START: IN PRODUCTION. equilibrium_sweep passes the previous selected flux after the first cold portfolio, so an uninterrupted campaign is 1 cold plus 1341434 warm, with extra cold starts at shard boundaries - though reachability is not proof of iteration savings and none has been measured.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260821T1315-diiid-demo-rescope" data-who="reckon-ship" data-when="2026-08-21T13:15:00+00:00">
     <div class="r-comment-body">OWNER RESCOPE 2026-08-21: the H200 throughput work now includes a capabilities demo on the DIII-D competition dataset, added as ladder stage L2b. The demo runs the batched pipeline end to end on the second onboarded machine - flux functions extracted from the labeled maps plus the corpus kA.turn conductor currents through the digest-pinned machine description (782e9e08), the magnetics-free forward route diiid-forward-onboarding validated - and publishes side-by-side solved/labeled maps with difference fields on named shots and frames, throughput and convergence receipts beside the MAST ladder numbers, and the labeled DIII-D demo store. Constraint: same code path as the MAST ladder, no machine-specific solver fork. Sequenced inside the ladder before L3 and behind the same efit-forward-parity entry gate as the rest of the plan.</div>

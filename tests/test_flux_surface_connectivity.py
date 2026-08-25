@@ -207,6 +207,70 @@ def test_flood_fill_core_matches_ndimage_label():
     assert int(steps) <= math.ceil(math.log2(rg.size + zg.size))
 
 
+def test_component_labels_and_private_mask_match_ndimage():
+    """Every component is labelled and only non-axis components are private."""
+    from scipy import ndimage
+
+    confined = np.zeros((19, 27), dtype=bool)
+    confined[2:15, 2:9] = True
+    confined[7:12, 9:17] = True
+    confined[1:5, 20:25] = True
+    confined[14:18, 18:22] = True
+    seed = np.zeros_like(confined)
+    seed[8, 4] = True
+
+    labels, steps = fsc.label_connected_components_with_steps(
+        jnp.asarray(confined), sum(confined.shape)
+    )
+    labels = np.asarray(labels)
+    reference, component_count = ndimage.label(confined)
+    private = np.asarray(fsc.private_flux_mask(labels, jnp.asarray(seed)))
+    reference_private = (reference != 0) & (reference != reference[8, 4])
+
+    assert np.array_equal(labels == 0, reference == 0)
+    assert len(np.unique(labels[labels > 0])) == component_count == 3
+    for reference_label in range(1, component_count + 1):
+        component = reference == reference_label
+        assert np.unique(labels[component]).size == 1
+    assert np.array_equal(private, reference_private)
+    assert int(steps) <= sum(confined.shape)
+
+    batch = jnp.stack((jnp.asarray(confined), jnp.asarray(np.fliplr(confined))))
+    batched = jax.vmap(
+        lambda mask: fsc.label_connected_components(mask, sum(confined.shape))
+    )(batch)
+    per_slice = jnp.stack(
+        [fsc.label_connected_components(mask, sum(confined.shape)) for mask in batch]
+    )
+    assert np.array_equal(np.asarray(batched), np.asarray(per_slice))
+
+
+def test_connectivity_can_reject_inside_height_band_wall_cell():
+    """A private cell inside the saddle-height band defeats the height proxy."""
+    confined = np.zeros((13, 17), dtype=bool)
+    confined[3:10, 2:9] = True
+    confined[5:8, 12:16] = True
+    seed = np.zeros_like(confined)
+    seed[6, 4] = True
+
+    labels = fsc.label_connected_components(jnp.asarray(confined), sum(confined.shape))
+    private = np.asarray(fsc.private_flux_mask(labels, jnp.asarray(seed)))
+    labels = np.asarray(labels)
+
+    saddle_height_min = 2
+    saddle_height_max = 10
+    wall_cell = (6, 14)
+    vertical_rule_shadowed = not (
+        saddle_height_min <= wall_cell[0] <= saddle_height_max
+    )
+    connectivity_rule_shadowed = bool(private[wall_cell])
+
+    assert not vertical_rule_shadowed
+    assert connectivity_rule_shadowed
+    assert int(labels[seed][0]) == 54
+    assert int(labels[wall_cell]) == 98
+
+
 def test_doubling_fill_matches_fixed_iteration_fixtures_exactly():
     """Doubling and one-cell dilation reach exactly the same fixed point."""
 

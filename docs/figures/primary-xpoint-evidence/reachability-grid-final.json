@@ -1,0 +1,501 @@
+{
+  "artifact": "post-cutover wall reachability with independent EFIT overlay",
+  "coverage": {
+    "agreement_count": 7,
+    "diiid_terminal_count": 1,
+    "disagreement_count": 6,
+    "iter_exclusion_reason": "retired fixed-boundary field with no divertor saddle",
+    "iter_included": false,
+    "mast_arm_count": 12,
+    "panel_count": 13
+  },
+  "method": {
+    "binding": "s_star = min(u_wall, u_x)",
+    "diiid_efit_label_authority": "stored EFIT LCFS lower X-point in the banked DIII-D source frame",
+    "height_band_used": false,
+    "mast_achieved_class_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/dual-branch-selection/pinned-branch-contrast.json",
+    "mast_achieved_class_rule": "the banked post-rebaseline class margin, never the legacy ForwardTopologyState.diverted-derived achieved_class string",
+    "mast_efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+    "private_region": "positive production component label unequal to the axis label",
+    "public_region": "production saddle-aware axis component immediately before binding",
+    "wall_segment_rule": "segment is reachable only when both endpoint wall nodes touch the public region"
+  },
+  "panels": [
+    {
+      "arm": "pure",
+      "axis_to_classified_cell_distance_m": 0.010273923011193438,
+      "binding_flux_wb": -0.07017520665944828,
+      "binding_level_wb_from_axis_outward": 0.3839922933803552,
+      "classification_inward_offset_wb": 0.0002037849339989549,
+      "efit_label": "diverted",
+      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_x_points_m": [
+        [
+          0.5688938498497009,
+          -1.2379939556121826
+        ],
+        [
+          0.5643741488456726,
+          1.2358670234680176
+        ]
+      ],
+      "label_agreement": true,
+      "machine": "MAST",
+      "nova_achieved_class": "diverted",
+      "panel": "A",
+      "private_area_m2": 0.3031250002095476,
+      "private_region_count": 3,
+      "public_area_m2": 1.9324218763358658,
+      "reachable_wall_limiter_point_m": [
+        0.19524440169334412,
+        -0.0536151138208446
+      ],
+      "reachable_wall_segment_count": 0,
+      "selected_saddle_m": [
+        0.5676559771789977,
+        -1.2338307252843705
+      ],
+      "shadowed_wall_segment_count": 36,
+      "shot_slice": "21978/35",
+      "wall_segment_count": 36
+    },
+    {
+      "arm": "mixed",
+      "axis_to_classified_cell_distance_m": 0.029937904872844517,
+      "binding_flux_wb": -0.06472970545236578,
+      "binding_level_wb_from_axis_outward": 0.3792330010098876,
+      "classification_inward_offset_wb": 0.0002024765698907393,
+      "efit_label": "diverted",
+      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_x_points_m": [
+        [
+          0.5688938498497009,
+          -1.2379939556121826
+        ],
+        [
+          0.5643741488456726,
+          1.2358670234680176
+        ]
+      ],
+      "label_agreement": true,
+      "machine": "MAST",
+      "nova_achieved_class": "diverted",
+      "panel": "B",
+      "private_area_m2": 0.23492187516239937,
+      "private_region_count": 3,
+      "public_area_m2": 1.8490625012782402,
+      "reachable_wall_limiter_point_m": null,
+      "reachable_wall_segment_count": 0,
+      "selected_saddle_m": [
+        0.5746975883277566,
+        1.2639851582160506
+      ],
+      "shadowed_wall_segment_count": 36,
+      "shot_slice": "21978/35",
+      "wall_segment_count": 36
+    },
+    {
+      "arm": "pure",
+      "axis_to_classified_cell_distance_m": 0.016499409968033653,
+      "binding_flux_wb": -0.10235202822469194,
+      "binding_level_wb_from_axis_outward": 0.4074577036297895,
+      "classification_inward_offset_wb": 0.00021249772257913555,
+      "efit_label": "diverted",
+      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_x_points_m": [
+        [
+          0.5459407567977905,
+          -1.230005145072937
+        ],
+        [
+          0.5431188344955444,
+          1.236562728881836
+        ]
+      ],
+      "label_agreement": true,
+      "machine": "MAST",
+      "nova_achieved_class": "diverted",
+      "panel": "C",
+      "private_area_m2": 0.2879687501990702,
+      "private_region_count": 3,
+      "public_area_m2": 1.9400000013411045,
+      "reachable_wall_limiter_point_m": [
+        0.19524440169334412,
+        -0.03215463290081369
+      ],
+      "reachable_wall_segment_count": 0,
+      "selected_saddle_m": [
+        0.5444663022219217,
+        1.2491324433637334
+      ],
+      "shadowed_wall_segment_count": 36,
+      "shot_slice": "21983/35",
+      "wall_segment_count": 36
+    },
+    {
+      "arm": "mixed",
+      "axis_to_classified_cell_distance_m": 0.044146600884222384,
+      "binding_flux_wb": -0.09466841630521576,
+      "binding_level_wb_from_axis_outward": 0.39962035000195006,
+      "classification_inward_offset_wb": 0.00021151063428358322,
+      "efit_label": "diverted",
+      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_x_points_m": [
+        [
+          0.5459407567977905,
+          -1.230005145072937
+        ],
+        [
+          0.5431188344955444,
+          1.236562728881836
+        ]
+      ],
+      "label_agreement": true,
+      "machine": "MAST",
+      "nova_achieved_class": "diverted",
+      "panel": "D",
+      "private_area_m2": 0.2121875001466833,
+      "private_region_count": 4,
+      "public_area_m2": 1.8111718762520468,
+      "reachable_wall_limiter_point_m": null,
+      "reachable_wall_segment_count": 0,
+      "selected_saddle_m": [
+        0.5526016041428223,
+        1.2740427974363968
+      ],
+      "shadowed_wall_segment_count": 36,
+      "shot_slice": "21983/35",
+      "wall_segment_count": 36
+    },
+    {
+      "arm": "pure",
+      "axis_to_classified_cell_distance_m": 1.1868641501473969,
+      "binding_flux_wb": -0.03261235508724845,
+      "binding_level_wb_from_axis_outward": 0.032924251731601156,
+      "classification_inward_offset_wb": 0.0002852413082705959,
+      "efit_label": "diverted",
+      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_x_points_m": [
+        [
+          0.5590311884880066,
+          -1.1253553628921509
+        ],
+        [
+          0.558182954788208,
+          1.1303188800811768
+        ]
+      ],
+      "label_agreement": false,
+      "machine": "MAST",
+      "nova_achieved_class": "limited",
+      "panel": "E",
+      "private_area_m2": 0.0,
+      "private_region_count": 0,
+      "public_area_m2": 0.8714843756024493,
+      "reachable_wall_limiter_point_m": [
+        0.5649306774139404,
+        1.8250000476837158
+      ],
+      "reachable_wall_segment_count": 0,
+      "selected_saddle_m": [
+        0.5559167705425359,
+        -1.1178653484963965
+      ],
+      "shadowed_wall_segment_count": 36,
+      "shot_slice": "21985/51",
+      "wall_segment_count": 36
+    },
+    {
+      "arm": "mixed",
+      "axis_to_classified_cell_distance_m": 1.1852775182632624,
+      "binding_flux_wb": -0.03227189744878237,
+      "binding_level_wb_from_axis_outward": 0.033386748165128134,
+      "classification_inward_offset_wb": 0.00028326859479465877,
+      "efit_label": "diverted",
+      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_x_points_m": [
+        [
+          0.5590311884880066,
+          -1.1253553628921509
+        ],
+        [
+          0.558182954788208,
+          1.1303188800811768
+        ]
+      ],
+      "label_agreement": false,
+      "machine": "MAST",
+      "nova_achieved_class": "limited",
+      "panel": "F",
+      "private_area_m2": 0.0,
+      "private_region_count": 0,
+      "public_area_m2": 0.8714843756024493,
+      "reachable_wall_limiter_point_m": [
+        0.5649306774139404,
+        1.8250000476837158
+      ],
+      "reachable_wall_segment_count": 0,
+      "selected_saddle_m": [
+        0.5501755974182085,
+        -1.1108815031067991
+      ],
+      "shadowed_wall_segment_count": 36,
+      "shot_slice": "21985/51",
+      "wall_segment_count": 36
+    },
+    {
+      "arm": "pure",
+      "axis_to_classified_cell_distance_m": 0.05571643350771628,
+      "binding_flux_wb": -0.011436113567912715,
+      "binding_level_wb_from_axis_outward": 0.35594762941932445,
+      "classification_inward_offset_wb": 0.000256883881641781,
+      "efit_label": "diverted",
+      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_x_points_m": [
+        [
+          0.5724796056747437,
+          -1.0747820138931274
+        ],
+        [
+          0.6237258315086365,
+          1.1930568218231201
+        ]
+      ],
+      "label_agreement": false,
+      "machine": "MAST",
+      "nova_achieved_class": "limited",
+      "panel": "G",
+      "private_area_m2": 0.0,
+      "private_region_count": 0,
+      "public_area_m2": 0.879062500607688,
+      "reachable_wall_limiter_point_m": [
+        0.5649306774139404,
+        1.7704750160686
+      ],
+      "reachable_wall_segment_count": 0,
+      "selected_saddle_m": [
+        0.6223335197166885,
+        1.1835211753458317
+      ],
+      "shadowed_wall_segment_count": 36,
+      "shot_slice": "21986/46",
+      "wall_segment_count": 36
+    },
+    {
+      "arm": "mixed",
+      "axis_to_classified_cell_distance_m": 0.05252277009666857,
+      "binding_flux_wb": -0.012786586205697725,
+      "binding_level_wb_from_axis_outward": 0.35550425659824464,
+      "classification_inward_offset_wb": 0.00025380214962282375,
+      "efit_label": "diverted",
+      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_x_points_m": [
+        [
+          0.5724796056747437,
+          -1.0747820138931274
+        ],
+        [
+          0.6237258315086365,
+          1.1930568218231201
+        ]
+      ],
+      "label_agreement": false,
+      "machine": "MAST",
+      "nova_achieved_class": "limited",
+      "panel": "H",
+      "private_area_m2": 0.0,
+      "private_region_count": 0,
+      "public_area_m2": 0.8866406256129267,
+      "reachable_wall_limiter_point_m": [
+        0.5649306774139404,
+        1.7751596610076703
+      ],
+      "reachable_wall_segment_count": 0,
+      "selected_saddle_m": [
+        0.613205589806735,
+        1.169184132897963
+      ],
+      "shadowed_wall_segment_count": 36,
+      "shot_slice": "21986/46",
+      "wall_segment_count": 36
+    },
+    {
+      "arm": "pure",
+      "axis_to_classified_cell_distance_m": 0.022877963285007036,
+      "binding_flux_wb": -0.20962926651531572,
+      "binding_level_wb_from_axis_outward": 0.5410701790814221,
+      "classification_inward_offset_wb": 0.000281222585800967,
+      "efit_label": "diverted",
+      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_x_points_m": [
+        [
+          0.5749794840812683,
+          -1.117248296737671
+        ],
+        [
+          0.5782567262649536,
+          1.134856939315796
+        ]
+      ],
+      "label_agreement": true,
+      "machine": "MAST",
+      "nova_achieved_class": "diverted",
+      "panel": "I",
+      "private_area_m2": 0.4471093753090827,
+      "private_region_count": 2,
+      "public_area_m2": 1.659609376147273,
+      "reachable_wall_limiter_point_m": null,
+      "reachable_wall_segment_count": 0,
+      "selected_saddle_m": [
+        0.5820680211861393,
+        1.1449629505049974
+      ],
+      "shadowed_wall_segment_count": 36,
+      "shot_slice": "21989/55",
+      "wall_segment_count": 36
+    },
+    {
+      "arm": "mixed",
+      "axis_to_classified_cell_distance_m": 0.04821986696726458,
+      "binding_flux_wb": 0.0056375657351001255,
+      "binding_level_wb_from_axis_outward": 0.3243709244057854,
+      "classification_inward_offset_wb": 0.00027988749726209097,
+      "efit_label": "diverted",
+      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_x_points_m": [
+        [
+          0.5749794840812683,
+          -1.117248296737671
+        ],
+        [
+          0.5782567262649536,
+          1.134856939315796
+        ]
+      ],
+      "label_agreement": false,
+      "machine": "MAST",
+      "nova_achieved_class": "limited",
+      "panel": "J",
+      "private_area_m2": 0.0,
+      "private_region_count": 0,
+      "public_area_m2": 0.780546875539585,
+      "reachable_wall_limiter_point_m": [
+        0.5649306774139404,
+        1.7647929111717349
+      ],
+      "reachable_wall_segment_count": 0,
+      "selected_saddle_m": [
+        0.5899385460397589,
+        1.1628726852556768
+      ],
+      "shadowed_wall_segment_count": 36,
+      "shot_slice": "21989/55",
+      "wall_segment_count": 36
+    },
+    {
+      "arm": "pure",
+      "axis_to_classified_cell_distance_m": 0.01442828703686296,
+      "binding_flux_wb": -0.12728627524409405,
+      "binding_level_wb_from_axis_outward": 0.4691723819746658,
+      "classification_inward_offset_wb": 0.00024576125274482826,
+      "efit_label": "diverted",
+      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_x_points_m": [
+        [
+          0.5856547355651855,
+          -1.196423053741455
+        ],
+        [
+          0.5821353197097778,
+          1.2025988101959229
+        ]
+      ],
+      "label_agreement": true,
+      "machine": "MAST",
+      "nova_achieved_class": "diverted",
+      "panel": "K",
+      "private_area_m2": 0.341015625235741,
+      "private_region_count": 2,
+      "public_area_m2": 1.8111718762520468,
+      "reachable_wall_limiter_point_m": null,
+      "reachable_wall_segment_count": 0,
+      "selected_saddle_m": [
+        0.5874171527268778,
+        1.2123192901859092
+      ],
+      "shadowed_wall_segment_count": 36,
+      "shot_slice": "22086/43",
+      "wall_segment_count": 36
+    },
+    {
+      "arm": "mixed",
+      "axis_to_classified_cell_distance_m": 0.02632156891525161,
+      "binding_flux_wb": -0.12254674397700278,
+      "binding_level_wb_from_axis_outward": 0.46365824716905,
+      "classification_inward_offset_wb": 0.0002436227978103113,
+      "efit_label": "diverted",
+      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_x_points_m": [
+        [
+          0.5856547355651855,
+          -1.196423053741455
+        ],
+        [
+          0.5821353197097778,
+          1.2025988101959229
+        ]
+      ],
+      "label_agreement": true,
+      "machine": "MAST",
+      "nova_achieved_class": "diverted",
+      "panel": "L",
+      "private_area_m2": 0.31828125022002496,
+      "private_region_count": 2,
+      "public_area_m2": 1.7732812512258533,
+      "reachable_wall_limiter_point_m": null,
+      "reachable_wall_segment_count": 0,
+      "selected_saddle_m": [
+        0.5870751527016022,
+        1.2225553064310346
+      ],
+      "shadowed_wall_segment_count": 36,
+      "shot_slice": "22086/43",
+      "wall_segment_count": 36
+    },
+    {
+      "arm": "physical ring",
+      "axis_to_classified_cell_distance_m": 0.029628081553120023,
+      "binding_flux_wb": -0.6528660710369747,
+      "binding_level_wb_from_axis_outward": 0.5699826595230931,
+      "classification_inward_offset_wb": 0.0007287551969848596,
+      "efit_label": "diverted",
+      "efit_label_authority": "stored EFIT LCFS lower X-point in the banked DIII-D source frame",
+      "efit_x_points_m": [
+        [
+          1.5306249856948853,
+          -0.9479644298553467
+        ]
+      ],
+      "label_agreement": false,
+      "machine": "DIII-D",
+      "nova_achieved_class": "limited",
+      "panel": "M",
+      "private_area_m2": 0.0,
+      "private_region_count": 0,
+      "public_area_m2": 0.5206250041071325,
+      "reachable_wall_limiter_point_m": [
+        1.4376001489812287,
+        -1.2447745168988193
+      ],
+      "reachable_wall_segment_count": 2,
+      "selected_saddle_m": [
+        1.273397130736346,
+        0.7010464877080773
+      ],
+      "shadowed_wall_segment_count": 81,
+      "shot_slice": "00000c4a7b/179",
+      "wall_segment_count": 83
+    }
+  ],
+  "project_absolute_src": "/nova/figures/primary-xpoint-evidence/reachability-grid-final.png"
+}

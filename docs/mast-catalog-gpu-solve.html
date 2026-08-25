@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S15">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="37">
+<meta name="plan-version" content="38">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -184,6 +184,21 @@
     9025-cell plasma grid is roughly 2.6&times; under-resolved on a linear basis. No study has ever
     tested the natural expectation that wall resolution should match plasma resolution, so the limited
     branch's geometric fidelity is currently unquantified.</p>
+
+    <p><strong>THROUGHPUT WORK IS PARKED BEHIND TOPOLOGY, by direction, 2026-08-25.</strong> Two
+    topology defects are open and both sit upstream of every number on this plan. The limiter point is
+    selected from the whole wall polygon rather than from the reachable wall, so seven of twelve banked
+    arms are <em>limited with genuine wall contact</em> yet carry a non-finite class margin; the correct
+    definition is the reachable-wall position minimising |&psi;<sub>wall</sub> &minus;
+    &psi;<sub>axis</sub>|, sub-grid refined. And the component partition is computed 4-connected on a
+    rectangular lattice while the shipped plasma mesh is hexagons on a half-offset tiling with six
+    neighbours, so the public/private split can differ exactly at a pinch — which is where the
+    classification turns.</p>
+
+    <p>Neither the fixed-point work nor the accelerator throughput rungs resume until those are settled,
+    because both consume the classification. The parked items remain the step-to-convergence
+    distribution behind the fixed Newton ladder and the wall-resolution study above; nothing here is
+    withdrawn, only sequenced.</p>
 
 
     <h2 id="s4">§4 — Compute constraints (SDCC)</h2>

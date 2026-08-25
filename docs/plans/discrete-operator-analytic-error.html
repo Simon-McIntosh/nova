@@ -26,7 +26,7 @@
 <meta name="plan-commits" content="ae723e28,3dc5155f,f2665b5d,815ca8fe,497b0372">
 <meta name="plan-artifacts" content="benchmarks/analytic_operator_ladder.py,benchmarks/diverted_basin_probe.py,benchmarks/contraction_discriminator.py,docs/figures/discrete-operator-analytic-error/operator-refinement-ladder.json,docs/figures/discrete-operator-analytic-error/diverted-basin-probe.json,docs/figures/discrete-operator-analytic-error/contraction-discriminator.json,docs/evidence/archive/discrete-operator-analytic-error-landed.html">
 <meta name="plan-impl" content="0.875">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 </head>
 <body>
   <main class="plan-doc">
@@ -326,6 +326,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260825T091038465601-primary-branch-vmap-status" data-who="reference-verify" data-when="2026-08-25T09:26:22Z">
     <div class="r-comment-body"><p>MAIN IS RED at origin/main 07476834 on a clean checkout. test_equilibrium_forward_solve.py 26 passed 2 failed; test_transport_coupled_window.py 11 passed 1 failed; test_two_class_recovery.py 0 passed 5 failed. The container fault is TypeError: Output from batched function ForwardTopologyState is not a valid JAX type, raised at forward.py:1402 in solve_portfolio inner vmap and forward.py:1444 in solve_batch, and reaching production through coupled_window.py:1636. It also REFUTED my hypothesis: read constructs the state with its lambda on every call, so the inner vmap must flatten it as transformed output whether or not the margin is consumed. The existing portfolio test does cover the container path, failing at line 782 before reaching the line 809 assertion, so coverage was adequate and the gap was which tests my gate ran. A distinct test is still needed for the transformed deferred-margin path, which nothing currently exercises. The five recovery failures are separate banked-result regressions, not the container exception, and need independent triage.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260825T093634640882-primary-branch-green-check" data-who="integration-verify" data-when="2026-08-25T09:49:33Z">
+    <div class="r-comment-body"><p>Verdict delivered and it is split. The container regression CLEARS: test_equilibrium_forward_solve.py goes 26 passed 2 failed to 28 passed 0 failed, and test_transport_coupled_window.py goes 11 passed 1 failed to 12 passed 0 failed. The five recovery failures SURVIVE unchanged at 0 passed 5 failed, all AssertionError rather than the repaired JAX container TypeError - converged still false for coarse and fine limited roots, achieved_class still [0,1] against [0,0], receipt.passed still [True,True,False], and measured composition still differing from the banked receipt. So a SECOND INDEPENDENT REGRESSION exists and the three-file primary-branch gate remains RED. Measured from a clean detached worktree at c7016004; it noted origin/main advancing to 1efe00ea mid-run and verified that commit touches only plans, evidence, crew state and a manifest, with no source, test, config, lock or banked artifact differing.</p></div>
 </div>
 </section>
 </main>

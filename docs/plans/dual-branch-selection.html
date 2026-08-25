@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-commits" content="632a4396,991d5d6e">
 <meta name="plan-artifacts" content="benchmarks/traced_selection_seam.py,benchmarks/pinned_branch_contrast.py,docs/figures/dual-branch-selection/traced-selection-continuity.json,docs/figures/dual-branch-selection/pinned-branch-contrast.json,docs/audit/plan-grounds-audit.md,docs/audit/quantitative-claims-audit.md">
 <meta name="plan-impl" content="0.25">
@@ -321,6 +321,56 @@
     measurement, and 372.62 slices/s is recorded as the derived one-hour requirement rather than as
     throughput — so no invented rate enters the pricing.</p>
 
+    <p><strong>THE COST HALF IS NOW MEASURED, 2026-08-25, node
+    <code>two-branch-batch-cost</code></strong>, commit <code>0bd3af3d</code>, gate PASSED, artifact
+    <code>docs/figures/dual-branch-selection/two-branch-batch-cost.json</code>. One reserved H200 NVL at
+    float64, SLURM 1254620, 6m54s, <strong>600/600 single and 600/600 dual timed solves converged with
+    zero non-convergences</strong>, distinct qualified input slices across three seed cohorts, no
+    broadcast or tile.</p>
+
+    <table>
+      <caption>Measured per-slice cost, single pinned branch against two-branch portfolio</caption>
+      <thead>
+        <tr><th scope="col">Batch width</th><th scope="col">Single</th><th scope="col">Dual</th>
+        <th scope="col">Ratio</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>4, read-inclusive</td><td>41.7178 ms</td><td>55.3304 ms</td><td>1.3255</td></tr>
+        <tr><td><strong>16, read-inclusive</strong></td><td><strong>42.7719 ms</strong></td><td><strong>52.1766 ms</strong></td><td><strong>1.2198</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Forking does not double the cost — batching amortises it to about 22 %.</strong> That
+    replaces the 1.0-solve-second parameter the pricing framework carried, and the armed multiples become
+    <strong>1.0733&times;</strong> at 2/6, 1.1466&times; at 4/6, 1.1832&times; at 5/6 and
+    <strong>1.2198&times;</strong> for always-fork.</p>
+
+    <p><strong>This is evidence for always-fork, and it should be said plainly even though the decision
+    stays open.</strong> The entire saving available to the tightest armed threshold over always-fork is
+    about <strong>15 percentage points of single-branch workload</strong>. Buying that requires an arming
+    observable which the sibling attribution has just shown is <em>undefined on a third of the frozen
+    cohort</em> — those frames fall back to fork regardless, flooring any armed policy at 2/6 — plus the
+    machinery to evaluate it per slice. A 15-point saving is a thin return for a policy that depends on a
+    quantity that does not always exist. The decision is not locked here because the armed fractions are
+    still measured on six references rather than catalog frames, but the cost half no longer favours
+    complexity.</p>
+
+    <p><strong>The honest throughput anchor, replacing a retracted one.</strong> 42.77 ms/slice is about
+    <strong>23.4 slices/s on one H200</strong>, against the 372.6 slices/s this section's one-hour goal
+    requires — so roughly sixteen such devices, or a labelled extrapolation of <strong>15.94 h single and
+    19.44 h dual</strong> for the full 1,341,435-slice census on one. An earlier benchmark on this lane
+    implied about 25,000 slices/s and was retracted; the measured figure is some three orders of
+    magnitude slower, which is the difference between timing one map application on a broadcast state and
+    timing converged solves on distinct slices with the read included.</p>
+
+    <p><strong>Two caveats the node kept rather than smoothed.</strong> It makes <em>no</em>
+    shared-operator fusion claim, because no current bank carries two nondegenerate qualified roots, so
+    the dual lane is two real solve lanes rather than the fused production arrangement — a fused
+    implementation could only improve the ratio. And a preflight inversion is retained that cuts against
+    this sprint's working narrative: at 1e-4 to 5e-4 the <em>limited</em> lane converged 1/4 and 1/16 and
+    at 5e-4 to 1e-3 it converged 0/4 and 0/16, while <em>diverted</em> held 4/4 and 16/16 throughout. On
+    perturbation robustness the fragile branch is the limited one.</p>
+
     <p><strong>The limit is disqualifying for the decision, and the node said so itself.</strong> The
     cohort is the <strong>six frozen MAST references, not catalog frames</strong> — four of them with a
     finite margin. That carries no representativeness or confidence claim, so it prices the policies
@@ -416,6 +466,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20260825T084655542502-fork-arming-fraction" data-who="catalog-census" data-when="2026-08-25T08:54:07Z">
     <div class="r-comment-body"><p>Pricing framework banked and arithmetic verified. Four finite absolute margins span 0.00339536 to 0.0197108, median 0.00606505; two of six are non-finite and fall back conservatively to fork. Always-fork arms 6/6 at 2.000x the single-branch denominator; thresholds 0.0025, 0.005, 0.01 and 0.02 arm 2/6, 4/6, 5/6 and 6/6 at 1.333x, 1.667x, 1.833x and 2.000x. Solve cost is an explicit parameter at 1.0 solve-second per pinned branch, not a measurement, and 372.62 slices/s is recorded as the derived one-hour requirement rather than throughput. CRITICAL LIMIT the node stated itself: the cohort is the six frozen MAST references, not catalog frames, so with four finite margins it carries no representativeness or confidence claim and cannot support the policy decision. The decision also needs the accelerator two-branch batch cost, which is out of scope here.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20260825T085631015497-two-branch-batch-cost" data-who="h200-matrix" data-when="2026-08-25T10:00:17Z">
+    <div class="r-comment-body"><p>Measured on one reserved H200 NVL at float64, SLURM 1254620, 6m54s, exit 0, with 600/600 single and 600/600 dual timed solves converged and zero non-convergences. Width 16 read-inclusive: 42.7719 ms/slice single against 52.1766 dual, ratio 1.2198 with cohort range 1.2181-1.2200; width 4 gives 1.3255. So FORKING DOES NOT DOUBLE COST - batching amortises it to about 22 percent, against the 2.0 the sibling pricing framework assumed, which recomputes the armed multiples to 1.0733 at 2/6, 1.1466 at 4/6, 1.1832 at 5/6 and 1.2198 for always-fork. The labelled extrapolation is 15.94 h single against 19.44 h dual for 1,341,435 slices on one H200. It also confirmed my suspicion about the exact-zero residual: that state was an EMPTY IDENTITY with zero plasma current and volume and non-finite axis, boundary and span, and the conditioned path was collapsing toward the same empty configuration rather than converging to a different root - current 86.6 to 38.8 kA, volume 2.48 to 1.17 m3 - so all such states were excluded from timing. Honest caveats retained: no shared-operator fusion claim, since no bank carries two nondegenerate qualified roots; and a preflight inversion worth following up, where the LIMITED lane converged 1/4 and 1/16 at 1e-4 to 5e-4 and 0/4 and 0/16 at 5e-4 to 1e-3 while DIVERTED stayed 4/4 and 16/16.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260825T084506969055-mast-margin-operand-attribution" data-who="margin-remeasure" data-when="2026-08-25T09:35:51Z">
     <div class="r-comment-body"><p>Production repair plus the attribution, and the attribution REFUTES the leading hypothesis. ForwardTopologyState is registered as a lossless PyTree with the nine landmarks and the evaluated class_margin as array leaves and the Callable excluded and reconstructed, and ForwardFluxOperator.connectivity_grid_axes is now the public radius/height/shape contract with both benchmark callers migrated and zero executable callers of the removed private attributes remaining. The previously failing production test test_the_topology_portfolio_matches_per_branch_solves_under_jit_and_vmap passes, and a new test_forward_topology_state_is_a_vmap_output_pytree gates the registration. SCIENCE: the connectivity-reachability hypothesis does NOT hold on MAST. All four absent-margin terminals carry connectivity SUPPORT, while three finite-margin terminals lack reachability. The named cause is wall_extremum_rejected_by_private_flux_shadow: finite pre-shadow wall operands, 0.3310275619269073 and 0.3310454781725451 on 21978/35 and 0.30190002257031606 and 0.3000846561326388 on 22086/43, are discarded by the private-flux shadow and become positive infinity. All-terminal counts are 9 with connectivity support, 3 not reachable, 0 no-candidate, 0 nonfinite-operand. Gate discipline was exemplary: a non-banked diagnostic pass enumerated all 252 changed leaves with magnitudes before any classification, and the final regeneration reproduced 381 float fields and 258 semantic fields with ZERO differences while preserving 644 of 644 banked leaves and adding 12 diagnostic subtrees.</p></div>

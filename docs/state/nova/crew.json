@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T11:36:12",
+  "updated": "2026-08-25T12:00:53",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -34278,9 +34278,182 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T093634640882-primary-branch-green-check",
+        "plan": "discrete-operator-analytic-error",
+        "section": "\u00a75",
+        "node": "primary-branch-green-check",
+        "node_definition": {
+          "done_when": "Report the verbatim verdict of running all three previously red files against current origin/main, unmodified, each in its own fresh process with JAX_PLATFORMS=cpu pinned and -m \"slow or not slow\": tests/test_equilibrium_forward_solve.py, which was 26 passed 2 failed; tests/test_transport_coupled_window.py, which was 11 passed 1 failed; and tests/test_two_class_recovery.py, which was 0 passed 5 failed. Quote each exact command with its pass, fail, skip and error counts. THE DECIDING QUESTION is the recovery file: its five failures were assertion failures on banked results rather than the container TypeError - converged False, achieved_class [0,1] against [0,0], receipt.passed [True,True,False], and measured-versus-banked composition differing - so state plainly whether they CLEAR under the repair or SURVIVE it, because that decides whether a second independent regression exists. If any survive, quote the assertion and traceback in full and do NOT repair it, since attribution comes first. Pin CPU explicitly: an unpinned process previously selected CUDA and exhausted device memory during fixture setup, producing 26 errors that are environmental rather than real. Change no source or test file - this node only measures.",
+          "estimated_hours": 1.0,
+          "goal": "Establish whether the primary branch is green after the batched topology receipt repair, since the repairing node verified only two focused tests and one production test rather than the three files measured red.",
+          "id": "primary-branch-green-check",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/primary-branch-green-check.md",
+          "plan": "discrete-operator-analytic-error",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/figures/discrete-operator-analytic-error/primary-branch-green-check.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "integration-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T09:36:43Z",
+        "completed_at": "2026-08-25T09:49:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 770,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 770,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "c701600431f9a7f4d5d06b885e0213161e329de2",
+        "commits": [
+          "c383d3fa68973b34c4d185bf3f6d86f2f452180a"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "unresolvable_revision"
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/primary-branch-green-check.md",
+        "scope_changed": false,
+        "session_id": "01a03847-7cea-7743-b5b4-e3ce766cba03",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T085631015497-two-branch-batch-cost",
+        "plan": "dual-branch-selection",
+        "section": "\u00a76",
+        "node": "two-branch-batch-cost",
+        "node_definition": {
+          "done_when": "A banked artifact under docs/figures/dual-branch-selection/ reports wall-clock cost per slice for the single pinned branch and for the two-branch portfolio at more than one batch width, with the ratio stated, on the H200 lane. READ THIS CAREFULLY, because a prior benchmark on this lane was retracted for exactly these faults and the retraction is recorded in mast-catalog-gpu-solve section 20. The measurement MUST time real CONVERGED solves, not one application of a flux map. It MUST use DISTINCT input slices, never a broadcast or tile of one state, since identical slices let caching and identical convergence paths flatter the result. It MUST include the input read in the timed region, or else report the IO cost separately and state the total honestly rather than omitting it. Report compile and warm-up time separately from steady-state, quote how many slices were solved and how many converged, and state the failure or non-convergence count rather than silently dropping those slices. If a per-slice figure is extrapolated to the 1,341,435-slice census, label it an extrapolation and give the assumptions - do not present it as a measured campaign throughput. Submit to partition betelgeuse with --reservation=gpu_0003_grpA, which has no time limit, so size --time to the work rather than to an hour; the one-hour cap belongs to the debug queues only. Your worktree is under $HOME so SLURM can see it.",
+          "estimated_hours": 4.0,
+          "goal": "Measure the two-branch batch cost of the dual-branch portfolio against the single pinned branch on the accelerator lane, so the always-fork versus margin-armed decision has the second of the two numbers it requires - the first, the armed fraction, landed at commit 3387739f as a pricing framework with an explicit cost parameter this node is meant to replace with a measurement.",
+          "id": "two-branch-batch-cost",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/two-branch-batch-cost.md",
+          "plan": "dual-branch-selection",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a76",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/two_branch_batch_cost.py",
+            "docs/figures/dual-branch-selection/two-branch-batch-cost.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "h200-matrix",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T08:56:40Z",
+        "completed_at": "2026-08-25T10:00:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3817,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3817,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "262dd9abdd4ffd1aabd6ecd3626954c11b4244df",
+        "commits": [
+          "0bd3af3d6dfc935cf4d19df971f90f50e499f2b4"
+        ],
+        "changed_lines": {
+          "added": 7292,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/two-branch-batch-cost.md",
+        "scope_changed": false,
+        "session_id": "01a0358b-83fb-7493-b03c-93b69217d2d5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 26036992,
+            "cached_input_tokens_cumulative": 108488448,
+            "input_tokens": 26658269,
+            "input_tokens_cumulative": 110188379,
+            "output_tokens": 88390,
+            "output_tokens_cumulative": 178363,
+            "reasoning_output_tokens": 26256,
+            "reasoning_output_tokens_cumulative": 52498
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 844
+    "_version": 846
   }
 }

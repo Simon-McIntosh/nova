@@ -203,6 +203,57 @@
     reproduction was achievable once the code path was correct, and was impossible only through the broken
     one.</p>
 
+    <h2 id="two-branch-cost">§6 — forking costs 1.22x, not 2x</h2>
+
+    <p><strong>Node <code>two-branch-batch-cost</code>, commit <code>0bd3af3d</code>, gate PASSED,
+    2026-08-25.</strong> One reserved NVIDIA H200 NVL, partition betelgeuse, reservation
+    gpu_0003_grpA, JAX 0.11.0, float64. SLURM 1254620, COMPLETED in 00:06:54, exit 0.
+    <strong>600/600 single and 600/600 dual timed solves converged</strong> — 1200/1200 dual-branch
+    solves — with zero failures or non-convergences, on distinct qualified input slices across three seed
+    cohorts spanning 1e-6 to 1e-4 of each branch flux span, with no broadcast or tile.</p>
+
+    <table>
+      <caption>Per-slice cost and dual/single ratio</caption>
+      <thead>
+        <tr><th scope="col">Width</th><th scope="col">Measure</th><th scope="col">Single</th>
+        <th scope="col">Dual</th><th scope="col">Ratio (cohort range)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>4</td><td>execute</td><td>41.5105 ms</td><td>55.0657 ms</td><td>1.3257 (1.3175&ndash;1.3267)</td></tr>
+        <tr><td>4</td><td>read-inclusive</td><td>41.7178 ms</td><td>55.3304 ms</td><td>1.3255 (1.3188&ndash;1.3263)</td></tr>
+        <tr><td>16</td><td>execute</td><td>42.6880 ms</td><td>52.0623 ms</td><td>1.2194 (1.2179&ndash;1.2200)</td></tr>
+        <tr><td><strong>16</strong></td><td><strong>read-inclusive</strong></td><td><strong>42.7719 ms</strong></td><td><strong>52.1766 ms</strong></td><td><strong>1.2198 (1.2181&ndash;1.2200)</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p>Compile is reported separately at 9.23/15.09 s (width 4) and 9.47/14.94 s (width 16) for
+    single/dual, with warm-up execute 0.233/0.340 s and 0.748/0.959 s. Applying the measured 1.2198 to
+    the armed fractions gives 1.0733&times; at 2/6, 1.1466&times; at 4/6, 1.1832&times; at 5/6 and
+    1.2198&times; for always-fork.</p>
+
+    <p><strong>Throughput anchor.</strong> 42.77 ms/slice is ~23.4 slices/s on one H200 against the
+    372.6 slices/s one-hour requirement. Labelled extrapolation for the 1,341,435-slice census:
+    <strong>57,375.8 s (15.94 h) single, 69,991.5 s (19.44 h) dual</strong> on one device, conditional on
+    identical convergence and staging.</p>
+
+    <h3 id="empty-identity">The exact-zero residual was an empty identity</h3>
+
+    <p>A candidate root reporting relative residual exactly <code>0.0</code> was challenged before
+    timing rather than accepted. It proved to be an <strong>empty configuration</strong> — zero plasma
+    current and volume, non-finite axis, boundary and span. The conditioned no-current path was
+    <em>collapsing toward the same empty state</em> rather than converging to a different physical root:
+    across 30 to 100 steps the residual fell 0.2088553 to 0.0886395 while plasma current fell 86.6 to
+    38.8 kA, volume 2.48 to 1.17 m³ and span magnitude 0.1818 to 0.0746 Wb. All such states were
+    excluded from timing. Timing one would have understated cost, which is the failure mode of the
+    retracted benchmark in a new form.</p>
+
+    <p><strong>Caveats kept rather than smoothed.</strong> No shared-operator fusion is claimed, because
+    no current bank carries two nondegenerate qualified roots, so the dual lane is two real solve lanes
+    rather than the fused production arrangement; fusion could only improve the ratio. And a preflight
+    inversion is retained: at 1e-4&ndash;5e-4 the <em>limited</em> lane converged 1/4 and 1/16, at
+    5e-4&ndash;1e-3 it converged 0/4 and 0/16, while <em>diverted</em> held 4/4 and 16/16. On
+    perturbation robustness the limited branch is the fragile one.</p>
+
   </main>
 </body>
 </html>

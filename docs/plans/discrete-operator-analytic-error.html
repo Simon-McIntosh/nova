@@ -160,7 +160,17 @@
     one pulse dropped from 57 solves over 15 slices to 17 solves and 24.9 s once transient marginality
     stopped arming a two-branch fork. So multiplicity with a limiter-basin attractor is not a
     speculative candidate here; it is the account that a mature implementation of the same problem
-    converged on, and it comes with a continuous escape rather than a discrete one.</p>
+    converged on.</p>
+
+    <p><strong>The escape mechanism they used is explicitly OUT OF SCOPE here, by owner directive
+    2026-08-25: do not implement a separatrix drag.</strong> The citation above is evidence for the
+    limiter-basin <em>account</em> and nothing more — it is not a licence to build the thing that
+    escaped it. Two standing constraints on this plan and anything downstream of it: <strong>ideas
+    only from imas-efit, zero code ports</strong>, with every mechanism re-derived in Nova's traced
+    idiom; and no separatrix drag, in any form, however continuous. A node that proposes one is
+    misreading this section. That is independently consistent with what the prior-art map itself
+    records — the drag is specific to their Picard boundary normalisation and does not transplant into
+    a Newton residual — but the directive stands on its own and does not depend on that.</p>
 
     <p><strong>And the comparison sharpens the question, because branch purity is already present
     here.</strong> Nova's pinned route threads <code>requested_class</code> into
@@ -173,9 +183,8 @@
     fails to contract about this root, which is what the perturbation ladder in the done-when below is
     for.</p>
 
-    <p>Two cautions from the same map. Its drag is specific to that code's Picard boundary
-    normalisation and <strong>cannot be copied mechanically into a Newton residual</strong> — the idea
-    ports, the implementation does not. And its branch <em>selector</em> is a hard hierarchy of
+    <p>One further caution from the same map, about the other half of its architecture. Its branch
+    <em>selector</em> is a hard hierarchy of
     convergence, realisation, acceptability, chi-squared separation, wall-breach and a categorical
     temporal anchor: referentially pure, but not continuous in either branch flux map. So prior art
     supplies an escape mechanism and a qualification discipline, and supplies no differentiable

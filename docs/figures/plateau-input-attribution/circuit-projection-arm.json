@@ -1,0 +1,456 @@
+{
+  "receipt": "MAST single-circuit projection discrete-wiring check",
+  "inputs": {
+    "residual_field_receipt": {
+      "path": "docs/figures/plateau-input-attribution/label-seed-residual-field.json",
+      "sha256": "dff3bcce1c2a795390ac6f92ec776e7b46babe4139b3549e338ba7c35b40d4a8",
+      "source_revision": "f8f1f31087959f54029ea045dda56f7d449f6399"
+    },
+    "shot_store": "/work/projects/imas_gpu/mast/level1/shots",
+    "circuit_definition_arrays": [
+      "fcoil_n",
+      "fcoil_circ",
+      "fcoil_r",
+      "fcoil_z",
+      "fcoil_width",
+      "fcoil_height",
+      "fcoil_ang1",
+      "fcoil_ang2",
+      "fcoil_turns",
+      "fcoil_xmult"
+    ],
+    "shared_circuit_definition_sha256": "c26682ad7b1a17afc272103d48a03d705377b0c399833de9b46ac9b0b60272f7",
+    "definition_digest_by_reference": {
+      "21978/35": "c26682ad7b1a17afc272103d48a03d705377b0c399833de9b46ac9b0b60272f7",
+      "21983/35": "c26682ad7b1a17afc272103d48a03d705377b0c399833de9b46ac9b0b60272f7",
+      "21985/51": "c26682ad7b1a17afc272103d48a03d705377b0c399833de9b46ac9b0b60272f7",
+      "21986/46": "c26682ad7b1a17afc272103d48a03d705377b0c399833de9b46ac9b0b60272f7",
+      "21989/55": "c26682ad7b1a17afc272103d48a03d705377b0c399833de9b46ac9b0b60272f7",
+      "22086/43": "c26682ad7b1a17afc272103d48a03d705377b0c399833de9b46ac9b0b60272f7"
+    }
+  },
+  "comparison_contract": {
+    "reference_count": 6,
+    "reference_order": [
+      "21978/35",
+      "21983/35",
+      "21985/51",
+      "21986/46",
+      "21989/55",
+      "22086/43"
+    ],
+    "best_stored_circuit_by_reference": {
+      "21978/35": 83,
+      "21983/35": 83,
+      "21985/51": 83,
+      "21986/46": 84,
+      "21989/55": 83,
+      "22086/43": 83
+    },
+    "projection_role": "A read-only equivalent-current interpretation of an already-banked single-circuit residual projection; it is not a current fit.",
+    "discrete_rule": "Compare with the shipped section count, signed turns and gains. A simple open, polarity or added-series-turn choice must match its fixed response scale; a hardware wiring choice for one stored circuit must also be invariant across references."
+  },
+  "per_reference": [
+    {
+      "reference": "21978/35",
+      "shot": 21978,
+      "slice_index": 35,
+      "projection_explained_fraction_of_full_squared_magnitude": 0.09053951201422307,
+      "stored_circuit_one_based": 83,
+      "stored_response_column_zero_based": 82,
+      "stored_driven_current_a": 1267.2755126953125,
+      "equivalent_current_correction_a": -10466.654882318571,
+      "correction_fraction_of_stored_driven_current": -8.259178669094224,
+      "implied_total_current_a": -9199.379369623259,
+      "implied_response_scale": -7.259178669094224,
+      "shipped_definition": {
+        "circuit_assignment_path": "efm/fcoil_circ",
+        "driven_current_path": "efm/fcoil_c",
+        "turns_path": "efm/fcoil_turns",
+        "gain_path": "efm/fcoil_xmult",
+        "section_element_indices_zero_based": [
+          919
+        ],
+        "section_element_count": 1,
+        "turns": [
+          1.0
+        ],
+        "gains": [
+          1.0
+        ],
+        "turn_gain_products": [
+          1.0
+        ],
+        "summed_turn_gain_multiplier": 1.0,
+        "polarity": "positive",
+        "series_parallel_choice_present": false
+      },
+      "discrete_comparison": {
+        "simple_choices": [
+          {
+            "choice": "open_or_missing_single_section",
+            "equivalent_correction_fraction": -1.0,
+            "resulting_response_scale": 0.0
+          },
+          {
+            "choice": "single_section_polarity_reversal",
+            "equivalent_correction_fraction": -2.0,
+            "resulting_response_scale": -1.0
+          },
+          {
+            "choice": "one_additional_identical_series_turn",
+            "equivalent_correction_fraction": 1.0,
+            "resulting_response_scale": 2.0
+          }
+        ],
+        "matching_simple_choices": [],
+        "implied_turn_gain_multiplier": -7.259178669094224,
+        "nearest_integer_turn_gain_multiplier": -7,
+        "distance_to_nearest_integer": 0.25917866909422393,
+        "per_reference_verdict": "NONE",
+        "reason": "The shipped circuit has one section at one positive turn and unit gain, so it has no series-parallel branch choice. The projection matches neither an open section, a polarity reversal, nor one additional identical series turn; its much larger negative scale is not a shipped discrete choice."
+      }
+    },
+    {
+      "reference": "21983/35",
+      "shot": 21983,
+      "slice_index": 35,
+      "projection_explained_fraction_of_full_squared_magnitude": 0.05982878747394172,
+      "stored_circuit_one_based": 83,
+      "stored_response_column_zero_based": 82,
+      "stored_driven_current_a": 973.72607421875,
+      "equivalent_current_correction_a": -11477.616191970777,
+      "correction_fraction_of_stored_driven_current": -11.787315237685934,
+      "implied_total_current_a": -10503.890117752027,
+      "implied_response_scale": -10.787315237685934,
+      "shipped_definition": {
+        "circuit_assignment_path": "efm/fcoil_circ",
+        "driven_current_path": "efm/fcoil_c",
+        "turns_path": "efm/fcoil_turns",
+        "gain_path": "efm/fcoil_xmult",
+        "section_element_indices_zero_based": [
+          919
+        ],
+        "section_element_count": 1,
+        "turns": [
+          1.0
+        ],
+        "gains": [
+          1.0
+        ],
+        "turn_gain_products": [
+          1.0
+        ],
+        "summed_turn_gain_multiplier": 1.0,
+        "polarity": "positive",
+        "series_parallel_choice_present": false
+      },
+      "discrete_comparison": {
+        "simple_choices": [
+          {
+            "choice": "open_or_missing_single_section",
+            "equivalent_correction_fraction": -1.0,
+            "resulting_response_scale": 0.0
+          },
+          {
+            "choice": "single_section_polarity_reversal",
+            "equivalent_correction_fraction": -2.0,
+            "resulting_response_scale": -1.0
+          },
+          {
+            "choice": "one_additional_identical_series_turn",
+            "equivalent_correction_fraction": 1.0,
+            "resulting_response_scale": 2.0
+          }
+        ],
+        "matching_simple_choices": [],
+        "implied_turn_gain_multiplier": -10.787315237685934,
+        "nearest_integer_turn_gain_multiplier": -11,
+        "distance_to_nearest_integer": 0.21268476231406552,
+        "per_reference_verdict": "NONE",
+        "reason": "The shipped circuit has one section at one positive turn and unit gain, so it has no series-parallel branch choice. The projection matches neither an open section, a polarity reversal, nor one additional identical series turn; its much larger negative scale is not a shipped discrete choice."
+      }
+    },
+    {
+      "reference": "21985/51",
+      "shot": 21985,
+      "slice_index": 51,
+      "projection_explained_fraction_of_full_squared_magnitude": 0.09820649287887004,
+      "stored_circuit_one_based": 83,
+      "stored_response_column_zero_based": 82,
+      "stored_driven_current_a": 664.1617431640625,
+      "equivalent_current_correction_a": -16714.926994799975,
+      "correction_fraction_of_stored_driven_current": -25.16695242813921,
+      "implied_total_current_a": -16050.765251635912,
+      "implied_response_scale": -24.16695242813921,
+      "shipped_definition": {
+        "circuit_assignment_path": "efm/fcoil_circ",
+        "driven_current_path": "efm/fcoil_c",
+        "turns_path": "efm/fcoil_turns",
+        "gain_path": "efm/fcoil_xmult",
+        "section_element_indices_zero_based": [
+          919
+        ],
+        "section_element_count": 1,
+        "turns": [
+          1.0
+        ],
+        "gains": [
+          1.0
+        ],
+        "turn_gain_products": [
+          1.0
+        ],
+        "summed_turn_gain_multiplier": 1.0,
+        "polarity": "positive",
+        "series_parallel_choice_present": false
+      },
+      "discrete_comparison": {
+        "simple_choices": [
+          {
+            "choice": "open_or_missing_single_section",
+            "equivalent_correction_fraction": -1.0,
+            "resulting_response_scale": 0.0
+          },
+          {
+            "choice": "single_section_polarity_reversal",
+            "equivalent_correction_fraction": -2.0,
+            "resulting_response_scale": -1.0
+          },
+          {
+            "choice": "one_additional_identical_series_turn",
+            "equivalent_correction_fraction": 1.0,
+            "resulting_response_scale": 2.0
+          }
+        ],
+        "matching_simple_choices": [],
+        "implied_turn_gain_multiplier": -24.16695242813921,
+        "nearest_integer_turn_gain_multiplier": -24,
+        "distance_to_nearest_integer": 0.1669524281392114,
+        "per_reference_verdict": "NONE",
+        "reason": "The shipped circuit has one section at one positive turn and unit gain, so it has no series-parallel branch choice. The projection matches neither an open section, a polarity reversal, nor one additional identical series turn; its much larger negative scale is not a shipped discrete choice."
+      }
+    },
+    {
+      "reference": "21986/46",
+      "shot": 21986,
+      "slice_index": 46,
+      "projection_explained_fraction_of_full_squared_magnitude": 0.07299676996077238,
+      "stored_circuit_one_based": 84,
+      "stored_response_column_zero_based": 83,
+      "stored_driven_current_a": 2286.614013671875,
+      "equivalent_current_correction_a": -18417.106778122074,
+      "correction_fraction_of_stored_driven_current": -8.054313787987173,
+      "implied_total_current_a": -16130.492764450199,
+      "implied_response_scale": -7.054313787987173,
+      "shipped_definition": {
+        "circuit_assignment_path": "efm/fcoil_circ",
+        "driven_current_path": "efm/fcoil_c",
+        "turns_path": "efm/fcoil_turns",
+        "gain_path": "efm/fcoil_xmult",
+        "section_element_indices_zero_based": [
+          920
+        ],
+        "section_element_count": 1,
+        "turns": [
+          1.0
+        ],
+        "gains": [
+          1.0
+        ],
+        "turn_gain_products": [
+          1.0
+        ],
+        "summed_turn_gain_multiplier": 1.0,
+        "polarity": "positive",
+        "series_parallel_choice_present": false
+      },
+      "discrete_comparison": {
+        "simple_choices": [
+          {
+            "choice": "open_or_missing_single_section",
+            "equivalent_correction_fraction": -1.0,
+            "resulting_response_scale": 0.0
+          },
+          {
+            "choice": "single_section_polarity_reversal",
+            "equivalent_correction_fraction": -2.0,
+            "resulting_response_scale": -1.0
+          },
+          {
+            "choice": "one_additional_identical_series_turn",
+            "equivalent_correction_fraction": 1.0,
+            "resulting_response_scale": 2.0
+          }
+        ],
+        "matching_simple_choices": [],
+        "implied_turn_gain_multiplier": -7.054313787987173,
+        "nearest_integer_turn_gain_multiplier": -7,
+        "distance_to_nearest_integer": 0.0543137879871729,
+        "per_reference_verdict": "NONE",
+        "reason": "The shipped circuit has one section at one positive turn and unit gain, so it has no series-parallel branch choice. The projection matches neither an open section, a polarity reversal, nor one additional identical series turn; its much larger negative scale is not a shipped discrete choice."
+      }
+    },
+    {
+      "reference": "21989/55",
+      "shot": 21989,
+      "slice_index": 55,
+      "projection_explained_fraction_of_full_squared_magnitude": 0.19817706735479496,
+      "stored_circuit_one_based": 83,
+      "stored_response_column_zero_based": 82,
+      "stored_driven_current_a": 466.6722412109375,
+      "equivalent_current_correction_a": -25197.969953695825,
+      "correction_fraction_of_stored_driven_current": -53.99500490603694,
+      "implied_total_current_a": -24731.297712484888,
+      "implied_response_scale": -52.99500490603694,
+      "shipped_definition": {
+        "circuit_assignment_path": "efm/fcoil_circ",
+        "driven_current_path": "efm/fcoil_c",
+        "turns_path": "efm/fcoil_turns",
+        "gain_path": "efm/fcoil_xmult",
+        "section_element_indices_zero_based": [
+          919
+        ],
+        "section_element_count": 1,
+        "turns": [
+          1.0
+        ],
+        "gains": [
+          1.0
+        ],
+        "turn_gain_products": [
+          1.0
+        ],
+        "summed_turn_gain_multiplier": 1.0,
+        "polarity": "positive",
+        "series_parallel_choice_present": false
+      },
+      "discrete_comparison": {
+        "simple_choices": [
+          {
+            "choice": "open_or_missing_single_section",
+            "equivalent_correction_fraction": -1.0,
+            "resulting_response_scale": 0.0
+          },
+          {
+            "choice": "single_section_polarity_reversal",
+            "equivalent_correction_fraction": -2.0,
+            "resulting_response_scale": -1.0
+          },
+          {
+            "choice": "one_additional_identical_series_turn",
+            "equivalent_correction_fraction": 1.0,
+            "resulting_response_scale": 2.0
+          }
+        ],
+        "matching_simple_choices": [],
+        "implied_turn_gain_multiplier": -52.99500490603694,
+        "nearest_integer_turn_gain_multiplier": -53,
+        "distance_to_nearest_integer": 0.004995093963060526,
+        "per_reference_verdict": "NONE",
+        "reason": "The shipped circuit has one section at one positive turn and unit gain, so it has no series-parallel branch choice. The projection matches neither an open section, a polarity reversal, nor one additional identical series turn; its much larger negative scale is not a shipped discrete choice."
+      }
+    },
+    {
+      "reference": "22086/43",
+      "shot": 22086,
+      "slice_index": 43,
+      "projection_explained_fraction_of_full_squared_magnitude": 0.14405290383222777,
+      "stored_circuit_one_based": 83,
+      "stored_response_column_zero_based": 82,
+      "stored_driven_current_a": 779.3143310546875,
+      "equivalent_current_correction_a": -21266.74870153816,
+      "correction_fraction_of_stored_driven_current": -27.289051226296248,
+      "implied_total_current_a": -20487.434370483472,
+      "implied_response_scale": -26.289051226296248,
+      "shipped_definition": {
+        "circuit_assignment_path": "efm/fcoil_circ",
+        "driven_current_path": "efm/fcoil_c",
+        "turns_path": "efm/fcoil_turns",
+        "gain_path": "efm/fcoil_xmult",
+        "section_element_indices_zero_based": [
+          919
+        ],
+        "section_element_count": 1,
+        "turns": [
+          1.0
+        ],
+        "gains": [
+          1.0
+        ],
+        "turn_gain_products": [
+          1.0
+        ],
+        "summed_turn_gain_multiplier": 1.0,
+        "polarity": "positive",
+        "series_parallel_choice_present": false
+      },
+      "discrete_comparison": {
+        "simple_choices": [
+          {
+            "choice": "open_or_missing_single_section",
+            "equivalent_correction_fraction": -1.0,
+            "resulting_response_scale": 0.0
+          },
+          {
+            "choice": "single_section_polarity_reversal",
+            "equivalent_correction_fraction": -2.0,
+            "resulting_response_scale": -1.0
+          },
+          {
+            "choice": "one_additional_identical_series_turn",
+            "equivalent_correction_fraction": 1.0,
+            "resulting_response_scale": 2.0
+          }
+        ],
+        "matching_simple_choices": [],
+        "implied_turn_gain_multiplier": -26.289051226296248,
+        "nearest_integer_turn_gain_multiplier": -26,
+        "distance_to_nearest_integer": 0.28905122629624813,
+        "per_reference_verdict": "NONE",
+        "reason": "The shipped circuit has one section at one positive turn and unit gain, so it has no series-parallel branch choice. The projection matches neither an open section, a polarity reversal, nor one additional identical series turn; its much larger negative scale is not a shipped discrete choice."
+      }
+    }
+  ],
+  "per_circuit_consistency": {
+    "83": {
+      "reference_count": 5,
+      "references": [
+        "21978/35",
+        "21983/35",
+        "21985/51",
+        "21989/55",
+        "22086/43"
+      ],
+      "implied_response_scale_minimum": -52.99500490603694,
+      "implied_response_scale_maximum": -7.259178669094224,
+      "implied_response_scale_span": 45.735826236942714,
+      "common_discrete_scale_present": false
+    },
+    "84": {
+      "reference_count": 1,
+      "references": [
+        "21986/46"
+      ],
+      "implied_response_scale_minimum": -7.054313787987173,
+      "implied_response_scale_maximum": -7.054313787987173,
+      "implied_response_scale_span": 0.0,
+      "common_discrete_scale_present": false
+    }
+  },
+  "pattern_score_context": {
+    "conductor_wiring_cohort_mean": 0.11063358891913833,
+    "wall_cohort_mean": 0.09485726980527348,
+    "absolute_score_gap": 0.015776319113864845,
+    "interpretation": "The near-tied cohort means are carried without a separation claim; this projection check cannot separate conductor wiring from wall structure on its own."
+  },
+  "verdict": {
+    "discrete_wiring_difference": "NONE",
+    "references_with_plausible_discrete_difference": 0,
+    "references_checked": 6,
+    "statement": "None of the six equivalent current corrections corresponds to a plausible discrete difference in the shipped one-section, one-turn, unit-gain circuit definitions. Circuit 83 also demands different scales across its five references, which a fixed wiring choice cannot do.",
+    "conductor_wall_separation": "NOT_ESTABLISHED",
+    "fitted_current_authored": false,
+    "repair_authored": false
+  }
+}

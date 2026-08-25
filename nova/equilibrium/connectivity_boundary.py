@@ -38,8 +38,9 @@ Method (the connectivity read, re-expressed on device):
   never floods, so the lobe — and the radii read off it — are unaffected.  The
   Boolean class and its signed margin use that same pair unless an exact
   comparator candidate table and wall extremum are supplied.  In that case only
-  the class operands are replaced; the connectivity boundary remains unchanged,
-  and a wall extremum outside the X-point height band is removed by the
+  the class operands are replaced; the connectivity boundary remains unchanged.
+  Typed saddles outside the wall polygon are masked before selection, and a wall
+  extremum outside the surviving X-point height band is removed by the
   private-flux-shadow rule.
 
 * **LCFS radii.**  Read at ψ_lcfs = ψ_axis + lcfs_norm·(ψ_bnd − ψ_axis) by a
@@ -122,6 +123,52 @@ def _argmax_exact(values):
 def _argmin_exact(values):
     """Return the first minimum index without a default-dtype seed."""
     return _arg_extreme(values, maximize=False)
+
+
+def _points_inside_polygon(point_r, point_z, polygon_r, polygon_z):
+    """Test fixed-shape points against a polygon, including its boundary."""
+    point_r = jnp.asarray(point_r)
+    point_z = jnp.asarray(point_z)
+    polygon_r = jnp.asarray(polygon_r, dtype=point_r.dtype)
+    polygon_z = jnp.asarray(polygon_z, dtype=point_z.dtype)
+    previous_r = jnp.roll(polygon_r, 1)
+    previous_z = jnp.roll(polygon_z, 1)
+
+    query_r = point_r[..., None]
+    query_z = point_z[..., None]
+    straddles = (polygon_z > query_z) != (previous_z > query_z)
+    edge_height = previous_z - polygon_z
+    safe_height = jnp.where(edge_height == 0.0, 1.0, edge_height)
+    crossing_r = (previous_r - polygon_r) * (
+        query_z - polygon_z
+    ) / safe_height + polygon_r
+    inside = jnp.sum(straddles & (query_r < crossing_r), axis=-1) % 2 == 1
+
+    edge_r = previous_r - polygon_r
+    edge_z = previous_z - polygon_z
+    edge_length2 = edge_r**2 + edge_z**2
+    safe_length2 = jnp.where(edge_length2 == 0.0, 1.0, edge_length2)
+    projection = jnp.clip(
+        ((query_r - polygon_r) * edge_r + (query_z - polygon_z) * edge_z)
+        / safe_length2,
+        0.0,
+        1.0,
+    )
+    nearest_r = polygon_r + projection * edge_r
+    nearest_z = polygon_z + projection * edge_z
+    coordinate_scale = jnp.maximum(
+        1.0,
+        jnp.maximum(jnp.max(jnp.abs(polygon_r)), jnp.max(jnp.abs(polygon_z))),
+    )
+    tolerance = jnp.maximum(
+        jnp.asarray(1.0e-12, dtype=point_r.dtype),
+        16.0 * jnp.finfo(point_r.dtype).eps * coordinate_scale,
+    )
+    on_boundary = jnp.any(
+        ((query_r - nearest_r) ** 2 + (query_z - nearest_z) ** 2) <= tolerance**2,
+        axis=-1,
+    )
+    return inside | on_boundary
 
 
 #: static count of X-point candidate slots the stencil classifier fills (a
@@ -268,6 +315,8 @@ def _read_ingredients(
     operands, and the X-candidate diagnostics. ``classification_x`` carries an
     exact candidate table and ``classification_wall`` its selected wall
     extremum; they must be supplied together and affect only the class read.
+    The typed table stays fixed-shape while candidates outside the polygon
+    described by ``wall_r`` / ``wall_z`` are made ineligible.
     """
     if (classification_x is None) != (classification_wall is None):
         raise ValueError("classification candidates and wall must be supplied together")
@@ -532,7 +581,11 @@ def _read_ingredients(
     else:
         supplied_x = jnp.asarray(classification_x, dtype=psi2d.dtype)
         supplied_wall = jnp.asarray(classification_wall, dtype=psi2d.dtype)
-        supplied_x_valid = jnp.all(jnp.isfinite(supplied_x[:, :3]), axis=1)
+        supplied_x_present = jnp.all(jnp.isfinite(supplied_x[:, :3]), axis=1)
+        supplied_x_inside_wall = _points_inside_polygon(
+            supplied_x[:, 0], supplied_x[:, 1], wall_r, wall_z
+        )
+        supplied_x_valid = supplied_x_present & supplied_x_inside_wall
         supplied_x_flux = jnp.where(supplied_x_valid, supplied_x[:, 2], psi_axis)
         supplied_x_level = (supplied_x_flux - psi_axis) / span_safe
         class_x_index = _argmin_exact(
@@ -577,6 +630,9 @@ def _read_ingredients(
         "class_x_valid": class_x_valid,
         "class_x_state": class_x_state,
         "class_wall_shadowed": class_wall_shadowed,
+        "class_x_inside_wall": supplied_x_inside_wall
+        if classification_x is not None
+        else jnp.ones((_K_XCAND,), dtype=bool),
         "x_bind_valid": x_bind_valid,
         "x_bind_state": x_bind_state,
         "u_x": u_x,
@@ -623,9 +679,10 @@ def traced_boundary_read(
     NaN default falls every node back to bilerp, so the read is unchanged).
     ``classification_x`` and ``classification_wall`` optionally supply the
     exact saddle table and selected wall extremum used by the Boolean topology
-    read. Their normalised flux difference defines ``class_margin`` after the
-    vertical private-flux shadow is applied; they do not change ``s_star``,
-    ``psi_bnd``, radii, or the connected core.
+    read. Typed saddles outside the ``wall_r`` / ``wall_z`` polygon are masked
+    before selection. Their normalised flux difference defines ``class_margin``
+    after the vertical private-flux shadow is applied; they do not change
+    ``s_star``, ``psi_bnd``, radii, or the connected core.
 
     Returns a dict of fixed-shape arrays: ``found`` (bool — a valid closed
     axis-enclosing level exists), ``psi_axis``, ``psi_out``, ``psi_bnd`` (the
@@ -817,10 +874,14 @@ def traced_margin_candidate_diagnostics(
     )
 
     typed_present = jnp.all(jnp.isfinite(supplied_x[:, :3]), axis=1)
+    typed_inside_wall = _points_inside_polygon(
+        supplied_x[:, 0], supplied_x[:, 1], wall_r, wall_z
+    )
+    typed_eligible = typed_present & typed_inside_wall
     typed_flux = jnp.where(typed_present, supplied_x[:, 2], ing["psi_axis"])
     typed_level = (typed_flux - ing["psi_axis"]) / ing["span_safe"]
-    selected_index = _argmin_exact(jnp.where(typed_present, typed_level, jnp.inf))
-    selected_present = typed_present[selected_index]
+    selected_index = _argmin_exact(jnp.where(typed_eligible, typed_level, jnp.inf))
+    selected_present = typed_eligible[selected_index]
     selected_candidate = jnp.where(
         selected_present,
         supplied_x[selected_index],
@@ -847,7 +908,10 @@ def traced_margin_candidate_diagnostics(
         "outward_flux_span": ing["span"],
         "typed_candidates": supplied_x,
         "typed_candidate_present": typed_present,
+        "typed_candidate_inside_wall": typed_inside_wall,
+        "typed_candidate_eligible": typed_eligible,
         "typed_candidate_count": jnp.sum(typed_present, dtype=jnp.int32),
+        "typed_candidate_eligible_count": jnp.sum(typed_eligible, dtype=jnp.int32),
         "selected_typed_candidate_index": selected_index,
         "selected_typed_candidate_present": selected_present,
         "selected_typed_candidate": selected_candidate,

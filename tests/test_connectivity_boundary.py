@@ -227,6 +227,69 @@ def test_jit_vmap_grad_safe_and_fixed_shape():
     assert np.isfinite(float(g))
 
 
+def test_typed_saddle_selector_masks_points_outside_wall_polygon():
+    """A lower-level saddle inside the wall bounds but outside its polygon loses."""
+    configure_dtypes()
+    psi, rg, zg, axis, _lr, _lz, _inside = _limited_field(nr=41, nz=41)
+    wall_r = np.asarray([0.5, 1.0, 1.5, 1.0, 0.5])
+    wall_z = np.asarray([0.0, -0.8, 0.0, 0.8, 0.0])
+    rr, zz = np.meshgrid(rg, zg)
+    inside = _inside_polygon(rr.ravel(), zz.ravel(), wall_r, wall_z).reshape(zz.shape)
+    psi_axis = float(psi[np.argmin(abs(zg)), np.argmin(abs(rg - axis[0]))])
+    edge = np.concatenate([psi[0], psi[-1], psi[:, 0], psi[:, -1]])
+    psi_out = edge[np.argmax(abs(edge - psi_axis))]
+    span = psi_out - psi_axis
+
+    candidates = jnp.asarray(
+        [
+            [0.55, 0.60, psi_axis + 0.20 * span, 0.0],
+            [1.00, -0.50, psi_axis + 0.40 * span, 0.0],
+        ]
+    )
+    wall_candidate = jnp.asarray([1.50, 0.0, psi_axis + 0.60 * span])
+    wall_flux = jax.vmap(
+        lambda r, z: cb._bilerp(
+            jnp.asarray(psi), jnp.asarray(rg), jnp.asarray(zg), r, z
+        )
+    )(jnp.asarray(wall_r), jnp.asarray(wall_z))
+
+    def diagnose(typed_candidates):
+        return cb.traced_margin_candidate_diagnostics(
+            jnp.asarray(psi),
+            jnp.asarray(rg),
+            jnp.asarray(zg),
+            jnp.asarray(inside),
+            jnp.asarray(axis[0]),
+            jnp.asarray(axis[1]),
+            32,
+            10,
+            jnp.asarray(wall_r),
+            jnp.asarray(wall_z),
+            wall_flux,
+            typed_candidates,
+            wall_candidate,
+        )
+
+    diagnostic = diagnose(candidates)
+    assert np.asarray(diagnostic["typed_candidate_inside_wall"]).tolist() == [
+        False,
+        True,
+    ]
+    assert int(diagnostic["selected_typed_candidate_index"]) == 1
+    np.testing.assert_allclose(
+        np.asarray(diagnostic["selected_typed_candidate"][:2]),
+        [1.0, -0.5],
+        rtol=0.0,
+        atol=0.0,
+    )
+    assert float(diagnostic["selected_x_normalized_flux_operand"]) == pytest.approx(0.4)
+    assert float(diagnostic["class_margin"]) == pytest.approx(0.2)
+
+    batched = jax.vmap(diagnose)(jnp.stack((candidates, candidates)))
+    assert np.asarray(batched["selected_typed_candidate_index"]).tolist() == [1, 1]
+    assert np.asarray(batched["typed_candidate_eligible"]).shape == (2, 2)
+
+
 def test_module_is_contour_free():
     """Imports no contour / ndimage machinery and calls no argwhere / label."""
     tree = ast.parse(inspect.getsource(cb))

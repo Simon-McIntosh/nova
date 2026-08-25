@@ -151,6 +151,25 @@
     rather than of the root's absence. The single defector is the sharpest available discriminator and
     should be treated as such rather than averaged away.</p>
 
+    <p><strong>Prior art, cited rather than re-derived: imas-efit met this exact symptom and named
+    the mechanism.</strong> A prior-art map of that repository's limited-versus-diverted work
+    (<code>~/.config/reckon/crew/reports/efit-dual-branch-map.md</code>) reports that its retrospective
+    found the diverted majority getting <em>stuck in the limiter basin</em> — the same shape as our
+    limited terminals — and that a <strong>continuous, fixed-direction separatrix-boundary drag</strong>
+    added to the natural iteration let them escape at a single solve. The measured effect is large:
+    one pulse dropped from 57 solves over 15 slices to 17 solves and 24.9 s once transient marginality
+    stopped arming a two-branch fork. So multiplicity with a limiter-basin attractor is not a
+    speculative candidate here; it is the account that a mature implementation of the same problem
+    converged on, and it comes with a continuous escape rather than a discrete one.</p>
+
+    <p>Two cautions from the same map. Its drag is specific to that code's Picard boundary
+    normalisation and <strong>cannot be copied mechanically into a Newton residual</strong> — the idea
+    ports, the implementation does not. And its branch <em>selector</em> is a hard hierarchy of
+    convergence, realisation, acceptability, chi-squared separation, wall-breach and a categorical
+    temporal anchor: referentially pure, but not continuous in either branch flux map. So prior art
+    supplies an escape mechanism and a qualification discipline, and supplies no differentiable
+    selection rule at all.</p>
+
     <p><strong>Done when</strong> the solver's failure to reach the admitted fixed point is attributed,
     reporting: the terminal state and residual of a solve <em>seeded at</em> the analytic solution, so
     whether the iteration stays at a fixed point it starts on is answered directly; the same from

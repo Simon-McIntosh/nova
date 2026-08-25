@@ -48,6 +48,16 @@ Design intent: this is the GPU inner-loop kernel for the batched corpus labeller
 (a ``jax.vmap`` over slices sharing one campaign grid).  It runs on CPU today (no
 CUDA jaxlib) with identical semantics; the device is chosen by the installed
 jaxlib, not by this code.
+
+Component labelling exposes the topology distinction explicitly. The scan path
+labels four-connected cells on a rectangular tensor lattice. The plasma mesh
+shipped by the package is instead hexagonal and half-offset, so its component
+path consumes the centre-first six-neighbour rings from
+:func:`nova.geometry.hexstencil.hex_stencil` or the identically packed trimmed
+mesh tessellation. Near a saddle pinch, a diagonal hex neck can remain connected
+even though the rectangular four-neighbour interpretation severs it; using the
+rectangular labels there can therefore change which cells are classed as public
+or private flux.
 """
 
 from __future__ import annotations
@@ -66,6 +76,8 @@ _SQRT2 = 2.0**0.5
 __all__ = [
     "flood_fill_core",
     "flood_fill_core_with_steps",
+    "label_hex_connected_components",
+    "label_hex_connected_components_with_steps",
     "label_connected_components",
     "label_connected_components_with_steps",
     "private_flux_mask",
@@ -125,6 +137,29 @@ def _fill_label_segments(
         _compose_segment_minimum, elements, axis=axis, reverse=True
     )[0]
     return jnp.where(confined, jnp.minimum(forward, backward), 0)
+
+
+def _iterate_component_labels(
+    confined: jnp.ndarray, n_iter: int, propagate
+) -> tuple[jnp.ndarray, jnp.ndarray]:
+    """Propagate canonical minimum labels to a fixed point."""
+    initial = jnp.arange(confined.size, dtype=jnp.int32).reshape(confined.shape) + 1
+    initial = jnp.where(confined, initial, 0)
+
+    def condition(state):
+        step, labels, previous = state
+        return (step < n_iter) & jnp.any(labels != previous)
+
+    def body(state):
+        step, labels, _previous = state
+        return step + 1, propagate(labels), labels
+
+    step, labels, _previous = jax.lax.while_loop(
+        condition,
+        body,
+        (jnp.asarray(0, dtype=jnp.int32), initial, jnp.zeros_like(initial)),
+    )
+    return labels, step
 
 
 @partial(jax.jit, static_argnums=(2,))
@@ -190,31 +225,68 @@ def label_connected_components_with_steps(
     Labels are stable across execution order and need not be consecutive. The
     scalar step count is an execution diagnostic.
     """
-    initial = jnp.arange(confined.size, dtype=jnp.int32).reshape(confined.shape) + 1
-    initial = jnp.where(confined, initial, 0)
 
-    def condition(state):
-        step, labels, previous = state
-        return (step < n_iter) & jnp.any(labels != previous)
-
-    def body(state):
-        step, labels, _previous = state
+    def propagate(labels):
         row_filled = _fill_label_segments(labels, confined, axis=1)
-        next_labels = _fill_label_segments(row_filled, confined, axis=0)
-        return step + 1, next_labels, labels
+        return _fill_label_segments(row_filled, confined, axis=0)
 
-    step, labels, _previous = jax.lax.while_loop(
-        condition,
-        body,
-        (jnp.asarray(0, dtype=jnp.int32), initial, jnp.zeros_like(initial)),
-    )
-    return labels, step
+    return _iterate_component_labels(confined, n_iter, propagate)
 
 
 @partial(jax.jit, static_argnums=(1,))
 def label_connected_components(confined: jnp.ndarray, n_iter: int) -> jnp.ndarray:
     """Return canonical labels for every 4-connected confined component."""
     labels, _steps = label_connected_components_with_steps(confined, n_iter)
+    return labels
+
+
+def _propagate_hex_ring_minima(
+    labels: jnp.ndarray, confined: jnp.ndarray, rings: jnp.ndarray
+) -> jnp.ndarray:
+    """Propagate labels through centre-first six-neighbour rings once."""
+    flat_labels = labels.reshape(-1)
+    flat_confined = confined.reshape(-1)
+    ring_is_open = flat_confined[rings] & flat_confined[rings[:, :1]]
+    sentinel = jnp.asarray(jnp.iinfo(labels.dtype).max, dtype=labels.dtype)
+    ring_labels = jnp.where(ring_is_open, flat_labels[rings], sentinel)
+    ring_minimum = jnp.min(ring_labels, axis=1, keepdims=True)
+    propagated = jnp.where(ring_is_open, ring_minimum, sentinel)
+    return flat_labels.at[rings].min(propagated).reshape(labels.shape)
+
+
+@partial(jax.jit, static_argnums=(2,))
+def label_hex_connected_components_with_steps(
+    confined: jnp.ndarray, rings: jnp.ndarray, n_iter: int
+) -> tuple[jnp.ndarray, jnp.ndarray]:
+    """Return canonical labels for components on a hexagonal plasma mesh.
+
+    ``rings`` follows :func:`nova.geometry.hexstencil.hex_stencil`: every row
+    contains one centre flat index followed by its six touching neighbours.
+    The same centre-first rows are produced by the trimmed plasma mesh's
+    tessellation, so component labelling consumes the topology used by the null
+    search and quadratic derivative operator instead of interpreting the array
+    carrying the cells as a rectangular raster.
+
+    Every confined cell starts with its one-based flat index. A fixed-shape
+    scatter-min propagates the minimum through each open ring until
+    :func:`jax.lax.while_loop` reaches a fixed point. A ring whose centre is not
+    confined is closed: its neighbours cannot connect through a missing cell.
+    Zero remains reserved for unconfined cells. ``n_iter`` is a static safety
+    cap; the number of cells is sufficient for any finite ring graph.
+    """
+    return _iterate_component_labels(
+        confined,
+        n_iter,
+        lambda labels: _propagate_hex_ring_minima(labels, confined, rings),
+    )
+
+
+@partial(jax.jit, static_argnums=(2,))
+def label_hex_connected_components(
+    confined: jnp.ndarray, rings: jnp.ndarray, n_iter: int
+) -> jnp.ndarray:
+    """Return canonical labels for every six-neighbour confined component."""
+    labels, _steps = label_hex_connected_components_with_steps(confined, rings, n_iter)
     return labels
 
 

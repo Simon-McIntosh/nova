@@ -392,12 +392,12 @@ def measure() -> dict[str, Any]:
         projected_column_comparison["maximum_relative_column_error"] <= 2.0e-6
         and abs(projected_column_comparison["fitted_scale_factor"] - 1.0) <= 2.0e-6
     )
-    restored_direction = corrected_comparison["angle_degrees"] < projected_comparison[
-        "angle_degrees"
-    ] and abs(np.log(corrected_comparison["compared_to_reference_norm_ratio"])) < abs(
-        np.log(projected_comparison["compared_to_reference_norm_ratio"])
+    restored_direction = bool(
+        corrected_comparison["angle_degrees"] < projected_comparison["angle_degrees"]
+        and abs(np.log(corrected_comparison["compared_to_reference_norm_ratio"]))
+        < abs(np.log(projected_comparison["compared_to_reference_norm_ratio"]))
     )
-    converged = float(corrected_result.exact_residual) <= 1.0e-10
+    converged = bool(float(corrected_result.exact_residual) <= 1.0e-10)
     if not exact_matches_finite_difference:
         raise RuntimeError("exact-residual Jacobian failed its finite-difference check")
     if not projected_matches_own_finite_difference:

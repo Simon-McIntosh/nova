@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T20:42:08",
+  "updated": "2026-08-25T20:58:53",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -36597,9 +36597,103 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T183006044953-dual-stencil-null-sweep",
+        "plan": "primary-xpoint-evidence",
+        "section": "\u00a72",
+        "node": "dual-stencil-null-sweep",
+        "node_definition": {
+          "done_when": "THE EXPOSURE IS CONCRETE, verify it first: ring_sign_changes at nova/equilibrium/stencil_nulls.py:127-132 compares with strict greater-than, so a stationary point lying exactly on a shared cell edge or node produces tied samples whose comparisons collapse to false, and the winding degree can split between adjacent orbits or vanish - there is no dual lattice and no merge machinery in the module today. DEMONSTRATE the miss before repairing it: construct at least two analytic fields, one with a saddle exactly on a shared cell edge and one with a saddle exactly on a lattice node, and show the current single-family census misses or double-counts each, quoting the degree it reports. THEN IMPLEMENT THE DUAL SWEEP: the existing primal family orbits each centroid over its ring nodes; add the dual family orbiting each node over its surrounding centroid values - the same gradient_cell_degree machinery on the staggered lattice, reusing the existing ring packing rather than writing a second winding count. MERGE BY ADJACENCY: two detections are duplicates when their sub-grid refined positions - the existing quadratic refinement, position only - agree within half a cell pitch, and the merge must be fixed-shape, mask never compact, jit and vmap safe, with a stated capacity per index type. Prove on a generic interior saddle that the dual sweep does NOT invent a duplicate, on the two boundary constructions that exactly one merged candidate survives with the correct index, and add both as tests. THE REAL-DATA ACCEPTANCE TEST: re-run the ITER census from benchmarks/iter_saddle_resolution.py on iterhybrid_cocos17.eqdsk with the dual sweep - the boundary-implied X-point at [5.280813553, -3.911953897] was NEVER DETECTED by the single family across a 129x129 grid that covers it, and whether the dual family finds it is decisive evidence either for this guard or for a data fault, so report the outcome plainly either way. Report census cost per slice against the existing null search at 33x33 and 129x129, compilation excluded. Do not switch production over; land the kernel, tests, demonstrations and the ITER outcome.",
+          "estimated_hours": 5.0,
+          "goal": "Guard the stationary-point census against nulls sitting exactly on a cell partition, by sweeping a second staggered orbit family - orbits around the nodes using centroid values, dual to the existing orbits around centroids using node values - and merging duplicate detections by adjacency.",
+          "id": "dual-stencil-null-sweep",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/dual-stencil-null-sweep.md",
+          "plan": "primary-xpoint-evidence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/stencil_nulls.py",
+            "tests/test_stencil_nulls_dual_sweep.py",
+            "docs/figures/primary-xpoint-evidence/dual-stencil-null-sweep.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "hex-stencil",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T18:31:43Z",
+        "completed_at": "2026-08-25T18:58:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1585,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1585,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "bbb2fcce8e326519de428ede15561722c4baefc8",
+        "commits": [
+          "46e5d9b8"
+        ],
+        "changed_lines": {
+          "added": 333,
+          "removed": 27,
+          "files": 3
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/dual-stencil-null-sweep.md",
+        "scope_changed": false,
+        "session_id": "01a03a31-5926-7fa0-b65a-e386d969a28e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9809664,
+            "cached_input_tokens_cumulative": 9809664,
+            "input_tokens": 10000142,
+            "input_tokens_cumulative": 10000142,
+            "output_tokens": 30666,
+            "output_tokens_cumulative": 30666,
+            "reasoning_output_tokens": 9164,
+            "reasoning_output_tokens_cumulative": 9164
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 873
+    "_version": 874
   }
 }

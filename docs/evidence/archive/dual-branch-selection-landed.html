@@ -292,6 +292,31 @@
     a small cohort. The mechanism results — classification unambiguous, requested class not creating a
     root — are structural and independent of cohort size.</p>
 
+    <h2 id="rebaseline">The pinned contrast is rebaselined under the topology chain</h2>
+
+    <p><strong>Node <code>margin-artifact-regeneration</code>, commit <code>6270a879</code>, gate PASSED,
+    2026-08-25.</strong> Held deliberately while the containment, limiter and partition repairs landed,
+    then regenerated once under a two-sided gate that its own first run enforced fail-closed.</p>
+
+    <p><strong>The separation the gate proved.</strong> All <strong>72 pure-arm residual values</strong>
+    and every declared pure solve semantic are exactly unchanged — the production solve reproduces
+    bit-for-bit. Exactly <strong>36 mixed-arm residuals</strong> moved, on precisely the three references
+    whose grading-penalty operand <code>max(&minus;class_margin, 0)</code> changed under the repairs:
+    21985/51 (zero &rarr; 0.2069 active), 21986/46 (0.0066 &rarr; 0.1551), 21989/55 (corrected active
+    sequence ending 0.1614). The margin-graded arm consumes the margin in step selection, so the repaired
+    margins <em>necessarily</em> move its trajectory — the repair flowing through, not drift.</p>
+
+    <p><strong>Headline: 21986/46 mixed re-solves limited &rarr; diverted</strong>, with
+    <code>topology_consistent</code> false &rarr; true and <code>fitted_contraction.contracts</code>
+    false &rarr; true — moving independent EFIT agreement from 7/12 to <strong>8/12</strong>. The
+    corrected margins pull the mixed arm toward the class the independent reconstruction labels.</p>
+
+    <p><strong>One operand distinction worth keeping.</strong> 22086/43 pure carries margin +&infin;
+    because its <em>wall</em> is unreachable — zero reachable wall samples — while its <em>saddle</em> is
+    connectivity-supported with three admitted candidates. Both receipts are true of different operands;
+    the margin is undefined for the wall reason alone. <code>fork-arming-economics.json</code> stays
+    retired: co-reachability removed the decision it priced.</p>
+
   </main>
 </body>
 </html>

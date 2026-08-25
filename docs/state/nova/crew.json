@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T22:16:34",
+  "updated": "2026-08-25T22:28:06",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -36880,9 +36880,104 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T180643047783-margin-artifact-regeneration",
+        "plan": "dual-branch-selection",
+        "section": "\u00a74",
+        "node": "margin-artifact-regeneration",
+        "node_definition": {
+          "done_when": "Regenerate docs/figures/dual-branch-selection/pinned-branch-contrast.json through benchmarks/pinned_branch_contrast.py and docs/figures/plateau-input-attribution/margin-frame-remeasure.json through benchmarks/diiid_forward_gs_match.py, both against current main which carries the saddle containment at 5acfe07b, the reachable-wall limiter at ba1f9473 and the partition cutover at 80706f89. MARGINS ARE EXPECTED TO CHANGE, so the gate is the corrected one this repository already established: every CLASS, count, category, boolean, converged flag and residual-sequence value must be EXACTLY identical to the prior bank, while margin fields, wall operands and shadow verdicts may move - report every moved field per reference with old and new values in a delta table. Two anchor expectations to check against the cutover receipt: 22086/43 pure margin should be non-finite with zero reachable samples, and the DIII-D terminal margin should sit at -0.3322617796735 to within 1e-12. If a residual sequence or an achieved class moves, STOP and report rather than bank, because that would mean the solve itself changed and not just the classification overlay. Do NOT regenerate docs/figures/dual-branch-selection/fork-arming-economics.json: the decision it priced was retired when co-reachability came back negative, so add no fresh numbers to a moot artifact - state that disposition in your manifest instead. Quote wall-clock for each regeneration and run benchmarks-adjacent validation only; the full test surface belongs to a sibling node.",
+          "estimated_hours": 2.0,
+          "goal": "Regenerate the two margin-bearing banked artifacts under the post-cutover production classification, because both were deliberately held while the topology chain landed and their margin columns now read stale physics.",
+          "id": "margin-artifact-regeneration",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/margin-artifact-regeneration.md",
+          "plan": "dual-branch-selection",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/figures/dual-branch-selection/pinned-branch-contrast.json",
+            "docs/figures/plateau-input-attribution/margin-frame-remeasure.json",
+            "benchmarks/pinned_branch_contrast.py",
+            "benchmarks/diiid_forward_gs_match.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "margin-remeasure",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T18:08:35Z",
+        "completed_at": "2026-08-25T20:28:03Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 8368,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "bbb2fcce8e326519de428ede15561722c4baefc8",
+        "commits": [
+          "6270a879"
+        ],
+        "changed_lines": {
+          "added": 1847,
+          "removed": 959,
+          "files": 4
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/margin-artifact-regeneration.md",
+        "scope_changed": true,
+        "session_id": "01a03818-636e-7632-bc6e-05c3a7131c93",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 19731456,
+            "cached_input_tokens_cumulative": 29148928,
+            "input_tokens": 19935986,
+            "input_tokens_cumulative": 29469653,
+            "output_tokens": 10075,
+            "output_tokens_cumulative": 44841,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 9597
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 876
+    "_version": 877
   }
 }

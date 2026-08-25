@@ -157,6 +157,55 @@
     in-vessel X-point or the argmin selector passed over it, and whether the verdict flips when the band
     is rebuilt from in-vessel candidates only.</p>
 
+    <h2 id="saddle-containment">The class selector can choose a saddle outside the machine</h2>
+
+    <p><strong>Node <code>out-of-vessel-saddle-selection</code>, commit <code>ea521829</code>, gate
+    PASSED, 2026-08-25.</strong> Found by reading the adjudication figure — no in-vessel X-point was
+    marked on either 21983/35 panel — and confirmed from the banked coordinates. This is a
+    <strong>selection</strong> failure, not a detection failure.</p>
+
+    <table>
+      <caption>21983/35: what was selected against what was available</caption>
+      <thead><tr><th scope="col">Arm</th><th scope="col">Selected (out of vessel)</th><th scope="col">Genuine in-vessel pinch</th><th scope="col">Level deficit that won</th></tr></thead>
+      <tbody>
+        <tr><td>pure</td><td>(0.4500, &minus;1.8175) @ 0.35114</td><td>(0.5424, &minus;1.2231) @ 0.45117</td><td>0.09597</td></tr>
+        <tr><td>mixed</td><td>(0.4625, +1.8037) @ 0.34819</td><td>(0.5526, +1.2740) @ 0.43499</td><td>0.08680</td></tr>
+      </tbody>
+    </table>
+
+    <p>The typed detector <em>did</em> produce correct in-vessel pinch candidates at |Z| 1.19&ndash;1.27,
+    exactly where a MAST divertor X-point belongs. The selector takes an <code>argmin</code> over
+    normalised level with <strong>no containment test</strong>, and the out-of-vessel saddles carried
+    lower levels, so they won.</p>
+
+    <p><strong>A bounding-box test would not have caught this.</strong>
+    <code>operator.wall.coordinate</code> is a closed 37-node polygon bounding to
+    R = [0.1952, 1.9000] and <strong>Z = [&minus;1.8250, +1.8250]</strong>, so a box test <em>passes</em>
+    saddles at 1.8175 and 1.8037. Only true polygon containment rejects them. Only the separate
+    connectivity-local detector receives <code>inside_limiter</code>, and its table does not feed the
+    class selector.</p>
+
+    <p><strong>The corrupted quantity is the height band, so the damage spreads.</strong> The shadow rule
+    builds its band from minimum and maximum <em>selected</em> saddle heights. Correcting 21983/35 moves
+    the pure band from [&minus;1.8175, +1.2491] to [&minus;1.2231, +1.2491] and the mixed band from
+    [&minus;1.8193, +1.8037] to [&minus;1.1935, +1.2740], and <strong>both arms flip from ADMITTED to
+    SHADOWED</strong>. Private components go from 0, area exactly 0.0, at the spurious level to
+    <strong>4 components</strong> of 0.2879687501990702 m² and 0.2121875001466833 m² at the corrected
+    levels, each wall extremum nearest one. <code>s_star</code> and <code>psi_bnd</code> also derive from
+    the selected level, so a bad saddle sets the binding level for the whole solve.</p>
+
+    <p><strong>Incidence is conditional.</strong> 1 of 3 references in this cohort. The four already
+    rejected terminals select genuine in-vessel saddles at |Z| 1.21&ndash;1.26, so the fault fires only
+    when an out-of-vessel saddle happens to carry a lower level.</p>
+
+    <p><strong>What this does to earlier claims here.</strong> The adjudication's "admitted control" does
+    not exist — all six terminals in that cohort should be shadowed, so absent margins go from 4 of 12 to
+    <strong>6 of 12</strong>. 21983/35's quoted margins of +0.00723 and +0.00773 are spurious. And
+    21985/51, 21986/46 and 21989/55 have <em>never</em> been checked for out-of-vessel selection, while
+    their margins feed the fork-arming distribution and 21989/55's sole negative margin underpins a
+    boundary-case characterisation. The four original rejections keep independent support from
+    disconnected components, which does not depend on the band.</p>
+
   </main>
 </body>
 </html>

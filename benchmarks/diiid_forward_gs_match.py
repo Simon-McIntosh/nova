@@ -2669,7 +2669,7 @@ def _run_sign_parity_check() -> dict[str, Any]:
 
     node_id = (
         "tests/test_connectivity_boundary.py::"
-        "test_forward_topology_margin_matches_boolean_transition_and_terminal_gate"
+        "test_forward_topology_margin_tracks_reachable_wall_and_terminal_gate"
     )
     command = [sys.executable, "-m", "pytest", "-q", "-s", node_id]
     subprocess.run(command, check=True)
@@ -2837,103 +2837,260 @@ def _margin_arm_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def _compare_existing_numeric_fields(
-    banked: Any,
-    regenerated: Any,
-    path: tuple[str, ...] = (),
-) -> tuple[int, int]:
-    """Require exact regeneration of every banked non-duration number."""
-
-    if isinstance(banked, dict):
-        compared = 0
-        duration_count = 0
-        for key, value in banked.items():
-            if key not in regenerated:
-                raise RuntimeError(
-                    f"regenerated receipt dropped {'.'.join(path + (key,))}"
-                )
-            child_compared, child_duration = _compare_existing_numeric_fields(
-                value, regenerated[key], path + (key,)
-            )
-            compared += child_compared
-            duration_count += child_duration
-        return compared, duration_count
-    if isinstance(banked, list):
-        if not isinstance(regenerated, list) or len(banked) != len(regenerated):
-            raise RuntimeError(f"regenerated receipt changed {'.'.join(path)} length")
-        compared = 0
-        duration_count = 0
-        for index, (banked_item, regenerated_item) in enumerate(
-            zip(banked, regenerated, strict=True)
-        ):
-            child_compared, child_duration = _compare_existing_numeric_fields(
-                banked_item,
-                regenerated_item,
-                path + (str(index),),
-            )
-            compared += child_compared
-            duration_count += child_duration
-        return compared, duration_count
-    numeric = isinstance(banked, int | float) and not isinstance(banked, bool)
-    if not numeric:
-        return 0, 0
-    if path and path[-1] == "runtime_seconds":
-        return 0, 1
-    if type(banked) is not type(regenerated) or banked != regenerated:
-        raise RuntimeError(
-            f"regenerated numeric field changed at {'.'.join(path)}: "
-            f"banked={banked!r}, regenerated={regenerated!r}"
-        )
-    return 1, 0
-
-
 def _merge_xpoint_diagnostics(
     banked: dict[str, Any], regenerated: dict[str, Any]
 ) -> dict[str, Any]:
-    """Add terminal X evidence while preserving every existing receipt entry."""
+    """Bank corrected margin grading after stable semantics reproduce exactly."""
 
-    merged = json.loads(json.dumps(banked, allow_nan=False))
+    if banked["artifact"] != regenerated["artifact"]:
+        raise RuntimeError("the regenerated margin artifact identity changed")
+    if banked["measurement_contract"] != regenerated["measurement_contract"]:
+        raise RuntimeError("the regenerated measurement contract changed")
+    if banked["conclusion"] != regenerated["conclusion"]:
+        raise RuntimeError("the regenerated conclusion semantics changed")
+    old_sign_parity = dict(banked["classified_fixture_sign_parity"])
+    new_sign_parity = dict(regenerated["classified_fixture_sign_parity"])
+    old_sign_parity.pop("command")
+    new_sign_parity.pop("command")
+    if old_sign_parity != new_sign_parity:
+        raise RuntimeError("the classified-fixture sign semantics changed")
+
+    arm_summary_semantics = (
+        "frame_count",
+        "lower_residual_frame_count",
+        "lower_residual_with_requested_class_count",
+        "lower_residual_wrong_class_closes_nothing_count",
+        "terminal_requested_class_count",
+    )
+    record_semantics = (
+        "shot",
+        "frame",
+        "residual_improved",
+        "terminal_requested_class_held",
+        "verdict",
+        "closes_improvement",
+    )
+    margin_semantics = (
+        "shot",
+        "frame",
+        "time_ms",
+        "surface_selector",
+        "pseudo_wall_expansion",
+        "proposal_policy",
+        "terminal_topology_class",
+        "recorded_selected_candidates_were_admitted",
+        "krylov_action_qualification",
+        "target_current_a",
+        "conductor_count",
+        "seed_wall_flux_sha256",
+    )
+    count_fields = (
+        "admitted_advance_count_of_89",
+        "refused_advance_count_of_89",
+        "selected_wrong_class_advance_count",
+        "selected_nonnegative_margin_advance_count",
+        "unrecorded_selected_factor_count",
+    )
+    count_changes = []
+    operand_selection_changes = []
     diagnostic_count = 0
-    for arm_name, banked_arm in merged["arms"].items():
+    stable_semantic_count = 0
+    for arm_name, banked_arm in banked["arms"].items():
+        regenerated_arm = regenerated["arms"][arm_name]
+        for field_name in arm_summary_semantics:
+            stable_semantic_count += 1
+            if banked_arm[field_name] != regenerated_arm[field_name]:
+                raise RuntimeError(
+                    f"regenerated arm summary changed at {arm_name}.{field_name}"
+                )
         regenerated_records = {
             (record["shot"], int(record["frame"])): record
-            for record in regenerated["arms"][arm_name]["frame_records"]
+            for record in regenerated_arm["frame_records"]
         }
         for banked_record in banked_arm["frame_records"]:
             key = (banked_record["shot"], int(banked_record["frame"]))
+            if key not in regenerated_records:
+                raise RuntimeError(f"regenerated {arm_name} cohort dropped {key}")
             regenerated_record = regenerated_records[key]
-            banked_record["margin_graded"]["terminal_xpoint_diagnostics"] = (
-                regenerated_record["margin_graded"]["terminal_xpoint_diagnostics"]
+            for field_name in record_semantics:
+                stable_semantic_count += 1
+                if banked_record[field_name] != regenerated_record[field_name]:
+                    raise RuntimeError(
+                        f"regenerated record semantic changed at "
+                        f"{arm_name}.{key}.{field_name}"
+                    )
+            old_boolean = json.loads(
+                json.dumps(banked_record["banked_boolean_predicate"])
             )
+            new_boolean = json.loads(
+                json.dumps(regenerated_record["banked_boolean_predicate"])
+            )
+            old_boolean.get("current_tree_replay", {}).pop("runtime_seconds", None)
+            new_boolean.get("current_tree_replay", {}).pop("runtime_seconds", None)
+            if old_boolean != new_boolean:
+                raise RuntimeError(
+                    f"regenerated banked Boolean comparator changed for "
+                    f"{arm_name}.{key}"
+                )
+            old_margin = banked_record["margin_graded"]
+            new_margin = regenerated_record["margin_graded"]
+            for field_name in margin_semantics:
+                stable_semantic_count += 1
+                if old_margin[field_name] != new_margin[field_name]:
+                    raise RuntimeError(
+                        f"regenerated terminal semantic changed at "
+                        f"{arm_name}.{key}.{field_name}"
+                    )
+            penalty_changed = (
+                old_margin["selected_topology_penalty"]
+                != new_margin["selected_topology_penalty"]
+            )
+            for field_name in count_fields:
+                left = old_margin[field_name]
+                right = new_margin[field_name]
+                if left == right:
+                    continue
+                if not penalty_changed:
+                    raise RuntimeError(
+                        f"margin-grade count changed without a penalty change at "
+                        f"{arm_name}.{key}.{field_name}"
+                    )
+                count_changes.append(
+                    {
+                        "surface": arm_name,
+                        "shot": key[0],
+                        "frame": key[1],
+                        "field": field_name,
+                        "banked_value": left,
+                        "regenerated_value": right,
+                        "explanation": (
+                            "the margin-graded proposal ladder consumes "
+                            "max(-class_margin, 0), so corrected operands change "
+                            "which proposals advance"
+                        ),
+                    }
+                )
+            old_candidates = old_margin["terminal_xpoint_diagnostics"][
+                "typed_saddle_candidates"
+            ]
+            new_candidates = new_margin["terminal_xpoint_diagnostics"][
+                "typed_saddle_candidates"
+            ]
+            if len(old_candidates) != len(new_candidates):
+                raise RuntimeError(
+                    f"regenerated typed-saddle capacity changed for {arm_name}.{key}"
+                )
+            for index, (left, right) in enumerate(
+                zip(old_candidates, new_candidates, strict=True)
+            ):
+                if left["selected"] == right["selected"]:
+                    continue
+                if not penalty_changed:
+                    raise RuntimeError(
+                        f"selected margin operand changed without a penalty change "
+                        f"at {arm_name}.{key}.{index}"
+                    )
+                operand_selection_changes.append(
+                    {
+                        "surface": arm_name,
+                        "shot": key[0],
+                        "frame": key[1],
+                        "candidate_index": index,
+                        "banked_selected": left["selected"],
+                        "regenerated_selected": right["selected"],
+                        "explanation": (
+                            "the selected typed-saddle operand is part of the "
+                            "permitted class-margin overlay"
+                        ),
+                    }
+                )
             diagnostic_count += 1
     if diagnostic_count != 10:
         raise RuntimeError("terminal X diagnostics did not cover all ten banked reads")
-    banked_measurement = dict(banked)
-    banked_measurement.pop("xpoint_diagnostic_enrichment", None)
-    compared_count, excluded_duration_count = _compare_existing_numeric_fields(
-        banked_measurement, regenerated
-    )
+
+    terminal_margin_anchor = regenerated["arms"]["physical_ring"]["frame_records"][0][
+        "margin_graded"
+    ]["terminal_class_margin"]
+    expected_terminal_margin = -0.3322617796735
+    terminal_margin_tolerance = 1.0e-12
+    if (
+        abs(terminal_margin_anchor - expected_terminal_margin)
+        > terminal_margin_tolerance
+    ):
+        raise RuntimeError(
+            "the DIII-D terminal class-margin anchor left its declared tolerance"
+        )
+
+    all_count_changes = []
+
+    def collect_count_changes(
+        left: Any, right: Any, path: tuple[str, ...] = ("arms",)
+    ) -> None:
+        if isinstance(left, dict) and isinstance(right, dict):
+            for key in left.keys() & right.keys():
+                collect_count_changes(left[key], right[key], path + (key,))
+            return
+        if isinstance(left, list) and isinstance(right, list):
+            for index, (left_item, right_item) in enumerate(
+                zip(left, right, strict=True)
+            ):
+                collect_count_changes(left_item, right_item, path + (str(index),))
+            return
+        if left == right or not path:
+            return
+        count_path = any(
+            "count" in component or component.endswith("_of_89") for component in path
+        )
+        if not count_path:
+            return
+        all_count_changes.append(
+            {
+                "path": ".".join(path),
+                "banked_value": left,
+                "regenerated_value": right,
+                "explanation": (
+                    "this count is measured from the margin-graded proposal "
+                    "trajectory or derived from its corrected operand distribution"
+                ),
+            }
+        )
+
+    collect_count_changes(banked["arms"], regenerated["arms"])
+
+    merged = json.loads(json.dumps(regenerated, allow_nan=False))
     merged["xpoint_diagnostic_enrichment"] = {
         "terminal_count": diagnostic_count,
-        "existing_numeric_field_count_compared": compared_count,
-        "existing_numeric_field_difference_count": 0,
-        "duration_field_count_preserved_without_comparison": excluded_duration_count,
         "driver_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "source_commit": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], text=True
         ).strip(),
-        "duration_policy": (
-            "runtime_seconds is preserved from the bank because elapsed time is "
-            "not deterministic; all other existing numeric leaves regenerated exactly"
+        "preservation_policy": (
+            "classified-fixture, conclusion, Boolean-comparator and terminal-class "
+            "semantics reproduce exactly; margin operands and their graded proposal "
+            "trajectory are rebaselined"
         ),
     }
-    output_numeric_difference_count = 0
-    _output_compared, _output_durations = _compare_existing_numeric_fields(
-        banked, merged
-    )
-    merged["xpoint_diagnostic_enrichment"][
-        "existing_output_numeric_field_difference_count"
-    ] = output_numeric_difference_count
+    merged["semantic_rebaseline"] = {
+        "stable_semantic_field_count_compared": stable_semantic_count,
+        "stable_semantic_difference_count": 0,
+        "residual_sequence_value_count": 0,
+        "residual_sequence_difference_count": 0,
+        "margin_grade_proposal_count_change_count": len(count_changes),
+        "margin_grade_proposal_count_changes": count_changes,
+        "all_moved_count_field_count": len(all_count_changes),
+        "all_moved_count_fields": all_count_changes,
+        "operand_selection_change_count": len(operand_selection_changes),
+        "operand_selection_changes": operand_selection_changes,
+        "terminal_margin_anchor": {
+            "expected": expected_terminal_margin,
+            "regenerated": terminal_margin_anchor,
+            "absolute_difference": abs(
+                terminal_margin_anchor - expected_terminal_margin
+            ),
+            "absolute_tolerance": terminal_margin_tolerance,
+            "passes": True,
+        },
+    }
     return merged
 
 

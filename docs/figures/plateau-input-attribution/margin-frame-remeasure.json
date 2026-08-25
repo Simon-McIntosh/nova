@@ -27,7 +27,7 @@
             "admitted_advance_count_of_89": 9,
             "current_tree_replay": {
               "count_and_residual_match_banked": true,
-              "runtime_seconds": 92.69747611321509
+              "runtime_seconds": 817.2924054542091
             },
             "frame": 179,
             "shot": "d3d_shot_00000c4a7b.parquet",
@@ -35,41 +35,41 @@
             "terminal_topology_class": "diverted"
           },
           "change_from_banked_boolean": {
-            "achieved_newton_step_equivalents": 68.77826669075806,
+            "achieved_newton_step_equivalents": 53.060892839741044,
             "admitted_advance_count": 80,
             "terminal_relative_residual": -0.965920530763803
           },
           "closes_improvement": false,
           "frame": 179,
           "margin_graded": {
-            "achieved_newton_step_equivalents": 70.51778855553978,
+            "achieved_newton_step_equivalents": 54.80041470452277,
             "admitted_advance_count_of_89": 89,
             "conductor_count": 24,
             "frame": 179,
             "krylov_action_qualification": "ACCEPTED",
-            "magnetic_axis_displacement_mm": 769.1392452671437,
+            "magnetic_axis_displacement_mm": 774.2291803363258,
             "proposal_policy": "continuous_margin_grade",
             "pseudo_wall_expansion": null,
             "recorded_selected_candidates_were_admitted": true,
             "refused_advance_count_of_89": 0,
-            "runtime_seconds": 65.12531176023185,
+            "runtime_seconds": 160.07455757888965,
             "seed_wall_flux_sha256": "6b2cad19222403fabae118c566ec39eaf0e8465434978e17da14fa05966bb75a",
             "selected_class_margin": {
               "finite_count": 89,
-              "maximum_finite": -0.025942289997136048,
-              "mean_finite": -0.2730290057016341,
-              "median_finite": -0.3324752473947954,
-              "minimum_finite": -0.43745061615848624,
+              "maximum_finite": -0.040789867646773115,
+              "mean_finite": -0.28551970589016845,
+              "median_finite": -0.3322617796735002,
+              "minimum_finite": -0.4030260312121613,
               "negative_infinity_count": 0,
               "positive_infinity_count": 0
             },
             "selected_nonnegative_margin_advance_count": 0,
             "selected_topology_penalty": {
               "finite_count": 89,
-              "maximum_finite": 0.43745061615848624,
-              "mean_finite": 0.2730290057016341,
-              "median_finite": 0.3324752473947954,
-              "minimum_finite": 0.025942289997136048,
+              "maximum_finite": 0.4030260312121613,
+              "mean_finite": 0.28551970589016845,
+              "median_finite": 0.3322617796735002,
+              "minimum_finite": 0.040789867646773115,
               "negative_infinity_count": 0,
               "positive_infinity_count": 0
             },
@@ -78,14 +78,14 @@
             "surface_selector": "physical_ring",
             "target_current_a": 1279650.1007080078,
             "terminal_axis_rz_m": [
-              1.5684145322304703,
-              -0.7721787683842366
+              1.5655078990038729,
+              -0.7766537035429293
             ],
-            "terminal_class_margin": -0.3324752473947952,
-            "terminal_relative_residual": 2.4088012926532916e-16,
+            "terminal_class_margin": -0.3322617796735004,
+            "terminal_relative_residual": 2.3538865035722157e-16,
             "terminal_topology_class": "limited",
             "terminal_xpoint_diagnostics": {
-              "class_margin_from_operands": -0.3324752473947952,
+              "class_margin_from_operands": -0.3322617796735004,
               "connectivity_admission": {
                 "admitted_candidate_count": 0,
                 "candidate_count_before_capacity": 0,
@@ -95,41 +95,41 @@
                 "retained_candidate_count": 0
               },
               "selected_x_coordinate_m": [
-                1.2764483915500846,
-                0.7061945846011524
+                1.273397130736346,
+                0.7010464877080773
               ],
-              "selected_x_flux_wb": -2.2667926370005596,
-              "selected_x_normalized_flux_operand": 0.4464464859269247,
+              "selected_x_flux_wb": -2.2761564362501527,
+              "selected_x_normalized_flux_operand": 0.4480251467500064,
               "selected_x_normalized_flux_operand_nonfinite": null,
               "selection_status": "selected_typed_saddle_not_connectivity_reachable",
               "typed_saddle_candidate_count": 1,
               "typed_saddle_candidates": [
                 {
                   "coordinate_m": [
-                    1.2764483915500846,
-                    0.7061945846011524
+                    1.273397130736346,
+                    0.7010464877080773
                   ],
                   "fitted_null_type": 0.0,
-                  "flux_wb": -2.2667926370005596,
-                  "normalized_flux_operand": 0.4464464859269247,
+                  "flux_wb": -2.2761564362501527,
+                  "normalized_flux_operand": 0.4480251467500064,
                   "selected": true
                 }
               ],
               "wall_operand": {
                 "coordinate_m": [
-                  1.437754369807204,
-                  -1.2447745358084754
+                  1.4376001489812287,
+                  -1.2447745168988193
                 ],
-                "flux_wb": -0.649806460879492,
-                "normalized_flux": 0.11397123853212947,
-                "normalized_flux_before_shadow": 0.11397123853212947,
+                "flux_wb": -0.6395244172602588,
+                "normalized_flux": 0.11576336707650596,
+                "normalized_flux_before_shadow": 0.11303254225142473,
                 "normalized_flux_nonfinite": null,
                 "shadowed": false,
                 "status": "wall_extremum_admitted"
               }
             },
             "time_ms": 3740.0,
-            "unrecorded_selected_factor_count": 14
+            "unrecorded_selected_factor_count": 35
           },
           "residual_improved": true,
           "shot": "d3d_shot_00000c4a7b.parquet",
@@ -142,7 +142,7 @@
             "admitted_advance_count_of_89": 5,
             "current_tree_replay": {
               "count_and_residual_match_banked": true,
-              "runtime_seconds": 64.99679117091
+              "runtime_seconds": 614.5017736018635
             },
             "frame": 44,
             "shot": "d3d_shot_0003ff34e7.parquet",
@@ -150,41 +150,41 @@
             "terminal_topology_class": "diverted"
           },
           "change_from_banked_boolean": {
-            "achieved_newton_step_equivalents": 85.98710792861276,
+            "achieved_newton_step_equivalents": 70.45731642342226,
             "admitted_advance_count": 84,
             "terminal_relative_residual": -3.172712569973988
           },
           "closes_improvement": false,
           "frame": 44,
           "margin_graded": {
-            "achieved_newton_step_equivalents": 87.11566183735577,
+            "achieved_newton_step_equivalents": 71.58587033216527,
             "admitted_advance_count_of_89": 89,
             "conductor_count": 24,
             "frame": 44,
             "krylov_action_qualification": "ACCEPTED",
-            "magnetic_axis_displacement_mm": 783.1666714040567,
+            "magnetic_axis_displacement_mm": 783.1666714040564,
             "proposal_policy": "continuous_margin_grade",
             "pseudo_wall_expansion": null,
             "recorded_selected_candidates_were_admitted": true,
             "refused_advance_count_of_89": 0,
-            "runtime_seconds": 66.94567140564322,
+            "runtime_seconds": 188.60850006900728,
             "seed_wall_flux_sha256": "1b50c082f80ab244ba70cfaf03d64259e497b92951df2a452326eeaad2876e43",
             "selected_class_margin": {
               "finite_count": 89,
-              "maximum_finite": -0.023860225562311155,
-              "mean_finite": -0.33259779333540584,
-              "median_finite": -0.3428396379840549,
-              "minimum_finite": -0.34284017615628515,
+              "maximum_finite": -0.022471252999853086,
+              "mean_finite": -0.30648713986767606,
+              "median_finite": -0.34141261764148945,
+              "minimum_finite": -0.3414132808224775,
               "negative_infinity_count": 0,
               "positive_infinity_count": 0
             },
             "selected_nonnegative_margin_advance_count": 0,
             "selected_topology_penalty": {
               "finite_count": 89,
-              "maximum_finite": 0.34284017615628515,
-              "mean_finite": 0.33259779333540584,
-              "median_finite": 0.3428396379840549,
-              "minimum_finite": 0.023860225562311155,
+              "maximum_finite": 0.3414132808224775,
+              "mean_finite": 0.30648713986767606,
+              "median_finite": 0.34141261764148945,
+              "minimum_finite": 0.022471252999853086,
               "negative_infinity_count": 0,
               "positive_infinity_count": 0
             },
@@ -193,14 +193,14 @@
             "surface_selector": "physical_ring",
             "target_current_a": 1182769.0064013004,
             "terminal_axis_rz_m": [
-              1.5296882970854766,
-              -0.8105087748440727
+              1.5296882970854773,
+              -0.8105087748440726
             ],
-            "terminal_class_margin": -0.3428396379840549,
-            "terminal_relative_residual": 5.957494436883967e-16,
+            "terminal_class_margin": -0.34141261764148945,
+            "terminal_relative_residual": 4.1219420968710683e-16,
             "terminal_topology_class": "limited",
             "terminal_xpoint_diagnostics": {
-              "class_margin_from_operands": -0.3428396379840549,
+              "class_margin_from_operands": -0.34141261764148945,
               "connectivity_admission": {
                 "admitted_candidate_count": 0,
                 "candidate_count_before_capacity": 0,
@@ -210,10 +210,10 @@
                 "retained_candidate_count": 0
               },
               "selected_x_coordinate_m": [
-                1.3062966458748524,
-                0.7259512704407474
+                1.3062966458748522,
+                0.7259512704407475
               ],
-              "selected_x_flux_wb": -0.6847204611423335,
+              "selected_x_flux_wb": -0.6847204611423334,
               "selected_x_normalized_flux_operand": 0.4482727040541401,
               "selected_x_normalized_flux_operand_nonfinite": null,
               "selection_status": "selected_typed_saddle_not_connectivity_reachable",
@@ -221,11 +221,11 @@
               "typed_saddle_candidates": [
                 {
                   "coordinate_m": [
-                    1.3062966458748524,
-                    0.7259512704407474
+                    1.3062966458748522,
+                    0.7259512704407475
                   ],
                   "fitted_null_type": 0.0,
-                  "flux_wb": -0.6847204611423335,
+                  "flux_wb": -0.6847204611423334,
                   "normalized_flux_operand": 0.4482727040541401,
                   "selected": true
                 }
@@ -236,15 +236,15 @@
                   -1.244771812142771
                 ],
                 "flux_wb": 0.8982262813167277,
-                "normalized_flux": 0.1054330660700852,
-                "normalized_flux_before_shadow": 0.1054330660700852,
+                "normalized_flux": 0.10686008641265067,
+                "normalized_flux_before_shadow": 0.10543306607008524,
                 "normalized_flux_nonfinite": null,
                 "shadowed": false,
                 "status": "wall_extremum_admitted"
               }
             },
             "time_ms": 1080.0,
-            "unrecorded_selected_factor_count": 1
+            "unrecorded_selected_factor_count": 16
           },
           "residual_improved": true,
           "shot": "d3d_shot_0003ff34e7.parquet",
@@ -257,7 +257,7 @@
             "admitted_advance_count_of_89": 33,
             "current_tree_replay": {
               "count_and_residual_match_banked": true,
-              "runtime_seconds": 65.73703397996724
+              "runtime_seconds": 154.02329263207503
             },
             "frame": 144,
             "shot": "d3d_shot_001554e054.parquet",
@@ -265,14 +265,14 @@
             "terminal_topology_class": "diverted"
           },
           "change_from_banked_boolean": {
-            "achieved_newton_step_equivalents": 40.78406424613997,
+            "achieved_newton_step_equivalents": 52.973604970861146,
             "admitted_advance_count": 56,
-            "terminal_relative_residual": -0.05724825145696789
+            "terminal_relative_residual": -0.05724825145696799
           },
           "closes_improvement": false,
           "frame": 144,
           "margin_graded": {
-            "achieved_newton_step_equivalents": 44.231861923675964,
+            "achieved_newton_step_equivalents": 56.42140264839714,
             "admitted_advance_count_of_89": 89,
             "conductor_count": 24,
             "frame": 144,
@@ -282,40 +282,40 @@
             "pseudo_wall_expansion": null,
             "recorded_selected_candidates_were_admitted": true,
             "refused_advance_count_of_89": 0,
-            "runtime_seconds": 63.708210565149784,
+            "runtime_seconds": 227.31581001798622,
             "seed_wall_flux_sha256": "8d36214e9a61baef2f1c285281ecb22b22ecbe98277f92ac0cddd9acf42ba825",
             "selected_class_margin": {
-              "finite_count": 68,
-              "maximum_finite": -0.0032519674601739768,
-              "mean_finite": -0.12178215953976462,
-              "median_finite": -0.17834973983707897,
-              "minimum_finite": -0.1784565963296674,
+              "finite_count": 76,
+              "maximum_finite": 7.484381559685893e-05,
+              "mean_finite": -0.48108278826062245,
+              "median_finite": -0.5857319557762858,
+              "minimum_finite": -0.5859152625475853,
               "negative_infinity_count": 0,
-              "positive_infinity_count": 21
+              "positive_infinity_count": 13
             },
-            "selected_nonnegative_margin_advance_count": 21,
+            "selected_nonnegative_margin_advance_count": 15,
             "selected_topology_penalty": {
               "finite_count": 89,
-              "maximum_finite": 0.1784565963296674,
-              "mean_finite": 0.09304704324386508,
-              "median_finite": 0.08933058436460306,
+              "maximum_finite": 0.5859152625475853,
+              "mean_finite": 0.41081335980826594,
+              "median_finite": 0.5857319557762857,
               "minimum_finite": 0.0,
               "negative_infinity_count": 0,
               "positive_infinity_count": 0
             },
-            "selected_wrong_class_advance_count": 68,
+            "selected_wrong_class_advance_count": 74,
             "shot": "d3d_shot_001554e054.parquet",
             "surface_selector": "physical_ring",
             "target_current_a": 988842.2265648842,
             "terminal_axis_rz_m": [
-              1.6008925711501374,
+              1.6008925711501376,
               -1.1054978517271523
             ],
-            "terminal_class_margin": -0.1783497398371257,
-            "terminal_relative_residual": 5.298253652413161e-16,
+            "terminal_class_margin": -0.585731955776286,
+            "terminal_relative_residual": 4.238602921930528e-16,
             "terminal_topology_class": "limited",
             "terminal_xpoint_diagnostics": {
-              "class_margin_from_operands": -0.1783497398371257,
+              "class_margin_from_operands": -0.585731955776286,
               "connectivity_admission": {
                 "admitted_candidate_count": 0,
                 "candidate_count_before_capacity": 0,
@@ -325,11 +325,11 @@
                 "retained_candidate_count": 0
               },
               "selected_x_coordinate_m": [
-                1.3134597914827002,
-                -1.5453501367849396
+                1.1174116568595887,
+                0.4279345876354008
               ],
-              "selected_x_flux_wb": 2.4334227836209594,
-              "selected_x_normalized_flux_operand": 0.2499100779540097,
+              "selected_x_flux_wb": -0.4196744490856379,
+              "selected_x_normalized_flux_operand": 0.6607577782963739,
               "selected_x_normalized_flux_operand_nonfinite": null,
               "selection_status": "selected_typed_saddle_not_connectivity_reachable",
               "typed_saddle_candidate_count": 3,
@@ -340,29 +340,29 @@
                     1.31575494573337
                   ],
                   "fitted_null_type": 1.0,
-                  "flux_wb": 0.14335229615350145,
-                  "normalized_flux_operand": 0.5796815917363715,
+                  "flux_wb": 0.14335229615350148,
+                  "normalized_flux_operand": 0.5796815917363716,
                   "selected": false
                 },
                 {
                   "coordinate_m": [
-                    1.117411656859589,
-                    0.42793458763540115
+                    1.1174116568595887,
+                    0.4279345876354008
                   ],
                   "fitted_null_type": 0.0,
-                  "flux_wb": -0.41967444908563795,
-                  "normalized_flux_operand": 0.6607577782963738,
-                  "selected": false
+                  "flux_wb": -0.4196744490856379,
+                  "normalized_flux_operand": 0.6607577782963739,
+                  "selected": true
                 },
                 {
                   "coordinate_m": [
-                    1.3134597914827002,
+                    1.3134597914827006,
                     -1.5453501367849396
                   ],
                   "fitted_null_type": 0.0,
-                  "flux_wb": 2.4334227836209594,
-                  "normalized_flux_operand": 0.2499100779540097,
-                  "selected": true
+                  "flux_wb": 2.43342278362096,
+                  "normalized_flux_operand": 0.2499100779540098,
+                  "selected": false
                 }
               ],
               "wall_operand": {
@@ -370,8 +370,8 @@
                   1.577076933006731,
                   -1.244791618726596
                 ],
-                "flux_wb": 3.6719575223068888,
-                "normalized_flux": 0.071560338116884,
+                "flux_wb": 3.6719575223068897,
+                "normalized_flux": 0.0750258225200879,
                 "normalized_flux_before_shadow": 0.071560338116884,
                 "normalized_flux_nonfinite": null,
                 "shadowed": false,
@@ -379,7 +379,7 @@
               }
             },
             "time_ms": 3240.0,
-            "unrecorded_selected_factor_count": 34
+            "unrecorded_selected_factor_count": 18
           },
           "residual_improved": true,
           "shot": "d3d_shot_001554e054.parquet",
@@ -392,7 +392,7 @@
             "admitted_advance_count_of_89": 8,
             "current_tree_replay": {
               "count_and_residual_match_banked": true,
-              "runtime_seconds": 68.66615264490247
+              "runtime_seconds": 68.07207761285827
             },
             "frame": 146,
             "shot": "d3d_shot_002495e835.parquet",
@@ -400,57 +400,57 @@
             "terminal_topology_class": "diverted"
           },
           "change_from_banked_boolean": {
-            "achieved_newton_step_equivalents": 6.501703385438866,
-            "admitted_advance_count": 35,
-            "terminal_relative_residual": -0.07576686249449707
+            "achieved_newton_step_equivalents": 7.447273846728127,
+            "admitted_advance_count": 28,
+            "terminal_relative_residual": -0.07648282867828247
           },
           "closes_improvement": false,
           "frame": 146,
           "margin_graded": {
-            "achieved_newton_step_equivalents": 8.940082593799044,
-            "admitted_advance_count_of_89": 43,
+            "achieved_newton_step_equivalents": 9.885653055088305,
+            "admitted_advance_count_of_89": 36,
             "conductor_count": 24,
             "frame": 146,
             "krylov_action_qualification": "ACCEPTED",
-            "magnetic_axis_displacement_mm": 963.8827374451974,
+            "magnetic_axis_displacement_mm": 963.5912291562295,
             "proposal_policy": "continuous_margin_grade",
             "pseudo_wall_expansion": null,
             "recorded_selected_candidates_were_admitted": true,
-            "refused_advance_count_of_89": 46,
-            "runtime_seconds": 65.92914943769574,
+            "refused_advance_count_of_89": 53,
+            "runtime_seconds": 241.1255372830201,
             "seed_wall_flux_sha256": "7d9b51aa92b4133d7c82c45ba438ced96bd7c55c82487de2fcbb64197fe7a13a",
             "selected_class_margin": {
-              "finite_count": 39,
-              "maximum_finite": 0.015150339768093712,
-              "mean_finite": -0.1318629639301379,
-              "median_finite": -0.04947431001169228,
-              "minimum_finite": -0.35202831708084314,
+              "finite_count": 36,
+              "maximum_finite": 0.0026582576944755854,
+              "mean_finite": -0.2779504412231275,
+              "median_finite": -0.29379104488617863,
+              "minimum_finite": -0.46654909155165325,
               "negative_infinity_count": 0,
-              "positive_infinity_count": 4
+              "positive_infinity_count": 0
             },
-            "selected_nonnegative_margin_advance_count": 5,
+            "selected_nonnegative_margin_advance_count": 4,
             "selected_topology_penalty": {
-              "finite_count": 43,
-              "maximum_finite": 0.35202831708084314,
-              "mean_finite": 0.11994897518705748,
-              "median_finite": 0.04373296030296803,
+              "finite_count": 36,
+              "maximum_finite": 0.46654909155165325,
+              "mean_finite": 0.27822504595467706,
+              "median_finite": 0.29379104488617863,
               "minimum_finite": 0.0,
               "negative_infinity_count": 0,
               "positive_infinity_count": 0
             },
-            "selected_wrong_class_advance_count": 38,
+            "selected_wrong_class_advance_count": 32,
             "shot": "d3d_shot_002495e835.parquet",
             "surface_selector": "physical_ring",
             "target_current_a": 1623563.1957054138,
             "terminal_axis_rz_m": [
-              1.5060936343215043,
-              -0.9416226693731788
+              1.5058556623673376,
+              -0.9412701619192249
             ],
-            "terminal_class_margin": -0.3509936591482227,
-            "terminal_relative_residual": 0.004359793724622838,
+            "terminal_class_margin": -0.46654909155165325,
+            "terminal_relative_residual": 0.0036438275408374322,
             "terminal_topology_class": "limited",
             "terminal_xpoint_diagnostics": {
-              "class_margin_from_operands": -0.3509936591482227,
+              "class_margin_from_operands": -0.46654909155165325,
               "connectivity_admission": {
                 "admitted_candidate_count": 0,
                 "candidate_count_before_capacity": 0,
@@ -460,51 +460,51 @@
                 "retained_candidate_count": 0
               },
               "selected_x_coordinate_m": [
-                0.9924187884142757,
-                1.5222503949519135
+                1.1729282632837519,
+                0.619624938652635
               ],
-              "selected_x_flux_wb": -0.4140967802783122,
-              "selected_x_normalized_flux_operand": 0.42643291755154256,
+              "selected_x_flux_wb": -1.2853936998944828,
+              "selected_x_normalized_flux_operand": 0.5442828001109203,
               "selected_x_normalized_flux_operand_nonfinite": null,
               "selection_status": "selected_typed_saddle_not_connectivity_reachable",
               "typed_saddle_candidate_count": 2,
               "typed_saddle_candidates": [
                 {
                   "coordinate_m": [
-                    0.9924187884142757,
-                    1.5222503949519135
+                    0.9927016018002671,
+                    1.5221904267564514
                   ],
                   "fitted_null_type": 1.0,
-                  "flux_wb": -0.4140967802783122,
-                  "normalized_flux_operand": 0.42643291755154256,
-                  "selected": true
+                  "flux_wb": -0.4115756158723514,
+                  "normalized_flux_operand": 0.4236180440091056,
+                  "selected": false
                 },
                 {
                   "coordinate_m": [
-                    1.1720241623723808,
-                    0.6145423971516744
+                    1.1729282632837519,
+                    0.619624938652635
                   ],
                   "fitted_null_type": 0.0,
-                  "flux_wb": -1.294586671490068,
-                  "normalized_flux_operand": 0.5471743668423623,
-                  "selected": false
+                  "flux_wb": -1.2853936998944828,
+                  "normalized_flux_operand": 0.5442828001109203,
+                  "selected": true
                 }
               ],
               "wall_operand": {
                 "coordinate_m": [
-                  1.449894567518444,
-                  -1.2447760243685384
+                  1.4485973413382174,
+                  -1.2447758653102488
                 ],
-                "flux_wb": 2.1454746889613925,
-                "normalized_flux": 0.07543925840331984,
-                "normalized_flux_before_shadow": 0.07543925840331984,
+                "flux_wb": 2.1188186436439453,
+                "normalized_flux": 0.07773370855926709,
+                "normalized_flux_before_shadow": 0.07419816846641424,
                 "normalized_flux_nonfinite": null,
                 "shadowed": false,
                 "status": "wall_extremum_admitted"
               }
             },
             "time_ms": 3180.0,
-            "unrecorded_selected_factor_count": 27
+            "unrecorded_selected_factor_count": 20
           },
           "residual_improved": true,
           "shot": "d3d_shot_002495e835.parquet",
@@ -517,7 +517,7 @@
             "admitted_advance_count_of_89": 8,
             "current_tree_replay": {
               "count_and_residual_match_banked": true,
-              "runtime_seconds": 66.65575384907424
+              "runtime_seconds": 63.86241816706024
             },
             "frame": 137,
             "shot": "d3d_shot_0040ca9bdc.parquet",
@@ -525,57 +525,57 @@
             "terminal_topology_class": "diverted"
           },
           "change_from_banked_boolean": {
-            "achieved_newton_step_equivalents": 58.24281404670772,
+            "achieved_newton_step_equivalents": 62.10248319870334,
             "admitted_advance_count": 81,
-            "terminal_relative_residual": -0.08769043968335821
+            "terminal_relative_residual": -0.08769043968335814
           },
           "closes_improvement": false,
           "frame": 137,
           "margin_graded": {
-            "achieved_newton_step_equivalents": 60.46249763088185,
+            "achieved_newton_step_equivalents": 64.32216678287746,
             "admitted_advance_count_of_89": 89,
             "conductor_count": 24,
             "frame": 137,
             "krylov_action_qualification": "ACCEPTED",
-            "magnetic_axis_displacement_mm": 909.1874259466384,
+            "magnetic_axis_displacement_mm": 909.1874259466385,
             "proposal_policy": "continuous_margin_grade",
             "pseudo_wall_expansion": null,
             "recorded_selected_candidates_were_admitted": true,
             "refused_advance_count_of_89": 0,
-            "runtime_seconds": 65.92051215656102,
+            "runtime_seconds": 163.77020291402005,
             "seed_wall_flux_sha256": "6e338e99a4b6efa71119b00fdb6a0c90e1a88e79911536d21af7ad16da65387b",
             "selected_class_margin": {
-              "finite_count": 85,
-              "maximum_finite": -0.00016392573751922157,
-              "mean_finite": -0.23023642608334394,
-              "median_finite": -0.33682972341024886,
-              "minimum_finite": -0.3400552778106992,
+              "finite_count": 89,
+              "maximum_finite": 0.0026266715146432973,
+              "mean_finite": -0.3762917003436499,
+              "median_finite": -0.4475373006022213,
+              "minimum_finite": -0.4519652276515298,
               "negative_infinity_count": 0,
-              "positive_infinity_count": 4
+              "positive_infinity_count": 0
             },
-            "selected_nonnegative_margin_advance_count": 4,
+            "selected_nonnegative_margin_advance_count": 3,
             "selected_topology_penalty": {
               "finite_count": 89,
-              "maximum_finite": 0.3400552778106992,
-              "mean_finite": 0.21988872154027225,
-              "median_finite": 0.33682972341024886,
+              "maximum_finite": 0.4519652276515298,
+              "mean_finite": 0.37636579701986017,
+              "median_finite": 0.4475373006022213,
               "minimum_finite": 0.0,
               "negative_infinity_count": 0,
               "positive_infinity_count": 0
             },
-            "selected_wrong_class_advance_count": 85,
+            "selected_wrong_class_advance_count": 86,
             "shot": "d3d_shot_0040ca9bdc.parquet",
             "surface_selector": "physical_ring",
             "target_current_a": 1629095.3674316406,
             "terminal_axis_rz_m": [
-              1.531429667394178,
-              -0.8870572489449631
+              1.5314296673941779,
+              -0.8870572489449632
             ],
-            "terminal_class_margin": -0.33682972341024897,
-            "terminal_relative_residual": 4.392956522144886e-16,
+            "terminal_class_margin": -0.4475373006022213,
+            "terminal_relative_residual": 5.168184143699866e-16,
             "terminal_topology_class": "limited",
             "terminal_xpoint_diagnostics": {
-              "class_margin_from_operands": -0.33682972341024897,
+              "class_margin_from_operands": -0.4475373006022213,
               "connectivity_admission": {
                 "admitted_candidate_count": 0,
                 "candidate_count_before_capacity": 0,
@@ -585,19 +585,19 @@
                 "retained_candidate_count": 0
               },
               "selected_x_coordinate_m": [
-                0.9935382030093896,
-                1.5212765715919843
+                1.1714079431686526,
+                0.6600331180246156
               ],
-              "selected_x_flux_wb": -0.2824293410306401,
-              "selected_x_normalized_flux_operand": 0.4234937816420484,
+              "selected_x_flux_wb": -1.0618710821858197,
+              "selected_x_normalized_flux_operand": 0.5374834297466392,
               "selected_x_normalized_flux_operand_nonfinite": null,
               "selection_status": "selected_typed_saddle_not_connectivity_reachable",
               "typed_saddle_candidate_count": 3,
               "typed_saddle_candidates": [
                 {
                   "coordinate_m": [
-                    0.8677517754317394,
-                    0.4461060272225317
+                    0.8677517754317393,
+                    0.44610602722253123
                   ],
                   "fitted_null_type": -1.0,
                   "flux_wb": -1.2729009805350258,
@@ -606,40 +606,40 @@
                 },
                 {
                   "coordinate_m": [
-                    0.9935382030093896,
+                    0.9935382030093897,
                     1.5212765715919843
                   ],
                   "fitted_null_type": 1.0,
-                  "flux_wb": -0.2824293410306401,
+                  "flux_wb": -0.2824293410306402,
                   "normalized_flux_operand": 0.4234937816420484,
-                  "selected": true
+                  "selected": false
                 },
                 {
                   "coordinate_m": [
-                    1.171407943168653,
-                    0.660033118024615
+                    1.1714079431686526,
+                    0.6600331180246156
                   ],
                   "fitted_null_type": 0.0,
-                  "flux_wb": -1.0618710821858195,
-                  "normalized_flux_operand": 0.5374834297466391,
-                  "selected": false
+                  "flux_wb": -1.0618710821858197,
+                  "normalized_flux_operand": 0.5374834297466392,
+                  "selected": true
                 }
               ],
               "wall_operand": {
                 "coordinate_m": [
-                  1.450890437740998,
+                  1.4508904377409995,
                   -1.2447761464763225
                 ],
-                "flux_wb": 2.0207547678176487,
-                "normalized_flux": 0.0866640582317994,
-                "normalized_flux_before_shadow": 0.0866640582317994,
+                "flux_wb": 2.020754767817651,
+                "normalized_flux": 0.08994612914441791,
+                "normalized_flux_before_shadow": 0.08666405823179908,
                 "normalized_flux_nonfinite": null,
                 "shadowed": false,
                 "status": "wall_extremum_admitted"
               }
             },
             "time_ms": 3000.0,
-            "unrecorded_selected_factor_count": 25
+            "unrecorded_selected_factor_count": 20
           },
           "residual_improved": true,
           "shot": "d3d_shot_0040ca9bdc.parquet",
@@ -651,22 +651,22 @@
       "lower_residual_with_requested_class_count": 0,
       "lower_residual_wrong_class_closes_nothing_count": 5,
       "margin_graded_achieved_newton_step_equivalents": {
-        "maximum": 87.11566183735577,
-        "mean": 54.253578508250484,
-        "median": 60.46249763088185,
-        "minimum": 8.940082593799044
+        "maximum": 71.58587033216527,
+        "mean": 51.403101504610184,
+        "median": 56.42140264839714,
+        "minimum": 9.885653055088305
       },
       "margin_graded_admitted_advance_count_of_89": {
         "maximum": 89.0,
-        "mean": 79.8,
+        "mean": 78.4,
         "median": 89.0,
-        "minimum": 43.0
+        "minimum": 36.0
       },
       "margin_graded_terminal_relative_residual": {
-        "maximum": 0.004359793724622838,
-        "mean": 0.0008719587449249286,
-        "median": 5.298253652413161e-16,
-        "minimum": 2.4088012926532916e-16
+        "maximum": 0.0036438275408374322,
+        "mean": 0.0007287655081678042,
+        "median": 4.238602921930528e-16,
+        "minimum": 2.3538865035722157e-16
       },
       "terminal_requested_class_count": 0
     },
@@ -701,57 +701,57 @@
             "terminal_topology_class": "diverted"
           },
           "change_from_banked_boolean": {
-            "achieved_newton_step_equivalents": 58.21751749993409,
+            "achieved_newton_step_equivalents": 52.21751749993409,
             "admitted_advance_count": 81,
-            "terminal_relative_residual": 0.009466061552580146
+            "terminal_relative_residual": 0.03812626343173982
           },
           "closes_improvement": false,
           "frame": 179,
           "margin_graded": {
-            "achieved_newton_step_equivalents": 61.4375,
+            "achieved_newton_step_equivalents": 55.4375,
             "admitted_advance_count_of_89": 89,
             "conductor_count": 24,
             "frame": 179,
             "krylov_action_qualification": "ACCEPTED",
-            "magnetic_axis_displacement_mm": 1423.6900660383221,
+            "magnetic_axis_displacement_mm": 1419.3710677991905,
             "proposal_policy": "continuous_margin_grade",
             "pseudo_wall_expansion": 0.02,
             "recorded_selected_candidates_were_admitted": true,
             "refused_advance_count_of_89": 0,
-            "runtime_seconds": 95.31428732164204,
+            "runtime_seconds": 201.27047778107226,
             "seed_wall_flux_sha256": "3dfb22227810c9f640002b6cc3ae0b26a6de9d916f679f148f6a876aa44c1428",
             "selected_class_margin": {
-              "finite_count": 62,
-              "maximum_finite": -0.05635075658031907,
-              "mean_finite": -0.4589449013813378,
-              "median_finite": -0.44472456285545736,
-              "minimum_finite": -0.5308417372768683,
+              "finite_count": 86,
+              "maximum_finite": 0.007504207826040055,
+              "mean_finite": -0.490964054376566,
+              "median_finite": -0.5339705745781912,
+              "minimum_finite": -0.5485127500490955,
               "negative_infinity_count": 0,
-              "positive_infinity_count": 27
+              "positive_infinity_count": 3
             },
-            "selected_nonnegative_margin_advance_count": 27,
+            "selected_nonnegative_margin_advance_count": 4,
             "selected_topology_penalty": {
               "finite_count": 89,
-              "maximum_finite": 0.5308417372768683,
-              "mean_finite": 0.31971442568138136,
-              "median_finite": 0.4196820072552145,
+              "maximum_finite": 0.5485127500490955,
+              "mean_finite": 0.4744990211709069,
+              "median_finite": 0.533970574578191,
               "minimum_finite": 0.0,
               "negative_infinity_count": 0,
               "positive_infinity_count": 0
             },
-            "selected_wrong_class_advance_count": 62,
+            "selected_wrong_class_advance_count": 85,
             "shot": "d3d_shot_00000c4a7b.parquet",
             "surface_selector": "pseudo_wall",
             "target_current_a": 1279650.1007080078,
             "terminal_axis_rz_m": [
-              1.4791135526934471,
-              -1.423816693206926
+              1.9193869598043367,
+              -1.442794385886778
             ],
-            "terminal_class_margin": -0.5295734642179688,
-            "terminal_relative_residual": 0.11636848392712125,
+            "terminal_class_margin": -0.5428954711521393,
+            "terminal_relative_residual": 0.14502868580628092,
             "terminal_topology_class": "limited",
             "terminal_xpoint_diagnostics": {
-              "class_margin_from_operands": -0.5295734642179688,
+              "class_margin_from_operands": -0.5428954711521393,
               "connectivity_admission": {
                 "admitted_candidate_count": 0,
                 "candidate_count_before_capacity": 0,
@@ -761,34 +761,34 @@
                 "retained_candidate_count": 0
               },
               "selected_x_coordinate_m": [
-                1.231688341323851,
-                0.2923189276976337
+                1.2402528586194568,
+                0.29877030179687114
               ],
-              "selected_x_flux_wb": -3.0389879223219403,
-              "selected_x_normalized_flux_operand": 0.5839131090158333,
+              "selected_x_flux_wb": -3.0237279240927695,
+              "selected_x_normalized_flux_operand": 0.590108317624846,
               "selected_x_normalized_flux_operand_nonfinite": null,
               "selection_status": "selected_typed_saddle_not_connectivity_reachable",
               "typed_saddle_candidate_count": 1,
               "typed_saddle_candidates": [
                 {
                   "coordinate_m": [
-                    1.231688341323851,
-                    0.2923189276976337
+                    1.2402528586194568,
+                    0.29877030179687114
                   ],
                   "fitted_null_type": 0.0,
-                  "flux_wb": -3.0389879223219403,
-                  "normalized_flux_operand": 0.5839131090158333,
+                  "flux_wb": -3.0237279240927695,
+                  "normalized_flux_operand": 0.590108317624846,
                   "selected": true
                 }
               ],
               "wall_operand": {
                 "coordinate_m": [
-                  1.3599918208443051,
+                  1.999943620379129,
                   -1.6640000247955322
                 ],
-                "flux_wb": 0.24621939455173092,
-                "normalized_flux": 0.05433964479786443,
-                "normalized_flux_before_shadow": 0.05433964479786443,
+                "flux_wb": 0.3515364994781304,
+                "normalized_flux": 0.047212846472706654,
+                "normalized_flux_before_shadow": 0.04616823695063941,
                 "normalized_flux_nonfinite": null,
                 "shadowed": false,
                 "status": "wall_extremum_admitted"
@@ -829,28 +829,28 @@
             "pseudo_wall_expansion": 0.02,
             "recorded_selected_candidates_were_admitted": true,
             "refused_advance_count_of_89": 73,
-            "runtime_seconds": 64.16994697414339,
+            "runtime_seconds": 186.2717103480827,
             "seed_wall_flux_sha256": "b030f645005fb9ced9ebdea8aaebb4913691a3e92832dfb69c06686601816a1a",
             "selected_class_margin": {
-              "finite_count": 9,
-              "maximum_finite": -0.0062338515292647,
-              "mean_finite": -0.3529805376585454,
-              "median_finite": -0.4099374577073929,
-              "minimum_finite": -0.41066778622870476,
+              "finite_count": 12,
+              "maximum_finite": 0.0340170639912592,
+              "mean_finite": -0.30109720008487345,
+              "median_finite": -0.4257616539759047,
+              "minimum_finite": -0.43714854894377947,
               "negative_infinity_count": 0,
-              "positive_infinity_count": 7
+              "positive_infinity_count": 4
             },
-            "selected_nonnegative_margin_advance_count": 7,
+            "selected_nonnegative_margin_advance_count": 5,
             "selected_topology_penalty": {
               "finite_count": 16,
-              "maximum_finite": 0.41066778622870476,
-              "mean_finite": 0.1985515524329318,
-              "median_finite": 0.1724196733547197,
+              "maximum_finite": 0.43714854894377947,
+              "mean_finite": 0.22794896656310876,
+              "median_finite": 0.2743757216045662,
               "minimum_finite": 0.0,
               "negative_infinity_count": 0,
               "positive_infinity_count": 0
             },
-            "selected_wrong_class_advance_count": 9,
+            "selected_wrong_class_advance_count": 11,
             "shot": "d3d_shot_0003ff34e7.parquet",
             "surface_selector": "pseudo_wall",
             "target_current_a": 1182769.0064013004,
@@ -858,11 +858,11 @@
               1.2836137339509746,
               -1.338180280599143
             ],
-            "terminal_class_margin": -0.41066778622870476,
+            "terminal_class_margin": -0.43714854894377947,
             "terminal_relative_residual": 0.009986452049711993,
             "terminal_topology_class": "limited",
             "terminal_xpoint_diagnostics": {
-              "class_margin_from_operands": -0.41066778622870476,
+              "class_margin_from_operands": -0.43714854894377947,
               "connectivity_admission": {
                 "admitted_candidate_count": 0,
                 "candidate_count_before_capacity": 0,
@@ -918,7 +918,7 @@
                   -1.6640000247955322
                 ],
                 "flux_wb": 0.921305202523913,
-                "normalized_flux": 0.05785375443682416,
+                "normalized_flux": 0.03137299172174947,
                 "normalized_flux_before_shadow": 0.05785375443682416,
                 "normalized_flux_nonfinite": null,
                 "shadowed": false,
@@ -943,57 +943,57 @@
             "terminal_topology_class": "diverted"
           },
           "change_from_banked_boolean": {
-            "achieved_newton_step_equivalents": 56.32565656815512,
+            "achieved_newton_step_equivalents": 56.98190656815512,
             "admitted_advance_count": 77,
-            "terminal_relative_residual": 0.03429857009672957
+            "terminal_relative_residual": 0.03429857009672918
           },
           "closes_improvement": false,
           "frame": 144,
           "margin_graded": {
-            "achieved_newton_step_equivalents": 59.70721070510388,
+            "achieved_newton_step_equivalents": 60.36346070510388,
             "admitted_advance_count_of_89": 89,
             "conductor_count": 24,
             "frame": 144,
             "krylov_action_qualification": "ACCEPTED",
-            "magnetic_axis_displacement_mm": 1370.226484660063,
+            "magnetic_axis_displacement_mm": 1370.2264846600615,
             "proposal_policy": "continuous_margin_grade",
             "pseudo_wall_expansion": 0.02,
             "recorded_selected_candidates_were_admitted": true,
             "refused_advance_count_of_89": 0,
-            "runtime_seconds": 67.27112857997417,
+            "runtime_seconds": 224.57213501096703,
             "seed_wall_flux_sha256": "5ebfce7e8c37ed70ddc0a657915bb7594a005a5ca073e4b1060acf750a09fddb",
             "selected_class_margin": {
-              "finite_count": 79,
-              "maximum_finite": -0.2496713115257958,
-              "mean_finite": -0.44575084200792536,
-              "median_finite": -0.42179411892321733,
-              "minimum_finite": -0.48299969283734995,
+              "finite_count": 83,
+              "maximum_finite": -0.11136135201078812,
+              "mean_finite": -0.44172088754246963,
+              "median_finite": -0.42755076709308265,
+              "minimum_finite": -0.48959340440793164,
               "negative_infinity_count": 0,
-              "positive_infinity_count": 10
+              "positive_infinity_count": 6
             },
-            "selected_nonnegative_margin_advance_count": 10,
+            "selected_nonnegative_margin_advance_count": 6,
             "selected_topology_penalty": {
               "finite_count": 89,
-              "maximum_finite": 0.48299969283734995,
-              "mean_finite": 0.3956664777373719,
-              "median_finite": 0.4214149188634973,
+              "maximum_finite": 0.48959340440793164,
+              "mean_finite": 0.41194195130365147,
+              "median_finite": 0.42753335783506974,
               "minimum_finite": 0.0,
               "negative_infinity_count": 0,
               "positive_infinity_count": 0
             },
-            "selected_wrong_class_advance_count": 79,
+            "selected_wrong_class_advance_count": 83,
             "shot": "d3d_shot_001554e054.parquet",
             "surface_selector": "pseudo_wall",
             "target_current_a": 988842.2265648842,
             "terminal_axis_rz_m": [
-              1.6659785907710067,
-              1.380311384968612
+              1.665978590771004,
+              1.3803113849686102
             ],
-            "terminal_class_margin": -0.42141491886349725,
-            "terminal_relative_residual": 0.1868571024038173,
+            "terminal_class_margin": -0.42753335783506935,
+            "terminal_relative_residual": 0.18685710240381692,
             "terminal_topology_class": "limited",
             "terminal_xpoint_diagnostics": {
-              "class_margin_from_operands": -0.42141491886349725,
+              "class_margin_from_operands": -0.42753335783506935,
               "connectivity_admission": {
                 "admitted_candidate_count": 0,
                 "candidate_count_before_capacity": 0,
@@ -1003,43 +1003,43 @@
                 "retained_candidate_count": 0
               },
               "selected_x_coordinate_m": [
-                1.1461992102477698,
-                -0.4502020777806969
+                1.1461992102477707,
+                -0.45020207778069576
               ],
-              "selected_x_flux_wb": -0.38487515280024387,
-              "selected_x_normalized_flux_operand": 0.4745969115371108,
+              "selected_x_flux_wb": -0.3848751528002439,
+              "selected_x_normalized_flux_operand": 0.4745969115371107,
               "selected_x_normalized_flux_operand_nonfinite": null,
               "selection_status": "selected_typed_saddle_not_connectivity_reachable",
               "typed_saddle_candidate_count": 2,
               "typed_saddle_candidates": [
                 {
                   "coordinate_m": [
-                    1.1461992102477698,
-                    -0.4502020777806969
+                    1.1461992102477707,
+                    -0.45020207778069576
                   ],
                   "fitted_null_type": 0.0,
-                  "flux_wb": -0.38487515280024387,
-                  "normalized_flux_operand": 0.4745969115371108,
+                  "flux_wb": -0.3848751528002439,
+                  "normalized_flux_operand": 0.4745969115371107,
                   "selected": true
                 },
                 {
                   "coordinate_m": [
-                    2.495228279549795,
-                    1.0001073052425342
+                    2.4952282795497953,
+                    1.0001073052425338
                   ],
                   "fitted_null_type": 0.0,
-                  "flux_wb": -0.5844016709326896,
+                  "flux_wb": -0.5844016709326904,
                   "normalized_flux_operand": 0.5175059129081294,
                   "selected": false
                 }
               ],
               "wall_operand": {
                 "coordinate_m": [
-                  1.6972996393156439,
+                  1.697299639315645,
                   1.6640000247955322
                 ],
-                "flux_wb": 1.5747008979883002,
-                "normalized_flux": 0.053181992673613565,
+                "flux_wb": 1.5747008979882997,
+                "normalized_flux": 0.04706355370204133,
                 "normalized_flux_before_shadow": 0.053181992673613565,
                 "normalized_flux_nonfinite": null,
                 "shadowed": false,
@@ -1047,7 +1047,7 @@
               }
             },
             "time_ms": 3240.0,
-            "unrecorded_selected_factor_count": 5
+            "unrecorded_selected_factor_count": 4
           },
           "residual_improved": false,
           "shot": "d3d_shot_001554e054.parquet",
@@ -1081,23 +1081,23 @@
             "pseudo_wall_expansion": 0.02,
             "recorded_selected_candidates_were_admitted": true,
             "refused_advance_count_of_89": 0,
-            "runtime_seconds": 67.04725792631507,
+            "runtime_seconds": 213.06902176816948,
             "seed_wall_flux_sha256": "ae7211ffeb3964e7fba489812ce8ae630ed3acf3d14412be675a42803ba8a530",
             "selected_class_margin": {
-              "finite_count": 85,
-              "maximum_finite": -0.18470022412613546,
-              "mean_finite": -0.47661468387148115,
-              "median_finite": -0.44991953011852587,
-              "minimum_finite": -0.5180928367259452,
+              "finite_count": 87,
+              "maximum_finite": 0.018680120069549166,
+              "mean_finite": -0.4831189268787372,
+              "median_finite": -0.4750394820324257,
+              "minimum_finite": -0.5289070181675304,
               "negative_infinity_count": 0,
-              "positive_infinity_count": 4
+              "positive_infinity_count": 2
             },
             "selected_nonnegative_margin_advance_count": 4,
             "selected_topology_penalty": {
               "finite_count": 89,
-              "maximum_finite": 0.5180928367259452,
-              "mean_finite": 0.4551937992031,
-              "median_finite": 0.4499195150857444,
+              "maximum_finite": 0.5289070181675304,
+              "mean_finite": 0.47266590121147783,
+              "median_finite": 0.47503948179840055,
               "minimum_finite": 0.0,
               "negative_infinity_count": 0,
               "positive_infinity_count": 0
@@ -1110,11 +1110,11 @@
               1.389750780640819,
               1.3793539179357923
             ],
-            "terminal_class_margin": -0.44991951508185,
+            "terminal_class_margin": -0.47503948179463784,
             "terminal_relative_residual": 0.14000643607149874,
             "terminal_topology_class": "limited",
             "terminal_xpoint_diagnostics": {
-              "class_margin_from_operands": -0.44991951508185,
+              "class_margin_from_operands": -0.47503948179463784,
               "connectivity_admission": {
                 "admitted_candidate_count": 0,
                 "candidate_count_before_capacity": 0,
@@ -1160,7 +1160,7 @@
                   1.6640000247955322
                 ],
                 "flux_wb": 1.5833815002934517,
-                "normalized_flux": 0.0536801509364917,
+                "normalized_flux": 0.028560184223703888,
                 "normalized_flux_before_shadow": 0.0536801509364917,
                 "normalized_flux_nonfinite": null,
                 "shadowed": false,
@@ -1202,28 +1202,28 @@
             "pseudo_wall_expansion": 0.02,
             "recorded_selected_candidates_were_admitted": true,
             "refused_advance_count_of_89": 0,
-            "runtime_seconds": 65.76968022622168,
+            "runtime_seconds": 161.58866401319392,
             "seed_wall_flux_sha256": "c67c744e8e29f158422a4dd0be93aefd623c6071cfc4637636ca1085748ff5ff",
             "selected_class_margin": {
-              "finite_count": 83,
-              "maximum_finite": -0.21963003959186544,
-              "mean_finite": -0.3721104428971213,
-              "median_finite": -0.3744030895205361,
-              "minimum_finite": -0.374406363820324,
+              "finite_count": 86,
+              "maximum_finite": 0.02635804341781589,
+              "mean_finite": -0.3910712898386713,
+              "median_finite": -0.4078070367247857,
+              "minimum_finite": -0.4078096210887778,
               "negative_infinity_count": 0,
-              "positive_infinity_count": 6
+              "positive_infinity_count": 3
             },
-            "selected_nonnegative_margin_advance_count": 6,
+            "selected_nonnegative_margin_advance_count": 5,
             "selected_topology_penalty": {
               "finite_count": 89,
-              "maximum_finite": 0.374406363820324,
-              "mean_finite": 0.34702434562315804,
-              "median_finite": 0.3744030895205361,
+              "maximum_finite": 0.4078096210887778,
+              "mean_finite": 0.3784546099954985,
+              "median_finite": 0.40780703672478563,
               "minimum_finite": 0.0,
               "negative_infinity_count": 0,
               "positive_infinity_count": 0
             },
-            "selected_wrong_class_advance_count": 83,
+            "selected_wrong_class_advance_count": 84,
             "shot": "d3d_shot_0040ca9bdc.parquet",
             "surface_selector": "pseudo_wall",
             "target_current_a": 1629095.3674316406,
@@ -1231,11 +1231,11 @@
               1.336947054447935,
               -1.4764460384038383
             ],
-            "terminal_class_margin": -0.3744030895205362,
+            "terminal_class_margin": -0.4078070367247857,
             "terminal_relative_residual": 1.747136781563195e-16,
             "terminal_topology_class": "limited",
             "terminal_xpoint_diagnostics": {
-              "class_margin_from_operands": -0.3744030895205362,
+              "class_margin_from_operands": -0.4078070367247857,
               "connectivity_admission": {
                 "admitted_candidate_count": 0,
                 "candidate_count_before_capacity": 0,
@@ -1281,7 +1281,7 @@
                   -1.6640000247955322
                 ],
                 "flux_wb": 2.5678835755380436,
-                "normalized_flux": 0.05125604700201342,
+                "normalized_flux": 0.017852099797763917,
                 "normalized_flux_before_shadow": 0.05125604700201342,
                 "normalized_flux_nonfinite": null,
                 "shadowed": false,
@@ -1302,8 +1302,8 @@
       "lower_residual_wrong_class_closes_nothing_count": 2,
       "margin_graded_achieved_newton_step_equivalents": {
         "maximum": 87.60798827061583,
-        "mean": 60.23512930345098,
-        "median": 61.4375,
+        "mean": 59.16637930345098,
+        "median": 60.36346070510388,
         "minimum": 8.724544139261996
       },
       "margin_graded_admitted_advance_count_of_89": {
@@ -1313,9 +1313,9 @@
         "minimum": 16.0
       },
       "margin_graded_terminal_relative_residual": {
-        "maximum": 0.1868571024038173,
-        "mean": 0.09064369489042991,
-        "median": 0.11636848392712125,
+        "maximum": 0.18685710240381692,
+        "mean": 0.09637573526626174,
+        "median": 0.14000643607149874,
         "minimum": 1.747136781563195e-16
       },
       "terminal_requested_class_count": 0
@@ -1324,7 +1324,7 @@
   "artifact": "margin_frame_remeasure",
   "classified_fixture_sign_parity": {
     "classified_fixture_count": 53,
-    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python3 -m pytest -q -s tests/test_connectivity_boundary.py::test_forward_topology_margin_matches_boolean_transition_and_terminal_gate",
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python3 -m pytest -q -s tests/test_connectivity_boundary.py::test_forward_topology_margin_tracks_reachable_wall_and_terminal_gate",
     "families": {
       "growing_saddle": {
         "classified": 19,
@@ -1348,7 +1348,7 @@
     "requested_class_held_on_every_reported_improvement": false,
     "wrong_class_lower_residual_closes_nothing_count": 7
   },
-  "driver_sha256": "c86a875d49f69ecc63de7365255628dff90c679d03b0ae23bade3b6119c3fac5",
+  "driver_sha256": "99ac01ccb5e0d51297ba588afc8943578b7b57384d62e73d0f6c492cfcd80b8f",
   "measurement_contract": {
     "banked_sources": {
       "pseudo_wall_newton_equivalents": "docs/figures/topology-preserving-continuation/conditioning-repair.json",
@@ -1368,15 +1368,537 @@
     "tuned_thresholds": 0,
     "wrong_class_rule": "lower residual in the wrong class closes nothing"
   },
-  "source_commit": "fae92c7623001fd034ad861edf1574e112b1fc0a",
+  "semantic_rebaseline": {
+    "all_moved_count_field_count": 42,
+    "all_moved_count_fields": [
+      {
+        "banked_value": 27,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.pseudo_wall.frame_records.0.margin_graded.selected_nonnegative_margin_advance_count",
+        "regenerated_value": 4
+      },
+      {
+        "banked_value": 27,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.pseudo_wall.frame_records.0.margin_graded.selected_class_margin.positive_infinity_count",
+        "regenerated_value": 3
+      },
+      {
+        "banked_value": 62,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.pseudo_wall.frame_records.0.margin_graded.selected_class_margin.finite_count",
+        "regenerated_value": 86
+      },
+      {
+        "banked_value": 62,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.pseudo_wall.frame_records.0.margin_graded.selected_wrong_class_advance_count",
+        "regenerated_value": 85
+      },
+      {
+        "banked_value": 7,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.pseudo_wall.frame_records.1.margin_graded.selected_nonnegative_margin_advance_count",
+        "regenerated_value": 5
+      },
+      {
+        "banked_value": 7,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.pseudo_wall.frame_records.1.margin_graded.selected_class_margin.positive_infinity_count",
+        "regenerated_value": 4
+      },
+      {
+        "banked_value": 9,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.pseudo_wall.frame_records.1.margin_graded.selected_class_margin.finite_count",
+        "regenerated_value": 12
+      },
+      {
+        "banked_value": 9,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.pseudo_wall.frame_records.1.margin_graded.selected_wrong_class_advance_count",
+        "regenerated_value": 11
+      },
+      {
+        "banked_value": 10,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.pseudo_wall.frame_records.2.margin_graded.selected_nonnegative_margin_advance_count",
+        "regenerated_value": 6
+      },
+      {
+        "banked_value": 5,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.pseudo_wall.frame_records.2.margin_graded.unrecorded_selected_factor_count",
+        "regenerated_value": 4
+      },
+      {
+        "banked_value": 10,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.pseudo_wall.frame_records.2.margin_graded.selected_class_margin.positive_infinity_count",
+        "regenerated_value": 6
+      },
+      {
+        "banked_value": 79,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.pseudo_wall.frame_records.2.margin_graded.selected_class_margin.finite_count",
+        "regenerated_value": 83
+      },
+      {
+        "banked_value": 79,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.pseudo_wall.frame_records.2.margin_graded.selected_wrong_class_advance_count",
+        "regenerated_value": 83
+      },
+      {
+        "banked_value": 4,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.pseudo_wall.frame_records.3.margin_graded.selected_class_margin.positive_infinity_count",
+        "regenerated_value": 2
+      },
+      {
+        "banked_value": 85,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.pseudo_wall.frame_records.3.margin_graded.selected_class_margin.finite_count",
+        "regenerated_value": 87
+      },
+      {
+        "banked_value": 6,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.pseudo_wall.frame_records.4.margin_graded.selected_nonnegative_margin_advance_count",
+        "regenerated_value": 5
+      },
+      {
+        "banked_value": 6,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.pseudo_wall.frame_records.4.margin_graded.selected_class_margin.positive_infinity_count",
+        "regenerated_value": 3
+      },
+      {
+        "banked_value": 83,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.pseudo_wall.frame_records.4.margin_graded.selected_class_margin.finite_count",
+        "regenerated_value": 86
+      },
+      {
+        "banked_value": 83,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.pseudo_wall.frame_records.4.margin_graded.selected_wrong_class_advance_count",
+        "regenerated_value": 84
+      },
+      {
+        "banked_value": 79.8,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.margin_graded_admitted_advance_count_of_89.mean",
+        "regenerated_value": 78.4
+      },
+      {
+        "banked_value": 43.0,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.margin_graded_admitted_advance_count_of_89.minimum",
+        "regenerated_value": 36.0
+      },
+      {
+        "banked_value": 14,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.0.margin_graded.unrecorded_selected_factor_count",
+        "regenerated_value": 35
+      },
+      {
+        "banked_value": 1,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.1.margin_graded.unrecorded_selected_factor_count",
+        "regenerated_value": 16
+      },
+      {
+        "banked_value": 21,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.2.margin_graded.selected_nonnegative_margin_advance_count",
+        "regenerated_value": 15
+      },
+      {
+        "banked_value": 34,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.2.margin_graded.unrecorded_selected_factor_count",
+        "regenerated_value": 18
+      },
+      {
+        "banked_value": 21,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.2.margin_graded.selected_class_margin.positive_infinity_count",
+        "regenerated_value": 13
+      },
+      {
+        "banked_value": 68,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.2.margin_graded.selected_class_margin.finite_count",
+        "regenerated_value": 76
+      },
+      {
+        "banked_value": 68,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.2.margin_graded.selected_wrong_class_advance_count",
+        "regenerated_value": 74
+      },
+      {
+        "banked_value": 5,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.3.margin_graded.selected_nonnegative_margin_advance_count",
+        "regenerated_value": 4
+      },
+      {
+        "banked_value": 43,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.3.margin_graded.selected_topology_penalty.finite_count",
+        "regenerated_value": 36
+      },
+      {
+        "banked_value": 43,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.3.margin_graded.admitted_advance_count_of_89",
+        "regenerated_value": 36
+      },
+      {
+        "banked_value": 27,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.3.margin_graded.unrecorded_selected_factor_count",
+        "regenerated_value": 20
+      },
+      {
+        "banked_value": 4,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.3.margin_graded.selected_class_margin.positive_infinity_count",
+        "regenerated_value": 0
+      },
+      {
+        "banked_value": 39,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.3.margin_graded.selected_class_margin.finite_count",
+        "regenerated_value": 36
+      },
+      {
+        "banked_value": 46,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.3.margin_graded.refused_advance_count_of_89",
+        "regenerated_value": 53
+      },
+      {
+        "banked_value": 38,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.3.margin_graded.selected_wrong_class_advance_count",
+        "regenerated_value": 32
+      },
+      {
+        "banked_value": 35,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.3.change_from_banked_boolean.admitted_advance_count",
+        "regenerated_value": 28
+      },
+      {
+        "banked_value": 4,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.4.margin_graded.selected_nonnegative_margin_advance_count",
+        "regenerated_value": 3
+      },
+      {
+        "banked_value": 25,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.4.margin_graded.unrecorded_selected_factor_count",
+        "regenerated_value": 20
+      },
+      {
+        "banked_value": 4,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.4.margin_graded.selected_class_margin.positive_infinity_count",
+        "regenerated_value": 0
+      },
+      {
+        "banked_value": 85,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.4.margin_graded.selected_class_margin.finite_count",
+        "regenerated_value": 89
+      },
+      {
+        "banked_value": 85,
+        "explanation": "this count is measured from the margin-graded proposal trajectory or derived from its corrected operand distribution",
+        "path": "arms.physical_ring.frame_records.4.margin_graded.selected_wrong_class_advance_count",
+        "regenerated_value": 86
+      }
+    ],
+    "margin_grade_proposal_count_change_count": 22,
+    "margin_grade_proposal_count_changes": [
+      {
+        "banked_value": 14,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "unrecorded_selected_factor_count",
+        "frame": 179,
+        "regenerated_value": 35,
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "surface": "physical_ring"
+      },
+      {
+        "banked_value": 1,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "unrecorded_selected_factor_count",
+        "frame": 44,
+        "regenerated_value": 16,
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "surface": "physical_ring"
+      },
+      {
+        "banked_value": 68,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "selected_wrong_class_advance_count",
+        "frame": 144,
+        "regenerated_value": 74,
+        "shot": "d3d_shot_001554e054.parquet",
+        "surface": "physical_ring"
+      },
+      {
+        "banked_value": 21,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "selected_nonnegative_margin_advance_count",
+        "frame": 144,
+        "regenerated_value": 15,
+        "shot": "d3d_shot_001554e054.parquet",
+        "surface": "physical_ring"
+      },
+      {
+        "banked_value": 34,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "unrecorded_selected_factor_count",
+        "frame": 144,
+        "regenerated_value": 18,
+        "shot": "d3d_shot_001554e054.parquet",
+        "surface": "physical_ring"
+      },
+      {
+        "banked_value": 43,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "admitted_advance_count_of_89",
+        "frame": 146,
+        "regenerated_value": 36,
+        "shot": "d3d_shot_002495e835.parquet",
+        "surface": "physical_ring"
+      },
+      {
+        "banked_value": 46,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "refused_advance_count_of_89",
+        "frame": 146,
+        "regenerated_value": 53,
+        "shot": "d3d_shot_002495e835.parquet",
+        "surface": "physical_ring"
+      },
+      {
+        "banked_value": 38,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "selected_wrong_class_advance_count",
+        "frame": 146,
+        "regenerated_value": 32,
+        "shot": "d3d_shot_002495e835.parquet",
+        "surface": "physical_ring"
+      },
+      {
+        "banked_value": 5,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "selected_nonnegative_margin_advance_count",
+        "frame": 146,
+        "regenerated_value": 4,
+        "shot": "d3d_shot_002495e835.parquet",
+        "surface": "physical_ring"
+      },
+      {
+        "banked_value": 27,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "unrecorded_selected_factor_count",
+        "frame": 146,
+        "regenerated_value": 20,
+        "shot": "d3d_shot_002495e835.parquet",
+        "surface": "physical_ring"
+      },
+      {
+        "banked_value": 85,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "selected_wrong_class_advance_count",
+        "frame": 137,
+        "regenerated_value": 86,
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "surface": "physical_ring"
+      },
+      {
+        "banked_value": 4,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "selected_nonnegative_margin_advance_count",
+        "frame": 137,
+        "regenerated_value": 3,
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "surface": "physical_ring"
+      },
+      {
+        "banked_value": 25,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "unrecorded_selected_factor_count",
+        "frame": 137,
+        "regenerated_value": 20,
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "surface": "physical_ring"
+      },
+      {
+        "banked_value": 62,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "selected_wrong_class_advance_count",
+        "frame": 179,
+        "regenerated_value": 85,
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "surface": "pseudo_wall"
+      },
+      {
+        "banked_value": 27,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "selected_nonnegative_margin_advance_count",
+        "frame": 179,
+        "regenerated_value": 4,
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "surface": "pseudo_wall"
+      },
+      {
+        "banked_value": 9,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "selected_wrong_class_advance_count",
+        "frame": 44,
+        "regenerated_value": 11,
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "surface": "pseudo_wall"
+      },
+      {
+        "banked_value": 7,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "selected_nonnegative_margin_advance_count",
+        "frame": 44,
+        "regenerated_value": 5,
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "surface": "pseudo_wall"
+      },
+      {
+        "banked_value": 79,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "selected_wrong_class_advance_count",
+        "frame": 144,
+        "regenerated_value": 83,
+        "shot": "d3d_shot_001554e054.parquet",
+        "surface": "pseudo_wall"
+      },
+      {
+        "banked_value": 10,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "selected_nonnegative_margin_advance_count",
+        "frame": 144,
+        "regenerated_value": 6,
+        "shot": "d3d_shot_001554e054.parquet",
+        "surface": "pseudo_wall"
+      },
+      {
+        "banked_value": 5,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "unrecorded_selected_factor_count",
+        "frame": 144,
+        "regenerated_value": 4,
+        "shot": "d3d_shot_001554e054.parquet",
+        "surface": "pseudo_wall"
+      },
+      {
+        "banked_value": 83,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "selected_wrong_class_advance_count",
+        "frame": 137,
+        "regenerated_value": 84,
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "surface": "pseudo_wall"
+      },
+      {
+        "banked_value": 6,
+        "explanation": "the margin-graded proposal ladder consumes max(-class_margin, 0), so corrected operands change which proposals advance",
+        "field": "selected_nonnegative_margin_advance_count",
+        "frame": 137,
+        "regenerated_value": 5,
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "surface": "pseudo_wall"
+      }
+    ],
+    "operand_selection_change_count": 6,
+    "operand_selection_changes": [
+      {
+        "banked_selected": false,
+        "candidate_index": 1,
+        "explanation": "the selected typed-saddle operand is part of the permitted class-margin overlay",
+        "frame": 144,
+        "regenerated_selected": true,
+        "shot": "d3d_shot_001554e054.parquet",
+        "surface": "physical_ring"
+      },
+      {
+        "banked_selected": true,
+        "candidate_index": 2,
+        "explanation": "the selected typed-saddle operand is part of the permitted class-margin overlay",
+        "frame": 144,
+        "regenerated_selected": false,
+        "shot": "d3d_shot_001554e054.parquet",
+        "surface": "physical_ring"
+      },
+      {
+        "banked_selected": true,
+        "candidate_index": 0,
+        "explanation": "the selected typed-saddle operand is part of the permitted class-margin overlay",
+        "frame": 146,
+        "regenerated_selected": false,
+        "shot": "d3d_shot_002495e835.parquet",
+        "surface": "physical_ring"
+      },
+      {
+        "banked_selected": false,
+        "candidate_index": 1,
+        "explanation": "the selected typed-saddle operand is part of the permitted class-margin overlay",
+        "frame": 146,
+        "regenerated_selected": true,
+        "shot": "d3d_shot_002495e835.parquet",
+        "surface": "physical_ring"
+      },
+      {
+        "banked_selected": true,
+        "candidate_index": 1,
+        "explanation": "the selected typed-saddle operand is part of the permitted class-margin overlay",
+        "frame": 137,
+        "regenerated_selected": false,
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "surface": "physical_ring"
+      },
+      {
+        "banked_selected": false,
+        "candidate_index": 2,
+        "explanation": "the selected typed-saddle operand is part of the permitted class-margin overlay",
+        "frame": 137,
+        "regenerated_selected": true,
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "surface": "physical_ring"
+      }
+    ],
+    "residual_sequence_difference_count": 0,
+    "residual_sequence_value_count": 0,
+    "stable_semantic_difference_count": 0,
+    "stable_semantic_field_count_compared": 190,
+    "terminal_margin_anchor": {
+      "absolute_difference": 3.885780586188048e-16,
+      "absolute_tolerance": 1e-12,
+      "expected": -0.3322617796735,
+      "passes": true,
+      "regenerated": -0.3322617796735004
+    }
+  },
+  "source_commit": "bbb2fcce8e326519de428ede15561722c4baefc8",
   "xpoint_diagnostic_enrichment": {
-    "driver_sha256": "838cd5c753c0f87522749ddcce8911b55072f900f3e90c4399f01ef0bb6ab982",
-    "duration_field_count_preserved_without_comparison": 15,
-    "duration_policy": "runtime_seconds is preserved from the bank because elapsed time is not deterministic; all other existing numeric leaves regenerated exactly",
-    "existing_numeric_field_count_compared": 447,
-    "existing_numeric_field_difference_count": 0,
-    "existing_output_numeric_field_difference_count": 0,
-    "source_commit": "527eb94a2285e943fcebdced8728404deb9a8530",
+    "driver_sha256": "d368d28fc3cf69e908471256ffbf59cf5a6f0ed4a04cadec8efebc60f6b896a8",
+    "preservation_policy": "classified-fixture, conclusion, Boolean-comparator and terminal-class semantics reproduce exactly; margin operands and their graded proposal trajectory are rebaselined",
+    "source_commit": "bbb2fcce8e326519de428ede15561722c4baefc8",
     "terminal_count": 10
   }
 }

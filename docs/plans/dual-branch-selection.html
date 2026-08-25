@@ -184,7 +184,7 @@
     to 3.58e-16 achieved-DIVERTED</strong> (ρ 0.078, topology consistent, p_diverted 1.0, quadratic:
     1.243e-3 → 1.357e-4 → 1.730e-7 → 7.078e-14), the repository's first machine-precision diverted
     terminal, on one of the two references whose exact-margin operand is absent. That operand absence
-    (+∞ margin on 2/6 references) is the connectivity-localisation defect measured live on the
+    (+∞ margin on 2/6 references) was initially read as a connectivity-localisation defect on the
     production cohort. Batch-two jit and vmap parity holds at 2.2e-16. <strong>So existence is
     demonstrated, not inferred from weak contraction</strong> — why ρ sits at 0.95–0.98 rather than
     0.33 on the pure arm stays with the basin probe.</p>
@@ -215,6 +215,36 @@
     reach a saddle. Across all twelve terminals: <strong>9</strong> selected-typed-saddle-with-
     connectivity-support, <strong>3</strong> not-connectivity-reachable, <strong>0</strong>
     no-typed-saddle-candidate, <strong>0</strong> typed-saddle-operand-nonfinite.</p>
+
+    <p><strong>ADJUDICATED CORRECT 2026-08-25, node <code>shadow-rejection-adjudication</code></strong>,
+    commit <code>19f52dec</code>, gate PASSED — so the absence is <em>correct physics</em>, not a defect,
+    and no production repair is warranted. Each rejected wall extremum sits at
+    R = 0.5649306774139404 m and |Z| between 1.745 and 1.756 m, outside its typed-X height band, with its
+    nearest confined in-vessel cell in a private component <strong>disconnected from the magnetic-axis
+    component</strong>. Decisively, every pre-shadow operand (0.3310, 0.3310, 0.3019, 0.3001) is
+    <em>lower</em> than its selected-X operand (0.43&ndash;0.44), so admitting them would produce a
+    spuriously <strong>negative</strong> margin — a false limited verdict. The classification is stable
+    across all five inward offsets from 5e&minus;5 to 1e&minus;3 of terminal flux range (20/20 private),
+    and the admitted control 21983/35 stays outside private flux in both arms at every offset (10/10).
+    Carrier discipline held: 6/6 terminal maps reconstructed from the persisted response carrier with
+    zero direct kernel-builder entries, and 6/6 wall and X coordinates bit-exact against the banked
+    receipt.</p>
+
+    <figure>
+      <img src="/nova/figures/primary-xpoint-evidence/private-flux-shadow-adjudication.png"
+           alt="Six panels showing, for each adjudicated terminal, the separatrix, the private-flux region and the wall extremum, with rejected extrema falling inside the disconnected private component and the admitted control outside it.">
+      <figcaption>Separatrix, private-flux region and wall extremum per terminal. The four rejected
+      extrema fall in a private component disconnected from the magnetic axis; the admitted control does
+      not. A claim about which side of a boundary a point lies on needed the picture.</figcaption>
+    </figure>
+
+    <p><strong>The consequence for §5, and it reverses how this sprint had been describing the
+    problem.</strong> The four infinite margins are <em>legitimately undefined</em>, so the selection
+    observable must be <strong>total</strong>: the exact margin only where finite, with the always-fork
+    fallback where shadow-rejected. Treating an undefined margin as a repairable data error would have
+    been wrong — and this plan, and my own reporting, had been calling it a localisation defect. The
+    traced selector's choice to leave non-finite margins <em>explicitly unclassified</em> rather than
+    defaulted is therefore correct rather than merely cautious.</p>
 
     <p><strong>So the connectivity-reachability hypothesis is refuted, and the way it arose is the
     lesson.</strong> It came from the DIII-D bank, where the selected typed saddle was not reachable on

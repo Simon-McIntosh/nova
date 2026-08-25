@@ -76,6 +76,58 @@
     axis-to-X span 3.1072837439676566 Wb; two wall/X near-tangency slices at
     &plusmn;3.107283743967657e&minus;10 Wb.</p>
 
+    <h2 id="shadow-adjudication">The private-flux shadow rejection is correct</h2>
+
+    <p><strong>Node <code>shadow-rejection-adjudication</code>, commit <code>19f52dec</code>, gate
+    PASSED, 2026-08-25.</strong> Artifacts
+    <code>docs/figures/primary-xpoint-evidence/private-flux-shadow-adjudication.json</code> and
+    <code>.png</code>. Verdict <strong>CORRECT on 4/4 rejected terminals</strong>; <strong>no production
+    repair is warranted</strong>.</p>
+
+    <figure>
+      <img src="/nova/figures/primary-xpoint-evidence/private-flux-shadow-adjudication.png"
+           alt="Six panels showing, for each adjudicated terminal, the separatrix, the private-flux region and the wall extremum, with the four rejected extrema inside a disconnected private component and the admitted control outside it.">
+      <figcaption>Per-terminal separatrix, private-flux region and wall extremum. The rejected extrema
+      fall in a private component disconnected from the magnetic-axis component.</figcaption>
+    </figure>
+
+    <table>
+      <caption>Rejected terminals: wall extremum against its typed-X band</caption>
+      <thead>
+        <tr><th scope="col">Terminal</th><th scope="col">Wall extremum (R, Z) m</th>
+        <th scope="col">Pre-shadow operand</th><th scope="col">Selected-X operand</th>
+        <th scope="col">Typed-X height band (m)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>21978/35 pure</td><td>(0.5649306774139404, &minus;1.7451425858451193)</td><td>0.3310275619269073</td><td>0.44252817236845116</td><td>[&minus;1.2338307252843705, 1.2448486718561536] — below</td></tr>
+        <tr><td>21978/35 mixed</td><td>(0.5649306774139404, 1.747484634297699)</td><td>0.3310454781725451</td><td>0.43580205514567494</td><td>[&minus;1.212691610310149, 1.2639851582160506] — above</td></tr>
+        <tr><td>22086/43 pure</td><td>(0.5649306774139404, &minus;1.7536177684350878)</td><td>0.30190002257031606</td><td>0.4363887681813337</td><td>[&minus;1.189639243938404, 1.2123192901859092] — below</td></tr>
+        <tr><td>22086/43 mixed</td><td>(0.5649306774139404, 1.756137557477899)</td><td>0.3000846561326388</td><td>0.4309790002082113</td><td>[&minus;1.177930653249266, 1.2225553064310346] — above</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Three independent reasons the rejection is right.</strong> Each extremum lies outside its
+    typed-X height band; each has its nearest confined in-vessel cell in a private component
+    <em>disconnected</em> from the magnetic-axis component; and every pre-shadow operand is
+    <em>lower</em> than its selected-X operand, so admitting it would yield a spuriously
+    <strong>negative</strong> margin — a false limited verdict rather than a missing one.</p>
+
+    <p><strong>Stability and control.</strong> All four classifications hold across five inward offsets
+    from 5e&minus;5 to 1e&minus;3 of terminal flux range, 20/20 private. The admitted control 21983/35
+    stays outside private flux in both arms at every offset, 10/10, with wall operands 0.3583732394250173
+    and 0.3559232625718283 above selected-X levels 0.3511402755578827 and 0.34819032364053737. The other
+    admitted references keep their banked finite margins.</p>
+
+    <p><strong>Carrier discipline, unprompted.</strong> 6/6 terminal maps were reconstructed from the
+    persisted response carrier with <em>zero</em> direct kernel-builder entries, and 6/6 reconstructed
+    wall and X coordinates are bit-exact against the banked receipt.</p>
+
+    <p><strong>Consequence, which reverses earlier language in this sprint.</strong> The four infinite
+    margins are <em>legitimately undefined</em> because those wall extrema are not confinement
+    boundaries. The selection observable must therefore be <strong>total</strong> — exact margin only
+    where finite, with the always-fork fallback where shadow-rejected. Records describing this as a
+    connectivity-localisation defect, including my own reporting, were wrong.</p>
+
   </main>
 </body>
 </html>

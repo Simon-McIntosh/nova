@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T12:55:45",
+  "updated": "2026-08-25T12:57:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -34910,9 +34910,101 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T104313357800-shadow-rejection-adjudication",
+        "plan": "primary-xpoint-evidence",
+        "section": "\u00a72",
+        "node": "shadow-rejection-adjudication",
+        "node_definition": {
+          "done_when": "A verdict per rejected terminal, supported by GEOMETRY rather than by assertion. Embed a figure under docs/figures/primary-xpoint-evidence/ showing the wall extremum, the separatrix and the private-flux region for at least one REJECTED and one ADMITTED terminal, with project-absolute src so the plan renders it - a claim about which side of a boundary a point falls on is under-communicated without a picture. The four rejected terminals are both arms of 21978/35, where the pre-shadow wall operands are 0.3310275619269073 and 0.3310454781725451, and both arms of 22086/43, where they are 0.30190002257031606 and 0.3000846561326388; the admitted comparison set is 21983/35, 21985/51, 21986/46 and 21989/55, whose margins are finite. State for each rejected terminal whether the wall extremum genuinely lies in the private-flux region, which would make the rejection CORRECT and the margin legitimately undefined, or whether the shadow test is capturing a point outside it, which would make four absent margins finite. Do not assume the rule is wrong because its consequence is inconvenient - the rule exists because a wall extremum inside the private-flux region is not a confinement boundary and must not set the margin. If the rejections are correct, say so plainly and state what a defined fallback for the selection observable must be, because dual-branch-selection then cannot use the exact margin as its selector and the fork policy already falls back to always-fork on exactly these frames. Change no production behaviour in this node - adjudicate and report; a repair, if warranted, is a separate node.",
+          "estimated_hours": 3.0,
+          "goal": "Adjudicate whether the private-flux shadow correctly rejects the wall extremum on the four MAST terminals where it sends the exact class margin to positive infinity, or whether it over-rejects, since the selection observable cannot be the exact margin if that margin is undefined on a third of the cohort.",
+          "id": "shadow-rejection-adjudication",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/shadow-rejection-adjudication.md",
+          "plan": "primary-xpoint-evidence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "margin-scout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T10:43:23Z",
+        "completed_at": "2026-08-25T10:57:23Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 840,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 840,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "7a3fcfdd17cf3828c227101ea31dc555059c2de0",
+        "commits": [
+          "19f52decb8b4dfe913ac473e71335dbead1e359d"
+        ],
+        "changed_lines": {
+          "added": 868,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/shadow-rejection-adjudication.md",
+        "scope_changed": false,
+        "session_id": "01a03884-8599-7fc1-8dca-7bf02cbe73dd",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3392512,
+            "cached_input_tokens_cumulative": 3392512,
+            "input_tokens": 3526069,
+            "input_tokens_cumulative": 3526069,
+            "output_tokens": 18587,
+            "output_tokens_cumulative": 18587,
+            "reasoning_output_tokens": 4089,
+            "reasoning_output_tokens_cumulative": 4089
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 852
+    "_version": 853
   }
 }

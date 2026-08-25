@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 <meta name="plan-commits" content="597417af,19f52dec,ea521829,5acfe07b,7a7bd365,04a4a6ca,f7a2dad8">
 <meta name="plan-artifacts" content="benchmarks/diiid_forward_gs_match.py,nova/equilibrium/connectivity_boundary.py,docs/figures/plateau-input-attribution/margin-frame-remeasure.json,docs/figures/primary-xpoint-evidence/private-flux-shadow-adjudication.json,docs/figures/primary-xpoint-evidence/private-flux-shadow-adjudication.png,docs/evidence/archive/primary-xpoint-evidence-landed.html">
 <meta name="plan-impl" content="1.0">
@@ -69,6 +69,41 @@
     <p>Full record:
     <a href="/nova/evidence/archive/primary-xpoint-evidence-landed#spatial-evidence">primary X-point
     evidence landed</a>.</p>
+
+    <h2 id="topology-chain">§ The topology chain this plan grew into</h2>
+
+    <p>The three §2 deliverables closed a serialization gap. Reading the figure they produced then
+    exposed a chain of defects in how the class operands are chosen, each found by looking at geometry
+    rather than at numbers. The detail is in the cumulative evidence; this section is the index.</p>
+
+    <table>
+      <caption>Landed 2026-08-25, in the order the defects surfaced</caption>
+      <thead><tr><th scope="col">Finding</th><th scope="col">Commit</th><th scope="col">Record</th></tr></thead>
+      <tbody>
+        <tr><td>The class selector chose saddles <strong>outside the vessel</strong> on 8 of 12 arms, so every finite margin the sprint quoted was spurious. Polygon containment, not a bounding box: six of the eight sat beyond the box but two did not, and one of those produced a false admitted control</td><td><code>ea521829</code>, <code>5acfe07b</code></td><td><a href="/nova/evidence/archive/primary-xpoint-evidence-landed#saddle-containment">saddle containment</a></td></tr>
+        <tr><td>Component labelling with a private mask from connectivity, replacing a one-coordinate height band, with a constructed case where the two disagree</td><td><code>7a7bd365</code></td><td><a href="/nova/evidence/archive/primary-xpoint-evidence-landed#reachability-grid">reachability grid</a></td></tr>
+        <tr><td>The <strong>limiter point</strong> is the reachable-wall minimiser of |&psi;<sub>wall</sub> &minus; &psi;<sub>axis</sub>|, sub-grid refined in <em>position only</em>, with node flux from the exact <code>g_wall</code> GEMM and off-node flux from the global spline. MAST finite margins <strong>2/12 &rarr; 8/12</strong></td><td><code>ba1f9473</code></td><td>receipt <code>reachable-wall-limiter-point.json</code></td></tr>
+        <tr><td>Six-neighbour adjacency <strong>bridges the saddle</strong> and annihilates the private region; shared-edge admissibility recovers the partition while keeping hex bulk adjacency, and costs less than plain six-neighbour</td><td><code>8d4f3f33</code>, <code>5c1bf8c1</code></td><td><a href="/nova/evidence/archive/primary-xpoint-evidence-landed#hex-partition">hex partition</a></td></tr>
+        <tr><td>The DIII-D cohort's <strong>10-of-10 reachability pattern is withdrawn</strong> as evidence: 4 of 10 of its own selections were out of vessel</td><td><code>f7a2dad8</code></td><td>receipt <code>diiid-containment-recheck.json</code></td></tr>
+        <tr><td>ITER's X-point is <strong>never detected</strong> rather than detected-then-rejected. The grid covers the expected location and the EQDSK limiter is a 5-point bounding rectangle, so containment was never the gate</td><td>see receipt</td><td>receipt <code>iter-saddle-resolution.json</code></td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>What the sequence has in common.</strong> Every one was a <em>selector</em> drawing its
+    operand from too wide a set — saddles from the whole plane rather than the vessel, wall points from
+    the whole polygon rather than the reachable wall, neighbours from the whole ring rather than across
+    admissible edges. None was an arithmetic error, and no tighter tolerance would have caught any of
+    them.</p>
+
+    <p><strong>Cutover state.</strong> The reachable-wall limiter is live:
+    <code>_refine_wall_minimum_position</code> is called unconditionally and
+    <code>class_wall_shadowed</code> is now a reachability test, so the vertical height band no longer
+    gates the class operand. The saddle-aware partition is landed but unconsumed and its cutover is in
+    flight. Three artifacts are deliberately held un-regenerated —
+    <code>pinned-branch-contrast.json</code>, <code>fork-arming-economics.json</code> and
+    <code>margin-frame-remeasure.json</code> — so the deltas stay readable before one regeneration pass.
+    The ITER panel of the reachability figure is not physically interpretable until its detector or data
+    seam is repaired and a governed ITER first wall is sourced.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>

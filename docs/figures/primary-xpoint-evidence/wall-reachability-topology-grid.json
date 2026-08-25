@@ -1,0 +1,181 @@
+{
+  "artifact": "machine-and-topology wall reachability grid",
+  "caption": "A: DIII-D wall, limited fixture. B: MAST wall, diverted fixture. C: MAST wall, double-null fixture. Wall reachability is derived from the first O-point-connected component, never from a height band.",
+  "coverage": {
+    "diverted_panel_count": 1,
+    "double_null_panel_count": 1,
+    "limited_panel_count": 1,
+    "machines": [
+      "DIII-D",
+      "MAST"
+    ],
+    "real_machine_wall_count": 2,
+    "topologies": [
+      "limited",
+      "diverted",
+      "double-null"
+    ]
+  },
+  "method": {
+    "component_kernel": "nova.equilibrium.flux_surface_connectivity.label_connected_components and private_flux_mask",
+    "component_labelling_source_commit": "7a7bd365",
+    "definition": "The public region is the positive four-connected component containing the magnetic-axis seed immediately before the first saddle crossing. Every other positive component label is private. A wall segment is reachable only when its nearest in-vessel grid cell carries the axis component label.",
+    "height_band_used": false,
+    "private_predicate": "positive component label unequal to the axis component label",
+    "selection": "finite analytic saddles are refined, Hessian-typed, checked inside the governed wall, and reduced by the smallest outward level; the limited panel binds at the wall before that selected saddle",
+    "selection_repair_source_commit": "5acfe07b",
+    "wall_segment_sampling": 420
+  },
+  "panels": [
+    {
+      "axis_component_label": 13715,
+      "axis_coordinate_m": [
+        2.149789407383253,
+        0.019956722313705082
+      ],
+      "binding_kind": "wall",
+      "binding_level_normalized_outward": 0.25074051303814193,
+      "classification_inward_offset": 0.0021320329597680487,
+      "classification_level_normalized_outward": 0.25287254599791,
+      "connectivity": 4,
+      "field_source": "analytic topology fixture evaluated inside the governed machine wall",
+      "finite_x_candidate_coordinates_m": [
+        [
+          1.685753710350353,
+          -0.0855479676478263
+        ]
+      ],
+      "finite_x_candidates_inside_wall": [
+        true
+      ],
+      "grid_shape_height_by_radius": [
+        181,
+        181
+      ],
+      "machine": "DIII-D",
+      "panel": "A",
+      "post_repair_selection": true,
+      "private_region_area_m2": 0.011125335664987652,
+      "private_region_count": 1,
+      "private_touching_wall_segment_count": 0,
+      "public_region_area_m2": 0.18149820858113577,
+      "reachable_wall_segment_count": 5,
+      "selected_x_binding_level_normalized_outward": 0.6271518638061103,
+      "selected_x_coordinate_m": [
+        1.685753710350353,
+        -0.0855479676478263
+      ],
+      "shadowed_wall_segment_count": 415,
+      "topology": "limited",
+      "wall_extremum_coordinate_m": [
+        2.354,
+        0.028763996340784803
+      ],
+      "wall_extremum_level_normalized_outward": 0.25074051303814193,
+      "wall_segment_count": 420,
+      "wall_source": "docs/figures/diiid-forward-onboarding/ids-description/ids_description_receipt.json"
+    },
+    {
+      "axis_component_label": 13463,
+      "axis_coordinate_m": [
+        1.0792416199624155,
+        0.17875136615766152
+      ],
+      "binding_kind": "saddle",
+      "binding_level_normalized_outward": 0.6146560964828374,
+      "classification_inward_offset": 0.0010564796846398439,
+      "classification_level_normalized_outward": 0.6135996167981975,
+      "connectivity": 4,
+      "field_source": "analytic topology fixture evaluated inside the governed machine wall",
+      "finite_x_candidate_coordinates_m": [
+        [
+          0.8113420413707351,
+          -0.35568389021593416
+        ]
+      ],
+      "finite_x_candidates_inside_wall": [
+        true
+      ],
+      "grid_shape_height_by_radius": [
+        181,
+        181
+      ],
+      "machine": "MAST",
+      "panel": "B",
+      "post_repair_selection": true,
+      "private_region_area_m2": 0.5079597373378272,
+      "private_region_count": 1,
+      "private_touching_wall_segment_count": 0,
+      "public_region_area_m2": 0.6540467136240247,
+      "reachable_wall_segment_count": 0,
+      "selected_x_binding_level_normalized_outward": 0.6146560964828374,
+      "selected_x_coordinate_m": [
+        0.8113420413707351,
+        -0.35568389021593416
+      ],
+      "shadowed_wall_segment_count": 420,
+      "topology": "diverted",
+      "wall_extremum_coordinate_m": [
+        0.2674603159828575,
+        -1.2075509179323292
+      ],
+      "wall_extremum_level_normalized_outward": 0.7672502367924104,
+      "wall_segment_count": 420,
+      "wall_source": "nova/catalog/mast_geometry.json"
+    },
+    {
+      "axis_component_label": 12558,
+      "axis_coordinate_m": [
+        1.0768758991061884,
+        -2.6637453262938392e-05
+      ],
+      "binding_kind": "saddle",
+      "binding_level_normalized_outward": 0.5202296739374577,
+      "classification_inward_offset": 0.0019809961109523155,
+      "classification_level_normalized_outward": 0.5182486778265054,
+      "connectivity": 4,
+      "field_source": "analytic topology fixture evaluated inside the governed machine wall",
+      "finite_x_candidate_coordinates_m": [
+        [
+          0.7988764144718196,
+          -0.4652134509884478
+        ],
+        [
+          0.7980444685011454,
+          0.46692558014867913
+        ]
+      ],
+      "finite_x_candidates_inside_wall": [
+        true,
+        true
+      ],
+      "grid_shape_height_by_radius": [
+        181,
+        181
+      ],
+      "machine": "MAST",
+      "panel": "C",
+      "post_repair_selection": true,
+      "private_region_area_m2": 0.5694586859959753,
+      "private_region_count": 2,
+      "private_touching_wall_segment_count": 0,
+      "public_region_area_m2": 0.5450748923174815,
+      "reachable_wall_segment_count": 0,
+      "selected_x_binding_level_normalized_outward": 0.5202296739374577,
+      "selected_x_coordinate_m": [
+        0.7988764144718196,
+        -0.4652134509884478
+      ],
+      "shadowed_wall_segment_count": 420,
+      "topology": "double-null",
+      "wall_extremum_coordinate_m": [
+        0.19524,
+        -0.9040720710471488
+      ],
+      "wall_extremum_level_normalized_outward": 0.8314287097359718,
+      "wall_segment_count": 420,
+      "wall_source": "nova/catalog/mast_geometry.json"
+    }
+  ],
+  "project_absolute_src": "/nova/figures/primary-xpoint-evidence/wall-reachability-topology-grid.png"
+}

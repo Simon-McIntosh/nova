@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="roundoff-scale-acceptance-bounds">
   <meta name="plan-title" content="Acceptance Bounds Whose Reference Is Zero">
   <meta name="plan-summary" content="Determinism is fixed and acceptance still fails at 67 of 69 bounds. The two that fail score divergence residuals that are zero in the continuum, so a relative bound has no nonzero reference and a one-ULP change crosses it by a factor of three. Their computed value is truncation-dominated rather than roundoff, at 1e-10 against a 1e-16 process variation, so the floor must come from the discretisation order where the stencil does not preserve the identity.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="6.0">
   <meta name="plan-capability-version" content="1.0">
@@ -22,6 +22,11 @@
   <title>Acceptance Bounds Whose Reference Is Zero | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-25">
+<meta name="plan-commits" content="f1ae4f46">
+<meta name="plan-artifacts" content="benchmarks/bound_reference_classification.py,docs/figures/roundoff-scale-acceptance-bounds/bound-classification.json">
+<meta name="plan-impl" content="0.333">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -150,6 +155,11 @@
     </article>
 </section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-20260825T0725-classify" data-who="reckon-ship" data-when="2026-08-25T07:25:00Z">
+    <div class="r-comment-body">bound-reference-classification landed - commit f1ae4f46, merged, gate PASSED. ALL 69 BOUNDS CLASSIFIED with a per-bound reason: 67 carry a nonzero-reference quantity and 2 are zero continuum identities, namely conservation.divergence_b and conservation.divergence_j. Both zero identities record NON-PRESERVATION by the production least-squares ring-mesh discretisation and therefore a truncation floor - which is the distinction this plan was corrected to make after review, and it is now measured rather than asserted. THE CHEAP HYPOTHESIS IS REJECTED, BUT ONLY FOR ONE OF THE TWO, AND THAT SPLIT IS THE RESULT. On divergence_b the banked exemplar fits it exactly: 21978/35 at width 1 records values 2.220446049250313e-16, 6.106226635438361e-16 and 5.551115123125783e-16, ALL below the registered absolute bound of 9.83631031098047e-16, with passes true, false, false under a relative bound of 0.8425616333270692. So there the absolute criterion is already satisfied and the relative one is the entire fault - a registration rule fixes it. On divergence_j it does NOT fit: the four width-4 members for 22086/43 reach absolute difference 1.4551915228366852e-10 against an absolute bound of 1.3703738919113413e-10, so they exceed the absolute criterion too by about six per cent. All 18 currently failing member evaluations violate their relative bounds, so none is relative-only across the board. THE TWO SCALES ARE MEASURED AND SIX ORDERS APART, which is why keeping them separate mattered: maximum observable magnitudes are 7.216449660063518e-16 for divergence_b and 4.656612873077393e-10 for divergence_j, against a banked process roundoff scale of 2.7755575615628914e-16. The divergence_j separation is 6.224719895935548 orders. So divergence_b sits at roundoff scale and divergence_j at truncation scale, and its absolute bound is too TIGHT for its own discretisation floor. HAD THE PLAN KEPT ITS ORIGINAL PREMISE it would have derived an epsilon-scale floor for both and divergence_j would still have failed, which is exactly the error the review caught. THE NODE CORRECTLY RECOMMENDS NOTHING: no bound change and no repair authored, because the hypothesis was rejected rather than supported across all failures. The two bounds now need different repairs and the next node carries them.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

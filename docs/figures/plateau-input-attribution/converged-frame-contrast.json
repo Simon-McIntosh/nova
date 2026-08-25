@@ -1,0 +1,361 @@
+{
+  "receipt": "MAST machine-precision frame contrast",
+  "source_revision": "f8f1f31087959f54029ea045dda56f7d449f6399",
+  "inputs": {
+    "residual_field_receipt": {
+      "path": "docs/figures/plateau-input-attribution/label-seed-residual-field.json",
+      "sha256": "dff3bcce1c2a795390ac6f92ec776e7b46babe4139b3549e338ba7c35b40d4a8",
+      "source_revision": "f8f1f31087959f54029ea045dda56f7d449f6399"
+    },
+    "machine_precision_receipt": {
+      "path": "docs/figures/current-constrained-forward-solve/mast-constrained/current-constrained-frozen-six-scorecard.json",
+      "sha256": "a2220d93b5fe103aeacc01a5fe410ee1d0a8611d5e468c54fb88056e8ac083ab",
+      "artifact_banking_commit": "a0aee18c330c35e8009bbe0b96f7fd3d078b9a00",
+      "execution_source_revision_embedded": false
+    }
+  },
+  "comparison_contract": {
+    "control_reference": "22086/43",
+    "plateau_references": [
+      "21978/35",
+      "21983/35",
+      "21985/51",
+      "21986/46",
+      "21989/55"
+    ],
+    "control_sample_count": 1,
+    "plateau_sample_count": 5,
+    "total_sample_count": 6,
+    "separation_rule": "descriptive non-overlap: the control value must lie outside the inclusive range of the five plateau values",
+    "power_qualification": "A one-control, five-comparator range contrast is descriptive; it does not establish a population effect or causal mechanism."
+  },
+  "route_context": {
+    "machine_precision_route": {
+      "reference_seeded": true,
+      "target_current_a": 933034.875,
+      "terminal_relative_residual": 2.911868346631881e-16,
+      "terminal_branch_classification": "converged_plasma_root",
+      "terminal_plasma_current_fraction_of_label": 1.0,
+      "response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994"
+    },
+    "current_pinned_label_seeded_route": {
+      "source_revision": "f8f1f31087959f54029ea045dda56f7d449f6399",
+      "reference_seeded": true,
+      "target_current_a": 933034.875,
+      "terminal_relative_residual": 0.005049061244966342,
+      "terminal_branch_classification": "bounded_non_convergence",
+      "terminal_plasma_current_fraction_of_label": 1.0,
+      "response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994"
+    },
+    "shared_route_properties": {
+      "initial_state": "stored EFIT label",
+      "requested_branch": "diverted",
+      "target_current_policy": "absolute stored scalar plasma current",
+      "stored_circuit_count": 101,
+      "response_identity_equal": true
+    },
+    "tree_difference": {
+      "machine_precision_artifact_banking_tree": "a0aee18c330c35e8009bbe0b96f7fd3d078b9a00",
+      "current_measurement_tree": "f8f1f31087959f54029ea045dda56f7d449f6399",
+      "changed_production_python_path_count": 32,
+      "changed_production_python_paths": [
+        "nova/biot/biot.py",
+        "nova/biot/plasma.py",
+        "nova/biot/polygonanalytic.py",
+        "nova/biot/polysection.py",
+        "nova/biot/second_moment_kernel.py",
+        "nova/biot/solve.py",
+        "nova/biot/tiledassembly.py",
+        "nova/database/filepath.py",
+        "nova/database/zarrstore.py",
+        "nova/equilibrium/__init__.py",
+        "nova/equilibrium/coefficient_carrier.py",
+        "nova/equilibrium/fixed_point.py",
+        "nova/equilibrium/forward.py",
+        "nova/equilibrium/forward_operator.py",
+        "nova/equilibrium/internal_inductance.py",
+        "nova/equilibrium/manifold_advance.py",
+        "nova/equilibrium/map_extraction.py",
+        "nova/equilibrium/moment.py",
+        "nova/equilibrium/observable_acceptance.py",
+        "nova/equilibrium/observation.py",
+        "nova/equilibrium/observation_kernels.py",
+        "nova/equilibrium/seed_alignment.py",
+        "nova/frame/frame.py",
+        "nova/imas/diiid_current.py",
+        "nova/imas/diiid_description.py",
+        "nova/imas/diiid_machine_ids.py",
+        "nova/imas/fuse.py",
+        "nova/imas/transient.py",
+        "nova/imas/waveform.py",
+        "nova/transport/__init__.py",
+        "nova/transport/coupled_window.py",
+        "nova/transport/window_batch.py"
+      ],
+      "machine_precision_execution_source_revision_was_not_embedded": true,
+      "attribution": "DECLINED",
+      "reason": "More than one production mechanism changed, and the older receipt did not embed its execution source revision. The residual change is context, not a causal estimate."
+    }
+  },
+  "substitution_contrasts": {
+    "wall": {
+      "measured_property": "boundary-band plus wall-state fraction of full residual squared magnitude",
+      "control_value": 0.09506945818225918,
+      "plateau_values_by_reference": {
+        "21978/35": 0.09281662731430965,
+        "21983/35": 0.08640290979900724,
+        "21985/51": 0.0898497315766741,
+        "21986/46": 0.0960758213203428,
+        "21989/55": 0.10892907063904789
+      },
+      "plateau_sample_count": 5,
+      "plateau_range": {
+        "minimum": 0.08640290979900724,
+        "maximum": 0.10892907063904789
+      },
+      "control_outside_plateau_range": false
+    },
+    "conductor_current_wiring": {
+      "measured_property": "largest single-circuit response projection fraction of full residual squared magnitude",
+      "control_value": 0.14405290383222777,
+      "plateau_values_by_reference": {
+        "21978/35": 0.09053951201422307,
+        "21983/35": 0.05982878747394172,
+        "21985/51": 0.09820649287887004,
+        "21986/46": 0.07299676996077238,
+        "21989/55": 0.19817706735479496
+      },
+      "plateau_sample_count": 5,
+      "plateau_range": {
+        "minimum": 0.05982878747394172,
+        "maximum": 0.19817706735479496
+      },
+      "control_outside_plateau_range": false
+    },
+    "profiles": {
+      "measured_property": "closed-core residual fraction explained by twelve labelled-flux bins",
+      "control_value": 0.04940376816385429,
+      "plateau_values_by_reference": {
+        "21978/35": 0.0409930824802311,
+        "21983/35": 0.02784861670213376,
+        "21985/51": 0.07349929358157953,
+        "21986/46": 0.038118440764436885,
+        "21989/55": 0.07909236446554183
+      },
+      "plateau_sample_count": 5,
+      "plateau_range": {
+        "minimum": 0.02784861670213376,
+        "maximum": 0.07909236446554183
+      },
+      "control_outside_plateau_range": false
+    },
+    "discretisation": {
+      "measured_property": "normalised neighbour-difference energy on one-stencil grid edges",
+      "control_value": 0.03224642962780687,
+      "plateau_values_by_reference": {
+        "21978/35": 0.03663698713818693,
+        "21983/35": 0.03739640188823471,
+        "21985/51": 0.031105803798991066,
+        "21986/46": 0.031984907775925796,
+        "21989/55": 0.026264863157707978
+      },
+      "plateau_sample_count": 5,
+      "plateau_range": {
+        "minimum": 0.026264863157707978,
+        "maximum": 0.03739640188823471
+      },
+      "control_outside_plateau_range": false
+    }
+  },
+  "supporting_property_contrasts": {
+    "full_state_residual_sup_wb": {
+      "control_value": 0.010070435734553573,
+      "plateau_values_by_reference": {
+        "21978/35": 0.006693844425557427,
+        "21983/35": 0.009319663946120826,
+        "21985/51": 0.009377078203996358,
+        "21986/46": 0.01258649414293056,
+        "21989/55": 0.009413262905261233
+      },
+      "plateau_sample_count": 5,
+      "plateau_range": {
+        "minimum": 0.006693844425557427,
+        "maximum": 0.01258649414293056
+      },
+      "control_outside_plateau_range": false
+    },
+    "full_state_residual_l2_wb": {
+      "control_value": 0.07375750614009774,
+      "plateau_values_by_reference": {
+        "21978/35": 0.045788346761827636,
+        "21983/35": 0.061767884991054615,
+        "21985/51": 0.07021024953714845,
+        "21986/46": 0.0897203020654975,
+        "21989/55": 0.0745083572967866
+      },
+      "plateau_sample_count": 5,
+      "plateau_range": {
+        "minimum": 0.045788346761827636,
+        "maximum": 0.0897203020654975
+      },
+      "control_outside_plateau_range": false
+    },
+    "closed_flux_squared_magnitude_fraction": {
+      "control_value": 0.2857439492721901,
+      "plateau_values_by_reference": {
+        "21978/35": 0.26602972317101753,
+        "21983/35": 0.21907819910519316,
+        "21985/51": 0.2907281832580748,
+        "21986/46": 0.24846294430927124,
+        "21989/55": 0.3438072038957695
+      },
+      "plateau_sample_count": 5,
+      "plateau_range": {
+        "minimum": 0.21907819910519316,
+        "maximum": 0.3438072038957695
+      },
+      "control_outside_plateau_range": false
+    },
+    "scrape_off_squared_magnitude_fraction": {
+      "control_value": 0.71425605072781,
+      "plateau_values_by_reference": {
+        "21978/35": 0.7339702768289827,
+        "21983/35": 0.780921800894807,
+        "21985/51": 0.7092718167419252,
+        "21986/46": 0.7515370556907289,
+        "21989/55": 0.6561927961042305
+      },
+      "plateau_sample_count": 5,
+      "plateau_range": {
+        "minimum": 0.6561927961042305,
+        "maximum": 0.780921800894807
+      },
+      "control_outside_plateau_range": false
+    },
+    "boundary_band_squared_magnitude_fraction": {
+      "control_value": 0.0611625459967646,
+      "plateau_values_by_reference": {
+        "21978/35": 0.055299850960433494,
+        "21983/35": 0.04833594915455983,
+        "21985/51": 0.05656415372343291,
+        "21986/46": 0.059992229934027794,
+        "21989/55": 0.07984409928455515
+      },
+      "plateau_sample_count": 5,
+      "plateau_range": {
+        "minimum": 0.04833594915455983,
+        "maximum": 0.07984409928455515
+      },
+      "control_outside_plateau_range": false
+    },
+    "best_stored_circuit_one_based": {
+      "control_value": 83,
+      "plateau_values_by_reference": {
+        "21978/35": 83,
+        "21983/35": 83,
+        "21985/51": 83,
+        "21986/46": 84,
+        "21989/55": 83
+      },
+      "plateau_sample_count": 5,
+      "plateau_unique_values": [
+        83,
+        84
+      ],
+      "control_absent_from_plateau_values": false
+    },
+    "equivalent_current_correction_a": {
+      "control_value": -21266.74870153816,
+      "plateau_values_by_reference": {
+        "21978/35": -10466.654882318571,
+        "21983/35": -11477.616191970777,
+        "21985/51": -16714.926994799975,
+        "21986/46": -18417.106778122074,
+        "21989/55": -25197.969953695825
+      },
+      "plateau_sample_count": 5,
+      "plateau_range": {
+        "minimum": -25197.969953695825,
+        "maximum": -10466.654882318571
+      },
+      "control_outside_plateau_range": false
+    },
+    "terminal_relative_residual": {
+      "control_value": 0.005049061244966342,
+      "plateau_values_by_reference": {
+        "21978/35": 0.004585167307195374,
+        "21983/35": 0.006623820952318247,
+        "21985/51": 0.005167711618738154,
+        "21986/46": 0.007425336057810689,
+        "21989/55": 0.005024282863481057
+      },
+      "plateau_sample_count": 5,
+      "plateau_range": {
+        "minimum": 0.004585167307195374,
+        "maximum": 0.007425336057810689
+      },
+      "control_outside_plateau_range": false
+    },
+    "terminal_plasma_current_fraction_of_label": {
+      "control_value": 1.0,
+      "plateau_values_by_reference": {
+        "21978/35": 1.0000000000000002,
+        "21983/35": 1.0,
+        "21985/51": 1.0,
+        "21986/46": 1.0,
+        "21989/55": 1.0000000000000002
+      },
+      "plateau_sample_count": 5,
+      "plateau_range": {
+        "minimum": 1.0,
+        "maximum": 1.0000000000000002
+      },
+      "control_outside_plateau_range": false
+    },
+    "stored_source_support_nodes": {
+      "control_value": 243.0,
+      "plateau_values_by_reference": {
+        "21978/35": 248.0,
+        "21983/35": 257.0,
+        "21985/51": 227.0,
+        "21986/46": 208.0,
+        "21989/55": 222.0
+      },
+      "plateau_sample_count": 5,
+      "plateau_range": {
+        "minimum": 208.0,
+        "maximum": 257.0
+      },
+      "control_outside_plateau_range": false
+    },
+    "stored_lcfs_contour_discrepancy_fraction": {
+      "control_value": 0.0034558984831316586,
+      "plateau_values_by_reference": {
+        "21978/35": 0.0039565704776983734,
+        "21983/35": 0.003801441005144457,
+        "21985/51": 0.0026320993551678384,
+        "21986/46": 0.0029569918752245794,
+        "21989/55": 0.0038093633492954915
+      },
+      "plateau_sample_count": 5,
+      "plateau_range": {
+        "minimum": 0.0026320993551678384,
+        "maximum": 0.0039565704776983734
+      },
+      "control_outside_plateau_range": false
+    }
+  },
+  "verdict": {
+    "separating_candidates": [],
+    "separating_candidate_count": 0,
+    "properties_compared": [
+      "conductor_current_wiring",
+      "discretisation",
+      "profiles",
+      "wall"
+    ],
+    "sample_count": 6,
+    "statement": "None of the four measured substitution-pattern properties separates 22086/43 from the five plateau frames: every control value lies inside the corresponding five-frame range.",
+    "causal_attribution": "DECLINED"
+  }
+}

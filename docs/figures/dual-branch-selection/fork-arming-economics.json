@@ -1,0 +1,208 @@
+{
+  "absolute_margin_distribution": {
+    "count": 4,
+    "maximum": 0.01971081357477064,
+    "mean": 0.008809067972744895,
+    "minimum": 0.003395359754118532,
+    "quantiles": {
+      "0.25": 0.004521690959746472,
+      "0.50": 0.006065049281045204,
+      "0.75": 0.010352426294043628
+    },
+    "values_sorted": [
+      0.003395359754118532,
+      0.004897134694955785,
+      0.007232963867134623,
+      0.01971081357477064
+    ]
+  },
+  "artifact": "fork arming economics from production branch margins",
+  "catalog_budget": {
+    "goal_seconds": 3600.0,
+    "required_aggregate_slices_per_second": 372.620833333,
+    "required_rate_status": "derived requirement from slice_count / goal_seconds, not measured throughput",
+    "single_branch_solve_cost_parameter": {
+      "status": "assumed normalization parameter, not a measurement",
+      "units": "aggregate solve-seconds per slice for one pinned branch",
+      "value": 1.0
+    },
+    "slice_count": 1341435,
+    "workload_denominator": "1,341,435 single-branch solve equivalents; policy fractions compare branch-solve work against processing every catalog slice once"
+  },
+  "decision_status": {
+    "fork_policy_locked": false,
+    "out_of_scope": "two-branch batch cost on the accelerator lane",
+    "reason": "armed fraction alone is insufficient; the separate accelerator-lane measurement of two-branch batch cost is still required"
+  },
+  "frames": [
+    {
+      "absolute_class_margin": null,
+      "class_margin": null,
+      "class_margin_nonfinite": "positive_infinity",
+      "machine": "MAST",
+      "margin_availability": "nonfinite",
+      "shot": 21978,
+      "slice_index": 35,
+      "time_s": 0.1899999976158142
+    },
+    {
+      "absolute_class_margin": 0.007232963867134623,
+      "class_margin": 0.007232963867134623,
+      "class_margin_nonfinite": null,
+      "machine": "MAST",
+      "margin_availability": "finite",
+      "shot": 21983,
+      "slice_index": 35,
+      "time_s": 0.1899999976158142
+    },
+    {
+      "absolute_class_margin": 0.01971081357477064,
+      "class_margin": 0.01971081357477064,
+      "class_margin_nonfinite": null,
+      "machine": "MAST",
+      "margin_availability": "finite",
+      "shot": 21985,
+      "slice_index": 51,
+      "time_s": 0.2750000059604645
+    },
+    {
+      "absolute_class_margin": 0.004897134694955785,
+      "class_margin": 0.004897134694955785,
+      "class_margin_nonfinite": null,
+      "machine": "MAST",
+      "margin_availability": "finite",
+      "shot": 21986,
+      "slice_index": 46,
+      "time_s": 0.25
+    },
+    {
+      "absolute_class_margin": 0.003395359754118532,
+      "class_margin": -0.003395359754118532,
+      "class_margin_nonfinite": null,
+      "machine": "MAST",
+      "margin_availability": "finite",
+      "shot": 21989,
+      "slice_index": 55,
+      "time_s": 0.29499998688697815
+    },
+    {
+      "absolute_class_margin": null,
+      "class_margin": null,
+      "class_margin_nonfinite": "positive_infinity",
+      "machine": "MAST",
+      "margin_availability": "nonfinite",
+      "shot": 22086,
+      "slice_index": 43,
+      "time_s": 0.22999998927116394
+    }
+  ],
+  "margin_availability": {
+    "finite_count": 4,
+    "frame_count": 6,
+    "nonfinite_or_absent_count": 2,
+    "nonfinite_or_absent_fraction": 0.3333333333333333
+  },
+  "measurement_contract": {
+    "arming_rule": "fork when abs(class_margin) <= threshold",
+    "cohort": "six frozen MAST diverted-label references",
+    "extrapolation": "the observed armed fraction of the six-frame frozen cohort is projected onto the full catalog denominator; no representativeness claim or confidence interval is made",
+    "frame_count": 6,
+    "frame_selection": "lowest worst-fraction qualified row per frozen shot",
+    "machine": "MAST",
+    "margin_source": "terminal class_margin from the pure DIVERTED branch of ForwardProfile.solve_portfolio, one value per frozen catalog frame",
+    "unavailable_margin_fallback": "always fork when class_margin is absent or non-finite"
+  },
+  "policies": [
+    {
+      "absolute_margin_threshold": null,
+      "additional_solve_equivalents_above_single_branch": 1341435.0,
+      "armed_fraction": 1.0,
+      "armed_frame_count": 6,
+      "assumed_aggregate_solve_seconds": 2682870.0,
+      "finite_armed_frame_count": 4,
+      "fraction_of_always_fork_workload": 1.0,
+      "fraction_of_one_hour_aggregate_time_budget_under_assumed_cost": 745.2416666666667,
+      "fraction_of_single_branch_workload_budget": 2.0,
+      "policy": "always_fork",
+      "projected_armed_catalog_slices": 1341435.0,
+      "required_aggregate_branch_solves_per_second_for_goal": 745.2416666666667,
+      "single_branch_solve_equivalents": 2682870.0,
+      "unavailable_margin_fallback_frame_count": 2
+    },
+    {
+      "absolute_margin_threshold": 0.0025,
+      "additional_solve_equivalents_above_single_branch": 447145.0,
+      "armed_fraction": 0.3333333333333333,
+      "armed_frame_count": 2,
+      "assumed_aggregate_solve_seconds": 1788580.0,
+      "finite_armed_frame_count": 0,
+      "fraction_of_always_fork_workload": 0.6666666666666666,
+      "fraction_of_one_hour_aggregate_time_budget_under_assumed_cost": 496.8277777777778,
+      "fraction_of_single_branch_workload_budget": 1.3333333333333333,
+      "policy": "margin_armed",
+      "projected_armed_catalog_slices": 447145.0,
+      "required_aggregate_branch_solves_per_second_for_goal": 496.8277777777778,
+      "single_branch_solve_equivalents": 1788580.0,
+      "unavailable_margin_fallback_frame_count": 2
+    },
+    {
+      "absolute_margin_threshold": 0.005,
+      "additional_solve_equivalents_above_single_branch": 894290.0,
+      "armed_fraction": 0.6666666666666666,
+      "armed_frame_count": 4,
+      "assumed_aggregate_solve_seconds": 2235725.0,
+      "finite_armed_frame_count": 2,
+      "fraction_of_always_fork_workload": 0.8333333333333334,
+      "fraction_of_one_hour_aggregate_time_budget_under_assumed_cost": 621.0347222222222,
+      "fraction_of_single_branch_workload_budget": 1.6666666666666667,
+      "policy": "margin_armed",
+      "projected_armed_catalog_slices": 894290.0,
+      "required_aggregate_branch_solves_per_second_for_goal": 621.0347222222222,
+      "single_branch_solve_equivalents": 2235725.0,
+      "unavailable_margin_fallback_frame_count": 2
+    },
+    {
+      "absolute_margin_threshold": 0.01,
+      "additional_solve_equivalents_above_single_branch": 1117862.5,
+      "armed_fraction": 0.8333333333333334,
+      "armed_frame_count": 5,
+      "assumed_aggregate_solve_seconds": 2459297.5,
+      "finite_armed_frame_count": 3,
+      "fraction_of_always_fork_workload": 0.9166666666666666,
+      "fraction_of_one_hour_aggregate_time_budget_under_assumed_cost": 683.1381944444445,
+      "fraction_of_single_branch_workload_budget": 1.8333333333333333,
+      "policy": "margin_armed",
+      "projected_armed_catalog_slices": 1117862.5,
+      "required_aggregate_branch_solves_per_second_for_goal": 683.1381944444445,
+      "single_branch_solve_equivalents": 2459297.5,
+      "unavailable_margin_fallback_frame_count": 2
+    },
+    {
+      "absolute_margin_threshold": 0.02,
+      "additional_solve_equivalents_above_single_branch": 1341435.0,
+      "armed_fraction": 1.0,
+      "armed_frame_count": 6,
+      "assumed_aggregate_solve_seconds": 2682870.0,
+      "finite_armed_frame_count": 4,
+      "fraction_of_always_fork_workload": 1.0,
+      "fraction_of_one_hour_aggregate_time_budget_under_assumed_cost": 745.2416666666667,
+      "fraction_of_single_branch_workload_budget": 2.0,
+      "policy": "margin_armed",
+      "projected_armed_catalog_slices": 1341435.0,
+      "required_aggregate_branch_solves_per_second_for_goal": 745.2416666666667,
+      "single_branch_solve_equivalents": 2682870.0,
+      "unavailable_margin_fallback_frame_count": 2
+    }
+  ],
+  "provenance": {
+    "catalog_census": "docs/figures/mast-catalog-gpu-solve/slice-census.json",
+    "catalog_census_sha256": "65f5a48a0b34b5bd132b7bf9696fc6402a72f36f1818770ab52d6c8e9eb94e1a",
+    "catalog_identity_sha256": "edab6ebb557eb1de6249852c105cac23f79ad4ce615f35f3d9812de0b1d9fad6",
+    "catalog_index": "https://mastapp.site/parquet/level2/shots",
+    "driver_sha256": "34d3a1c42b7f1031a574a16c8099765f157b74555a3e40a0c23148d4289bfeaf",
+    "margin_receipt": "docs/figures/dual-branch-selection/pinned-branch-contrast.json",
+    "margin_receipt_sha256": "a1bf304c4987a95656fec4c56d057f63a01205b477a6e2ab18e440af41067b7b",
+    "margin_receipt_source_commit": "ccc37b623d4d526258c0c2991bebc26b78f366fb",
+    "slice_counts_sha256": "af58cdf9d1a83b5e9f41c42f09bb423b4578a2dbee1b50f6160cbbf5d8c9b1df"
+  }
+}

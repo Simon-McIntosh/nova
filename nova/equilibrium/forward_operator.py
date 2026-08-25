@@ -61,6 +61,7 @@ __all__ = [
 ]
 
 
+@jax.tree_util.register_pytree_node_class
 @dataclass(frozen=True)
 class ForwardTopologyState:
     """Topology landmarks plus the continuous connectivity margin."""
@@ -85,6 +86,31 @@ class ForwardTopologyState:
     def flux_span(self) -> jax.Array:
         """Return the total poloidal flux [Wb] from the axis to the boundary."""
         return self.boundary_flux - self.axis_flux
+
+    def tree_flatten(self):
+        """Return topology arrays with the deferred callable evaluated once."""
+        return (
+            (
+                self.axis,
+                self.axis_flux,
+                self.boundary,
+                self.boundary_flux,
+                self.x_point,
+                self.x_point_flux,
+                self.wall_point,
+                self.wall_point_flux,
+                self.diverted,
+                self.class_margin,
+            ),
+            None,
+        )
+
+    @classmethod
+    def tree_unflatten(cls, aux_data, children):
+        """Rebuild a topology state without carrying a callable as a leaf."""
+        del aux_data
+        *landmarks, class_margin = children
+        return cls(*landmarks, lambda: class_margin)
 
 
 def _structured_grid_axes(coordinate) -> tuple[np.ndarray, np.ndarray]:
@@ -394,6 +420,17 @@ class ForwardFluxOperator:
         """Return the radius [m] of every plasma grid node."""
         return self.grid.coordinate[:, 0]
 
+    def connectivity_grid_axes(
+        self,
+    ) -> tuple[jax.Array, jax.Array, tuple[int, int]]:
+        """Return structured radius, height, and shape for connectivity reads."""
+        radius, height = _structured_grid_axes(self.grid.coordinate)
+        return (
+            jnp.asarray(radius, dtype=jnp.float64),
+            jnp.asarray(height, dtype=jnp.float64),
+            (radius.size, height.size),
+        )
+
     def _current(self, current) -> jax.Array:
         """Return the conductor currents one evaluation should use."""
         return self.external_current if current is None else jnp.asarray(current)
@@ -421,16 +458,15 @@ class ForwardFluxOperator:
         self, physical, topology: TopologyState
     ) -> jax.Array:
         """Read the signed reachable-wall minus X-point flux margin."""
-        radius, height = _structured_grid_axes(self.grid.coordinate)
-        connectivity_radius = jnp.asarray(radius, dtype=jnp.float64)
-        connectivity_height = jnp.asarray(height, dtype=jnp.float64)
+        connectivity_radius, connectivity_height, connectivity_shape = (
+            self.connectivity_grid_axes()
+        )
         grid_flux, wall_flux = self.topology.split_flux_map(physical)
         _vmap_o, vmap_x = self._fixed_design_topology.grid(grid_flux)
         classification_wall = jnp.concatenate(
             (topology.wall_point, topology.wall_point_flux[None])
         )
-        radial_count = radius.size
-        vertical_count = height.size
+        radial_count, vertical_count = connectivity_shape
         reading = traced_boundary_read(
             grid_flux.reshape((radial_count, vertical_count)).T,
             connectivity_radius,

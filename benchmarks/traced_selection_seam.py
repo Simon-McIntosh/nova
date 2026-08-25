@@ -159,18 +159,19 @@ def _class_observables(operator: Any, state: jax.Array) -> tuple[jax.Array, ...]
     classification_wall = jnp.concatenate(
         (topology.wall_point, topology.wall_point_flux[None])
     )
-    radial_count, vertical_count = operator._connectivity_shape
+    radius, height, connectivity_shape = operator.connectivity_grid_axes()
+    radial_count, vertical_count = connectivity_shape
     smooth = traced_smooth_boundary_read(
         grid_flux.reshape((radial_count, vertical_count)).T,
-        operator._connectivity_radius,
-        operator._connectivity_height,
+        radius,
+        height,
         operator.inside_material.reshape((radial_count, vertical_count)).T,
         topology.axis[0],
         topology.axis[1],
         96,
         18,
         2,
-        jnp.empty((0,), dtype=operator._connectivity_radius.dtype),
+        jnp.empty((0,), dtype=radius.dtype),
         jnp.asarray(1.0, dtype=grid_flux.dtype),
         operator.wall.coordinate[:, 0],
         operator.wall.coordinate[:, 1],

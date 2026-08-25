@@ -1,5 +1,6 @@
-"""Structured-axis requirements for forward topology margins."""
+"""Structured-axis and batching requirements for forward topology reads."""
 
+import jax
 import jax.numpy as jnp
 import numpy as np
 import pytest
@@ -87,6 +88,11 @@ def test_tensor_product_grid_class_margin_is_unchanged() -> None:
     wall_flux = _flux_field(np.asarray(operator.wall.coordinate)) + 0.2
     state = jnp.asarray(np.r_[grid_flux, wall_flux])
 
+    radius, height, shape = operator.connectivity_grid_axes()
+    np.testing.assert_array_equal(radius, lattice.radius)
+    np.testing.assert_array_equal(height, lattice.height)
+    assert shape == lattice.shape
+
     _masks, topology = operator.read(state)
 
     assert float(topology.class_margin) == pytest.approx(
@@ -95,3 +101,22 @@ def test_tensor_product_grid_class_margin_is_unchanged() -> None:
     assert float(operator.topology_margin(state)) == pytest.approx(
         float(topology.class_margin), rel=0.0, abs=0.0
     )
+
+
+def test_forward_topology_state_is_a_vmap_output_pytree() -> None:
+    """A batched forward read returns every topology array and its margin."""
+    configure_dtypes()
+    lattice = FluxLattice(np.linspace(0.5, 1.5, 9), np.linspace(-0.5, 0.5, 9))
+    operator = _operator(lattice.coordinate)
+    grid_flux = _flux_field(lattice.coordinate)
+    wall_flux = _flux_field(np.asarray(operator.wall.coordinate)) + 0.2
+    state = jnp.asarray(np.r_[grid_flux, wall_flux])
+
+    topology = jax.vmap(lambda flux: operator.read(flux)[1])(jnp.stack((state, state)))
+
+    assert topology.axis.shape == (2, 2)
+    assert topology.diverted.shape == (2,)
+    assert topology.class_margin.shape == (2,)
+    np.testing.assert_array_equal(topology.axis[0], topology.axis[1])
+    np.testing.assert_array_equal(topology.diverted[0], topology.diverted[1])
+    np.testing.assert_array_equal(topology.class_margin[0], topology.class_margin[1])

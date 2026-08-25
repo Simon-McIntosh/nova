@@ -344,6 +344,20 @@
     not being held back by any input: <strong>it is landing on a different fixed point from the one
     requested.</strong></p>
 
+    <p><strong>One correction to how §6 should be read, 2026-08-25, after a cross-repository
+    comparison.</strong> Those ten terminals came from a merit function — proposals graded by
+    <code>relative_residual + max(&minus;class_margin, 0)</code> — so the class participated in step
+    <em>selection</em> rather than anchoring the map. In the taxonomy imas-efit arrived at, that is a
+    <strong>mixed</strong> iteration, and 0 of 10 holding the requested class is its known failure
+    mode: their mixed boundary iteration flipped verdict 42 times out of 42. <strong>So §6's result
+    should not be cited as evidence about whether a diverted root is reachable.</strong> It is evidence
+    about what happens when the class is a penalty instead of an anchor, and it corroborates that prior
+    finding rather than measuring this one. The reachability evidence is §2's label-seeded arm, which
+    <em>was</em> branch-pure — <code>requested_class</code> threaded into
+    <code>operator.read</code> and <code>cell_current_moments</code> inside the flux map, with no
+    step-refusing predicate on that route — and which stalls at 4.585e-3 to 7.425e-3 while mostly
+    holding the class.</p>
+
     <p>That is why this plan closes here rather than adding a fifth candidate. Its own question is
     answered, and the surviving question — which fixed point the solver reaches and why not the
     requested one — belongs to

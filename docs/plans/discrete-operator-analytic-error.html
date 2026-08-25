@@ -162,6 +162,17 @@
     speculative candidate here; it is the account that a mature implementation of the same problem
     converged on, and it comes with a continuous escape rather than a discrete one.</p>
 
+    <p><strong>And the comparison sharpens the question, because branch purity is already present
+    here.</strong> Nova's pinned route threads <code>requested_class</code> into
+    <code>operator.read</code> and <code>cell_current_moments</code> inside the flux map and carries no
+    step-refusing predicate, which is imas-efit's forced-stream construction rather than its mixed one.
+    So purity is not the missing ingredient. What differs is contraction: <strong>their pure branches
+    contracted geometrically at &rho; = 0.33 to fixed points 3.1e-4 apart, while nova's pure diverted
+    branch is bounded non-convergent at ~5e-3 and does not contract at all.</strong> Same construction,
+    different contraction behaviour — so the question is not whether to pin the branch but why the map
+    fails to contract about this root, which is what the perturbation ladder in the done-when below is
+    for.</p>
+
     <p>Two cautions from the same map. Its drag is specific to that code's Picard boundary
     normalisation and <strong>cannot be copied mechanically into a Newton residual</strong> — the idea
     ports, the implementation does not. And its branch <em>selector</em> is a hard hierarchy of

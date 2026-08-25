@@ -147,6 +147,7 @@ __all__ = [
     "traced_iteration_boundary_read",
     "host_boundary_read",
     "host_boundary_read_batch",
+    "traced_margin_candidate_diagnostics",
     "traced_smooth_boundary_read",
     "host_boundary_read_smooth",
 ]
@@ -767,6 +768,110 @@ def traced_boundary_read(
         "x_overflow": ing["x_overflow"],
         "x_discarded_score_upper_bound": ing["x_discarded_score_upper_bound"],
         "x_unresolved_count": ing["x_unresolved_count"],
+    }
+
+
+@partial(jax.jit, static_argnums=(6, 7, 13))
+def traced_margin_candidate_diagnostics(
+    psi2d: jnp.ndarray,
+    rg: jnp.ndarray,
+    zg: jnp.ndarray,
+    inside_limiter: jnp.ndarray,
+    axis_r,
+    axis_z,
+    n_levels: int,
+    n_bisect: int,
+    wall_r: jnp.ndarray,
+    wall_z: jnp.ndarray,
+    wall_psi: jnp.ndarray,
+    classification_x: jnp.ndarray,
+    classification_wall: jnp.ndarray,
+    use_doubling: bool = True,
+) -> dict:
+    """Return fixed-shape evidence behind one exact topology-margin read.
+
+    The exact comparator candidates and selected wall extremum determine the
+    class operands.  The connectivity-local candidate table is retained beside
+    them so a receipt can distinguish an absent typed saddle from a typed
+    saddle that the flood-rejoin and binding-flux admission did not retain.
+    This diagnostic adapter does not feed the boundary or class calculation.
+    """
+    supplied_x = jnp.asarray(classification_x, dtype=psi2d.dtype)
+    supplied_wall = jnp.asarray(classification_wall, dtype=psi2d.dtype)
+    ing = _read_ingredients(
+        psi2d,
+        rg,
+        zg,
+        inside_limiter,
+        axis_r,
+        axis_z,
+        n_levels,
+        n_bisect,
+        wall_r,
+        wall_z,
+        wall_psi,
+        jnp.asarray(jnp.nan, dtype=psi2d.dtype),
+        use_doubling,
+        supplied_x,
+        supplied_wall,
+    )
+
+    typed_present = jnp.all(jnp.isfinite(supplied_x[:, :3]), axis=1)
+    typed_flux = jnp.where(typed_present, supplied_x[:, 2], ing["psi_axis"])
+    typed_level = (typed_flux - ing["psi_axis"]) / ing["span_safe"]
+    selected_index = _argmin_exact(jnp.where(typed_present, typed_level, jnp.inf))
+    selected_present = typed_present[selected_index]
+    selected_candidate = jnp.where(
+        selected_present,
+        supplied_x[selected_index],
+        jnp.full(supplied_x.shape[1:], jnp.nan, dtype=supplied_x.dtype),
+    )
+
+    wall_present = jnp.all(jnp.isfinite(supplied_wall[:3]))
+    wall_flux_safe = jnp.where(wall_present, supplied_wall[2], ing["psi_axis"])
+    wall_level_before_shadow = (wall_flux_safe - ing["psi_axis"]) / ing["span_safe"]
+    connectivity = ing["xc"]
+    connectivity_table = jnp.stack(
+        (
+            connectivity["r"],
+            connectivity["z"],
+            connectivity["psi"],
+            connectivity["ntype"],
+        ),
+        axis=-1,
+    )
+
+    return {
+        "class_margin": ing["class_u_wall"] - ing["class_u_x"],
+        "axis_flux": ing["psi_axis"],
+        "outward_flux_span": ing["span"],
+        "typed_candidates": supplied_x,
+        "typed_candidate_present": typed_present,
+        "typed_candidate_count": jnp.sum(typed_present, dtype=jnp.int32),
+        "selected_typed_candidate_index": selected_index,
+        "selected_typed_candidate_present": selected_present,
+        "selected_typed_candidate": selected_candidate,
+        "selected_x_normalized_flux_operand": ing["class_u_x"],
+        "wall_candidate": supplied_wall,
+        "wall_candidate_present": wall_present,
+        "wall_normalized_flux_operand_before_shadow": wall_level_before_shadow,
+        "wall_normalized_flux_operand": ing["class_u_wall"],
+        "wall_shadowed": ing["class_wall_shadowed"],
+        "connectivity_candidates": connectivity_table,
+        "connectivity_candidate_present": connectivity["present"],
+        "connectivity_candidate_admitted": ing["x_valid"],
+        "connectivity_candidate_resolved": connectivity["resolved"],
+        "connectivity_candidate_state": connectivity["state"],
+        "connectivity_candidate_confidence": connectivity["confidence"],
+        "connectivity_candidate_class_margin": connectivity["class_margin"],
+        "connectivity_candidate_boundary_snr": connectivity["boundary_snr"],
+        "connectivity_candidate_root_support_cell": connectivity["root_support_cell"],
+        "connectivity_candidate_count_before_capacity": ing["x_candidate_count"],
+        "connectivity_admitted_slot_count": jnp.sum(ing["x_valid"], dtype=jnp.int32),
+        "connectivity_candidate_overflow": ing["x_overflow"],
+        "connectivity_discarded_score_upper_bound": ing[
+            "x_discarded_score_upper_bound"
+        ],
     }
 
 

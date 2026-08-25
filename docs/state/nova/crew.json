@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T19:10:48",
+  "updated": "2026-08-25T20:42:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -421,7 +421,10 @@
         "harness": "claude",
         "role": "implement",
         "session_id": "019ffb42-5d8a-7972-a213-5e64bec221f3",
-        "created": "2026-08-13"
+        "created": "2026-08-13",
+        "sessions": {
+          "gpt-5.6-sol": "01a039eb-aa87-7193-98ff-72afc0ba9566"
+        }
       },
       {
         "id": "equivalence-ladder",
@@ -36502,9 +36505,101 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260825T180434049467-post-cutover-solve-verification",
+        "plan": "primary-xpoint-evidence",
+        "section": "\u00a72",
+        "node": "post-cutover-solve-verification",
+        "node_definition": {
+          "done_when": "Run each file in its own fresh process with JAX_PLATFORMS=cpu and -m \"slow or not slow\", capture each to a log once, and quote per-file passed, failed, skipped and error counts against these expected baselines: tests/test_equilibrium_forward_solve.py expected 28 passed 0 failed; tests/test_transport_coupled_window.py expected 12 passed 0 failed; tests/test_two_class_recovery.py expected 3 passed 2 failed, where the two failures are the cold-start basin pair left visible BY DESIGN at residuals 1.29980506 and 1.30949372 - if those two are still the only failures with those residuals the file is AT BASELINE and green is not expected; tests/test_observable_acceptance.py expected 12 passed 0 failed. Any DEVIATION from a baseline must be quoted verbatim with its assertion and traceback and NOT repaired, because attribution of a cutover-induced change belongs to a separate node. Also state explicitly whether any achieved topology class in the recovery file moved, since the cutover changed the partition that classifies converged states. Change no source or test file.",
+          "estimated_hours": 1.5,
+          "goal": "Verify that the partition cutover left the forward-solve surface at its expected state, because the cutover changed production classification and only the seven topology test files were re-run.",
+          "id": "post-cutover-solve-verification",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/post-cutover-solve-verification.md",
+          "plan": "primary-xpoint-evidence",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/post-cutover-solve-verification.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "integration-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T18:06:03Z",
+        "completed_at": "2026-08-25T18:29:54Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1431,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1431,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "bbb2fcce8e326519de428ede15561722c4baefc8",
+        "commits": [
+          "35ff7cf4a802d38fc35420edc584a56e3e3f217f"
+        ],
+        "changed_lines": {
+          "added": 131,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/post-cutover-solve-verification.md",
+        "scope_changed": false,
+        "session_id": "01a03a19-d860-7a42-bd40-c13588ac9caa",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5484800,
+            "cached_input_tokens_cumulative": 5484800,
+            "input_tokens": 5616395,
+            "input_tokens_cumulative": 5616395,
+            "output_tokens": 17403,
+            "output_tokens_cumulative": 17403,
+            "reasoning_output_tokens": 4946,
+            "reasoning_output_tokens_cumulative": 4946
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 871
+    "_version": 873
   }
 }

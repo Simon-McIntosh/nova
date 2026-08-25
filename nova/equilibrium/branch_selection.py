@@ -4,9 +4,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Any
+from typing import Any, NamedTuple
 
-from nova.equilibrium.forward import ForwardPortfolio
+import jax
+import jax.numpy as jnp
+
+from nova.equilibrium.forward import ForwardBranchReceipt, ForwardPortfolio
 from nova.equilibrium.topology import TopologyClass
 
 __all__ = [
@@ -19,8 +22,18 @@ __all__ = [
     "SelectionPolicy",
     "SelectionReason",
     "SelectionReceipt",
+    "TracedSelectionInput",
+    "TracedSelectionState",
+    "TracedSelectionStep",
+    "forward_branch_selection_input",
+    "initial_traced_selection_state",
+    "scan_forward_branch_selection",
     "select_forward_branch",
+    "traced_select_forward_branch",
 ]
+
+
+_NO_CLASS = -1
 
 
 class ColdStartRule(StrEnum):
@@ -52,6 +65,96 @@ class SelectionReason(StrEnum):
     ADMISSIBILITY_PERSISTED = "admissibility_persisted"
     NO_VALID_BRANCH = "no_valid_branch"
     NO_ADMISSIBLE_ALTERNATIVE = "no_admissible_alternative"
+
+
+_REASON_VALUES = tuple(SelectionReason)
+_REASON_CODES = {reason: index for index, reason in enumerate(_REASON_VALUES)}
+
+
+class TracedSelectionInput(NamedTuple):
+    """Array-only evidence for one post-solve branch selection.
+
+    The branch axis is ordered limited, diverted. ``p_diverted`` is the smooth
+    blend weight. ``class_margin`` remains the exact signed comparator for
+    reporting and gates; it is never substituted for the smooth weight.
+    """
+
+    flux: jax.Array
+    availability: jax.Array
+    admissibility: jax.Array
+    residuals: jax.Array
+    p_diverted: jax.Array
+    class_margin: jax.Array
+
+
+class TracedSelectionState(NamedTuple):
+    """Device-visible selector history and current qualification masks."""
+
+    selected_class: jax.Array
+    pending_class: jax.Array
+    pending_count: jax.Array
+    sequence_index: jax.Array
+    availability: jax.Array
+    admissibility: jax.Array
+    degrade_path_firings: jax.Array
+    two_qualified_selections: jax.Array
+
+
+class TracedSelectionStep(NamedTuple):
+    """Array-only selection result emitted by one traced transition."""
+
+    flux: jax.Array
+    diverted_weight: jax.Array
+    class_margin: jax.Array
+    comparator_class: jax.Array
+    selected_class: jax.Array
+    previous_class: jax.Array
+    switched: jax.Array
+    reason_code: jax.Array
+    qualified: jax.Array
+    degraded: jax.Array
+    both_qualified: jax.Array
+    availability: jax.Array
+    admissibility: jax.Array
+    residuals: jax.Array
+
+
+def forward_branch_selection_input(
+    branches: ForwardBranchReceipt,
+    p_diverted: jax.Array,
+    class_margin: jax.Array,
+    admissibility: jax.Array | None = None,
+) -> TracedSelectionInput:
+    """Build array evidence directly from a paired forward-branch receipt."""
+
+    availability = jnp.asarray(branches.converged, dtype=bool) & jnp.asarray(
+        branches.topology_consistent, dtype=bool
+    )
+    if admissibility is None:
+        admissibility = jnp.ones_like(availability, dtype=bool)
+    return TracedSelectionInput(
+        flux=jnp.asarray(branches.equilibrium.flux),
+        availability=availability,
+        admissibility=jnp.asarray(admissibility, dtype=bool),
+        residuals=jnp.asarray(branches.residual),
+        p_diverted=jnp.asarray(p_diverted),
+        class_margin=jnp.asarray(class_margin),
+    )
+
+
+def initial_traced_selection_state() -> TracedSelectionState:
+    """Return an array-only state with no previously selected branch."""
+
+    return TracedSelectionState(
+        selected_class=jnp.asarray(_NO_CLASS, dtype=jnp.int8),
+        pending_class=jnp.asarray(_NO_CLASS, dtype=jnp.int8),
+        pending_count=jnp.asarray(0, dtype=jnp.int32),
+        sequence_index=jnp.asarray(0, dtype=jnp.int32),
+        availability=jnp.zeros((2,), dtype=bool),
+        admissibility=jnp.ones((2,), dtype=bool),
+        degrade_path_firings=jnp.asarray(0, dtype=jnp.int32),
+        two_qualified_selections=jnp.asarray(0, dtype=jnp.int32),
+    )
 
 
 def _class_value(value: TopologyClass | None) -> str | None:
@@ -154,6 +257,8 @@ class SelectionHistory:
     pending_class: TopologyClass | None = None
     pending_count: int = 0
     sequence_index: int = 0
+    degrade_path_firings: int = 0
+    two_qualified_selections: int = 0
 
     def __post_init__(self) -> None:
         """Normalize class values and validate pending-transition state."""
@@ -168,6 +273,10 @@ class SelectionHistory:
             raise ValueError("pending_count cannot be negative")
         if self.sequence_index < 0:
             raise ValueError("sequence_index cannot be negative")
+        if self.degrade_path_firings < 0:
+            raise ValueError("degrade_path_firings cannot be negative")
+        if self.two_qualified_selections < 0:
+            raise ValueError("two_qualified_selections cannot be negative")
         if (self.pending_class is None) != (self.pending_count == 0):
             raise ValueError("pending_class and pending_count must be set together")
         if self.pending_class is not None and self.pending_class is self.selected_class:
@@ -208,7 +317,220 @@ class SelectionReceipt:
                 "pending_class": _class_value(self.next_history.pending_class),
                 "pending_count": self.next_history.pending_count,
             },
+            "selection_cohort": {
+                "degrade_path_firings": self.next_history.degrade_path_firings,
+                "two_qualified_selections": (
+                    self.next_history.two_qualified_selections
+                ),
+            },
         }
+
+
+def _history_to_traced(
+    history: SelectionHistory,
+    availability: jax.Array,
+    admissibility: jax.Array,
+) -> TracedSelectionState:
+    """Convert host history to the array boundary consumed by the core."""
+
+    selected = (
+        _NO_CLASS if history.selected_class is None else int(history.selected_class)
+    )
+    pending = _NO_CLASS if history.pending_class is None else int(history.pending_class)
+    return TracedSelectionState(
+        selected_class=jnp.asarray(selected, dtype=jnp.int8),
+        pending_class=jnp.asarray(pending, dtype=jnp.int8),
+        pending_count=jnp.asarray(history.pending_count, dtype=jnp.int32),
+        sequence_index=jnp.asarray(history.sequence_index, dtype=jnp.int32),
+        availability=jnp.asarray(availability, dtype=bool),
+        admissibility=jnp.asarray(admissibility, dtype=bool),
+        degrade_path_firings=jnp.asarray(history.degrade_path_firings, dtype=jnp.int32),
+        two_qualified_selections=jnp.asarray(
+            history.two_qualified_selections, dtype=jnp.int32
+        ),
+    )
+
+
+def _advance_traced_selection(
+    state: TracedSelectionState,
+    evidence: TracedSelectionInput,
+    cold_start_class: jax.Array,
+    persistence_threshold: jax.Array,
+) -> tuple[TracedSelectionState, TracedSelectionStep]:
+    """Advance one selection using only integer, boolean, and floating arrays."""
+
+    limited = jnp.asarray(int(TopologyClass.LIMITED), dtype=jnp.int8)
+    diverted = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
+    no_class = jnp.asarray(_NO_CLASS, dtype=jnp.int8)
+    availability = jnp.asarray(evidence.availability, dtype=bool)
+    admissibility = jnp.asarray(evidence.admissibility, dtype=bool)
+    selectable = availability & admissibility
+    limited_selectable, diverted_selectable = selectable[0], selectable[1]
+    both_qualified = limited_selectable & diverted_selectable
+    exactly_one_qualified = limited_selectable ^ diverted_selectable
+    any_qualified = limited_selectable | diverted_selectable
+
+    previous = state.selected_class
+    has_previous = previous != no_class
+    alternate = jnp.where(previous == limited, diverted, limited)
+    previous_available = jnp.where(
+        previous == diverted, availability[1], availability[0]
+    )
+    previous_admissible = jnp.where(
+        previous == diverted, admissibility[1], admissibility[0]
+    )
+    alternate_selectable = jnp.where(
+        alternate == diverted, diverted_selectable, limited_selectable
+    )
+    sole_class = jnp.where(limited_selectable, limited, diverted)
+
+    cold_selected = jnp.where(
+        ~any_qualified,
+        no_class,
+        jnp.where(exactly_one_qualified, sole_class, cold_start_class),
+    )
+    cold_reason = jnp.where(
+        ~any_qualified,
+        _REASON_CODES[SelectionReason.NO_VALID_BRANCH],
+        jnp.where(
+            exactly_one_qualified,
+            _REASON_CODES[SelectionReason.SOLE_VALID],
+            _REASON_CODES[SelectionReason.COLD_START],
+        ),
+    )
+
+    pending_count = jnp.where(
+        state.pending_class == alternate, state.pending_count + 1, 1
+    )
+    persistence_reached = pending_count >= persistence_threshold
+    history_selected = jnp.where(
+        ~previous_available,
+        jnp.where(alternate_selectable, alternate, no_class),
+        jnp.where(
+            previous_admissible,
+            previous,
+            jnp.where(
+                ~alternate_selectable,
+                previous,
+                jnp.where(persistence_reached, alternate, previous),
+            ),
+        ),
+    )
+    history_reason = jnp.where(
+        ~previous_available,
+        jnp.where(
+            alternate_selectable,
+            _REASON_CODES[SelectionReason.BRANCH_DISAPPEARED],
+            _REASON_CODES[SelectionReason.NO_VALID_BRANCH],
+        ),
+        jnp.where(
+            previous_admissible,
+            _REASON_CODES[SelectionReason.HISTORY_CONTINUITY],
+            jnp.where(
+                ~alternate_selectable,
+                _REASON_CODES[SelectionReason.NO_ADMISSIBLE_ALTERNATIVE],
+                jnp.where(
+                    persistence_reached,
+                    _REASON_CODES[SelectionReason.ADMISSIBILITY_PERSISTED],
+                    _REASON_CODES[SelectionReason.ADMISSIBILITY_PENDING],
+                ),
+            ),
+        ),
+    )
+    selected = jnp.where(has_previous, history_selected, cold_selected).astype(jnp.int8)
+    reason_code = jnp.where(has_previous, history_reason, cold_reason).astype(jnp.int8)
+    pending_active = (
+        has_previous
+        & previous_available
+        & ~previous_admissible
+        & alternate_selectable
+        & ~persistence_reached
+    )
+    next_pending_class = jnp.where(pending_active, alternate, no_class).astype(jnp.int8)
+    next_pending_count = jnp.where(pending_active, pending_count, 0).astype(jnp.int32)
+    anchored_selected = jnp.where(selected == no_class, previous, selected).astype(
+        jnp.int8
+    )
+    switched = has_previous & (selected != no_class) & (selected != previous)
+    degraded = exactly_one_qualified
+
+    smooth_weight = jnp.clip(jnp.asarray(evidence.p_diverted), 0.0, 1.0)
+    diverted_weight = jnp.where(
+        both_qualified,
+        smooth_weight,
+        jnp.where(
+            limited_selectable,
+            0.0,
+            jnp.where(diverted_selectable, 1.0, jnp.nan),
+        ),
+    )
+    limited_flux = evidence.flux[0]
+    diverted_flux = evidence.flux[1]
+    selected_flux = limited_flux + diverted_weight * (diverted_flux - limited_flux)
+    class_margin = jnp.asarray(evidence.class_margin)
+    comparator_class = jnp.where(
+        jnp.isfinite(class_margin), class_margin >= 0, no_class
+    ).astype(jnp.int8)
+
+    next_state = TracedSelectionState(
+        selected_class=anchored_selected,
+        pending_class=next_pending_class,
+        pending_count=next_pending_count,
+        sequence_index=state.sequence_index + 1,
+        availability=availability,
+        admissibility=admissibility,
+        degrade_path_firings=state.degrade_path_firings + degraded.astype(jnp.int32),
+        two_qualified_selections=(
+            state.two_qualified_selections + both_qualified.astype(jnp.int32)
+        ),
+    )
+    step = TracedSelectionStep(
+        flux=selected_flux,
+        diverted_weight=diverted_weight,
+        class_margin=class_margin,
+        comparator_class=comparator_class,
+        selected_class=selected,
+        previous_class=previous,
+        switched=switched,
+        reason_code=reason_code,
+        qualified=any_qualified,
+        degraded=degraded,
+        both_qualified=both_qualified,
+        availability=availability,
+        admissibility=admissibility,
+        residuals=jnp.asarray(evidence.residuals),
+    )
+    return next_state, step
+
+
+def traced_select_forward_branch(
+    evidence: TracedSelectionInput,
+    state: TracedSelectionState,
+    cold_start_class: jax.Array,
+    persistence_threshold: jax.Array,
+) -> tuple[TracedSelectionState, TracedSelectionStep]:
+    """Select one branch through the production array-only core."""
+
+    return _advance_traced_selection(
+        state, evidence, cold_start_class, persistence_threshold
+    )
+
+
+def scan_forward_branch_selection(
+    evidence: TracedSelectionInput,
+    initial_state: TracedSelectionState,
+    cold_start_class: jax.Array,
+    persistence_threshold: jax.Array,
+) -> tuple[TracedSelectionState, TracedSelectionStep]:
+    """Advance a time-ordered selector state with :func:`jax.lax.scan`."""
+
+    return jax.lax.scan(
+        lambda state, item: _advance_traced_selection(
+            state, item, cold_start_class, persistence_threshold
+        ),
+        initial_state,
+        evidence,
+    )
 
 
 def _pair(values, name: str) -> tuple[Any, Any]:
@@ -249,75 +571,49 @@ def select_forward_branch(
     )
     availability = BranchAvailability(*available_pair)
     residuals = float(residual_pair[0]), float(residual_pair[1])
-    previous = history.selected_class
-
-    def selectable(topology_class: TopologyClass) -> bool:
-        return availability.for_class(topology_class) and admissibility.for_class(
-            topology_class
-        )
-
-    def finish(
-        selected: TopologyClass | None,
-        reason: SelectionReason,
-        *,
-        pending_class: TopologyClass | None = None,
-        pending_count: int = 0,
-    ) -> SelectionReceipt:
-        anchor = previous if selected is None else selected
-        next_history = SelectionHistory(
-            selected_class=anchor,
-            pending_class=pending_class,
-            pending_count=pending_count,
-            sequence_index=history.sequence_index + 1,
-        )
-        return SelectionReceipt(
-            selected_class=selected,
-            previous_class=previous,
-            switched=(
-                previous is not None
-                and selected is not None
-                and selected is not previous
-            ),
-            reason=reason,
-            availability=availability,
-            admissibility=admissibility,
-            residuals=residuals,
-            policy=policy,
-            next_history=next_history,
-        )
-
-    limited = TopologyClass.LIMITED
-    diverted = TopologyClass.DIVERTED
-    if previous is None:
-        limited_selectable = selectable(limited)
-        diverted_selectable = selectable(diverted)
-        if not limited_selectable and not diverted_selectable:
-            return finish(None, SelectionReason.NO_VALID_BRANCH)
-        if limited_selectable != diverted_selectable:
-            selected = limited if limited_selectable else diverted
-            return finish(selected, SelectionReason.SOLE_VALID)
-        return finish(policy.cold_start_class, SelectionReason.COLD_START)
-
-    alternate = diverted if previous is limited else limited
-    if not availability.for_class(previous):
-        if selectable(alternate):
-            return finish(alternate, SelectionReason.BRANCH_DISAPPEARED)
-        return finish(None, SelectionReason.NO_VALID_BRANCH)
-
-    if admissibility.for_class(previous):
-        return finish(previous, SelectionReason.HISTORY_CONTINUITY)
-
-    if not selectable(alternate):
-        return finish(previous, SelectionReason.NO_ADMISSIBLE_ALTERNATIVE)
-
-    pending_count = (
-        history.pending_count + 1 if history.pending_class is alternate else 1
+    evidence = TracedSelectionInput(
+        flux=jnp.zeros((2,), dtype=jnp.asarray(residuals).dtype),
+        availability=jnp.asarray(available_pair, dtype=bool),
+        admissibility=jnp.asarray(
+            (admissibility.limited, admissibility.diverted), dtype=bool
+        ),
+        residuals=jnp.asarray(residuals),
+        p_diverted=jnp.asarray(0.5),
+        class_margin=jnp.asarray(jnp.nan),
     )
-    if pending_count >= policy.persistence_threshold:
-        return finish(alternate, SelectionReason.ADMISSIBILITY_PERSISTED)
-    return finish(
-        previous,
-        SelectionReason.ADMISSIBILITY_PENDING,
-        pending_class=alternate,
-        pending_count=pending_count,
+    state, step = traced_select_forward_branch(
+        evidence,
+        _history_to_traced(history, evidence.availability, evidence.admissibility),
+        jnp.asarray(int(policy.cold_start_class), dtype=jnp.int8),
+        jnp.asarray(policy.persistence_threshold, dtype=jnp.int32),
+    )
+    selected_code = int(step.selected_class)
+    previous_code = int(step.previous_class)
+    pending_code = int(state.pending_class)
+    selected = None if selected_code == _NO_CLASS else TopologyClass(selected_code)
+    previous = None if previous_code == _NO_CLASS else TopologyClass(previous_code)
+    pending = None if pending_code == _NO_CLASS else TopologyClass(pending_code)
+    state_selected_code = int(state.selected_class)
+    next_history = SelectionHistory(
+        selected_class=(
+            None
+            if state_selected_code == _NO_CLASS
+            else TopologyClass(state_selected_code)
+        ),
+        pending_class=pending,
+        pending_count=int(state.pending_count),
+        sequence_index=int(state.sequence_index),
+        degrade_path_firings=int(state.degrade_path_firings),
+        two_qualified_selections=int(state.two_qualified_selections),
+    )
+    return SelectionReceipt(
+        selected_class=selected,
+        previous_class=previous,
+        switched=bool(step.switched),
+        reason=_REASON_VALUES[int(step.reason_code)],
+        availability=availability,
+        admissibility=admissibility,
+        residuals=residuals,
+        policy=policy,
+        next_history=next_history,
     )

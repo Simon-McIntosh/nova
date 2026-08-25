@@ -1,0 +1,10 @@
+node: traced-selector-state
+status: complete
+commits: c64440e8
+changed_paths: nova/equilibrium/branch_selection.py; tests/test_branch_selection.py
+tests: JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH="$PWD" uv run --no-sync pytest tests/test_branch_selection.py -> 18 passed in 8.34s; the unchanged host-only file before adding traced tests -> 14 passed in 11.49s; four new traced tests after the final implementation changes -> 4 passed in 8.49s; path-scoped ruff check and format -> clean
+test_logs: /tmp/traced-selector-host-tests.log; /tmp/traced-selector-focused-tests-final.log
+artifacts: nova/equilibrium/branch_selection.py now owns the production array selector input, state, step, single-step kernel, and lax.scan sequence API; the transform test proves a scan primitive in the jaxpr and jit(vmap(...)) over 3 independent batches x 4 time steps; that cohort records 2 degrade-path firings against 1 genuinely two-qualified selection; the smooth p_diverted path has nonzero gradients and class_margin remains a separate exact comparator with non-finite margins explicitly unclassified
+evidence_inputs: Existing host SelectionReceipt remains the provenance egress and all 14 existing semantic-oracle cases pass unchanged. The host selector now delegates its transition semantics to the array core and receipts expose cumulative degrade_path_firings and two_qualified_selections. The landed prototype evidence was consumed without re-derivation: 53/53 exact-class agreement, maximum adjacent persistent-rail weight step 3.5255e-4, and p_diverted agreement with sigmoid(class_margin/0.01) to 2.2e-16. Production keeps the fixed design roles: p_diverted alone carries the smooth blend and gradients; class_margin is carried separately for exact reporting and gates. No continuity claim is made at saddle-operand emergence, and no private operator attribute access was introduced.
+follow_ons: The sibling shadow-rejection adjudication must decide whether continuity can be claimed at saddle-operand emergence; this node deliberately makes no such claim.
+blockers: none

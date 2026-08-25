@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="5">
-<meta name="plan-commits" content="632a4396,991d5d6e">
-<meta name="plan-artifacts" content="benchmarks/traced_selection_seam.py,benchmarks/pinned_branch_contrast.py,docs/figures/dual-branch-selection/traced-selection-continuity.json,docs/figures/dual-branch-selection/pinned-branch-contrast.json,docs/audit/plan-grounds-audit.md,docs/audit/quantitative-claims-audit.md">
-<meta name="plan-impl" content="0.25">
+<meta name="plan-version" content="7">
+<meta name="plan-commits" content="632a4396,991d5d6e,5cdcaf72,3387739f,0bd3af3d,c64440e8">
+<meta name="plan-artifacts" content="benchmarks/traced_selection_seam.py,benchmarks/pinned_branch_contrast.py,benchmarks/fork_arming_economics.py,benchmarks/two_branch_batch_cost.py,nova/equilibrium/branch_selection.py,docs/figures/dual-branch-selection/traced-selection-continuity.json,docs/figures/dual-branch-selection/pinned-branch-contrast.json,docs/figures/dual-branch-selection/fork-arming-economics.json,docs/figures/dual-branch-selection/two-branch-batch-cost.json,docs/evidence/archive/dual-branch-selection-landed.html">
+<meta name="plan-impl" content="0.6">
 </head>
 <body>
   <main class="plan-doc">
@@ -386,6 +386,40 @@
     needs either a cheaper margin estimate on a catalog sample, or a conservative first pass that
     instruments margins as it runs, and that choice belongs to the lead rather than to this section.</p>
 
+    <p><strong>LANDED 2026-08-25, node <code>traced-selector-state</code></strong>, commit
+    <code>c64440e8</code>, gate PASSED, 4 tests added. Selector state now advances as integer and boolean
+    device arrays under <code>jax.lax.scan</code> inside
+    <code>nova/equilibrium/branch_selection.py</code> — its canonical home, with <em>no</em> parallel
+    module. The host selector <strong>delegates</strong> its transition semantics to the array core
+    rather than duplicating them, and the host <code>SelectionReceipt</code> is retained as the egress
+    and provenance boundary exactly as this section specified.</p>
+
+    <p><strong>The oracle held.</strong> All <strong>14</strong> existing host-selector cases pass
+    unchanged, 18 in the file. The traced property is <em>proven</em> rather than asserted: the test
+    inspects <code>jax.make_jaxpr</code> for a scan primitive and runs <code>jit(vmap(...))</code> over
+    three independent batches by four time steps. A traced claim whose test contains no transform is not
+    evidence — the lesson of a regression earlier in this sprint, where a <code>NamedTuple</code>
+    silently stopped being a PyTree and no gate noticed.</p>
+
+    <p><strong>Degrade-path accounting confirms this section's own warning.</strong> The receipt exposes
+    cumulative <code>degrade_path_firings</code> against <code>two_qualified_selections</code>, and the
+    landing cohort records <strong>2 degrade firings against 1 genuinely two-qualified
+    selection</strong>. §5 required that count precisely because an all-degrade cohort tests nothing
+    about selection; it is now visible rather than implicit.</p>
+
+    <p><strong>Design roles held, and the absent operand handled honestly.</strong>
+    <code>p_diverted</code> alone carries the smooth blend and has nonzero gradients,
+    <code>class_margin</code> remains a separate exact comparator, and <strong>non-finite margins are
+    explicitly unclassified rather than defaulted</strong> — the correct treatment of the four terminals
+    whose wall operand the private-flux shadow rejects. No continuity claim was made at saddle-operand
+    emergence, and no private-attribute access was introduced: it consumes the public
+    <code>connectivity_grid_axes</code> contract.</p>
+
+    <p><strong>What remains in §5.</strong> Two of the three host islands — array-only seed construction
+    so the portfolio sits under an outer catalog <code>vmap</code>, and the admitted-state bootstrap as a
+    fixed ladder with device selection. The continuity claim at saddle-operand emergence stays blocked on
+    whether the shadow rejection is correct.</p>
+
 <h2 id="s6">§6 — Fork policy under catalog economics</h2>
 
     <p>A two-branch portfolio doubles solve cost wherever it runs. The reference implementation
@@ -472,6 +506,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260825T084506969055-mast-margin-operand-attribution" data-who="margin-remeasure" data-when="2026-08-25T09:35:51Z">
     <div class="r-comment-body"><p>Production repair plus the attribution, and the attribution REFUTES the leading hypothesis. ForwardTopologyState is registered as a lossless PyTree with the nine landmarks and the evaluated class_margin as array leaves and the Callable excluded and reconstructed, and ForwardFluxOperator.connectivity_grid_axes is now the public radius/height/shape contract with both benchmark callers migrated and zero executable callers of the removed private attributes remaining. The previously failing production test test_the_topology_portfolio_matches_per_branch_solves_under_jit_and_vmap passes, and a new test_forward_topology_state_is_a_vmap_output_pytree gates the registration. SCIENCE: the connectivity-reachability hypothesis does NOT hold on MAST. All four absent-margin terminals carry connectivity SUPPORT, while three finite-margin terminals lack reachability. The named cause is wall_extremum_rejected_by_private_flux_shadow: finite pre-shadow wall operands, 0.3310275619269073 and 0.3310454781725451 on 21978/35 and 0.30190002257031606 and 0.3000846561326388 on 22086/43, are discarded by the private-flux shadow and become positive infinity. All-terminal counts are 9 with connectivity support, 3 not reachable, 0 no-candidate, 0 nonfinite-operand. Gate discipline was exemplary: a non-banked diagnostic pass enumerated all 252 changed leaves with magnitudes before any classification, and the final regeneration reproduced 381 float fields and 258 semantic fields with ZERO differences while preserving 644 of 644 banked leaves and adding 12 diagnostic subtrees.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260825T104524221366-traced-selector-state" data-who="selection-proto" data-when="2026-08-25T10:55:22Z">
+    <div class="r-comment-body"><p>The traced path lives in nova/equilibrium/branch_selection.py, its canonical home, with no parallel module - the host selector now DELEGATES its transition semantics to the array core rather than duplicating them, and the host SelectionReceipt remains the provenance egress. All 14 existing semantic-oracle cases pass unchanged, 18 total in the file. The traced property is PROVEN rather than asserted: the test inspects jax.make_jaxpr for a scan primitive and runs jit(vmap(...)) over 3 independent batches by 4 time steps. Degrade-path accounting landed as §5 required and confirms the concern - that cohort records 2 degrade-path firings against 1 genuinely two-qualified selection. Design roles held: p_diverted alone carries the smooth blend and has nonzero gradients, class_margin stays a separate exact comparator, and non-finite margins are explicitly UNCLASSIFIED rather than defaulted, which is the honest handling of the four absent operands. It made no continuity claim at saddle-operand emergence, as fenced, and introduced no private operator attribute access.</p></div>
 </div>
 </section>
 </main>

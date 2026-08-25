@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T12:50:02",
+  "updated": "2026-08-25T12:55:45",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -34817,9 +34817,102 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T104524221366-traced-selector-state",
+        "plan": "dual-branch-selection",
+        "section": "\u00a75",
+        "node": "traced-selector-state",
+        "node_definition": {
+          "done_when": "The traced path lives IN nova/equilibrium/branch_selection.py, its canonical home. Do NOT create a parallel module beside it - a second selector file next to the first doubles the surface, hides which is canonical, and this repository bans that pattern explicitly; extend the existing module and keep one home. The host SelectionReceipt stays the egress, so the traced core returns arrays and the receipt is constructed at the boundary. THE EXISTING HOST SELECTOR TESTS ARE THE SEMANTIC ORACLE and the traced port must reproduce them: run them and report that they still pass unchanged, and add a parity test asserting the traced path agrees with the host path on the same inputs. Prove the traced property rather than asserting it: the selector state must advance under jax.lax.scan, and a test must jit and vmap the traced path and fail without the array-based state - a traced claim with no transform in its test is not evidence. Reuse the landed prototype benchmarks/traced_selection_seam.py rather than re-deriving it; it demonstrates 53/53 exact-class agreement, continuous rails with maximum adjacent weight step 3.5255e-4, and p_diverted equal to sigmoid(class_margin/0.01) to 2.2e-16. Note that prototype reaches into the operator through the PUBLIC connectivity_grid_axes accessor as of commit 5cdcaf72 - do not reintroduce private-attribute access. Carry the design \u00a75 already fixed: p_diverted carries the smooth selection weight so gradients flow through it, class_margin carries the exact signed comparator for reporting and gates, and neither silently substitutes for the other. Record degrade-path firings against genuine two-qualified selections in the receipt, because on present evidence the degrade path fires on every experimental frame and an all-degrade cohort tests nothing about selection. Do NOT claim continuity at saddle-operand emergence: the exact margin is undefined on four of twelve banked MAST terminals because a private-flux shadow rejects a finite wall extremum, a sibling node is adjudicating whether that rejection is correct, and the continuity claim there depends on the answer. If the sixty-minute fence stops you short, land what is complete and green and state precisely what remains rather than reporting partial work as done.",
+          "estimated_hours": 4.0,
+          "goal": "Promote the traced branch selector from prototype to production by giving nova/equilibrium/branch_selection.py an array-based selector-state path advanced by lax.scan, so selected class, pending class and count, availability and admissibility become integer and boolean arrays rather than host dataclasses, while the existing host SelectionReceipt is retained as the egress and provenance boundary.",
+          "id": "traced-selector-state",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/traced-selector-state.md",
+          "plan": "dual-branch-selection",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/branch_selection.py",
+            "tests/test_branch_selection.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "selection-proto",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T10:45:36Z",
+        "completed_at": "2026-08-25T10:55:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 586,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 586,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "7a3fcfdd17cf3828c227101ea31dc555059c2de0",
+        "commits": [
+          "c64440e8c1e5a6c59cf17d51b8bc17f3e3cfd18a"
+        ],
+        "changed_lines": {
+          "added": 528,
+          "removed": 72,
+          "files": 2
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/traced-selector-state.md",
+        "scope_changed": false,
+        "session_id": "01a03886-8bf5-74d2-8292-ed21630da90c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2775552,
+            "cached_input_tokens_cumulative": 2775552,
+            "input_tokens": 2891320,
+            "input_tokens_cumulative": 2891320,
+            "output_tokens": 22657,
+            "output_tokens_cumulative": 22657,
+            "reasoning_output_tokens": 5401,
+            "reasoning_output_tokens_cumulative": 5401
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 851
+    "_version": 852
   }
 }

@@ -1,0 +1,149 @@
+{
+  "critical_points": [
+    {
+      "cluster_index_certified": true,
+      "confidence": 1.0,
+      "coordinate_m": [
+        6.398827480605484,
+        -0.0001091200594601616
+      ],
+      "flux_wb_per_rad": -57.79729663018108,
+      "inside_eqdsk_limiter": true,
+      "native_winding": 1.0,
+      "resolved": true,
+      "signed_index": 1,
+      "source_cell": 8133,
+      "state": 2
+    }
+  ],
+  "diagnosis": {
+    "physical_geometry_follow_on": "a governed ITER first-wall contour is still required before wall reachability can be interpreted physically",
+    "repair_direction": "repair the detection or field-data seam; the complete signed-degree census contains no saddle even though the grid covers the expected lower-divertor region, so changing containment cannot recover it",
+    "resolved_saddle_count": 0,
+    "resolved_saddles_inside_eqdsk_limiter": 0,
+    "resolved_saddles_rejected_by_eqdsk_limiter": 0,
+    "situation": "never_detected"
+  },
+  "eqdsk_limiter": {
+    "classification": "computational_grid_bounding_rectangle",
+    "closed": true,
+    "declared_point_count": 5,
+    "extent_r_m": [
+      4.014304215,
+      8.389290133
+    ],
+    "extent_z_m": [
+      -4.107745091,
+      4.107656289
+    ],
+    "interpretation": "the EQDSK limiter block contains only the four computational domain corners plus closure, so it supplies neither an ITER first-wall outline nor a plasma-limiting contour",
+    "is_axis_aligned_rectangle": true,
+    "is_first_wall": false,
+    "is_plasma_limiting_surface": false,
+    "maximum_inset_from_grid_edge_m": 4.375099999975873e-05,
+    "stored_points_rz_m": [
+      [
+        4.014304215,
+        -4.107745091
+      ],
+      [
+        8.389290133,
+        -4.107745091
+      ],
+      [
+        8.389290133,
+        4.107656289
+      ],
+      [
+        4.014304215,
+        4.107656289
+      ],
+      [
+        4.014304215,
+        -4.107745091
+      ]
+    ],
+    "unique_point_count": 4
+  },
+  "grid": {
+    "expected_iter_x_region_m": {
+      "r": [
+        4.0,
+        6.0
+      ],
+      "z": [
+        -4.0,
+        -3.0
+      ]
+    },
+    "expected_location_covered": true,
+    "expected_lower_x_from_plasma_boundary_m": [
+      5.280813553,
+      -3.911953897
+    ],
+    "extent": {
+      "r_m": [
+        4.014264073,
+        8.389333884
+      ],
+      "z_m": [
+        -4.10778616836823,
+        4.10769736663177
+      ]
+    },
+    "interpretation": "the grid includes the lower-divertor region where the supplied plasma boundary reaches its lowest point",
+    "shape_nz_nr": [
+      129,
+      129
+    ],
+    "spacing_m": [
+      0.034180232898437496,
+      0.0641834651171875
+    ]
+  },
+  "measurement": "full-grid signed-degree critical-point census and post-search EQDSK-limiter containment classification",
+  "schema": "nova-iter-saddle-resolution",
+  "search": {
+    "capacity_per_signed_index": 64,
+    "containment_mask": "none; all grid samples eligible",
+    "material_dilate": 0,
+    "noise_sigma_wb_per_rad": 0.0,
+    "routine": "critical_point_candidates_batch",
+    "summaries": [
+      {
+        "candidate_count_before_compaction": 0,
+        "candidate_index_sum": 0,
+        "cluster_count": 0,
+        "domain_signed_index": 1,
+        "overflow": false,
+        "reported_count": 0,
+        "resolved_count": 0,
+        "target_signed_index": -1,
+        "work_overflow": false
+      },
+      {
+        "candidate_count_before_compaction": 1,
+        "candidate_index_sum": 1,
+        "cluster_count": 1,
+        "domain_signed_index": 1,
+        "overflow": false,
+        "reported_count": 1,
+        "resolved_count": 1,
+        "target_signed_index": 1,
+        "work_overflow": false
+      }
+    ],
+    "typing": "signed degree of the native finite-difference gradient"
+  },
+  "source": {
+    "cocos": 17,
+    "flux_unit": "Wb/rad",
+    "path": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/torax/data/third_party/geo/iterhybrid_cocos17.eqdsk",
+    "sha256": "02d948b51525156d883e5afd7085b7c5b68304341be49360d88405d3151ac367"
+  },
+  "typing_hypothesis": {
+    "reason": "Nova types native critical-point cells by the signed winding degree of grad-psi; the counter-clockwise cell traversal gives a saddle index of -1 and needs continuity of grad-psi, which a C1 flux field supplies",
+    "status": "falsified_before_this_measurement"
+  },
+  "verdict": "NEVER DETECTED: the full-grid signed-degree census reports only the magnetic-axis extremum and no saddle, before any containment predicate; the unavailable panel is therefore a detection or field-data fault, not limiter rejection or a physical property of the diverted equilibrium"
+}

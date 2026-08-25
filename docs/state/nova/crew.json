@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T14:27:05",
+  "updated": "2026-08-25T14:44:55",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -35467,9 +35467,102 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T123156881037-out-of-vessel-saddle-selection",
+        "plan": "primary-xpoint-evidence",
+        "section": "\u00a72",
+        "node": "out-of-vessel-saddle-selection",
+        "node_definition": {
+          "done_when": "The banked adjudication artifact records selected_x_coordinate_m of [0.4500099684729799, -1.817467111402243] for the pure arm and [0.46252017254143946, 1.8036925839708253] for the mixed arm, while their wall extrema are at [0.28, -1.638011343762036] and [0.28, 1.6409891353985715]. A saddle further from the midplane than the wall extremum cannot be in-vessel. Determine which of these holds: the typed-saddle candidate table CONTAINS a genuine in-vessel X-point near the boundary pinch that the selection rule passed over, or the detector never PRODUCED one. Print the full candidate table for both arms with each coordinate, flux, normalised level and any validity or admission flags, marking which was selected and why - the selector takes an argmin over normalised level, so say whether the out-of-vessel saddle simply carried the lower level. Quote the vessel extent from operator.wall.coordinate and state for every candidate whether it lies inside that polygon, because a containment test appears absent - grep for one and report what you find rather than assuming. THE CONSEQUENCE TO MEASURE: the production shadow rule sets its height band from the minimum and maximum selected-saddle heights, and this terminal band is [-1.817467111402243, 1.2491324433637334], so the wall at -1.638 falls INSIDE the band and is admitted. Recompute the band and the verdict using only in-vessel candidates and report whether the ADMITTED verdict flips to shadowed. If it flips, the adjudication control that reported CORRECT_ADMISSION was admitted only because a spurious out-of-vessel saddle widened the band, and say that plainly. Also report why private_component_count is 0 and private_component_area_m2 is 0.0 on both arms, since a separatrix taken at an out-of-vessel saddle level would plausibly enclose no private region. Change no production code: diagnose and quantify.",
+          "estimated_hours": 3.0,
+          "goal": "Establish why the selected X-point on both 21983/35 arms sits at |Z| about 1.80 to 1.82 m, further from the midplane than that terminal own wall extremum at |Z| about 1.64 m and therefore outside the vessel, when a MAST divertor X-point should lie near |Z| 1.2 to 1.4 m at the pinch of the plasma boundary.",
+          "id": "out-of-vessel-saddle-selection",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/out-of-vessel-saddle-selection.md",
+          "plan": "primary-xpoint-evidence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/out-of-vessel-saddle-selection.json",
+            "benchmarks/out_of_vessel_saddle_selection.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "limiter-topology",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T12:32:07Z",
+        "completed_at": "2026-08-25T12:44:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 739,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 739,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "38a366fae1b5e3447d6076b0e2dd2a76c39a9f56",
+        "commits": [
+          "ea5218294343643d423d67cbc431a407f3cde2af"
+        ],
+        "changed_lines": {
+          "added": 871,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/out-of-vessel-saddle-selection.md",
+        "scope_changed": false,
+        "session_id": "01a038e8-137e-7e43-a0a5-0b757a32c32c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4134400,
+            "cached_input_tokens_cumulative": 4134400,
+            "input_tokens": 4285416,
+            "input_tokens_cumulative": 4285416,
+            "output_tokens": 18999,
+            "output_tokens_cumulative": 18999,
+            "reasoning_output_tokens": 4288,
+            "reasoning_output_tokens_cumulative": 4288
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 858
+    "_version": 859
   }
 }

@@ -256,6 +256,42 @@
     5e-4&ndash;1e-3 it converged 0/4 and 0/16, while <em>diverted</em> held 4/4 and 16/16. On
     perturbation robustness the limited branch is the fragile one.</p>
 
+    <h2 id="coreachability">The fork is not load bearing</h2>
+
+    <p><strong>Node <code>class-coreachability</code>, commit <code>a9ea090c</code>, gate PASSED,
+    2026-08-25.</strong> Two fixed MAST frames, 20 deterministic seeds each, spanning both the
+    limited-map and diverted-map neighbourhoods.</p>
+
+    <table>
+      <caption>Distinct qualified roots per fixed frame</caption>
+      <thead><tr><th scope="col">Frame</th><th scope="col">Converged</th><th scope="col">Qualified</th><th scope="col">Distinct roots</th><th scope="col">Classes present</th></tr></thead>
+      <tbody>
+        <tr><td>21989/55</td><td>0/20</td><td>0</td><td><strong>0</strong></td><td>none</td></tr>
+        <tr><td>22086/43</td><td>16/20</td><td>8</td><td><strong>1</strong></td><td>DIVERTED only, best 2.688e&minus;16</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>0 of 2 frames admit qualified roots of two different classes</strong>, and the fork landed
+    in a different qualified basin on <strong>0 of 2</strong>. The degrade path dominating selection is
+    therefore expected behaviour, not an anomaly.</p>
+
+    <p><strong>Post-hoc classification is unambiguous.</strong> Nondegenerate qualified controls — LIMITED
+    at 5.104e&minus;15 and DIVERTED at 1.584e&minus;16 — classified correctly with <strong>0/2
+    cross-classifications</strong>, and the 16 converged terminals showed <strong>0</strong>
+    connectivity-versus-achieved-class disagreements. All 16 classified DIVERTED by their own
+    flood-filled connectivity, and the converged <em>requested-LIMITED</em> terminals
+    <strong>correctly failed topology consistency</strong>: requesting a class does not produce a root of
+    that class.</p>
+
+    <p><strong>Cost of the retired second solve.</strong> At 42.7719 ms per pinned solve over 1,341,435
+    slices, one solve plus post-hoc classification is <strong>15.9377 H200-hours</strong> against
+    31.8754 for two independent solves — an avoidable <strong>15.9377 H200-hours per catalog
+    pass</strong>.</p>
+
+    <p><strong>Stated limit.</strong> Two frames, one yielding no root at all, so the statistic rests on
+    a small cohort. The mechanism results — classification unambiguous, requested class not creating a
+    root — are structural and independent of cohort size.</p>
+
   </main>
 </body>
 </html>

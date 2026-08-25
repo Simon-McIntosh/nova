@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T14:05:30",
+  "updated": "2026-08-25T14:11:06",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -35281,9 +35281,102 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T115442281645-class-coreachability",
+        "plan": "dual-branch-selection",
+        "section": "\u00a74",
+        "node": "class-coreachability",
+        "node_definition": {
+          "done_when": "Take at least two frozen MAST frames, including 22086/43 where an unsteered solve reached a machine-precision DIVERTED root at 3.584e-16, and sweep many seeds across the flux span - at least twenty per frame, spanning both the diverted and limited label neighbourhoods. For every seed record achieved class, converged flag, terminal residual and topology consistency, then report per frame how many DISTINCT qualified roots were found and which classes they carry. The deciding question is whether ANY single frame admits two distinct qualified roots of different class. If none does, the fork is solving for a root that is not present at that frame, and the degrade path firing on two of three selections is the expected consequence rather than an anomaly - state that conclusion plainly if the data supports it. Answer a second question that decides whether a fork is needed at all: for a CONVERGED state, is its topology class unambiguously determined by the connectivity of its own flood-filled cell map? Test it directly by classifying converged states of both classes from connectivity alone and checking whether any converged limited state can be read as diverted or the reverse. If classification of a converged state is unambiguous, then a class can be reported after the fact without ever forking, and the fork buys only the chance of landing in a different basin - say how often that chance actually paid, using the seed sweep above. Report cost against the alternative: one pinned solve plus post-hoc classification, against two solves, at the measured 42.77 ms per slice and 1,341,435 slices. Do not change production selection behaviour in this node.",
+          "estimated_hours": 4.0,
+          "goal": "Determine whether BOTH topology classes are reachable at a single fixed configuration, because the fork strategy assumes two qualified roots coexist per frame and no banked artifact currently carries two nondegenerate qualified roots at one frame - the H200 cost node said so explicitly when it declined to claim shared-operator fusion.",
+          "id": "class-coreachability",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/class-coreachability.md",
+          "plan": "dual-branch-selection",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/class_coreachability.py",
+            "docs/figures/dual-branch-selection/class-coreachability.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "basin-branches",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T11:54:51Z",
+        "completed_at": "2026-08-25T12:10:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 962,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 962,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "e34aa3618ebf69e4d6d01a1ab0fece15091879a9",
+        "commits": [
+          "a9ea090c74ed4f37285602eb2bf33f78da9477f0"
+        ],
+        "changed_lines": {
+          "added": 1555,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/class-coreachability.md",
+        "scope_changed": false,
+        "session_id": "01a038c5-f3f5-75c1-bab1-28847da1741d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7809536,
+            "cached_input_tokens_cumulative": 7809536,
+            "input_tokens": 8002385,
+            "input_tokens_cumulative": 8002385,
+            "output_tokens": 21780,
+            "output_tokens_cumulative": 21780,
+            "reasoning_output_tokens": 4149,
+            "reasoning_output_tokens_cumulative": 4149
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 856
+    "_version": 857
   }
 }

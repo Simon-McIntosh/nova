@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="dual-branch-selection">
   <meta name="plan-title" content="Dual-Branch Selection — a class is an outcome, not an input">
-  <meta name="plan-summary" content="The catalog solver reaches limiter-class roots on every diverted request: 0 of 10 under the mixed margin-penalty iteration, while the branch-pure pinned diverted arm contracts only weakly and stalls at 4.6e-3 to 7.4e-3 (fitted rho 0.950 to 0.984 against a reference implementation&#x27;s 0.33). The plan promotes the already-traced differentiable class observable p_diverted to a selection seam over the existing two-branch portfolio, closes the three host-Python islands that block a compiled catalog verdict, and confines forking to a margin-armed rare set. Ideas from imas-efit&#x27;s dual-stream solution are adopted as concepts only — zero code ports, and no separatrix drag in any form.">
+  <meta name="plan-summary" content="Forking to obtain a topology class cannot work: no frame carries qualified roots of both classes, and post-hoc connectivity classification is unambiguous.">
   <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="12.0">
@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="8">
-<meta name="plan-commits" content="632a4396,991d5d6e,5cdcaf72,3387739f,0bd3af3d,c64440e8">
+<meta name="plan-version" content="10">
+<meta name="plan-commits" content="632a4396,991d5d6e,5cdcaf72,3387739f,0bd3af3d,c64440e8,a9ea090c">
 <meta name="plan-artifacts" content="benchmarks/traced_selection_seam.py,benchmarks/pinned_branch_contrast.py,benchmarks/fork_arming_economics.py,benchmarks/two_branch_batch_cost.py,nova/equilibrium/branch_selection.py,docs/figures/dual-branch-selection/traced-selection-continuity.json,docs/figures/dual-branch-selection/pinned-branch-contrast.json,docs/figures/dual-branch-selection/fork-arming-economics.json,docs/figures/dual-branch-selection/two-branch-batch-cost.json,docs/evidence/archive/dual-branch-selection-landed.html">
-<meta name="plan-impl" content="0.6">
+<meta name="plan-impl" content="0.7">
 </head>
 <body>
   <main class="plan-doc">
@@ -450,6 +450,54 @@
     fixed ladder with device selection. The continuity claim at saddle-operand emergence stays blocked on
     whether the shadow rejection is correct.</p>
 
+    <h2 id="coreachability">§ Is the fork load bearing? Measured: no</h2>
+
+    <p><strong>MEASURED 2026-08-25, node <code>class-coreachability</code></strong>, commit
+    <code>a9ea090c</code>, gate PASSED, artifact
+    <code>docs/figures/dual-branch-selection/class-coreachability.json</code>. Two fixed MAST frames, 20
+    deterministic seeds each, spanning both the limited-map and diverted-map neighbourhoods.</p>
+
+    <table>
+      <caption>Distinct qualified roots per fixed frame</caption>
+      <thead><tr><th scope="col">Frame</th><th scope="col">Converged</th><th scope="col">Qualified</th><th scope="col">Distinct qualified roots</th><th scope="col">Classes</th></tr></thead>
+      <tbody>
+        <tr><td>21989/55</td><td>0/20</td><td>0</td><td><strong>0</strong></td><td>—</td></tr>
+        <tr><td>22086/43</td><td>16/20</td><td>8</td><td><strong>1</strong></td><td>DIVERTED only, best 2.688e&minus;16</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>No frame admits qualified roots of two different classes, and the fork landed in a
+    different qualified basin on 0 of 2 frames.</strong> So on this evidence the fork was seeking a
+    second-class root that is not present, which makes the degrade path firing on two of three
+    selections the <em>expected</em> behaviour rather than an anomaly.</p>
+
+    <p><strong>Post-hoc classification is unambiguous, which removes the fork's remaining purpose.</strong>
+    Independently qualified nondegenerate controls — LIMITED at relative residual 5.104e&minus;15 and
+    DIVERTED at 1.584e&minus;16 — classified correctly with <strong>0/2 cross-classifications</strong>,
+    and the 16 converged MAST terminals showed <strong>0</strong> connectivity-versus-achieved-class
+    disagreements. The decisive detail: all 16 converged terminals on 22086/43 classified DIVERTED by
+    their own flood-filled connectivity, and the converged <em>requested-LIMITED</em> terminals
+    <strong>correctly failed topology consistency</strong>. Requesting a class does not produce a root of
+    that class — the connectivity read refuses it.</p>
+
+    <p><strong>This plan's own title turns out to be enforced by the physics.</strong> A class is an
+    outcome, not an input — and that is precisely why forking to <em>obtain</em> a class cannot work. Two
+    earlier results fall into place: the degrade path dominating was correct behaviour, and the pinned
+    diverted arm failing to qualify on five of six references was the topology-consistency check refusing
+    states that are not diverted, rather than a solver weakness.</p>
+
+    <p><strong>Consequence for §6: the decision below is moot.</strong> The answer is neither always-fork
+    nor margin-armed, but a <strong>single pinned solve plus post-hoc connectivity classification</strong>.
+    At 42.7719 ms per pinned solve over 1,341,435 slices that is <strong>15.9377 H200-hours</strong>
+    against 31.8754 for two independent solves, so the avoidable second solve is
+    <strong>15.9377 H200-hours per catalog pass</strong>. The armed-fraction economics priced a choice
+    between two options when the correct answer was outside that menu.</p>
+
+    <p><strong>Stated limit.</strong> Two frames, one of which yielded no root at all, so the
+    <em>statistic</em> rests on a small cohort. The <em>mechanism</em> half does not: classification being
+    unambiguous, and a requested class not creating a root, are structural and independent of how many
+    frames are sampled. A wider cohort would strengthen the first without changing the second.</p>
+
 <h2 id="s6">§6 — Fork policy under catalog economics</h2>
 
     <p>A two-branch portfolio doubles solve cost wherever it runs. The reference implementation
@@ -536,6 +584,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260825T084506969055-mast-margin-operand-attribution" data-who="margin-remeasure" data-when="2026-08-25T09:35:51Z">
     <div class="r-comment-body"><p>Production repair plus the attribution, and the attribution REFUTES the leading hypothesis. ForwardTopologyState is registered as a lossless PyTree with the nine landmarks and the evaluated class_margin as array leaves and the Callable excluded and reconstructed, and ForwardFluxOperator.connectivity_grid_axes is now the public radius/height/shape contract with both benchmark callers migrated and zero executable callers of the removed private attributes remaining. The previously failing production test test_the_topology_portfolio_matches_per_branch_solves_under_jit_and_vmap passes, and a new test_forward_topology_state_is_a_vmap_output_pytree gates the registration. SCIENCE: the connectivity-reachability hypothesis does NOT hold on MAST. All four absent-margin terminals carry connectivity SUPPORT, while three finite-margin terminals lack reachability. The named cause is wall_extremum_rejected_by_private_flux_shadow: finite pre-shadow wall operands, 0.3310275619269073 and 0.3310454781725451 on 21978/35 and 0.30190002257031606 and 0.3000846561326388 on 22086/43, are discarded by the private-flux shadow and become positive infinity. All-terminal counts are 9 with connectivity support, 3 not reachable, 0 no-candidate, 0 nonfinite-operand. Gate discipline was exemplary: a non-banked diagnostic pass enumerated all 252 changed leaves with magnitudes before any classification, and the final regeneration reproduced 381 float fields and 258 semantic fields with ZERO differences while preserving 644 of 644 banked leaves and adding 12 diagnostic subtrees.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260825T115442281645-class-coreachability" data-who="basin-branches" data-when="2026-08-25T12:10:53Z">
+    <div class="r-comment-body"><p>CO-REACHABILITY IS NEGATIVE and the fork paid nothing on the measured evidence. Two fixed MAST frames, 20 deterministic seeds each spanning both the limited-map and diverted-map neighbourhoods. 21989/55 found 0 distinct qualified roots with 0/20 converging. 22086/43 found exactly 1 distinct qualified root, DIVERTED, from 8 qualified seeds at best residual 2.688e-16, matching or improving the banked 3.584e-16. So 0 of 2 frames admitted qualified roots of DIFFERENT classes and the fork landed in a different qualified basin on 0 of 2 frames. POST-HOC CLASSIFICATION IS UNAMBIGUOUS, which is the second half: independently qualified nondegenerate LIMITED at 5.104e-15 and DIVERTED at 1.584e-16 controls classified correctly with 0/2 cross-classifications, and the 16 converged MAST terminals showed 0 connectivity-versus-achieved-class disagreements. Tellingly, all 16 converged terminals on 22086/43 classified DIVERTED by their own flood-filled connectivity, and the converged requested-LIMITED terminals CORRECTLY FAILED topology consistency - requesting a class does not produce a root of that class. COST: one solve plus post-hoc classification is 15.9377 H200-hours against 31.8754 for two independent solves, so the avoidable second solve is 15.9377 H200-hours per catalog pass. Honest limit: n=2 frames, and one of those yielded no root at all, so this is a mechanism-level result on a small cohort rather than a campaign-wide one.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260825T104524221366-traced-selector-state" data-who="selection-proto" data-when="2026-08-25T10:55:22Z">
     <div class="r-comment-body"><p>The traced path lives in nova/equilibrium/branch_selection.py, its canonical home, with no parallel module - the host selector now DELEGATES its transition semantics to the array core rather than duplicating them, and the host SelectionReceipt remains the provenance egress. All 14 existing semantic-oracle cases pass unchanged, 18 total in the file. The traced property is PROVEN rather than asserted: the test inspects jax.make_jaxpr for a scan primitive and runs jit(vmap(...)) over 3 independent batches by 4 time steps. Degrade-path accounting landed as §5 required and confirms the concern - that cohort records 2 degrade-path firings against 1 genuinely two-qualified selection. Design roles held: p_diverted alone carries the smooth blend and has nonzero gradients, class_margin stays a separate exact comparator, and non-finite margins are explicitly UNCLASSIFIED rather than defaulted, which is the honest handling of the four absent operands. It made no continuity claim at saddle-operand emergence, as fenced, and introduced no private operator attribute access.</p></div>

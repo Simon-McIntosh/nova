@@ -107,7 +107,9 @@
       <strong>0.0</strong>. On a declared ladder of 1e−6 → 1e−2 of label axis-to-boundary span,
       <strong>five of six labels hold the diverted branch with decreasing residual at every rung</strong>
       — largest qualifying radius is the largest tested, so the basin is ≥1e−2 wide and its edge was
-      not found. <strong>21989/55 holds none</strong>, terminating limited and topology-inconsistent at
+      not found — though the pure arm contracts only weakly, &rho; 0.95&ndash;0.98, so a decreasing
+      residual here means slow approach rather than healthy convergence.
+      <strong>21989/55 holds none</strong>, terminating limited and topology-inconsistent at
       the label and every perturbation — and it is <em>not</em> a scalar-residual outlier: its residual
       decreases like the holders' and it differs only in the class it lands in, so the defector must be
       explained structurally. <strong>The criterion is excluded:</strong> all six labelled-state
@@ -127,13 +129,79 @@
     an absent root, and not a criterion accepting the wrong thing. It is an attractor whose fixed point
     is not a solution of the residual we are scoring.</p>
 
-    <p><strong>The comparison target is a number, not an adjective.</strong> imas-efit's pure branches
-    contracted geometrically at <strong>&rho; = 0.33</strong> to fixed points 3.1e−4 apart. If nova's
-    pure diverted branch has a fitted contraction ratio near unity, the map is barely contracting and
-    the stall is a rate problem. If it contracts at a healthy rate to a nonzero limit, the map is
-    contracting correctly onto the wrong object — which would mean the residual being iterated and the
-    residual being scored differ, exactly the fault §19 of the coefficient plan found in a different
-    place, where a Jacobian differentiated the projected residual while the exact one was scored.</p>
+    <p><strong>MEASURED 2026-08-25, and it closes both of this section's questions while refuting two
+    statements I had recorded.</strong> Artifact
+    <code>docs/figures/dual-branch-selection/pinned-branch-contrast.json</code>, six frozen MAST
+    references, twelve Newton promotions per arm, fitted &rho; = exp(slope) of log-residual against
+    promotion index. Read from the artifact rather than from its summary, because two of the findings
+    below are not in the summary.</p>
+
+    <table>
+      <caption>Pinned diverted arm against the margin-graded arm, per reference</caption>
+      <thead>
+        <tr><th scope="col">Reference</th><th scope="col">Pure &rho; (r²)</th>
+        <th scope="col">Pure terminal</th><th scope="col">Mixed &rho; (r²)</th>
+        <th scope="col">Mixed terminal</th><th scope="col">Class margin</th><th scope="col">p<sub>diverted</sub></th></tr>
+      </thead>
+      <tbody>
+        <tr><td>21978/35</td><td>0.9503 (0.55)</td><td>4.585e&minus;3 div</td><td>1.0185 (0.21)</td><td>1.050e&minus;2 div</td><td>absent, +&infin;</td><td>1.0</td></tr>
+        <tr><td>21983/35</td><td>0.9768 (1.00)</td><td>6.624e&minus;3 div</td><td>0.9997 (0.00)</td><td>1.256e&minus;3 div</td><td>+0.00723</td><td>1.0</td></tr>
+        <tr><td>21985/51</td><td>0.9835 (1.00)</td><td>5.168e&minus;3 div</td><td>1.0181 (0.48)</td><td>2.962e&minus;3 div</td><td>+0.01971</td><td>1.0</td></tr>
+        <tr><td>21986/46</td><td>0.9776 (1.00)</td><td>7.425e&minus;3 div</td><td>1.0386 (0.08)</td><td>8.920e&minus;3 <em>lim</em></td><td>+0.00490</td><td>1.0</td></tr>
+        <tr><td>21989/55</td><td>0.9804 (0.99)</td><td>5.024e&minus;3 <em>lim</em></td><td>0.9784 (0.06)</td><td>2.823e&minus;3 <em>lim</em></td><td><strong>&minus;0.00340</strong></td><td><strong>0.41</strong></td></tr>
+        <tr><td>22086/43</td><td>0.9613 (1.00)</td><td>5.049e&minus;3 div</td><td><strong>0.0776 (0.72)</strong></td><td><strong>3.584e&minus;16 div, converged</strong></td><td>absent, +&infin;</td><td>1.0</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Retraction 1 — the pure arm contracts, and cleanly.</strong> Every fitted ratio is below
+    one and <strong>five of six fits have r² &ge; 0.99</strong>, so slow geometric contraction at
+    0.95&ndash;0.98 is a well-resolved measurement rather than a trend read out of noise. My earlier
+    statement that the map "does not contract" about the diverted root was wrong. Against imas-efit's
+    0.33 this is roughly a factor of twenty in promotions-to-tolerance, which makes the stall a
+    <em>rate</em> problem, not convergence onto a different object.</p>
+
+    <p><strong>Retraction 2 — a diverted root now has a machine-precision demonstration.</strong> I had
+    recorded that a diverted root had none anywhere, the best being bounded non-convergence near
+    5e&minus;3. 22086/43 reached <strong>3.584e&minus;16</strong> with
+    <code>achieved_class = diverted</code>, <code>topology_consistent = true</code>,
+    p<sub>diverted</sub> = 1.0 and <code>converged = true</code> against a 1e&minus;8 criterion, along a
+    quadratic sequence — 1.243e&minus;3, 1.357e&minus;4, 1.730e&minus;7, 7.078e&minus;14, then floor.
+    The branch asymmetry is therefore quantitative, not existential.</p>
+
+    <p><strong>But the mechanism is not the one the arm label suggests, and this is the first finding
+    absent from the summary.</strong> 22086/43's class margin operand is <em>absent</em>, so its
+    penalty <code>max(&minus;margin, 0)</code> was <strong>identically zero at all twelve
+    promotions</strong>. Its "mixed" arm was therefore an <em>unpenalised</em> residual-ranked Newton
+    with no class steering whatsoever. That strengthens the existence claim — the plain map converges to
+    a diverted-classified root from the label, with nothing pushing it there — while saying nothing
+    about whether margin grading helps. And absence of the penalty is not sufficient: 21978/35 also ran
+    at zero penalty throughout and fell into a clean <strong>period-2 cycle</strong>, alternating
+    1.076e&minus;2 / 1.050e&minus;2 to the last promotion. Two references, same inactive penalty,
+    quadratic convergence against a limit cycle.</p>
+
+    <p><strong>21989/55 is characterised, which was this section's other open question.</strong> It is
+    the only reference with a <strong>negative class margin (&minus;0.00340)</strong> and the only one
+    whose smooth class observable is not saturated — <strong>p<sub>diverted</sub> = 0.41</strong>
+    against 1.0 everywhere else. So it is not a diverted configuration at its own label under this
+    comparator; it sits on the class boundary, and its defection to limited in <em>both</em> arms is the
+    comparator reporting that correctly rather than an anomaly. Its mixed arm shows the textbook
+    mixed-iteration failure directly: the residual falls to 1.727e&minus;3 by the fourth promotion and
+    then <em>rises</em> monotonically to 2.823e&minus;3 as the active penalty fights it.</p>
+
+    <p><strong>The second summary-absent finding is a measurement-quality one: do not quote "the mixed
+    arm expands on three of six" as a contraction result.</strong> The mixed fits carry
+    r² = 0.21, 0.00, 0.48, 0.08, 0.06 and 0.72 — <strong>three are unresolved noise</strong> and
+    0.9997 at r² = 0.00 is a null fit, not a near-unity ratio. Only 22086/43's mixed ratio is
+    meaningfully resolved. The pure column is the measurement here; the mixed column is one converged
+    reference, one limit cycle, and four fits that do not support a rate claim. Every cross-arm terminal
+    comparison also crosses two different iterations, as the artifact's own qualification states.</p>
+
+    <p><strong>What remains open is narrower than before.</strong> Not "why does the map fail to
+    contract" — it contracts, at 0.95&ndash;0.98. The question is why the same map converges
+    quadratically on 22086/43 and cycles with period two on 21978/35 from equivalent unpenalised
+    starts, since those two differ in no recorded quantity except shot identity: both carry absent
+    margins, saturated p<sub>diverted</sub>, and qualifying pure arms. That comparison is now the
+    cheapest available discriminator, and it needs no new machinery — both runs already exist.</p>
 
     <p><strong>And 21989/55 is the cheapest structural discriminator available.</strong> One reference
     out of six leaves the branch from every seed while its residual falls like the others'. Whatever

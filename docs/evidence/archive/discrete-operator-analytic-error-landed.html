@@ -94,6 +94,63 @@
     class refusal is relaxed, on <strong>0 of 10</strong> diverted terminals: it finds roots easily and
     finds the wrong class. Both plans now point at the same question, from opposite directions.</p>
 
+    <h2 id="contraction-and-existence">Contraction measured, and a diverted root demonstrated</h2>
+
+    <p><strong>Node <code>dual-branch-selection</code> pinned-branch contrast, 2026-08-25</strong>,
+    artifact <code>docs/figures/dual-branch-selection/pinned-branch-contrast.json</code>, six frozen
+    MAST references, twelve Newton promotions per arm. Two numbers retract claims made in §2 above and
+    across this sprint, so they are recorded with the retraction attached. Two further findings come
+    from reading the artifact rather than its summary.</p>
+
+    <table>
+      <caption>Fitted contraction ratio and terminal, per reference and arm</caption>
+      <thead>
+        <tr><th scope="col">Reference</th><th scope="col">Pure &rho; (r²)</th>
+        <th scope="col">Pure terminal</th><th scope="col">Mixed &rho; (r²)</th>
+        <th scope="col">Mixed terminal</th><th scope="col">Class margin</th><th scope="col">p<sub>div</sub></th></tr>
+      </thead>
+      <tbody>
+        <tr><td>21978/35</td><td>0.9503 (0.55)</td><td>4.585e&minus;3 div</td><td>1.0185 (0.21)</td><td>1.050e&minus;2 div, 2-cycle</td><td>absent</td><td>1.0</td></tr>
+        <tr><td>21983/35</td><td>0.9768 (1.00)</td><td>6.624e&minus;3 div</td><td>0.9997 (0.00)</td><td>1.256e&minus;3 div</td><td>+0.00723</td><td>1.0</td></tr>
+        <tr><td>21985/51</td><td>0.9835 (1.00)</td><td>5.168e&minus;3 div</td><td>1.0181 (0.48)</td><td>2.962e&minus;3 div</td><td>+0.01971</td><td>1.0</td></tr>
+        <tr><td>21986/46</td><td>0.9776 (1.00)</td><td>7.425e&minus;3 div</td><td>1.0386 (0.08)</td><td>8.920e&minus;3 lim</td><td>+0.00490</td><td>1.0</td></tr>
+        <tr><td>21989/55</td><td>0.9804 (0.99)</td><td>5.024e&minus;3 lim</td><td>0.9784 (0.06)</td><td>2.823e&minus;3 lim</td><td><strong>&minus;0.00340</strong></td><td><strong>0.41</strong></td></tr>
+        <tr><td>22086/43</td><td>0.9613 (1.00)</td><td>5.049e&minus;3 div</td><td><strong>0.0776 (0.72)</strong></td><td><strong>3.584e&minus;16 div, converged</strong></td><td>absent</td><td>1.0</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Retraction 1 — the pure arm contracts, and the measurement is clean.</strong> All six
+    ratios are below one with r² &ge; 0.99 on five, so slow geometric contraction at 0.95&ndash;0.98 is
+    resolved rather than inferred from noise. The earlier claim that the map "does not contract" about
+    the diverted root was wrong; against imas-efit's 0.33 the stall is a rate problem.</p>
+
+    <p><strong>Retraction 2 — a diverted root has a machine-precision demonstration.</strong> §2 above
+    recorded 2.409e&minus;16 on <em>0 of 10</em> diverted terminals, and this sprint recorded that no
+    diverted root had been demonstrated anywhere. 22086/43 reached <strong>3.584e&minus;16</strong>,
+    <code>achieved_class = diverted</code>, <code>topology_consistent = true</code>,
+    p<sub>diverted</sub> = 1.0, <code>converged = true</code> against a 1e&minus;8 criterion, along
+    1.243e&minus;3 &rarr; 1.357e&minus;4 &rarr; 1.730e&minus;7 &rarr; 7.078e&minus;14. The asymmetry
+    between branches is quantitative, not existential.</p>
+
+    <p><strong>The converging arm was unpenalised, which is not what its label implies.</strong>
+    22086/43's margin operand is absent, so <code>max(&minus;margin, 0)</code> was identically zero at
+    all twelve promotions — an unsteered residual-ranked Newton. This strengthens existence, since
+    nothing pushed the solve toward the diverted class, and says nothing about whether margin grading
+    helps. Zero penalty is not sufficient either: 21978/35 ran the same way and settled into a period-2
+    cycle alternating 1.076e&minus;2 / 1.050e&minus;2.</p>
+
+    <p><strong>21989/55 is characterised.</strong> It carries the only negative class margin
+    (&minus;0.00340) and the only unsaturated class observable (p<sub>diverted</sub> = 0.41 against 1.0
+    elsewhere), so it is not a diverted configuration at its own label; its defection in both arms is
+    the comparator reporting a boundary case. Its mixed residual falls to 1.727e&minus;3 then rises
+    monotonically to 2.823e&minus;3 as the active penalty fights it.</p>
+
+    <p><strong>Measurement-quality caveat: the mixed column does not support a rate claim.</strong>
+    Mixed fits carry r² of 0.21, 0.00, 0.48, 0.08, 0.06, 0.72 — three unresolved, and 0.9997 at
+    r² = 0.00 is a null fit rather than a near-unity ratio. "Expands on three of six" should not be
+    quoted as a contraction measurement. All cross-arm terminal comparisons additionally cross two
+    different iterations, per the artifact's own qualification.</p>
+
   </main>
 </body>
 </html>

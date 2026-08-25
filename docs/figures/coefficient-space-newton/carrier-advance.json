@@ -1,0 +1,456 @@
+{
+  "advance_summary": {
+    "banked_carrier_admitted_advances": 1,
+    "baseline_exact_value_admitted_advances": 10,
+    "diagnostic_carrier_admitted_advances": 1,
+    "diagnostic_carrier_refused_advances": 1,
+    "diagnostic_rejected_candidates": 5
+  },
+  "artifact": "docs/figures/coefficient-space-newton/carrier-advance.json",
+  "attempts": [
+    {
+      "attempt": 1,
+      "candidate_ladder": {
+        "accepted_factor": 1.0,
+        "admitted_candidate_count": 1,
+        "records": [
+          {
+            "checks": {
+              "coefficient_candidate_finite": true,
+              "exact_output_and_residual_finite": true,
+              "improves_exact_residual": true,
+              "remains_limited": true,
+              "topology_axis_finite": true
+            },
+            "exact_relative_residual": 0.03847988208719086,
+            "factor": 1.0,
+            "outcome": "ADMITTED",
+            "topology": {
+              "axis_m": [
+                1.6208011576738954,
+                0.00025136201420883586
+              ],
+              "class": "limited"
+            }
+          }
+        ],
+        "rejected_candidate_count": 0,
+        "selection": "sequential first admitted candidate"
+      },
+      "current_exact_relative_residual": 0.052788907521397276,
+      "dense_coefficient_jacobian": {
+        "achieved_relative_linear_residual_2_norm": 5.866627896314804e-16,
+        "condition_number_2_norm": 119.50900517536923,
+        "condition_number_over_banked_projected_krylov": 0.029238331986727654,
+        "shape": [
+          36,
+          36
+        ]
+      },
+      "dense_coefficient_step_against_projected_exact_step": {
+        "angle_degrees": 27.64788324539326,
+        "compared_l2_norm": 2.0095835620831073,
+        "compared_to_reference_norm_ratio": 2.4197252884973532,
+        "cosine_similarity": 0.8858160839052266,
+        "reference_l2_norm": 0.830500706686029
+      },
+      "exact_newton_krylov_step": {
+        "gmres_iterations": 30,
+        "projected_krylov_condition_on_diagnostic_state": 67.11806558146317,
+        "qualification": "ACCEPTED"
+      },
+      "exact_step_after_carrier_projection": {
+        "angle_degrees": 23.910514623164957,
+        "compared_l2_norm": 0.830500706686029,
+        "compared_to_reference_norm_ratio": 0.9141795903649336,
+        "cosine_similarity": 0.9141795903649333,
+        "reference_l2_norm": 0.9084655962998468
+      },
+      "step_utility_probe": {
+        "exact_newton_step": [
+          {
+            "exact_relative_residual": 0.000889708765846711,
+            "factor": 1.0,
+            "improves_exact_residual": true,
+            "output_and_residual_finite": true,
+            "state_finite": true,
+            "topology_axis_finite": true,
+            "topology_class": "limited"
+          },
+          {
+            "exact_relative_residual": 0.026865673450456,
+            "factor": 0.5,
+            "improves_exact_residual": true,
+            "output_and_residual_finite": true,
+            "state_finite": true,
+            "topology_axis_finite": true,
+            "topology_class": "limited"
+          },
+          {
+            "exact_relative_residual": 0.039868171529684374,
+            "factor": 0.25,
+            "improves_exact_residual": true,
+            "output_and_residual_finite": true,
+            "state_finite": true,
+            "topology_axis_finite": true,
+            "topology_class": "limited"
+          },
+          {
+            "exact_relative_residual": 0.04633719728521481,
+            "factor": 0.125,
+            "improves_exact_residual": true,
+            "output_and_residual_finite": true,
+            "state_finite": true,
+            "topology_axis_finite": true,
+            "topology_class": "limited"
+          },
+          {
+            "exact_relative_residual": 0.04956519498192925,
+            "factor": 0.0625,
+            "improves_exact_residual": true,
+            "output_and_residual_finite": true,
+            "state_finite": true,
+            "topology_axis_finite": true,
+            "topology_class": "limited"
+          }
+        ],
+        "promotion_affected": false,
+        "same_step_after_carrier_projection": [
+          {
+            "exact_relative_residual": 0.057147705080281996,
+            "factor": 1.0,
+            "improves_exact_residual": false,
+            "output_and_residual_finite": true,
+            "state_finite": true,
+            "topology_axis_finite": true,
+            "topology_class": "limited"
+          },
+          {
+            "exact_relative_residual": 0.05491529588472439,
+            "factor": 0.5,
+            "improves_exact_residual": false,
+            "output_and_residual_finite": true,
+            "state_finite": true,
+            "topology_axis_finite": true,
+            "topology_class": "limited"
+          },
+          {
+            "exact_relative_residual": 0.05386342991348224,
+            "factor": 0.25,
+            "improves_exact_residual": false,
+            "output_and_residual_finite": true,
+            "state_finite": true,
+            "topology_axis_finite": true,
+            "topology_class": "limited"
+          },
+          {
+            "exact_relative_residual": 0.053329082966293836,
+            "factor": 0.125,
+            "improves_exact_residual": false,
+            "output_and_residual_finite": true,
+            "state_finite": true,
+            "topology_axis_finite": true,
+            "topology_class": "limited"
+          },
+          {
+            "exact_relative_residual": 0.053059716147857865,
+            "factor": 0.0625,
+            "improves_exact_residual": false,
+            "output_and_residual_finite": true,
+            "state_finite": true,
+            "topology_axis_finite": true,
+            "topology_class": "limited"
+          }
+        ]
+      }
+    },
+    {
+      "attempt": 2,
+      "candidate_ladder": {
+        "accepted_factor": null,
+        "admitted_candidate_count": 0,
+        "records": [
+          {
+            "checks": {
+              "coefficient_candidate_finite": true,
+              "exact_output_and_residual_finite": true,
+              "improves_exact_residual": false,
+              "remains_limited": true,
+              "topology_axis_finite": true
+            },
+            "exact_relative_residual": 0.03853754462579835,
+            "factor": 1.0,
+            "outcome": "EXACT_RESIDUAL_NOT_IMPROVED",
+            "topology": {
+              "axis_m": [
+                1.620834361375988,
+                0.0003074624886132629
+              ],
+              "class": "limited"
+            }
+          },
+          {
+            "checks": {
+              "coefficient_candidate_finite": true,
+              "exact_output_and_residual_finite": true,
+              "improves_exact_residual": false,
+              "remains_limited": true,
+              "topology_axis_finite": true
+            },
+            "exact_relative_residual": 0.03850861921467395,
+            "factor": 0.5,
+            "outcome": "EXACT_RESIDUAL_NOT_IMPROVED",
+            "topology": {
+              "axis_m": [
+                1.6208177568583186,
+                0.00027939848027371775
+              ],
+              "class": "limited"
+            }
+          },
+          {
+            "checks": {
+              "coefficient_candidate_finite": true,
+              "exact_output_and_residual_finite": true,
+              "improves_exact_residual": false,
+              "remains_limited": true,
+              "topology_axis_finite": true
+            },
+            "exact_relative_residual": 0.03849422711439358,
+            "factor": 0.25,
+            "outcome": "EXACT_RESIDUAL_NOT_IMPROVED",
+            "topology": {
+              "axis_m": [
+                1.620809456599287,
+                0.00026537680667549615
+              ],
+              "class": "limited"
+            }
+          },
+          {
+            "checks": {
+              "coefficient_candidate_finite": true,
+              "exact_output_and_residual_finite": true,
+              "improves_exact_residual": false,
+              "remains_limited": true,
+              "topology_axis_finite": true
+            },
+            "exact_relative_residual": 0.03848704871652165,
+            "factor": 0.125,
+            "outcome": "EXACT_RESIDUAL_NOT_IMPROVED",
+            "topology": {
+              "axis_m": [
+                1.620805306969867,
+                0.00025836855057832363
+              ],
+              "class": "limited"
+            }
+          },
+          {
+            "checks": {
+              "coefficient_candidate_finite": true,
+              "exact_output_and_residual_finite": true,
+              "improves_exact_residual": false,
+              "remains_limited": true,
+              "topology_axis_finite": true
+            },
+            "exact_relative_residual": 0.03848346393077181,
+            "factor": 0.0625,
+            "outcome": "EXACT_RESIDUAL_NOT_IMPROVED",
+            "topology": {
+              "axis_m": [
+                1.620803232280197,
+                0.0002548650674645828
+              ],
+              "class": "limited"
+            }
+          }
+        ],
+        "rejected_candidate_count": 5,
+        "selection": "sequential first admitted candidate"
+      },
+      "current_exact_relative_residual": 0.03847988208719086,
+      "dense_coefficient_jacobian": {
+        "achieved_relative_linear_residual_2_norm": 3.159529404905616e-16,
+        "condition_number_2_norm": 119.02398382363397,
+        "condition_number_over_banked_projected_krylov": 0.02911966967101448,
+        "shape": [
+          36,
+          36
+        ]
+      },
+      "dense_coefficient_step_against_projected_exact_step": {
+        "angle_degrees": 49.73527543299367,
+        "compared_l2_norm": 0.015875750428632204,
+        "compared_to_reference_norm_ratio": 0.012955053999124593,
+        "cosine_similarity": 0.6463201030767687,
+        "reference_l2_norm": 1.2254484180231877
+      },
+      "exact_newton_krylov_step": {
+        "gmres_iterations": 30,
+        "projected_krylov_condition_on_diagnostic_state": 64.40361895876974,
+        "qualification": "ACCEPTED"
+      },
+      "exact_step_after_carrier_projection": {
+        "angle_degrees": 16.853185544462796,
+        "compared_l2_norm": 1.2254484180231877,
+        "compared_to_reference_norm_ratio": 0.9570507876389435,
+        "cosine_similarity": 0.9570507876389434,
+        "reference_l2_norm": 1.2804424110515438
+      },
+      "step_utility_probe": {
+        "exact_newton_step": [
+          {
+            "exact_relative_residual": 0.001948363339752102,
+            "factor": 1.0,
+            "improves_exact_residual": true,
+            "output_and_residual_finite": true,
+            "state_finite": true,
+            "topology_axis_finite": true,
+            "topology_class": "limited"
+          },
+          {
+            "exact_relative_residual": 0.01877962051589792,
+            "factor": 0.5,
+            "improves_exact_residual": true,
+            "output_and_residual_finite": true,
+            "state_finite": true,
+            "topology_axis_finite": true,
+            "topology_class": "limited"
+          },
+          {
+            "exact_relative_residual": 0.028622529262687723,
+            "factor": 0.25,
+            "improves_exact_residual": true,
+            "output_and_residual_finite": true,
+            "state_finite": true,
+            "topology_axis_finite": true,
+            "topology_class": "limited"
+          },
+          {
+            "exact_relative_residual": 0.03354951517780781,
+            "factor": 0.125,
+            "improves_exact_residual": true,
+            "output_and_residual_finite": true,
+            "state_finite": true,
+            "topology_axis_finite": true,
+            "topology_class": "limited"
+          },
+          {
+            "exact_relative_residual": 0.03601424595928205,
+            "factor": 0.0625,
+            "improves_exact_residual": true,
+            "output_and_residual_finite": true,
+            "state_finite": true,
+            "topology_axis_finite": true,
+            "topology_class": "limited"
+          }
+        ],
+        "promotion_affected": false,
+        "same_step_after_carrier_projection": [
+          {
+            "exact_relative_residual": 0.05653880358552117,
+            "factor": 1.0,
+            "improves_exact_residual": false,
+            "output_and_residual_finite": true,
+            "state_finite": true,
+            "topology_axis_finite": true,
+            "topology_class": "limited"
+          },
+          {
+            "exact_relative_residual": 0.047738775791705816,
+            "factor": 0.5,
+            "improves_exact_residual": false,
+            "output_and_residual_finite": true,
+            "state_finite": true,
+            "topology_axis_finite": true,
+            "topology_class": "limited"
+          },
+          {
+            "exact_relative_residual": 0.04315993019780234,
+            "factor": 0.25,
+            "improves_exact_residual": false,
+            "output_and_residual_finite": true,
+            "state_finite": true,
+            "topology_axis_finite": true,
+            "topology_class": "limited"
+          },
+          {
+            "exact_relative_residual": 0.040830797498891784,
+            "factor": 0.125,
+            "improves_exact_residual": false,
+            "output_and_residual_finite": true,
+            "state_finite": true,
+            "topology_axis_finite": true,
+            "topology_class": "limited"
+          },
+          {
+            "exact_relative_residual": 0.03965790904712727,
+            "factor": 0.0625,
+            "improves_exact_residual": false,
+            "output_and_residual_finite": true,
+            "state_finite": true,
+            "topology_axis_finite": true,
+            "topology_class": "limited"
+          }
+        ]
+      }
+    }
+  ],
+  "evidence_inputs": {
+    "banked_projected_krylov_condition": 4087.40844825275,
+    "banked_root_terminal_residual": 2.7110550053242652e-15,
+    "carrier_receipt": "docs/figures/coefficient-space-newton/plasma-only-carrier.json",
+    "carrier_receipt_sha256": "97040d14f27dc986e622d7689abfcda65404d3cf85ac21d9737222f634cc6411",
+    "root_bank": "scripts/oracle_rebaseline/root-coarse.npz",
+    "root_bank_sha256": "79f4a3f507680b7531bf3a3dc6a1195acf321027f0c3f4d4ab103bc70e1a1e0c",
+    "root_receipt": "scripts/oracle_rebaseline/results.json",
+    "root_receipt_sha256": "4d07594d3e08e072a817d1b31acde6a4f7bddd12d9bbc3a0e795efccbe71548d"
+  },
+  "measurement_scope": {
+    "candidate_selection": "unchanged sequential factors from the banked dense carrier solve",
+    "carrier_state": "plasma-only flux with known external field restored before every exact map read",
+    "coefficient_count": 36,
+    "exact_state_values": 2253,
+    "frame": "closed-form-oracle-coarse",
+    "knots_per_axis": 6,
+    "platform": "cpu",
+    "precision": "float64",
+    "realised_plasma_cells": 551
+  },
+  "schema": "carrier-advance-diagnosis-1",
+  "source_commit": "20e6626ab66beeadc2250f9f3e9e459566f2b093",
+  "verdict": {
+    "admission_discriminator": {
+      "exclusive_refusal_reasons": [
+        "EXACT_RESIDUAL_NOT_IMPROVED"
+      ],
+      "topology_refused_any_stalled_candidate": false
+    },
+    "basis": "The exact Newton direction has a residual-improving factor but the same direction after carrier projection does not.",
+    "classification": "PROJECTION",
+    "conditioning_discriminator": {
+      "banked_projected_krylov_condition_number": 4087.40844825275,
+      "dense_coefficient_condition_number": 119.02398382363397,
+      "dense_to_banked_ratio": 0.02911966967101448
+    },
+    "projection_discriminator": {
+      "dense_coefficient_step_against_projected_exact_step": {
+        "angle_degrees": 49.73527543299367,
+        "compared_l2_norm": 0.015875750428632204,
+        "compared_to_reference_norm_ratio": 0.012955053999124593,
+        "cosine_similarity": 0.6463201030767687,
+        "reference_l2_norm": 1.2254484180231877
+      },
+      "direct_projection": {
+        "angle_degrees": 16.853185544462796,
+        "compared_l2_norm": 1.2254484180231877,
+        "compared_to_reference_norm_ratio": 0.9570507876389435,
+        "cosine_similarity": 0.9570507876389434,
+        "reference_l2_norm": 1.2804424110515438
+      },
+      "exact_step_has_improving_factor": true,
+      "projected_exact_step_has_improving_factor": false
+    }
+  }
+}

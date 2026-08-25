@@ -755,7 +755,7 @@ def test_the_conservation_receipts_agree_between_the_meshes():
     assert 0.9 < float(ring.checked_cells) / float(raster.checked_cells) < 1.0
 
 
-def test_the_divergence_floor_is_truncation_and_falls_with_the_mesh():
+def test_stencil_mesh_divergence_floor_is_truncation_and_falls_under_refinement():
     """The identically-zero receipts converge instead of sitting at round-off.
 
     Central differences commute, so the raster cancels these term by term and

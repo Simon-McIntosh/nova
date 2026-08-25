@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="7">
 <meta name="plan-commits" content="cef8f151582f8fef72dd5cee6dab5cac6fbd9710,e529e385f64ed252036bb8cdbaf6bbd9cdc1b415,91ac686cd78e4d43a62d1942c53975f0886bde03">
 <meta name="plan-artifacts" content="scripts/determinism_reuse/report.md,benchmarks/observable_batch_acceptance.py,docs/figures/same-device-label-determinism/state-label-reproducibility.json,docs/figures/same-device-label-determinism/state-label-reproducibility.npz,docs/figures/same-device-label-determinism/executable-boundary-arms.json,docs/evidence/archive/same-device-label-determinism-landed.html">
-<meta name="plan-impl" content="1.0">
+<meta name="plan-impl" content="0.75">
 </head>
 <body>
   <main class="plan-doc">
@@ -159,9 +159,39 @@
     <p><strong>Never derive an acceptance criterion from an achieved value of the quantity it
     scores</strong>, and a criterion must be passable by something.</p>
 
+    <h2 id="s5">§5 — Apply the control on the path that produces the store</h2>
+
+    <p><strong>The lock creates work, and naming it here is the difference between a decision and a
+    note.</strong> Fixed persistent executable reuse is demonstrated on the acceptance driver and is
+    absent from the production forward path: no production entry calls
+    <code>nova.biot.tiledassembly.compilation_cache</code>, which is exactly the gap the reuse map
+    recorded. A control that exists only where it was measured leaves the published store produced by
+    the uncontrolled route, which is the arrangement the owner decision rejected.</p>
+
+    <p>Two properties must survive the change, and both are already established rather than hoped
+    for. The cache is documented not to alter an executable's answers, so reuse must not move any
+    result — the §2 receipt is the reference: bitwise identity across repetitions within one
+    executable. And the configuration must be explicit and receipt-visible rather than inherited from
+    whatever a user happens to have set, which is the precedent
+    <code>configure_compilation_cache</code> already sets on the throughput benchmark. Silently
+    inheriting a user cache and calling that a deterministic production route is the failure mode to
+    avoid.</p>
+
+    <p><strong>Done when</strong> the production forward path selects a fixed compilation cache by an
+    explicit, receipt-recorded configuration rather than by inheritance; three consecutive
+    fresh-process invocations of the production route on one frozen case return bitwise-identical
+    terminal flux and identical values for all 69 registered observables, quoted against the
+    cache-off arm's 11 changing case verdicts; the per-slice cost is re-quoted from a steady-state
+    measurement that separates one-time compilation from per-slice execute, against the
+    <strong>0.113 s/slice and 2.197 %</strong> cold-driver upper bound this decision was taken on;
+    and a test asserts the configuration is explicit, so a future route that inherits a user cache
+    fails rather than passing by accident. A steady-state cost materially above the cold-driver upper
+    bound would be a surprising result and reopens the scope decision rather than being absorbed
+    quietly.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="determinism-control-scope" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="determinism-control-scope" data-choice="production-wide" data-by="Simon McIntosh" data-when="2026-08-25T05:04:20+00:00">
     <p class="r-dec-q">If a deterministic control is found, does it apply to the whole
         production forward path or only to the acceptance-measurement driver? Applying it
         everywhere makes every published label reproducible and pays its throughput cost on all
@@ -170,10 +200,10 @@
         different from the one that produced the store. Answer it only after the cost is measured,
         never before.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="production-wide">production-wide determinism</button>
+      <button class="r-opt chosen" data-value="production-wide">production-wide determinism</button>
       <button class="r-opt" data-value="measurement-only">measurement driver only</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Owner decision, 2026-08-25, taken after the cost was measured as the plan required and never before. The control is fixed persistent executable reuse, and it applies to the whole production forward path rather than to the acceptance driver alone. The measured cost is 0.11300887924929537 s per candidate slice, 2.1971256764727887 per cent - and it is an UPPER BOUND rather than an estimate: the receipt records it as cold-driver time including process startup, scalar references and compilation across 30 candidate slices per invocation, not steady-state solve-only throughput, so the per-slice figure is dominated by terms that amortise across a batched catalog run instead of recurring on all 1,341,435 slices. The alternative was refused on the plan&#x27;s own reasoning: a measurement-only control certifies a route different from the one that produced the store, which is close to certifying nothing, and the throughput product&#x27;s entire value rests on a consumer trusting a published label. Note what this does and does not buy. It makes every published label reproducible. It does NOT make acceptance pass: the route still fails at 67 of 69 bounds once deterministic, because the two bounds that move are on divergence residuals that are identically zero in exact arithmetic, so their computed value is roundoff and a bound on them is a bound on roundoff. That second fault is untouched by this decision and is recorded as such.</p>
     </div>
 </section>
 
@@ -195,6 +225,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260825T0100-boundary" data-who="reckon-ship" data-when="2026-08-25T01:00:00Z">
     <div class="r-comment-body">executable-boundary-determinism landed - commit 91ac686c, merged, gate PASSED, 9 of 9 tests, scope clean at the two fenced paths. THE MECHANISM IS NAMED AND THE CONTROL IS DEMONSTRATED. H200 SLURM job 1254333 on betelgeuse produced six fresh-process receipts in one allocation, six distinct PIDs, one job id, GPU UUID GPU-ca419d0a-a452-e2ef-a8dc-90ce956cce04, driver 595.58.03, JAX and jaxlib 0.11.0, float64, JAX_PLATFORMS=cuda. CACHE-OFF ARM, three fresh processes with a null cache directory and zero hits: case-pass counts width 1 = 410, 409, 411 of 414 and width 4 = 412, 409, 410 of 414, with ELEVEN changing case verdicts, all of them conservation.divergence_b and conservation.divergence_j, and every change carrying its three absolute candidate values beside the registered absolute and relative bounds. FIXED-CACHE ARM, three processes sharing one initially empty persistent compilation directory, invocation 1 cold and invocations 2 and 3 each recording one cache hit: width 1 = 409, 409, 409 and width 4 = 410, 410, 410, ZERO changing case verdicts, and all 69 aggregate verdicts plus all 828 per-case verdicts identical in all three processes. 67 of 69 bounds in every invocation of both arms. TOGETHER WITH THE RETAINED WITHIN-EXECUTABLE CONTROL - three repetitions, 12 of 12 state reproducible, zero unequal flux elements, zero label or verdict movement - the arm difference establishes INDEPENDENT PROCESS COMPILATION SELECTING A DIFFERENT ACCEPTANCE EXECUTABLE as the nondeterministic mechanism, and fixed persistent executable reuse as the demonstrated control. That is the candidate the reuse map ranked strongest on the independent ground that no acceptance driver called the persistent cache, now confirmed by a paired arm rather than by elimination alone. THE CONTROL COST IS 0.11300887924929537 s per candidate slice, 2.1971256764727887 per cent, cache-off median 5.143487259714553 s per slice against warm fixed-cache 5.256496138963849. The receipt is careful that this is COLD-DRIVER time including process startup, scalar references and compilation over 30 candidate slices per invocation, NOT steady-state solve-only throughput - so it is an upper bound on the production-wide cost rather than an estimate of it. AND THE SECOND FAULT SURVIVES THE FIRST: acceptance remains scientifically FAILING at 67 of 69 bounds even once the route is deterministic, exactly as section 1 required the two be kept apart. Determinism was never going to make a bound on a roundoff-scale residual passable.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260825T0110-scope" data-who="reckon-ship" data-when="2026-08-25T01:10:00Z">
+    <div class="r-comment-body">CONTROL SCOPE LOCKED PRODUCTION-WIDE by the owner, 2026-08-25, after the cost was measured and not before, which is the ordering section 3 insisted on. The trade as presented: 2.1971256764727887 per cent, explicitly an upper bound because the measured figure is cold-driver time carrying process startup and compilation across 30 candidate slices rather than steady-state solve throughput, so the terms that dominate it amortise across a batched catalog run rather than recurring on each of the 1,341,435 slices. Measurement-only was refused on the plan's own ground that it certifies a route different from the one that produced the store. WHAT REMAINS OPEN IS NOT DETERMINISM. Acceptance still fails at 67 of 69 bounds with the control applied, and the two bounds whose verdicts moved are conservation.divergence_b and conservation.divergence_j - divergence residuals that are identically zero in exact arithmetic, so their computed value IS roundoff and a bound on them is a bound on roundoff. Section 1 separated those two faults deliberately, and locking this decision closes the first without touching the second. The consumer hold on mast-catalog-gpu-solve is released for reproducibility: the acceptance driver now returns identical bound and case counts with identical per-case verdicts across three consecutive invocations under the control. It is NOT released for acceptance passing, which was never this plan's claim.</div>
 </div>
 </section>
 </main>

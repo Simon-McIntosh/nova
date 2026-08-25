@@ -61,14 +61,19 @@
           <td>Margin receipts carry the selected X coordinate, its flux operand, and the admitted
             candidate diagnostics, so a future audit can verify the physical saddle independently
             of the Boolean comparator. Verified by regenerating one banked terminal receipt with
-            zero differing numeric fields in the existing entries. <strong>The authoritative egress
-            is <code>benchmarks/diiid_forward_gs_match.py::_solve_surface_frame</code></strong>,
-            which builds each terminal record by hand and today serializes only
-            <code>terminal_class_margin</code> plus the aggregate margin distributions — the banked
-            artifact is
-            <code>docs/figures/plateau-input-attribution/margin-frame-remeasure.json</code>. Nothing
-            under <code>nova/equilibrium/</code> controls that record, so a scope drawn from the
-            core modules alone cannot deliver this item.</td>
+            zero differing numeric fields in the existing entries. <strong>The egress for
+            <em>these</em> terminals is
+            <code>benchmarks/diiid_forward_gs_match.py::_solve_surface_frame</code></strong> — the
+            machine name in that path is accurate and load-bearing, because §1's ten terminals are
+            five banked score-blind <strong>DIII-D</strong> frames under two arms, physical-ring and
+            pseudo-wall, banked as
+            <code>docs/figures/plateau-input-attribution/margin-frame-remeasure.json</code>. That
+            function builds each record by hand and today serializes only
+            <code>terminal_class_margin</code> plus the aggregate margin distributions. Nothing under
+            <code>nova/equilibrium/</code> controls that record, so a scope drawn from the core
+            modules alone cannot deliver this item. <strong>It is authoritative for this cohort only,
+            not for margin receipts generally</strong> — the MAST frozen-six margins are written by a
+            different driver, named below.</td>
         </tr>
         <tr>
           <td>Isolated-test dtype self-configuration</td>
@@ -79,16 +84,24 @@
       </tbody>
     </table>
 
-    <p><strong>The diagnostics must be discriminating, not merely present.</strong> The exact class
-    margin is <em>absent</em> (+&infin;) on two of the six frozen MAST references, 21978/35 and
-    22086/43, and no receipt currently records why. So the admitted-candidate diagnostics have to
+    <p><strong>The diagnostics must be discriminating, not merely present.</strong> A receipt that
+    records an absent margin as absent explains nothing. The admitted-candidate diagnostics have to
     separate <em>no typed saddle candidate was found</em> from <em>candidates were found and all were
     rejected</em> — by the wall-shadow rule or by reachability — and record the operand values that
-    drove the rejection. Without that separation an absent operand stays a mystery rather than becoming
-    a named rejection, and those two references carry weight beyond this plan: they are the pair whose
-    contrasting behaviour under an identically inactive class penalty, quadratic convergence against a
-    period-2 cycle, is the open discriminator on
-    <code>discrete-operator-analytic-error</code> §5.</p>
+    drove the rejection. That is what converts an absent operand from a mystery into a named
+    rejection, and it is the reason this item is worth more than its size suggests.</p>
+
+    <p><strong>Where the absent operands actually are, and why that is a second cohort.</strong> The
+    exact margin is absent (+&infin;) on two of the six frozen <strong>MAST</strong> references,
+    21978/35 and 22086/43 — and those are <em>not</em> the terminals above. They are written by
+    <code>benchmarks/pinned_branch_contrast.py</code> into
+    <code>docs/figures/dual-branch-selection/pinned-branch-contrast.json</code>, which serializes the
+    margin's <em>sign</em> (<code>class_margin_nonfinite</code>) but never its operands. So the same
+    discriminating-diagnostics requirement applies there, against a different driver, and this plan
+    does not carry it: regenerating the DIII-D receipt cannot touch a MAST reference. Those two
+    references matter beyond either plan — they are the pair whose contrasting behaviour under an
+    identically inactive class penalty, quadratic convergence against a period-2 cycle, is the open
+    discriminator on <code>discrete-operator-analytic-error</code> §5.</p>
 
     
 

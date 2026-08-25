@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T17:34:40",
+  "updated": "2026-08-25T18:33:01",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -36127,9 +36127,290 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T151635771982-reachable-wall-limiter-point",
+        "plan": "primary-xpoint-evidence",
+        "section": "\u00a72",
+        "node": "reachable-wall-limiter-point",
+        "node_definition": {
+          "done_when": "THE DEFINITION IS THE SPECIFICATION. The limiter point is the wall position minimising |psi_wall - psi_axis|, restricted to the wall the shadow partition marks REACHABLE - the wall touched by the axis-connected component immediately before the selected saddle is crossed. Restriction matters because a shadowed wall point can carry a flux nearer the axis while being topologically unreachable, which is the present defect. SUB-GRID REFINE the minimiser along the wall polyline rather than returning a node value, in the spirit of how nova already refines stationary points - see magnetic_axis_subgrid and the ring least-squares quadratic in nova/equilibrium/stencil_nulls.py, and reuse that machinery rather than writing a second refinement. Report the refined arc position, coordinate, flux, |psi - psi_axis| and the shift from the nearest node so the refinement is visible as a number. MEASURE THE REPAIR against the banked cohort: for all 12 frozen MAST arms and the DIII-D terminal report the old selected wall point, the new limiter point, whether each lies on reachable wall, and the resulting class margin. The target is specific - seven arms are currently LIMITED with reachable wall present, at 10, 17, 47, 47, 49, 64 and 124 reachable segments, yet carry a positive-infinity margin because a private-region wall point was selected, and those seven must become FINITE. Three arms are diverted with zero reachable segments and must stay positive infinity since no wall is reachable and no wall operand exists. The DIII-D terminal at -0.3350 already selects on the reachable run and is the reference for correct behaviour, so it must not move materially. Stay jit and vmap safe and fixed-shape: mask rather than compact, since a data-dependent count breaks tracing. Do NOT re-bank pinned-branch-contrast.json or any figure - report the deltas. Run the connectivity and topology test files and quote counts.",
+          "estimated_hours": 4.0,
+          "goal": "Select the limiter point as the position on the REACHABLE wall whose flux is closest to the O-point flux, sub-grid refined along the wall, replacing a selector that picks from the whole polygon and therefore returns private-region points on limited configurations.",
+          "id": "reachable-wall-limiter-point",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/reachable-wall-limiter-point.md",
+          "plan": "primary-xpoint-evidence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/connectivity_boundary.py",
+            "tests/test_connectivity_boundary.py",
+            "docs/figures/primary-xpoint-evidence/reachable-wall-limiter-point.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "limiter-topology",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T15:16:45Z",
+        "completed_at": "2026-08-25T16:27:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4240,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4240,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "ed45ee1a4c7e27eed39a6ab097f734a30d7c9570",
+        "commits": [
+          "ba1f947380270949003e1a4b894d66409081dc07"
+        ],
+        "changed_lines": {
+          "added": 986,
+          "removed": 78,
+          "files": 3
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/reachable-wall-limiter-point.md",
+        "scope_changed": false,
+        "session_id": "01a0397e-cbf8-7f22-8cf4-82c0f36ce42f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 24138752,
+            "cached_input_tokens_cumulative": 24138752,
+            "input_tokens": 24602562,
+            "input_tokens_cumulative": 24602562,
+            "output_tokens": 57208,
+            "output_tokens_cumulative": 57208,
+            "reasoning_output_tokens": 17136,
+            "reasoning_output_tokens_cumulative": 17136
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T162049000674-iter-saddle-resolution",
+        "plan": "primary-xpoint-evidence",
+        "section": "\u00a72",
+        "node": "iter-saddle-resolution",
+        "node_definition": {
+          "done_when": "The reachability grid reported ITER reachability unavailable because no typed stationary saddle resolves inside the limiter of iterhybrid_cocos17.eqdsk. ONE HYPOTHESIS IS ALREADY FALSIFIED so do not spend time on it: I suspected typing was corrupted by the source discontinuity at the separatrix, but nova types critical points by DEGREE and not by Hessian - ring_sign_changes counts cyclic neighbour sign changes about a centre, and gradient_cell_degree traverses cell corners counter-clockwise for a signed index where a saddle is -1 - and a winding number of grad-psi needs only continuity of grad-psi, which C1 supplies. Test the data-extent candidates instead. ONE: quote the EQDSK grid extents in R and Z and state whether they cover the region where an ITER X-point sits, roughly R 4 to 6 m and Z around -3 to -4 m, alongside the expected location. TWO: identify what the limiter contour in that file actually is - first wall, plasma-limiting surface, or bounding rectangle - since the reachability figure drew it as a rectangle. If it is a plasma-limiting contour then a divertor X-point falls outside it by construction and the containment predicate needs the FIRST WALL instead of the EQDSK limiter; say which contour the file supplies and how many points it carries. THREE: run the degree-based null search over the full EQDSK grid with NO containment mask and report every critical point found with coordinate, flux and index. Then state which of exactly two situations holds: the saddle is DETECTED AND THEN REJECTED by containment, or it is NEVER DETECTED. Those need opposite repairs, so name one. Change no production code: diagnose and report.",
+          "estimated_hours": 2.0,
+          "goal": "Explain why no typed stationary saddle resolves inside the ITER hybrid EQDSK limiter, since that equilibrium is diverted in reality and a missing X-point points to a detection or data-extent fault rather than a property of the field.",
+          "id": "iter-saddle-resolution",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/iter-saddle-resolution.md",
+          "plan": "primary-xpoint-evidence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/iter-saddle-resolution.json",
+            "benchmarks/iter_saddle_resolution.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "topology-admission",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T16:20:58Z",
+        "completed_at": "2026-08-25T16:28:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 457,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 457,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "d2d9ddcd7001abac05951b58990f1bb61147ea92",
+        "commits": [
+          "72fcece8881b63c6be069c7bce252e4c3459cf15"
+        ],
+        "changed_lines": {
+          "added": 461,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/iter-saddle-resolution.md",
+        "scope_changed": false,
+        "session_id": "01a039b9-9784-7242-8d98-dca378d5c231",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2462208,
+            "cached_input_tokens_cumulative": 2462208,
+            "input_tokens": 2598068,
+            "input_tokens_cumulative": 2598068,
+            "output_tokens": 16902,
+            "output_tokens_cumulative": 16902,
+            "reasoning_output_tokens": 5771,
+            "reasoning_output_tokens_cumulative": 5771
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T161920341500-saddle-aware-hex-partition",
+        "plan": "primary-xpoint-evidence",
+        "section": "\u00a72",
+        "node": "saddle-aware-hex-partition",
+        "node_definition": {
+          "done_when": "READ THE REVERSAL FIRST. Commit 8d4f3f33 measured a real disagreement and drew the wrong conclusion, and my dispatch caused it. On an 11x13 saddle pinch four-connectivity gave 9 public and 6 private cells and SHADOWED wall cell [6,3], while six-neighbour hex gave 15 public and ZERO PRIVATE and ADMITTED it. Zero private cells on a fixture built to have a private lobe is topologically wrong: six-connectivity bridged the two lobes through the saddle then admitted a wall cell sitting behind it, the exact error class this sprint spent the day repairing. By the governing definition, reachable from the O-point WITHOUT CROSSING A SADDLE, passing through the saddle point is crossing one. Neither adjacency is correct alone - four-connectivity under-connects in the bulk while accidentally cutting the saddle, six-connectivity is correct in the bulk while wrongly bridging it. FIRST TASK: invert tests/test_flux_surface_connectivity.py::test_hex_neighbour_keeps_a_pinch_joined_that_four_neighbours_sever, which asserts the bridging as expected and will otherwise defend the bug against your fix, and rename it to what it should measure. THE REPAIR IS NOT AN ADJACENCY CHOICE. Keep the mesh true six-neighbour adjacency for the bulk and add EDGE-BASED ADMISSIBILITY: admit a neighbour link only where the shared edge has a portion strictly on the same side of the binding level, so a level passing through a cut cell closes the neck instead of centroid-to-centroid adjacency bridging it. Excising the saddle cell as a cut vertex is an acceptable alternative or complement - state which you chose and why. Target: the 11x13 pinch must yield a NON-EMPTY private region and SHADOW wall cell [6,3] while bulk connectivity stays six-neighbour. FLUX SOURCE HAS A RECORDED CONSTRAINT: per-cell reconstruction of the level was refuted twice here - see curved-clip-global-surface, whose prescription is to take the curve from the global tensor B-spline rather than per-cell interpolants. flux_surface_connectivity already calls fit_tensor_spline at line 498. That spline is legitimate INTERIOR solve support, since inside the plasma the source is smooth and the solution is C2 while the C1 kink sits at the edge of its support, so use it for sub-cell level crossings and build no local reconstruction. Assert the partition identity that public plus private plus scrape-off area fractions sum to cell area. BANK A FIGURE under docs/figures/primary-xpoint-evidence/ with project-absolute src showing the pinch under four-connectivity, plain six-neighbour, and your corrected rule side by side, because a six-cell difference on an 11x13 grid is easier to adjudicate as a picture than a table. GPU SHAPE IS A REQUIREMENT: fixed-shape cells-by-seven ring gather, mask never compact, no jax.pure_callback anywhere since a callback holding a jnp op can deadlock dispatch here, and report the fixpoint iteration DISTRIBUTION and wall-clock against the measured baseline of four-connectivity at 3 iterations and 0.4911 ms and six-neighbour at 16 iterations and 0.7666 ms at 33x33. Do not switch production over.",
+          "estimated_hours": 5.0,
+          "goal": "Make the hexagonal component partition topologically correct at a saddle, because six-neighbour adjacency is right in the bulk but BRIDGES public to private through the saddle cell, and the previous node landed that bridging as expected behaviour.",
+          "id": "saddle-aware-hex-partition",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/saddle-aware-hex-partition.md",
+          "plan": "primary-xpoint-evidence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/flux_surface_connectivity.py",
+            "tests/test_flux_surface_connectivity.py",
+            "docs/figures/primary-xpoint-evidence/saddle-aware-hex-partition.json",
+            "docs/figures/primary-xpoint-evidence/saddle-aware-hex-partition.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "saddle-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T16:19:30Z",
+        "completed_at": "2026-08-25T16:32:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 786,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 786,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "d2d9ddcd7001abac05951b58990f1bb61147ea92",
+        "commits": [
+          "5c1bf8c1dcf7bb955029fdd87dbfb04d0357ea1a"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "unresolvable_revision"
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/saddle-aware-hex-partition.md",
+        "scope_changed": false,
+        "session_id": "01a039b8-3d82-7f03-bc91-428abadd9ba5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3997312,
+            "cached_input_tokens_cumulative": 3997312,
+            "input_tokens": 4139737,
+            "input_tokens_cumulative": 4139737,
+            "output_tokens": 27370,
+            "output_tokens_cumulative": 27370,
+            "reasoning_output_tokens": 6949,
+            "reasoning_output_tokens_cumulative": 6949
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 867
+    "_version": 870
   }
 }

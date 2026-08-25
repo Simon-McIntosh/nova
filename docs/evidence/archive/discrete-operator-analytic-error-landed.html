@@ -248,6 +248,51 @@
     fixed ten-step Newton&ndash;Krylov budget does not guarantee recovery from a cold seed more than a
     full root span away.</p>
 
+    <h2 id="inner-solve">Inner Krylov accuracy does not explain the cycle</h2>
+
+    <p><strong>Node <code>inner-solve-accuracy</code>, commit <code>0fb07ac5</code>, gate PASSED,
+    2026-08-25.</strong> Reserved H200, SLURM 1254819, 2m00s, MaxRSS 5.15 GB. Banked GMRES-12 terminals
+    reproduced first to 5.482e&minus;16 and 4.032e&minus;16 against a 5e&minus;12 tolerance.</p>
+
+    <table>
+      <caption>Terminal residual against inner Krylov budget</caption>
+      <thead><tr><th scope="col">GMRES iterations</th><th scope="col">21978/35 (cycling)</th><th scope="col">22086/43 (converged)</th></tr></thead>
+      <tbody>
+        <tr><td>12</td><td>1.0504359639162268e&minus;2</td><td>3.135858219449719e&minus;16</td></tr>
+        <tr><td>30</td><td>1.0504360271221558e&minus;2</td><td>2.6878784738140444e&minus;16</td></tr>
+        <tr><td>60</td><td>1.0504360271221723e&minus;2</td><td>3.1358582194497186e&minus;16</td></tr>
+        <tr><td>120</td><td>1.0504360271221670e&minus;2</td><td>4.479797456356742e&minus;16</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The hypothesis is falsified and the falsification is clean.</strong> A tenfold budget
+    increase leaves the cycling trace unmoved and the period-2 alternation intact at every setting. The
+    angle between the true dense Newton step and the GMRES-12 step is <strong>9.507e&minus;6
+    degrees</strong> — the Krylov step already is the Newton step, despite an exact linear relative
+    residual of 9.684e&minus;16 against 4.328e&minus;7 for GMRES-12. And decisively, the <strong>exact
+    dense full Newton action carries 21978/35 from one alternating terminal to the other</strong>:
+    1.0762712491604898e&minus;2 against GMRES-12's 1.0762710781618877e&minus;2, agreeing to
+    1.71e&minus;9. <strong>Exact Newton itself cycles</strong>, so a dense autodiff Jacobian is not the
+    remedy — it was tried exactly.</p>
+
+    <p><strong>Two corrections to the dispatch's own figures.</strong> The carried state is
+    <strong>1,126</strong> values, not the ~4,052 asserted, so each dense Jacobian was 1126 &times; 1126
+    at 10,143,008 bytes rather than 131 MB. Dense 2-norm conditioning is <strong>167.917 cycling against
+    86.251 converged</strong>, ratio 1.947 — a stronger separation than the projected 36.785/21.040, and
+    still modest against the behavioural gap.</p>
+
+    <p><strong>The failed option is priced so it stays closed.</strong> Production pays
+    <code>gmres_iterations + 2</code> forward-action equivalents per outer step: 14, 32, 62 and 122 for
+    those budgets, which is 0.599, 1.369, 2.652 and 5.218 s per slice per outer step at 42.77 ms, or
+    <strong>223, 510, 988 and 1,944 catalog-hours per outer step</strong> over 1,341,435 slices. Buying
+    2.29&times; to 8.71&times; the action count changes no outcome.</p>
+
+    <p><strong>Where the mechanism must be instead.</strong> Since the exact step reproduces the cycle,
+    the residual map itself admits an exact full-step 2-cycle. The free-boundary reading is the leading
+    candidate: the domain comes from a flood fill <em>of the state</em>, so a mask differing between the
+    two alternating states, with a Jacobian formed as though the mask were fixed, omits the
+    mask-dependence term and overshoots the switching surface every step.</p>
+
   </main>
 </body>
 </html>

@@ -6,8 +6,8 @@
   <meta name="docs-project" content="nova">
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="roundoff-scale-acceptance-bounds">
-  <meta name="plan-title" content="A Bound on a Quantity That Is Exactly Zero Is a Bound on Roundoff">
-  <meta name="plan-summary" content="Determinism is fixed and acceptance still fails at 67 of 69 bounds. The two that fail score divergence residuals whose exact value is zero, so their computed value is rounding error and a relative bound on them is passable only by luck of the last bit. Classify every registered bound by whether its scored quantity has a nonzero exact value, and give those that do not an absolute floor derived from the arithmetic rather than from an achieved value.">
+  <meta name="plan-title" content="Acceptance Bounds Whose Reference Is Zero">
+  <meta name="plan-summary" content="Determinism is fixed and acceptance still fails at 67 of 69 bounds. The two that fail score divergence residuals that are zero in the continuum, so a relative bound has no nonzero reference and a one-ULP change crosses it by a factor of three. Their computed value is truncation-dominated rather than roundoff, at 1e-10 against a 1e-16 process variation, so the floor must come from the discretisation order where the stencil does not preserve the identity.">
   <meta name="plan-status" content="draft">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="6.0">
@@ -19,7 +19,7 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="same-device-label-determinism">
   <meta name="plan-sprint" content="S15">
-  <title>A Bound on a Quantity That Is Exactly Zero | nova</title>
+  <title>Acceptance Bounds Whose Reference Is Zero | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 </head>
@@ -34,20 +34,38 @@
     cent. <strong>And acceptance still fails at 67 of 69 bounds.</strong> That was predicted rather than
     discovered: making a verdict reproducible cannot make a criterion passable.</p>
 
-    <p><strong>The two bounds that fail are the two that were never passable.</strong> Every one of the
-    11 case verdicts that moved under the cache-off arm belonged to
-    <code>conservation.divergence_b</code> or <code>conservation.divergence_j</code>. Those are
-    divergence residuals: in exact arithmetic they are identically zero, so their computed value
-    <em>is</em> the rounding error of the computation that produced them. A relative bound on such a
-    quantity is a bound on roundoff. The receipt's own figures show what that means — maximum absolute
-    differences of 1.3877787807814457e-16 and 2.7755575615628914e-16, one and two units in the last
-    place of a binary64 number near unity, carrying maximum relative differences of 2.5 and 4.5 and
-    maximum bound ratios of 2.967 and 5.341. A one-ULP change crosses the bound by a factor of three.</p>
+    <p><strong>The two bounds that fail score quantities whose continuum value is zero.</strong> Every
+    one of the 11 case verdicts that moved under the cache-off arm belonged to
+    <code>conservation.divergence_b</code> or <code>conservation.divergence_j</code>. In the continuum
+    both are identically zero, so neither has a nonzero exact value for a relative bound to be relative
+    to.</p>
 
-    <p><strong>This plan's own standing rule already forbids it.</strong> A criterion must be passable
-    by something. A relative criterion on a quantity whose exact value is zero is passable only when
-    the last bit falls the right way, which is not a property of the solve. Determinism made that luck
-    repeatable; it did not make it a measurement.</p>
+    <p><strong>But their computed value is NOT roundoff, and this plan was drafted saying it was.
+    Corrected 2026-08-25 after review.</strong> The distinction is the whole plan and getting it wrong
+    would have produced a floor orders of magnitude too tight.
+    <code>tests/test_equilibrium_stencil_mesh.py</code> carries the repository's contract explicitly:
+    the continuum divergence identities cancel under <em>commuting</em> central differences, while the
+    ring-mesh least-squares derivatives <strong>do not commute</strong> and therefore land at a
+    <strong>second-order truncation floor</strong>. Truncation does not shrink with working precision;
+    it shrinks with the mesh. The receipt values separate the two scales unmistakably: the
+    process-to-process <em>changes</em> are around <strong>1e-16</strong> — one and two units in the
+    last place, 1.3877787807814457e-16 and 2.7755575615628914e-16 — while the
+    <code>divergence_j</code> observable <em>itself</em> is around <strong>1e-10</strong>, six orders
+    larger. So the value is truncation-dominated and only its variation is roundoff.</p>
+
+    <p><strong>Three quantities must be kept apart, and conflating any two of them produces a wrong
+    floor.</strong> The exact continuum identity, which is zero. The non-commuting stencil's truncation
+    floor, which is a real numerical property of the discretisation and scales with <em>h</em>. And the
+    last-bit process-to-process variation, which is roundoff and scales with &epsilon;. The acceptance
+    driver already distinguishes them in part: its failure verdict calls <code>divergence_j</code> a
+    fitted field-function gradient computation difference and leaves <code>divergence_b</code>
+    unadjudicated, so neither is currently claimed as pure rounding.</p>
+
+    <p><strong>What is nonetheless wrong today.</strong> A relative bound whose reference has no
+    nonzero exact value is not a meaningful criterion however the computed value arises, and the
+    figures show the consequence: maximum bound ratios of 2.967 and 5.341 against absolute differences
+    at 1e-16, so a one-ULP change crosses the bound by a factor of three. A criterion must be passable
+    by something. Determinism made that crossing repeatable; it did not make it a measurement.</p>
 
     <h2 id="s2">§2 — Classify every bound before repairing any</h2>
 
@@ -60,11 +78,13 @@
       <li><strong>Nonzero exact value.</strong> A relative bound is meaningful, because there is
       something to be relative to. Volume, major radius, plasma current and the geometric moments are
       in this class.</li>
-      <li><strong>Exactly zero.</strong> Only an absolute bound is meaningful, and it must come from
-      the arithmetic — the number of operations, the magnitudes entering them and the working
-      precision — rather than from any observed residual. A floor of the form
-      <em>n</em>·&epsilon;·scale is derived; a floor chosen because the current value sits below it is
-      not.</li>
+      <li><strong>Zero in the continuum.</strong> Only an absolute bound is meaningful, and it must be
+      derived rather than observed — but <em>from the right term</em>. Where the discretisation does not
+      preserve the identity, the floor is set by <strong>truncation</strong> and scales with the mesh:
+      an <em>n</em>·&epsilon;·scale roundoff floor would be orders of magnitude too tight and would fail
+      a correct computation. Where the discretisation does preserve it, a roundoff floor is the right
+      form. Either way a floor chosen because the current value sits below it is derived from an
+      achieved value and is prohibited.</li>
     </ul>
 
     <p>The classification is not a judgement call and should not be recorded as one: for each
@@ -73,16 +93,21 @@
     recurring on the next observable someone registers.</p>
 
     <p><strong>Done when</strong> every one of the 69 registered bounds carries a recorded
-    classification of whether its scored quantity has a nonzero exact value, with the reason stated per
-    bound rather than in aggregate; every bound classified exactly-zero carries an absolute floor whose
-    derivation from operation count, entering magnitudes and working precision is shown, and explicitly
-    <em>not</em> from any achieved residual; the acceptance route is re-scored under the corrected
-    criteria on the frozen six-case cohort at both registered widths, reporting the new pass count
-    against the banked 67 of 69 and naming every bound whose verdict changed and why; and a test
-    asserts that a bound on an exactly-zero quantity cannot be registered with a relative criterion, so
-    the next observable cannot reintroduce this. <strong>A re-score that still fails is a legitimate
-    outcome</strong> provided the surviving failures are on quantities with nonzero exact values, where
-    a relative bound means something and a failure is a real disagreement.</p>
+    classification of whether its scored quantity has a nonzero <em>continuum</em> value, with the
+    reason stated per bound rather than in aggregate; every bound classified zero-in-the-continuum
+    additionally records whether its discretisation preserves the identity, so a truncation floor is
+    separated from a roundoff floor rather than assumed; each such bound then carries an absolute floor
+    whose derivation is shown — from the discretisation order and mesh where truncation dominates, from
+    operation count and working precision where it does not — and explicitly <em>not</em> from any
+    achieved residual; the measured separation of scales is quoted per bound, with the
+    process-to-process variation beside the observable's own magnitude, since the two differ by six
+    orders on <code>divergence_j</code> and a single figure would hide that; the acceptance route is
+    re-scored under the corrected criteria on the frozen six-case cohort at both registered widths,
+    reporting the new pass count against the banked 67 of 69 and naming every bound whose verdict
+    changed and why; and a test asserts that a bound on a quantity with no nonzero continuum value
+    cannot be registered with a relative criterion. <strong>A re-score that still fails is a legitimate
+    outcome</strong> provided the surviving failures are on quantities with nonzero continuum values,
+    where a relative bound means something and a failure is a real disagreement.</p>
 
     <h2 id="s3">§3 — What this does and does not unblock</h2>
 

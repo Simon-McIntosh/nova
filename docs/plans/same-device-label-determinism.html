@@ -90,9 +90,14 @@
     place of a binary64 number near unity. It nonetheless carries a maximum relative difference of
     2.5 and 4.5 and a maximum bound ratio of 2.967 and 5.341, because both observables whose
     verdicts move, <code>conservation.divergence_b</code> and
-    <code>conservation.divergence_j</code>, are divergence residuals that are identically zero in
-    exact arithmetic. <strong>Their computed value is roundoff, so a bound on them is a bound on
-    roundoff</strong>, and a last-bit change crosses it.</p>
+    <code>conservation.divergence_j</code>, are divergence residuals that are identically zero in the
+    <em>continuum</em> — so a relative bound on them has no nonzero reference, and a last-bit change
+    crosses it. <strong>Corrected 2026-08-25 after review: their computed value is NOT roundoff.</strong>
+    The ring-mesh least-squares derivatives do not commute, so these residuals sit at a second-order
+    truncation floor: the observable itself is around 1e-10 while the process-to-process variation is
+    around 1e-16, six orders apart. Only the variation is rounding error. The distinction matters to the
+    repair, not to this plan's verdict, and it is carried by
+    <a href="/nova/roundoff-scale-acceptance-bounds">roundoff-scale-acceptance-bounds</a>.</p>
 
     <p><strong>That makes two candidate faults, not one, and they must not be merged.</strong> A
     genuinely nondeterministic operation is one fault, and §3 owns it. A criterion that scores a

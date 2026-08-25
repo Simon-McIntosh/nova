@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T08:02:27",
+  "updated": "2026-08-25T08:16:30",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -152,6 +152,13 @@
         "created": "2026-08-21"
       },
       {
+        "id": "circuit-arm",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-25"
+      },
+      {
         "id": "circuit-ensemble",
         "harness": "codex",
         "role": "implement",
@@ -211,7 +218,7 @@
         "id": "contour-order",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a03775-daad-7cd0-9362-e12346325d07",
         "created": "2026-08-25"
       },
       {
@@ -694,7 +701,7 @@
         "id": "operator-ladder",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a03774-b58d-7963-b477-2442c3949fa9",
         "created": "2026-08-25"
       },
       {
@@ -32029,9 +32036,84 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T060531414498-circuit-projection-arm",
+        "plan": "plateau-input-attribution",
+        "section": "\u00a72",
+        "node": "circuit-projection-arm",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "circuit-arm",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T06:05:50Z",
+        "completed_at": "2026-08-25T06:16:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 634,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 634,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "45665322360f3d89b3984d64410e9ff798679d3e",
+        "commits": [
+          "8aaa505f7367cb416cb6662d9db12a55438a41c7"
+        ],
+        "changed_lines": {
+          "added": 841,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T060531414498-circuit-projection-arm/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03786-6b19-7ba1-971c-f9f6bccca2ec",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3338240,
+            "cached_input_tokens_cumulative": 3338240,
+            "input_tokens": 3504722,
+            "input_tokens_cumulative": 3504722,
+            "output_tokens": 19597,
+            "output_tokens_cumulative": 19597,
+            "reasoning_output_tokens": 7239,
+            "reasoning_output_tokens_cumulative": 7239
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 797
+    "_version": 801
   }
 }

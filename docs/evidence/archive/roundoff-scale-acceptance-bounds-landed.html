@@ -122,6 +122,55 @@
     identifier line changed, zero assertion or tolerance changes, and 19 still passing. The old name is
     kept here so earlier manifests remain traceable.</p>
 
+    <h2 id="failability-census">The registry is sound: one flagged bound, and it is the known one</h2>
+
+    <p><strong>Node <code>bound-failability-sweep</code>, commit <code>99c56eb3</code>, gate PASSED,
+    2026-08-25.</strong> Artifact
+    <code>docs/figures/roundoff-scale-acceptance-bounds/bound-failability-census.json</code>. The rule
+    this plan established — a criterion must be failable by something, not only passable — was applied to
+    two bounds; this turns it on all sixty-nine.</p>
+
+    <table>
+      <caption>Effective slack distribution over the registered bounds</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Value</th></tr></thead>
+      <tbody>
+        <tr><td>Rows</td><td>69</td></tr>
+        <tr><td>Numeric slack assessed</td><td>34</td></tr>
+        <tr><td>Exact-equality, not assessable</td><td>35</td></tr>
+        <tr><td>Minimum / median</td><td><strong>1.0&times; / 1.0&times;</strong></td></tr>
+        <tr><td>95th percentile</td><td>1.213802953&times;</td></tr>
+        <tr><td>Maximum</td><td>22.627416998&times;</td></tr>
+        <tr><td>At or below 2&times;</td><td>33</td></tr>
+        <tr><td>Between 2&times; and 20&times;</td><td><strong>0</strong></td></tr>
+        <tr><td>Above 20&times;</td><td><strong>1</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>There is no hidden third instance of the category error.</strong> The distribution is
+    effectively bimodal at 1.0&times; with a single outlier, and that outlier is
+    <code>conservation.divergence_j</code> at 22.627416998&times; — the envelope this plan knowingly
+    registered and recorded as failable but not tight. Thirty-two numeric envelopes sit at exactly
+    1.0&times; because their banked calibration observations reach the limiting component, which is as
+    tight as a bound can be. <code>conservation.divergence_b</code> reproduces the 1.610865580&times;
+    discriminating anchor, so the census is calibrated against a bound independently known to
+    discriminate.</p>
+
+    <p><strong>The flagged bound remains demonstrably failable</strong>, by a named perturbation rather
+    than an assertion: multiplying the radial poloidal-current component by 1 + 1e&minus;6 while leaving
+    the vertical component unchanged reaches 7.568358363e&minus;8, which is 7.182846291&times; the
+    1.053671213e&minus;8 envelope.</p>
+
+    <p><strong>A stated limitation rather than a silent one.</strong> Thirty-five criteria are
+    exact-equality, where bound-over-largest-observed is zero over zero and indeterminate. These are
+    reported as <em>not assessable</em> with the reason, not given an invented ratio, and none is dropped
+    from the table; all remain failable by any one-representable-unit mismatch. Half the registry being
+    unassessable by this metric is worth knowing — covering only the tractable thirty-four would have
+    read as full coverage.</p>
+
+    <p>No bound was changed. Repair or reclassification of the single flag is left to a separately
+    authorised node, since this plan's whole argument is that a bound must change <em>kind</em> for a
+    stated reason rather than magnitude to fit a measurement.</p>
+
   </main>
 </body>
 </html>

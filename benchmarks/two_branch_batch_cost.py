@@ -49,9 +49,9 @@ CONVERGENCE_TOLERANCE = 1.0e-10
 TIMING_REPEATS = 5
 CENSUS_SLICE_COUNT = 1_341_435
 SEED_COHORTS = {
-    "tight_neighbour": (1.0e-5, 1.0e-4),
-    "mid_neighbour": (1.0e-4, 5.0e-4),
-    "wide_neighbour": (5.0e-4, 1.0e-3),
+    "nearest_neighbour": (1.0e-6, 1.0e-5),
+    "close_neighbour": (1.0e-5, 5.0e-5),
+    "outer_qualified_neighbour": (5.0e-5, 1.0e-4),
 }
 
 
@@ -845,6 +845,42 @@ def _run(output: Path) -> dict[str, Any]:
             "timing_exclusion": (
                 "neither the empty unconditioned identity nor the collapsing "
                 "conditioned trajectory appears in any timed input"
+            ),
+        },
+        "seed_range_preflight": {
+            "source_slurm_job": 1254602,
+            "status": "nonconverged_ranges_excluded_from_cost_distribution",
+            "qualified_range_relative_to_branch_flux_span": [1.0e-6, 1.0e-4],
+            "excluded_ranges": [
+                {
+                    "range_relative_to_branch_flux_span": [1.0e-4, 5.0e-4],
+                    "limited_converged_per_invocation": {
+                        "batch_width_4": "1/4",
+                        "batch_width_16": "1/16",
+                    },
+                    "diverted_converged_per_invocation": {
+                        "batch_width_4": "4/4",
+                        "batch_width_16": "16/16",
+                    },
+                    "maximum_terminal_relative_residual": 4.561941905915858e-4,
+                },
+                {
+                    "range_relative_to_branch_flux_span": [5.0e-4, 1.0e-3],
+                    "limited_converged_per_invocation": {
+                        "batch_width_4": "0/4",
+                        "batch_width_16": "0/16",
+                    },
+                    "diverted_converged_per_invocation": {
+                        "batch_width_4": "4/4",
+                        "batch_width_16": "16/16",
+                    },
+                    "maximum_terminal_relative_residual": 9.124068905329867e-4,
+                },
+            ],
+            "interpretation": (
+                "the two-promotion limited workload is seed-range sensitive; "
+                "nonconverged slices are retained here and their timings are not "
+                "used as converged-solve cost evidence"
             ),
         },
         "measurements": rows,

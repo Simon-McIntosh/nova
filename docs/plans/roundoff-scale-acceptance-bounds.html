@@ -26,7 +26,7 @@
 <meta name="plan-commits" content="f1ae4f46,2da77ed9">
 <meta name="plan-artifacts" content="benchmarks/bound_reference_classification.py,nova/equilibrium/observable_acceptance.py,docs/figures/roundoff-scale-acceptance-bounds/bound-classification.json,docs/figures/roundoff-scale-acceptance-bounds/corrected-criteria.json">
 <meta name="plan-impl" content="0.667">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 </head>
 <body>
   <main class="plan-doc">
@@ -182,10 +182,57 @@
     <p><strong>The unexplained fact is the interesting one.</strong> The observable sits roughly six
     orders <em>below</em> its own derived truncation floor. A second-order transfer from the reference
     stencil predicts an error the production computation beats by a factor of a million, which means the
-    transfer is measuring something other than this observable — plausibly because the acceptance
-    quantity is a masked extremum over a region rather than a raw per-node derivative error, so
-    cancellation across the region does far better than the pointwise bound. Until that is settled, no
-    absolute floor for this observable can be trusted, tight or loose.</p>
+    transfer is measuring something other than this observable. Until that is settled, no absolute floor
+    for this observable can be trusted, tight or loose.</p>
+
+    <p><strong>EXPLAINED 2026-08-25 by node <code>divergence-floor-attribution</code></strong>, commit
+    <code>a59932ae</code>, gate PASSED. The guess recorded here — that the acceptance quantity is a
+    masked extremum over a region, so cancellation across the region beats the pointwise bound — was
+    <strong>wrong</strong>, and the real mechanism is sharper. The terminal route is
+    <code>ForwardProfile._receipt</code> into <code>conservation_ledger(self.lattice, …)</code>, where
+    the lattice is a <code>FluxLattice</code> whose central radial and vertical differences
+    <strong>commute</strong>. So <code>divergence_j</code> is not an approximation carrying truncation
+    error at all — it is a <strong>discrete identity</strong>, and what is left of it is a
+    floating-point cancellation floor. The 9.042e&minus;4 figure had transferred 7.316e&minus;5 from a
+    <em>separate, non-commuting</em> <code>StencilMesh</code> test route, which is why the arithmetic was
+    right while the bound was inapplicable: it bounded a different operator.</p>
+
+    <p><strong>The scaling measurement settles it against the alternative.</strong> Across the four
+    required pitches the relative observable runs
+    1.485e&minus;15, 9.910e&minus;16, 4.762e&minus;16, 1.646e&minus;16 — it <em>grows as the mesh
+    refines</em>, which is the signature of cancellation rather than truncation. Fitted order is
+    <strong>&minus;1.7203</strong>, 95 % interval [&minus;2.6432, &minus;0.7973], which
+    <strong>excludes +2</strong> and brackets the &minus;1 to &minus;2 range a differenced roundoff
+    floor predicts.</p>
+
+    <table>
+      <caption>Measured relative <code>divergence_j</code> against grid pitch</caption>
+      <thead><tr><th scope="col">Pitch (m)</th><th scope="col">Relative observable</th></tr></thead>
+      <tbody>
+        <tr><td>0.0357143</td><td>1.4850810754087815e&minus;15</td></tr>
+        <tr><td>0.05</td><td>9.910098972398255e&minus;16</td></tr>
+        <tr><td>0.0833333</td><td>4.7622064756208e&minus;16</td></tr>
+        <tr><td>0.125</td><td>1.6459809994448845e&minus;16</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The replacement bound is failable, which is what §4 demanded.</strong> It is
+    <strong>sqrt(binary64 unit roundoff) = 1.0536712127723509e&minus;8</strong>, derived from precision
+    rather than fitted to the cohort and <em>selected before cohort inspection</em>. Failability is
+    demonstrated rather than argued: a plausible one-part-per-million radial-current component scale
+    mismatch at pitch 0.05 m drives the relative observable to <strong>7.568e&minus;8</strong>, failing
+    at <strong>7.18&times;</strong> the bound. The frozen cohort rescores <strong>69/69</strong> at
+    frozen widths 1 and 4, with 22.63&times; headroom over the largest observable magnitude
+    (4.657e&minus;10) and 72.41&times; over the largest acceptance difference (1.455e&minus;10). The
+    1.94-million-fold slack is replaced by a finite, discriminating scale. Full record:
+    <a href="/nova/evidence/archive/roundoff-scale-acceptance-bounds-landed#divergence-floor">divergence
+    floor landed</a>.</p>
+
+    <p><strong>Two things this leaves honest.</strong> 22.63&times; headroom is failable but not tight —
+    it would not catch a twentyfold degradation — and that is the accepted cost of a preregistered
+    precision-derived scale over a bound fitted to the cohort it scores. And the &minus;1.7203 order,
+    while decisively excluding +2, has an interval wide enough to admit both &minus;1 and &minus;2, so
+    the mechanism is established as cancellation without the differencing order being pinned.</p>
 
     <p><strong>Done when</strong> the six-order gap between the observable and its derived truncation
     floor is explained by measurement: the reference stencil quantity and the acceptance observable are
@@ -212,6 +259,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260825T0745-repair" data-who="reckon-ship" data-when="2026-08-25T07:45:00Z">
     <div class="r-comment-body">zero-reference-bound-repair landed - commit 2da77ed9, merged, gate PASSED, 12 tests. HALF A GENUINE FIX AND HALF AN UNFAILABLE BOUND, and only measuring the slack showed which was which. DIVERGENCE_B IS FIXED PROPERLY: it retains absolute bound 9.83631031098047e-16 and DROPS its relative criterion, which is a registration rule rather than a widened number, and the validation now rejects an absolute-plus-relative registration when has_nonzero_continuum_value is false. Its largest observed value is 6.106226635438361e-16, so the retained bound carries 1.61x headroom - tight enough to discriminate. DIVERGENCE_J IS DERIVED CORRECTLY AND LANDS SOMEWHERE USELESS. The transfer is internally consistent and honest: an independent stencil value of 7.315873469501451e-05 at pitch 0.035555555555555556 m carried at order 2 to the production conservative pitch 0.125 m gives 0.0009042140976404076, and the receipt records observations_used_only_after_registration_for_rescore true, so the old bound and observed values were quoted but not used to select it. BUT THE SLACK IS THE PROBLEM: that bound sits 1,941,785 times above the observable magnitude 4.656612873077393e-10 and 6,213,712 times above the observed acceptance difference 1.4551915228366852e-10, and it loosens the old bound 1.3703738919113413e-10 by a factor of 6,598,302. A bound that large cannot fail on any plausible computation. SO THE 69-OF-69 RESCORE AT BOTH WIDTHS IS NOT EVIDENCE THAT ACCEPTANCE IS MEANINGFUL. It is evidence that one bound became tight and correct and one became unfailable. The node is not at fault - the done-when I wrote asked for a derived floor and never asked whether the floor discriminates. Section 4 now carries the dual rule that was missing: a criterion must be FAILABLE by something as well as passable by something. AND THE UNEXPLAINED FACT IS THE INTERESTING ONE: the observable sits about six orders BELOW its own derived truncation floor, so a second-order transfer from the reference stencil predicts an error the production computation beats by a million. That means the transfer is measuring something other than this observable - plausibly because the acceptance quantity is a masked extremum over a region rather than a raw per-node derivative error, so cancellation across the region does far better than a pointwise bound. Until that is settled no absolute floor for this observable can be trusted, tight or loose, and section 4 requires the gap explained before any floor is accepted.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260825T080302349716-divergence-floor-attribution" data-who="bound-classify" data-when="2026-08-25T08:27:47Z">
+    <div class="r-comment-body"><p>The production observable route commutes, so divergence_j is a discrete identity at a cancellation floor rather than a truncation signal. Measured order over four pitches is -1.7203, CI [-2.6432, -0.7973], excluding +2. The old 9.042e-4 floor had been transferred from a non-commuting mesh route and is inapplicable. Replacement is sqrt(unit roundoff) = 1.0537e-8, preregistered before cohort inspection, proven failable by a one-ppm radial-current scale mismatch reaching 7.568e-8 at 7.18x the bound. Cohort rescores 69/69 with 22.63x headroom, replacing 1.94-million-fold slack.</p></div>
 </div>
 </section>
 </main>

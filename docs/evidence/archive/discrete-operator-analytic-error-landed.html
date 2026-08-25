@@ -156,6 +156,51 @@
     quoted as a contraction measurement. All cross-arm terminal comparisons additionally cross two
     different iterations, per the artifact's own qualification.</p>
 
+    <h2 id="contraction-discriminator">Conditioning separates the pair, and the map is expanding in both</h2>
+
+    <p><strong>Node <code>contraction-discriminator</code>, commit <code>497b0372</code>, gate PASSED,
+    2026-08-25.</strong> Artifact
+    <code>docs/figures/discrete-operator-analytic-error/contraction-discriminator.json</code>. Both
+    banked terminals reproduced as a precondition: 21978/35 to a maximum absolute delta of
+    4.892e&minus;16, 22086/43 to 3.136e&minus;16.</p>
+
+    <table>
+      <caption>Candidate discriminators across the unpenalised pair</caption>
+      <thead>
+        <tr><th scope="col">Quantity</th><th scope="col">21978/35 cycles</th>
+        <th scope="col">22086/43 converges</th><th scope="col">Verdict</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Projected condition of I &minus; J, terminal</td><td><strong>36.785</strong></td><td><strong>21.040</strong></td><td>Separates, 1.748&times;</td></tr>
+        <tr><td>Projected condition of I &minus; J, seed</td><td>17.842</td><td>14.988</td><td>Separates, same direction</td></tr>
+        <tr><td>Spectral radius of the fixed-point map, seed</td><td>1.1323</td><td>1.1310</td><td>Does not separate</td></tr>
+        <tr><td>Spectral radius of the fixed-point map, terminal</td><td>1.0556</td><td>1.0934</td><td>Does not separate, reverses</td></tr>
+        <tr><td>Gauge-aligned seed-to-terminal RMS travel</td><td>0.006966</td><td>0.005525</td><td>Separates weakly</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Positive result.</strong> The terminal projected condition of the Newton residual
+    Jacobian I &minus; J separates the pair in the intuitive direction: the reference that fails to
+    converge is the more ill-conditioned, at both seed and terminal.</p>
+
+    <p><strong>The load-bearing negative result.</strong> The fixed-point map's spectral radius exceeds
+    one at <em>both</em> references and is larger at the converged one at terminal, so the map is
+    locally expanding in both neighbourhoods. The fitted &rho; of 0.9613&ndash;0.9835 recorded above is
+    therefore a property of the <em>Newton promotion policy's</em> residual sequence, not of the flux
+    map's local spectrum — the promotion policy contracts slowly while the map beneath it expands, and
+    the comparison against imas-efit's 0.33 compares promotion policies.</p>
+
+    <p><strong>The alternation is not an orbit of the map.</strong> Alternating states repeat by parity
+    to 6.214e&minus;10 and differ across parity by 9.983e&minus;3, yet replaying the fixed-point map on
+    each misses its partner by 7.711e&minus;3 and 7.327e&minus;3 against a 5e&minus;12 identity
+    tolerance. Nor is it step control: both final promotions accepted a complete undamped Newton action
+    at factor 1.0, effective fraction 1.0, topology penalty 0.0. The alternation belongs to the
+    promotion policy.</p>
+
+    <p><strong>Stated limit.</strong> A 1.748&times; conditioning separation is modest against the gap
+    it is asked to explain, and both references are well conditioned in absolute terms at roughly 21 and
+    37. Conditioning is established as the discriminating direction, not as a sufficient cause.</p>
+
   </main>
 </body>
 </html>

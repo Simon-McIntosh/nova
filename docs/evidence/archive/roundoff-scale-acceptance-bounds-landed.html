@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="roundoff-scale-acceptance-bounds-landed">
+  <meta name="plan-evidence-for" content="roundoff-scale-acceptance-bounds">
+  <meta name="plan-title" content="Roundoff-Scale Acceptance Bounds — execution record">
+  <meta name="plan-summary" content="Cumulative execution evidence: why the current-divergence observable sat six orders below its derived floor, and the failable bound that replaced it.">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Roundoff-Scale Acceptance Bounds — execution record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h1>Roundoff-Scale Acceptance Bounds — execution record</h1>
+
+    <p>Execution evidence for
+    <a href="/nova/roundoff-scale-acceptance-bounds">roundoff-scale-acceptance-bounds</a>. One anchor
+    per material result, updated as each node lands.</p>
+
+    <h2 id="divergence-floor">§4 — the observable is a discrete identity, not a truncation signal</h2>
+
+    <p><strong>Node <code>divergence-floor-attribution</code>, commit <code>a59932ae</code>, gate
+    PASSED, 2026-08-25.</strong> Artifacts
+    <code>docs/figures/roundoff-scale-acceptance-bounds/divergence-floor-scaling.json</code>,
+    <code>divergence-floor-scaling.png</code> and <code>corrected-criteria.json</code>.</p>
+
+    <p><strong>The mechanism.</strong> The terminal route is <code>ForwardProfile._receipt</code> into
+    <code>conservation_ledger(self.lattice, …)</code>, where the lattice is a <code>FluxLattice</code>
+    whose central radial and vertical differences <strong>commute</strong>. <code>divergence_j</code> is
+    therefore a <strong>discrete identity</strong> rather than an approximation, and what remains of it
+    is a floating-point cancellation floor. The rejected 9.042e&minus;4 bound had transferred
+    7.316e&minus;5 from a separate <em>non-commuting</em> <code>StencilMesh</code> route: the arithmetic
+    was correct and the operator was the wrong one.</p>
+
+    <p>A hypothesis recorded in the plan — that the acceptance quantity is a masked extremum whose
+    regional cancellation beats a pointwise bound — was <strong>wrong</strong> and is retained here
+    because it was the plausible reading before measurement.</p>
+
+    <table>
+      <caption>Measured relative <code>divergence_j</code> against grid pitch</caption>
+      <thead><tr><th scope="col">Pitch (m)</th><th scope="col">Relative observable</th></tr></thead>
+      <tbody>
+        <tr><td>0.0357143</td><td>1.4850810754087815e&minus;15</td></tr>
+        <tr><td>0.05</td><td>9.910098972398255e&minus;16</td></tr>
+        <tr><td>0.0833333</td><td>4.7622064756208e&minus;16</td></tr>
+        <tr><td>0.125</td><td>1.6459809994448845e&minus;16</td></tr>
+      </tbody>
+    </table>
+
+    <p>The observable <em>grows as the mesh refines</em>, which is the cancellation signature and not
+    the truncation one. Fitted order <strong>&minus;1.7203</strong>, 95 % interval
+    [&minus;2.6432, &minus;0.7973] — <strong>excluding +2</strong>, and bracketing the &minus;1 to
+    &minus;2 range a differenced roundoff floor predicts.</p>
+
+    <h3 id="failable-bound">The replacement bound, and its failability witness</h3>
+
+    <table>
+      <caption>Old and replacement absolute envelopes for <code>divergence_j</code></caption>
+      <thead>
+        <tr><th scope="col">Bound</th><th scope="col">Value</th><th scope="col">Largest observed</th>
+        <th scope="col">Headroom</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Derived truncation floor, withdrawn</td><td>9.042140976404076e&minus;4</td><td>4.657e&minus;10</td><td>1,941,785&times; — unfailable</td></tr>
+        <tr><td><strong>sqrt(binary64 unit roundoff)</strong></td><td><strong>1.0536712127723509e&minus;8</strong></td><td>4.656612873077393e&minus;10</td><td>22.63&times;</td></tr>
+        <tr><td>Same bound, against acceptance difference</td><td>1.0536712127723509e&minus;8</td><td>1.4551915228366852e&minus;10</td><td>72.41&times;</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Failability is demonstrated, not argued.</strong> A plausible one-part-per-million
+    radial-current component scale mismatch at pitch 0.05 m drives the relative observable to
+    <strong>7.568e&minus;8</strong>, failing the bound at <strong>7.18&times;</strong>. The bound was
+    derived from machine precision and <em>selected before cohort inspection</em>, so the 69/69 rescore
+    at frozen widths 1 and 4 is a result rather than a construction.</p>
+
+    <p><strong>Stated limits.</strong> 22.63&times; headroom is failable but not tight — it would not
+    catch a twentyfold degradation — which is the accepted cost of a preregistered precision-derived
+    scale over one fitted to the cohort it scores. And the &minus;1.7203 interval, while excluding +2
+    decisively, admits both &minus;1 and &minus;2, so cancellation is established as the mechanism
+    without the differencing order being pinned.</p>
+
+  </main>
+</body>
+</html>

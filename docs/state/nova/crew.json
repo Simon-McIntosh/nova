@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T09:43:56",
+  "updated": "2026-08-25T10:31:07",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -43,8 +43,12 @@
         "id": "basin-probe",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "created": "2026-08-25"
+        "session_id": "01a037ef-c2e3-7730-8209-94d61cc0b07c",
+        "created": "2026-08-25",
+        "sessions": {
+          "gpt-5.6-sol": "01a037ef-c2e3-7730-8209-94d61cc0b07c"
+        },
+        "session_model": "gpt-5.6-sol"
       },
       {
         "id": "basin-scout",
@@ -78,8 +82,12 @@
         "id": "bound-classify",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "created": "2026-08-25"
+        "session_id": "01a037f1-ddb2-79d1-a3e8-b7cee5faa6fb",
+        "created": "2026-08-25",
+        "sessions": {
+          "gpt-5.6-sol": "01a037f1-ddb2-79d1-a3e8-b7cee5faa6fb"
+        },
+        "session_model": "gpt-5.6-sol"
       },
       {
         "id": "bound-repair",
@@ -1190,8 +1198,12 @@
         "id": "xpoint-map",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "created": "2026-08-25"
+        "session_id": "01a037ef-13e9-76a1-a117-d5aa565eb4b7",
+        "created": "2026-08-25",
+        "sessions": {
+          "gpt-5.6-sol": "01a037ef-13e9-76a1-a117-d5aa565eb4b7"
+        },
+        "session_model": "gpt-5.6-sol"
       }
     ],
     "runs": [
@@ -33516,9 +33528,197 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T080043720566-contraction-discriminator",
+        "plan": "discrete-operator-analytic-error",
+        "section": "\u00a75",
+        "node": "contraction-discriminator",
+        "node_definition": {
+          "done_when": "A banked artifact under docs/figures/ names at least one quantity separating the two references, measured on BOTH, with the direction stated and its value quoted for each. Test and report explicitly on these candidates even where they fail to separate - the Jacobian or Krylov conditioning at the seed and at the terminal, the seed-to-terminal distance under a common gauge, the local spectral radius of the fixed-point map, and whether the 2-cycle is a genuine period-2 orbit of the map, verified by re-applying the map to each alternating state and checking it returns the other to the residual floor, rather than a line-search or step-control artifact. A negative result naming what does NOT separate them is an acceptable landing provided the period-2 question is answered either way. Reproduce both banked terminals first and report that reproduction as a precondition.",
+          "estimated_hours": 3.0,
+          "goal": "Identify the quantity that separates MAST 22086/43, where the production forward map converges quadratically to 3.584e-16 achieved-DIVERTED at fitted rho 0.078, from 21978/35, where the same map settles into a period-2 cycle alternating 1.076e-2 and 1.050e-2 to the last promotion, given that BOTH run under an identically-zero class penalty because their exact margin operand is absent. Both residual sequences are already banked in docs/figures/dual-branch-selection/pinned-branch-contrast.json, so the deliverable is the discriminating quantity rather than a new solver arm.",
+          "id": "contraction-discriminator",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/contraction-discriminator.md",
+          "plan": "discrete-operator-analytic-error",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/contraction_discriminator.py",
+            "docs/figures/discrete-operator-analytic-error"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "basin-probe",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T08:00:54Z",
+        "completed_at": "2026-08-25T08:16:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 919,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 919,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "527eb94a2285e943fcebdced8728404deb9a8530",
+        "commits": [
+          "497b03724f2c08080ec0cd92b2a98c975f45d877"
+        ],
+        "changed_lines": {
+          "added": 971,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/contraction-discriminator.md",
+        "scope_changed": false,
+        "session_id": "01a037ef-c2e3-7730-8209-94d61cc0b07c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5650688,
+            "cached_input_tokens_cumulative": 5650688,
+            "input_tokens": 5804140,
+            "input_tokens_cumulative": 5804140,
+            "output_tokens": 24366,
+            "output_tokens_cumulative": 24366,
+            "reasoning_output_tokens": 5014,
+            "reasoning_output_tokens_cumulative": 5014
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T080302349716-divergence-floor-attribution",
+        "plan": "roundoff-scale-acceptance-bounds",
+        "section": "\u00a74",
+        "node": "divergence-floor-attribution",
+        "node_definition": {
+          "done_when": "A banked artifact measures how the divergence_j observable actually scales with grid pitch across at least four resolutions spanning the reference stencil pitch of 0.0356 m to the production pitch of 0.125 m, reporting the fitted order with its confidence interval. State plainly which the data supports - a second-order truncation signal, meaning the derived floor is right while the cohort is unusually favourable, or a pitch-independent floor, meaning the discrete divergence identity holds to roundoff by construction so a truncation transfer cannot bound it. Register a replacement bound. Prove it FAILABLE by exhibiting at least one concrete perturbation that exceeds it, quoting the perturbation with the value it produced. Re-score the existing cohort under the replacement, reporting the pass count with the largest observed slack, which must be a small multiple rather than a millionfold. Should no failable bound exist at this scale, say so explicitly, stating what a meaningful acceptance criterion for this observable would have to measure instead.",
+          "estimated_hours": 3.0,
+          "goal": "Replace the unfailable divergence_j acceptance bound with one that a plausible computation can exceed, selected from whatever mechanism explains why the observable sits roughly six orders below its own derived truncation floor. Largest observed is 4.657e-10 against a derived floor of 9.042e-4, a slack of 1.94 million. The arithmetic of the second-order transfer is not in question, so what is wanted is the mechanism that makes the transfer inapplicable to this observable.",
+          "id": "divergence-floor-attribution",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/divergence-floor-attribution.md",
+          "plan": "roundoff-scale-acceptance-bounds",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/observable_acceptance.py",
+            "nova/equilibrium/conservation.py",
+            "benchmarks/divergence_floor_scaling.py",
+            "docs/figures/roundoff-scale-acceptance-bounds"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "bound-classify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T08:03:12Z",
+        "completed_at": "2026-08-25T08:27:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1475,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1475,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "527eb94a2285e943fcebdced8728404deb9a8530",
+        "commits": [
+          "a59932ae5e269039f916b8d58565b5bcd88f994a"
+        ],
+        "changed_lines": {
+          "added": 705,
+          "removed": 96,
+          "files": 6
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/divergence-floor-attribution.md",
+        "scope_changed": false,
+        "session_id": "01a037f1-ddb2-79d1-a3e8-b7cee5faa6fb",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4574208,
+            "cached_input_tokens_cumulative": 4574208,
+            "input_tokens": 4860418,
+            "input_tokens_cumulative": 4860418,
+            "output_tokens": 30430,
+            "output_tokens_cumulative": 30430,
+            "reasoning_output_tokens": 10328,
+            "reasoning_output_tokens_cumulative": 10328
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 832
+    "_version": 837
   }
 }

@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="coil-geometry-inversion">
   <meta name="plan-title" content="Coil Geometry Inversion — solve coil positions and shapes from vacuum measurements by autodiff">
-  <meta name="plan-summary" content="The traced polygon Green&#x27;s kernel is verified autograd-able with respect to coil geometry (jacfwd against finite differences to 1e-6; values to 8e-12; second derivatives finite; jacrev consistent to 1e-12), so coil positions and shapes are solvable from vacuum measurements by gradient optimisation. Two problem classes: sensor-space (recorded currents fixed, optimise per-coil geometry against vacuum magnetics — the MAST case, seeded with Kirk&#x27;s measured as-built offsets) and flux-map-space (currents fixed, match a plasma-subtracted flux map). First stage: audit and refactor the remaining kernel classes (ring filament, arc, line, closed-form polygon) to the traced dual-namespace pattern with a traceable section pack.">
+  <meta name="plan-summary" content="Use autodiff-ready Green kernels to recover coil positions and shapes from vacuum measurements, after bringing every kernel behind one traced section contract.">
   <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">

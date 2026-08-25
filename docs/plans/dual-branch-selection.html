@@ -171,7 +171,7 @@
       plan forbids.</figcaption>
     </figure>
 
-    <h2 id="s4">§4 — The diverted arm: contraction measured, existence deferred</h2>
+    <h2 id="s4">§4 — The diverted arm: contraction measured, existence demonstrated</h2>
 
     <p>The paired contrast node runs the pinned portfolio and the mixed margin-penalty iteration on
     identical seeds over the six diverted references, records per-iterate residual sequences, and
@@ -180,20 +180,53 @@
     <code>991d5d6e</code>) and the finding is sharp: the pure diverted arm is <strong>weakly
     contracting but stalled</strong> — fitted ρ <strong>0.9503 to 0.9835</strong>, below one on all
     six references, residuals 4.6e-3 to 7.4e-3, converged 0/6 — an order of magnitude slower
-    contraction than the reference implementation's pure branches. The mixed arm expands on three
-    references (ρ up to 1.039) yet <strong>converged 22086/43 to 3.58e-16 achieved-DIVERTED</strong>
-    (ρ 0.078), the repository's first machine-precision diverted terminal, on the one reference
-    whose exact-margin operand is absent. That operand absence (+∞ margin on 2/6 references) is the
-    connectivity-localisation defect measured live on the production cohort. Batch-two jit and vmap
-    parity holds at 2.2e-16. A weak contraction is existence evidence, not an unreachable root —
-    why ρ sits at 0.95–0.98 rather than 0.33 stays with the basin probe. Full record:
+    contraction than the reference implementation's pure branches. The mixed arm <strong>converged 22086/43
+    to 3.58e-16 achieved-DIVERTED</strong> (ρ 0.078, topology consistent, p_diverted 1.0, quadratic:
+    1.243e-3 → 1.357e-4 → 1.730e-7 → 7.078e-14), the repository's first machine-precision diverted
+    terminal, on one of the two references whose exact-margin operand is absent. That operand absence
+    (+∞ margin on 2/6 references) is the connectivity-localisation defect measured live on the
+    production cohort. Batch-two jit and vmap parity holds at 2.2e-16. <strong>So existence is
+    demonstrated, not inferred from weak contraction</strong> — why ρ sits at 0.95–0.98 rather than
+    0.33 on the pure arm stays with the basin probe.</p>
+
+    <p><strong>Three refinements from re-reading the artifact, which the receipt summary does not
+    carry.</strong> First, <strong>the converged arm was unpenalised</strong>: 22086/43's margin is
+    absent, so <code>max(−margin, 0)</code> was identically zero at all twelve promotions and the
+    "mixed" arm there was an unsteered residual-ranked Newton. That strengthens existence — nothing
+    pushed the solve toward the diverted class — and means the run says nothing about whether margin
+    grading helps. Absence is not sufficient either: <strong>21978/35 ran at zero penalty too and
+    settled into a period-2 cycle</strong>, alternating 1.076e-2 / 1.050e-2 to the last promotion.
+    Second, <strong>21989/55 is characterised</strong>: it holds the only negative class margin
+    (−0.00340) and the only unsaturated observable (p_diverted <strong>0.41</strong> against 1.0 on
+    all five others), so it is not a diverted configuration at its own label and its defection in
+    both arms is the comparator reporting a boundary case rather than an anomaly. Third, a
+    <strong>measurement-quality correction to this section's own earlier claim</strong>: "expands on
+    three references (ρ up to 1.039)" is not supportable, because the mixed fits carry r² of 0.21,
+    0.00, 0.48, 0.08, 0.06 and 0.72 — three are unresolved noise and ρ 1.0386 sits at r² 0.08. Only
+    22086/43's mixed ratio is resolved. The pure column carries r² ≥ 0.99 on five of six and is the
+    measurement here. Full record:
     <a href="/nova/evidence/archive/dual-branch-selection-landed#s4-contrast">§4 contrast
     landed</a>.</p>
 
-    <p>Whether a discrete diverted root <em>exists</em> — multiplicity, contraction, or a criterion
-    satisfied in the wrong place — belongs to <code>discrete-operator-analytic-error</code> §4 and is
-    consumed here, not re-measured. The selection semantics decision below stays open until that
-    answer lands; every other section is executable now.</p>
+    <p><strong>The existence half of that dependency has now landed and is consumed here, not
+    re-measured.</strong> <code>discrete-operator-analytic-error</code> §5 records the same
+    22086/43 terminal with its mechanism — converged, topology consistent, and reached under an
+    inactive class penalty — so the published-label decision below is no longer gated on whether a
+    discrete diverted root exists. It does exist. What remains from that plan is the <em>rate</em>
+    question: why the pure map contracts at 0.95–0.98 rather than 0.33, and specifically why the
+    same map converges quadratically on 22086/43 yet cycles with period two on 21978/35 from
+    equivalent unpenalised starts. Those two references differ in no recorded quantity except shot
+    identity — both carry absent margins, saturated p_diverted, and qualifying pure arms — so that
+    pair is the cheapest available discriminator and needs no new runs.</p>
+
+    <p><strong>Consequence for the selection-observable decision, which its own gating receipt has
+    also now supplied.</strong> The exact <code>class_margin</code> is <em>undefined on two of six
+    production references</em>, while <code>p_diverted</code> is defined on all six and is
+    informative exactly where the margin is negative (0.41 against a margin of −0.00340 on
+    21989/55, saturated at 1.0 elsewhere). An observable that is absent on a third of the cohort
+    cannot carry selection; one that is defined everywhere and agrees in sign where both exist can.
+    That is evidence for explicit split roles rather than either observable alone, and it is
+    recorded here for the lead to lock rather than assumed by this section.</p>
 
     <h2 id="s5">§5 — The traced selection seam</h2>
 

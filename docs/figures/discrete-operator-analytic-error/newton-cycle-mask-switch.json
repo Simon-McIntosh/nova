@@ -1,0 +1,1660 @@
+{
+  "artifact": "discrete topology operands across a Newton period-two cycle",
+  "driver_sha256": "5ee1904b36aa6a088f004dfd8bf1ac96ce1a88a91dfb2c9ce41496726a90bac3",
+  "evidence_inputs": {
+    "banked_contrast": "docs/figures/dual-branch-selection/pinned-branch-contrast.json",
+    "banked_contrast_sha256": "e2a04316d317d52a3a5feabc71350dd2d81330c0f68fb864748a5d7f1e8c02b9",
+    "response_carrier": {
+      "carrier": {
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "frozen_reference_count": 6,
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "size_bytes": 645864,
+        "stored_circuit_count": 101,
+        "warm_load_seconds": 0.005271547473967075
+      },
+      "loaded_from_persisted_carrier": true,
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/topology-and-throughput/newton-cycle-mask-switch/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "direct_green_operator_builder_entries": 0,
+        "passes": true,
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.041044 direct_builders=0 verdict=PASS"
+      }
+    }
+  },
+  "measurement_contract": {
+    "control_reference": [
+      22086,
+      43
+    ],
+    "control_states": "last four promoted states",
+    "cycling_reference": [
+      21978,
+      35
+    ],
+    "cycling_states": "last two promoted states, one from each parity",
+    "mask_comparison": "cell-by-cell on the connectivity confined and flood-filled core masks and on every production domain mask",
+    "state_source": "retained states from one exact replay of the banked twelve-promotion unpenalised merit-ranked trajectory"
+  },
+  "references": [
+    {
+      "adjacent_final_promotion_comparisons": [
+        {
+          "all_discrete_selections_identical": true,
+          "all_masks_identical": false,
+          "any_discrete_residual_definition_switch": true,
+          "binding_level_absolute_difference": 0.004867513842087501,
+          "boundary_flux_absolute_difference_wb": 0.0016142240419570464,
+          "continuous_selected_operand_changes": {
+            "typed_saddle_maximum_absolute_change": 0.00392147584808944,
+            "wall_extremum_maximum_absolute_change": 0.0006247675470184219
+          },
+          "discrete_selections": {
+            "achieved_topology_class_changes": false,
+            "pinned_residual_topology_class_changes": false,
+            "private_flux_shadow_verdict_flips": false,
+            "selected_typed_saddle_index_changes": false,
+            "selected_typed_saddle_presence_changes": false,
+            "selected_wall_extremum_cluster_changes": false
+          },
+          "first_promotion_state_index": 11,
+          "mask_differences": {
+            "connectivity_confined": {
+              "differing_cell_count": 5,
+              "differing_cells": [
+                {
+                  "first": true,
+                  "height_m": -1.375,
+                  "radial_index": 6,
+                  "radius_m": 0.4237499989103526,
+                  "second": false,
+                  "vertical_index": 5
+                },
+                {
+                  "first": true,
+                  "height_m": -1.375,
+                  "radial_index": 8,
+                  "radius_m": 0.5449999989941716,
+                  "second": false,
+                  "vertical_index": 5
+                },
+                {
+                  "first": true,
+                  "height_m": -1.0,
+                  "radial_index": 7,
+                  "radius_m": 0.4843749989522621,
+                  "second": false,
+                  "vertical_index": 8
+                },
+                {
+                  "first": true,
+                  "height_m": -1.0,
+                  "radial_index": 12,
+                  "radius_m": 0.7874999991618097,
+                  "second": false,
+                  "vertical_index": 8
+                },
+                {
+                  "first": false,
+                  "height_m": 0.125,
+                  "radial_index": 22,
+                  "radius_m": 1.3937499995809048,
+                  "second": true,
+                  "vertical_index": 17
+                }
+              ],
+              "identical": false
+            },
+            "connectivity_core": {
+              "differing_cell_count": 3,
+              "differing_cells": [
+                {
+                  "first": true,
+                  "height_m": -1.0,
+                  "radial_index": 7,
+                  "radius_m": 0.4843749989522621,
+                  "second": false,
+                  "vertical_index": 8
+                },
+                {
+                  "first": true,
+                  "height_m": -1.0,
+                  "radial_index": 12,
+                  "radius_m": 0.7874999991618097,
+                  "second": false,
+                  "vertical_index": 8
+                },
+                {
+                  "first": false,
+                  "height_m": 0.125,
+                  "radial_index": 22,
+                  "radius_m": 1.3937499995809048,
+                  "second": true,
+                  "vertical_index": 17
+                }
+              ],
+              "identical": false
+            },
+            "production_common_sol": {
+              "differing_cell_count": 4,
+              "differing_cells": [
+                {
+                  "first": false,
+                  "height_m": -1.375,
+                  "radial_index": 6,
+                  "radius_m": 0.4237499989103526,
+                  "second": true,
+                  "vertical_index": 5
+                },
+                {
+                  "first": false,
+                  "height_m": -1.0,
+                  "radial_index": 7,
+                  "radius_m": 0.4843749989522621,
+                  "second": true,
+                  "vertical_index": 8
+                },
+                {
+                  "first": false,
+                  "height_m": -1.0,
+                  "radial_index": 12,
+                  "radius_m": 0.7874999991618097,
+                  "second": true,
+                  "vertical_index": 8
+                },
+                {
+                  "first": true,
+                  "height_m": 0.125,
+                  "radial_index": 22,
+                  "radius_m": 1.3937499995809048,
+                  "second": false,
+                  "vertical_index": 17
+                }
+              ],
+              "identical": false
+            },
+            "production_core": {
+              "differing_cell_count": 1,
+              "differing_cells": [
+                {
+                  "first": false,
+                  "height_m": 0.125,
+                  "radial_index": 22,
+                  "radius_m": 1.3937499995809048,
+                  "second": true,
+                  "vertical_index": 17
+                }
+              ],
+              "identical": false
+            },
+            "production_private_flux": {
+              "differing_cell_count": 3,
+              "differing_cells": [
+                {
+                  "first": true,
+                  "height_m": -1.375,
+                  "radial_index": 6,
+                  "radius_m": 0.4237499989103526,
+                  "second": false,
+                  "vertical_index": 5
+                },
+                {
+                  "first": true,
+                  "height_m": -1.0,
+                  "radial_index": 7,
+                  "radius_m": 0.4843749989522621,
+                  "second": false,
+                  "vertical_index": 8
+                },
+                {
+                  "first": true,
+                  "height_m": -1.0,
+                  "radial_index": 12,
+                  "radius_m": 0.7874999991618097,
+                  "second": false,
+                  "vertical_index": 8
+                }
+              ],
+              "identical": false
+            }
+          },
+          "second_promotion_state_index": 12,
+          "state_relative_sup_difference": 0.009983275125832303
+        }
+      ],
+      "banked_reproduction": {
+        "absolute_tolerance": 5e-12,
+        "banked_tail": [
+          0.010762710928760664,
+          0.010504359648235024,
+          0.010762710781425898,
+          0.010504359639162271
+        ],
+        "maximum_residual_absolute_difference": 4.527628272299467e-16,
+        "passes": true,
+        "replayed_tail": [
+          0.0107627109287606,
+          0.010504359648234906,
+          0.010762710781425947,
+          0.01050435963916254
+        ]
+      },
+      "final_state_repetition": {
+        "maximum_same_parity_relative_sup": 1.989717238107158e-08,
+        "opposite_parity_relative_sup": 0.009983275125832303,
+        "same_parity_relative_sup": [
+          6.214475299053969e-10,
+          1.989717238107158e-08
+        ]
+      },
+      "reference": {
+        "shot": 21978,
+        "slice_index": 35
+      },
+      "snapshots": [
+        {
+          "achieved_topology_class": "diverted",
+          "connectivity_boundary": {
+            "found": true,
+            "n_core_cells_reported": 245,
+            "private_flux_shadowed": true,
+            "psi_bnd_wb": -0.06615457343832587,
+            "s_flood": 0.43135889371236164,
+            "s_star": 0.43071622295799455,
+            "selected_typed_saddle_index": 2,
+            "selected_typed_saddle_present": true,
+            "selected_typed_saddle_r_z_psi_type": [
+              0.5732366065227957,
+              1.2600636823679607,
+              -0.06626107236310409,
+              0.0
+            ],
+            "selected_wall_cluster_index": 10,
+            "selected_wall_cluster_roll": 0,
+            "selected_wall_extremum_r_z_psi": [
+              0.5649306774139404,
+              1.7479083270768727,
+              0.025505011124601275
+            ],
+            "selected_x_normalized_flux": 0.430839888820031,
+            "typed_saddle_candidate_count": 5,
+            "wall_extremum_present": true,
+            "wall_normalized_flux_after_shadow": null,
+            "wall_normalized_flux_before_shadow": 0.3242817067177233
+          },
+          "emergent_domain_cell_counts": {
+            "common_sol": 405,
+            "core": 115,
+            "excluded_material": 405,
+            "private_flux": 164
+          },
+          "masks": {
+            "connectivity_confined": {
+              "sha256": "6520dc1736eb7239513a93759b564252fa39c1aa3a07518453f9390b4aaf045b",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.75,
+                  1.75
+                ],
+                "radial_index": [
+                  4,
+                  22
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3937499995809048
+                ],
+                "vertical_index": [
+                  2,
+                  30
+                ]
+              },
+              "true_cell_count": 279
+            },
+            "connectivity_core": {
+              "sha256": "8782a45aaad3618eb1e16f1e281f3cabc894b99758bec2f524451989503ce73e",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.0,
+                  1.125
+                ],
+                "radial_index": [
+                  4,
+                  22
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3937499995809048
+                ],
+                "vertical_index": [
+                  8,
+                  25
+                ]
+              },
+              "true_cell_count": 245
+            },
+            "production_common_sol": {
+              "sha256": "3f4d6ecdf6e750eee9ebc23f15f4fa7a8f0f455c21c80c0ca0211d33e3c20f3f",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.75,
+                  1.75
+                ],
+                "radial_index": [
+                  3,
+                  30
+                ],
+                "radius_m": [
+                  0.24187499878462404,
+                  1.878749999916181
+                ],
+                "vertical_index": [
+                  2,
+                  30
+                ]
+              },
+              "true_cell_count": 405
+            },
+            "production_core": {
+              "sha256": "4de02a9bfc8774426f4483fe28c4e041b11dffbdb846a1281855efdd5c5b2722",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  0.0,
+                  0.75
+                ],
+                "radial_index": [
+                  4,
+                  22
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3937499995809048
+                ],
+                "vertical_index": [
+                  16,
+                  22
+                ]
+              },
+              "true_cell_count": 115
+            },
+            "production_private_flux": {
+              "sha256": "f3c4b0e2e8388febd09295d2bcfc5914e5ff083d42fcb836327878253eddcfe4",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.75,
+                  1.75
+                ],
+                "radial_index": [
+                  4,
+                  21
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3331249995389953
+                ],
+                "vertical_index": [
+                  2,
+                  30
+                ]
+              },
+              "true_cell_count": 164
+            }
+          },
+          "pinned_residual_topology_class": "diverted",
+          "production_boundary": {
+            "emergent_axis_flux_wb": 0.3070775515273862,
+            "emergent_axis_r_z": [
+              0.9072287571850816,
+              0.06592400943606501
+            ],
+            "emergent_boundary_flux_wb": -0.06626107236310409,
+            "emergent_boundary_r_z": [
+              0.5732366065227957,
+              1.2600636823679607
+            ],
+            "emergent_wall_point_flux_wb": 0.025505011124601275,
+            "emergent_wall_point_r_z": [
+              0.5649306774139404,
+              1.7479083270768727
+            ],
+            "emergent_x_point_flux_wb": -0.06626107236310409,
+            "emergent_x_point_r_z": [
+              0.5732366065227957,
+              1.2600636823679607
+            ],
+            "pinned_boundary_flux_wb": -0.06626107236310409,
+            "pinned_boundary_r_z": [
+              0.5732366065227957,
+              1.2600636823679607
+            ]
+          },
+          "promotion_state_index": 11,
+          "state_sha256": "7f720c1e4e4c7fb1047bd5a3f5972fd874bcfa8c011797905c3151585f286c9c"
+        },
+        {
+          "achieved_topology_class": "diverted",
+          "connectivity_boundary": {
+            "found": true,
+            "n_core_cells_reported": 244,
+            "private_flux_shadowed": true,
+            "psi_bnd_wb": -0.06454034939636882,
+            "s_flood": 0.43606559435526526,
+            "s_star": 0.43558373680008206,
+            "selected_typed_saddle_index": 2,
+            "selected_typed_saddle_present": true,
+            "selected_typed_saddle_r_z_psi_type": [
+              0.5746975883277561,
+              1.2639851582160502,
+              -0.06472970545236592,
+              0.0
+            ],
+            "selected_wall_cluster_index": 10,
+            "selected_wall_cluster_roll": 0,
+            "selected_wall_extremum_r_z_psi": [
+              0.5649306774139404,
+              1.7474846342976995,
+              0.026129778671619697
+            ],
+            "selected_x_normalized_flux": 0.43580205514567516,
+            "typed_saddle_candidate_count": 5,
+            "wall_extremum_present": true,
+            "wall_normalized_flux_after_shadow": null,
+            "wall_normalized_flux_before_shadow": 0.3310454781725452
+          },
+          "emergent_domain_cell_counts": {
+            "common_sol": 407,
+            "core": 116,
+            "excluded_material": 405,
+            "private_flux": 161
+          },
+          "masks": {
+            "connectivity_confined": {
+              "sha256": "0bcb8885b922f4a0950527d08bd95860d7ecd5992b2b97ced1eb8bcb9bf28490",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.75,
+                  1.75
+                ],
+                "radial_index": [
+                  4,
+                  22
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3937499995809048
+                ],
+                "vertical_index": [
+                  2,
+                  30
+                ]
+              },
+              "true_cell_count": 276
+            },
+            "connectivity_core": {
+              "sha256": "6108b81a8f652071c27ebb620e7668e4726712b5c0c40684fead61d07cd6b121",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.0,
+                  1.125
+                ],
+                "radial_index": [
+                  4,
+                  22
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3937499995809048
+                ],
+                "vertical_index": [
+                  8,
+                  25
+                ]
+              },
+              "true_cell_count": 244
+            },
+            "production_common_sol": {
+              "sha256": "fd8501e610a66b30cc5c733211196131477b739c2bc4dfd12cc8ade0ebbb9217",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.75,
+                  1.75
+                ],
+                "radial_index": [
+                  3,
+                  30
+                ],
+                "radius_m": [
+                  0.24187499878462404,
+                  1.878749999916181
+                ],
+                "vertical_index": [
+                  2,
+                  30
+                ]
+              },
+              "true_cell_count": 407
+            },
+            "production_core": {
+              "sha256": "31dbb9c2a6ec3e9ac69b032f38fc4c4d26a0a240f76623b555a6d351821d0a58",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  0.0,
+                  0.75
+                ],
+                "radial_index": [
+                  4,
+                  22
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3937499995809048
+                ],
+                "vertical_index": [
+                  16,
+                  22
+                ]
+              },
+              "true_cell_count": 116
+            },
+            "production_private_flux": {
+              "sha256": "6bed2850d0cf809013bdbf9f6f944e54266e3d429e26e735e41db7bd2bfeb960",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.75,
+                  1.75
+                ],
+                "radial_index": [
+                  4,
+                  21
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3331249995389953
+                ],
+                "vertical_index": [
+                  2,
+                  30
+                ]
+              },
+              "true_cell_count": 161
+            }
+          },
+          "pinned_residual_topology_class": "diverted",
+          "production_boundary": {
+            "emergent_axis_flux_wb": 0.31493054575572577,
+            "emergent_axis_r_z": [
+              0.9039844285928292,
+              0.029556175065941808
+            ],
+            "emergent_boundary_flux_wb": -0.06472970545236592,
+            "emergent_boundary_r_z": [
+              0.5746975883277561,
+              1.2639851582160502
+            ],
+            "emergent_wall_point_flux_wb": 0.026129778671619697,
+            "emergent_wall_point_r_z": [
+              0.5649306774139404,
+              1.7474846342976995
+            ],
+            "emergent_x_point_flux_wb": -0.06472970545236592,
+            "emergent_x_point_r_z": [
+              0.5746975883277561,
+              1.2639851582160502
+            ],
+            "pinned_boundary_flux_wb": -0.06472970545236592,
+            "pinned_boundary_r_z": [
+              0.5746975883277561,
+              1.2639851582160502
+            ]
+          },
+          "promotion_state_index": 12,
+          "state_sha256": "e66e2be064c29fe16db14faf326b0c07b7df556e5d78d7024c249db0841d143a"
+        }
+      ]
+    },
+    {
+      "adjacent_final_promotion_comparisons": [
+        {
+          "all_discrete_selections_identical": true,
+          "all_masks_identical": true,
+          "any_discrete_residual_definition_switch": false,
+          "binding_level_absolute_difference": 1.1102230246251565e-15,
+          "boundary_flux_absolute_difference_wb": 1.1102230246251565e-15,
+          "continuous_selected_operand_changes": {
+            "typed_saddle_maximum_absolute_change": 2.6645352591003757e-15,
+            "wall_extremum_maximum_absolute_change": 3.2612801348363973e-16
+          },
+          "discrete_selections": {
+            "achieved_topology_class_changes": false,
+            "pinned_residual_topology_class_changes": false,
+            "private_flux_shadow_verdict_flips": false,
+            "selected_typed_saddle_index_changes": false,
+            "selected_typed_saddle_presence_changes": false,
+            "selected_wall_extremum_cluster_changes": false
+          },
+          "first_promotion_state_index": 9,
+          "mask_differences": {
+            "connectivity_confined": {
+              "differing_cell_count": 0,
+              "differing_cells": [],
+              "identical": true
+            },
+            "connectivity_core": {
+              "differing_cell_count": 0,
+              "differing_cells": [],
+              "identical": true
+            },
+            "production_common_sol": {
+              "differing_cell_count": 0,
+              "differing_cells": [],
+              "identical": true
+            },
+            "production_core": {
+              "differing_cell_count": 0,
+              "differing_cells": [],
+              "identical": true
+            },
+            "production_private_flux": {
+              "differing_cell_count": 0,
+              "differing_cells": [],
+              "identical": true
+            }
+          },
+          "second_promotion_state_index": 10,
+          "state_relative_sup_difference": 2.575883537405124e-15
+        },
+        {
+          "all_discrete_selections_identical": true,
+          "all_masks_identical": true,
+          "any_discrete_residual_definition_switch": false,
+          "binding_level_absolute_difference": 4.440892098500626e-16,
+          "boundary_flux_absolute_difference_wb": 6.106226635438361e-16,
+          "continuous_selected_operand_changes": {
+            "typed_saddle_maximum_absolute_change": 1.5543122344752192e-15,
+            "wall_extremum_maximum_absolute_change": 1.8735013540549517e-16
+          },
+          "discrete_selections": {
+            "achieved_topology_class_changes": false,
+            "pinned_residual_topology_class_changes": false,
+            "private_flux_shadow_verdict_flips": false,
+            "selected_typed_saddle_index_changes": false,
+            "selected_typed_saddle_presence_changes": false,
+            "selected_wall_extremum_cluster_changes": false
+          },
+          "first_promotion_state_index": 10,
+          "mask_differences": {
+            "connectivity_confined": {
+              "differing_cell_count": 0,
+              "differing_cells": [],
+              "identical": true
+            },
+            "connectivity_core": {
+              "differing_cell_count": 0,
+              "differing_cells": [],
+              "identical": true
+            },
+            "production_common_sol": {
+              "differing_cell_count": 0,
+              "differing_cells": [],
+              "identical": true
+            },
+            "production_core": {
+              "differing_cell_count": 0,
+              "differing_cells": [],
+              "identical": true
+            },
+            "production_private_flux": {
+              "differing_cell_count": 0,
+              "differing_cells": [],
+              "identical": true
+            }
+          },
+          "second_promotion_state_index": 11,
+          "state_relative_sup_difference": 1.5651292363146357e-15
+        },
+        {
+          "all_discrete_selections_identical": true,
+          "all_masks_identical": true,
+          "any_discrete_residual_definition_switch": false,
+          "binding_level_absolute_difference": 5.551115123125783e-17,
+          "boundary_flux_absolute_difference_wb": 0.0,
+          "continuous_selected_operand_changes": {
+            "typed_saddle_maximum_absolute_change": 3.3306690738754696e-16,
+            "wall_extremum_maximum_absolute_change": 1.0408340855860843e-17
+          },
+          "discrete_selections": {
+            "achieved_topology_class_changes": false,
+            "pinned_residual_topology_class_changes": false,
+            "private_flux_shadow_verdict_flips": false,
+            "selected_typed_saddle_index_changes": false,
+            "selected_typed_saddle_presence_changes": false,
+            "selected_wall_extremum_cluster_changes": false
+          },
+          "first_promotion_state_index": 11,
+          "mask_differences": {
+            "connectivity_confined": {
+              "differing_cell_count": 0,
+              "differing_cells": [],
+              "identical": true
+            },
+            "connectivity_core": {
+              "differing_cell_count": 0,
+              "differing_cells": [],
+              "identical": true
+            },
+            "production_common_sol": {
+              "differing_cell_count": 0,
+              "differing_cells": [],
+              "identical": true
+            },
+            "production_core": {
+              "differing_cell_count": 0,
+              "differing_cells": [],
+              "identical": true
+            },
+            "production_private_flux": {
+              "differing_cell_count": 0,
+              "differing_cells": [],
+              "identical": true
+            }
+          },
+          "second_promotion_state_index": 12,
+          "state_relative_sup_difference": 2.2398987281783703e-16
+        }
+      ],
+      "banked_reproduction": {
+        "absolute_tolerance": 5e-12,
+        "banked_tail": [
+          7.335668334784153e-16,
+          3.3598480922675544e-16,
+          3.359848092267555e-16,
+          3.583837965085392e-16
+        ],
+        "maximum_residual_absolute_difference": 3.3602135830756996e-16,
+        "passes": true,
+        "replayed_tail": [
+          5.151767074810246e-16,
+          3.807827837903228e-16,
+          1.7919189825426964e-16,
+          1.7919189825426964e-16
+        ]
+      },
+      "final_state_repetition": {
+        "maximum_same_parity_relative_sup": 4.1410127737197585e-15,
+        "opposite_parity_relative_sup": 2.2398987281783703e-16,
+        "same_parity_relative_sup": [
+          1.3775377178296972e-15,
+          4.1410127737197585e-15
+        ]
+      },
+      "reference": {
+        "shot": 22086,
+        "slice_index": 43
+      },
+      "snapshots": [
+        {
+          "achieved_topology_class": "diverted",
+          "connectivity_boundary": {
+            "found": true,
+            "n_core_cells_reported": 234,
+            "private_flux_shadowed": true,
+            "psi_bnd_wb": -0.12241064376718763,
+            "s_flood": 0.4310057957967122,
+            "s_star": 0.4308519954330046,
+            "selected_typed_saddle_index": 2,
+            "selected_typed_saddle_present": true,
+            "selected_typed_saddle_r_z_psi_type": [
+              0.5870751527016039,
+              1.222555306431039,
+              -0.12254674397700109,
+              0.0
+            ],
+            "selected_wall_cluster_index": 10,
+            "selected_wall_cluster_roll": 0,
+            "selected_wall_extremum_r_z_psi": [
+              0.5649306774139404,
+              1.7561375574778992,
+              0.01772158580283783
+            ],
+            "selected_x_normalized_flux": 0.4309790002082097,
+            "typed_saddle_candidate_count": 5,
+            "wall_extremum_present": true,
+            "wall_normalized_flux_after_shadow": null,
+            "wall_normalized_flux_before_shadow": 0.30008465613263835
+          },
+          "emergent_domain_cell_counts": {
+            "common_sol": 408,
+            "core": 95,
+            "excluded_material": 405,
+            "private_flux": 181
+          },
+          "masks": {
+            "connectivity_confined": {
+              "sha256": "d2c4024ae254a2724c2c7b16e6458a7618457001360bcda92fe53d14ef83821e",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.75,
+                  1.75
+                ],
+                "radial_index": [
+                  4,
+                  22
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3937499995809048
+                ],
+                "vertical_index": [
+                  2,
+                  30
+                ]
+              },
+              "true_cell_count": 276
+            },
+            "connectivity_core": {
+              "sha256": "e19b6364910cfeb58759b085e7bc904a320bb75dcc71a3b2b26f30570f9d8635",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.0,
+                  1.125
+                ],
+                "radial_index": [
+                  4,
+                  22
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3937499995809048
+                ],
+                "vertical_index": [
+                  8,
+                  25
+                ]
+              },
+              "true_cell_count": 234
+            },
+            "production_common_sol": {
+              "sha256": "1aaf8568ed896df3d8d1551bfe96797f49ff765afd0fc66daa3b9e25859bdd82",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.75,
+                  1.75
+                ],
+                "radial_index": [
+                  3,
+                  30
+                ],
+                "radius_m": [
+                  0.24187499878462404,
+                  1.878749999916181
+                ],
+                "vertical_index": [
+                  2,
+                  30
+                ]
+              },
+              "true_cell_count": 408
+            },
+            "production_core": {
+              "sha256": "72cc3c17b670027d8d841bddf27eec12a6a0a19e193744747431b88f99f86c30",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  0.125,
+                  0.75
+                ],
+                "radial_index": [
+                  4,
+                  21
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3331249995389953
+                ],
+                "vertical_index": [
+                  17,
+                  22
+                ]
+              },
+              "true_cell_count": 95
+            },
+            "production_private_flux": {
+              "sha256": "815eb6667da07105fc5dfc335b754b23e81a7ee19046ae29317a295663564a9b",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.75,
+                  1.75
+                ],
+                "radial_index": [
+                  4,
+                  22
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3937499995809048
+                ],
+                "vertical_index": [
+                  2,
+                  30
+                ]
+              },
+              "true_cell_count": 181
+            }
+          },
+          "pinned_residual_topology_class": "diverted",
+          "production_boundary": {
+            "emergent_axis_flux_wb": 0.34160791047499883,
+            "emergent_axis_r_z": [
+              0.9015370805669831,
+              0.0253140039167208
+            ],
+            "emergent_boundary_flux_wb": -0.12254674397700109,
+            "emergent_boundary_r_z": [
+              0.5870751527016039,
+              1.222555306431039
+            ],
+            "emergent_wall_point_flux_wb": 0.01772158580283783,
+            "emergent_wall_point_r_z": [
+              0.5649306774139404,
+              1.7561375574778992
+            ],
+            "emergent_x_point_flux_wb": -0.12254674397700109,
+            "emergent_x_point_r_z": [
+              0.5870751527016039,
+              1.222555306431039
+            ],
+            "pinned_boundary_flux_wb": -0.12254674397700109,
+            "pinned_boundary_r_z": [
+              0.5870751527016039,
+              1.222555306431039
+            ]
+          },
+          "promotion_state_index": 9,
+          "state_sha256": "484316fdaf76bf3fdf8d2375ea87c20ab557f71b9632ef60cc9e282e6c13c93a"
+        },
+        {
+          "achieved_topology_class": "diverted",
+          "connectivity_boundary": {
+            "found": true,
+            "n_core_cells_reported": 234,
+            "private_flux_shadowed": true,
+            "psi_bnd_wb": -0.12241064376718874,
+            "s_flood": 0.4310057957967122,
+            "s_star": 0.43085199543300573,
+            "selected_typed_saddle_index": 2,
+            "selected_typed_saddle_present": true,
+            "selected_typed_saddle_r_z_psi_type": [
+              0.5870751527016029,
+              1.2225553064310364,
+              -0.12254674397700216,
+              0.0
+            ],
+            "selected_wall_cluster_index": 10,
+            "selected_wall_cluster_roll": 0,
+            "selected_wall_extremum_r_z_psi": [
+              0.5649306774139404,
+              1.7561375574778995,
+              0.017721585802837503
+            ],
+            "selected_x_normalized_flux": 0.4309790002082108,
+            "typed_saddle_candidate_count": 5,
+            "wall_extremum_present": true,
+            "wall_normalized_flux_after_shadow": null,
+            "wall_normalized_flux_before_shadow": 0.30008465613263874
+          },
+          "emergent_domain_cell_counts": {
+            "common_sol": 408,
+            "core": 95,
+            "excluded_material": 405,
+            "private_flux": 181
+          },
+          "masks": {
+            "connectivity_confined": {
+              "sha256": "d2c4024ae254a2724c2c7b16e6458a7618457001360bcda92fe53d14ef83821e",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.75,
+                  1.75
+                ],
+                "radial_index": [
+                  4,
+                  22
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3937499995809048
+                ],
+                "vertical_index": [
+                  2,
+                  30
+                ]
+              },
+              "true_cell_count": 276
+            },
+            "connectivity_core": {
+              "sha256": "e19b6364910cfeb58759b085e7bc904a320bb75dcc71a3b2b26f30570f9d8635",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.0,
+                  1.125
+                ],
+                "radial_index": [
+                  4,
+                  22
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3937499995809048
+                ],
+                "vertical_index": [
+                  8,
+                  25
+                ]
+              },
+              "true_cell_count": 234
+            },
+            "production_common_sol": {
+              "sha256": "1aaf8568ed896df3d8d1551bfe96797f49ff765afd0fc66daa3b9e25859bdd82",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.75,
+                  1.75
+                ],
+                "radial_index": [
+                  3,
+                  30
+                ],
+                "radius_m": [
+                  0.24187499878462404,
+                  1.878749999916181
+                ],
+                "vertical_index": [
+                  2,
+                  30
+                ]
+              },
+              "true_cell_count": 408
+            },
+            "production_core": {
+              "sha256": "72cc3c17b670027d8d841bddf27eec12a6a0a19e193744747431b88f99f86c30",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  0.125,
+                  0.75
+                ],
+                "radial_index": [
+                  4,
+                  21
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3331249995389953
+                ],
+                "vertical_index": [
+                  17,
+                  22
+                ]
+              },
+              "true_cell_count": 95
+            },
+            "production_private_flux": {
+              "sha256": "815eb6667da07105fc5dfc335b754b23e81a7ee19046ae29317a295663564a9b",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.75,
+                  1.75
+                ],
+                "radial_index": [
+                  4,
+                  22
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3937499995809048
+                ],
+                "vertical_index": [
+                  2,
+                  30
+                ]
+              },
+              "true_cell_count": 181
+            }
+          },
+          "pinned_residual_topology_class": "diverted",
+          "production_boundary": {
+            "emergent_axis_flux_wb": 0.34160791047499867,
+            "emergent_axis_r_z": [
+              0.901537080566983,
+              0.025314003916718293
+            ],
+            "emergent_boundary_flux_wb": -0.12254674397700216,
+            "emergent_boundary_r_z": [
+              0.5870751527016029,
+              1.2225553064310364
+            ],
+            "emergent_wall_point_flux_wb": 0.017721585802837503,
+            "emergent_wall_point_r_z": [
+              0.5649306774139404,
+              1.7561375574778995
+            ],
+            "emergent_x_point_flux_wb": -0.12254674397700216,
+            "emergent_x_point_r_z": [
+              0.5870751527016029,
+              1.2225553064310364
+            ],
+            "pinned_boundary_flux_wb": -0.12254674397700216,
+            "pinned_boundary_r_z": [
+              0.5870751527016029,
+              1.2225553064310364
+            ]
+          },
+          "promotion_state_index": 10,
+          "state_sha256": "2e591ff797b9b25d95e3930b7858c8320a59010868d164bc3adf758b73af7b06"
+        },
+        {
+          "achieved_topology_class": "diverted",
+          "connectivity_boundary": {
+            "found": true,
+            "n_core_cells_reported": 234,
+            "private_flux_shadowed": true,
+            "psi_bnd_wb": -0.12241064376718935,
+            "s_flood": 0.4310057957967122,
+            "s_star": 0.4308519954330062,
+            "selected_typed_saddle_index": 2,
+            "selected_typed_saddle_present": true,
+            "selected_typed_saddle_r_z_psi_type": [
+              0.5870751527016023,
+              1.2225553064310348,
+              -0.12254674397700277,
+              0.0
+            ],
+            "selected_wall_cluster_index": 10,
+            "selected_wall_cluster_roll": 0,
+            "selected_wall_extremum_r_z_psi": [
+              0.5649306774139404,
+              1.7561375574778995,
+              0.017721585802837315
+            ],
+            "selected_x_normalized_flux": 0.4309790002082112,
+            "typed_saddle_candidate_count": 5,
+            "wall_extremum_present": true,
+            "wall_normalized_flux_after_shadow": null,
+            "wall_normalized_flux_before_shadow": 0.3000846561326388
+          },
+          "emergent_domain_cell_counts": {
+            "common_sol": 408,
+            "core": 95,
+            "excluded_material": 405,
+            "private_flux": 181
+          },
+          "masks": {
+            "connectivity_confined": {
+              "sha256": "d2c4024ae254a2724c2c7b16e6458a7618457001360bcda92fe53d14ef83821e",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.75,
+                  1.75
+                ],
+                "radial_index": [
+                  4,
+                  22
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3937499995809048
+                ],
+                "vertical_index": [
+                  2,
+                  30
+                ]
+              },
+              "true_cell_count": 276
+            },
+            "connectivity_core": {
+              "sha256": "e19b6364910cfeb58759b085e7bc904a320bb75dcc71a3b2b26f30570f9d8635",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.0,
+                  1.125
+                ],
+                "radial_index": [
+                  4,
+                  22
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3937499995809048
+                ],
+                "vertical_index": [
+                  8,
+                  25
+                ]
+              },
+              "true_cell_count": 234
+            },
+            "production_common_sol": {
+              "sha256": "1aaf8568ed896df3d8d1551bfe96797f49ff765afd0fc66daa3b9e25859bdd82",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.75,
+                  1.75
+                ],
+                "radial_index": [
+                  3,
+                  30
+                ],
+                "radius_m": [
+                  0.24187499878462404,
+                  1.878749999916181
+                ],
+                "vertical_index": [
+                  2,
+                  30
+                ]
+              },
+              "true_cell_count": 408
+            },
+            "production_core": {
+              "sha256": "72cc3c17b670027d8d841bddf27eec12a6a0a19e193744747431b88f99f86c30",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  0.125,
+                  0.75
+                ],
+                "radial_index": [
+                  4,
+                  21
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3331249995389953
+                ],
+                "vertical_index": [
+                  17,
+                  22
+                ]
+              },
+              "true_cell_count": 95
+            },
+            "production_private_flux": {
+              "sha256": "815eb6667da07105fc5dfc335b754b23e81a7ee19046ae29317a295663564a9b",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.75,
+                  1.75
+                ],
+                "radial_index": [
+                  4,
+                  22
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3937499995809048
+                ],
+                "vertical_index": [
+                  2,
+                  30
+                ]
+              },
+              "true_cell_count": 181
+            }
+          },
+          "pinned_residual_topology_class": "diverted",
+          "production_boundary": {
+            "emergent_axis_flux_wb": 0.3416079104749985,
+            "emergent_axis_r_z": [
+              0.9015370805669826,
+              0.025314003916716912
+            ],
+            "emergent_boundary_flux_wb": -0.12254674397700277,
+            "emergent_boundary_r_z": [
+              0.5870751527016023,
+              1.2225553064310348
+            ],
+            "emergent_wall_point_flux_wb": 0.017721585802837315,
+            "emergent_wall_point_r_z": [
+              0.5649306774139404,
+              1.7561375574778995
+            ],
+            "emergent_x_point_flux_wb": -0.12254674397700277,
+            "emergent_x_point_r_z": [
+              0.5870751527016023,
+              1.2225553064310348
+            ],
+            "pinned_boundary_flux_wb": -0.12254674397700277,
+            "pinned_boundary_r_z": [
+              0.5870751527016023,
+              1.2225553064310348
+            ]
+          },
+          "promotion_state_index": 11,
+          "state_sha256": "600a353c481839873cda7701012e9198f8afad27de448a99b702c65aa468e1ab"
+        },
+        {
+          "achieved_topology_class": "diverted",
+          "connectivity_boundary": {
+            "found": true,
+            "n_core_cells_reported": 234,
+            "private_flux_shadowed": true,
+            "psi_bnd_wb": -0.12241064376718935,
+            "s_flood": 0.4310057957967122,
+            "s_star": 0.43085199543300623,
+            "selected_typed_saddle_index": 2,
+            "selected_typed_saddle_present": true,
+            "selected_typed_saddle_r_z_psi_type": [
+              0.5870751527016019,
+              1.2225553064310348,
+              -0.12254674397700276,
+              0.0
+            ],
+            "selected_wall_cluster_index": 10,
+            "selected_wall_cluster_roll": 0,
+            "selected_wall_extremum_r_z_psi": [
+              0.5649306774139404,
+              1.7561375574778995,
+              0.017721585802837326
+            ],
+            "selected_x_normalized_flux": 0.4309790002082113,
+            "typed_saddle_candidate_count": 5,
+            "wall_extremum_present": true,
+            "wall_normalized_flux_after_shadow": null,
+            "wall_normalized_flux_before_shadow": 0.30008465613263885
+          },
+          "emergent_domain_cell_counts": {
+            "common_sol": 408,
+            "core": 95,
+            "excluded_material": 405,
+            "private_flux": 181
+          },
+          "masks": {
+            "connectivity_confined": {
+              "sha256": "d2c4024ae254a2724c2c7b16e6458a7618457001360bcda92fe53d14ef83821e",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.75,
+                  1.75
+                ],
+                "radial_index": [
+                  4,
+                  22
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3937499995809048
+                ],
+                "vertical_index": [
+                  2,
+                  30
+                ]
+              },
+              "true_cell_count": 276
+            },
+            "connectivity_core": {
+              "sha256": "e19b6364910cfeb58759b085e7bc904a320bb75dcc71a3b2b26f30570f9d8635",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.0,
+                  1.125
+                ],
+                "radial_index": [
+                  4,
+                  22
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3937499995809048
+                ],
+                "vertical_index": [
+                  8,
+                  25
+                ]
+              },
+              "true_cell_count": 234
+            },
+            "production_common_sol": {
+              "sha256": "1aaf8568ed896df3d8d1551bfe96797f49ff765afd0fc66daa3b9e25859bdd82",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.75,
+                  1.75
+                ],
+                "radial_index": [
+                  3,
+                  30
+                ],
+                "radius_m": [
+                  0.24187499878462404,
+                  1.878749999916181
+                ],
+                "vertical_index": [
+                  2,
+                  30
+                ]
+              },
+              "true_cell_count": 408
+            },
+            "production_core": {
+              "sha256": "72cc3c17b670027d8d841bddf27eec12a6a0a19e193744747431b88f99f86c30",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  0.125,
+                  0.75
+                ],
+                "radial_index": [
+                  4,
+                  21
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3331249995389953
+                ],
+                "vertical_index": [
+                  17,
+                  22
+                ]
+              },
+              "true_cell_count": 95
+            },
+            "production_private_flux": {
+              "sha256": "815eb6667da07105fc5dfc335b754b23e81a7ee19046ae29317a295663564a9b",
+              "shape_vertical_radial": [
+                33,
+                33
+              ],
+              "true_cell_bounds": {
+                "height_m": [
+                  -1.75,
+                  1.75
+                ],
+                "radial_index": [
+                  4,
+                  22
+                ],
+                "radius_m": [
+                  0.30249999882653356,
+                  1.3937499995809048
+                ],
+                "vertical_index": [
+                  2,
+                  30
+                ]
+              },
+              "true_cell_count": 181
+            }
+          },
+          "pinned_residual_topology_class": "diverted",
+          "production_boundary": {
+            "emergent_axis_flux_wb": 0.3416079104749986,
+            "emergent_axis_r_z": [
+              0.9015370805669826,
+              0.025314003916716833
+            ],
+            "emergent_boundary_flux_wb": -0.12254674397700276,
+            "emergent_boundary_r_z": [
+              0.5870751527016019,
+              1.2225553064310348
+            ],
+            "emergent_wall_point_flux_wb": 0.017721585802837326,
+            "emergent_wall_point_r_z": [
+              0.5649306774139404,
+              1.7561375574778995
+            ],
+            "emergent_x_point_flux_wb": -0.12254674397700276,
+            "emergent_x_point_r_z": [
+              0.5870751527016019,
+              1.2225553064310348
+            ],
+            "pinned_boundary_flux_wb": -0.12254674397700276,
+            "pinned_boundary_r_z": [
+              0.5870751527016019,
+              1.2225553064310348
+            ]
+          },
+          "promotion_state_index": 12,
+          "state_sha256": "d1e37e4950b13fd27d3773f56c3697c5f36633cb02576d630350142754e23b1f"
+        }
+      ]
+    }
+  ],
+  "source_commit": "8849869eb6e8250d1c9c8c479863fca9d3810053",
+  "verdict": {
+    "control_masks_and_selections_stable_across_final_promotions": true,
+    "cycling_all_discrete_selections_identical": true,
+    "cycling_all_masks_identical": false,
+    "cycling_binding_level_absolute_difference": 0.004867513842087501,
+    "cycling_boundary_flux_absolute_difference_wb": 0.0016142240419570464,
+    "interpretation": "the exact Newton linearisation holds a discrete residual definition fixed while the full step crosses its switching surface",
+    "name": "discrete_residual_definition_switch_supports_newton_cycle",
+    "supports_discrete_mask_switch_mechanism": true
+  }
+}

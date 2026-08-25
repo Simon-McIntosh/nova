@@ -118,6 +118,41 @@
     why of ρ ≈ 0.95–0.98 remains owned by <code>discrete-operator-analytic-error</code> §4's
     perturbation ladder, deliberately not duplicated here.</p>
 
+    <h2 id="fork-arming">§6 — fork pricing lands, the distribution does not</h2>
+
+    <p><strong>Node <code>fork-arming-fraction</code>, commit <code>3387739f</code>, gate PASSED,
+    2026-08-25.</strong> Artifact
+    <code>docs/figures/dual-branch-selection/fork-arming-economics.json</code>
+    (sha256 13fa65f1&hellip;). Cost multiple is 1 + armed fraction, the fork doubling the solve only
+    where it arms.</p>
+
+    <table>
+      <caption>Armed fraction and workload multiple per candidate policy</caption>
+      <thead><tr><th scope="col">Policy</th><th scope="col">Armed</th><th scope="col">Workload multiple</th></tr></thead>
+      <tbody>
+        <tr><td>always-fork</td><td>6/6</td><td>2.000&times;</td></tr>
+        <tr><td>|margin| &lt; 0.0025</td><td>2/6</td><td>1.333&times;</td></tr>
+        <tr><td>|margin| &lt; 0.005</td><td>4/6</td><td>1.667&times;</td></tr>
+        <tr><td>|margin| &lt; 0.01</td><td>5/6</td><td>1.833&times;</td></tr>
+        <tr><td>|margin| &lt; 0.02</td><td>6/6</td><td>2.000&times;</td></tr>
+      </tbody>
+    </table>
+
+    <p>Four finite absolute margins span 0.00339536 to 0.0197108, median 0.00606505. Two of six are
+    non-finite and fall back conservatively to fork, so an armed policy cannot go below 2/6 on this
+    cohort at any threshold. Solve cost is an explicit parameter at 1.0 aggregate solve-second per pinned
+    branch — not a measurement — and 372.620833333 slices/s is the derived one-hour requirement against
+    a 1,341,435-slice census, not a throughput figure.</p>
+
+    <p><strong>Stated limit, disqualifying for the decision.</strong> The cohort is the six frozen MAST
+    references rather than catalog frames, four carrying a finite margin, with no representativeness or
+    confidence claim. The framework and the conservative fallback landed; the distribution did not.</p>
+
+    <p><strong>Ordering problem this exposed.</strong> A catalog frame has no class margin until it is
+    solved, and the catalog solve is blocked by this plan — so the decision's stated precondition,
+    "measured on real catalog frames", sits downstream of the plan containing it. The graph edges are
+    correct; the decision as posed is unanswerable in the declared order.</p>
+
   </main>
 </body>
 </html>

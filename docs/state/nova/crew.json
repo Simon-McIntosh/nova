@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T10:50:01",
+  "updated": "2026-08-25T10:54:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -33996,9 +33996,102 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T084655542502-fork-arming-fraction",
+        "plan": "dual-branch-selection",
+        "section": "\u00a76",
+        "node": "fork-arming-fraction",
+        "node_definition": {
+          "done_when": "A banked artifact under docs/figures/dual-branch-selection/ reports the distribution of |class_margin| over real catalog frames and the armed fraction it implies at several candidate thresholds, with the frame count, machine, and data provenance stated so the number is reproducible. Price each candidate against the stated denominator, 1,341,435 slices at 372.6 slices per second aggregate for the one-hour goal, reporting for always-fork and for each armed threshold what fraction of that budget the policy consumes ASSUMING a per-slice solve cost you take as a parameter rather than measure - state the parameter and its units explicitly, and do not invent a throughput figure. Report how many frames carry a NON-FINITE or absent margin, because an armed rule cannot read a margin that does not exist and those frames need a stated fallback; a sibling node is attributing that absence right now on the frozen MAST references. Explicitly OUT of scope and left to a separate node: the two-branch batch cost on the accelerator lane. Say plainly in the manifest that the decision cannot be locked on this half alone, since the plan requires both numbers.",
+          "estimated_hours": 3.0,
+          "goal": "Measure the armed fraction of a margin-armed fork policy on real catalog frames, so the always-fork versus margin-armed decision can be priced from nova own margin distribution rather than from the reference implementation arming trigger, which is not portable here.",
+          "id": "fork-arming-fraction",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/fork-arming-fraction.md",
+          "plan": "dual-branch-selection",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a76",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/fork_arming_economics.py",
+            "docs/figures/dual-branch-selection/fork-arming-economics.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "catalog-census",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T08:47:05Z",
+        "completed_at": "2026-08-25T08:54:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 422,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 422,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "f62779ce7a76974a19714c37ae3393f2c7dc1b2a",
+        "commits": [
+          "3387739fe14a9ced1145a9ea298a0ebf5b2c4657"
+        ],
+        "changed_lines": {
+          "added": 533,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/fork-arming-fraction.md",
+        "scope_changed": false,
+        "session_id": "01a0381a-0aaa-7a53-aa1b-f5d514577b62",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2146560,
+            "cached_input_tokens_cumulative": 2146560,
+            "input_tokens": 2281014,
+            "input_tokens_cumulative": 2281014,
+            "output_tokens": 15715,
+            "output_tokens_cumulative": 15715,
+            "reasoning_output_tokens": 4753,
+            "reasoning_output_tokens_cumulative": 4753
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 840
+    "_version": 841
   }
 }

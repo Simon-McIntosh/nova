@@ -90,15 +90,32 @@
     at machine precision the operator reproduces the analytic fixed point and the fault is in how the
     solve was posed or seeded; if it is large, the operator does not admit that solution at all.</p>
 
-    <p><strong>Done when</strong> the residue is attributed to posing or to the operator, reporting: a
-    refinement ladder of at least four resolutions with the fitted convergence order of the analytic
-    error and its uncertainty, so a constant offset is distinguished from a converging one; the
-    one-application residual of the exact map at the analytic solution, in absolute flux and by
-    region, against the terminal residual the solve reaches on its own fixed point; the external,
-    boundary and source terms the analytic case is posed with, each quoted against what the closed
-    form specifies; and a named verdict. <strong>A verdict of posing is the better outcome and must
-    not be presented as the lesser one</strong> — it would mean the operator is sound and one setup is
-    wrong, which is a bounded repair. No repair is authored under this section.</p>
+    <p><strong>The ladder is over the one-application residual, not over converged fixed points, and
+    that is a correction rather than a concession.</strong> A first attempt built the ladder from
+    terminal solves and could not qualify its rungs — the production moment seed reached relative
+    residual 1.25 at 300 requests and 1.30 at 500 against a 1e-10 criterion, so it did not recover its
+    own banked fixed point at fresh resolutions. That is worth recording, and it is also the wrong
+    dependency to carry: a ladder of converged roots depends on a seed, a solver route and a basin,
+    and any of those changing between rungs changes the fitted order for reasons that have nothing to
+    do with the operator. <strong>The one-application residual at the analytic solution has none of
+    those dependencies.</strong> It needs no seed and no solve: apply the exact map once to the
+    closed-form field and keep what comes back. If the operator is consistent that residual falls
+    under refinement at the operator's order; if the case is mis-posed it stays constant. So it is
+    strictly the better discriminator for exactly the question this plan asks, and the seed's failure
+    to recover its banked root becomes an observation to report rather than a prerequisite to
+    repair.</p>
+
+    <p><strong>Done when</strong> the residue is attributed to posing or to the operator, reporting:
+    the one-application residual of the exact map at the analytic solution across at least four
+    resolutions, in absolute flux and split by region, with the fitted convergence order of that
+    residual and its uncertainty, so a constant offset is distinguished from a converging one; the
+    external, boundary and source terms the analytic case is posed with, each quoted against what the
+    closed form specifies; the terminal residual any rung that does qualify reaches on its own fixed
+    point, with unqualified rungs reported as unqualified and their achieved residual stated rather
+    than omitted; and a named verdict. <strong>A verdict of posing is the better outcome and must not
+    be presented as the lesser one</strong> — it would mean the operator is sound and one setup is
+    wrong, which is a bounded repair. No repair is authored under this section, including no repair to
+    the seed.</p>
 
     <h2 id="s3">§3 — What is downstream, and what may not be claimed until this closes</h2>
 

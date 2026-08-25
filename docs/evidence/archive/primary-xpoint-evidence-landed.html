@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="primary-xpoint-evidence-landed">
+  <meta name="plan-evidence-for" content="primary-xpoint-evidence">
+  <meta name="plan-title" content="Primary X-Point Evidence — execution record">
+  <meta name="plan-summary" content="Cumulative execution evidence: batched primary-X parity beyond the O-point, additive candidate-and-operand serialization in the margin receipts, and self-configured precision for the isolated transform test.">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Primary X-Point Evidence — execution record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h1>Primary X-Point Evidence — execution record</h1>
+
+    <p>Execution evidence for
+    <a href="/nova/primary-xpoint-evidence">primary-xpoint-evidence</a>. One anchor per material
+    result.</p>
+
+    <h2 id="spatial-evidence">§2 — the coordinate is now evidenced, not only agreed with</h2>
+
+    <p><strong>Node <code>xpoint-spatial-evidence</code>, commit <code>597417af</code>, gate PASSED,
+    2026-08-25.</strong> Scope was widened mid-flight to the receipt egress benchmark after a correct
+    fence report, so this node is excluded from effort calibration.</p>
+
+    <table>
+      <caption>The three §2 measures and what each returned</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Result</th></tr></thead>
+      <tbody>
+        <tr><td>Batched primary-X parity</td><td>Coordinates match per-slice reads to <strong>8 machine eps</strong>, X flux matches <strong>exactly</strong>, on three slices spanning a two-saddle double-null field and both sides of a near-tangent wall/X flux tie. The test no longer asserts only the O-point.</td></tr>
+        <tr><td>Terminal X-candidate serialization</td><td>Ten-terminal receipt regenerated in place and enriched additively: <strong>462 of 462</strong> pre-existing numeric leaves value-identical, 447 non-duration leaves compared exactly with zero differences and 15 banked duration fields preserved.</td></tr>
+        <tr><td>Isolated-test dtype self-configuration</td><td><code>test_jit_vmap_grad_safe_and_fixed_shape</code> calls <code>configure_dtypes()</code> itself and passes alone with <code>JAX_ENABLE_X64</code> explicitly removed from the environment.</td></tr>
+      </tbody>
+    </table>
+
+    <p>22 tests pass across <code>tests/test_connectivity_boundary.py</code> and
+    <code>tests/test_jax_topology.py</code> in 142.57 s. The regeneration reported an internal
+    sign-parity check of 53/53 with zero disagreements.</p>
+
+    <h3 id="diagnostics">The diagnostics discriminate, which was the point</h3>
+
+    <p>The receipt now separates <code>no_typed_saddle_candidate</code>,
+    <code>typed_saddle_operand_nonfinite</code>,
+    <code>selected_typed_saddle_not_connectivity_reachable</code> and
+    <code>selected_typed_saddle_with_connectivity_support</code>, while the wall record independently
+    distinguishes absent, private-flux-shadow-rejected and admitted extrema, recording both the
+    pre-shadow and the admitted operand. An absent operand can now be attributed to a named rejection
+    rather than reported as merely absent.</p>
+
+    <p><strong>What the ten DIII-D terminals then measured, and it is a finding rather than a
+    formality.</strong> Every terminal carries 1&ndash;3 typed saddles with a finite exact operand, and
+    all ten admit their wall operand with no shadow rejections — yet
+    <strong>the selected typed saddle is <em>not</em> connectivity-reachable on 10 of 10</strong>, with
+    <strong>zero</strong> terminals showing connectivity support. So on this cohort the exact margin
+    survives only because the typed-saddle route supplies the operand independently of connectivity
+    reachability, and the connectivity-local admission contributes nothing at all. Preserved class
+    margins run &minus;0.5296 to &minus;0.1783 and every terminal remains limited.</p>
+
+    <p><strong>Scope stated honestly by the node itself.</strong> The regeneration covered the
+    ten-terminal <strong>DIII-D</strong> bank and did <em>not</em> cover frozen MAST references
+    21978/35 or 22086/43, so it makes no claim about the cause of their +&infin; operand. That
+    separation is carried forward as a followup against the MAST egress,
+    <code>benchmarks/pinned_branch_contrast.py</code>, where the 10-of-10 connectivity-reachability
+    rejection above makes that rule the prime suspect.</p>
+
+    <h3 id="parity-fixture">The double-null parity fixture</h3>
+
+    <p>Two finite X candidates; selected coordinate
+    [1.1019047226795156, &minus;0.4448939832318258] m; selected flux 2.6776133229622467 Wb;
+    axis-to-X span 3.1072837439676566 Wb; two wall/X near-tangency slices at
+    &plusmn;3.107283743967657e&minus;10 Wb.</p>
+
+  </main>
+</body>
+</html>

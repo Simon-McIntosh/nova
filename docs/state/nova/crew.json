@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T10:31:07",
+  "updated": "2026-08-25T10:38:23",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -33716,9 +33716,105 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T075958475442-xpoint-spatial-evidence",
+        "plan": "primary-xpoint-evidence",
+        "section": "\u00a72",
+        "node": "xpoint-spatial-evidence",
+        "node_definition": {
+          "done_when": "All three \u00a72 measures hold: (1) a test asserts primary X-point coordinates AND flux from Topology.read_batch match per-slice reads on fixtures including double-null and near-tangency cases, not only the O-point; (2) margin receipts carry the selected X coordinate, its flux operand, and admitted candidate diagnostics, verified by regenerating one banked terminal receipt with ZERO differing numeric fields in existing entries; (3) test_jit_vmap_grad_safe_and_fixed_shape configures nova x64 policy itself and passes in an isolated process. Report each measure with its command and output.",
+          "estimated_hours": 3.0,
+          "goal": "Close the primary X-point spatial-evidence gap with the three deliverables in primary-xpoint-evidence \u00a72: a batched primary-X coordinate-and-flux parity test, terminal X-candidate serialization in margin receipts, and x64 self-configuration for the isolated transform test. No production behaviour may change.",
+          "id": "xpoint-spatial-evidence",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/xpoint-spatial-evidence.md",
+          "plan": "primary-xpoint-evidence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/connectivity_boundary.py",
+            "nova/equilibrium/topology.py",
+            "nova/equilibrium/stencil_nulls.py",
+            "tests/test_connectivity_boundary.py",
+            "tests/test_jax_topology.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "xpoint-map",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T08:00:09Z",
+        "completed_at": "2026-08-25T08:37:37Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2248,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2248,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "527eb94a2285e943fcebdced8728404deb9a8530",
+        "commits": [
+          "597417afae7432fcb60c59e90ddcd6375da8436e"
+        ],
+        "changed_lines": {
+          "added": 177,
+          "removed": 10,
+          "files": 3
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/xpoint-spatial-evidence.md",
+        "scope_changed": true,
+        "session_id": "01a037ef-13e9-76a1-a117-d5aa565eb4b7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13702912,
+            "cached_input_tokens_cumulative": 13702912,
+            "input_tokens": 13936314,
+            "input_tokens_cumulative": 13936314,
+            "output_tokens": 30943,
+            "output_tokens_cumulative": 30943,
+            "reasoning_output_tokens": 11277,
+            "reasoning_output_tokens_cumulative": 11277
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 837
+    "_version": 838
   }
 }

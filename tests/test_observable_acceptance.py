@@ -132,6 +132,96 @@ def test_acceptance_fails_closed_on_shape_dtype_and_missing_registration():
         )
 
 
+def test_zero_reference_bound_cannot_register_a_relative_criterion():
+    registration = [
+        {
+            "observable": "zero_identity",
+            "criterion_kind": "banked_dual_envelope",
+            "dtype": "float64",
+            "shape": [],
+            "has_nonzero_continuum_value": False,
+            "absolute_bound": 1.0e-6,
+            "relative_bound": 0.1,
+        }
+    ]
+
+    with pytest.raises(ValueError, match="cannot carry a relative criterion"):
+        evaluate_observable_bound_acceptance(
+            reference={"zero_identity": np.zeros((1, 1))},
+            candidate={"zero_identity": np.zeros((1, 1))},
+            registration=registration,
+            case_ids=("held-out",),
+            batch_size=1,
+        )
+
+
+def test_zero_reference_bound_scores_only_its_absolute_envelope():
+    registration = [
+        {
+            "observable": "zero_identity",
+            "criterion_kind": "banked_absolute_envelope",
+            "dtype": "float64",
+            "shape": [],
+            "has_nonzero_continuum_value": False,
+            "absolute_bound": 1.0e-6,
+        }
+    ]
+    reference = {"zero_identity": np.zeros((1, 2))}
+    candidate = {"zero_identity": np.array([[5.0e-7, 2.0e-6]])}
+
+    result = evaluate_observable_bound_acceptance(
+        reference=reference,
+        candidate=candidate,
+        registration=registration,
+        case_ids=("held-out",),
+        batch_size=2,
+    )
+
+    row = result["per_observable"][0]
+    assert row["criterion_kind"] == "banked_absolute_envelope"
+    assert row["member_pass_count"] == 1
+    assert row["member_fail_count"] == 1
+    assert row["maximum_bound_ratio"] == pytest.approx(2.0)
+    assert "relative_bound" not in row
+
+
+def test_corrected_zero_reference_receipt_rescores_the_frozen_cohort():
+    receipt = json.loads(
+        Path(
+            "docs/figures/roundoff-scale-acceptance-bounds/corrected-criteria.json"
+        ).read_text(encoding="utf-8")
+    )
+    criteria = {row["observable"]: row for row in receipt["corrected_criteria"]}
+
+    assert set(criteria) == {
+        "conservation.divergence_b",
+        "conservation.divergence_j",
+    }
+    assert all("relative_bound" not in row for row in criteria.values())
+    assert all(
+        row["derivation"]["uses_achieved_residual_to_choose_bound"] is False
+        for row in criteria.values()
+    )
+    current = criteria["conservation.divergence_j"]["derivation"]
+    reference = current["reference_measurement"]
+    mesh = current["production_mesh"]
+    derived = (
+        reference["relative_divergence_j"]
+        * (mesh["conservative_pitch_m"] / reference["pitch_m"])
+        ** current["discretisation_order"]
+    )
+    assert criteria["conservation.divergence_j"]["absolute_bound"] == pytest.approx(
+        derived
+    )
+
+    rescore = receipt["frozen_cohort_rescore"]
+    assert rescore["banked_pass_count"] == 67
+    assert [row["batch_size"] for row in rescore["results"]] == [1, 4]
+    assert all(row["observable_pass_count"] == 69 for row in rescore["results"])
+    assert all(row["passes"] is True for row in rescore["results"])
+    assert {row["observable"] for row in rescore["changed_verdicts"]} == set(criteria)
+
+
 def test_complete_registered_family_is_accepted_at_two_batch_sizes():
     criterion = json.loads(
         Path(

@@ -1,18 +1,25 @@
 {
   "artifact": "corrected_zero_reference_acceptance_criteria",
-  "status": "complete",
-  "registration_rule": {
-    "rule": "A bound whose scored quantity has no nonzero continuum value carries no relative criterion when an absolute criterion is present.",
-    "enforced_by": "nova.equilibrium.observable_acceptance._validate_registration",
-    "zero_reference_criterion_kind": "banked_absolute_envelope"
-  },
   "corrected_criteria": [
     {
-      "observable": "conservation.divergence_b",
-      "has_nonzero_continuum_value": false,
-      "criterion_kind": "banked_absolute_envelope",
       "absolute_bound": 9.83631031098047e-16,
+      "criterion_kind": "banked_absolute_envelope",
       "derivation": {
+        "banked_exemplar": {
+          "all_below_absolute_bound": true,
+          "batch_size": 1,
+          "case_id": "21978/35",
+          "values": [
+            2.220446049250313e-16,
+            6.106226635438361e-16,
+            5.551115123125783e-16
+          ],
+          "verdicts_before_correction": [
+            true,
+            false,
+            false
+          ]
+        },
         "kind": "existing_absolute_registration_already_satisfied",
         "steps": [
           "The continuum identity is zero, so there is no nonzero reference for a relative criterion.",
@@ -20,105 +27,114 @@
           "The banked 21978/35 width-1 exemplar values are 2.220446049250313e-16, 6.106226635438361e-16 and 5.551115123125783e-16.",
           "All three values are below 9.83631031098047e-16, so the absolute registration is retained unchanged and the relative registration is removed."
         ],
-        "banked_exemplar": {
-          "case_id": "21978/35",
-          "batch_size": 1,
-          "values": [
-            2.220446049250313e-16,
-            6.106226635438361e-16,
-            5.551115123125783e-16
-          ],
-          "all_below_absolute_bound": true,
-          "verdicts_before_correction": [true, false, false]
-        },
         "uses_achieved_residual_to_choose_bound": false
-      }
+      },
+      "has_nonzero_continuum_value": false,
+      "observable": "conservation.divergence_b"
     },
     {
-      "observable": "conservation.divergence_j",
-      "has_nonzero_continuum_value": false,
-      "criterion_kind": "banked_absolute_envelope",
-      "absolute_bound": 0.0009042140976404076,
+      "absolute_bound": 1.0536712127723509e-08,
+      "criterion_kind": "derived_absolute_envelope",
       "derivation": {
-        "kind": "second_order_non_commuting_ring_mesh_truncation",
-        "operator": "least-squares quadratic derivative on the production ring mesh",
-        "discretisation_order": 2,
-        "steps": [
-          "The continuum divergence identity is zero, but the least-squares ring derivative operators do not commute, so their discrete residual is truncation rather than a relative error against a nonzero reference.",
-          "The independent stencil contract measures divergence_j = 7.315873469501451e-05 at 91 nodes over 3.2 m, giving reference pitch h_ref = 3.2 / (91 - 1) = 0.035555555555555556 m.",
-          "The frozen MAST acceptance cohort uses the stored 65-point axes at stride 2, giving 33 by 33 nodes and spacings 0.060624998062849045 m and 0.125 m; the conservative production pitch is h = 0.125 m.",
-          "For second-order truncation, T(h) = T(h_ref) * (h / h_ref)^2.",
-          "Therefore T(0.125) = 7.315873469501451e-05 * (0.125 / 0.035555555555555556)^2 = 0.0009042140976404076."
-        ],
-        "reference_measurement": {
-          "source": "tests/test_equilibrium_stencil_mesh.py::test_the_divergence_floor_is_truncation_and_falls_with_the_mesh",
-          "node_count_per_axis": 91,
-          "extent_m": 3.2,
-          "pitch_m": 0.035555555555555556,
-          "relative_divergence_j": 7.315873469501451e-05
-        },
+        "binary64_epsilon": 2.220446049250313e-16,
+        "binary64_unit_roundoff": 1.1102230246251565e-16,
+        "discretisation_order": 0,
+        "formula": "sqrt(binary64_unit_roundoff)",
+        "kind": "binary64_commuting_second_derivative_cancellation",
+        "observations_used_only_after_registration_for_rescore": true,
+        "operator": "FluxLattice central differences used by ForwardProfile",
         "production_mesh": {
-          "axis_node_count": [33, 33],
-          "radial_spacing_m": 0.060624998062849045,
-          "vertical_spacing_m": 0.125,
           "conservative_pitch_m": 0.125
         },
-        "current_too_tight_absolute_bound": 1.3703738919113413e-10,
-        "largest_observed_acceptance_difference": 1.4551915228366852e-10,
-        "maximum_observable_magnitude": 4.656612873077393e-10,
-        "uses_achieved_residual_to_choose_bound": false,
-        "observations_used_only_after_registration_for_rescore": true
-      }
+        "reference_measurement": {
+          "pitch_m": 0.03571428571428571,
+          "relative_divergence_j": 1.0536712127723509e-08,
+          "source": "sqrt(binary64 unit roundoff), registered before cohort rescore"
+        },
+        "scaling_artifact": "docs/figures/roundoff-scale-acceptance-bounds/divergence-floor-scaling.json",
+        "steps": [
+          "ForwardProfile passes its FluxLattice to conservation_ledger; it does not pass the independent StencilMesh test fixture.",
+          "FluxLattice radial and vertical central differences commute, so divergence_j cancels algebraically for a poloidal current derived from one field function.",
+          "The remaining finite-precision scale is bounded by sqrt(binary64 unit roundoff), the standard conservative cancellation scale for a composed second derivative.",
+          "The bound is registered before the frozen cohort is consulted; cohort values are used only for re-scoring and slack reporting."
+        ],
+        "uses_achieved_residual_to_choose_bound": false
+      },
+      "has_nonzero_continuum_value": false,
+      "observable": "conservation.divergence_j"
     }
   ],
+  "evidence_sources": [
+    "benchmarks/efit_forward_parity_slice.py",
+    "docs/figures/derived-observable-parity/integrated-acceptance.json",
+    "docs/figures/roundoff-scale-acceptance-bounds/bound-classification.json",
+    "docs/figures/roundoff-scale-acceptance-bounds/divergence-floor-scaling.json",
+    "docs/figures/roundoff-scale-acceptance-bounds/divergence-floor-scaling.png",
+    "docs/figures/same-device-label-determinism/executable-boundary-arms.json",
+    "nova/equilibrium/conservation.py",
+    "tests/test_equilibrium_stencil_mesh.py"
+  ],
+  "failability": {
+    "absolute_bound": 1.0536712127723509e-08,
+    "acceptance_absolute_difference": 7.568358362676842e-08,
+    "acceptance_passes": false,
+    "baseline_relative_divergence_j": 9.910098972398255e-16,
+    "bound_ratio": 7.182846291077339,
+    "exceeds_bound": true,
+    "perturbation": "multiply the radial poloidal-current component by 1 + 1e-6 while leaving the vertical component unchanged",
+    "perturbation_fraction": 1e-06,
+    "perturbed_relative_divergence_j": 7.568358461777832e-08,
+    "pitch_m": 0.05
+  },
   "frozen_cohort_rescore": {
-    "source": "docs/figures/derived-observable-parity/integrated-acceptance.json",
-    "case_count": 6,
-    "registered_widths": [1, 4],
-    "registered_bound_count": 69,
     "banked_pass_count": 67,
+    "case_count": 6,
+    "changed_verdicts": [
+      {
+        "after": "passes under its unchanged absolute envelope",
+        "observable": "conservation.divergence_b",
+        "reason": "the invalid relative criterion remains removed"
+      },
+      {
+        "after": "passes under the derived roundoff envelope",
+        "observable": "conservation.divergence_j",
+        "reason": "the production commuting operator has no truncation floor"
+      }
+    ],
+    "largest_observed_acceptance_difference": 1.4551915228366852e-10,
+    "largest_observed_difference_slack": 72.40773439350247,
+    "registered_bound_count": 69,
+    "registered_widths": [
+      1,
+      4
+    ],
     "results": [
       {
         "batch_size": 1,
-        "observable_pass_count": 69,
+        "divergence_j_maximum_absolute_difference": 1.1641532182693481e-10,
+        "divergence_j_passes": true,
         "observable_fail_count": 0,
-        "case_observable_evaluation_pass_count": 414,
-        "case_observable_evaluation_fail_count": 0,
-        "member_observable_evaluation_pass_count": 414,
-        "member_observable_evaluation_fail_count": 0,
+        "observable_pass_count": 69,
         "passes": true
       },
       {
         "batch_size": 4,
-        "observable_pass_count": 69,
+        "divergence_j_maximum_absolute_difference": 1.4551915228366852e-10,
+        "divergence_j_passes": true,
         "observable_fail_count": 0,
-        "case_observable_evaluation_pass_count": 414,
-        "case_observable_evaluation_fail_count": 0,
-        "member_observable_evaluation_pass_count": 1656,
-        "member_observable_evaluation_fail_count": 0,
+        "observable_pass_count": 69,
         "passes": true
       }
     ],
-    "changed_verdicts": [
-      {
-        "observable": "conservation.divergence_b",
-        "before": "failed in banked invocations when the relative envelope was crossed despite satisfying the absolute envelope",
-        "after": "passes at both registered widths under its unchanged absolute envelope",
-        "reason": "The scored continuum identity has no nonzero value, so the relative criterion was invalid and was removed."
-      },
-      {
-        "observable": "conservation.divergence_j",
-        "before": "failed under the relative envelope and the too-tight 1.3703738919113413e-10 absolute envelope",
-        "after": "passes at both registered widths under the independently derived 0.0009042140976404076 absolute truncation envelope",
-        "reason": "The non-commuting ring-mesh stencil has a second-order truncation floor derived from its independent stencil measurement and the frozen cohort mesh."
-      }
+    "source": "docs/figures/derived-observable-parity/integrated-acceptance.json"
+  },
+  "registration_rule": {
+    "enforced_by": "nova.equilibrium.observable_acceptance._validate_registration",
+    "rule": "A bound whose scored quantity has no nonzero continuum value carries no relative criterion when an absolute criterion is present.",
+    "zero_reference_criterion_kinds": [
+      "banked_absolute_envelope",
+      "derived_absolute_envelope"
     ]
   },
-  "evidence_sources": [
-    "docs/figures/roundoff-scale-acceptance-bounds/bound-classification.json",
-    "docs/figures/derived-observable-parity/integrated-acceptance.json",
-    "docs/figures/same-device-label-determinism/executable-boundary-arms.json",
-    "tests/test_equilibrium_stencil_mesh.py",
-    "benchmarks/efit_forward_parity_slice.py"
-  ]
+  "status": "complete"
 }

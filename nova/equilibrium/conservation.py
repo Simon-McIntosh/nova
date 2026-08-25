@@ -46,16 +46,15 @@ Four residuals, each measuring a different failure:
     density :math:`\rho R \Omega^2` for a rotating one, which is what makes
     the outboard pressure pile-up a balance rather than a residual.
 
-The two identically-vanishing residuals are read against the mesh, not
-against machine epsilon. Central differences on a raster commute exactly, so
-the mixed derivative cancels term by term and ``divergence_b`` lands at
-round-off. A least-squares stencil fit does not commute, so on
-:class:`~nova.equilibrium.stencil_mesh.StencilMesh` the same residual lands
-at the truncation floor of the second fit and falls at second order under
-refinement rather than staying at round-off. It is still four to five decades
-below the physical residuals, so it still discriminates a broken
-flux-to-field relation from a converged one — but its floor is a property of
-the mesh and has to be read as such.
+The two identically-vanishing residuals inherit the differential route of the
+mesh passed here. Central differences on :class:`FluxLattice` commute, so the
+mixed derivative cancels algebraically and the residual lands at round-off.
+That is the route used by :class:`~nova.equilibrium.forward.ForwardProfile`
+for its terminal conservation receipt. A least-squares stencil fit does not
+commute, so a caller passing
+:class:`~nova.equilibrium.stencil_mesh.StencilMesh` instead sees the
+truncation floor of the second fit. A floor measured on one route must not be
+transferred to the other.
 
 Every residual is restricted to cells where the source is declared and the
 stencil is complete, so a one-sided difference at the mesh border never

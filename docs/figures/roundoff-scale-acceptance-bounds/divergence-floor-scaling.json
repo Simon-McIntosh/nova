@@ -1,0 +1,123 @@
+{
+  "artifact": "divergence_floor_scaling",
+  "failability": {
+    "absolute_bound": 1.0536712127723509e-08,
+    "acceptance_absolute_difference": 7.568358362676842e-08,
+    "acceptance_passes": false,
+    "baseline_relative_divergence_j": 9.910098972398255e-16,
+    "bound_ratio": 7.182846291077339,
+    "exceeds_bound": true,
+    "perturbation": "multiply the radial poloidal-current component by 1 + 1e-6 while leaving the vertical component unchanged",
+    "perturbation_fraction": 1e-06,
+    "perturbed_relative_divergence_j": 7.568358461777832e-08,
+    "pitch_m": 0.05
+  },
+  "fitted_pitch_order": {
+    "confidence_interval_high": -0.7973482147243438,
+    "confidence_interval_low": -2.643159653335359,
+    "confidence_level": 0.95,
+    "order": -1.7202539340298515,
+    "r_squared": 0.9698429824927571
+  },
+  "fixed_domain": {
+    "extent_m": 2.0,
+    "pitch_interval_counts": [
+      56,
+      40,
+      24,
+      16
+    ]
+  },
+  "frozen_cohort_rescore": {
+    "banked_pass_count": 67,
+    "case_count": 6,
+    "changed_verdicts": [
+      {
+        "after": "passes under its unchanged absolute envelope",
+        "observable": "conservation.divergence_b",
+        "reason": "the invalid relative criterion remains removed"
+      },
+      {
+        "after": "passes under the derived roundoff envelope",
+        "observable": "conservation.divergence_j",
+        "reason": "the production commuting operator has no truncation floor"
+      }
+    ],
+    "largest_observed_acceptance_difference": 1.4551915228366852e-10,
+    "largest_observed_difference_slack": 72.40773439350247,
+    "registered_bound_count": 69,
+    "registered_widths": [
+      1,
+      4
+    ],
+    "results": [
+      {
+        "batch_size": 1,
+        "divergence_j_maximum_absolute_difference": 1.1641532182693481e-10,
+        "divergence_j_passes": true,
+        "observable_fail_count": 0,
+        "observable_pass_count": 69,
+        "passes": true
+      },
+      {
+        "batch_size": 4,
+        "divergence_j_maximum_absolute_difference": 1.4551915228366852e-10,
+        "divergence_j_passes": true,
+        "observable_fail_count": 0,
+        "observable_pass_count": 69,
+        "passes": true
+      }
+    ],
+    "source": "docs/figures/derived-observable-parity/integrated-acceptance.json"
+  },
+  "interpretation": "The confidence interval excludes order +2 and the measured residual moves opposite to a second-order truncation signal. The production observable is a commuting discrete identity at a roundoff floor.",
+  "measurements": [
+    {
+      "absolute_divergence_j": 6.463096724473871e-11,
+      "axis_node_count": 57,
+      "checked_cells": 845,
+      "divergence_j_scale": 43520.16082822177,
+      "pitch_m": 0.03571428571428571,
+      "relative_divergence_j": 1.4850810754087815e-15
+    },
+    {
+      "absolute_divergence_j": 4.263256414560601e-11,
+      "axis_node_count": 41,
+      "checked_cells": 382,
+      "divergence_j_scale": 43019.31218280142,
+      "pitch_m": 0.05,
+      "relative_divergence_j": 9.910098972398255e-16
+    },
+    {
+      "absolute_divergence_j": 1.864464138634503e-11,
+      "axis_node_count": 25,
+      "checked_cells": 109,
+      "divergence_j_scale": 39151.26629177606,
+      "pitch_m": 0.08333333333333333,
+      "relative_divergence_j": 4.7622064756208e-16
+    },
+    {
+      "absolute_divergence_j": 5.9117155615240335e-12,
+      "axis_node_count": 17,
+      "checked_cells": 37,
+      "divergence_j_scale": 35916.06199292574,
+      "pitch_m": 0.125,
+      "relative_divergence_j": 1.6459809994448845e-16
+    }
+  ],
+  "operator_attribution": {
+    "acceptance_observable_route": "ForwardProfile._receipt -> conservation_ledger(FluxLattice)",
+    "inapplicable_transfer_route": "independent StencilMesh least-squares derivative fixture",
+    "mechanism": "central radial and vertical differences commute, making the discrete identity exact apart from floating-point roundoff"
+  },
+  "replacement_registration": {
+    "absolute_bound": 1.0536712127723509e-08,
+    "criterion_kind": "derived_absolute_envelope",
+    "formula": "sqrt(binary64_unit_roundoff)",
+    "largest_observed_observable_magnitude": 4.656612873077393e-10,
+    "observable": "conservation.divergence_j",
+    "observable_magnitude_slack": 22.627416997969522,
+    "selected_before_cohort_rescore": true
+  },
+  "status": "complete"
+}

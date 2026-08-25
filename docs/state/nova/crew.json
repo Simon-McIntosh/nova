@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T09:22:36",
+  "updated": "2026-08-25T09:28:55",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -79,6 +79,15 @@
         "harness": "codex",
         "role": "implement",
         "session_id": null,
+        "created": "2026-08-25"
+      },
+      {
+        "id": "bound-repair",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-08-25"
       },
       {
@@ -33053,9 +33062,84 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T071151065667-connectivity-axes-lazy",
+        "plan": "plateau-input-attribution",
+        "section": "\u00a76",
+        "node": "connectivity-axes-lazy",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "lazy-axes",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T07:12:16Z",
+        "completed_at": "2026-08-25T07:27:01Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 885,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 885,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "e3d69322598ea1dc5f362970194ccd501b963b13",
+        "commits": [
+          "f2665b5d"
+        ],
+        "changed_lines": {
+          "added": 117,
+          "removed": 16,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T071151065667-connectivity-axes-lazy/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a037c3-3ddc-7933-b422-3eeaab8e86cc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4832768,
+            "cached_input_tokens_cumulative": 4832768,
+            "input_tokens": 4971073,
+            "input_tokens_cumulative": 4971073,
+            "output_tokens": 18855,
+            "output_tokens_cumulative": 18855,
+            "reasoning_output_tokens": 5061,
+            "reasoning_output_tokens_cumulative": 5061
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 824
+    "_version": 826
   }
 }

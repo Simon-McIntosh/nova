@@ -22,9 +22,11 @@ import time
 from typing import Any, Callable
 
 import jax
+import jax.numpy as jnp
 import numpy as np
 
-from benchmarks.portfolio_warm_start import _limited_root, _problem
+from benchmarks.portfolio_warm_start import _problem
+from nova.equilibrium import fixed_point
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import configure_dtypes
 
@@ -39,6 +41,8 @@ TIMING_REPEATS = 5
 CENSUS_SLICE_COUNT = 1_341_435
 MINIMUM_SEED_DISTANCE = 2.5e-4
 MAXIMUM_SEED_DISTANCE = 1.0e-3
+LIMITED_ROOT_STEPS = 20
+LIMITED_ROOT_DIGEST = "ea75c675928714add998bead5b31cc0e5317946c677186d344a96fe33e3507be"
 
 
 def _strict(value: Any) -> Any:
@@ -87,6 +91,57 @@ def _source_revision() -> str:
         capture_output=True,
         text=True,
     ).stdout.strip()
+
+
+def _prepare_limited_root(
+    profile: Any, cold_flux: jax.Array
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Reconstruct and verify the banked coexisting limited root."""
+    requested = jnp.asarray(int(TopologyClass.LIMITED), dtype=jnp.int8)
+    map_fn = profile.operator.flux_map(requested_class=requested)
+    solve = jax.jit(
+        lambda seed: fixed_point.newton_krylov(
+            map_fn,
+            seed,
+            newton_steps=LIMITED_ROOT_STEPS,
+            gmres_iterations=GMRES_ITERATIONS,
+            warmup=0,
+            krylov_condition_limit=float("inf"),
+        )
+    )
+    compiled = solve.lower(cold_flux).compile()
+    started = time.perf_counter()
+    result = compiled(cold_flux)
+    jax.block_until_ready(result)
+    elapsed = time.perf_counter() - started
+    state = np.asarray(result.state)
+    _masks, topology = profile.operator.read(result.state)
+    achieved = int(np.asarray(topology.diverted))
+    residual = float(np.asarray(result.residual))
+    digest = _digest(state)
+    if (
+        achieved != int(TopologyClass.LIMITED)
+        or residual > CONVERGENCE_TOLERANCE
+        or digest != LIMITED_ROOT_DIGEST
+    ):
+        raise RuntimeError(
+            "limited root does not match the banked coexisting solution: "
+            f"achieved={achieved}, residual={residual:.6e}, sha256={digest}"
+        )
+    return state, {
+        "method": (
+            "banked unconditioned root preparation outside all timed regions; "
+            "steady-state solves retain the current production conditioning"
+        ),
+        "newton_steps": LIMITED_ROOT_STEPS,
+        "gmres_iterations": GMRES_ITERATIONS,
+        "requested_class": int(TopologyClass.LIMITED),
+        "achieved_class": achieved,
+        "relative_residual": residual,
+        "first_execution_seconds": elapsed,
+        "state_sha256": digest,
+        "expected_state_sha256": LIMITED_ROOT_DIGEST,
+    }
 
 
 def _summary(samples: list[float]) -> dict[str, Any]:
@@ -361,7 +416,7 @@ def _run(output: Path) -> dict[str, Any]:
 
     setup_started = time.perf_counter()
     profile, cold, diverted_root = _problem()
-    limited_root, limited_preparation = _limited_root(
+    limited_root, limited_preparation = _prepare_limited_root(
         profile, cold.branches.flux[int(TopologyClass.LIMITED)]
     )
     roots = np.stack((limited_root, diverted_root))

@@ -84,6 +84,50 @@
             "terminal_class_margin": -0.3324752473947952,
             "terminal_relative_residual": 2.4088012926532916e-16,
             "terminal_topology_class": "limited",
+            "terminal_xpoint_diagnostics": {
+              "class_margin_from_operands": -0.3324752473947952,
+              "connectivity_admission": {
+                "admitted_candidate_count": 0,
+                "candidate_count_before_capacity": 0,
+                "candidates": [],
+                "discarded_score_upper_bound": null,
+                "overflow": false,
+                "retained_candidate_count": 0
+              },
+              "selected_x_coordinate_m": [
+                1.2764483915500846,
+                0.7061945846011524
+              ],
+              "selected_x_flux_wb": -2.2667926370005596,
+              "selected_x_normalized_flux_operand": 0.4464464859269247,
+              "selected_x_normalized_flux_operand_nonfinite": null,
+              "selection_status": "selected_typed_saddle_not_connectivity_reachable",
+              "typed_saddle_candidate_count": 1,
+              "typed_saddle_candidates": [
+                {
+                  "coordinate_m": [
+                    1.2764483915500846,
+                    0.7061945846011524
+                  ],
+                  "fitted_null_type": 0.0,
+                  "flux_wb": -2.2667926370005596,
+                  "normalized_flux_operand": 0.4464464859269247,
+                  "selected": true
+                }
+              ],
+              "wall_operand": {
+                "coordinate_m": [
+                  1.437754369807204,
+                  -1.2447745358084754
+                ],
+                "flux_wb": -0.649806460879492,
+                "normalized_flux": 0.11397123853212947,
+                "normalized_flux_before_shadow": 0.11397123853212947,
+                "normalized_flux_nonfinite": null,
+                "shadowed": false,
+                "status": "wall_extremum_admitted"
+              }
+            },
             "time_ms": 3740.0,
             "unrecorded_selected_factor_count": 14
           },
@@ -155,6 +199,50 @@
             "terminal_class_margin": -0.3428396379840549,
             "terminal_relative_residual": 5.957494436883967e-16,
             "terminal_topology_class": "limited",
+            "terminal_xpoint_diagnostics": {
+              "class_margin_from_operands": -0.3428396379840549,
+              "connectivity_admission": {
+                "admitted_candidate_count": 0,
+                "candidate_count_before_capacity": 0,
+                "candidates": [],
+                "discarded_score_upper_bound": null,
+                "overflow": false,
+                "retained_candidate_count": 0
+              },
+              "selected_x_coordinate_m": [
+                1.3062966458748524,
+                0.7259512704407474
+              ],
+              "selected_x_flux_wb": -0.6847204611423335,
+              "selected_x_normalized_flux_operand": 0.4482727040541401,
+              "selected_x_normalized_flux_operand_nonfinite": null,
+              "selection_status": "selected_typed_saddle_not_connectivity_reachable",
+              "typed_saddle_candidate_count": 1,
+              "typed_saddle_candidates": [
+                {
+                  "coordinate_m": [
+                    1.3062966458748524,
+                    0.7259512704407474
+                  ],
+                  "fitted_null_type": 0.0,
+                  "flux_wb": -0.6847204611423335,
+                  "normalized_flux_operand": 0.4482727040541401,
+                  "selected": true
+                }
+              ],
+              "wall_operand": {
+                "coordinate_m": [
+                  1.4155410638284487,
+                  -1.244771812142771
+                ],
+                "flux_wb": 0.8982262813167277,
+                "normalized_flux": 0.1054330660700852,
+                "normalized_flux_before_shadow": 0.1054330660700852,
+                "normalized_flux_nonfinite": null,
+                "shadowed": false,
+                "status": "wall_extremum_admitted"
+              }
+            },
             "time_ms": 1080.0,
             "unrecorded_selected_factor_count": 1
           },
@@ -226,6 +314,70 @@
             "terminal_class_margin": -0.1783497398371257,
             "terminal_relative_residual": 5.298253652413161e-16,
             "terminal_topology_class": "limited",
+            "terminal_xpoint_diagnostics": {
+              "class_margin_from_operands": -0.1783497398371257,
+              "connectivity_admission": {
+                "admitted_candidate_count": 0,
+                "candidate_count_before_capacity": 0,
+                "candidates": [],
+                "discarded_score_upper_bound": null,
+                "overflow": false,
+                "retained_candidate_count": 0
+              },
+              "selected_x_coordinate_m": [
+                1.3134597914827002,
+                -1.5453501367849396
+              ],
+              "selected_x_flux_wb": 2.4334227836209594,
+              "selected_x_normalized_flux_operand": 0.2499100779540097,
+              "selected_x_normalized_flux_operand_nonfinite": null,
+              "selection_status": "selected_typed_saddle_not_connectivity_reachable",
+              "typed_saddle_candidate_count": 3,
+              "typed_saddle_candidates": [
+                {
+                  "coordinate_m": [
+                    0.8483812152698343,
+                    1.31575494573337
+                  ],
+                  "fitted_null_type": 1.0,
+                  "flux_wb": 0.14335229615350145,
+                  "normalized_flux_operand": 0.5796815917363715,
+                  "selected": false
+                },
+                {
+                  "coordinate_m": [
+                    1.117411656859589,
+                    0.42793458763540115
+                  ],
+                  "fitted_null_type": 0.0,
+                  "flux_wb": -0.41967444908563795,
+                  "normalized_flux_operand": 0.6607577782963738,
+                  "selected": false
+                },
+                {
+                  "coordinate_m": [
+                    1.3134597914827002,
+                    -1.5453501367849396
+                  ],
+                  "fitted_null_type": 0.0,
+                  "flux_wb": 2.4334227836209594,
+                  "normalized_flux_operand": 0.2499100779540097,
+                  "selected": true
+                }
+              ],
+              "wall_operand": {
+                "coordinate_m": [
+                  1.577076933006731,
+                  -1.244791618726596
+                ],
+                "flux_wb": 3.6719575223068888,
+                "normalized_flux": 0.071560338116884,
+                "normalized_flux_before_shadow": 0.071560338116884,
+                "normalized_flux_nonfinite": null,
+                "shadowed": false,
+                "status": "wall_extremum_admitted"
+              }
+            },
             "time_ms": 3240.0,
             "unrecorded_selected_factor_count": 34
           },
@@ -297,6 +449,60 @@
             "terminal_class_margin": -0.3509936591482227,
             "terminal_relative_residual": 0.004359793724622838,
             "terminal_topology_class": "limited",
+            "terminal_xpoint_diagnostics": {
+              "class_margin_from_operands": -0.3509936591482227,
+              "connectivity_admission": {
+                "admitted_candidate_count": 0,
+                "candidate_count_before_capacity": 0,
+                "candidates": [],
+                "discarded_score_upper_bound": null,
+                "overflow": false,
+                "retained_candidate_count": 0
+              },
+              "selected_x_coordinate_m": [
+                0.9924187884142757,
+                1.5222503949519135
+              ],
+              "selected_x_flux_wb": -0.4140967802783122,
+              "selected_x_normalized_flux_operand": 0.42643291755154256,
+              "selected_x_normalized_flux_operand_nonfinite": null,
+              "selection_status": "selected_typed_saddle_not_connectivity_reachable",
+              "typed_saddle_candidate_count": 2,
+              "typed_saddle_candidates": [
+                {
+                  "coordinate_m": [
+                    0.9924187884142757,
+                    1.5222503949519135
+                  ],
+                  "fitted_null_type": 1.0,
+                  "flux_wb": -0.4140967802783122,
+                  "normalized_flux_operand": 0.42643291755154256,
+                  "selected": true
+                },
+                {
+                  "coordinate_m": [
+                    1.1720241623723808,
+                    0.6145423971516744
+                  ],
+                  "fitted_null_type": 0.0,
+                  "flux_wb": -1.294586671490068,
+                  "normalized_flux_operand": 0.5471743668423623,
+                  "selected": false
+                }
+              ],
+              "wall_operand": {
+                "coordinate_m": [
+                  1.449894567518444,
+                  -1.2447760243685384
+                ],
+                "flux_wb": 2.1454746889613925,
+                "normalized_flux": 0.07543925840331984,
+                "normalized_flux_before_shadow": 0.07543925840331984,
+                "normalized_flux_nonfinite": null,
+                "shadowed": false,
+                "status": "wall_extremum_admitted"
+              }
+            },
             "time_ms": 3180.0,
             "unrecorded_selected_factor_count": 27
           },
@@ -368,6 +574,70 @@
             "terminal_class_margin": -0.33682972341024897,
             "terminal_relative_residual": 4.392956522144886e-16,
             "terminal_topology_class": "limited",
+            "terminal_xpoint_diagnostics": {
+              "class_margin_from_operands": -0.33682972341024897,
+              "connectivity_admission": {
+                "admitted_candidate_count": 0,
+                "candidate_count_before_capacity": 0,
+                "candidates": [],
+                "discarded_score_upper_bound": null,
+                "overflow": false,
+                "retained_candidate_count": 0
+              },
+              "selected_x_coordinate_m": [
+                0.9935382030093896,
+                1.5212765715919843
+              ],
+              "selected_x_flux_wb": -0.2824293410306401,
+              "selected_x_normalized_flux_operand": 0.4234937816420484,
+              "selected_x_normalized_flux_operand_nonfinite": null,
+              "selection_status": "selected_typed_saddle_not_connectivity_reachable",
+              "typed_saddle_candidate_count": 3,
+              "typed_saddle_candidates": [
+                {
+                  "coordinate_m": [
+                    0.8677517754317394,
+                    0.4461060272225317
+                  ],
+                  "fitted_null_type": -1.0,
+                  "flux_wb": -1.2729009805350258,
+                  "normalized_flux_operand": 0.5683455488534787,
+                  "selected": false
+                },
+                {
+                  "coordinate_m": [
+                    0.9935382030093896,
+                    1.5212765715919843
+                  ],
+                  "fitted_null_type": 1.0,
+                  "flux_wb": -0.2824293410306401,
+                  "normalized_flux_operand": 0.4234937816420484,
+                  "selected": true
+                },
+                {
+                  "coordinate_m": [
+                    1.171407943168653,
+                    0.660033118024615
+                  ],
+                  "fitted_null_type": 0.0,
+                  "flux_wb": -1.0618710821858195,
+                  "normalized_flux_operand": 0.5374834297466391,
+                  "selected": false
+                }
+              ],
+              "wall_operand": {
+                "coordinate_m": [
+                  1.450890437740998,
+                  -1.2447761464763225
+                ],
+                "flux_wb": 2.0207547678176487,
+                "normalized_flux": 0.0866640582317994,
+                "normalized_flux_before_shadow": 0.0866640582317994,
+                "normalized_flux_nonfinite": null,
+                "shadowed": false,
+                "status": "wall_extremum_admitted"
+              }
+            },
             "time_ms": 3000.0,
             "unrecorded_selected_factor_count": 25
           },
@@ -480,6 +750,50 @@
             "terminal_class_margin": -0.5295734642179688,
             "terminal_relative_residual": 0.11636848392712125,
             "terminal_topology_class": "limited",
+            "terminal_xpoint_diagnostics": {
+              "class_margin_from_operands": -0.5295734642179688,
+              "connectivity_admission": {
+                "admitted_candidate_count": 0,
+                "candidate_count_before_capacity": 0,
+                "candidates": [],
+                "discarded_score_upper_bound": null,
+                "overflow": false,
+                "retained_candidate_count": 0
+              },
+              "selected_x_coordinate_m": [
+                1.231688341323851,
+                0.2923189276976337
+              ],
+              "selected_x_flux_wb": -3.0389879223219403,
+              "selected_x_normalized_flux_operand": 0.5839131090158333,
+              "selected_x_normalized_flux_operand_nonfinite": null,
+              "selection_status": "selected_typed_saddle_not_connectivity_reachable",
+              "typed_saddle_candidate_count": 1,
+              "typed_saddle_candidates": [
+                {
+                  "coordinate_m": [
+                    1.231688341323851,
+                    0.2923189276976337
+                  ],
+                  "fitted_null_type": 0.0,
+                  "flux_wb": -3.0389879223219403,
+                  "normalized_flux_operand": 0.5839131090158333,
+                  "selected": true
+                }
+              ],
+              "wall_operand": {
+                "coordinate_m": [
+                  1.3599918208443051,
+                  -1.6640000247955322
+                ],
+                "flux_wb": 0.24621939455173092,
+                "normalized_flux": 0.05433964479786443,
+                "normalized_flux_before_shadow": 0.05433964479786443,
+                "normalized_flux_nonfinite": null,
+                "shadowed": false,
+                "status": "wall_extremum_admitted"
+              }
+            },
             "time_ms": 3740.0,
             "unrecorded_selected_factor_count": 1
           },
@@ -547,6 +861,70 @@
             "terminal_class_margin": -0.41066778622870476,
             "terminal_relative_residual": 0.009986452049711993,
             "terminal_topology_class": "limited",
+            "terminal_xpoint_diagnostics": {
+              "class_margin_from_operands": -0.41066778622870476,
+              "connectivity_admission": {
+                "admitted_candidate_count": 0,
+                "candidate_count_before_capacity": 0,
+                "candidates": [],
+                "discarded_score_upper_bound": null,
+                "overflow": false,
+                "retained_candidate_count": 0
+              },
+              "selected_x_coordinate_m": [
+                1.2622439463097783,
+                0.5041265734167183
+              ],
+              "selected_x_flux_wb": -1.1033322372838879,
+              "selected_x_normalized_flux_operand": 0.4685215406655289,
+              "selected_x_normalized_flux_operand_nonfinite": null,
+              "selection_status": "selected_typed_saddle_not_connectivity_reachable",
+              "typed_saddle_candidate_count": 3,
+              "typed_saddle_candidates": [
+                {
+                  "coordinate_m": [
+                    1.2622439463097783,
+                    0.5041265734167183
+                  ],
+                  "fitted_null_type": 0.0,
+                  "flux_wb": -1.1033322372838879,
+                  "normalized_flux_operand": 0.4685215406655289,
+                  "selected": true
+                },
+                {
+                  "coordinate_m": [
+                    1.832674879050774,
+                    1.5372525160371038
+                  ],
+                  "fitted_null_type": 0.0,
+                  "flux_wb": -1.5577692866313755,
+                  "normalized_flux_operand": 0.5606973808265967,
+                  "selected": false
+                },
+                {
+                  "coordinate_m": [
+                    2.493574120899379,
+                    0.9619637884669289
+                  ],
+                  "fitted_null_type": 0.0,
+                  "flux_wb": -2.7360271153772473,
+                  "normalized_flux_operand": 0.7996895700571,
+                  "selected": false
+                }
+              ],
+              "wall_operand": {
+                "coordinate_m": [
+                  1.2548957279435489,
+                  -1.6640000247955322
+                ],
+                "flux_wb": 0.921305202523913,
+                "normalized_flux": 0.05785375443682416,
+                "normalized_flux_before_shadow": 0.05785375443682416,
+                "normalized_flux_nonfinite": null,
+                "shadowed": false,
+                "status": "wall_extremum_admitted"
+              }
+            },
             "time_ms": 1080.0,
             "unrecorded_selected_factor_count": 4
           },
@@ -614,6 +992,60 @@
             "terminal_class_margin": -0.42141491886349725,
             "terminal_relative_residual": 0.1868571024038173,
             "terminal_topology_class": "limited",
+            "terminal_xpoint_diagnostics": {
+              "class_margin_from_operands": -0.42141491886349725,
+              "connectivity_admission": {
+                "admitted_candidate_count": 0,
+                "candidate_count_before_capacity": 0,
+                "candidates": [],
+                "discarded_score_upper_bound": null,
+                "overflow": false,
+                "retained_candidate_count": 0
+              },
+              "selected_x_coordinate_m": [
+                1.1461992102477698,
+                -0.4502020777806969
+              ],
+              "selected_x_flux_wb": -0.38487515280024387,
+              "selected_x_normalized_flux_operand": 0.4745969115371108,
+              "selected_x_normalized_flux_operand_nonfinite": null,
+              "selection_status": "selected_typed_saddle_not_connectivity_reachable",
+              "typed_saddle_candidate_count": 2,
+              "typed_saddle_candidates": [
+                {
+                  "coordinate_m": [
+                    1.1461992102477698,
+                    -0.4502020777806969
+                  ],
+                  "fitted_null_type": 0.0,
+                  "flux_wb": -0.38487515280024387,
+                  "normalized_flux_operand": 0.4745969115371108,
+                  "selected": true
+                },
+                {
+                  "coordinate_m": [
+                    2.495228279549795,
+                    1.0001073052425342
+                  ],
+                  "fitted_null_type": 0.0,
+                  "flux_wb": -0.5844016709326896,
+                  "normalized_flux_operand": 0.5175059129081294,
+                  "selected": false
+                }
+              ],
+              "wall_operand": {
+                "coordinate_m": [
+                  1.6972996393156439,
+                  1.6640000247955322
+                ],
+                "flux_wb": 1.5747008979883002,
+                "normalized_flux": 0.053181992673613565,
+                "normalized_flux_before_shadow": 0.053181992673613565,
+                "normalized_flux_nonfinite": null,
+                "shadowed": false,
+                "status": "wall_extremum_admitted"
+              }
+            },
             "time_ms": 3240.0,
             "unrecorded_selected_factor_count": 5
           },
@@ -681,6 +1113,60 @@
             "terminal_class_margin": -0.44991951508185,
             "terminal_relative_residual": 0.14000643607149874,
             "terminal_topology_class": "limited",
+            "terminal_xpoint_diagnostics": {
+              "class_margin_from_operands": -0.44991951508185,
+              "connectivity_admission": {
+                "admitted_candidate_count": 0,
+                "candidate_count_before_capacity": 0,
+                "candidates": [],
+                "discarded_score_upper_bound": null,
+                "overflow": false,
+                "retained_candidate_count": 0
+              },
+              "selected_x_coordinate_m": [
+                1.112819497302449,
+                -0.52302205916762
+              ],
+              "selected_x_flux_wb": -1.5459469733008635,
+              "selected_x_normalized_flux_operand": 0.5035996660183417,
+              "selected_x_normalized_flux_operand_nonfinite": null,
+              "selection_status": "selected_typed_saddle_not_connectivity_reachable",
+              "typed_saddle_candidate_count": 2,
+              "typed_saddle_candidates": [
+                {
+                  "coordinate_m": [
+                    1.112819497302449,
+                    -0.52302205916762
+                  ],
+                  "fitted_null_type": 0.0,
+                  "flux_wb": -1.5459469733008635,
+                  "normalized_flux_operand": 0.5035996660183417,
+                  "selected": true
+                },
+                {
+                  "coordinate_m": [
+                    2.4857149078199976,
+                    1.009563922460729
+                  ],
+                  "fitted_null_type": 0.0,
+                  "flux_wb": -1.849726266133555,
+                  "normalized_flux_operand": 0.5472755643065796,
+                  "selected": false
+                }
+              ],
+              "wall_operand": {
+                "coordinate_m": [
+                  1.3040063344896398,
+                  1.6640000247955322
+                ],
+                "flux_wb": 1.5833815002934517,
+                "normalized_flux": 0.0536801509364917,
+                "normalized_flux_before_shadow": 0.0536801509364917,
+                "normalized_flux_nonfinite": null,
+                "shadowed": false,
+                "status": "wall_extremum_admitted"
+              }
+            },
             "time_ms": 3180.0,
             "unrecorded_selected_factor_count": 1
           },
@@ -748,6 +1234,60 @@
             "terminal_class_margin": -0.3744030895205362,
             "terminal_relative_residual": 1.747136781563195e-16,
             "terminal_topology_class": "limited",
+            "terminal_xpoint_diagnostics": {
+              "class_margin_from_operands": -0.3744030895205362,
+              "connectivity_admission": {
+                "admitted_candidate_count": 0,
+                "candidate_count_before_capacity": 0,
+                "candidates": [],
+                "discarded_score_upper_bound": null,
+                "overflow": false,
+                "retained_candidate_count": 0
+              },
+              "selected_x_coordinate_m": [
+                0.9773408156595623,
+                1.5237727187427772
+              ],
+              "selected_x_flux_wb": -0.416635227718006,
+              "selected_x_normalized_flux_operand": 0.4256591365225496,
+              "selected_x_normalized_flux_operand_nonfinite": null,
+              "selection_status": "selected_typed_saddle_not_connectivity_reachable",
+              "typed_saddle_candidate_count": 2,
+              "typed_saddle_candidates": [
+                {
+                  "coordinate_m": [
+                    0.9773408156595623,
+                    1.5237727187427772
+                  ],
+                  "fitted_null_type": 1.0,
+                  "flux_wb": -0.416635227718006,
+                  "normalized_flux_operand": 0.4256591365225496,
+                  "selected": true
+                },
+                {
+                  "coordinate_m": [
+                    1.1086552551990196,
+                    0.40404739233763576
+                  ],
+                  "fitted_null_type": 0.0,
+                  "flux_wb": -1.552348185298609,
+                  "normalized_flux_operand": 0.5681325026352988,
+                  "selected": false
+                }
+              ],
+              "wall_operand": {
+                "coordinate_m": [
+                  1.311929166869504,
+                  -1.6640000247955322
+                ],
+                "flux_wb": 2.5678835755380436,
+                "normalized_flux": 0.05125604700201342,
+                "normalized_flux_before_shadow": 0.05125604700201342,
+                "normalized_flux_nonfinite": null,
+                "shadowed": false,
+                "status": "wall_extremum_admitted"
+              }
+            },
             "time_ms": 3000.0,
             "unrecorded_selected_factor_count": 0
           },
@@ -828,5 +1368,15 @@
     "tuned_thresholds": 0,
     "wrong_class_rule": "lower residual in the wrong class closes nothing"
   },
-  "source_commit": "fae92c7623001fd034ad861edf1574e112b1fc0a"
+  "source_commit": "fae92c7623001fd034ad861edf1574e112b1fc0a",
+  "xpoint_diagnostic_enrichment": {
+    "driver_sha256": "838cd5c753c0f87522749ddcce8911b55072f900f3e90c4399f01ef0bb6ab982",
+    "duration_field_count_preserved_without_comparison": 15,
+    "duration_policy": "runtime_seconds is preserved from the bank because elapsed time is not deterministic; all other existing numeric leaves regenerated exactly",
+    "existing_numeric_field_count_compared": 447,
+    "existing_numeric_field_difference_count": 0,
+    "existing_output_numeric_field_difference_count": 0,
+    "source_commit": "527eb94a2285e943fcebdced8728404deb9a8530",
+    "terminal_count": 10
+  }
 }

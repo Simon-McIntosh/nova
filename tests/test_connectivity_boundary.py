@@ -27,6 +27,7 @@ from __future__ import annotations
 import ast
 import importlib.util
 import inspect
+import json
 from types import SimpleNamespace
 
 import numpy as np
@@ -152,6 +153,7 @@ def test_explicit_double_extreme_reductions_keep_first_tie():
 
 
 def test_jit_vmap_grad_safe_and_fixed_shape():
+    configure_dtypes()
     ang = jnp.asarray(np.asarray(LCFS_ANGLES))
     small = _limited_field(nr=61, nz=61)
     big = _diverted_field(nr=61, nz=61)
@@ -626,6 +628,29 @@ def test_forward_topology_margin_matches_boolean_transition_and_terminal_gate():
 
     limited = reads[-1]
     profile = ForwardProfile(operator=operator, lattice=lattice)
+    _limited_masks, limited_topology = operator.read(limited[1])
+    from benchmarks.diiid_forward_gs_match import (  # noqa: PLC0415
+        _terminal_xpoint_diagnostics,
+    )
+
+    xpoint_diagnostics = _terminal_xpoint_diagnostics(
+        profile, limited[1], limited_topology
+    )
+    assert xpoint_diagnostics["typed_saddle_candidate_count"] >= 1
+    np.testing.assert_allclose(
+        xpoint_diagnostics["selected_x_coordinate_m"],
+        np.asarray(limited_topology.x_point),
+        rtol=0.0,
+        atol=0.0,
+    )
+    assert xpoint_diagnostics["selected_x_flux_wb"] == float(
+        limited_topology.x_point_flux
+    )
+    assert xpoint_diagnostics["class_margin_from_operands"] == float(
+        limited_topology.class_margin
+    )
+    assert xpoint_diagnostics["connectivity_admission"]["candidates"]
+    json.dumps(xpoint_diagnostics, allow_nan=False)
     equilibrium = SimpleNamespace(
         flux=limited[1],
         fixed_point=SimpleNamespace(residual=jnp.asarray(0.0)),

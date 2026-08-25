@@ -49,6 +49,9 @@ from benchmarks.diiid_corpus_conventions import (
 from nova.biot.greens import hybrid_greens
 from nova.biot.polygon import polygon_greens
 from nova.equilibrium.conservation import FluxLattice
+from nova.equilibrium.connectivity_boundary import (
+    traced_margin_candidate_diagnostics,
+)
 from nova.equilibrium.branch_selection import (
     BranchAdmissibility,
     SelectionHistory,
@@ -2032,6 +2035,197 @@ def _selected_surface_candidates_were_admitted(result) -> bool:
     return True
 
 
+def _finite_or_none(value: float) -> float | None:
+    """Return one finite JSON number, using null for a non-finite operand."""
+
+    return float(value) if np.isfinite(value) else None
+
+
+def _infinity_name(value: float) -> str | None:
+    """Name a non-finite operand without inventing a numeric sentinel."""
+
+    if np.isposinf(value):
+        return "positive_infinity"
+    if np.isneginf(value):
+        return "negative_infinity"
+    if np.isnan(value):
+        return "not_a_number"
+    return None
+
+
+def _terminal_xpoint_diagnostics(profile, state, topology) -> dict[str, Any]:
+    """Serialize the exact X operand and its connectivity-local evidence."""
+
+    operator = profile.operator
+    physical = jnp.asarray(state)[: operator.physical_node_number]
+    coordinate = np.asarray(operator.grid.coordinate, dtype=np.float64)
+    radius = np.unique(coordinate[:, 0])
+    height = np.unique(coordinate[:, 1])
+    expected = np.c_[
+        np.repeat(radius, height.size),
+        np.tile(height, radius.size),
+    ]
+    if coordinate.shape != expected.shape or not np.array_equal(coordinate, expected):
+        raise ValueError("margin diagnostics require a tensor-product grid")
+    grid_flux, wall_flux = operator.topology.split_flux_map(physical)
+    _vmap_o, vmap_x = operator._fixed_design_topology.grid(grid_flux)
+    classification_wall = jnp.concatenate(
+        (topology.wall_point, topology.wall_point_flux[None])
+    )
+    radial_count = radius.size
+    vertical_count = height.size
+    diagnostic = traced_margin_candidate_diagnostics(
+        grid_flux.reshape((radial_count, vertical_count)).T,
+        jnp.asarray(radius, dtype=jnp.float64),
+        jnp.asarray(height, dtype=jnp.float64),
+        operator.inside_material.reshape((radial_count, vertical_count)).T,
+        topology.axis[0],
+        topology.axis[1],
+        96,
+        18,
+        operator.wall.coordinate[:, 0],
+        operator.wall.coordinate[:, 1],
+        wall_flux,
+        vmap_x,
+        classification_wall,
+    )
+    host = jax.device_get(diagnostic)
+    diagnostic_margin = float(host["class_margin"])
+    terminal_margin = float(topology.class_margin)
+    if diagnostic_margin != terminal_margin:
+        raise RuntimeError(
+            "terminal X diagnostics changed the exact class-margin operand"
+        )
+
+    axis_flux = float(host["axis_flux"])
+    outward_span = float(host["outward_flux_span"])
+    typed_table = np.asarray(host["typed_candidates"], dtype=float)
+    typed_present = np.asarray(host["typed_candidate_present"], dtype=bool)
+    selected_index = int(host["selected_typed_candidate_index"])
+    typed_candidates = []
+    for index in np.flatnonzero(typed_present):
+        candidate = typed_table[index]
+        typed_candidates.append(
+            {
+                "coordinate_m": candidate[:2].tolist(),
+                "flux_wb": float(candidate[2]),
+                "fitted_null_type": float(candidate[3]),
+                "normalized_flux_operand": float(
+                    (candidate[2] - axis_flux) / outward_span
+                ),
+                "selected": int(index) == selected_index,
+            }
+        )
+
+    connectivity_table = np.asarray(host["connectivity_candidates"], dtype=float)
+    connectivity_present = np.asarray(
+        host["connectivity_candidate_present"], dtype=bool
+    )
+    connectivity_admitted = np.asarray(
+        host["connectivity_candidate_admitted"], dtype=bool
+    )
+    connectivity_resolved = np.asarray(
+        host["connectivity_candidate_resolved"], dtype=bool
+    )
+    connectivity_state = np.asarray(host["connectivity_candidate_state"], dtype=int)
+    connectivity_confidence = np.asarray(
+        host["connectivity_candidate_confidence"], dtype=float
+    )
+    connectivity_class_margin = np.asarray(
+        host["connectivity_candidate_class_margin"], dtype=float
+    )
+    connectivity_boundary_snr = np.asarray(
+        host["connectivity_candidate_boundary_snr"], dtype=float
+    )
+    connectivity_root_support = np.asarray(
+        host["connectivity_candidate_root_support_cell"], dtype=float
+    )
+    state_name = {0: "absent", 1: "unresolved", 2: "resolved"}
+    connectivity_candidates = []
+    for index in np.flatnonzero(connectivity_present):
+        candidate = connectivity_table[index]
+        connectivity_candidates.append(
+            {
+                "coordinate_m": [
+                    _finite_or_none(candidate[0]),
+                    _finite_or_none(candidate[1]),
+                ],
+                "flux_wb": _finite_or_none(candidate[2]),
+                "fitted_null_type": _finite_or_none(candidate[3]),
+                "admitted": bool(connectivity_admitted[index]),
+                "resolved": bool(connectivity_resolved[index]),
+                "state": state_name[int(connectivity_state[index])],
+                "confidence": _finite_or_none(connectivity_confidence[index]),
+                "class_margin": _finite_or_none(connectivity_class_margin[index]),
+                "boundary_snr": _finite_or_none(connectivity_boundary_snr[index]),
+                "root_support_cell": _finite_or_none(connectivity_root_support[index]),
+            }
+        )
+
+    selected = np.asarray(host["selected_typed_candidate"], dtype=float)
+    selected_present = bool(host["selected_typed_candidate_present"])
+    selected_operand = float(host["selected_x_normalized_flux_operand"])
+    wall = np.asarray(host["wall_candidate"], dtype=float)
+    wall_present = bool(host["wall_candidate_present"])
+    wall_operand_before_shadow = float(
+        host["wall_normalized_flux_operand_before_shadow"]
+    )
+    wall_operand = float(host["wall_normalized_flux_operand"])
+    wall_shadowed = bool(host["wall_shadowed"])
+    typed_count = int(host["typed_candidate_count"])
+    connectivity_admitted_count = int(host["connectivity_admitted_slot_count"])
+    if typed_count == 0:
+        selection_status = "no_typed_saddle_candidate"
+    elif not np.isfinite(selected_operand):
+        selection_status = "typed_saddle_operand_nonfinite"
+    elif connectivity_admitted_count == 0:
+        selection_status = "selected_typed_saddle_not_connectivity_reachable"
+    else:
+        selection_status = "selected_typed_saddle_with_connectivity_support"
+    if not wall_present:
+        wall_status = "no_wall_extremum"
+    elif wall_shadowed:
+        wall_status = "wall_extremum_rejected_by_private_flux_shadow"
+    else:
+        wall_status = "wall_extremum_admitted"
+
+    return {
+        "selection_status": selection_status,
+        "selected_x_coordinate_m": selected[:2].tolist() if selected_present else None,
+        "selected_x_flux_wb": float(selected[2]) if selected_present else None,
+        "selected_x_normalized_flux_operand": _finite_or_none(selected_operand),
+        "selected_x_normalized_flux_operand_nonfinite": _infinity_name(
+            selected_operand
+        ),
+        "typed_saddle_candidate_count": typed_count,
+        "typed_saddle_candidates": typed_candidates,
+        "connectivity_admission": {
+            "candidate_count_before_capacity": int(
+                host["connectivity_candidate_count_before_capacity"]
+            ),
+            "retained_candidate_count": len(connectivity_candidates),
+            "admitted_candidate_count": connectivity_admitted_count,
+            "overflow": bool(host["connectivity_candidate_overflow"]),
+            "discarded_score_upper_bound": _finite_or_none(
+                float(host["connectivity_discarded_score_upper_bound"])
+            ),
+            "candidates": connectivity_candidates,
+        },
+        "wall_operand": {
+            "status": wall_status,
+            "coordinate_m": wall[:2].tolist() if wall_present else None,
+            "flux_wb": float(wall[2]) if wall_present else None,
+            "normalized_flux_before_shadow": _finite_or_none(
+                wall_operand_before_shadow
+            ),
+            "normalized_flux": _finite_or_none(wall_operand),
+            "normalized_flux_nonfinite": _infinity_name(wall_operand),
+            "shadowed": wall_shadowed,
+        },
+        "class_margin_from_operands": diagnostic_margin,
+    }
+
+
 def _solve_wall_topology_frame(
     row: dict[str, Any],
     frame: int,
@@ -2183,9 +2377,13 @@ def _solve_wall_topology_frame(
         selected_penalties = np.asarray(result.accepted_topology_penalties, dtype=float)
         promoted_margins = selected_margins[promoted]
         promoted_penalties = selected_penalties[promoted]
+        terminal_xpoint_diagnostics = _terminal_xpoint_diagnostics(
+            profile, result.state, topology
+        )
         record.update(
             {
                 "terminal_class_margin": float(topology.class_margin),
+                "terminal_xpoint_diagnostics": terminal_xpoint_diagnostics,
                 "selected_wrong_class_advance_count": int(
                     np.count_nonzero(promoted_margins < 0.0)
                 ),
@@ -2639,6 +2837,106 @@ def _margin_arm_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _compare_existing_numeric_fields(
+    banked: Any,
+    regenerated: Any,
+    path: tuple[str, ...] = (),
+) -> tuple[int, int]:
+    """Require exact regeneration of every banked non-duration number."""
+
+    if isinstance(banked, dict):
+        compared = 0
+        duration_count = 0
+        for key, value in banked.items():
+            if key not in regenerated:
+                raise RuntimeError(
+                    f"regenerated receipt dropped {'.'.join(path + (key,))}"
+                )
+            child_compared, child_duration = _compare_existing_numeric_fields(
+                value, regenerated[key], path + (key,)
+            )
+            compared += child_compared
+            duration_count += child_duration
+        return compared, duration_count
+    if isinstance(banked, list):
+        if not isinstance(regenerated, list) or len(banked) != len(regenerated):
+            raise RuntimeError(f"regenerated receipt changed {'.'.join(path)} length")
+        compared = 0
+        duration_count = 0
+        for index, (banked_item, regenerated_item) in enumerate(
+            zip(banked, regenerated, strict=True)
+        ):
+            child_compared, child_duration = _compare_existing_numeric_fields(
+                banked_item,
+                regenerated_item,
+                path + (str(index),),
+            )
+            compared += child_compared
+            duration_count += child_duration
+        return compared, duration_count
+    numeric = isinstance(banked, int | float) and not isinstance(banked, bool)
+    if not numeric:
+        return 0, 0
+    if path and path[-1] == "runtime_seconds":
+        return 0, 1
+    if type(banked) is not type(regenerated) or banked != regenerated:
+        raise RuntimeError(
+            f"regenerated numeric field changed at {'.'.join(path)}: "
+            f"banked={banked!r}, regenerated={regenerated!r}"
+        )
+    return 1, 0
+
+
+def _merge_xpoint_diagnostics(
+    banked: dict[str, Any], regenerated: dict[str, Any]
+) -> dict[str, Any]:
+    """Add terminal X evidence while preserving every existing receipt entry."""
+
+    merged = json.loads(json.dumps(banked, allow_nan=False))
+    diagnostic_count = 0
+    for arm_name, banked_arm in merged["arms"].items():
+        regenerated_records = {
+            (record["shot"], int(record["frame"])): record
+            for record in regenerated["arms"][arm_name]["frame_records"]
+        }
+        for banked_record in banked_arm["frame_records"]:
+            key = (banked_record["shot"], int(banked_record["frame"]))
+            regenerated_record = regenerated_records[key]
+            banked_record["margin_graded"]["terminal_xpoint_diagnostics"] = (
+                regenerated_record["margin_graded"]["terminal_xpoint_diagnostics"]
+            )
+            diagnostic_count += 1
+    if diagnostic_count != 10:
+        raise RuntimeError("terminal X diagnostics did not cover all ten banked reads")
+    banked_measurement = dict(banked)
+    banked_measurement.pop("xpoint_diagnostic_enrichment", None)
+    compared_count, excluded_duration_count = _compare_existing_numeric_fields(
+        banked_measurement, regenerated
+    )
+    merged["xpoint_diagnostic_enrichment"] = {
+        "terminal_count": diagnostic_count,
+        "existing_numeric_field_count_compared": compared_count,
+        "existing_numeric_field_difference_count": 0,
+        "duration_field_count_preserved_without_comparison": excluded_duration_count,
+        "driver_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "source_commit": subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], text=True
+        ).strip(),
+        "duration_policy": (
+            "runtime_seconds is preserved from the bank because elapsed time is "
+            "not deterministic; all other existing numeric leaves regenerated exactly"
+        ),
+    }
+    output_numeric_difference_count = 0
+    _output_compared, _output_durations = _compare_existing_numeric_fields(
+        banked, merged
+    )
+    merged["xpoint_diagnostic_enrichment"][
+        "existing_output_numeric_field_difference_count"
+    ] = output_numeric_difference_count
+    return merged
+
+
 def run_margin_frame_remeasure(
     data: Path,
     output: Path,
@@ -2648,6 +2946,7 @@ def run_margin_frame_remeasure(
     """Re-measure both wall surfaces with continuously graded proposals."""
 
     configure_dtypes()
+    banked_receipt = json.loads(output.read_text()) if output.exists() else None
     sign_parity = _run_sign_parity_check()
     pseudo_banked, physical_banked = _banked_boolean_surface_records()
     cases = [(record["shot"], record["frame"]) for record in pseudo_banked]
@@ -2772,6 +3071,8 @@ def run_margin_frame_remeasure(
             ),
         },
     }
+    if banked_receipt is not None:
+        receipt = _merge_xpoint_diagnostics(banked_receipt, receipt)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(
         json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n"

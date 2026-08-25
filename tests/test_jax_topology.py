@@ -122,18 +122,55 @@ def test_batched_update_matches_per_slice(topology):
         assert np.array_equal(np.asarray(batch_ionize[i]), np.asarray(ionize_i))
 
 
-def test_batched_primary_points_match_per_slice(topology):
-    """Primary o-/x-point queries vmap to the same values as per-slice."""
-    topo, coordinate, wall_xy = topology
-    scales = [1.0, 1.15, 0.85]
-    psi_batch = _flux_stack(coordinate, wall_xy, scales)
-    polarity = 1
-    psi_grid = jax.vmap(lambda p: topo.split_flux_map(p)[0])(psi_batch)
+def test_batched_primary_points_match_per_slice(diverted):
+    """Batched primary X coordinates and flux equal per-slice reads.
 
-    batch_o = jax.vmap(topo.o_point, in_axes=(0, None))(psi_grid, polarity)
-    for i in range(len(scales)):
-        o_i = topo.o_point(psi_grid[i], polarity)
-        assert np.allclose(np.asarray(batch_o[i]), np.asarray(o_i), equal_nan=True)
+    The shared grid carries two physical saddles.  Two additional slices move
+    only the wall operand to either side of an almost-tangent wall/X flux tie,
+    so the parity assertion covers both a double-null and the class hand-off.
+    """
+    topo, psi, inside = diverted
+    polarity = 1
+    psi_grid, psi_wall = topo.split_flux_map(psi)
+    vmap_o, vmap_x = topo.grid(psi_grid)
+    data_o = topo.o_point_data(vmap_o, polarity)
+    data_x = topo.x_point_data(vmap_x, polarity, data_o[2])
+    data_w = topo.wall(psi_wall, polarity)
+    finite_x_count = int(np.sum(np.isfinite(np.asarray(vmap_x)[:, 0])))
+    assert finite_x_count == 2
+
+    flux_span = abs(float(data_x[2] - data_o[2]))
+    tie_offset = float(data_x[2] - data_w[2])
+    tie_epsilon = 1.0e-10 * flux_span
+    wall_offsets = jnp.asarray(
+        [0.0, tie_offset - tie_epsilon, tie_offset + tie_epsilon]
+    )
+    psi_batch = jnp.concatenate(
+        (
+            jnp.broadcast_to(psi_grid, (wall_offsets.size, psi_grid.size)),
+            psi_wall[None, :] + wall_offsets[:, None],
+        ),
+        axis=1,
+    )
+
+    _batch_masks, batch_state = topo.read_batch(psi_batch, polarity, inside)
+    np.testing.assert_allclose(
+        np.abs(
+            np.asarray(batch_state.wall_point_flux[1:] - batch_state.x_point_flux[1:])
+        ),
+        tie_epsilon,
+        rtol=1.0e-6,
+        atol=8.0 * np.finfo(float).eps * max(flux_span, 1.0),
+    )
+    for index in range(psi_batch.shape[0]):
+        _slice_masks, slice_state = topo.read(psi_batch[index], polarity, inside)
+        np.testing.assert_allclose(
+            np.asarray(batch_state.x_point[index]),
+            np.asarray(slice_state.x_point),
+            rtol=0.0,
+            atol=8.0 * np.finfo(float).eps,
+        )
+        assert float(batch_state.x_point_flux[index]) == float(slice_state.x_point_flux)
 
 
 def test_flux_target_preserves_matrix_and_tree_contracts():

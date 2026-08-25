@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T09:28:55",
+  "updated": "2026-08-25T09:30:32",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -522,7 +522,11 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a0358b-83fb-7493-b03c-93b69217d2d5",
-        "created": "2026-08-24"
+        "created": "2026-08-24",
+        "sessions": {
+          "gpt-5.6-sol": "01a0358b-83fb-7493-b03c-93b69217d2d5"
+        },
+        "session_model": "gpt-5.6-sol"
       },
       {
         "id": "harmonics",
@@ -33137,9 +33141,84 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260824T205205768560-h200-matrix-benchmark",
+        "plan": "coefficient-space-newton",
+        "section": "\u00a712",
+        "node": "h200-matrix-benchmark",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "h200-matrix",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T20:52:10Z",
+        "completed_at": "2026-08-25T07:30:23Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 38293,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "20e6626ab66beeadc2250f9f3e9e459566f2b093",
+        "commits": [
+          "2c8e02a2dade3d81228b4dc8ba26662caf5d6363"
+        ],
+        "changed_lines": {
+          "added": 651,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T205205768560-h200-matrix-benchmark/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0358b-83fb-7493-b03c-93b69217d2d5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 82451456,
+            "cached_input_tokens_cumulative": 82451456,
+            "input_tokens": 83530110,
+            "input_tokens_cumulative": 83530110,
+            "output_tokens": 89973,
+            "output_tokens_cumulative": 89973,
+            "reasoning_output_tokens": 26242,
+            "reasoning_output_tokens_cumulative": 26242
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 826
+    "_version": 828
   }
 }

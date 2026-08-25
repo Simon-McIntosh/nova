@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="coefficient-space-newton">
   <meta name="plan-title" content="Coefficient-Space Newton — solve for a smooth basis, not for every cell">
   <meta name="plan-summary" content="The flux map is smooth in value and gradient, so the Newton unknown need not be one value per cell. Carry a tensor-product spline coefficient set as the state, keep cell-resolution source evaluation and current moments, and the effective solution degree becomes the knot count. If that degree is order one hundred rather than order ten thousand, the dense Jacobian is affordable and the entire Krylov conditioning apparatus becomes unnecessary.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="12.0">
   <meta name="plan-capability-version" content="1.0">
@@ -28,8 +28,8 @@
 <meta name="plan-modified" content="2026-08-25">
 <meta name="plan-commits" content="485f6fdaa88328b96633db85111093e332b4aa53,dbee3048d4767af04373155c50b6e9753bfc330c,975e4acec3016cd56295d458d07eaf2aa8233454,75d6eb010612c12486327fa8c794efe6c662b71c,bf9dafdbf258624fc42d3f2d7eef8e468495b328,d6be878b6eb1eac9ea3d85d87f16cd2b48787cef,fd2baeb113b3443314618b9e6e29819ba233ce6e,231659ea748322d8607a71cc82b2d4e522e8cc1c,df676ca4329ead0f850aeeace59abc9c4f7a6a95,8794f6067002889a75aa99a05cf83863998d22af">
 <meta name="plan-artifacts" content="scripts/coefficient_basis_reuse/report.md,docs/figures/coefficient-space-newton/representation-degree.json,docs/figures/coefficient-space-newton/edge-current-jump.json,docs/figures/coefficient-space-newton/clipped-coupling-order.json,docs/figures/coefficient-space-newton/second-order-kernel.json,docs/figures/coefficient-space-newton/support-order-arms.json,docs/figures/coefficient-space-newton/carrier-arms.json,docs/figures/coefficient-space-newton/analytic-truth-rescore.json,docs/figures/coefficient-space-newton/plasma-only-carrier.json,nova/biot/second_moment_kernel.py,nova/equilibrium/coefficient_carrier.py,docs/evidence/archive/coefficient-space-newton-landed.html">
-<meta name="plan-impl" content="0.966">
-<meta name="plan-version" content="13">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-version" content="14">
 </head>
 <body>
   <main class="plan-doc">
@@ -432,43 +432,25 @@
     trade rather than summarised as a win. A matrix in which no arm beats A on any axis closes this
     plan honestly, and arm A remaining the production path is then the result.</p>
 
-    <h2 id="s12">§12 — Benchmark the matrix on the H200, and assess batchability across cards</h2>
-
-    <p><strong>The matrix's speed axis is not credible on a CPU lane.</strong> The consumer this work
-    ultimately serves is a catalog rung on the reserved H200, so the authoritative timing must be
-    measured there, on the device and dtype the product runs. Until that is done, any speed claim from
-    a host-lane arm is indicative only and the receipt must say so.</p>
-
-    <p><strong>Separate the one-time build from the per-slice execute, because conflating them has
-    already misled this campaign once.</strong> The throughput plan records the lesson explicitly: a
-    one-time interaction build of roughly 202 s measured 52 times the solve, and only the execute
-    multiplies by the 1,341,435 slices, so an end-to-end wall clock would measure the build and report
-    it as throughput. Every arm reports build and execute separately, and the throughput figure is the
-    execute alone, quoted against the banked <strong>46.577604167 slices per second per device</strong>.</p>
-
-    <p><strong>Batchability is the property that decides whether an arm is usable at campaign scale,
-    and it is not the same as single-frame speed.</strong> An arm can be slower per frame and still win
-    if it batches wider — which is precisely the coefficient carrier's expected shape, since it stacks
-    a coefficient axis of order one hundred rather than a state axis of order ten thousand, and the
-    second-order support doubles the coupling rather than multiplying it by 13.6 as refinement does. So
-    the assessment sweeps batch width to saturation on one card, then scales across cards.</p>
-
-    <p>The reservation constraint is a fact of the lane rather than a detail: work on
-    <code>betelgeuse</code> must name <code>--reservation=gpu_0003_grpA</code>, which reserves CPUs
-    15-29 and 47-61 while making the cards requestable through it. Card availability is expected to be
-    around six rather than the full complement, so the ladder is declared from what the reservation
-    actually grants at run time rather than assumed, and a short ladder is a reportable constraint
-    rather than a failure.</p>
-
-    <p><strong>Done when</strong> each matrix arm carries, on the reserved H200 at the production
-    dtype: the one-time build cost and the per-slice execute cost reported separately, with the
-    execute converted to slices per second per device and quoted against the banked 46.577604167; the
-    batch width at which one card saturates, with peak device memory at that width; a card ladder from
-    one card to the largest the reservation grants, reporting throughput and scaling efficiency at
-    each rung together with the sharding arrangement used; and an explicit statement of which arm is
-    preferred at campaign scale and whether that differs from the arm preferred on single-frame
-    convergence. A ladder shorter than the cards nominally present is recorded with the number
-    actually granted, since a silently truncated ladder reads as full coverage.</p>
+    <section id="s12" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-25 — arm A at campaign scale</span>
+        <h2>§12 — Benchmark the matrix on the H200, and assess batchability across cards</h2></header>
+      <p class="landed-summary"><strong>Arm A wins at campaign scale and it is not close.</strong>
+      Saturating at width <strong>512</strong> (8.202 GiB/device) it executes
+      <strong>39.647 µs/slice</strong> = <strong>25,222.87 slices/s/device</strong> —
+      <strong>541.5×</strong> the banked 46.5776 — scaling across the <em>five</em> cards actually
+      granted at <strong>97.72 %</strong> efficiency. Campaign arithmetic on measured five-card
+      execute alone: <strong>A 10.96 s</strong>, B 20.39 s, C 11.87 s, D 20.30 s for all 1,341,435
+      slices, one-time totals (2.07 / 16.14 / 11.96 / 24.35 s) left unmultiplied. A and B are the only
+      float64-converged eligible arms, so this does not promote the stalled carriers, and it agrees
+      with the single-frame verdict (an A/B tie). <strong>Arm B's memory is far worse than the shared
+      CPU lane suggested:</strong> 66.18 % above A at width 256 and 66.02 % at 512, spanning
+      61.68–523.94 % across the equal-width table — not 40–51 %. Five of eight nominal cards recorded
+      explicitly so the ladder is not read as full-node coverage. Artifact
+      <code>docs/figures/coefficient-space-newton/h200-matrix-benchmark.json</code> (commit
+      <code>2c8e02a2</code>). Full record:
+      <a href="/nova/evidence/archive/coefficient-space-newton-landed#h200-matrix">§12 landed</a>.</p>
+    </section>
 
     <section id="s13" class="section-landed">
       <header><span class="badge badge-shipped">✓ landed 2026-08-24 — floor account refuted</span>
@@ -701,10 +683,16 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-csn-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-24" data-recommends-skill="/reckon-ship coefficient-space-newton" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-csn-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-24" data-recommends-skill="/reckon-ship coefficient-space-newton" data-resolved-at="2026-08-25T07:32:04+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Measure the degree before building anything, and split every error by region</h4>
     <div class="r-fu-body"><p>SECTION 4 BEFORE SECTION 5, and the ordering carries the whole risk of the plan. The central claim is that the effective solution degree is low. That is answerable with no solve, on banked maps, by fitting spline lattices of increasing knot count and reporting the error. If a modest lattice reproduces a banked converged root well below the residual the production solve is fighting, the prototype is justified; if the error stalls near the plateau, the compression is not available at this order and the honest outcome is to say so and stop. Building the solver first would spend the expensive part of the plan on an unmeasured premise.</p><p>THE MACHINERY IS MOSTLY THERE AND ONE THING IS NOT. <code>nova/linalg/tensor_spline.py</code> is already a traced <code>Pytree</code> tensor-product cubic spline with not-a-knot ends, and its <code>TensorSplineEvaluation</code> already returns both second derivatives and the mixed term, which is exactly what Δ* needs. What it does not do is carry a coarse-knot coefficient set as its primary object: it is parameterised by sampled cell values with one Bernstein block per cell, so its degree-of-freedom count is still the cell count. That gap is the plan, and the open <code>coefficient-parameterisation</code> decision is about how to close it without creating a second authority for spline evaluation.</p><p>EVERY ERROR IS REPORTED BY REGION, never as a single global norm. A spline can fit a flux map to six digits in the core while carrying all its error in a thin band at the separatrix, and that band is exactly where the topology predicate reads. The physical reason is not subtle: the toroidal current density jumps to zero across the plasma boundary, so ψ is C¹ but not C² there, and a globally smooth basis cannot represent a curvature jump without error. Closed-flux region, separatrix band, scrape-off layer — three numbers, every time.</p><p>THE PAYOFF TO MEASURE IS CONDITIONING, and it is separate from convergence. At order one hundred unknowns the Jacobian can be formed explicitly and solved directly, which removes Arnoldi, GMRES, the projected condition number, step conditioning and non-normal amplification from the path altogether. Quote the dense condition number against the banked projected Krylov condition of 4087.40844825275 on the same frame. Then quote the terminal residual separately. A receipt that lets a conditioning win read as a convergence win fails review.</p><p>WATCH THE FIXED-SHAPE CONTRACT if the boundary treatment tempts you toward a knot line that follows the moving separatrix. A basis that depends on the iterate threatens exactly the traced, batchable property that makes this approach attractive for the catalog. That tension is the second open decision and it should be answered from the section 4 measurement, not in advance.</p></div>
     <pre class="r-fu-prompt">/reckon-ship coefficient-space-newton</pre>
+    <p class="r-fu-outcome">done. Every instruction here held and the ordering it insisted on was the right one. Section 4 ran before section 5 with zero solves and zero forward-map evaluations enforced on the driver, and it found the effective degree low - all eight targets below the hardest banked production residual at 4 knots per axis for the closed-form carriers and 6 for the stored ones. Every error was reported by region throughout, which is what let the separatrix band be shown binding for only 2 of 8 targets rather than assumed universal. The conditioning payoff was measured and kept separate from convergence, exactly as demanded: the dense 36 by 36 Jacobian conditions at 119.02 against the banked projected Krylov 4087.41, thirty-four times better, solved to 3.16e-16 - and the carrier still does not converge, terminating at 3.708e-2 against arm A's 2.711e-15 even after its Jacobian was corrected from differentiating the projected residual to the exact one. A receipt letting the conditioning win read as a convergence win would have failed review; none did. The fixed-shape contract was never traded away, and the boundary treatment was decided from measurement rather than in advance: the edge current tapers to exactly zero on the experimental lane so no enrichment was needed, and the Green operator generates the jump by construction. Three attributions were refuted by measurement rather than argued - a Delta-star stencil not in the residual path, a clipped-source coupling already second order, and the projection floor undone by its own remedy - and the second-order support lever closed as a curiosity on a seven-rung iso-accuracy ladder. The H200 benchmark then made arm A the campaign-scale preference in agreement with its single-frame verdict. FOLLOWUP: f-csn-002 points at discrete-operator-analytic-error for the analytic gap this plan opened and could not carry.</p>
+    </article>
+<article class="r-fu" data-id="f-csn-002" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship discrete-operator-analytic-error" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The analytic gap this plan opened is owned elsewhere</h4>
+    <div class="r-fu-body"><p>POINTER ONLY - this plan is shipped and carries no executable work. Its own question is answered: the coefficient carrier wins conditioning at 119.02 against a banked projected Krylov 4087.41 and loses convergence, its stall is attributed to a Jacobian differentiating the projected residual rather than the exact one, and arm A remains the production path with arm B a measured trade rather than a win.</p><p>WHAT IT OPENED AND COULD NOT CARRY is the 26 to 45 per cent analytic error both exact-value arms show while converging to machine precision on their own discrete fixed points. That is owned by <code>discrete-operator-analytic-error</code>, which has since established that the forward map ADMITS an analytic fixed point at machine precision with every posed term matching the closed form, and relocated the question to which fixed point the solver reaches. Nothing is owed from here.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship discrete-operator-analytic-error</pre>
     </article>
 </section>
 
@@ -747,6 +735,9 @@
 </div>
 <div class="r-comment" data-section="s15" data-id="c-20260825T0645-contour" data-who="reckon-ship" data-when="2026-08-25T06:45:00Z">
     <div class="r-comment-body">higher-order-contour-extraction landed - commit 479667ed, merged, gate PASSED, 7 connectivity tests plus 3 characterisation tests green. ORDER AND CONTINUITY BOTH DELIVERED. Fitted crossing order 3.744794319429303 +/- 0.13911937829698434 for the global-spline route against 1.869269255057073 +/- 0.07115600867187753 linear, across 16 to 96 cells per axis - nearly fourth order against second, uncertainties nowhere near overlapping. Finest crossing RMS 1.1903150941168268e-9 m against 8.376552623155767e-5 m, a factor of about 70000. The retained coarse smoke agrees: 9.151001514989856e-7 m against 2.370674740501376e-3 m, ratio 2590.617799175399. MAXIMUM UNIT-TANGENT JUMP IS MEASURED EXACTLY 0.0 over all 276 shared joins at the finest grid against 0.0351 linear, and 0.0 over 29 matched joins on the coarse smoke. An exactly zero tangent jump is a stronger statement than a small one and is reported as measured rather than folded into a tolerance. Curvature matching is explicitly NOT implemented and the receipt says so rather than implying C2. THE CONTRACT PASSES WITHOUT MASKING, which is what I asked for and refused to weaken. Every inactive edge, segment, index, tangent, control and saddle slot is canonical exact zero; eager against jit agrees to a maximum 9.094947017729282e-13 in edge_parameter and scalar against vmap to 3.3306690738754696e-16 in edge_tangent_rz, over EVERY active and canonical padded value. The tempting option - narrowing the agreement comparison to valid slots - was refused, because a padded fixed-shape output whose inactive contents vary is how a result becomes layout dependent, and canonicalising the padding is what separatrix_clip already does to earn its 2.2e-16 area exactness. Machinery: global not-a-knot tensor-spline edge restrictions rooted with 40 fixed bisection steps, connected by gradient-matched cubic controls. AMBIGUITY REPORTED RATHER THAN AVERAGED: 2 ambiguous saddle cells encountered, 1 resolved from its measured stationary value and 1 tie-broken at the exact saddle level, both stated with their treatment. AND THE GATE LOCK DID ITS JOB - this node changes extraction, which is exactly what the standing STEP assertions were installed to catch: separatrix_clip.py is unchanged with working_tree_changed false, and the transport characterisation is 3 of 3 green with vpr_face and g1_face bounds unchanged at 3.92 and 6.20 per cent.</div>
+</div>
+<div class="r-comment" data-section="s12" data-id="c-20260825T0735-h200" data-who="reckon-ship" data-when="2026-08-25T07:35:00Z">
+    <div class="r-comment-body">h200-matrix-benchmark landed - commit 2c8e02a2, merged, gate PASSED, job 1254399 on the reserved H200 at float64, receipt 209699 bytes sha256 666f053c. ARM A IS PREFERRED AT CAMPAIGN SCALE AND THE MARGIN IS NOT CLOSE. Arm A: one-time 2.074064 s (build 0.209207 + compile 1.864857), saturates at width 512 with 8.202224 GiB/device, execute 39.646553 us/slice = 25222.873741 slices/s/device = 541.523640x the banked 46.577604167, card ladder 25054.014877 at 100 per cent, 49903.594617 at 99.592011, 74344.445642 at 98.912218, 97841.379291 at 97.630439 and 122410.216621 at 97.717046. Arm B: one-time 16.135270 s, saturates at 256 with 6.855924 GiB, execute 72.237923 us/slice = 13843.144464 = 297.206022x, efficiency falling to 95.377534. Arm C: one-time 11.960875 s including a 9.450949 s carrier build, saturates at 256 with the LOWEST device memory at 4.123420 GiB, execute 41.121402 us/slice = 24318.236821 = 522.101496x, efficiency to 92.233605, and width 2048 records the one-card exhaustion boundary after a successful 1024. Arm D: one-time 24.348369 s, 13765.039825 = 295.529151x, efficiency 96.306693. THE CAMPAIGN ARITHMETIC, with build separated from execute as this section required: applying 1341435 slices only to measured five-card execute gives 10.958522 s for A, 20.387690 for B, 11.865246 for C and 20.301401 for D, one-time totals unmultiplied. So the full catalog's EXECUTE is about eleven seconds on five cards - the hour-scale goal was never throughput-bound and the binding constraint is convergence. THE PREFERENCE IS PROPERLY FENCED: A and B are the only float64-converged eligible arms, so this does not promote the stalled carriers whatever their throughput, and it does NOT differ from the single-frame preference, which is an A/B tie - the comparison this section asked for explicitly, answered as agreement. TWO CORRECTIONS THE DEVICE LANE FORCED. Arm B's memory overhead is much WORSE than the shared CPU allocation suggested: 66.182101 per cent above A at width 256 and 66.018271 at 512, spanning 61.681737 to 523.940439 per cent across the equal-width device table against the 40 to 51 previously believed, with all raw bytes retained. That is device memory at equal width, a DIFFERENT quantity from section 14's peak process RSS which measured 1.0x on an exclusive CPU node; not contradictory but not to be conflated. And the allocation granted FIVE of eight nominal cards, SLURM_JOB_GPUS 0,1,2,3,6 remapped to five local tokens, recorded explicitly so a short ladder is not read back as full-node coverage. METHOD HELD: independent slice batches per rung, static interactions replicated once per device, the dynamic slice axis evenly sharded, inputs preplaced before warmup and timing, no cross-device collective in the timed region - excluding the resharding defect that correctly invalidated job 1254320. Jobs 1254380 and 1254382 ended at external allocation limits with no traceback and are capacity history, not code-defect attempts.</div>
 </div>
 </section>
 </main>

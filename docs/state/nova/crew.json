@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T14:44:55",
+  "updated": "2026-08-25T15:07:32",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -35560,9 +35560,103 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T124539901365-typed-saddle-containment",
+        "plan": "primary-xpoint-evidence",
+        "section": "\u00a72",
+        "node": "typed-saddle-containment",
+        "node_definition": {
+          "done_when": "The selector currently takes an argmin over normalised level with NO containment test, so on 21983/35 it chose saddles at (0.4500, -1.8175) and (0.4625, +1.8037) over genuine in-vessel pinch candidates at (0.5424, -1.2231) and (0.5526, +1.2740), because the outside ones sat 0.09597 and 0.08680 lower in level. Add a POLYGON containment test against operator.wall.coordinate, not a bounding-box test: that polygon bounds to Z plus or minus 1.825 so a box test passes both offending saddles and fixes nothing. Only the separate connectivity-local detector currently receives inside_limiter, and its table does not feed the class selector, so establish where containment belongs for the typed candidates and say why you put it there. It must stay jit and vmap safe and fixed-shape - mask candidates rather than compacting them, since a data-dependent count breaks tracing. REQUIRED REPORTING, because this changes production class margins: give a before-and-after table of selected X coordinate, selected level, height band, wall shadow verdict and class margin for ALL SIX frozen MAST references across both arms, twelve rows, and mark every row that changed. Expect 21983/35 to flip both arms from ADMITTED to SHADOWED with margins becoming non-finite; expect the four already-rejected terminals to be unchanged since they select in-vessel saddles at |Z| 1.21 to 1.26. THE THREE UNCHECKED REFERENCES ARE THE POINT of this table: 21985/51, 21986/46 and 21989/55 have never been examined for out-of-vessel selection, and their margins of 0.01971, 0.004897 and -0.003395 feed the fork-arming distribution while the last is the sole negative margin behind a boundary-case characterisation. State plainly for each whether its selection was in-vessel all along. Do NOT re-bank pinned-branch-contrast.json or any figure under docs/figures - report the deltas so the consequences can be adjudicated before any artifact is regenerated. Run the connectivity and topology test files and report counts.",
+          "estimated_hours": 4.0,
+          "goal": "Restrict typed-saddle candidacy to saddles inside the wall polygon, so the class selector cannot choose a saddle outside the machine, and report every class margin that changes as a result.",
+          "id": "typed-saddle-containment",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/typed-saddle-containment.md",
+          "plan": "primary-xpoint-evidence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/connectivity_boundary.py",
+            "tests/test_connectivity_boundary.py",
+            "docs/figures/primary-xpoint-evidence/typed-saddle-containment.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "saddle-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T12:45:48Z",
+        "completed_at": "2026-08-25T13:06:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1239,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1239,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "c08540193c4123f00c15e79eaee33374feaf14b7",
+        "commits": [
+          "5acfe07bd589534d70dd88ce98516889ff5f7db0"
+        ],
+        "changed_lines": {
+          "added": 220,
+          "removed": 8,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/typed-saddle-containment.md",
+        "scope_changed": false,
+        "session_id": "01a038f4-99ad-7e11-ba9e-719948170020",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7678720,
+            "cached_input_tokens_cumulative": 7678720,
+            "input_tokens": 7868281,
+            "input_tokens_cumulative": 7868281,
+            "output_tokens": 28298,
+            "output_tokens_cumulative": 28298,
+            "reasoning_output_tokens": 7007,
+            "reasoning_output_tokens_cumulative": 7007
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 859
+    "_version": 860
   }
 }

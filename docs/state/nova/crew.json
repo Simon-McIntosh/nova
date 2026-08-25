@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T17:04:37",
+  "updated": "2026-08-25T17:34:40",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -670,7 +670,10 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a020fb-2d2e-7701-93b4-413c3f5adf68",
-        "created": "2026-08-20"
+        "created": "2026-08-20",
+        "sessions": {
+          "gpt-5.6-sol": "01a0397e-cbf8-7f22-8cf4-82c0f36ce42f"
+        }
       },
       {
         "id": "loop-records",
@@ -36030,9 +36033,103 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T151707377191-hex-connectivity-partition",
+        "plan": "primary-xpoint-evidence",
+        "section": "\u00a72",
+        "node": "hex-connectivity-partition",
+        "node_definition": {
+          "done_when": "The mismatch is stated in the code itself: stencil_mesh.py opens by saying the plasma mesh the package ships is not a tensor-product raster, that cells are hexagons on a half-offset tiling trimmed where the first wall cuts them, and that six neighbours plus the centre give seven samples for the six coefficients of the fitted quadratic - while flux_surface_connectivity.py labels every 4-connected confined component. So the reachability partition is computed on a different topology from the physics mesh. WHY THIS IS MORE THAN TIDINESS, and the thing to demonstrate: near a saddle the confined region pinches, and 4-connectivity SEVERS a diagonal neck that six-neighbour adjacency keeps joined. So the public-private partition can differ precisely at the X-point, which is where the whole classification turns. Exhibit at least one banked or constructed field where the two adjacencies give DIFFERENT public and private partitions near a pinch, quoting the differing cell count and which side each assigns the wall to. If after honest effort no disagreement can be produced on real banked fields, report that as the finding and say what it implies about 4-connectivity being an adequate proxy - a negative result here is genuinely useful. Reuse the labelling kernel landed at commit 7a7bd365 and the ring packing from nova.geometry.hexstencil.hex_stencil so the null search, the derivative operator and the component labels all read the same rings; do not write a second adjacency scheme. Keep it jit and vmap safe and fixed-shape. Report the fixpoint iteration count and wall-clock against the 4-connected kernel at production grid size, both in the same process, since this must stay affordable for a 1,341,435-slice campaign. Do NOT switch production over in this node: land the kernel, the comparison and the disagreement evidence, leaving the cutover to a separate decision.",
+          "estimated_hours": 4.0,
+          "goal": "Label confined components on the hexagonal plasma mesh the package actually ships, with six-neighbour adjacency, because the component kernel is 4-connected on a rectangular lattice while the production plasma mesh is hexagons on a half-offset tiling.",
+          "id": "hex-connectivity-partition",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/hex-connectivity-partition.md",
+          "plan": "primary-xpoint-evidence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/flux_surface_connectivity.py",
+            "tests/test_flux_surface_connectivity.py",
+            "docs/figures/primary-xpoint-evidence/hex-connectivity-partition.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "hex-stencil",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T15:17:16Z",
+        "completed_at": "2026-08-25T15:27:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 608,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 608,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "ed45ee1a4c7e27eed39a6ab097f734a30d7c9570",
+        "commits": [
+          "8d4f3f33a67d61450d6081e4b4c240ae80db19a3"
+        ],
+        "changed_lines": {
+          "added": 268,
+          "removed": 16,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/hex-connectivity-partition.md",
+        "scope_changed": false,
+        "session_id": "01a0397f-4248-7aa0-bddc-59f72d6276bb",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2558720,
+            "cached_input_tokens_cumulative": 2558720,
+            "input_tokens": 2687571,
+            "input_tokens_cumulative": 2687571,
+            "output_tokens": 17058,
+            "output_tokens_cumulative": 17058,
+            "reasoning_output_tokens": 5638,
+            "reasoning_output_tokens_cumulative": 5638
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 865
+    "_version": 867
   }
 }

@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-commits" content="ae723e28">
-<meta name="plan-artifacts" content="benchmarks/analytic_operator_ladder.py,docs/figures/discrete-operator-analytic-error/operator-refinement-ladder.json">
-<meta name="plan-impl" content="0.5">
-<meta name="plan-version" content="1">
+<meta name="plan-commits" content="ae723e28,3dc5155f">
+<meta name="plan-artifacts" content="benchmarks/analytic_operator_ladder.py,docs/figures/discrete-operator-analytic-error/operator-refinement-ladder.json,docs/evidence/archive/discrete-operator-analytic-error-landed.html">
+<meta name="plan-impl" content="0.667">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -84,11 +84,17 @@
       <strong>Posing is exonerated term by term:</strong> external completion to 4.44e−16 Wb, boundary
       −8.67e−19 against closed-form zero, source normalisation matched, both flux-function gradients at
       zero quoted delta, boundary primitives agreeing on both sides, current density within 3.87e−16.
-      Verdict <code>posing/operator_admits_analytic_fixed_point</code> — <strong>and that
-      <code>cause: posing</code> field is set mechanically and contradicts the receipt's own term
-      audit.</strong> Every posed term matches, so nothing is mis-posed; the field should read
-      unresolved solver/root selection. Consumers should use the term audit and §4, not that field.
-      §4 carries what is left.
+      Verdict originally read <code>posing/operator_admits_analytic_fixed_point</code>, from a two-way
+      branch that returned <em>posing</em> whenever the map error sat at roundoff — contradicting its
+      own term audit. <strong>Repaired 2026-08-25 (commit <code>3dc5155f</code>):</strong> the cause now
+      reads <code>solver_or_root_selection_unresolved</code> with reason
+      <code>analytic_fixed_point_admitted_and_all_posed_terms_match</code>, decided by three explicit
+      conditions, with <strong>395 numeric fields compared and 0 differing</strong> so the measurement
+      is untouched, plus a test refusing a <em>posing</em> cause when the term audit is clean.
+      <strong>Reproducibility obligation outstanding:</strong> the four-rung ladder cannot re-run on
+      main because a merge narrowed <code>ForwardFluxOperator</code> construction to tensor-product
+      grids; the repair is dispatched and gated on reproducing all four banked residuals. §4 carries
+      what is left.
       Artifact <code>docs/figures/discrete-operator-analytic-error/operator-refinement-ladder.json</code>
       (commit <code>ae723e28</code>).</p>
     </section>
@@ -188,6 +194,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-20260825T0630-ladder" data-who="reckon-ship" data-when="2026-08-25T06:30:00Z">
     <div class="r-comment-body">analytic-operator-refinement-ladder landed - commit ae723e28, merged, gate PASSED, SLURM job 1254395 in 94 seconds. BOTH BRANCHES OF THIS SECTION ARE CLOSED AND NEITHER IS THE ANSWER. THE OPERATOR ADMITS THE ANALYTIC FIXED POINT AT MACHINE PRECISION. One application of the exact production forward map to the independently evaluated closed-form field - no seed, no solve, no basin, which is the whole point of the reshaped measurement - returns all-carrier relative-sup residuals of 2.6922745652091497e-15, 3.054874184360744e-15, 2.83332350384108e-15 and 2.893824705250372e-15 at requested/realised cells 300/342, 500/551, 750/815 and 1000/1076, with full-state absolute sup from 3.9968028886505635e-15 to 4.884981308350689e-15 Wb. Every rung is below the preregistered 4096-binary64-epsilon tolerance, so physical convergence order is BELOW RESOLUTION: fitted order -0.0831452960470665 with standard error 0.1287518999975828 and 95 per cent interval [-0.637120010032096, 0.4708294179379629], which includes a constant AND excludes the 0.5 converging-order floor - because there is nothing left to converge. POSING IS EXONERATED TERM BY TERM RATHER THAN IN AGGREGATE, which is what makes it a finding instead of an absence of evidence: external completion matches the closed form to at most 4.440892098500626e-16 Wb; the analytic boundary is -8.673617379884035e-19 Wb against closed-form zero at EVERY rung; absolute source normalisation matches; pressure gradient -72400.04058623493 Pa/Wb with zero quoted delta; FF gradient -0.06997315389737607 T m^2/Wb with zero quoted delta; boundary primitives 0 Pa and 3.4 T m on both sides; rotation closure and particle mass match; current-density relative-sup disagreement at most 3.8707986461934123e-16. Verdict posing/operator_admits_analytic_fixed_point, and the section required a posing verdict be reported as the BETTER bounded outcome rather than the lesser one - it is, and by a wide margin, because an inconsistent operator would have invalidated every forward result in this repository. WHAT SURVIVES IS A THIRD THING THIS SECTION DID NOT POSE, and section 4 now carries it. The map admits the solution and the inputs match, yet the SOLVE does not arrive: the terminal attempts are retained and explicitly excluded as unqualified - requested 300 achieved 1.2549724178436488 and requested 500 achieved 1.2998050585857959 against 1e-10 - and where the solve does converge it lands 19 to 38 per cent away under a common gauge. So the residue is in WHICH FIXED POINT THE SOLVER REACHES. That also retro-explains two loose results on adjacent lanes: the plateau plan's four input substitutions converging on nothing is exactly what no-wrong-input-plus-wrong-root predicts, and the frame that once reached 2.9e-16 failing to reproduce with attribution declined across 32 differing paths is the signature of basin selection rather than a named regression.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260825T0715-verdict" data-who="reckon-ship" data-when="2026-08-25T07:15:00Z">
+    <div class="r-comment-body">operator-verdict-semantics landed - commit 3dc5155f, merged, gate PASSED, 2 tests added. THE RECEIPT DEFECT AN AUDIT FOUND IS REPAIRED. The aggregate cause was decided by a two-way branch at benchmarks/analytic_operator_ladder.py line 541 - cause = operator if converging and not at_roundoff else posing - with no third state, so a map error sitting at roundoff mechanically reported posing and contradicted the receipt's own term audit and this plan's conclusion. Three explicit conditions now: map admission at roundoff WITH clean posed terms is unresolved solver or root selection; any posed-term disagreement is posing; a cleanly posed map that does not admit the analytic fixed point is an operator consistency error. The regenerated receipt reads cause solver_or_root_selection_unresolved with machine-readable reason analytic_fixed_point_admitted_and_all_posed_terms_match, posed_terms_match true and operator_admits_analytic_fixed_point true. THE MEASUREMENT IS PROVEN UNTOUCHED, which is what made a semantics-only check acceptable: 395 numeric fields compared field by field against the banked receipt with ZERO differing. The receipt was regenerated from its banked measurement rows rather than from a new run, and both tests independently recompute the rung term audit, one asserting that a clean audit cannot carry a posing cause. AND A REPRODUCIBILITY OBLIGATION IS OUTSTANDING, RECORDED RATHER THAN GLOSSED. The four-rung named check was NOT re-run and could not be: my merge of the margin seam at 9cc2d0f3 added _structured_grid_axes and calls it UNCONDITIONALLY in ForwardFluxOperator.__post_init__, so every operator construction now requires a tensor-product grid where none was required before, and the analytic oracle carrier is not one. That is a production contract narrowed to serve a diagnostic, introduced on the merge side rather than by this node, and it means this plan's headline ladder result is banked but not currently re-runnable on main. Node connectivity-axes-lazy is dispatched to move the axes derivation to the point where a margin is actually read, and its gate is reproducing all four banked one-application residuals with zero differing numeric fields - so the fix is not done when the exception stops, only when the headline result is demonstrably reproducible again.</div>
 </div>
 </section>
 </main>

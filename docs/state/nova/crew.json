@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T22:28:06",
+  "updated": "2026-08-25T22:49:37",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -36975,9 +36975,104 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T201715305009-subordinate-dual-merge",
+        "plan": "primary-xpoint-evidence",
+        "section": "\u00a72",
+        "node": "subordinate-dual-merge",
+        "node_definition": {
+          "done_when": "The benchmark at commit 6c5e2944 measured the fault precisely: with dual_sweep=True, 6 of 12 frozen MAST arms disagree with the single family - five keep their candidate count while a merged resolved saddle coordinate or flux moves, and 21983/35 mixed drops from 3 resolved candidates to 2 - because the half-min-pitch adjacency merge can fuse two genuinely distinct saddles and lets a dual refinement alter a primal coordinate. REDESIGN THE MERGE AS SUBORDINATE UNION: the resolved set is every primal candidate, with primal refined coordinates and fluxes BIT-IDENTICAL to the single-family output, plus only those dual candidates lying farther than the merge tolerance from every primal candidate of the same signed index; same-family candidates are never merged, and a dual candidate never replaces, averages with, or re-refines a primal one. VERIFY BY CONSTRUCTION AND BY MEASUREMENT: the twelve frozen MAST arms must show ZERO disagreements against the single family - identical candidate counts, bit-identical coordinates and fluxes - and the two on-partition constructions from commit 46e5d9b8, the shared-edge saddle and the lattice-node saddle where the primal family reads degree zero, must still resolve exactly one merged candidate each. The generic interior saddle must still yield exactly one candidate with the PRIMAL refinement, not the dual. With the default still False, tests/test_stencil_nulls.py and tests/test_stencil_nulls_dual_sweep.py must pass with counts quoted, updating the dual-sweep tests to assert the subordinate semantics. Then RE-APPLY THE PREREGISTERED LOCK RULE UNCHANGED on the reserved H200, partition betelgeuse reservation gpu_0003_grpA, TMPDIR=/tmp, float64: clause A dual at most 2.0x single at 33x33 and 129x129; clause B dual at most 1.0 ms per slice at 33x33; clause C the six topology files green with the default flipped - tests/test_stencil_nulls.py, tests/test_stencil_nulls_dual_sweep.py, tests/test_connectivity_boundary.py, tests/test_flux_surface_connectivity.py, tests/test_jax_topology.py, tests/test_topology_boundary.py. All clauses hold: commit the flipped default. Any clause fails: quote it with its measured value against its bound and leave the opt-in, including a width-1-only clause B miss, which is a lead adjudication and not yours to waive. Bank the numbers as JSON.",
+          "estimated_hours": 3.0,
+          "goal": "Make the dual-sweep merge strictly additive so the on-partition guard can never perturb a primal detection, repairing the over-merge the device benchmark caught before it reached production.",
+          "id": "subordinate-dual-merge",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/subordinate-dual-merge.md",
+          "plan": "primary-xpoint-evidence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/stencil_nulls.py",
+            "tests/test_stencil_nulls_dual_sweep.py",
+            "benchmarks/null_census_device_benchmark.py",
+            "docs/figures/primary-xpoint-evidence/subordinate-dual-merge.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "hex-stencil",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T20:17:23Z",
+        "completed_at": "2026-08-25T20:49:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1901,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1901,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "dc7450b783fe7bd03aaccbd065a12b7f5a1cef0f",
+        "commits": [
+          "00006fda4e9baa9323276b8bcd06aab62487fef5"
+        ],
+        "changed_lines": {
+          "added": 1055,
+          "removed": 26,
+          "files": 4
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/subordinate-dual-merge.md",
+        "scope_changed": false,
+        "session_id": "01a03a92-09b7-7fe3-9ca5-75d3fac7987c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8260608,
+            "cached_input_tokens_cumulative": 8260608,
+            "input_tokens": 8447557,
+            "input_tokens_cumulative": 8447557,
+            "output_tokens": 23481,
+            "output_tokens_cumulative": 23481,
+            "reasoning_output_tokens": 7158,
+            "reasoning_output_tokens_cumulative": 7158
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 877
+    "_version": 878
   }
 }

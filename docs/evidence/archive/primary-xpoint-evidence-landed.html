@@ -280,6 +280,49 @@
     the same definition on analytic fixtures inside governed DIII-D and MAST walls, including a
     double-null case the real bank does not contain.</p>
 
+    <h2 id="hex-partition">Hex adjacency: a real disagreement, and an inverted conclusion</h2>
+
+    <p><strong>Node <code>hex-connectivity-partition</code>, commit <code>8d4f3f33</code>, gate PASSED,
+    2026-08-25.</strong> The component kernel labels 4-connected components on a rectangular lattice,
+    while the shipped plasma mesh is hexagons on a half-offset tiling whose six-neighbour rings are
+    shared by the null search and the derivative operator. So the reachability partition is computed on a
+    different topology from the physics mesh.</p>
+
+    <table>
+      <caption>Constructed 11&times;13 saddle pinch, joining [4,5] to [5,4] through the hex edge</caption>
+      <thead><tr><th scope="col">Adjacency</th><th scope="col">Public</th><th scope="col">Private</th><th scope="col">Wall cell [6,3]</th><th scope="col">Iterations / median</th></tr></thead>
+      <tbody>
+        <tr><td>4-connected (rect proxy)</td><td>9</td><td><strong>6</strong></td><td>PRIVATE &rarr; SHADOW</td><td>3 / 0.4911 ms</td></tr>
+        <tr><td>6-neighbour (hex)</td><td>15</td><td><strong>0</strong></td><td>PUBLIC &rarr; ADMIT</td><td>16 / 0.7666 ms</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The measurement is sound and the conclusion drawn from it was inverted — by my
+    dispatch.</strong> Zero private cells, on a fixture built to contain a private lobe, means
+    six-connectivity <em>bridged</em> the two lobes through the saddle and then admitted a wall cell
+    sitting behind it. That is the error class this record documents elsewhere, arrived at from the
+    opposite direction. By the governing definition — reachable from the O-point <em>without crossing a
+    saddle</em> — passing through the saddle point <em>is</em> crossing one, so the private lobe must stay
+    unreachable. One level below the saddle the lobes are genuinely disconnected in the continuum; the
+    neck is narrower than a cell, so the apparent connection is pure discretisation.</p>
+
+    <p><strong>So neither adjacency is correct alone.</strong> 4-connectivity under-connects in the bulk
+    while <em>accidentally</em> cutting the saddle — which is why it has appeared to work. 6-connectivity
+    matches the mesh in the bulk while wrongly bridging the saddle. The repair is not a choice of
+    adjacency but <strong>edge-based admissibility</strong>: admit a neighbour link only where the shared
+    edge has a portion strictly on the same side of the binding level, so a level crossing a cut cell
+    closes the neck. Excising the saddle cell as a cut vertex is the equivalent complement.</p>
+
+    <p><strong>A test now encodes the wrong expectation.</strong>
+    <code>test_hex_neighbour_keeps_a_pinch_joined_that_four_neighbours_sever</code> asserts the bridging
+    as intended behaviour. That is worse than a stale comment, because a test defends what it encodes —
+    it must be inverted rather than superseded. Production was not switched over, which is what kept this
+    from becoming a regression.</p>
+
+    <p>Cost is recorded with its own caveat: the node labelled its 1,341,435-slice figure a scalar
+    arithmetic projection rather than measured batched throughput, so it prices the kernel and not the
+    campaign.</p>
+
   </main>
 </body>
 </html>

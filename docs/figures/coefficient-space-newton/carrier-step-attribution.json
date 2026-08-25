@@ -1,0 +1,288 @@
+{
+  "artifact": "docs/figures/coefficient-space-newton/carrier-step-attribution.json",
+  "evidence_inputs": {
+    "advance_receipt": "docs/figures/coefficient-space-newton/carrier-advance.json",
+    "advance_receipt_sha256": "5f0bea0478bee2d4ba40dff2b2e680524400161b985f85e80fe770a30b79109a",
+    "banked_carrier_terminal_residual": 0.03847988208719086,
+    "banked_exact_arm_terminal_residual": 2.7110550053242652e-15,
+    "banked_step_angle_degrees": 49.73527543299367,
+    "banked_step_norm_ratio": 0.012955053999124593,
+    "carrier_receipt": "docs/figures/coefficient-space-newton/plasma-only-carrier.json",
+    "carrier_receipt_sha256": "97040d14f27dc986e622d7689abfcda65404d3cf85ac21d9737222f634cc6411",
+    "root_bank": "scripts/oracle_rebaseline/root-coarse.npz",
+    "root_bank_sha256": "79f4a3f507680b7531bf3a3dc6a1195acf321027f0c3f4d4ab103bc70e1a1e0c",
+    "root_receipt": "scripts/oracle_rebaseline/results.json",
+    "root_receipt_sha256": "4d07594d3e08e072a817d1b31acde6a4f7bddd12d9bbc3a0e795efccbe71548d"
+  },
+  "measurement_scope": {
+    "coefficient_count": 36,
+    "exact_state_values": 2253,
+    "finite_difference_step_range": [
+      6.0554544523933395e-06,
+      2.7431462306100268e-05
+    ],
+    "finite_difference_step_rule": "binary64_epsilon_to_one_third_times_maximum_of_one_and_basis_coefficient_magnitude",
+    "frame": "closed-form-oracle-coarse",
+    "knots_per_axis": 6,
+    "platform": "cpu",
+    "precision": "float64",
+    "realised_plasma_cells": 551
+  },
+  "residual_identity_demonstration": {
+    "attribution": "PROJECTED_RESIDUAL_DIFFERENTIATED",
+    "basis": "The square dense Jacobian matches finite differences of the projected residual, while its exact-space expansion does not match finite differences of the exact residual. The rectangular exact-residual Jacobian matches all exact-residual basis derivatives.",
+    "exact_residual": {
+      "definition": "exact_map(total_state) minus total_state",
+      "dimension": 2253,
+      "traced_jacobian_against_finite_difference": {
+        "finite_difference_model": "central_difference_per_basis_direction",
+        "fitted_scale_factor": 0.9999999797120991,
+        "maximum_relative_column_error": 5.350605353071424e-08,
+        "maximum_scale_fitted_relative_column_error": 3.3332847646650514e-08,
+        "median_relative_column_error": 5.179188027431339e-10,
+        "relative_column_errors": [
+          2.910127890525405e-09,
+          2.268858559804335e-09,
+          5.599167173549025e-10,
+          5.856765925928373e-10,
+          4.723030953289847e-10,
+          4.413796473981947e-09,
+          2.5498463718743395e-10,
+          1.6676428452664381e-10,
+          8.474545033015596e-10,
+          9.864971639657175e-10,
+          4.759208881313654e-10,
+          3.383351139325155e-10,
+          1.1380324622645031e-08,
+          1.170520509475834e-08,
+          6.777360312079845e-09,
+          3.6428455358812246e-10,
+          2.3179566064484547e-10,
+          1.569558073704146e-10,
+          5.350605353071424e-08,
+          1.1508623726360085e-08,
+          5.980931242158618e-09,
+          3.9063596912667377e-10,
+          2.5433547627162556e-10,
+          2.5072087888167237e-10,
+          5.774268939657139e-10,
+          1.5260300432575928e-10,
+          2.4948628327992783e-10,
+          7.447008000705047e-10,
+          3.6258948298643313e-10,
+          3.3081775183882825e-10,
+          2.157206997044522e-09,
+          3.325734196734421e-09,
+          3.6321115705100586e-10,
+          3.3507991780245967e-10,
+          4.325534696026187e-10,
+          4.745836889816459e-09
+        ],
+        "scale_fit_model": "finite_difference_equals_scale_times_traced",
+        "shape": [
+          2253,
+          36
+        ]
+      }
+    },
+    "projected_residual": {
+      "definition": "project(exact_map(total_state) minus external) minus coefficients",
+      "dimension": 36,
+      "expanded_traced_jacobian_against_exact_residual_finite_difference": {
+        "finite_difference_model": "central_difference_per_basis_direction",
+        "fitted_scale_factor": 0.9999999797073813,
+        "maximum_relative_column_error": 0.06899077124977254,
+        "maximum_scale_fitted_relative_column_error": 0.06899077124977558,
+        "median_relative_column_error": 0.030637099754618837,
+        "relative_column_errors": [
+          0.014474955820843991,
+          0.03657312348538682,
+          0.05319148447979326,
+          0.06294845061210742,
+          0.05699130268456762,
+          0.03555493786967775,
+          0.014385806438244539,
+          0.019254703690821134,
+          0.05142945399063575,
+          0.0658397320028871,
+          0.025509576165150986,
+          0.036656678967990304,
+          0.015705529052908212,
+          0.015558114002125107,
+          0.01909865011870946,
+          0.02352439002408938,
+          0.041666457306607146,
+          0.025096277972156966,
+          0.015735430923780064,
+          0.015530353724316572,
+          0.018846769622584063,
+          0.024400474896674115,
+          0.04270028173625963,
+          0.025140755460479162,
+          0.014422578727460382,
+          0.018981148608513618,
+          0.04404109936720515,
+          0.06899077124977254,
+          0.02616985393371745,
+          0.03790173422473766,
+          0.014527738425994665,
+          0.035104345575520224,
+          0.046510162976978735,
+          0.06550280132822706,
+          0.05583574438055533,
+          0.03673342046292641
+        ],
+        "scale_fit_model": "finite_difference_equals_scale_times_traced",
+        "shape": [
+          2253,
+          36
+        ]
+      },
+      "traced_jacobian_against_its_finite_difference": {
+        "finite_difference_model": "central_difference_per_basis_direction",
+        "fitted_scale_factor": 0.999999982253865,
+        "maximum_relative_column_error": 1.0181914475518321e-07,
+        "maximum_scale_fitted_relative_column_error": 1.0184153191631254e-07,
+        "median_relative_column_error": 2.308663601277195e-09,
+        "relative_column_errors": [
+          4.5066589322754765e-09,
+          3.4466178384938796e-09,
+          2.456957653066833e-09,
+          2.409023412979076e-09,
+          9.97256945651971e-10,
+          2.6870544801549097e-09,
+          2.068776104871291e-09,
+          2.3528442454806553e-09,
+          1.8170870605109163e-09,
+          2.5271966575277442e-09,
+          1.3727722719343385e-09,
+          9.650834023549714e-10,
+          1.0181914475518321e-07,
+          1.8298118705173753e-08,
+          1.2566046170472683e-08,
+          7.582372662601992e-10,
+          4.823711358327892e-10,
+          7.286071303040594e-10,
+          7.801554156373198e-08,
+          6.873685426861581e-08,
+          5.226916713962989e-08,
+          3.837355783299293e-09,
+          8.174512382177119e-10,
+          6.468039005691185e-10,
+          2.264482957073735e-09,
+          1.899078942547597e-09,
+          1.0849911930936873e-09,
+          1.1021741108747642e-09,
+          1.5229495957012512e-09,
+          5.256405264797385e-10,
+          5.248950530411844e-09,
+          3.128707613545039e-09,
+          2.4985189143596832e-09,
+          7.297752835238367e-10,
+          3.293287136630139e-09,
+          7.065325959759956e-10
+        ],
+        "scale_fit_model": "finite_difference_equals_scale_times_traced",
+        "shape": [
+          36,
+          36
+        ]
+      }
+    }
+  },
+  "schema": "carrier-step-attribution-1",
+  "source_commit": "2cc90008f955a34008ff1d19c8837c410fc6be5b",
+  "step_comparison": {
+    "banked_projected_residual_formulation": {
+      "angle_degrees": 49.73527543299367,
+      "compared_to_reference_norm_ratio": 0.012955053999124593
+    },
+    "corrected_step_utility_ladder": [
+      {
+        "admissible": true,
+        "exact_relative_residual": 0.03718310104246046,
+        "factor": 1.0,
+        "improves_exact_residual": true,
+        "topology_class": "limited"
+      },
+      {
+        "admissible": true,
+        "exact_relative_residual": 0.037820636238855856,
+        "factor": 0.5,
+        "improves_exact_residual": true,
+        "topology_class": "limited"
+      },
+      {
+        "admissible": true,
+        "exact_relative_residual": 0.03814200835780518,
+        "factor": 0.25,
+        "improves_exact_residual": true,
+        "topology_class": "limited"
+      },
+      {
+        "admissible": true,
+        "exact_relative_residual": 0.038309828220563454,
+        "factor": 0.125,
+        "improves_exact_residual": true,
+        "topology_class": "limited"
+      },
+      {
+        "admissible": true,
+        "exact_relative_residual": 0.03839428515367831,
+        "factor": 0.0625,
+        "improves_exact_residual": true,
+        "topology_class": "limited"
+      }
+    ],
+    "exact_residual_least_squares_formulation": {
+      "angle_degrees": 6.16191299780726,
+      "compared_l2_norm": 1.0934708990592776,
+      "compared_to_reference_norm_ratio": 0.8923026730273906,
+      "cosine_similarity": 0.9942225361967948,
+      "reference_l2_norm": 1.2254484180231877
+    },
+    "projected_residual_formulation": {
+      "angle_degrees": 49.73527543299367,
+      "compared_l2_norm": 0.015875750428632204,
+      "compared_to_reference_norm_ratio": 0.012955053999124593,
+      "cosine_similarity": 0.6463201030767687,
+      "reference_l2_norm": 1.2254484180231877
+    },
+    "restored_direction": true
+  },
+  "trajectory_comparison": {
+    "comparators": {
+      "exact_value_arm_terminal_residual": 2.7110550053242652e-15,
+      "stalled_projected_residual_carrier": 0.03847988208719086
+    },
+    "exact_residual_least_squares_formulation": {
+      "admitted_advances": 1,
+      "newton_step_equivalents": 1.0,
+      "terminal_exact_relative_residual": 0.03708054430983738,
+      "terminal_topology_class": "limited",
+      "trace": [
+        0.052788907521397276,
+        0.03708054430983738
+      ]
+    },
+    "projected_residual_formulation": {
+      "accepted_factors": [
+        1.0
+      ],
+      "admitted_advances": 1,
+      "terminal_exact_relative_residual": 0.03847988208719086,
+      "trace": [
+        0.052788907521397276,
+        0.03847988208719086
+      ]
+    }
+  },
+  "verdict": {
+    "classification": "CARRIER_QUESTION_CLOSED_CONDITIONING_WON_CONVERGENCE_LOST",
+    "corrected_carrier_converged": false,
+    "correction_restores_direction": true,
+    "exact_residual_jacobian_matches_finite_difference": true,
+    "production_route": "exact_values",
+    "projected_residual_was_differentiated": true
+  }
+}

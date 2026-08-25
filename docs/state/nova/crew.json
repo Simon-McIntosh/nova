@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T16:06:57",
+  "updated": "2026-08-25T16:24:35",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1185,7 +1185,10 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a03481-0b88-73b2-9537-1d4eae954f86",
-        "created": "2026-08-24"
+        "created": "2026-08-24",
+        "sessions": {
+          "gpt-5.6-sol": "01a0393f-cc5a-7852-89ab-ea49a36244e7"
+        }
       },
       {
         "id": "warm-neighbour",
@@ -35748,9 +35751,101 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T140836336600-diiid-containment-recheck",
+        "plan": "primary-xpoint-evidence",
+        "section": "\u00a72",
+        "node": "diiid-containment-recheck",
+        "node_definition": {
+          "done_when": "Report, for all ten terminals in docs/figures/plateau-input-attribution/margin-frame-remeasure.json, a before-and-after table of selected X coordinate, selected normalised level, wall shadow verdict, class margin and achieved class, using the containment repair at commit 5acfe07b as the after state. Mark every row that changes and state for each terminal whether its pre-repair selection was inside the DIII-D wall polygon, testing with true polygon containment rather than a bounding box, since on MAST a bounding box would have missed the one saddle that mattered most. THE CLAIM AT RISK is this cohort reported the selected typed saddle as NOT connectivity-reachable on 10 of 10 terminals with 0 showing connectivity support, and I used that pattern to build a reachability hypothesis that later proved wrong on MAST. If those selections were out of vessel, that 10-of-10 pattern is an artifact of selecting a far-field saddle and must be withdrawn, so say explicitly whether it survives. Also report whether any achieved class flips between limited and diverted, because all ten currently classify limited and a corrected in-vessel saddle could bind before the wall. Do NOT re-bank margin-frame-remeasure.json or any figure - report deltas only, so the consequences can be adjudicated before regeneration. Run the connectivity and topology test files and quote counts.",
+          "estimated_hours": 2.0,
+          "goal": "Determine whether the ten banked DIII-D margin-remeasure terminals also selected saddles outside the vessel, since that cohort was measured with the uncontained selector and every one of its terminals classifies limited - which is exactly what a wrongly shadowed wall extremum would produce.",
+          "id": "diiid-containment-recheck",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/diiid-containment-recheck.md",
+          "plan": "primary-xpoint-evidence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "benchmarks/diiid_containment_recheck.py",
+            "docs/figures/plateau-input-attribution/diiid-containment-recheck.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T14:08:45Z",
+        "completed_at": "2026-08-25T14:20:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 718,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 718,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "7f48eaa2e59861b03702b439dd6e46062a92f665",
+        "commits": [
+          "f7a2dad8b38b116ee89d6994574095fab15e32f7"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "unresolvable_revision"
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/diiid-containment-recheck.md",
+        "scope_changed": false,
+        "session_id": "01a03940-8ac3-7453-a970-3e7ecd59932b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4200704,
+            "cached_input_tokens_cumulative": 4200704,
+            "input_tokens": 4368756,
+            "input_tokens_cumulative": 4368756,
+            "output_tokens": 16828,
+            "output_tokens_cumulative": 16828,
+            "reasoning_output_tokens": 4043,
+            "reasoning_output_tokens_cumulative": 4043
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 861
+    "_version": 863
   }
 }

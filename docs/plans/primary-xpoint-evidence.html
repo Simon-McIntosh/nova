@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-commits" content="597417af,19f52dec">
 <meta name="plan-artifacts" content="benchmarks/diiid_forward_gs_match.py,nova/equilibrium/connectivity_boundary.py,docs/figures/plateau-input-attribution/margin-frame-remeasure.json,docs/figures/primary-xpoint-evidence/private-flux-shadow-adjudication.json,docs/figures/primary-xpoint-evidence/private-flux-shadow-adjudication.png,docs/evidence/archive/primary-xpoint-evidence-landed.html">
 <meta name="plan-impl" content="1.0">
@@ -55,13 +55,16 @@
     itself, passing with <code>JAX_ENABLE_X64</code> removed. 22 tests pass across the two topology
     files.</p>
 
-    <p><strong>One finding beyond the done-when.</strong> On all ten terminals the selected typed saddle
-    is <em>not</em> connectivity-reachable, with zero terminals showing connectivity support — so the
-    exact margin survives on this cohort only because the typed-saddle route supplies the operand
-    independently of connectivity reachability. That makes the connectivity-reachability rule the prime
-    suspect for the absent +&infin; operands on frozen MAST 21978/35 and 22086/43, which this DIII-D
-    regeneration did not cover and about which it correctly claims nothing. Carried as a followup
-    against <code>benchmarks/pinned_branch_contrast.py</code>.</p>
+    <p><strong>One finding beyond the done-when — since WITHDRAWN as evidence.</strong> On all ten
+    terminals the selected typed saddle read as <em>not</em> connectivity-reachable with zero showing
+    connectivity support, and I took that to make the connectivity-reachability rule the prime suspect for
+    the absent +&infin; MAST operands. <strong>That inference was wrong twice over.</strong> MAST refuted
+    the mechanism — the cause is private-flux shadow rejection of a finite wall extremum — and node
+    <code>diiid-containment-recheck</code> (commit <code>f7a2dad8</code>) then found <strong>4 of 10</strong>
+    of this cohort's own selections lying <em>outside</em> the true governed 84-point DIII-D wall polygon.
+    The counts do not move under the containment repair, 10 of 10 and 0 of 10 before and after, and no
+    achieved class flips, so the bank keeps its limited character — but the pattern cannot be cited as
+    evidence about reachability, because the correlation was measured on partly invalid selections.</p>
 
     <p>Full record:
     <a href="/nova/evidence/archive/primary-xpoint-evidence-landed#spatial-evidence">primary X-point
@@ -107,6 +110,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260825T134650393524-wall-reachability-topology-grid" data-who="diiid-poloidal-figures" data-when="2026-08-25T14:05:53Z">
     <div class="r-comment-body"><p>The mechanism is demonstrated clearly and the reachability derivation is exactly to spec: the axis-connected four-connected component immediately before saddle crossing, private cells being positive labels unequal to the axis label, NO height band anywhere. Three topologies across two real wall shapes - DIII-D limited with 5 reachable and 415 shadowed segments, public 0.181498 m2 and 1 private region of 0.0111253 m2; MAST diverted with 0 reachable and 420 shadowed, public 0.654047 m2, 1 private of 0.507960 m2; MAST double-null with 0 reachable and 420 shadowed, public 0.545075 m2, 2 private totalling 0.569459 m2. Those counts are physically sensible: a limited plasma touches the wall over a small contact patch while a diverted or double-null separatrix closes before reaching it. Per-panel numbers are banked as JSON beside the image and the two connectivity tests pass, including the inside-height-band rejection case. TWO DEVIATIONS TO CARRY FORWARD, neither hidden by the node but neither flagged as a limitation either. First, the plasma fields are ANALYTIC FIXTURES evaluated inside governed real-machine walls, not real banked equilibria, so the figure illustrates the mechanism rather than displaying the frozen six or the DIII-D terminals whose selections the containment repair just changed - it therefore replaces the superseded figures message but not their content. Second, ITER is absent with no explanation, though the dispatch required that an unsourceable machine be named and explained rather than omitted; the dispatch also wrongly called the machine iter_md, which is the machine-description database identifier, so the omission is partly my error.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260825T140836336600-diiid-containment-recheck" data-who="diiid-forward-gs" data-when="2026-08-25T14:20:43Z">
+    <div class="r-comment-body"><p>THE 10-OF-10 REACHABILITY CLAIM IS WITHDRAWN as evidence - the artifact says so in its own verdict field. 4 of 10 pre-repair selections lie outside the true governed 84-point DIII-D wall polygon, tested by production fixed-shape ray crossing rather than a bounding box. 3 of 10 selections change under commit 5acfe07b, 7 unchanged, and 0 of 10 achieved classes flip so the cohort keeps its limited character. Connectivity support is 0 of 10 both before and after and not-reachable is 10 of 10 both before and after - the NUMBERS are unchanged, but the cohort producing them contains out-of-vessel selections, so the pattern cannot be cited as evidence about reachability. This closes my worst reasoning error of the session: I took that pattern from this cohort and built the hypothesis that connectivity reachability explained the absent MAST margins, MAST refuted it, and I recorded the lesson as reading a correlation in one cohort as a mechanism - the truer version is that the correlation itself was measured on partly invalid selections. One subtlety handled correctly: this cohort has physical_ring and pseudo_wall arms and the pseudo-wall bounding surface is a RECTANGLE by design, so a candidate outside the physical vessel but inside that rectangle is legitimately retained for that arm, which is why only 3 selections change while 4 sit outside the physical wall. The node kept the inside-physical-wall verdict on the true wall while applying the repair against each terminal active surface. Nothing was re-banked.</p></div>
 </div>
 </section>
 </main>

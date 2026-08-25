@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 <meta name="plan-commits" content="632a4396,991d5d6e">
 <meta name="plan-artifacts" content="benchmarks/traced_selection_seam.py,benchmarks/pinned_branch_contrast.py,docs/figures/dual-branch-selection/traced-selection-continuity.json,docs/figures/dual-branch-selection/pinned-branch-contrast.json,docs/audit/plan-grounds-audit.md,docs/audit/quantitative-claims-audit.md">
 <meta name="plan-impl" content="0.25">
@@ -188,6 +188,41 @@
     production cohort. Batch-two jit and vmap parity holds at 2.2e-16. <strong>So existence is
     demonstrated, not inferred from weak contraction</strong> — why ρ sits at 0.95–0.98 rather than
     0.33 on the pure arm stays with the basin probe.</p>
+
+    <p><strong>ATTRIBUTED 2026-08-25 by node <code>mast-margin-operand-attribution</code></strong>,
+    commit <code>5cdcaf72</code>, gate PASSED. The absent operand now has a named cause, and it is
+    <em>not</em> the one this sprint suspected.</p>
+
+    <table>
+      <caption>Absent-margin terminals against the finite-margin cohort</caption>
+      <thead>
+        <tr><th scope="col">Reference</th><th scope="col">Typed saddle</th>
+        <th scope="col">Connectivity</th><th scope="col">Wall extremum</th><th scope="col">Margin</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>21978/35, both arms</td><td>5 candidates, selected</td><td><strong>supported</strong></td><td>finite at 0.33103 / 0.33105, <strong>shadow-rejected</strong></td><td>+&infin;</td></tr>
+        <tr><td>22086/43, both arms</td><td>selected</td><td><strong>supported</strong></td><td>finite at 0.30190 / 0.30008, <strong>shadow-rejected</strong></td><td>+&infin;</td></tr>
+        <tr><td>21983/35</td><td>selected</td><td>supported</td><td>admitted</td><td>+0.00723 / +0.00773</td></tr>
+        <tr><td>21985/51</td><td>selected</td><td><em>not reachable</em></td><td>admitted</td><td>+0.01971 / +0.01907</td></tr>
+        <tr><td>21986/46</td><td>selected</td><td>supported / <em>not reachable</em></td><td>admitted</td><td>+0.00490 / &minus;0.00657</td></tr>
+        <tr><td>21989/55</td><td>selected</td><td>supported</td><td>admitted</td><td>&minus;0.00340 / &minus;0.00363</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The cause is private-flux shadow rejection of a finite wall extremum.</strong> Since the
+    margin is <code>u_wall &minus; u_x</code>, discarding the wall operand alone produces the absence.
+    The wall extrema are <em>finite before the shadow rule</em> — this was never a failure to find or to
+    reach a saddle. Across all twelve terminals: <strong>9</strong> selected-typed-saddle-with-
+    connectivity-support, <strong>3</strong> not-connectivity-reachable, <strong>0</strong>
+    no-typed-saddle-candidate, <strong>0</strong> typed-saddle-operand-nonfinite.</p>
+
+    <p><strong>So the connectivity-reachability hypothesis is refuted, and the way it arose is the
+    lesson.</strong> It came from the DIII-D bank, where the selected typed saddle was not reachable on
+    10 of 10 while wall operands were admitted on 10 of 10. On MAST the pattern inverts: all four absent
+    terminals have connectivity <em>support</em>, and three <em>finite</em>-margin terminals lack
+    reachability. A correlation in the one cohort that happened not to exercise the shadow rule was read
+    as a mechanism, and the mechanism sat in the subsystem that cohort could not see. The two cohorts
+    together are what identify it; either alone misleads.</p>
 
     <p><strong>Three refinements from re-reading the artifact, which the receipt summary does not
     carry.</strong> First, <strong>the converged arm was unpenalised</strong>: 22086/43's margin is
@@ -381,6 +416,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20260825T084655542502-fork-arming-fraction" data-who="catalog-census" data-when="2026-08-25T08:54:07Z">
     <div class="r-comment-body"><p>Pricing framework banked and arithmetic verified. Four finite absolute margins span 0.00339536 to 0.0197108, median 0.00606505; two of six are non-finite and fall back conservatively to fork. Always-fork arms 6/6 at 2.000x the single-branch denominator; thresholds 0.0025, 0.005, 0.01 and 0.02 arm 2/6, 4/6, 5/6 and 6/6 at 1.333x, 1.667x, 1.833x and 2.000x. Solve cost is an explicit parameter at 1.0 solve-second per pinned branch, not a measurement, and 372.62 slices/s is recorded as the derived one-hour requirement rather than throughput. CRITICAL LIMIT the node stated itself: the cohort is the six frozen MAST references, not catalog frames, so with four finite margins it carries no representativeness or confidence claim and cannot support the policy decision. The decision also needs the accelerator two-branch batch cost, which is out of scope here.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260825T084506969055-mast-margin-operand-attribution" data-who="margin-remeasure" data-when="2026-08-25T09:35:51Z">
+    <div class="r-comment-body"><p>Production repair plus the attribution, and the attribution REFUTES the leading hypothesis. ForwardTopologyState is registered as a lossless PyTree with the nine landmarks and the evaluated class_margin as array leaves and the Callable excluded and reconstructed, and ForwardFluxOperator.connectivity_grid_axes is now the public radius/height/shape contract with both benchmark callers migrated and zero executable callers of the removed private attributes remaining. The previously failing production test test_the_topology_portfolio_matches_per_branch_solves_under_jit_and_vmap passes, and a new test_forward_topology_state_is_a_vmap_output_pytree gates the registration. SCIENCE: the connectivity-reachability hypothesis does NOT hold on MAST. All four absent-margin terminals carry connectivity SUPPORT, while three finite-margin terminals lack reachability. The named cause is wall_extremum_rejected_by_private_flux_shadow: finite pre-shadow wall operands, 0.3310275619269073 and 0.3310454781725451 on 21978/35 and 0.30190002257031606 and 0.3000846561326388 on 22086/43, are discarded by the private-flux shadow and become positive infinity. All-terminal counts are 9 with connectivity support, 3 not reachable, 0 no-candidate, 0 nonfinite-operand. Gate discipline was exemplary: a non-banked diagnostic pass enumerated all 252 changed leaves with magnitudes before any classification, and the final regeneration reproduced 381 float fields and 258 semantic fields with ZERO differences while preserving 644 of 644 banked leaves and adding 12 diagnostic subtrees.</p></div>
 </div>
 </section>
 </main>

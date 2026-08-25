@@ -153,6 +153,56 @@
     "measured on real catalog frames", sits downstream of the plan containing it. The graph edges are
     correct; the decision as posed is unanswerable in the declared order.</p>
 
+    <h2 id="margin-operand-attribution">§4 — the absent operand is a shadow rejection, not a reachability failure</h2>
+
+    <p><strong>Node <code>mast-margin-operand-attribution</code>, commit <code>5cdcaf72</code>, gate
+    PASSED, 2026-08-25.</strong> Scope widened mid-flight from attribution to a production repair, so the
+    node is excluded from effort calibration. The enriched artifact preserves 644 of 644 banked leaves
+    exactly and adds 12 terminal diagnostic subtrees.</p>
+
+    <p><strong>Named cause.</strong> All four absent-margin terminals are
+    <code>selected_typed_saddle_with_connectivity_support</code> <em>and</em>
+    <code>wall_extremum_rejected_by_private_flux_shadow</code>. The wall extrema are finite before the
+    shadow rule — 0.3310275619269073 and 0.3310454781725451 on 21978/35, 0.30190002257031606 and
+    0.3000846561326388 on 22086/43 — and the shadow discards them, sending
+    <code>u_wall &minus; u_x</code> to +&infin;. Selected-X operands are finite throughout
+    (0.44252817236845116 / 0.43580205514567494 and 0.4363887681813337 / 0.4309790002082113).</p>
+
+    <table>
+      <caption>Status counts across all twelve terminals</caption>
+      <thead><tr><th scope="col">Category</th><th scope="col">Count</th></tr></thead>
+      <tbody>
+        <tr><td>selected typed saddle with connectivity support</td><td>9</td></tr>
+        <tr><td>selected typed saddle not connectivity-reachable</td><td>3</td></tr>
+        <tr><td>no typed saddle candidate</td><td>0</td></tr>
+        <tr><td>typed saddle operand non-finite</td><td>0</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The connectivity-reachability hypothesis is refuted.</strong> It was drawn from the DIII-D
+    bank, where the selected saddle was unreachable on 10 of 10 with wall operands admitted on 10 of 10.
+    MAST inverts it: the four absent terminals all have connectivity support, and three finite-margin
+    terminals lack reachability. A correlation within the single cohort that never exercised the shadow
+    rule was mistaken for a mechanism.</p>
+
+    <h3 id="batching-repair">The production batching repair carried with it</h3>
+
+    <p>Commit <code>f2665b5d</code> had changed <code>ForwardTopologyState</code> from an automatically
+    PyTree-compatible <code>NamedTuple</code> into an unregistered frozen dataclass carrying a
+    <code>Callable</code>, breaking <code>solve_portfolio</code>'s inner vmap at
+    <code>forward.py:1402</code> and reaching production via
+    <code>coupled_window.py:1636</code>. The repair registers a lossless PyTree — nine landmarks plus the
+    evaluated margin as array leaves, the callable excluded and reconstructed — and publishes
+    <code>ForwardFluxOperator.connectivity_grid_axes</code> as the radius/height/shape contract,
+    replacing three deleted private attributes. Both benchmark callers are migrated, with zero executable
+    callers of the private names remaining.</p>
+
+    <p><strong>Gate discipline worth copying.</strong> A non-banked diagnostic pass enumerated all 252
+    changed leaves with magnitudes before any envelope was chosen. The final regeneration then reproduced
+    <strong>381 float fields and 258 semantic fields with zero differences</strong> — so bitwise
+    reproduction was achievable once the code path was correct, and was impossible only through the broken
+    one.</p>
+
   </main>
 </body>
 </html>

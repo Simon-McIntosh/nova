@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T11:26:40",
+  "updated": "2026-08-25T11:36:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -34185,9 +34185,102 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260825T084506969055-mast-margin-operand-attribution",
+        "plan": "dual-branch-selection",
+        "section": "\u00a74",
+        "node": "mast-margin-operand-attribution",
+        "node_definition": {
+          "done_when": "The regenerated docs/figures/dual-branch-selection/pinned-branch-contrast.json states, for BOTH 21978/35 and 22086/43, which category the absent operand falls into - no typed saddle candidate found, typed saddle operand non-finite, selected typed saddle not connectivity-reachable, or selected typed saddle with connectivity support - together with the wall record distinguishing absent, private-flux-shadow-rejected and admitted extrema and the operand values behind the rejection. Reuse traced_margin_candidate_diagnostics from commit 597417af rather than writing a second implementation, and say in the manifest if it does not fit and why. Every pre-existing numeric field must be value-identical on regeneration - report the counts compared and unchanged the way the DIII-D regeneration did, and treat a changed existing value as a failure to report rather than accept. Then state whether the leading hypothesis holds: on the ten DIII-D terminals the selected typed saddle was NOT connectivity-reachable on 10 of 10 with zero showing connectivity support, so the exact operand survived there only because the typed-saddle route supplies it independently, which makes the connectivity-reachability rule the prime suspect here. Report the four other references too, since the contrast between finite and absent operands within one cohort is the evidence.",
+          "estimated_hours": 3.0,
+          "goal": "Attribute the absent exact class-margin operand on frozen MAST references 21978/35 and 22086/43 to a NAMED rejection category rather than leaving it reported as merely absent, by carrying the candidate-and-operand diagnostics that landed at commit 597417af onto the MAST receipt egress benchmarks/pinned_branch_contrast.py, which today records only the sign of a non-finite margin through class_margin_nonfinite.",
+          "id": "mast-margin-operand-attribution",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/mast-margin-operand-attribution.md",
+          "plan": "dual-branch-selection",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/pinned_branch_contrast.py",
+            "docs/figures/dual-branch-selection/pinned-branch-contrast.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "margin-remeasure",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T08:45:17Z",
+        "completed_at": "2026-08-25T09:35:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3034,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3034,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "f62779ce7a76974a19714c37ae3393f2c7dc1b2a",
+        "commits": [
+          "5cdcaf72"
+        ],
+        "changed_lines": {
+          "added": 2001,
+          "removed": 5,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/mast-margin-operand-attribution.md",
+        "scope_changed": true,
+        "session_id": "01a03818-636e-7632-bc6e-05c3a7131c93",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9417472,
+            "cached_input_tokens_cumulative": 9417472,
+            "input_tokens": 9533667,
+            "input_tokens_cumulative": 9533667,
+            "output_tokens": 34766,
+            "output_tokens_cumulative": 34766,
+            "reasoning_output_tokens": 13478,
+            "reasoning_output_tokens_cumulative": 13478
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 843
+    "_version": 844
   }
 }

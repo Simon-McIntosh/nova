@@ -17,10 +17,11 @@ Method (the connectivity read, re-expressed on device):
   axis) to 1, so the confined side at a candidate level ``s`` is simply
   ``u ≤ s`` — sign-agnostic (MAST ψ_axis > ψ_bnd or the reverse).
 
-* **Axis-connected region (flood-fill).**  At level ``s`` the confined-and-in-
-  wall set ``(u ≤ s) ∧ inside_wall`` is flood-filled from the axis cell by
-  iterated 4-neighbour dilation (the shipped ``flood_fill_core`` device kernel)
-  — the axis-connected component, never a disconnected pocket.
+* **Axis-connected region.**  At level ``s`` the confined-and-in-wall set
+  ``(u ≤ s) ∧ inside_wall`` is propagated over the half-offset hexagonal
+  cell graph.  Six-neighbour links remain open in the bulk only when their
+  shared physical edge contains flux strictly on the axis side of the binding
+  level, so the component cannot bridge a private lobe through a saddle cell.
 
 * **The binding level.**  A level is *valid*
   while the axis region stays clear of the wall; each escape transition is the
@@ -70,7 +71,12 @@ from functools import partial
 import jax
 import jax.numpy as jnp
 
-from nova.equilibrium.flux_surface_connectivity import _dilate4, flood_fill_core
+from nova.equilibrium.flux_surface_connectivity import (
+    _dilate4,
+    flood_fill_core,
+    hex_edge_admissibility,
+    label_saddle_aware_hex_connected_components,
+)
 from nova.equilibrium.stencil_nulls import (
     magnetic_axis_subgrid,
     xpoint_candidates,
@@ -82,6 +88,7 @@ from nova.geometry.select import (
     wall_coordinate,
     wall_length,
 )
+from nova.geometry.hexstencil import hex_stencil
 from nova.jax.config import Precision, resolve_precision
 from nova.linalg.tensor_spline import fit_tensor_spline
 
@@ -298,6 +305,36 @@ def _flood_fill(confined, seed, n_iter, use_doubling):
     return _linear_flood_fill_core(confined, seed, n_iter)
 
 
+def _raster_hex_partition_geometry(rg, zg):
+    """Return centre-first rings and physical shared edges for a flux raster.
+
+    The tensor field remains the flux authority.  Its static array indices are
+    interpreted as the half-offset tiling used by the plasma component graph;
+    each graph link receives a centred segment of its physical perpendicular
+    bisector.  The segment stays inside the local cell pitch, which is enough
+    to decide whether any finite portion of the shared edge lies on the axis
+    side without requiring another mesh input.
+    """
+    shape = (zg.shape[0], rg.shape[0])
+    rings = jnp.asarray(hex_stencil(shape), dtype=jnp.int32)
+    radius, height = jnp.meshgrid(rg, zg)
+    centres = jnp.stack((radius, height), axis=-1).reshape(-1, 2)
+    centre = centres[rings[:, :1]]
+    neighbour = centres[rings]
+    midpoint = 0.5 * (centre + neighbour)
+    separation = neighbour - centre
+    norm = jnp.linalg.norm(separation, axis=-1, keepdims=True)
+    norm = norm.at[:, 0].set(1.0)
+    tangent = jnp.stack((-separation[..., 1], separation[..., 0]), axis=-1) / norm
+    radial_pitch = jnp.abs(rg[1] - rg[0])
+    vertical_pitch = jnp.abs(zg[1] - zg[0])
+    half_edge = 0.45 * jnp.minimum(radial_pitch, vertical_pitch)
+    endpoints = jnp.stack(
+        (midpoint - half_edge * tangent, midpoint + half_edge * tangent), axis=-2
+    )
+    return rings, endpoints.at[:, 0].set(centre[:, 0, None, :])
+
+
 def _axis_component_before_level(
     u,
     inside_limiter,
@@ -328,7 +365,24 @@ def _axis_component_before_level(
     )
     has_seed = jnp.any(confined)
     seed &= has_seed
-    return _flood_fill(confined, seed, n_iter, use_doubling) > 0.5
+    rings, shared_edges = _raster_hex_partition_geometry(rg, zg)
+    link_admissible = hex_edge_admissibility(
+        u,
+        rg,
+        zg,
+        level - inward_offset,
+        jnp.asarray(0.0, dtype=u.dtype),
+        shared_edges,
+    )
+    labels = label_saddle_aware_hex_connected_components(
+        confined,
+        rings,
+        link_admissible,
+        n_iter,
+    )
+    sentinel = jnp.asarray(jnp.iinfo(labels.dtype).max, dtype=labels.dtype)
+    axis_label = jnp.min(jnp.where(seed & (labels > 0), labels, sentinel))
+    return has_seed & (labels == axis_label)
 
 
 def _wall_nodes_touching_region(region, inside_limiter, rg, zg, wall_r, wall_z):

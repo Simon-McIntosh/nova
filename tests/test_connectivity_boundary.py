@@ -380,6 +380,36 @@ def test_reachable_wall_minimum_is_refined_along_polyline():
     np.testing.assert_allclose(batched["r"], [2.25, 2.25], rtol=0.0, atol=0.0)
 
 
+def test_pre_saddle_axis_component_uses_admissible_hex_links():
+    """The production partition keeps the lobe behind a saddle unreachable."""
+    configure_dtypes()
+    inside = np.zeros((11, 13), dtype=bool)
+    inside[2:5, 5:8] = True
+    inside[5:8, 3:5] = True
+    radial = np.arange(inside.shape[1], dtype=float)
+    vertical = np.arange(inside.shape[0], dtype=float)
+    radius, height = np.meshgrid(radial, vertical)
+    saddle = -(radius - 4.5) * (height - 4.5)
+    axis_cell = (3, 6)
+    normalized_flux = saddle[axis_cell] - saddle
+
+    region = cb._axis_component_before_level(
+        jnp.asarray(normalized_flux),
+        jnp.asarray(inside),
+        jnp.asarray(radial),
+        jnp.asarray(vertical),
+        jnp.asarray(radial[axis_cell[1]]),
+        jnp.asarray(vertical[axis_cell[0]]),
+        jnp.asarray(saddle[axis_cell]),
+        sum(inside.shape),
+        True,
+    )
+
+    assert bool(region[axis_cell])
+    assert not bool(region[6, 3])
+    assert int(jnp.count_nonzero(region)) == 9
+
+
 def test_module_is_contour_free():
     """Imports no contour / ndimage machinery and calls no argwhere / label."""
     tree = ast.parse(inspect.getsource(cb))

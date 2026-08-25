@@ -568,3 +568,30 @@ def test_a_directory_already_chosen_wins_over_the_default(
     jax.config.update("jax_compilation_cache_dir", str(tmp_path / "theirs"))
     monkeypatch.setenv("NOVA_COMPILATION_CACHE", str(tmp_path / "ours"))
     assert compilation_cache() == tmp_path / "theirs"
+
+
+def test_production_route_records_and_overrides_an_inherited_user_cache(
+    monkeypatch, tmp_path, unconfigured_cache
+):
+    """The production executable identity is explicit and receipt-visible."""
+    inherited = tmp_path / "inherited"
+    monkeypatch.setenv("NOVA_COMPILATION_CACHE", str(tmp_path / "environment"))
+    monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path / "cache-home"))
+    jax.config.update("jax_compilation_cache_dir", str(inherited))
+    forget_evaluators()
+
+    plan = TilePlan(target_tile=2, source_tile=2, block=4, n_panels=2, n_nodes=4)
+    evaluate = tile_evaluator(plan)
+    resolved = (tmp_path / "cache-home" / "nova" / "production-forward").resolve()
+
+    assert jax.config.jax_compilation_cache_dir == str(resolved)
+    assert evaluate.compilation_cache_receipt == {
+        "selection": "fixed_persistent",
+        "explicit": True,
+        "directory": str(tmp_path / "cache-home" / "nova" / "production-forward"),
+        "resolved_directory": str(resolved),
+        "minimum_compile_seconds": 1.0,
+        "maximum_bytes": 2 << 30,
+    }
+    assert evaluate.compilation_cache_configuration.resolved_directory != inherited
+    forget_evaluators()

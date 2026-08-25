@@ -375,6 +375,76 @@
     <code>margin-frame-remeasure.json</code>, all deliberately held so these deltas stayed readable, plus
     a redraw of the real-equilibria grid whose wall markers predate the limiter fix.</p>
 
+    <h2 id="dual-sweep">The on-partition guard: a dual orbit family with adjacency merge</h2>
+
+    <p><strong>Node <code>dual-stencil-null-sweep</code>, commit <code>46e5d9b8</code>, gate PASSED,
+    2026-08-25.</strong> The ring test compares with strict inequality, so a stationary point sitting
+    exactly on a cell partition produces tied samples and the winding degree can vanish or split. On the
+    two constructions the single family genuinely misses — a saddle exactly on a shared cell edge and one
+    exactly on a lattice node each read <strong>primal cell degree zero</strong> — the dual family, the
+    same signed-degree machinery orbiting each native node over its surrounding centroid values, reads
+    degree &minus;1, and the adjacency merge within half the minimum cell pitch returns exactly one
+    resolved saddle each. A generic interior saddle yields one primal plus one dual detection merging to
+    exactly one candidate, so the guard invents no duplicates. Opt-in <code>dual_sweep=True</code>,
+    fixed work slots, no compaction; a preregistered three-clause reserved-H200 benchmark decides the
+    production default.</p>
+
+    <p><strong>The ITER acceptance test returned a clean negative that retired the test case.</strong>
+    Even with the last geometric miss mode guarded, zero saddle candidates resolve on the 129&times;129
+    grid covering the boundary-implied X location — so <code>iterhybrid_cocos17.eqdsk</code> is a
+    fixed-boundary scenario field whose &psi; carries no divertor saddle, and it is
+    <strong>excluded from all topology test cases</strong> by direction.</p>
+
+    <h2 id="efit-corroboration">Independent EFIT corroboration: the chain is sound, the basin is the problem</h2>
+
+    <p><strong>Node <code>efit-topology-corroboration</code>, commit <code>4e8b0e7e</code>, gate PASSED,
+    2026-08-25.</strong> Twelve-panel overlay of the independent <code>efm</code> reconstruction against
+    nova's post-cutover forward solves, per arm, self-inspected before banking.</p>
+
+    <figure>
+      <img src="/nova/figures/primary-xpoint-evidence/efit-topology-corroboration.png"
+           alt="Twelve panels, one per frozen MAST arm, each overlaying the EFIT efm LCFS in teal with the nova binding contour in red, marking the EFIT X-point, the nova selected saddle and the nova limiter point, with per-panel sup and RMS distances and an agree or disagree label verdict.">
+      <figcaption>EFIT <code>efm</code> LCFS (teal) against the nova binding contour (red), with the EFIT
+      X-point, nova selected saddle and nova limiter point marked, per-panel sup/RMS distances, and the
+      label verdict. Where the solve converges to the diverted root the curves coincide at centimetre
+      scale; where it lands limited, the smaller nova boundary sits visibly inside the EFIT teardrop.</figcaption>
+    </figure>
+
+    <p><strong>Methodology, stated because it is what makes the comparison neutral.</strong> Nova runs
+    <em>forward</em> GS solves driven by the 101 circuit currents fitted per frame to the
+    <code>efm</code> flux-map labels; the comparison is <em>geometric</em> — contour against LCFS with
+    sup/RMS never computed across an inter-branch chord, saddle against stored X-point, label against
+    label. <strong>No magnetics-reproduction metric is used anywhere</strong>: <code>efm</code> is itself
+    magnetics-fitted, so magnetics enters exactly once, upstream, inside EFIT's own reconstruction.
+    COCOS 3 &rarr; 17 with a unit geometric factor; the machine description reopened at its written
+    DD 4.1.1; the raw <code>efm</code> Zarr carries no DD version to infer.</p>
+
+    <table>
+      <caption>Headline corroboration numbers across the twelve arms</caption>
+      <thead><tr><th scope="col">Quantity</th><th scope="col">Result</th></tr></thead>
+      <tbody>
+        <tr><td>Nova selected saddle to stored EFIT X-point</td><td><strong>4.343&ndash;38.661 mm</strong> on all twelve arms</td></tr>
+        <tr><td>Best converged-arm LCFS agreement</td><td>21983/35 pure: sup 0.086 m, RMS <strong>0.013 m</strong>; 22086/43 mixed: sup 0.157 m, RMS 0.031 m</td></tr>
+        <tr><td>EFIT label</td><td>diverted on <strong>12/12</strong></td></tr>
+        <tr><td>Nova post-cutover agreement</td><td><strong>7/12</strong>; limited on 21985/51 both, 21986/46 both, 21989/55 mixed</td></tr>
+        <tr><td>EFIT LCFS&ndash;wall contacts</td><td>0/12 identifiable — all limiter-contact distances honestly unavailable, none backfilled from nova</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The verdict the figure makes visible.</strong> Millimetre-scale saddle agreement from an
+    independent reconstruction corroborates post-containment detection and selection. The five
+    disagreements are the <em>solve</em> landing in the limited basin where EFIT reconstructs diverted —
+    the sprint's central solver-basin question restated on independent data, and not evidence for any
+    further topology-chain repair. The margin regeneration's authorised rebaseline already shows the
+    corrected margins pulling the mixed arm the right way: 21986/46 mixed re-solves to
+    <strong>diverted</strong> with <code>topology_consistent</code> true, moving agreement to 8/12.</p>
+
+    <p><strong>A trap embedded for the next consumer, found the hard way.</strong> The node's first
+    generation consumed <code>ForwardTopologyState.diverted</code>, falsely reported 10/12 agreement, and
+    was rejected: that field is the legacy geometric label — on one route an echo of the
+    <em>requested</em> class — not the achieved classification. The warning is embedded in the banked
+    JSON, and the repair is an open followup requiring a consumer census first.</p>
+
   </main>
 </body>
 </html>

@@ -1,0 +1,848 @@
+{
+  "comparison_contract": {
+    "analytic_authority": "moderate-rotation-conventional closed-form total flux evaluated independently at every target",
+    "basin": "not applicable",
+    "forward_map": "one application of production ForwardFluxOperator.flux_map with exact-value state and first-order current moments",
+    "map_roundoff_basis": "4096 binary64 epsilon",
+    "map_roundoff_tolerance": 9.094947017729282e-13,
+    "regional_partition": {
+      "closed_flux_region": "analytic psi_N < 0.95",
+      "scrape_off_layer": "analytic psi_N > 1.05",
+      "separatrix_band": "0.95 <= analytic psi_N <= 1.05"
+    },
+    "relative_normalisation": "closed-form axis-to-boundary total-flux span",
+    "repair_authored": false,
+    "seed": "none",
+    "solve": "none"
+  },
+  "convergence_order_fit": {
+    "characteristic_pitch": "square root of median carrier-cell area",
+    "confidence_interval": [
+      -0.637120010032096,
+      0.4708294179379629
+    ],
+    "confidence_level": 0.95,
+    "constant_offset_included_by_confidence_interval": true,
+    "converging_order_floor": 0.5,
+    "converging_order_supported": false,
+    "degrees_of_freedom": 2,
+    "error_quantity": "all-carrier one-application relative-sup residual",
+    "fitted_relative_sup_residual": [
+      2.7883310618122457e-15,
+      2.8481783229263497e-15,
+      2.8965948666999833e-15,
+      2.93144527327674e-15
+    ],
+    "interpretation": "physical convergence order is below resolution because every rung is within the preregistered binary64 roundoff tolerance",
+    "model": "log(relative_sup_error) = intercept + order*log(characteristic_pitch)",
+    "order": -0.0831452960470665,
+    "r_squared": 0.1725384530075973,
+    "roundoff_dominated": true,
+    "rung_count": 4,
+    "standard_error": 0.1287518999975828
+  },
+  "evidence_inputs": {
+    "analytic_fixture_driver": {
+      "path": "scripts/analytic_oracle_fixtures/measure.py",
+      "sha256": "10ccc20c76068c79943358ac5b9d7b323501afe82509ebbfbf30481992d27207"
+    },
+    "prior_gauge_receipt": {
+      "path": "docs/figures/coefficient-space-newton/analytic-truth-gauge.json",
+      "sha256": "0c5fa4f3f567292158b7c97da4d0faba29fae7b7370ec5d1bebd949d85371559"
+    }
+  },
+  "headline_metrics": {
+    "analytic_boundary_flux_wb_range": {
+      "maximum": -8.673617379884035e-19,
+      "minimum": -8.673617379884035e-19
+    },
+    "one_application_absolute_sup_wb_range": {
+      "maximum": 4.884981308350689e-15,
+      "minimum": 3.9968028886505635e-15
+    },
+    "regional_relative_sup_ranges": {
+      "all_carrier_cells": {
+        "maximum": 3.054874184360744e-15,
+        "minimum": 2.6922745652091497e-15
+      },
+      "closed_flux_region": {
+        "maximum": 3.054874184360744e-15,
+        "minimum": 2.6922745652091497e-15
+      },
+      "scrape_off_layer": {
+        "maximum": 1.3666542403719119e-15,
+        "minimum": 1.1251296690426296e-15
+      },
+      "separatrix_band": {
+        "maximum": 2.83332350384108e-15,
+        "minimum": 1.5244502435465986e-15
+      }
+    },
+    "worst_full_state_one_application_relative_sup": 3.536896861972677e-15
+  },
+  "measurement_lane": {
+    "backend": "cpu",
+    "cpus_per_task": 8,
+    "execution": "slurm",
+    "hostname": "98dci4-clu-3141.iter.org",
+    "precision": "float64",
+    "requested_memory_mb": 98304,
+    "slurm_job_id": "1254395",
+    "slurm_node_list": "98dci4-clu-3141",
+    "slurm_partition": "all_debug",
+    "tmpdir": "/tmp"
+  },
+  "refinement_ladder": [
+    {
+      "analytic_topology": {
+        "axis_flux_wb": 1.3814516470779585,
+        "axis_rz_m": [
+          1.698430185826133,
+          -4.066163097706696e-16
+        ],
+        "boundary_flux_wb": -8.673617379884035e-19,
+        "boundary_minus_axis_span_wb": -1.3814516470779585,
+        "class": "limited",
+        "x_point_rz_m": null
+      },
+      "cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.14174687303602695,
+        "lock_wait_seconds": 8.429214358329773e-05,
+        "semantic_key": "f1be7effa82759ba",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_300.zarr",
+        "store_seconds": 0.0
+      },
+      "characteristic_pitch_m": 0.07973339531853098,
+      "one_application_residual": {
+        "application_count": 1,
+        "definition": "exact production forward map at analytic total flux minus analytic total flux",
+        "full_state": {
+          "absolute_rms_wb": 1.3580885250466286e-15,
+          "absolute_sup_wb": 4.524158825347513e-15,
+          "relative_rms": 9.830879914756715e-16,
+          "relative_sup": 3.2749310009633687e-15,
+          "state_node_count": 1524
+        },
+        "regions": {
+          "all_carrier_cells": {
+            "absolute_rms_wb": 1.4041825258647584e-15,
+            "absolute_sup_wb": 3.7192471324942744e-15,
+            "cell_count": 342,
+            "relative_rms": 1.0164543426727096e-15,
+            "relative_sup": 2.6922745652091497e-15
+          },
+          "closed_flux_region": {
+            "absolute_rms_wb": 1.5130798732358575e-15,
+            "absolute_sup_wb": 3.7192471324942744e-15,
+            "cell_count": 260,
+            "relative_rms": 1.0952825431395434e-15,
+            "relative_sup": 2.6922745652091497e-15
+          },
+          "scrape_off_layer": {
+            "absolute_rms_wb": 8.886505245077507e-16,
+            "absolute_sup_wb": 1.5543122344752192e-15,
+            "cell_count": 45,
+            "relative_rms": 6.432729848977494e-16,
+            "relative_sup": 1.1251296690426296e-15
+          },
+          "separatrix_band": {
+            "absolute_rms_wb": 1.0848825800854444e-15,
+            "absolute_sup_wb": 2.105954299835844e-15,
+            "cell_count": 37,
+            "relative_rms": 7.853207040435936e-16,
+            "relative_sup": 1.5244502435465986e-15
+          }
+        },
+        "seed_used": false,
+        "solve_used": false
+      },
+      "posed_terms": {
+        "boundary": {
+          "absolute_delta_wb": 8.673617379884035e-19,
+          "closed_form_boundary_flux_wb": 0.0,
+          "condition": "limited-plasma separatrix selected by the analytic field; the wall carries the sampled exterior completion",
+          "operator_boundary_flux_at_analytic_solution_wb": -8.673617379884035e-19
+        },
+        "external": {
+          "by_target_family": {
+            "grid": {
+              "closed_form_completion_absolute_sup_delta_wb": 4.440892098500626e-16,
+              "node_count": 342,
+              "operator_external_max_wb": -2.130656787045085,
+              "operator_external_min_wb": -4.909387099038827
+            },
+            "sample": {
+              "closed_form_completion_absolute_sup_delta_wb": 4.440892098500626e-16,
+              "node_count": 1061,
+              "operator_external_max_wb": -2.0851903633695814,
+              "operator_external_min_wb": -5.121385951771387
+            },
+            "wall": {
+              "closed_form_completion_absolute_sup_delta_wb": 4.440892098500626e-16,
+              "node_count": 121,
+              "operator_external_max_wb": -2.1145938912919746,
+              "operator_external_min_wb": -4.972262730096596
+            }
+          },
+          "closed_form_specification": "the exterior contribution which completes the analytic total-flux field",
+          "external_current_amplitude": {
+            "closed_form_completion": 1.0,
+            "matches": true,
+            "operator": 1.0
+          },
+          "full_state_identity_absolute_sup_wb": 4.440892098500626e-16,
+          "operator_specification": "closed-form total flux minus analytically integrated exact-density plasma image"
+        },
+        "source": {
+          "boundary_primitives": {
+            "closed_form_field_function_tm": 3.4,
+            "closed_form_pressure_pa": 0.0,
+            "operator_field_function_tm": 3.4,
+            "operator_pressure_pa": 0.0
+          },
+          "current_density": {
+            "comparison_support": "analytic axis-connected core cell centroids",
+            "core_cell_count": 278,
+            "operator_vs_closed_form_absolute_sup_a_per_m2": 4.656612873077393e-10,
+            "operator_vs_closed_form_relative_sup": 3.8617299182210207e-16
+          },
+          "ff_gradient_tm2_per_wb": {
+            "closed_form_after_total_flux_conversion": -0.06997315389737607,
+            "maximum_absolute_delta": 0.0,
+            "operator_at_psi_norm_0_0p5_1": [
+              -0.06997315389737607,
+              -0.06997315389737607,
+              -0.06997315389737607
+            ]
+          },
+          "normalisation": {
+            "closed_form": "absolute analytic pressure and FF gradients",
+            "matches": true,
+            "operator": "absolute source; no target-current amplitude scaling",
+            "operator_policy": "absolute"
+          },
+          "open_region_sources": {
+            "closed_form": "zero outside the closed-flux core",
+            "matches": true,
+            "operator_common_sol": "undeclared",
+            "operator_private_flux": "undeclared"
+          },
+          "pressure_gradient_pa_per_wb": {
+            "closed_form_after_total_flux_conversion": -72400.04058623493,
+            "maximum_absolute_delta": 0.0,
+            "operator_at_psi_norm_0_0p5_1": [
+              -72400.04058623493,
+              -72400.04058623493,
+              -72400.04058623493
+            ]
+          },
+          "rotation": {
+            "closed_form_axis_temperature_j": 3.204353268e-16,
+            "closed_form_boundary_temperature_j": 8.01088317e-18,
+            "closed_form_closure": "isothermal_surface",
+            "closed_form_mean_particle_mass_kg": 3.3435837768e-27,
+            "closed_form_uniform_rotation_parameter_per_m2": 0.04238754325259515,
+            "operator_angular_frequency_per_s": [
+              90135.98537203309,
+              64527.54549594322,
+              14251.750645962202
+            ],
+            "operator_closure": "isothermal_surface",
+            "operator_mean_particle_mass_kg": 3.3435837768e-27,
+            "operator_temperature_j": [
+              3.204353268e-16,
+              1.6422310498499997e-16,
+              8.01088317e-18
+            ],
+            "psi_norm_probe": [
+              0.0,
+              0.5,
+              1.0
+            ]
+          }
+        }
+      },
+      "realised_cells": 342,
+      "requested_cells": -300,
+      "state_dimension": 1524
+    },
+    {
+      "analytic_topology": {
+        "axis_flux_wb": 1.3810216850087464,
+        "axis_rz_m": [
+          1.6993434455115166,
+          -1.4986107995330714e-17
+        ],
+        "boundary_flux_wb": -8.673617379884035e-19,
+        "boundary_minus_axis_span_wb": -1.3810216850087464,
+        "class": "limited",
+        "x_point_rz_m": null
+      },
+      "cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.14542787708342075,
+        "lock_wait_seconds": 3.662332892417908e-05,
+        "semantic_key": "030667d40f96d904",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_500.zarr",
+        "store_seconds": 0.0
+      },
+      "characteristic_pitch_m": 0.06176122244104858,
+      "one_application_residual": {
+        "application_count": 1,
+        "definition": "exact production forward map at analytic total flux minus analytic total flux",
+        "full_state": {
+          "absolute_rms_wb": 1.4450216608364005e-15,
+          "absolute_sup_wb": 4.773959005888173e-15,
+          "relative_rms": 1.0463424843522633e-15,
+          "relative_sup": 3.4568313138818946e-15,
+          "state_node_count": 2253
+        },
+        "regions": {
+          "all_carrier_cells": {
+            "absolute_rms_wb": 1.4715885592710698e-15,
+            "absolute_sup_wb": 4.218847493575595e-15,
+            "cell_count": 551,
+            "relative_rms": 1.0655796177898176e-15,
+            "relative_sup": 3.054874184360744e-15
+          },
+          "closed_flux_region": {
+            "absolute_rms_wb": 1.5698453846424284e-15,
+            "absolute_sup_wb": 4.218847493575595e-15,
+            "cell_count": 426,
+            "relative_rms": 1.1367275414161843e-15,
+            "relative_sup": 3.054874184360744e-15
+          },
+          "scrape_off_layer": {
+            "absolute_rms_wb": 8.582033439247628e-16,
+            "absolute_sup_wb": 1.887379141862766e-15,
+            "cell_count": 67,
+            "relative_rms": 6.214264071598032e-16,
+            "relative_sup": 1.3666542403719119e-15
+          },
+          "separatrix_band": {
+            "absolute_rms_wb": 1.2733589915591611e-15,
+            "absolute_sup_wb": 3.078266808120844e-15,
+            "cell_count": 58,
+            "relative_rms": 9.220412723288241e-16,
+            "relative_sup": 2.228977894797755e-15
+          }
+        },
+        "seed_used": false,
+        "solve_used": false
+      },
+      "posed_terms": {
+        "boundary": {
+          "absolute_delta_wb": 8.673617379884035e-19,
+          "closed_form_boundary_flux_wb": 0.0,
+          "condition": "limited-plasma separatrix selected by the analytic field; the wall carries the sampled exterior completion",
+          "operator_boundary_flux_at_analytic_solution_wb": -8.673617379884035e-19
+        },
+        "external": {
+          "by_target_family": {
+            "grid": {
+              "closed_form_completion_absolute_sup_delta_wb": 4.440892098500626e-16,
+              "node_count": 551,
+              "operator_external_max_wb": -2.136929663492707,
+              "operator_external_min_wb": -4.893677117038058
+            },
+            "sample": {
+              "closed_form_completion_absolute_sup_delta_wb": 4.440892098500626e-16,
+              "node_count": 1581,
+              "operator_external_max_wb": -2.099258368505515,
+              "operator_external_min_wb": -5.050505465222662
+            },
+            "wall": {
+              "closed_form_completion_absolute_sup_delta_wb": 3.673276960380889e-16,
+              "node_count": 121,
+              "operator_external_max_wb": -2.1158530156745714,
+              "operator_external_min_wb": -4.974993638516187
+            }
+          },
+          "closed_form_specification": "the exterior contribution which completes the analytic total-flux field",
+          "external_current_amplitude": {
+            "closed_form_completion": 1.0,
+            "matches": true,
+            "operator": 1.0
+          },
+          "full_state_identity_absolute_sup_wb": 4.440892098500626e-16,
+          "operator_specification": "closed-form total flux minus analytically integrated exact-density plasma image"
+        },
+        "source": {
+          "boundary_primitives": {
+            "closed_form_field_function_tm": 3.4,
+            "closed_form_pressure_pa": 0.0,
+            "operator_field_function_tm": 3.4,
+            "operator_pressure_pa": 0.0
+          },
+          "current_density": {
+            "comparison_support": "analytic axis-connected core cell centroids",
+            "core_cell_count": 456,
+            "operator_vs_closed_form_absolute_sup_a_per_m2": 4.656612873077393e-10,
+            "operator_vs_closed_form_relative_sup": 3.8707986461934123e-16
+          },
+          "ff_gradient_tm2_per_wb": {
+            "closed_form_after_total_flux_conversion": -0.06997315389737607,
+            "maximum_absolute_delta": 0.0,
+            "operator_at_psi_norm_0_0p5_1": [
+              -0.06997315389737607,
+              -0.06997315389737607,
+              -0.06997315389737607
+            ]
+          },
+          "normalisation": {
+            "closed_form": "absolute analytic pressure and FF gradients",
+            "matches": true,
+            "operator": "absolute source; no target-current amplitude scaling",
+            "operator_policy": "absolute"
+          },
+          "open_region_sources": {
+            "closed_form": "zero outside the closed-flux core",
+            "matches": true,
+            "operator_common_sol": "undeclared",
+            "operator_private_flux": "undeclared"
+          },
+          "pressure_gradient_pa_per_wb": {
+            "closed_form_after_total_flux_conversion": -72400.04058623493,
+            "maximum_absolute_delta": 0.0,
+            "operator_at_psi_norm_0_0p5_1": [
+              -72400.04058623493,
+              -72400.04058623493,
+              -72400.04058623493
+            ]
+          },
+          "rotation": {
+            "closed_form_axis_temperature_j": 3.204353268e-16,
+            "closed_form_boundary_temperature_j": 8.01088317e-18,
+            "closed_form_closure": "isothermal_surface",
+            "closed_form_mean_particle_mass_kg": 3.3435837768e-27,
+            "closed_form_uniform_rotation_parameter_per_m2": 0.04238754325259515,
+            "operator_angular_frequency_per_s": [
+              90135.98537203309,
+              64527.54549594322,
+              14251.750645962202
+            ],
+            "operator_closure": "isothermal_surface",
+            "operator_mean_particle_mass_kg": 3.3435837768e-27,
+            "operator_temperature_j": [
+              3.204353268e-16,
+              1.6422310498499997e-16,
+              8.01088317e-18
+            ],
+            "psi_norm_probe": [
+              0.0,
+              0.5,
+              1.0
+            ]
+          }
+        }
+      },
+      "realised_cells": 551,
+      "requested_cells": -500,
+      "state_dimension": 2253
+    },
+    {
+      "analytic_topology": {
+        "axis_flux_wb": 1.3812528489945375,
+        "axis_rz_m": [
+          1.6993280358438496,
+          -2.7100015426462173e-16
+        ],
+        "boundary_flux_wb": -8.673617379884035e-19,
+        "boundary_minus_axis_span_wb": -1.3812528489945375,
+        "class": "limited",
+        "x_point_rz_m": null
+      },
+      "cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.1875103935599327,
+        "lock_wait_seconds": 1.6553327441215515e-05,
+        "semantic_key": "3fa6c6d51e8cf59d",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_750.zarr",
+        "store_seconds": 0.0
+      },
+      "characteristic_pitch_m": 0.050427826957033,
+      "one_application_residual": {
+        "application_count": 1,
+        "definition": "exact production forward map at analytic total flux minus analytic total flux",
+        "full_state": {
+          "absolute_rms_wb": 1.4720375569208639e-15,
+          "absolute_sup_wb": 3.9968028886505635e-15,
+          "relative_rms": 1.0657263498080107e-15,
+          "relative_sup": 2.8936069826462093e-15,
+          "state_node_count": 3184
+        },
+        "regions": {
+          "all_carrier_cells": {
+            "absolute_rms_wb": 1.4827044833031507e-15,
+            "absolute_sup_wb": 3.913536161803677e-15,
+            "cell_count": 815,
+            "relative_rms": 1.0734489955133584e-15,
+            "relative_sup": 2.83332350384108e-15
+          },
+          "closed_flux_region": {
+            "absolute_rms_wb": 1.5676335204811438e-15,
+            "absolute_sup_wb": 3.774758283725532e-15,
+            "cell_count": 639,
+            "relative_rms": 1.1349359544288211e-15,
+            "relative_sup": 2.732851039165864e-15
+          },
+          "scrape_off_layer": {
+            "absolute_rms_wb": 8.916135165156263e-16,
+            "absolute_sup_wb": 1.734723475976807e-15,
+            "cell_count": 90,
+            "relative_rms": 6.455107167124855e-16,
+            "relative_sup": 1.2559058084401949e-15
+          },
+          "separatrix_band": {
+            "absolute_rms_wb": 1.3199370356474545e-15,
+            "absolute_sup_wb": 3.913536161803677e-15,
+            "cell_count": 86,
+            "relative_rms": 9.556085524878975e-16,
+            "relative_sup": 2.83332350384108e-15
+          }
+        },
+        "seed_used": false,
+        "solve_used": false
+      },
+      "posed_terms": {
+        "boundary": {
+          "absolute_delta_wb": 8.673617379884035e-19,
+          "closed_form_boundary_flux_wb": 0.0,
+          "condition": "limited-plasma separatrix selected by the analytic field; the wall carries the sampled exterior completion",
+          "operator_boundary_flux_at_analytic_solution_wb": -8.673617379884035e-19
+        },
+        "external": {
+          "by_target_family": {
+            "grid": {
+              "closed_form_completion_absolute_sup_delta_wb": 4.440892098500626e-16,
+              "node_count": 815,
+              "operator_external_max_wb": -2.118682483240577,
+              "operator_external_min_wb": -4.966673086712093
+            },
+            "sample": {
+              "closed_form_completion_absolute_sup_delta_wb": 4.440892098500626e-16,
+              "node_count": 2248,
+              "operator_external_max_wb": -2.0906450608951985,
+              "operator_external_min_wb": -5.102376348750928
+            },
+            "wall": {
+              "closed_form_completion_absolute_sup_delta_wb": 4.440892098500626e-16,
+              "node_count": 121,
+              "operator_external_max_wb": -2.1165120785431526,
+              "operator_external_min_wb": -4.9766504566775
+            }
+          },
+          "closed_form_specification": "the exterior contribution which completes the analytic total-flux field",
+          "external_current_amplitude": {
+            "closed_form_completion": 1.0,
+            "matches": true,
+            "operator": 1.0
+          },
+          "full_state_identity_absolute_sup_wb": 4.440892098500626e-16,
+          "operator_specification": "closed-form total flux minus analytically integrated exact-density plasma image"
+        },
+        "source": {
+          "boundary_primitives": {
+            "closed_form_field_function_tm": 3.4,
+            "closed_form_pressure_pa": 0.0,
+            "operator_field_function_tm": 3.4,
+            "operator_pressure_pa": 0.0
+          },
+          "current_density": {
+            "comparison_support": "analytic axis-connected core cell centroids",
+            "core_cell_count": 683,
+            "operator_vs_closed_form_absolute_sup_a_per_m2": 4.656612873077393e-10,
+            "operator_vs_closed_form_relative_sup": 3.8363483891317943e-16
+          },
+          "ff_gradient_tm2_per_wb": {
+            "closed_form_after_total_flux_conversion": -0.06997315389737607,
+            "maximum_absolute_delta": 0.0,
+            "operator_at_psi_norm_0_0p5_1": [
+              -0.06997315389737607,
+              -0.06997315389737607,
+              -0.06997315389737607
+            ]
+          },
+          "normalisation": {
+            "closed_form": "absolute analytic pressure and FF gradients",
+            "matches": true,
+            "operator": "absolute source; no target-current amplitude scaling",
+            "operator_policy": "absolute"
+          },
+          "open_region_sources": {
+            "closed_form": "zero outside the closed-flux core",
+            "matches": true,
+            "operator_common_sol": "undeclared",
+            "operator_private_flux": "undeclared"
+          },
+          "pressure_gradient_pa_per_wb": {
+            "closed_form_after_total_flux_conversion": -72400.04058623493,
+            "maximum_absolute_delta": 0.0,
+            "operator_at_psi_norm_0_0p5_1": [
+              -72400.04058623493,
+              -72400.04058623493,
+              -72400.04058623493
+            ]
+          },
+          "rotation": {
+            "closed_form_axis_temperature_j": 3.204353268e-16,
+            "closed_form_boundary_temperature_j": 8.01088317e-18,
+            "closed_form_closure": "isothermal_surface",
+            "closed_form_mean_particle_mass_kg": 3.3435837768e-27,
+            "closed_form_uniform_rotation_parameter_per_m2": 0.04238754325259515,
+            "operator_angular_frequency_per_s": [
+              90135.98537203309,
+              64527.54549594322,
+              14251.750645962202
+            ],
+            "operator_closure": "isothermal_surface",
+            "operator_mean_particle_mass_kg": 3.3435837768e-27,
+            "operator_temperature_j": [
+              3.204353268e-16,
+              1.6422310498499997e-16,
+              8.01088317e-18
+            ],
+            "psi_norm_probe": [
+              0.0,
+              0.5,
+              1.0
+            ]
+          }
+        }
+      },
+      "realised_cells": 815,
+      "requested_cells": -750,
+      "state_dimension": 3184
+    },
+    {
+      "analytic_topology": {
+        "axis_flux_wb": 1.3811489277145979,
+        "axis_rz_m": [
+          1.6996514078262106,
+          1.177481896523725e-15
+        ],
+        "boundary_flux_wb": -8.673617379884035e-19,
+        "boundary_minus_axis_span_wb": -1.3811489277145979,
+        "class": "limited",
+        "x_point_rz_m": null
+      },
+      "cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.21006616204977036,
+        "lock_wait_seconds": 1.76113098859787e-05,
+        "semantic_key": "7c94be9b777c55ba",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_1000.zarr",
+        "store_seconds": 0.0
+      },
+      "characteristic_pitch_m": 0.043671779202436194,
+      "one_application_residual": {
+        "application_count": 1,
+        "definition": "exact production forward map at analytic total flux minus analytic total flux",
+        "full_state": {
+          "absolute_rms_wb": 1.4870925863378572e-15,
+          "absolute_sup_wb": 4.884981308350689e-15,
+          "relative_rms": 1.0767069043007299e-15,
+          "relative_sup": 3.536896861972677e-15,
+          "state_node_count": 4052
+        },
+        "regions": {
+          "all_carrier_cells": {
+            "absolute_rms_wb": 1.5567334811521616e-15,
+            "absolute_sup_wb": 3.9968028886505635e-15,
+            "cell_count": 1076,
+            "relative_rms": 1.1271293413144848e-15,
+            "relative_sup": 2.893824705250372e-15
+          },
+          "closed_flux_region": {
+            "absolute_rms_wb": 1.6451561589874538e-15,
+            "absolute_sup_wb": 3.9968028886505635e-15,
+            "cell_count": 844,
+            "relative_rms": 1.1911504443693207e-15,
+            "relative_sup": 2.893824705250372e-15
+          },
+          "scrape_off_layer": {
+            "absolute_rms_wb": 8.387315322502534e-16,
+            "absolute_sup_wb": 1.7763568394002505e-15,
+            "cell_count": 121,
+            "relative_rms": 6.072708854345719e-16,
+            "relative_sup": 1.2861443134446099e-15
+          },
+          "separatrix_band": {
+            "absolute_rms_wb": 1.4647827011749403e-15,
+            "absolute_sup_wb": 3.654195002145144e-15,
+            "cell_count": 111,
+            "relative_rms": 1.0605537692439381e-15,
+            "relative_sup": 2.6457646447959672e-15
+          }
+        },
+        "seed_used": false,
+        "solve_used": false
+      },
+      "posed_terms": {
+        "boundary": {
+          "absolute_delta_wb": 8.673617379884035e-19,
+          "closed_form_boundary_flux_wb": 0.0,
+          "condition": "limited-plasma separatrix selected by the analytic field; the wall carries the sampled exterior completion",
+          "operator_boundary_flux_at_analytic_solution_wb": -8.673617379884035e-19
+        },
+        "external": {
+          "by_target_family": {
+            "grid": {
+              "closed_form_completion_absolute_sup_delta_wb": 4.440892098500626e-16,
+              "node_count": 1076,
+              "operator_external_max_wb": -2.1177450129140674,
+              "operator_external_min_wb": -4.972379016575438
+            },
+            "sample": {
+              "closed_form_completion_absolute_sup_delta_wb": 4.440892098500626e-16,
+              "node_count": 2855,
+              "operator_external_max_wb": -2.0933121718883867,
+              "operator_external_min_wb": -5.089298060713973
+            },
+            "wall": {
+              "closed_form_completion_absolute_sup_delta_wb": 4.440892098500626e-16,
+              "node_count": 121,
+              "operator_external_max_wb": -2.116824090624295,
+              "operator_external_min_wb": -4.977276196808737
+            }
+          },
+          "closed_form_specification": "the exterior contribution which completes the analytic total-flux field",
+          "external_current_amplitude": {
+            "closed_form_completion": 1.0,
+            "matches": true,
+            "operator": 1.0
+          },
+          "full_state_identity_absolute_sup_wb": 4.440892098500626e-16,
+          "operator_specification": "closed-form total flux minus analytically integrated exact-density plasma image"
+        },
+        "source": {
+          "boundary_primitives": {
+            "closed_form_field_function_tm": 3.4,
+            "closed_form_pressure_pa": 0.0,
+            "operator_field_function_tm": 3.4,
+            "operator_pressure_pa": 0.0
+          },
+          "current_density": {
+            "comparison_support": "analytic axis-connected core cell centroids",
+            "core_cell_count": 907,
+            "operator_vs_closed_form_absolute_sup_a_per_m2": 4.656612873077393e-10,
+            "operator_vs_closed_form_relative_sup": 3.833941078863312e-16
+          },
+          "ff_gradient_tm2_per_wb": {
+            "closed_form_after_total_flux_conversion": -0.06997315389737607,
+            "maximum_absolute_delta": 0.0,
+            "operator_at_psi_norm_0_0p5_1": [
+              -0.06997315389737607,
+              -0.06997315389737607,
+              -0.06997315389737607
+            ]
+          },
+          "normalisation": {
+            "closed_form": "absolute analytic pressure and FF gradients",
+            "matches": true,
+            "operator": "absolute source; no target-current amplitude scaling",
+            "operator_policy": "absolute"
+          },
+          "open_region_sources": {
+            "closed_form": "zero outside the closed-flux core",
+            "matches": true,
+            "operator_common_sol": "undeclared",
+            "operator_private_flux": "undeclared"
+          },
+          "pressure_gradient_pa_per_wb": {
+            "closed_form_after_total_flux_conversion": -72400.04058623493,
+            "maximum_absolute_delta": 0.0,
+            "operator_at_psi_norm_0_0p5_1": [
+              -72400.04058623493,
+              -72400.04058623493,
+              -72400.04058623493
+            ]
+          },
+          "rotation": {
+            "closed_form_axis_temperature_j": 3.204353268e-16,
+            "closed_form_boundary_temperature_j": 8.01088317e-18,
+            "closed_form_closure": "isothermal_surface",
+            "closed_form_mean_particle_mass_kg": 3.3435837768e-27,
+            "closed_form_uniform_rotation_parameter_per_m2": 0.04238754325259515,
+            "operator_angular_frequency_per_s": [
+              90135.98537203309,
+              64527.54549594322,
+              14251.750645962202
+            ],
+            "operator_closure": "isothermal_surface",
+            "operator_mean_particle_mass_kg": 3.3435837768e-27,
+            "operator_temperature_j": [
+              3.204353268e-16,
+              1.6422310498499997e-16,
+              8.01088317e-18
+            ],
+            "psi_norm_probe": [
+              0.0,
+              0.5,
+              1.0
+            ]
+          }
+        }
+      },
+      "realised_cells": 1076,
+      "requested_cells": -1000,
+      "state_dimension": 4052
+    }
+  ],
+  "schema": "nova.analytic-operator-refinement-ladder",
+  "source_revision": "67cb20d58aa4b77a2dae326394f5a393efe752d7",
+  "terminal_solve_observations": {
+    "by_rung": [
+      {
+        "achieved_relative_residual": 1.2549724178436488,
+        "criterion": 1e-10,
+        "qualification": "unqualified",
+        "realised_cells": 342,
+        "requested_cells": -300,
+        "route": "production moment seed with undamped Newton-Krylov",
+        "used_in_refinement_fit": false
+      },
+      {
+        "achieved_relative_residual": 1.2998050585857959,
+        "criterion": 1e-10,
+        "qualification": "unqualified",
+        "realised_cells": 551,
+        "requested_cells": -500,
+        "route": "production moment seed with undamped Newton-Krylov",
+        "used_in_refinement_fit": false
+      },
+      {
+        "achieved_relative_residual": null,
+        "qualification": "not_attempted",
+        "realised_cells": 815,
+        "reason": "the one-application ladder requires no terminal solve",
+        "requested_cells": -750,
+        "used_in_refinement_fit": false
+      },
+      {
+        "achieved_relative_residual": null,
+        "qualification": "not_attempted",
+        "realised_cells": 1076,
+        "reason": "the one-application ladder requires no terminal solve",
+        "requested_cells": -1000,
+        "used_in_refinement_fit": false
+      }
+    ],
+    "qualified_rung_count": 0,
+    "role": "reported terminal-solve observations; excluded from the one-application residual ladder and convergence fit",
+    "unqualified_rung_count": 2
+  },
+  "verdict": {
+    "cause": "posing",
+    "classification": "operator_admits_analytic_fixed_point",
+    "operator_admits_analytic_fixed_point": true,
+    "repair_authored": false,
+    "roundoff_dominated": true,
+    "statement": "POSING is the better outcome: one exact map application reproduces the closed-form field within the preregistered binary64 tolerance at every resolution, independently of any seed, solve, or basin. The operator is sound for this analytic fixed point; the bounded case-presentation discrepancy is not repaired here."
+  }
+}

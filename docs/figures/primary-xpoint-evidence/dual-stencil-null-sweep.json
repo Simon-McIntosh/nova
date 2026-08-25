@@ -1,0 +1,118 @@
+{
+  "schema": "nova-dual-stencil-null-sweep",
+  "production_cutover": false,
+  "design": {
+    "primal_orbit": "each field-cell centroid enclosed by its four native-node gradient samples",
+    "dual_orbit": "each interior native node enclosed by four surrounding field-centroid samples, evaluated by gradient_cell_degree on the centroid lattice",
+    "duplicate_rule": "same signed index, opposite orbit family, and position-only quadratic refinements separated by no more than half the minimum cell pitch",
+    "shape_contract": "candidates remain masked in fixed slots; no data-dependent compaction is used",
+    "capacity_per_signed_index": {
+      "output": "k_slots requested by the caller",
+      "work_when_k_slots_at_most_8": 32,
+      "work_when_k_slots_at_most_64": 128,
+      "work_above_64": "2 * k_slots, bounded by the native cell count"
+    }
+  },
+  "analytic_exposure": {
+    "grid": {
+      "shape_nz_nr": [
+        9,
+        9
+      ],
+      "coordinates": "integer nodes from -4 through 4; unit pitch"
+    },
+    "shared_edge_saddle": {
+      "coordinate": [
+        0.0,
+        0.25
+      ],
+      "field": "2*(R-centre_r)^2 - (Z-centre_z)^2 + 1.5*(R-centre_r)*(Z-centre_z)",
+      "single_family_cell_degree_nonzero_count": 0,
+      "single_family_reported_degree": 0,
+      "dual_family_reported_degree": -1,
+      "dual_raw_candidate_count": 1,
+      "merged_cluster_count": 1,
+      "resolved_count": 1,
+      "merged_signed_index": -1
+    },
+    "lattice_node_saddle": {
+      "coordinate": [
+        0.0,
+        0.0
+      ],
+      "field": "(R-centre_r)^2 - 1.3*(Z-centre_z)^2 + 0.7*(R-centre_r)*(Z-centre_z)",
+      "single_family_cell_degree_nonzero_count": 0,
+      "single_family_reported_degree": 0,
+      "dual_family_reported_degree": -1,
+      "dual_raw_candidate_count": 1,
+      "merged_cluster_count": 1,
+      "resolved_count": 1,
+      "merged_signed_index": -1
+    },
+    "generic_interior_saddle": {
+      "coordinate": [
+        0.25,
+        0.25
+      ],
+      "field": "(R-centre_r)^2 - 1.3*(Z-centre_z)^2 + 0.7*(R-centre_r)*(Z-centre_z)",
+      "primal_raw_candidate_count": 1,
+      "dual_raw_candidate_count": 1,
+      "merged_cluster_count": 1,
+      "resolved_count": 1,
+      "merged_signed_index": -1,
+      "verdict": "the staggered family contributes corroborating evidence and does not invent a second reported root"
+    }
+  },
+  "iter_acceptance": {
+    "source": "torax/data/third_party/geo/iterhybrid_cocos17.eqdsk",
+    "source_sha256": "02d948b51525156d883e5afd7085b7c5b68304341be49360d88405d3151ac367",
+    "grid_shape_nz_nr": [
+      129,
+      129
+    ],
+    "expected_lower_x_from_plasma_boundary_m": [
+      5.280813553,
+      -3.911953897
+    ],
+    "expected_location_covered": true,
+    "capacity_per_signed_index": 64,
+    "saddle_raw_candidate_count": 0,
+    "saddle_cluster_count": 0,
+    "saddle_resolved_count": 0,
+    "extremum_raw_candidate_count": 2,
+    "extremum_cluster_count": 1,
+    "extremum_resolved_count": 1,
+    "verdict": "NOT RECOVERED: the dual sweep still finds no saddle before containment; the ITER absence is outside this partition-boundary guard and remains a broader detector limitation or field-data fault"
+  },
+  "cpu_cost_per_slice_compilation_excluded": {
+    "method": "30 alternating warmed calls per route on the same analytic saddle; median and interquartile range",
+    "backend": "JAX CPU",
+    "grid_33x33": {
+      "single_family_median_ms": 2.7265495155006647,
+      "single_family_iqr_ms": [
+        2.4584143538959324,
+        3.115008003078401
+      ],
+      "dual_family_median_ms": 2.698828582651913,
+      "dual_family_iqr_ms": [
+        2.4476959370076656,
+        3.111214784439653
+      ],
+      "median_ratio": 0.9898329618841852
+    },
+    "grid_129x129": {
+      "single_family_median_ms": 18.83232092950493,
+      "single_family_iqr_ms": [
+        17.219968955032527,
+        74.14073590189219
+      ],
+      "dual_family_median_ms": 75.76031098142266,
+      "dual_family_iqr_ms": [
+        20.49693965818733,
+        84.2541932943277
+      ],
+      "median_ratio": 4.022887633713147
+    },
+    "qualification": "The 129x129 distributions are bimodal under concurrent CPU load; retain the measured intervals and do not interpret the 4.02x median as an isolated throughput constant."
+  }
+}

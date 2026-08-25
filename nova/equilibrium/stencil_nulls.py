@@ -1,10 +1,11 @@
 """Device-resident critical points of a scalar field on a rectangular grid.
 
-Candidate existence is the signed degree of the native finite-difference
-gradient around each rectangular cell.  Confidence evidence can therefore
-defer an uncertain nonzero-degree cell, but cannot make it disappear.  Every
-candidate is fitted in exact dimensionless stencil coordinates before its
-sub-cell offset is combined with the physical grid metadata.
+Candidate existence is the signed degree of the finite-difference gradient.
+The optional staggered route combines rectangular-cell orbits over native
+nodes with node-centred orbits over cell-centroid samples.  Confidence evidence
+can defer an uncertain nonzero-degree orbit, but cannot make it disappear.
+Every candidate is fitted in exact dimensionless stencil coordinates before
+its sub-cell offset is combined with the physical grid metadata.
 
 The batch API is the production kernel.  Scalar axis and X-point helpers are
 thin fixed-shape adapters for the reconstruction and connectivity consumers.
@@ -199,6 +200,19 @@ def gradient_cell_degree(fields, rg, zg):
     degree = jnp.rint(winding).astype(jnp.int32)
     margin = jnp.min(jnp.linalg.norm(vectors, axis=-1), axis=-1)
     return degree, winding, margin, radial, vertical
+
+
+def _centroid_lattice(fields, rg, zg):
+    """Return cell-centroid samples and their staggered tensor coordinates."""
+    centroid_fields = 0.25 * (
+        fields[..., :-1, :-1]
+        + fields[..., :-1, 1:]
+        + fields[..., 1:, 1:]
+        + fields[..., 1:, :-1]
+    )
+    centroid_radius = 0.5 * (rg[:-1] + rg[1:])
+    centroid_height = 0.5 * (zg[:-1] + zg[1:])
+    return centroid_fields, centroid_radius, centroid_height
 
 
 def _automatic_noise_sigma(fields):
@@ -783,6 +797,7 @@ def _same_root_clusters(
     fit_local_z,
     rescue_scale,
     source_cells,
+    orbit_family,
     minimum_spacing,
 ):
     """Cluster uncertainty-overlapping same-sign evidence on device."""
@@ -796,11 +811,17 @@ def _same_root_clusters(
     shared_fit_center = (fit_rows[:, :, None] == fit_rows[:, None, :]) & (
         fit_columns[:, :, None] == fit_columns[:, None, :]
     )
+    same_family_root = (orbit_family[:, :, None] == orbit_family[:, None, :]) & (
+        shared_fit_center | (distance <= uncertainty_limit)
+    )
+    staggered_duplicate = (orbit_family[:, :, None] != orbit_family[:, None, :]) & (
+        distance <= 0.5
+    )
     same_root = (
         present[:, :, None]
         & present[:, None, :]
         & (native_index[:, :, None] == native_index[:, None, :])
-        & (shared_fit_center | (distance <= uncertainty_limit))
+        & (same_family_root | staggered_duplicate)
     )
     tie = source_cells.astype(score.dtype) * (
         jnp.finfo(score.dtype).eps / max(count, 1)
@@ -882,7 +903,7 @@ def _sample_noise_sigma(fields, supplied_noise_sigma, *, estimate_noise):
 
 @partial(
     jax.jit,
-    static_argnames=("work_slots", "material_dilate"),
+    static_argnames=("work_slots", "material_dilate", "dual_sweep"),
     inline=False,
 )
 def _native_candidate_stage(
@@ -896,17 +917,37 @@ def _native_candidate_stage(
     work_slots,
     material_dilate,
     target_index,
+    dual_sweep,
 ):
     """Generate and rank native unsmoothed degree evidence."""
     batch, nz, nr = fields.shape
     degree, winding, cell_margin, radial_gradient, vertical_gradient = (
         gradient_cell_degree(fields, rg, zg)
     )
+    if dual_sweep:
+        centroid_fields, centroid_radius, centroid_height = _centroid_lattice(
+            fields, rg, zg
+        )
+        dual_degree, dual_winding, dual_margin, _dual_radial, _dual_vertical = (
+            gradient_cell_degree(centroid_fields, centroid_radius, centroid_height)
+        )
+    else:
+        dual_shape = (batch, nz - 2, nr - 2)
+        dual_degree = jnp.zeros(dual_shape, dtype=jnp.int32)
+        dual_winding = jnp.zeros(dual_shape, dtype=fields.dtype)
+        dual_margin = jnp.zeros(dual_shape, dtype=fields.dtype)
     gate = inside_limiter
     for _ in range(material_dilate):
         gate = _dilate4(gate)
     eligible = _cell_gate(gate) & _cell_gate(extra_masks)
     unit_candidates = (degree == target_index) & eligible
+    centroid_gate = _cell_gate(gate)
+    centroid_extra_gate = _cell_gate(extra_masks)
+    dual_eligible = _cell_gate(centroid_gate) & _cell_gate(centroid_extra_gate)
+    dual_candidates = (dual_degree == target_index) & dual_eligible
+    dual_candidates_padded = jnp.pad(dual_candidates, ((0, 0), (0, 1), (0, 1)))
+    dual_winding_padded = jnp.pad(dual_winding, ((0, 0), (0, 1), (0, 1)))
+    dual_margin_padded = jnp.pad(dual_margin, ((0, 0), (0, 1), (0, 1)))
     absolute_scale = jnp.max(jnp.abs(fields), axis=(-2, -1))
     numeric_floor = 32.0 * jnp.finfo(jnp.float32).eps * absolute_scale
     minimum_spacing = jnp.minimum(jnp.min(jnp.diff(rg)), jnp.min(jnp.diff(zg))).astype(
@@ -924,7 +965,7 @@ def _native_candidate_stage(
         _rescue_representatives(
             radius_two_degree,
             radius_two_margin,
-            unit_candidates,
+            unit_candidates | dual_candidates_padded,
             target_index,
             2,
         )
@@ -937,50 +978,69 @@ def _native_candidate_stage(
         _rescue_representatives(
             radius_four_degree,
             radius_four_margin,
-            unit_candidates | radius_two_rescue,
+            unit_candidates | dual_candidates_padded | radius_two_rescue,
             target_index,
             4,
         )
         & eligible
     )
-    candidate_mask = unit_candidates | radius_two_rescue | radius_four_rescue
+    primal_candidates = unit_candidates | radius_two_rescue | radius_four_rescue
     rescue_scale_grid = jnp.where(
         unit_candidates,
         0,
         jnp.where(radius_two_rescue, 2, jnp.where(radius_four_rescue, 4, -1)),
     ).astype(jnp.int8)
-    seed_margin = jnp.where(
+    primal_seed_margin = jnp.where(
         unit_candidates,
         cell_margin,
         jnp.where(radius_two_rescue, radius_two_margin, radius_four_margin),
     )
-    seed_boundary_snr = seed_margin / gradient_noise_sigma
-    cheap_score = (
+    primal_seed_boundary_snr = primal_seed_margin / gradient_noise_sigma
+    primal_score = (
         2.0 * unit_candidates.astype(fields.dtype)
-        + jnp.log1p(jnp.maximum(seed_boundary_snr, 0.0))
+        + jnp.log1p(jnp.maximum(primal_seed_boundary_snr, 0.0))
         + 0.05 * radius_two_rescue.astype(fields.dtype)
         + 0.025 * radius_four_rescue.astype(fields.dtype)
     )
+    dual_seed_boundary_snr = dual_margin_padded / gradient_noise_sigma
+    dual_score = 2.0 + jnp.log1p(jnp.maximum(dual_seed_boundary_snr, 0.0))
 
     count = (nz - 1) * (nr - 1)
-    work_rank_slots = min(count, work_slots + 1)
-    source = jnp.arange(count, dtype=cheap_score.dtype)
-    cheap_score = cheap_score.reshape(batch, count) - source[None, :] * (
-        jnp.finfo(cheap_score.dtype).eps / count
+    packed_count = 2 * count
+    work_rank_slots = min(packed_count, work_slots + 1)
+    source = jnp.arange(packed_count, dtype=fields.dtype)
+    packed_candidates = jnp.concatenate(
+        [
+            primal_candidates.reshape(batch, count),
+            dual_candidates_padded.reshape(batch, count),
+        ],
+        axis=1,
     )
+    packed_score = jnp.concatenate(
+        [primal_score.reshape(batch, count), dual_score.reshape(batch, count)], axis=1
+    ) - source[None, :] * (jnp.finfo(fields.dtype).eps / packed_count)
     _ranked_seed_score, ranked_source = jax.lax.top_k(
-        jnp.where(candidate_mask.reshape(batch, count), cheap_score, -jnp.inf),
+        jnp.where(packed_candidates, packed_score, -jnp.inf),
         work_rank_slots,
     )
-    work_source = ranked_source[:, :work_slots]
+    work_packed_source = ranked_source[:, :work_slots]
+    work_source = work_packed_source % count
+    work_orbit_family = (work_packed_source // count).astype(jnp.int8)
 
-    def gather_grid(array):
-        return jnp.take_along_axis(array.reshape(batch, count), work_source, axis=1)
+    def gather_packed(primal, dual):
+        packed = jnp.concatenate(
+            [primal.reshape(batch, count), dual.reshape(batch, count)], axis=1
+        )
+        return jnp.take_along_axis(packed, work_packed_source, axis=1)
 
-    work_present = gather_grid(candidate_mask)
-    work_rescue_scale = gather_grid(rescue_scale_grid)
+    work_present = jnp.take_along_axis(packed_candidates, work_packed_source, axis=1)
+    work_rescue_scale = gather_packed(
+        rescue_scale_grid, jnp.zeros_like(rescue_scale_grid)
+    )
     work_native_index = jnp.where(work_present, target_index, 0).astype(jnp.int32)
-    candidate_count = jnp.sum(candidate_mask, axis=(-2, -1), dtype=jnp.int32)
+    primal_candidate_count = jnp.sum(primal_candidates, axis=(-2, -1), dtype=jnp.int32)
+    dual_candidate_count = jnp.sum(dual_candidates, axis=(-2, -1), dtype=jnp.int32)
+    candidate_count = primal_candidate_count + dual_candidate_count
     work_overflow = candidate_count > work_slots
     prework_discarded_bound = jnp.where(
         work_overflow, jnp.asarray(1.012, fields.dtype), jnp.nan
@@ -989,10 +1049,11 @@ def _native_candidate_stage(
         "radial_gradient": radial_gradient,
         "vertical_gradient": vertical_gradient,
         "work_source": work_source,
+        "work_orbit_family": work_orbit_family,
         "work_present": work_present,
         "work_rescue_scale": work_rescue_scale,
         "work_native_index": work_native_index,
-        "work_winding": gather_grid(winding),
+        "work_winding": gather_packed(winding, dual_winding_padded),
         "sample_sigma": sample_sigma,
         "numeric_floor": numeric_floor,
         "minimum_spacing": minimum_spacing,
@@ -1002,6 +1063,11 @@ def _native_candidate_stage(
         "prework_discarded_bound": prework_discarded_bound,
         "candidate_index_sum": jnp.sum(
             jnp.where(unit_candidates, degree, 0),
+            axis=(-2, -1),
+            dtype=jnp.int32,
+        )
+        + jnp.sum(
+            jnp.where(dual_candidates, dual_degree, 0),
             axis=(-2, -1),
             dtype=jnp.int32,
         ),
@@ -1014,6 +1080,8 @@ def _native_candidate_stage(
         "unit_candidate_count": jnp.sum(
             unit_candidates, axis=(-2, -1), dtype=jnp.int32
         ),
+        "primal_candidate_count": primal_candidate_count,
+        "dual_candidate_count": dual_candidate_count,
         "rescue_candidate_count": jnp.sum(
             radius_two_rescue | radius_four_rescue,
             axis=(-2, -1),
@@ -1337,6 +1405,7 @@ def _cluster_compaction_stage(
     work_source = native["work_source"]
     work_rescue_scale = native["work_rescue_scale"]
     work_native_index = native["work_native_index"]
+    work_orbit_family = native["work_orbit_family"]
     batch, work_slots = work_source.shape
     output_dtype = evidence["r"].dtype
     clusters = _same_root_clusters(
@@ -1352,6 +1421,7 @@ def _cluster_compaction_stage(
         evidence["fit_local_z"],
         work_rescue_scale,
         work_source,
+        work_orbit_family,
         native["minimum_spacing"],
     )
     representative = clusters["representative"]
@@ -1493,7 +1563,11 @@ def _cluster_compaction_stage(
         "member_rescue_scale": jnp.where(
             member_present, select_members(work_rescue_scale), -1
         ).astype(jnp.int8),
+        "member_orbit_family": jnp.where(
+            member_present, select_members(work_orbit_family), -1
+        ).astype(jnp.int8),
         "native_winding": select(native["work_winding"]).astype(output_dtype),
+        "orbit_family": select(work_orbit_family).astype(jnp.int8),
         "rescue_scale": select(work_rescue_scale),
         "boundary_snr": select(cluster_boundary_snr).astype(output_dtype),
         "enclosing_loop_degree": select(enclosing_degree),
@@ -1545,6 +1619,8 @@ def _cluster_compaction_stage(
         "eligible_cell_index_sum": native["eligible_cell_index_sum"],
         "domain_signed_index": native["domain_signed_index"],
         "unit_candidate_count": native["unit_candidate_count"],
+        "primal_candidate_count": native["primal_candidate_count"],
+        "dual_candidate_count": native["dual_candidate_count"],
         "rescue_candidate_count": native["rescue_candidate_count"],
         "sample_noise_sigma": native["sample_sigma"].astype(output_dtype),
     }
@@ -1562,6 +1638,7 @@ def _critical_point_candidates_batch(
     material_dilate,
     target_index,
     estimate_noise,
+    dual_sweep,
 ):
     """Run the device-resident detector as three bounded compiled stages."""
     sample_sigma = _sample_noise_sigma(
@@ -1585,6 +1662,7 @@ def _critical_point_candidates_batch(
         work_slots=work_slots,
         material_dilate=material_dilate,
         target_index=target_index,
+        dual_sweep=dual_sweep,
     )
     evidence = _gathered_confidence_stage(
         fields,
@@ -1627,6 +1705,7 @@ def critical_point_candidates_batch(
     material_dilate=1,
     target_index=-1,
     noise_sigma=None,
+    dual_sweep=False,
 ):
     """Return ranked fixed-capacity critical points for ``(batch, nz, nr)``.
 
@@ -1635,7 +1714,8 @@ def critical_point_candidates_batch(
     ``state`` then distinguishes resolved and unresolved evidence.  Supplying a
     scalar or per-field sample-noise standard deviation is preferred when the
     acquisition covariance is known; otherwise a quadratic-annihilating robust
-    estimate is used.
+    estimate is used.  ``dual_sweep=True`` adds the centroid-lattice orbit
+    family; it is opt-in so existing production consumers remain unchanged.
     """
     fields = _explicit_float_array(fields)
     if fields.ndim != 3:
@@ -1664,6 +1744,7 @@ def critical_point_candidates_batch(
         material_dilate=int(material_dilate),
         target_index=int(target_index),
         estimate_noise=noise_sigma is None,
+        dual_sweep=bool(dual_sweep),
     )
 
 

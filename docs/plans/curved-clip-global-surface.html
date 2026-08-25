@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="curved-clip-global-surface">
   <meta name="plan-title" content="Curved Clip from the Global Surface — the one condition the prior refutation named">
   <meta name="plan-summary" content="Curved sagitta clips are built and validated and were refuted twice, both times because the curve came from a local per-cell reconstruction that converges to a different surface than the reference readers use. The prescription left behind was to take the curve from the global C2 tensor spline. That spline landed on 2026-08-21, so the condition is now met and the refutation is retestable.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort-hours" content="8.0">
   <meta name="plan-capability-version" content="1.0">
@@ -22,11 +22,11 @@
   <title>Curved Clip from the Global Surface | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-24">
-<meta name="plan-version" content="6">
-<meta name="plan-commits" content="7f2c046aa18659101e7960599b4308fc353ef906,fcca3ed4e1105897818fffa8ca1636502b76e94a">
-<meta name="plan-artifacts" content="scripts/clip_surface_reuse/report.md,benchmarks/global_surface_clip_rescore.py,docs/figures/curved-clip-global-surface/global-surface-clip-rescore.json,docs/evidence/archive/curved-clip-global-surface-landed.html">
-<meta name="plan-impl" content="0.667">
+<meta name="plan-modified" content="2026-08-25">
+<meta name="plan-version" content="8">
+<meta name="plan-commits" content="7f2c046aa18659101e7960599b4308fc353ef906,fcca3ed4e1105897818fffa8ca1636502b76e94a,9317ef5049c45cc028dabdc7d5fe55b8dfa17e23">
+<meta name="plan-artifacts" content="scripts/clip_surface_reuse/report.md,benchmarks/global_surface_clip_rescore.py,docs/figures/curved-clip-global-surface/global-surface-clip-rescore.json,tests/test_transport_geometry_reference.py,docs/evidence/archive/curved-clip-global-surface-landed.html">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -150,29 +150,21 @@
       <a href="/nova/evidence/archive/curved-clip-global-surface-landed#rescore">§4 landed</a>.</p>
     </section>
 
-    <h2 id="s6">§6 — A gate closed in a benchmark receipt is not regression-protected</h2>
-
-    <p><strong>The re-score closed both STEP gates through a one-off driver, and nothing in the test
-    suite holds them closed.</strong> The characterisation harness that produced the historical banks
-    lives in <code>tests/test_transport_geometry_reference.py</code>, and the reuse map recorded that
-    its constants "have moved with later extraction-service changes" — which is why the historical
-    figures had to be quoted from <code>47808904</code> and its parent rather than read off the tree.
-    That leaves an open question the re-score did not answer: whether those constants currently agree
-    with what the production path measures. If they do not, the suite is either failing or
-    characterising something other than the shipped route, and in both cases a future regression in
-    the curve source would land silently.</p>
-
-    <p>This is deliberately not a re-derivation. The measured values are the ones already banked by
-    §4 through the production path, so the work is to confirm the suite sees the same numbers and to
-    make the closed gates a standing assertion rather than a receipt someone has to remember.</p>
-
-    <p><strong>Done when</strong> the characterisation tests are executed and their outcome reported
-    with the command and count; every constant that disagrees with the §4 production measurement is
-    reconciled to the measured value with the previous constant and the difference quoted per field;
-    and the STEP clipped-to-contour gates are asserted as bounds — <em>vpr_face</em> below 3.92 % and
-    <em>g1_face</em> below 6.20 % — so a regression in the curve source fails a test rather than
-    surviving until someone re-reads a receipt. A suite that already agrees with the measurement is
-    the good outcome and is reported as such, with the assertion still added.</p>
+    <section id="s6" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-25 — a green suite was measuring the wrong route</span>
+        <h2>§6 — A gate closed in a benchmark receipt is not regression-protected</h2></header>
+      <p class="landed-summary">The suite was green <em>and wrong</em>: <code>_nova_geometry</code>
+      called the traced helper, not <code>extract_flux_surface_geometry</code>, so STEP was still
+      characterised against the superseded local reconstruction at vpr <strong>18.14 %</strong> and
+      g1 <strong>22.31 %</strong> — a passing test pinning a route production does not use. Routed
+      through the shipped entry point, all <strong>72</strong> affected constants move to the
+      production measurement (full previous/measured/difference receipt retained): STEP vpr
+      −15.79 pp to <strong>2.349 %</strong>, g1 −18.42 pp to <strong>3.885 %</strong>, all four ITER
+      coefficients improved. The gates are now <strong>standing assertions</strong> — vpr &lt; 3.92 %,
+      g1 &lt; 6.20 % — passing with 1.57 and 2.32 pp headroom, 6 passed / 0 failed (commit
+      <code>9317ef50</code>). Full record:
+      <a href="/nova/evidence/archive/curved-clip-global-surface-landed#gate-lock">§6 landed</a>.</p>
+    </section>
 
     <h2 id="s5">§5 — Method requirements</h2>
 
@@ -212,10 +204,11 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-ccg-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-24" data-recommends-skill="/reckon-ship curved-clip-global-surface" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ccg-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-24" data-recommends-skill="/reckon-ship curved-clip-global-surface" data-resolved-at="2026-08-25T04:46:06+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Do not rebuild the curved clip, and do not gate on the analytic oracle</h4>
     <div class="r-fu-body"><p>THE MACHINERY EXISTS AND REBUILDING IT WOULD WASTE THE PLAN. A chord-to-hyperbola closed form validated to 1.57e-5 against a subcell raster, a C1 bicubic route with oriented Green-theorem area and moment corrections, the 12-node Gauss-Legendre <code>_arc_rule</code> along in-cell arcs, fixed bisection for edge roots and constrained Newton extrema all landed at commit <code>47808904</code>. Read that work and the evidence anchors <code>bicubic-negative</code> and <code>clipped-cell-moments</code> in <code>docs/evidence/archive/flux-function-forward-transport-landed.html</code> before writing anything. The single change this plan makes is WHERE THE CURVE COMES FROM.</p><p>GATE ON STEP, NOT ON THE ORACLE. This is the trap that caught the previous programme twice. The bicubic reached fourth order to six figures on a smooth analytic surface and then moved STEP <em>vpr</em> from 16.46 to 18.14 per cent against a 3.92 per cent gate and <em>g1</em> from 9.78 to 22.31 against 6.20. An analytic-surface result is evidence about the primitive and about nothing else, because a local and a global construction converge to different surfaces and only the difference between them shows up on a low-aspect-ratio grid.</p><p>THE MONOTONICITY PROOF CONSTRAINS WHAT MAY BE CLAIMED. For bilinear flux the level-set derivative has a constant numerator, so every branch is monotone and its extrema are its endpoints - an arc turning point inside a cell cannot exist under that reconstruction, and the square-root extremum error belongs to the reconstruction rather than to the chord. Under a global C2 surface the reconstruction changes and that error class may not arise at all, but that is a PREDICTION. Measure it; do not assume the proof transfers unchanged to a different surface.</p><p>ANSWER THE OPEN DECISION BEFORE DISPATCH. The fitted global surface is available today and tests the prescription immediately; the carried surface from <code>coefficient-space-newton</code> removes a residual difference but couples this schedule to a larger programme. A negative on the fitted form would close the curvature question without needing the stronger one, which is an argument for taking it first.</p><p>OWNERSHIP: this plan holds write authority over <code>separatrix_clip</code> for this work. <code>plasma-edge-current-representation</code> owns that module and is shipped, so it cannot carry the work itself; <code>coefficient-space-newton</code> supplies the global surface and is fenced out of writing the clip. Keep <code>TracedClippedSupports</code>, <code>padded_polynomial_current_moments</code>, the interpolant-over-support integration and the ramped edge-crossing blend stable in name and field shape, because the transport side consumes them read-only.</p></div>
     <pre class="r-fu-prompt">/reckon-ship curved-clip-global-surface</pre>
+    <p class="r-fu-outcome">done - no followup. The plan's question is answered, and answered positively: the fitted global surface closes both STEP gates at vpr 2.349 per cent against 3.92 and g1 3.885 against 6.20, and those gates are now standing test assertions rather than a receipt. Both of this followup's warnings held. The machinery was not rebuilt, because the reuse map found the production path already composing the global spline, so the plan re-scored what ships. And the gate was STEP rather than the analytic oracle, which is what made the result mean anything. The stronger carried-surface form is deliberately NOT owed from here: the locked decision made it contingent, and although the fitted result is positive, that form belongs to coefficient-space-newton, whose sections 2 and 9 own the carried solution object and whose section 19 is currently attributing a projection defect in it.</p>
     </article>
 </section>
 
@@ -225,6 +218,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260824T1945-rescore" data-who="reckon-ship" data-when="2026-08-24T19:45:00Z">
     <div class="r-comment-body">global-surface-clip-rescore landed - commit fcca3ed4, merged, gate PASSED, scope clean at the two fenced paths. THE VERDICT IS YES: the shipped global-surface curve closes both STEP gaps. STEP clipped-to-contour vpr_face 2.349369 per cent against the 3.92 gate and g1_face 3.884814 against 6.20, where the straight chord banked 16.46 and 9.78 and the local bicubic banked 18.14 and 22.31 - a sevenfold and roughly sixfold improvement on the better of the two prior curve sources. ITER clipped-to-TORAX lands at 2.625219 / 0.891521 / 2.024575 / 1.886636 per cent against the straight-chord bank 2.63 / 0.90 / 2.08 / 1.98 and the local-bicubic 2.96 / 1.03 / 2.36 / 2.31, so it is at or slightly below the best prior on all four. THE THREE-WAY PAIRINGS INVERT THE TWO-AGAINST-ONE READING, which is the finding beyond the gates. STEP (clipped-to-contour, clipped-to-TORAX, contour-to-TORAX) is vpr_face (2.349369, 1.841215, 3.932154) and g1_face (3.884814, 8.096167, 6.220674) per cent. On g1 the clipped route now agrees with the contour reader BETTER than the two reference readers agree with each other, so the clipped route is no longer the outlier that argument rested on. ITER pairings are g2g3_over_rhon_face (3.110312, 2.625219, 0.779371), g0_face (1.053973, 0.891521, 0.229960), g1_face (2.328958, 2.024575, 0.394440) and g2_face (2.386247, 1.886636, 0.667289). All composed directly from all three readers, never by subtracting percentages. ROUTE AND CAPACITY BOTH PASS: instrumentation observed _surface_clips 2 calls, fit_tensor_spline 4, TensorBSpline.cell_coefficients 4, _tensor_bicubic_coefficients 0 and _clipped_surface_geometry 0, and both machines required 5 vertices, used 5 and retained capacity 8 unwidened. The worker's measure log records it correctly REJECTING the superseded _clipped_surface_geometry helper before routing through production. Causal attribution across 47808904 to current is DECLINED because more than the curve producer changed in that range - the method requirement honoured rather than waived. One caveat carried forward unresolved: TORAX warned that STEP's maximum normalised-radius spacing 0.0894 exceeds 0.0200 and can create artifacts in differentiated quantities such as j_total, and no j_total result is reported here.</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260825T0045-gatelock" data-who="reckon-ship" data-when="2026-08-25T00:45:00Z">
+    <div class="r-comment-body">clip-gate-regression-lock landed - commit 9317ef50, merged, gate PASSED, 6 passed and 0 failed in 833.20 s, scope clean at the single fenced test file. IT FOUND A REAL DEFECT, WHICH IS WHY THE SECTION EXISTED. The pre-change suite was GREEN - 6 passed in 560.13 s - while measuring the wrong route: _nova_geometry called traced_flux_surface_geometry rather than the shipped extract_flux_surface_geometry, so STEP was still characterised against the SUPERSEDED LOCAL RECONSTRUCTION at vpr_face 18.14270502 per cent and g1_face 22.30580450. A passing test pinning a route production does not use is worse than no test, because it reads as coverage. Routed through the production entry point - the same one the banked re-score measured - all 72 affected characterisation constants were replaced by production CPU measurements, with the complete previous/measured/signed-difference receipt retained as 72 per-field rows in baseline-reconciliation.tsv. HEADLINE RECONCILIATIONS in percentage points: STEP vpr_face 18.137000000 to 2.349368719, difference -15.787631281; STEP g1_face 22.306000000 to 3.884813932, -18.421186068; ITER g0_face 1.029600000 to 0.891520937, -0.138079063; ITER g1_face 2.363200000 to 2.024575120, -0.338624880; ITER g2_face 2.313600000 to 1.886635685, -0.426964315; ITER g2g3_over_rhon_face 2.960200000 to 2.625218535, -0.334981465. THE GATES ARE NOW STANDING ASSERTIONS rather than a receipt: independent bounds require STEP vpr_face below 3.92 per cent and g1_face below 6.20, and the final measurements pass with 1.570631281 and 2.315186068 percentage points of headroom. A regression in the curve source now fails a test.</div>
 </div>
 </section>
 </main>

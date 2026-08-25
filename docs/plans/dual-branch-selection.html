@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="dual-branch-selection">
   <meta name="plan-title" content="Dual-Branch Selection — a class is an outcome, not an input">
-  <meta name="plan-summary" content="The catalog solver reaches limiter-class roots on every diverted request: 0 of 10 under the mixed margin-penalty iteration, and the branch-pure pinned diverted arm stalls at 4.6e-3 to 7.4e-3 without contracting. The plan promotes the already-traced differentiable class observable p_diverted to a selection seam over the existing two-branch portfolio, closes the three host-Python islands that block a compiled catalog verdict, and confines forking to a margin-armed rare set. Ideas from imas-efit&#x27;s dual-stream solution are adopted as concepts only — zero code ports, and no separatrix drag in any form.">
+  <meta name="plan-summary" content="The catalog solver reaches limiter-class roots on every diverted request: 0 of 10 under the mixed margin-penalty iteration, while the branch-pure pinned diverted arm contracts only weakly and stalls at 4.6e-3 to 7.4e-3 (fitted rho 0.950 to 0.984 against a reference implementation's 0.33). The plan promotes the already-traced differentiable class observable p_diverted to a selection seam over the existing two-branch portfolio, closes the three host-Python islands that block a compiled catalog verdict, and confines forking to a margin-armed rare set. Ideas from imas-efit&#x27;s dual-stream solution are adopted as concepts only — zero code ports, and no separatrix drag in any form.">
   <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="12.0">
@@ -25,7 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
+<meta name="plan-commits" content="632a4396,991d5d6e">
+<meta name="plan-artifacts" content="benchmarks/traced_selection_seam.py,benchmarks/pinned_branch_contrast.py,docs/figures/dual-branch-selection/traced-selection-continuity.json,docs/figures/dual-branch-selection/pinned-branch-contrast.json,docs/audit/plan-grounds-audit.md,docs/audit/quantitative-claims-audit.md">
+<meta name="plan-impl" content="0.25">
 </head>
 <body>
   <main class="plan-doc">
@@ -42,8 +45,8 @@
     <code>nova/equilibrium/forward.py:936-937</code>; route
     <code>ForwardProfile.solve_branch newton_krylov</code>,
     <code>benchmarks/label_seed_residual_field.py:441,468,492</code>) and stalls at
-    <strong>4.585e-3 to 7.425e-3</strong> on five of six diverted references without contracting,
-    while one (21989/55) defects to limited even from a diverted seed.</p>
+    <strong>4.585e-3 to 7.425e-3</strong> on five of six diverted references, contracting only
+    weakly (§4), while one (21989/55) defects to limited even from a diverted seed.</p>
 
     <p>Three explanations are already excluded by measurement. The operator is exonerated: one
     application of the exact forward map to a closed-form field holds <strong>2.69e-15 to
@@ -296,6 +299,11 @@
     </article>
 </section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="c-drain-20260825T0755" data-who="reckon-ship" data-when="2026-08-25T07:55:00Z">
+    <div class="r-comment-body"><p><strong>Session drain ledger</strong> — investigating session (S15 check-in plus the dual-branch investigation), closing 2026-08-25. Two prototype nodes landed here (<code>traced-selection-seam</code> commit <code>632a4396</code>, <code>pinned-branch-contrast</code> commit <code>991d5d6e</code>); impl 0.25 counts them against eight executable nodes and the denominator passes to the implementing orchestrator with its DAG.</p><table><caption>Every queue row from this session with its disposition</caption><thead><tr><th scope="col">Row</th><th scope="col">Disposition</th></tr></thead><tbody><tr><td>efit scout: define and validate a traced differentiable branch-root selection or transport contract</td><td>folded → <code>traced-selection-seam</code>, plus this plan §5</td></tr><tr><td>topology scout: batched X coordinate and flux coverage; terminal X-candidate serialization</td><td>folded → <code>primary-xpoint-evidence</code> §2 (plan authored and sprint-admitted)</td></tr><tr><td>topology scout: isolated connectivity transform test must self-configure x64</td><td>folded → <code>primary-xpoint-evidence</code> §2</td></tr><tr><td>topology scout: device-native seed and bootstrap, lax.scan selector</td><td>folded → this plan §5</td></tr><tr><td>seam prototype: production promotion must consume the connectivity-localization outcome</td><td>folded → this plan §5, stated as the promotion precondition</td></tr><tr><td>contrast prototype: no follow-ons</td><td>none raised</td></tr><tr><td>grounds audit: report filename carried a sprint label</td><td>folded → renamed to <code>docs/audit/plan-grounds-audit.md</code> and <code>docs/audit/quantitative-claims-audit.md</code></td></tr><tr><td>grounds audit: three repairs the node was fenced out of (accelerator walltime, determinism cost re-quote, plateau closure wording)</td><td>foreign-owner → the S15 orchestrator session; all three acted on</td></tr><tr><td>grounds audit: which account explains the determinism control's cost sign</td><td>foreign-owner → <code>same-device-label-determinism</code>; answered by its execute-level measurement, which is inconsistent with the slower-executable account</td></tr><tr><td>claims audit: plateau causal wording overstrong</td><td>foreign-owner → <code>plateau-input-attribution</code>; corrected</td></tr><tr><td>claims audit: separate truncation from roundoff before deriving floors</td><td>foreign-owner → <code>roundoff-scale-acceptance-bounds</code>; classification landed, repair dispatched</td></tr><tr><td>claims audit: operator receipt cause semantics contradict its own term audit</td><td>foreign-owner → <code>discrete-operator-analytic-error</code>; repair node dispatched</td></tr><tr><td>claims audit: bank or explicitly retain the accelerator capacity result</td><td>foreign-owner → <code>coefficient-space-newton</code> §12; run marked still-working</td></tr><tr><td>this plan: implementation followup</td><td>foreign-owner → the S15 orchestrator session, by owner directive of 2026-08-25 routing implementation there; visible in roadmap pending work as this sprint's critical path</td></tr><tr><td><code>primary-xpoint-evidence</code>: implementation followup</td><td>foreign-owner → the S15 orchestrator session, same directive; visible in roadmap pending work</td></tr></tbody></table><p>rows: 15 · foldable-remaining: 0 · unreconciled-runs: 0 (read from the live drain view, not from memory).</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T18:33:01",
+  "updated": "2026-08-25T19:10:48",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -36408,9 +36408,103 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T163725971866-saddle-aware-partition-cutover",
+        "plan": "primary-xpoint-evidence",
+        "section": "\u00a72",
+        "node": "saddle-aware-partition-cutover",
+        "node_definition": {
+          "done_when": "READ THE CURRENT STATE FIRST, because half of this is done. The reachable-wall limiter IS already production: _refine_wall_minimum_position is called unconditionally at connectivity_boundary.py line 479, and class_wall_shadowed is now supplied_wall_valid AND NOT class_wall reachable at the supplied index, so the vertical height band no longer gates the class operand and reachability already does. What remains is the LABELLING: connectivity_boundary.py imports _dilate4 and flood_fill_core from flux_surface_connectivity and its module docstring at line 22 still describes iterated 4-neighbour dilation, while hex_edge_admissibility and _propagate_admissible_hex_minima from commit 5c1bf8c1 are exported and unconsumed. Wire the saddle-aware path so the pre-saddle region feeding reachability comes from six-neighbour bulk adjacency with shared-edge admissibility, and update that stale docstring. The previous node applied hex adjacency to the same array shape by treating raster indices as a half-offset tiling joined through the physical hex edge, so no new mesh input is required. Report a 13-row before-and-after table over the 12 frozen MAST arms and the DIII-D terminal giving reachable-segment count, wall shadow verdict and class margin, marking every changed row, and state whether the count of finite MAST margins stays at 8 of 12 or moves and which arms move. The DIII-D terminal margin near -0.3323 must not move by more than 1e-3. Run tests/test_connectivity_boundary.py, tests/test_flux_surface_connectivity.py, tests/test_jax_topology.py, tests/test_limiter_topology_receipts.py, tests/test_topology_boundary.py, tests/test_topology_qualified_admission.py and tests/test_topology_read_equivalence.py, quoting per-file passed and failed counts against the 58 that passed before, and report any failure with its assertion rather than accommodating it. Quote the per-slice labelling wall-clock at 33x33 against the measured 0.674666 ms corrected and 0.4911435 ms four-neighbour. Do NOT re-bank pinned-branch-contrast.json, margin-frame-remeasure.json, fork-arming-economics.json or any figure.",
+          "estimated_hours": 4.0,
+          "goal": "Cut production classification over from the 4-neighbour rectangular labelling to the saddle-aware hexagonal partition, since the reachable-wall limiter half of this cutover is already live and the labelling half is not.",
+          "id": "saddle-aware-partition-cutover",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/saddle-aware-partition-cutover.md",
+          "plan": "primary-xpoint-evidence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/connectivity_boundary.py",
+            "tests/test_connectivity_boundary.py",
+            "docs/figures/primary-xpoint-evidence/saddle-aware-partition-cutover.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "topology-admission",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T16:37:36Z",
+        "completed_at": "2026-08-25T16:58:52Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1276,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1276,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "203293435c833c1cf72095f382f8e4b0a8125021",
+        "commits": [
+          "80706f8952d9ab7c64d479b49df1ecbacba32ea4"
+        ],
+        "changed_lines": {
+          "added": 292,
+          "removed": 6,
+          "files": 3
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/saddle-aware-partition-cutover.md",
+        "scope_changed": false,
+        "session_id": "01a039c8-d29b-73c3-8bf2-109d07e18a8b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12259584,
+            "cached_input_tokens_cumulative": 12259584,
+            "input_tokens": 12512271,
+            "input_tokens_cumulative": 12512271,
+            "output_tokens": 22328,
+            "output_tokens_cumulative": 22328,
+            "reasoning_output_tokens": 5689,
+            "reasoning_output_tokens_cumulative": 5689
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "Run tests",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 870
+    "_version": 871
   }
 }

@@ -128,6 +128,35 @@
     where finite, with the always-fork fallback where shadow-rejected. Records describing this as a
     connectivity-localisation defect, including my own reporting, were wrong.</p>
 
+    <p><strong>QUALIFICATION ADDED 2026-08-25: the ADMITTED CONTROL IN THIS ANCHOR IS COMPROMISED, and
+    the "no production repair warranted" conclusion above is suspended pending measurement.</strong>
+    Reading the figure showed no in-vessel X-point marked on either 21983/35 panel, and the banked
+    coordinates confirm why: the selected saddle sits at
+    <strong>(0.4500, &minus;1.8175) m</strong> on the pure arm and
+    <strong>(0.4625, +1.8037) m</strong> on the mixed arm, both <em>further from the midplane than that
+    terminal's own wall extremum</em> at (0.28, &minus;1.6380) and (0.28, +1.6410). A saddle beyond the
+    wall's own Z extent cannot be in-vessel, and a MAST divertor X-point belongs near |Z| 1.2 to 1.4 at
+    the plasma-boundary pinch. Corroborating: <code>private_component_count</code> is 0 and
+    <code>private_component_area_m2</code> is 0.0 on both arms, which is what a separatrix drawn at an
+    out-of-vessel level would give.</p>
+
+    <p><strong>Why that contaminates this anchor rather than merely the plot.</strong> The production
+    shadow rule builds its height band from the minimum and maximum selected-saddle heights. The pure
+    arm's band is <code>[&minus;1.8175, +1.2491]</code> — its lower bound <em>is</em> the spurious
+    saddle — so the wall at &minus;1.638 falls <em>inside</em> the band and is admitted. A band derived
+    from a genuine in-vessel X-point near &minus;1.25 would place that wall <em>outside</em>, shadowing
+    it and flipping the verdict. So the control that made the four rejections look well-governed may be
+    admitted only because an out-of-vessel saddle widened the band.</p>
+
+    <p><strong>What survives and what does not.</strong> The four rejections retain independent support:
+    their wall extrema lie in components <em>disconnected</em> from the magnetic axis, which is a
+    connectivity fact that does not depend on the height band. What does not survive is the claim that
+    the <em>rule</em> is sound and needs no repair — the band is set by whichever saddles reach the
+    candidate table, and no containment test filtering candidates to in-vessel was found. Node
+    <code>out-of-vessel-saddle-selection</code> is measuring whether the detector never produced the
+    in-vessel X-point or the argmin selector passed over it, and whether the verdict flips when the band
+    is rebuilt from in-vessel candidates only.</p>
+
   </main>
 </body>
 </html>

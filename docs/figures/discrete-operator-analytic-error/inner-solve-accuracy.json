@@ -1,0 +1,413 @@
+{
+  "artifact": "inner Krylov accuracy discriminator on two MAST references",
+  "cost": {
+    "accounting": "production fixed-shape trace contract: one linearisation value, one tangent action per GMRES iteration, and one promotion read",
+    "catalog_slice_count": 1341435,
+    "measured_seconds_per_slice": 0.04277,
+    "options": [
+      {
+        "catalog_hours_per_outer_step_at_measured_rate": 223.11790258333332,
+        "forward_action_equivalents_per_outer_step": 14,
+        "gmres_iterations": 12,
+        "seconds_per_slice_outer_step_at_measured_rate": 0.5987800000000001
+      },
+      {
+        "catalog_hours_per_outer_step_at_measured_rate": 509.98377733333336,
+        "forward_action_equivalents_per_outer_step": 32,
+        "gmres_iterations": 30,
+        "seconds_per_slice_outer_step_at_measured_rate": 1.36864
+      },
+      {
+        "catalog_hours_per_outer_step_at_measured_rate": 988.0935685833334,
+        "forward_action_equivalents_per_outer_step": 62,
+        "gmres_iterations": 60,
+        "seconds_per_slice_outer_step_at_measured_rate": 2.65174
+      },
+      {
+        "catalog_hours_per_outer_step_at_measured_rate": 1944.3131510833332,
+        "forward_action_equivalents_per_outer_step": 122,
+        "gmres_iterations": 120,
+        "seconds_per_slice_outer_step_at_measured_rate": 5.2179400000000005
+      }
+    ]
+  },
+  "driver_sha256": "c6d2689bd143e416ea0374f67e74b9cd3756cd8bcf779e763c9660ea7919fe9a",
+  "evidence_inputs": {
+    "banked_contrast": "docs/figures/dual-branch-selection/pinned-branch-contrast.json",
+    "banked_contrast_sha256": "e2a04316d317d52a3a5feabc71350dd2d81330c0f68fb864748a5d7f1e8c02b9",
+    "response_carrier": {
+      "carrier": {
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "frozen_reference_count": 6,
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "size_bytes": 645864,
+        "stored_circuit_count": 101,
+        "warm_load_seconds": 0.004913984797894955
+      },
+      "loaded_from_persisted_carrier": true,
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/topology-and-throughput/inner-solve-accuracy/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "direct_green_operator_builder_entries": 0,
+        "passes": true,
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.042877 direct_builders=0 verdict=PASS"
+      }
+    }
+  },
+  "measurement_contract": {
+    "dense_comparison_terminal": "retained terminal of the reproduced twelve-iteration GMRES run",
+    "gmres_iterations": [
+      12,
+      30,
+      60,
+      120
+    ],
+    "held_fixed": "seed, fixed-point map, topology-margin function, target current, promotion count, merit ladder, conditioning policy, and precision",
+    "newton_promotions": 12,
+    "references": [
+      [
+        21978,
+        35
+      ],
+      [
+        22086,
+        43
+      ]
+    ]
+  },
+  "references": [
+    {
+      "budget_sweep": [
+        {
+          "alternation": {
+            "identity_tolerance": 5e-08,
+            "opposite_parity_relative_sup": 0.009983275125832467,
+            "period_two_alternation_persists": true,
+            "same_parity_relative_sup": [
+              6.214473507622081e-10,
+              1.9897172451691597e-08
+            ]
+          },
+          "banked_reproduction": {
+            "absolute_tolerance": 5e-12,
+            "maximum_absolute_difference": 5.48172618408671e-16,
+            "passes": true
+          },
+          "gmres_iterations": 12,
+          "residual_sequence": [
+            0.006490775847303649,
+            0.010724656507623371,
+            0.010729470625706167,
+            0.01051629009981168,
+            0.010766584340180957,
+            0.010502680913983134,
+            0.010762641116952985,
+            0.01050435256766501,
+            0.010762710928760544,
+            0.010504359648235128,
+            0.01076271078142617,
+            0.010504359639162597
+          ],
+          "terminal_residual": 0.010504359639162268
+        },
+        {
+          "alternation": {
+            "identity_tolerance": 5e-08,
+            "opposite_parity_relative_sup": 0.009983277617453417,
+            "period_two_alternation_persists": true,
+            "same_parity_relative_sup": [
+              6.214077310478464e-10,
+              1.989627826546551e-08
+            ]
+          },
+          "gmres_iterations": 30,
+          "residual_sequence": [
+            0.006490775899418858,
+            0.010724648572213146,
+            0.010729462238379065,
+            0.010516291200708438,
+            0.010766586006685097,
+            0.010502681550684506,
+            0.010762642800807127,
+            0.010504353190395952,
+            0.010762712635714287,
+            0.010504360280292287,
+            0.010762712488378736,
+            0.01050436027122156
+          ],
+          "terminal_residual": 0.010504360271221558
+        },
+        {
+          "alternation": {
+            "identity_tolerance": 5e-08,
+            "opposite_parity_relative_sup": 0.009983277617453361,
+            "period_two_alternation_persists": true,
+            "same_parity_relative_sup": [
+              6.21407985982384e-10,
+              1.989627783485567e-08
+            ]
+          },
+          "gmres_iterations": 60,
+          "residual_sequence": [
+            0.006490775899418858,
+            0.010724648572213146,
+            0.010729462238379174,
+            0.010516291200708494,
+            0.010766586006684875,
+            0.01050268155068445,
+            0.010762642800807293,
+            0.010504353190395953,
+            0.010762712635714286,
+            0.010504360280292287,
+            0.010762712488378736,
+            0.010504360271221612
+          ],
+          "terminal_residual": 0.010504360271221723
+        },
+        {
+          "alternation": {
+            "identity_tolerance": 5e-08,
+            "opposite_parity_relative_sup": 0.009983277617453582,
+            "period_two_alternation_persists": true,
+            "same_parity_relative_sup": [
+              6.214070971565636e-10,
+              1.9896277373241922e-08
+            ]
+          },
+          "gmres_iterations": 120,
+          "residual_sequence": [
+            0.006490775899418858,
+            0.01072464857221326,
+            0.010729462238379232,
+            0.010516291200708386,
+            0.010766586006685041,
+            0.010502681550684725,
+            0.010762642800807236,
+            0.010504353190395952,
+            0.01076271263571434,
+            0.010504360280292396,
+            0.010762712488378902,
+            0.01050436027122167
+          ],
+          "terminal_residual": 0.01050436027122167
+        }
+      ],
+      "dense_terminal_comparison": {
+        "angle_degrees_true_newton_to_gmres_12": 9.50722096304615e-06,
+        "condition_number_2_norm": 167.91699285452827,
+        "dense_jacobian_bytes": 10143008,
+        "dense_jacobian_shape": [
+          1126,
+          1126
+        ],
+        "gmres_12_full_trial_nonlinear_residual": 0.010762710781618877,
+        "gmres_12_relative_linear_residual_l2": 4.328002633370736e-07,
+        "gmres_12_step": {
+          "l2_norm_wb": 0.09779271459525303,
+          "mean_wb": -0.0015499599239605544,
+          "sha256": "17d17b3cbaca0e4d661980587f6437eee397cf34570e0905282fcbece2508089",
+          "size": 1126,
+          "sup_norm_wb": 0.010054473998491326
+        },
+        "gmres_info": 0,
+        "largest_singular_value": 4.251484314004644,
+        "smallest_singular_value": 0.025318964100839024,
+        "state_size": 1126,
+        "true_newton_step": {
+          "l2_norm_wb": 0.09779270384711472,
+          "mean_wb": -0.0015499597006561757,
+          "sha256": "2a9f91ecdfe560d249457832269bd7a37401e1668e41ebb29f36fd000541f78a",
+          "size": 1126,
+          "sup_norm_wb": 0.010054475743890698
+        },
+        "true_step_full_trial_nonlinear_residual": 0.010762712491604898,
+        "true_step_relative_linear_residual_l2": 9.68382281892727e-16
+      },
+      "reference": {
+        "shot": 21978,
+        "slice_index": 35
+      }
+    },
+    {
+      "budget_sweep": [
+        {
+          "alternation": {
+            "identity_tolerance": 5e-08,
+            "opposite_parity_relative_sup": 5.375756947628089e-16,
+            "period_two_alternation_persists": false,
+            "same_parity_relative_sup": [
+              1.0415529086029421e-15,
+              3.3038506240630933e-15
+            ]
+          },
+          "banked_reproduction": {
+            "absolute_tolerance": 5e-12,
+            "maximum_absolute_difference": 4.031819124810938e-16,
+            "passes": true
+          },
+          "gmres_iterations": 12,
+          "residual_sequence": [
+            0.001242945873466942,
+            0.00013567440568532929,
+            1.7302284546900365e-07,
+            7.07248023422193e-14,
+            2.6229214106966956e-14,
+            1.0057145289520625e-14,
+            3.875024799748544e-15,
+            1.444734679675044e-15,
+            5.011773404299098e-16,
+            2.687878473814044e-16,
+            4.479797456356741e-16,
+            3.135858219449719e-16
+          ],
+          "terminal_residual": 3.135858219449719e-16
+        },
+        {
+          "alternation": {
+            "identity_tolerance": 5e-08,
+            "opposite_parity_relative_sup": 1.0751513895256178e-15,
+            "period_two_alternation_persists": false,
+            "same_parity_relative_sup": [
+              3.1358582194497174e-15,
+              5.924532136031781e-15
+            ]
+          },
+          "gmres_iterations": 30,
+          "residual_sequence": [
+            0.0012429462040922043,
+            0.00013567481009555175,
+            1.730257645675033e-07,
+            6.468827526978096e-14,
+            2.677798929537063e-14,
+            1.130028908365956e-14,
+            4.804582771942549e-15,
+            2.0159088553605235e-15,
+            7.727650612215364e-16,
+            4.1158139130277526e-16,
+            3.583837965085392e-16,
+            2.687878473814045e-16
+          ],
+          "terminal_residual": 2.6878784738140444e-16
+        },
+        {
+          "alternation": {
+            "identity_tolerance": 5e-08,
+            "opposite_parity_relative_sup": 1.3663382241888056e-15,
+            "period_two_alternation_persists": false,
+            "same_parity_relative_sup": [
+              3.695832901494309e-15,
+              6.148522008849617e-15
+            ]
+          },
+          "gmres_iterations": 60,
+          "residual_sequence": [
+            0.0012429462040922268,
+            0.00013567481009552936,
+            1.7302576463470028e-07,
+            6.425149501778624e-14,
+            2.7046777142752e-14,
+            1.144588250099115e-14,
+            4.7709842910198726e-15,
+            1.948711893515173e-15,
+            7.391665802988608e-16,
+            4.92777720199241e-16,
+            3.2478531558586363e-16,
+            2.2398987281783703e-16
+          ],
+          "terminal_residual": 3.1358582194497186e-16
+        },
+        {
+          "alternation": {
+            "identity_tolerance": 5e-08,
+            "opposite_parity_relative_sup": 5.375756947628089e-16,
+            "period_two_alternation_persists": false,
+            "same_parity_relative_sup": [
+              3.057461763963474e-15,
+              6.215718970694969e-15
+            ]
+          },
+          "gmres_iterations": 120,
+          "residual_sequence": [
+            0.0012429462040922268,
+            0.00013567481009568616,
+            1.730257645899023e-07,
+            6.459867932065385e-14,
+            2.6867585244497753e-14,
+            1.1255491109095994e-14,
+            4.804582771942548e-15,
+            2.0831058172058744e-15,
+            7.167675930170773e-16,
+            5.263762011219166e-16,
+            2.2993960381456084e-16,
+            2.687878473814045e-16
+          ],
+          "terminal_residual": 4.479797456356742e-16
+        }
+      ],
+      "dense_terminal_comparison": {
+        "angle_degrees_true_newton_to_gmres_12": 0.00014522938173266666,
+        "condition_number_2_norm": 86.25096885837556,
+        "dense_jacobian_bytes": 10143008,
+        "dense_jacobian_shape": [
+          1126,
+          1126
+        ],
+        "gmres_12_full_trial_nonlinear_residual": 2.0159088553605335e-16,
+        "gmres_12_relative_linear_residual_l2": 7.206198318337769e-07,
+        "gmres_12_step": {
+          "l2_norm_wb": 2.6672262583393607e-15,
+          "mean_wb": 4.655645514951178e-17,
+          "sha256": "d9eb7dc5584cd2cabbb80c58fc118329c54fddf992b498eed3ca43e623c2704e",
+          "size": 1126,
+          "sup_norm_wb": 3.1433757410934787e-16
+        },
+        "gmres_info": 0,
+        "largest_singular_value": 4.125746967509854,
+        "smallest_singular_value": 0.0478342101209825,
+        "state_size": 1126,
+        "true_newton_step": {
+          "l2_norm_wb": 2.6672288905124085e-15,
+          "mean_wb": 4.655657086375746e-17,
+          "sha256": "ea7bdb2c02827163d7492c9cc3a6716b354060e0d2d0ff645219301fb7a95341",
+          "size": 1126,
+          "sup_norm_wb": 3.143378529518406e-16
+        },
+        "true_step_full_trial_nonlinear_residual": 2.0159088553605335e-16,
+        "true_step_relative_linear_residual_l2": 4.0634256269321663e-16
+      },
+      "reference": {
+        "shot": 22086,
+        "slice_index": 43
+      }
+    }
+  ],
+  "source_commit": "e34aa3618ebf69e4d6d01a1ab0fece15091879a9",
+  "verdict": {
+    "converged_angle_degrees": 0.00014522938173266666,
+    "cycling_alternation_by_gmres_iterations": {
+      "12": true,
+      "30": true,
+      "60": true,
+      "120": true
+    },
+    "cycling_angle_degrees": 9.50722096304615e-06,
+    "cycling_gmres_12_full_trial_nonlinear_residual": 0.010762710781618877,
+    "cycling_true_step_full_trial_nonlinear_residual": 0.010762712491604898,
+    "name": "inner_solve_accuracy_does_not_explain_cycle",
+    "supports_inner_solve_accuracy_mechanism": false
+  }
+}

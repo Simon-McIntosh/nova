@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="efit-baseline-demonstration">
+  <meta name="plan-title"     content="EFIT Baseline Demonstration — stable, accurate, precise forward topology on MAST and DIII-D">
+  <meta name="plan-summary"   content="Demonstrate stable, accurate GS forward modelling against MAST and DIII-D EFIT baselines: spline-precise extraction, limited-basin convergence, gates.">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="16.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-tags"      content="equilibrium,topology,efit,mast,diii-d">
+  <title>EFIT Baseline Demonstration | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The mandate, and what the twelve panels actually show</h2>
+
+    <p><strong>The deliverable is non-negotiable: stable, accurate, and precise GS forward
+    modelling demonstrated against the MAST and DIII-D EFIT baselines.</strong> Everything
+    downstream rides on the topology extraction; where it is wrong or imprecise the whole
+    pipeline is broken. This plan owns the demonstration and the scoping that decides how to
+    reach it; the implementation work it identifies will be locked here as design decisions
+    before any production change is dispatched.</p>
+
+    <figure>
+      <img src="/nova/figures/primary-xpoint-evidence/efit-topology-corroboration.png"
+           alt="Twelve panels, one per frozen MAST arm, overlaying the EFIT efm LCFS with the nova binding contour, marking the EFIT X-point, the nova selected saddle and the nova limiter point, with per-panel sup and RMS distances and an agree or disagree verdict.">
+      <figcaption>The current state of the comparison (pre-rebaseline verdicts; agreement now
+      8/12 at commit <code>6270a879</code>). Where the solve converges diverted the boundary
+      matches at cm scale; where it lands limited the nova boundary is a small interior oval or
+      a wall-bound sliver. Open divertor legs run unclipped past the X-point.</figcaption>
+    </figure>
+
+    <p>Reading the figure with the banked evidence
+    (<a href="/nova/evidence/archive/primary-xpoint-evidence-landed">primary X-point evidence</a>)
+    decomposes the visible failure into three distinct mechanisms:</p>
+
+    <table>
+      <caption>The three visible failure classes and their standing attribution</caption>
+      <thead><tr><th scope="col">Symptom</th><th scope="col">Standing attribution</th><th scope="col">Status</th></tr></thead>
+      <tbody>
+        <tr><td>Coarse, wavy LCFS contours; divertor legs not clipped at the X-point; sup 0.9&ndash;1.3 m on agreeing arms</td><td>Contour polylines drawn from grid-resolution level sets; no X-point split of the separatrix into closed boundary and open legs</td><td>To corroborate in §2 — is the production geometric extraction or only the figure path coarse?</td></tr>
+        <tr><td>Nova saddle 4.3&ndash;38.7 mm from the stored EFIT X-point</td><td>Post-containment detection and selection corroborated; residual offset unattributed between reconstruction difference, grid resolution, and subgrid refinement precision</td><td>To decompose in §2 with a spline-Newton polish and a resolution proof</td></tr>
+        <tr><td>Limited where EFIT says diverted (21985/51 both arms, 21986/46 pure, 21989/55 mixed); pathological limited boundaries</td><td>Reported as stalled, non-converged terminals bounded near 5e-3 residual, with the state-dependent domain (Boolean flood-fill masks linearised as fixed by the Newton Jacobian) evidenced as the cycling mechanism on 21978/35</td><td>To corroborate independently in §2 before treatment work is cut</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Posture: corroborate, do not inherit.</strong> The prior session's findings above
+    are treated as leads. Every claim this plan builds on gets its own study from the banked
+    artifacts and, where needed, fresh measurements — in particular the stalled-versus-misclassified
+    reading of the four disagreeing arms and the mask-switch mechanism.</p>
+
+    <p><strong>The physics seam that couples the two thrusts.</strong> The Newton solve carries the
+    plasma current on quadratic-current plasma cells whose boundary cells are clipped against the
+    global tensor-spline surface. Boundary precision is therefore not cosmetic: an imprecise X-point
+    or limiter level moves the clipped edge-cell current inside the residual, so extraction precision
+    and basin behaviour are coupled through the current representation itself.</p>
+
+    <h2 id="s2">§2 — Scoping and corroboration nodes</h2>
+
+    <p>Four read-mostly nodes, each delivering a report under
+    <code>docs/figures/efit-baseline-demonstration/</code>. No production file is touched. Fences
+    honour in-flight S15 work: no writes to <code>nova/equilibrium/stencil_nulls.py</code>,
+    <code>tests/test_stencil_nulls_dual_sweep.py</code>,
+    <code>benchmarks/null_census_device_benchmark.py</code>, or
+    <code>docs/figures/primary-xpoint-evidence/</code>.</p>
+
+    <table>
+      <caption>Scoping nodes and their done-when measures</caption>
+      <thead><tr><th scope="col">Node</th><th scope="col">Deliverable</th><th scope="col">Done when</th></tr></thead>
+      <tbody>
+        <tr><td><code>reuse-map</code></td><td>Capability-shaped reuse map for: contour tracing from the global tensor spline, stationary-point Newton polish on a C2 surface, separatrix splitting/clipping at a saddle, and EFIT-baseline comparison harnesses — across nova and imas-ambix, with a one-line fitness verdict per candidate</td><td>Map names modules, symbols, tests; every §3 design element cites it or states why each candidate fails</td></tr>
+        <tr><td><code>extraction-seam-map</code></td><td>Mechanism map of where the LCFS polyline comes from in production versus the corroboration figure; where <code>_surface_clips</code> (global-spline Bernstein blocks) versus <code>_traced_clip</code> (straight chord) apply; where the quadratic-current cell clipping consumes the boundary; where an X-point split would attach</td><td>Report with file:line anchors for every seam; states which consumer sees grid-resolution polylines and which sees spline geometry</td></tr>
+        <tr><td><code>stall-corroboration</code></td><td>Independent study of the four disagreeing arms from current banks: converged or stalled, terminal residuals, achieved class via the saddle-aware partition, and whether the confined-cell mask is stable across the last outer iterations — measured, not quoted</td><td>Per-arm table with residual trajectories and mask-change counts; verdict per arm on stalled-versus-misclassified, agreeing or explicitly disagreeing with the banked account</td></tr>
+        <tr><td><code>wall-machinery-map</code></td><td>Mechanism map of wall sampling: where the 37 MAST wall segments enter, how <code>g_wall</code> is assembled, what varying wall element count and order requires, and what an isolated wall-resolution ladder must hold fixed</td><td>Report naming the exact inputs a ladder varies and holds; feasibility verdict for count and order sweeps without plasma-carrier changes</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s3">§3 — Design (locked after §2 and lead review)</h2>
+
+    <p>Two implementation thrusts and one demonstration gate, to be specified from the §2 reports
+    and the decisions below, then dispatched as fenced implementation nodes — either as sections
+    here or as dedicated plans if the write scopes demand it (open decision).</p>
+
+    <p><strong>Thrust A — spline-precise extraction.</strong> Subgrid stationary-point extraction by
+    Newton on the global C2 tensor spline (gradient and Hessian are already exposed), replacing
+    local quadratic refinement as the position authority; separatrix and LCFS polylines traced from
+    the spline level set at extraction resolution decoupled from solve resolution; the separatrix
+    split at the X-point into the closed boundary and open legs, with the legs retained as separate
+    branches; the comparison metrics computed on the closed boundary only. Prior art binds this
+    thrust: local per-cell reconstruction is refuted twice
+    (<a href="/nova/plans/curved-clip-global-surface">curved-clip-global-surface</a>), the global
+    spline is the sanctioned curve source, and fixed-shape traced contracts must be preserved.</p>
+
+    <p><strong>Thrust B — limited-basin convergence.</strong> Treatment of the state-dependent
+    domain per the mask-switch decision below, instrumented with mask-change-per-outer-iteration as
+    a first-class receipt field; the isolated wall-resolution ladder (hold plasma carrier, source
+    treatment, and seed fixed; vary wall element count and order; report limited-branch boundary
+    flux, contact location, terminal residual per rung); and re-solve of the four disagreeing arms
+    with the chosen treatment. GPU-compatible fixed shapes are non-negotiable: fixed trip counts, no
+    data-dependent compaction, no host callbacks. Any smoothed membership design must re-run the
+    conservation acceptance rescore, because divergence identities live on the commuting production
+    route with failable envelopes that must not be widened to fit.</p>
+
+    <p><strong>Demonstration gate.</strong> Preregistered geometric comparison against both EFIT
+    baselines — the twelve frozen MAST arms and the DIII-D bank — with thresholds stated before the
+    runs: topology-class agreement, closed-boundary sup/RMS, and saddle-to-X distance. Comparison
+    stays geometric (efm is magnetics-fitted; COCOS 3 to 17 with unit geometric factor; EFIT treated
+    as an independent reconstruction, not truth). Class labels read the achieved classification
+    through the saddle-aware partition, never <code>ForwardTopologyState.diverted</code>.</p>
+
+    <h2 id="s4">§4 — Work inherited by handover, linked not duplicated</h2>
+
+    <p>Three followups from the S15 session are handed to this plan and will be marked handed-over
+    (foreign-owner) by their owning plans once this plan is committed:</p>
+
+    <ul>
+      <li>The mask-switch treatment decision and repair — diagnosis banked on
+      <a href="/nova/plans/discrete-operator-analytic-error">discrete-operator-analytic-error</a>
+      (<code>newton-cycle-mask-switch.json</code>, <code>inner-solve-accuracy.json</code>).</li>
+      <li>The wall-resolution ladder —
+      <a href="/nova/mast-catalog-gpu-solve">mast-catalog-gpu-solve</a> followup; the isolation
+      requirement is restated in §3 Thrust B.</li>
+      <li>The <code>ForwardTopologyState.diverted</code> legacy-label repair —
+      <a href="/nova/plans/primary-xpoint-evidence">primary-xpoint-evidence</a> followup; requires a
+      consumer census first because banked receipts serialize the flag.</li>
+    </ul>
+
+    <p>Ruled out by banked negative results, not to be re-run: inner Krylov accuracy as the cycling
+    cause; fixed-point map contraction as a discriminator; connectivity-reachability as the cause of
+    absent margins; scalar homotopies for cold MAST basin reachability
+    (<a href="/nova/plans/dual-basin-solve">dual-basin-solve</a>); local per-cell curve
+    reconstruction (twice). The <code>iterhybrid_cocos17.eqdsk</code> field carries no divertor
+    saddle and is excluded from all topology test cases.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="mask-switch-treatment" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">How should the free-boundary solve treat the state-dependent domain so
+        Newton stops overshooting the mask switching surface? The Jacobian currently linearises the
+        flood-fill Boolean cell masks as fixed; the evidenced consequence is a 2-cycle on 21978/35
+        (5 of 1,089 confined cells alternating) and the suspected consequence is the stalled limited
+        arms. Constraints already set: GPU fixed shapes (fixed trip counts, no data-dependent
+        compaction, no host callbacks); a smoothed membership entering the residual domain must
+        re-run the conservation acceptance rescore without widening any envelope.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="freeze-per-outer">freeze the domain per outer iteration (conventional free-boundary practice; inner solve genuinely smooth; needs an outer mask fixed-point receipt)</button>
+          <button class="r-opt" data-value="smooth-membership">smooth cell membership so the Jacobian sees the dependence (idiomatic precedent: sigmoid-graded class margin; must pass conservation rescore)</button>
+          <button class="r-opt" data-value="damp-crossing">damp mask-crossing steps (least invasive; treats the symptom at the switching surface only)</button>
+          <button class="r-opt" data-value="freeze-then-smooth">freeze per outer iteration now, evaluate smoothing as a follow-on against the same instrumented receipts</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="implementation-plan-shape" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Do the two implementation thrusts live as sections on this plan or as two
+        dedicated plans linked under this demonstration endpoint? Sections keep one lifecycle and one
+        evidence record; dedicated plans give each thrust its own write authority, sprint item, and
+        gate, with this plan holding the demonstration gate and the dependency links.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="sections-here">sections on this plan</button>
+          <button class="r-opt" data-value="two-plans">two dedicated plans, this plan the endpoint</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="demonstration-thresholds" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Preregistered gate thresholds for the demonstration: topology-class
+        agreement count on the twelve MAST arms, closed-boundary RMS bound on converged arms, and
+        saddle-to-EFIT-X distance bound. To be proposed from the §2 corroboration numbers and locked
+        before any implementation node is credited against them — never derived from achieved
+        values afterwards.</p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-ebd-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship efit-baseline-demonstration §2">
+        <h4 class="r-fu-title">Run the scoping and corroboration wave</h4>
+        <div class="r-fu-body">Dispatch the four §2 nodes: the capability reuse map, the extraction
+        seam map, the independent stall corroboration, and the wall machinery map. Their reports and
+        the three open decisions gate the §3 design lock.</div>
+        <pre class="r-fu-prompt">/reckon-ship efit-baseline-demonstration §2</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>

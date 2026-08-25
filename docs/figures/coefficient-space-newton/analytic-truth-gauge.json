@@ -1,0 +1,1005 @@
+{
+  "arms": {
+    "A": [
+      {
+        "anchor_pairs": {
+          "analytic_closed_form": {
+            "axis_flux_wb": 1.3810216850087467,
+            "axis_rz_m": [
+              1.6993434455115168,
+              9.17089886430993e-16
+            ],
+            "boundary_flux_wb": -8.673617379884035e-19,
+            "boundary_minus_axis_span_wb": -1.3810216850087467,
+            "field": "analytic_closed_form",
+            "provenance": "operator.read of the independently evaluated closed-form field when the root bank was authored",
+            "receipt_path": "scripts/oracle_rebaseline/receipt-coarse.json",
+            "receipt_sha256": "8e288da4029bb42964d85b6975d194f5ec208f0ef1f6e04f451dba4f30338df7"
+          },
+          "terminal_discrete_fixed_point": {
+            "axis_flux_wb": 1.0241986753014287,
+            "axis_rz_m": [
+              1.6245046337882394,
+              -9.519414654132269e-05
+            ],
+            "boundary_flux_wb": -0.24590656947069325,
+            "boundary_minus_axis_span_wb": -1.270105244772122,
+            "field": "terminal_discrete_fixed_point",
+            "provenance": "fresh operator.read of this arm's terminal discrete field",
+            "terminal_state_sha256": "b27d5bebbab861d9ec4ae02e3cb0aa948dd9723a138efe3bb93175882c893c48"
+          }
+        },
+        "banked_rescore_reproduction": {
+          "contract": "raw terminal minus analytic field, divided by the full analytic carrier-field span, partitioned by analytic psi_N",
+          "maximum_absolute_delta_from_banked_relative_sup": 0.0,
+          "regions": {
+            "all_carrier_cells": {
+              "absolute_rms_error_wb": 0.3738624499277662,
+              "absolute_sup_error_wb": 0.7366204470320584,
+              "cell_count": 551,
+              "relative_normalisation_wb": 1.6364328840564049,
+              "relative_rms_error": 0.22846182912251956,
+              "relative_sup_error": 0.4501378909021413
+            },
+            "closed_flux_region": {
+              "absolute_rms_error_wb": 0.3958045614865496,
+              "absolute_sup_error_wb": 0.7366204470320584,
+              "cell_count": 426,
+              "relative_normalisation_wb": 1.6364328840564049,
+              "relative_rms_error": 0.24187032987593454,
+              "relative_sup_error": 0.4501378909021413
+            },
+            "scrape_off_layer": {
+              "absolute_rms_error_wb": 0.14952216765791937,
+              "absolute_sup_error_wb": 0.4275296724948212,
+              "cell_count": 67,
+              "relative_normalisation_wb": 1.6364328840564049,
+              "relative_rms_error": 0.09137079138087378,
+              "relative_sup_error": 0.2612570773052768
+            },
+            "separatrix_band": {
+              "absolute_rms_error_wb": 0.3890614633095641,
+              "absolute_sup_error_wb": 0.70719973638139,
+              "cell_count": 58,
+              "relative_normalisation_wb": 1.6364328840564049,
+              "relative_rms_error": 0.23774972203269037,
+              "relative_sup_error": 0.4321593285441544
+            }
+          }
+        },
+        "carrier": {
+          "bank_path": "scripts/oracle_rebaseline/root-coarse.npz",
+          "bank_sha256": "79f4a3f507680b7531bf3a3dc6a1195acf321027f0c3f4d4ab103bc70e1a1e0c",
+          "cell_count": 551,
+          "name": "coarse",
+          "terminal_state_sha256": "b27d5bebbab861d9ec4ae02e3cb0aa948dd9723a138efe3bb93175882c893c48"
+        },
+        "field_owned_common_psi_norm_gauge": {
+          "contract": "each field is normalized by axis and boundary anchors read from that same field; differences are dimensionless psi_N errors and the regional partition remains the analytic field's psi_N",
+          "regions": {
+            "all_carrier_cells": {
+              "absolute_rms_error_wb": 0.3738624499277662,
+              "absolute_sup_error_wb": 0.7366204470320584,
+              "cell_count": 551,
+              "relative_normalisation_wb": null,
+              "relative_rms_error": 0.15730042750331494,
+              "relative_sup_error": 0.37769755459732846
+            },
+            "closed_flux_region": {
+              "absolute_rms_error_wb": 0.3958045614865496,
+              "absolute_sup_error_wb": 0.7366204470320584,
+              "cell_count": 426,
+              "relative_normalisation_wb": null,
+              "relative_rms_error": 0.15555487154276107,
+              "relative_sup_error": 0.37769755459732846
+            },
+            "scrape_off_layer": {
+              "absolute_rms_error_wb": 0.14952216765791937,
+              "absolute_sup_error_wb": 0.4275296724948212,
+              "cell_count": 67,
+              "relative_normalisation_wb": null,
+              "relative_rms_error": 0.1332100991302925,
+              "relative_sup_error": 0.1866961139280532
+            },
+            "separatrix_band": {
+              "absolute_rms_error_wb": 0.3890614633095641,
+              "absolute_sup_error_wb": 0.70719973638139,
+              "cell_count": 58,
+              "relative_normalisation_wb": null,
+              "relative_rms_error": 0.19193475262801132,
+              "relative_sup_error": 0.3590533573121659
+            }
+          }
+        },
+        "label": "A",
+        "raw_flux_gauge_provenance": {
+          "oracle_anchors_wb": [
+            1.3810216850087467,
+            -8.673617379884035e-19
+          ],
+          "psi_norm_oracle_anchors_from": "closed_form_field",
+          "psi_norm_root_anchors_from": "root_field",
+          "psi_norm_sup_difference": 0.3776975545973289,
+          "raw_flux_comparison_gauge": "shared_exact_exterior",
+          "raw_flux_difference": "root_state - independently evaluated closed_form_state",
+          "reference_gauge_constant_used": false,
+          "root_anchors_wb": [
+            1.0241986753014278,
+            -0.24590656947069361
+          ]
+        },
+        "single_anchor_pair_cross_checks": {
+          "analytic_pair_applied_to_both_fields": {
+            "contract": "one analytic-field axis/boundary pair is applied to both raw fields; regions are partitioned by the analytic field",
+            "regions": {
+              "all_carrier_cells": {
+                "absolute_rms_error_wb": 0.3738624499277662,
+                "absolute_sup_error_wb": 0.7366204470320584,
+                "cell_count": 551,
+                "relative_normalisation_wb": 1.3810216850087467,
+                "relative_rms_error": 0.27071439499184863,
+                "relative_sup_error": 0.5333880380215703
+              },
+              "closed_flux_region": {
+                "absolute_rms_error_wb": 0.3958045614865496,
+                "absolute_sup_error_wb": 0.7366204470320584,
+                "cell_count": 426,
+                "relative_normalisation_wb": 1.3810216850087467,
+                "relative_rms_error": 0.2866027128922619,
+                "relative_sup_error": 0.5333880380215703
+              },
+              "scrape_off_layer": {
+                "absolute_rms_error_wb": 0.14952216765791937,
+                "absolute_sup_error_wb": 0.4275296724948212,
+                "cell_count": 67,
+                "relative_normalisation_wb": 1.3810216850087467,
+                "relative_rms_error": 0.10826923956445504,
+                "relative_sup_error": 0.30957491626361655
+              },
+              "separatrix_band": {
+                "absolute_rms_error_wb": 0.3890614633095641,
+                "absolute_sup_error_wb": 0.70719973638139,
+                "cell_count": 58,
+                "relative_normalisation_wb": 1.3810216850087467,
+                "relative_rms_error": 0.2817200247707189,
+                "relative_sup_error": 0.5120844546165915
+              }
+            }
+          },
+          "discrete_pair_applied_to_both_fields": {
+            "contract": "one terminal-discrete axis/boundary pair is applied to both raw fields; regions are partitioned by the discrete field",
+            "regions": {
+              "all_carrier_cells": {
+                "absolute_rms_error_wb": 0.3738624499277662,
+                "absolute_sup_error_wb": 0.7366204470320584,
+                "cell_count": 551,
+                "relative_normalisation_wb": 1.270105244772122,
+                "relative_rms_error": 0.2943554886231836,
+                "relative_sup_error": 0.5799680381323207
+              },
+              "closed_flux_region": {
+                "absolute_rms_error_wb": 0.33781259490648546,
+                "absolute_sup_error_wb": 0.6623177942781603,
+                "cell_count": 415,
+                "relative_normalisation_wb": 1.270105244772122,
+                "relative_rms_error": 0.2659721281342277,
+                "relative_sup_error": 0.5214668603285636
+              },
+              "scrape_off_layer": {
+                "absolute_rms_error_wb": 0.5410233359087658,
+                "absolute_sup_error_wb": 0.7366204470320584,
+                "cell_count": 81,
+                "relative_normalisation_wb": 1.270105244772122,
+                "relative_rms_error": 0.4259673268303324,
+                "relative_sup_error": 0.5799680381323207
+              },
+              "separatrix_band": {
+                "absolute_rms_error_wb": 0.32882958387680006,
+                "absolute_sup_error_wb": 0.7170001495905773,
+                "cell_count": 55,
+                "relative_normalisation_wb": 1.270105244772122,
+                "relative_rms_error": 0.2588994772128491,
+                "relative_sup_error": 0.5645202651841809
+              }
+            }
+          }
+        },
+        "terminal_reproduction": {
+          "measurement_backend": "cpu",
+          "terminal_exact_field_relative_residual": 2.1688440042594083e-15,
+          "terminal_topology_class": "limited"
+        }
+      },
+      {
+        "anchor_pairs": {
+          "analytic_closed_form": {
+            "axis_flux_wb": 1.3811489277145976,
+            "axis_rz_m": [
+              1.6996514078262104,
+              5.913459967054991e-16
+            ],
+            "boundary_flux_wb": -8.673617379884035e-19,
+            "boundary_minus_axis_span_wb": -1.3811489277145976,
+            "field": "analytic_closed_form",
+            "provenance": "operator.read of the independently evaluated closed-form field when the root bank was authored",
+            "receipt_path": "scripts/oracle_rebaseline/receipt-fine.json",
+            "receipt_sha256": "b26d82e45184197a83146d74749bb8954f872c821b8ddfe0b58b0127c202ef9e"
+          },
+          "terminal_discrete_fixed_point": {
+            "axis_flux_wb": 1.0227451468118647,
+            "axis_rz_m": [
+              1.6254626823425178,
+              -0.00013937914252238264
+            ],
+            "boundary_flux_wb": -0.24697114012695603,
+            "boundary_minus_axis_span_wb": -1.2697162869388208,
+            "field": "terminal_discrete_fixed_point",
+            "provenance": "fresh operator.read of this arm's terminal discrete field",
+            "terminal_state_sha256": "8248632ba050b17f57ccf8cdddd8cc29a43075e1d128548bff8c73dd9000d03b"
+          }
+        },
+        "banked_rescore_reproduction": {
+          "contract": "raw terminal minus analytic field, divided by the full analytic carrier-field span, partitioned by analytic psi_N",
+          "maximum_absolute_delta_from_banked_relative_sup": 0.0,
+          "regions": {
+            "all_carrier_cells": {
+              "absolute_rms_error_wb": 0.37548179228385486,
+              "absolute_sup_error_wb": 0.7373438580645562,
+              "cell_count": 1076,
+              "relative_normalisation_wb": 1.6360910184801212,
+              "relative_rms_error": 0.22949932983109098,
+              "relative_sup_error": 0.45067410659678714
+            },
+            "closed_flux_region": {
+              "absolute_rms_error_wb": 0.39384840515001396,
+              "absolute_sup_error_wb": 0.7373438580645562,
+              "cell_count": 844,
+              "relative_normalisation_wb": 1.6360910184801212,
+              "relative_rms_error": 0.24072524126187497,
+              "relative_sup_error": 0.45067410659678714
+            },
+            "scrape_off_layer": {
+              "absolute_rms_error_wb": 0.15096754803771065,
+              "absolute_sup_error_wb": 0.42198730092337855,
+              "cell_count": 121,
+              "relative_normalisation_wb": 1.6360910184801212,
+              "relative_rms_error": 0.09227331874112658,
+              "relative_sup_error": 0.2579240984498478
+            },
+            "separatrix_band": {
+              "absolute_rms_error_wb": 0.40297809124460665,
+              "absolute_sup_error_wb": 0.7324698795657442,
+              "cell_count": 111,
+              "relative_normalisation_wb": 1.6360910184801212,
+              "relative_rms_error": 0.24630542353258628,
+              "relative_sup_error": 0.44769506787353824
+            }
+          }
+        },
+        "carrier": {
+          "bank_path": "scripts/oracle_rebaseline/root-fine.npz",
+          "bank_sha256": "512f8a4bce44b2701a76b587bf0740cd17c1b037839dbcfbde86863115b251de",
+          "cell_count": 1076,
+          "name": "fine",
+          "terminal_state_sha256": "8248632ba050b17f57ccf8cdddd8cc29a43075e1d128548bff8c73dd9000d03b"
+        },
+        "field_owned_common_psi_norm_gauge": {
+          "contract": "each field is normalized by axis and boundary anchors read from that same field; differences are dimensionless psi_N errors and the regional partition remains the analytic field's psi_N",
+          "regions": {
+            "all_carrier_cells": {
+              "absolute_rms_error_wb": 0.37548179228385486,
+              "absolute_sup_error_wb": 0.7373438580645562,
+              "cell_count": 1076,
+              "relative_normalisation_wb": null,
+              "relative_rms_error": 0.15704310104805738,
+              "relative_sup_error": 0.38185611273715736
+            },
+            "closed_flux_region": {
+              "absolute_rms_error_wb": 0.39384840515001396,
+              "absolute_sup_error_wb": 0.7373438580645562,
+              "cell_count": 844,
+              "relative_normalisation_wb": null,
+              "relative_rms_error": 0.15234143659885394,
+              "relative_sup_error": 0.3780609414527597
+            },
+            "scrape_off_layer": {
+              "absolute_rms_error_wb": 0.15096754803771065,
+              "absolute_sup_error_wb": 0.42198730092337855,
+              "cell_count": 121,
+              "relative_normalisation_wb": null,
+              "relative_rms_error": 0.1339403781640626,
+              "relative_sup_error": 0.18874845490631886
+            },
+            "separatrix_band": {
+              "absolute_rms_error_wb": 0.40297809124460665,
+              "absolute_sup_error_wb": 0.7324698795657442,
+              "cell_count": 111,
+              "relative_normalisation_wb": null,
+              "relative_rms_error": 0.2074874673027032,
+              "relative_sup_error": 0.38185611273715736
+            }
+          }
+        },
+        "label": "A",
+        "raw_flux_gauge_provenance": {
+          "oracle_anchors_wb": [
+            1.3811489277145976,
+            -8.673617379884035e-19
+          ],
+          "psi_norm_oracle_anchors_from": "closed_form_field",
+          "psi_norm_root_anchors_from": "root_field",
+          "psi_norm_sup_difference": 0.38185611273715914,
+          "raw_flux_comparison_gauge": "shared_exact_exterior",
+          "raw_flux_difference": "root_state - independently evaluated closed_form_state",
+          "reference_gauge_constant_used": false,
+          "root_anchors_wb": [
+            1.022745146811864,
+            -0.246971140126956
+          ]
+        },
+        "single_anchor_pair_cross_checks": {
+          "analytic_pair_applied_to_both_fields": {
+            "contract": "one analytic-field axis/boundary pair is applied to both raw fields; regions are partitioned by the analytic field",
+            "regions": {
+              "all_carrier_cells": {
+                "absolute_rms_error_wb": 0.37548179228385486,
+                "absolute_sup_error_wb": 0.7373438580645562,
+                "cell_count": 1076,
+                "relative_normalisation_wb": 1.3811489277145976,
+                "relative_rms_error": 0.27186191492409784,
+                "relative_sup_error": 0.5338626727855099
+              },
+              "closed_flux_region": {
+                "absolute_rms_error_wb": 0.39384840515001396,
+                "absolute_sup_error_wb": 0.7373438580645562,
+                "cell_count": 844,
+                "relative_normalisation_wb": 1.3811489277145976,
+                "relative_rms_error": 0.2851599832913886,
+                "relative_sup_error": 0.5338626727855099
+              },
+              "scrape_off_layer": {
+                "absolute_rms_error_wb": 0.15096754803771065,
+                "absolute_sup_error_wb": 0.42198730092337855,
+                "cell_count": 121,
+                "relative_normalisation_wb": 1.3811489277145976,
+                "relative_rms_error": 0.10930577073069038,
+                "relative_sup_error": 0.30553352535388445
+              },
+              "separatrix_band": {
+                "absolute_rms_error_wb": 0.40297809124460665,
+                "absolute_sup_error_wb": 0.7324698795657442,
+                "cell_count": 111,
+                "relative_normalisation_wb": 1.3811489277145976,
+                "relative_rms_error": 0.29177019447961994,
+                "relative_sup_error": 0.5303337423414363
+              }
+            }
+          },
+          "discrete_pair_applied_to_both_fields": {
+            "contract": "one terminal-discrete axis/boundary pair is applied to both raw fields; regions are partitioned by the discrete field",
+            "regions": {
+              "all_carrier_cells": {
+                "absolute_rms_error_wb": 0.37548179228385486,
+                "absolute_sup_error_wb": 0.7373438580645562,
+                "cell_count": 1076,
+                "relative_normalisation_wb": 1.2697162869388208,
+                "relative_rms_error": 0.2957210174795111,
+                "relative_sup_error": 0.5807154445834749
+              },
+              "closed_flux_region": {
+                "absolute_rms_error_wb": 0.34203998264512786,
+                "absolute_sup_error_wb": 0.6899170367661684,
+                "cell_count": 826,
+                "relative_normalisation_wb": 1.2697162869388208,
+                "relative_rms_error": 0.26938300009505073,
+                "relative_sup_error": 0.5433631464470701
+              },
+              "scrape_off_layer": {
+                "absolute_rms_error_wb": 0.546332931370098,
+                "absolute_sup_error_wb": 0.7373438580645562,
+                "cell_count": 151,
+                "relative_normalisation_wb": 1.2697162869388208,
+                "relative_rms_error": 0.4302795333020897,
+                "relative_sup_error": 0.5807154445834749
+              },
+              "separatrix_band": {
+                "absolute_rms_error_wb": 0.3177615967769967,
+                "absolute_sup_error_wb": 0.6859670115525123,
+                "cell_count": 99,
+                "relative_normalisation_wb": 1.2697162869388208,
+                "relative_rms_error": 0.25026188924700116,
+                "relative_sup_error": 0.5402521953989587
+              }
+            }
+          }
+        },
+        "terminal_reproduction": {
+          "measurement_backend": "cpu",
+          "terminal_exact_field_relative_residual": 2.063412250107058e-15,
+          "terminal_topology_class": "limited"
+        }
+      }
+    ],
+    "B": [
+      {
+        "anchor_pairs": {
+          "analytic_closed_form": {
+            "axis_flux_wb": 1.3810216850087467,
+            "axis_rz_m": [
+              1.6993434455115168,
+              9.17089886430993e-16
+            ],
+            "boundary_flux_wb": -8.673617379884035e-19,
+            "boundary_minus_axis_span_wb": -1.3810216850087467,
+            "field": "analytic_closed_form",
+            "provenance": "operator.read of the independently evaluated closed-form field when the root bank was authored",
+            "receipt_path": "scripts/oracle_rebaseline/receipt-coarse.json",
+            "receipt_sha256": "8e288da4029bb42964d85b6975d194f5ec208f0ef1f6e04f451dba4f30338df7"
+          },
+          "terminal_discrete_fixed_point": {
+            "axis_flux_wb": 1.0245070816540787,
+            "axis_rz_m": [
+              1.6245014899066004,
+              -0.00017885195294618805
+            ],
+            "boundary_flux_wb": -0.24568140018774126,
+            "boundary_minus_axis_span_wb": -1.2701884818418199,
+            "field": "terminal_discrete_fixed_point",
+            "provenance": "fresh operator.read of this arm's terminal discrete field",
+            "terminal_state_sha256": "a307ec9ab27e8df9d61dd48ece180b9d3fd1ff0dc619ae3502af807afa0f9eeb"
+          }
+        },
+        "banked_rescore_reproduction": {
+          "contract": "raw terminal minus analytic field, divided by the full analytic carrier-field span, partitioned by analytic psi_N",
+          "maximum_absolute_delta_from_banked_relative_sup": 0.0,
+          "regions": {
+            "all_carrier_cells": {
+              "absolute_rms_error_wb": 0.3735291145784583,
+              "absolute_sup_error_wb": 0.7364515961617161,
+              "cell_count": 551,
+              "relative_normalisation_wb": 1.6364328840564049,
+              "relative_rms_error": 0.22825813280685908,
+              "relative_sup_error": 0.45003470862562545
+            },
+            "closed_flux_region": {
+              "absolute_rms_error_wb": 0.39547943247274653,
+              "absolute_sup_error_wb": 0.7364515961617161,
+              "cell_count": 426,
+              "relative_normalisation_wb": 1.6364328840564049,
+              "relative_rms_error": 0.24167164833086735,
+              "relative_sup_error": 0.45003470862562545
+            },
+            "scrape_off_layer": {
+              "absolute_rms_error_wb": 0.14916174133321403,
+              "absolute_sup_error_wb": 0.42701101757715576,
+              "cell_count": 67,
+              "relative_normalisation_wb": 1.6364328840564049,
+              "relative_rms_error": 0.09115054016970774,
+              "relative_sup_error": 0.2609401349346372
+            },
+            "separatrix_band": {
+              "absolute_rms_error_wb": 0.38860780440088316,
+              "absolute_sup_error_wb": 0.7069270240216772,
+              "cell_count": 58,
+              "relative_normalisation_wb": 1.6364328840564049,
+              "relative_rms_error": 0.23747249776452703,
+              "relative_sup_error": 0.4319926780433182
+            }
+          }
+        },
+        "carrier": {
+          "bank_path": "scripts/oracle_rebaseline/root-coarse.npz",
+          "bank_sha256": "79f4a3f507680b7531bf3a3dc6a1195acf321027f0c3f4d4ab103bc70e1a1e0c",
+          "cell_count": 551,
+          "name": "coarse",
+          "terminal_state_sha256": "a307ec9ab27e8df9d61dd48ece180b9d3fd1ff0dc619ae3502af807afa0f9eeb"
+        },
+        "field_owned_common_psi_norm_gauge": {
+          "contract": "each field is normalized by axis and boundary anchors read from that same field; differences are dimensionless psi_N errors and the regional partition remains the analytic field's psi_N",
+          "regions": {
+            "all_carrier_cells": {
+              "absolute_rms_error_wb": 0.3735291145784583,
+              "absolute_sup_error_wb": 0.7364515961617161,
+              "cell_count": 551,
+              "relative_normalisation_wb": null,
+              "relative_rms_error": 0.15727095308457728,
+              "relative_sup_error": 0.37772364016011406
+            },
+            "closed_flux_region": {
+              "absolute_rms_error_wb": 0.39547943247274653,
+              "absolute_sup_error_wb": 0.7364515961617161,
+              "cell_count": 426,
+              "relative_normalisation_wb": null,
+              "relative_rms_error": 0.15552784115625293,
+              "relative_sup_error": 0.37772364016011406
+            },
+            "scrape_off_layer": {
+              "absolute_rms_error_wb": 0.14916174133321403,
+              "absolute_sup_error_wb": 0.42701101757715576,
+              "cell_count": 67,
+              "relative_normalisation_wb": null,
+              "relative_rms_error": 0.13329111805551488,
+              "relative_sup_error": 0.18670184920749733
+            },
+            "separatrix_band": {
+              "absolute_rms_error_wb": 0.38860780440088316,
+              "absolute_sup_error_wb": 0.7069270240216772,
+              "cell_count": 58,
+              "relative_normalisation_wb": null,
+              "relative_rms_error": 0.19180116100772593,
+              "relative_sup_error": 0.358995504435659
+            }
+          }
+        },
+        "label": "B",
+        "raw_flux_gauge_provenance": {
+          "oracle_anchors_wb": [
+            1.3810216850087467,
+            -8.673617379884035e-19
+          ],
+          "psi_norm_oracle_anchors_from": "closed_form_field",
+          "psi_norm_root_anchors_from": "root_field",
+          "psi_norm_sup_difference": 0.3776975545973289,
+          "raw_flux_comparison_gauge": "shared_exact_exterior",
+          "raw_flux_difference": "root_state - independently evaluated closed_form_state",
+          "reference_gauge_constant_used": false,
+          "root_anchors_wb": [
+            1.0241986753014278,
+            -0.24590656947069361
+          ]
+        },
+        "single_anchor_pair_cross_checks": {
+          "analytic_pair_applied_to_both_fields": {
+            "contract": "one analytic-field axis/boundary pair is applied to both raw fields; regions are partitioned by the analytic field",
+            "regions": {
+              "all_carrier_cells": {
+                "absolute_rms_error_wb": 0.3735291145784583,
+                "absolute_sup_error_wb": 0.7364515961617161,
+                "cell_count": 551,
+                "relative_normalisation_wb": 1.3810216850087467,
+                "relative_rms_error": 0.2704730263349142,
+                "relative_sup_error": 0.5332657728376304
+              },
+              "closed_flux_region": {
+                "absolute_rms_error_wb": 0.39547943247274653,
+                "absolute_sup_error_wb": 0.7364515961617161,
+                "cell_count": 426,
+                "relative_normalisation_wb": 1.3810216850087467,
+                "relative_rms_error": 0.28636728645592685,
+                "relative_sup_error": 0.5332657728376304
+              },
+              "scrape_off_layer": {
+                "absolute_rms_error_wb": 0.14916174133321403,
+                "absolute_sup_error_wb": 0.42701101757715576,
+                "cell_count": 67,
+                "relative_normalisation_wb": 1.3810216850087467,
+                "relative_rms_error": 0.10800825428912025,
+                "relative_sup_error": 0.30919935741229976
+              },
+              "separatrix_band": {
+                "absolute_rms_error_wb": 0.38860780440088316,
+                "absolute_sup_error_wb": 0.7069270240216772,
+                "cell_count": 58,
+                "relative_normalisation_wb": 1.3810216850087467,
+                "relative_rms_error": 0.28139152963294845,
+                "relative_sup_error": 0.5118869831629038
+              }
+            }
+          },
+          "discrete_pair_applied_to_both_fields": {
+            "contract": "one terminal-discrete axis/boundary pair is applied to both raw fields; regions are partitioned by the discrete field",
+            "regions": {
+              "all_carrier_cells": {
+                "absolute_rms_error_wb": 0.3735291145784583,
+                "absolute_sup_error_wb": 0.7364515961617161,
+                "cell_count": 551,
+                "relative_normalisation_wb": 1.2701884818418199,
+                "relative_rms_error": 0.294073769301409,
+                "relative_sup_error": 0.57979709837538
+              },
+              "closed_flux_region": {
+                "absolute_rms_error_wb": 0.3374578122142322,
+                "absolute_sup_error_wb": 0.6621834198188125,
+                "cell_count": 415,
+                "relative_normalisation_wb": 1.2701884818418199,
+                "relative_rms_error": 0.26567538364456433,
+                "relative_sup_error": 0.5213268969803775
+              },
+              "scrape_off_layer": {
+                "absolute_rms_error_wb": 0.540680751182753,
+                "absolute_sup_error_wb": 0.7364515961617161,
+                "cell_count": 81,
+                "relative_normalisation_wb": 1.2701884818418199,
+                "relative_rms_error": 0.42566970092402834,
+                "relative_sup_error": 0.57979709837538
+              },
+              "separatrix_band": {
+                "absolute_rms_error_wb": 0.3286129916209464,
+                "absolute_sup_error_wb": 0.7174876524332567,
+                "cell_count": 55,
+                "relative_normalisation_wb": 1.2701884818418199,
+                "relative_rms_error": 0.2587119914238598,
+                "relative_sup_error": 0.5648670749973055
+              }
+            }
+          }
+        },
+        "terminal_reproduction": {
+          "measurement_backend": "cpu",
+          "terminal_exact_field_relative_residual": 2.4121205026729323e-15,
+          "terminal_topology_class": "limited"
+        }
+      },
+      {
+        "anchor_pairs": {
+          "analytic_closed_form": {
+            "axis_flux_wb": 1.3811489277145976,
+            "axis_rz_m": [
+              1.6996514078262104,
+              5.913459967054991e-16
+            ],
+            "boundary_flux_wb": -8.673617379884035e-19,
+            "boundary_minus_axis_span_wb": -1.3811489277145976,
+            "field": "analytic_closed_form",
+            "provenance": "operator.read of the independently evaluated closed-form field when the root bank was authored",
+            "receipt_path": "scripts/oracle_rebaseline/receipt-fine.json",
+            "receipt_sha256": "b26d82e45184197a83146d74749bb8954f872c821b8ddfe0b58b0127c202ef9e"
+          },
+          "terminal_discrete_fixed_point": {
+            "axis_flux_wb": 1.0227885983376792,
+            "axis_rz_m": [
+              1.6254736908966534,
+              -0.00016259252614934965
+            ],
+            "boundary_flux_wb": -0.24694004866913227,
+            "boundary_minus_axis_span_wb": -1.2697286470068114,
+            "field": "terminal_discrete_fixed_point",
+            "provenance": "fresh operator.read of this arm's terminal discrete field",
+            "terminal_state_sha256": "2444de959376c971b055ed4d7a93094edd0f6db9733aa97adc80e6d2da68da70"
+          }
+        },
+        "banked_rescore_reproduction": {
+          "contract": "raw terminal minus analytic field, divided by the full analytic carrier-field span, partitioned by analytic psi_N",
+          "maximum_absolute_delta_from_banked_relative_sup": 0.0,
+          "regions": {
+            "all_carrier_cells": {
+              "absolute_rms_error_wb": 0.37544649303004335,
+              "absolute_sup_error_wb": 0.7371719914575647,
+              "cell_count": 1076,
+              "relative_normalisation_wb": 1.6360910184801212,
+              "relative_rms_error": 0.22947775447042165,
+              "relative_sup_error": 0.450569059502799
+            },
+            "closed_flux_region": {
+              "absolute_rms_error_wb": 0.39380918037961204,
+              "absolute_sup_error_wb": 0.7371719914575647,
+              "cell_count": 844,
+              "relative_normalisation_wb": 1.6360910184801212,
+              "relative_rms_error": 0.24070126657467308,
+              "relative_sup_error": 0.450569059502799
+            },
+            "scrape_off_layer": {
+              "absolute_rms_error_wb": 0.15099264261599135,
+              "absolute_sup_error_wb": 0.42197737718526973,
+              "cell_count": 121,
+              "relative_normalisation_wb": 1.6360910184801212,
+              "relative_rms_error": 0.0922886568720724,
+              "relative_sup_error": 0.2579180329327117
+            },
+            "separatrix_band": {
+              "absolute_rms_error_wb": 0.4029405013199444,
+              "absolute_sup_error_wb": 0.7322907167129938,
+              "cell_count": 111,
+              "relative_normalisation_wb": 1.6360910184801212,
+              "relative_rms_error": 0.24628244808425379,
+              "relative_sup_error": 0.4475855612197356
+            }
+          }
+        },
+        "carrier": {
+          "bank_path": "scripts/oracle_rebaseline/root-fine.npz",
+          "bank_sha256": "512f8a4bce44b2701a76b587bf0740cd17c1b037839dbcfbde86863115b251de",
+          "cell_count": 1076,
+          "name": "fine",
+          "terminal_state_sha256": "2444de959376c971b055ed4d7a93094edd0f6db9733aa97adc80e6d2da68da70"
+        },
+        "field_owned_common_psi_norm_gauge": {
+          "contract": "each field is normalized by axis and boundary anchors read from that same field; differences are dimensionless psi_N errors and the regional partition remains the analytic field's psi_N",
+          "regions": {
+            "all_carrier_cells": {
+              "absolute_rms_error_wb": 0.37544649303004335,
+              "absolute_sup_error_wb": 0.7371719914575647,
+              "cell_count": 1076,
+              "relative_normalisation_wb": null,
+              "relative_rms_error": 0.15702335720494534,
+              "relative_sup_error": 0.38173583579004045
+            },
+            "closed_flux_region": {
+              "absolute_rms_error_wb": 0.39380918037961204,
+              "absolute_sup_error_wb": 0.7371719914575647,
+              "cell_count": 844,
+              "relative_normalisation_wb": null,
+              "relative_rms_error": 0.1523195825446262,
+              "relative_sup_error": 0.37794729448347175
+            },
+            "scrape_off_layer": {
+              "absolute_rms_error_wb": 0.15099264261599135,
+              "absolute_sup_error_wb": 0.42197737718526973,
+              "cell_count": 121,
+              "relative_normalisation_wb": null,
+              "relative_rms_error": 0.13394254923651042,
+              "relative_sup_error": 0.18873362201249588
+            },
+            "separatrix_band": {
+              "absolute_rms_error_wb": 0.4029405013199444,
+              "absolute_sup_error_wb": 0.7322907167129938,
+              "cell_count": 111,
+              "relative_normalisation_wb": null,
+              "relative_rms_error": 0.20746308362537524,
+              "relative_sup_error": 0.38173583579004045
+            }
+          }
+        },
+        "label": "B",
+        "raw_flux_gauge_provenance": {
+          "oracle_anchors_wb": [
+            1.3811489277145976,
+            -8.673617379884035e-19
+          ],
+          "psi_norm_oracle_anchors_from": "closed_form_field",
+          "psi_norm_root_anchors_from": "root_field",
+          "psi_norm_sup_difference": 0.38185611273715914,
+          "raw_flux_comparison_gauge": "shared_exact_exterior",
+          "raw_flux_difference": "root_state - independently evaluated closed_form_state",
+          "reference_gauge_constant_used": false,
+          "root_anchors_wb": [
+            1.022745146811864,
+            -0.246971140126956
+          ]
+        },
+        "single_anchor_pair_cross_checks": {
+          "analytic_pair_applied_to_both_fields": {
+            "contract": "one analytic-field axis/boundary pair is applied to both raw fields; regions are partitioned by the analytic field",
+            "regions": {
+              "all_carrier_cells": {
+                "absolute_rms_error_wb": 0.37544649303004335,
+                "absolute_sup_error_wb": 0.7371719914575647,
+                "cell_count": 1076,
+                "relative_normalisation_wb": 1.3811489277145976,
+                "relative_rms_error": 0.27183635703305276,
+                "relative_sup_error": 0.5337382353671093
+              },
+              "closed_flux_region": {
+                "absolute_rms_error_wb": 0.39380918037961204,
+                "absolute_sup_error_wb": 0.7371719914575647,
+                "cell_count": 844,
+                "relative_normalisation_wb": 1.3811489277145976,
+                "relative_rms_error": 0.28513158318940474,
+                "relative_sup_error": 0.5337382353671093
+              },
+              "scrape_off_layer": {
+                "absolute_rms_error_wb": 0.15099264261599135,
+                "absolute_sup_error_wb": 0.42197737718526973,
+                "cell_count": 121,
+                "relative_normalisation_wb": 1.3811489277145976,
+                "relative_rms_error": 0.10932394008069829,
+                "relative_sup_error": 0.3055263402213406
+              },
+              "separatrix_band": {
+                "absolute_rms_error_wb": 0.4029405013199444,
+                "absolute_sup_error_wb": 0.7322907167129938,
+                "cell_count": 111,
+                "relative_normalisation_wb": 1.3811489277145976,
+                "relative_rms_error": 0.2917429780629772,
+                "relative_sup_error": 0.5302040221866033
+              }
+            }
+          },
+          "discrete_pair_applied_to_both_fields": {
+            "contract": "one terminal-discrete axis/boundary pair is applied to both raw fields; regions are partitioned by the discrete field",
+            "regions": {
+              "all_carrier_cells": {
+                "absolute_rms_error_wb": 0.37544649303004335,
+                "absolute_sup_error_wb": 0.7371719914575647,
+                "cell_count": 1076,
+                "relative_normalisation_wb": 1.2697286470068114,
+                "relative_rms_error": 0.2956903381798152,
+                "relative_sup_error": 0.5805744346993614
+              },
+              "closed_flux_region": {
+                "absolute_rms_error_wb": 0.34200270248411335,
+                "absolute_sup_error_wb": 0.6896566596789456,
+                "cell_count": 826,
+                "relative_normalisation_wb": 1.2697286470068114,
+                "relative_rms_error": 0.26935101707780773,
+                "relative_sup_error": 0.5431527919801639
+              },
+              "scrape_off_layer": {
+                "absolute_rms_error_wb": 0.5462948156105988,
+                "absolute_sup_error_wb": 0.7371719914575647,
+                "cell_count": 151,
+                "relative_normalisation_wb": 1.2697286470068114,
+                "relative_rms_error": 0.4302453259587426,
+                "relative_sup_error": 0.5805744346993614
+              },
+              "separatrix_band": {
+                "absolute_rms_error_wb": 0.3177430137514275,
+                "absolute_sup_error_wb": 0.6854774991280512,
+                "cell_count": 99,
+                "relative_normalisation_wb": 1.2697286470068114,
+                "relative_rms_error": 0.2502448176627797,
+                "relative_sup_error": 0.5398614111321802
+              }
+            }
+          }
+        },
+        "terminal_reproduction": {
+          "measurement_backend": "cpu",
+          "terminal_exact_field_relative_residual": 3.637876065081374e-15,
+          "terminal_topology_class": "limited"
+        }
+      }
+    ]
+  },
+  "availability": {
+    "carriers": [
+      "coarse",
+      "fine"
+    ],
+    "measured_arms": [
+      "A",
+      "B"
+    ],
+    "rows": 4
+  },
+  "comparison_contract": {
+    "common_supports": "each carrier's plasma-cell centroids",
+    "gauge_only_decision_rule": "a pure affine flux-gauge mismatch must collapse to binary64 roundoff after each field is normalized by its own anchors",
+    "gauge_only_roundoff_tolerance": 9.094947017729282e-13,
+    "regional_partition": {
+      "closed_flux_region": "psi_N < 0.95",
+      "scrape_off_layer": "psi_N > 1.05",
+      "separatrix_band": "0.95 <= psi_N <= 1.05"
+    },
+    "repair_authored": false
+  },
+  "evidence_inputs": {
+    "analytic_rescore_receipt": {
+      "path": "docs/figures/coefficient-space-newton/analytic-truth-rescore.json",
+      "sha256": "fe24d146097ab7aee282c6fbeae9a2c5925b4f9ddb18d3dfcda1c9d1ccad4a1b"
+    },
+    "root_banks": {
+      "coarse": {
+        "path": "scripts/oracle_rebaseline/root-coarse.npz",
+        "receipt": "scripts/oracle_rebaseline/receipt-coarse.json",
+        "receipt_sha256": "8e288da4029bb42964d85b6975d194f5ec208f0ef1f6e04f451dba4f30338df7",
+        "sha256": "79f4a3f507680b7531bf3a3dc6a1195acf321027f0c3f4d4ab103bc70e1a1e0c"
+      },
+      "fine": {
+        "path": "scripts/oracle_rebaseline/root-fine.npz",
+        "receipt": "scripts/oracle_rebaseline/receipt-fine.json",
+        "receipt_sha256": "b26d82e45184197a83146d74749bb8954f872c821b8ddfe0b58b0127c202ef9e",
+        "sha256": "512f8a4bce44b2701a76b587bf0740cd17c1b037839dbcfbde86863115b251de"
+      }
+    },
+    "support_order_receipt": {
+      "path": "docs/figures/coefficient-space-newton/support-order-arms.json",
+      "sha256": "1988964548db65d98e24aaafc80afbbc224dd5534851756b3b170e976412eff3",
+      "source_revision": "3b0b4ed62071f2e9c24703806de348088dd5eea1"
+    }
+  },
+  "headline_metrics": {
+    "banked_relative_sup_range": {
+      "maximum": {
+        "arm": "A",
+        "carrier": "fine",
+        "region": "closed_flux_region",
+        "value": 0.45067410659678714
+      },
+      "minimum": {
+        "arm": "B",
+        "carrier": "fine",
+        "region": "scrape_off_layer",
+        "value": 0.2579180329327117
+      }
+    },
+    "field_owned_common_gauge_relative_sup_range": {
+      "maximum": {
+        "arm": "A",
+        "carrier": "fine",
+        "region": "separatrix_band",
+        "value": 0.38185611273715736
+      },
+      "minimum": {
+        "arm": "A",
+        "carrier": "coarse",
+        "region": "scrape_off_layer",
+        "value": 0.1866961139280532
+      }
+    },
+    "raw_absolute_sup_range_wb": {
+      "maximum": {
+        "arm": "A",
+        "carrier": "fine",
+        "region": "closed_flux_region",
+        "value": 0.7373438580645562
+      },
+      "minimum": {
+        "arm": "B",
+        "carrier": "fine",
+        "region": "scrape_off_layer",
+        "value": 0.42197737718526973
+      }
+    }
+  },
+  "lane_validation": {
+    "banked_relative_sup_range": {
+      "maximum": {
+        "arm": "A",
+        "carrier": "fine",
+        "region": "closed_flux_region",
+        "value": 0.45067410659678714
+      },
+      "minimum": {
+        "arm": "B",
+        "carrier": "fine",
+        "region": "scrape_off_layer",
+        "value": 0.2579180329327117
+      }
+    },
+    "maximum_absolute_delta_from_banked_relative_sup": 0.0,
+    "passed": true,
+    "required_rows": 4,
+    "required_rows_reproduced": 4,
+    "role": "validates that this CPU code-generation lane measures the same four arm/carrier objects as the banked analytic rescore",
+    "tolerance": 5e-12
+  },
+  "measurement_lane": {
+    "cpus_per_task": 8,
+    "execution": "slurm",
+    "hostname": "98dci4-clu-4073.iter.org",
+    "measurement_children_backend": "cpu",
+    "precision": "float64",
+    "requested_memory_mb": 491520,
+    "slurm_job_id": "1254313",
+    "slurm_node_list": "98dci4-clu-4073",
+    "slurm_partition": "vega_debug",
+    "tmpdir": "/tmp"
+  },
+  "schema": "nova.analytic-truth-gauge-attribution",
+  "source_revision": "ad37abcee4a039754b0972b5f62438e70a2ea1cc",
+  "verdict": {
+    "cause": "operator",
+    "classification": "genuine_discrete_operator_error",
+    "repair_authored": false,
+    "statement": "The comparison gauge is exonerated.  Field-owned axis/boundary normalisation leaves a large regional relative-sup error, while the raw fields already share the exact exterior gauge and retain a large absolute flux difference.  The discrepancy is therefore a genuine error in the discrete operator's fixed point, not a normalisation artefact.",
+    "surviving_absolute_sup_error_wb": {
+      "maximum": {
+        "arm": "A",
+        "carrier": "fine",
+        "region": "closed_flux_region",
+        "value": 0.7373438580645562
+      },
+      "minimum": {
+        "arm": "B",
+        "carrier": "fine",
+        "region": "scrape_off_layer",
+        "value": 0.42197737718526973
+      }
+    },
+    "surviving_relative_sup_error": {
+      "maximum": {
+        "arm": "A",
+        "carrier": "fine",
+        "region": "separatrix_band",
+        "value": 0.38185611273715736
+      },
+      "minimum": {
+        "arm": "A",
+        "carrier": "coarse",
+        "region": "scrape_off_layer",
+        "value": 0.1866961139280532
+      }
+    }
+  }
+}

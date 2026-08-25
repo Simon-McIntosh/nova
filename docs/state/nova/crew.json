@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T14:02:41",
+  "updated": "2026-08-25T14:05:30",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -35188,9 +35188,102 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T115247083549-inner-solve-accuracy",
+        "plan": "discrete-operator-analytic-error",
+        "section": "\u00a75",
+        "node": "inner-solve-accuracy",
+        "node_definition": {
+          "done_when": "Reproduce the alternation first, then vary ONLY the inner Krylov budget and report the residual sequence at each setting. The banked contrast used twelve GMRES iterations per Newton promotion, while PerturbedSeedPolicy defaults to newton_steps 10 with gmres_iterations 30, so the budget is a policy default rather than a solver limit and is free to change. Sweep gmres_iterations across at least 12, 30, 60 and 120 on 21978/35 and on the converging reference 22086/43, holding everything else fixed, and quote the terminal residual and whether the alternation persists at each. Then answer the structural question with a measurement rather than an opinion: form the DENSE Jacobian by jax.jacfwd at the terminal state of both references and report its condition number, the true Newton step, and the angle between that step and the GMRES-12 step. The forward state carries about 4052 values so a dense Jacobian is 4052 by 4052, roughly 131 MB in float64, which is affordable once on an H200 even though it costs order 4052 forward applications to build. That angle is the deciding number: if the GMRES step is far from the true Newton direction on the cycling reference and close on the converging one, the stall is an inner-solve accuracy problem and the whole contraction story is about the linear solve rather than the map. State which conclusion the data supports. Report cost honestly: how many map applications each option needs per outer step, so the accuracy gain can be weighed against a catalog of 1,341,435 slices at a measured 42.77 ms per slice.",
+          "estimated_hours": 3.0,
+          "goal": "Test whether an under-converged inner linear solve explains the period-2 residual alternation on 21978/35, since an inexact Newton direction loses quadratic convergence and can cycle, and the outer iteration is already known to take complete undamped steps.",
+          "id": "inner-solve-accuracy",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/inner-solve-accuracy.md",
+          "plan": "discrete-operator-analytic-error",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/inner_solve_accuracy.py",
+            "docs/figures/discrete-operator-analytic-error/inner-solve-accuracy.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "krylov-guard",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T11:52:54Z",
+        "completed_at": "2026-08-25T12:05:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 732,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 732,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "e34aa3618ebf69e4d6d01a1ab0fece15091879a9",
+        "commits": [
+          "0fb07ac5aaa18c2d5464c85c249c6a0a17d40b43"
+        ],
+        "changed_lines": {
+          "added": 927,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/inner-solve-accuracy.md",
+        "scope_changed": false,
+        "session_id": "01a038c4-2b09-7942-a394-35529d202da2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3721472,
+            "cached_input_tokens_cumulative": 3721472,
+            "input_tokens": 3861672,
+            "input_tokens_cumulative": 3861672,
+            "output_tokens": 21148,
+            "output_tokens_cumulative": 21148,
+            "reasoning_output_tokens": 4848,
+            "reasoning_output_tokens_cumulative": 4848
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 855
+    "_version": 856
   }
 }

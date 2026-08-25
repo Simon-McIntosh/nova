@@ -1,13 +1,18 @@
-"""Contour-free, accelerator-native flux-surface averaging (JAX).
+"""Accelerator-native flux-surface connectivity and contour geometry (JAX).
 
 Fixed-shape, ``jit`` / ``vmap`` / ``grad``-safe flux-surface metrics from a
 solved poloidal-flux field ψ(R, Z) — the device-native replacement for the
 host-side coarea binning (``argsort`` + cumulative-sum + ``scipy.ndimage.label``)
-that cannot batch on an accelerator.  Everything here is a fixed-shape reduction
-over the full grid: no data-dependent shapes, no sort, and no contour / marching-
-squares / level-set extraction at all.
+that cannot batch on an accelerator.  The averaging path is a fixed-shape
+reduction over the full grid: no data-dependent shapes, no sort, and no contour
+or marching-squares extraction.
 
-Two device primitives:
+The flux-surface averaging path remains contour-free.  A separate contour
+primitive at the end of this module extracts fixed-capacity cubic Hermite arcs
+from the global tensor spline.  It does not participate in clipped-support
+integration, whose polygon-exact path remains independent.
+
+Three device primitives:
 
 1. **connectivity core weight** — a dilate-by-doubling flood-fill from the axis
    cell over the confined level set {ψ_N < 1 ∧ inside-limiter}.  Associative
@@ -53,6 +58,7 @@ import jax
 import jax.numpy as jnp
 
 from nova.equilibrium.morphology import _dilate4 as _dilate4
+from nova.linalg.tensor_spline import fit_tensor_spline
 
 
 _SQRT2 = 2.0**0.5
@@ -60,6 +66,7 @@ _SQRT2 = 2.0**0.5
 __all__ = [
     "flood_fill_core",
     "flood_fill_core_with_steps",
+    "traced_spline_contour",
     "traced_flux_surface_bins",
 ]
 
@@ -249,4 +256,311 @@ def traced_flux_surface_bins(
         "core_fraction": ncore / (nz * nr),
         "n_core_cells": ncore,
         "well_posed": (dv_lvl > 0).all() & (ncore >= 200),
+    }
+
+
+# ---------------------------------------------------------------------------
+# global-spline contour geometry (separate from polygon clip integration)
+# ---------------------------------------------------------------------------
+
+
+def _structured_cell_edges(
+    radial: jnp.ndarray, vertical: jnp.ndarray
+) -> tuple[jnp.ndarray, jnp.ndarray]:
+    """Return counter-clockwise physical edge endpoints for every grid cell."""
+    cell_shape = (vertical.size - 1, radial.size - 1)
+    radial_low = jnp.broadcast_to(radial[:-1][None, :], cell_shape)
+    radial_high = jnp.broadcast_to(radial[1:][None, :], cell_shape)
+    vertical_low = jnp.broadcast_to(vertical[:-1, None], cell_shape)
+    vertical_high = jnp.broadcast_to(vertical[1:, None], cell_shape)
+    start = jnp.stack(
+        (
+            jnp.stack((radial_low, vertical_low), axis=-1),
+            jnp.stack((radial_high, vertical_low), axis=-1),
+            jnp.stack((radial_high, vertical_high), axis=-1),
+            jnp.stack((radial_low, vertical_high), axis=-1),
+        ),
+        axis=-2,
+    )
+    return start, jnp.roll(start, shift=-1, axis=-2)
+
+
+def _ordered_crossing_indices(edge_crossing: jnp.ndarray) -> jnp.ndarray:
+    """Pack four edge indices per cell without a data-dependent output shape."""
+    rank = jnp.cumsum(edge_crossing.astype(jnp.int32), axis=-1) - 1
+    edge_index = jnp.arange(4, dtype=jnp.int32)
+    return jnp.stack(
+        [
+            jnp.sum(jnp.where(edge_crossing & (rank == slot), edge_index, 0), axis=-1)
+            for slot in range(4)
+        ],
+        axis=-1,
+    )
+
+
+def _paired_edge_values(values: jnp.ndarray, indices: jnp.ndarray) -> jnp.ndarray:
+    """Gather two edge endpoints for each of two fixed-capacity segments."""
+    return jnp.take_along_axis(values[..., None, :, :], indices[..., None], axis=-2)
+
+
+@partial(jax.jit, static_argnums=(4, 5))
+def traced_spline_contour(
+    values: jnp.ndarray,
+    radial: jnp.ndarray,
+    vertical: jnp.ndarray,
+    level: jnp.ndarray,
+    bisection_steps: int = 40,
+    saddle_steps: int = 8,
+) -> dict[str, jnp.ndarray]:
+    """Extract fixed-capacity cubic contour arcs from a global tensor spline.
+
+    ``values`` has shape ``(vertical.size, radial.size)``.  Every cell owns four
+    edge slots and at most two cubic Bezier segments, so output shapes depend
+    only on the input lattice.  Every inactive padded edge, segment, and saddle
+    slot is canonical exact zero.  Edge crossings are fixed-iteration roots of
+    the global spline restriction.  Segment endpoint tangents are perpendicular
+    to the same spline's gradient, giving geometrically continuous tangents
+    where adjacent cells share a crossing.
+
+    Diagonal corner configurations use the global spline's interior stationary
+    value when a saddle is found, with a centre-value fallback.  Only an
+    interior value indistinguishable from the requested level uses the declared
+    deterministic pairing.  The returned masks distinguish resolved cells from
+    those tie-broken cells.
+
+    This function returns contour geometry only.  It neither imports nor calls
+    the polygonal clipped-support integration path.
+    """
+    values = jnp.asarray(values)
+    radial = jnp.asarray(radial, dtype=values.dtype)
+    vertical = jnp.asarray(vertical, dtype=values.dtype)
+    level = jnp.asarray(level, dtype=values.dtype)
+    spline = fit_tensor_spline(radial, vertical, values)
+
+    corners = jnp.stack(
+        (
+            values[:-1, :-1],
+            values[:-1, 1:],
+            values[1:, 1:],
+            values[1:, :-1],
+        ),
+        axis=-1,
+    )
+    corner_delta = corners - level
+    edge_start_delta = corner_delta
+    edge_end_delta = jnp.roll(corner_delta, shift=-1, axis=-1)
+    edge_crossing = (edge_start_delta >= 0.0) != (edge_end_delta >= 0.0)
+    crossing_count = jnp.sum(edge_crossing, axis=-1, dtype=jnp.int32)
+
+    edge_start, edge_end = _structured_cell_edges(radial, vertical)
+    edge_vector = edge_end - edge_start
+    lower = jnp.zeros(edge_crossing.shape, dtype=values.dtype)
+    upper = jnp.ones(edge_crossing.shape, dtype=values.dtype)
+    lower_value = edge_start_delta
+
+    def bisect(_iteration, state):
+        low, high, low_value = state
+        middle = 0.5 * (low + high)
+        point = edge_start + middle[..., None] * edge_vector
+        middle_value = spline(point[..., 0], point[..., 1]) - level
+        same_side = (low_value >= 0.0) == (middle_value >= 0.0)
+        next_low = jnp.where(same_side, middle, low)
+        next_high = jnp.where(same_side, high, middle)
+        next_value = jnp.where(same_side, middle_value, low_value)
+        return next_low, next_high, next_value
+
+    lower, upper, _ = jax.lax.fori_loop(
+        0, bisection_steps, bisect, (lower, upper, lower_value)
+    )
+    edge_parameter = 0.5 * (lower + upper)
+    edge_point = edge_start + edge_parameter[..., None] * edge_vector
+    edge_evaluation = spline.evaluate(edge_point[..., 0], edge_point[..., 1])
+    gradient_norm = jnp.hypot(
+        edge_evaluation.radial_derivative,
+        edge_evaluation.vertical_derivative,
+    )
+    safe_gradient_norm = jnp.where(gradient_norm > 0.0, gradient_norm, 1.0)
+    edge_tangent = jnp.stack(
+        (
+            -edge_evaluation.vertical_derivative / safe_gradient_norm,
+            edge_evaluation.radial_derivative / safe_gradient_norm,
+        ),
+        axis=-1,
+    )
+
+    radial_low = jnp.broadcast_to(radial[:-1][None, :], crossing_count.shape)
+    radial_high = jnp.broadcast_to(radial[1:][None, :], crossing_count.shape)
+    vertical_low = jnp.broadcast_to(vertical[:-1, None], crossing_count.shape)
+    vertical_high = jnp.broadcast_to(vertical[1:, None], crossing_count.shape)
+    centre_radial = 0.5 * (radial_low + radial_high)
+    centre_vertical = 0.5 * (vertical_low + vertical_high)
+
+    def locate_saddle(_iteration, point):
+        evaluation = spline.evaluate(point[..., 0], point[..., 1])
+        determinant = (
+            evaluation.radial_second_derivative * evaluation.vertical_second_derivative
+            - evaluation.mixed_derivative**2
+        )
+        safe_determinant = jnp.where(
+            jnp.abs(determinant) > jnp.finfo(values.dtype).tiny,
+            determinant,
+            1.0,
+        )
+        radial_step = (
+            evaluation.vertical_second_derivative * evaluation.radial_derivative
+            - evaluation.mixed_derivative * evaluation.vertical_derivative
+        ) / safe_determinant
+        vertical_step = (
+            evaluation.radial_second_derivative * evaluation.vertical_derivative
+            - evaluation.mixed_derivative * evaluation.radial_derivative
+        ) / safe_determinant
+        return jnp.stack(
+            (
+                jnp.clip(point[..., 0] - radial_step, radial_low, radial_high),
+                jnp.clip(point[..., 1] - vertical_step, vertical_low, vertical_high),
+            ),
+            axis=-1,
+        )
+
+    saddle_point = jax.lax.fori_loop(
+        0,
+        saddle_steps,
+        locate_saddle,
+        jnp.stack((centre_radial, centre_vertical), axis=-1),
+    )
+    saddle_evaluation = spline.evaluate(saddle_point[..., 0], saddle_point[..., 1])
+    saddle_hessian_determinant = (
+        saddle_evaluation.radial_second_derivative
+        * saddle_evaluation.vertical_second_derivative
+        - saddle_evaluation.mixed_derivative**2
+    )
+    minimum_spacing = jnp.minimum(
+        radial_high - radial_low, vertical_high - vertical_low
+    )
+    field_scale = jnp.maximum(jnp.max(jnp.abs(corner_delta), axis=-1), 1.0)
+    gradient_tolerance = (
+        jnp.sqrt(jnp.finfo(values.dtype).eps) * field_scale / minimum_spacing
+    )
+    saddle_gradient = jnp.hypot(
+        saddle_evaluation.radial_derivative,
+        saddle_evaluation.vertical_derivative,
+    )
+    saddle_stationary = (
+        (saddle_hessian_determinant < 0.0)
+        & (saddle_gradient <= gradient_tolerance)
+        & jnp.isfinite(saddle_evaluation.value)
+    )
+    centre_value = spline(centre_radial, centre_vertical)
+    decision_delta = jnp.where(
+        saddle_stationary, saddle_evaluation.value - level, centre_value - level
+    )
+    decision_tolerance = 128.0 * jnp.finfo(values.dtype).eps * field_scale
+    decision_tie = jnp.abs(decision_delta) <= decision_tolerance
+    same_side_as_first_corner = jnp.where(
+        decision_tie,
+        True,
+        (decision_delta >= 0.0) == (corner_delta[..., 0] >= 0.0),
+    )
+
+    packed = _ordered_crossing_indices(edge_crossing)
+    regular_pairs = jnp.stack(
+        (
+            jnp.stack((packed[..., 0], packed[..., 1]), axis=-1),
+            jnp.zeros(packed.shape[:-1] + (2,), dtype=jnp.int32),
+        ),
+        axis=-2,
+    )
+    paired_around_second_and_fourth = jnp.asarray(((0, 1), (2, 3)), jnp.int32)
+    paired_around_first_and_third = jnp.asarray(((3, 0), (1, 2)), jnp.int32)
+    saddle_pairs = jnp.where(
+        same_side_as_first_corner[..., None, None],
+        paired_around_second_and_fourth,
+        paired_around_first_and_third,
+    )
+    ambiguous = crossing_count == 4
+    pair_indices = jnp.where(ambiguous[..., None, None], saddle_pairs, regular_pairs)
+    segment_valid = jnp.stack((crossing_count == 2, jnp.zeros_like(ambiguous)), axis=-1)
+    segment_valid = jnp.where(
+        ambiguous[..., None], jnp.ones_like(segment_valid), segment_valid
+    )
+
+    segment_point = _paired_edge_values(edge_point, pair_indices)
+    segment_tangent = _paired_edge_values(edge_tangent, pair_indices)
+    chord = segment_point[..., 1, :] - segment_point[..., 0, :]
+    reverse = (
+        jnp.sum(
+            chord * (segment_tangent[..., 0, :] + segment_tangent[..., 1, :]), axis=-1
+        )
+        < 0.0
+    )
+    endpoint_order = jnp.where(
+        reverse[..., None], jnp.asarray((1, 0)), jnp.asarray((0, 1))
+    )
+    segment_point = jnp.take_along_axis(
+        segment_point, endpoint_order[..., None], axis=-2
+    )
+    segment_tangent = jnp.take_along_axis(
+        segment_tangent, endpoint_order[..., None], axis=-2
+    )
+    chord = segment_point[..., 1, :] - segment_point[..., 0, :]
+    chord_length = jnp.linalg.norm(chord, axis=-1)
+    minimum_scale = 0.25 * chord_length
+    start_scale = jnp.maximum(
+        jnp.sum(chord * segment_tangent[..., 0, :], axis=-1), minimum_scale
+    )
+    end_scale = jnp.maximum(
+        jnp.sum(chord * segment_tangent[..., 1, :], axis=-1), minimum_scale
+    )
+    start_control = (
+        segment_point[..., 0, :]
+        + start_scale[..., None] * segment_tangent[..., 0, :] / 3.0
+    )
+    end_control = (
+        segment_point[..., 1, :]
+        - end_scale[..., None] * segment_tangent[..., 1, :] / 3.0
+    )
+    controls = jnp.stack(
+        (
+            segment_point[..., 0, :],
+            start_control,
+            end_control,
+            segment_point[..., 1, :],
+        ),
+        axis=-2,
+    )
+
+    canonical_edge_parameter = jnp.where(edge_crossing, edge_parameter, 0.0)
+    canonical_edge_point = jnp.where(edge_crossing[..., None], edge_point, 0.0)
+    canonical_edge_tangent = jnp.where(edge_crossing[..., None], edge_tangent, 0.0)
+    canonical_pair_indices = jnp.where(segment_valid[..., None], pair_indices, 0)
+    canonical_segment_point = jnp.where(
+        segment_valid[..., None, None], segment_point, 0.0
+    )
+    canonical_segment_tangent = jnp.where(
+        segment_valid[..., None, None], segment_tangent, 0.0
+    )
+    canonical_controls = jnp.where(segment_valid[..., None, None], controls, 0.0)
+    canonical_saddle_point = jnp.where(ambiguous[..., None], saddle_point, 0.0)
+    canonical_saddle_value = jnp.where(ambiguous, saddle_evaluation.value, 0.0)
+
+    return {
+        "edge_crossing": edge_crossing,
+        "edge_parameter": canonical_edge_parameter,
+        "edge_crossing_rz": canonical_edge_point,
+        "edge_tangent_rz": canonical_edge_tangent,
+        "segment_valid": segment_valid,
+        "segment_edge_indices": canonical_pair_indices,
+        "segment_endpoints_rz": canonical_segment_point,
+        "segment_endpoint_tangents_rz": canonical_segment_tangent,
+        "segment_controls_rz": canonical_controls,
+        "cell_crossing_count": crossing_count,
+        "ambiguous_saddle": ambiguous,
+        "ambiguous_resolved": ambiguous & ~decision_tie,
+        "ambiguous_tie_broken": ambiguous & decision_tie,
+        "saddle_stationary": ambiguous & saddle_stationary,
+        "saddle_rz": canonical_saddle_point,
+        "saddle_value": canonical_saddle_value,
+        "well_formed": jnp.all(
+            (crossing_count == 0) | (crossing_count == 2) | (crossing_count == 4)
+        ),
     }

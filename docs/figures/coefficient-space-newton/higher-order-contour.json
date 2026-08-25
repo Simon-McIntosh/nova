@@ -1,0 +1,363 @@
+{
+  "ambiguous_saddles": {
+    "ambiguous_cell_count": 2,
+    "cases": {
+      "exact_saddle_level": {
+        "ambiguous_cell_count": 1,
+        "level": 0.0,
+        "outcomes": [
+          {
+            "cell_index_vertical_radial": [
+              1,
+              1
+            ],
+            "level": 0.0,
+            "outcome": "tie_broken",
+            "segment_edge_pairing": [
+              [
+                0,
+                1
+              ],
+              [
+                2,
+                3
+              ]
+            ],
+            "stationary_point_found": true,
+            "stationary_rz": [
+              -4.0137337897761e-17,
+              1.5065919711787504e-17
+            ],
+            "stationary_value": 3.1570481695553107e-19
+          }
+        ],
+        "resolved_count": 0,
+        "tie_broken_count": 1,
+        "truth": "psi(R,Z)=R*Z with an analytic saddle at (0,0)"
+      },
+      "resolved_offset_level": {
+        "ambiguous_cell_count": 1,
+        "level": 0.015,
+        "outcomes": [
+          {
+            "cell_index_vertical_radial": [
+              1,
+              1
+            ],
+            "level": 0.015,
+            "outcome": "resolved",
+            "segment_edge_pairing": [
+              [
+                3,
+                0
+              ],
+              [
+                1,
+                2
+              ]
+            ],
+            "stationary_point_found": true,
+            "stationary_rz": [
+              -4.0137337897761e-17,
+              1.5065919711787504e-17
+            ],
+            "stationary_value": 3.1570481695553107e-19
+          }
+        ],
+        "resolved_count": 1,
+        "tie_broken_count": 0,
+        "truth": "psi(R,Z)=R*Z with an analytic saddle at (0,0)"
+      }
+    },
+    "classified_cell_count": 2,
+    "tie_break_rule": "pair edges (0,1) and (2,3) only when the evaluated interior stationary value is indistinguishable from the requested level"
+  },
+  "characterisation_suite": {
+    "passed_tests": 3,
+    "statement": "The pinned STEP clipped-to-contour upper bounds remain 3.92% for vpr_face and 6.20% for g1_face.",
+    "status": "passed",
+    "step_bounds_percent": {
+      "g1_face": 6.2,
+      "vpr_face": 3.92
+    },
+    "step_bounds_unchanged": true,
+    "test_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054733438043-higher-order-contour-extraction/higher-order-contour-characterisation.log",
+    "tests": [
+      "tests/test_transport_geometry_reference.py::test_nova_fsa_matches_torax_eqdsk_reader",
+      "tests/test_transport_geometry_reference.py::test_clipped_cells_match_independent_contour_geometry"
+    ]
+  },
+  "clip_integration": {
+    "path": "nova/equilibrium/separatrix_clip.py",
+    "source_sha256": "90a4cbeac409ea5c33584fdead8d098dbb3ff1ef7543e364416a4804071cd171",
+    "statement": "The contour output is separate from polygon clip integration; the clip implementation, fixed capacities, and exact edge antiderivatives are unchanged.",
+    "working_tree_changed": false
+  },
+  "continuity_on_finest_grid": {
+    "curvature": {
+      "implemented": false,
+      "measured_jump": null,
+      "statement": "This extraction implements continuously tangent cubic arcs; quintic curvature matching is not implemented."
+    },
+    "global_spline_cubic": {
+      "maximum_unit_tangent_jump": 0.0,
+      "rms_unit_tangent_jump": 0.0,
+      "shared_edge_comparisons": 276
+    },
+    "linear": {
+      "maximum_unit_tangent_jump": 0.035060042782624395,
+      "rms_unit_tangent_jump": 0.024061686051398905,
+      "shared_edge_comparisons": 276
+    },
+    "tangent_measure": "sign-invariant Euclidean jump between unit tangents at each shared cell-edge crossing"
+  },
+  "contract": {
+    "agreement_tolerance": 2e-12,
+    "comparison_scope": "every returned value, including canonical exact-zero inactive padding",
+    "expected_shapes": {
+      "ambiguous_saddle": [
+        18,
+        16
+      ],
+      "edge_crossing": [
+        18,
+        16,
+        4
+      ],
+      "segment_controls_rz": [
+        18,
+        16,
+        2,
+        4,
+        2
+      ],
+      "segment_valid": [
+        18,
+        16,
+        2
+      ]
+    },
+    "fixed_shapes_pass": true,
+    "inactive_padding": "canonical exact zero",
+    "jit_agreement_pass": true,
+    "jit_field_maximum_absolute_differences": {
+      "ambiguous_resolved": 0.0,
+      "ambiguous_saddle": 0.0,
+      "ambiguous_tie_broken": 0.0,
+      "cell_crossing_count": 0.0,
+      "edge_crossing": 0.0,
+      "edge_crossing_rz": 9.903189379656396e-14,
+      "edge_parameter": 9.094947017729282e-13,
+      "edge_tangent_rz": 7.16093850883226e-14,
+      "saddle_rz": 0.0,
+      "saddle_stationary": 0.0,
+      "saddle_value": 0.0,
+      "segment_controls_rz": 9.903189379656396e-14,
+      "segment_edge_indices": 0.0,
+      "segment_endpoint_tangents_rz": 7.16093850883226e-14,
+      "segment_endpoints_rz": 9.903189379656396e-14,
+      "segment_valid": 0.0,
+      "well_formed": 0.0
+    },
+    "jit_maximum_absolute_difference": 9.094947017729282e-13,
+    "jit_maximum_difference_field": "edge_parameter",
+    "observed_shapes": {
+      "ambiguous_saddle": [
+        18,
+        16
+      ],
+      "edge_crossing": [
+        18,
+        16,
+        4
+      ],
+      "segment_controls_rz": [
+        18,
+        16,
+        2,
+        4,
+        2
+      ],
+      "segment_valid": [
+        18,
+        16,
+        2
+      ]
+    },
+    "vmap_agreement_pass": true,
+    "vmap_field_maximum_absolute_differences": {
+      "ambiguous_resolved": 0.0,
+      "ambiguous_saddle": 0.0,
+      "ambiguous_tie_broken": 0.0,
+      "cell_crossing_count": 0.0,
+      "edge_crossing": 0.0,
+      "edge_crossing_rz": 0.0,
+      "edge_parameter": 0.0,
+      "edge_tangent_rz": 3.3306690738754696e-16,
+      "saddle_rz": 0.0,
+      "saddle_stationary": 0.0,
+      "saddle_value": 0.0,
+      "segment_controls_rz": 2.7755575615628914e-17,
+      "segment_edge_indices": 0.0,
+      "segment_endpoint_tangents_rz": 3.3306690738754696e-16,
+      "segment_endpoints_rz": 0.0,
+      "segment_valid": 0.0,
+      "well_formed": 0.0
+    },
+    "vmap_maximum_absolute_difference": 3.3306690738754696e-16,
+    "vmap_maximum_difference_field": "edge_tangent_rz"
+  },
+  "crossing_position": {
+    "cell_ladder": [
+      {
+        "active_edge_slots": 88,
+        "linear_crossing_max_error_m": 0.003052778932670197,
+        "linear_crossing_rms_error_m": 0.002370674740501376,
+        "maximum_cell_pitch_m": 0.12250000000000005,
+        "radial_cells": 16,
+        "spline_crossing_max_error_m": 2.1955031745957143e-06,
+        "spline_crossing_rms_error_m": 8.265800842320264e-07,
+        "total_cells": 256,
+        "unique_crossings": 44,
+        "vertical_cells": 16
+      },
+      {
+        "active_edge_slots": 136,
+        "linear_crossing_max_error_m": 0.0017551007627345516,
+        "linear_crossing_rms_error_m": 0.0011055247381475885,
+        "maximum_cell_pitch_m": 0.08166666666666678,
+        "radial_cells": 24,
+        "spline_crossing_max_error_m": 6.342562628436355e-07,
+        "spline_crossing_rms_error_m": 2.5711644744620244e-07,
+        "total_cells": 576,
+        "unique_crossings": 68,
+        "vertical_cells": 24
+      },
+      {
+        "active_edge_slots": 184,
+        "linear_crossing_max_error_m": 0.0018217268096768768,
+        "linear_crossing_rms_error_m": 0.0008059260260384703,
+        "maximum_cell_pitch_m": 0.06125000000000003,
+        "radial_cells": 32,
+        "spline_crossing_max_error_m": 3.2492942247941414e-07,
+        "spline_crossing_rms_error_m": 1.028434635694123e-07,
+        "total_cells": 1024,
+        "unique_crossings": 92,
+        "vertical_cells": 32
+      },
+      {
+        "active_edge_slots": 272,
+        "linear_crossing_max_error_m": 0.0007628870449880587,
+        "linear_crossing_rms_error_m": 0.00029332516520349654,
+        "maximum_cell_pitch_m": 0.0408333333333335,
+        "radial_cells": 48,
+        "spline_crossing_max_error_m": 8.392117445410463e-08,
+        "spline_crossing_rms_error_m": 1.8565953930874747e-08,
+        "total_cells": 2304,
+        "unique_crossings": 136,
+        "vertical_cells": 48
+      },
+      {
+        "active_edge_slots": 368,
+        "linear_crossing_max_error_m": 0.0006441379947454973,
+        "linear_crossing_rms_error_m": 0.00019393047528193136,
+        "maximum_cell_pitch_m": 0.030625000000000124,
+        "radial_cells": 64,
+        "spline_crossing_max_error_m": 2.2370072461086465e-08,
+        "spline_crossing_rms_error_m": 5.21742890196314e-09,
+        "total_cells": 4096,
+        "unique_crossings": 184,
+        "vertical_cells": 64
+      },
+      {
+        "active_edge_slots": 552,
+        "linear_crossing_max_error_m": 0.0002977883432951356,
+        "linear_crossing_rms_error_m": 8.376552623155767e-05,
+        "maximum_cell_pitch_m": 0.02041666666666675,
+        "radial_cells": 96,
+        "spline_crossing_max_error_m": 7.0958261488840435e-09,
+        "spline_crossing_rms_error_m": 1.1903150941168268e-09,
+        "total_cells": 9216,
+        "unique_crossings": 276,
+        "vertical_cells": 96
+      }
+    ],
+    "fitted_orders": {
+      "global_spline": {
+        "confidence_95_percent": [
+          3.3585370025184806,
+          4.131051636340126
+        ],
+        "estimate": 3.744794319429303,
+        "one_sigma_uncertainty": 0.13911937829698434,
+        "rungs": 6
+      },
+      "linear": {
+        "confidence_95_percent": [
+          1.671708503074627,
+          2.066830007039519
+        ],
+        "estimate": 1.869269255057073,
+        "one_sigma_uncertainty": 0.07115600867187753,
+        "rungs": 6
+      }
+    },
+    "interim_coarse_smoke": {
+      "global_spline_crossing_rms_error_m": 9.151001514989856e-07,
+      "global_spline_maximum_unit_tangent_jump": 0.0,
+      "global_spline_shared_edge_comparisons": 29,
+      "linear_crossing_rms_error_m": 0.002370674740501376,
+      "linear_maximum_unit_tangent_jump": 0.2258469748620969,
+      "linear_to_global_spline_error_ratio": 2590.617799175399,
+      "statement": "Initial isolated 16-by-16-cell smoke retained exactly as observed before the full configured-x64 receipt."
+    }
+  },
+  "method": {
+    "declared_order_bands": {
+      "global_spline": [
+        3.2,
+        4.8
+      ],
+      "linear": [
+        1.7,
+        2.3
+      ]
+    },
+    "declared_point_counts_per_axis": [
+      17,
+      25,
+      33,
+      49,
+      65,
+      97
+    ],
+    "global_spline": "fixed 40-step edge roots of the global not-a-knot tensor spline with cubic Hermite controls from its gradient",
+    "linear": "corner-value linear interpolation on each crossed edge",
+    "truth": "psi=((R-1.55)/0.58)^2 + 0.16*((R-1.55)/0.58)^4 + (Z/0.73)^2 at level 1"
+  },
+  "provenance": {
+    "benchmark_sha256": "727015924014e753930eeccfe9655a6cecc24a1b60673896adfc3fa9f932580d",
+    "connectivity_sha256": "4df7c186c0c7f55e7da9b531c3925fbdd2b672adbbfb184ca3392ded12028982",
+    "execution": "local",
+    "hostname": "98dci4-srv-1006.iter.org",
+    "jax_backend": "cpu",
+    "jax_enable_x64": true,
+    "slurm_job_id": null,
+    "source_revision": "67cb20d58aa4b77a2dae326394f5a393efe752d7"
+  },
+  "schema": "nova-higher-order-contour-measurement",
+  "verdict": {
+    "checks": {
+      "clip_integration_source_unchanged": true,
+      "every_ambiguous_cell_classified": true,
+      "fixed_shape_jit_vmap_contract": true,
+      "global_tangent_jump_below_declared_limit": true,
+      "linear_order_in_declared_band": true,
+      "resolved_and_tie_broken_cases_exercised": true,
+      "spline_more_accurate_on_finest_grid": true,
+      "spline_order_in_declared_band": true
+    },
+    "complete": true,
+    "measurement_pass": true
+  }
+}

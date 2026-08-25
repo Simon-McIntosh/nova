@@ -28,8 +28,8 @@
 <meta name="plan-modified" content="2026-08-25">
 <meta name="plan-commits" content="485f6fdaa88328b96633db85111093e332b4aa53,dbee3048d4767af04373155c50b6e9753bfc330c,975e4acec3016cd56295d458d07eaf2aa8233454,75d6eb010612c12486327fa8c794efe6c662b71c,bf9dafdbf258624fc42d3f2d7eef8e468495b328,d6be878b6eb1eac9ea3d85d87f16cd2b48787cef,fd2baeb113b3443314618b9e6e29819ba233ce6e,231659ea748322d8607a71cc82b2d4e522e8cc1c,df676ca4329ead0f850aeeace59abc9c4f7a6a95,8794f6067002889a75aa99a05cf83863998d22af">
 <meta name="plan-artifacts" content="scripts/coefficient_basis_reuse/report.md,docs/figures/coefficient-space-newton/representation-degree.json,docs/figures/coefficient-space-newton/edge-current-jump.json,docs/figures/coefficient-space-newton/clipped-coupling-order.json,docs/figures/coefficient-space-newton/second-order-kernel.json,docs/figures/coefficient-space-newton/support-order-arms.json,docs/figures/coefficient-space-newton/carrier-arms.json,docs/figures/coefficient-space-newton/analytic-truth-rescore.json,docs/figures/coefficient-space-newton/plasma-only-carrier.json,nova/biot/second_moment_kernel.py,nova/equilibrium/coefficient_carrier.py,docs/evidence/archive/coefficient-space-newton-landed.html">
-<meta name="plan-impl" content="0.933">
-<meta name="plan-version" content="10">
+<meta name="plan-impl" content="0.966">
+<meta name="plan-version" content="12">
 </head>
 <body>
   <main class="plan-doc">
@@ -549,67 +549,22 @@
       <a href="/nova/evidence/archive/coefficient-space-newton-landed#iso-accuracy">§14 landed</a>.</p>
     </section>
 
-    <h2 id="s15">§15 — Contour extraction that matches the representation's fidelity</h2>
-
-    <p><strong>The contour is currently the least accurate object in the chain, and raising the cell
-    support order widens that gap.</strong> Marching squares — and its triangular counterpart —
-    classifies cell corners against the level and then interpolates the crossing <em>linearly</em>
-    along each edge, emitting straight segments. The result is C⁰: crossings are continuous but the
-    tangent jumps at every cell edge. With first-order cell data that roughly matches what is known.
-    With second-order in-cell information it does not: the solution carries curvature the contour
-    discards.</p>
-
-    <p><strong>Take the curve from the global surface, not from per-cell data — the same lesson §16
-    records from two measured failures.</strong> A higher-order contour driven by a local centred-tangent
-    reconstruction would repeat exactly the mistake that cost the curved-clip programme twice: it
-    converges to a different surface from the one the reference readers use, and on a low-aspect-ratio
-    grid that difference reached twenty per cent. Driven by the global C² carrier the contour inherits
-    the surface both reference routes already agree with.</p>
-
-    <p><strong>Three separable improvements, in increasing order of what they need and give.</strong>
-    First, the crossing <em>position</em>: root-find along the edge on the higher-order edge
-    restriction rather than interpolating linearly, which raises the accuracy of where the contour
-    sits without changing its continuity. Second, the crossing <em>tangent</em>: a level set's tangent
-    is perpendicular to the gradient, and the gradient is available exactly — from
-    <code>TensorSplineEvaluation</code> for a carrier, or from the second-order cell data — so a cubic
-    Hermite through two accurate crossings with gradient-derived end tangents gives a
-    <strong>C¹</strong> contour. Third, the <em>curvature</em>: level-set curvature follows from the
-    gradient together with the Hessian, and <code>TensorSplineEvaluation</code> already returns
-    <code>radial_second_derivative</code>, <code>mixed_derivative</code> and
-    <code>vertical_second_derivative</code>, so a quintic Hermite matching curvature at both ends
-    gives <strong>C²</strong>. The machinery for all three already exists; none of it needs a new
-    kernel.</p>
-
-    <p><strong>A benefit beyond drawing, and it lands where the physics is hardest.</strong> Marching
-    squares has genuinely ambiguous cells — the saddle configuration with diagonal corners on opposite
-    sides of the level — and resolves them by an arbitrary tie-break. Higher-order in-cell data
-    <em>resolves</em> that ambiguity rather than breaking the tie, by evaluating the interior rather
-    than guessing it. The ambiguous saddle case is precisely the X-point neighbourhood, so this is an
-    improvement exactly where the topology read is most consequential and where the admissibility
-    predicate spends its time. It also bears on the smooth topology margin of §6: a margin computed
-    from a C⁰ boundary inherits that boundary's tangent discontinuities.</p>
-
-    <p><strong>Two constraints that must be respected rather than discovered.</strong> The separatrix
-    clip's exactness is polygon exactness — it conserves patch area to 2.2e-16 m² because it integrates
-    straight-edged shapes with exact edge antiderivatives, and §16 confirms from the source that the
-    clip is polygonal with linearly interpolated crossings. A curved boundary breaks those formulas, so
-    <em>the drawn and reported contour and the clip integration are separate questions</em> and this
-    section improves the former without silently changing the latter; §16 owns the question of whether
-    the clip itself should follow, and prefers subdivision over curvature precisely because it keeps
-    the exact formulas.
-    And the extraction must keep the padded fixed-shape traced form that already lets the clip trace
-    once over a moving separatrix; a higher-order variant that reintroduces data-dependent shapes
-    would trade a real property for a cosmetic one.</p>
-
-    <p><strong>Done when</strong> a higher-order extraction is demonstrated against the existing
-    linear one on a case with closed-form truth: the crossing-position error of each at a declared set
-    of cell counts, with the fitted order of each and its uncertainty; the tangent and, where
-    implemented, curvature continuity across cell edges reported as the measured jump rather than
-    asserted; the resolved-versus-tie-broken outcome on every ambiguous saddle cell encountered, with
-    the count of such cells stated; and a passing contract test showing fixed shapes and
-    <code>jit</code>/<code>vmap</code> agreement, with an explicit statement that the clip integration
-    path is unchanged. A higher-order contour that is more accurate in position but no smoother, or
-    smoother but not more accurate, is reported as exactly that.</p>
+    <section id="s15" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-25 — nearly fourth order, exact C¹</span>
+        <h2>§15 — Contour extraction that matches the representation's fidelity</h2></header>
+      <p class="landed-summary">Driven by the global spline the extraction is <strong>3.745 ± 0.139</strong>
+      order against the linear route's <strong>1.869 ± 0.071</strong> across 16→96 cells per axis, with
+      finest crossing RMS <strong>1.19e−9 m</strong> against <strong>8.38e−5 m</strong> — 70,000×.
+      Maximum unit-tangent jump at the finest grid is <strong>exactly 0.0</strong> over all 276 shared
+      joins against 0.0351 linear, so C¹ is exact rather than small. Curvature matching explicitly not
+      implemented. The fixed-shape contract passes <em>without masking</em>: every inactive slot is
+      canonical exact zero, eager↔jit 9.09e−13, scalar↔vmap 3.33e−16 over active <em>and</em> padded
+      values. 2 ambiguous saddle cells — 1 resolved from its stationary value, 1 tie-broken — both
+      stated. <strong>Clip integration untouched and the characterisation suite green with the STEP
+      bounds unchanged</strong>, which is what those standing assertions exist for. Artifact
+      <code>docs/figures/coefficient-space-newton/higher-order-contour.json</code> (commit
+      <code>479667ed</code>).</p>
+    </section>
 
     <h2 id="s16">§16 — Curved clips are already built and already refuted, for a reason this plan removes</h2>
 
@@ -783,6 +738,12 @@
 </div>
 <div class="r-comment" data-section="s19" data-id="c-20260825T0615-carrierstep" data-who="reckon-ship" data-when="2026-08-25T06:15:00Z">
     <div class="r-comment-body">carrier-step-attribution landed - commit d785864c, merged, gate PASSED, 1 test added, SLURM job 1254386 on vega_debug in 00:01:33. ATTRIBUTION PROJECTED_RESIDUAL_DIFFERENTIATED - the second of the three mechanisms section 19 listed, and it is arithmetic exactly as section 18 predicted rather than physics. THE DEMONSTRATION IS SYMMETRIC, WHICH IS WHAT MAKES IT CONCLUSIVE. The square 36 by 36 system was differentiating project(exact_map(total_state) - external) - coefficients: it matches central finite differences OF THAT PROJECTED RESIDUAL to a maximum relative column error of 1.0181914475518321e-07, so it is a correct Jacobian of the wrong function. Expanding those same columns into exact space and comparing against exact-residual finite differences gives 0.06899077124977254 - five orders worse. The corrected 2253 by 36 exact-residual Jacobian matches every carrier-basis directional derivative to 5.350605353071424e-08 at a fitted scale factor of 0.9999999797120991, so the corrected object is right to eight digits and unit-scaled. THE REPAIR RESTORES THE DIRECTION ALMOST COMPLETELY: replacing the projected square solve with exact-residual least squares moves the step from the banked 49.73527543299367 degrees at norm ratio 0.012955053999124593 to 6.16191299780726 degrees at 0.8923026730273906. Every tested corrected factor from the stalled state is finite, limited AND residual-improving, which is the direct refutation of the stall - the corrected direction is usable where the projected one was not. AND THE CARRIER STILL DOES NOT CONVERGE. The four-step corrected arm admits only ONE advance and terminates limited at 0.03708054430983738, against exact-value arm A at 2.7110550053242652e-15 and only modestly below the projected-residual stall at 0.03847988208719086. Verdict CARRIER_QUESTION_CLOSED_CONDITIONING_WON_CONVERGENCE_LOST. THIS IS THE COMPLETE ANSWER THE SECTION SPECIFIED IN ADVANCE, and it must not be read as a failure: section 19's done-when named a correction that restores the step and still does not converge as closing the carrier question honestly. The arithmetic is repaired, conditioning is won at 119.02 against the banked projected Krylov 4087.41, convergence is lost, and exact values remain the production route. Section 11's provisional carrier verdict now resolves against the carrier on convergence with its cause fully named rather than left as a floor story.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260825T064027095403-s15-reasoning-audit" data-who="s15-audit-reasoning" data-when="2026-08-25T06:41:43Z">
+    <div class="r-comment-body"><p>stopped 1 min after launch: dispatch routed to the codex default backend where the coordinator required a claude opus worker; redispatched with default_backend forced</p></div>
+</div>
+<div class="r-comment" data-section="s15" data-id="c-20260825T0645-contour" data-who="reckon-ship" data-when="2026-08-25T06:45:00Z">
+    <div class="r-comment-body">higher-order-contour-extraction landed - commit 479667ed, merged, gate PASSED, 7 connectivity tests plus 3 characterisation tests green. ORDER AND CONTINUITY BOTH DELIVERED. Fitted crossing order 3.744794319429303 +/- 0.13911937829698434 for the global-spline route against 1.869269255057073 +/- 0.07115600867187753 linear, across 16 to 96 cells per axis - nearly fourth order against second, uncertainties nowhere near overlapping. Finest crossing RMS 1.1903150941168268e-9 m against 8.376552623155767e-5 m, a factor of about 70000. The retained coarse smoke agrees: 9.151001514989856e-7 m against 2.370674740501376e-3 m, ratio 2590.617799175399. MAXIMUM UNIT-TANGENT JUMP IS MEASURED EXACTLY 0.0 over all 276 shared joins at the finest grid against 0.0351 linear, and 0.0 over 29 matched joins on the coarse smoke. An exactly zero tangent jump is a stronger statement than a small one and is reported as measured rather than folded into a tolerance. Curvature matching is explicitly NOT implemented and the receipt says so rather than implying C2. THE CONTRACT PASSES WITHOUT MASKING, which is what I asked for and refused to weaken. Every inactive edge, segment, index, tangent, control and saddle slot is canonical exact zero; eager against jit agrees to a maximum 9.094947017729282e-13 in edge_parameter and scalar against vmap to 3.3306690738754696e-16 in edge_tangent_rz, over EVERY active and canonical padded value. The tempting option - narrowing the agreement comparison to valid slots - was refused, because a padded fixed-shape output whose inactive contents vary is how a result becomes layout dependent, and canonicalising the padding is what separatrix_clip already does to earn its 2.2e-16 area exactness. Machinery: global not-a-knot tensor-spline edge restrictions rooted with 40 fixed bisection steps, connected by gradient-matched cubic controls. AMBIGUITY REPORTED RATHER THAN AVERAGED: 2 ambiguous saddle cells encountered, 1 resolved from its measured stationary value and 1 tie-broken at the exact saddle level, both stated with their treatment. AND THE GATE LOCK DID ITS JOB - this node changes extraction, which is exactly what the standing STEP assertions were installed to catch: separatrix_clip.py is unchanged with working_tree_changed false, and the transport characterisation is 3 of 3 green with vpr_face and g1_face bounds unchanged at 3.92 and 6.20 per cent.</div>
 </div>
 </section>
 </main>

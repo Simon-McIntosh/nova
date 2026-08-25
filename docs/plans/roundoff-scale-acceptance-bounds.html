@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-commits" content="f1ae4f46">
-<meta name="plan-artifacts" content="benchmarks/bound_reference_classification.py,docs/figures/roundoff-scale-acceptance-bounds/bound-classification.json">
-<meta name="plan-impl" content="0.333">
-<meta name="plan-version" content="1">
+<meta name="plan-commits" content="f1ae4f46,2da77ed9">
+<meta name="plan-artifacts" content="benchmarks/bound_reference_classification.py,nova/equilibrium/observable_acceptance.py,docs/figures/roundoff-scale-acceptance-bounds/bound-classification.json,docs/figures/roundoff-scale-acceptance-bounds/corrected-criteria.json">
+<meta name="plan-impl" content="0.667">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -146,6 +146,57 @@
     Repairing a criterion changes what the acceptance route can certify; it changes nothing about which
     equilibrium the solver finds.</p>
 
+    <h2 id="s4">§4 — A criterion must be failable, not only passable</h2>
+
+    <p><strong>The repair fixed one bound and made the other unfailable, and only measuring the slack
+    showed which was which.</strong> §1's standing rule says a criterion must be passable by something.
+    It needs its dual, stated here because omitting it is how the second bound went wrong: <strong>a
+    criterion must also be failable by something.</strong> A bound no plausible computation can exceed
+    is not a criterion, and a cohort passing under it is not evidence.</p>
+
+    <table>
+      <caption>Headroom of each corrected bound over the quantity it scores</caption>
+      <thead><tr><th scope="col">Bound</th><th scope="col">Value</th><th scope="col">Largest observed</th><th scope="col">Slack</th><th scope="col">Verdict</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>divergence_b</code> absolute, relative dropped</td>
+          <td>9.836e&minus;16</td><td>6.106e&minus;16</td><td><strong>1.61&times;</strong></td>
+          <td><strong>Discriminating.</strong> A genuine fix by registration rule.</td>
+        </tr>
+        <tr>
+          <td><code>divergence_j</code> derived truncation floor</td>
+          <td>9.042e&minus;4</td><td>4.657e&minus;10</td><td><strong>1,941,785&times;</strong></td>
+          <td><strong>Vacuous.</strong> Loosens the old bound 6.6 million-fold; cannot fail.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><strong>So the 69-of-69 re-score does not establish that acceptance is meaningful.</strong> It
+    establishes that one bound is now tight and correct and one is unfailable. The derivation of the
+    second is not at fault — an independent stencil value of 7.316e&minus;5 at pitch 0.0356 m carried at
+    order two to the production pitch of 0.125 m gives 9.042e&minus;4, the arithmetic is right, and the
+    observed values were correctly quoted but not used to select it. The <em>done-when</em> that asked
+    for it was at fault, because it asked for a derived floor without asking whether the floor
+    discriminates.</p>
+
+    <p><strong>The unexplained fact is the interesting one.</strong> The observable sits roughly six
+    orders <em>below</em> its own derived truncation floor. A second-order transfer from the reference
+    stencil predicts an error the production computation beats by a factor of a million, which means the
+    transfer is measuring something other than this observable — plausibly because the acceptance
+    quantity is a masked extremum over a region rather than a raw per-node derivative error, so
+    cancellation across the region does far better than the pointwise bound. Until that is settled, no
+    absolute floor for this observable can be trusted, tight or loose.</p>
+
+    <p><strong>Done when</strong> the six-order gap between the observable and its derived truncation
+    floor is explained by measurement: the reference stencil quantity and the acceptance observable are
+    compared term by term on one case with the difference in what each aggregates stated explicitly;
+    a floor is derived for the quantity the acceptance route <em>actually</em> scores rather than for a
+    pointwise derivative error, with its slack over the largest observed value quoted and required to be
+    within two orders; and the cohort is re-scored under it with the pass count and every changed verdict
+    named. <strong>A re-score that fails under a discriminating bound is a better outcome than a pass
+    under an unfailable one</strong>, and if the tight bound cannot be met that is a finding about the
+    computation rather than a reason to loosen it.</p>
+
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-rab-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship roundoff-scale-acceptance-bounds" data-resolved-at="" data-resolved-by="">
@@ -158,6 +209,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-20260825T0725-classify" data-who="reckon-ship" data-when="2026-08-25T07:25:00Z">
     <div class="r-comment-body">bound-reference-classification landed - commit f1ae4f46, merged, gate PASSED. ALL 69 BOUNDS CLASSIFIED with a per-bound reason: 67 carry a nonzero-reference quantity and 2 are zero continuum identities, namely conservation.divergence_b and conservation.divergence_j. Both zero identities record NON-PRESERVATION by the production least-squares ring-mesh discretisation and therefore a truncation floor - which is the distinction this plan was corrected to make after review, and it is now measured rather than asserted. THE CHEAP HYPOTHESIS IS REJECTED, BUT ONLY FOR ONE OF THE TWO, AND THAT SPLIT IS THE RESULT. On divergence_b the banked exemplar fits it exactly: 21978/35 at width 1 records values 2.220446049250313e-16, 6.106226635438361e-16 and 5.551115123125783e-16, ALL below the registered absolute bound of 9.83631031098047e-16, with passes true, false, false under a relative bound of 0.8425616333270692. So there the absolute criterion is already satisfied and the relative one is the entire fault - a registration rule fixes it. On divergence_j it does NOT fit: the four width-4 members for 22086/43 reach absolute difference 1.4551915228366852e-10 against an absolute bound of 1.3703738919113413e-10, so they exceed the absolute criterion too by about six per cent. All 18 currently failing member evaluations violate their relative bounds, so none is relative-only across the board. THE TWO SCALES ARE MEASURED AND SIX ORDERS APART, which is why keeping them separate mattered: maximum observable magnitudes are 7.216449660063518e-16 for divergence_b and 4.656612873077393e-10 for divergence_j, against a banked process roundoff scale of 2.7755575615628914e-16. The divergence_j separation is 6.224719895935548 orders. So divergence_b sits at roundoff scale and divergence_j at truncation scale, and its absolute bound is too TIGHT for its own discretisation floor. HAD THE PLAN KEPT ITS ORIGINAL PREMISE it would have derived an epsilon-scale floor for both and divergence_j would still have failed, which is exactly the error the review caught. THE NODE CORRECTLY RECOMMENDS NOTHING: no bound change and no repair authored, because the hypothesis was rejected rather than supported across all failures. The two bounds now need different repairs and the next node carries them.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260825T0745-repair" data-who="reckon-ship" data-when="2026-08-25T07:45:00Z">
+    <div class="r-comment-body">zero-reference-bound-repair landed - commit 2da77ed9, merged, gate PASSED, 12 tests. HALF A GENUINE FIX AND HALF AN UNFAILABLE BOUND, and only measuring the slack showed which was which. DIVERGENCE_B IS FIXED PROPERLY: it retains absolute bound 9.83631031098047e-16 and DROPS its relative criterion, which is a registration rule rather than a widened number, and the validation now rejects an absolute-plus-relative registration when has_nonzero_continuum_value is false. Its largest observed value is 6.106226635438361e-16, so the retained bound carries 1.61x headroom - tight enough to discriminate. DIVERGENCE_J IS DERIVED CORRECTLY AND LANDS SOMEWHERE USELESS. The transfer is internally consistent and honest: an independent stencil value of 7.315873469501451e-05 at pitch 0.035555555555555556 m carried at order 2 to the production conservative pitch 0.125 m gives 0.0009042140976404076, and the receipt records observations_used_only_after_registration_for_rescore true, so the old bound and observed values were quoted but not used to select it. BUT THE SLACK IS THE PROBLEM: that bound sits 1,941,785 times above the observable magnitude 4.656612873077393e-10 and 6,213,712 times above the observed acceptance difference 1.4551915228366852e-10, and it loosens the old bound 1.3703738919113413e-10 by a factor of 6,598,302. A bound that large cannot fail on any plausible computation. SO THE 69-OF-69 RESCORE AT BOTH WIDTHS IS NOT EVIDENCE THAT ACCEPTANCE IS MEANINGFUL. It is evidence that one bound became tight and correct and one became unfailable. The node is not at fault - the done-when I wrote asked for a derived floor and never asked whether the floor discriminates. Section 4 now carries the dual rule that was missing: a criterion must be FAILABLE by something as well as passable by something. AND THE UNEXPLAINED FACT IS THE INTERESTING ONE: the observable sits about six orders BELOW its own derived truncation floor, so a second-order transfer from the reference stencil predicts an error the production computation beats by a million. That means the transfer is measuring something other than this observable - plausibly because the acceptance quantity is a masked extremum over a region rather than a raw per-node derivative error, so cancellation across the region does far better than a pointwise bound. Until that is settled no absolute floor for this observable can be trusted, tight or loose, and section 4 requires the gap explained before any floor is accepted.</div>
 </div>
 </section>
 </main>

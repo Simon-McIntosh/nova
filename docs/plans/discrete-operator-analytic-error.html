@@ -328,3 +328,45 @@
 </main>
 </body>
 </html>
+    <h2 id="lazy-axes-fallout">The lazy-axes repair broke two banked benchmarks</h2>
+
+    <p><strong>Found 2026-08-25 while a worker was blocked on an unrelated gate, and it is my
+    regression.</strong> Commit <code>f2665b5d</code> removed
+    <code>_connectivity_radius</code>, <code>_connectivity_height</code> and
+    <code>_connectivity_shape</code> from <code>ForwardFluxOperator.__post_init__</code>, deriving the
+    tensor-product axes lazily instead. That repair was correct in its own terms — it restored general
+    forward topology reads on arbitrary grids, which the seam node had narrowed — but it was merged
+    <strong>without checking who read the attributes it deleted</strong>, and two banked benchmarks
+    did:</p>
+
+    <table>
+      <caption>Callers of the removed attributes</caption>
+      <thead><tr><th scope="col">File</th><th scope="col">Lines</th><th scope="col">State</th></tr></thead>
+      <tbody>
+        <tr><td><code>benchmarks/pinned_branch_contrast.py</code></td><td>124, 127, 128, 135</td><td>Repaired incidentally by a node that needed to run it</td></tr>
+        <tr><td><code>benchmarks/traced_selection_seam.py</code></td><td>162, 165, 166, 173</td><td><strong>Silently broken</strong> — nothing has run it since</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The second victim matters more than the first.</strong>
+    <code>traced_selection_seam.py</code> is the landed §5 seam prototype of
+    <code>dual-branch-selection</code>, commit <code>632a4396</code>, the artifact whose 53/53
+    exact-class agreement and continuous-rail measurements the traced production port is meant to
+    reproduce. Its oracle currently raises <code>AttributeError</code> before it measures anything, and
+    that was discovered only because an unrelated node happened to need the <em>other</em> benchmark.</p>
+
+    <p><strong>The design fault underneath, which is the thing to fix rather than the symptom.</strong>
+    Both benchmarks reached into <em>private</em> operator state — a leading-underscore attribute is not
+    a contract, so a production-internals change was always free to break them, and restoring the three
+    attributes would only re-establish the coupling that made this possible. The repair is a
+    <strong>public accessor</strong> for the connectivity axes and shape, with both benchmarks migrated
+    onto it, so the next internals change is caught by an interface rather than by luck. Sequenced after
+    the live node holding <code>pinned_branch_contrast.py</code>, to avoid two workers in one file.</p>
+
+    <p><strong>What this says about the earlier repair, stated plainly.</strong> The lazy-axes commit was
+    itself the fix for a regression I merged, where a diagnostic narrowed a production contract. Gating
+    it on reproducing four banked residuals proved the production path was sound and said nothing about
+    callers of the deleted attributes. A grep for the removed names would have cost seconds. The lesson
+    is not "test more" but "when a change deletes a name, the search for that name is part of the
+    change".</p>
+

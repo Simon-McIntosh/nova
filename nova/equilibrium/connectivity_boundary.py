@@ -39,9 +39,9 @@ Method (the connectivity read, re-expressed on device):
   Boolean class and its signed margin use that same pair unless an exact
   comparator candidate table and wall extremum are supplied.  In that case only
   the class operands are replaced; the connectivity boundary remains unchanged.
-  Typed saddles outside the wall polygon are masked before selection, and a wall
-  extremum outside the surviving X-point height band is removed by the
-  private-flux-shadow rule.
+  Typed saddles outside the wall polygon are masked before selection.  The wall
+  operand is then selected from the wall touched by the axis component
+  immediately inside that saddle, so private-region wall extrema cannot compete.
 
 * **LCFS radii.**  Read at ψ_lcfs = ψ_axis + lcfs_norm·(ψ_bnd − ψ_axis) by a
   fixed outward ray-march from the axis at the evaluator's 8 poloidal angles —
@@ -53,7 +53,7 @@ shapes, no host round-trip, no contour extraction — so a batch of slices shari
 one campaign grid is a single ``jax.vmap``.  The only machine input is the wall
 as a raster boolean mask (``inside_limiter``), so a single loop (MAST), a union
 of discrete limiters (AUG), or a per-pulse movable wall (WEST) is data, not a
-new code path.
+separate code path.
 
 Sub-grid note: the two-sided mean removes the ~one-cell systematic bias in the
 scalar ψ_bnd, leaving an unbiased sub-cell residual; the LCFS radii are sub-grid
@@ -76,7 +76,14 @@ from nova.equilibrium.stencil_nulls import (
     xpoint_candidates,
 )
 from nova.equilibrium.labels import LCFS_ANGLES, N_XPOINT_SLOTS
+from nova.geometry.select import (
+    length_2d,
+    traced_quadratic_wall,
+    wall_coordinate,
+    wall_length,
+)
 from nova.jax.config import Precision, resolve_precision
+from nova.linalg.tensor_spline import fit_tensor_spline
 
 
 def _boundary_defaults(psi2d, rg, zg, angles, wall_r, wall_z, wall_psi):
@@ -182,6 +189,15 @@ _X_FLUX_BAND = 0.05
 #: ψ_N tolerance for an X-point to be reported as sitting ON the boundary ring.
 _X_ON_RING_U = 0.02
 
+# Keep the connectivity partition strictly on the axis side of a selected
+# saddle.  Scaling by the in-vessel flux range makes this a geometric
+# separation from the crossing rather than a machine-gauge tolerance.
+_PRE_SADDLE_OFFSET_FRACTION = 2.0e-4
+
+# Fixed arc samples expose reachable sub-segment wall runs even when a machine's
+# exact GEMM wall nodes are sparse, without data-dependent compaction.
+_WALL_REACHABILITY_SAMPLES = 420
+
 # Coarse-grid offsets probed around the preceding binding level.  The asymmetric
 # upper reach covers both sides of the two-sided flood mean while retaining the
 # exact grid points used by the cold sweep.
@@ -280,6 +296,284 @@ def _flood_fill(confined, seed, n_iter, use_doubling):
     if use_doubling:
         return flood_fill_core(confined, seed, n_iter)
     return _linear_flood_fill_core(confined, seed, n_iter)
+
+
+def _axis_component_before_level(
+    u,
+    inside_limiter,
+    rg,
+    zg,
+    axis_r,
+    axis_z,
+    level,
+    n_iter,
+    use_doubling,
+):
+    """Return the axis component immediately inside a flux obstruction."""
+    inside_values = jnp.where(inside_limiter, u, jnp.nan)
+    flux_range = jnp.nanmax(inside_values) - jnp.nanmin(inside_values)
+    inward_offset = _PRE_SADDLE_OFFSET_FRACTION * flux_range
+    confined = inside_limiter & (u <= level - inward_offset)
+
+    distance2 = (rg[None, :] - axis_r) ** 2 + (zg[:, None] - axis_z) ** 2
+    seed_index = _argmin_exact(
+        jnp.where(confined.reshape(-1), distance2.reshape(-1), jnp.inf)
+    )
+    seed = (
+        jnp.zeros_like(confined)
+        .reshape(-1)
+        .at[seed_index]
+        .set(True)
+        .reshape(confined.shape)
+    )
+    has_seed = jnp.any(confined)
+    seed &= has_seed
+    return _flood_fill(confined, seed, n_iter, use_doubling) > 0.5
+
+
+def _wall_nodes_touching_region(region, inside_limiter, rg, zg, wall_r, wall_z):
+    """Mark wall nodes whose nearest in-material raster node is in ``region``."""
+    distance2 = (wall_r[:, None, None] - rg[None, None, :]) ** 2 + (
+        wall_z[:, None, None] - zg[None, :, None]
+    ) ** 2
+    nearest = jnp.argmin(
+        jnp.where(inside_limiter[None, :, :], distance2, jnp.inf).reshape(
+            wall_r.shape[0], -1
+        ),
+        axis=1,
+    )
+    return region.reshape(-1)[nearest]
+
+
+def _sample_wall_polyline(wall_r, wall_z, sample_count):
+    """Return fixed-count, equal-arc samples around a closed wall polyline."""
+    segment_length = jnp.hypot(
+        jnp.roll(wall_r, -1) - wall_r,
+        jnp.roll(wall_z, -1) - wall_z,
+    )
+    segment_end = jnp.cumsum(segment_length)
+    segment_start = segment_end - segment_length
+    perimeter = segment_end[-1]
+    arc = jnp.linspace(0.0, perimeter, sample_count, endpoint=False, dtype=wall_r.dtype)
+    segment = jnp.clip(
+        jnp.searchsorted(segment_end, arc, side="right"), 0, wall_r.size - 1
+    )
+    safe_length = jnp.where(segment_length[segment] > 0.0, segment_length[segment], 1.0)
+    fraction = (arc - segment_start[segment]) / safe_length
+    following = jnp.mod(segment + 1, wall_r.size)
+    sample_r = wall_r[segment] + fraction * (wall_r[following] - wall_r[segment])
+    sample_z = wall_z[segment] + fraction * (wall_z[following] - wall_z[segment])
+    return arc, sample_r, sample_z
+
+
+def _refine_wall_minimum_position(wall_r, wall_z, wall_psi, reachable, psi_axis):
+    """Locate the reachable wall minimum with a cyclic three-node quadratic.
+
+    The selected node and its two ring neighbours define the local
+    least-squares quadratic, mirroring the fixed-ring stationary refinement
+    used for grid nulls.  The stationary position is clipped to reachable
+    adjacent segments, preserving a fixed-shape masked reduction.  This fit
+    determines position only; it is not a field interpolant.
+    """
+    node_count = wall_r.shape[0]
+    closed = (wall_r[0] == wall_r[-1]) & (wall_z[0] == wall_z[-1])
+    unique_count = node_count - closed.astype(jnp.int32)
+    node_indices = jnp.arange(node_count, dtype=jnp.int32)
+    eligible = reachable & (node_indices < unique_count) & jnp.isfinite(wall_psi)
+    distance = jnp.abs(wall_psi - psi_axis)
+    selected = _argmin_exact(jnp.where(eligible, distance, jnp.inf))
+    previous = jnp.mod(selected - 1, unique_count)
+    following = jnp.mod(selected + 1, unique_count)
+
+    left_length = jnp.hypot(
+        wall_r[selected] - wall_r[previous], wall_z[selected] - wall_z[previous]
+    )
+    right_length = jnp.hypot(
+        wall_r[following] - wall_r[selected], wall_z[following] - wall_z[selected]
+    )
+
+    cluster_r = jnp.stack((wall_r[previous], wall_r[selected], wall_r[following]))
+    cluster_z = jnp.stack((wall_z[previous], wall_z[selected], wall_z[following]))
+    cluster_distance = jnp.stack(
+        (distance[previous], distance[selected], distance[following])
+    )
+    cluster_arc = length_2d(cluster_r, cluster_z, array_namespace=jnp)
+    coefficients = traced_quadratic_wall(cluster_arc, cluster_distance)
+    stationary_arc = wall_length(coefficients, array_namespace=jnp)
+    lower_arc = jnp.where(eligible[previous], 0.0, left_length)
+    upper_arc = jnp.where(eligible[following], left_length + right_length, left_length)
+    stationary_arc = jnp.clip(stationary_arc, lower_arc, upper_arc)
+    stationary_shift = stationary_arc - left_length
+    refined_distance = (
+        coefficients[0] * stationary_arc**2
+        + coefficients[1] * stationary_arc
+        + coefficients[2]
+    )
+    node_value = distance[selected]
+    refinement_valid = (
+        jnp.any(eligible)
+        & eligible[previous]
+        & eligible[following]
+        & (coefficients[0] > 0.0)
+        & (left_length > 0.0)
+        & (right_length > 0.0)
+        & (refined_distance <= node_value)
+    )
+    shift = jnp.where(refinement_valid, stationary_shift, 0.0)
+
+    refined_cluster_arc = left_length + shift
+    refined_r, refined_z = wall_coordinate(
+        refined_cluster_arc,
+        cluster_r,
+        cluster_z,
+        cluster_arc,
+        array_namespace=jnp,
+    )
+
+    segment_lengths = jnp.hypot(
+        jnp.roll(wall_r, -1) - wall_r,
+        jnp.roll(wall_z, -1) - wall_z,
+    )
+    arc_nodes = jnp.concatenate(
+        [jnp.zeros((1,), dtype=wall_r.dtype), jnp.cumsum(segment_lengths[:-1])]
+    )
+    perimeter = jnp.sum(segment_lengths)
+    refined_arc = jnp.mod(arc_nodes[selected] + shift, perimeter)
+    has_reachable = jnp.any(eligible)
+    nan = jnp.asarray(jnp.nan, dtype=wall_r.dtype)
+    return {
+        "reachable": eligible,
+        "node_index": selected,
+        "node_arc": jnp.where(has_reachable, arc_nodes[selected], nan),
+        "node_r": jnp.where(has_reachable, wall_r[selected], nan),
+        "node_z": jnp.where(has_reachable, wall_z[selected], nan),
+        "node_psi": jnp.where(has_reachable, wall_psi[selected], nan),
+        "arc": jnp.where(has_reachable, refined_arc, nan),
+        "r": jnp.where(has_reachable, refined_r, nan),
+        "z": jnp.where(has_reachable, refined_z, nan),
+        "shift": jnp.where(has_reachable, shift, nan),
+        "valid": has_reachable,
+    }
+
+
+def _reachable_wall_limiter_point(
+    psi2d,
+    rg,
+    zg,
+    wall_r,
+    wall_z,
+    wall_psi,
+    reachable,
+    psi_axis,
+    *,
+    exact_nodes,
+    global_surface=None,
+):
+    """Return a position-refined limiter point with globally sourced flux.
+
+    Exact campaign wall flux selects the nearest node and locates the local
+    along-wall stationary position.  When that position moves between nodes,
+    its field value comes from the global C2 tensor spline fitted to the whole
+    grid, never from the local position fit or a per-cell reconstruction.
+    """
+    point = _refine_wall_minimum_position(wall_r, wall_z, wall_psi, reachable, psi_axis)
+    if global_surface is None:
+        global_surface = fit_tensor_spline(rg, zg, psi2d)
+    global_surface_flux = global_surface(point["r"], point["z"])
+    between_nodes = point["valid"] & ((point["shift"] != 0.0) | (not exact_nodes))
+    refined_flux = jnp.where(between_nodes, global_surface_flux, point["node_psi"])
+    point = dict(point)
+    point.update(
+        {
+            "psi": jnp.where(point["valid"], refined_flux, jnp.nan),
+            "distance": jnp.where(
+                point["valid"], jnp.abs(refined_flux - psi_axis), jnp.inf
+            ),
+            "flux_from_global_surface": between_nodes,
+        }
+    )
+    return point
+
+
+def _select_reachable_wall_limiter(
+    psi2d,
+    rg,
+    zg,
+    inside_limiter,
+    wall_r,
+    wall_z,
+    wall_psi,
+    pre_saddle_region,
+    psi_axis,
+    global_surface,
+):
+    """Select a limiter point over exact wall nodes and reachable sub-segments."""
+    node_reachable = _wall_nodes_touching_region(
+        pre_saddle_region, inside_limiter, rg, zg, wall_r, wall_z
+    )
+    node_point = _reachable_wall_limiter_point(
+        psi2d,
+        rg,
+        zg,
+        wall_r,
+        wall_z,
+        wall_psi,
+        node_reachable,
+        psi_axis,
+        exact_nodes=True,
+        global_surface=global_surface,
+    )
+
+    sample_arc, sample_r, sample_z = _sample_wall_polyline(
+        wall_r, wall_z, _WALL_REACHABILITY_SAMPLES
+    )
+    sample_reachable = _wall_nodes_touching_region(
+        pre_saddle_region, inside_limiter, rg, zg, sample_r, sample_z
+    )
+    sample_psi = global_surface(sample_r, sample_z)
+    sample_point = _reachable_wall_limiter_point(
+        psi2d,
+        rg,
+        zg,
+        sample_r,
+        sample_z,
+        sample_psi,
+        sample_reachable,
+        psi_axis,
+        exact_nodes=False,
+        global_surface=global_surface,
+    )
+    # Exact GEMM nodes are the stronger field authority and win whenever the
+    # reachable partition contains one.  Global-surface samples fill only a
+    # reachable sub-segment run whose sparse exact endpoints are both absent.
+    use_node = node_point["valid"]
+    selected = {
+        key: jnp.where(use_node, node_point[key], sample_point[key])
+        for key in (
+            "node_index",
+            "node_arc",
+            "node_r",
+            "node_z",
+            "node_psi",
+            "arc",
+            "r",
+            "z",
+            "psi",
+            "distance",
+            "shift",
+            "valid",
+            "flux_from_global_surface",
+        )
+    }
+    selected.update(
+        {
+            "reachable": node_reachable,
+            "reachable_samples": sample_reachable,
+            "sample_arc": sample_arc,
+            "selected_from_exact_nodes": use_node,
+        }
+    )
+    return selected
 
 
 # ---------------------------------------------------------------------------
@@ -518,18 +812,19 @@ def _read_ingredients(
     wj = jnp.clip(jnp.round(jnp.interp(wall_r, rg, ar_idx)), 0, nr - 1)
     wi = jnp.clip(jnp.round(jnp.interp(wall_z, zg, az_idx)), 0, nz - 1)
     reachable = reach[wi.astype(jnp.int32), wj.astype(jnp.int32)]
-    u_wall_bilerp = jax.vmap(
-        lambda r_, z_: (_bilerp(psi2d, rg, zg, r_, z_) - psi_axis) / span_safe
-    )(wall_r, wall_z)
-    # exact node flux (campaign g_wall) where provided; bilerp elsewhere.  A
-    # length-1 NaN sentinel broadcasts to "all bilerp"; a per-node finite array
-    # reads each tangency EXACTLY (no O(Δ²) floor at the lean point).  Sanitise
-    # the exact branch to a finite value BEFORE the select so the NaN sentinel
-    # never poisons the gradient (the jnp.where NaN-VJP trap).
+    global_surface = fit_tensor_spline(rg, zg, psi2d)
+    wall_global_flux = global_surface(wall_r, wall_z)
+    u_wall_global = (wall_global_flux - psi_axis) / span_safe
+    # Exact node flux (campaign g_wall) is authoritative where provided; the
+    # global C2 tensor surface supplies the fallback.  A length-1 NaN sentinel
+    # broadcasts to "all global-surface" while a per-node finite array reads each
+    # tangency EXACTLY (no O(Δ²) floor at the lean point).  Sanitise the exact
+    # branch to a finite value BEFORE the select so the NaN sentinel never
+    # poisons the gradient (the jnp.where NaN-VJP trap).
     wall_psi_finite = jnp.isfinite(wall_psi)
     wall_psi_safe = jnp.where(wall_psi_finite, wall_psi, psi_axis)
     u_wall_exact = (wall_psi_safe - psi_axis) / span_safe
-    u_wall_pts = jnp.where(wall_psi_finite, u_wall_exact, u_wall_bilerp)
+    u_wall_pts = jnp.where(wall_psi_finite, u_wall_exact, u_wall_global)
     u_wall = jnp.min(jnp.where(reachable, u_wall_pts, jnp.inf))
     u_wall_valid = jnp.any(reachable) & jnp.isfinite(u_wall)
     u_wall_c = jnp.where(u_wall_valid, u_wall, jnp.inf)
@@ -569,15 +864,32 @@ def _read_ingredients(
     u_x_c = jnp.where(x_bind_valid, u_x[kbind], jnp.inf)
 
     # Exact candidate data can replace the class operands without changing the
-    # connectivity binding. The selected wall extremum is removed when it lies
-    # vertically beyond the X-point band, so an unreachable private-flux wall
-    # point never competes with the saddle.
+    # connectivity binding.  Its wall operand is selected from the pre-saddle
+    # axis component rather than trusting a whole-polygon extremum.
     if classification_x is None or classification_wall is None:
         class_u_wall = u_wall_c
         class_u_x = u_x_c
         class_x_valid = x_bind_valid
         class_x_state = x_bind_state
         class_wall_shadowed = jnp.asarray(False)
+        class_wall = {
+            "reachable": reachable,
+            "node_index": _argmin_exact(jnp.where(reachable, u_wall_pts, jnp.inf)),
+            "node_arc": jnp.asarray(jnp.nan, dtype=rg.dtype),
+            "node_r": jnp.asarray(jnp.nan, dtype=rg.dtype),
+            "node_z": jnp.asarray(jnp.nan, dtype=zg.dtype),
+            "node_psi": jnp.asarray(jnp.nan, dtype=psi2d.dtype),
+            "arc": jnp.asarray(jnp.nan, dtype=rg.dtype),
+            "r": jnp.asarray(jnp.nan, dtype=rg.dtype),
+            "z": jnp.asarray(jnp.nan, dtype=zg.dtype),
+            "psi": jnp.asarray(jnp.nan, dtype=psi2d.dtype),
+            "distance": jnp.asarray(jnp.inf, dtype=psi2d.dtype),
+            "shift": jnp.asarray(jnp.nan, dtype=rg.dtype),
+            "valid": u_wall_valid,
+            "flux_from_global_surface": jnp.asarray(False),
+            "reachable_samples": jnp.zeros((_WALL_REACHABILITY_SAMPLES,), dtype=bool),
+            "selected_from_exact_nodes": jnp.asarray(False),
+        }
     else:
         supplied_x = jnp.asarray(classification_x, dtype=psi2d.dtype)
         supplied_wall = jnp.asarray(classification_wall, dtype=psi2d.dtype)
@@ -595,19 +907,40 @@ def _read_ingredients(
         class_u_x = jnp.where(class_x_valid, supplied_x_level[class_x_index], jnp.inf)
         class_x_state = jnp.where(class_x_valid, 2, 0)
 
-        x_height = jnp.where(supplied_x_valid, supplied_x[:, 1], jnp.nan)
-        x_height_min = jnp.nanmin(x_height)
-        x_height_max = jnp.nanmax(x_height)
-        x_height_min = jnp.where(x_height_min > axis_z, -jnp.inf, x_height_min)
-        x_height_max = jnp.where(x_height_max < axis_z, jnp.inf, x_height_max)
-        supplied_wall_valid = jnp.all(jnp.isfinite(supplied_wall[:3]))
-        class_wall_shadowed = supplied_wall_valid & (
-            (supplied_wall[1] < x_height_min) | (supplied_wall[1] > x_height_max)
+        pre_saddle_region = _axis_component_before_level(
+            u,
+            inside_limiter,
+            rg,
+            zg,
+            axis_r,
+            axis_z,
+            class_u_x,
+            n_iter,
+            use_doubling,
         )
-        supplied_wall_level = (supplied_wall[2] - psi_axis) / span_safe
+        class_wall = _select_reachable_wall_limiter(
+            psi2d,
+            rg,
+            zg,
+            inside_limiter,
+            wall_r,
+            wall_z,
+            wall_psi,
+            pre_saddle_region,
+            psi_axis,
+            global_surface,
+        )
+        supplied_wall_valid = jnp.all(jnp.isfinite(supplied_wall[:3]))
+        supplied_wall_index = _argmin_exact(
+            (wall_r - supplied_wall[0]) ** 2 + (wall_z - supplied_wall[1]) ** 2
+        )
+        class_wall_shadowed = (
+            supplied_wall_valid & ~class_wall["reachable"][supplied_wall_index]
+        )
+        refined_wall_level = (class_wall["psi"] - psi_axis) / span_safe
         class_u_wall = jnp.where(
-            supplied_wall_valid & ~class_wall_shadowed,
-            supplied_wall_level,
+            class_wall["valid"],
+            refined_wall_level,
             jnp.inf,
         )
 
@@ -630,6 +963,7 @@ def _read_ingredients(
         "class_x_valid": class_x_valid,
         "class_x_state": class_x_state,
         "class_wall_shadowed": class_wall_shadowed,
+        "class_wall": class_wall,
         "class_x_inside_wall": supplied_x_inside_wall
         if classification_x is not None
         else jnp.ones((_K_XCAND,), dtype=bool),
@@ -675,13 +1009,14 @@ def traced_boundary_read(
     densified) — used for the SUB-GRID binding flux (see below); omit them to fall
     back to the cell-level flood binding.  ``wall_psi`` is the EXACT node flux
     (the campaign ``g_wall`` GEMM) aligned with those points; each finite entry
-    reads its exact flux instead of the O(Δ²) bilinear grid read (the sentinel
-    NaN default falls every node back to bilerp, so the read is unchanged).
+    reads its exact flux instead of a reconstructed grid value.  The sentinel
+    NaN default evaluates the global C2 tensor surface at every wall node.
     ``classification_x`` and ``classification_wall`` optionally supply the
-    exact saddle table and selected wall extremum used by the Boolean topology
-    read. Typed saddles outside the ``wall_r`` / ``wall_z`` polygon are masked
-    before selection. Their normalised flux difference defines ``class_margin``
-    after the vertical private-flux shadow is applied; they do not change
+    exact saddle table and whole-polygon wall extremum used by the Boolean
+    topology read. Typed saddles outside the ``wall_r`` / ``wall_z`` polygon are
+    masked before selection. The wall operand is independently selected and
+    refined on the wall reachable from the pre-saddle axis component. Their
+    normalised flux difference defines ``class_margin``; they do not change
     ``s_star``, ``psi_bnd``, radii, or the connected core.
 
     Returns a dict of fixed-shape arrays: ``found`` (bool — a valid closed
@@ -819,6 +1154,25 @@ def traced_boundary_read(
         "u_wall": class_u_wall,
         "u_xpoint": class_u_x,
         "wall_shadowed": ing["class_wall_shadowed"],
+        "reachable_wall_node_mask": ing["class_wall"]["reachable"],
+        "reachable_wall_sample_mask": ing["class_wall"]["reachable_samples"],
+        "limiter_wall_node_index": ing["class_wall"]["node_index"],
+        "limiter_wall_node_arc": ing["class_wall"]["node_arc"],
+        "limiter_wall_node_r": ing["class_wall"]["node_r"],
+        "limiter_wall_node_z": ing["class_wall"]["node_z"],
+        "limiter_wall_node_psi": ing["class_wall"]["node_psi"],
+        "limiter_arc": ing["class_wall"]["arc"],
+        "limiter_r": ing["class_wall"]["r"],
+        "limiter_z": ing["class_wall"]["z"],
+        "limiter_psi": ing["class_wall"]["psi"],
+        "limiter_axis_flux_distance": ing["class_wall"]["distance"],
+        "limiter_refinement_shift": ing["class_wall"]["shift"],
+        "limiter_flux_from_global_surface": ing["class_wall"][
+            "flux_from_global_surface"
+        ],
+        "limiter_selected_from_exact_nodes": ing["class_wall"][
+            "selected_from_exact_nodes"
+        ],
         "binding_u_wall": u_wall_c,
         "binding_u_xpoint": u_x_c,
         "x_candidate_count": ing["x_candidate_count"],
@@ -847,10 +1201,12 @@ def traced_margin_candidate_diagnostics(
 ) -> dict:
     """Return fixed-shape evidence behind one exact topology-margin read.
 
-    The exact comparator candidates and selected wall extremum determine the
-    class operands.  The connectivity-local candidate table is retained beside
-    them so a receipt can distinguish an absent typed saddle from a typed
-    saddle that the flood-rejoin and binding-flux admission did not retain.
+    The exact comparator candidates determine the saddle operand.  The supplied
+    whole-polygon wall extremum is retained for before/after evidence, while the
+    class wall operand comes from the reachable pre-saddle wall.  The
+    connectivity-local candidate table is retained beside them so a receipt can
+    distinguish an absent typed saddle from a typed saddle that the flood-rejoin
+    and binding-flux admission did not retain.
     This diagnostic adapter does not feed the boundary or class calculation.
     """
     supplied_x = jnp.asarray(classification_x, dtype=psi2d.dtype)
@@ -891,6 +1247,7 @@ def traced_margin_candidate_diagnostics(
     wall_present = jnp.all(jnp.isfinite(supplied_wall[:3]))
     wall_flux_safe = jnp.where(wall_present, supplied_wall[2], ing["psi_axis"])
     wall_level_before_shadow = (wall_flux_safe - ing["psi_axis"]) / ing["span_safe"]
+    refined_wall = ing["class_wall"]
     connectivity = ing["xc"]
     connectivity_table = jnp.stack(
         (
@@ -921,6 +1278,27 @@ def traced_margin_candidate_diagnostics(
         "wall_normalized_flux_operand_before_shadow": wall_level_before_shadow,
         "wall_normalized_flux_operand": ing["class_u_wall"],
         "wall_shadowed": ing["class_wall_shadowed"],
+        "reachable_wall_node_mask": refined_wall["reachable"],
+        "reachable_wall_node_count": jnp.sum(
+            refined_wall["reachable"], dtype=jnp.int32
+        ),
+        "reachable_wall_sample_mask": refined_wall["reachable_samples"],
+        "reachable_wall_sample_count": jnp.sum(
+            refined_wall["reachable_samples"], dtype=jnp.int32
+        ),
+        "limiter_wall_node_index": refined_wall["node_index"],
+        "limiter_wall_node_arc": refined_wall["node_arc"],
+        "limiter_wall_node_coordinate": jnp.stack(
+            (refined_wall["node_r"], refined_wall["node_z"])
+        ),
+        "limiter_wall_node_flux": refined_wall["node_psi"],
+        "limiter_arc": refined_wall["arc"],
+        "limiter_coordinate": jnp.stack((refined_wall["r"], refined_wall["z"])),
+        "limiter_flux": refined_wall["psi"],
+        "limiter_axis_flux_distance": refined_wall["distance"],
+        "limiter_refinement_shift": refined_wall["shift"],
+        "limiter_flux_from_global_surface": refined_wall["flux_from_global_surface"],
+        "limiter_selected_from_exact_nodes": refined_wall["selected_from_exact_nodes"],
         "connectivity_candidates": connectivity_table,
         "connectivity_candidate_present": connectivity["present"],
         "connectivity_candidate_admitted": ing["x_valid"],

@@ -243,7 +243,7 @@ def test_typed_saddle_selector_masks_points_outside_wall_polygon():
     candidates = jnp.asarray(
         [
             [0.55, 0.60, psi_axis + 0.20 * span, 0.0],
-            [1.00, -0.50, psi_axis + 0.40 * span, 0.0],
+            [1.00, -0.50, psi_axis + 1.20 * span, 0.0],
         ]
     )
     wall_candidate = jnp.asarray([1.50, 0.0, psi_axis + 0.60 * span])
@@ -282,12 +282,102 @@ def test_typed_saddle_selector_masks_points_outside_wall_polygon():
         rtol=0.0,
         atol=0.0,
     )
-    assert float(diagnostic["selected_x_normalized_flux_operand"]) == pytest.approx(0.4)
-    assert float(diagnostic["class_margin"]) == pytest.approx(0.2)
+    assert float(diagnostic["selected_x_normalized_flux_operand"]) == pytest.approx(1.2)
+    assert int(diagnostic["reachable_wall_node_count"]) > 0
+    assert np.isfinite(float(diagnostic["limiter_flux"]))
+    assert float(diagnostic["wall_normalized_flux_operand"]) == pytest.approx(
+        (float(diagnostic["limiter_flux"]) - float(diagnostic["axis_flux"]))
+        / float(diagnostic["outward_flux_span"])
+    )
 
     batched = jax.vmap(diagnose)(jnp.stack((candidates, candidates)))
     assert np.asarray(batched["selected_typed_candidate_index"]).tolist() == [1, 1]
     assert np.asarray(batched["typed_candidate_eligible"]).shape == (2, 2)
+
+
+def test_reachable_wall_minimum_is_refined_along_polyline():
+    """The reachable ring minimum moves off-node while a lower shadowed node loses."""
+    configure_dtypes()
+    rg = jnp.linspace(0.0, 4.0, 9)
+    zg = jnp.linspace(-1.0, 1.0, 7)
+    rr, zz = jnp.meshgrid(rg, zg)
+    psi = (rr - 2.25) ** 2 + zz**2 + 1.0
+    wall_r = jnp.asarray([0.0, 1.0, 2.0, 3.0, 4.0, 0.0])
+    wall_z = jnp.zeros_like(wall_r)
+    wall_psi = (wall_r - 2.25) ** 2 + 1.0
+    wall_psi = wall_psi.at[4].set(0.1)
+    reachable = jnp.asarray([False, True, True, True, False, False])
+
+    refined = cb._reachable_wall_limiter_point(
+        psi,
+        rg,
+        zg,
+        wall_r,
+        wall_z,
+        wall_psi,
+        reachable,
+        jnp.asarray(0.0),
+        exact_nodes=True,
+    )
+
+    assert int(refined["node_index"]) == 2
+    assert float(refined["node_arc"]) == pytest.approx(2.0)
+    assert float(refined["shift"]) == pytest.approx(0.25)
+    assert float(refined["arc"]) == pytest.approx(2.25)
+    assert float(refined["r"]) == pytest.approx(2.25)
+    assert float(refined["z"]) == pytest.approx(0.0)
+    assert float(refined["psi"]) == pytest.approx(1.0)
+    assert float(refined["distance"]) == pytest.approx(1.0)
+    assert bool(refined["flux_from_global_surface"])
+
+    node_only = cb._reachable_wall_limiter_point(
+        psi,
+        rg,
+        zg,
+        wall_r,
+        wall_z,
+        wall_psi,
+        reachable.at[1].set(False).at[3].set(False),
+        jnp.asarray(0.0),
+        exact_nodes=True,
+    )
+    assert float(node_only["shift"]) == 0.0
+    assert float(node_only["psi"]) == pytest.approx(1.0625)
+    assert not bool(node_only["flux_from_global_surface"])
+
+    compiled = jax.jit(
+        cb._reachable_wall_limiter_point, static_argnames=("exact_nodes",)
+    )(
+        psi,
+        rg,
+        zg,
+        wall_r,
+        wall_z,
+        wall_psi,
+        reachable,
+        jnp.asarray(0.0),
+        exact_nodes=True,
+    )
+    np.testing.assert_allclose(compiled["r"], refined["r"], rtol=0.0, atol=0.0)
+    batched = jax.vmap(
+        lambda field, exact_flux, mask, axis_flux: cb._reachable_wall_limiter_point(
+            field,
+            rg,
+            zg,
+            wall_r,
+            wall_z,
+            exact_flux,
+            mask,
+            axis_flux,
+            exact_nodes=True,
+        )
+    )(
+        jnp.stack((psi, psi + 1.0)),
+        jnp.stack((wall_psi, wall_psi + 1.0)),
+        jnp.stack((reachable, reachable)),
+        jnp.asarray([0.0, 1.0]),
+    )
+    np.testing.assert_allclose(batched["r"], [2.25, 2.25], rtol=0.0, atol=0.0)
 
 
 def test_module_is_contour_free():
@@ -578,8 +668,8 @@ def test_continuous_through_marginal_transition():
     assert clf_step > 3.0 * conn_step
 
 
-def test_forward_topology_margin_matches_boolean_transition_and_terminal_gate():
-    """The operator publishes a signed margin without weakening its class gate."""
+def test_forward_topology_margin_tracks_reachable_wall_and_terminal_gate():
+    """The margin excludes wall flux that the pre-saddle core cannot reach."""
     configure_dtypes()
     amplitudes = np.linspace(0.0, 0.9, 19)
     growing_psi, growing_rg, growing_zg, _axis, lr, lz, growing_inside = _sweep_field(
@@ -619,8 +709,8 @@ def test_forward_topology_margin_matches_boolean_transition_and_terminal_gate():
         reads.append((float(shift), state, topology))
 
     classifications = np.asarray([bool(row[2].diverted) for row in reads])
-    disagreement_count = _class_disagreement_count(reads)
-    assert disagreement_count == 0
+    margins = np.asarray([float(row[2].class_margin) for row in reads])
+    assert np.all(np.isposinf(margins))
 
     negative_operator, _negative_lattice = _forward_operator(
         rg,
@@ -638,43 +728,22 @@ def test_forward_topology_margin_matches_boolean_transition_and_terminal_gate():
     negative_classifications = np.asarray(
         [bool(row[2].diverted) for row in negative_reads]
     )
-    negative_disagreement_count = _class_disagreement_count(negative_reads)
-    assert negative_disagreement_count == 0
+    negative_margins = np.asarray(
+        [float(row[2].class_margin) for row in negative_reads]
+    )
+    assert np.all(np.isposinf(negative_margins))
     assert np.array_equal(negative_classifications, classifications)
 
+    # The whole-polygon landmark read still crosses when unreachable wall flux is
+    # translated through the saddle.  The connectivity margin must not follow it.
     flips = np.flatnonzero(classifications[1:] != classifications[:-1])
     assert flips.size == 1
     lower = reads[int(flips[0])]
     upper = reads[int(flips[0]) + 1]
     assert bool(lower[2].diverted)
     assert not bool(upper[2].diverted)
-    assert float(lower[2].class_margin) >= 0.0
-    assert float(upper[2].class_margin) < 0.0
-
-    bracket = [float(lower[0]), float(upper[0])]
-    bracket_topology = [bool(lower[2].diverted), bool(upper[2].diverted)]
-    bracket_margin = [
-        float(lower[2].class_margin),
-        float(upper[2].class_margin),
-    ]
-    for _ in range(14):
-        midpoint = 0.5 * (bracket[0] + bracket[1])
-        _masks, topology = operator.read(_forward_state(psi, wall_psi + midpoint))
-        midpoint_margin = float(topology.class_margin)
-        midpoint_class = bool(topology.diverted)
-        assert midpoint_class == (midpoint_margin >= 0.0)
-        if midpoint_class:
-            bracket[0] = midpoint
-            bracket_topology[0] = midpoint_class
-            bracket_margin[0] = midpoint_margin
-        else:
-            bracket[1] = midpoint
-            bracket_topology[1] = midpoint_class
-            bracket_margin[1] = midpoint_margin
-    crossing = 0.5 * (bracket[0] + bracket[1])
-    assert bracket[1] - bracket[0] < 1.0e-7
-    assert bracket_topology == [True, False]
-    assert bracket_margin[0] >= 0.0 > bracket_margin[1]
+    assert np.isposinf(float(lower[2].class_margin))
+    assert np.isposinf(float(upper[2].class_margin))
 
     diverted_state = reads[0][1]
     _diverted_masks, diverted = operator.read(diverted_state)
@@ -712,8 +781,18 @@ def test_forward_topology_margin_matches_boolean_transition_and_terminal_gate():
     assert xpoint_diagnostics["class_margin_from_operands"] == float(
         limited_topology.class_margin
     )
+    assert xpoint_diagnostics["wall_operand"]["normalized_flux"] is None
+    assert (
+        xpoint_diagnostics["wall_operand"]["normalized_flux_nonfinite"]
+        == "positive_infinity"
+    )
     assert xpoint_diagnostics["connectivity_admission"]["candidates"]
-    json.dumps(xpoint_diagnostics, allow_nan=False)
+    serializable_diagnostics = {
+        **xpoint_diagnostics,
+        "class_margin_from_operands": None,
+        "class_margin_from_operands_nonfinite": "positive_infinity",
+    }
+    json.dumps(serializable_diagnostics, allow_nan=False)
     equilibrium = SimpleNamespace(
         flux=limited[1],
         fixed_point=SimpleNamespace(residual=jnp.asarray(0.0)),
@@ -739,12 +818,9 @@ def test_forward_topology_margin_matches_boolean_transition_and_terminal_gate():
         f"growing_classified={len(growing_reads)}, "
         f"growing_disagreement_count={growing_disagreement_count}, "
         f"persistent_classified={len(reads)}, "
-        f"persistent_disagreement_count={disagreement_count}, "
+        "persistent_reachable_wall_operand=false, "
         f"negative_classified={len(negative_reads)}, "
-        f"negative_disagreement_count={negative_disagreement_count}, "
-        f"crossing_wall_flux_shift={crossing:.12f}, "
-        f"bracket=({bracket[0]:.12f}, diverted, {bracket_margin[0]:.9g}; "
-        f"{bracket[1]:.12f}, limited, {bracket_margin[1]:.9g}), "
+        "negative_reachable_wall_operand=false, "
         "unreachable_wall_vertex_ignored=true, terminal_wrong_class_rejected=true"
     )
 

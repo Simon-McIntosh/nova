@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T15:07:32",
+  "updated": "2026-08-25T16:06:57",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -35654,9 +35654,103 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T134650393524-wall-reachability-topology-grid",
+        "plan": "primary-xpoint-evidence",
+        "section": "\u00a72",
+        "node": "wall-reachability-topology-grid",
+        "node_definition": {
+          "done_when": "THE REACHABILITY DEFINITION IS THE SPECIFICATION, take it literally. The reachable wall is the wall touched by the FIRST PUBLIC REGION measured outward from the O-point: the cells reachable from the magnetic axis WITHOUT CROSSING A SADDLE. Wall reachable in that region is a genuine limiting candidate; wall reachable only by crossing a saddle sits in a private region and is shadowed. Derive it topologically from connectivity, never from a height band or a vertical extent, using the component-labelling kernel landed at commit 7a7bd365 where the private mask is a positive component label unequal to the axis component label. Each panel draws: the machine wall polygon, the binding contour, the O-point-connected public region and the private regions in distinguishable shading, wall segments coloured reachable against shadowed, and markers for the selected X-point and the wall extremum. USE POST-REPAIR SELECTION from commit 5acfe07b - the earlier figure showed two panels whose selected X-point sat outside the vessel near |Z| 1.8 and six more at 1.90 to 1.94, so reproducing it would republish the defect. Span machines AND topologies rather than one machine repeated: MAST has twelve frozen diverted arms, DIII-D has ten banked score-blind terminals that all classify limited, iter_md carries a machine description, and a double-null parity fixture with two finite X candidates exists in the topology tests. Cover at least two real machines with visibly different wall shapes and at least a limited, a diverted and a double-null case, stating in the caption which panel is which and which machine. Bank under docs/figures/primary-xpoint-evidence/ with a project-absolute src of the form /nova/figures/... since a relative src 404s in the docs SPA. Bank the per-panel numbers as JSON beside it - reachable and shadowed wall segment counts, public region area, private region count and area, selected X and wall coordinates - so the figure is checkable rather than decorative. If a machine or topology cannot be sourced, say which and why rather than padding the grid with near-duplicates.",
+          "estimated_hours": 4.0,
+          "goal": "Replace the stale pre-repair adjudication figure with a machine-and-topology grid that shows, per panel, which wall is REACHABLE from the O-point without crossing a saddle, so the shadow decision can be read off the geometry instead of inferred from a height band.",
+          "id": "wall-reachability-topology-grid",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/wall-reachability-topology-grid.md",
+          "plan": "primary-xpoint-evidence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/wall_reachability_grid.py",
+            "docs/figures/primary-xpoint-evidence/wall-reachability-topology-grid.png",
+            "docs/figures/primary-xpoint-evidence/wall-reachability-topology-grid.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "diiid-poloidal-figures",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T13:47:00Z",
+        "completed_at": "2026-08-25T14:05:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1133,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1133,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "84aa1a79c070e75eb83545aab522e03cc1914ef6",
+        "commits": [
+          "04a4a6caaa9fbd536395724131f5acc4fc1e3adf"
+        ],
+        "changed_lines": {
+          "added": 800,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/wall-reachability-topology-grid.md",
+        "scope_changed": false,
+        "session_id": "01a0392c-9e90-7191-954b-a38a1f8da521",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6917632,
+            "cached_input_tokens_cumulative": 6917632,
+            "input_tokens": 7089927,
+            "input_tokens_cumulative": 7089927,
+            "output_tokens": 32691,
+            "output_tokens_cumulative": 32691,
+            "reasoning_output_tokens": 8045,
+            "reasoning_output_tokens_cumulative": 8045
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 860
+    "_version": 861
   }
 }

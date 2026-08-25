@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T12:00:53",
+  "updated": "2026-08-25T12:21:28",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -16,7 +16,10 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a03283-ecee-7252-9157-42dba56eddc2",
-        "created": "2026-08-24"
+        "created": "2026-08-24",
+        "sessions": {
+          "gpt-5.6-sol": "01a0385f-dcef-7911-9f42-782a70d66e2e"
+        }
       },
       {
         "id": "assertion-sweep",
@@ -34451,9 +34454,95 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T100314047850-recovery-regression-attribution",
+        "plan": "discrete-operator-analytic-error",
+        "section": "\u00a75",
+        "node": "recovery-regression-attribution",
+        "node_definition": {
+          "done_when": "Your sandbox is READ-ONLY apart from the manifest, so put the whole finding in the manifest including any table. Name the cause of each of the five failures, or state precisely which evidence is missing and why. They are: converged false for the coarse and fine limited-root cases, achieved_class [0,1] against expected [0,0] in the vmap receipt case, receipt.passed [True,True,False] in the diverted near-basin perturbation ladder, and measured-versus-banked composition differing in test_banked_diverted_state_is_a_machine_precision_pinned_root. DO NOT BISECT and do not hunt blame across history. Instead, for each banked artifact the test reads, run git log on that exact path and on the test file itself, and report whether the artifact or the expectation moved most recently and in which commit - a banked artifact updated without its test, or a test updated without its artifact, is the likely mechanism and is visible from two git log invocations. For the composition failure, print the measured and banked compositions side by side with the differing fields and their magnitudes so the delta is characterised rather than merely reported. PRESERVE THE BANKED RESULT: regenerate, re-bank or overwrite nothing, because that erases the evidence of whatever moved. Change no source and no test. State clearly whether the machine-precision pinned root ITSELF is in doubt or only its comparison, since this sprint has recorded conclusions resting on that root. Group the five if they share one cause. One measured hint from a sibling H200 node worth testing against: under seed perturbation the LIMITED lane converged 1/4 and 1/16 at 1e-4 to 5e-4 and 0/4 and 0/16 at 5e-4 to 1e-3 while DIVERTED held 4/4 and 16/16, so a limited-root convergence failure may be genuine sensitivity rather than a code regression - check whether the failing coarse and fine cases sit at perturbation scales where that lane is known fragile.",
+          "estimated_hours": 3.0,
+          "goal": "Attribute the five surviving tests/test_two_class_recovery.py failures to a named cause without repairing them and without re-banking anything, since they persisted unchanged through the topology container repair and are therefore a second independent regression keeping the primary branch red.",
+          "id": "recovery-regression-attribution",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/recovery-regression-attribution.md",
+          "plan": "discrete-operator-analytic-error",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/state/nova/manifests/recovery-regression-attribution.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "analytic-rescore",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-25T10:03:21Z",
+        "completed_at": "2026-08-25T10:21:09Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1068,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1068,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "c8db1abafec95a53fd52ac792aeb42ffd6029066",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/recovery-regression-attribution.md",
+        "scope_changed": false,
+        "session_id": "01a0385f-dcef-7911-9f42-782a70d66e2e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 217600,
+            "cached_input_tokens_cumulative": 217600,
+            "input_tokens": 333834,
+            "input_tokens_cumulative": 333834,
+            "output_tokens": 3832,
+            "output_tokens_cumulative": 3832,
+            "reasoning_output_tokens": 466,
+            "reasoning_output_tokens_cumulative": 466
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 846
+    "_version": 848
   }
 }

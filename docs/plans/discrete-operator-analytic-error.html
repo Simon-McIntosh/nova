@@ -26,7 +26,7 @@
 <meta name="plan-commits" content="ae723e28,3dc5155f,f2665b5d,815ca8fe,497b0372">
 <meta name="plan-artifacts" content="benchmarks/analytic_operator_ladder.py,benchmarks/diverted_basin_probe.py,benchmarks/contraction_discriminator.py,docs/figures/discrete-operator-analytic-error/operator-refinement-ladder.json,docs/figures/discrete-operator-analytic-error/diverted-basin-probe.json,docs/figures/discrete-operator-analytic-error/contraction-discriminator.json,docs/evidence/archive/discrete-operator-analytic-error-landed.html">
 <meta name="plan-impl" content="0.875">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 </head>
 <body>
   <main class="plan-doc">
@@ -330,6 +330,9 @@
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260825T093634640882-primary-branch-green-check" data-who="integration-verify" data-when="2026-08-25T09:49:33Z">
     <div class="r-comment-body"><p>Verdict delivered and it is split. The container regression CLEARS: test_equilibrium_forward_solve.py goes 26 passed 2 failed to 28 passed 0 failed, and test_transport_coupled_window.py goes 11 passed 1 failed to 12 passed 0 failed. The five recovery failures SURVIVE unchanged at 0 passed 5 failed, all AssertionError rather than the repaired JAX container TypeError - converged still false for coarse and fine limited roots, achieved_class still [0,1] against [0,0], receipt.passed still [True,True,False], and measured composition still differing from the banked receipt. So a SECOND INDEPENDENT REGRESSION exists and the three-file primary-branch gate remains RED. Measured from a clean detached worktree at c7016004; it noted origin/main advancing to 1efe00ea mid-run and verified that commit touches only plans, evidence, crew state and a manifest, with no source, test, config, lock or banked artifact differing.</p></div>
 </div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260825T100314047850-recovery-regression-attribution" data-who="analytic-rescore" data-when="2026-08-25T10:21:09Z">
+    <div class="r-comment-body"><p>Four of five attributed and the sprint-critical question answered: the machine-precision pinned root is NOT in doubt - map is among five identical top-level receipt items, class 1/1, topology consistent, converged in one application, relative residual 1.58405e-16, absolute difference 4.44089e-16 Wb. Only composition drifted, exposing external_field.sha256. THE RED BRANCH IS NOT A SECOND PRODUCTION REGRESSION. The vmap [0,1]-versus-[0,0] case is a test updated without its artifact in d3093912, where the diverted branch now ACHIEVES diverted class - an improvement the test scores as failure. The 0.05 ladder demands an amplitude no banked receipt established, against a plan conclusion of only 0.01, added without a banked perturbation receipt. The coarse and fine limited failures are cold-start basin misses at 1.15254 and 1.13853 full root spans from their banked roots within a fixed ten-step budget, with seed byte-equality PASSING so not a wrong-file or regenerated-bank fault. Method note: per-path git log identified d3093912 as the expectation-side move postdating the banks. It also REJECTED the H200 perturbation hypothesis I supplied, showing those cold seeds sit three orders of magnitude outside the 1e-4 to 1e-3 probe range, so the hint supports fragility in direction only and proves no regression. Composition field enumeration was fenced out to a writable-cache node after my dispatch gave it a read-only tier that refuses the cache writes qualify needs.</p></div>
+</div>
 </section>
 </main>
 </body>
@@ -403,15 +406,42 @@
     container gate rather than duplicating it, and adds one focused test for the transformed
     deferred-margin path.</p>
 
-    <p><strong>A second failure set that is not yet attributed.</strong> All five
-    <code>test_two_class_recovery.py</code> assertions fail on different grounds —
-    <code>converged</code> False, <code>achieved_class</code> [0,1] against [0,0],
-    <code>receipt.passed</code> [True, True, False], and measured-versus-banked composition differing.
-    These are banked-result regressions rather than the container exception, and one of them guards the
-    machine-precision pinned diverted root recorded above. Whether they clear under the container repair
-    or survive it decides whether a second independent regression exists, so the repair node reports that
-    verdict without touching them. No bisect: the files are claimed by a live repair, so the rule is to
-    surface and continue rather than hunt blame.</p>
+    <p><strong>ATTRIBUTED 2026-08-25 by node <code>recovery-regression-attribution</code>, and the
+    framing I gave it was wrong: the red branch is NOT a second production regression.</strong> Manifest
+    <code>docs/state/nova/manifests/recovery-regression-attribution.md</code>. Nothing in the five
+    failures indicts production code.</p>
+
+    <table>
+      <caption>The five surviving recovery failures, attributed</caption>
+      <thead><tr><th scope="col">Failure</th><th scope="col">Cause</th><th scope="col">Class</th></tr></thead>
+      <tbody>
+        <tr><td>vmap <code>achieved_class</code> [0,1] against [0,0]</td><td><strong>Test updated without its artifact</strong> in <code>d3093912</code> — the diverted branch now <em>achieves</em> diverted class</td><td>Stale expectation scoring an <em>improvement</em> as failure</td></tr>
+        <tr><td>Ladder <code>passed</code> [True, True, False]</td><td>Demands relative amplitude <strong>0.05</strong> pass; §4's banked conclusion is only that the basin is <strong>&ge; 0.01</strong> wide. Added with no banked perturbation receipt</td><td>Over-wide, unbanked expectation</td></tr>
+        <tr><td>Coarse limited <code>converged == false</code></td><td>Cold start <strong>1.15254 full root spans</strong> from the banked root, terminating at residual 1.29980506 inside a fixed ten-step budget</td><td>Basin sensitivity; seed byte-equality <em>passes</em></td></tr>
+        <tr><td>Fine limited <code>converged == false</code></td><td>Same, at <strong>1.13853 root spans</strong>, residual 1.30949372 — resolution does not cure it</td><td>Same, grouped</td></tr>
+        <tr><td>Measured receipt differs from banked</td><td>Only <code>composition</code> of six top-level items differs, exposing <code>external_field.sha256</code></td><td>Comparison drift over a sound root</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The pinned root is not in doubt, which is what several conclusions here rest on.</strong>
+    Because <code>map</code> is among the five <em>identical</em> top-level receipt items, the fresh
+    measurement still carries requested/achieved class 1/1, topology consistency, convergence in one
+    application, relative residual <strong>1.58405e&minus;16</strong> and absolute difference
+    4.44089e&minus;16 Wb. Only the composition comparison moved, and enumerating its fields is fenced to
+    a writable-cache node.</p>
+
+    <p><strong>Two method points worth keeping.</strong> Per-path <code>git log</code> — not a bisect —
+    identified <code>d3093912</code> as the expectation-side move postdating the banks, which is what
+    separates "the artifact moved" from "the expectation moved". And the node <em>rejected the
+    hypothesis I supplied</em>: I offered the sibling H200 finding that the limited lane is fragile under
+    1e&minus;4 to 1e&minus;3 perturbation, and it showed these cold seeds sit three orders of magnitude
+    outside that range, so the hint supports fragility in direction only and proves no regression. A
+    worker that adopted an orchestrator's guess would have produced a confident wrong attribution.</p>
+
+    <p><strong>What this leaves.</strong> Two expectation reviews, not repairs — the vmap [0,0] case and
+    the 0.05 ladder assert things no bank establishes. One robustness decision on whether a ten-step
+    budget should reach a cold start over a full root span. Neither should be conflated with the pinned
+    root receipt.</p>
 
     <p><strong>What this says about the earlier repair, stated plainly.</strong> The lazy-axes commit was
     itself the fix for a regression I merged, where a diagnostic narrowed a production contract. Gating

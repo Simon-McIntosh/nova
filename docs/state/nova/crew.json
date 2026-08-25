@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T21:33:16",
+  "updated": "2026-08-25T22:16:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -36785,9 +36785,104 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T193808155820-dual-sweep-device-lock",
+        "plan": "primary-xpoint-evidence",
+        "section": "\u00a72",
+        "node": "dual-sweep-device-lock",
+        "node_definition": {
+          "done_when": "BENCHMARK ON THE RESERVED CARD, not a login node and not CPU: partition betelgeuse with --reservation=gpu_0003_grpA, which has NO time limit so size --time to the work in hours, export TMPDIR=/tmp on the compute node, and run at float64. Measure the null census single-family against dual_sweep=True from commit 46e5d9b8 at grid sizes 33x33 and 129x129, at batch widths 1, 4 and 16 under vmap, quoting warmed execute-only median and IQR per configuration with compile reported separately - the prior CPU figures of 2.727/2.699 ms at 33x33 and 18.832/75.760 ms at 129x129 were taken under noisy shared load and decide nothing. EXCLUDE THE ITER EQDSK ENTIRELY: iterhybrid_cocos17.eqdsk is a fixed-boundary scenario field carrying no divertor saddle and is not a valid topology test case - do not use it for correctness or cost, and state that exclusion in the manifest. Correctness spot-check on device with the twelve frozen MAST arms instead: the dual sweep must return the same merged resolved candidates as the single family on every arm, zero disagreements, since real interior saddles must not be perturbed by the guard. THE LOCK RULE IS PREREGISTERED, apply it mechanically. Clause A: dual median at most 2.0x single median at both 33x33 and 129x129 on device. Clause B: absolute dual median at 33x33 at most 1.0 ms per slice. Clause C: with the default flipped to dual_sweep=True, these files pass with per-file counts quoted - tests/test_stencil_nulls.py, tests/test_stencil_nulls_dual_sweep.py, tests/test_connectivity_boundary.py, tests/test_flux_surface_connectivity.py, tests/test_jax_topology.py, tests/test_topology_boundary.py. If A, B and C all hold, commit the flipped default. If any clause fails, do not flip, quote the failing clause with its measured value against its bound, and leave the opt-in unchanged. Bank the measured numbers as JSON either way.",
+          "estimated_hours": 3.0,
+          "goal": "Benchmark the dual-sweep null census on the reserved H200 against the single family, applying the preregistered three-clause lock rule below mechanically so the production default follows from the measured metrics.",
+          "id": "dual-sweep-device-lock",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/dual-sweep-device-lock.md",
+          "plan": "primary-xpoint-evidence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/stencil_nulls.py",
+            "tests/test_stencil_nulls_dual_sweep.py",
+            "benchmarks/null_census_device_benchmark.py",
+            "docs/figures/primary-xpoint-evidence/dual-sweep-device-lock.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "biot-bench",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T19:39:40Z",
+        "completed_at": "2026-08-25T20:15:55Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2175,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2175,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "2df9a6959abaafbe7272f794bb7e57159a11b20e",
+        "commits": [
+          "6c5e2944"
+        ],
+        "changed_lines": {
+          "added": 1361,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/dual-sweep-device-lock.md",
+        "scope_changed": false,
+        "session_id": "01a03a6f-8fb7-7831-974c-fe8ee24b49db",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9865472,
+            "cached_input_tokens_cumulative": 9865472,
+            "input_tokens": 10057309,
+            "input_tokens_cumulative": 10057309,
+            "output_tokens": 26300,
+            "output_tokens_cumulative": 26300,
+            "reasoning_output_tokens": 6504,
+            "reasoning_output_tokens_cumulative": 6504
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 875
+    "_version": 876
   }
 }

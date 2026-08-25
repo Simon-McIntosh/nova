@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T09:30:32",
+  "updated": "2026-08-25T09:34:41",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -33216,9 +33216,84 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T071741696962-diverted-branch-basin-probe",
+        "plan": "discrete-operator-analytic-error",
+        "section": "\u00a74",
+        "node": "diverted-branch-basin-probe",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "basin-probe",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T07:17:57Z",
+        "completed_at": "2026-08-25T07:28:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 634,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 634,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "fd3d6a24784cf3efd916f625c9d2cc9e393d3f52",
+        "commits": [
+          "815ca8fe"
+        ],
+        "changed_lines": {
+          "added": 1900,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T071741696962-diverted-branch-basin-probe/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a037c8-7185-70a0-b1ed-737ccf33c124",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5022208,
+            "cached_input_tokens_cumulative": 5022208,
+            "input_tokens": 5184734,
+            "input_tokens_cumulative": 5184734,
+            "output_tokens": 16598,
+            "output_tokens_cumulative": 16598,
+            "reasoning_output_tokens": 2808,
+            "reasoning_output_tokens_cumulative": 2808
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 828
+    "_version": 829
   }
 }

@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-commits" content="ae723e28,3dc5155f">
-<meta name="plan-artifacts" content="benchmarks/analytic_operator_ladder.py,docs/figures/discrete-operator-analytic-error/operator-refinement-ladder.json,docs/evidence/archive/discrete-operator-analytic-error-landed.html">
-<meta name="plan-impl" content="0.667">
-<meta name="plan-version" content="2">
+<meta name="plan-commits" content="ae723e28,3dc5155f,f2665b5d,815ca8fe">
+<meta name="plan-artifacts" content="benchmarks/analytic_operator_ladder.py,benchmarks/diverted_basin_probe.py,docs/figures/discrete-operator-analytic-error/operator-refinement-ladder.json,docs/figures/discrete-operator-analytic-error/diverted-basin-probe.json,docs/evidence/archive/discrete-operator-analytic-error-landed.html">
+<meta name="plan-impl" content="0.75">
+<meta name="plan-version" content="3">
 </head>
 <body>
   <main class="plan-doc">
@@ -99,109 +99,57 @@
       (commit <code>ae723e28</code>).</p>
     </section>
 
-    <h2 id="s4">§4 — The map admits the solution the solve does not find</h2>
+    <section id="s4" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-25 — multiplicity with branch-dependent contraction</span>
+        <h2>§4 — The map admits the solution the solve does not find</h2></header>
+      <p class="landed-summary">Verdict <code>multiplicity_with_branch_dependent_contraction</code>,
+      criterion <strong>excluded</strong>. Label terminals reproduce the bank at absolute delta
+      <strong>0.0</strong>. On a declared ladder of 1e−6 → 1e−2 of label axis-to-boundary span,
+      <strong>five of six labels hold the diverted branch with decreasing residual at every rung</strong>
+      — largest qualifying radius is the largest tested, so the basin is ≥1e−2 wide and its edge was
+      not found. <strong>21989/55 holds none</strong>, terminating limited and topology-inconsistent at
+      the label and every perturbation — and it is <em>not</em> a scalar-residual outlier: its residual
+      decreases like the holders' and it differs only in the class it lands in, so the defector must be
+      explained structurally. <strong>The criterion is excluded:</strong> all six labelled-state
+      criterion values sit at 6.34e−3 to 9.74e−3 against a 1e−8 threshold, so zero of six is satisfied
+      at the physical state — the criterion accepts nothing wrongly, the label simply is not a discrete
+      root. Artifact
+      <code>docs/figures/discrete-operator-analytic-error/diverted-basin-probe.json</code> (commit
+      <code>815ca8fe</code>).</p>
+    </section>
 
-    <p><strong>§2 closed both branches it posed, and what survives is a third thing it did not.</strong>
-    The operator applied once to the closed form returns machine precision, so the map has the analytic
-    solution as a fixed point. Every posed term matches the closed form to rounding, so the case is not
-    mis-fed. Yet the solve does not arrive there: where it was attempted on this ladder it stalled
-    unqualified at relative residual <strong>1.255</strong> and <strong>1.300</strong> against a 1e−10
-    criterion, and where it does converge — the banked roots — it lands 19 to 38 per cent away under a
-    common gauge. <strong>So the residue is not in the operator, not in the inputs, but in which fixed
-    point the solver reaches.</strong></p>
+    <h2 id="s5">§5 — Why the basin contracts to a floor rather than to a root</h2>
 
-    <p>That is a materially better position than either branch of §2, and it should be said plainly
-    rather than buried: a map that admits the right answer and a solver that misses it is a bounded,
-    local problem, whereas an inconsistent operator would have invalidated every forward result in the
-    repository. It also explains two results on adjacent lanes that were otherwise loose. The plateau
-    lane's four documented input substitutions converged on <em>nothing</em> — no wall, wiring, profile
-    or discretisation candidate accounts for the residual — which is exactly what one expects if no
-    input is wrong and the solve is landing on the wrong root. And the frame that once reached
-    2.9e−16 no longer reproduces, with 32 production paths differing and attribution declined, which
-    is the signature of basin selection rather than of a named regression.</p>
+    <p><strong>§4 narrowed the question to one shape, and it is narrower than multiplicity alone.</strong>
+    There <em>is</em> a diverted attractor for five of six references, at least 1e−2 wide in label span,
+    and the residual decreases monotonically toward it from every perturbation tested. It simply does
+    not decrease to zero: it stalls between 4.585e−3 and 7.425e−3. So this is not a repulsive root, not
+    an absent root, and not a criterion accepting the wrong thing. It is an attractor whose fixed point
+    is not a solution of the residual we are scoring.</p>
 
-    <p>Three mechanisms produce a solver that misses a fixed point its map admits, and they are
-    distinguishable. The discrete problem may have <em>multiple</em> fixed points, with the seed
-    selecting a different one — the dual-basin work on this repository establishes that more than one
-    branch exists. The iteration may be unable to reach it even from nearby, which is a contraction
-    property of the map about that root rather than a property of the root. Or the convergence
-    criterion may be satisfied away from it, which the plateau lane's sup-norm-over-global-peak
-    residual makes plausible. The first is settled by seeding <em>at</em> the analytic solution and
-    asking whether the iteration stays; the second by perturbing it and asking whether it returns; the
-    third by evaluating the criterion at the analytic solution directly.</p>
+    <p><strong>The comparison target is a number, not an adjective.</strong> imas-efit's pure branches
+    contracted geometrically at <strong>&rho; = 0.33</strong> to fixed points 3.1e−4 apart. If nova's
+    pure diverted branch has a fitted contraction ratio near unity, the map is barely contracting and
+    the stall is a rate problem. If it contracts at a healthy rate to a nonzero limit, the map is
+    contracting correctly onto the wrong object — which would mean the residual being iterated and the
+    residual being scored differ, exactly the fault §19 of the coefficient plan found in a different
+    place, where a Jacobian differentiated the projected residual while the exact one was scored.</p>
 
-    <p><strong>Banked evidence already bears on the first mechanism, and it is asymmetric between the
-    two branches — recorded 2026-08-25 in answer to a question from the dual-branch lane.</strong>
-    Seeding at the diverted EFIT labels is not the same experiment as seeding at the analytic solution,
-    and the plateau lane already ran it. Of the six frozen MAST references, <strong>five hold the
-    diverted branch</strong> — <code>achieved_branch = diverted</code>,
-    <code>topology_consistent = true</code> — at terminal residuals of 4.585e-3, 6.624e-3, 5.168e-3,
-    7.425e-3 and 5.049e-3, bounded non-convergent. <strong>One does not:</strong> 21989/55 ends
-    <code>limited</code> with <code>topology_consistent = false</code> at 5.024e-3, so the branch is
-    not uniformly held even from a seed that starts on it.</p>
+    <p><strong>And 21989/55 is the cheapest structural discriminator available.</strong> One reference
+    out of six leaves the branch from every seed while its residual falls like the others'. Whatever
+    distinguishes it is a property of that configuration rather than of the iteration, and a single
+    clean defector against five clean holders is a better experiment than any amount of averaged
+    behaviour. It should be characterised before any mechanism is proposed.</p>
 
-    <p><strong>The two branches are therefore not symmetric in the evidence, and a design that assumes
-    they are would be building on sand.</strong> A <em>limited</em> root has a machine-precision
-    demonstration: §6 of the plateau plan reached <strong>2.409e-16</strong> from the production moment
-    seed once the class refusal was relaxed. A <em>diverted</em> root has none — the best diverted
-    evidence anywhere is bounded non-convergence around <strong>5e-3</strong>. So the existence of a
-    discrete diverted root is still open, while the limited one is settled. What the label-seeded
-    result does establish is that the diverted neighbourhood is mostly not repulsive: the iteration
-    stays there and fails to converge, which is the signature of a contraction failure on that branch
-    rather than of the root's absence. The single defector is the sharpest available discriminator and
-    should be treated as such rather than averaged away.</p>
-
-    <p><strong>Prior art, cited rather than re-derived: imas-efit met this exact symptom and named
-    the mechanism.</strong> A prior-art map of that repository's limited-versus-diverted work
-    (<code>~/.config/reckon/crew/reports/efit-dual-branch-map.md</code>) reports that its retrospective
-    found the diverted majority getting <em>stuck in the limiter basin</em> — the same shape as our
-    limited terminals — and that a <strong>continuous, fixed-direction separatrix-boundary drag</strong>
-    added to the natural iteration let them escape at a single solve. The measured effect is large:
-    one pulse dropped from 57 solves over 15 slices to 17 solves and 24.9 s once transient marginality
-    stopped arming a two-branch fork. So multiplicity with a limiter-basin attractor is not a
-    speculative candidate here; it is the account that a mature implementation of the same problem
-    converged on.</p>
-
-    <p><strong>The escape mechanism they used is explicitly OUT OF SCOPE here, by owner directive
-    2026-08-25: do not implement a separatrix drag.</strong> The citation above is evidence for the
-    limiter-basin <em>account</em> and nothing more — it is not a licence to build the thing that
-    escaped it. Two standing constraints on this plan and anything downstream of it: <strong>ideas
-    only from imas-efit, zero code ports</strong>, with every mechanism re-derived in Nova's traced
-    idiom; and no separatrix drag, in any form, however continuous. A node that proposes one is
-    misreading this section. That is independently consistent with what the prior-art map itself
-    records — the drag is specific to their Picard boundary normalisation and does not transplant into
-    a Newton residual — but the directive stands on its own and does not depend on that.</p>
-
-    <p><strong>And the comparison sharpens the question, because branch purity is already present
-    here.</strong> Nova's pinned route threads <code>requested_class</code> into
-    <code>operator.read</code> and <code>cell_current_moments</code> inside the flux map and carries no
-    step-refusing predicate, which is imas-efit's forced-stream construction rather than its mixed one.
-    So purity is not the missing ingredient. What differs is contraction: <strong>their pure branches
-    contracted geometrically at &rho; = 0.33 to fixed points 3.1e-4 apart, while nova's pure diverted
-    branch is bounded non-convergent at ~5e-3 and does not contract at all.</strong> Same construction,
-    different contraction behaviour — so the question is not whether to pin the branch but why the map
-    fails to contract about this root, which is what the perturbation ladder in the done-when below is
-    for.</p>
-
-    <p>One further caution from the same map, about the other half of its architecture. Its branch
-    <em>selector</em> is a hard hierarchy of
-    convergence, realisation, acceptability, chi-squared separation, wall-breach and a categorical
-    temporal anchor: referentially pure, but not continuous in either branch flux map. So prior art
-    supplies an escape mechanism and a qualification discipline, and supplies no differentiable
-    selection rule at all.</p>
-
-    <p><strong>Done when</strong> the solver's failure to reach the admitted fixed point is attributed,
-    reporting: the terminal state and residual of a solve <em>seeded at</em> the analytic solution, so
-    whether the iteration stays at a fixed point it starts on is answered directly; the same from
-    seeds perturbed by a declared ladder of magnitudes, with the largest perturbation that still
-    returns quoted as a basin radius or its absence stated; the same seeded and perturbed measurement
-    repeated from the six diverted EFIT labels rather than only from the analytic solution, since those
-    are the seeds that start on the requested branch, reporting per reference whether the branch is
-    held and why 21989/55 alone leaves it; the convergence criterion evaluated at the
-    analytic solution itself, since a criterion that is not satisfied there cannot select it; and a
-    named verdict among multiplicity, contraction and criterion, or a statement of which were excluded
-    and by what figure. A verdict of multiplicity makes this a seeding problem and is the cheapest
-    outcome; a verdict of criterion makes it a scoring problem and is cheaper still.</p>
+    <p><strong>Done when</strong> the stall is attributed, reporting: the fitted contraction ratio of
+    the pure diverted iteration per reference with its uncertainty, quoted against
+    <strong>&rho; = 0.33</strong>, so a rate problem is separated from convergence onto a different
+    object; the residual actually iterated compared term by term against the residual scored, with any
+    difference named and its magnitude quoted, since a mismatch there would explain a nonzero limit
+    exactly; what structurally distinguishes 21989/55 from the five holders, quoted as configuration
+    properties rather than as convergence behaviour; and a named verdict. <strong>No separatrix drag is
+    to be implemented under this section or any other</strong> — the constraint in §4 binds here
+    too, as does ideas-only-from-imas-efit with zero code ports.</p>
 
     <h2 id="s3">§3 — What is downstream, and what may not be claimed until this closes</h2>
 
@@ -236,6 +184,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260825T0715-verdict" data-who="reckon-ship" data-when="2026-08-25T07:15:00Z">
     <div class="r-comment-body">operator-verdict-semantics landed - commit 3dc5155f, merged, gate PASSED, 2 tests added. THE RECEIPT DEFECT AN AUDIT FOUND IS REPAIRED. The aggregate cause was decided by a two-way branch at benchmarks/analytic_operator_ladder.py line 541 - cause = operator if converging and not at_roundoff else posing - with no third state, so a map error sitting at roundoff mechanically reported posing and contradicted the receipt's own term audit and this plan's conclusion. Three explicit conditions now: map admission at roundoff WITH clean posed terms is unresolved solver or root selection; any posed-term disagreement is posing; a cleanly posed map that does not admit the analytic fixed point is an operator consistency error. The regenerated receipt reads cause solver_or_root_selection_unresolved with machine-readable reason analytic_fixed_point_admitted_and_all_posed_terms_match, posed_terms_match true and operator_admits_analytic_fixed_point true. THE MEASUREMENT IS PROVEN UNTOUCHED, which is what made a semantics-only check acceptable: 395 numeric fields compared field by field against the banked receipt with ZERO differing. The receipt was regenerated from its banked measurement rows rather than from a new run, and both tests independently recompute the rung term audit, one asserting that a clean audit cannot carry a posing cause. AND A REPRODUCIBILITY OBLIGATION IS OUTSTANDING, RECORDED RATHER THAN GLOSSED. The four-rung named check was NOT re-run and could not be: my merge of the margin seam at 9cc2d0f3 added _structured_grid_axes and calls it UNCONDITIONALLY in ForwardFluxOperator.__post_init__, so every operator construction now requires a tensor-product grid where none was required before, and the analytic oracle carrier is not one. That is a production contract narrowed to serve a diagnostic, introduced on the merge side rather than by this node, and it means this plan's headline ladder result is banked but not currently re-runnable on main. Node connectivity-axes-lazy is dispatched to move the axes derivation to the point where a margin is actually read, and its gate is reproducing all four banked one-application residuals with zero differing numeric fields - so the fix is not done when the exception stops, only when the headline result is demonstrably reproducible again.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260825T0740-basin" data-who="reckon-ship" data-when="2026-08-25T07:40:00Z">
+    <div class="r-comment-body">diverted-branch-basin-probe landed - commit 815ca8fe, merged, gate PASSED. VERDICT multiplicity_with_branch_dependent_contraction, with the criterion EXCLUDED by measurement rather than argument. ANCHORED FIRST: label terminal residuals reproduce the bank exactly at absolute delta 0.0 - 4.585167307195374e-3, 6.623820952318247e-3, 5.167711618738154e-3, 7.425336057810689e-3, 5.024282863481057e-3 and 5.049061244966342e-3 - so the perturbation results rest on a reproduced baseline. THE BASIN IS WIDE AND ITS EDGE WAS NOT FOUND. The declared ladder is 1e-6, 1e-5, 1e-4, 1e-3 and 1e-2 of label axis-to-boundary span along normalised F(label) minus label. FIVE of six labels hold the diverted branch with DECREASING residual at every rung, so the largest qualifying radius is 1e-2 for 21978/35, 21983/35, 21985/51, 21986/46 and 22086/43 - the largest tested. The basin is therefore at least 1e-2 wide and this probe did not reach its boundary. 21989/55 HOLDS NONE: limited and topology-inconsistent at the label and at every perturbation. AND IT IS NOT A SCALAR-RESIDUAL OUTLIER, which is the sharpest fact the node produced. Its residual DECREASES at every rung exactly like the five holders; it differs only in the class it terminates in. So the defector cannot be found by looking at convergence behaviour and must be explained structurally, from configuration properties. One clean defector against five clean holders is a better experiment than any averaged behaviour, and section 5 now requires it characterised before any mechanism is proposed. THE CRITERION IS EXCLUDED, and the reasoning is worth keeping: all six labelled-state criterion values sit between 6.336406180817708e-3 and 9.741723601405872e-3 against a 1e-8 threshold, so ZERO of six is satisfied at the physical state. That does not mean the criterion wrongly accepts something - it means the label is not a discrete root, which the one-application residuals already implied. So a criterion satisfied in the wrong place is off the list. WHAT SURVIVES IS NARROWER THAN MULTIPLICITY: there IS a diverted attractor, the residual decreases monotonically toward it from every seed tested, and it stalls at 5e-3 rather than reaching zero. Not a repulsive root, not an absent root, not a criterion fault - an attractor whose fixed point is not a solution of the residual being scored. Section 5 carries the contraction ratio against the imas-efit rho of 0.33 and the iterated-versus-scored residual comparison, because a healthy contraction rate onto a nonzero limit would mean those two residuals differ, which is exactly the fault the coefficient plan's section 19 found in a different place.</div>
 </div>
 </section>
 </main>

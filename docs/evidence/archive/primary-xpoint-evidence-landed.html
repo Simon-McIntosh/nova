@@ -234,6 +234,10 @@
     vertical extent enter this at all</strong> — which is the point, since the band is what proved
     unsound.</p>
 
+    <p><strong style="color:#b00">SUPERSEDED by the final grid below</strong> — this earlier image
+    predates the limiter repair, the partition cutover and the rebaseline, and its titles are inverted
+    against achieved classes. Retained for inspection only.</p>
+
     <figure>
       <img src="/nova/figures/primary-xpoint-evidence/real-equilibria-reachability-grid.png"
            alt="Four panels of real banked equilibria: MAST 21983/35 limited, MAST 21989/55 diverted, DIII-D 179 limited, and an ITER hybrid. Each shows the wall coloured reachable or shadowed, the public axis-connected region, private components, and the selected X-point, with dashed displacement lines from the pre-containment out-of-vessel selections to the corrected in-vessel ones.">
@@ -435,15 +439,39 @@
     independent reconstruction corroborates post-containment detection and selection. The five
     disagreements are the <em>solve</em> landing in the limited basin where EFIT reconstructs diverted —
     the sprint's central solver-basin question restated on independent data, and not evidence for any
-    further topology-chain repair. The margin regeneration's authorised rebaseline already shows the
-    corrected margins pulling the mixed arm the right way: 21986/46 mixed re-solves to
-    <strong>diverted</strong> with <code>topology_consistent</code> true, moving agreement to 8/12.</p>
+    further topology-chain repair. A rebaseline sentence that stood here — 21986/46 mixed re-solving to diverted, agreement 8/12 —
+    is <strong>retracted</strong>: it was read through the receipt's legacy <code>achieved_class</code>
+    strings, while that arm's margin of &minus;0.155 is <em>limited</em> by the comparator. Margin-derived
+    MAST agreement is <strong>7/12</strong>.</p>
 
     <p><strong>A trap embedded for the next consumer, found the hard way.</strong> The node's first
     generation consumed <code>ForwardTopologyState.diverted</code>, falsely reported 10/12 agreement, and
     was rejected: that field is the legacy geometric label — on one route an echo of the
     <em>requested</em> class — not the achieved classification. The warning is embedded in the banked
     JSON, and the repair is an open followup requiring a consumer census first.</p>
+
+    <h2 id="final-grid">The final reachability grid</h2>
+
+    <p><strong>Node <code>reachability-grid-final</code>, commit <code>b476146f</code>, gate PASSED,
+    2026-08-25.</strong> Thirteen panels — the twelve frozen MAST arms and the banked DIII-D
+    physical-ring terminal, ITER excluded as a retired fixed-boundary field. This supersedes every
+    earlier reachability figure.</p>
+
+    <figure>
+      <img src="/nova/figures/primary-xpoint-evidence/reachability-grid-final.png"
+           alt="Thirteen panels, one per arm, each drawing the true binding contour distinct from the light pre-saddle public shading, the production private regions, wall segments coloured reachable or shadowed, the EFIT LCFS overlay, and markers for the selected saddle, the EFIT X-point and the finite reachable-wall limiter point, titled by the margin-derived achieved class beside the EFIT label with an agree or disagree tag.">
+      <figcaption>The production saddle-aware partition under
+      <code>s_star = min(u_wall, u_x)</code>, with the pre-saddle reachability region drawn as light
+      shading <em>distinct</em> from the binding contour — conflating them was the original defect —
+      the EFIT LCFS overlaid, and titles from margin-derived achieved classes, never the legacy leaf.
+      Aggregate: 2 reachable and 513 shadowed native wall segments, 17.59 m² public area, 19 private
+      regions totalling 2.14 m². MAST label agreement with EFIT: 7/12.</figcaption>
+    </figure>
+
+    <p><strong>The figure's one non-obvious feature is a known defect, not a rendering fault.</strong>
+    The sparse, offset public regions on 21985/51 trace to the banked axis-cell mask-to-grid mismatch —
+    the classified seed lies 1.187 m from the continuous axis because the nominal axis cell falls outside
+    the confined material raster. That open item transfers with the solver-basin work.</p>
 
   </main>
 </body>

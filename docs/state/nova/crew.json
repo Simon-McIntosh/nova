@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T22:59:14",
+  "updated": "2026-08-25T23:24:23",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -37092,9 +37092,103 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T205025749191-reachability-grid-final",
+        "plan": "primary-xpoint-evidence",
+        "section": "\u00a72",
+        "node": "reachability-grid-final",
+        "node_definition": {
+          "done_when": "Reuse rather than rebuild: the corroboration generator docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py already carries the operand cache keyed on carrier identity plus source commit, the MOVETO compound-path split, per-branch distance rules and the COCOS handling - extend it or import from it, do not write a third generator. PANELS: the twelve frozen MAST arms plus the one banked DIII-D terminal, NO ITER - iterhybrid_cocos17.eqdsk is retired as a fixed-boundary field with no divertor saddle. Each panel must draw, distinctly: the TRUE binding contour at s_star from min(u_wall, u_x), the pre-saddle reachability region as light shading clearly distinguished from the plasma boundary since conflating them was the original defect, private regions from the production saddle-aware partition, wall segments coloured reachable against shadowed, the EFIT efm LCFS overlaid, and markers for the selected saddle, the EFIT X-point and the reachable-wall limiter point where finite. TITLES from the post-rebaseline ACHIEVED class of each arm read from the regenerated pinned-branch-contrast.json at commit 6270a879, never from requested class and never from ForwardTopologyState.diverted, with the EFIT label beside it and an agree or disagree tag - the corroboration receipt at commit 4e8b0e7e is the label authority. Bank the per-panel numbers as JSON: reachable and shadowed segment counts, public and private areas, binding level, both class labels. Embed nothing yourself - the orchestrator owns the evidence write - but use a project-absolute src convention in the PNG metadata note. Self-inspect the PNG at original resolution before committing and state in the manifest that you did, naming anything that looks wrong rather than shipping it - two figure defects this session were caught only by looking. Run the connectivity test file and quote counts. Change no production code.",
+          "estimated_hours": 3.0,
+          "goal": "Supersede the stale real-equilibria reachability grid with one final figure that combines the post-cutover reachability partition, achieved-class titles and the independent EFIT overlay, so the evidence record carries a single current reachability figure instead of a corrected caption over a stale image.",
+          "id": "reachability-grid-final",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/reachability-grid-final.md",
+          "plan": "primary-xpoint-evidence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/reachability_grid_final.py",
+            "docs/figures/primary-xpoint-evidence/reachability-grid-final.png",
+            "docs/figures/primary-xpoint-evidence/reachability-grid-final.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "wall-surface",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T20:50:34Z",
+        "completed_at": "2026-08-25T21:22:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1943,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1943,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "5deeaf1d8a357624a8dd643464de58b914f518ff",
+        "commits": [
+          "b476146f74721d981a354112c54d54848d522252"
+        ],
+        "changed_lines": {
+          "added": 1032,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/reachability-grid-final.md",
+        "scope_changed": false,
+        "session_id": "01a0393f-cc5a-7852-89ab-ea49a36244e7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 11085440,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 11521861,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 30864,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 6991
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 883
+    "_version": 884
   }
 }

@@ -137,6 +137,53 @@
     terminal flux, scalar references and all 69 labels with repetition and case axes, so the
     elimination is checkable rather than asserted.</p>
 
+    <h2 id="boundary-arms">§3 — the boundary is the executable, and the control is cache reuse</h2>
+
+    <p><strong>Node <code>executable-boundary-determinism</code>, commit <code>91ac686c</code>, gate
+    PASSED, 9 tests, 2026-08-25.</strong> H200 SLURM job 1254333 on betelgeuse, six fresh-process
+    receipts in one allocation, six distinct PIDs, GPU UUID
+    <code>GPU-ca419d0a-a452-e2ef-a8dc-90ce956cce04</code>, driver 595.58.03, JAX/jaxlib 0.11.0,
+    float64.</p>
+
+    <table>
+      <caption>Three fresh-process invocations per arm, in one allocation on one device</caption>
+      <thead>
+        <tr><th scope="col">Arm</th><th scope="col">Width 1 case passes / 414</th><th scope="col">Width 4 case passes / 414</th><th scope="col">Changing case verdicts</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Compilation cache <strong>off</strong></td><td>410 / 409 / 411</td><td>412 / 409 / 410</td><td><strong>11</strong></td></tr>
+        <tr><td><strong>Fixed</strong> persistent cache (cold, hit, hit)</td><td>409 / 409 / 409</td><td>410 / 410 / 410</td><td><strong>0</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p>Every one of the eleven changes is <code>conservation.divergence_b</code> or
+    <code>conservation.divergence_j</code>, and each carries its three absolute candidate values
+    beside the registered absolute and relative bounds — the reporting §1 required so that a
+    roundoff-scale criterion stays distinguishable from a nondeterministic operation. In the fixed
+    arm all 69 aggregate verdicts and all 828 per-case verdicts are identical across the three
+    processes. 67 of 69 bounds pass in every invocation of both arms.</p>
+
+    <p><strong>The mechanism, established by pairing rather than by elimination alone.</strong> The
+    §2 control had already shown that nothing moves inside one compiled executable. The two arms here
+    differ only in whether independent processes reuse one executable. So the nondeterminism is
+    <em>independent process compilation selecting a different acceptance executable</em>, and fixed
+    persistent executable reuse is the demonstrated control. That was the candidate the reuse map
+    ranked strongest, on the independent ground that no acceptance driver called the persistent
+    cache.</p>
+
+    <p><strong>The cost, and what kind of number it is.</strong> The control costs
+    <strong>0.113 s per candidate slice</strong>, <strong>2.197 %</strong> — cache-off median
+    5.1435 s/slice against warm fixed-cache 5.2565 s/slice. The receipt is explicit that this is
+    cold-driver time including process startup, scalar references and compilation across 30 candidate
+    slices per invocation, and <em>not</em> steady-state solve-only throughput. It is therefore an
+    upper bound on a production-wide control's cost rather than an estimate of it, which matters to
+    the open control-scope decision.</p>
+
+    <p><strong>And the second fault survives the first.</strong> Acceptance remains scientifically
+    failing at 67 of 69 bounds once the route is deterministic. Determinism was never going to make a
+    bound on a residual that is identically zero in exact arithmetic passable; §1 separated the two
+    faults precisely so that fixing one could not be read as closing the other.</p>
+
   </main>
 </body>
 </html>

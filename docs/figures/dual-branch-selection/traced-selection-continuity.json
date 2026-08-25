@@ -1,0 +1,822 @@
+{
+  "artifact": "traced_selection_continuity",
+  "created_at": "2026-08-25T07:35:41.863804+00:00",
+  "fixture_source": {
+    "families": [
+      {
+        "class_transitions": 1,
+        "classified_fixtures": 19,
+        "continuity_role": "localisation_boundary",
+        "exact_class_agreements": 19,
+        "maximum_adjacent_fixture_weight_step": 1.0,
+        "maximum_p_diverted_margin_probability_difference": 0.0,
+        "name": "growing_saddle"
+      },
+      {
+        "class_transitions": 1,
+        "classified_fixtures": 17,
+        "continuity_role": "continuous_transition_rail",
+        "exact_class_agreements": 17,
+        "maximum_adjacent_fixture_weight_step": 0.08932517523969885,
+        "maximum_p_diverted_margin_probability_difference": 2.220446049250313e-16,
+        "name": "persistent_saddle_positive_polarity"
+      },
+      {
+        "class_transitions": 1,
+        "classified_fixtures": 17,
+        "continuity_role": "continuous_transition_rail",
+        "exact_class_agreements": 17,
+        "maximum_adjacent_fixture_weight_step": 0.08932517523969885,
+        "maximum_p_diverted_margin_probability_difference": 2.220446049250313e-16,
+        "name": "persistent_saddle_negative_polarity"
+      }
+    ],
+    "path": "tests/test_connectivity_boundary.py"
+  },
+  "fixtures": [
+    {
+      "blob_amplitude": 0.0,
+      "both_branches_qualified": true,
+      "class_margin": null,
+      "class_margin_infinity_sign": "negative",
+      "diverted_weight": 0.0,
+      "exact_class": "limited",
+      "family": "growing_saddle",
+      "fixture_index": 0,
+      "p_diverted": 0.0,
+      "selected_class": "limited"
+    },
+    {
+      "blob_amplitude": 0.05,
+      "both_branches_qualified": true,
+      "class_margin": null,
+      "class_margin_infinity_sign": "negative",
+      "diverted_weight": 0.0,
+      "exact_class": "limited",
+      "family": "growing_saddle",
+      "fixture_index": 1,
+      "p_diverted": 0.0,
+      "selected_class": "limited"
+    },
+    {
+      "blob_amplitude": 0.1,
+      "both_branches_qualified": true,
+      "class_margin": null,
+      "class_margin_infinity_sign": "positive",
+      "diverted_weight": 1.0,
+      "exact_class": "diverted",
+      "family": "growing_saddle",
+      "fixture_index": 2,
+      "p_diverted": 1.0,
+      "selected_class": "diverted"
+    },
+    {
+      "blob_amplitude": 0.15000000000000002,
+      "both_branches_qualified": true,
+      "class_margin": null,
+      "class_margin_infinity_sign": "positive",
+      "diverted_weight": 1.0,
+      "exact_class": "diverted",
+      "family": "growing_saddle",
+      "fixture_index": 3,
+      "p_diverted": 1.0,
+      "selected_class": "diverted"
+    },
+    {
+      "blob_amplitude": 0.2,
+      "both_branches_qualified": true,
+      "class_margin": null,
+      "class_margin_infinity_sign": "positive",
+      "diverted_weight": 1.0,
+      "exact_class": "diverted",
+      "family": "growing_saddle",
+      "fixture_index": 4,
+      "p_diverted": 1.0,
+      "selected_class": "diverted"
+    },
+    {
+      "blob_amplitude": 0.25,
+      "both_branches_qualified": true,
+      "class_margin": null,
+      "class_margin_infinity_sign": "positive",
+      "diverted_weight": 1.0,
+      "exact_class": "diverted",
+      "family": "growing_saddle",
+      "fixture_index": 5,
+      "p_diverted": 1.0,
+      "selected_class": "diverted"
+    },
+    {
+      "blob_amplitude": 0.30000000000000004,
+      "both_branches_qualified": true,
+      "class_margin": null,
+      "class_margin_infinity_sign": "positive",
+      "diverted_weight": 1.0,
+      "exact_class": "diverted",
+      "family": "growing_saddle",
+      "fixture_index": 6,
+      "p_diverted": 1.0,
+      "selected_class": "diverted"
+    },
+    {
+      "blob_amplitude": 0.35000000000000003,
+      "both_branches_qualified": true,
+      "class_margin": null,
+      "class_margin_infinity_sign": "positive",
+      "diverted_weight": 1.0,
+      "exact_class": "diverted",
+      "family": "growing_saddle",
+      "fixture_index": 7,
+      "p_diverted": 1.0,
+      "selected_class": "diverted"
+    },
+    {
+      "blob_amplitude": 0.4,
+      "both_branches_qualified": true,
+      "class_margin": null,
+      "class_margin_infinity_sign": "positive",
+      "diverted_weight": 1.0,
+      "exact_class": "diverted",
+      "family": "growing_saddle",
+      "fixture_index": 8,
+      "p_diverted": 1.0,
+      "selected_class": "diverted"
+    },
+    {
+      "blob_amplitude": 0.45,
+      "both_branches_qualified": true,
+      "class_margin": null,
+      "class_margin_infinity_sign": "positive",
+      "diverted_weight": 1.0,
+      "exact_class": "diverted",
+      "family": "growing_saddle",
+      "fixture_index": 9,
+      "p_diverted": 1.0,
+      "selected_class": "diverted"
+    },
+    {
+      "blob_amplitude": 0.5,
+      "both_branches_qualified": true,
+      "class_margin": null,
+      "class_margin_infinity_sign": "positive",
+      "diverted_weight": 1.0,
+      "exact_class": "diverted",
+      "family": "growing_saddle",
+      "fixture_index": 10,
+      "p_diverted": 1.0,
+      "selected_class": "diverted"
+    },
+    {
+      "blob_amplitude": 0.55,
+      "both_branches_qualified": true,
+      "class_margin": null,
+      "class_margin_infinity_sign": "positive",
+      "diverted_weight": 1.0,
+      "exact_class": "diverted",
+      "family": "growing_saddle",
+      "fixture_index": 11,
+      "p_diverted": 1.0,
+      "selected_class": "diverted"
+    },
+    {
+      "blob_amplitude": 0.6000000000000001,
+      "both_branches_qualified": true,
+      "class_margin": null,
+      "class_margin_infinity_sign": "positive",
+      "diverted_weight": 1.0,
+      "exact_class": "diverted",
+      "family": "growing_saddle",
+      "fixture_index": 12,
+      "p_diverted": 1.0,
+      "selected_class": "diverted"
+    },
+    {
+      "blob_amplitude": 0.65,
+      "both_branches_qualified": true,
+      "class_margin": null,
+      "class_margin_infinity_sign": "positive",
+      "diverted_weight": 1.0,
+      "exact_class": "diverted",
+      "family": "growing_saddle",
+      "fixture_index": 13,
+      "p_diverted": 1.0,
+      "selected_class": "diverted"
+    },
+    {
+      "blob_amplitude": 0.7000000000000001,
+      "both_branches_qualified": true,
+      "class_margin": null,
+      "class_margin_infinity_sign": "positive",
+      "diverted_weight": 1.0,
+      "exact_class": "diverted",
+      "family": "growing_saddle",
+      "fixture_index": 14,
+      "p_diverted": 1.0,
+      "selected_class": "diverted"
+    },
+    {
+      "blob_amplitude": 0.75,
+      "both_branches_qualified": true,
+      "class_margin": null,
+      "class_margin_infinity_sign": "positive",
+      "diverted_weight": 1.0,
+      "exact_class": "diverted",
+      "family": "growing_saddle",
+      "fixture_index": 15,
+      "p_diverted": 1.0,
+      "selected_class": "diverted"
+    },
+    {
+      "blob_amplitude": 0.8,
+      "both_branches_qualified": true,
+      "class_margin": null,
+      "class_margin_infinity_sign": "positive",
+      "diverted_weight": 1.0,
+      "exact_class": "diverted",
+      "family": "growing_saddle",
+      "fixture_index": 16,
+      "p_diverted": 1.0,
+      "selected_class": "diverted"
+    },
+    {
+      "blob_amplitude": 0.8500000000000001,
+      "both_branches_qualified": true,
+      "class_margin": null,
+      "class_margin_infinity_sign": "positive",
+      "diverted_weight": 1.0,
+      "exact_class": "diverted",
+      "family": "growing_saddle",
+      "fixture_index": 17,
+      "p_diverted": 1.0,
+      "selected_class": "diverted"
+    },
+    {
+      "blob_amplitude": 0.9,
+      "both_branches_qualified": true,
+      "class_margin": null,
+      "class_margin_infinity_sign": "positive",
+      "diverted_weight": 1.0,
+      "exact_class": "diverted",
+      "family": "growing_saddle",
+      "fixture_index": 18,
+      "p_diverted": 1.0,
+      "selected_class": "diverted"
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": 0.02883015081429885,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.9470003965976387,
+      "exact_class": "diverted",
+      "family": "persistent_saddle_positive_polarity",
+      "fixture_index": 0,
+      "p_diverted": 0.9470003965976387,
+      "selected_class": "diverted",
+      "wall_flux_shift": -0.013610945977105037
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": 0.02522003606170757,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.9256700306366452,
+      "exact_class": "diverted",
+      "family": "persistent_saddle_positive_polarity",
+      "fixture_index": 1,
+      "p_diverted": 0.9256700306366453,
+      "selected_class": "diverted",
+      "wall_flux_shift": -0.01261094534132216
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": 0.02160992130911628,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.8966914916209393,
+      "exact_class": "diverted",
+      "family": "persistent_saddle_positive_polarity",
+      "fixture_index": 2,
+      "p_diverted": 0.8966914916209393,
+      "selected_class": "diverted",
+      "wall_flux_shift": -0.011610944705539281
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": 0.017999806556525,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.8581465803085385,
+      "exact_class": "diverted",
+      "family": "persistent_saddle_positive_polarity",
+      "fixture_index": 3,
+      "p_diverted": 0.8581465803085386,
+      "selected_class": "diverted",
+      "wall_flux_shift": -0.010610944069756403
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": 0.014389691803933721,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.808294972360309,
+      "exact_class": "diverted",
+      "family": "persistent_saddle_positive_polarity",
+      "fixture_index": 4,
+      "p_diverted": 0.808294972360309,
+      "selected_class": "diverted",
+      "wall_flux_shift": -0.009610943433973524
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": 0.01077957705134245,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.7461073034691958,
+      "exact_class": "diverted",
+      "family": "persistent_saddle_positive_polarity",
+      "fixture_index": 5,
+      "p_diverted": 0.7461073034691958,
+      "selected_class": "diverted",
+      "wall_flux_shift": -0.008610942798190645
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": 0.007169462298751164,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.6719342019472619,
+      "exact_class": "diverted",
+      "family": "persistent_saddle_positive_polarity",
+      "fixture_index": 6,
+      "p_diverted": 0.671934201947262,
+      "selected_class": "diverted",
+      "wall_flux_shift": -0.007610942162407768
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": 0.0035593475461598925,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.5880559978047984,
+      "exact_class": "diverted",
+      "family": "persistent_saddle_positive_polarity",
+      "fixture_index": 7,
+      "p_diverted": 0.5880559978047984,
+      "selected_class": "diverted",
+      "wall_flux_shift": -0.00661094152662489
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": -5.0767206431392986e-05,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.4987308225650996,
+      "exact_class": "limited",
+      "family": "persistent_saddle_positive_polarity",
+      "fixture_index": 8,
+      "p_diverted": 0.49873082256509954,
+      "selected_class": "limited",
+      "wall_flux_shift": -0.005610940890842011
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": -0.0036608819590226716,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.4094865884382343,
+      "exact_class": "limited",
+      "family": "persistent_saddle_positive_polarity",
+      "fixture_index": 9,
+      "p_diverted": 0.4094865884382344,
+      "selected_class": "limited",
+      "wall_flux_shift": -0.004610940255059133
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": -0.007270996711613947,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.32583150701369523,
+      "exact_class": "limited",
+      "family": "persistent_saddle_positive_polarity",
+      "fixture_index": 10,
+      "p_diverted": 0.3258315070136953,
+      "selected_class": "limited",
+      "wall_flux_shift": -0.003610939619276255
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": -0.010881111464205222,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.25197412868172786,
+      "exact_class": "limited",
+      "family": "persistent_saddle_positive_polarity",
+      "fixture_index": 11,
+      "p_diverted": 0.25197412868172786,
+      "selected_class": "limited",
+      "wall_flux_shift": -0.0026109389834933763
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": -0.014491226216796504,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.19013663211809695,
+      "exact_class": "limited",
+      "family": "persistent_saddle_positive_polarity",
+      "fixture_index": 12,
+      "p_diverted": 0.19013663211809695,
+      "selected_class": "limited",
+      "wall_flux_shift": -0.0016109383477104985
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": -0.018101340969387786,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.14062191968738352,
+      "exact_class": "limited",
+      "family": "persistent_saddle_positive_polarity",
+      "fixture_index": 13,
+      "p_diverted": 0.14062191968738352,
+      "selected_class": "limited",
+      "wall_flux_shift": -0.0006109377119276199
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": -0.02171145572197906,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.10237171685042329,
+      "exact_class": "limited",
+      "family": "persistent_saddle_positive_polarity",
+      "fixture_index": 14,
+      "p_diverted": 0.10237171685042327,
+      "selected_class": "limited",
+      "wall_flux_shift": 0.0003890629238552587
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": -0.02532157047457034,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.07363437393185757,
+      "exact_class": "limited",
+      "family": "persistent_saddle_positive_polarity",
+      "fixture_index": 15,
+      "p_diverted": 0.07363437393185758,
+      "selected_class": "limited",
+      "wall_flux_shift": 0.0013890635596381365
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": -0.028931685227161615,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.05249230242129831,
+      "exact_class": "limited",
+      "family": "persistent_saddle_positive_polarity",
+      "fixture_index": 16,
+      "p_diverted": 0.05249230242129832,
+      "selected_class": "limited",
+      "wall_flux_shift": 0.002389064195421014
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": 0.02883015081429885,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.9470003965976387,
+      "exact_class": "diverted",
+      "family": "persistent_saddle_negative_polarity",
+      "fixture_index": 0,
+      "p_diverted": 0.9470003965976387,
+      "selected_class": "diverted",
+      "wall_flux_shift": -0.013610945977105037
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": 0.02522003606170757,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.9256700306366452,
+      "exact_class": "diverted",
+      "family": "persistent_saddle_negative_polarity",
+      "fixture_index": 1,
+      "p_diverted": 0.9256700306366453,
+      "selected_class": "diverted",
+      "wall_flux_shift": -0.01261094534132216
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": 0.02160992130911628,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.8966914916209393,
+      "exact_class": "diverted",
+      "family": "persistent_saddle_negative_polarity",
+      "fixture_index": 2,
+      "p_diverted": 0.8966914916209393,
+      "selected_class": "diverted",
+      "wall_flux_shift": -0.011610944705539281
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": 0.017999806556525,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.8581465803085385,
+      "exact_class": "diverted",
+      "family": "persistent_saddle_negative_polarity",
+      "fixture_index": 3,
+      "p_diverted": 0.8581465803085386,
+      "selected_class": "diverted",
+      "wall_flux_shift": -0.010610944069756403
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": 0.014389691803933721,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.808294972360309,
+      "exact_class": "diverted",
+      "family": "persistent_saddle_negative_polarity",
+      "fixture_index": 4,
+      "p_diverted": 0.808294972360309,
+      "selected_class": "diverted",
+      "wall_flux_shift": -0.009610943433973524
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": 0.01077957705134245,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.7461073034691958,
+      "exact_class": "diverted",
+      "family": "persistent_saddle_negative_polarity",
+      "fixture_index": 5,
+      "p_diverted": 0.7461073034691958,
+      "selected_class": "diverted",
+      "wall_flux_shift": -0.008610942798190645
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": 0.007169462298751164,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.6719342019472619,
+      "exact_class": "diverted",
+      "family": "persistent_saddle_negative_polarity",
+      "fixture_index": 6,
+      "p_diverted": 0.671934201947262,
+      "selected_class": "diverted",
+      "wall_flux_shift": -0.007610942162407768
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": 0.0035593475461598925,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.5880559978047984,
+      "exact_class": "diverted",
+      "family": "persistent_saddle_negative_polarity",
+      "fixture_index": 7,
+      "p_diverted": 0.5880559978047984,
+      "selected_class": "diverted",
+      "wall_flux_shift": -0.00661094152662489
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": -5.0767206431392986e-05,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.4987308225650996,
+      "exact_class": "limited",
+      "family": "persistent_saddle_negative_polarity",
+      "fixture_index": 8,
+      "p_diverted": 0.49873082256509954,
+      "selected_class": "limited",
+      "wall_flux_shift": -0.005610940890842011
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": -0.0036608819590226716,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.4094865884382343,
+      "exact_class": "limited",
+      "family": "persistent_saddle_negative_polarity",
+      "fixture_index": 9,
+      "p_diverted": 0.4094865884382344,
+      "selected_class": "limited",
+      "wall_flux_shift": -0.004610940255059133
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": -0.007270996711613947,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.32583150701369523,
+      "exact_class": "limited",
+      "family": "persistent_saddle_negative_polarity",
+      "fixture_index": 10,
+      "p_diverted": 0.3258315070136953,
+      "selected_class": "limited",
+      "wall_flux_shift": -0.003610939619276255
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": -0.010881111464205222,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.25197412868172786,
+      "exact_class": "limited",
+      "family": "persistent_saddle_negative_polarity",
+      "fixture_index": 11,
+      "p_diverted": 0.25197412868172786,
+      "selected_class": "limited",
+      "wall_flux_shift": -0.0026109389834933763
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": -0.014491226216796504,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.19013663211809695,
+      "exact_class": "limited",
+      "family": "persistent_saddle_negative_polarity",
+      "fixture_index": 12,
+      "p_diverted": 0.19013663211809695,
+      "selected_class": "limited",
+      "wall_flux_shift": -0.0016109383477104985
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": -0.018101340969387786,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.14062191968738352,
+      "exact_class": "limited",
+      "family": "persistent_saddle_negative_polarity",
+      "fixture_index": 13,
+      "p_diverted": 0.14062191968738352,
+      "selected_class": "limited",
+      "wall_flux_shift": -0.0006109377119276199
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": -0.02171145572197906,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.10237171685042329,
+      "exact_class": "limited",
+      "family": "persistent_saddle_negative_polarity",
+      "fixture_index": 14,
+      "p_diverted": 0.10237171685042327,
+      "selected_class": "limited",
+      "wall_flux_shift": 0.0003890629238552587
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": -0.02532157047457034,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.07363437393185757,
+      "exact_class": "limited",
+      "family": "persistent_saddle_negative_polarity",
+      "fixture_index": 15,
+      "p_diverted": 0.07363437393185758,
+      "selected_class": "limited",
+      "wall_flux_shift": 0.0013890635596381365
+    },
+    {
+      "both_branches_qualified": true,
+      "class_margin": -0.028931685227161615,
+      "class_margin_infinity_sign": null,
+      "diverted_weight": 0.05249230242129831,
+      "exact_class": "limited",
+      "family": "persistent_saddle_negative_polarity",
+      "fixture_index": 16,
+      "p_diverted": 0.05249230242129832,
+      "selected_class": "limited",
+      "wall_flux_shift": 0.002389064195421014
+    }
+  ],
+  "properties": {
+    "all_property_assertions_passed": true,
+    "classified_fixture_count": 53,
+    "continuous_transition_interpolations_measured": 2,
+    "exact_boolean_class_agreement_count": 53,
+    "exact_boolean_class_disagreement_count": 0,
+    "finite_nonzero_observable_gradients": true,
+    "flux_sum_gradient_by_observable": {
+      "class_margin": 75.0,
+      "p_diverted": 3.0
+    },
+    "jax_jit_traceable": true,
+    "jax_vmap_batchable": true,
+    "jaxpr_equation_count": 30,
+    "localisation_transition_limitation_count": 1,
+    "maximum_p_diverted_margin_probability_difference": 2.220446049250313e-16,
+    "sole_qualified_branch_degradation": {
+      "diverted_only_exact": true,
+      "diverted_weights": [
+        0.7655292893150025,
+        0.0,
+        1.0,
+        null
+      ],
+      "limited_only_exact": true,
+      "mask_order": [
+        "both_qualify",
+        "limited_only",
+        "diverted_only",
+        "neither_qualifies"
+      ],
+      "neither_qualified_is_explicit": true,
+      "selected_class_code": [
+        1,
+        0,
+        1,
+        -1
+      ]
+    }
+  },
+  "scope": {
+    "claim_boundary": "selection continuity is conditional on fixed convergence and topology-qualification masks; a mask change deliberately clamps to the sole qualified branch",
+    "forward_solve_performed": false,
+    "localisation_limitation": "the growing-saddle fixture changes class when the saddle operand appears from an infinite sentinel, so it is retained as an observable-localisation boundary rather than claimed as a continuous two-operand transition",
+    "production_selector_changed": false,
+    "prototype_only": true,
+    "verdict": "qualified_prototype"
+  },
+  "selector": {
+    "both_qualified_weight": "0.5 * (p_diverted + sigmoid(class_margin / temperature))",
+    "branch_axis": [
+      "limited",
+      "diverted"
+    ],
+    "class_rule": "diverted when weight >= 0.5; minus one when neither qualifies",
+    "qualification_rule": "ForwardBranchReceipt.converged and topology_consistent",
+    "state_rule": "limited_flux + weight * (diverted_flux - limited_flux)",
+    "temperature_normalised_flux": 0.01
+  },
+  "source": {
+    "commit": "ea17b4410cf8cdb1cd256c2678060ccf3836d77f",
+    "tree": "a0fe18cd130149a821306c9c046d93eedcf59a30"
+  },
+  "transition_interpolations": [
+    {
+      "family": "growing_saddle",
+      "fixture_class_margin": [
+        null,
+        null
+      ],
+      "fixture_class_margin_infinity_sign": [
+        "negative",
+        "positive"
+      ],
+      "fixture_indices": [
+        1,
+        2
+      ],
+      "measured": false,
+      "reason": "the exact class transition is an operand-localisation event, not a persistent two-operand wall-to-saddle hand-off"
+    },
+    {
+      "dense_coordinate_endpoints": [
+        -0.00661094152662489,
+        -0.005610940890842011
+      ],
+      "dense_exact_class_transition_count": 1,
+      "family": "persistent_saddle_positive_polarity",
+      "finite_selected_flux": true,
+      "finite_weights": true,
+      "fixture_bracket_coordinates": [
+        -0.00661094152662489,
+        -0.005610940890842011
+      ],
+      "fixture_class_margin": [
+        0.0035593475461598925,
+        -5.0767206431392986e-05
+      ],
+      "fixture_indices": [
+        7,
+        8
+      ],
+      "fixture_p_diverted": [
+        0.5880559978047984,
+        0.49873082256509954
+      ],
+      "interpolation_points": 257,
+      "maximum_adjacent_flux_step": 0.001221269898925401,
+      "maximum_adjacent_weight_step": 0.00035255025244890215,
+      "maximum_p_diverted_margin_probability_difference": 2.220446049250313e-16,
+      "measured": true,
+      "measurement": "dense flux-map reads inside the classified bracket",
+      "sigmoid_lipschitz_step_bound": 0.00035255026880811474
+    },
+    {
+      "dense_coordinate_endpoints": [
+        -0.00661094152662489,
+        -0.005610940890842011
+      ],
+      "dense_exact_class_transition_count": 1,
+      "family": "persistent_saddle_negative_polarity",
+      "finite_selected_flux": true,
+      "finite_weights": true,
+      "fixture_bracket_coordinates": [
+        -0.00661094152662489,
+        -0.005610940890842011
+      ],
+      "fixture_class_margin": [
+        0.0035593475461598925,
+        -5.0767206431392986e-05
+      ],
+      "fixture_indices": [
+        7,
+        8
+      ],
+      "fixture_p_diverted": [
+        0.5880559978047984,
+        0.49873082256509954
+      ],
+      "interpolation_points": 257,
+      "maximum_adjacent_flux_step": 0.001221269898925401,
+      "maximum_adjacent_weight_step": 0.00035255025244890215,
+      "maximum_p_diverted_margin_probability_difference": 2.220446049250313e-16,
+      "measured": true,
+      "measurement": "dense flux-map reads inside the classified bracket",
+      "sigmoid_lipschitz_step_bound": 0.00035255026880811474
+    }
+  ]
+}

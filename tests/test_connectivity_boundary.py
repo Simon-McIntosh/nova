@@ -27,6 +27,7 @@ from __future__ import annotations
 import ast
 import importlib.util
 import inspect
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -37,8 +38,16 @@ with skip_import("jax"):
     import jax
     import jax.numpy as jnp
 
+    from nova.biot.null import Null1D, Null2D
+    from nova.biot.target import FluxTarget
     from nova.equilibrium import connectivity_boundary as cb
+    from nova.equilibrium.conservation import FluxLattice
+    from nova.equilibrium.forward import ForwardProfile
+    from nova.equilibrium.forward_operator import ForwardFluxOperator
+    from nova.equilibrium.source import DomainProfile, ForwardSource
     from nova.equilibrium.stencil_nulls import xpoint_candidates
+    from nova.equilibrium.topology import TopologyClass
+    from nova.geometry.hexstencil import hex_stencil
     from nova.jax.config import configure_dtypes
 
 from nova.equilibrium.labels import LCFS_ANGLES
@@ -80,6 +89,53 @@ class _Grid:
     def __init__(self, rg, zg, inside, lr=None, lz=None):
         self.rg, self.zg, self.inside_limiter = rg, zg, inside
         self.limiter_r, self.limiter_z = lr, lz
+
+
+def _forward_operator(rg, zg, inside, wall_r, wall_z, *, polarity=1):
+    """Build the topology seam without materialising Green matrices."""
+    lattice = FluxLattice(rg, zg)
+    node_count = lattice.node_count
+    wall_count = len(wall_r)
+    grid = FluxTarget(
+        source_target=jnp.zeros((node_count, 1)),
+        plasma_target=jnp.zeros((node_count, 1)),
+        null=Null2D.from_coordinates(
+            lattice.coordinate,
+            hex_stencil(lattice.shape),
+        ),
+    )
+    wall = FluxTarget(
+        source_target=jnp.zeros((wall_count, 1)),
+        plasma_target=jnp.zeros((wall_count, 1)),
+        null=Null1D(jnp.asarray(np.c_[wall_r, wall_z], dtype=jnp.float64)),
+    )
+
+    def zero(psi_norm):
+        return jnp.zeros_like(psi_norm)
+
+    operator = ForwardFluxOperator(
+        grid=grid,
+        wall=wall,
+        source=ForwardSource(core=DomainProfile(p_prime=zero, ff_prime=zero)),
+        external_current=jnp.zeros(1),
+        area=jnp.asarray(lattice.cell_area),
+        inside_material=jnp.asarray(inside.T.ravel()),
+        polarity=polarity,
+        use_linear_moments=False,
+    )
+    return operator, lattice
+
+
+def _forward_state(psi, wall_psi):
+    """Pack a conventional height-by-radius field for the forward operator."""
+    return jnp.asarray(np.r_[psi.T.ravel(), wall_psi])
+
+
+def _class_disagreement_count(reads):
+    """Count Boolean classifications that disagree with the margin sign."""
+    classifications = np.asarray([bool(row[2].diverted) for row in reads])
+    margins = np.asarray([float(row[2].class_margin) for row in reads])
+    return int(np.count_nonzero(classifications != (margins >= 0.0)))
 
 
 # --- accelerator compliance -------------------------------------------------
@@ -403,6 +459,25 @@ def _psi_sweep(r, z, amp):
     )
 
 
+def _persistent_saddle_field(nr=81, nz=81):
+    """A resolved axis/saddle pair whose wall level can cross the saddle."""
+    rg = np.linspace(0.5, 1.5, nr)
+    zg = np.linspace(-0.5, 0.5, nz)
+    rr, zz = np.meshgrid(rg, zg)
+    radial = rr - 1.0
+    psi = -(radial**3 / 3.0 - 0.2**2 * radial + zz**2)
+    lr = np.array([0.65, 1.45, 1.45, 0.65, 0.65])
+    lz = np.array([-0.45, -0.45, 0.45, 0.45, -0.45])
+    inside = _inside_polygon(rr.ravel(), zz.ravel(), lr, lz).reshape(nz, nr)
+    return psi, rg, zg, (1.2, 0.0), lr, lz, inside
+
+
+def _persistent_saddle_psi(r, z):
+    """Evaluate the resolved axis/saddle field at arbitrary coordinates."""
+    radial = np.asarray(r) - 1.0
+    return -(radial**3 / 3.0 - 0.2**2 * radial + np.asarray(z) ** 2)
+
+
 def _classify_first_psi_bnd(psi, rg, zg, inside, psi_axis, lr, lz, amp):
     """The classify-first binding: innermost in-vessel X flux, else tangency."""
     cands = xpoint_candidates(
@@ -436,6 +511,154 @@ def test_continuous_through_marginal_transition():
     assert int(np.sum(np.diff(n_x) != 0)) >= 1  # the sweep really transitions
     assert conn_step < 0.05
     assert clf_step > 3.0 * conn_step
+
+
+def test_forward_topology_margin_matches_boolean_transition_and_terminal_gate():
+    """The operator publishes a signed margin without weakening its class gate."""
+    configure_dtypes()
+    amplitudes = np.linspace(0.0, 0.9, 19)
+    growing_psi, growing_rg, growing_zg, _axis, lr, lz, growing_inside = _sweep_field(
+        float(amplitudes[0]), 61, 61
+    )
+    growing_wall_r, growing_wall_z = _dense_wall(lr, lz, m=160)
+    growing_operator, _growing_lattice = _forward_operator(
+        growing_rg,
+        growing_zg,
+        growing_inside,
+        growing_wall_r,
+        growing_wall_z,
+    )
+    growing_reads = []
+    for amplitude in amplitudes:
+        growing_psi = _psi_sweep(*np.meshgrid(growing_rg, growing_zg), float(amplitude))
+        growing_wall_psi = _psi_sweep(growing_wall_r, growing_wall_z, float(amplitude))
+        growing_state = _forward_state(growing_psi, growing_wall_psi)
+        _growing_masks, growing_topology = growing_operator.read(growing_state)
+        growing_reads.append((float(amplitude), growing_state, growing_topology))
+    growing_disagreement_count = _class_disagreement_count(growing_reads)
+    assert growing_disagreement_count == 0
+
+    psi, rg, zg, _axis, lr, lz, inside = _persistent_saddle_field()
+    wall_r, wall_z = _dense_wall(lr, lz, m=160)
+    operator, lattice = _forward_operator(rg, zg, inside, wall_r, wall_z)
+    wall_psi = _persistent_saddle_psi(wall_r, wall_z)
+    _base_masks, base = operator.read(_forward_state(psi, wall_psi))
+    crossing_shift = float(base.x_point_flux) - float(np.max(wall_psi))
+    scale = abs(float(base.axis_flux) - float(base.x_point_flux))
+    shifts = crossing_shift + scale * np.linspace(-0.75, 0.75, 17)
+
+    reads = []
+    for shift in shifts:
+        state = _forward_state(psi, wall_psi + float(shift))
+        _masks, topology = operator.read(state)
+        reads.append((float(shift), state, topology))
+
+    classifications = np.asarray([bool(row[2].diverted) for row in reads])
+    disagreement_count = _class_disagreement_count(reads)
+    assert disagreement_count == 0
+
+    negative_operator, _negative_lattice = _forward_operator(
+        rg,
+        zg,
+        inside,
+        wall_r,
+        wall_z,
+        polarity=-1,
+    )
+    negative_reads = []
+    for shift, state, _topology in reads:
+        negative_state = -state
+        _negative_masks, negative_topology = negative_operator.read(negative_state)
+        negative_reads.append((shift, negative_state, negative_topology))
+    negative_classifications = np.asarray(
+        [bool(row[2].diverted) for row in negative_reads]
+    )
+    negative_disagreement_count = _class_disagreement_count(negative_reads)
+    assert negative_disagreement_count == 0
+    assert np.array_equal(negative_classifications, classifications)
+
+    flips = np.flatnonzero(classifications[1:] != classifications[:-1])
+    assert flips.size == 1
+    lower = reads[int(flips[0])]
+    upper = reads[int(flips[0]) + 1]
+    assert bool(lower[2].diverted)
+    assert not bool(upper[2].diverted)
+    assert float(lower[2].class_margin) >= 0.0
+    assert float(upper[2].class_margin) < 0.0
+
+    bracket = [float(lower[0]), float(upper[0])]
+    bracket_topology = [bool(lower[2].diverted), bool(upper[2].diverted)]
+    bracket_margin = [
+        float(lower[2].class_margin),
+        float(upper[2].class_margin),
+    ]
+    for _ in range(14):
+        midpoint = 0.5 * (bracket[0] + bracket[1])
+        _masks, topology = operator.read(_forward_state(psi, wall_psi + midpoint))
+        midpoint_margin = float(topology.class_margin)
+        midpoint_class = bool(topology.diverted)
+        assert midpoint_class == (midpoint_margin >= 0.0)
+        if midpoint_class:
+            bracket[0] = midpoint
+            bracket_topology[0] = midpoint_class
+            bracket_margin[0] = midpoint_margin
+        else:
+            bracket[1] = midpoint
+            bracket_topology[1] = midpoint_class
+            bracket_margin[1] = midpoint_margin
+    crossing = 0.5 * (bracket[0] + bracket[1])
+    assert bracket[1] - bracket[0] < 1.0e-7
+    assert bracket_topology == [True, False]
+    assert bracket_margin[0] >= 0.0 > bracket_margin[1]
+
+    diverted_state = reads[0][1]
+    _diverted_masks, diverted = operator.read(diverted_state)
+    assert bool(diverted.diverted)
+    unreachable = int(np.argmin(wall_z))
+    shadow_flux = np.asarray(wall_psi + reads[0][0]).copy()
+    shadow_flux[unreachable] = 0.5 * (
+        float(diverted.axis_flux) + float(diverted.x_point_flux)
+    )
+    assert shadow_flux[unreachable] > float(diverted.x_point_flux)
+    _shadow_masks, shadowed = operator.read(_forward_state(psi, shadow_flux))
+    assert bool(shadowed.diverted)
+    assert np.isposinf(float(shadowed.class_margin))
+
+    limited = reads[-1]
+    profile = ForwardProfile(operator=operator, lattice=lattice)
+    equilibrium = SimpleNamespace(
+        flux=limited[1],
+        fixed_point=SimpleNamespace(residual=jnp.asarray(0.0)),
+        finite=SimpleNamespace(passed=jnp.asarray(True)),
+    )
+    profile._solve_accelerated = lambda *_args, **_kwargs: equilibrium
+    receipt = profile._branch_receipt(
+        limited[1],
+        TopologyClass.DIVERTED,
+        None,
+        route="fixed_point",
+        tolerance=1.0e-12,
+        iterations=0,
+    )
+    assert not bool(receipt.achieved_class)
+    assert bool(receipt.requested_class)
+    assert not bool(receipt.topology_consistent)
+    assert not bool(receipt.converged)
+    assert float(receipt.residual) == 0.0
+
+    print(
+        "topology-margin evidence: "
+        f"growing_classified={len(growing_reads)}, "
+        f"growing_disagreement_count={growing_disagreement_count}, "
+        f"persistent_classified={len(reads)}, "
+        f"persistent_disagreement_count={disagreement_count}, "
+        f"negative_classified={len(negative_reads)}, "
+        f"negative_disagreement_count={negative_disagreement_count}, "
+        f"crossing_wall_flux_shift={crossing:.12f}, "
+        f"bracket=({bracket[0]:.12f}, diverted, {bracket_margin[0]:.9g}; "
+        f"{bracket[1]:.12f}, limited, {bracket_margin[1]:.9g}), "
+        "unreachable_wall_vertex_ignored=true, terminal_wrong_class_rejected=true"
+    )
 
 
 # --- Lipschitz smooth-weight bound --------------------------------------------

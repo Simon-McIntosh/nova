@@ -61,11 +61,20 @@
     fitted field-function gradient computation difference and leaves <code>divergence_b</code>
     unadjudicated, so neither is currently claimed as pure rounding.</p>
 
-    <p><strong>What is nonetheless wrong today.</strong> A relative bound whose reference has no
-    nonzero exact value is not a meaningful criterion however the computed value arises, and the
-    figures show the consequence: maximum bound ratios of 2.967 and 5.341 against absolute differences
-    at 1e-16, so a one-ULP change crosses the bound by a factor of three. A criterion must be passable
-    by something. Determinism made that crossing repeatable; it did not make it a measurement.</p>
+    <p><strong>What is wrong today is narrower and sharper than a missing floor: an absolute bound
+    already exists and is already satisfied, and a relative bound overrides it.</strong> On case
+    21978/35 at width 1 all three invocation values sit <em>below</em> the registered
+    <code>absolute_bound</code> of <strong>9.84e-16</strong> — and the case passes
+    <code>[true, false, false]</code> anyway, because a <code>relative_bound</code> of
+    <strong>0.8426</strong> is applied as well and one ULP of movement crosses it. So the repair may
+    not require deriving a new floor at all. It may require the registration to stop applying a
+    relative criterion where the reference has no nonzero continuum value and an absolute criterion is
+    already present and met. That is a much smaller change than this plan was drafted assuming, and it
+    should be tested before any floor is derived.</p>
+
+    <p>The consequence is visible in the aggregate figures too: maximum bound ratios of 2.967 and 5.341
+    against absolute differences at 1e-16. A criterion must be passable by something. Determinism made
+    that crossing repeatable; it did not make it a measurement.</p>
 
     <h2 id="s2">§2 — Classify every bound before repairing any</h2>
 
@@ -91,6 +100,14 @@
     registered observable it is a fact about the quantity's definition, checkable by reading how it is
     formed. Recording it once, per bound, is most of the work — and it is the part that stops this
     recurring on the next observable someone registers.</p>
+
+    <p><strong>Take the cheap test first.</strong> Before deriving any floor, check the hypothesis that
+    §1 raises: that the failing cases already satisfy their registered absolute bound and fail only
+    because a relative bound is applied alongside it. If that holds across the failing cases, the
+    repair is a registration rule — no relative criterion where the reference has no nonzero continuum
+    value and an absolute one is present — and no new floor needs deriving at all. Report that outcome
+    plainly if it holds, because it is a far smaller and more durable change than a set of hand-derived
+    floors.</p>
 
     <p><strong>Done when</strong> every one of the 69 registered bounds carries a recorded
     classification of whether its scored quantity has a nonzero <em>continuum</em> value, with the

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T08:58:25",
+  "updated": "2026-08-25T09:02:13",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -348,6 +348,13 @@
         "created": "2026-08-12"
       },
       {
+        "id": "dual-trace-proto",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-25"
+      },
+      {
         "id": "edge-clip",
         "harness": "codex",
         "role": "implement",
@@ -367,6 +374,13 @@
         "role": "implement",
         "session_id": "01a03251-e7e3-7923-8bb0-27e8789573e1",
         "created": "2026-08-24"
+      },
+      {
+        "id": "efit-prior-art",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-25"
       },
       {
         "id": "efit-referee",
@@ -1097,6 +1111,13 @@
         "created": "2026-08-12"
       },
       {
+        "id": "verdict-semantics",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-25"
+      },
+      {
         "id": "volume-support",
         "harness": "codex",
         "role": "implement",
@@ -1123,6 +1144,13 @@
         "role": "implement",
         "session_id": "873551b5-ecde-42de-b56e-a097270f68b8",
         "created": "2026-08-22"
+      },
+      {
+        "id": "xpoint-map",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-25"
       }
     ],
     "runs": [
@@ -32712,6 +32740,6 @@
       }
     ],
     "holds": [],
-    "_version": 811
+    "_version": 815
   }
 }

@@ -1,0 +1,114 @@
+{
+  "artifact": "device connected-component labelling and private-flux comparison",
+  "production_cutover": false,
+  "criterion": "A cell is private when it is confined at the binding level and its positive component label differs from the magnetic-axis component label.",
+  "kernel": {
+    "component_labels": "label_connected_components_with_steps",
+    "private_mask": "private_flux_mask",
+    "connectivity": 4,
+    "background_label": 0,
+    "component_label": "minimum one-based flat-grid cell index",
+    "implementation": "Alternating row and column associative scans propagate minimum integer labels to a lax.while_loop fixpoint, preserving the existing boolean flood-fill cost structure and batchability."
+  },
+  "banked_terminal_comparison": {
+    "source": "docs/figures/primary-xpoint-evidence/private-flux-shadow-adjudication.json",
+    "method": "The banked host labels use scipy.ndimage.label with 4-connectivity. The focused device test proves identical component partitions and the same private-mask predicate. Each terminal verdict below applies that predicate to the banked component relationship and compares it with the existing vertical shadow verdict.",
+    "agreement_count": 6,
+    "terminal_count": 6,
+    "rejected_agreement_count": 4,
+    "admitted_control_agreement_count": 2,
+    "terminals": [
+      {
+        "shot": 21978,
+        "slice_index": 35,
+        "arm": "pure_arm",
+        "vertical_rule": "REJECT",
+        "connectivity_private_mask": "REJECT",
+        "verdict": "MATCH_PRIVATE_FLUX_REJECTION"
+      },
+      {
+        "shot": 21978,
+        "slice_index": 35,
+        "arm": "mixed_arm",
+        "vertical_rule": "REJECT",
+        "connectivity_private_mask": "REJECT",
+        "verdict": "MATCH_PRIVATE_FLUX_REJECTION"
+      },
+      {
+        "shot": 22086,
+        "slice_index": 43,
+        "arm": "pure_arm",
+        "vertical_rule": "REJECT",
+        "connectivity_private_mask": "REJECT",
+        "verdict": "MATCH_PRIVATE_FLUX_REJECTION"
+      },
+      {
+        "shot": 22086,
+        "slice_index": 43,
+        "arm": "mixed_arm",
+        "vertical_rule": "REJECT",
+        "connectivity_private_mask": "REJECT",
+        "verdict": "MATCH_PRIVATE_FLUX_REJECTION"
+      },
+      {
+        "shot": 21983,
+        "slice_index": 35,
+        "arm": "pure_arm",
+        "vertical_rule": "ADMIT",
+        "connectivity_private_mask": "ADMIT",
+        "verdict": "MATCH_CONTROL_ADMISSION"
+      },
+      {
+        "shot": 21983,
+        "slice_index": 35,
+        "arm": "mixed_arm",
+        "vertical_rule": "ADMIT",
+        "connectivity_private_mask": "ADMIT",
+        "verdict": "MATCH_CONTROL_ADMISSION"
+      }
+    ]
+  },
+  "constructed_disagreement": {
+    "grid_shape": [
+      13,
+      17
+    ],
+    "wall_cell": {
+      "vertical_index": 6,
+      "radial_index": 14
+    },
+    "typed_saddle_vertical_index_band": [
+      2,
+      10
+    ],
+    "axis_component_label": 54,
+    "wall_component_label": 98,
+    "vertical_rule": "ADMIT",
+    "connectivity_private_mask": "REJECT",
+    "reason": "The wall vertical index 6 is inside the inclusive height band [2, 10], but the wall cell carries disconnected component label 98 instead of axis component label 54."
+  },
+  "same_process_benchmark": {
+    "backend": "cpu",
+    "grid_shape": [
+      33,
+      33
+    ],
+    "production_grid_basis": "The MAST connectivity lattice has 33 radial by 33 vertical nodes, evident from the banked 0.060625 m radial and 0.125 m vertical node spacing and reconstructed connectivity geometry.",
+    "compilation": "excluded by one warm call per kernel",
+    "warm_execution_repetitions": 100,
+    "boolean_axis_component": {
+      "fixpoint_iterations": 2,
+      "median_wall_clock_ms": 0.0359365,
+      "minimum_wall_clock_ms": 0.030795
+    },
+    "all_component_labels": {
+      "fixpoint_iterations": 3,
+      "median_wall_clock_ms": 0.0561845,
+      "minimum_wall_clock_ms": 0.052713,
+      "component_count": 3,
+      "private_cell_count": 66
+    },
+    "median_time_ratio_labels_over_boolean": 1.5634,
+    "log": "/tmp/reeb-component-labelling-benchmark.log"
+  }
+}

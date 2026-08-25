@@ -66,6 +66,9 @@ _SQRT2 = 2.0**0.5
 __all__ = [
     "flood_fill_core",
     "flood_fill_core_with_steps",
+    "label_connected_components",
+    "label_connected_components_with_steps",
+    "private_flux_mask",
     "traced_spline_contour",
     "traced_flux_surface_bins",
 ]
@@ -99,6 +102,29 @@ def _fill_segments(core: jnp.ndarray, confined: jnp.ndarray, axis: int) -> jnp.n
         _compose_segment_reach, elements, axis=axis, reverse=True
     )[0]
     return (forward | backward) & confined
+
+
+def _compose_segment_minimum(left, right):
+    """Compose minimum-label maps for adjacent confined segments."""
+    label_left, open_left = left
+    label_right, open_right = right
+    return (
+        jnp.where(open_right, jnp.minimum(label_right, label_left), label_right),
+        open_right & open_left,
+    )
+
+
+def _fill_label_segments(
+    labels: jnp.ndarray, confined: jnp.ndarray, axis: int
+) -> jnp.ndarray:
+    """Propagate each segment's minimum positive label along ``axis``."""
+    sentinel = jnp.asarray(jnp.iinfo(labels.dtype).max, dtype=labels.dtype)
+    elements = (jnp.where(confined, labels, sentinel), confined)
+    forward = jax.lax.associative_scan(_compose_segment_minimum, elements, axis=axis)[0]
+    backward = jax.lax.associative_scan(
+        _compose_segment_minimum, elements, axis=axis, reverse=True
+    )[0]
+    return jnp.where(confined, jnp.minimum(forward, backward), 0)
 
 
 @partial(jax.jit, static_argnums=(2,))
@@ -146,6 +172,68 @@ def flood_fill_core(
     """Return the seed-connected component of ``confined`` as float 0/1 weights."""
     core, _steps = flood_fill_core_with_steps(confined, seed, n_iter)
     return core
+
+
+@partial(jax.jit, static_argnums=(1,))
+def label_connected_components_with_steps(
+    confined: jnp.ndarray, n_iter: int
+) -> tuple[jnp.ndarray, jnp.ndarray]:
+    """Return canonical labels for every 4-connected confined component.
+
+    Every confined cell starts with its one-based flat-grid index. Row and
+    column scans then propagate the minimum index within each uninterrupted
+    segment. Alternating the two segment fills to a fixed point leaves every
+    component carrying its minimum member index, with zero reserved for cells
+    outside ``confined``. ``n_iter`` is a static safety cap; ``nr + nz`` is
+    sufficient for a grid whose components use 4-connectivity.
+
+    Labels are stable across execution order and need not be consecutive. The
+    scalar step count is an execution diagnostic.
+    """
+    initial = jnp.arange(confined.size, dtype=jnp.int32).reshape(confined.shape) + 1
+    initial = jnp.where(confined, initial, 0)
+
+    def condition(state):
+        step, labels, previous = state
+        return (step < n_iter) & jnp.any(labels != previous)
+
+    def body(state):
+        step, labels, _previous = state
+        row_filled = _fill_label_segments(labels, confined, axis=1)
+        next_labels = _fill_label_segments(row_filled, confined, axis=0)
+        return step + 1, next_labels, labels
+
+    step, labels, _previous = jax.lax.while_loop(
+        condition,
+        body,
+        (jnp.asarray(0, dtype=jnp.int32), initial, jnp.zeros_like(initial)),
+    )
+    return labels, step
+
+
+@partial(jax.jit, static_argnums=(1,))
+def label_connected_components(confined: jnp.ndarray, n_iter: int) -> jnp.ndarray:
+    """Return canonical labels for every 4-connected confined component."""
+    labels, _steps = label_connected_components_with_steps(confined, n_iter)
+    return labels
+
+
+@jax.jit
+def private_flux_mask(
+    component_labels: jnp.ndarray, axis_seed: jnp.ndarray
+) -> jnp.ndarray:
+    """Return labelled confined cells disconnected from the magnetic axis.
+
+    ``component_labels`` comes from :func:`label_connected_components` and
+    uses zero for unconfined cells. ``axis_seed`` is a boolean field containing
+    the binding-level magnetic-axis cell. A confined cell is private precisely
+    when its positive component label differs from the axis component label.
+    """
+    sentinel = jnp.asarray(jnp.iinfo(component_labels.dtype).max)
+    axis_label = jnp.min(
+        jnp.where(axis_seed & (component_labels > 0), component_labels, sentinel)
+    )
+    return (component_labels > 0) & (component_labels != axis_label)
 
 
 # ---------------------------------------------------------------------------

@@ -1,0 +1,469 @@
+{
+  "admission_outside_private_flux_count": 2,
+  "admitted_terminal_count": 2,
+  "artifact": "geometric adjudication of the private-flux wall shadow",
+  "method": "At a flux level displaced inward from the selected-X separatrix by 2e-4 of the terminal flux range, 4-connected in-vessel cells are labelled. A wall extremum is private flux iff its nearest confined cell belongs to a component disconnected from the magnetic-axis component.",
+  "private_flux_supported_rejection_count": 4,
+  "project_absolute_src": "/nova/figures/primary-xpoint-evidence/private-flux-shadow-adjudication.png",
+  "rejected_terminal_count": 4,
+  "selection_fallback": "The exact margin is undefined when the only confined-most wall extremum is private flux. Dual-branch selection therefore needs a total observable: retain exact margin where finite and use the already-defined always-fork policy on these shadow-rejected frames.",
+  "terminal_count": 6,
+  "terminals": [
+    {
+      "arm": "pure_arm",
+      "axis_to_classified_cell_distance_m": 0.010273923011193438,
+      "banked_coordinate_exact": true,
+      "classification_offset_wb": 0.0002625669990006271,
+      "confined_component_count": 4,
+      "nearest_confined_cell_to_wall_m": [
+        0.6056249990360811,
+        -1.75
+      ],
+      "offset_sensitivity": [
+        {
+          "offset_fraction_of_flux_range": 5e-05,
+          "offset_wb": 6.564174975015678e-05,
+          "private_component_count": 2,
+          "wall_in_private_flux_component": true,
+          "wall_to_classified_cell_distance_m": 0.040983195148234404
+        },
+        {
+          "offset_fraction_of_flux_range": 0.0001,
+          "offset_wb": 0.00013128349950031356,
+          "private_component_count": 3,
+          "wall_in_private_flux_component": true,
+          "wall_to_classified_cell_distance_m": 0.040983195148234404
+        },
+        {
+          "offset_fraction_of_flux_range": 0.0002,
+          "offset_wb": 0.0002625669990006271,
+          "private_component_count": 3,
+          "wall_in_private_flux_component": true,
+          "wall_to_classified_cell_distance_m": 0.040983195148234404
+        },
+        {
+          "offset_fraction_of_flux_range": 0.0005,
+          "offset_wb": 0.0006564174975015678,
+          "private_component_count": 3,
+          "wall_in_private_flux_component": true,
+          "wall_to_classified_cell_distance_m": 0.040983195148234404
+        },
+        {
+          "offset_fraction_of_flux_range": 0.001,
+          "offset_wb": 0.0013128349950031356,
+          "private_component_count": 3,
+          "wall_in_private_flux_component": true,
+          "wall_to_classified_cell_distance_m": 0.040983195148234404
+        }
+      ],
+      "private_component_area_m2": 0.3031250002095476,
+      "private_flux_verdict_stable_across_offsets": true,
+      "selected_x_coordinate_m": [
+        0.5676559771789977,
+        -1.2338307252843705
+      ],
+      "selected_x_flux_wb": -0.07017520665944828,
+      "selected_x_height_band_m": [
+        -1.2338307252843705,
+        1.2448486718561536
+      ],
+      "selected_x_normalized_flux_operand": 0.44252817236845116,
+      "shot": 21978,
+      "slice_index": 35,
+      "verdict": "CORRECT_PRIVATE_FLUX_REJECTION",
+      "wall_beyond_x_height_band": true,
+      "wall_coordinate_m": [
+        0.5649306774139404,
+        -1.7451425858451193
+      ],
+      "wall_in_axis_connected_component": false,
+      "wall_in_private_flux_component": true,
+      "wall_inside_selected_flux_level": true,
+      "wall_normalized_flux_before_shadow": 0.3310275619269073,
+      "wall_outside_selected_flux_level": false,
+      "wall_shadowed": true,
+      "wall_status": "wall_extremum_rejected_by_private_flux_shadow",
+      "wall_to_classified_cell_distance_m": 0.040983195148234404
+    },
+    {
+      "arm": "mixed_arm",
+      "axis_to_classified_cell_distance_m": 0.02993790487284452,
+      "banked_coordinate_exact": true,
+      "classification_offset_wb": 0.00026431634502637206,
+      "confined_component_count": 5,
+      "nearest_confined_cell_to_wall_m": [
+        0.6056249990360811,
+        1.75
+      ],
+      "offset_sensitivity": [
+        {
+          "offset_fraction_of_flux_range": 5e-05,
+          "offset_wb": 6.607908625659302e-05,
+          "private_component_count": 4,
+          "wall_in_private_flux_component": true,
+          "wall_to_classified_cell_distance_m": 0.04077198642330958
+        },
+        {
+          "offset_fraction_of_flux_range": 0.0001,
+          "offset_wb": 0.00013215817251318603,
+          "private_component_count": 4,
+          "wall_in_private_flux_component": true,
+          "wall_to_classified_cell_distance_m": 0.04077198642330958
+        },
+        {
+          "offset_fraction_of_flux_range": 0.0002,
+          "offset_wb": 0.00026431634502637206,
+          "private_component_count": 4,
+          "wall_in_private_flux_component": true,
+          "wall_to_classified_cell_distance_m": 0.04077198642330958
+        },
+        {
+          "offset_fraction_of_flux_range": 0.0005,
+          "offset_wb": 0.0006607908625659301,
+          "private_component_count": 4,
+          "wall_in_private_flux_component": true,
+          "wall_to_classified_cell_distance_m": 0.04077198642330958
+        },
+        {
+          "offset_fraction_of_flux_range": 0.001,
+          "offset_wb": 0.0013215817251318602,
+          "private_component_count": 4,
+          "wall_in_private_flux_component": true,
+          "wall_to_classified_cell_distance_m": 0.04077198642330958
+        }
+      ],
+      "private_component_area_m2": 0.23492187516239937,
+      "private_flux_verdict_stable_across_offsets": true,
+      "selected_x_coordinate_m": [
+        0.5746975883277566,
+        1.2639851582160506
+      ],
+      "selected_x_flux_wb": -0.06472970545236578,
+      "selected_x_height_band_m": [
+        -1.212691610310149,
+        1.2639851582160506
+      ],
+      "selected_x_normalized_flux_operand": 0.43580205514567494,
+      "shot": 21978,
+      "slice_index": 35,
+      "verdict": "CORRECT_PRIVATE_FLUX_REJECTION",
+      "wall_beyond_x_height_band": true,
+      "wall_coordinate_m": [
+        0.5649306774139404,
+        1.747484634297699
+      ],
+      "wall_in_axis_connected_component": false,
+      "wall_in_private_flux_component": true,
+      "wall_inside_selected_flux_level": true,
+      "wall_normalized_flux_before_shadow": 0.3310454781725451,
+      "wall_outside_selected_flux_level": false,
+      "wall_shadowed": true,
+      "wall_status": "wall_extremum_rejected_by_private_flux_shadow",
+      "wall_to_classified_cell_distance_m": 0.04077198642330958
+    },
+    {
+      "arm": "pure_arm",
+      "axis_to_classified_cell_distance_m": 0.016499409968033656,
+      "banked_coordinate_exact": true,
+      "classification_offset_wb": 0.0002726608159676388,
+      "confined_component_count": 1,
+      "nearest_confined_cell_to_wall_m": [
+        0.5449999989941716,
+        -0.75
+      ],
+      "offset_sensitivity": [
+        {
+          "offset_fraction_of_flux_range": 5e-05,
+          "offset_wb": 6.81652039919097e-05,
+          "private_component_count": 0,
+          "wall_in_private_flux_component": false,
+          "wall_to_classified_cell_distance_m": 0.9267087705882354
+        },
+        {
+          "offset_fraction_of_flux_range": 0.0001,
+          "offset_wb": 0.0001363304079838194,
+          "private_component_count": 0,
+          "wall_in_private_flux_component": false,
+          "wall_to_classified_cell_distance_m": 0.9267087705882354
+        },
+        {
+          "offset_fraction_of_flux_range": 0.0002,
+          "offset_wb": 0.0002726608159676388,
+          "private_component_count": 0,
+          "wall_in_private_flux_component": false,
+          "wall_to_classified_cell_distance_m": 0.9267087705882354
+        },
+        {
+          "offset_fraction_of_flux_range": 0.0005,
+          "offset_wb": 0.000681652039919097,
+          "private_component_count": 0,
+          "wall_in_private_flux_component": false,
+          "wall_to_classified_cell_distance_m": 0.9267087705882354
+        },
+        {
+          "offset_fraction_of_flux_range": 0.001,
+          "offset_wb": 0.001363304079838194,
+          "private_component_count": 0,
+          "wall_in_private_flux_component": false,
+          "wall_to_classified_cell_distance_m": 0.9267087705882354
+        }
+      ],
+      "private_component_area_m2": 0.0,
+      "private_flux_verdict_stable_across_offsets": true,
+      "selected_x_coordinate_m": [
+        0.4500099684729799,
+        -1.817467111402243
+      ],
+      "selected_x_flux_wb": -0.015153877800157861,
+      "selected_x_height_band_m": [
+        -1.817467111402243,
+        1.2491324433637334
+      ],
+      "selected_x_normalized_flux_operand": 0.3511402755578827,
+      "shot": 21983,
+      "slice_index": 35,
+      "verdict": "CORRECT_ADMISSION",
+      "wall_beyond_x_height_band": false,
+      "wall_coordinate_m": [
+        0.2800000011920929,
+        -1.638011343762036
+      ],
+      "wall_in_axis_connected_component": true,
+      "wall_in_private_flux_component": false,
+      "wall_inside_selected_flux_level": false,
+      "wall_normalized_flux_before_shadow": 0.3583732394250173,
+      "wall_outside_selected_flux_level": true,
+      "wall_shadowed": false,
+      "wall_status": "wall_extremum_admitted",
+      "wall_to_classified_cell_distance_m": 0.9267087705882354
+    },
+    {
+      "arm": "mixed_arm",
+      "axis_to_classified_cell_distance_m": 0.044146600884222384,
+      "banked_coordinate_exact": true,
+      "classification_offset_wb": 0.00027476734094783424,
+      "confined_component_count": 1,
+      "nearest_confined_cell_to_wall_m": [
+        0.6056249990360811,
+        0.875
+      ],
+      "offset_sensitivity": [
+        {
+          "offset_fraction_of_flux_range": 5e-05,
+          "offset_wb": 6.869183523695856e-05,
+          "private_component_count": 0,
+          "wall_in_private_flux_component": false,
+          "wall_to_classified_cell_distance_m": 0.8323286579047656
+        },
+        {
+          "offset_fraction_of_flux_range": 0.0001,
+          "offset_wb": 0.00013738367047391712,
+          "private_component_count": 0,
+          "wall_in_private_flux_component": false,
+          "wall_to_classified_cell_distance_m": 0.8323286579047656
+        },
+        {
+          "offset_fraction_of_flux_range": 0.0002,
+          "offset_wb": 0.00027476734094783424,
+          "private_component_count": 0,
+          "wall_in_private_flux_component": false,
+          "wall_to_classified_cell_distance_m": 0.8323286579047656
+        },
+        {
+          "offset_fraction_of_flux_range": 0.0005,
+          "offset_wb": 0.0006869183523695856,
+          "private_component_count": 0,
+          "wall_in_private_flux_component": false,
+          "wall_to_classified_cell_distance_m": 0.8323286579047656
+        },
+        {
+          "offset_fraction_of_flux_range": 0.001,
+          "offset_wb": 0.0013738367047391711,
+          "private_component_count": 0,
+          "wall_in_private_flux_component": false,
+          "wall_to_classified_cell_distance_m": 0.8323286579047656
+        }
+      ],
+      "private_component_area_m2": 0.0,
+      "private_flux_verdict_stable_across_offsets": true,
+      "selected_x_coordinate_m": [
+        0.46252017254143946,
+        1.8036925839708253
+      ],
+      "selected_x_flux_wb": -0.015207047473228714,
+      "selected_x_height_band_m": [
+        -1.8192616189296464,
+        1.8036925839708253
+      ],
+      "selected_x_normalized_flux_operand": 0.34819032364053737,
+      "shot": 21983,
+      "slice_index": 35,
+      "verdict": "CORRECT_ADMISSION",
+      "wall_beyond_x_height_band": false,
+      "wall_coordinate_m": [
+        0.2800000011920929,
+        1.6409891353985715
+      ],
+      "wall_in_axis_connected_component": true,
+      "wall_in_private_flux_component": false,
+      "wall_inside_selected_flux_level": false,
+      "wall_normalized_flux_before_shadow": 0.3559232625718283,
+      "wall_outside_selected_flux_level": true,
+      "wall_shadowed": false,
+      "wall_status": "wall_extremum_admitted",
+      "wall_to_classified_cell_distance_m": 0.8323286579047656
+    },
+    {
+      "arm": "pure_arm",
+      "axis_to_classified_cell_distance_m": 0.014428287036862962,
+      "banked_coordinate_exact": true,
+      "classification_offset_wb": 0.0003156334057079785,
+      "confined_component_count": 2,
+      "nearest_confined_cell_to_wall_m": [
+        0.6056249990360811,
+        -1.75
+      ],
+      "offset_sensitivity": [
+        {
+          "offset_fraction_of_flux_range": 5e-05,
+          "offset_wb": 7.890835142699463e-05,
+          "private_component_count": 1,
+          "wall_in_private_flux_component": true,
+          "wall_to_classified_cell_distance_m": 0.040854816860881236
+        },
+        {
+          "offset_fraction_of_flux_range": 0.0001,
+          "offset_wb": 0.00015781670285398925,
+          "private_component_count": 1,
+          "wall_in_private_flux_component": true,
+          "wall_to_classified_cell_distance_m": 0.040854816860881236
+        },
+        {
+          "offset_fraction_of_flux_range": 0.0002,
+          "offset_wb": 0.0003156334057079785,
+          "private_component_count": 1,
+          "wall_in_private_flux_component": true,
+          "wall_to_classified_cell_distance_m": 0.040854816860881236
+        },
+        {
+          "offset_fraction_of_flux_range": 0.0005,
+          "offset_wb": 0.0007890835142699462,
+          "private_component_count": 2,
+          "wall_in_private_flux_component": true,
+          "wall_to_classified_cell_distance_m": 0.040854816860881236
+        },
+        {
+          "offset_fraction_of_flux_range": 0.001,
+          "offset_wb": 0.0015781670285398923,
+          "private_component_count": 2,
+          "wall_in_private_flux_component": true,
+          "wall_to_classified_cell_distance_m": 0.040854816860881236
+        }
+      ],
+      "private_component_area_m2": 0.16671875011525117,
+      "private_flux_verdict_stable_across_offsets": true,
+      "selected_x_coordinate_m": [
+        0.5874171527268778,
+        1.2123192901859092
+      ],
+      "selected_x_flux_wb": -0.12728627524409405,
+      "selected_x_height_band_m": [
+        -1.189639243938404,
+        1.2123192901859092
+      ],
+      "selected_x_normalized_flux_operand": 0.4363887681813337,
+      "shot": 22086,
+      "slice_index": 43,
+      "verdict": "CORRECT_PRIVATE_FLUX_REJECTION",
+      "wall_beyond_x_height_band": true,
+      "wall_coordinate_m": [
+        0.5649306774139404,
+        -1.7536177684350878
+      ],
+      "wall_in_axis_connected_component": false,
+      "wall_in_private_flux_component": true,
+      "wall_inside_selected_flux_level": true,
+      "wall_normalized_flux_before_shadow": 0.30190002257031606,
+      "wall_outside_selected_flux_level": false,
+      "wall_shadowed": true,
+      "wall_status": "wall_extremum_rejected_by_private_flux_shadow",
+      "wall_to_classified_cell_distance_m": 0.040854816860881236
+    },
+    {
+      "arm": "mixed_arm",
+      "axis_to_classified_cell_distance_m": 0.02632156891525161,
+      "banked_coordinate_exact": true,
+      "classification_offset_wb": 0.00031605114456298764,
+      "confined_component_count": 3,
+      "nearest_confined_cell_to_wall_m": [
+        0.6056249990360811,
+        1.75
+      ],
+      "offset_sensitivity": [
+        {
+          "offset_fraction_of_flux_range": 5e-05,
+          "offset_wb": 7.901278614074691e-05,
+          "private_component_count": 2,
+          "wall_in_private_flux_component": true,
+          "wall_to_classified_cell_distance_m": 0.04115455532599936
+        },
+        {
+          "offset_fraction_of_flux_range": 0.0001,
+          "offset_wb": 0.00015802557228149382,
+          "private_component_count": 2,
+          "wall_in_private_flux_component": true,
+          "wall_to_classified_cell_distance_m": 0.04115455532599936
+        },
+        {
+          "offset_fraction_of_flux_range": 0.0002,
+          "offset_wb": 0.00031605114456298764,
+          "private_component_count": 2,
+          "wall_in_private_flux_component": true,
+          "wall_to_classified_cell_distance_m": 0.04115455532599936
+        },
+        {
+          "offset_fraction_of_flux_range": 0.0005,
+          "offset_wb": 0.0007901278614074691,
+          "private_component_count": 2,
+          "wall_in_private_flux_component": true,
+          "wall_to_classified_cell_distance_m": 0.04115455532599936
+        },
+        {
+          "offset_fraction_of_flux_range": 0.001,
+          "offset_wb": 0.0015802557228149381,
+          "private_component_count": 2,
+          "wall_in_private_flux_component": true,
+          "wall_to_classified_cell_distance_m": 0.04115455532599936
+        }
+      ],
+      "private_component_area_m2": 0.31828125022002496,
+      "private_flux_verdict_stable_across_offsets": true,
+      "selected_x_coordinate_m": [
+        0.5870751527016022,
+        1.2225553064310346
+      ],
+      "selected_x_flux_wb": -0.12254674397700278,
+      "selected_x_height_band_m": [
+        -1.177930653249266,
+        1.2225553064310346
+      ],
+      "selected_x_normalized_flux_operand": 0.4309790002082113,
+      "shot": 22086,
+      "slice_index": 43,
+      "verdict": "CORRECT_PRIVATE_FLUX_REJECTION",
+      "wall_beyond_x_height_band": true,
+      "wall_coordinate_m": [
+        0.5649306774139404,
+        1.756137557477899
+      ],
+      "wall_in_axis_connected_component": false,
+      "wall_in_private_flux_component": true,
+      "wall_inside_selected_flux_level": true,
+      "wall_normalized_flux_before_shadow": 0.3000846561326388,
+      "wall_outside_selected_flux_level": false,
+      "wall_shadowed": true,
+      "wall_status": "wall_extremum_rejected_by_private_flux_shadow",
+      "wall_to_classified_cell_distance_m": 0.04115455532599936
+    }
+  ]
+}

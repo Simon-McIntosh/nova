@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="dual-branch-selection-landed">
+  <meta name="plan-title" content="Dual-Branch Selection — cumulative execution evidence">
+  <meta name="plan-summary" content="Node-by-node execution record for the dual-branch-selection plan: the traced selection seam prototype, the pinned-branch contrast, and the implementation waves that follow.">
+  <meta name="plan-evidence-for" content="dual-branch-selection">
+  <meta name="plan-verifies" content="dual-branch-selection#s5">
+  <title>Dual-Branch Selection — landed evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s5-seam">§5 seam — traced selection prototype (landed 2026-08-25)</h2>
+
+    <p>Node <code>traced-selection-seam</code> (run <code>r-20260825T072300044988</code>, commit
+    <code>632a4396</code>, merged <code>Merge the traced selection seam prototype</code>) built and
+    measured the continuous selector between two <code>ForwardBranchReceipt</code> states, as a
+    prototype with no production module changed.</p>
+
+    <table>
+      <caption>Measured properties of the prototype selector
+        (<code>benchmarks/traced_selection_seam.py</code>; receipt
+        <code>docs/figures/dual-branch-selection/traced-selection-continuity.json</code>)</caption>
+      <thead><tr><th scope="col">Property</th><th scope="col">Measured</th></tr></thead>
+      <tbody>
+        <tr><td>Traceability</td><td><code>jax.jit</code> clean — a 30-equation jaxpr;
+          <code>jax.vmap</code> batchable over the classified fixtures</td></tr>
+        <tr><td>Exact-class agreement, both arms qualified</td><td><strong>53/53</strong> classified
+          fixtures, 0 disagreements</td></tr>
+        <tr><td>Continuity across the transition</td><td>Two dense 257-point persistent-saddle rails
+          (both polarities) finite and continuous; maximum adjacent weight step
+          <strong>3.5255025e-4</strong> within the Lipschitz bound 3.5255027e-4; maximum adjacent
+          selected-flux step 1.2213e-3</td></tr>
+        <tr><td>Observable equivalence</td><td><code>p_diverted</code> vs
+          <code>sigmoid(class_margin / 0.01)</code>: maximum disagreement
+          <strong>2.220446e-16</strong> across all 53 fixtures</td></tr>
+        <tr><td>Gradients</td><td>Finite and nonzero through both observables (flux-sum gradients
+          3.0 via <code>p_diverted</code>, 75.0 via <code>class_margin</code>)</td></tr>
+        <tr><td>Degrade semantics</td><td>Exactly the sole qualified branch: limited-only weight
+          <strong>0.0</strong>, diverted-only weight <strong>1.0</strong>; neither-qualified returns
+          weight NaN, class code −1, qualified false</td></tr>
+        <tr><td>Retained limitation</td><td>In the 19-point growing-saddle family the weight jumps
+          0 → 1 when the saddle operand first <em>appears</em> (class agreement still 19/19).
+          Continuity through operand emergence is NOT claimed; production promotion must consume
+          the connectivity-localization repair before claiming it.</td></tr>
+      </tbody>
+    </table>
+
+    <p>Verdict: the continuous-selection mechanism the plan proposes is demonstrated where both
+    branches qualify, with the degrade path exact and the one discontinuity honestly located at
+    operand emergence rather than at the class transition.</p>
+
+    <h2 id="s4-contrast">§4 contrast — pure versus mixed on the frozen six (landed 2026-08-25)</h2>
+
+    <p>Node <code>pinned-branch-contrast</code> (run <code>r-20260825T072235381782</code>, commit
+    <code>991d5d6e</code>, merged <code>Merge the pinned-branch contrast</code>) ran the branch-pure
+    pinned DIVERTED solve and the margin-penalty mixed iteration from byte-identical labelled seeds
+    on the six frozen MAST references, recording twelve post-promotion residuals per arm per
+    reference. Terminal comparisons cross two different iterations and are reported as such, never
+    as a scalar margin-only ablation.</p>
+
+    <table>
+      <caption>Per-reference terminals (receipt
+        <code>docs/figures/dual-branch-selection/pinned-branch-contrast.json</code>; margin +∞ means
+        one exact comparator operand is absent — recorded as strict-JSON null with
+        <code>class_margin_nonfinite</code>, no numeric sentinel)</caption>
+      <thead><tr><th scope="col">Reference</th><th scope="col">Pure: residual / class / fitted ρ</th>
+        <th scope="col">Mixed: residual / class / fitted ρ</th></tr></thead>
+      <tbody>
+        <tr><td>21978/35</td><td>4.585e-3 / DIVERTED / 0.9503</td><td>1.050e-2 / DIVERTED / 1.0185</td></tr>
+        <tr><td>21983/35</td><td>6.624e-3 / DIVERTED / 0.9768</td><td>1.256e-3 / DIVERTED / 0.9997</td></tr>
+        <tr><td>21985/51</td><td>5.168e-3 / DIVERTED / 0.9835</td><td>2.962e-3 / DIVERTED / 1.0181</td></tr>
+        <tr><td>21986/46</td><td>7.425e-3 / DIVERTED / 0.9776</td><td>8.920e-3 / LIMITED / 1.0386</td></tr>
+        <tr><td>21989/55</td><td>5.024e-3 / LIMITED / 0.9804</td><td>2.823e-3 / LIMITED / 0.9784</td></tr>
+        <tr><td>22086/43</td><td>5.049e-3 / DIVERTED / 0.9613</td><td><strong>3.584e-16 / DIVERTED / 0.0776</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p>Headlines. The pure arm is <strong>weakly contracting but stalled</strong>: ρ below one on
+    6/6 yet 0.950–0.984 against the prior-art reference's 0.33, no terminal under the 1e-8
+    criterion, achieved DIVERTED on 5/6 (21989/55 crosses to LIMITED at margin −3.395e-3,
+    p_diverted 0.416). The mixed arm expands on 3/6 yet converged <strong>one diverted terminal to
+    machine precision</strong> — 22086/43 at 3.584e-16 — the repository's first. The exact-margin
+    operand is absent (+∞) on 21978/35 and 22086/43 in both arms: the connectivity-localisation
+    defect measured live on the production cohort. Batch-two jit+vmap parity: maximum flux relative
+    difference 2.223e-16 against the registered 1e-10, terminal residual difference exactly 0,
+    categorical receipts exact. A weak contraction is evidence a diverted fixed point exists; the
+    why of ρ ≈ 0.95–0.98 remains owned by <code>discrete-operator-analytic-error</code> §4's
+    perturbation ladder, deliberately not duplicated here.</p>
+
+  </main>
+</body>
+</html>

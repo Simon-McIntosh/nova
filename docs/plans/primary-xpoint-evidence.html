@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="primary-xpoint-evidence">
+  <meta name="plan-title" content="Primary X-Point Evidence — prove the coordinate, not the comparator">
+  <meta name="plan-summary" content="Primary X-point identification agrees with the exact Boolean comparator on 10 of 10 banked terminals and 53 of 53 classified fixtures, but no receipt serializes the selected X coordinate, flux operand, or candidate table, so spatial correctness is currently proven only against the implementation it checks. Close the gap: a dedicated batched X coordinate-and-flux parity test, terminal X-candidate serialization in margin receipts, and dtype self-configuration for the one transform test that fails in isolation.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="mid">
+  <meta name="plan-effort-hours" content="3.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-sprint" content="S15">
+  <title>Primary X-Point Evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-25">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The gap: agreement is banked, the coordinate is not</h2>
+
+    <p>The topology capability audit (run <code>r-20260825T070446317634</code>) confirmed the
+    primary X-point rule — the first reachable saddle obstruction from the magnetic axis, with the
+    private-flux wall shadow discarded — agrees with the exact Boolean comparator on
+    <strong>10 of 10</strong> margin-remeasure terminals and <strong>53 of 53</strong> classified
+    fixtures, across both surface selectors, with the crossing bracketed to
+    <strong>6.1e-8 Wb</strong>. It also found what the agreement cannot prove: no terminal receipt
+    serializes the selected X-point coordinate, its flux operand, the candidate table, or a
+    Hessian/saddle check, so the 10/10 result demonstrates comparator consistency rather than
+    independent spatial correctness. The batched test suite has the same shape of gap:
+    <code>test_batched_primary_points_match_per_slice</code> directly asserts only the O-point,
+    while the X-dependent read is exercised without a dedicated batched X-coordinate parity
+    assertion. A selection mechanism about to route catalog-scale class decisions through this
+    identification (sibling plan <code>dual-branch-selection</code>) deserves the independent
+    audit trail.</p>
+
+    <h2 id="s2">§2 — Deliverables</h2>
+
+    <p>Three small items, each independently shippable and none altering production behaviour:</p>
+
+    <table>
+      <caption>Deliverables with their done-when measures</caption>
+      <thead><tr><th scope="col">Item</th><th scope="col">Done when</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Batched primary-X parity test</td>
+          <td>A test asserts the primary X-point <em>coordinates and flux</em> from
+            <code>Topology.read_batch</code> match per-slice reads on fixtures that include
+            double-null and near-tangency cases — not only the O-point.</td>
+        </tr>
+        <tr>
+          <td>Terminal X-candidate serialization</td>
+          <td>Margin receipts carry the selected X coordinate, its flux operand, and the admitted
+            candidate diagnostics, so a future audit can verify the physical saddle independently
+            of the Boolean comparator. Verified by regenerating one banked terminal receipt with
+            zero differing numeric fields in the existing entries.</td>
+        </tr>
+        <tr>
+          <td>Isolated-test dtype self-configuration</td>
+          <td><code>test_jit_vmap_grad_safe_and_fixed_shape</code> configures nova's x64 policy
+            itself and passes in an isolated process, removing the run-order sensitivity the audit
+            measured (17/18 in one order, 18/18 with the recheck).</td>
+        </tr>
+      </tbody>
+    </table>
+
+    
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-pxe-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship primary-xpoint-evidence" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close the primary X-point spatial-evidence gap</h4>
+    <div class="r-fu-body">Three deliverables from the topology capability audit: a batched X coordinate-and-flux parity test, terminal X-candidate serialization in margin receipts with zero differing numeric fields on regeneration, and x64 self-configuration for the isolated transform test.</div>
+    <pre class="r-fu-prompt">/reckon-ship primary-xpoint-evidence</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>

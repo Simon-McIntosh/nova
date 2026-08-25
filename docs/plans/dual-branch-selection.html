@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="dual-branch-selection">
+  <meta name="plan-title" content="Dual-Branch Selection — a class is an outcome, not an input">
+  <meta name="plan-summary" content="The catalog solver reaches limiter-class roots on every diverted request: 0 of 10 under the mixed margin-penalty iteration, and the branch-pure pinned diverted arm stalls at 4.6e-3 to 7.4e-3 without contracting. The plan promotes the already-traced differentiable class observable p_diverted to a selection seam over the existing two-branch portfolio, closes the three host-Python islands that block a compiled catalog verdict, and confines forking to a margin-armed rare set. Ideas from imas-efit&#x27;s dual-stream solution are adopted as concepts only — zero code ports, and no separatrix drag in any form.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="12.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-context" content="extended">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-sprint" content="S15">
+  <meta name="plan-depends-on" content="dual-basin-solve,topology-preserving-continuation">
+  <meta name="plan-blocks" content="mast-catalog-gpu-solve">
+  <title>Dual-Branch Selection | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-25">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The measured problem: every road leads to the limiter</h2>
+
+    <p>Unconstrained or penalty-guided, the forward solve finds limiter-class roots wherever a
+    diverted equilibrium is requested. The margin re-measurement graded proposals by
+    <code>relative_residual + max(−class_margin, 0)</code> and reached terminal residuals down to
+    <strong>2.409e-16</strong> — with <strong>10 of 10</strong> terminals limited where diverted was
+    requested and <strong>7 of 10</strong> wrong-class proposals <em>reducing</em> the residual while
+    closing nothing. The branch-pure arm is no better: the label-seeded lane pins the class into the
+    flux map itself (<code>operator.read(flux, requested_class)</code>,
+    <code>nova/equilibrium/forward.py:936-937</code>; route
+    <code>ForwardProfile.solve_branch newton_krylov</code>,
+    <code>benchmarks/label_seed_residual_field.py:441,468,492</code>) and stalls at
+    <strong>4.585e-3 to 7.425e-3</strong> on five of six diverted references without contracting,
+    while one (21989/55) defects to limited even from a diverted seed.</p>
+
+    <p>Three explanations are already excluded by measurement. The operator is exonerated: one
+    application of the exact forward map to a closed-form field holds <strong>2.69e-15 to
+    3.06e-15</strong> across four resolutions (the operator refinement ladder), so the map admits
+    the analytic fixed point. The inputs are exonerated: all four documented input substitutions
+    were closed or screened without moving the plateau. And the root asymmetry is measured rather
+    than assumed: a <em>limited</em> root has a machine-precision demonstration at
+    <strong>2.4e-16</strong>, while on the diverted side five of six references stall near
+    <strong>5e-3</strong> — the §4 contrast has since produced exactly one machine-precision
+    diverted terminal (22086/43, mixed arm, 3.58e-16), so a diverted fixed point exists somewhere
+    in the family and is still unreached on five of six. Any design that assumes both branches
+    converge everywhere is refuted before it starts.</p>
+
+    <p>The two iterations fail differently, and the difference carries the diagnosis. The
+    mixed iteration — class participating as a penalty — reproduces exactly the failure a mature
+    implementation of this ambiguity measured before separating branches: verdict-flipping
+    non-convergence cured only by branch purity. Nova's <em>pure</em> diverted branch instead
+    stalls without flipping, which relocates the open question from selection to contraction:
+    <strong>why does the pinned diverted map fail to contract about its root where the reference
+    implementation's pure branches contracted geometrically at ρ ≈ 0.33</strong>? That question is
+    owned by <code>discrete-operator-analytic-error</code> §4 (seeded and perturbed at the analytic
+    solution and at the six diverted labels); this plan consumes its answer and does not duplicate
+    the experiment.</p>
+
+    <h2 id="s2">§2 — Prior art is adopted as ideas, never as code</h2>
+
+    <p>imas-efit solved this ambiguity in production, and its record was mapped end-to-end
+    (prior-art map, run <code>r-20260825T070435806649</code>; fifteen commits, thirteen symbol
+    groups). Five concepts port; two things are banned outright.</p>
+
+    <table>
+      <caption>Concepts adopted from the imas-efit dual-stream record, re-derived natively</caption>
+      <thead><tr><th scope="col">Concept</th><th scope="col">What it means in nova's idiom</th></tr></thead>
+      <tbody>
+        <tr><td>Branch purity</td><td>Each class solved by its own pinned map with its own state and
+          history; the label is output-only. Already the shape of
+          <code>ForwardProfile.solve_portfolio</code>.</td></tr>
+        <tr><td>Identical-seed fork</td><td>Both branch solves start from one common seed so the
+          contrast measures the map, not the seed.</td></tr>
+        <tr><td>Qualification before selection</td><td>A branch result must be converged, class-realised,
+          and physically admissible before it may compete; qualification folds into the receipt as
+          traced masks, never into either iteration.</td></tr>
+        <tr><td>Selection after solves</td><td>No label feedback into any nonlinear iteration — the
+          reference implementation deleted its cross-iteration latch for cause.</td></tr>
+        <tr><td>Fork rarely</td><td>The reference retrospective measured fork-by-default as
+          over-deployed (57 → 17 solves once transient marginality stopped arming it). The fork arms
+          from the class margin, not unconditionally — subject to the batch-economics decision below.</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Banned, unconditionally (user directives, 2026-08-25):</strong> no imas-efit code is
+    ported — the execution models are disjoint and every mechanism is re-derived in nova's traced,
+    batched, functional idiom; and <strong>no separatrix drag is implemented, in any form, however
+    continuous</strong>. The reference selector itself is also rejected on its merits: it is a hard
+    precedence of booleans, a chi-squared tie band, and a categorical pulse anchor — "referentially
+    pure, but not continuous in either branch flux map" — and its per-pulse temporal hysteresis
+    presumes a slice ordering a batch-parallel catalog does not have. The continuous selector is the
+    one genuinely novel object in this plan.</p>
+
+    <h2 id="s3">§3 — What already exists, graded for trace and batch</h2>
+
+    <p>The capability map (run <code>r-20260825T070446317634</code>) graded every piece. The
+    substrate is in better shape than the symptom suggests: the axis-connected flood fill, the
+    connectivity boundary read, primary-X-point selection, the exact signed class margin
+    (<code>topology_margin = u_wall − u_xpoint</code>, reconciled at <code>9cc2d0f3</code>), the
+    smooth class observable, and the two-branch pinned portfolio are all
+    <code>jax.jit</code>-traceable and <code>vmap</code>-batchable today
+    (17/18 focused tests; the one failure an isolated-process x64-configuration artifact, green on
+    recheck). Primary-X identification agrees with the exact Boolean comparator on
+    <strong>10/10</strong> banked terminals and <strong>53/53</strong> classified fixtures, with one
+    honest gap: terminal receipts do not serialize the selected X coordinate, so spatial correctness
+    is proven against the comparator, not independently (§7 closes this).</p>
+
+    <p><strong>The differentiable transition quantity the design needs already ships.</strong>
+    <code>p_diverted</code> — a softmax saddle weight inside
+    <code>traced_smooth_boundary_read</code> (<code>nova/equilibrium/connectivity_boundary.py:877-886</code>)
+    — is jitted, batched, produced on the production smooth read, and consumed by the profile
+    basis; it has simply never been promoted to a branch-selection API. Three host-Python islands
+    block a compiled catalog verdict: <code>cold_seed_portfolio</code> builds seeds with host NumPy
+    and cannot sit under an outer vmap; <code>select_forward_branch</code> is a host history machine
+    (<code>bool()</code>/<code>float()</code>/enums); and the admitted-state bootstrap loops in
+    Python. Closing those three islands is implementation, not research.</p>
+
+    <figure>
+      <svg viewBox="0 0 720 250" role="img" aria-label="Dual-branch selection pipeline" style="max-width:100%;height:auto;font-family:system-ui;">
+        <defs>
+          <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#444"/>
+          </marker>
+        </defs>
+        <!-- seed -->
+        <rect x="10" y="100" width="120" height="44" fill="none" stroke="#444" stroke-width="1"/>
+        <text x="70" y="118" text-anchor="middle" font-size="13" fill="#222">one common seed</text>
+        <text x="70" y="134" text-anchor="middle" font-size="11" fill="#555">(array-only, batched)</text>
+        <!-- branch maps -->
+        <rect x="200" y="40" width="170" height="44" fill="none" stroke="#444" stroke-width="1"/>
+        <text x="285" y="58" text-anchor="middle" font-size="13" fill="#222">pinned LIMITED map</text>
+        <text x="285" y="74" text-anchor="middle" font-size="11" fill="#555">own state, own history</text>
+        <rect x="200" y="160" width="170" height="44" fill="none" stroke="#444" stroke-width="1"/>
+        <text x="285" y="178" text-anchor="middle" font-size="13" fill="#222">pinned DIVERTED map</text>
+        <text x="285" y="194" text-anchor="middle" font-size="11" fill="#555">own state, own history</text>
+        <!-- receipts + qualification -->
+        <rect x="430" y="100" width="150" height="44" fill="none" stroke="#444" stroke-width="1"/>
+        <text x="505" y="118" text-anchor="middle" font-size="13" fill="#222">receipts + traced</text>
+        <text x="505" y="134" text-anchor="middle" font-size="13" fill="#222">qualification masks</text>
+        <!-- selector -->
+        <rect x="620" y="100" width="90" height="44" fill="none" stroke="#0a6" stroke-width="1.5"/>
+        <text x="665" y="118" text-anchor="middle" font-size="13" fill="#0a6">continuous</text>
+        <text x="665" y="134" text-anchor="middle" font-size="13" fill="#0a6">selection</text>
+        <!-- arrows -->
+        <line x1="130" y1="112" x2="200" y2="66" stroke="#444" stroke-width="1" marker-end="url(#a)"/>
+        <line x1="130" y1="132" x2="200" y2="178" stroke="#444" stroke-width="1" marker-end="url(#a)"/>
+        <line x1="370" y1="66" x2="430" y2="112" stroke="#444" stroke-width="1" marker-end="url(#a)"/>
+        <line x1="370" y1="178" x2="430" y2="132" stroke="#444" stroke-width="1" marker-end="url(#a)"/>
+        <line x1="580" y1="122" x2="620" y2="122" stroke="#444" stroke-width="1" marker-end="url(#a)"/>
+        <!-- banned back-edge -->
+        <path d="M 505 144 C 505 230, 285 240, 285 208" fill="none" stroke="#b00" stroke-width="1" stroke-dasharray="5 4"/>
+        <text x="400" y="238" text-anchor="middle" font-size="11" fill="#b00">banned: label feedback into any iteration; separatrix drag in any form</text>
+      </svg>
+      <figcaption>Both classes solved branch-pure from one seed under <code>vmap</code>; receipts are
+      qualified by traced masks; one continuous selector chooses. The dashed edge is the pattern this
+      plan forbids.</figcaption>
+    </figure>
+
+    <h2 id="s4">§4 — The diverted arm: contraction measured, existence deferred</h2>
+
+    <p>The paired contrast node runs the pinned portfolio and the mixed margin-penalty iteration on
+    identical seeds over the six diverted references, records per-iterate residual sequences, and
+    fits a contraction ratio per arm. The comparison target is the reference implementation's
+    ρ ≈ 0.33 on pure branches. <strong>The contrast is landed</strong> (commit
+    <code>991d5d6e</code>) and the finding is sharp: the pure diverted arm is <strong>weakly
+    contracting but stalled</strong> — fitted ρ <strong>0.9503 to 0.9835</strong>, below one on all
+    six references, residuals 4.6e-3 to 7.4e-3, converged 0/6 — an order of magnitude slower
+    contraction than the reference implementation's pure branches. The mixed arm expands on three
+    references (ρ up to 1.039) yet <strong>converged 22086/43 to 3.58e-16 achieved-DIVERTED</strong>
+    (ρ 0.078), the repository's first machine-precision diverted terminal, on the one reference
+    whose exact-margin operand is absent. That operand absence (+∞ margin on 2/6 references) is the
+    connectivity-localisation defect measured live on the production cohort. Batch-two jit and vmap
+    parity holds at 2.2e-16. A weak contraction is existence evidence, not an unreachable root —
+    why ρ sits at 0.95–0.98 rather than 0.33 stays with the basin probe. Full record:
+    <a href="/nova/evidence/archive/dual-branch-selection-landed#s4-contrast">§4 contrast
+    landed</a>.</p>
+
+    <p>Whether a discrete diverted root <em>exists</em> — multiplicity, contraction, or a criterion
+    satisfied in the wrong place — belongs to <code>discrete-operator-analytic-error</code> §4 and is
+    consumed here, not re-measured. The selection semantics decision below stays open until that
+    answer lands; every other section is executable now.</p>
+
+    <h2 id="s5">§5 — The traced selection seam</h2>
+
+    <p>Promote the class decision to one public, traced, batched seam consuming two qualified branch
+    receipts: <code>p_diverted</code> carries the smooth selection weight (gradients flow through
+    it), <code>class_margin</code> carries the exact signed comparator for reporting and gates, and
+    neither substitutes for the other silently. Selection semantics must be explicit about the
+    measured asymmetry: when exactly one branch qualifies, the selector degrades to the qualified
+    branch — and the receipt <strong>counts degrade-path firings against genuine two-qualified
+    selections</strong>, because on present evidence the degrade path fires on every experimental
+    frame and an all-degrade cohort tests nothing about selection. Continuity is measured, not
+    asserted: the selection weight must be continuous across the classified transition rail where
+    both branches qualify. <strong>The prototype is landed and passes</strong> (commit
+    <code>632a4396</code>): jit-traceable with a 30-equation jaxpr, vmap-batchable,
+    <strong>53/53</strong> exact-class agreement where both arms qualify, continuous on both dense
+    257-point persistent-saddle rails (max adjacent weight step 3.5255e-4, inside the Lipschitz
+    bound), degrade semantics exact, and <code>p_diverted</code> equal to
+    <code>sigmoid(class_margin/0.01)</code> to 2.2e-16. One discontinuity is retained honestly: the
+    weight jumps at saddle-operand <em>emergence</em> (growing-saddle family), so production
+    promotion consumes the connectivity-localization repair before claiming continuity there. Full
+    record: <a href="/nova/evidence/archive/dual-branch-selection-landed#s5-seam">§5 seam
+    landed</a>.</p>
+
+    <p>Implementation follows the capability map's composition list: seed construction becomes an
+    array-only kernel (or precomputed batch tensors) so the portfolio sits under an outer catalog
+    <code>vmap</code>; the selector state (selected class, pending class and count, availability,
+    admissibility) becomes integer and boolean arrays advanced by <code>lax.scan</code> where a time
+    axis exists, with the host <code>SelectionReceipt</code> retained as the egress and provenance
+    boundary; the admitted-state bootstrap becomes a fixed ladder with device selection. The
+    existing host selector's tests remain the semantic oracle the traced port must reproduce.</p>
+
+    <h2 id="s6">§6 — Fork policy under catalog economics</h2>
+
+    <p>A two-branch portfolio doubles solve cost wherever it runs. The reference implementation
+    measured fork-by-default as over-deployed and confined the fork to terminal marginality — but its
+    escape mechanism is banned here, so nova's arming rule must come from its own margin: fork where
+    <code>|class_margin|</code> is small or the smooth weight is uncertain, solve one pinned branch
+    elsewhere, and measure the armed fraction on real catalog frames before locking the policy. The
+    1,341,435-slice budget (372.6 slices/s aggregate for the one-hour goal) is the denominator every
+    candidate policy is priced against.</p>
+
+    <h2 id="s7">§7 — What this plan does not carry</h2>
+
+    <p>The primary-X spatial-evidence gap (batched coordinate parity, terminal X-candidate
+    serialization, the isolated test's x64 self-configuration) is independently shippable
+    verification hardening on shipped machinery and is carried by the sibling plan
+    <code>primary-xpoint-evidence</code>. Whether a discrete diverted root exists, and why the pure
+    diverted map fails to contract, is carried by <code>discrete-operator-analytic-error</code> §4.
+    This plan consumes both answers and duplicates neither experiment.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="selection-observable" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which observable carries branch selection: the smooth softmax weight
+        p_diverted, the exact signed class_margin, or both with explicit roles (smooth weight for
+        selection and gradients, exact margin for reporting and gates)? The capability map warns
+        against silent substitution; the traced-selection receipt measures whether the smooth weight
+        is continuous across the transition rail and agrees with the exact comparator where both
+        branches qualify. Decide from that receipt, not in advance.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="p-diverted-only">p-diverted-only</button>
+      <button class="r-opt" data-value="class-margin-only">class-margin-only</button>
+      <button class="r-opt" data-value="both-explicit-roles">both-explicit-roles</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="fork-arming" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Does the catalog fork both branches on every slice (simple, uniform
+        shapes, twice the solve cost on 1,341,435 slices) or arm the fork from the class margin
+        (near-tangency slices only, single pinned solve elsewhere)? The reference implementation
+        measured always-fork as over-deployed, but its arming trigger is not portable. Answer after
+        the armed fraction is measured on real catalog frames and the two-branch batch cost is
+        measured on the accelerator lane — never from either number alone.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="always-fork">always-fork</button>
+      <button class="r-opt" data-value="margin-armed">margin-armed</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="unqualified-branch-semantics" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What does the published label carry when the diverted arm never
+        qualifies — degrade to the limited root with the diverted stall recorded, publish a
+        two-state receipt with no single class, or withhold the label? On present evidence this is
+        the common case, so the answer defines the catalog product. Answer only after
+        discrete-operator-analytic-error §4 reports whether a discrete diverted root exists and why
+        the pure map does not contract; deciding earlier would encode today&#x27;s stall as a permanent
+        semantic.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="degrade-with-recorded-stall">degrade-with-recorded-stall</button>
+      <button class="r-opt" data-value="two-state-receipt">two-state-receipt</button>
+      <button class="r-opt" data-value="withhold-label">withhold-label</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-dbs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship dual-branch-selection" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Implement the traced selection seam and fork policy</h4>
+    <div class="r-fu-body">The selection-seam prototype is landed and passing (commit 632a4396; 53/53 exact-class agreement, continuous rails, exact degrade semantics). Next: promote the seam to a production API consuming the connectivity-localization repair, close the three host islands (array-only seed construction, lax.scan selector state, fixed-ladder bootstrap), and measure the fork-arming economics on catalog frames. The pinned-branch-contrast receipt and discrete-operator-analytic-error section 4 feed the open decisions.</div>
+    <pre class="r-fu-prompt">/reckon-ship dual-branch-selection</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>

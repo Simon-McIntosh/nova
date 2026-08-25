@@ -26,7 +26,7 @@
 <meta name="plan-commits" content="ae723e28,3dc5155f,f2665b5d,815ca8fe,497b0372">
 <meta name="plan-artifacts" content="benchmarks/analytic_operator_ladder.py,benchmarks/diverted_basin_probe.py,benchmarks/contraction_discriminator.py,docs/figures/discrete-operator-analytic-error/operator-refinement-ladder.json,docs/figures/discrete-operator-analytic-error/diverted-basin-probe.json,docs/figures/discrete-operator-analytic-error/contraction-discriminator.json,docs/evidence/archive/discrete-operator-analytic-error-landed.html">
 <meta name="plan-impl" content="0.875">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 </head>
 <body>
   <main class="plan-doc">
@@ -333,6 +333,9 @@
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260825T100314047850-recovery-regression-attribution" data-who="analytic-rescore" data-when="2026-08-25T10:21:09Z">
     <div class="r-comment-body"><p>Four of five attributed and the sprint-critical question answered: the machine-precision pinned root is NOT in doubt - map is among five identical top-level receipt items, class 1/1, topology consistent, converged in one application, relative residual 1.58405e-16, absolute difference 4.44089e-16 Wb. Only composition drifted, exposing external_field.sha256. THE RED BRANCH IS NOT A SECOND PRODUCTION REGRESSION. The vmap [0,1]-versus-[0,0] case is a test updated without its artifact in d3093912, where the diverted branch now ACHIEVES diverted class - an improvement the test scores as failure. The 0.05 ladder demands an amplitude no banked receipt established, against a plan conclusion of only 0.01, added without a banked perturbation receipt. The coarse and fine limited failures are cold-start basin misses at 1.15254 and 1.13853 full root spans from their banked roots within a fixed ten-step budget, with seed byte-equality PASSING so not a wrong-file or regenerated-bank fault. Method note: per-path git log identified d3093912 as the expectation-side move postdating the banks. It also REJECTED the H200 perturbation hypothesis I supplied, showing those cold seeds sit three orders of magnitude outside the 1e-4 to 1e-3 probe range, so the hint supports fragility in direction only and proves no regression. Composition field enumeration was fenced out to a writable-cache node after my dispatch gave it a read-only tier that refuses the cache writes qualify needs.</p></div>
 </div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260825T102051495285-receipt-composition-delta" data-who="state-repetition" data-when="2026-08-25T10:27:51Z">
+    <div class="r-comment-body"><p>All 26 composition leaves enumerated: 16 identical, 10 differing - 2 SHA-256 digests plus 8 numeric leaves covering 4 quantities across pinned and unpinned anchors. The drift is NOT digest-only, but it is entirely roundoff-scale: axis radius +2.220446049250313e-16 m, which is one eps, axis height +4.163336342344337e-17 m, axis flux -8.673617379884035e-19 Wb, boundary flux +3.231430693775156e-19 Wb. Both digests are SHA-256 over ascontiguousarray tobytes with metadata excluded, so the arrays genuinely are not bitwise identical and metadata-only movement is ruled out. Yet every summary is exactly unchanged: external and source maximum absolute fluxes at 2.8331924006294433 and 0.14172801675859822 Wb, reconstruction and repeat differences exactly 0.0, pinned-versus-unpinned distances and flux differences exactly zero, closure exactly 4.440892098500626e-16 Wb. The five other top-level items are exactly identical and the root verdict is untouched at relative residual 1.5840538799920246e-16. CONCLUSION: this is the fifth expectation problem, not a physics one. Asserting receipt equality including SHA-256 digests over float64 arrays is a bitwise-identity gate on roundoff-scale values, which any code-generator reordering breaks - the same category error I made hours ago in a bitwise gate on a parity diagnostic and had to correct.</p></div>
+</div>
 </section>
 </main>
 </body>
@@ -437,6 +440,46 @@
     1e&minus;4 to 1e&minus;3 perturbation, and it showed these cold seeds sit three orders of magnitude
     outside that range, so the hint supports fragility in direction only and proves no regression. A
     worker that adopted an orchestrator's guess would have produced a confident wrong attribution.</p>
+
+    <p><strong>The composition delta is enumerated, 2026-08-25, node
+    <code>receipt-composition-delta</code></strong>, commit <code>33012360</code>, gate PASSED. Of 26
+    composition leaves, 16 are identical and 10 differ — two SHA-256 digests plus eight numeric leaves
+    covering four quantities across pinned and unpinned anchors.</p>
+
+    <table>
+      <caption>Every differing physical leaf, measured against banked</caption>
+      <thead><tr><th scope="col">Leaf</th><th scope="col">Delta</th></tr></thead>
+      <tbody>
+        <tr><td>axis radius</td><td><strong>+2.220446049250313e&minus;16 m</strong> — exactly one &epsilon;</td></tr>
+        <tr><td>axis height</td><td>+4.163336342344337e&minus;17 m</td></tr>
+        <tr><td>axis flux</td><td>&minus;8.673617379884035e&minus;19 Wb</td></tr>
+        <tr><td>boundary flux</td><td>+3.231430693775156e&minus;19 Wb</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The drift is not digest-only, and that was checked rather than assumed.</strong> Both
+    digests are SHA-256 over <code>np.ascontiguousarray(values).tobytes()</code> with file and cache
+    metadata excluded, so the differing digests prove the arrays are <em>not</em> bitwise identical —
+    metadata-only movement, the innocent explanation this repository has seen before, is ruled out. The
+    bank does not retain the old arrays, so no pointwise historical delta is recoverable without
+    regeneration, which was forbidden and correctly not attempted.</p>
+
+    <p><strong>Yet every derived quantity is exactly unchanged.</strong> External and source maximum
+    absolute fluxes hold at 2.8331924006294433 Wb and 0.14172801675859822 Wb; reconstruction and repeat
+    differences are exactly 0.0 Wb; pinned-versus-unpinned distances and flux differences are exactly
+    zero; closure is exactly 4.440892098500626e&minus;16 Wb. The five other top-level receipt items are
+    exactly identical and the root verdict is untouched at relative residual
+    1.5840538799920246e&minus;16.</p>
+
+    <p><strong>So the fifth failure is an expectation problem too, and it is the same category error
+    recorded elsewhere in this sprint.</strong> Asserting receipt equality <em>including SHA-256 digests
+    over float64 arrays</em> is a bitwise-identity gate on roundoff-scale physical values: any
+    code-generator reordering breaks it, and it cannot distinguish a real physical change from a
+    reordered reduction. That is exactly the gate I wrote and had to withdraw on a parity diagnostic
+    earlier the same day, corrected only because a worker refused it. The repair is the same in both
+    places — <strong>compare semantic fields exactly and physical values within a stated roundoff
+    envelope</strong> — and it is a change of kind rather than of magnitude, so it does not violate the
+    standing rule against widening a criterion until it passes.</p>
 
     <p><strong>What this leaves.</strong> Two expectation reviews, not repairs — the vmap [0,0] case and
     the 0.05 ladder assert things no bank establishes. One robustness decision on whether a ten-step

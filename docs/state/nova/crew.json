@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T12:21:28",
+  "updated": "2026-08-25T12:28:05",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -34540,9 +34540,101 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T102051495285-receipt-composition-delta",
+        "plan": "discrete-operator-analytic-error",
+        "section": "\u00a75",
+        "node": "receipt-composition-delta",
+        "node_definition": {
+          "done_when": "Run qualify(write=False) on the banked diverted root and print EVERY measured-versus-banked composition field side by side with its numeric delta and absolute magnitude, not only the fields that differ - the identical ones bound the drift. At minimum resolve composition.external_field.sha256, measured d6941b63cd30c1a60b31cd18bb3f473e27c500295fa0155251583ae6c23c69e6 against banked b1a26f6828854302e6a62bb18938e3e5f908630dff06a50783353c2e2df47463, by saying what that digest covers and whether the field it hashes is numerically identical despite the digest differing - a digest can move on write metadata while the values are bitwise equal, which this repository has hit before. State whether the drift is confined to digests and provenance or reaches physical values. You have a writable cache and a writable worktree, and that is the point of this node: the read-only tier refused the cache writes qualify needs. DO NOT re-bank, regenerate or overwrite anything under scripts/ or docs/figures/ - the banked receipt is the evidence and must survive unchanged. Change no source and no test. Its sibling already established that map is among the five identical top-level receipt items, so the pinned root is sound at relative residual 1.58405e-16; you are characterising the composition delta only, and if it turns out to be digest-and-provenance only then say so plainly, because that closes the last open question on this branch.",
+          "estimated_hours": 1.0,
+          "goal": "Enumerate every differing field between the measured and banked composition of the diverted root receipt, with numeric deltas, since a read-only sibling could name only the external-field digest before its sandbox refused the cache writes the measurement needs.",
+          "id": "receipt-composition-delta",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/receipt-composition-delta.md",
+          "plan": "discrete-operator-analytic-error",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/figures/discrete-operator-analytic-error/receipt-composition-delta.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "state-repetition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T10:21:01Z",
+        "completed_at": "2026-08-25T10:27:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 410,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 410,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "c8db1abafec95a53fd52ac792aeb42ffd6029066",
+        "commits": [
+          "33012360113fc6eca26a1fe369485d6fa35dcb0c"
+        ],
+        "changed_lines": {
+          "added": 68,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/receipt-composition-delta.md",
+        "scope_changed": false,
+        "session_id": "01a03870-0910-7810-900d-2606bdbb0d6f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2197248,
+            "cached_input_tokens_cumulative": 2197248,
+            "input_tokens": 2332338,
+            "input_tokens_cumulative": 2332338,
+            "output_tokens": 15222,
+            "output_tokens_cumulative": 15222,
+            "reasoning_output_tokens": 6541,
+            "reasoning_output_tokens_cumulative": 6541
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 848
+    "_version": 849
   }
 }

@@ -124,11 +124,35 @@
     asking whether the iteration stays; the second by perturbing it and asking whether it returns; the
     third by evaluating the criterion at the analytic solution directly.</p>
 
+    <p><strong>Banked evidence already bears on the first mechanism, and it is asymmetric between the
+    two branches — recorded 2026-08-25 in answer to a question from the dual-branch lane.</strong>
+    Seeding at the diverted EFIT labels is not the same experiment as seeding at the analytic solution,
+    and the plateau lane already ran it. Of the six frozen MAST references, <strong>five hold the
+    diverted branch</strong> — <code>achieved_branch = diverted</code>,
+    <code>topology_consistent = true</code> — at terminal residuals of 4.585e-3, 6.624e-3, 5.168e-3,
+    7.425e-3 and 5.049e-3, bounded non-convergent. <strong>One does not:</strong> 21989/55 ends
+    <code>limited</code> with <code>topology_consistent = false</code> at 5.024e-3, so the branch is
+    not uniformly held even from a seed that starts on it.</p>
+
+    <p><strong>The two branches are therefore not symmetric in the evidence, and a design that assumes
+    they are would be building on sand.</strong> A <em>limited</em> root has a machine-precision
+    demonstration: §6 of the plateau plan reached <strong>2.409e-16</strong> from the production moment
+    seed once the class refusal was relaxed. A <em>diverted</em> root has none — the best diverted
+    evidence anywhere is bounded non-convergence around <strong>5e-3</strong>. So the existence of a
+    discrete diverted root is still open, while the limited one is settled. What the label-seeded
+    result does establish is that the diverted neighbourhood is mostly not repulsive: the iteration
+    stays there and fails to converge, which is the signature of a contraction failure on that branch
+    rather than of the root's absence. The single defector is the sharpest available discriminator and
+    should be treated as such rather than averaged away.</p>
+
     <p><strong>Done when</strong> the solver's failure to reach the admitted fixed point is attributed,
     reporting: the terminal state and residual of a solve <em>seeded at</em> the analytic solution, so
     whether the iteration stays at a fixed point it starts on is answered directly; the same from
     seeds perturbed by a declared ladder of magnitudes, with the largest perturbation that still
-    returns quoted as a basin radius or its absence stated; the convergence criterion evaluated at the
+    returns quoted as a basin radius or its absence stated; the same seeded and perturbed measurement
+    repeated from the six diverted EFIT labels rather than only from the analytic solution, since those
+    are the seeds that start on the requested branch, reporting per reference whether the branch is
+    held and why 21989/55 alone leaves it; the convergence criterion evaluated at the
     analytic solution itself, since a criterion that is not satisfied there cannot select it; and a
     named verdict among multiplicity, contraction and criterion, or a statement of which were excluded
     and by what figure. A verdict of multiplicity makes this a seeding problem and is the cheapest

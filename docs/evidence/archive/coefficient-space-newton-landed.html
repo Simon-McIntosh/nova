@@ -449,6 +449,63 @@ call site; call-site selection remains true and <code>global_switch_introduced</
 arm A survives as a first-class production path and the factorial stays runnable.</p>
 </section>
 
+<section id="carrier-advance">
+<h2>§18 — the stall is projection, and conditioning is the plan's headline delivered</h2>
+
+<p><strong>Node <code>carrier-advance-diagnosis</code>, commit <code>8794f606</code>, gate PASSED,
+2026-08-25.</strong> SLURM job 1254321, 00:01:18, MaxRSS 3,320,684 K, frame
+<code>closed-form-oracle-coarse</code>, source revision <code>20e6626a</code>. Receipt sha256
+<code>5f0bea0478bee2d4ba40dff2b2e680524400161b985f85e80fe770a30b79109a</code>.</p>
+
+<table>
+  <caption>The three candidate mechanisms, each decided by figure</caption>
+  <thead><tr><th scope="col">Candidate</th><th scope="col">Verdict</th><th scope="col">Figure</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Topology admission</td>
+      <td><strong>Exonerated</strong></td>
+      <td>Every stalled candidate admitted finite and limited; 1 advance then 5 sequential candidates all refused as <code>EXACT_RESIDUAL_NOT_IMPROVED</code>. Not the 85-of-89 refusal that dominates the plateau lane.</td>
+    </tr>
+    <tr>
+      <td>Dense conditioning</td>
+      <td><strong>Exonerated, and vindicated</strong></td>
+      <td>36&times;36 dense Jacobian condition <strong>119.024</strong> against banked projected Krylov <strong>4087.408</strong> — ratio 0.02912, 34.3&times; better — solved to relative linear residual 3.160e&minus;16.</td>
+    </tr>
+    <tr>
+      <td>Projection</td>
+      <td><strong>Convicted</strong></td>
+      <td>Exact Newton full step residual <strong>1.948e&minus;3</strong>; the same direction projected, <strong>5.654e&minus;2</strong>, worse than the <strong>3.848e&minus;2</strong> it stalls at; every projected factor through 0.0625 worsens it.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="carrier-advance-pair">The pair of angles that locates the defect</h3>
+
+<p>Two measurements that ought to agree do not, and the gap between them is the whole finding.</p>
+
+<table>
+  <caption>Direction comparisons about the coefficient space</caption>
+  <thead><tr><th scope="col">Comparison</th><th scope="col">Angle</th><th scope="col">Norm ratio</th></tr></thead>
+  <tbody>
+    <tr><td>Exact Newton step &rarr; its projection onto the carrier</td><td>16.853&deg;</td><td>0.9571</td></tr>
+    <tr><td>Dense coefficient step &rarr; projected exact step</td><td><strong>49.735&deg;</strong></td><td><strong>0.01296</strong></td></tr>
+  </tbody>
+</table>
+
+<p>The first row says the coefficient space <em>contains</em> the useful direction almost exactly —
+projecting the exact Newton step barely turns it and barely shortens it. The second says the step the
+dense solve actually returns is half a right angle away from that direction and seventy-seven times
+too short. A well-formed Newton solve in a space that holds the useful direction does not return
+that, and at condition 119 the solve is not losing it to conditioning. <strong>So the defect is
+arithmetic rather than physics</strong>, and §19 carries the attribution.</p>
+
+<p><strong>The plan's two claims are now properly separate, which §6 required.</strong> §1 argued that
+at order one hundred unknowns the Jacobian could be formed explicitly and solved directly, retiring
+Arnoldi, GMRES, the projected condition number, step conditioning and non-normal amplification. That
+is measured true. Convergence is separately and clearly lost. Neither is reported as though it
+established the other.</p>
+</section>
+
 </main>
 </body>
 </html>

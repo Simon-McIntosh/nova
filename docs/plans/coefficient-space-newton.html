@@ -25,11 +25,11 @@
   <title>Coefficient-Space Newton | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-24">
-<meta name="plan-commits" content="485f6fdaa88328b96633db85111093e332b4aa53,dbee3048d4767af04373155c50b6e9753bfc330c,975e4acec3016cd56295d458d07eaf2aa8233454,75d6eb010612c12486327fa8c794efe6c662b71c,bf9dafdbf258624fc42d3f2d7eef8e468495b328,d6be878b6eb1eac9ea3d85d87f16cd2b48787cef,fd2baeb113b3443314618b9e6e29819ba233ce6e,231659ea748322d8607a71cc82b2d4e522e8cc1c,df676ca4329ead0f850aeeace59abc9c4f7a6a95">
+<meta name="plan-modified" content="2026-08-25">
+<meta name="plan-commits" content="485f6fdaa88328b96633db85111093e332b4aa53,dbee3048d4767af04373155c50b6e9753bfc330c,975e4acec3016cd56295d458d07eaf2aa8233454,75d6eb010612c12486327fa8c794efe6c662b71c,bf9dafdbf258624fc42d3f2d7eef8e468495b328,d6be878b6eb1eac9ea3d85d87f16cd2b48787cef,fd2baeb113b3443314618b9e6e29819ba233ce6e,231659ea748322d8607a71cc82b2d4e522e8cc1c,df676ca4329ead0f850aeeace59abc9c4f7a6a95,8794f6067002889a75aa99a05cf83863998d22af">
 <meta name="plan-artifacts" content="scripts/coefficient_basis_reuse/report.md,docs/figures/coefficient-space-newton/representation-degree.json,docs/figures/coefficient-space-newton/edge-current-jump.json,docs/figures/coefficient-space-newton/clipped-coupling-order.json,docs/figures/coefficient-space-newton/second-order-kernel.json,docs/figures/coefficient-space-newton/support-order-arms.json,docs/figures/coefficient-space-newton/carrier-arms.json,docs/figures/coefficient-space-newton/analytic-truth-rescore.json,docs/figures/coefficient-space-newton/plasma-only-carrier.json,nova/biot/second_moment_kernel.py,nova/equilibrium/coefficient_carrier.py,docs/evidence/archive/coefficient-space-newton-landed.html">
-<meta name="plan-impl" content="0.75">
-<meta name="plan-version" content="6">
+<meta name="plan-impl" content="0.786">
+<meta name="plan-version" content="7">
 </head>
 <body>
   <main class="plan-doc">
@@ -490,44 +490,57 @@
       <a href="/nova/evidence/archive/coefficient-space-newton-landed#plasma-only-shift">§13 landed</a>.</p>
     </section>
 
-    <h2 id="s18">§18 — The carrier is not floored, it is stalled, so ask about the advance</h2>
+    <section id="s18" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-25 — verdict PROJECTION</span>
+        <h2>§18 — The carrier is not floored, it is stalled, so ask about the advance</h2></header>
+      <p class="landed-summary">Two of the three candidates are exonerated with figures and the third
+      is convicted. <strong>Conditioning is vindicated, not merely cleared:</strong> the dense 36×36
+      coefficient Jacobian conditions at <strong>119.02</strong> against the banked projected Krylov
+      <strong>4087.41</strong> — 34.3× better — solved to relative linear residual 3.16e−16, which is
+      §1's opening claim demonstrated. <strong>Admission is exonerated:</strong> every stalled
+      candidate is admitted finite and limited, refused only on
+      <code>EXACT_RESIDUAL_NOT_IMPROVED</code>. <strong>Projection is convicted:</strong> the exact
+      Newton full step reaches 1.948e−3 while the same direction projected reaches 5.654e−2 — worse
+      than the 3.848e−2 it is stalled at — and every factor through 0.0625 worsens it. Projection
+      barely turns the direction (16.85°, norm ratio 0.957), yet the dense coefficient step sits
+      49.74° away at norm ratio 0.0130, so it is <em>not</em> the projected exact step. §19 carries
+      the repair. Artifact <code>docs/figures/coefficient-space-newton/carrier-advance.json</code>
+      (commit <code>8794f606</code>). Full record:
+      <a href="/nova/evidence/archive/coefficient-space-newton-landed#carrier-advance">§18 landed</a>.</p>
+    </section>
 
-    <p><strong>The floor account is refuted by its own remedy.</strong> §11 read the carrier arms as
-    converging to their projection floor, which was a coherent story: a coefficient iterate cannot
-    beat its own representation error, and the total flux is a harder object to fit than the plasma
-    hump. §13 removed the coil field exactly, dropped the floors by four to thirteen times, and the
-    terminal residual moved the wrong way. A quantity that gets worse when its stated cause is
-    removed by more than an order of magnitude was not caused by it.</p>
+    <h2 id="s19">§19 — The coefficient-space step is not the projected exact step, and that is repairable</h2>
 
-    <p><strong>The surviving asymmetry is in the advance, and it was visible in the first pass.</strong>
-    Arm A takes <strong>10</strong> admitted advances and 6.0 Newton-step-equivalents to reach
-    2.711e-15. Arm C takes <strong>1</strong>. Arm D also takes 1. A route that makes a single
-    admitted advance has not converged to anything — it has stopped, and where it stops is then set
-    by wherever one step from the seed lands rather than by any property of the representation. That
-    also explains why arms C and D agree to three digits (2.6019e-2 against 2.6049e-2) despite
-    different in-cell support: two routes that both stop after one advance report the same place
-    because neither of them moved.</p>
+    <p><strong>§18 leaves one discrepancy doing all the work, and it is arithmetic rather than
+    physics.</strong> Two directions that should be closely related are not. Projecting the exact
+    Newton step onto the coefficient space barely turns it — 16.85° at norm ratio 0.957 — so the
+    coefficient space can represent that direction almost exactly. Yet the step the dense
+    coefficient-space solve actually returns sits <strong>49.74°</strong> away from it at norm ratio
+    <strong>0.0130</strong>: seventy-seven times too short and half a right angle off. A well-formed
+    Newton solve in a space that demonstrably contains the useful direction should not return that.
+    The dense system is not ill-conditioned — 119.02 — so the discrepancy is not the solve losing the
+    direction to conditioning.</p>
 
-    <p>Three mechanisms can stop an advance and they are distinguishable rather than a matter of
-    taste. The projected step may be refused by the topology predicate, which the plateau lane has
-    measured refusing roughly 85 of every 89 updates. The projection back onto the coefficient space
-    may be destroying the step direction, since projecting a Newton step is not the same as taking a
-    Newton step in the projected space. Or the Jacobian formed in coefficient space may be
-    ill-conditioned or wrongly scaled, in which case the dense solve returns a direction that the
-    line search cannot use. The first is observable from the admission record, the second from the
-    angle between the step before and after projection, and the third from the dense condition number
-    the plan already wants quoted against the banked projected Krylov 4087.40844825275.</p>
+    <p><strong>Three mechanisms produce exactly this signature and they are distinguishable.</strong>
+    The coefficient-space Jacobian may be assembled with respect to a different variable than the
+    residual it is paired with — a chain-rule factor dropped between the carrier basis and the cell
+    evaluation would scale and rotate the step precisely this way. The residual being differentiated
+    may be the projected residual rather than the exact one, so the solve is converging a different
+    fixed point from the one scored. Or the projection and its transpose may be inconsistent, which
+    is the classic cause of a Newton direction that is short and rotated rather than merely
+    inaccurate. A finite-difference directional derivative of the exact residual along the carrier
+    basis distinguishes all three without needing to read the assembly.</p>
 
-    <p><strong>Done when</strong> the carrier arm's single advance is explained by measurement rather
-    than by argument, reporting for at least one frame: the admitted and refused advance counts with
-    the refusal reason recorded per rejected candidate; the angle and norm ratio between the Newton
-    step in the exact-value space and the same step after projection onto the coefficient space, so a
-    projection that destroys the direction is separated from a step that was never useful; the dense
-    coefficient-space Jacobian condition number quoted against the banked projected Krylov
-    4087.40844825275 on the same frame; and a named verdict assigning the stall to admission,
-    projection or conditioning, or stating which of the three were excluded and by what figure. A
-    verdict that the carrier stalls for a reason no change of representation can fix closes the
-    carrier question honestly, and arm A remaining the production path is then the result.</p>
+    <p><strong>Done when</strong> the discrepancy is attributed by measurement, reporting: the dense
+    coefficient-space Jacobian compared column by column against a finite-difference directional
+    derivative of the exact residual along the same basis directions, with the maximum relative
+    column error and the fitted scale factor between them stated; whether the differentiated residual
+    is the exact or the projected one, demonstrated rather than asserted; the angle and norm ratio
+    between the dense step and the projected exact step after any correction, against the banked
+    49.74° and 0.0130; and the terminal residual of a corrected carrier arm against arm A's
+    2.711e−15 and the stalled 3.848e−2. <strong>A correction that restores the step and still does not
+    converge closes the carrier question with conditioning won and convergence lost</strong>, which is
+    a complete answer; arm A remaining the production path is then the result, and §11 records it.</p>
 
     <h2 id="s14">§14 — Higher order should buy fewer cells, and the first pass priced it wrong</h2>
 
@@ -803,6 +816,9 @@
 </div>
 <div class="r-comment" data-section="s13" data-id="c-20260824T1955-plasmaonly" data-who="reckon-ship" data-when="2026-08-24T19:55:00Z">
     <div class="r-comment-body">plasma-only-carrier-shift landed - commit df676ca4, merged, gate PASSED, 5 tests, scope clean at the three fenced paths. THE SHIFT WORKS AND THE EXPLANATION IT WAS BUILT ON IS REFUTED. At 6 knots per axis and 36 coefficients the plasma-only regional projection floors are 3.8223649516099328e-3 closed flux, 3.5702815088892747e-3 separatrix band and 3.6065855262073353e-3 scrape-off, against the banked total-flux 1.525476830559581e-2, 4.808881037725249e-2 and 2.1969766027799164e-2 - improvements of about 3.99x, 13.47x and 6.09x, with the separatrix band improving MOST exactly as the localised-hump argument requires, and the first plasma-only floor below the banked same-carrier terminal residual now arriving at 4 knots per axis and 16 coefficients with worst regional floor 5.622747463336225e-3. BUT THE TERMINAL RESIDUAL WORSENED. Arm C is 3.8364148194535375e-2 Wb absolute, 3.847988208719086e-2 normalised on the stated total-flux peak 9.969923532407599e-1 Wb and 8.265349619249284e-3 on the stated plasma-flux peak 4.641563873497692 Wb; arm D gives 3.846704280493841e-2 and 8.262211007358059e-3. Against the banked total-carrier 2.6019345673404647e-2 under the same normalisation that is a REGRESSION, and both normalisations are reported so the change of variables cannot manufacture the move. SO THE PROJECTION FLOOR WAS NEVER THE BINDING CONSTRAINT: a quantity that gets worse when its stated cause is removed by four to thirteen times was not caused by it, and section 13's own done-when named this outcome in advance as locating the constraint elsewhere. Section 18 now carries the narrowed question - the carrier makes 1 admitted advance against arm A's 10, so it is stalled rather than floored, and arms C and D agreeing to three digits despite different in-cell support is what two routes that both stop after one advance look like. IterateRoute.EXACT_VALUES was asserted byte-for-byte equal to the direct map at the call site, call-site selection remains true and global_switch_introduced is false. Measured on SLURM job 1254212 in 00:01:38 with MaxRSS 3405684K after the identical login-lane attempt was OOM-killed at exit 137, which is the repository's stated reason for the CPU debug lane.</div>
+</div>
+<div class="r-comment" data-section="s18" data-id="c-20260825T0030-advance" data-who="reckon-ship" data-when="2026-08-25T00:30:00Z">
+    <div class="r-comment-body">carrier-advance-diagnosis landed - commit 8794f606, merged, gate PASSED, scope clean at the two fenced paths, SLURM job 1254321 in 00:01:18 with MaxRSS 3320684K on frame closed-form-oracle-coarse. VERDICT PROJECTION, with the other two candidates exonerated by figure rather than by argument. ADMISSION IS NOT THE CAUSE: the unchanged topology predicate admits every stalled candidate as finite and limited, and the replay refused 1 advance across 5 sequential candidates all rejected as EXACT_RESIDUAL_NOT_IMPROVED. So the 85-of-89 refusal problem that dominates the plateau lane is simply not what is happening here. CONDITIONING IS NOT THE CAUSE AND IS IN FACT THE PLAN'S HEADLINE DELIVERED: the dense 36 by 36 coefficient Jacobian conditions at 119.02398382363397 against the banked projected Krylov 4087.40844825275, a ratio of 0.02911966967101448 - thirty-four times better - and the dense solve achieves relative linear residual 3.159529404905616e-16. Section 1 claimed that at order one hundred unknowns the Jacobian could be formed explicitly and solved directly, removing Arnoldi, GMRES, the projected condition number and step conditioning from the path. That claim is now measured true. PROJECTION IS THE CAUSE, and the numbers locate it precisely. The exact Newton full step reaches residual 0.001948363339752102 while the SAME DIRECTION after carrier projection reaches 0.05653880358552117 - worse than the 0.03847988208719086 the arm is stalled at - and every tested projected factor through 0.0625 worsens the residual. The striking pair is this: projecting the exact step barely turns it, 16.853185544462796 degrees at norm ratio 0.9570507876389435, so the coefficient space CONTAINS the useful direction almost exactly; yet the dense coefficient step sits 49.73527543299367 degrees from the projected exact step at norm ratio 0.012955053999124593, seventy-seven times too short. A well-formed Newton solve in a space that contains the useful direction does not return that, and the solve is not ill-conditioned. So the discrepancy is arithmetic rather than physics and section 19 carries it. THE TWO CLAIMS ARE NOW PROPERLY SEPARATE, which section 6 required: conditioning WON, convergence LOST, and neither is reported as though it established the other.</div>
 </div>
 </section>
 </main>

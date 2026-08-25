@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="coefficient-space-newton">
   <meta name="plan-title" content="Coefficient-Space Newton — solve for a smooth basis, not for every cell">
-  <meta name="plan-summary" content="The flux map is smooth in value and gradient, so the Newton unknown need not be one value per cell. Carry a tensor-product spline coefficient set as the state, keep cell-resolution source evaluation and current moments, and the effective solution degree becomes the knot count. If that degree is order one hundred rather than order ten thousand, the dense Jacobian is affordable and the entire Krylov conditioning apparatus becomes unnecessary.">
+  <meta name="plan-summary" content="Measured 16–36 spline coefficients as sufficient on banked maps and roots; the reported order deficit was withdrawn, and no reduced solver is built yet.">
   <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="12.0">

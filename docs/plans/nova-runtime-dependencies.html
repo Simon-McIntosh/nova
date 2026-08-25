@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="Nova Runtime Dependency Surface">
-<meta name="plan-summary" content="Declare what nova actually needs to import: separate the plain JAX runtime the equilibrium package requires from the CUDA build that only GPU hosts want, so no install pulls CUDA it cannot use and no environment is missing a dependency the code imports unconditionally">
+<meta name="plan-summary" content="Declare plain JAX as required by Nova physics while keeping CUDA wheels in a GPU-only extra, so imports work without forcing accelerator packages.">
 <meta name="plan-status" content="shipped">
 <meta name="plan-roi" content="mid">
 <meta name="plan-effort" content="S">

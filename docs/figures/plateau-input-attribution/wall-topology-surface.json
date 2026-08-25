@@ -1,0 +1,1522 @@
+{
+  "artifact": "wall_topology_surface",
+  "banked_pseudo_wall_comparator": {
+    "axis_displacement_receipt": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+    "axis_displacement_receipt_sha256": "38dd1e5263efcd429ff3cf17ab3685739f0f80fd9b65696f266986287ae83700",
+    "expansion": 0.02,
+    "frame_records": [
+      {
+        "admitted_advance_count_of_89": 6,
+        "frame": 179,
+        "magnetic_axis_displacement_mm": 195.25456949563895,
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "terminal_relative_residual": 0.08540058568223574
+      },
+      {
+        "admitted_advance_count_of_89": 6,
+        "frame": 44,
+        "magnetic_axis_displacement_mm": 251.09398873153137,
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "terminal_relative_residual": 0.10977362967104506
+      },
+      {
+        "admitted_advance_count_of_89": 9,
+        "frame": 144,
+        "magnetic_axis_displacement_mm": 118.53997648848426,
+        "shot": "d3d_shot_001554e054.parquet",
+        "terminal_relative_residual": 0.16437432961354986
+      },
+      {
+        "admitted_advance_count_of_89": 4,
+        "frame": 146,
+        "magnetic_axis_displacement_mm": 124.69298808292953,
+        "shot": "d3d_shot_002495e835.parquet",
+        "terminal_relative_residual": 0.09035889068687517
+      },
+      {
+        "admitted_advance_count_of_89": 7,
+        "frame": 137,
+        "magnetic_axis_displacement_mm": 133.39328700897974,
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "terminal_relative_residual": 0.12204384813135218
+      }
+    ],
+    "magnetic_axis_displacement_mm": {
+      "maximum": 251.09398873153137,
+      "mean": 164.59496196151278,
+      "median": 133.39328700897974,
+      "minimum": 118.53997648848426
+    },
+    "qualified_solve_receipt": "docs/figures/diiid-forward-onboarding/repaired-solve-five-frame-remeasure.json",
+    "qualified_solve_receipt_sha256": "f2b14c3b0b974991db9def51b6a67a2dd93ad4f3d866d1afcebf191d9e8d46ce",
+    "quoted_rounded_magnetic_axis_displacement_mm": {
+      "mean": 164.6,
+      "median": 133.4,
+      "range": [
+        118.5,
+        251.1
+      ]
+    },
+    "route_qualification": "admission count and terminal residual come from the banked 89-update qualified solve; magnetic-axis displacement comes from the earlier 32-update scored solve and is a contextual, not causal, comparator",
+    "surface_selector": "pseudo_wall"
+  },
+  "driver_sha256": "607f4e7a5c30753144f4b3789551027d5788c6d894dc84d4db1c5e20826461d9",
+  "measurement_contract": {
+    "candidate_factors": [
+      1.0,
+      0.5,
+      0.25,
+      0.125
+    ],
+    "cohort": "five banked score-blind DIII-D frames",
+    "default_surface_selector": "physical_ring",
+    "fallback_surface_selector": "pseudo_wall",
+    "frame_count": 5,
+    "gmres_iterations": 24,
+    "grid_seam_requirement": "label state, material mask, grid Green targets and plasma Green sources use the same canonical efit_grid axes at the declared stride; both wall Green target counts equal the selected wall rows",
+    "held_inputs": "profiles, 24-conductor circuit currents, target plasma current, cold-seed construction, solver route and 89-update budget",
+    "newton_updates": 89,
+    "one_input_per_arm": true,
+    "solver_route": "topology-qualified nonmonotone Newton-Krylov"
+  },
+  "physical_ring_arm": {
+    "admitted_advance_count_of_89": {
+      "maximum": 33.0,
+      "mean": 12.6,
+      "median": 8.0,
+      "minimum": 5.0
+    },
+    "axis_displacement_comparison": {
+      "banked_pseudo_wall_mm": {
+        "maximum": 251.09398873153137,
+        "mean": 164.59496196151278,
+        "median": 133.39328700897974,
+        "minimum": 118.53997648848426
+      },
+      "mean_change_from_banked_pseudo_wall_mm": 177.84177480217156,
+      "mean_ratio_to_banked_pseudo_wall": 2.0804812776940054,
+      "physical_ring_mm": {
+        "maximum": 501.59963778103776,
+        "mean": 342.43673676368434,
+        "median": 369.085212872652,
+        "minimum": 195.01645182381534
+      },
+      "statement": "The physical ring moves the magnetic axis farther from the labelled reconstruction than the banked pseudo-wall baseline; this measured negative is retained without tuning.",
+      "verdict": "WORSE"
+    },
+    "cross_frame_equality_exclusion": [
+      "seed_wall_flux_sha256"
+    ],
+    "cross_frame_geometry_equal": true,
+    "default_selection": true,
+    "frame_records": [
+      {
+        "admitted_advance_count_of_89": 9,
+        "change_from_banked_pseudo_wall": {
+          "admitted_advance_count_change": 3,
+          "admitted_advance_count_ratio": 1.5,
+          "magnetic_axis_displacement_mm_change": -0.238117671823602,
+          "magnetic_axis_displacement_ratio": 0.9987804758042863,
+          "terminal_relative_residual_change": 0.8805199450815675,
+          "terminal_relative_residual_ratio": 11.310467288337641
+        },
+        "change_from_measured_rectangle_baseline": {
+          "admitted_advance_count_change": 1,
+          "admitted_advance_count_ratio": 1.125,
+          "magnetic_axis_displacement_mm_change": -535.8023703643528,
+          "magnetic_axis_displacement_ratio": 0.2668465095629452,
+          "terminal_relative_residual_change": 0.8590181083892622,
+          "terminal_relative_residual_ratio": 9.03553454925113
+        },
+        "conductor_count": 24,
+        "frame": 179,
+        "krylov_action_qualification": "ACCEPTED",
+        "magnetic_axis_displacement_mm": 195.01645182381534,
+        "pseudo_wall_expansion": null,
+        "recorded_selected_candidates_were_admitted": true,
+        "refused_advance_count_of_89": 80,
+        "runtime_seconds": 87.70820984430611,
+        "seed_wall_flux_sha256": "6b2cad19222403fabae118c566ec39eaf0e8465434978e17da14fa05966bb75a",
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "surface_selector": "physical_ring",
+        "target_current_a": 1279650.1007080078,
+        "terminal_axis_rz_m": [
+          1.8108754936117901,
+          -0.22235512011703976
+        ],
+        "terminal_relative_residual": 0.9659205307638032,
+        "terminal_topology_class": "diverted",
+        "time_ms": 3740.0,
+        "unrecorded_selected_factor_count": 4
+      },
+      {
+        "admitted_advance_count_of_89": 5,
+        "change_from_banked_pseudo_wall": {
+          "admitted_advance_count_change": -1,
+          "admitted_advance_count_ratio": 0.8333333333333334,
+          "magnetic_axis_displacement_mm_change": 2.9475639580601296,
+          "magnetic_axis_displacement_ratio": 1.011738886991881,
+          "terminal_relative_residual_change": 3.0629389403029434,
+          "terminal_relative_residual_ratio": 28.902319978682943
+        },
+        "change_from_measured_rectangle_baseline": {
+          "admitted_advance_count_change": -4,
+          "admitted_advance_count_ratio": 0.5555555555555556,
+          "magnetic_axis_displacement_mm_change": -781.2554995736532,
+          "magnetic_axis_displacement_ratio": 0.24538034966315775,
+          "terminal_relative_residual_change": 3.0730118163456424,
+          "terminal_relative_residual_ratio": 31.822352936276527
+        },
+        "conductor_count": 24,
+        "frame": 44,
+        "krylov_action_qualification": "ACCEPTED",
+        "magnetic_axis_displacement_mm": 254.0415526895915,
+        "pseudo_wall_expansion": null,
+        "recorded_selected_candidates_were_admitted": true,
+        "refused_advance_count_of_89": 84,
+        "runtime_seconds": 68.00581531226635,
+        "seed_wall_flux_sha256": "1b50c082f80ab244ba70cfaf03d64259e497b92951df2a452326eeaad2876e43",
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "surface_selector": "physical_ring",
+        "target_current_a": 1182769.0064013004,
+        "terminal_axis_rz_m": [
+          1.7164083985135088,
+          -0.30434540076129507
+        ],
+        "terminal_relative_residual": 3.1727125699739886,
+        "terminal_topology_class": "diverted",
+        "time_ms": 1080.0,
+        "unrecorded_selected_factor_count": 2
+      },
+      {
+        "admitted_advance_count_of_89": 33,
+        "change_from_banked_pseudo_wall": {
+          "admitted_advance_count_change": 24,
+          "admitted_advance_count_ratio": 3.6666666666666665,
+          "magnetic_axis_displacement_mm_change": 383.0596612925535,
+          "magnetic_axis_displacement_ratio": 4.231480827312011,
+          "terminal_relative_residual_change": -0.10712607815658146,
+          "terminal_relative_residual_ratio": 0.3482797562828769
+        },
+        "change_from_measured_rectangle_baseline": {
+          "admitted_advance_count_change": 21,
+          "admitted_advance_count_ratio": 2.75,
+          "magnetic_axis_displacement_mm_change": -211.41332851954706,
+          "magnetic_axis_displacement_ratio": 0.7034930099287682,
+          "terminal_relative_residual_change": -0.09531028085011933,
+          "terminal_relative_residual_ratio": 0.3752543406863171
+        },
+        "conductor_count": 24,
+        "frame": 144,
+        "krylov_action_qualification": "ACCEPTED",
+        "magnetic_axis_displacement_mm": 501.59963778103776,
+        "pseudo_wall_expansion": null,
+        "recorded_selected_candidates_were_admitted": true,
+        "refused_advance_count_of_89": 56,
+        "runtime_seconds": 67.7780946008861,
+        "seed_wall_flux_sha256": "8d36214e9a61baef2f1c285281ecb22b22ecbe98277f92ac0cddd9acf42ba825",
+        "shot": "d3d_shot_001554e054.parquet",
+        "surface_selector": "physical_ring",
+        "target_current_a": 988842.2265648842,
+        "terminal_axis_rz_m": [
+          1.7732564048173374,
+          -0.48813231671096974
+        ],
+        "terminal_relative_residual": 0.057248251456968414,
+        "terminal_topology_class": "diverted",
+        "time_ms": 3240.0,
+        "unrecorded_selected_factor_count": 25
+      },
+      {
+        "admitted_advance_count_of_89": 8,
+        "change_from_banked_pseudo_wall": {
+          "admitted_advance_count_change": 4,
+          "admitted_advance_count_ratio": 2.0,
+          "magnetic_axis_displacement_mm_change": 244.39222478972246,
+          "magnetic_axis_displacement_ratio": 2.959951626367191,
+          "terminal_relative_residual_change": -0.010232234467755258,
+          "terminal_relative_residual_ratio": 0.8867600698727756
+        },
+        "change_from_measured_rectangle_baseline": {
+          "admitted_advance_count_change": 1,
+          "admitted_advance_count_ratio": 1.1428571428571428,
+          "magnetic_axis_displacement_mm_change": -208.5257272059702,
+          "magnetic_axis_displacement_ratio": 0.6389858419620887,
+          "terminal_relative_residual_change": -0.0063393773513405055,
+          "terminal_relative_residual_ratio": 0.9266836110138601
+        },
+        "conductor_count": 24,
+        "frame": 146,
+        "krylov_action_qualification": "ACCEPTED",
+        "magnetic_axis_displacement_mm": 369.085212872652,
+        "pseudo_wall_expansion": null,
+        "recorded_selected_candidates_were_admitted": true,
+        "refused_advance_count_of_89": 81,
+        "runtime_seconds": 64.66323763690889,
+        "seed_wall_flux_sha256": "7d9b51aa92b4133d7c82c45ba438ced96bd7c55c82487de2fcbb64197fe7a13a",
+        "shot": "d3d_shot_002495e835.parquet",
+        "surface_selector": "physical_ring",
+        "target_current_a": 1623563.1957054138,
+        "terminal_axis_rz_m": [
+          1.7303975101877211,
+          -0.37020491897739094
+        ],
+        "terminal_relative_residual": 0.08012665621911991,
+        "terminal_topology_class": "diverted",
+        "time_ms": 3180.0,
+        "unrecorded_selected_factor_count": 5
+      },
+      {
+        "admitted_advance_count_of_89": 8,
+        "change_from_banked_pseudo_wall": {
+          "admitted_advance_count_change": 1,
+          "admitted_advance_count_ratio": 1.1428571428571428,
+          "magnetic_axis_displacement_mm_change": 259.0475416423453,
+          "magnetic_axis_displacement_ratio": 2.9419833445209793,
+          "terminal_relative_residual_change": -0.03435340844799352,
+          "terminal_relative_residual_ratio": 0.718515853326585
+        },
+        "change_from_measured_rectangle_baseline": {
+          "admitted_advance_count_change": -3,
+          "admitted_advance_count_ratio": 0.7272727272727273,
+          "magnetic_axis_displacement_mm_change": -382.35404590894825,
+          "magnetic_axis_displacement_ratio": 0.5065093246442173,
+          "terminal_relative_residual_change": -0.03486535650816973,
+          "terminal_relative_residual_ratio": 0.7155144220703958
+        },
+        "conductor_count": 24,
+        "frame": 137,
+        "krylov_action_qualification": "ACCEPTED",
+        "magnetic_axis_displacement_mm": 392.4408286513251,
+        "pseudo_wall_expansion": null,
+        "recorded_selected_candidates_were_admitted": true,
+        "refused_advance_count_of_89": 81,
+        "runtime_seconds": 65.9405994322151,
+        "seed_wall_flux_sha256": "6e338e99a4b6efa71119b00fdb6a0c90e1a88e79911536d21af7ad16da65387b",
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "surface_selector": "physical_ring",
+        "target_current_a": 1629095.3674316406,
+        "terminal_axis_rz_m": [
+          1.724090126265987,
+          -0.3907490668015662
+        ],
+        "terminal_relative_residual": 0.08769043968335866,
+        "terminal_topology_class": "diverted",
+        "time_ms": 3000.0,
+        "unrecorded_selected_factor_count": 3
+      }
+    ],
+    "grid_seam_verified": true,
+    "magnetic_axis_displacement_mm": {
+      "maximum": 501.59963778103776,
+      "mean": 342.43673676368434,
+      "median": 369.085212872652,
+      "minimum": 195.01645182381534
+    },
+    "one_input_change": "replace the complete pseudo-wall geometry input with the governed physical limiter ring",
+    "surface_authority": {
+      "artifact_digest": "sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e",
+      "artifact_file": "diiid_machine_description.nc",
+      "available_occurrences": [
+        0
+      ],
+      "coupling_cache_key": [
+        "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
+        "physical-ring:993e2b368200bc74f58725ec41066f86022db84d91b9e835e4355fca425e8318",
+        "65c08636f2371c9af5b96ca111a0ac5aceaaa98f343ab7e9f82f14dfa0917334"
+      ],
+      "dd_version": "4.1.1",
+      "derived_inputs": {
+        "inside_material": "selected topology surface polygon",
+        "plasma_to_wall_green_rows": "selected topology surface coordinate",
+        "seed_wall_flux": "selected topology surface coordinate",
+        "source_to_wall_green_rows": "selected topology surface coordinate",
+        "wall_coordinate": "selected topology surface coordinate"
+      },
+      "explicit_fallback": false,
+      "grid_seam": {
+        "all_grid_rows_share_labelled_frame_grid": true,
+        "all_wall_target_rows_share_selected_surface": true,
+        "axis_source": "canonical efit_grid axes from the labelled frame at the declared stride 2",
+        "grid_coordinate_sha256": "65c08636f2371c9af5b96ca111a0ac5aceaaa98f343ab7e9f82f14dfa0917334",
+        "grid_node_count": 1089,
+        "inside_material_rows": 1089,
+        "plasma_to_grid_source_rows": 1089,
+        "plasma_to_grid_target_rows": 1089,
+        "plasma_to_wall_grid_source_rows": 1089,
+        "plasma_to_wall_target_rows": 84,
+        "radial_axis_points": 33,
+        "source_to_grid_target_rows": 1089,
+        "source_to_wall_target_rows": 84,
+        "vertical_axis_points": 33,
+        "wall_coordinate_rows": 84
+      },
+      "inside_material_false": 562,
+      "inside_material_sha256": "2629daa01d6c5489aa00b8813d7ab4623a9ed6e1eca54a6debcb1610a7bdfbbb",
+      "inside_material_true": 527,
+      "labelled_frame_grid": {
+        "label_and_lattice_identical": true,
+        "label_node_count": 1089,
+        "label_shape": [
+          33,
+          33
+        ],
+        "lattice_node_count": 1089,
+        "lattice_shape": [
+          33,
+          33
+        ]
+      },
+      "occurrence": 0,
+      "outline_path": "description_2d[0].limiter.unit[0].outline",
+      "physical_digest": "993e2b368200bc74f58725ec41066f86022db84d91b9e835e4355fca425e8318",
+      "plasma_to_wall_rows": 84,
+      "plasma_to_wall_sha256": "e9406f5d3bfa495821d04fceecac9aa0a08f327b7ff23a74cab40c8e59fbe73b",
+      "seed_wall_flux_rows": 84,
+      "selector": "physical_ring",
+      "semantic_identity": "sha256:35242df9c7860d9f190479d77cb6e68b1f2b2b0fbca8677643b42071a87e4d77",
+      "source_to_wall_rows": 84,
+      "source_to_wall_sha256": "8a97d905886b294f312395315c6d4482526f6e89232ce2264feb2c2714712867",
+      "wall_coordinate_rows": 84,
+      "wall_coordinate_sha256": "a45135511161237ad38db8e6515b66bf79471b9eb719779281a37dbda9bfffd8"
+    },
+    "surface_selector": "physical_ring",
+    "terminal_relative_residual": {
+      "maximum": 3.1727125699739886,
+      "mean": 0.8727396896194477,
+      "median": 0.08769043968335866,
+      "minimum": 0.057248251456968414
+    }
+  },
+  "rectangle_expansion_sweep": {
+    "arms": [
+      {
+        "admitted_advance_count_of_89": {
+          "maximum": 11.0,
+          "mean": 6.8,
+          "median": 6.0,
+          "minimum": 5.0
+        },
+        "cross_frame_equality_exclusion": [
+          "seed_wall_flux_sha256"
+        ],
+        "cross_frame_geometry_equal": true,
+        "expansion": 0.0,
+        "frame_records": [
+          {
+            "admitted_advance_count_of_89": 7,
+            "change_from_banked_pseudo_wall": {
+              "admitted_advance_count_change": 1,
+              "admitted_advance_count_ratio": 1.1666666666666667,
+              "magnetic_axis_displacement_mm_change": 482.646195276223,
+              "magnetic_axis_displacement_ratio": 3.471881690261815,
+              "terminal_relative_residual_change": -0.008308575332965598,
+              "terminal_relative_residual_ratio": 0.9027105579359759
+            },
+            "change_from_measured_rectangle_baseline": {
+              "admitted_advance_count_change": -1,
+              "admitted_advance_count_ratio": 0.875,
+              "magnetic_axis_displacement_mm_change": -52.91805741630617,
+              "magnetic_axis_displacement_ratio": 0.9275907300008195,
+              "terminal_relative_residual_change": -0.02981041202527096,
+              "terminal_relative_residual_ratio": 0.7211437181392596
+            },
+            "conductor_count": 24,
+            "frame": 179,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 677.900764771862,
+            "pseudo_wall_expansion": 0.0,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 82,
+            "runtime_seconds": 87.13096087612212,
+            "seed_wall_flux_sha256": "5e3091c068ef08feee4f05199a42585ca347c7493e1068ae64b9f40915e246e8",
+            "shot": "d3d_shot_00000c4a7b.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 1279650.1007080078,
+            "terminal_axis_rz_m": [
+              1.7987858513913755,
+              -0.708360074942301
+            ],
+            "terminal_relative_residual": 0.07709201034927014,
+            "terminal_topology_class": "diverted",
+            "time_ms": 3740.0,
+            "unrecorded_selected_factor_count": 2
+          },
+          {
+            "admitted_advance_count_of_89": 5,
+            "change_from_banked_pseudo_wall": {
+              "admitted_advance_count_change": -1,
+              "admitted_advance_count_ratio": 0.8333333333333334,
+              "magnetic_axis_displacement_mm_change": 285.48711788857963,
+              "magnetic_axis_displacement_ratio": 2.136973128392258,
+              "terminal_relative_residual_change": 0.1044789559485918,
+              "terminal_relative_residual_ratio": 1.951767343957564
+            },
+            "change_from_measured_rectangle_baseline": {
+              "admitted_advance_count_change": -4,
+              "admitted_advance_count_ratio": 0.5555555555555556,
+              "magnetic_axis_displacement_mm_change": -498.71594564313375,
+              "magnetic_axis_displacement_ratio": 0.51828709977209,
+              "terminal_relative_residual_change": 0.11455183199129056,
+              "terminal_relative_residual_ratio": 2.148956530642732
+            },
+            "conductor_count": 24,
+            "frame": 44,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 536.581106620111,
+            "pseudo_wall_expansion": 0.0,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 84,
+            "runtime_seconds": 64.28090033307672,
+            "seed_wall_flux_sha256": "f0fb689d3822a75a6712b678136fa3cb52a12c7009524ea680c9d8548a71ff07",
+            "shot": "d3d_shot_0003ff34e7.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 1182769.0064013004,
+            "terminal_axis_rz_m": [
+              1.8804410939733887,
+              -0.5616975815393552
+            ],
+            "terminal_relative_residual": 0.21425258561963686,
+            "terminal_topology_class": "diverted",
+            "time_ms": 1080.0,
+            "unrecorded_selected_factor_count": 3
+          },
+          {
+            "admitted_advance_count_of_89": 11,
+            "change_from_banked_pseudo_wall": {
+              "admitted_advance_count_change": 2,
+              "admitted_advance_count_ratio": 1.2222222222222223,
+              "magnetic_axis_displacement_mm_change": 638.2394483467525,
+              "magnetic_axis_displacement_ratio": 6.3841705326198985,
+              "terminal_relative_residual_change": -0.020661103697574762,
+              "terminal_relative_residual_ratio": 0.8743045599264205
+            },
+            "change_from_measured_rectangle_baseline": {
+              "admitted_advance_count_change": -1,
+              "admitted_advance_count_ratio": 0.9166666666666666,
+              "magnetic_axis_displacement_mm_change": 43.766458534651974,
+              "magnetic_axis_displacement_ratio": 1.0613824160333731,
+              "terminal_relative_residual_change": -0.00884530639111264,
+              "terminal_relative_residual_ratio": 0.942020244575323
+            },
+            "conductor_count": 24,
+            "frame": 144,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 756.7794248352368,
+            "pseudo_wall_expansion": 0.0,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 78,
+            "runtime_seconds": 66.79897412098944,
+            "seed_wall_flux_sha256": "9654ff64989d229968dbba6757980170758cae41fd8f3c98dc7f76cf0d23174b",
+            "shot": "d3d_shot_001554e054.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 988842.2265648842,
+            "terminal_axis_rz_m": [
+              1.5997017396026374,
+              0.7530015131645615
+            ],
+            "terminal_relative_residual": 0.1437132259159751,
+            "terminal_topology_class": "diverted",
+            "time_ms": 3240.0,
+            "unrecorded_selected_factor_count": 5
+          },
+          {
+            "admitted_advance_count_of_89": 6,
+            "change_from_banked_pseudo_wall": {
+              "admitted_advance_count_change": 2,
+              "admitted_advance_count_ratio": 1.5,
+              "magnetic_axis_displacement_mm_change": 464.8712106464491,
+              "magnetic_axis_displacement_ratio": 4.72812631883741,
+              "terminal_relative_residual_change": -0.007691565484657964,
+              "terminal_relative_residual_ratio": 0.9148776016815888
+            },
+            "change_from_measured_rectangle_baseline": {
+              "admitted_advance_count_change": -1,
+              "admitted_advance_count_ratio": 0.8571428571428571,
+              "magnetic_axis_displacement_mm_change": 11.953258650756425,
+              "magnetic_axis_displacement_ratio": 1.0206943079179376,
+              "terminal_relative_residual_change": -0.0037987083682432116,
+              "terminal_relative_residual_ratio": 0.9560670449264025
+            },
+            "conductor_count": 24,
+            "frame": 146,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 589.5641987293786,
+            "pseudo_wall_expansion": 0.0,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 83,
+            "runtime_seconds": 68.10978892818093,
+            "seed_wall_flux_sha256": "69438af74fee08b87643daa99360cc9e5764c60713d5eeebb07d28a867f049ed",
+            "shot": "d3d_shot_002495e835.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 1623563.1957054138,
+            "terminal_axis_rz_m": [
+              1.6229014297399673,
+              0.5805127460686607
+            ],
+            "terminal_relative_residual": 0.0826673252022172,
+            "terminal_topology_class": "diverted",
+            "time_ms": 3180.0,
+            "unrecorded_selected_factor_count": 2
+          },
+          {
+            "admitted_advance_count_of_89": 5,
+            "change_from_banked_pseudo_wall": {
+              "admitted_advance_count_change": -2,
+              "admitted_advance_count_ratio": 0.7142857142857143,
+              "magnetic_axis_displacement_mm_change": 641.1348736376527,
+              "magnetic_axis_displacement_ratio": 5.806350364501423,
+              "terminal_relative_residual_change": 0.004339148963733622,
+              "terminal_relative_residual_ratio": 1.0355540162832584
+            },
+            "change_from_measured_rectangle_baseline": {
+              "admitted_advance_count_change": -6,
+              "admitted_advance_count_ratio": 0.45454545454545453,
+              "magnetic_axis_displacement_mm_change": -0.2667139136408423,
+              "magnetic_axis_displacement_ratio": 0.9996557619024103,
+              "terminal_relative_residual_change": 0.0038272009035574123,
+              "terminal_relative_residual_ratio": 1.031228232547862
+            },
+            "conductor_count": 24,
+            "frame": 137,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 774.5281606466325,
+            "pseudo_wall_expansion": 0.0,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 84,
+            "runtime_seconds": 69.14095291309059,
+            "seed_wall_flux_sha256": "322454af0f4653a423bc05f1a153dda19818f938eb4004f1302d037d960ef37d",
+            "shot": "d3d_shot_0040ca9bdc.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 1629095.3674316406,
+            "terminal_axis_rz_m": [
+              1.701656298513131,
+              -0.7725398349293451
+            ],
+            "terminal_relative_residual": 0.1263829970950858,
+            "terminal_topology_class": "diverted",
+            "time_ms": 3000.0,
+            "unrecorded_selected_factor_count": 0
+          }
+        ],
+        "magnetic_axis_displacement_mm": {
+          "maximum": 774.5281606466325,
+          "mean": 667.0707311206442,
+          "median": 677.900764771862,
+          "minimum": 536.581106620111
+        },
+        "surface_geometry_authority": {
+          "coupling_cache_key": [
+            "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
+            "pseudo-wall:0",
+            "65c08636f2371c9af5b96ca111a0ac5aceaaa98f343ab7e9f82f14dfa0917334"
+          ],
+          "derived_inputs": {
+            "inside_material": "selected topology surface polygon",
+            "plasma_to_wall_green_rows": "selected topology surface coordinate",
+            "seed_wall_flux": "selected topology surface coordinate",
+            "source_to_wall_green_rows": "selected topology surface coordinate",
+            "wall_coordinate": "selected topology surface coordinate"
+          },
+          "expansion": 0.0,
+          "explicit_fallback": true,
+          "grid_seam": {
+            "all_grid_rows_share_labelled_frame_grid": true,
+            "all_wall_target_rows_share_selected_surface": true,
+            "axis_source": "canonical efit_grid axes from the labelled frame at the declared stride 2",
+            "grid_coordinate_sha256": "65c08636f2371c9af5b96ca111a0ac5aceaaa98f343ab7e9f82f14dfa0917334",
+            "grid_node_count": 1089,
+            "inside_material_rows": 1089,
+            "plasma_to_grid_source_rows": 1089,
+            "plasma_to_grid_target_rows": 1089,
+            "plasma_to_wall_grid_source_rows": 1089,
+            "plasma_to_wall_target_rows": 132,
+            "radial_axis_points": 33,
+            "source_to_grid_target_rows": 1089,
+            "source_to_wall_target_rows": 132,
+            "vertical_axis_points": 33,
+            "wall_coordinate_rows": 132
+          },
+          "labelled_frame_grid": {
+            "label_and_lattice_identical": true,
+            "label_node_count": 1089,
+            "label_shape": [
+              33,
+              33
+            ],
+            "lattice_node_count": 1089,
+            "lattice_shape": [
+              33,
+              33
+            ]
+          },
+          "plasma_to_wall_rows": 132,
+          "plasma_to_wall_sha256": "efb1cfc15f6d57bd2eba59b129a739568673ce1f06303bef3ff74a0db23878db",
+          "seed_wall_flux_rows": 132,
+          "selector": "pseudo_wall",
+          "source": "competition row efit_grid extent",
+          "source_to_wall_rows": 132,
+          "source_to_wall_sha256": "47459bfbd2b6a961071a50a0b56a45d0a3bdc9e1c0a7ff9bd44ef4a93fcac037",
+          "wall_coordinate_rows": 132,
+          "wall_coordinate_sha256": "e416e6c97079d5da9a85ed135e360c752a2c8bde2620d8215ce1b95266baa07b"
+        },
+        "terminal_relative_residual": {
+          "maximum": 0.21425258561963686,
+          "mean": 0.12882162883643702,
+          "median": 0.1263829970950858,
+          "minimum": 0.07709201034927014
+        }
+      },
+      {
+        "admitted_advance_count_of_89": {
+          "maximum": 20.0,
+          "mean": 9.6,
+          "median": 8.0,
+          "minimum": 5.0
+        },
+        "cross_frame_equality_exclusion": [
+          "seed_wall_flux_sha256"
+        ],
+        "cross_frame_geometry_equal": true,
+        "expansion": 0.01,
+        "frame_records": [
+          {
+            "admitted_advance_count_of_89": 8,
+            "change_from_banked_pseudo_wall": {
+              "admitted_advance_count_change": 2,
+              "admitted_advance_count_ratio": 1.3333333333333333,
+              "magnetic_axis_displacement_mm_change": 490.23919397959526,
+              "magnetic_axis_displacement_ratio": 3.510769377873868,
+              "terminal_relative_residual_change": -0.01649788616598262,
+              "terminal_relative_residual_ratio": 0.8068176461064439
+            },
+            "change_from_measured_rectangle_baseline": {
+              "admitted_advance_count_change": 0,
+              "admitted_advance_count_ratio": 1.0,
+              "magnetic_axis_displacement_mm_change": -45.325058712933924,
+              "magnetic_axis_displacement_ratio": 0.9379804442129381,
+              "terminal_relative_residual_change": -0.03799972285828798,
+              "terminal_relative_residual_ratio": 0.6445382432481002
+            },
+            "conductor_count": 24,
+            "frame": 179,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 685.4937634752342,
+            "pseudo_wall_expansion": 0.01,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 81,
+            "runtime_seconds": 90.67033972591162,
+            "seed_wall_flux_sha256": "c55127bbf6c1d237b87510b6462d9abf1340334524942da0a7a1100760a53523",
+            "shot": "d3d_shot_00000c4a7b.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 1279650.1007080078,
+            "terminal_axis_rz_m": [
+              1.795240530429143,
+              -0.7160791783698314
+            ],
+            "terminal_relative_residual": 0.06890269951625312,
+            "terminal_topology_class": "diverted",
+            "time_ms": 3740.0,
+            "unrecorded_selected_factor_count": 3
+          },
+          {
+            "admitted_advance_count_of_89": 20,
+            "change_from_banked_pseudo_wall": {
+              "admitted_advance_count_change": 14,
+              "admitted_advance_count_ratio": 3.3333333333333335,
+              "magnetic_axis_displacement_mm_change": 769.6797868266581,
+              "magnetic_axis_displacement_ratio": 4.065305508566341,
+              "terminal_relative_residual_change": 0.0006541021902271987,
+              "terminal_relative_residual_ratio": 1.0059586459169414
+            },
+            "change_from_measured_rectangle_baseline": {
+              "admitted_advance_count_change": 11,
+              "admitted_advance_count_ratio": 2.2222222222222223,
+              "magnetic_axis_displacement_mm_change": -14.52327670505531,
+              "magnetic_axis_displacement_ratio": 0.9859718747645362,
+              "terminal_relative_residual_change": 0.010726978232925954,
+              "terminal_relative_residual_ratio": 1.1075917467275405
+            },
+            "conductor_count": 24,
+            "frame": 44,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 1020.7737755581894,
+            "pseudo_wall_expansion": 0.01,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 69,
+            "runtime_seconds": 68.50180799514055,
+            "seed_wall_flux_sha256": "9add8aabb2a3cc2cc014e5684e42211aa9f9835d10e7fdaad83b5c046981f69c",
+            "shot": "d3d_shot_0003ff34e7.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 1182769.0064013004,
+            "terminal_axis_rz_m": [
+              1.6666879645228292,
+              0.9691767953664909
+            ],
+            "terminal_relative_residual": 0.11042773186127226,
+            "terminal_topology_class": "diverted",
+            "time_ms": 1080.0,
+            "unrecorded_selected_factor_count": 3
+          },
+          {
+            "admitted_advance_count_of_89": 8,
+            "change_from_banked_pseudo_wall": {
+              "admitted_advance_count_change": -1,
+              "admitted_advance_count_ratio": 0.8888888888888888,
+              "magnetic_axis_displacement_mm_change": 658.5102366911818,
+              "magnetic_axis_displacement_ratio": 6.555174348757812,
+              "terminal_relative_residual_change": -0.022939953788449152,
+              "terminal_relative_residual_ratio": 0.8604407765958235
+            },
+            "change_from_measured_rectangle_baseline": {
+              "admitted_advance_count_change": -4,
+              "admitted_advance_count_ratio": 0.6666666666666666,
+              "magnetic_axis_displacement_mm_change": 64.0372468790813,
+              "magnetic_axis_displacement_ratio": 1.0898121772053233,
+              "terminal_relative_residual_change": -0.01112415648198703,
+              "terminal_relative_residual_ratio": 0.927082698596005
+            },
+            "conductor_count": 24,
+            "frame": 144,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 777.0502131796661,
+            "pseudo_wall_expansion": 0.01,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 81,
+            "runtime_seconds": 69.34066766314209,
+            "seed_wall_flux_sha256": "24afddfb7ecf6532afb2c76145fcbba3b6d3b7573b6be8959103d00c526f4b24",
+            "shot": "d3d_shot_001554e054.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 988842.2265648842,
+            "terminal_axis_rz_m": [
+              1.5922238681276646,
+              0.7721175943658612
+            ],
+            "terminal_relative_residual": 0.1414343758251007,
+            "terminal_topology_class": "diverted",
+            "time_ms": 3240.0,
+            "unrecorded_selected_factor_count": 3
+          },
+          {
+            "admitted_advance_count_of_89": 5,
+            "change_from_banked_pseudo_wall": {
+              "admitted_advance_count_change": 1,
+              "admitted_advance_count_ratio": 1.25,
+              "magnetic_axis_displacement_mm_change": 423.83800236373565,
+              "magnetic_axis_displacement_ratio": 4.399052415696814,
+              "terminal_relative_residual_change": 0.0011071985930125317,
+              "terminal_relative_residual_ratio": 1.0122533442431179
+            },
+            "change_from_measured_rectangle_baseline": {
+              "admitted_advance_count_change": -2,
+              "admitted_advance_count_ratio": 0.7142857142857143,
+              "magnetic_axis_displacement_mm_change": -29.079949631956993,
+              "magnetic_axis_displacement_ratio": 0.949654780382105,
+              "terminal_relative_residual_change": 0.005000055709427284,
+              "terminal_relative_residual_ratio": 1.0578268194221352
+            },
+            "conductor_count": 24,
+            "frame": 146,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 548.5309904466652,
+            "pseudo_wall_expansion": 0.01,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 84,
+            "runtime_seconds": 71.20791994035244,
+            "seed_wall_flux_sha256": "7985e6bd542f944a5d1176dd784997f7f7c5904be507b0507557000f23a2c6eb",
+            "shot": "d3d_shot_002495e835.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 1623563.1957054138,
+            "terminal_axis_rz_m": [
+              1.646895474885563,
+              0.5425726480200979
+            ],
+            "terminal_relative_residual": 0.0914660892798877,
+            "terminal_topology_class": "diverted",
+            "time_ms": 3180.0,
+            "unrecorded_selected_factor_count": 2
+          },
+          {
+            "admitted_advance_count_of_89": 7,
+            "change_from_banked_pseudo_wall": {
+              "admitted_advance_count_change": 0,
+              "admitted_advance_count_ratio": 1.0,
+              "magnetic_axis_displacement_mm_change": 623.6492328009373,
+              "magnetic_axis_displacement_ratio": 5.675267000197353,
+              "terminal_relative_residual_change": 0.0005099832186871989,
+              "terminal_relative_residual_ratio": 1.004178688450878
+            },
+            "change_from_measured_rectangle_baseline": {
+              "admitted_advance_count_change": -4,
+              "admitted_advance_count_ratio": 0.6363636363636364,
+              "magnetic_axis_displacement_mm_change": -17.75235475035629,
+              "magnetic_axis_displacement_ratio": 0.9770876714169909,
+              "terminal_relative_residual_change": -1.9648414890105492e-06,
+              "terminal_relative_residual_ratio": 0.9999839677799821
+            },
+            "conductor_count": 24,
+            "frame": 137,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 757.042519809917,
+            "pseudo_wall_expansion": 0.01,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 82,
+            "runtime_seconds": 69.07803635858,
+            "seed_wall_flux_sha256": "189d0659c35ec041df998b5490a608277b3b090f2acb6544d4c86f26b1870069",
+            "shot": "d3d_shot_0040ca9bdc.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 1629095.3674316406,
+            "terminal_axis_rz_m": [
+              1.6897053576188408,
+              -0.7546136917197459
+            ],
+            "terminal_relative_residual": 0.12255383135003937,
+            "terminal_topology_class": "diverted",
+            "time_ms": 3000.0,
+            "unrecorded_selected_factor_count": 2
+          }
+        ],
+        "magnetic_axis_displacement_mm": {
+          "maximum": 1020.7737755581894,
+          "mean": 757.7782524939345,
+          "median": 757.042519809917,
+          "minimum": 548.5309904466652
+        },
+        "surface_geometry_authority": {
+          "coupling_cache_key": [
+            "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
+            "pseudo-wall:0.01",
+            "65c08636f2371c9af5b96ca111a0ac5aceaaa98f343ab7e9f82f14dfa0917334"
+          ],
+          "derived_inputs": {
+            "inside_material": "selected topology surface polygon",
+            "plasma_to_wall_green_rows": "selected topology surface coordinate",
+            "seed_wall_flux": "selected topology surface coordinate",
+            "source_to_wall_green_rows": "selected topology surface coordinate",
+            "wall_coordinate": "selected topology surface coordinate"
+          },
+          "expansion": 0.01,
+          "explicit_fallback": true,
+          "grid_seam": {
+            "all_grid_rows_share_labelled_frame_grid": true,
+            "all_wall_target_rows_share_selected_surface": true,
+            "axis_source": "canonical efit_grid axes from the labelled frame at the declared stride 2",
+            "grid_coordinate_sha256": "65c08636f2371c9af5b96ca111a0ac5aceaaa98f343ab7e9f82f14dfa0917334",
+            "grid_node_count": 1089,
+            "inside_material_rows": 1089,
+            "plasma_to_grid_source_rows": 1089,
+            "plasma_to_grid_target_rows": 1089,
+            "plasma_to_wall_grid_source_rows": 1089,
+            "plasma_to_wall_target_rows": 132,
+            "radial_axis_points": 33,
+            "source_to_grid_target_rows": 1089,
+            "source_to_wall_target_rows": 132,
+            "vertical_axis_points": 33,
+            "wall_coordinate_rows": 132
+          },
+          "labelled_frame_grid": {
+            "label_and_lattice_identical": true,
+            "label_node_count": 1089,
+            "label_shape": [
+              33,
+              33
+            ],
+            "lattice_node_count": 1089,
+            "lattice_shape": [
+              33,
+              33
+            ]
+          },
+          "plasma_to_wall_rows": 132,
+          "plasma_to_wall_sha256": "29c43215eefbc3845b65bc8d6e6c9e10a5fb398585621137d748accd6ed9fc88",
+          "seed_wall_flux_rows": 132,
+          "selector": "pseudo_wall",
+          "source": "competition row efit_grid extent",
+          "source_to_wall_rows": 132,
+          "source_to_wall_sha256": "26c984bb8d209b460a3face1ddb60e3b135c8a2c887e99b19dc863424abe5bdc",
+          "wall_coordinate_rows": 132,
+          "wall_coordinate_sha256": "c7b7585fa6986bd6c9aadb437a8bb7717a7125bcaf1fbde5f6bcd782d1944978"
+        },
+        "terminal_relative_residual": {
+          "maximum": 0.1414343758251007,
+          "mean": 0.10695694556651063,
+          "median": 0.11042773186127226,
+          "minimum": 0.06890269951625312
+        }
+      },
+      {
+        "admitted_advance_count_of_89": {
+          "maximum": 12.0,
+          "mean": 9.4,
+          "median": 9.0,
+          "minimum": 7.0
+        },
+        "cross_frame_equality_exclusion": [
+          "seed_wall_flux_sha256"
+        ],
+        "cross_frame_geometry_equal": true,
+        "expansion": 0.02,
+        "frame_records": [
+          {
+            "admitted_advance_count_of_89": 8,
+            "change_from_banked_pseudo_wall": {
+              "admitted_advance_count_change": 2,
+              "admitted_advance_count_ratio": 1.3333333333333333,
+              "magnetic_axis_displacement_mm_change": 535.5642526925292,
+              "magnetic_axis_displacement_ratio": 3.7429025301479113,
+              "terminal_relative_residual_change": 0.021501836692305362,
+              "terminal_relative_residual_ratio": 1.251776220508731
+            },
+            "change_from_measured_rectangle_baseline": {
+              "admitted_advance_count_change": 0,
+              "admitted_advance_count_ratio": 1.0,
+              "magnetic_axis_displacement_mm_change": 0.0,
+              "magnetic_axis_displacement_ratio": 1.0,
+              "terminal_relative_residual_change": 0.0,
+              "terminal_relative_residual_ratio": 1.0
+            },
+            "conductor_count": 24,
+            "frame": 179,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 730.8188221881682,
+            "pseudo_wall_expansion": 0.02,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 81,
+            "runtime_seconds": 87.88731601089239,
+            "seed_wall_flux_sha256": "3dfb22227810c9f640002b6cc3ae0b26a6de9d916f679f148f6a876aa44c1428",
+            "shot": "d3d_shot_00000c4a7b.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 1279650.1007080078,
+            "terminal_axis_rz_m": [
+              1.8626690536303134,
+              -0.7563019266956954
+            ],
+            "terminal_relative_residual": 0.1069024223745411,
+            "terminal_topology_class": "diverted",
+            "time_ms": 3740.0,
+            "unrecorded_selected_factor_count": 3
+          },
+          {
+            "admitted_advance_count_of_89": 9,
+            "change_from_banked_pseudo_wall": {
+              "admitted_advance_count_change": 3,
+              "admitted_advance_count_ratio": 1.5,
+              "magnetic_axis_displacement_mm_change": 784.2030635317134,
+              "magnetic_axis_displacement_ratio": 4.1231455101467205,
+              "terminal_relative_residual_change": -0.010072876042698756,
+              "terminal_relative_residual_ratio": 0.9082395647034374
+            },
+            "change_from_measured_rectangle_baseline": {
+              "admitted_advance_count_change": 0,
+              "admitted_advance_count_ratio": 1.0,
+              "magnetic_axis_displacement_mm_change": 0.0,
+              "magnetic_axis_displacement_ratio": 1.0,
+              "terminal_relative_residual_change": 0.0,
+              "terminal_relative_residual_ratio": 1.0
+            },
+            "conductor_count": 24,
+            "frame": 44,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 1035.2970522632447,
+            "pseudo_wall_expansion": 0.02,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 80,
+            "runtime_seconds": 68.9089028891176,
+            "seed_wall_flux_sha256": "b030f645005fb9ced9ebdea8aaebb4913691a3e92832dfb69c06686601816a1a",
+            "shot": "d3d_shot_0003ff34e7.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 1182769.0064013004,
+            "terminal_axis_rz_m": [
+              1.7076199800634,
+              0.9849368521179829
+            ],
+            "terminal_relative_residual": 0.09970075362834631,
+            "terminal_topology_class": "diverted",
+            "time_ms": 1080.0,
+            "unrecorded_selected_factor_count": 3
+          },
+          {
+            "admitted_advance_count_of_89": 12,
+            "change_from_banked_pseudo_wall": {
+              "admitted_advance_count_change": 3,
+              "admitted_advance_count_ratio": 1.3333333333333333,
+              "magnetic_axis_displacement_mm_change": 594.4729898121005,
+              "magnetic_axis_displacement_ratio": 6.014957885282283,
+              "terminal_relative_residual_change": -0.011815797306462122,
+              "terminal_relative_residual_ratio": 0.928116529300886
+            },
+            "change_from_measured_rectangle_baseline": {
+              "admitted_advance_count_change": 0,
+              "admitted_advance_count_ratio": 1.0,
+              "magnetic_axis_displacement_mm_change": 0.0,
+              "magnetic_axis_displacement_ratio": 1.0,
+              "terminal_relative_residual_change": 0.0,
+              "terminal_relative_residual_ratio": 1.0
+            },
+            "conductor_count": 24,
+            "frame": 144,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 713.0129663005848,
+            "pseudo_wall_expansion": 0.02,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 77,
+            "runtime_seconds": 67.40869037248194,
+            "seed_wall_flux_sha256": "5ebfce7e8c37ed70ddc0a657915bb7594a005a5ca073e4b1060acf750a09fddb",
+            "shot": "d3d_shot_001554e054.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 988842.2265648842,
+            "terminal_axis_rz_m": [
+              1.6075679423041997,
+              0.7099234280746091
+            ],
+            "terminal_relative_residual": 0.15255853230708774,
+            "terminal_topology_class": "diverted",
+            "time_ms": 3240.0,
+            "unrecorded_selected_factor_count": 4
+          },
+          {
+            "admitted_advance_count_of_89": 7,
+            "change_from_banked_pseudo_wall": {
+              "admitted_advance_count_change": 3,
+              "admitted_advance_count_ratio": 1.75,
+              "magnetic_axis_displacement_mm_change": 452.91795199569265,
+              "magnetic_axis_displacement_ratio": 4.632264804613317,
+              "terminal_relative_residual_change": -0.0038928571164147524,
+              "terminal_relative_residual_ratio": 0.9569178297030577
+            },
+            "change_from_measured_rectangle_baseline": {
+              "admitted_advance_count_change": 0,
+              "admitted_advance_count_ratio": 1.0,
+              "magnetic_axis_displacement_mm_change": 0.0,
+              "magnetic_axis_displacement_ratio": 1.0,
+              "terminal_relative_residual_change": 0.0,
+              "terminal_relative_residual_ratio": 1.0
+            },
+            "conductor_count": 24,
+            "frame": 146,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 577.6109400786222,
+            "pseudo_wall_expansion": 0.02,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 82,
+            "runtime_seconds": 68.81511437520385,
+            "seed_wall_flux_sha256": "ae7211ffeb3964e7fba489812ce8ae630ed3acf3d14412be675a42803ba8a530",
+            "shot": "d3d_shot_002495e835.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 1623563.1957054138,
+            "terminal_axis_rz_m": [
+              1.6442507371320296,
+              0.5715532157120969
+            ],
+            "terminal_relative_residual": 0.08646603357046041,
+            "terminal_topology_class": "diverted",
+            "time_ms": 3180.0,
+            "unrecorded_selected_factor_count": 2
+          },
+          {
+            "admitted_advance_count_of_89": 11,
+            "change_from_banked_pseudo_wall": {
+              "admitted_advance_count_change": 4,
+              "admitted_advance_count_ratio": 1.5714285714285714,
+              "magnetic_axis_displacement_mm_change": 641.4015875512936,
+              "magnetic_axis_displacement_ratio": 5.808349819793524,
+              "terminal_relative_residual_change": 0.0005119480601762094,
+              "terminal_relative_residual_ratio": 1.004194787922659
+            },
+            "change_from_measured_rectangle_baseline": {
+              "admitted_advance_count_change": 0,
+              "admitted_advance_count_ratio": 1.0,
+              "magnetic_axis_displacement_mm_change": 0.0,
+              "magnetic_axis_displacement_ratio": 1.0,
+              "terminal_relative_residual_change": 0.0,
+              "terminal_relative_residual_ratio": 1.0
+            },
+            "conductor_count": 24,
+            "frame": 137,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 774.7948745602733,
+            "pseudo_wall_expansion": 0.02,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 78,
+            "runtime_seconds": 69.06907111592591,
+            "seed_wall_flux_sha256": "c67c744e8e29f158422a4dd0be93aefd623c6071cfc4637636ca1085748ff5ff",
+            "shot": "d3d_shot_0040ca9bdc.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 1629095.3674316406,
+            "terminal_axis_rz_m": [
+              1.7173163870740835,
+              -0.7730824748443554
+            ],
+            "terminal_relative_residual": 0.12255579619152838,
+            "terminal_topology_class": "diverted",
+            "time_ms": 3000.0,
+            "unrecorded_selected_factor_count": 4
+          }
+        ],
+        "magnetic_axis_displacement_mm": {
+          "maximum": 1035.2970522632447,
+          "mean": 766.3069310781786,
+          "median": 730.8188221881682,
+          "minimum": 577.6109400786222
+        },
+        "surface_geometry_authority": {
+          "coupling_cache_key": [
+            "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
+            "pseudo-wall:0.02",
+            "65c08636f2371c9af5b96ca111a0ac5aceaaa98f343ab7e9f82f14dfa0917334"
+          ],
+          "derived_inputs": {
+            "inside_material": "selected topology surface polygon",
+            "plasma_to_wall_green_rows": "selected topology surface coordinate",
+            "seed_wall_flux": "selected topology surface coordinate",
+            "source_to_wall_green_rows": "selected topology surface coordinate",
+            "wall_coordinate": "selected topology surface coordinate"
+          },
+          "expansion": 0.02,
+          "explicit_fallback": true,
+          "grid_seam": {
+            "all_grid_rows_share_labelled_frame_grid": true,
+            "all_wall_target_rows_share_selected_surface": true,
+            "axis_source": "canonical efit_grid axes from the labelled frame at the declared stride 2",
+            "grid_coordinate_sha256": "65c08636f2371c9af5b96ca111a0ac5aceaaa98f343ab7e9f82f14dfa0917334",
+            "grid_node_count": 1089,
+            "inside_material_rows": 1089,
+            "plasma_to_grid_source_rows": 1089,
+            "plasma_to_grid_target_rows": 1089,
+            "plasma_to_wall_grid_source_rows": 1089,
+            "plasma_to_wall_target_rows": 132,
+            "radial_axis_points": 33,
+            "source_to_grid_target_rows": 1089,
+            "source_to_wall_target_rows": 132,
+            "vertical_axis_points": 33,
+            "wall_coordinate_rows": 132
+          },
+          "labelled_frame_grid": {
+            "label_and_lattice_identical": true,
+            "label_node_count": 1089,
+            "label_shape": [
+              33,
+              33
+            ],
+            "lattice_node_count": 1089,
+            "lattice_shape": [
+              33,
+              33
+            ]
+          },
+          "plasma_to_wall_rows": 132,
+          "plasma_to_wall_sha256": "c9549661e7332564af2fb19d864775c2940e5ae09bcf37cf12c6ae5a679f31ff",
+          "seed_wall_flux_rows": 132,
+          "selector": "pseudo_wall",
+          "source": "competition row efit_grid extent",
+          "source_to_wall_rows": 132,
+          "source_to_wall_sha256": "97fcdda89452af554a771b88a179338563a68f2402a55703452819c43013f071",
+          "wall_coordinate_rows": 132,
+          "wall_coordinate_sha256": "82174c7c679666def6ee14c8653e67a56f1963d517194297b13b7a5412335ec8"
+        },
+        "terminal_relative_residual": {
+          "maximum": 0.15255853230708774,
+          "mean": 0.11363670761439279,
+          "median": 0.1069024223745411,
+          "minimum": 0.08646603357046041
+        }
+      },
+      {
+        "admitted_advance_count_of_89": {
+          "maximum": 31.0,
+          "mean": 15.8,
+          "median": 10.0,
+          "minimum": 5.0
+        },
+        "cross_frame_equality_exclusion": [
+          "seed_wall_flux_sha256"
+        ],
+        "cross_frame_geometry_equal": true,
+        "expansion": 0.05,
+        "frame_records": [
+          {
+            "admitted_advance_count_of_89": 7,
+            "change_from_banked_pseudo_wall": {
+              "admitted_advance_count_change": 1,
+              "admitted_advance_count_ratio": 1.1666666666666667,
+              "magnetic_axis_displacement_mm_change": 515.8377685871149,
+              "magnetic_axis_displacement_ratio": 3.6418729657368467,
+              "terminal_relative_residual_change": 0.006078726113445468,
+              "terminal_relative_residual_ratio": 1.0711789745337768
+            },
+            "change_from_measured_rectangle_baseline": {
+              "admitted_advance_count_change": -1,
+              "admitted_advance_count_ratio": 0.875,
+              "magnetic_axis_displacement_mm_change": -19.72648410541433,
+              "magnetic_axis_displacement_ratio": 0.973007695605936,
+              "terminal_relative_residual_change": -0.015423110578859894,
+              "terminal_relative_residual_ratio": 0.8557272114487378
+            },
+            "conductor_count": 24,
+            "frame": 179,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 711.0923380827538,
+            "pseudo_wall_expansion": 0.05,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 82,
+            "runtime_seconds": 88.06764883734286,
+            "seed_wall_flux_sha256": "2bd36740e1ecbda38d801b2bff6233198b99c63c22b06d25a94be6cc17a10e19",
+            "shot": "d3d_shot_00000c4a7b.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 1279650.1007080078,
+            "terminal_axis_rz_m": [
+              1.6953019227437849,
+              0.675837944809226
+            ],
+            "terminal_relative_residual": 0.09147931179568121,
+            "terminal_topology_class": "diverted",
+            "time_ms": 3740.0,
+            "unrecorded_selected_factor_count": 2
+          },
+          {
+            "admitted_advance_count_of_89": 10,
+            "change_from_banked_pseudo_wall": {
+              "admitted_advance_count_change": 4,
+              "admitted_advance_count_ratio": 1.6666666666666667,
+              "magnetic_axis_displacement_mm_change": 778.5263037798146,
+              "magnetic_axis_displacement_ratio": 4.100537403196106,
+              "terminal_relative_residual_change": -0.016266802650538342,
+              "terminal_relative_residual_ratio": 0.8518150242523225
+            },
+            "change_from_measured_rectangle_baseline": {
+              "admitted_advance_count_change": 1,
+              "admitted_advance_count_ratio": 1.1111111111111112,
+              "magnetic_axis_displacement_mm_change": -5.676759751898771,
+              "magnetic_axis_displacement_ratio": 0.9945167816913137,
+              "terminal_relative_residual_change": -0.006193926607839587,
+              "terminal_relative_residual_ratio": 0.937874826594304
+            },
+            "conductor_count": 24,
+            "frame": 44,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 1029.620292511346,
+            "pseudo_wall_expansion": 0.05,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 79,
+            "runtime_seconds": 66.50703060440719,
+            "seed_wall_flux_sha256": "41fa6352d0b0c52394275cf720527e80abaf0abf44f2c9cde1ff30b60d7779d9",
+            "shot": "d3d_shot_0003ff34e7.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 1182769.0064013004,
+            "terminal_axis_rz_m": [
+              1.6797959961909181,
+              0.9786042294483496
+            ],
+            "terminal_relative_residual": 0.09350682702050672,
+            "terminal_topology_class": "diverted",
+            "time_ms": 1080.0,
+            "unrecorded_selected_factor_count": 3
+          },
+          {
+            "admitted_advance_count_of_89": 26,
+            "change_from_banked_pseudo_wall": {
+              "admitted_advance_count_change": 17,
+              "admitted_advance_count_ratio": 2.888888888888889,
+              "magnetic_axis_displacement_mm_change": 1026.069704878803,
+              "magnetic_axis_displacement_ratio": 9.655895970913086,
+              "terminal_relative_residual_change": -0.07217248771121716,
+              "terminal_relative_residual_ratio": 0.5609260406968816
+            },
+            "change_from_measured_rectangle_baseline": {
+              "admitted_advance_count_change": 14,
+              "admitted_advance_count_ratio": 2.1666666666666665,
+              "magnetic_axis_displacement_mm_change": 431.59671506670225,
+              "magnetic_axis_displacement_ratio": 1.6053139780977757,
+              "terminal_relative_residual_change": -0.06035669040475504,
+              "terminal_relative_residual_ratio": 0.6043702735467984
+            },
+            "conductor_count": 24,
+            "frame": 144,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 1144.609681367287,
+            "pseudo_wall_expansion": 0.05,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 63,
+            "runtime_seconds": 69.40609681792557,
+            "seed_wall_flux_sha256": "42e42edfd4352f1a4e94bf5b1a2df2d3980ae6339e135ed86174124c8dd8efa1",
+            "shot": "d3d_shot_001554e054.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 988842.2265648842,
+            "terminal_axis_rz_m": [
+              1.6108015355169896,
+              -1.121636929290259
+            ],
+            "terminal_relative_residual": 0.0922018419023327,
+            "terminal_topology_class": "diverted",
+            "time_ms": 3240.0,
+            "unrecorded_selected_factor_count": 11
+          },
+          {
+            "admitted_advance_count_of_89": 31,
+            "change_from_banked_pseudo_wall": {
+              "admitted_advance_count_change": 27,
+              "admitted_advance_count_ratio": 7.75,
+              "magnetic_axis_displacement_mm_change": 591.0408565599553,
+              "magnetic_axis_displacement_ratio": 5.739968667419149,
+              "terminal_relative_residual_change": 0.05944678038297954,
+              "terminal_relative_residual_ratio": 1.6578963058431428
+            },
+            "change_from_measured_rectangle_baseline": {
+              "admitted_advance_count_change": 24,
+              "admitted_advance_count_ratio": 4.428571428571429,
+              "magnetic_axis_displacement_mm_change": 138.12290456426263,
+              "magnetic_axis_displacement_ratio": 1.2391279232790533,
+              "terminal_relative_residual_change": 0.0633396374993943,
+              "terminal_relative_residual_ratio": 1.7325377941359987
+            },
+            "conductor_count": 24,
+            "frame": 146,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 715.7338446428848,
+            "pseudo_wall_expansion": 0.05,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 58,
+            "runtime_seconds": 68.9379482511431,
+            "seed_wall_flux_sha256": "c09d44432eed8be6c881a142070cc7c8eabac3cff13dc373bea5b7dd9a9e8208",
+            "shot": "d3d_shot_002495e835.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 1623563.1957054138,
+            "terminal_axis_rz_m": [
+              1.6079462409097074,
+              0.7058912379264493
+            ],
+            "terminal_relative_residual": 0.1498056710698547,
+            "terminal_topology_class": "diverted",
+            "time_ms": 3180.0,
+            "unrecorded_selected_factor_count": 27
+          },
+          {
+            "admitted_advance_count_of_89": 5,
+            "change_from_banked_pseudo_wall": {
+              "admitted_advance_count_change": -2,
+              "admitted_advance_count_ratio": 0.7142857142857143,
+              "magnetic_axis_displacement_mm_change": 400.0550951883454,
+              "magnetic_axis_displacement_ratio": 3.999064676781033,
+              "terminal_relative_residual_change": -0.007120077100339545,
+              "terminal_relative_residual_ratio": 0.9416596804398005
+            },
+            "change_from_measured_rectangle_baseline": {
+              "admitted_advance_count_change": -6,
+              "admitted_advance_count_ratio": 0.45454545454545453,
+              "magnetic_axis_displacement_mm_change": -241.3464923629482,
+              "magnetic_axis_displacement_ratio": 0.6885027246728731,
+              "terminal_relative_residual_change": -0.007632025160515754,
+              "terminal_relative_residual_ratio": 0.9377261182442278
+            },
+            "conductor_count": 24,
+            "frame": 137,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 533.4483821973251,
+            "pseudo_wall_expansion": 0.05,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 84,
+            "runtime_seconds": 68.62175284698606,
+            "seed_wall_flux_sha256": "11987aee95505f1fb10613506100736b085cc4509aa87d7b0a78095bf1307bda",
+            "shot": "d3d_shot_0040ca9bdc.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 1629095.3674316406,
+            "terminal_axis_rz_m": [
+              1.660322877591663,
+              0.5314286629012569
+            ],
+            "terminal_relative_residual": 0.11492377103101263,
+            "terminal_topology_class": "diverted",
+            "time_ms": 3000.0,
+            "unrecorded_selected_factor_count": 1
+          }
+        ],
+        "magnetic_axis_displacement_mm": {
+          "maximum": 1144.609681367287,
+          "mean": 826.9009077603193,
+          "median": 715.7338446428848,
+          "minimum": 533.4483821973251
+        },
+        "surface_geometry_authority": {
+          "coupling_cache_key": [
+            "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
+            "pseudo-wall:0.050000000000000003",
+            "65c08636f2371c9af5b96ca111a0ac5aceaaa98f343ab7e9f82f14dfa0917334"
+          ],
+          "derived_inputs": {
+            "inside_material": "selected topology surface polygon",
+            "plasma_to_wall_green_rows": "selected topology surface coordinate",
+            "seed_wall_flux": "selected topology surface coordinate",
+            "source_to_wall_green_rows": "selected topology surface coordinate",
+            "wall_coordinate": "selected topology surface coordinate"
+          },
+          "expansion": 0.05,
+          "explicit_fallback": true,
+          "grid_seam": {
+            "all_grid_rows_share_labelled_frame_grid": true,
+            "all_wall_target_rows_share_selected_surface": true,
+            "axis_source": "canonical efit_grid axes from the labelled frame at the declared stride 2",
+            "grid_coordinate_sha256": "65c08636f2371c9af5b96ca111a0ac5aceaaa98f343ab7e9f82f14dfa0917334",
+            "grid_node_count": 1089,
+            "inside_material_rows": 1089,
+            "plasma_to_grid_source_rows": 1089,
+            "plasma_to_grid_target_rows": 1089,
+            "plasma_to_wall_grid_source_rows": 1089,
+            "plasma_to_wall_target_rows": 132,
+            "radial_axis_points": 33,
+            "source_to_grid_target_rows": 1089,
+            "source_to_wall_target_rows": 132,
+            "vertical_axis_points": 33,
+            "wall_coordinate_rows": 132
+          },
+          "labelled_frame_grid": {
+            "label_and_lattice_identical": true,
+            "label_node_count": 1089,
+            "label_shape": [
+              33,
+              33
+            ],
+            "lattice_node_count": 1089,
+            "lattice_shape": [
+              33,
+              33
+            ]
+          },
+          "plasma_to_wall_rows": 132,
+          "plasma_to_wall_sha256": "edd767739b591e52edd23baa476621269647a60db97590eee67135c11cf3ede1",
+          "seed_wall_flux_rows": 132,
+          "selector": "pseudo_wall",
+          "source": "competition row efit_grid extent",
+          "source_to_wall_rows": 132,
+          "source_to_wall_sha256": "30f2aae1209e329fb2d2fb5960f04cd53203513d651c4193520119e2c67aecbc",
+          "wall_coordinate_rows": 132,
+          "wall_coordinate_sha256": "f3fa4275a5bb06bddb63c93b16a903bb2a40b0a156289a1c22ed10edeb2a0527"
+        },
+        "terminal_relative_residual": {
+          "maximum": 0.1498056710698547,
+          "mean": 0.10838348456387759,
+          "median": 0.09350682702050672,
+          "minimum": 0.09147931179568121
+        }
+      }
+    ],
+    "expansions": [
+      0.0,
+      0.01,
+      0.02,
+      0.05
+    ],
+    "explicit_fallback": true,
+    "frame_count_per_expansion": 5,
+    "legacy_receipts_kept_separate": {
+      "baseline_expansion": 0.02,
+      "preregistration_path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_preregistration.json",
+      "receipt_path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+      "sensitivity_expansions": [
+        0.02,
+        0.05
+      ]
+    },
+    "surface_selector": "pseudo_wall"
+  },
+  "source_commit": "f1ecf6afb5fbe9a3268c9698e1b216dd39f603fc"
+}

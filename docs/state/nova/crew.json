@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T10:57:33",
+  "updated": "2026-08-25T11:26:40",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -34093,9 +34093,101 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T091038465601-primary-branch-vmap-status",
+        "plan": "discrete-operator-analytic-error",
+        "section": "\u00a75",
+        "node": "primary-branch-vmap-status",
+        "node_definition": {
+          "done_when": "Report the verbatim verdict of running tests/test_equilibrium_forward_solve.py against current origin/main, unmodified, in a fresh process under -m \"slow or not slow\", quoting the exact command and the pass, fail, skip and error counts. The test at line 809 runs jax.jit(jax.vmap(solve_portfolio)) and asserts on ensemble.branches, and that file carries no slow marker, so state whether it is collected and whether it passes. If ANY test fails, quote its assertion and traceback in full and put that first in the manifest - a red primary branch is the headline, not a detail. Then answer the discriminating question either way: which code path constructs ForwardTopologyState INSIDE a jit or vmap transform and which does not, given that the deferred class-margin read is what carries the callable, so the state is presumably only a problem when the margin is consumed. Read nova/equilibrium/forward_operator.py around lines 420 to 490 and nova/equilibrium/forward.py around 1361 to 1450 to answer it, and say explicitly whether the existing test can be made to cover the failing path or whether a different one is needed. Also run tests/test_transport_coupled_window.py and tests/test_two_class_recovery.py the same way, since both reference solve_portfolio and the transport module calls it in production at coupled_window.py:1636. Change NO source or test file - this node only measures and reads. Do not repair anything even if you see the fix, because a sibling node owns the repair and is working in those files now.",
+          "estimated_hours": 0.5,
+          "goal": "Determine whether the primary branch is currently red, by running the existing test that batches a portfolio solve, because commit f2665b5d changed ForwardTopologyState from a NamedTuple, which JAX treats as a PyTree automatically, into an unregistered frozen dataclass carrying a Callable.",
+          "id": "primary-branch-vmap-status",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/primary-branch-vmap-status.md",
+          "plan": "discrete-operator-analytic-error",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "docs/figures/discrete-operator-analytic-error/primary-branch-vmap-status.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "reference-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T09:10:53Z",
+        "completed_at": "2026-08-25T09:26:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 929,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 929,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "0747683489a8ba637731b4b4873572f62990477e",
+        "commits": [
+          "5db3c436"
+        ],
+        "changed_lines": {
+          "added": 176,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/primary-branch-vmap-status.md",
+        "scope_changed": false,
+        "session_id": "01a0382f-d3d6-7ca3-9154-d029c9184711",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3582720,
+            "cached_input_tokens_cumulative": 3582720,
+            "input_tokens": 3777772,
+            "input_tokens_cumulative": 3777772,
+            "output_tokens": 21661,
+            "output_tokens_cumulative": 21661,
+            "reasoning_output_tokens": 8068,
+            "reasoning_output_tokens_cumulative": 8068
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "running tests",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 842
+    "_version": 843
   }
 }

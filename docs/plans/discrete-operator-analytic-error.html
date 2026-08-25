@@ -26,7 +26,7 @@
 <meta name="plan-commits" content="ae723e28,3dc5155f,f2665b5d,815ca8fe,497b0372">
 <meta name="plan-artifacts" content="benchmarks/analytic_operator_ladder.py,benchmarks/diverted_basin_probe.py,benchmarks/contraction_discriminator.py,docs/figures/discrete-operator-analytic-error/operator-refinement-ladder.json,docs/figures/discrete-operator-analytic-error/diverted-basin-probe.json,docs/figures/discrete-operator-analytic-error/contraction-discriminator.json,docs/evidence/archive/discrete-operator-analytic-error-landed.html">
 <meta name="plan-impl" content="0.875">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 </head>
 <body>
   <main class="plan-doc">
@@ -324,6 +324,9 @@
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260825T080043720566-contraction-discriminator" data-who="basin-probe" data-when="2026-08-25T08:16:13Z">
     <div class="r-comment-body"><p>Terminal projected condition of the Newton residual Jacobian I minus J separates the pair, 36.785 on cycling 21978/35 against 21.040 on converged 22086/43, same direction at seed 17.842 against 14.988. Spectral radius does not separate and exceeds one on both. The alternation is not an orbit of the fixed-point map and not a line-search or penalty artifact, so it comes from the Newton promotion policy.</p></div>
 </div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260825T091038465601-primary-branch-vmap-status" data-who="reference-verify" data-when="2026-08-25T09:26:22Z">
+    <div class="r-comment-body"><p>MAIN IS RED at origin/main 07476834 on a clean checkout. test_equilibrium_forward_solve.py 26 passed 2 failed; test_transport_coupled_window.py 11 passed 1 failed; test_two_class_recovery.py 0 passed 5 failed. The container fault is TypeError: Output from batched function ForwardTopologyState is not a valid JAX type, raised at forward.py:1402 in solve_portfolio inner vmap and forward.py:1444 in solve_batch, and reaching production through coupled_window.py:1636. It also REFUTED my hypothesis: read constructs the state with its lambda on every call, so the inner vmap must flatten it as transformed output whether or not the margin is consumed. The existing portfolio test does cover the container path, failing at line 782 before reaching the line 809 assertion, so coverage was adequate and the gap was which tests my gate ran. A distinct test is still needed for the transformed deferred-margin path, which nothing currently exercises. The five recovery failures are separate banked-result regressions, not the container exception, and need independent triage.</p></div>
+</div>
 </section>
 </main>
 </body>
@@ -362,6 +365,50 @@
     <strong>public accessor</strong> for the connectivity axes and shape, with both benchmarks migrated
     onto it, so the next internals change is caught by an interface rather than by luck. Sequenced after
     the live node holding <code>pinned_branch_contrast.py</code>, to avoid two workers in one file.</p>
+
+    <p><strong>MEASURED 2026-08-25 by node <code>primary-branch-vmap-status</code></strong>, commit
+    <code>5db3c436</code>: <strong>the primary branch is RED</strong> at <code>07476834</code> on a
+    clean, unmodified checkout. This is worse than the benchmark breakage described above.</p>
+
+    <table>
+      <caption>Fresh CPU-pinned process per file, <code>-m "slow or not slow"</code></caption>
+      <thead><tr><th scope="col">File</th><th scope="col">Verdict</th></tr></thead>
+      <tbody>
+        <tr><td><code>tests/test_equilibrium_forward_solve.py</code></td><td>26 passed, <strong>2 failed</strong></td></tr>
+        <tr><td><code>tests/test_transport_coupled_window.py</code></td><td>11 passed, <strong>1 failed</strong></td></tr>
+        <tr><td><code>tests/test_two_class_recovery.py</code></td><td><strong>0 passed, 5 failed</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p>The container fault is <code>TypeError: Output from batched function ForwardTopologyState(…) is
+    not a valid JAX type</code>, raised at <code>forward.py:1402</code> in
+    <code>solve_portfolio</code>'s inner vmap and <code>forward.py:1444</code> in
+    <code>solve_batch</code>, reaching production through <code>coupled_window.py:1636</code>.</p>
+
+    <p><strong>It refuted the mechanism I had assumed.</strong> I presumed the callable would only bite
+    where <code>class_margin</code> is consumed. <code>ForwardFluxOperator.read</code> constructs the
+    state with its lambda on <em>every</em> call, so the inner vmap must flatten it as transformed output
+    regardless — margin consumption is not required. By contrast
+    <code>topology_margin</code> never constructs <code>ForwardTopologyState</code> at all, consuming the
+    <code>NamedTuple</code> <code>TopologyState</code> directly, so the deferred-margin path is a
+    genuinely separate one that <em>no</em> test currently exercises under a transform.</p>
+
+    <p><strong>And it settled the coverage question against my own instruction.</strong> The existing
+    portfolio test <em>does</em> cover the failing path — it fails at line 782, before ever reaching the
+    line 809 <code>jit(vmap(...))</code> assertion I had pointed at as the missing gate. So coverage was
+    adequate and the gap was <strong>which tests the gate ran</strong>. The repair keeps that test as the
+    container gate rather than duplicating it, and adds one focused test for the transformed
+    deferred-margin path.</p>
+
+    <p><strong>A second failure set that is not yet attributed.</strong> All five
+    <code>test_two_class_recovery.py</code> assertions fail on different grounds —
+    <code>converged</code> False, <code>achieved_class</code> [0,1] against [0,0],
+    <code>receipt.passed</code> [True, True, False], and measured-versus-banked composition differing.
+    These are banked-result regressions rather than the container exception, and one of them guards the
+    machine-precision pinned diverted root recorded above. Whether they clear under the container repair
+    or survive it decides whether a second independent regression exists, so the repair node reports that
+    verdict without touching them. No bisect: the files are claimed by a live repair, so the rule is to
+    surface and continue rather than hunt blame.</p>
 
     <p><strong>What this says about the earlier repair, stated plainly.</strong> The lazy-axes commit was
     itself the fix for a regression I merged, where a diagnostic narrowed a production contract. Gating

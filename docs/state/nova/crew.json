@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T07:50:33",
+  "updated": "2026-08-25T07:58:02",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -640,6 +640,13 @@
         "role": "implement",
         "session_id": "01a0307a-e108-76c1-b636-2a43d42a4503",
         "created": "2026-08-23"
+      },
+      {
+        "id": "margin-remeasure",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-25"
       },
       {
         "id": "margin-scout",
@@ -31872,9 +31879,84 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T054718286410-converged-frame-contrast",
+        "plan": "plateau-input-attribution",
+        "section": "\u00a73",
+        "node": "converged-frame-contrast",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "frame-contrast",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T05:47:29Z",
+        "completed_at": "2026-08-25T05:57:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 602,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 602,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "67cb20d58aa4b77a2dae326394f5a393efe752d7",
+        "commits": [
+          "c44ebc4fca5f3482eef3e5cb2c680d48da2efb81"
+        ],
+        "changed_lines": {
+          "added": 829,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054718286410-converged-frame-contrast/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03775-9c01-7ca3-bdb0-7a056fe6861c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5046528,
+            "cached_input_tokens_cumulative": 5046528,
+            "input_tokens": 5234913,
+            "input_tokens_cumulative": 5234913,
+            "output_tokens": 21934,
+            "output_tokens_cumulative": 21934,
+            "reasoning_output_tokens": 5923,
+            "reasoning_output_tokens_cumulative": 5923
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 794
+    "_version": 796
   }
 }

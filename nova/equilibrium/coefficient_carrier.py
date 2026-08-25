@@ -229,7 +229,7 @@ def dense_newton(
     factors: tuple[float, ...] = (1.0, 0.5, 0.25, 0.125, 0.0625),
     external=None,
 ) -> DenseNewtonResult:
-    """Drive coefficient residuals with dense direct steps and exact admission."""
+    """Drive the exact residual in the carrier subspace with dense steps."""
     from time import perf_counter
 
     configure_dtypes()
@@ -250,9 +250,9 @@ def dense_newton(
         else lambda value: jnp.all(jnp.isfinite(value))
     )
 
-    def coefficient_residual(value):
-        exact = exact_map(known_external + carrier.expand(value))
-        return carrier.project(exact - known_external) - value
+    def exact_residual(value):
+        state = known_external + carrier.expand(value)
+        return exact_map(state) - state
 
     def evaluated(value):
         state = known_external + carrier.expand(value)
@@ -268,12 +268,13 @@ def dense_newton(
 
     for _ in range(steps):
         jacobian_started = perf_counter()
-        jacobian = jax.jacfwd(coefficient_residual)(coefficients)
+        residual_vector = exact_residual(coefficients)
+        jacobian = jax.jacfwd(exact_residual)(coefficients)
         jacobian.block_until_ready()
         jacobian_seconds += perf_counter() - jacobian_started
 
         solve_started = perf_counter()
-        step = jnp.linalg.solve(jacobian, -coefficient_residual(coefficients))
+        step = jnp.linalg.lstsq(jacobian, -residual_vector, rcond=None)[0]
         step.block_until_ready()
         solve_seconds += perf_counter() - solve_started
 

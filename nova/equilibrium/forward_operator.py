@@ -29,7 +29,6 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import InitVar, dataclass, field
-from typing import NamedTuple
 
 import jax
 import jax.numpy as jnp
@@ -62,7 +61,8 @@ __all__ = [
 ]
 
 
-class ForwardTopologyState(NamedTuple):
+@dataclass(frozen=True)
+class ForwardTopologyState:
     """Topology landmarks plus the continuous connectivity margin."""
 
     axis: jax.Array
@@ -74,7 +74,12 @@ class ForwardTopologyState(NamedTuple):
     wall_point: jax.Array
     wall_point_flux: jax.Array
     diverted: jax.Array
-    class_margin: jax.Array
+    _class_margin_read: Callable[[], jax.Array] = field(repr=False)
+
+    @property
+    def class_margin(self) -> jax.Array:
+        """Derive and return the continuous connectivity margin."""
+        return self._class_margin_read()
 
     @property
     def flux_span(self) -> jax.Array:
@@ -286,9 +291,6 @@ class ForwardFluxOperator:
     prescribed_field: PrescribedCurrentField | None = field(
         init=False, repr=False, default=None
     )
-    _connectivity_radius: jnp.ndarray = field(init=False, repr=False)
-    _connectivity_height: jnp.ndarray = field(init=False, repr=False)
-    _connectivity_shape: tuple[int, int] = field(init=False, repr=False)
 
     def __post_init__(self, prescribed_current_field: PrescribedCurrentField | None):
         """Build the topology read and default the material mask."""
@@ -323,10 +325,6 @@ class ForwardFluxOperator:
             raise ValueError("cell-average weights must carry five fixed entries")
         if self.inside_material.shape != (self.grid.node_number,):
             raise ValueError("inside_material must carry one flag per grid node")
-        radius, height = _structured_grid_axes(self.grid.coordinate)
-        self._connectivity_radius = jnp.asarray(radius, dtype=jnp.float64)
-        self._connectivity_height = jnp.asarray(height, dtype=jnp.float64)
-        self._connectivity_shape = (radius.size, height.size)
         if (
             self.prescribed_field is not None
             and self.prescribed_field.response.shape[0] != self.node_number
@@ -423,23 +421,27 @@ class ForwardFluxOperator:
         self, physical, topology: TopologyState
     ) -> jax.Array:
         """Read the signed reachable-wall minus X-point flux margin."""
+        radius, height = _structured_grid_axes(self.grid.coordinate)
+        connectivity_radius = jnp.asarray(radius, dtype=jnp.float64)
+        connectivity_height = jnp.asarray(height, dtype=jnp.float64)
         grid_flux, wall_flux = self.topology.split_flux_map(physical)
         _vmap_o, vmap_x = self._fixed_design_topology.grid(grid_flux)
         classification_wall = jnp.concatenate(
             (topology.wall_point, topology.wall_point_flux[None])
         )
-        radial_count, vertical_count = self._connectivity_shape
+        radial_count = radius.size
+        vertical_count = height.size
         reading = traced_boundary_read(
             grid_flux.reshape((radial_count, vertical_count)).T,
-            self._connectivity_radius,
-            self._connectivity_height,
+            connectivity_radius,
+            connectivity_height,
             self.inside_material.reshape((radial_count, vertical_count)).T,
             topology.axis[0],
             topology.axis[1],
             96,
             18,
             2,
-            jnp.empty((0,), dtype=self._connectivity_radius.dtype),
+            jnp.empty((0,), dtype=connectivity_radius.dtype),
             jnp.asarray(1.0, dtype=grid_flux.dtype),
             self.wall.coordinate[:, 0],
             self.wall.coordinate[:, 1],
@@ -476,8 +478,10 @@ class ForwardFluxOperator:
             self.inside_material,
             requested_class,
         )
-        margin = self._connectivity_class_margin(physical, topology)
-        return masks, ForwardTopologyState(*topology, margin)
+        return masks, ForwardTopologyState(
+            *topology,
+            lambda: self._connectivity_class_margin(physical, topology),
+        )
 
     def shared_node_flux(self, psi) -> jax.Array:
         """Evaluate the plasma-grid flux on fixed atomic shared nodes."""

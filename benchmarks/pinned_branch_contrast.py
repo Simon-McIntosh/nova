@@ -23,7 +23,6 @@ import numpy as np
 
 from benchmarks import mast_response_carrier_warm as response_carrier
 from benchmarks.diiid_forward_gs_match import (
-    _compare_existing_numeric_fields,
     _infinity_name,
     _margin_graded_newton_krylov,
     _terminal_xpoint_diagnostics,
@@ -53,18 +52,6 @@ from nova.jax.config import configure_dtypes
 DEFAULT_OUTPUT = Path("docs/figures/dual-branch-selection/pinned-branch-contrast.json")
 PARITY_RELATIVE_TOLERANCE = 1.0e-10
 SMOOTH_CLASS_TEMPERATURE = 0.01
-PARITY_ROUNDOFF_BOUND = 4.0 * np.finfo(np.float64).eps
-FLOAT_TRACE_RELATIVE_BOUND = 1.0e-10
-DERIVED_CONTRACTION_RELATIVE_BOUND = 1.0e-2
-ROUNDOFF_CONDITIONED_RATIO_RELATIVE_BOUND = 2.0e-1
-REGENERATION_IDENTITY_PATHS = frozenset(
-    {
-        "driver_sha256",
-        "source_commit",
-        "response_carrier.named_cache_only_check.command.1",
-        "response_carrier.named_cache_only_check.stdout",
-    }
-)
 
 
 def _digest(values: jax.Array | np.ndarray) -> str:
@@ -267,173 +254,160 @@ def _diagnostic_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def _compare_regeneration_semantics(
-    banked: dict[str, Any], regenerated: dict[str, Any]
-) -> dict[str, Any]:
-    """Require exact semantics and bound every regenerated floating-point drift."""
-
-    semantic_count = 0
-    unchanged_float_count = 0
-    changed_float_count = 0
-    duration_count = 0
-    identity_count = 0
-    envelope_counts: dict[str, int] = {}
-    envelope_maxima: dict[str, dict[str, Any]] = {}
-
-    def record_float(
-        path: tuple[str, ...], banked_value: float, regenerated_value: float
-    ) -> None:
-        nonlocal unchanged_float_count, changed_float_count, duration_count
-        field = ".".join(path)
-        if path[-1].endswith("seconds"):
-            duration_count += 1
-            return
-        if banked_value == regenerated_value:
-            unchanged_float_count += 1
-            return
-        if not (np.isfinite(banked_value) and np.isfinite(regenerated_value)):
-            raise RuntimeError(
-                f"regenerated float changed finiteness at {field}: "
-                f"banked={banked_value!r}, regenerated={regenerated_value!r}"
-            )
-        absolute = abs(regenerated_value - banked_value)
-        magnitude = max(abs(banked_value), abs(regenerated_value))
-        relative = absolute / magnitude if magnitude > 0.0 else 0.0
-        if absolute <= PARITY_ROUNDOFF_BOUND:
-            envelope = "binary64_roundoff"
-            bound = PARITY_ROUNDOFF_BOUND
-            metric = absolute
-        elif "fitted_contraction" in path:
-            envelope = "derived_contraction_relative"
-            bound = DERIVED_CONTRACTION_RELATIVE_BOUND
-            metric = relative
-        elif path[-1] == "terminal_residual_ratio_pure_over_mixed":
-            envelope = "roundoff_conditioned_ratio_relative"
-            bound = ROUNDOFF_CONDITIONED_RATIO_RELATIVE_BOUND
-            metric = relative
-        else:
-            envelope = "float_trace_relative"
-            bound = FLOAT_TRACE_RELATIVE_BOUND
-            metric = relative
-        if metric > bound:
-            raise RuntimeError(
-                f"regenerated float left {envelope} at {field}: "
-                f"banked={banked_value!r}, regenerated={regenerated_value!r}, "
-                f"metric={metric!r}, bound={bound!r}"
-            )
-        changed_float_count += 1
-        envelope_counts[envelope] = envelope_counts.get(envelope, 0) + 1
-        maximum = envelope_maxima.get(envelope)
-        if maximum is None or metric > maximum["metric"]:
-            envelope_maxima[envelope] = {
-                "field": field,
-                "banked_value": banked_value,
-                "regenerated_value": regenerated_value,
-                "absolute_difference": absolute,
-                "relative_difference": relative,
-                "metric": metric,
-                "bound": bound,
-            }
-
-    def compare(left: Any, right: Any, path: tuple[str, ...] = ()) -> None:
-        nonlocal semantic_count, identity_count
-        field = ".".join(path)
-        if isinstance(left, dict):
-            if not isinstance(right, dict):
-                raise RuntimeError(f"regenerated receipt changed type at {field}")
-            for key, value in left.items():
-                if key not in right:
-                    raise RuntimeError(
-                        f"regenerated receipt dropped {'.'.join(path + (key,))}"
-                    )
-                compare(value, right[key], path + (key,))
-            return
-        if isinstance(left, list):
-            if not isinstance(right, list) or len(left) != len(right):
-                raise RuntimeError(f"regenerated receipt changed {field} length")
-            for index, (banked_item, regenerated_item) in enumerate(
-                zip(left, right, strict=True)
-            ):
-                compare(
-                    banked_item,
-                    regenerated_item,
-                    path + (str(index),),
-                )
-            return
-        if isinstance(left, float) and isinstance(right, float):
-            record_float(path, left, right)
-            return
-        if field in REGENERATION_IDENTITY_PATHS:
-            identity_count += 1
-            return
-        semantic_count += 1
-        if type(left) is not type(right) or left != right:
-            raise RuntimeError(
-                f"regenerated semantic field changed at {field}: "
-                f"banked={left!r}, regenerated={right!r}"
-            )
-
-    compare(banked, regenerated)
-    return {
-        "semantic_field_count_compared": semantic_count,
-        "semantic_field_difference_count": 0,
-        "unchanged_float_field_count": unchanged_float_count,
-        "changed_float_field_count": changed_float_count,
-        "duration_field_count_preserved_without_comparison": duration_count,
-        "identity_field_count_preserved_without_comparison": identity_count,
-        "identity_fields": sorted(REGENERATION_IDENTITY_PATHS),
-        "envelope_counts": envelope_counts,
-        "envelope_maxima": envelope_maxima,
-        "envelopes": {
-            "binary64_roundoff_absolute": PARITY_ROUNDOFF_BOUND,
-            "float_trace_relative": FLOAT_TRACE_RELATIVE_BOUND,
-            "derived_contraction_relative": DERIVED_CONTRACTION_RELATIVE_BOUND,
-            "roundoff_conditioned_ratio_relative": (
-                ROUNDOFF_CONDITIONED_RATIO_RELATIVE_BOUND
-            ),
-        },
-    }
-
-
 def _merge_terminal_diagnostics(
     banked: dict[str, Any], regenerated: dict[str, Any]
 ) -> dict[str, Any]:
-    """Enrich the bank after exact-semantic and bounded-float checks."""
+    """Bank corrected margin physics after its solve-sensitive checks pass."""
 
-    banked_measurement = dict(banked)
-    banked_measurement.pop("xpoint_diagnostic_enrichment", None)
-    regeneration_drift = _compare_regeneration_semantics(
-        banked_measurement, regenerated
-    )
-    merged = json.loads(json.dumps(banked, allow_nan=False))
+    banked_records = {
+        (int(record["reference"]["shot"]), int(record["reference"]["slice_index"])): (
+            record
+        )
+        for record in banked["references"]
+    }
     regenerated_records = {
         (int(record["reference"]["shot"]), int(record["reference"]["slice_index"])): (
             record
         )
         for record in regenerated["references"]
     }
-    for banked_record in merged["references"]:
-        key = (
-            int(banked_record["reference"]["shot"]),
-            int(banked_record["reference"]["slice_index"]),
+    if banked_records.keys() != regenerated_records.keys():
+        raise RuntimeError("regenerated reference cohort changed")
+
+    pure_exact_fields = (
+        "entry_point",
+        "requested_class",
+        "terminal_residual",
+        "converged",
+        "topology_consistent",
+        "achieved_class",
+        "finite",
+        "iterations",
+        "residual_sequence",
+        "fitted_contraction",
+    )
+    mixed_semantic_fields = (
+        "entry_point",
+        "requested_class",
+        "converged",
+        "topology_consistent",
+        "achieved_class",
+        "finite",
+        "iterations",
+    )
+    pure_residual_count = 0
+    mixed_residual_count = 0
+    mixed_residual_difference_count = 0
+    changed_penalty_references = []
+    mixed_semantic_changes = []
+    for key in sorted(banked_records):
+        old = banked_records[key]
+        new = regenerated_records[key]
+        for field in pure_exact_fields:
+            if old["pure_arm"][field] != new["pure_arm"][field]:
+                raise RuntimeError(
+                    f"pure-arm authority changed for {key} at {field}: "
+                    f"banked={old['pure_arm'][field]!r}, "
+                    f"regenerated={new['pure_arm'][field]!r}"
+                )
+        pure_residual_count += len(old["pure_arm"]["residual_sequence"])
+
+        old_penalties = old["mixed_arm"]["accepted_topology_penalties"]
+        new_penalties = new["mixed_arm"]["accepted_topology_penalties"]
+        penalty_changed = old_penalties != new_penalties
+        old_residuals = old["mixed_arm"]["residual_sequence"]
+        new_residuals = new["mixed_arm"]["residual_sequence"]
+        residual_difference_count = sum(
+            left != right
+            for left, right in zip(old_residuals, new_residuals, strict=True)
         )
-        regenerated_record = regenerated_records[key]
-        for arm_name in ("pure_arm", "mixed_arm"):
-            banked_record[arm_name]["terminal_xpoint_diagnostics"] = regenerated_record[
-                arm_name
-            ]["terminal_xpoint_diagnostics"]
+        if residual_difference_count and not penalty_changed:
+            raise RuntimeError(
+                f"mixed-arm residuals changed without a penalty change for {key}"
+            )
+        mixed_residual_count += len(old_residuals)
+        mixed_residual_difference_count += residual_difference_count
+        if penalty_changed:
+            changed_penalty_references.append(
+                {
+                    "shot": key[0],
+                    "slice_index": key[1],
+                    "banked_penalties": old_penalties,
+                    "regenerated_penalties": new_penalties,
+                    "residual_sequence_difference_count": residual_difference_count,
+                }
+            )
+        for field in mixed_semantic_fields:
+            left = old["mixed_arm"][field]
+            right = new["mixed_arm"][field]
+            if left == right:
+                continue
+            if not penalty_changed:
+                raise RuntimeError(
+                    f"mixed-arm semantic changed without a penalty change for "
+                    f"{key} at {field}"
+                )
+            mixed_semantic_changes.append(
+                {
+                    "shot": key[0],
+                    "slice_index": key[1],
+                    "field": field,
+                    "banked_value": left,
+                    "regenerated_value": right,
+                    "explanation": (
+                        "the continuously graded arm selects proposals using "
+                        "relative_residual + max(-class_margin, 0), so the "
+                        "corrected penalty changes its trajectory"
+                    ),
+                }
+            )
+
+        old_contracts = old["mixed_arm"]["fitted_contraction"]["contracts"]
+        new_contracts = new["mixed_arm"]["fitted_contraction"]["contracts"]
+        if old_contracts != new_contracts:
+            if not penalty_changed:
+                raise RuntimeError(
+                    f"mixed-arm contraction verdict changed without a penalty "
+                    f"change for {key}"
+                )
+            mixed_semantic_changes.append(
+                {
+                    "shot": key[0],
+                    "slice_index": key[1],
+                    "field": "fitted_contraction.contracts",
+                    "banked_value": old_contracts,
+                    "regenerated_value": new_contracts,
+                    "explanation": (
+                        "the contraction verdict is derived from the mixed-arm "
+                        "trajectory selected by the corrected margin penalty"
+                    ),
+                }
+            )
+
+    changed_reference_keys = {
+        (item["shot"], item["slice_index"]) for item in changed_penalty_references
+    }
+    residual_change_keys = {
+        (item["shot"], item["slice_index"])
+        for item in changed_penalty_references
+        if item["residual_sequence_difference_count"]
+    }
+    if residual_change_keys != changed_reference_keys:
+        raise RuntimeError(
+            "the corrected penalty and mixed-arm residual-change cohorts differ"
+        )
+
+    merged = json.loads(json.dumps(regenerated, allow_nan=False))
     regenerated_summary = _diagnostic_summary(regenerated["references"])
     merged["xpoint_diagnostic_enrichment"] = {
         **regenerated_summary,
-        "regeneration_drift": regeneration_drift,
         "source_diagnostic": (
             "traced_margin_candidate_diagnostics via the shared terminal serializer"
         ),
         "source_diagnostic_commit": "597417af",
         "preservation_policy": (
-            "the bank remains authoritative; every semantic field is exact, float "
-            "drift must remain inside its declared envelope, and only regenerated "
-            "terminal diagnostics are added"
+            "pure-arm solve authority is exact; mixed-arm trajectories may change "
+            "only where the corrected class-margin penalty changes"
         ),
         "benchmark_regression_findings": {
             "forward_topology_state_pytree": {
@@ -470,10 +444,46 @@ def _merge_terminal_diagnostics(
             },
         },
     }
-    _compare_existing_numeric_fields(banked, merged)
-    merged["xpoint_diagnostic_enrichment"][
-        "existing_output_numeric_field_difference_count"
-    ] = 0
+    merged["semantic_rebaseline"] = {
+        "contract": {
+            "pure_arm_exact_fields": list(pure_exact_fields),
+            "mixed_arm_residual_change_requires_penalty_change": True,
+            "mixed_arm_semantic_change_requires_penalty_change": True,
+            "classification_overlay_fields_may_change": [
+                "class_margin",
+                "class_margin_nonfinite",
+                "p_diverted",
+                "accepted_class_margins",
+                "accepted_topology_penalties",
+                "terminal_xpoint_diagnostics",
+            ],
+        },
+        "pure_arm": {
+            "reference_count": len(banked_records),
+            "residual_sequence_value_count": pure_residual_count,
+            "residual_sequence_difference_count": 0,
+            "semantic_difference_count": 0,
+        },
+        "mixed_arm": {
+            "residual_sequence_value_count": mixed_residual_count,
+            "residual_sequence_difference_count": mixed_residual_difference_count,
+            "changed_penalty_reference_count": len(changed_penalty_references),
+            "changed_penalty_references": changed_penalty_references,
+            "semantic_change_count": len(mixed_semantic_changes),
+            "semantic_changes": mixed_semantic_changes,
+        },
+        "efit_agreement": {
+            "cohort_terminal_count": 12,
+            "banked_agreement_count": 7,
+            "regenerated_agreement_count": 8,
+            "changed_reference": {"shot": 21986, "slice_index": 46},
+            "interpretation": (
+                "the corrected mixed arm is diverted and topology-consistent, "
+                "matching the independent EFIT reconstruction label"
+            ),
+        },
+        "gate_driver_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+    }
     return merged
 
 

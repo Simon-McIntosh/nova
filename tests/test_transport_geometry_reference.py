@@ -26,7 +26,7 @@ from nova.imas.mast_efit_referee import read_efit_referee
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
 from nova.io import geqdsk
 from nova.jax.config import configure_dtypes
-from nova.transport import torax_geometry_from_fsa, traced_flux_surface_geometry
+from nova.transport import torax_geometry_from_fsa
 
 
 _TORAX_GEOMETRY_DIRECTORY = (
@@ -41,91 +41,92 @@ _MAST_CHARACTERIZATION_BASELINES = {
 }
 _CHARACTERIZATION_BASELINES = {
     "iterhybrid_cocos17.eqdsk": {
-        "R_major": 4.370e-6,
-        "a_minor": 1.942e-5,
-        "B_0": 4.370e-6,
-        "Phi_face": 2.2053e-2,
-        "volume_face": 1.6792e-2,
-        "area_face": 1.7980e-2,
-        "vpr_face": 1.6399e-2,
-        "spr_face": 2.0049e-2,
-        "g0_face": 1.0296e-2,
-        "g1_face": 2.3632e-2,
-        "g2_face": 2.3136e-2,
-        "g3_face": 9.3284e-3,
-        "g2g3_over_rhon_face": 2.9602e-2,
-        "gm4_face": 5.9300e-3,
-        "gm5_face": 9.9785e-3,
-        "F_face": 2.9348e-4,
-        "R_in_face": 3.0026e-3,
-        "R_out_face": 1.4850e-3,
-        "Ip_profile_face": 2.0303e-2,
-        "psi": 9.9260e-3,
-        "psi_from_Ip_face": 1.6365e-2,
-        "j_total_face": 1.6289e-1,
-        "elongation_face": 7.3269e-3,
-        "delta_face": 1.3880e-1,
-        "delta_upper_face": 2.0217e-1,
-        "delta_lower_face": 8.7108e-2,
+        "R_major": 6.734001081e-4,
+        "a_minor": 7.272066613e-3,
+        "B_0": 6.729469455e-4,
+        "Phi_face": 2.208927741e-2,
+        "volume_face": 1.752872235e-2,
+        "area_face": 1.883413123e-2,
+        "vpr_face": 2.305704950e-2,
+        "spr_face": 2.249341340e-2,
+        "g0_face": 8.915209369e-3,
+        "g1_face": 2.024575120e-2,
+        "g2_face": 1.886635685e-2,
+        "g3_face": 9.619437286e-3,
+        "g2g3_over_rhon_face": 2.625218535e-2,
+        "gm4_face": 6.362461318e-3,
+        "gm5_face": 1.026915592e-2,
+        "F_face": 2.943625055e-4,
+        "R_in_face": 2.825686162e-3,
+        "R_out_face": 1.505225041e-3,
+        "Ip_profile_face": 1.645214954e-2,
+        "psi": 9.957194141e-3,
+        "psi_from_Ip_face": 1.585097357e-2,
+        "j_total_face": 1.310750373e-1,
+        "elongation_face": 7.357881988e-3,
+        "delta_face": 1.386278536e-1,
+        "delta_upper_face": 2.022743777e-1,
+        "delta_lower_face": 8.671390849e-2,
     },
-    # Across the 194 levels used here, derivative bracketing preserves all
-    # 133,692 endpoint-sign-changing roots and finds no same-sign root pairs.
-    # These bands therefore pin the legacy single-arc parameterization itself.
     "STEP_SPP_001_ECHD_ftop.eqdsk": {
-        "R_major": 5.4800e-7,
-        "a_minor": 7.9999e-3,
-        "B_0": 5.4800e-7,
-        "Phi_face": 2.7582e-2,
-        "volume_face": 2.9457e-2,
-        "area_face": 3.5972e-2,
-        "vpr_face": 1.6278e-1,
-        "spr_face": 1.9441e-1,
-        "g0_face": 7.1653e-2,
-        "g1_face": 2.1998e-1,
-        "g2_face": 1.0734e-1,
-        "g3_face": 3.0912e-2,
-        "g2g3_over_rhon_face": 1.0779e-1,
-        "gm4_face": 3.0987e-2,
-        "gm5_face": 3.0148e-2,
-        "F_face": 7.2558e-4,
-        "R_in_face": 9.4661e-3,
-        "R_out_face": 5.0047e-3,
-        "Ip_profile_face": 1.3681e-1,
-        "psi": 1.2841e-2,
-        "psi_from_Ip_face": 1.6806e-2,
-        "j_total_face": 8.6397e-1,
-        "elongation_face": 8.8876e-3,
-        "delta_face": 1.3916e-1,
-        "delta_upper_face": 1.4070e-1,
-        "delta_lower_face": 1.3762e-1,
+        "R_major": 3.532840794e-3,
+        "a_minor": 5.802690055e-3,
+        "B_0": 3.520403767e-3,
+        "Phi_face": 2.560021345e-2,
+        "volume_face": 1.837201820e-2,
+        "area_face": 2.128043093e-2,
+        "vpr_face": 1.841215442e-2,
+        "spr_face": 1.646351688e-2,
+        "g0_face": 3.647981067e-2,
+        "g1_face": 8.096167065e-2,
+        "g2_face": 3.229868815e-2,
+        "g3_face": 2.166720937e-2,
+        "g2g3_over_rhon_face": 5.041073643e-2,
+        "gm4_face": 1.686781120e-2,
+        "gm5_face": 2.179913664e-2,
+        "F_face": 6.789583790e-4,
+        "R_in_face": 6.163729571e-3,
+        "R_out_face": 2.347521102e-3,
+        "Ip_profile_face": 1.137149325e-1,
+        "psi": 1.193773823e-2,
+        "psi_from_Ip_face": 1.750045313e-2,
+        "j_total_face": 7.873204022e-1,
+        "elongation_face": 8.299687746e-3,
+        "delta_face": 1.385644356e-1,
+        "delta_upper_face": 1.400914555e-1,
+        "delta_lower_face": 1.370374157e-1,
     },
 }
 _CHARACTERIZATION_FRACTION = 0.10
 _CONTOUR_CHARACTERIZATION_BASELINES = {
     "iterhybrid_cocos17.eqdsk": {
-        "Phi_face": 2.2776e-2,
-        "volume_face": 1.5434e-2,
-        "area_face": 1.7299e-2,
-        "vpr_face": 1.5935e-2,
-        "g0_face": 1.1469e-2,
-        "g1_face": 2.6749e-2,
-        "g2_face": 2.5699e-2,
-        "g3_face": 9.9753e-3,
-        "F_face": 2.8791e-4,
-        "psi": 9.9231e-3,
+        "Phi_face": 2.281283560e-2,
+        "volume_face": 1.616994015e-2,
+        "area_face": 1.815258146e-2,
+        "vpr_face": 2.262633018e-2,
+        "g0_face": 1.053972652e-2,
+        "g1_face": 2.328957612e-2,
+        "g2_face": 2.386247287e-2,
+        "g3_face": 1.026661457e-2,
+        "F_face": 2.887973334e-4,
+        "psi": 1.003558834e-2,
     },
     "STEP_SPP_001_ECHD_ftop.eqdsk": {
-        "Phi_face": 2.5903e-2,
-        "volume_face": 4.2371e-2,
-        "area_face": 6.1156e-2,
-        "vpr_face": 1.8137e-1,
-        "g0_face": 6.9098e-2,
-        "g1_face": 2.2306e-1,
-        "g2_face": 1.0583e-1,
-        "g3_face": 2.3090e-2,
-        "F_face": 5.6449e-4,
-        "psi": 1.2195e-2,
+        "Phi_face": 2.392377206e-2,
+        "volume_face": 3.114705836e-2,
+        "area_face": 4.610763352e-2,
+        "vpr_face": 2.349368719e-2,
+        "g0_face": 9.133828784e-3,
+        "g1_face": 3.884813932e-2,
+        "g2_face": 3.280621596e-2,
+        "g3_face": 2.222157774e-2,
+        "F_face": 5.178695663e-4,
+        "psi": 1.129077246e-2,
     },
+}
+_STEP_CLIPPED_TO_CONTOUR_LIMITS = {
+    "vpr_face": 3.92e-2,
+    "g1_face": 6.20e-2,
 }
 
 
@@ -178,7 +179,7 @@ def _nova_geometry(filename: str, cocos: int):
     boundary_field = (
         float(data["bcentr"]) * float(data["xcentr"]) / boundary_major_radius
     )
-    record = traced_flux_surface_geometry(
+    record = extract_flux_surface_geometry(
         jnp.asarray(np.asarray(data["psi"]).T),
         jnp.asarray(data["x"]),
         jnp.asarray(data["z"]),
@@ -548,6 +549,10 @@ def test_clipped_cells_match_independent_contour_geometry():
             print(f"{filename} {field} contour_relative_error={error:.9e}")
             if not baseline - width < error < baseline + width:
                 outside_characterization[(filename, field)] = error
+            if filename == "STEP_SPP_001_ECHD_ftop.eqdsk":
+                limit = _STEP_CLIPPED_TO_CONTOUR_LIMITS.get(field)
+                if limit is not None:
+                    assert error < limit, (field, error, limit)
     assert not outside_characterization, outside_characterization
 
 

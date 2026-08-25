@@ -6,6 +6,7 @@ import argparse
 import json
 from pathlib import Path
 import subprocess
+import sys
 from typing import Any
 
 import jax
@@ -21,13 +22,13 @@ from benchmarks.efit_forward_parity_slice import (
     FROZEN_SCORECARD_RECEIPT_NAME,
     GMRES_ITERATIONS,
     NEWTON_STEPS,
-    REFERENCE_NATIVE_GRID_POINTS,
     _baseline_by_shot,
     _mast_case_from_selection,
     _passive_inclusive_case,
     _passive_inclusive_solve,
     select_slices_by_shot,
 )
+from benchmarks import mast_response_carrier_warm as response_carrier
 from nova.equilibrium.topology import TopologyClass
 from nova.imas.mast_solve_inputs import SHOT_STORE
 from nova.jax.config import configure_dtypes
@@ -40,6 +41,83 @@ FROZEN_BASELINE_RECEIPT = DEFAULT_OUTPUT / FROZEN_SCORECARD_RECEIPT_NAME
 PINNING_COMMIT = "cf812416343bbc821757fa2382d1e333d55e9f4f"
 SINGLE_REFERENCE_SOURCE_COMMIT = "57a1bfb987f2fa3f0d126f6a0b04e1e06bbf0e61"
 FROZEN_BASELINE_SOURCE_COMMIT = "f771f90db43f946dd72a71b9d7decbb2acd8dc36"
+
+
+def _archive_scalar(archive: Any, name: str) -> str:
+    """Read one required scalar string from a persisted response carrier."""
+    values = np.asarray(archive[name])
+    if values.shape != ():
+        raise ValueError(f"persisted {name} must be scalar")
+    return str(values.item())
+
+
+def _persisted_response_cache(
+    carrier: Path,
+    carrier_receipt: Path,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Load the exact response carrier after an isolated fail-closed check."""
+    command = [
+        sys.executable,
+        str(Path(response_carrier.__file__).resolve()),
+        "check",
+        "--carrier",
+        str(carrier),
+        "--receipt",
+        str(carrier_receipt),
+    ]
+    checked = subprocess.run(
+        command,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    response, metadata = response_carrier.load_carrier(carrier)
+    with np.load(carrier, allow_pickle=False) as archive:
+        input_digests = json.loads(_archive_scalar(archive, "input_digests_json"))
+        audit = json.loads(_archive_scalar(archive, "audit_json"))
+
+    if input_digests.get("combined_sha256") != metadata["semantic_response_identity"]:
+        raise ValueError("persisted response input ledger changed identity")
+    required_audit = {
+        "active_circuit_count",
+        "passive_or_vessel_circuit_count",
+        "section_kernel_evaluations",
+        "passive_registry_minimum_overlap_fraction",
+        "passive_registry_maximum_separation_m",
+    }
+    missing_audit = required_audit.difference(audit)
+    if missing_audit:
+        raise ValueError(
+            "persisted response audit is incomplete: "
+            + ", ".join(sorted(missing_audit))
+        )
+    if int(audit["active_circuit_count"]) != 13:
+        raise ValueError("persisted response has the wrong active-circuit inventory")
+    if int(audit["passive_or_vessel_circuit_count"]) != 88:
+        raise ValueError("persisted response has the wrong passive-circuit inventory")
+    checked_stdout = checked.stdout.strip()
+    if "direct_builders=0 verdict=PASS" not in checked_stdout:
+        raise RuntimeError("named carrier check did not report a cache-only pass")
+
+    cache = {
+        "response": response,
+        "input_digests": input_digests,
+        "audit": {
+            "stored_circuit_count": metadata["stored_circuit_count"],
+            **audit,
+        },
+    }
+    evidence = {
+        "loaded_from_persisted_carrier": True,
+        "carrier": metadata,
+        "named_cache_only_check": {
+            "command": command,
+            "stdout": checked_stdout,
+            "direct_green_operator_builder_entries": 0,
+            "passes": True,
+        },
+    }
+    return cache, evidence
 
 
 def _source_revision() -> str:
@@ -191,6 +269,24 @@ def _field_receipt(
     full_squared = grid_squared + wall_squared
 
     operator = profile.operator
+    prescribed = operator.prescribed_current_field
+    if prescribed is None:
+        raise RuntimeError("the labelled map has no prescribed current response")
+    circuit_response = np.asarray(prescribed.response, dtype=np.float64)
+    if circuit_response.shape != (residual.size, 101):
+        raise RuntimeError("the labelled map has the wrong circuit-response shape")
+    response_squared = np.sum(circuit_response**2, axis=0)
+    fitted_amplitude = np.divide(
+        circuit_response.T @ residual,
+        response_squared,
+        out=np.zeros(circuit_response.shape[1], dtype=np.float64),
+        where=response_squared > 0.0,
+    )
+    projection_squared = fitted_amplitude**2 * response_squared
+    best_circuit = int(np.argmax(projection_squared))
+    circuit_fraction = float(
+        projection_squared[best_circuit] / max(full_squared, np.finfo(float).tiny)
+    )
     normalized_flux = (state[:grid_count] - float(operator.declared_axis_flux)) / (
         float(operator.declared_boundary_flux) - float(operator.declared_axis_flux)
     )
@@ -204,7 +300,8 @@ def _field_receipt(
         "wall": float(
             (boundary_squared + wall_squared) / max(full_squared, np.finfo(float).tiny)
         ),
-        "profile_extraction": float(
+        "conductor_current_wiring": circuit_fraction,
+        "profiles": float(
             core_squared / max(full_squared, np.finfo(float).tiny) * profile_fraction
         ),
         "discretisation": float(
@@ -264,16 +361,27 @@ def _field_receipt(
             "method": "twelve fixed normalized-flux bins over the closed-flux core",
             "explained_core_variance_fraction": profile_fraction,
         },
+        "single_circuit_green_pattern": {
+            "method": (
+                "least-squares projection of the full residual onto each of 101 "
+                "single-circuit response columns"
+            ),
+            "best_response_column_zero_based": best_circuit,
+            "best_stored_circuit_one_based": best_circuit + 1,
+            "equivalent_current_correction_a": float(fitted_amplitude[best_circuit]),
+            "fraction_of_full_squared_magnitude_explained": circuit_fraction,
+        },
         "stencil_pattern": oscillation,
         "wall_state_fraction_of_full_squared_magnitude": float(
             wall_squared / max(full_squared, np.finfo(float).tiny)
         ),
         "candidate_pattern_scores": {
             "method": (
-                "wall is boundary-band plus wall-state energy; profile extraction "
-                "is closed-core energy explained by labelled flux; discretisation "
-                "is neighbour-difference energy. Scores describe patterns and are "
-                "not acceptance criteria."
+                "wall is boundary-band plus wall-state energy; conductor wiring "
+                "is the best single-circuit projection; profiles are closed-core "
+                "energy explained by labelled flux; discretisation is neighbour-"
+                "difference energy. Scores describe patterns and are not "
+                "acceptance criteria."
             ),
             "scores": candidate_scores,
             "most_implicated_candidate": implicated,
@@ -327,42 +435,31 @@ def run(
     store: Path = SHOT_STORE,
     bank: Path = DECOMPOSITION_BANK,
     output: Path = DEFAULT_RECEIPT,
+    carrier: Path = response_carrier.DEFAULT_CARRIER,
+    carrier_receipt: Path = response_carrier.DEFAULT_RECEIPT,
 ) -> dict[str, Any]:
     """Measure one map application and one pinned solve for every frozen row."""
     configure_dtypes()
     source_revision = _source_revision()
     single_reading, historical_baseline = _historical_context()
+    response_cache, carrier_evidence = _persisted_response_cache(
+        carrier,
+        carrier_receipt,
+    )
     selected = select_slices_by_shot(bank)
-    response_cache = None
     records = []
     candidate_rows = []
+    direct_builder_entries = 0
     for selected_row, qualification in selected:
         case, context = _mast_case_from_selection(
             store,
             selected_row,
             qualification,
-            grid_points=REFERENCE_NATIVE_GRID_POINTS,
         )
         passive_case, profile, policy = _passive_inclusive_case(
             case, context, response_cache
         )
-        if response_cache is None:
-            prescribed = profile.operator.prescribed_current_field
-            response_cache = {
-                "response": np.asarray(prescribed.response, dtype=np.float64),
-                "input_digests": policy["response_input_digests"],
-                "audit": {
-                    name: policy[name]
-                    for name in (
-                        "stored_circuit_count",
-                        "active_circuit_count",
-                        "passive_or_vessel_circuit_count",
-                        "section_kernel_evaluations",
-                        "passive_registry_minimum_overlap_fraction",
-                        "passive_registry_maximum_separation_m",
-                    )
-                },
-            }
+        direct_builder_entries += int(policy["section_kernel_evaluations_this_shot"])
 
         reference = passive_case["reference"]
         target_current = abs(float(reference["plasma_current_a"]))
@@ -437,9 +534,18 @@ def run(
 
     if len(records) != 6:
         raise RuntimeError(f"expected six frozen references, measured {len(records)}")
+    if direct_builder_entries != 0:
+        raise RuntimeError(
+            "persisted-carrier run entered the direct Green response builder"
+        )
     mean_scores = {
         name: float(np.mean([row[name] for row in candidate_rows]))
-        for name in ("wall", "profile_extraction", "discretisation")
+        for name in (
+            "wall",
+            "conductor_current_wiring",
+            "profiles",
+            "discretisation",
+        )
     }
     implicated = max(mean_scores, key=mean_scores.get)
     verdict = {
@@ -447,9 +553,11 @@ def run(
         "cohort_mean_pattern_scores": mean_scores,
         "statement": (
             f"The one-application residual structure most strongly implicates "
-            f"{implicated.replace('_', ' ')} among wall, profile extraction and "
-            "discretisation; this is a spatial attribution, not proof that changing "
-            "that input produces a converged parity root."
+            f"{implicated.replace('_', ' ')} among wall, conductor-current wiring, "
+            "profiles and discretisation; this is a spatial attribution, not proof "
+            "that changing that input produces a converged parity root. The current "
+            "production circuit is closed, so its score diagnoses a wiring-shaped "
+            "residual and does not authorise fitted currents."
         ),
         "qualification": (
             "The scores are commensurate fractions of full residual energy after "
@@ -471,6 +579,8 @@ def run(
             "gmres_iterations_per_promotion": GMRES_ITERATIONS,
             "fixed_point_criterion": FIXED_POINT_CRITERION,
             "residual_and_solve_share_source_revision": True,
+            "persisted_response_carrier": carrier_evidence,
+            "direct_green_operator_builder_entries": direct_builder_entries,
         },
         "historical_context": {
             "quoted_2026_08_21_vacuum_reading": single_reading,
@@ -520,8 +630,20 @@ def main() -> None:
     parser.add_argument("--store", type=Path, default=SHOT_STORE)
     parser.add_argument("--bank", type=Path, default=DECOMPOSITION_BANK)
     parser.add_argument("--output", type=Path, default=DEFAULT_RECEIPT)
+    parser.add_argument(
+        "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
+    )
+    parser.add_argument(
+        "--carrier-receipt", type=Path, default=response_carrier.DEFAULT_RECEIPT
+    )
     arguments = parser.parse_args()
-    receipt = run(arguments.store, arguments.bank, arguments.output)
+    receipt = run(
+        arguments.store,
+        arguments.bank,
+        arguments.output,
+        arguments.carrier,
+        arguments.carrier_receipt,
+    )
     aggregate = receipt["aggregate"]
     print(
         "LABEL_SEED_RESIDUAL_FIELD "

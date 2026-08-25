@@ -1,0 +1,332 @@
+{
+  "artifact": "DIII-D typed-saddle containment recheck",
+  "measurement_contract": {
+    "after_authority_commit": "5acfe07bd589534d70dd88ce98516889ff5f7db0",
+    "after_selector": "argmin normalized level over finite typed saddles inside the active topology-surface polygon",
+    "bank_preservation": "margin-frame-remeasure.json and existing figures were read only",
+    "input": "docs/figures/plateau-input-attribution/margin-frame-remeasure.json",
+    "input_sha256": "52ee8f321b13615e50efe3f7d5a446ba7ebfdd0a53a31c4908bf972215e7432e",
+    "physical_wall": {
+      "artifact_digest": "sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e",
+      "artifact_file": "diiid_machine_description.nc",
+      "available_occurrences": [
+        0
+      ],
+      "dd_version": "4.1.1",
+      "occurrence": 0,
+      "outline_path": "description_2d[0].limiter.unit[0].outline",
+      "physical_digest": "993e2b368200bc74f58725ec41066f86022db84d91b9e835e4355fca425e8318",
+      "selector": "physical_ring",
+      "semantic_identity": "sha256:35242df9c7860d9f190479d77cb6e68b1f2b2b0fbca8677643b42071a87e4d77",
+      "wall_coordinate_rows": 84,
+      "wall_coordinate_sha256": "a45135511161237ad38db8e6515b66bf79471b9eb719779281a37dbda9bfffd8"
+    },
+    "vessel_test": "production fixed-shape ray crossing with boundary inclusion against the governed DIII-D wall polygon; no bounding box"
+  },
+  "rows": [
+    {
+      "after": {
+        "achieved_class": "limited",
+        "class_margin": -0.3324752473947952,
+        "class_margin_nonfinite": null,
+        "selected_normalized_level": 0.4464464859269247,
+        "selected_x_coordinate_m": [
+          1.2764483915500846,
+          0.7061945846011524
+        ],
+        "wall_shadow_verdict": "ADMITTED"
+      },
+      "arm": "physical_ring",
+      "before": {
+        "achieved_class": "limited",
+        "class_margin": -0.3324752473947952,
+        "class_margin_nonfinite": null,
+        "selected_normalized_level": 0.4464464859269247,
+        "selected_x_coordinate_m": [
+          1.2764483915500846,
+          0.7061945846011524
+        ],
+        "wall_shadow_verdict": "ADMITTED"
+      },
+      "changed": false,
+      "frame": 179,
+      "pre_repair_selection_inside_diiid_wall": true,
+      "shot": "d3d_shot_00000c4a7b.parquet"
+    },
+    {
+      "after": {
+        "achieved_class": "limited",
+        "class_margin": -0.3428396379840549,
+        "class_margin_nonfinite": null,
+        "selected_normalized_level": 0.4482727040541401,
+        "selected_x_coordinate_m": [
+          1.3062966458748524,
+          0.7259512704407474
+        ],
+        "wall_shadow_verdict": "ADMITTED"
+      },
+      "arm": "physical_ring",
+      "before": {
+        "achieved_class": "limited",
+        "class_margin": -0.3428396379840549,
+        "class_margin_nonfinite": null,
+        "selected_normalized_level": 0.4482727040541401,
+        "selected_x_coordinate_m": [
+          1.3062966458748524,
+          0.7259512704407474
+        ],
+        "wall_shadow_verdict": "ADMITTED"
+      },
+      "changed": false,
+      "frame": 44,
+      "pre_repair_selection_inside_diiid_wall": true,
+      "shot": "d3d_shot_0003ff34e7.parquet"
+    },
+    {
+      "after": {
+        "achieved_class": "limited",
+        "class_margin": -0.5891974401794898,
+        "class_margin_nonfinite": null,
+        "selected_normalized_level": 0.6607577782963738,
+        "selected_x_coordinate_m": [
+          1.117411656859589,
+          0.42793458763540115
+        ],
+        "wall_shadow_verdict": "ADMITTED"
+      },
+      "arm": "physical_ring",
+      "before": {
+        "achieved_class": "limited",
+        "class_margin": -0.1783497398371257,
+        "class_margin_nonfinite": null,
+        "selected_normalized_level": 0.2499100779540097,
+        "selected_x_coordinate_m": [
+          1.3134597914827002,
+          -1.5453501367849396
+        ],
+        "wall_shadow_verdict": "ADMITTED"
+      },
+      "changed": true,
+      "frame": 144,
+      "pre_repair_selection_inside_diiid_wall": false,
+      "shot": "d3d_shot_001554e054.parquet"
+    },
+    {
+      "after": {
+        "achieved_class": "limited",
+        "class_margin": -0.4717351084390425,
+        "class_margin_nonfinite": null,
+        "selected_normalized_level": 0.5471743668423623,
+        "selected_x_coordinate_m": [
+          1.1720241623723808,
+          0.6145423971516744
+        ],
+        "wall_shadow_verdict": "ADMITTED"
+      },
+      "arm": "physical_ring",
+      "before": {
+        "achieved_class": "limited",
+        "class_margin": -0.3509936591482227,
+        "class_margin_nonfinite": null,
+        "selected_normalized_level": 0.42643291755154256,
+        "selected_x_coordinate_m": [
+          0.9924187884142757,
+          1.5222503949519135
+        ],
+        "wall_shadow_verdict": "ADMITTED"
+      },
+      "changed": true,
+      "frame": 146,
+      "pre_repair_selection_inside_diiid_wall": false,
+      "shot": "d3d_shot_002495e835.parquet"
+    },
+    {
+      "after": {
+        "achieved_class": "limited",
+        "class_margin": -0.4508193715148397,
+        "class_margin_nonfinite": null,
+        "selected_normalized_level": 0.5374834297466391,
+        "selected_x_coordinate_m": [
+          1.171407943168653,
+          0.660033118024615
+        ],
+        "wall_shadow_verdict": "ADMITTED"
+      },
+      "arm": "physical_ring",
+      "before": {
+        "achieved_class": "limited",
+        "class_margin": -0.33682972341024897,
+        "class_margin_nonfinite": null,
+        "selected_normalized_level": 0.4234937816420484,
+        "selected_x_coordinate_m": [
+          0.9935382030093896,
+          1.5212765715919843
+        ],
+        "wall_shadow_verdict": "ADMITTED"
+      },
+      "changed": true,
+      "frame": 137,
+      "pre_repair_selection_inside_diiid_wall": false,
+      "shot": "d3d_shot_0040ca9bdc.parquet"
+    },
+    {
+      "after": {
+        "achieved_class": "limited",
+        "class_margin": -0.5295734642179688,
+        "class_margin_nonfinite": null,
+        "selected_normalized_level": 0.5839131090158333,
+        "selected_x_coordinate_m": [
+          1.231688341323851,
+          0.2923189276976337
+        ],
+        "wall_shadow_verdict": "ADMITTED"
+      },
+      "arm": "pseudo_wall",
+      "before": {
+        "achieved_class": "limited",
+        "class_margin": -0.5295734642179688,
+        "class_margin_nonfinite": null,
+        "selected_normalized_level": 0.5839131090158333,
+        "selected_x_coordinate_m": [
+          1.231688341323851,
+          0.2923189276976337
+        ],
+        "wall_shadow_verdict": "ADMITTED"
+      },
+      "changed": false,
+      "frame": 179,
+      "pre_repair_selection_inside_diiid_wall": true,
+      "shot": "d3d_shot_00000c4a7b.parquet"
+    },
+    {
+      "after": {
+        "achieved_class": "limited",
+        "class_margin": -0.41066778622870476,
+        "class_margin_nonfinite": null,
+        "selected_normalized_level": 0.4685215406655289,
+        "selected_x_coordinate_m": [
+          1.2622439463097783,
+          0.5041265734167183
+        ],
+        "wall_shadow_verdict": "ADMITTED"
+      },
+      "arm": "pseudo_wall",
+      "before": {
+        "achieved_class": "limited",
+        "class_margin": -0.41066778622870476,
+        "class_margin_nonfinite": null,
+        "selected_normalized_level": 0.4685215406655289,
+        "selected_x_coordinate_m": [
+          1.2622439463097783,
+          0.5041265734167183
+        ],
+        "wall_shadow_verdict": "ADMITTED"
+      },
+      "changed": false,
+      "frame": 44,
+      "pre_repair_selection_inside_diiid_wall": true,
+      "shot": "d3d_shot_0003ff34e7.parquet"
+    },
+    {
+      "after": {
+        "achieved_class": "limited",
+        "class_margin": -0.42141491886349725,
+        "class_margin_nonfinite": null,
+        "selected_normalized_level": 0.4745969115371108,
+        "selected_x_coordinate_m": [
+          1.1461992102477698,
+          -0.4502020777806969
+        ],
+        "wall_shadow_verdict": "ADMITTED"
+      },
+      "arm": "pseudo_wall",
+      "before": {
+        "achieved_class": "limited",
+        "class_margin": -0.42141491886349725,
+        "class_margin_nonfinite": null,
+        "selected_normalized_level": 0.4745969115371108,
+        "selected_x_coordinate_m": [
+          1.1461992102477698,
+          -0.4502020777806969
+        ],
+        "wall_shadow_verdict": "ADMITTED"
+      },
+      "changed": false,
+      "frame": 144,
+      "pre_repair_selection_inside_diiid_wall": true,
+      "shot": "d3d_shot_001554e054.parquet"
+    },
+    {
+      "after": {
+        "achieved_class": "limited",
+        "class_margin": -0.44991951508185,
+        "class_margin_nonfinite": null,
+        "selected_normalized_level": 0.5035996660183417,
+        "selected_x_coordinate_m": [
+          1.112819497302449,
+          -0.52302205916762
+        ],
+        "wall_shadow_verdict": "ADMITTED"
+      },
+      "arm": "pseudo_wall",
+      "before": {
+        "achieved_class": "limited",
+        "class_margin": -0.44991951508185,
+        "class_margin_nonfinite": null,
+        "selected_normalized_level": 0.5035996660183417,
+        "selected_x_coordinate_m": [
+          1.112819497302449,
+          -0.52302205916762
+        ],
+        "wall_shadow_verdict": "ADMITTED"
+      },
+      "changed": false,
+      "frame": 146,
+      "pre_repair_selection_inside_diiid_wall": true,
+      "shot": "d3d_shot_002495e835.parquet"
+    },
+    {
+      "after": {
+        "achieved_class": "limited",
+        "class_margin": -0.3744030895205362,
+        "class_margin_nonfinite": null,
+        "selected_normalized_level": 0.4256591365225496,
+        "selected_x_coordinate_m": [
+          0.9773408156595623,
+          1.5237727187427772
+        ],
+        "wall_shadow_verdict": "ADMITTED"
+      },
+      "arm": "pseudo_wall",
+      "before": {
+        "achieved_class": "limited",
+        "class_margin": -0.3744030895205362,
+        "class_margin_nonfinite": null,
+        "selected_normalized_level": 0.4256591365225496,
+        "selected_x_coordinate_m": [
+          0.9773408156595623,
+          1.5237727187427772
+        ],
+        "wall_shadow_verdict": "ADMITTED"
+      },
+      "changed": false,
+      "frame": 137,
+      "pre_repair_selection_inside_diiid_wall": false,
+      "shot": "d3d_shot_0040ca9bdc.parquet"
+    }
+  ],
+  "summary": {
+    "achieved_class_flip_count": 0,
+    "after_connectivity_support_count": 0,
+    "after_without_connectivity_support_count": 10,
+    "before_connectivity_support_count": 0,
+    "before_not_connectivity_reachable_count": 10,
+    "changed_terminal_count": 3,
+    "pre_repair_selection_inside_diiid_wall_count": 6,
+    "pre_repair_selection_outside_diiid_wall_count": 4,
+    "reachability_claim_verdict": "WITHDRAW: the cohort includes out-of-vessel selected saddles",
+    "ten_of_ten_reachability_claim_survives_as_evidence": false,
+    "terminal_count": 10,
+    "unchanged_terminal_count": 7
+  }
+}

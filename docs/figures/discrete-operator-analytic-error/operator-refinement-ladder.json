@@ -838,11 +838,13 @@
     "unqualified_rung_count": 2
   },
   "verdict": {
-    "cause": "posing",
+    "cause": "solver_or_root_selection_unresolved",
     "classification": "operator_admits_analytic_fixed_point",
     "operator_admits_analytic_fixed_point": true,
+    "posed_terms_match": true,
+    "reason": "analytic_fixed_point_admitted_and_all_posed_terms_match",
     "repair_authored": false,
     "roundoff_dominated": true,
-    "statement": "POSING is the better outcome: one exact map application reproduces the closed-form field within the preregistered binary64 tolerance at every resolution, independently of any seed, solve, or basin. The operator is sound for this analytic fixed point; the bounded case-presentation discrepancy is not repaired here."
+    "statement": "UNRESOLVED SOLVER OR ROOT SELECTION: one exact map application reproduces the closed-form field within the preregistered binary64 tolerance at every resolution, and the term audit finds no posing disagreement. The operator admits this analytic fixed point, but this measurement does not determine why the solve selects another state."
   }
 }

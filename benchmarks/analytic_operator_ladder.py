@@ -466,6 +466,126 @@ def _terminal_observations(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _within_roundoff(delta: float, scale: float) -> bool:
+    reference = max(abs(scale), np.finfo(np.float64).tiny)
+    return bool(abs(delta) / reference <= MAP_ROUNDOFF_TOLERANCE)
+
+
+def _posed_terms_match(row: dict[str, Any]) -> bool:
+    terms = row["posed_terms"]
+    span_wb = abs(row["analytic_topology"]["boundary_minus_axis_span_wb"])
+    external = terms["external"]
+    boundary = terms["boundary"]
+    source = terms["source"]
+    pressure = source["pressure_gradient_pa_per_wb"]
+    field = source["ff_gradient_tm2_per_wb"]
+    primitives = source["boundary_primitives"]
+    rotation = source["rotation"]
+
+    external_matches = (
+        external["external_current_amplitude"]["matches"]
+        and _within_roundoff(external["full_state_identity_absolute_sup_wb"], span_wb)
+        and all(
+            _within_roundoff(
+                family["closed_form_completion_absolute_sup_delta_wb"], span_wb
+            )
+            for family in external["by_target_family"].values()
+        )
+    )
+    boundary_matches = _within_roundoff(boundary["absolute_delta_wb"], span_wb)
+    source_matches = (
+        source["normalisation"]["matches"]
+        and source["open_region_sources"]["matches"]
+        and _within_roundoff(
+            pressure["maximum_absolute_delta"],
+            pressure["closed_form_after_total_flux_conversion"],
+        )
+        and _within_roundoff(
+            field["maximum_absolute_delta"],
+            field["closed_form_after_total_flux_conversion"],
+        )
+        and _within_roundoff(
+            primitives["operator_pressure_pa"],
+            primitives["closed_form_pressure_pa"],
+        )
+        and _within_roundoff(
+            primitives["operator_field_function_tm"]
+            - primitives["closed_form_field_function_tm"],
+            primitives["closed_form_field_function_tm"],
+        )
+        and rotation["operator_closure"] == rotation["closed_form_closure"]
+        and _within_roundoff(
+            rotation["operator_temperature_j"][0]
+            - rotation["closed_form_axis_temperature_j"],
+            rotation["closed_form_axis_temperature_j"],
+        )
+        and _within_roundoff(
+            rotation["operator_temperature_j"][-1]
+            - rotation["closed_form_boundary_temperature_j"],
+            rotation["closed_form_boundary_temperature_j"],
+        )
+        and _within_roundoff(
+            rotation["operator_mean_particle_mass_kg"]
+            - rotation["closed_form_mean_particle_mass_kg"],
+            rotation["closed_form_mean_particle_mass_kg"],
+        )
+        and source["current_density"]["operator_vs_closed_form_relative_sup"]
+        <= MAP_ROUNDOFF_TOLERANCE
+    )
+    return bool(external_matches and boundary_matches and source_matches)
+
+
+def _verdict(
+    rows: list[dict[str, Any]], fit: dict[str, Any], worst_relative: float
+) -> dict[str, Any]:
+    at_roundoff = bool(worst_relative <= MAP_ROUNDOFF_TOLERANCE)
+    posed_terms_match = all(_posed_terms_match(row) for row in rows)
+
+    # A roundoff map residual and a clean term audit leave solver or root
+    # selection unresolved. A posed-term disagreement is a posing defect.
+    # Without either condition, the map itself does not admit the fixed point.
+    if at_roundoff and posed_terms_match:
+        cause = "solver_or_root_selection_unresolved"
+        classification = "operator_admits_analytic_fixed_point"
+        reason = "analytic_fixed_point_admitted_and_all_posed_terms_match"
+        statement = (
+            "UNRESOLVED SOLVER OR ROOT SELECTION: one exact map application "
+            "reproduces the closed-form field within the preregistered binary64 "
+            "tolerance at every resolution, and the term audit finds no posing "
+            "disagreement. The operator admits this analytic fixed point, but "
+            "this measurement does not determine why the solve selects another "
+            "state."
+        )
+    elif not posed_terms_match:
+        cause = "posing"
+        classification = "posed_term_disagreement"
+        reason = "one_or_more_posed_terms_disagree_with_the_closed_form"
+        statement = (
+            "POSING: at least one audited operator input or boundary term "
+            "disagrees with the independently evaluated closed form."
+        )
+    else:
+        cause = "operator"
+        classification = "discrete_operator_consistency_error"
+        reason = "clean_posing_but_map_does_not_admit_the_analytic_fixed_point"
+        statement = (
+            "OPERATOR: the posed terms match, but the one-application analytic "
+            "residual is above the preregistered binary64 roundoff tolerance. "
+            "The measurement identifies a discrete consistency error and "
+            "authors no repair."
+        )
+    return {
+        "cause": cause,
+        "classification": classification,
+        "reason": reason,
+        "statement": statement,
+        "operator_admits_analytic_fixed_point": at_roundoff,
+        "posed_terms_match": posed_terms_match,
+        "roundoff_dominated": fit["roundoff_dominated"],
+        "repair_authored": False,
+    }
+
+
 def _validate(receipt: dict[str, Any]) -> None:
     rows = receipt["refinement_ladder"]
     if len(rows) < 4:
@@ -511,6 +631,11 @@ def _validate(receipt: dict[str, Any]) -> None:
         raise RuntimeError("the unqualified terminal attempts are not explicit")
     if receipt["verdict"]["repair_authored"]:
         raise RuntimeError("this measurement receipt may not author a repair")
+    posed_terms_match = all(_posed_terms_match(row) for row in rows)
+    if receipt["verdict"]["posed_terms_match"] != posed_terms_match:
+        raise RuntimeError("the aggregate posed-term audit disagrees with its rungs")
+    if posed_terms_match and receipt["verdict"]["cause"] == "posing":
+        raise RuntimeError("a clean posed-term audit cannot carry a posing cause")
     if receipt["measurement_lane"]["backend"] != "cpu":
         raise RuntimeError("all refinement children must use the CPU backend")
 
@@ -534,28 +659,6 @@ def _aggregate(parts: list[Path], output: Path) -> dict[str, Any]:
     worst_relative = max(
         row["one_application_residual"]["full_state"]["relative_sup"] for row in rows
     )
-    at_roundoff = bool(worst_relative <= MAP_ROUNDOFF_TOLERANCE)
-    converging = bool(
-        fit["converging_order_supported"] and not fit["roundoff_dominated"]
-    )
-    cause = "operator" if converging and not at_roundoff else "posing"
-    if cause == "posing":
-        classification = "operator_admits_analytic_fixed_point"
-        statement = (
-            "POSING is the better outcome: one exact map application reproduces "
-            "the closed-form field within the preregistered binary64 tolerance "
-            "at every resolution, independently of any seed, solve, or basin. "
-            "The operator is sound for this analytic fixed point; the bounded "
-            "case-presentation discrepancy is not repaired here."
-        )
-    else:
-        classification = "discrete_operator_consistency_error"
-        statement = (
-            "OPERATOR: the one-application analytic residual is above roundoff "
-            "and converges with a positive order established by its uncertainty. "
-            "The measurement identifies a discrete consistency error and authors "
-            "no repair."
-        )
     receipt = {
         "schema": "nova.analytic-operator-refinement-ladder",
         "source_revision": _source_revision(),
@@ -607,14 +710,7 @@ def _aggregate(parts: list[Path], output: Path) -> dict[str, Any]:
                 ),
             },
         },
-        "verdict": {
-            "cause": cause,
-            "classification": classification,
-            "statement": statement,
-            "operator_admits_analytic_fixed_point": at_roundoff,
-            "roundoff_dominated": fit["roundoff_dominated"],
-            "repair_authored": False,
-        },
+        "verdict": _verdict(rows, fit, worst_relative),
         "evidence_inputs": {
             "analytic_fixture_driver": {
                 "path": "scripts/analytic_oracle_fixtures/measure.py",

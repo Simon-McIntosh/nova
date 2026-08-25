@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T10:54:44",
+  "updated": "2026-08-25T10:57:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -708,8 +708,12 @@
         "id": "margin-remeasure",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "created": "2026-08-25"
+        "session_id": "01a03818-636e-7632-bc6e-05c3a7131c93",
+        "created": "2026-08-25",
+        "sessions": {
+          "gpt-5.6-sol": "01a03818-636e-7632-bc6e-05c3a7131c93"
+        },
+        "session_model": "gpt-5.6-sol"
       },
       {
         "id": "margin-scout",
@@ -34092,6 +34096,6 @@
       }
     ],
     "holds": [],
-    "_version": 841
+    "_version": 842
   }
 }

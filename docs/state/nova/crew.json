@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T06:47:27",
+  "updated": "2026-08-25T07:06:48",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -31462,9 +31462,159 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260824T205111903253-label-seed-residual-field",
+        "plan": "plateau-input-attribution",
+        "section": "\u00a72",
+        "node": "label-seed-residual-field",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "residual-field",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T20:51:17Z",
+        "completed_at": "2026-08-24T21:13:03Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1306,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1306,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "20e6626ab66beeadc2250f9f3e9e459566f2b093",
+        "commits": [
+          "fac85eadee2548e4d199331f5006546394f044f8"
+        ],
+        "changed_lines": {
+          "added": 40346,
+          "removed": 30,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T205111903253-label-seed-residual-field/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0358a-b4f0-7971-b669-77754a6e414f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7731200,
+            "cached_input_tokens_cumulative": 7731200,
+            "input_tokens": 7907570,
+            "input_tokens_cumulative": 7907570,
+            "output_tokens": 28670,
+            "output_tokens_cumulative": 28670,
+            "reasoning_output_tokens": 9265,
+            "reasoning_output_tokens_cumulative": 9265
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260824T160059451958-diiid-wall-topology-surface",
+        "plan": "plateau-input-attribution",
+        "section": "\u00a75",
+        "node": "diiid-wall-topology-surface",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "wall-surface",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T16:01:06Z",
+        "completed_at": "2026-08-24T21:39:30Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 20304,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "f1ecf6afb5fbe9a3268c9698e1b216dd39f603fc",
+        "commits": [
+          "7485f6f7aef8a2dae16aeec6a7572b5bffb37688"
+        ],
+        "changed_lines": {
+          "added": 2434,
+          "removed": 25,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T160059451958-diiid-wall-topology-surface/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03481-0b88-73b2-9537-1d4eae954f86",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 25726464,
+            "cached_input_tokens_cumulative": 25726464,
+            "input_tokens": 26342304,
+            "input_tokens_cumulative": 26342304,
+            "output_tokens": 72694,
+            "output_tokens_cumulative": 72694,
+            "reasoning_output_tokens": 23217,
+            "reasoning_output_tokens_cumulative": 23217
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 782
+    "_version": 784
   }
 }

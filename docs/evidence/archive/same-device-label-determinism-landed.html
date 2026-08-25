@@ -184,6 +184,45 @@
     bound on a residual that is identically zero in exact arithmetic passable; §1 separated the two
     faults precisely so that fixing one could not be read as closing the other.</p>
 
+    <h2 id="production-control">§5 — the control on the production path, priced at steady state</h2>
+
+    <p><strong>Node <code>production-compilation-control</code>, commit <code>e4093c4e</code>, gate
+    PASSED, 6 tests, 2026-08-25.</strong> H200 job 1254407 on 98dci4-gpu-0003, NVIDIA H200 NVL, driver
+    595.58.03, JAX/jaxlib 0.11.0, float64, three distinct PIDs, frozen case 21978/35 at batch width 1.
+    Receipt sha256 <code>de1e8d00&hellip;</code>, 59,356 bytes.</p>
+
+    <table>
+      <caption>Three fresh production-route processes under the fixed persistent cache</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Result</th></tr></thead>
+      <tbody>
+        <tr><td>Terminal flux, shape 1&times;1126</td><td>one identical sha256 in all three; <strong>0</strong> unequal elements, max abs/rel difference <strong>0.0</strong></td></tr>
+        <tr><td>Registered observables</td><td>all <strong>69</strong> bitwise identical, 0.0 maximum absolute difference</td></tr>
+        <tr><td>Cache-off comparator</td><td>11 changing case verdicts, confined to <code>divergence_b</code> and <code>divergence_j</code></td></tr>
+        <tr><td>Cache hits across the three</td><td>0 / 1 / 1, warm compile saved 3.606 s and 3.628 s</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The steady-state cost is essentially nil, and that changes the premise the decision was
+    taken on.</strong> Cache-enabled execute median <strong>0.040605 s/slice</strong> against
+    cache-disabled <strong>0.040538 s/slice</strong> — a paired median delta of
+    <strong>3.53e&minus;5 s/slice</strong>, <strong>0.087 %</strong>. The owner locked production-wide
+    scope against a cold-driver upper bound of 0.11301 s/slice and 2.197 %, which included process
+    startup and compilation across 30 candidate slices. The true steady-state figure is roughly
+    twenty-five times smaller, so the choice is cheaper than it was authorised to be. One-time
+    preparation plus compilation was 31.77 / 25.38 / 25.49 s, and compile-or-cache-load alone
+    4.367 / 0.414 / 0.392 s — separated from the per-slice execute, as required.</p>
+
+    <p><strong>Two properties were tested adversarially rather than assumed.</strong> Deliberately
+    conflicting inherited JAX and NOVA cache paths were overridden by one resolved
+    <code>nova/production-forward</code> directory with <code>explicit=true</code>,
+    <code>maximum_bytes=2147483648</code>, <code>minimum_compile_seconds=1.0</code> — so silently
+    inheriting a user cache and calling that a deterministic production route now fails rather than
+    passing by accident. And the receipt states plainly that this <strong>closes determinism only</strong>
+    and does not claim the separate 67-of-69 scientific acceptance fault passed. An earlier full-file
+    diagnostic stopped after 10 tests without a verdict is retained and explicitly not claimed as
+    validation.</p>
+
+
   </main>
 </body>
 </html>

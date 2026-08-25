@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="same-device-label-determinism">
   <meta name="plan-title" content="Same-Device Label Determinism — a route that disagrees with itself">
   <meta name="plan-summary" content="Two back-to-back runs of one driver on one H200, on identical inputs, return different registered-bound verdicts: bound totals move at both batch widths and ten individual case verdicts change. Establish whether a single route is reproducible against itself before any labelled store certifies its own output.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="8.0">
   <meta name="plan-capability-version" content="1.0">
@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="7">
-<meta name="plan-commits" content="cef8f151582f8fef72dd5cee6dab5cac6fbd9710,e529e385f64ed252036bb8cdbaf6bbd9cdc1b415,91ac686cd78e4d43a62d1942c53975f0886bde03">
-<meta name="plan-artifacts" content="scripts/determinism_reuse/report.md,benchmarks/observable_batch_acceptance.py,docs/figures/same-device-label-determinism/state-label-reproducibility.json,docs/figures/same-device-label-determinism/state-label-reproducibility.npz,docs/figures/same-device-label-determinism/executable-boundary-arms.json,docs/evidence/archive/same-device-label-determinism-landed.html">
-<meta name="plan-impl" content="0.75">
+<meta name="plan-version" content="8">
+<meta name="plan-commits" content="cef8f151582f8fef72dd5cee6dab5cac6fbd9710,e529e385f64ed252036bb8cdbaf6bbd9cdc1b415,91ac686cd78e4d43a62d1942c53975f0886bde03,e4093c4ec0df360856a75d285040cae8f29e8c5c">
+<meta name="plan-artifacts" content="scripts/determinism_reuse/report.md,benchmarks/observable_batch_acceptance.py,nova/biot/tiledassembly.py,docs/figures/same-device-label-determinism/state-label-reproducibility.json,docs/figures/same-device-label-determinism/state-label-reproducibility.npz,docs/figures/same-device-label-determinism/executable-boundary-arms.json,docs/figures/same-device-label-determinism/production-compilation-control.json,docs/evidence/archive/same-device-label-determinism-landed.html">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -159,35 +159,25 @@
     <p><strong>Never derive an acceptance criterion from an achieved value of the quantity it
     scores</strong>, and a criterion must be passable by something.</p>
 
-    <h2 id="s5">§5 — Apply the control on the path that produces the store</h2>
-
-    <p><strong>The lock creates work, and naming it here is the difference between a decision and a
-    note.</strong> Fixed persistent executable reuse is demonstrated on the acceptance driver and is
-    absent from the production forward path: no production entry calls
-    <code>nova.biot.tiledassembly.compilation_cache</code>, which is exactly the gap the reuse map
-    recorded. A control that exists only where it was measured leaves the published store produced by
-    the uncontrolled route, which is the arrangement the owner decision rejected.</p>
-
-    <p>Two properties must survive the change, and both are already established rather than hoped
-    for. The cache is documented not to alter an executable's answers, so reuse must not move any
-    result — the §2 receipt is the reference: bitwise identity across repetitions within one
-    executable. And the configuration must be explicit and receipt-visible rather than inherited from
-    whatever a user happens to have set, which is the precedent
-    <code>configure_compilation_cache</code> already sets on the throughput benchmark. Silently
-    inheriting a user cache and calling that a deterministic production route is the failure mode to
-    avoid.</p>
-
-    <p><strong>Done when</strong> the production forward path selects a fixed compilation cache by an
-    explicit, receipt-recorded configuration rather than by inheritance; three consecutive
-    fresh-process invocations of the production route on one frozen case return bitwise-identical
-    terminal flux and identical values for all 69 registered observables, quoted against the
-    cache-off arm's 11 changing case verdicts; the per-slice cost is re-quoted from a steady-state
-    measurement that separates one-time compilation from per-slice execute, against the
-    <strong>0.113 s/slice and 2.197 %</strong> cold-driver upper bound this decision was taken on;
-    and a test asserts the configuration is explicit, so a future route that inherits a user cache
-    fails rather than passing by accident. A steady-state cost materially above the cold-driver upper
-    bound would be a surprising result and reopens the scope decision rather than being absorbed
-    quietly.</p>
+    <section id="s5" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-25 — the control is essentially free</span>
+        <h2>§5 — Apply the control on the path that produces the store</h2></header>
+      <p class="landed-summary">The production tile evaluator now selects an <strong>explicit</strong>
+      <code>fixed_persistent</code> cache before constructing ring or arc executables and exposes its
+      receipt. Three fresh processes on one H200 return <strong>one identical terminal-flux digest</strong>,
+      0 unequal elements, and all <strong>69</strong> registered observables bitwise identical at 0.0
+      maximum difference — against 11 changing case verdicts with the cache off. Cache hits 0/1/1,
+      warm compile saving 3.61 s. <strong>Steady-state cost 0.087 %</strong> (paired median delta
+      3.5e−5 s/slice) against the <strong>2.197 %</strong> cold-driver upper bound the decision was
+      taken on — twenty-five times cheaper than authorised. Tested adversarially: deliberately
+      conflicting inherited JAX and NOVA cache paths were <em>overridden</em> by one resolved directory
+      with <code>explicit=true</code>, so the route cannot silently inherit a user cache and be called
+      deterministic. Artifact
+      <code>docs/figures/same-device-label-determinism/production-compilation-control.json</code>
+      (commit <code>e4093c4e</code>). <strong>Closes determinism only</strong> — the 67-of-69 acceptance
+      fault is untouched and is not this plan's claim. Full record:
+      <a href="/nova/evidence/archive/same-device-label-determinism-landed#production-control">§5 landed</a>.</p>
+    </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -209,10 +199,16 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-sdd-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-24" data-recommends-skill="/reckon-ship same-device-label-determinism" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sdd-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-24" data-recommends-skill="/reckon-ship same-device-label-determinism" data-resolved-at="2026-08-25T06:50:13+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">§2 before §3 — separate state from labels before hunting a kernel</h4>
     <div class="r-fu-body"><p>ONE HYPOTHESIS IS ALREADY EXCLUDED and starting from it would waste the plan. The reduction association in Nova's own moment code is NOT the cause: a fixed binary summation tree plus a cell-centred radial-volume reconstruction made <code>moments.volume</code> and <code>moments.major_radius</code> bitwise equal between the scalar observation entry and a jitted <code>vmap</code> of it on all six cases, improved the bound counts from 65 and 66 to 67 and 68 at the two widths, and left the run-to-run movement intact. Read <code>docs/figures/derived-observable-parity/integrated-acceptance.json</code> and the landed record at <code>docs/evidence/archive/derived-observable-parity-landed.html</code> before dispatching anything.</p><p>§2 IS CHEAP AND IT SPLITS THE PROBLEM IN HALF. Nobody has yet compared the terminal flux array bitwise across two runs of the same case in one allocation, because no existing receipt retains the raw terminal arrays across repetitions. If the state repeats and only the labels move, the search is confined to the observation path. If the state itself varies, then every single-run label argument on this lane becomes provisional and that is a much larger finding, so it is worth an hour to know which world we are in.</p><p>THE CLEANEST TARGET TO INSTRUMENT is <code>conservation.divergence_b</code>. It failed both batch widths in one repetition and passed both in the next, so it flips on the coarsest possible signal and needs no subtle statistics to detect. Use it as the canary while building the repetition harness, then widen to all 69.</p><p>DO NOT DECIDE THE CONTROL SCOPE BEFORE THE COST IS MEASURED. The open decision asks whether a deterministic control applies production-wide or only to the measurement driver, and the honest answer depends entirely on the per-slice throughput cost across 1,341,435 slices. A measurement-only control certifies a route that is not the one which produced the store, which is close to certifying nothing - but a production-wide control that halves throughput is a real trade and belongs to the owner, not to this plan.</p><p>CONSUMER: <code>mast-catalog-gpu-solve</code>, which is held on this and on <code>branch-root-existence</code>. Do not report either hold released until the acceptance driver returns identical counts and identical per-case verdicts across three consecutive runs.</p></div>
     <pre class="r-fu-prompt">/reckon-ship same-device-label-determinism</pre>
+    <p class="r-fu-outcome">done. Section 2 ran before section 3 as instructed, and it returned neither of the two outcomes the section anticipated: three repetitions inside one process and one compiled executable were bitwise identical in state AND in all 69 labels, 12 of 12 STATE_REPRODUCIBLE with zero pass-status changes. That eliminated the in-executable mechanisms by measurement and left the process boundary, which the reuse map had independently ranked strongest because no acceptance driver called the persistent compilation cache. Section 3 then confirmed it with a paired arm: cache-off moved 11 case verdicts across three fresh processes while a shared persistent cache moved zero, all 69 aggregate and all 828 per-case verdicts identical. divergence_b was used as the canary exactly as advised. The control scope decision was answered by the owner AFTER the cost was measured and never before, locked production-wide, and section 5 then applied it on the production path where the steady-state cost turned out to be 0.087 per cent - twenty-five times below the cold-driver upper bound the decision was taken on. CONSUMER HOLD: mast-catalog-gpu-solve is released for REPRODUCIBILITY only, which is what this plan claimed. It is not released for acceptance passing, and f-sdd-002 hands that second fault to roundoff-scale-acceptance-bounds rather than leaving it unowned.</p>
+    </article>
+<article class="r-fu" data-id="f-sdd-002" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship roundoff-scale-acceptance-bounds" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The second fault has its own plan now that the first is closed</h4>
+    <div class="r-fu-body"><p>POINTER ONLY - this plan is shipped and carries no executable work. Section 1 separated two faults and this plan closed one: the route is now reproducible, with three fresh production processes returning bitwise-identical terminal flux and all 69 observables identical at a steady-state cost of 0.087 per cent.</p><p>THE SECOND FAULT IS UNTOUCHED AND WAS NEVER THIS PLAN'S CLAIM. Acceptance still fails at 67 of 69 bounds, and the two that fail score conservation.divergence_b and conservation.divergence_j - divergence residuals whose exact value is zero, so their computed value IS roundoff and a relative bound on them is passable only by luck of the last bit. Maximum absolute differences of 1.3877787807814457e-16 and 2.7755575615628914e-16 carried maximum bound ratios of 2.967 and 5.341: one ULP crossing a bound by a factor of three. Determinism made that luck repeatable rather than making it a measurement.</p><p>OWNED BY <code>roundoff-scale-acceptance-bounds</code>, which classifies every registered bound by whether its scored quantity has a nonzero exact value and gives the exactly-zero ones an absolute floor derived from the arithmetic rather than from an achieved value. Nothing is owed from here.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship roundoff-scale-acceptance-bounds</pre>
     </article>
 </section>
 
@@ -228,6 +224,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260825T0110-scope" data-who="reckon-ship" data-when="2026-08-25T01:10:00Z">
     <div class="r-comment-body">CONTROL SCOPE LOCKED PRODUCTION-WIDE by the owner, 2026-08-25, after the cost was measured and not before, which is the ordering section 3 insisted on. The trade as presented: 2.1971256764727887 per cent, explicitly an upper bound because the measured figure is cold-driver time carrying process startup and compilation across 30 candidate slices rather than steady-state solve throughput, so the terms that dominate it amortise across a batched catalog run rather than recurring on each of the 1,341,435 slices. Measurement-only was refused on the plan's own ground that it certifies a route different from the one that produced the store. WHAT REMAINS OPEN IS NOT DETERMINISM. Acceptance still fails at 67 of 69 bounds with the control applied, and the two bounds whose verdicts moved are conservation.divergence_b and conservation.divergence_j - divergence residuals that are identically zero in exact arithmetic, so their computed value IS roundoff and a bound on them is a bound on roundoff. Section 1 separated those two faults deliberately, and locking this decision closes the first without touching the second. The consumer hold on mast-catalog-gpu-solve is released for reproducibility: the acceptance driver now returns identical bound and case counts with identical per-case verdicts across three consecutive invocations under the control. It is NOT released for acceptance passing, which was never this plan's claim.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260825T0650-prodcache" data-who="reckon-ship" data-when="2026-08-25T06:50:00Z">
+    <div class="r-comment-body">production-compilation-control landed - commit e4093c4e, merged, gate PASSED, 6 tests, H200 job 1254407 on 98dci4-gpu-0003 with three distinct PIDs 2332526, 2337678 and 2341548, frozen case 21978/35 at width 1. THE CONTROL IS APPLIED WHERE THE STORE IS PRODUCED. The production tile_evaluator now selects an explicit fixed_persistent cache BEFORE constructing ring or arc executables and exposes its receipt. Terminal flux shape 1x1126 returned ONE identical sha256 in all three processes with 0 unequal elements and maximum absolute and relative difference 0.0; all 69 registered observable values bitwise identical at 0.0 maximum absolute difference, quoted against the 11 changing cache-off case verdicts confined to conservation.divergence_b and conservation.divergence_j. Cache hits 0/1/1 with warm compile time saved 3.606119466945529 and 3.6280285455286503 s. AND THE STEADY-STATE COST IS ESSENTIALLY NIL, WHICH IMPROVES ON THE PREMISE THE DECISION WAS TAKEN ON. Cache-enabled execute median 0.04060504026710987 s per slice against cache-disabled 0.04053800832480192, a paired median delta of 0.00003527943044900894 s per slice and 0.08702803099338335 per cent - against the cold-driver upper bounds of 0.11300887924929537 s per slice and 2.1971256764727887 per cent the owner locked production-wide scope against. Roughly TWENTY-FIVE TIMES cheaper than authorised, because the upper bound carried process startup and compilation across 30 candidate slices while the steady-state figure does not. One-time preparation plus compilation 31.770160162821412 / 25.38360291160643 / 25.488890314474702 s and compile-or-cache-load alone 4.366750932298601 / 0.41424654703587294 / 0.3924280721694231 s, separated from the per-slice execute as required. TWO PROPERTIES TESTED ADVERSARIALLY RATHER THAN ASSUMED: deliberately conflicting inherited JAX and NOVA cache paths were OVERRIDDEN by one resolved nova/production-forward directory with explicit true, maximum_bytes 2147483648 and minimum_compile_seconds 1.0 - so silently inheriting a user cache and calling that a deterministic production route now fails rather than passing by accident. And the receipt states plainly that this CLOSES DETERMINISM ONLY and does not claim the separate 67-of-69 scientific acceptance fault passed. An earlier full-file diagnostic stopped after 10 tests without a verdict is retained and explicitly not claimed as validation.</div>
 </div>
 </section>
 </main>

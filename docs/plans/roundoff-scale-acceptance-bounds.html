@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="roundoff-scale-acceptance-bounds">
+  <meta name="plan-title" content="A Bound on a Quantity That Is Exactly Zero Is a Bound on Roundoff">
+  <meta name="plan-summary" content="Determinism is fixed and acceptance still fails at 67 of 69 bounds. The two that fail score divergence residuals whose exact value is zero, so their computed value is rounding error and a relative bound on them is passable only by luck of the last bit. Classify every registered bound by whether its scored quantity has a nonzero exact value, and give those that do not an absolute floor derived from the arithmetic rather than from an achieved value.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="6.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="same-device-label-determinism">
+  <meta name="plan-sprint" content="S15">
+  <title>A Bound on a Quantity That Is Exactly Zero | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The second fault, now that the first is closed</h2>
+
+    <p>The determinism lane separated two faults deliberately and closed one. Fixed persistent
+    executable reuse now makes three fresh production processes return bitwise-identical terminal flux
+    and bitwise-identical values for all 69 registered observables, at a steady-state cost of 0.087 per
+    cent. <strong>And acceptance still fails at 67 of 69 bounds.</strong> That was predicted rather than
+    discovered: making a verdict reproducible cannot make a criterion passable.</p>
+
+    <p><strong>The two bounds that fail are the two that were never passable.</strong> Every one of the
+    11 case verdicts that moved under the cache-off arm belonged to
+    <code>conservation.divergence_b</code> or <code>conservation.divergence_j</code>. Those are
+    divergence residuals: in exact arithmetic they are identically zero, so their computed value
+    <em>is</em> the rounding error of the computation that produced them. A relative bound on such a
+    quantity is a bound on roundoff. The receipt's own figures show what that means — maximum absolute
+    differences of 1.3877787807814457e-16 and 2.7755575615628914e-16, one and two units in the last
+    place of a binary64 number near unity, carrying maximum relative differences of 2.5 and 4.5 and
+    maximum bound ratios of 2.967 and 5.341. A one-ULP change crosses the bound by a factor of three.</p>
+
+    <p><strong>This plan's own standing rule already forbids it.</strong> A criterion must be passable
+    by something. A relative criterion on a quantity whose exact value is zero is passable only when
+    the last bit falls the right way, which is not a property of the solve. Determinism made that luck
+    repeatable; it did not make it a measurement.</p>
+
+    <h2 id="s2">§2 — Classify every bound before repairing any</h2>
+
+    <p>The temptation is to loosen the two failing bounds, and it must be refused: a criterion widened
+    until the current value passes is derived from an achieved value of the quantity it scores, which is
+    the one thing the standing rule prohibits. The distinction that makes a repair legitimate is
+    whether the scored quantity has a nonzero exact value.</p>
+
+    <ul>
+      <li><strong>Nonzero exact value.</strong> A relative bound is meaningful, because there is
+      something to be relative to. Volume, major radius, plasma current and the geometric moments are
+      in this class.</li>
+      <li><strong>Exactly zero.</strong> Only an absolute bound is meaningful, and it must come from
+      the arithmetic — the number of operations, the magnitudes entering them and the working
+      precision — rather than from any observed residual. A floor of the form
+      <em>n</em>·&epsilon;·scale is derived; a floor chosen because the current value sits below it is
+      not.</li>
+    </ul>
+
+    <p>The classification is not a judgement call and should not be recorded as one: for each
+    registered observable it is a fact about the quantity's definition, checkable by reading how it is
+    formed. Recording it once, per bound, is most of the work — and it is the part that stops this
+    recurring on the next observable someone registers.</p>
+
+    <p><strong>Done when</strong> every one of the 69 registered bounds carries a recorded
+    classification of whether its scored quantity has a nonzero exact value, with the reason stated per
+    bound rather than in aggregate; every bound classified exactly-zero carries an absolute floor whose
+    derivation from operation count, entering magnitudes and working precision is shown, and explicitly
+    <em>not</em> from any achieved residual; the acceptance route is re-scored under the corrected
+    criteria on the frozen six-case cohort at both registered widths, reporting the new pass count
+    against the banked 67 of 69 and naming every bound whose verdict changed and why; and a test
+    asserts that a bound on an exactly-zero quantity cannot be registered with a relative criterion, so
+    the next observable cannot reintroduce this. <strong>A re-score that still fails is a legitimate
+    outcome</strong> provided the surviving failures are on quantities with nonzero exact values, where
+    a relative bound means something and a failure is a real disagreement.</p>
+
+    <h2 id="s3">§3 — What this does and does not unblock</h2>
+
+    <p>The throughput product is a store of boundaries, moments and conservation diagnostics whose value
+    rests on a consumer trusting a published label. Reproducibility is now established and priced. What
+    remains is whether the acceptance check that certifies a label is measuring anything: two of its
+    bounds currently are not, and until they are, a passing acceptance run and a failing one differ by
+    the last bit of a quantity that should be zero.</p>
+
+    <p><strong>This plan does not touch convergence, and must not be read as doing so.</strong> The
+    plateau lane established that none of four documented input substitutions moves the residual, and
+    the operator lane established that the forward map admits an analytic fixed point at machine
+    precision while the solver reaches a different one. Those are separate and larger questions.
+    Repairing a criterion changes what the acceptance route can certify; it changes nothing about which
+    equilibrium the solver finds.</p>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-rab-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship roundoff-scale-acceptance-bounds" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Classify all sixty-nine before repairing two, and never widen to fit</h4>
+    <div class="r-fu-body"><p>DO NOT START BY LOOSENING THE TWO FAILING BOUNDS. A criterion widened until the current value passes is derived from an achieved value of the quantity it scores, which is the standing rule this repository has already spent nodes enforcing elsewhere. The legitimate repair is a change of KIND - absolute rather than relative - justified by the scored quantity having no nonzero exact value, not a change of magnitude justified by the current measurement.</p><p>THE EVIDENCE IS ALREADY BANKED AND SHOULD BE READ, NOT REMEASURED. <code>docs/figures/derived-observable-parity/integrated-acceptance.json</code> carries the maximum absolute differences of 1.3877787807814457e-16 and 2.7755575615628914e-16 against maximum bound ratios 2.967 and 5.341, which is the whole argument in two numbers: one ULP crossing a bound by a factor of three. <code>docs/figures/same-device-label-determinism/executable-boundary-arms.json</code> carries the 11 changing case verdicts and confirms every one belongs to the two divergence residuals. <code>docs/figures/same-device-label-determinism/production-compilation-control.json</code> confirms 69 of 69 observables now bitwise identical across fresh production processes, so the movement is gone and the failure is not.</p><p>CLASSIFY ALL SIXTY-NINE, because the classification is the durable product. Two bounds are broken today; the reason they are broken is a category error that any future registered observable can repeat. A per-bound record of whether its scored quantity has a nonzero exact value, with the reason, plus a test refusing a relative criterion on an exactly-zero quantity, is what stops the third instance.</p><p>THIS IS NOT A CONVERGENCE PLAN. The plateau lane closed with none of four input substitutions moving the residual, and the operator lane showed the map admits an analytic fixed point at machine precision while the solver reaches a different one. Do not let a criterion repair be read as progress on either, and do not let either be cited as a reason to relax a bound.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship roundoff-scale-acceptance-bounds</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>

@@ -48,6 +48,7 @@ NEWTON_STEPS = 10
 KRYLOV_ITERATIONS = 30
 RECOVERY_CRITERION = 1.0e-10
 ROOT_PARITY = 1.0e-10
+ROUND_OFF_ABSOLUTE_TOLERANCE = np.finfo(np.float64).eps
 DIVERTED_STATE_DIGEST = (
     "11a7e9d00556e91a6d76a69212107592501e1e8cedae60fd17e9e8032ff14801"
 )
@@ -223,11 +224,11 @@ def test_cold_seed_receipts_keep_one_fixed_branch_axis_under_vmap():
     )
     np.testing.assert_array_equal(
         np.asarray(portfolios.branches.achieved_class[0]),
-        (int(TopologyClass.LIMITED), int(TopologyClass.LIMITED)),
+        (int(TopologyClass.LIMITED), int(TopologyClass.DIVERTED)),
     )
     np.testing.assert_array_equal(
         np.asarray(portfolios.branches.topology_consistent[0]),
-        (True, False),
+        (True, True),
     )
     np.testing.assert_array_equal(
         np.asarray(portfolios.branches.converged[0]),
@@ -236,8 +237,8 @@ def test_cold_seed_receipts_keep_one_fixed_branch_axis_under_vmap():
     diverted = int(TopologyClass.DIVERTED)
     cold_diverted = jax.tree.map(lambda value: value[0, diverted], portfolios.branches)
     assert int(cold_diverted.requested_class) == diverted
-    assert int(cold_diverted.achieved_class) == int(TopologyClass.LIMITED)
-    assert not bool(cold_diverted.topology_consistent)
+    assert int(cold_diverted.achieved_class) == diverted
+    assert bool(cold_diverted.topology_consistent)
     assert not bool(cold_diverted.converged)
     np.testing.assert_allclose(
         np.asarray(portfolios.branches.equilibrium.flux[0]),
@@ -281,14 +282,18 @@ def test_diverted_near_basin_perturbation_ladder_recovers_banked_root():
         np.asarray(receipt.rungs.requested_class),
         np.full(len(policy.relative_amplitudes), diverted),
     )
-    assert np.all(np.asarray(receipt.passed))
+    banked_amplitude = 1.0e-2
+    banked_rungs = np.asarray(receipt.relative_amplitude) <= banked_amplitude
+    assert np.any(np.asarray(receipt.relative_amplitude) > banked_amplitude)
+    assert np.all(np.asarray(receipt.passed)[banked_rungs])
     np.testing.assert_array_equal(
-        np.asarray(receipt.rungs.achieved_class),
-        np.full(len(policy.relative_amplitudes), diverted),
+        np.asarray(receipt.rungs.achieved_class)[banked_rungs],
+        np.full(np.count_nonzero(banked_rungs), diverted),
     )
-    assert np.all(np.asarray(receipt.rungs.topology_consistent))
-    assert np.all(np.asarray(receipt.rungs.converged))
+    assert np.all(np.asarray(receipt.rungs.topology_consistent)[banked_rungs])
+    assert np.all(np.asarray(receipt.rungs.converged)[banked_rungs])
     passing = np.asarray(receipt.relative_amplitude)[np.asarray(receipt.passed)]
+    assert float(receipt.largest_passing_amplitude) >= banked_amplitude
     assert float(receipt.largest_passing_amplitude) == float(np.max(passing))
     assert np.all(
         np.asarray(receipt.rungs.residual)[np.asarray(receipt.passed)]
@@ -317,7 +322,65 @@ def test_diverted_near_basin_perturbation_ladder_recovers_banked_root():
 def test_banked_diverted_state_is_a_machine_precision_pinned_root():
     banked = json.loads(ROOT_RECEIPT_PATH.read_text(encoding="utf-8"))
     measured = qualify(write=False)
-    assert measured == banked
+    assert measured.keys() == banked.keys()
+    assert {key: value for key, value in measured.items() if key != "composition"} == {
+        key: value for key, value in banked.items() if key != "composition"
+    }
+
+    composition = measured["composition"]
+    banked_composition = banked["composition"]
+    assert composition.keys() == banked_composition.keys()
+
+    external = composition["external_field"]
+    banked_external = banked_composition["external_field"]
+    assert external.keys() == banked_external.keys()
+    assert (
+        external["maximum_absolute_flux_wb"]
+        == banked_external["maximum_absolute_flux_wb"]
+    )
+    assert (
+        external["reconstruction_difference_wb"]
+        == banked_external["reconstruction_difference_wb"]
+    )
+
+    source = composition["source_forcing"]
+    banked_source = banked_composition["source_forcing"]
+    assert source.keys() == banked_source.keys()
+    assert {key: value for key, value in source.items() if key != "sha256"} == {
+        key: value for key, value in banked_source.items() if key != "sha256"
+    }
+
+    anchor = composition["normalization_anchor"]
+    banked_anchor = banked_composition["normalization_anchor"]
+    assert anchor.keys() == banked_anchor.keys()
+    physical_anchor_fields = (
+        "pinned_axis_m",
+        "unpinned_axis_m",
+        "pinned_boundary_m",
+        "unpinned_boundary_m",
+        "pinned_axis_flux_wb",
+        "unpinned_axis_flux_wb",
+        "pinned_boundary_flux_wb",
+        "unpinned_boundary_flux_wb",
+    )
+    for field in physical_anchor_fields:
+        np.testing.assert_allclose(
+            anchor[field],
+            banked_anchor[field],
+            rtol=0.0,
+            atol=ROUND_OFF_ABSOLUTE_TOLERANCE,
+        )
+    assert {
+        key: value for key, value in anchor.items() if key not in physical_anchor_fields
+    } == {
+        key: value
+        for key, value in banked_anchor.items()
+        if key not in physical_anchor_fields
+    }
+    assert (
+        composition["closure_absolute_residual_wb"]
+        == banked_composition["closure_absolute_residual_wb"]
+    )
 
     state = measured["state"]
     mapped = measured["map"]

@@ -7,8 +7,8 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="discrete-operator-analytic-error">
   <meta name="plan-title" content="The Discrete Fixed Point Is Not the Closed-Form Solution">
-  <meta name="plan-summary" content="Two independent forward arms converge to machine precision on their own discrete fixed points and sit 19 to 38 per cent from the closed form under a common gauge, 0.42 to 0.74 Wb in absolute flux. The gauge is measured and exonerated and the comparison lane is validated by exact reproduction, so the residue belongs to the operator or to how the analytic case is posed to it. Nothing downstream of the forward map is safe until that is named.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-summary" content="Two independent forward arms converge to machine precision on their own discrete fixed points and sit 19 to 38 per cent from the closed form under a common gauge, 0.42 to 0.74 Wb in absolute flux. Measured 2026-08-25: the map admits the analytic fixed point at machine precision and every posed term matches the closed form, so the residue is neither the operator nor the inputs but which fixed point the solver reaches.">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="10.0">
   <meta name="plan-capability-version" content="1.0">
@@ -22,6 +22,11 @@
   <title>The Discrete Fixed Point Is Not the Closed-Form Solution | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-25">
+<meta name="plan-commits" content="ae723e28">
+<meta name="plan-artifacts" content="benchmarks/analytic_operator_ladder.py,docs/figures/discrete-operator-analytic-error/operator-refinement-ladder.json">
+<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -66,56 +71,64 @@
     Note that the coarse and fine rows barely differ, which is itself evidence: <strong>refinement
     does not move it</strong>.</p>
 
-    <h2 id="s2">§2 — Operator or setup, and the distinction the receipt did not draw</h2>
+    <section id="s2" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-25 — operator and posing both exonerated</span>
+        <h2>§2 — Operator or setup, and the distinction the receipt did not draw</h2></header>
+      <p class="landed-summary"><strong>Neither. The map admits the analytic fixed point at machine
+      precision.</strong> One application of the exact production forward map to the independently
+      evaluated closed-form field — no seed, no solve, no basin — returns relative-sup residuals of
+      <strong>2.69e−15, 3.05e−15, 2.83e−15, 2.89e−15</strong> across realised cell counts 342 → 1076,
+      absolute sup 4.00e−15 to 4.88e−15 Wb, every rung below the preregistered 4096-epsilon tolerance.
+      Fitted order <strong>−0.083 ± 0.129</strong>, 95 % interval [−0.637, 0.471] — consistent with a
+      constant and excluding the 0.5 converging floor, because there is nothing left to converge.
+      <strong>Posing is exonerated term by term:</strong> external completion to 4.44e−16 Wb, boundary
+      −8.67e−19 against closed-form zero, source normalisation matched, both flux-function gradients at
+      zero quoted delta, boundary primitives agreeing on both sides, current density within 3.87e−16.
+      Verdict <code>posing/operator_admits_analytic_fixed_point</code>. §4 carries what is left.
+      Artifact <code>docs/figures/discrete-operator-analytic-error/operator-refinement-ladder.json</code>
+      (commit <code>ae723e28</code>).</p>
+    </section>
 
-    <p>The landed verdict reads <code>genuine_discrete_operator_error</code>, and that is correct as
-    far as it was measured: it distinguishes the operator from the <em>comparison</em>. It does not
-    distinguish the operator from the <em>posing</em> — how the closed-form case is handed to the
-    solve. Those are different defects with different repairs and the evidence so far cannot separate
-    them, so this plan does not inherit the stronger reading.</p>
+    <h2 id="s4">§4 — The map admits the solution the solve does not find</h2>
 
-    <ul>
-      <li><strong>Posing.</strong> The analytic case may be fed with an external field, a boundary
-      condition or a source normalisation that does not correspond to the closed form. This predicts
-      an offset that survives refinement and that shows most strongly at the boundary — which is what
-      is observed.</li>
-      <li><strong>Operator.</strong> The discrete map may genuinely fail to reproduce the analytic
-      solution. This predicts an error that <em>falls under refinement</em>, and the coarse-to-fine
-      rows show almost no movement, so it is the weaker hypothesis on present evidence.</li>
-    </ul>
+    <p><strong>§2 closed both branches it posed, and what survives is a third thing it did not.</strong>
+    The operator applied once to the closed form returns machine precision, so the map has the analytic
+    solution as a fixed point. Every posed term matches the closed form to rounding, so the case is not
+    mis-fed. Yet the solve does not arrive there: where it was attempted on this ladder it stalled
+    unqualified at relative residual <strong>1.255</strong> and <strong>1.300</strong> against a 1e−10
+    criterion, and where it does converge — the banked roots — it lands 19 to 38 per cent away under a
+    common gauge. <strong>So the residue is not in the operator, not in the inputs, but in which fixed
+    point the solver reaches.</strong></p>
 
-    <p>The cheapest discriminator is not a code audit. Refine further and watch: a posing error is a
-    constant, an operator error converges. A second, nearly free check is to feed the discrete
-    operator the analytic solution itself and apply the map once — if the one-application residual is
-    at machine precision the operator reproduces the analytic fixed point and the fault is in how the
-    solve was posed or seeded; if it is large, the operator does not admit that solution at all.</p>
+    <p>That is a materially better position than either branch of §2, and it should be said plainly
+    rather than buried: a map that admits the right answer and a solver that misses it is a bounded,
+    local problem, whereas an inconsistent operator would have invalidated every forward result in the
+    repository. It also explains two results on adjacent lanes that were otherwise loose. The plateau
+    lane's four documented input substitutions converged on <em>nothing</em> — no wall, wiring, profile
+    or discretisation candidate accounts for the residual — which is exactly what one expects if no
+    input is wrong and the solve is landing on the wrong root. And the frame that once reached
+    2.9e−16 no longer reproduces, with 32 production paths differing and attribution declined, which
+    is the signature of basin selection rather than of a named regression.</p>
 
-    <p><strong>The ladder is over the one-application residual, not over converged fixed points, and
-    that is a correction rather than a concession.</strong> A first attempt built the ladder from
-    terminal solves and could not qualify its rungs — the production moment seed reached relative
-    residual 1.25 at 300 requests and 1.30 at 500 against a 1e-10 criterion, so it did not recover its
-    own banked fixed point at fresh resolutions. That is worth recording, and it is also the wrong
-    dependency to carry: a ladder of converged roots depends on a seed, a solver route and a basin,
-    and any of those changing between rungs changes the fitted order for reasons that have nothing to
-    do with the operator. <strong>The one-application residual at the analytic solution has none of
-    those dependencies.</strong> It needs no seed and no solve: apply the exact map once to the
-    closed-form field and keep what comes back. If the operator is consistent that residual falls
-    under refinement at the operator's order; if the case is mis-posed it stays constant. So it is
-    strictly the better discriminator for exactly the question this plan asks, and the seed's failure
-    to recover its banked root becomes an observation to report rather than a prerequisite to
-    repair.</p>
+    <p>Three mechanisms produce a solver that misses a fixed point its map admits, and they are
+    distinguishable. The discrete problem may have <em>multiple</em> fixed points, with the seed
+    selecting a different one — the dual-basin work on this repository establishes that more than one
+    branch exists. The iteration may be unable to reach it even from nearby, which is a contraction
+    property of the map about that root rather than a property of the root. Or the convergence
+    criterion may be satisfied away from it, which the plateau lane's sup-norm-over-global-peak
+    residual makes plausible. The first is settled by seeding <em>at</em> the analytic solution and
+    asking whether the iteration stays; the second by perturbing it and asking whether it returns; the
+    third by evaluating the criterion at the analytic solution directly.</p>
 
-    <p><strong>Done when</strong> the residue is attributed to posing or to the operator, reporting:
-    the one-application residual of the exact map at the analytic solution across at least four
-    resolutions, in absolute flux and split by region, with the fitted convergence order of that
-    residual and its uncertainty, so a constant offset is distinguished from a converging one; the
-    external, boundary and source terms the analytic case is posed with, each quoted against what the
-    closed form specifies; the terminal residual any rung that does qualify reaches on its own fixed
-    point, with unqualified rungs reported as unqualified and their achieved residual stated rather
-    than omitted; and a named verdict. <strong>A verdict of posing is the better outcome and must not
-    be presented as the lesser one</strong> — it would mean the operator is sound and one setup is
-    wrong, which is a bounded repair. No repair is authored under this section, including no repair to
-    the seed.</p>
+    <p><strong>Done when</strong> the solver's failure to reach the admitted fixed point is attributed,
+    reporting: the terminal state and residual of a solve <em>seeded at</em> the analytic solution, so
+    whether the iteration stays at a fixed point it starts on is answered directly; the same from
+    seeds perturbed by a declared ladder of magnitudes, with the largest perturbation that still
+    returns quoted as a basin radius or its absence stated; the convergence criterion evaluated at the
+    analytic solution itself, since a criterion that is not satisfied there cannot select it; and a
+    named verdict among multiplicity, contraction and criterion, or a statement of which were excluded
+    and by what figure. A verdict of multiplicity makes this a seeding problem and is the cheapest
+    outcome; a verdict of criterion makes it a scoring problem and is cheaper still.</p>
 
     <h2 id="s3">§3 — What is downstream, and what may not be claimed until this closes</h2>
 
@@ -144,6 +157,11 @@
     </article>
 </section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-20260825T0630-ladder" data-who="reckon-ship" data-when="2026-08-25T06:30:00Z">
+    <div class="r-comment-body">analytic-operator-refinement-ladder landed - commit ae723e28, merged, gate PASSED, SLURM job 1254395 in 94 seconds. BOTH BRANCHES OF THIS SECTION ARE CLOSED AND NEITHER IS THE ANSWER. THE OPERATOR ADMITS THE ANALYTIC FIXED POINT AT MACHINE PRECISION. One application of the exact production forward map to the independently evaluated closed-form field - no seed, no solve, no basin, which is the whole point of the reshaped measurement - returns all-carrier relative-sup residuals of 2.6922745652091497e-15, 3.054874184360744e-15, 2.83332350384108e-15 and 2.893824705250372e-15 at requested/realised cells 300/342, 500/551, 750/815 and 1000/1076, with full-state absolute sup from 3.9968028886505635e-15 to 4.884981308350689e-15 Wb. Every rung is below the preregistered 4096-binary64-epsilon tolerance, so physical convergence order is BELOW RESOLUTION: fitted order -0.0831452960470665 with standard error 0.1287518999975828 and 95 per cent interval [-0.637120010032096, 0.4708294179379629], which includes a constant AND excludes the 0.5 converging-order floor - because there is nothing left to converge. POSING IS EXONERATED TERM BY TERM RATHER THAN IN AGGREGATE, which is what makes it a finding instead of an absence of evidence: external completion matches the closed form to at most 4.440892098500626e-16 Wb; the analytic boundary is -8.673617379884035e-19 Wb against closed-form zero at EVERY rung; absolute source normalisation matches; pressure gradient -72400.04058623493 Pa/Wb with zero quoted delta; FF gradient -0.06997315389737607 T m^2/Wb with zero quoted delta; boundary primitives 0 Pa and 3.4 T m on both sides; rotation closure and particle mass match; current-density relative-sup disagreement at most 3.8707986461934123e-16. Verdict posing/operator_admits_analytic_fixed_point, and the section required a posing verdict be reported as the BETTER bounded outcome rather than the lesser one - it is, and by a wide margin, because an inconsistent operator would have invalidated every forward result in this repository. WHAT SURVIVES IS A THIRD THING THIS SECTION DID NOT POSE, and section 4 now carries it. The map admits the solution and the inputs match, yet the SOLVE does not arrive: the terminal attempts are retained and explicitly excluded as unqualified - requested 300 achieved 1.2549724178436488 and requested 500 achieved 1.2998050585857959 against 1e-10 - and where the solve does converge it lands 19 to 38 per cent away under a common gauge. So the residue is in WHICH FIXED POINT THE SOLVER REACHES. That also retro-explains two loose results on adjacent lanes: the plateau plan's four input substitutions converging on nothing is exactly what no-wrong-input-plus-wrong-root predicts, and the frame that once reached 2.9e-16 failing to reproduce with attribution declined across 32 differing paths is the signature of basin selection rather than a named regression.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

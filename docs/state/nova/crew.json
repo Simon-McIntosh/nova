@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T08:16:30",
+  "updated": "2026-08-25T08:27:11",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -78,7 +78,7 @@
         "id": "cache-control",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a03775-4004-7661-87a7-cfc39b5ab419",
         "created": "2026-08-25"
       },
       {
@@ -32111,9 +32111,84 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T054622637912-analytic-operator-refinement-ladder",
+        "plan": "discrete-operator-analytic-error",
+        "section": "\u00a72",
+        "node": "analytic-operator-refinement-ladder",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "operator-ladder",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T05:46:30Z",
+        "completed_at": "2026-08-25T06:26:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2421,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2421,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "67cb20d58aa4b77a2dae326394f5a393efe752d7",
+        "commits": [
+          "ae723e28"
+        ],
+        "changed_lines": {
+          "added": 1563,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054622637912-analytic-operator-refinement-ladder/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03774-b58d-7963-b477-2442c3949fa9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6749952,
+            "cached_input_tokens_cumulative": 6749952,
+            "input_tokens": 6929409,
+            "input_tokens_cumulative": 6929409,
+            "output_tokens": 26991,
+            "output_tokens_cumulative": 26991,
+            "reasoning_output_tokens": 7239,
+            "reasoning_output_tokens_cumulative": 7239
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 801
+    "_version": 803
   }
 }

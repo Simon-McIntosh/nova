@@ -224,6 +224,62 @@
     boundary-case characterisation. The four original rejections keep independent support from
     disconnected components, which does not depend on the band.</p>
 
+    <h2 id="reachability-grid">Wall reachability across machines, and a second selector bug</h2>
+
+    <p><strong>Nodes <code>wall-reachability-topology-grid</code> (<code>04a4a6ca</code>) and
+    <code>real-equilibria-reachability-grid</code> (<code>9388ee41</code>), gate PASSED,
+    2026-08-25.</strong> Reachability is derived purely from connectivity: the reachable wall is the wall
+    touched by the axis-connected component <em>immediately before the selected saddle is crossed</em>.
+    Wall reachable only after crossing a saddle is private, hence shadowed. <strong>No height band and no
+    vertical extent enter this at all</strong> — which is the point, since the band is what proved
+    unsound.</p>
+
+    <figure>
+      <img src="/nova/figures/primary-xpoint-evidence/real-equilibria-reachability-grid.png"
+           alt="Four panels of real banked equilibria: MAST 21983/35 limited, MAST 21989/55 diverted, DIII-D 179 limited, and an ITER hybrid. Each shows the wall coloured reachable or shadowed, the public axis-connected region, private components, and the selected X-point, with dashed displacement lines from the pre-containment out-of-vessel selections to the corrected in-vessel ones.">
+      <figcaption>Real banked equilibria under containment-repaired selection, across MAST, DIII-D and
+      ITER. Dashed lines mark where the repair moved the selected X-point: 21983/35 pure from
+      (0.4500, &minus;1.8175) to (0.5445, +1.2491) m, and 21989/55 pure from (0.2863, +1.9405) to
+      (0.5821, +1.1450) m — both from outside the vessel to the plasma-boundary pinch.</figcaption>
+    </figure>
+
+    <p><strong>Panel A against panel C is the finding.</strong> Both are limited configurations. Panel C,
+    DIII-D, has 178 reachable segments with its selected wall point <em>on</em> the reachable run and a
+    margin of <strong>&minus;0.3350</strong> — finite and negative, which is what a limited configuration
+    should give, since the wall binds before the X-point. Panel A, MAST 21983/35, has
+    <strong>17 reachable segments</strong> yet a margin of <strong>+&infin;</strong>, because its selected
+    wall point (0.2800, &minus;1.6380) sits in a <em>private</em> region rather than on the reachable
+    wall. <strong>The wall-extremum selector chooses from the whole polygon rather than from the
+    reachable wall</strong> — the exact analogue of the saddle-containment bug, one level up.</p>
+
+    <table>
+      <caption>The ten undefined margins, decomposed by whether the wall is reachable</caption>
+      <thead><tr><th scope="col">Case</th><th scope="col">Arms</th><th scope="col">Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>Diverted, <strong>0</strong> reachable segments</td><td>3 — 21978/35 mixed, 21983/35 mixed, 21989/55 pure</td><td><strong>Legitimately undefined</strong>: no wall is reachable, so no wall operand exists</td></tr>
+        <tr><td>Limited, reachable wall present (10, 17, 47, 47, 49 segments)</td><td><strong>7</strong></td><td><strong>Illegitimately undefined</strong>: a private-region wall point was selected while genuine contact existed</td></tr>
+        <tr><td>Limited, wall point on reachable wall</td><td>2 — 21985/51 both arms (64 and 124 segments)</td><td>Finite, &minus;0.2026 and &minus;0.2132</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>This retracts the "legitimately undefined" claim recorded above.</strong> Only three of the
+    twelve arms are legitimately undefined. Seven are a second selector defect. And 21989/55 mixed is
+    limited with <strong>47</strong> reachable segments, so the boundary-case reading of that reference
+    was wrong twice over: the margin was spurious <em>and</em> the configuration has genuine wall
+    contact that should yield a finite negative margin.</p>
+
+    <p><strong>Two gaps reported rather than padded.</strong> No double-null panel exists because no
+    reconstructed field has two contained saddles entering at the first crossing — candidate tables hold
+    two, but not within the measured inward offset. And the ITER panel is present with reachability
+    explicitly unavailable, since no Hessian-typed saddle resolves inside its EQDSK limiter; treat that
+    as suspicious rather than settled, because an ITER hybrid equilibrium is diverted in reality, and the
+    panel's boundary is the EQDSK bounding rectangle rather than the ITER first wall.</p>
+
+    <p>A companion figure,
+    <code>/nova/figures/primary-xpoint-evidence/wall-reachability-topology-grid.png</code>, demonstrates
+    the same definition on analytic fixtures inside governed DIII-D and MAST walls, including a
+    double-null case the real bank does not contain.</p>
+
   </main>
 </body>
 </html>

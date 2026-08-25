@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T16:41:17",
+  "updated": "2026-08-25T17:04:37",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -35936,9 +35936,103 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T140745454321-real-equilibria-reachability-grid",
+        "plan": "primary-xpoint-evidence",
+        "section": "\u00a72",
+        "node": "real-equilibria-reachability-grid",
+        "node_definition": {
+          "done_when": "Same reachability definition as the landed fixture grid at commit 04a4a6ca, which you should read and reuse rather than re-derive: the reachable wall is the wall touched by the axis-connected component immediately BEFORE saddle crossing, private cells carry a positive component label unequal to the axis label, and NO height band or vertical extent enters it. What changes is the source of the flux field. Use REAL BANKED EQUILIBRIA, not analytic fixtures: the twelve frozen MAST arms behind docs/figures/dual-branch-selection/pinned-branch-contrast.json and the ten DIII-D terminals behind docs/figures/plateau-input-attribution/margin-frame-remeasure.json. Selection MUST come from the containment repair at commit 5acfe07b. Include ITER if a banked equilibrium or a solvable machine description exists - the machine is called ITER, and iter_md is only the machine-description database identifier, so check what is actually available and if no ITER equilibrium can be sourced SAY SO with the reason rather than omitting it silently, which is what the previous grid did. Choose panels to span topology rather than to fill a grid: at least one limited, one diverted, and the double-null case if a real one exists among the banked frames. Two panels must be 21983/35 and 21989/55, because those are references whose selected saddle moved from outside the vessel to inside and whose class margin changed - 21983/35 from +0.00723 to non-finite and 21989/55 from -0.003395 to non-finite - so the figure should make the repair visible. Bank the per-panel numbers as JSON beside the image: reachable and shadowed wall segment counts, public area, private region count and area, selected X and wall coordinates, and for the repaired references BOTH the pre-repair and post-repair selected X so a reader sees the move. Project-absolute src of the form /nova/figures/... since a relative src 404s in the SPA. Label every panel by MACHINE NAME and shot/slice, never by a database or artifact identifier.",
+          "estimated_hours": 4.0,
+          "goal": "Draw the wall-reachability grid from REAL banked equilibria under post-containment selection, so the evidence record shows what the repair actually changed on the frozen references rather than the analytic fixtures the first grid used.",
+          "id": "real-equilibria-reachability-grid",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/real-equilibria-reachability-grid.md",
+          "plan": "primary-xpoint-evidence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py",
+            "docs/figures/primary-xpoint-evidence/real-equilibria-reachability-grid.png",
+            "docs/figures/primary-xpoint-evidence/real-equilibria-reachability-grid.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "wall-surface",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T14:07:56Z",
+        "completed_at": "2026-08-25T15:03:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3311,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3311,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "7f48eaa2e59861b03702b439dd6e46062a92f665",
+        "commits": [
+          "9388ee41"
+        ],
+        "changed_lines": {
+          "added": 1545,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/real-equilibria-reachability-grid.md",
+        "scope_changed": false,
+        "session_id": "01a0393f-cc5a-7852-89ab-ea49a36244e7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 18177280,
+            "cached_input_tokens_cumulative": 18177280,
+            "input_tokens": 18451069,
+            "input_tokens_cumulative": 18451069,
+            "output_tokens": 37265,
+            "output_tokens_cumulative": 37265,
+            "reasoning_output_tokens": 12090,
+            "reasoning_output_tokens_cumulative": 12090
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 864
+    "_version": 865
   }
 }

@@ -314,13 +314,45 @@ def test_hex_component_labels_match_six_neighbour_reference():
     assert np.array_equal(np.asarray(batched), np.asarray(per_slice))
 
 
-def test_hex_neighbour_keeps_a_pinch_joined_that_four_neighbours_sever():
-    """A diagonal hex neck changes the public/private wall partition."""
+def _ring_shared_edges(shape, rings, half_length=0.45):
+    """Return square-index Voronoi edges for a centre-first ring gather."""
+    row, column = np.indices(shape)
+    centres = np.stack((column, row), axis=-1).reshape(-1, 2).astype(float)
+    centre = centres[rings[:, :1]]
+    neighbour = centres[rings]
+    midpoint = 0.5 * (centre + neighbour)
+    separation = neighbour - centre
+    norm = np.linalg.norm(separation, axis=-1, keepdims=True)
+    norm[:, 0] = 1.0
+    tangent = np.stack((-separation[..., 1], separation[..., 0]), axis=-1) / norm
+    endpoints = np.stack(
+        (midpoint - half_length * tangent, midpoint + half_length * tangent), axis=-2
+    )
+    endpoints[:, 0] = centre[:, 0, None, :]
+    return endpoints
+
+
+def _saddle_pinch_fixture():
+    """Return the diagonal pinch and its global smooth saddle field."""
     confined = np.zeros((11, 13), dtype=bool)
     confined[2:5, 5:8] = True
     confined[5:8, 3:5] = True
     seed = np.zeros_like(confined)
     seed[3, 6] = True
+    vertical = np.arange(confined.shape[0], dtype=float)
+    radial = np.arange(confined.shape[1], dtype=float)
+    radius, height = np.meshgrid(radial, vertical)
+    values = -(radius - 4.5) * (height - 4.5)
+    rings = hex_stencil(confined.shape)
+    shared_edges = _ring_shared_edges(confined.shape, rings)
+    return confined, seed, radial, vertical, values, rings, shared_edges
+
+
+def test_saddle_level_closes_hex_neck_without_changing_bulk_adjacency():
+    """A strict shared-edge test preserves the private lobe behind a saddle."""
+    confined, seed, radial, vertical, values, rings, shared_edges = (
+        _saddle_pinch_fixture()
+    )
     wall_cell = (6, 3)
 
     square_labels = fsc.label_connected_components(
@@ -328,23 +360,95 @@ def test_hex_neighbour_keeps_a_pinch_joined_that_four_neighbours_sever():
     )
     hex_labels = fsc.label_hex_connected_components(
         jnp.asarray(confined),
-        jnp.asarray(hex_stencil(confined.shape)),
+        jnp.asarray(rings),
+        confined.size,
+    )
+    link_admissible = fsc.hex_edge_admissibility(
+        _f64(values),
+        _f64(radial),
+        _f64(vertical),
+        _f64(0.0),
+        _f64(values[seed][0]),
+        _f64(shared_edges),
+    )
+    corrected_labels = fsc.label_saddle_aware_hex_connected_components(
+        jnp.asarray(confined),
+        jnp.asarray(rings),
+        link_admissible,
         confined.size,
     )
     square_labels = np.asarray(square_labels)
     hex_labels = np.asarray(hex_labels)
+    corrected_labels = np.asarray(corrected_labels)
     square_private = np.asarray(fsc.private_flux_mask(square_labels, jnp.asarray(seed)))
     hex_private = np.asarray(fsc.private_flux_mask(hex_labels, jnp.asarray(seed)))
+    corrected_private = np.asarray(
+        fsc.private_flux_mask(corrected_labels, jnp.asarray(seed))
+    )
 
     assert int(np.count_nonzero(confined & ~square_private)) == 9
     assert int(np.count_nonzero(square_private)) == 6
     assert int(np.count_nonzero(confined & ~hex_private)) == 15
     assert int(np.count_nonzero(hex_private)) == 0
+    assert int(np.count_nonzero(confined & ~corrected_private)) == 9
+    assert int(np.count_nonzero(corrected_private)) == 6
     assert int(square_labels[seed][0]) == 32
     assert int(square_labels[wall_cell]) == 69
     assert int(hex_labels[seed][0]) == int(hex_labels[wall_cell]) == 32
+    assert int(corrected_labels[seed][0]) == 32
+    assert int(corrected_labels[wall_cell]) == 69
     assert square_private[wall_cell]
     assert not hex_private[wall_cell]
+    assert corrected_private[wall_cell]
+
+    bridge_flat = np.ravel_multi_index((4, 5), confined.shape)
+    bridge_ring = np.flatnonzero(rings[:, 0] == bridge_flat)[0]
+    bridge_slot = np.flatnonzero(
+        rings[bridge_ring] == np.ravel_multi_index((5, 4), confined.shape)
+    )[0]
+    assert not bool(np.asarray(link_admissible)[bridge_ring, bridge_slot])
+
+    cell_area = np.linspace(0.7, 1.3, confined.size).reshape(confined.shape)
+    public_area = np.where(confined & ~corrected_private, cell_area, 0.0)
+    private_area = np.where(corrected_private, cell_area, 0.0)
+    scrape_off_area = np.where(~confined, cell_area, 0.0)
+    np.testing.assert_allclose(public_area + private_area + scrape_off_area, cell_area)
+
+
+def test_saddle_aware_hex_labels_are_fixed_shape_jit_and_vmap_safe():
+    """Cells-by-seven link masks stay fixed under compilation and batching."""
+    confined, _seed, radial, vertical, values, rings, shared_edges = (
+        _saddle_pinch_fixture()
+    )
+    admissible = fsc.hex_edge_admissibility(
+        _f64(values),
+        _f64(radial),
+        _f64(vertical),
+        _f64(0.0),
+        _f64(values[3, 6]),
+        _f64(shared_edges),
+    )
+    assert admissible.shape == rings.shape
+    assert bool(np.all(np.asarray(admissible)[:, 0]))
+
+    batch = jnp.stack((jnp.asarray(confined), jnp.asarray(np.flipud(confined))))
+    batched = jax.jit(
+        jax.vmap(
+            lambda mask: fsc.label_saddle_aware_hex_connected_components(
+                mask, jnp.asarray(rings), admissible, confined.size
+            )
+        )
+    )(batch)
+    per_slice = jnp.stack(
+        [
+            fsc.label_saddle_aware_hex_connected_components(
+                mask, jnp.asarray(rings), admissible, confined.size
+            )
+            for mask in batch
+        ]
+    )
+    assert np.array_equal(np.asarray(batched), np.asarray(per_slice))
+    assert "pure_callback" not in inspect.getsource(fsc)
 
 
 def test_doubling_fill_matches_fixed_iteration_fixtures_exactly():

@@ -54,10 +54,12 @@ labels four-connected cells on a rectangular tensor lattice. The plasma mesh
 shipped by the package is instead hexagonal and half-offset, so its component
 path consumes the centre-first six-neighbour rings from
 :func:`nova.geometry.hexstencil.hex_stencil` or the identically packed trimmed
-mesh tessellation. Near a saddle pinch, a diagonal hex neck can remain connected
-even though the rectangular four-neighbour interpretation severs it; using the
-rectangular labels there can therefore change which cells are classed as public
-or private flux.
+mesh tessellation. Six-neighbour adjacency is the bulk topology, but a graph edge
+is not admissible merely because both cell centroids lie inside a binding level:
+the shared physical edge must contain a portion strictly on the magnetic-axis
+side of that level. The admissibility test evaluates the global tensor spline,
+so a contour that closes a saddle neck between centroids cannot bridge public and
+private flux through a cut cell.
 """
 
 from __future__ import annotations
@@ -76,8 +78,11 @@ _SQRT2 = 2.0**0.5
 __all__ = [
     "flood_fill_core",
     "flood_fill_core_with_steps",
+    "hex_edge_admissibility",
     "label_hex_connected_components",
     "label_hex_connected_components_with_steps",
+    "label_saddle_aware_hex_connected_components",
+    "label_saddle_aware_hex_connected_components_with_steps",
     "label_connected_components",
     "label_connected_components_with_steps",
     "private_flux_mask",
@@ -254,6 +259,115 @@ def _propagate_hex_ring_minima(
     return flat_labels.at[rings].min(propagated).reshape(labels.shape)
 
 
+def _propagate_admissible_hex_minima(
+    labels: jnp.ndarray,
+    confined: jnp.ndarray,
+    rings: jnp.ndarray,
+    link_admissible: jnp.ndarray,
+) -> jnp.ndarray:
+    """Propagate labels once through admissible centre-to-neighbour links."""
+    flat_labels = labels.reshape(-1)
+    flat_confined = confined.reshape(-1)
+    centre_is_open = flat_confined[rings[:, :1]]
+    ring_is_open = jnp.concatenate(
+        (
+            centre_is_open,
+            link_admissible[:, 1:] & centre_is_open & flat_confined[rings[:, 1:]],
+        ),
+        axis=1,
+    )
+    sentinel = jnp.asarray(jnp.iinfo(labels.dtype).max, dtype=labels.dtype)
+    ring_labels = jnp.where(ring_is_open, flat_labels[rings], sentinel)
+    ring_minimum = jnp.min(ring_labels, axis=1, keepdims=True)
+    propagated = jnp.where(ring_is_open, ring_minimum, sentinel)
+    return flat_labels.at[rings].min(propagated).reshape(labels.shape)
+
+
+@partial(jax.jit, static_argnums=(6,))
+def hex_edge_admissibility(
+    values: jnp.ndarray,
+    radial: jnp.ndarray,
+    vertical: jnp.ndarray,
+    level: jnp.ndarray,
+    axis_value: jnp.ndarray,
+    shared_edge_rz: jnp.ndarray,
+    stationary_steps: int = 8,
+) -> jnp.ndarray:
+    """Return a fixed-shape mask for hex links open at ``level``.
+
+    ``shared_edge_rz`` has shape ``(n_ring, 7, 2, 2)``: ring, centre-first
+    slot, endpoint, and ``(R, Z)`` coordinate. Slot zero is padding and is
+    returned open. Every other slot describes the physical edge shared by the
+    ring centre and that neighbour.
+
+    A link is open only if some portion of its shared edge is strictly on the
+    same side of ``level`` as ``axis_value``. Endpoints and fixed-iteration
+    stationary searches from seven edge parameters evaluate the global tensor
+    B-spline restriction; thus a tangent contact at the binding level has zero
+    measure on the axis side and closes the link. No per-cell reconstruction or
+    compacted gather is used.
+    """
+    values = jnp.asarray(values)
+    radial = jnp.asarray(radial, dtype=values.dtype)
+    vertical = jnp.asarray(vertical, dtype=values.dtype)
+    level = jnp.asarray(level, dtype=values.dtype)
+    axis_value = jnp.asarray(axis_value, dtype=values.dtype)
+    shared_edge_rz = jnp.asarray(shared_edge_rz, dtype=values.dtype)
+    spline = fit_tensor_spline(radial, vertical, values)
+
+    edge_start = shared_edge_rz[..., 0, :]
+    edge_end = shared_edge_rz[..., 1, :]
+    padding_point = jnp.stack((radial[0], vertical[0]))
+    edge_start = edge_start.at[:, 0].set(padding_point)
+    edge_end = edge_end.at[:, 0].set(padding_point)
+    edge_vector = edge_end - edge_start
+
+    def locate_stationary(_iteration, parameter):
+        point = (
+            edge_start[..., None, :] + parameter[..., None] * edge_vector[..., None, :]
+        )
+        evaluation = spline.evaluate(point[..., 0], point[..., 1])
+        first = (
+            evaluation.radial_derivative * edge_vector[..., None, 0]
+            + evaluation.vertical_derivative * edge_vector[..., None, 1]
+        )
+        second = (
+            evaluation.radial_second_derivative * edge_vector[..., None, 0] ** 2
+            + 2.0
+            * evaluation.mixed_derivative
+            * edge_vector[..., None, 0]
+            * edge_vector[..., None, 1]
+            + evaluation.vertical_second_derivative * edge_vector[..., None, 1] ** 2
+        )
+        safe_second = jnp.where(
+            jnp.abs(second) > jnp.finfo(values.dtype).tiny, second, 1.0
+        )
+        candidate = jnp.clip(parameter - first / safe_second, 0.0, 1.0)
+        return jnp.where(
+            jnp.abs(second) > jnp.finfo(values.dtype).tiny, candidate, parameter
+        )
+
+    seeds = jnp.linspace(0.0, 1.0, 7, dtype=values.dtype)
+    initial = jnp.broadcast_to(seeds, edge_start.shape[:-1] + seeds.shape)
+    stationary = jax.lax.fori_loop(0, stationary_steps, locate_stationary, initial)
+    stationary_point = (
+        edge_start[..., None, :] + stationary[..., None] * edge_vector[..., None, :]
+    )
+    samples = jnp.concatenate(
+        (
+            spline(edge_start[..., 0], edge_start[..., 1])[..., None],
+            spline(edge_end[..., 0], edge_end[..., 1])[..., None],
+            spline(stationary_point[..., 0], stationary_point[..., 1]),
+        ),
+        axis=-1,
+    )
+    side = jnp.where(axis_value >= level, 1.0, -1.0)
+    field_scale = jnp.maximum(jnp.max(jnp.abs(values - level)), 1.0)
+    strict_tolerance = 128.0 * jnp.finfo(values.dtype).eps * field_scale
+    open_link = jnp.max(side * (samples - level), axis=-1) > strict_tolerance
+    return open_link.at[:, 0].set(True)
+
+
 @partial(jax.jit, static_argnums=(2,))
 def label_hex_connected_components_with_steps(
     confined: jnp.ndarray, rings: jnp.ndarray, n_iter: int
@@ -287,6 +401,42 @@ def label_hex_connected_components(
 ) -> jnp.ndarray:
     """Return canonical labels for every six-neighbour confined component."""
     labels, _steps = label_hex_connected_components_with_steps(confined, rings, n_iter)
+    return labels
+
+
+@partial(jax.jit, static_argnums=(3,))
+def label_saddle_aware_hex_connected_components_with_steps(
+    confined: jnp.ndarray,
+    rings: jnp.ndarray,
+    link_admissible: jnp.ndarray,
+    n_iter: int,
+) -> tuple[jnp.ndarray, jnp.ndarray]:
+    """Label six-neighbour components without crossing closed level edges.
+
+    The graph remains the supplied hex ring graph in the bulk. The fixed-shape
+    ``link_admissible`` mask has the same cells-by-seven packing as ``rings``;
+    only its six centre-to-neighbour entries control propagation.
+    """
+    return _iterate_component_labels(
+        confined,
+        n_iter,
+        lambda labels: _propagate_admissible_hex_minima(
+            labels, confined, rings, link_admissible
+        ),
+    )
+
+
+@partial(jax.jit, static_argnums=(3,))
+def label_saddle_aware_hex_connected_components(
+    confined: jnp.ndarray,
+    rings: jnp.ndarray,
+    link_admissible: jnp.ndarray,
+    n_iter: int,
+) -> jnp.ndarray:
+    """Return saddle-aware labels on a six-neighbour bulk graph."""
+    labels, _steps = label_saddle_aware_hex_connected_components_with_steps(
+        confined, rings, link_admissible, n_iter
+    )
     return labels
 
 

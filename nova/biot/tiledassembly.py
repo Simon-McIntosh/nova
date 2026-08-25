@@ -40,10 +40,10 @@ by each static shape, including edge count.
 
 *The compile.* :func:`tile_evaluator` memoises on that complete executable
 identity, and geometry is an argument rather than a constant, so moving a section
-does not force a retrace. :func:`compilation_cache` points JAX's persistent cache
-at a directory, allowing a diagnostic executable to outlive the process that
-produced it. Neither cache changes arithmetic or makes a diagnostic kernel a
-supported product route.
+does not force a retrace. The production evaluator selects a fixed persistent
+cache explicitly, allowing its executable to outlive the process that produced
+it without inheriting a caller's JAX cache. Neither cache changes arithmetic or
+makes a diagnostic kernel a supported product route.
 """
 
 from __future__ import annotations
@@ -98,6 +98,13 @@ _CACHE_OFF = frozenset({"", "0", "off", "false", "no", "none"})
 # a home directory; -1 (JAX's own default) would let it.
 _CACHE_LIMIT = 2 << 30
 
+# The production graph has one cache identity across every process.  Its parent
+# follows the platform cache-home convention, but its namespace and JAX policy
+# are fixed here rather than inherited from JAX_COMPILATION_CACHE_DIR or
+# NOVA_COMPILATION_CACHE.
+_PRODUCTION_CACHE_NAMESPACE = ("nova", "production-forward")
+_PRODUCTION_MIN_COMPILE_SECONDS = 1.0
+
 # How many compiled tile kernels are kept warm.  Each holds an executable and,
 # on a device, its buffers -- so this is a memory ceiling as much as a hit rate,
 # and a build uses one plan.
@@ -143,6 +150,31 @@ class TilePlan:
         return math.ceil(n_target / self.target_tile) * math.ceil(
             n_source / self.source_tile
         )
+
+
+@dataclass(frozen=True)
+class CompilationCacheConfiguration:
+    """Explicit persistent-cache identity carried by a compiled production route."""
+
+    directory: pathlib.Path
+    minimum_compile_seconds: float
+    maximum_bytes: int
+
+    @property
+    def resolved_directory(self) -> pathlib.Path:
+        """Return the absolute directory shared by independently started processes."""
+        return self.directory.expanduser().resolve()
+
+    def receipt(self) -> dict[str, object]:
+        """Return the complete configuration suitable for a production receipt."""
+        return {
+            "selection": "fixed_persistent",
+            "explicit": True,
+            "directory": str(self.directory),
+            "resolved_directory": str(self.resolved_directory),
+            "minimum_compile_seconds": self.minimum_compile_seconds,
+            "maximum_bytes": self.maximum_bytes,
+        }
 
 
 def plan_tiles(
@@ -460,6 +492,7 @@ class TileEvaluator:
         devices: int = 1,
         precision: Precision = Precision.DOUBLE,
         edge_count: int | None = None,
+        compilation: CompilationCacheConfiguration,
     ):
         self._kernel = kernel
         self.plan = plan
@@ -470,6 +503,8 @@ class TileEvaluator:
         self.devices = devices
         self.precision = precision
         self.edge_count = edge_count
+        self.compilation_cache_configuration = compilation
+        self.compilation_cache_receipt = compilation.receipt()
         self.dtype = np.float32 if precision is Precision.SINGLE else np.float64
         self._staged_shape = False
 
@@ -552,7 +587,10 @@ class TileEvaluator:
 
 
 def compilation_cache(
-    directory=None, *, min_compile_seconds: float | None = None
+    directory=None,
+    *,
+    min_compile_seconds: float | None = None,
+    max_size_bytes: int = _CACHE_LIMIT,
 ) -> pathlib.Path | None:
     """Point JAX's persistent compilation cache at ``directory`` and return it.
 
@@ -594,12 +632,43 @@ def compilation_cache(
     directory = pathlib.Path(directory).expanduser()
     directory.mkdir(parents=True, exist_ok=True)
     jax.config.update("jax_compilation_cache_dir", str(directory))
-    jax.config.update("jax_compilation_cache_max_size", _CACHE_LIMIT)
+    jax.config.update("jax_compilation_cache_max_size", max_size_bytes)
     if min_compile_seconds is not None:
         jax.config.update(
             "jax_persistent_cache_min_compile_time_secs", min_compile_seconds
         )
     return directory
+
+
+def production_compilation_cache_configuration() -> CompilationCacheConfiguration:
+    """Return the explicit cache configuration used by every production evaluator.
+
+    The cache-home convention selects only the filesystem parent.  The route's
+    namespace, storage threshold and size ceiling are fixed configuration, and
+    neither an existing JAX cache nor ``NOVA_COMPILATION_CACHE`` participates in
+    the selection.
+    """
+    cache_home = pathlib.Path(
+        os.environ.get("XDG_CACHE_HOME", pathlib.Path.home() / ".cache")
+    )
+    return CompilationCacheConfiguration(
+        directory=cache_home.joinpath(*_PRODUCTION_CACHE_NAMESPACE),
+        minimum_compile_seconds=_PRODUCTION_MIN_COMPILE_SECONDS,
+        maximum_bytes=_CACHE_LIMIT,
+    )
+
+
+def configure_production_compilation_cache() -> CompilationCacheConfiguration:
+    """Apply and return the production route's explicit persistent-cache policy."""
+    configuration = production_compilation_cache_configuration()
+    resolved = compilation_cache(
+        configuration.resolved_directory,
+        min_compile_seconds=configuration.minimum_compile_seconds,
+        max_size_bytes=configuration.maximum_bytes,
+    )
+    if resolved != configuration.resolved_directory:
+        raise RuntimeError("production compilation cache did not resolve as configured")
+    return configuration
 
 
 def tile_evaluator(
@@ -664,6 +733,7 @@ def tile_evaluator(
     diagnostic callers may omit it when they intentionally allow shape-driven JAX
     compilation and inspect :attr:`TileEvaluator.compile_count` themselves.
     """
+    compilation = configure_production_compilation_cache()
     if geometry not in {"ring", "arc"}:
         raise ValueError(f"unknown geometry {geometry!r}")
     if kernel not in KERNELS:
@@ -678,8 +748,12 @@ def tile_evaluator(
         raise ValueError("packed edge count must be positive")
     resolved = resolve_precision(precision, Precision.DOUBLE)
     if geometry == "arc":
-        return _warm_arc_evaluator(plan, batched, kernel, devices, resolved, edge_count)
-    return _warm_evaluator(plan, batched, kernel, devices, resolved, edge_count)
+        return _warm_arc_evaluator(
+            plan, batched, kernel, devices, resolved, edge_count, compilation
+        )
+    return _warm_evaluator(
+        plan, batched, kernel, devices, resolved, edge_count, compilation
+    )
 
 
 def forget_evaluators() -> None:
@@ -701,12 +775,11 @@ def _warm_evaluator(
     devices: int,
     precision: Precision,
     edge_count: int | None,
+    compilation: CompilationCacheConfiguration,
 ) -> TileEvaluator:
     """Trace and compile one tile kernel; see :func:`tile_evaluator`."""
     import jax
     import jax.numpy as jnp
-
-    compilation_cache()
 
     dtype = jnp.float32 if precision is Precision.SINGLE else jnp.float64
 
@@ -835,6 +908,7 @@ def _warm_evaluator(
         precision=precision,
         edge_count=edge_count,
         components=MOMENT_COMPONENTS if kernel == "moments" else COMPONENTS,
+        compilation=compilation,
     )
 
 
@@ -846,12 +920,11 @@ def _warm_arc_evaluator(
     devices: int,
     precision: Precision,
     edge_count: int | None,
+    compilation: CompilationCacheConfiguration,
 ) -> TileEvaluator:
     """Trace and compile the finite-arc packed kernel for one tile shape."""
     import jax
     import jax.numpy as jnp
-
-    compilation_cache()
 
     rows, columns = _device_blocks(plan, devices)
     index = (jnp.asarray(rows), jnp.asarray(columns))
@@ -949,6 +1022,7 @@ def _warm_arc_evaluator(
         devices=devices,
         precision=precision,
         edge_count=edge_count,
+        compilation=compilation,
     )
 
 
@@ -1208,6 +1282,7 @@ def budget_from_environment(default: int = 512 << 20) -> int:
 
 __all__ = [
     "ARC_COMPONENTS",
+    "CompilationCacheConfiguration",
     "KERNELS",
     "MOMENT_COMPONENTS",
     "TileEvaluator",
@@ -1216,8 +1291,10 @@ __all__ = [
     "assemble_arcs",
     "budget_from_environment",
     "compilation_cache",
+    "configure_production_compilation_cache",
     "forget_evaluators",
     "plan_tiles",
+    "production_compilation_cache_configuration",
     "tile_coupling",
     "tile_evaluator",
 ]

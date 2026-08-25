@@ -26,7 +26,7 @@
 <meta name="plan-commits" content="f1ae4f46,2da77ed9,a59932ae,2b77347c">
 <meta name="plan-artifacts" content="benchmarks/bound_reference_classification.py,benchmarks/divergence_floor_scaling.py,nova/equilibrium/observable_acceptance.py,nova/equilibrium/conservation.py,docs/figures/roundoff-scale-acceptance-bounds/bound-classification.json,docs/figures/roundoff-scale-acceptance-bounds/corrected-criteria.json,docs/figures/roundoff-scale-acceptance-bounds/divergence-floor-scaling.json,docs/figures/roundoff-scale-acceptance-bounds/divergence-floor-scaling.png,docs/figures/roundoff-scale-acceptance-bounds/acceptance-lane-verify.md,docs/evidence/archive/roundoff-scale-acceptance-bounds-landed.html">
 <meta name="plan-impl" content="1.0">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 </head>
 <body>
   <main class="plan-doc">
@@ -249,14 +249,23 @@
     the cohort from source data, so it is a consistency check rather than an independent rederivation.</p>
 
     <p><strong>A naming defect found in passing, and it is the kind this repository's rules exist to
-    catch.</strong> <code>test_the_divergence_floor_is_truncation_and_falls_with_the_mesh</code> passes
+    catch.</strong> <code>test_stencil_mesh_divergence_floor_is_truncation_and_falls_under_refinement</code> passes
     and is <em>correct for the route it asserts</em> — its truncation floor is populated only from
     <code>conservation_ledger(mesh, …)</code> on the non-commuting <code>StencilMesh</code>, requiring
     refinement ratios above 3.0 for <code>divergence_b</code> and 1.5 for <code>divergence_j</code>,
     while separate <code>conservation_ledger(lattice, …)</code> assertions require the commuting route
-    below 1.0e&minus;12. But the name is <strong>route-underqualified</strong>: read without that
-    context it asserts the mechanism the production route contradicts. It should name the mesh route it
-    measures.</p>
+    below 1.0e&minus;12. But the name was <strong>route-underqualified</strong>: read without that
+    context it asserted the mechanism the production route contradicts.</p>
+
+    <p><strong>RENAMED 2026-08-25, commit <code>74daf018</code>, gate PASSED.</strong> It is now
+    <code>test_stencil_mesh_divergence_floor_is_truncation_and_falls_under_refinement</code>, formerly
+    <code>test_the_divergence_floor_is_truncation_and_falls_with_the_mesh</code> — the old
+    name is recorded here once so a reader arriving from an earlier manifest or ledger entry can find
+    it. One identifier line changed, <strong>zero</strong> assertion, tolerance or refinement-ratio
+    changes, and the file still passes 19 in a fresh process under both marker selections. No other test
+    name in that file claimed a route-dependent mechanism without naming its route. The historical
+    manifests and run ledger keep the old name deliberately: they record what was executed at the time
+    and are not live documents to rewrite.</p>
 
     <p><strong>Two things this leaves honest.</strong> 22.63&times; headroom is failable but not tight —
     it would not catch a twentyfold degradation — and that is the accepted cost of a preregistered
@@ -283,7 +292,7 @@
     </article>
 <article class="r-fu" data-id="f-20260825T084407296780" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship roundoff-scale-acceptance-bounds" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Rename the route-underqualified divergence floor test</h4>
-    <div class="r-fu-body">test_the_divergence_floor_is_truncation_and_falls_with_the_mesh passes and is correct for the assertion it makes — its truncation floor is populated only from conservation_ledger(mesh, ...) on the non-commuting StencilMesh route, requiring refinement ratios above 3.0 for divergence_b and 1.5 for divergence_j. But the name is route-underqualified: read without that context it asserts the mechanism the production FluxLattice route contradicts, where the same observable is a discrete identity at a cancellation floor that GROWS under refinement. Rename it to name the mesh route it measures, and keep the separate commuting-route assertions distinguishable in the name. Small, mechanical, and covered by the naming rule that a test name must describe what it measures.</div>
+    <div class="r-fu-body">test_stencil_mesh_divergence_floor_is_truncation_and_falls_under_refinement passes and is correct for the assertion it makes — its truncation floor is populated only from conservation_ledger(mesh, ...) on the non-commuting StencilMesh route, requiring refinement ratios above 3.0 for divergence_b and 1.5 for divergence_j. But the name is route-underqualified: read without that context it asserts the mechanism the production FluxLattice route contradicts, where the same observable is a discrete identity at a cancellation floor that GROWS under refinement. Rename it to name the mesh route it measures, and keep the separate commuting-route assertions distinguishable in the name. Small, mechanical, and covered by the naming rule that a test name must describe what it measures.</div>
     <pre class="r-fu-prompt">/reckon-ship roundoff-scale-acceptance-bounds</pre>
     </article>
 </section>
@@ -299,7 +308,10 @@
     <div class="r-comment-body"><p>The production observable route commutes, so divergence_j is a discrete identity at a cancellation floor rather than a truncation signal. Measured order over four pitches is -1.7203, CI [-2.6432, -0.7973], excluding +2. The old 9.042e-4 floor had been transferred from a non-commuting mesh route and is inapplicable. Replacement is sqrt(unit roundoff) = 1.0537e-8, preregistered before cohort inspection, proven failable by a one-ppm radial-current scale mismatch reaching 7.568e-8 at 7.18x the bound. Cohort rescores 69/69 with 22.63x headroom, replacing 1.94-million-fold slack.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260825T083414048749-acceptance-lane-verify" data-who="integration-verify" data-when="2026-08-25T08:42:36Z">
-    <div class="r-comment-body"><p>The whole importer-derived surface is green: 67 passed, 0 failed, 0 skipped, 0 errors across tests/test_observable_acceptance.py (12), tests/test_equilibrium_stencil_mesh.py (19), tests/test_observable_reduction_parity.py (1) and tests/test_equilibrium_forward.py (35), each in a fresh process under -m "slow or not slow". The four files were found by grep rather than assumed. The cohort rescore reproduces 69/69 at both frozen widths against a banked 67/69 baseline, so the two repaired bounds are exactly the two that had been failing - but it validates the committed receipt rather than recomputing the cohort from source data. test_the_divergence_floor_is_truncation_and_falls_with_the_mesh passes and is route-correct for the non-commuting mesh, though its name is route-underqualified and must not be read as describing the production commuting route.</p></div>
+    <div class="r-comment-body"><p>The whole importer-derived surface is green: 67 passed, 0 failed, 0 skipped, 0 errors across tests/test_observable_acceptance.py (12), tests/test_equilibrium_stencil_mesh.py (19), tests/test_observable_reduction_parity.py (1) and tests/test_equilibrium_forward.py (35), each in a fresh process under -m "slow or not slow". The four files were found by grep rather than assumed. The cohort rescore reproduces 69/69 at both frozen widths against a banked 67/69 baseline, so the two repaired bounds are exactly the two that had been failing - but it validates the committed receipt rather than recomputing the cohort from source data. test_stencil_mesh_divergence_floor_is_truncation_and_falls_under_refinement passes and is route-correct for the non-commuting mesh, though its name is route-underqualified and must not be read as describing the production commuting route.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260825T084534734664-divergence-test-route-naming" data-who="assertion-sweep" data-when="2026-08-25T08:49:27Z">
+    <div class="r-comment-body"><p>Renamed to test_stencil_mesh_divergence_floor_is_truncation_and_falls_under_refinement, which names the non-commuting StencilMesh route it asserts. One identifier line changed, zero assertion, tolerance or refinement-ratio changes, 19 passed in a fresh process under both marker selections. No other test name in the file claimed a route-dependent mechanism without naming its route. It correctly left the eight old-name references in plan, evidence, figure and ledger files for the orchestrator, since shared state is not a worker scope.</p></div>
 </div>
 </section>
 </main>

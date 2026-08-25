@@ -114,11 +114,13 @@
     1.0536712127723509e&minus;8 envelope. <strong>Limit:</strong> this validates the committed receipt
     rather than recomputing the cohort from source data.</p>
 
-    <p><strong>Naming defect recorded.</strong>
-    <code>test_the_divergence_floor_is_truncation_and_falls_with_the_mesh</code> passes and is correct
-    for the non-commuting <code>StencilMesh</code> route it asserts, but its name is
-    route-underqualified and reads as describing the production commuting route, where the mechanism is
-    the opposite.</p>
+    <p><strong>Naming defect recorded and repaired.</strong> The test passes and is correct for the
+    non-commuting <code>StencilMesh</code> route it asserts, but its name read as describing the
+    production commuting route, where the mechanism is the opposite. Renamed at commit
+    <code>74daf018</code> to <code>test_stencil_mesh_divergence_floor_is_truncation_and_falls_under_refinement</code>
+    from <code>test_the_divergence_floor_is_truncation_and_falls_with_the_mesh</code>, with one
+    identifier line changed, zero assertion or tolerance changes, and 19 still passing. The old name is
+    kept here so earlier manifests remain traceable.</p>
 
   </main>
 </body>

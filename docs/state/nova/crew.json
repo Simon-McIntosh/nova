@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T10:43:13",
+  "updated": "2026-08-25T10:50:01",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -33904,9 +33904,101 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260825T084534734664-divergence-test-route-naming",
+        "plan": "roundoff-scale-acceptance-bounds",
+        "section": "\u00a74",
+        "node": "divergence-test-route-naming",
+        "node_definition": {
+          "done_when": "The test is renamed to name the non-commuting StencilMesh route it measures, its commuting-FluxLattice assertions remain distinguishable in whatever names they carry, and any other test in that file whose name claims a mechanism without naming its route is renamed the same way. The test file still passes in a fresh process under -m \"slow or not slow\" with the same count it had before, 19 passed, quoted with the command. Do NOT change any assertion, tolerance, or refinement ratio - this is a naming change only, and a changed number is a failure to report. Grep the repository for the old name first and update every reference you find, including plan and evidence HTML under docs/, reporting what you changed. Context: the truncation floor in that test is populated only from conservation_ledger(mesh, ...) where central differences do NOT commute, so real second-order truncation exists and the required refinement ratios above 3.0 for divergence_b and 1.5 for divergence_j are correct there. The production route is conservation_ledger(lattice, ...) on a FluxLattice whose differences DO commute, making the same observable a discrete identity at a cancellation floor that GROWS under refinement, measured at fitted order -1.72.",
+          "estimated_hours": 0.5,
+          "goal": "Rename test_the_divergence_floor_is_truncation_and_falls_with_the_mesh so its name states the route it actually asserts, since the current name reads as describing the production route where the mechanism is the opposite.",
+          "id": "divergence-test-route-naming",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/divergence-test-route-naming.md",
+          "plan": "roundoff-scale-acceptance-bounds",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "tests/test_equilibrium_stencil_mesh.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "assertion-sweep",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T08:45:46Z",
+        "completed_at": "2026-08-25T08:49:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 221,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 221,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "f62779ce7a76974a19714c37ae3393f2c7dc1b2a",
+        "commits": [
+          "74daf018"
+        ],
+        "changed_lines": {
+          "added": 1,
+          "removed": 1,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/divergence-test-route-naming.md",
+        "scope_changed": false,
+        "session_id": "01a03818-d996-7d61-bd1c-7e5cb8de523b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1053440,
+            "cached_input_tokens_cumulative": 1053440,
+            "input_tokens": 1138190,
+            "input_tokens_cumulative": 1138190,
+            "output_tokens": 7147,
+            "output_tokens_cumulative": 7147,
+            "reasoning_output_tokens": 2984,
+            "reasoning_output_tokens_cumulative": 2984
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 839
+    "_version": 840
   }
 }

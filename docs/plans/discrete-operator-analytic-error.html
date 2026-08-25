@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="discrete-operator-analytic-error">
+  <meta name="plan-title" content="The Discrete Fixed Point Is Not the Closed-Form Solution">
+  <meta name="plan-summary" content="Two independent forward arms converge to machine precision on their own discrete fixed points and sit 19 to 38 per cent from the closed form under a common gauge, 0.42 to 0.74 Wb in absolute flux. The gauge is measured and exonerated and the comparison lane is validated by exact reproduction, so the residue belongs to the operator or to how the analytic case is posed to it. Nothing downstream of the forward map is safe until that is named.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="10.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-context" content="extended">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-sprint" content="S15">
+  <title>The Discrete Fixed Point Is Not the Closed-Form Solution | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The measurement, and why it outranks the plan that found it</h2>
+
+    <p>A node measuring something else found this and could not carry it. Two forward arms — the
+    shipped exact-value route and the second-order support variant — converge on their own discrete
+    fixed points to <strong>1.221e-15 to 2.494e-15</strong>, and sit <strong>0.258 to 0.451</strong>
+    in relative-sup error against a closed-form solution on identical carriers, supports, masks and
+    denominator. A solve that has converged to machine precision and is still tens of per cent from
+    the analytic answer is either solving a different problem or being compared against one.</p>
+
+    <p><strong>Two explanations are already excluded by measurement rather than by argument.</strong>
+    The comparison lane is not at fault: all four fresh rows reproduced the banked scores
+    <em>exactly</em>, maximum delta <strong>0.0</strong> against a 5e-12 tolerance, so the figures are
+    reproducible on the lane that produced them. And the flux gauge — the leading suspect, on the
+    standing rule that ψ<sub>N</sub> is gauge-safe only when its anchors come from the field being
+    normalised — is measured and only partly responsible.</p>
+
+    <table>
+      <caption>Error before and after a common gauge whose anchors come from each field being
+        normalised in turn</caption>
+      <thead>
+        <tr><th scope="col">Measure</th><th scope="col">Value</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Banked relative-sup, raw fields</td><td>0.2579180329 to 0.4506741066</td></tr>
+        <tr><td>Regional relative-sup under the common gauge</td><td><strong>0.1866961139 to 0.3818561127</strong></td></tr>
+        <tr><td>Regional sup in absolute flux</td><td><strong>0.4219773772 to 0.7373438581 Wb</strong></td></tr>
+        <tr><td>Preregistered gauge-only floor</td><td>4096 binary64 epsilon — exceeded by &gt;11 orders</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The anchors say where to look.</strong> The analytic axis and boundary flux are
+    1.3810216850 and −8.6736e−19 Wb (coarse) and 1.3811489277 and −8.6736e−19 (fine) — a boundary at
+    zero to rounding, as a closed-form case should be. The discrete terminal anchors are near
+    <strong>1.0242 Wb on axis and −0.2459 Wb at the boundary</strong>, and the four arm/resolution
+    rows agree with each other to three or four digits. A boundary that should be zero and is instead
+    −0.246 Wb, with an axis low by the same order, is the signature of a different external or
+    boundary contribution rather than of a discretisation error that would shrink under refinement.
+    Note that the coarse and fine rows barely differ, which is itself evidence: <strong>refinement
+    does not move it</strong>.</p>
+
+    <h2 id="s2">§2 — Operator or setup, and the distinction the receipt did not draw</h2>
+
+    <p>The landed verdict reads <code>genuine_discrete_operator_error</code>, and that is correct as
+    far as it was measured: it distinguishes the operator from the <em>comparison</em>. It does not
+    distinguish the operator from the <em>posing</em> — how the closed-form case is handed to the
+    solve. Those are different defects with different repairs and the evidence so far cannot separate
+    them, so this plan does not inherit the stronger reading.</p>
+
+    <ul>
+      <li><strong>Posing.</strong> The analytic case may be fed with an external field, a boundary
+      condition or a source normalisation that does not correspond to the closed form. This predicts
+      an offset that survives refinement and that shows most strongly at the boundary — which is what
+      is observed.</li>
+      <li><strong>Operator.</strong> The discrete map may genuinely fail to reproduce the analytic
+      solution. This predicts an error that <em>falls under refinement</em>, and the coarse-to-fine
+      rows show almost no movement, so it is the weaker hypothesis on present evidence.</li>
+    </ul>
+
+    <p>The cheapest discriminator is not a code audit. Refine further and watch: a posing error is a
+    constant, an operator error converges. A second, nearly free check is to feed the discrete
+    operator the analytic solution itself and apply the map once — if the one-application residual is
+    at machine precision the operator reproduces the analytic fixed point and the fault is in how the
+    solve was posed or seeded; if it is large, the operator does not admit that solution at all.</p>
+
+    <p><strong>Done when</strong> the residue is attributed to posing or to the operator, reporting: a
+    refinement ladder of at least four resolutions with the fitted convergence order of the analytic
+    error and its uncertainty, so a constant offset is distinguished from a converging one; the
+    one-application residual of the exact map at the analytic solution, in absolute flux and by
+    region, against the terminal residual the solve reaches on its own fixed point; the external,
+    boundary and source terms the analytic case is posed with, each quoted against what the closed
+    form specifies; and a named verdict. <strong>A verdict of posing is the better outcome and must
+    not be presented as the lesser one</strong> — it would mean the operator is sound and one setup is
+    wrong, which is a bounded repair. No repair is authored under this section.</p>
+
+    <h2 id="s3">§3 — What is downstream, and what may not be claimed until this closes</h2>
+
+    <p>This is recorded so the blast radius is stated once rather than rediscovered. Every parity,
+    accuracy and reproduction claim that scores Nova's forward map against an analytic or reference
+    solution inherits this residue, including the forward-parity lane and any accuracy axis of the
+    coefficient-carrier matrix. <strong>Claims about self-consistency are untouched</strong> — a
+    converged fixed point is still converged, a batched route still matches a scalar one, and a
+    deterministic route is still deterministic. The distinction to hold is between <em>agreeing with
+    yourself</em>, which remains demonstrated, and <em>agreeing with the physics</em>, which this plan
+    is about.</p>
+
+    <p><strong>Method requirements carried from the lane that found this.</strong> Report every error
+    with its regional split, never as a single global norm. Name the production diff between compared
+    trees and decline attribution when more than one mechanism sits in it. Never derive an acceptance
+    criterion from an achieved value of the quantity it scores. And do not let a third plausible
+    attribution stand without measurement: two attributions on the originating lane were argued from
+    plausibility and both were refuted, which is why the verdict here waits for the ladder.</p>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-doa-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship discrete-operator-analytic-error" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Refine before auditing, and do not inherit the operator verdict</h4>
+    <div class="r-fu-body"><p>THE VERDICT THIS PLAN INHERITS IS NARROWER THAN ITS NAME. The landed receipt says <code>genuine_discrete_operator_error</code>, and what it actually established is that the error is not the GAUGE and not the comparison LANE. It never separated the operator from how the analytic case is posed to it. Starting from the stronger reading would send the first node into an operator audit when the evidence points elsewhere.</p><p>THE EVIDENCE POINTS AT POSING, AND ONE NUMBER CARRIES IT. The analytic boundary flux is -8.6736e-19 Wb, zero to rounding, while the discrete terminal boundary anchor is about -0.2459 Wb; the axis is about 1.0242 against an analytic 1.3810. Both are large, both are the same order, and the coarse and fine rows agree to three or four digits - so REFINEMENT DOES NOT MOVE IT. A discretisation error shrinks under refinement and a posing error does not, which makes the refinement ladder the cheapest discriminator available and the right first node.</p><p>THE SECOND CHECK IS NEARLY FREE AND IT IS DECISIVE IN THE OTHER DIRECTION. Apply the exact forward map ONCE at the analytic solution and keep the residual as a field. If it is at machine precision the operator admits the analytic fixed point and the fault is in the posing or the seed; if it is large the operator does not admit that solution at all. The machinery exists - a one-application residual field driver with regional norms landed on the plateau lane at commit fac85ead and is worth reading before writing anything.</p><p>SELF-CONSISTENCY IS NOT AT STAKE AND SAYING SO MATTERS. A converged fixed point is still converged, batched still matches scalar at 1e-10, the route is deterministic under its control, and the clip gates are closed. What is at stake is agreement with the physics. Do not let this plan be read as invalidating results it does not touch, and do not let those results be cited as if they answered it.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship discrete-operator-analytic-error</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>

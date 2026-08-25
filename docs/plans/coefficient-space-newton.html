@@ -28,8 +28,8 @@
 <meta name="plan-modified" content="2026-08-25">
 <meta name="plan-commits" content="485f6fdaa88328b96633db85111093e332b4aa53,dbee3048d4767af04373155c50b6e9753bfc330c,975e4acec3016cd56295d458d07eaf2aa8233454,75d6eb010612c12486327fa8c794efe6c662b71c,bf9dafdbf258624fc42d3f2d7eef8e468495b328,d6be878b6eb1eac9ea3d85d87f16cd2b48787cef,fd2baeb113b3443314618b9e6e29819ba233ce6e,231659ea748322d8607a71cc82b2d4e522e8cc1c,df676ca4329ead0f850aeeace59abc9c4f7a6a95,8794f6067002889a75aa99a05cf83863998d22af">
 <meta name="plan-artifacts" content="scripts/coefficient_basis_reuse/report.md,docs/figures/coefficient-space-newton/representation-degree.json,docs/figures/coefficient-space-newton/edge-current-jump.json,docs/figures/coefficient-space-newton/clipped-coupling-order.json,docs/figures/coefficient-space-newton/second-order-kernel.json,docs/figures/coefficient-space-newton/support-order-arms.json,docs/figures/coefficient-space-newton/carrier-arms.json,docs/figures/coefficient-space-newton/analytic-truth-rescore.json,docs/figures/coefficient-space-newton/plasma-only-carrier.json,nova/biot/second_moment_kernel.py,nova/equilibrium/coefficient_carrier.py,docs/evidence/archive/coefficient-space-newton-landed.html">
-<meta name="plan-impl" content="0.786">
-<meta name="plan-version" content="7">
+<meta name="plan-impl" content="0.867">
+<meta name="plan-version" content="9">
 </head>
 <body>
   <main class="plan-doc">
@@ -542,43 +542,24 @@
     converge closes the carrier question with conditioning won and convergence lost</strong>, which is
     a complete answer; arm A remaining the production path is then the result, and §11 records it.</p>
 
-    <h2 id="s14">§14 — Higher order should buy fewer cells, and the first pass priced it wrong</h2>
-
-    <p><strong>The support-order arm was measured at fixed cell count, which is the wrong
-    comparison.</strong> Arm B was scored against arm A on the same carrier with the same 551 or 1,069
-    plasma cells, and came out 11.6 to 20.7 per cent slower per iterate with 40 to 51 per cent more
-    peak memory. That prices the second order as a pure surcharge. But the point of raising order is
-    that a richer in-cell representation should reach a given accuracy with <em>fewer</em> cells, and
-    the rescoring already shows arm B is more accurate at equal cell count in all six carrier-region
-    comparisons. Spending that accuracy back as coarser cells is the trade the first pass never
-    made.</p>
-
-    <p><strong>Why the net can be a saving rather than a cost.</strong> The per-cell surcharge is
-    bounded and known: exactly 2.0× stored coupling and 1.98× contraction for six columns against
-    three. Cell count enters the cost more than linearly — the refinement study measured 4.2× cells
-    costing 3.24× interaction build and 13.6× memory, so memory in particular grows faster than cell
-    count. If second-order support lets the cell count fall by more than a factor of two at fixed
-    accuracy, the 2× per-cell surcharge is repaid outright, and the memory position improves rather
-    than degrades. That matters directly to the catalog, whose binding constraint on refinement was
-    the 13.6× memory as batch capacity rather than the build time.</p>
-
-    <p><strong>What is not yet known, and must not be assumed.</strong> Whether the second-order
-    support raises the <em>order</em> of the field error or only improves its constant. The rescoring
-    measured margins of 6.066e-6 to 3.169e-4 at two carrier resolutions — enough to establish that B
-    is more accurate, not enough to establish an order. If it raises the order, the cell reduction at
-    fixed accuracy is large; if it only improves the constant, the reduction is a modest fixed factor
-    and may not repay 2×. That distinction decides whether p-refinement of the source is a lever or a
-    curiosity, and it is measurable from a ladder rather than argued.</p>
-
-    <p><strong>Done when</strong> an iso-accuracy comparison replaces the fixed-cell one: for a
-    declared target accuracy against analytic truth, the cell count each support order requires to
-    reach it, on a ladder of at least four cell counts per order so the field-error order of each is
-    fitted with its uncertainty rather than inferred from two points; the interaction-build time, peak
-    device memory and per-iterate cost at each order's iso-accuracy cell count, quoted against each
-    other and against the banked 3.24× build and 13.6× memory that h-refinement charges; and an
-    explicit statement of whether second-order support raises the field-error order or only its
-    constant. A finding that it only improves the constant, with the implied cell reduction failing to
-    repay the 2× per-cell surcharge, closes this as a curiosity and is as useful as the opposite.</p>
+    <section id="s14" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-25 — the lever is a curiosity</span>
+        <h2>§14 — Higher order should buy fewer cells, and the first pass priced it wrong</h2></header>
+      <p class="landed-summary">Verdict <code>no_resolved_order_or_constant_improvement</code>. Seven
+      rungs per order on two cases, targets a declared 0.12-minor-radius physical offset outside the
+      exact LCFS. Fitted field-error orders: analytic <strong>2.035 ± 0.065</strong> (first) against
+      <strong>2.035 ± 0.068</strong> (second); low-aspect 2.016 ± 0.091 against 2.019 ± 0.092. The
+      second-minus-first differences are <strong>−0.00003 ± 0.094</strong> and
+      <strong>0.00228 ± 0.130</strong> — both consistent with zero — and second order wins only
+      <strong>3 of 7</strong> analytic and <strong>1 of 7</strong> low-aspect rungs. Both orders
+      select the <em>same</em> coarsest target-reaching rung (3,354 and 1,998 cells), so there is no
+      cell reduction and the 2.0× six-column surcharge is not repaid. It also corrects a shared-
+      allocation artefact: on an exclusive node peak process memory is <strong>identical</strong> at
+      778.97 MiB, ratio <strong>1.0×</strong>, not the 40–51 % previously reported. Artifact
+      <code>docs/figures/coefficient-space-newton/support-order-iso-accuracy.json</code> (commit
+      <code>b774c28b</code>). Full record:
+      <a href="/nova/evidence/archive/coefficient-space-newton-landed#iso-accuracy">§14 landed</a>.</p>
+    </section>
 
     <h2 id="s15">§15 — Contour extraction that matches the representation's fidelity</h2>
 
@@ -728,39 +709,25 @@
     solution object, the clip plan gains a surface that cannot diverge from the converged solve, which
     is strictly stronger than the fitted surface it can already use today.</p>
 
-    <h2 id="s17">§17 — Both arms sit tens of per cent from closed-form truth while converging to
-      machine precision, and that is not yet attributed</h2>
-
-    <p><strong>The rescore that settled the accuracy axis raised a larger question than it
-    answered.</strong> Arms A and B converge to <strong>1.221e-15 to 2.494e-15</strong> against
-    their own discrete fixed points, and sit <strong>0.257918 to 0.450674</strong> in relative-sup
-    error against the closed form on the same carriers, supports, masks and denominator. A 26 to 45
-    per cent error against an analytic solution, reached by a solve that has converged to machine
-    precision, is either a genuine discretisation or setup error of that size or an artefact of the
-    comparison. The two readings are not close together in consequence: the first would mean the
-    discrete operator's fixed point is not the equilibrium anyone believes it is, and every accuracy
-    claim on this lane inherits the gap.</p>
-
-    <p><strong>The leading suspect is the flux gauge, and it is a suspect rather than a
-    finding.</strong> The standing rule on this repository is that ψ<sub>N</sub> is gauge-safe only
-    when its anchors come from the field being normalised, and a comparison that normalises the
-    analytic field by one pair of anchors and the discrete field by another would manufacture
-    exactly this shape of error while both fields converge perfectly on their own terms. Two prior
-    attributions on this plan — a Δ* stencil that is not in the residual path, and a clipped-source
-    coupling that turned out already second order — were each refuted by measurement after being
-    argued from plausibility. <strong>This one waits for a measurement rather than becoming a third
-    guess</strong>, and the node that measures it is not permitted to repair anything: an
-    attribution and a repair are separate results and merging them would leave neither auditable.</p>
-
-    <p><strong>Done when</strong> the 26 to 45 per cent analytic relative-sup error is attributed or
-    exonerated by measurement, reporting: the anchor pair used to normalise each field with its
-    provenance stated field by field, the same error recomputed under a single common gauge whose
-    anchors come from each field being normalised in turn, the error in absolute flux units beside
-    the relative figure so a normalisation artefact is separable from an amplitude error, and the
-    regional split this plan requires of every error. A verdict naming the comparison as the cause
-    must exhibit the corrected figure; a verdict naming a genuine discretisation error must exhibit
-    it surviving a common gauge, and it then becomes a finding about the operator rather than about
-    this plan. Either outcome is a result, and no repair is authored under this section.</p>
+    <section id="s17" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-25 — the operator, not the comparison</span>
+        <h2>§17 — Both arms sit tens of per cent from closed-form truth</h2></header>
+      <p class="landed-summary"><strong>Verdict <code>genuine_discrete_operator_error</code>.</strong>
+      The lane validated first: all four fresh A/B × coarse/fine rows reproduced the banked
+      relative-sup scores <em>exactly</em>, maximum delta <strong>0.0</strong> against a 5e−12
+      tolerance. Recomputed under a common gauge whose anchors come from each field being normalised
+      in turn, the error falls from <strong>0.258–0.451</strong> to <strong>0.187–0.382</strong> —
+      reduced but not removed, exceeding the preregistered 4096-epsilon gauge-only floor by
+      <strong>more than eleven orders</strong>. In absolute flux the surviving regional sup is
+      <strong>0.422–0.737 Wb</strong>: the discrete axis anchor sits near 1.024 Wb against an
+      analytic 1.381, and the boundary near −0.246 Wb against an analytic zero to rounding. So the
+      discrete fixed point is not the closed-form solution while converging to machine precision on
+      itself. No repair authored; the subject is wider than this plan and is carried by
+      <a href="/nova/discrete-operator-analytic-error">discrete-operator-analytic-error</a>.
+      Artifact <code>docs/figures/coefficient-space-newton/analytic-truth-gauge.json</code> (commit
+      <code>ee1d725f</code>). Full record:
+      <a href="/nova/evidence/archive/coefficient-space-newton-landed#gauge-attribution">§17 landed</a>.</p>
+    </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -819,6 +786,12 @@
 </div>
 <div class="r-comment" data-section="s18" data-id="c-20260825T0030-advance" data-who="reckon-ship" data-when="2026-08-25T00:30:00Z">
     <div class="r-comment-body">carrier-advance-diagnosis landed - commit 8794f606, merged, gate PASSED, scope clean at the two fenced paths, SLURM job 1254321 in 00:01:18 with MaxRSS 3320684K on frame closed-form-oracle-coarse. VERDICT PROJECTION, with the other two candidates exonerated by figure rather than by argument. ADMISSION IS NOT THE CAUSE: the unchanged topology predicate admits every stalled candidate as finite and limited, and the replay refused 1 advance across 5 sequential candidates all rejected as EXACT_RESIDUAL_NOT_IMPROVED. So the 85-of-89 refusal problem that dominates the plateau lane is simply not what is happening here. CONDITIONING IS NOT THE CAUSE AND IS IN FACT THE PLAN'S HEADLINE DELIVERED: the dense 36 by 36 coefficient Jacobian conditions at 119.02398382363397 against the banked projected Krylov 4087.40844825275, a ratio of 0.02911966967101448 - thirty-four times better - and the dense solve achieves relative linear residual 3.159529404905616e-16. Section 1 claimed that at order one hundred unknowns the Jacobian could be formed explicitly and solved directly, removing Arnoldi, GMRES, the projected condition number and step conditioning from the path. That claim is now measured true. PROJECTION IS THE CAUSE, and the numbers locate it precisely. The exact Newton full step reaches residual 0.001948363339752102 while the SAME DIRECTION after carrier projection reaches 0.05653880358552117 - worse than the 0.03847988208719086 the arm is stalled at - and every tested projected factor through 0.0625 worsens the residual. The striking pair is this: projecting the exact step barely turns it, 16.853185544462796 degrees at norm ratio 0.9570507876389435, so the coefficient space CONTAINS the useful direction almost exactly; yet the dense coefficient step sits 49.73527543299367 degrees from the projected exact step at norm ratio 0.012955053999124593, seventy-seven times too short. A well-formed Newton solve in a space that contains the useful direction does not return that, and the solve is not ill-conditioned. So the discrepancy is arithmetic rather than physics and section 19 carries it. THE TWO CLAIMS ARE NOW PROPERLY SEPARATE, which section 6 required: conditioning WON, convergence LOST, and neither is reported as though it established the other.</div>
+</div>
+<div class="r-comment" data-section="s17" data-id="c-20260825T0155-gauge" data-who="reckon-ship" data-when="2026-08-25T01:55:00Z">
+    <div class="r-comment-body">analytic-truth-gauge-attribution landed - commit ee1d725f, merged, gate PASSED, SLURM job 1254313 on vega_debug with 8 CPUs and an explicit 480G request, COMPLETED in 00:09:23, MaxRSS 7306220K. THE LANE VALIDATED FIRST, which is what makes the verdict trustworthy: all four fresh A and B by coarse and fine rows reproduced the banked relative-sup scores EXACTLY, maximum delta 0.0 against a 5e-12 tolerance, so a mismatching number could not have been blamed on a second code generator. THE GAUGE IS EXONERATED BY MEASUREMENT rather than argument, and it was the leading suspect. Under a field-owned common psi_N gauge whose anchors come from each field being normalised in turn, the regional relative-sup falls from the banked 0.2579180329327117 to 0.45067410659678714 down to 0.1866961139280532 to 0.38185611273715736 - REDUCED BUT NOT REMOVED - exceeding the preregistered 4096-epsilon gauge-only floor by more than ELEVEN ORDERS. In absolute flux the surviving regional sup is 0.42197737718526973 to 0.7373438580645562 Wb. THE ANCHORS SAY WHERE TO LOOK: analytic axis and boundary are 1.3810216850087467 and -8.673617379884035e-19 Wb coarse, 1.3811489277145976 and the same boundary fine - a boundary at zero to rounding as a closed form should have. The fresh discrete anchors are A coarse 1.0241986753014287 and -0.24590656947069325, A fine 1.0227451468118647 and -0.24697114012695603, B coarse 1.0245070816540787 and -0.24568140018774126, B fine 1.0227885983376792 and -0.24694004866913227. A boundary that should be zero sitting at -0.246 Wb, an axis low by the same order, and coarse and fine agreeing to three or four digits so REFINEMENT DOES NOT MOVE IT. Raw fields used shared_exact_exterior with reference_gauge_constant_used false. THE VERDICT IS NARROWER THAN ITS NAME, and this plan does not hand on the stronger reading. genuine_discrete_operator_error separates the operator from the COMPARISON; it does not separate the operator from the POSING - how the closed-form case is handed to the solve. Those have different repairs, and the near-zero refinement movement actually favours posing, since a discretisation error shrinks under refinement and a constant offset does not. THE SUBJECT IS WIDER THAN THIS PLAN. A discrete fixed point tens of per cent from the closed form touches every parity and accuracy claim that scores the forward map against a reference, so it is carried by the new plan discrete-operator-analytic-error on S15 rather than hidden as a section here. What it does NOT touch is self-consistency: converged is still converged, batched still matches scalar, the route is deterministic under its control. No repair was authored, as the section required.</div>
+</div>
+<div class="r-comment" data-section="s14" data-id="c-20260825T0205-isoacc" data-who="reckon-ship" data-when="2026-08-25T02:05:00Z">
+    <div class="r-comment-body">support-order-iso-accuracy landed - commit b774c28b, merged, gate PASSED, SLURM job 1254329 on an EXCLUSIVE sun_debug node in 00:03:15, 32 GiB, 8 task CPUs. Verdict no_resolved_order_or_constant_improvement. TARGET AND CONSTRUCTION: relative-sup error 0.004, seven requested-cell rungs per support order, on the analytic oracle and an aspect-ratio-1.782 low-aspect case, with targets a fixed 0.12-minor-radius physical R-Z offset outside the exact LCFS - 0.06535 m and 0.06061 m - declared as a construction choice rather than fitted, which is the repair to the flux-coordinate scaling that had made low-aspect inboard target radii non-finite. ORDERS ARE INDISTINGUISHABLE: analytic first 2.03495 +/- 0.06477 against second 2.03493 +/- 0.06797 at one sigma; low-aspect first 2.01632 +/- 0.09106 against second 2.01860 +/- 0.09219. Second-minus-first differences are -0.00003 +/- 0.09389 with 95 per cent interval [-0.20922, 0.20917] analytic and 0.00228 +/- 0.12958 with [-0.28645, 0.29100] low-aspect - both consistent with zero. Second order is better on only 3 of 7 analytic and 1 of 7 low-aspect rungs. Neither fitted order exceeds three, which also means the two-point-estimator artefact this plan retired once did not recur. NO CELL REDUCTION, SO THE SURCHARGE IS NOT REPAID: both orders select the SAME coarsest target-reaching rung, 3354 cells analytic achieving 0.0020840 against 0.0020794, and 1998 cells low-aspect achieving 0.0034310 against 0.0034172. Section 14 asked whether second-order support raises the field-error order or only improves its constant; the answer is NEITHER, which is weaker than either branch the section anticipated and closes it as a curiosity. IT ALSO CORRECTS A SHARED-ALLOCATION ARTEFACT, which is why the exclusive node mattered. Measured per fresh process on an exclusive node: analytic first and second build 2.57525 and 2.61108 s, peak process RSS 778.97 and 778.97 MiB, median iterate support contraction 0.16283 and 0.19039 ms; low-aspect 1.87801 and 1.76992 s, 787.52 and 787.52 MiB, 0.10295 and 0.24358 ms. Peak process memory is IDENTICAL between the orders, ratio 1.0x, against the 40 to 51 per cent more peak memory reported from the earlier shared CPU allocation. Stored coupling remains exactly 2.0x for six columns against three, but comparator-relative build ratios are 0.3129 and 0.2909 of the banked 3.24x h-refinement charge and process-peak ratios are 0.07353 of the banked 13.6x. So arm B is far cheaper than the first pass priced it AND buys nothing measurable, which is a cleaner reading than the trade the matrix previously recorded. THE ANALYTIC-TRUTH RESCORE IS SUPERSEDED ON THIS AXIS: its margins of 6.066e-6 to 3.169e-4 were two-point comparisons against errors of 0.26 to 0.45, and a seven-rung fit with uncertainty now shows no systematic improvement. Four attempts preceded this: two defect failures on target construction, one login-lane CUDA capacity failure with unrelated processes holding 21.7 of 23.0 GiB, and one numerically complete run whose reporting logic called mixed rung errors a systematic constant improvement - caught by validation rather than published.</div>
 </div>
 </section>
 </main>

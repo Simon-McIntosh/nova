@@ -506,6 +506,95 @@ is measured true. Convergence is separately and clearly lost. Neither is reporte
 established the other.</p>
 </section>
 
+<section id="gauge-attribution">
+<h2>§17 — the gauge is exonerated and the residue is not a comparison artefact</h2>
+
+<p><strong>Node <code>analytic-truth-gauge-attribution</code>, commit <code>ee1d725f</code>, gate
+PASSED, 2026-08-25.</strong> SLURM job 1254313 on vega_debug, 8 CPUs, explicit 480 G,
+<code>--time=01:00:00</code>, TMPDIR=/tmp; COMPLETED 00:09:23, MaxRSS 7,306,220 K. Receipt sha256
+<code>0c5fa4f3f567292158b7c97da4d0faba29fae7b7370ec5d1bebd949d85371559</code>.</p>
+
+<p><strong>The lane validated first.</strong> All four fresh A/B &times; coarse/fine rows reproduced
+the banked relative-sup scores exactly, maximum delta <strong>0.0</strong> against a 5e&minus;12
+tolerance. That is what makes the verdict trustworthy: a mismatching figure could not afterwards have
+been blamed on a second code generator.</p>
+
+<table>
+  <caption>Error before and after a field-owned common gauge</caption>
+  <thead><tr><th scope="col">Measure</th><th scope="col">Value</th></tr></thead>
+  <tbody>
+    <tr><td>Banked relative-sup, raw fields</td><td>0.2579180329 &ndash; 0.4506741066</td></tr>
+    <tr><td>Regional relative-sup, common gauge</td><td><strong>0.1866961139 &ndash; 0.3818561127</strong></td></tr>
+    <tr><td>Regional sup, absolute flux</td><td><strong>0.4219773772 &ndash; 0.7373438581 Wb</strong></td></tr>
+    <tr><td>Preregistered gauge-only floor</td><td>4096 binary64 epsilon &mdash; exceeded by &gt;11 orders</td></tr>
+  </tbody>
+</table>
+
+<h3 id="gauge-anchors">The anchors, and why refinement is the next discriminator</h3>
+
+<table>
+  <caption>Axis and boundary flux, analytic against fresh discrete terminal states</caption>
+  <thead><tr><th scope="col">Field</th><th scope="col">Axis (Wb)</th><th scope="col">Boundary (Wb)</th></tr></thead>
+  <tbody>
+    <tr><td>Analytic, coarse</td><td>1.3810216850</td><td>&minus;8.6736e&minus;19</td></tr>
+    <tr><td>Analytic, fine</td><td>1.3811489277</td><td>&minus;8.6736e&minus;19</td></tr>
+    <tr><td>Arm A, coarse</td><td>1.0241986753</td><td><strong>&minus;0.2459065695</strong></td></tr>
+    <tr><td>Arm A, fine</td><td>1.0227451468</td><td>&minus;0.2469711401</td></tr>
+    <tr><td>Arm B, coarse</td><td>1.0245070817</td><td>&minus;0.2456814002</td></tr>
+    <tr><td>Arm B, fine</td><td>1.0227885983</td><td>&minus;0.2469400487</td></tr>
+  </tbody>
+</table>
+
+<p>A boundary that a closed form puts at zero to rounding sits at &minus;0.246 Wb, the axis is low by
+the same order, and <strong>coarse and fine agree to three or four digits</strong>. A discretisation
+error shrinks under refinement; a constant offset does not. So the near-zero refinement movement
+favours a <em>posing</em> fault over an operator one, and the receipt's
+<code>genuine_discrete_operator_error</code> should be read as what it measured — operator rather
+than <em>comparison</em> — not as operator rather than <em>posing</em>. That distinction, and the
+refinement ladder that settles it, are carried by
+<a href="/nova/discrete-operator-analytic-error">discrete-operator-analytic-error</a>, because a
+discrete fixed point tens of per cent from the closed form is wider than this plan's subject. No
+repair was authored.</p>
+</section>
+
+<section id="iso-accuracy">
+<h2>§14 — second-order support neither raises the order nor improves the constant</h2>
+
+<p><strong>Node <code>support-order-iso-accuracy</code>, commit <code>b774c28b</code>, gate PASSED,
+2026-08-25.</strong> SLURM job 1254329 on an <em>exclusive</em> sun_debug node, 32 GiB, 8 task CPUs,
+00:03:15. Verdict <code>no_resolved_order_or_constant_improvement</code>. Targets are a declared
+0.12-minor-radius physical R&ndash;Z offset outside the exact LCFS &mdash; 0.06535 m and 0.06061 m
+&mdash; a construction choice, which is the repair to the flux-coordinate scaling that had made
+low-aspect inboard target radii non-finite.</p>
+
+<table>
+  <caption>Seven rungs per order, fitted field-error order with one-sigma uncertainty</caption>
+  <thead><tr><th scope="col">Case</th><th scope="col">First order</th><th scope="col">Second order</th><th scope="col">Difference (95 % interval)</th></tr></thead>
+  <tbody>
+    <tr><td>Analytic oracle</td><td>2.03495 &plusmn; 0.06477</td><td>2.03493 &plusmn; 0.06797</td><td>&minus;0.00003 [&minus;0.20922, 0.20917]</td></tr>
+    <tr><td>Low aspect (1.782)</td><td>2.01632 &plusmn; 0.09106</td><td>2.01860 &plusmn; 0.09219</td><td>0.00228 [&minus;0.28645, 0.29100]</td></tr>
+  </tbody>
+</table>
+
+<p>Both differences are consistent with zero, and second order wins only <strong>3 of 7</strong>
+analytic and <strong>1 of 7</strong> low-aspect rungs. Both orders select the <em>same</em> coarsest
+target-reaching rung &mdash; 3,354 cells analytic (0.0020840 against 0.0020794) and 1,998 low-aspect
+(0.0034310 against 0.0034172) &mdash; so there is no cell reduction and the 2.0&times; six-column
+surcharge is not repaid. §14 asked whether second order raises the field-error order or only improves
+its constant; the answer is <strong>neither</strong>, which is weaker than either branch it
+anticipated.</p>
+
+<p><strong>It also corrects a shared-allocation artefact, which is why an exclusive node
+mattered.</strong> Peak process RSS is <em>identical</em> between the orders at 778.97 MiB, a ratio
+of <strong>1.0&times;</strong> &mdash; against the 40 to 51 per cent more peak memory reported from
+the earlier shared CPU allocation. Build ratios are 1.0139&times; and 0.9424&times;. Stored coupling
+remains exactly 2.0&times;, but comparator-relative build is 0.3129 and 0.2909 of the banked
+3.24&times; h-refinement charge and process peak is 0.07353 of the banked 13.6&times;. So arm B is
+far cheaper than the first pass priced it <em>and</em> buys nothing measurable. The earlier
+analytic-truth rescore is superseded on this axis: its margins of 6.066e&minus;6 to 3.169e&minus;4
+were two-point comparisons against errors of 0.26 to 0.45.</p>
+</section>
+
 </main>
 </body>
 </html>

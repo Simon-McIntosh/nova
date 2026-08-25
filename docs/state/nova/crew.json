@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T07:06:48",
+  "updated": "2026-08-25T07:11:07",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -31612,9 +31612,159 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260824T154950442207-analytic-truth-gauge-attribution",
+        "plan": "coefficient-space-newton",
+        "section": "\u00a717",
+        "node": "analytic-truth-gauge-attribution",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "gauge-attribution",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T15:49:54Z",
+        "completed_at": "2026-08-24T21:04:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 18881,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "ad37abcee4a039754b0972b5f62438e70a2ea1cc",
+        "commits": [
+          "ee1d725f55d46833a471b389b448d572c6ba16cd"
+        ],
+        "changed_lines": {
+          "added": 1639,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T154950442207-analytic-truth-gauge-attribution/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03476-c7c6-7a33-a138-f8f0de18d785",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15709440,
+            "cached_input_tokens_cumulative": 15709440,
+            "input_tokens": 16078447,
+            "input_tokens_cumulative": 16078447,
+            "output_tokens": 36792,
+            "output_tokens_cumulative": 36792,
+            "reasoning_output_tokens": 12605,
+            "reasoning_output_tokens_cumulative": 12605
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260824T154941914805-support-order-iso-accuracy",
+        "plan": "coefficient-space-newton",
+        "section": "\u00a714",
+        "node": "support-order-iso-accuracy",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "iso-accuracy",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T15:49:45Z",
+        "completed_at": "2026-08-24T21:14:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 19462,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "ad37abcee4a039754b0972b5f62438e70a2ea1cc",
+        "commits": [
+          "b774c28b"
+        ],
+        "changed_lines": {
+          "added": 1859,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T154941914805-support-order-iso-accuracy/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03476-a4d8-7470-96c5-770047c78ef6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 20856320,
+            "cached_input_tokens_cumulative": 20856320,
+            "input_tokens": 21432679,
+            "input_tokens_cumulative": 21432679,
+            "output_tokens": 68159,
+            "output_tokens_cumulative": 68159,
+            "reasoning_output_tokens": 26982,
+            "reasoning_output_tokens_cumulative": 26982
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 784
+    "_version": 786
   }
 }

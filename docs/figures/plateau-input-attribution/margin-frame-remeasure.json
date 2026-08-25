@@ -1,0 +1,832 @@
+{
+  "arms": {
+    "physical_ring": {
+      "banked_boolean_achieved_newton_step_equivalents": {
+        "maximum": 3.4477976775359944,
+        "mean": 2.194787248719007,
+        "median": 2.219683584174124,
+        "minimum": 1.128553908743011
+      },
+      "banked_boolean_admitted_advance_count_of_89": {
+        "maximum": 33.0,
+        "mean": 12.6,
+        "median": 8.0,
+        "minimum": 5.0
+      },
+      "banked_boolean_terminal_relative_residual": {
+        "maximum": 3.1727125699739886,
+        "mean": 0.8727396896194477,
+        "median": 0.08769043968335866,
+        "minimum": 0.057248251456968414
+      },
+      "frame_count": 5,
+      "frame_records": [
+        {
+          "banked_boolean_predicate": {
+            "achieved_newton_step_equivalents": 1.7395218647817277,
+            "admitted_advance_count_of_89": 9,
+            "current_tree_replay": {
+              "count_and_residual_match_banked": true,
+              "runtime_seconds": 92.69747611321509
+            },
+            "frame": 179,
+            "shot": "d3d_shot_00000c4a7b.parquet",
+            "terminal_relative_residual": 0.9659205307638032,
+            "terminal_topology_class": "diverted"
+          },
+          "change_from_banked_boolean": {
+            "achieved_newton_step_equivalents": 68.77826669075806,
+            "admitted_advance_count": 80,
+            "terminal_relative_residual": -0.965920530763803
+          },
+          "closes_improvement": false,
+          "frame": 179,
+          "margin_graded": {
+            "achieved_newton_step_equivalents": 70.51778855553978,
+            "admitted_advance_count_of_89": 89,
+            "conductor_count": 24,
+            "frame": 179,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 769.1392452671437,
+            "proposal_policy": "continuous_margin_grade",
+            "pseudo_wall_expansion": null,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 0,
+            "runtime_seconds": 65.12531176023185,
+            "seed_wall_flux_sha256": "6b2cad19222403fabae118c566ec39eaf0e8465434978e17da14fa05966bb75a",
+            "selected_class_margin": {
+              "finite_count": 89,
+              "maximum_finite": -0.025942289997136048,
+              "mean_finite": -0.2730290057016341,
+              "median_finite": -0.3324752473947954,
+              "minimum_finite": -0.43745061615848624,
+              "negative_infinity_count": 0,
+              "positive_infinity_count": 0
+            },
+            "selected_nonnegative_margin_advance_count": 0,
+            "selected_topology_penalty": {
+              "finite_count": 89,
+              "maximum_finite": 0.43745061615848624,
+              "mean_finite": 0.2730290057016341,
+              "median_finite": 0.3324752473947954,
+              "minimum_finite": 0.025942289997136048,
+              "negative_infinity_count": 0,
+              "positive_infinity_count": 0
+            },
+            "selected_wrong_class_advance_count": 89,
+            "shot": "d3d_shot_00000c4a7b.parquet",
+            "surface_selector": "physical_ring",
+            "target_current_a": 1279650.1007080078,
+            "terminal_axis_rz_m": [
+              1.5684145322304703,
+              -0.7721787683842366
+            ],
+            "terminal_class_margin": -0.3324752473947952,
+            "terminal_relative_residual": 2.4088012926532916e-16,
+            "terminal_topology_class": "limited",
+            "time_ms": 3740.0,
+            "unrecorded_selected_factor_count": 14
+          },
+          "residual_improved": true,
+          "shot": "d3d_shot_00000c4a7b.parquet",
+          "terminal_requested_class_held": false,
+          "verdict": "LOWER_RESIDUAL_WRONG_CLASS_CLOSES_NOTHING"
+        },
+        {
+          "banked_boolean_predicate": {
+            "achieved_newton_step_equivalents": 1.128553908743011,
+            "admitted_advance_count_of_89": 5,
+            "current_tree_replay": {
+              "count_and_residual_match_banked": true,
+              "runtime_seconds": 64.99679117091
+            },
+            "frame": 44,
+            "shot": "d3d_shot_0003ff34e7.parquet",
+            "terminal_relative_residual": 3.1727125699739886,
+            "terminal_topology_class": "diverted"
+          },
+          "change_from_banked_boolean": {
+            "achieved_newton_step_equivalents": 85.98710792861276,
+            "admitted_advance_count": 84,
+            "terminal_relative_residual": -3.172712569973988
+          },
+          "closes_improvement": false,
+          "frame": 44,
+          "margin_graded": {
+            "achieved_newton_step_equivalents": 87.11566183735577,
+            "admitted_advance_count_of_89": 89,
+            "conductor_count": 24,
+            "frame": 44,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 783.1666714040567,
+            "proposal_policy": "continuous_margin_grade",
+            "pseudo_wall_expansion": null,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 0,
+            "runtime_seconds": 66.94567140564322,
+            "seed_wall_flux_sha256": "1b50c082f80ab244ba70cfaf03d64259e497b92951df2a452326eeaad2876e43",
+            "selected_class_margin": {
+              "finite_count": 89,
+              "maximum_finite": -0.023860225562311155,
+              "mean_finite": -0.33259779333540584,
+              "median_finite": -0.3428396379840549,
+              "minimum_finite": -0.34284017615628515,
+              "negative_infinity_count": 0,
+              "positive_infinity_count": 0
+            },
+            "selected_nonnegative_margin_advance_count": 0,
+            "selected_topology_penalty": {
+              "finite_count": 89,
+              "maximum_finite": 0.34284017615628515,
+              "mean_finite": 0.33259779333540584,
+              "median_finite": 0.3428396379840549,
+              "minimum_finite": 0.023860225562311155,
+              "negative_infinity_count": 0,
+              "positive_infinity_count": 0
+            },
+            "selected_wrong_class_advance_count": 89,
+            "shot": "d3d_shot_0003ff34e7.parquet",
+            "surface_selector": "physical_ring",
+            "target_current_a": 1182769.0064013004,
+            "terminal_axis_rz_m": [
+              1.5296882970854766,
+              -0.8105087748440727
+            ],
+            "terminal_class_margin": -0.3428396379840549,
+            "terminal_relative_residual": 5.957494436883967e-16,
+            "terminal_topology_class": "limited",
+            "time_ms": 1080.0,
+            "unrecorded_selected_factor_count": 1
+          },
+          "residual_improved": true,
+          "shot": "d3d_shot_0003ff34e7.parquet",
+          "terminal_requested_class_held": false,
+          "verdict": "LOWER_RESIDUAL_WRONG_CLASS_CLOSES_NOTHING"
+        },
+        {
+          "banked_boolean_predicate": {
+            "achieved_newton_step_equivalents": 3.4477976775359944,
+            "admitted_advance_count_of_89": 33,
+            "current_tree_replay": {
+              "count_and_residual_match_banked": true,
+              "runtime_seconds": 65.73703397996724
+            },
+            "frame": 144,
+            "shot": "d3d_shot_001554e054.parquet",
+            "terminal_relative_residual": 0.057248251456968414,
+            "terminal_topology_class": "diverted"
+          },
+          "change_from_banked_boolean": {
+            "achieved_newton_step_equivalents": 40.78406424613997,
+            "admitted_advance_count": 56,
+            "terminal_relative_residual": -0.05724825145696789
+          },
+          "closes_improvement": false,
+          "frame": 144,
+          "margin_graded": {
+            "achieved_newton_step_equivalents": 44.231861923675964,
+            "admitted_advance_count_of_89": 89,
+            "conductor_count": 24,
+            "frame": 144,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 1129.9571653034336,
+            "proposal_policy": "continuous_margin_grade",
+            "pseudo_wall_expansion": null,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 0,
+            "runtime_seconds": 63.708210565149784,
+            "seed_wall_flux_sha256": "8d36214e9a61baef2f1c285281ecb22b22ecbe98277f92ac0cddd9acf42ba825",
+            "selected_class_margin": {
+              "finite_count": 68,
+              "maximum_finite": -0.0032519674601739768,
+              "mean_finite": -0.12178215953976462,
+              "median_finite": -0.17834973983707897,
+              "minimum_finite": -0.1784565963296674,
+              "negative_infinity_count": 0,
+              "positive_infinity_count": 21
+            },
+            "selected_nonnegative_margin_advance_count": 21,
+            "selected_topology_penalty": {
+              "finite_count": 89,
+              "maximum_finite": 0.1784565963296674,
+              "mean_finite": 0.09304704324386508,
+              "median_finite": 0.08933058436460306,
+              "minimum_finite": 0.0,
+              "negative_infinity_count": 0,
+              "positive_infinity_count": 0
+            },
+            "selected_wrong_class_advance_count": 68,
+            "shot": "d3d_shot_001554e054.parquet",
+            "surface_selector": "physical_ring",
+            "target_current_a": 988842.2265648842,
+            "terminal_axis_rz_m": [
+              1.6008925711501374,
+              -1.1054978517271523
+            ],
+            "terminal_class_margin": -0.1783497398371257,
+            "terminal_relative_residual": 5.298253652413161e-16,
+            "terminal_topology_class": "limited",
+            "time_ms": 3240.0,
+            "unrecorded_selected_factor_count": 34
+          },
+          "residual_improved": true,
+          "shot": "d3d_shot_001554e054.parquet",
+          "terminal_requested_class_held": false,
+          "verdict": "LOWER_RESIDUAL_WRONG_CLASS_CLOSES_NOTHING"
+        },
+        {
+          "banked_boolean_predicate": {
+            "achieved_newton_step_equivalents": 2.438379208360178,
+            "admitted_advance_count_of_89": 8,
+            "current_tree_replay": {
+              "count_and_residual_match_banked": true,
+              "runtime_seconds": 68.66615264490247
+            },
+            "frame": 146,
+            "shot": "d3d_shot_002495e835.parquet",
+            "terminal_relative_residual": 0.08012665621911991,
+            "terminal_topology_class": "diverted"
+          },
+          "change_from_banked_boolean": {
+            "achieved_newton_step_equivalents": 6.501703385438866,
+            "admitted_advance_count": 35,
+            "terminal_relative_residual": -0.07576686249449707
+          },
+          "closes_improvement": false,
+          "frame": 146,
+          "margin_graded": {
+            "achieved_newton_step_equivalents": 8.940082593799044,
+            "admitted_advance_count_of_89": 43,
+            "conductor_count": 24,
+            "frame": 146,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 963.8827374451974,
+            "proposal_policy": "continuous_margin_grade",
+            "pseudo_wall_expansion": null,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 46,
+            "runtime_seconds": 65.92914943769574,
+            "seed_wall_flux_sha256": "7d9b51aa92b4133d7c82c45ba438ced96bd7c55c82487de2fcbb64197fe7a13a",
+            "selected_class_margin": {
+              "finite_count": 39,
+              "maximum_finite": 0.015150339768093712,
+              "mean_finite": -0.1318629639301379,
+              "median_finite": -0.04947431001169228,
+              "minimum_finite": -0.35202831708084314,
+              "negative_infinity_count": 0,
+              "positive_infinity_count": 4
+            },
+            "selected_nonnegative_margin_advance_count": 5,
+            "selected_topology_penalty": {
+              "finite_count": 43,
+              "maximum_finite": 0.35202831708084314,
+              "mean_finite": 0.11994897518705748,
+              "median_finite": 0.04373296030296803,
+              "minimum_finite": 0.0,
+              "negative_infinity_count": 0,
+              "positive_infinity_count": 0
+            },
+            "selected_wrong_class_advance_count": 38,
+            "shot": "d3d_shot_002495e835.parquet",
+            "surface_selector": "physical_ring",
+            "target_current_a": 1623563.1957054138,
+            "terminal_axis_rz_m": [
+              1.5060936343215043,
+              -0.9416226693731788
+            ],
+            "terminal_class_margin": -0.3509936591482227,
+            "terminal_relative_residual": 0.004359793724622838,
+            "terminal_topology_class": "limited",
+            "time_ms": 3180.0,
+            "unrecorded_selected_factor_count": 27
+          },
+          "residual_improved": true,
+          "shot": "d3d_shot_002495e835.parquet",
+          "terminal_requested_class_held": false,
+          "verdict": "LOWER_RESIDUAL_WRONG_CLASS_CLOSES_NOTHING"
+        },
+        {
+          "banked_boolean_predicate": {
+            "achieved_newton_step_equivalents": 2.219683584174124,
+            "admitted_advance_count_of_89": 8,
+            "current_tree_replay": {
+              "count_and_residual_match_banked": true,
+              "runtime_seconds": 66.65575384907424
+            },
+            "frame": 137,
+            "shot": "d3d_shot_0040ca9bdc.parquet",
+            "terminal_relative_residual": 0.08769043968335866,
+            "terminal_topology_class": "diverted"
+          },
+          "change_from_banked_boolean": {
+            "achieved_newton_step_equivalents": 58.24281404670772,
+            "admitted_advance_count": 81,
+            "terminal_relative_residual": -0.08769043968335821
+          },
+          "closes_improvement": false,
+          "frame": 137,
+          "margin_graded": {
+            "achieved_newton_step_equivalents": 60.46249763088185,
+            "admitted_advance_count_of_89": 89,
+            "conductor_count": 24,
+            "frame": 137,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 909.1874259466384,
+            "proposal_policy": "continuous_margin_grade",
+            "pseudo_wall_expansion": null,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 0,
+            "runtime_seconds": 65.92051215656102,
+            "seed_wall_flux_sha256": "6e338e99a4b6efa71119b00fdb6a0c90e1a88e79911536d21af7ad16da65387b",
+            "selected_class_margin": {
+              "finite_count": 85,
+              "maximum_finite": -0.00016392573751922157,
+              "mean_finite": -0.23023642608334394,
+              "median_finite": -0.33682972341024886,
+              "minimum_finite": -0.3400552778106992,
+              "negative_infinity_count": 0,
+              "positive_infinity_count": 4
+            },
+            "selected_nonnegative_margin_advance_count": 4,
+            "selected_topology_penalty": {
+              "finite_count": 89,
+              "maximum_finite": 0.3400552778106992,
+              "mean_finite": 0.21988872154027225,
+              "median_finite": 0.33682972341024886,
+              "minimum_finite": 0.0,
+              "negative_infinity_count": 0,
+              "positive_infinity_count": 0
+            },
+            "selected_wrong_class_advance_count": 85,
+            "shot": "d3d_shot_0040ca9bdc.parquet",
+            "surface_selector": "physical_ring",
+            "target_current_a": 1629095.3674316406,
+            "terminal_axis_rz_m": [
+              1.531429667394178,
+              -0.8870572489449631
+            ],
+            "terminal_class_margin": -0.33682972341024897,
+            "terminal_relative_residual": 4.392956522144886e-16,
+            "terminal_topology_class": "limited",
+            "time_ms": 3000.0,
+            "unrecorded_selected_factor_count": 25
+          },
+          "residual_improved": true,
+          "shot": "d3d_shot_0040ca9bdc.parquet",
+          "terminal_requested_class_held": false,
+          "verdict": "LOWER_RESIDUAL_WRONG_CLASS_CLOSES_NOTHING"
+        }
+      ],
+      "lower_residual_frame_count": 5,
+      "lower_residual_with_requested_class_count": 0,
+      "lower_residual_wrong_class_closes_nothing_count": 5,
+      "margin_graded_achieved_newton_step_equivalents": {
+        "maximum": 87.11566183735577,
+        "mean": 54.253578508250484,
+        "median": 60.46249763088185,
+        "minimum": 8.940082593799044
+      },
+      "margin_graded_admitted_advance_count_of_89": {
+        "maximum": 89.0,
+        "mean": 79.8,
+        "median": 89.0,
+        "minimum": 43.0
+      },
+      "margin_graded_terminal_relative_residual": {
+        "maximum": 0.004359793724622838,
+        "mean": 0.0008719587449249286,
+        "median": 5.298253652413161e-16,
+        "minimum": 2.4088012926532916e-16
+      },
+      "terminal_requested_class_count": 0
+    },
+    "pseudo_wall": {
+      "banked_boolean_achieved_newton_step_equivalents": {
+        "maximum": 5.192784877394542,
+        "mean": 3.7859978008188917,
+        "median": 3.3815541369487643,
+        "minimum": 2.9323650168757105
+      },
+      "banked_boolean_admitted_advance_count_of_89": {
+        "maximum": 12.0,
+        "mean": 9.4,
+        "median": 9.0,
+        "minimum": 7.0
+      },
+      "banked_boolean_terminal_relative_residual": {
+        "maximum": 0.15255853230708774,
+        "mean": 0.11363670761439279,
+        "median": 0.1069024223745411,
+        "minimum": 0.08646603357046041
+      },
+      "frame_count": 5,
+      "frame_records": [
+        {
+          "banked_boolean_predicate": {
+            "achieved_newton_step_equivalents": 3.2199825000659112,
+            "admitted_advance_count_of_89": 8,
+            "frame": 179,
+            "shot": "d3d_shot_00000c4a7b.parquet",
+            "terminal_relative_residual": 0.1069024223745411,
+            "terminal_topology_class": "diverted"
+          },
+          "change_from_banked_boolean": {
+            "achieved_newton_step_equivalents": 58.21751749993409,
+            "admitted_advance_count": 81,
+            "terminal_relative_residual": 0.009466061552580146
+          },
+          "closes_improvement": false,
+          "frame": 179,
+          "margin_graded": {
+            "achieved_newton_step_equivalents": 61.4375,
+            "admitted_advance_count_of_89": 89,
+            "conductor_count": 24,
+            "frame": 179,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 1423.6900660383221,
+            "proposal_policy": "continuous_margin_grade",
+            "pseudo_wall_expansion": 0.02,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 0,
+            "runtime_seconds": 95.31428732164204,
+            "seed_wall_flux_sha256": "3dfb22227810c9f640002b6cc3ae0b26a6de9d916f679f148f6a876aa44c1428",
+            "selected_class_margin": {
+              "finite_count": 62,
+              "maximum_finite": -0.05635075658031907,
+              "mean_finite": -0.4589449013813378,
+              "median_finite": -0.44472456285545736,
+              "minimum_finite": -0.5308417372768683,
+              "negative_infinity_count": 0,
+              "positive_infinity_count": 27
+            },
+            "selected_nonnegative_margin_advance_count": 27,
+            "selected_topology_penalty": {
+              "finite_count": 89,
+              "maximum_finite": 0.5308417372768683,
+              "mean_finite": 0.31971442568138136,
+              "median_finite": 0.4196820072552145,
+              "minimum_finite": 0.0,
+              "negative_infinity_count": 0,
+              "positive_infinity_count": 0
+            },
+            "selected_wrong_class_advance_count": 62,
+            "shot": "d3d_shot_00000c4a7b.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 1279650.1007080078,
+            "terminal_axis_rz_m": [
+              1.4791135526934471,
+              -1.423816693206926
+            ],
+            "terminal_class_margin": -0.5295734642179688,
+            "terminal_relative_residual": 0.11636848392712125,
+            "terminal_topology_class": "limited",
+            "time_ms": 3740.0,
+            "unrecorded_selected_factor_count": 1
+          },
+          "residual_improved": false,
+          "shot": "d3d_shot_00000c4a7b.parquet",
+          "terminal_requested_class_held": false,
+          "verdict": "NO_RESIDUAL_IMPROVEMENT"
+        },
+        {
+          "banked_boolean_predicate": {
+            "achieved_newton_step_equivalents": 4.203302472809529,
+            "admitted_advance_count_of_89": 9,
+            "frame": 44,
+            "shot": "d3d_shot_0003ff34e7.parquet",
+            "terminal_relative_residual": 0.09970075362834631,
+            "terminal_topology_class": "diverted"
+          },
+          "change_from_banked_boolean": {
+            "achieved_newton_step_equivalents": 4.521241666452466,
+            "admitted_advance_count": 7,
+            "terminal_relative_residual": -0.08971430157863432
+          },
+          "closes_improvement": false,
+          "frame": 44,
+          "margin_graded": {
+            "achieved_newton_step_equivalents": 8.724544139261996,
+            "admitted_advance_count_of_89": 16,
+            "conductor_count": 24,
+            "frame": 44,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 1359.1427295459089,
+            "proposal_policy": "continuous_margin_grade",
+            "pseudo_wall_expansion": 0.02,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 73,
+            "runtime_seconds": 64.16994697414339,
+            "seed_wall_flux_sha256": "b030f645005fb9ced9ebdea8aaebb4913691a3e92832dfb69c06686601816a1a",
+            "selected_class_margin": {
+              "finite_count": 9,
+              "maximum_finite": -0.0062338515292647,
+              "mean_finite": -0.3529805376585454,
+              "median_finite": -0.4099374577073929,
+              "minimum_finite": -0.41066778622870476,
+              "negative_infinity_count": 0,
+              "positive_infinity_count": 7
+            },
+            "selected_nonnegative_margin_advance_count": 7,
+            "selected_topology_penalty": {
+              "finite_count": 16,
+              "maximum_finite": 0.41066778622870476,
+              "mean_finite": 0.1985515524329318,
+              "median_finite": 0.1724196733547197,
+              "minimum_finite": 0.0,
+              "negative_infinity_count": 0,
+              "positive_infinity_count": 0
+            },
+            "selected_wrong_class_advance_count": 9,
+            "shot": "d3d_shot_0003ff34e7.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 1182769.0064013004,
+            "terminal_axis_rz_m": [
+              1.2836137339509746,
+              -1.338180280599143
+            ],
+            "terminal_class_margin": -0.41066778622870476,
+            "terminal_relative_residual": 0.009986452049711993,
+            "terminal_topology_class": "limited",
+            "time_ms": 1080.0,
+            "unrecorded_selected_factor_count": 4
+          },
+          "residual_improved": true,
+          "shot": "d3d_shot_0003ff34e7.parquet",
+          "terminal_requested_class_held": false,
+          "verdict": "LOWER_RESIDUAL_WRONG_CLASS_CLOSES_NOTHING"
+        },
+        {
+          "banked_boolean_predicate": {
+            "achieved_newton_step_equivalents": 3.3815541369487643,
+            "admitted_advance_count_of_89": 12,
+            "frame": 144,
+            "shot": "d3d_shot_001554e054.parquet",
+            "terminal_relative_residual": 0.15255853230708774,
+            "terminal_topology_class": "diverted"
+          },
+          "change_from_banked_boolean": {
+            "achieved_newton_step_equivalents": 56.32565656815512,
+            "admitted_advance_count": 77,
+            "terminal_relative_residual": 0.03429857009672957
+          },
+          "closes_improvement": false,
+          "frame": 144,
+          "margin_graded": {
+            "achieved_newton_step_equivalents": 59.70721070510388,
+            "admitted_advance_count_of_89": 89,
+            "conductor_count": 24,
+            "frame": 144,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 1370.226484660063,
+            "proposal_policy": "continuous_margin_grade",
+            "pseudo_wall_expansion": 0.02,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 0,
+            "runtime_seconds": 67.27112857997417,
+            "seed_wall_flux_sha256": "5ebfce7e8c37ed70ddc0a657915bb7594a005a5ca073e4b1060acf750a09fddb",
+            "selected_class_margin": {
+              "finite_count": 79,
+              "maximum_finite": -0.2496713115257958,
+              "mean_finite": -0.44575084200792536,
+              "median_finite": -0.42179411892321733,
+              "minimum_finite": -0.48299969283734995,
+              "negative_infinity_count": 0,
+              "positive_infinity_count": 10
+            },
+            "selected_nonnegative_margin_advance_count": 10,
+            "selected_topology_penalty": {
+              "finite_count": 89,
+              "maximum_finite": 0.48299969283734995,
+              "mean_finite": 0.3956664777373719,
+              "median_finite": 0.4214149188634973,
+              "minimum_finite": 0.0,
+              "negative_infinity_count": 0,
+              "positive_infinity_count": 0
+            },
+            "selected_wrong_class_advance_count": 79,
+            "shot": "d3d_shot_001554e054.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 988842.2265648842,
+            "terminal_axis_rz_m": [
+              1.6659785907710067,
+              1.380311384968612
+            ],
+            "terminal_class_margin": -0.42141491886349725,
+            "terminal_relative_residual": 0.1868571024038173,
+            "terminal_topology_class": "limited",
+            "time_ms": 3240.0,
+            "unrecorded_selected_factor_count": 5
+          },
+          "residual_improved": false,
+          "shot": "d3d_shot_001554e054.parquet",
+          "terminal_requested_class_held": false,
+          "verdict": "NO_RESIDUAL_IMPROVEMENT"
+        },
+        {
+          "banked_boolean_predicate": {
+            "achieved_newton_step_equivalents": 2.9323650168757105,
+            "admitted_advance_count_of_89": 7,
+            "frame": 146,
+            "shot": "d3d_shot_002495e835.parquet",
+            "terminal_relative_residual": 0.08646603357046041,
+            "terminal_topology_class": "diverted"
+          },
+          "change_from_banked_boolean": {
+            "achieved_newton_step_equivalents": 80.76603838539752,
+            "admitted_advance_count": 82,
+            "terminal_relative_residual": 0.05354040250103832
+          },
+          "closes_improvement": false,
+          "frame": 146,
+          "margin_graded": {
+            "achieved_newton_step_equivalents": 83.69840340227323,
+            "admitted_advance_count_of_89": 89,
+            "conductor_count": 24,
+            "frame": 146,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 1419.1699657548306,
+            "proposal_policy": "continuous_margin_grade",
+            "pseudo_wall_expansion": 0.02,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 0,
+            "runtime_seconds": 67.04725792631507,
+            "seed_wall_flux_sha256": "ae7211ffeb3964e7fba489812ce8ae630ed3acf3d14412be675a42803ba8a530",
+            "selected_class_margin": {
+              "finite_count": 85,
+              "maximum_finite": -0.18470022412613546,
+              "mean_finite": -0.47661468387148115,
+              "median_finite": -0.44991953011852587,
+              "minimum_finite": -0.5180928367259452,
+              "negative_infinity_count": 0,
+              "positive_infinity_count": 4
+            },
+            "selected_nonnegative_margin_advance_count": 4,
+            "selected_topology_penalty": {
+              "finite_count": 89,
+              "maximum_finite": 0.5180928367259452,
+              "mean_finite": 0.4551937992031,
+              "median_finite": 0.4499195150857444,
+              "minimum_finite": 0.0,
+              "negative_infinity_count": 0,
+              "positive_infinity_count": 0
+            },
+            "selected_wrong_class_advance_count": 85,
+            "shot": "d3d_shot_002495e835.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 1623563.1957054138,
+            "terminal_axis_rz_m": [
+              1.389750780640819,
+              1.3793539179357923
+            ],
+            "terminal_class_margin": -0.44991951508185,
+            "terminal_relative_residual": 0.14000643607149874,
+            "terminal_topology_class": "limited",
+            "time_ms": 3180.0,
+            "unrecorded_selected_factor_count": 1
+          },
+          "residual_improved": false,
+          "shot": "d3d_shot_002495e835.parquet",
+          "terminal_requested_class_held": false,
+          "verdict": "NO_RESIDUAL_IMPROVEMENT"
+        },
+        {
+          "banked_boolean_predicate": {
+            "achieved_newton_step_equivalents": 5.192784877394542,
+            "admitted_advance_count_of_89": 11,
+            "frame": 137,
+            "shot": "d3d_shot_0040ca9bdc.parquet",
+            "terminal_relative_residual": 0.12255579619152838,
+            "terminal_topology_class": "diverted"
+          },
+          "change_from_banked_boolean": {
+            "achieved_newton_step_equivalents": 82.41520339322129,
+            "admitted_advance_count": 78,
+            "terminal_relative_residual": -0.1225557961915282
+          },
+          "closes_improvement": false,
+          "frame": 137,
+          "margin_graded": {
+            "achieved_newton_step_equivalents": 87.60798827061583,
+            "admitted_advance_count_of_89": 89,
+            "conductor_count": 24,
+            "frame": 137,
+            "krylov_action_qualification": "ACCEPTED",
+            "magnetic_axis_displacement_mm": 1527.7516929094184,
+            "proposal_policy": "continuous_margin_grade",
+            "pseudo_wall_expansion": 0.02,
+            "recorded_selected_candidates_were_admitted": true,
+            "refused_advance_count_of_89": 0,
+            "runtime_seconds": 65.76968022622168,
+            "seed_wall_flux_sha256": "c67c744e8e29f158422a4dd0be93aefd623c6071cfc4637636ca1085748ff5ff",
+            "selected_class_margin": {
+              "finite_count": 83,
+              "maximum_finite": -0.21963003959186544,
+              "mean_finite": -0.3721104428971213,
+              "median_finite": -0.3744030895205361,
+              "minimum_finite": -0.374406363820324,
+              "negative_infinity_count": 0,
+              "positive_infinity_count": 6
+            },
+            "selected_nonnegative_margin_advance_count": 6,
+            "selected_topology_penalty": {
+              "finite_count": 89,
+              "maximum_finite": 0.374406363820324,
+              "mean_finite": 0.34702434562315804,
+              "median_finite": 0.3744030895205361,
+              "minimum_finite": 0.0,
+              "negative_infinity_count": 0,
+              "positive_infinity_count": 0
+            },
+            "selected_wrong_class_advance_count": 83,
+            "shot": "d3d_shot_0040ca9bdc.parquet",
+            "surface_selector": "pseudo_wall",
+            "target_current_a": 1629095.3674316406,
+            "terminal_axis_rz_m": [
+              1.336947054447935,
+              -1.4764460384038383
+            ],
+            "terminal_class_margin": -0.3744030895205362,
+            "terminal_relative_residual": 1.747136781563195e-16,
+            "terminal_topology_class": "limited",
+            "time_ms": 3000.0,
+            "unrecorded_selected_factor_count": 0
+          },
+          "residual_improved": true,
+          "shot": "d3d_shot_0040ca9bdc.parquet",
+          "terminal_requested_class_held": false,
+          "verdict": "LOWER_RESIDUAL_WRONG_CLASS_CLOSES_NOTHING"
+        }
+      ],
+      "lower_residual_frame_count": 2,
+      "lower_residual_with_requested_class_count": 0,
+      "lower_residual_wrong_class_closes_nothing_count": 2,
+      "margin_graded_achieved_newton_step_equivalents": {
+        "maximum": 87.60798827061583,
+        "mean": 60.23512930345098,
+        "median": 61.4375,
+        "minimum": 8.724544139261996
+      },
+      "margin_graded_admitted_advance_count_of_89": {
+        "maximum": 89.0,
+        "mean": 74.4,
+        "median": 89.0,
+        "minimum": 16.0
+      },
+      "margin_graded_terminal_relative_residual": {
+        "maximum": 0.1868571024038173,
+        "mean": 0.09064369489042991,
+        "median": 0.11636848392712125,
+        "minimum": 1.747136781563195e-16
+      },
+      "terminal_requested_class_count": 0
+    }
+  },
+  "artifact": "margin_frame_remeasure",
+  "classified_fixture_sign_parity": {
+    "classified_fixture_count": 53,
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python3 -m pytest -q -s tests/test_connectivity_boundary.py::test_forward_topology_margin_matches_boolean_transition_and_terminal_gate",
+    "families": {
+      "growing_saddle": {
+        "classified": 19,
+        "disagreements": 0
+      },
+      "persistent_saddle_negative_polarity": {
+        "classified": 17,
+        "disagreements": 0
+      },
+      "persistent_saddle_positive_polarity": {
+        "classified": 17,
+        "disagreements": 0
+      }
+    },
+    "sign_agreement_count": 53,
+    "sign_disagreement_count": 0,
+    "terminal_wrong_class_rejected": true
+  },
+  "conclusion": {
+    "closing_improvement_count_across_10_surface_frames": 0,
+    "requested_class_held_on_every_reported_improvement": false,
+    "wrong_class_lower_residual_closes_nothing_count": 7
+  },
+  "driver_sha256": "c86a875d49f69ecc63de7365255628dff90c679d03b0ae23bade3b6119c3fac5",
+  "measurement_contract": {
+    "banked_sources": {
+      "pseudo_wall_newton_equivalents": "docs/figures/topology-preserving-continuation/conditioning-repair.json",
+      "surface_boolean": "docs/figures/plateau-input-attribution/wall-topology-surface.json"
+    },
+    "class_margin": "u_wall - u_xpoint in normalized-flux units",
+    "cohort": "five banked score-blind DIII-D frames",
+    "held_inputs": "profiles, 24-conductor circuit currents, target plasma current, cold-seed construction, nonmonotone residual envelope, fixed proposal factors, Krylov route, conditioning rule and 89-update budget",
+    "penalty_weight": 1.0,
+    "proposal_grade": "relative_residual + max(-class_margin, 0)",
+    "pseudo_wall_expansion": 0.02,
+    "surfaces": [
+      "pseudo_wall",
+      "physical_ring"
+    ],
+    "terminal_authority": "exact Boolean requested diverted class",
+    "tuned_thresholds": 0,
+    "wrong_class_rule": "lower residual in the wrong class closes nothing"
+  },
+  "source_commit": "fae92c7623001fd034ad861edf1574e112b1fc0a"
+}

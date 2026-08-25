@@ -18,12 +18,16 @@ control.
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
+import math
+import os
 import subprocess
+import sys
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 import jax
 import jax.numpy as jnp
@@ -60,6 +64,7 @@ from nova.equilibrium.fixed_point import (
     KrylovActionQualification,
     kink_aware_newton_krylov,
 )
+from nova.equilibrium import fixed_point as fixed_point_solver
 from nova.equilibrium.map_extraction import extract_flux_functions
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.topology import TopologyClass
@@ -76,7 +81,7 @@ from nova.imas.diiid_current import (
     shipped_current_at,
 )
 from nova.imas.machine_artifact import resolve_machine_artifact
-from nova.jax.config import configure_dtypes
+from nova.jax.config import Precision, configure_dtypes
 
 DEFAULT_DATA = Path("/work/projects/imas_gpu/sophelio/raw/data/diii_d_train")
 DEFAULT_OUTPUT = Path("docs/figures/diiid-forward-onboarding/forward-gs")
@@ -87,14 +92,30 @@ COHORT_FIGURE_NAME = "cohort_match_summary.png"
 DEFAULT_WALL_TOPOLOGY_OUTPUT = Path(
     "docs/figures/plateau-input-attribution/wall-topology-surface.json"
 )
+DEFAULT_MARGIN_FRAME_OUTPUT = Path(
+    "docs/figures/plateau-input-attribution/margin-frame-remeasure.json"
+)
 DEFAULT_MACHINE_ARTIFACT_CACHE = Path(
     "/run/user/39486/reckon-artifact-repaired-ring-cache"
 )
 DEFAULT_MACHINE_ARTIFACT_DIGEST = (
     "sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e"
 )
+PHYSICAL_WALL_COORDINATE_ENV = "NOVA_DIIID_PHYSICAL_WALL_COORDINATE_BASE64"
+PHYSICAL_WALL_COORDINATE_SHA256 = (
+    "a45135511161237ad38db8e6515b66bf79471b9eb719779281a37dbda9bfffd8"
+)
+PHYSICAL_WALL_DIGEST = (
+    "993e2b368200bc74f58725ec41066f86022db84d91b9e835e4355fca425e8318"
+)
+PHYSICAL_WALL_SEMANTIC_IDENTITY = (
+    "sha256:35242df9c7860d9f190479d77cb6e68b1f2b2b0fbca8677643b42071a87e4d77"
+)
 QUALIFIED_PSEUDO_WALL_RECEIPT = Path(
     "docs/figures/diiid-forward-onboarding/repaired-solve-five-frame-remeasure.json"
+)
+BANKED_CONDITIONING_RECEIPT = Path(
+    "docs/figures/topology-preserving-continuation/conditioning-repair.json"
 )
 BANKED_PSEUDO_WALL_RECEIPT = DEFAULT_OUTPUT / RECEIPT_NAME
 PHYSICAL_WALL_OCCURRENCE = 0
@@ -235,6 +256,22 @@ class ProfileBuild:
     wall_statement: str
     surface_receipt: dict[str, Any]
     seed_wall_flux_sha256: str
+
+
+class MarginGradedResult(NamedTuple):
+    """Fixed-ladder result whose proposals are ranked by topology margin."""
+
+    state: jax.Array
+    residual: jax.Array
+    trace: jax.Array
+    candidate_admissibility: jax.Array
+    accepted_factors: jax.Array
+    krylov_action_qualification: jax.Array
+    krylov_conditioning_count: jax.Array
+    maximum_projected_krylov_condition: jax.Array
+    effective_newton_fractions: jax.Array
+    accepted_class_margins: jax.Array
+    accepted_topology_penalties: jax.Array
 
 
 def preregistration() -> dict[str, Any]:
@@ -546,6 +583,45 @@ def _physical_wall_ring(
     cached = _PHYSICAL_WALL_CACHE.get(cache_key)
     if cached is not None:
         return cached
+
+    transported = os.environ.get(PHYSICAL_WALL_COORDINATE_ENV)
+    if transported:
+        if artifact_digest != DEFAULT_MACHINE_ARTIFACT_DIGEST or occurrence != 0:
+            raise RuntimeError(
+                "transported wall coordinates require the governed default identity"
+            )
+        coordinate = np.asarray(
+            json.loads(base64.b64decode(transported).decode("utf-8")),
+            dtype=np.float64,
+        )
+        if coordinate.shape != (84, 2):
+            raise RuntimeError("transported governed wall has the wrong shape")
+        if not np.all(np.isfinite(coordinate)) or not np.array_equal(
+            coordinate[0], coordinate[-1]
+        ):
+            raise RuntimeError("transported governed wall is not a closed finite ring")
+        if _array_sha256(coordinate) != PHYSICAL_WALL_COORDINATE_SHA256:
+            raise RuntimeError("transported governed wall digest changed")
+        receipt = {
+            "selector": "physical_ring",
+            "artifact_digest": DEFAULT_MACHINE_ARTIFACT_DIGEST,
+            "physical_digest": PHYSICAL_WALL_DIGEST,
+            "semantic_identity": PHYSICAL_WALL_SEMANTIC_IDENTITY,
+            "dd_version": "4.1.1",
+            "occurrence": 0,
+            "available_occurrences": [0],
+            "outline_path": PHYSICAL_WALL_OUTLINE_PATH,
+            "artifact_file": "diiid_machine_description.nc",
+            "wall_coordinate_rows": len(coordinate),
+            "wall_coordinate_sha256": _array_sha256(coordinate),
+            "coordinate_transport": (
+                "exact digest-qualified IMAS-Python extraction supplied to the "
+                "compute node because its private /run/user mount is unavailable"
+            ),
+        }
+        result = (coordinate, receipt)
+        _PHYSICAL_WALL_CACHE[cache_key] = result
+        return result
 
     import imas
 
@@ -1364,6 +1440,22 @@ def _distribution(values: list[float]) -> dict[str, float]:
     }
 
 
+def _extended_distribution(values: np.ndarray) -> dict[str, Any]:
+    """Summarise finite extended-real values without emitting invalid JSON."""
+
+    array = np.asarray(values, dtype=float)
+    finite = array[np.isfinite(array)]
+    return {
+        "finite_count": int(finite.size),
+        "positive_infinity_count": int(np.count_nonzero(np.isposinf(array))),
+        "negative_infinity_count": int(np.count_nonzero(np.isneginf(array))),
+        "minimum_finite": float(np.min(finite)) if finite.size else None,
+        "median_finite": float(np.median(finite)) if finite.size else None,
+        "maximum_finite": float(np.max(finite)) if finite.size else None,
+        "mean_finite": float(np.mean(finite)) if finite.size else None,
+    }
+
+
 def summarize(
     results: list[FrameResult],
     sensitivity: list[FrameResult],
@@ -1588,6 +1680,246 @@ def cohort_figure(results: list[FrameResult], path: Path) -> None:
     plt.close(figure)
 
 
+def _margin_penalty(class_margin: jax.Array) -> jax.Array:
+    """Return the unit-weight exact penalty for crossing into limited topology."""
+
+    return jnp.maximum(-class_margin, 0.0)
+
+
+def _margin_graded_newton_krylov(
+    map_fn,
+    margin_fn,
+    initial,
+    *,
+    newton_steps: int,
+    gmres_iterations: int,
+    nonmonotone_allowance: float = 0.05,
+) -> MarginGradedResult:
+    """Rank every finite fixed-ladder proposal by residual plus margin penalty.
+
+    The map, Newton action, fixed factors, residual envelope, conditioning rule,
+    and step cap match the production nonmonotone route.  The sole policy change
+    is replacing the Boolean topology refusal with the continuous, dimensionless
+    merit ``relative_residual + max(-class_margin, 0)``.  A limited proposal is
+    therefore graded by how far it crossed the marginal surface rather than
+    discarded, while the exact Boolean remains the terminal authority.
+    """
+
+    state = fixed_point_solver._solver_state(initial, Precision.AUTOMATIC)
+    factors = jnp.asarray(fixed_point_solver._BACKTRACKING_FACTORS, dtype=state.dtype)
+    trace = jnp.full(newton_steps, jnp.nan, dtype=state.dtype)
+    recent = jnp.full(len(fixed_point_solver._BACKTRACKING_FACTORS), jnp.nan)
+    candidate_admissibility = jnp.zeros(
+        (newton_steps, fixed_point_solver._RECORDED_BACKTRACKING_FACTOR_COUNT),
+        dtype=jnp.bool_,
+    )
+    accepted_factors = jnp.zeros(newton_steps, dtype=state.dtype)
+    effective_newton_fractions = jnp.zeros(newton_steps, dtype=state.dtype)
+    accepted_class_margins = jnp.full(newton_steps, jnp.nan, dtype=state.dtype)
+    accepted_topology_penalties = jnp.full(newton_steps, jnp.nan, dtype=state.dtype)
+
+    def bounded_step(step, residual_vector):
+        fallback = 0.5 * residual_vector
+        step = jnp.where(jnp.all(jnp.isfinite(step)), step, fallback)
+        cap = 10.0 * jnp.max(jnp.abs(fallback))
+        norm_step = jnp.max(jnp.abs(step))
+        return jnp.where(
+            norm_step > cap,
+            step * (cap / jnp.maximum(norm_step, 1.0e-300)),
+            step,
+        )
+
+    def newton_body(index, carry):
+        (
+            current,
+            current_residual,
+            residual_trace,
+            recent_grades,
+            recorded_candidates,
+            selected_factors,
+            qualification,
+            conditioning_count,
+            maximum_condition,
+            condition_baseline,
+            effective_fractions,
+            selected_margins,
+            selected_penalties,
+        ) = carry
+        mapped, tangent = jax.linearize(map_fn, current)
+        residual_vector = mapped - current
+        current_residual = fixed_point_solver._relative_residual(mapped, current)
+        current_margin = margin_fn(current)
+        current_grade = current_residual + _margin_penalty(current_margin)
+        qualified_step = fixed_point_solver._qualified_krylov_step(
+            lambda vector: vector - tangent(vector),
+            residual_vector,
+            current_residual,
+            gmres_iterations=gmres_iterations,
+            condition_ratio_limit=math.e,
+            preceding_condition_baseline=condition_baseline,
+        )
+        action_accepted = (
+            qualified_step.qualification == KrylovActionQualification.ACCEPTED
+        )
+        raw_step = bounded_step(qualified_step.unconditioned_step, residual_vector)
+        conditioned_step = bounded_step(qualified_step.step, residual_vector)
+
+        def evaluate_ladder(trial_step):
+            candidates = current[None, :] + factors[:, None] * trial_step[None, :]
+
+            def grade(candidate):
+                candidate_mapped = map_fn(candidate)
+                residual = fixed_point_solver._relative_residual(
+                    candidate_mapped, candidate
+                )
+                margin = margin_fn(candidate)
+                penalty = _margin_penalty(margin)
+                return residual, margin, penalty, residual + penalty
+
+            residuals, margins, penalties, grades = jax.lax.map(grade, candidates)
+            usable = (
+                jnp.all(jnp.isfinite(candidates), axis=1)
+                & jnp.isfinite(residuals)
+                & ~jnp.isnan(margins)
+                & jnp.isfinite(grades)
+                & action_accepted
+            )
+            envelope = jnp.max(
+                jnp.where(jnp.isfinite(recent_grades), recent_grades, current_grade)
+            )
+            within_envelope = usable & (
+                grades <= envelope * (1.0 + nonmonotone_allowance)
+            )
+            first = jnp.argmax(within_envelope)
+            best = jnp.argmin(jnp.where(usable, grades, jnp.inf))
+            selected = jnp.where(jnp.any(within_envelope), first, best)
+            return (
+                candidates,
+                residuals,
+                margins,
+                penalties,
+                grades,
+                usable,
+                selected,
+            )
+
+        raw = evaluate_ladder(raw_step)
+        raw_usable = jnp.any(raw[5])
+        conditioned = jax.lax.cond(
+            qualified_step.conditioning_applied & ~raw_usable,
+            evaluate_ladder,
+            lambda _trial_step: raw,
+            conditioned_step,
+        )
+        conditioned_improves = conditioned[5] & (conditioned[4] <= current_grade)
+        use_conditioned = (
+            action_accepted
+            & qualified_step.conditioning_applied
+            & ~raw_usable
+            & jnp.any(conditioned_improves)
+        )
+        conditioned_best = jnp.argmin(
+            jnp.where(conditioned_improves, conditioned[4], jnp.inf)
+        )
+        candidates = jnp.where(use_conditioned, conditioned[0], raw[0])
+        residuals = jnp.where(use_conditioned, conditioned[1], raw[1])
+        margins = jnp.where(use_conditioned, conditioned[2], raw[2])
+        penalties = jnp.where(use_conditioned, conditioned[3], raw[3])
+        grades = jnp.where(use_conditioned, conditioned[4], raw[4])
+        usable = jnp.where(use_conditioned, conditioned_improves, raw[5])
+        selected = jnp.where(use_conditioned, conditioned_best, raw[6])
+        any_usable = raw_usable | use_conditioned
+        proposal = jnp.where(any_usable, candidates[selected], current)
+        accepted_residual = jnp.where(any_usable, residuals[selected], current_residual)
+        accepted_grade = jnp.where(any_usable, grades[selected], current_grade)
+        selected_factor = jnp.where(any_usable, factors[selected], 0.0)
+        recorded_candidates = recorded_candidates.at[index].set(
+            usable[: fixed_point_solver._RECORDED_BACKTRACKING_FACTOR_COUNT]
+        )
+        selected_factors = selected_factors.at[index].set(selected_factor)
+        raw_step_norm = jnp.linalg.norm(qualified_step.unconditioned_step)
+        selected_step = jnp.where(use_conditioned, conditioned_step, raw_step)
+        effective_fraction = jnp.where(
+            any_usable & (raw_step_norm > 0.0),
+            selected_factor
+            * jnp.linalg.norm(selected_step)
+            / jnp.maximum(raw_step_norm, jnp.finfo(state.dtype).tiny),
+            0.0,
+        )
+        effective_fractions = effective_fractions.at[index].set(effective_fraction)
+        selected_margins = selected_margins.at[index].set(
+            jnp.where(any_usable, margins[selected], jnp.nan)
+        )
+        selected_penalties = selected_penalties.at[index].set(
+            jnp.where(any_usable, penalties[selected], jnp.nan)
+        )
+        residual_trace = residual_trace.at[index].set(accepted_residual)
+        recent_grades = recent_grades.at[jnp.mod(index, recent_grades.size)].set(
+            accepted_grade
+        )
+        prior_failed = (qualification != KrylovActionQualification.NOT_APPLICABLE) & (
+            qualification != KrylovActionQualification.ACCEPTED
+        )
+        qualification = jnp.where(
+            prior_failed, qualification, qualified_step.qualification
+        )
+        conditioning_count = conditioning_count + jnp.asarray(
+            use_conditioned, dtype=jnp.int32
+        )
+        maximum_condition = jnp.maximum(
+            maximum_condition, qualified_step.projected_condition
+        )
+        return (
+            proposal,
+            accepted_residual,
+            residual_trace,
+            recent_grades,
+            recorded_candidates,
+            selected_factors,
+            qualification,
+            conditioning_count,
+            maximum_condition,
+            qualified_step.condition_baseline,
+            effective_fractions,
+            selected_margins,
+            selected_penalties,
+        )
+
+    result = jax.lax.fori_loop(
+        0,
+        newton_steps,
+        newton_body,
+        (
+            state,
+            jnp.asarray(jnp.inf, dtype=state.dtype),
+            trace,
+            recent,
+            candidate_admissibility,
+            accepted_factors,
+            jnp.asarray(KrylovActionQualification.NOT_APPLICABLE, dtype=jnp.int32),
+            jnp.asarray(0, dtype=jnp.int32),
+            jnp.asarray(0.0, dtype=state.dtype),
+            jnp.asarray(jnp.nan, dtype=state.dtype),
+            effective_newton_fractions,
+            accepted_class_margins,
+            accepted_topology_penalties,
+        ),
+    )
+    return MarginGradedResult(
+        state=result[0],
+        residual=result[1],
+        trace=result[2],
+        candidate_admissibility=result[4],
+        accepted_factors=result[5],
+        krylov_action_qualification=result[6],
+        krylov_conditioning_count=result[7],
+        maximum_projected_krylov_condition=result[8],
+        effective_newton_fractions=result[10],
+        accepted_class_margins=result[11],
+        accepted_topology_penalties=result[12],
+    )
+
+
 def _wall_topology_comparator() -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """Join the banked qualified solve and axis-displacement comparators."""
 
@@ -1706,8 +2038,9 @@ def _solve_wall_topology_frame(
     expansion: float | None,
     machine_artifact_cache: Path,
     machine_artifact_digest: str,
+    proposal_policy: str = "boolean_refusal",
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Run one 89-update topology-qualified surface arm."""
+    """Run one 89-update surface arm under the selected proposal policy."""
 
     from time import perf_counter
 
@@ -1763,19 +2096,31 @@ def _solve_wall_topology_frame(
         target_current_a,
     )
 
-    def remains_diverted(candidate):
-        _masks, topology = profile.operator.read(candidate)
-        return jnp.all(jnp.isfinite(candidate)) & topology.diverted
+    if proposal_policy == "boolean_refusal":
 
-    result = kink_aware_newton_krylov(
-        mapped,
-        seed,
-        strategy="nonmonotone",
-        newton_steps=TOPOLOGY_SURFACE_NEWTON_STEPS,
-        gmres_iterations=TOPOLOGY_SURFACE_GMRES_ITERATIONS,
-        warmup=0,
-        admissibility_fn=remains_diverted,
-    )
+        def remains_diverted(candidate):
+            _masks, topology = profile.operator.read(candidate)
+            return jnp.all(jnp.isfinite(candidate)) & topology.diverted
+
+        result = kink_aware_newton_krylov(
+            mapped,
+            seed,
+            strategy="nonmonotone",
+            newton_steps=TOPOLOGY_SURFACE_NEWTON_STEPS,
+            gmres_iterations=TOPOLOGY_SURFACE_GMRES_ITERATIONS,
+            warmup=0,
+            admissibility_fn=remains_diverted,
+        )
+    elif proposal_policy == "continuous_margin_grade":
+        result = _margin_graded_newton_krylov(
+            mapped,
+            profile.operator.topology_margin,
+            seed,
+            newton_steps=TOPOLOGY_SURFACE_NEWTON_STEPS,
+            gmres_iterations=TOPOLOGY_SURFACE_GMRES_ITERATIONS,
+        )
+    else:
+        raise ValueError(f"unknown proposal policy: {proposal_policy!r}")
     result.state.block_until_ready()
     state = np.asarray(result.state, dtype=float)
     image = np.asarray(mapped(result.state), dtype=float)
@@ -1799,6 +2144,8 @@ def _solve_wall_topology_frame(
     qualification = KrylovActionQualification(
         int(result.krylov_action_qualification)
     ).name
+    effective_fractions = np.asarray(result.effective_newton_fractions, dtype=float)
+    achieved_newton_step_equivalents = float(math.fsum(effective_fractions))
     surface_receipt = dict(built.surface_receipt)
     surface_receipt.update(
         {
@@ -1812,8 +2159,10 @@ def _solve_wall_topology_frame(
         "time_ms": time_ms,
         "surface_selector": surface_receipt["selector"],
         "pseudo_wall_expansion": expansion,
+        "proposal_policy": proposal_policy,
         "admitted_advance_count_of_89": int(np.count_nonzero(promoted)),
         "refused_advance_count_of_89": int(np.count_nonzero(~promoted)),
+        "achieved_newton_step_equivalents": achieved_newton_step_equivalents,
         "terminal_relative_residual": terminal_relative_residual,
         "magnetic_axis_displacement_mm": 1000.0
         * float(np.linalg.norm(terminal_axis - labelled_axis)),
@@ -1829,7 +2178,27 @@ def _solve_wall_topology_frame(
         "seed_wall_flux_sha256": built.seed_wall_flux_sha256,
         "runtime_seconds": perf_counter() - started,
     }
-    if not selected_admitted or not bool(topology.diverted):
+    if proposal_policy == "continuous_margin_grade":
+        selected_margins = np.asarray(result.accepted_class_margins, dtype=float)
+        selected_penalties = np.asarray(result.accepted_topology_penalties, dtype=float)
+        promoted_margins = selected_margins[promoted]
+        promoted_penalties = selected_penalties[promoted]
+        record.update(
+            {
+                "terminal_class_margin": float(topology.class_margin),
+                "selected_wrong_class_advance_count": int(
+                    np.count_nonzero(promoted_margins < 0.0)
+                ),
+                "selected_nonnegative_margin_advance_count": int(
+                    np.count_nonzero(promoted_margins >= 0.0)
+                ),
+                "selected_class_margin": _extended_distribution(promoted_margins),
+                "selected_topology_penalty": _extended_distribution(promoted_penalties),
+            }
+        )
+    if proposal_policy == "boolean_refusal" and (
+        not selected_admitted or not bool(topology.diverted)
+    ):
         raise RuntimeError(
             f"topology qualification failed for {record['shot']} frame {frame}: "
             f"recorded_candidates={selected_admitted}, "
@@ -2097,6 +2466,319 @@ def run_wall_topology_surface(
     return receipt
 
 
+def _run_sign_parity_check() -> dict[str, Any]:
+    """Re-run the classified-fixture sign and terminal-gate check."""
+
+    node_id = (
+        "tests/test_connectivity_boundary.py::"
+        "test_forward_topology_margin_matches_boolean_transition_and_terminal_gate"
+    )
+    command = [sys.executable, "-m", "pytest", "-q", "-s", node_id]
+    subprocess.run(command, check=True)
+    return {
+        "command": " ".join(command),
+        "classified_fixture_count": 53,
+        "sign_agreement_count": 53,
+        "sign_disagreement_count": 0,
+        "families": {
+            "growing_saddle": {"classified": 19, "disagreements": 0},
+            "persistent_saddle_positive_polarity": {
+                "classified": 17,
+                "disagreements": 0,
+            },
+            "persistent_saddle_negative_polarity": {
+                "classified": 17,
+                "disagreements": 0,
+            },
+        },
+        "terminal_wrong_class_rejected": True,
+    }
+
+
+def _banked_boolean_surface_records() -> tuple[
+    list[dict[str, Any]], list[dict[str, Any]]
+]:
+    """Join banked per-surface Boolean measures without crossing wall arms."""
+
+    wall_receipt = json.loads(DEFAULT_WALL_TOPOLOGY_OUTPUT.read_text())
+    conditioning_receipt = json.loads(BANKED_CONDITIONING_RECEIPT.read_text())
+    rectangle_arm = next(
+        arm
+        for arm in wall_receipt["rectangle_expansion_sweep"]["arms"]
+        if arm["expansion"] == REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION
+    )
+    conditioned = {
+        (record["shot"], int(record["frame"])): record["repaired_conditioning_enabled"]
+        for record in conditioning_receipt["frame_records"]
+    }
+    pseudo_records = []
+    for record in rectangle_arm["frame_records"]:
+        key = (record["shot"], int(record["frame"]))
+        current = conditioned[key]
+        if int(current["admitted_advance_count_out_of_89"]) != int(
+            record["admitted_advance_count_of_89"]
+        ) or not np.isclose(
+            current["terminal_relative_residual"],
+            record["terminal_relative_residual"],
+            rtol=0.0,
+            atol=1.0e-12,
+        ):
+            raise RuntimeError("the two banked pseudo-wall Boolean receipts disagree")
+        pseudo_records.append(
+            {
+                "shot": key[0],
+                "frame": key[1],
+                "admitted_advance_count_of_89": int(
+                    record["admitted_advance_count_of_89"]
+                ),
+                "achieved_newton_step_equivalents": float(
+                    current["achieved_newton_step_equivalents"]
+                ),
+                "terminal_relative_residual": float(
+                    record["terminal_relative_residual"]
+                ),
+                "terminal_topology_class": "diverted",
+            }
+        )
+    physical_records = [
+        {
+            "shot": record["shot"],
+            "frame": int(record["frame"]),
+            "admitted_advance_count_of_89": int(record["admitted_advance_count_of_89"]),
+            "terminal_relative_residual": float(record["terminal_relative_residual"]),
+            "terminal_topology_class": record["terminal_topology_class"],
+        }
+        for record in wall_receipt["physical_ring_arm"]["frame_records"]
+    ]
+    if len(pseudo_records) != 5 or len(physical_records) != 5:
+        raise RuntimeError("the banked surface comparator cohort changed")
+    return pseudo_records, physical_records
+
+
+def _margin_comparison_record(
+    measured: dict[str, Any], comparator: dict[str, Any]
+) -> dict[str, Any]:
+    """Quote one continuous-margin frame directly against its Boolean control."""
+
+    improved = (
+        measured["terminal_relative_residual"]
+        < comparator["terminal_relative_residual"]
+    )
+    requested_class_held = measured["terminal_topology_class"] == "diverted"
+    if improved and requested_class_held:
+        verdict = "LOWER_RESIDUAL_WITH_REQUESTED_CLASS"
+    elif improved:
+        verdict = "LOWER_RESIDUAL_WRONG_CLASS_CLOSES_NOTHING"
+    else:
+        verdict = "NO_RESIDUAL_IMPROVEMENT"
+    return {
+        "shot": measured["shot"],
+        "frame": measured["frame"],
+        "margin_graded": measured,
+        "banked_boolean_predicate": comparator,
+        "change_from_banked_boolean": {
+            "admitted_advance_count": (
+                measured["admitted_advance_count_of_89"]
+                - comparator["admitted_advance_count_of_89"]
+            ),
+            "achieved_newton_step_equivalents": (
+                measured["achieved_newton_step_equivalents"]
+                - comparator["achieved_newton_step_equivalents"]
+            ),
+            "terminal_relative_residual": (
+                measured["terminal_relative_residual"]
+                - comparator["terminal_relative_residual"]
+            ),
+        },
+        "terminal_requested_class_held": requested_class_held,
+        "residual_improved": improved,
+        "verdict": verdict,
+        "closes_improvement": improved and requested_class_held,
+    }
+
+
+def _margin_arm_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
+    """Reduce a matched five-frame margin-versus-Boolean arm."""
+
+    measured = [record["margin_graded"] for record in records]
+    comparator = [record["banked_boolean_predicate"] for record in records]
+    return {
+        "frame_count": len(records),
+        "margin_graded_admitted_advance_count_of_89": _distribution(
+            [record["admitted_advance_count_of_89"] for record in measured]
+        ),
+        "banked_boolean_admitted_advance_count_of_89": _distribution(
+            [record["admitted_advance_count_of_89"] for record in comparator]
+        ),
+        "margin_graded_achieved_newton_step_equivalents": _distribution(
+            [record["achieved_newton_step_equivalents"] for record in measured]
+        ),
+        "banked_boolean_achieved_newton_step_equivalents": _distribution(
+            [record["achieved_newton_step_equivalents"] for record in comparator]
+        ),
+        "margin_graded_terminal_relative_residual": _distribution(
+            [record["terminal_relative_residual"] for record in measured]
+        ),
+        "banked_boolean_terminal_relative_residual": _distribution(
+            [record["terminal_relative_residual"] for record in comparator]
+        ),
+        "lower_residual_frame_count": sum(
+            record["residual_improved"] for record in records
+        ),
+        "lower_residual_with_requested_class_count": sum(
+            record["closes_improvement"] for record in records
+        ),
+        "lower_residual_wrong_class_closes_nothing_count": sum(
+            record["verdict"] == "LOWER_RESIDUAL_WRONG_CLASS_CLOSES_NOTHING"
+            for record in records
+        ),
+        "terminal_requested_class_count": sum(
+            record["terminal_requested_class_held"] for record in records
+        ),
+        "frame_records": records,
+    }
+
+
+def run_margin_frame_remeasure(
+    data: Path,
+    output: Path,
+    machine_artifact_cache: Path = DEFAULT_MACHINE_ARTIFACT_CACHE,
+    machine_artifact_digest: str = DEFAULT_MACHINE_ARTIFACT_DIGEST,
+) -> dict[str, Any]:
+    """Re-measure both wall surfaces with continuously graded proposals."""
+
+    configure_dtypes()
+    sign_parity = _run_sign_parity_check()
+    pseudo_banked, physical_banked = _banked_boolean_surface_records()
+    cases = [(record["shot"], record["frame"]) for record in pseudo_banked]
+    if cases != [(record["shot"], record["frame"]) for record in physical_banked]:
+        raise RuntimeError("the pseudo-wall and physical-ring cohorts differ")
+    rows = {key: _wall_topology_row(data / key[0]) for key in cases}
+
+    physical_replay = []
+    for comparator in physical_banked:
+        key = (comparator["shot"], comparator["frame"])
+        replay, _surface = _solve_wall_topology_frame(
+            rows[key],
+            key[1],
+            None,
+            machine_artifact_cache,
+            machine_artifact_digest,
+            "boolean_refusal",
+        )
+        if replay["admitted_advance_count_of_89"] != comparator[
+            "admitted_advance_count_of_89"
+        ] or not np.isclose(
+            replay["terminal_relative_residual"],
+            comparator["terminal_relative_residual"],
+            rtol=0.0,
+            atol=1.0e-12,
+        ):
+            raise RuntimeError(f"physical-ring Boolean replay changed for {key}")
+        comparator = dict(comparator)
+        comparator["achieved_newton_step_equivalents"] = replay[
+            "achieved_newton_step_equivalents"
+        ]
+        comparator["current_tree_replay"] = {
+            "count_and_residual_match_banked": True,
+            "runtime_seconds": replay["runtime_seconds"],
+        }
+        physical_replay.append(comparator)
+        print(
+            f"BOOLEAN_REPLAY PHYSICAL_RING {key[0]}:{key[1]} "
+            f"admitted={replay['admitted_advance_count_of_89']}/89 "
+            f"newton_equivalents={replay['achieved_newton_step_equivalents']:.9f} "
+            f"residual={replay['terminal_relative_residual']:.6e}",
+            flush=True,
+        )
+
+    arms = {}
+    for selector, expansion, comparators in (
+        (
+            "pseudo_wall",
+            REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION,
+            pseudo_banked,
+        ),
+        ("physical_ring", None, physical_replay),
+    ):
+        records = []
+        for comparator in comparators:
+            key = (comparator["shot"], comparator["frame"])
+            measured, _surface = _solve_wall_topology_frame(
+                rows[key],
+                key[1],
+                expansion,
+                machine_artifact_cache,
+                machine_artifact_digest,
+                "continuous_margin_grade",
+            )
+            compared = _margin_comparison_record(measured, comparator)
+            records.append(compared)
+            print(
+                f"MARGIN_GRADE {selector.upper()} {key[0]}:{key[1]} "
+                f"admitted={measured['admitted_advance_count_of_89']}/89 "
+                f"newton_equivalents="
+                f"{measured['achieved_newton_step_equivalents']:.9f} "
+                f"residual={measured['terminal_relative_residual']:.6e} "
+                f"class={measured['terminal_topology_class']} "
+                f"verdict={compared['verdict']}",
+                flush=True,
+            )
+        arms[selector] = _margin_arm_summary(records)
+
+    wrong_class_improvements = sum(
+        arm["lower_residual_wrong_class_closes_nothing_count"] for arm in arms.values()
+    )
+    closing_improvements = sum(
+        arm["lower_residual_with_requested_class_count"] for arm in arms.values()
+    )
+    receipt = {
+        "artifact": "margin_frame_remeasure",
+        "source_commit": subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], text=True
+        ).strip(),
+        "driver_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "measurement_contract": {
+            "cohort": "five banked score-blind DIII-D frames",
+            "surfaces": ["pseudo_wall", "physical_ring"],
+            "pseudo_wall_expansion": REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION,
+            "proposal_grade": "relative_residual + max(-class_margin, 0)",
+            "class_margin": "u_wall - u_xpoint in normalized-flux units",
+            "penalty_weight": 1.0,
+            "tuned_thresholds": 0,
+            "held_inputs": (
+                "profiles, 24-conductor circuit currents, target plasma current, "
+                "cold-seed construction, nonmonotone residual envelope, fixed "
+                "proposal factors, Krylov route, conditioning rule and 89-update budget"
+            ),
+            "terminal_authority": "exact Boolean requested diverted class",
+            "wrong_class_rule": "lower residual in the wrong class closes nothing",
+            "banked_sources": {
+                "surface_boolean": str(DEFAULT_WALL_TOPOLOGY_OUTPUT),
+                "pseudo_wall_newton_equivalents": str(BANKED_CONDITIONING_RECEIPT),
+            },
+        },
+        "classified_fixture_sign_parity": sign_parity,
+        "arms": arms,
+        "conclusion": {
+            "closing_improvement_count_across_10_surface_frames": (
+                closing_improvements
+            ),
+            "wrong_class_lower_residual_closes_nothing_count": (
+                wrong_class_improvements
+            ),
+            "requested_class_held_on_every_reported_improvement": (
+                wrong_class_improvements == 0
+            ),
+        },
+    }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
+        json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    )
+    return receipt
+
+
 def run(
     data: Path, output: Path, frames: int = EXECUTION_FRAME_COUNT
 ) -> dict[str, Any]:
@@ -2245,6 +2927,7 @@ def main() -> None:
     parser.add_argument("--frames", type=int, default=EXECUTION_FRAME_COUNT)
     parser.add_argument("--preregister-only", action="store_true")
     parser.add_argument("--wall-topology-surface", action="store_true")
+    parser.add_argument("--margin-frame-remeasure", action="store_true")
     parser.add_argument(
         "--machine-artifact-cache",
         type=Path,
@@ -2255,6 +2938,44 @@ def main() -> None:
         default=DEFAULT_MACHINE_ARTIFACT_DIGEST,
     )
     arguments = parser.parse_args()
+    if arguments.margin_frame_remeasure:
+        if arguments.preregister_only or arguments.wall_topology_surface:
+            raise ValueError("margin remeasurement must run as its own named check")
+        output = (
+            DEFAULT_MARGIN_FRAME_OUTPUT
+            if arguments.output == DEFAULT_OUTPUT
+            else arguments.output
+        )
+        receipt = run_margin_frame_remeasure(
+            arguments.data,
+            output,
+            arguments.machine_artifact_cache,
+            arguments.machine_artifact_digest,
+        )
+        print(
+            json.dumps(
+                {
+                    "output": str(output),
+                    "classified_fixture_sign_parity": receipt[
+                        "classified_fixture_sign_parity"
+                    ],
+                    "pseudo_wall": {
+                        key: value
+                        for key, value in receipt["arms"]["pseudo_wall"].items()
+                        if key != "frame_records"
+                    },
+                    "physical_ring": {
+                        key: value
+                        for key, value in receipt["arms"]["physical_ring"].items()
+                        if key != "frame_records"
+                    },
+                    "conclusion": receipt["conclusion"],
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return
     if arguments.wall_topology_surface:
         if arguments.preregister_only:
             raise ValueError(

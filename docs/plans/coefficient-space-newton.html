@@ -28,8 +28,8 @@
 <meta name="plan-modified" content="2026-08-25">
 <meta name="plan-commits" content="485f6fdaa88328b96633db85111093e332b4aa53,dbee3048d4767af04373155c50b6e9753bfc330c,975e4acec3016cd56295d458d07eaf2aa8233454,75d6eb010612c12486327fa8c794efe6c662b71c,bf9dafdbf258624fc42d3f2d7eef8e468495b328,d6be878b6eb1eac9ea3d85d87f16cd2b48787cef,fd2baeb113b3443314618b9e6e29819ba233ce6e,231659ea748322d8607a71cc82b2d4e522e8cc1c,df676ca4329ead0f850aeeace59abc9c4f7a6a95,8794f6067002889a75aa99a05cf83863998d22af">
 <meta name="plan-artifacts" content="scripts/coefficient_basis_reuse/report.md,docs/figures/coefficient-space-newton/representation-degree.json,docs/figures/coefficient-space-newton/edge-current-jump.json,docs/figures/coefficient-space-newton/clipped-coupling-order.json,docs/figures/coefficient-space-newton/second-order-kernel.json,docs/figures/coefficient-space-newton/support-order-arms.json,docs/figures/coefficient-space-newton/carrier-arms.json,docs/figures/coefficient-space-newton/analytic-truth-rescore.json,docs/figures/coefficient-space-newton/plasma-only-carrier.json,nova/biot/second_moment_kernel.py,nova/equilibrium/coefficient_carrier.py,docs/evidence/archive/coefficient-space-newton-landed.html">
-<meta name="plan-impl" content="0.867">
-<meta name="plan-version" content="9">
+<meta name="plan-impl" content="0.933">
+<meta name="plan-version" content="10">
 </head>
 <body>
   <main class="plan-doc">
@@ -509,38 +509,26 @@
       <a href="/nova/evidence/archive/coefficient-space-newton-landed#carrier-advance">§18 landed</a>.</p>
     </section>
 
-    <h2 id="s19">§19 — The coefficient-space step is not the projected exact step, and that is repairable</h2>
-
-    <p><strong>§18 leaves one discrepancy doing all the work, and it is arithmetic rather than
-    physics.</strong> Two directions that should be closely related are not. Projecting the exact
-    Newton step onto the coefficient space barely turns it — 16.85° at norm ratio 0.957 — so the
-    coefficient space can represent that direction almost exactly. Yet the step the dense
-    coefficient-space solve actually returns sits <strong>49.74°</strong> away from it at norm ratio
-    <strong>0.0130</strong>: seventy-seven times too short and half a right angle off. A well-formed
-    Newton solve in a space that demonstrably contains the useful direction should not return that.
-    The dense system is not ill-conditioned — 119.02 — so the discrepancy is not the solve losing the
-    direction to conditioning.</p>
-
-    <p><strong>Three mechanisms produce exactly this signature and they are distinguishable.</strong>
-    The coefficient-space Jacobian may be assembled with respect to a different variable than the
-    residual it is paired with — a chain-rule factor dropped between the carrier basis and the cell
-    evaluation would scale and rotate the step precisely this way. The residual being differentiated
-    may be the projected residual rather than the exact one, so the solve is converging a different
-    fixed point from the one scored. Or the projection and its transpose may be inconsistent, which
-    is the classic cause of a Newton direction that is short and rotated rather than merely
-    inaccurate. A finite-difference directional derivative of the exact residual along the carrier
-    basis distinguishes all three without needing to read the assembly.</p>
-
-    <p><strong>Done when</strong> the discrepancy is attributed by measurement, reporting: the dense
-    coefficient-space Jacobian compared column by column against a finite-difference directional
-    derivative of the exact residual along the same basis directions, with the maximum relative
-    column error and the fitted scale factor between them stated; whether the differentiated residual
-    is the exact or the projected one, demonstrated rather than asserted; the angle and norm ratio
-    between the dense step and the projected exact step after any correction, against the banked
-    49.74° and 0.0130; and the terminal residual of a corrected carrier arm against arm A's
-    2.711e−15 and the stalled 3.848e−2. <strong>A correction that restores the step and still does not
-    converge closes the carrier question with conditioning won and convergence lost</strong>, which is
-    a complete answer; arm A remaining the production path is then the result, and §11 records it.</p>
+    <section id="s19" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-25 — carrier question closed</span>
+        <h2>§19 — The coefficient-space step is not the projected exact step</h2></header>
+      <p class="landed-summary">Attribution <code>PROJECTED_RESIDUAL_DIFFERENTIATED</code>, and it is
+      arithmetic exactly as §18 predicted. The square 36×36 system was differentiating the
+      <em>projected</em> residual: it matches finite differences of that residual to
+      <strong>1.02e−7</strong> per column, while expanding the same columns against exact-residual
+      finite differences gives <strong>6.9e−2</strong>. The corrected 2253×36 exact-residual Jacobian
+      matches every carrier-basis directional derivative to <strong>5.35e−8</strong> at fitted scale
+      <strong>0.99999998</strong>. Repairing it restores the direction from <strong>49.735° /
+      0.01296</strong> to <strong>6.162° / 0.8923</strong>, and every corrected step from the stalled
+      state is finite, limited and residual-improving. <strong>And it still does not converge:</strong>
+      one advance, terminating limited at <strong>3.708e−2</strong> against arm A's
+      <strong>2.711e−15</strong> and only modestly below the 3.848e−2 stall. Verdict
+      <code>CARRIER_QUESTION_CLOSED_CONDITIONING_WON_CONVERGENCE_LOST</code> — the complete answer
+      this section specified. Artifact
+      <code>docs/figures/coefficient-space-newton/carrier-step-attribution.json</code> (commit
+      <code>d785864c</code>). Full record:
+      <a href="/nova/evidence/archive/coefficient-space-newton-landed#carrier-step">§19 landed</a>.</p>
+    </section>
 
     <section id="s14" class="section-landed">
       <header><span class="badge badge-shipped">✓ landed 2026-08-25 — the lever is a curiosity</span>
@@ -792,6 +780,9 @@
 </div>
 <div class="r-comment" data-section="s14" data-id="c-20260825T0205-isoacc" data-who="reckon-ship" data-when="2026-08-25T02:05:00Z">
     <div class="r-comment-body">support-order-iso-accuracy landed - commit b774c28b, merged, gate PASSED, SLURM job 1254329 on an EXCLUSIVE sun_debug node in 00:03:15, 32 GiB, 8 task CPUs. Verdict no_resolved_order_or_constant_improvement. TARGET AND CONSTRUCTION: relative-sup error 0.004, seven requested-cell rungs per support order, on the analytic oracle and an aspect-ratio-1.782 low-aspect case, with targets a fixed 0.12-minor-radius physical R-Z offset outside the exact LCFS - 0.06535 m and 0.06061 m - declared as a construction choice rather than fitted, which is the repair to the flux-coordinate scaling that had made low-aspect inboard target radii non-finite. ORDERS ARE INDISTINGUISHABLE: analytic first 2.03495 +/- 0.06477 against second 2.03493 +/- 0.06797 at one sigma; low-aspect first 2.01632 +/- 0.09106 against second 2.01860 +/- 0.09219. Second-minus-first differences are -0.00003 +/- 0.09389 with 95 per cent interval [-0.20922, 0.20917] analytic and 0.00228 +/- 0.12958 with [-0.28645, 0.29100] low-aspect - both consistent with zero. Second order is better on only 3 of 7 analytic and 1 of 7 low-aspect rungs. Neither fitted order exceeds three, which also means the two-point-estimator artefact this plan retired once did not recur. NO CELL REDUCTION, SO THE SURCHARGE IS NOT REPAID: both orders select the SAME coarsest target-reaching rung, 3354 cells analytic achieving 0.0020840 against 0.0020794, and 1998 cells low-aspect achieving 0.0034310 against 0.0034172. Section 14 asked whether second-order support raises the field-error order or only improves its constant; the answer is NEITHER, which is weaker than either branch the section anticipated and closes it as a curiosity. IT ALSO CORRECTS A SHARED-ALLOCATION ARTEFACT, which is why the exclusive node mattered. Measured per fresh process on an exclusive node: analytic first and second build 2.57525 and 2.61108 s, peak process RSS 778.97 and 778.97 MiB, median iterate support contraction 0.16283 and 0.19039 ms; low-aspect 1.87801 and 1.76992 s, 787.52 and 787.52 MiB, 0.10295 and 0.24358 ms. Peak process memory is IDENTICAL between the orders, ratio 1.0x, against the 40 to 51 per cent more peak memory reported from the earlier shared CPU allocation. Stored coupling remains exactly 2.0x for six columns against three, but comparator-relative build ratios are 0.3129 and 0.2909 of the banked 3.24x h-refinement charge and process-peak ratios are 0.07353 of the banked 13.6x. So arm B is far cheaper than the first pass priced it AND buys nothing measurable, which is a cleaner reading than the trade the matrix previously recorded. THE ANALYTIC-TRUTH RESCORE IS SUPERSEDED ON THIS AXIS: its margins of 6.066e-6 to 3.169e-4 were two-point comparisons against errors of 0.26 to 0.45, and a seven-rung fit with uncertainty now shows no systematic improvement. Four attempts preceded this: two defect failures on target construction, one login-lane CUDA capacity failure with unrelated processes holding 21.7 of 23.0 GiB, and one numerically complete run whose reporting logic called mixed rung errors a systematic constant improvement - caught by validation rather than published.</div>
+</div>
+<div class="r-comment" data-section="s19" data-id="c-20260825T0615-carrierstep" data-who="reckon-ship" data-when="2026-08-25T06:15:00Z">
+    <div class="r-comment-body">carrier-step-attribution landed - commit d785864c, merged, gate PASSED, 1 test added, SLURM job 1254386 on vega_debug in 00:01:33. ATTRIBUTION PROJECTED_RESIDUAL_DIFFERENTIATED - the second of the three mechanisms section 19 listed, and it is arithmetic exactly as section 18 predicted rather than physics. THE DEMONSTRATION IS SYMMETRIC, WHICH IS WHAT MAKES IT CONCLUSIVE. The square 36 by 36 system was differentiating project(exact_map(total_state) - external) - coefficients: it matches central finite differences OF THAT PROJECTED RESIDUAL to a maximum relative column error of 1.0181914475518321e-07, so it is a correct Jacobian of the wrong function. Expanding those same columns into exact space and comparing against exact-residual finite differences gives 0.06899077124977254 - five orders worse. The corrected 2253 by 36 exact-residual Jacobian matches every carrier-basis directional derivative to 5.350605353071424e-08 at a fitted scale factor of 0.9999999797120991, so the corrected object is right to eight digits and unit-scaled. THE REPAIR RESTORES THE DIRECTION ALMOST COMPLETELY: replacing the projected square solve with exact-residual least squares moves the step from the banked 49.73527543299367 degrees at norm ratio 0.012955053999124593 to 6.16191299780726 degrees at 0.8923026730273906. Every tested corrected factor from the stalled state is finite, limited AND residual-improving, which is the direct refutation of the stall - the corrected direction is usable where the projected one was not. AND THE CARRIER STILL DOES NOT CONVERGE. The four-step corrected arm admits only ONE advance and terminates limited at 0.03708054430983738, against exact-value arm A at 2.7110550053242652e-15 and only modestly below the projected-residual stall at 0.03847988208719086. Verdict CARRIER_QUESTION_CLOSED_CONDITIONING_WON_CONVERGENCE_LOST. THIS IS THE COMPLETE ANSWER THE SECTION SPECIFIED IN ADVANCE, and it must not be read as a failure: section 19's done-when named a correction that restores the step and still does not converge as closing the carrier question honestly. The arithmetic is repaired, conditioning is won at 119.02 against the banked projected Krylov 4087.41, convergence is lost, and exact values remain the production route. Section 11's provisional carrier verdict now resolves against the carrier on convergence with its cause fully named rather than left as a floor story.</div>
 </div>
 </section>
 </main>

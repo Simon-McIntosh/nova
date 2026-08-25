@@ -1,0 +1,98 @@
+{
+  "artifact": "saddle-aware hexagonal component partition",
+  "production_cutover": false,
+  "repair": {
+    "choice": "edge-based admissibility",
+    "reason": "The mesh remains six-neighbour in the bulk and every physical cell retains a partition class. Excising a saddle cell would remove a graph vertex and require a separate ownership rule for its area.",
+    "binding_rule": "A centre-to-neighbour link is open only when its shared physical edge contains a portion strictly on the magnetic-axis side of the binding level.",
+    "flux_source": "global tensor B-spline from fit_tensor_spline",
+    "edge_extrema": "both endpoints plus eight fixed Newton iterations from seven edge parameters for stationary points of the global spline restriction",
+    "local_reconstruction": false,
+    "fixed_shape": "cells by seven centre-first ring gather and Boolean admissibility mask",
+    "mask_compaction": false,
+    "pure_callback": false
+  },
+  "constructed_saddle_pinch": {
+    "grid_shape": [11, 13],
+    "cell_count": 143,
+    "confined_cell_count": 15,
+    "axis_seed": [3, 6],
+    "wall_cell": [6, 3],
+    "binding_level": 0.0,
+    "smooth_field": "-(R - 4.5) * (Z - 4.5)",
+    "bridge": {
+      "axis_side_cell": [4, 5],
+      "private_side_cell": [5, 4],
+      "shared_edge_touches_level_only_at_saddle": [4.5, 4.5],
+      "closed_directed_links": 2
+    },
+    "four_connected": {
+      "public_cell_count": 9,
+      "private_cell_count": 6,
+      "wall_disposition": "SHADOW"
+    },
+    "plain_six_connected": {
+      "public_cell_count": 15,
+      "private_cell_count": 0,
+      "wall_disposition": "ADMIT",
+      "verdict": "topologically wrong because the graph crosses the saddle"
+    },
+    "saddle_aware_six_connected": {
+      "public_cell_count": 9,
+      "private_cell_count": 6,
+      "wall_disposition": "SHADOW",
+      "fixpoint_iterations": 3,
+      "verdict": "target met"
+    },
+    "partition_identity": {
+      "public_area_cells": 9,
+      "private_area_cells": 6,
+      "scrape_off_area_cells": 128,
+      "total_area_cells": 143,
+      "assertion": "public plus private plus scrape-off area fractions equal each cell area"
+    }
+  },
+  "gpu_benchmark": {
+    "backend": "gpu",
+    "device": "cuda:0",
+    "grid_shape": [33, 33],
+    "input": "same ellipse plus disconnected pocket as the recorded baseline; constant interior-side field leaves all bulk links admissible",
+    "admissibility_mask_shape": [961, 7],
+    "closed_link_count": 0,
+    "warm_execution_repetitions": 100,
+    "compilation": "excluded by one warm call per kernel",
+    "recorded_baseline": {
+      "four_connected": {
+        "fixpoint_iterations": 3,
+        "median_wall_clock_ms": 0.4911435
+      },
+      "plain_six_connected": {
+        "fixpoint_iterations": 16,
+        "median_wall_clock_ms": 0.766596
+      }
+    },
+    "same_process_measurement": {
+      "four_connected": {
+        "fixpoint_iteration_distribution": {"3": 100},
+        "median_wall_clock_ms": 0.5436565,
+        "component_count": 2
+      },
+      "plain_six_connected": {
+        "fixpoint_iteration_distribution": {"16": 100},
+        "median_wall_clock_ms": 0.5108065,
+        "component_count": 2
+      },
+      "saddle_aware_six_connected": {
+        "fixpoint_iteration_distribution": {"16": 100},
+        "median_wall_clock_ms": 0.674666,
+        "component_count": 2
+      }
+    },
+    "qualification": "Scalar warm GPU calls, not measured batched campaign throughput. The spline admissibility-mask construction is outside the timed label fixpoint because one binding level supplies the mask consumed by the component iteration."
+  },
+  "figure": "/nova/figures/primary-xpoint-evidence/saddle-aware-hex-partition.png",
+  "logs": {
+    "benchmark": "/tmp/saddle-aware-hex-partition-benchmark.log",
+    "focused_tests": "/tmp/saddle-aware-hex-partition-tests.log"
+  }
+}

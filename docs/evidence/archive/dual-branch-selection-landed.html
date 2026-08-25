@@ -71,27 +71,50 @@
         <code>docs/figures/dual-branch-selection/pinned-branch-contrast.json</code>; margin +∞ means
         one exact comparator operand is absent — recorded as strict-JSON null with
         <code>class_margin_nonfinite</code>, no numeric sentinel)</caption>
-      <thead><tr><th scope="col">Reference</th><th scope="col">Pure: residual / class / fitted ρ</th>
-        <th scope="col">Mixed: residual / class / fitted ρ</th></tr></thead>
+      <thead><tr><th scope="col">Reference</th>
+        <th scope="col">Pure: residual / class / ρ (fit r²)</th>
+        <th scope="col">Mixed: residual / class / ρ (fit r²)</th></tr></thead>
       <tbody>
-        <tr><td>21978/35</td><td>4.585e-3 / DIVERTED / 0.9503</td><td>1.050e-2 / DIVERTED / 1.0185</td></tr>
-        <tr><td>21983/35</td><td>6.624e-3 / DIVERTED / 0.9768</td><td>1.256e-3 / DIVERTED / 0.9997</td></tr>
-        <tr><td>21985/51</td><td>5.168e-3 / DIVERTED / 0.9835</td><td>2.962e-3 / DIVERTED / 1.0181</td></tr>
-        <tr><td>21986/46</td><td>7.425e-3 / DIVERTED / 0.9776</td><td>8.920e-3 / LIMITED / 1.0386</td></tr>
-        <tr><td>21989/55</td><td>5.024e-3 / LIMITED / 0.9804</td><td>2.823e-3 / LIMITED / 0.9784</td></tr>
-        <tr><td>22086/43</td><td>5.049e-3 / DIVERTED / 0.9613</td><td><strong>3.584e-16 / DIVERTED / 0.0776</strong></td></tr>
+        <tr><td>21978/35</td><td>4.585e-3 / DIVERTED / 0.9503 (0.548)</td><td>1.050e-2 / DIVERTED / 1.0185 (0.213)</td></tr>
+        <tr><td>21983/35</td><td>6.624e-3 / DIVERTED / 0.9768 (0.999)</td><td>1.256e-3 / DIVERTED / 0.9997 (0.000)</td></tr>
+        <tr><td>21985/51</td><td>5.168e-3 / DIVERTED / 0.9835 (1.000)</td><td>2.962e-3 / DIVERTED / 1.0181 (0.480)</td></tr>
+        <tr><td>21986/46</td><td>7.425e-3 / DIVERTED / 0.9776 (0.998)</td><td>8.920e-3 / LIMITED / 1.0386 (0.077)</td></tr>
+        <tr><td>21989/55</td><td>5.024e-3 / LIMITED / 0.9804 (0.992)</td><td>2.823e-3 / LIMITED / 0.9784 (0.062)</td></tr>
+        <tr><td>22086/43</td><td>5.049e-3 / DIVERTED / 0.9613 (1.000)</td><td><strong>3.584e-16 / DIVERTED / 0.0776 (0.723)</strong></td></tr>
       </tbody>
     </table>
 
+    <p><strong>Read the ρ column against its fit quality — a correction to this record's first
+    version.</strong> The mixed-arm geometric fits are unresolved: r² of 0.213, 0.000, 0.480,
+    0.077, 0.062 on five of six. The earlier statement that the mixed arm "expands on three
+    references, ρ up to 1.039" is <strong>withdrawn</strong>: ρ 1.0386 carries r² 0.077 and ρ 0.9997
+    carries r² 0.000, so those are noise, not measured expansion. Only 22086/43's mixed ratio is
+    resolved at all, and a single geometric ratio is anyway the wrong model for a quadratically
+    converging sequence. The pure column is the sound half — r² ≥ 0.99 on five of six — with one
+    caveat this record adds: the range's <em>lower</em> endpoint, ρ 0.9503 on 21978/35, carries
+    r² 0.548, so the well-fitted pure range is <strong>0.961 to 0.984</strong> and the headline
+    comparison against the prior-art reference's 0.33 should be quoted from that.</p>
+
     <p>Headlines. The pure arm is <strong>weakly contracting but stalled</strong>: ρ below one on
-    6/6 yet 0.950–0.984 against the prior-art reference's 0.33, no terminal under the 1e-8
-    criterion, achieved DIVERTED on 5/6 (21989/55 crosses to LIMITED at margin −3.395e-3,
-    p_diverted 0.416). The mixed arm expands on 3/6 yet converged <strong>one diverted terminal to
-    machine precision</strong> — 22086/43 at 3.584e-16 — the repository's first. The exact-margin
-    operand is absent (+∞) on 21978/35 and 22086/43 in both arms: the connectivity-localisation
-    defect measured live on the production cohort. Batch-two jit+vmap parity: maximum flux relative
-    difference 2.223e-16 against the registered 1e-10, terminal residual difference exactly 0,
-    categorical receipts exact. A weak contraction is evidence a diverted fixed point exists; the
+    6/6, well-fitted at 0.961–0.984 against the prior-art reference's 0.33, no terminal under the
+    1e-8 criterion, achieved DIVERTED on 5/6 (21989/55 crosses to LIMITED at margin −3.395e-3,
+    p_diverted 0.416). The mixed arm nonetheless converged <strong>one diverted terminal to machine
+    precision</strong> — 22086/43 at 3.584e-16 — the repository's first, and two facts sharpen what
+    that does and does not show. Its class-margin operand is absent, so the merit function's
+    <code>max(−margin, 0)</code> term was <strong>identically zero at all twelve promotions</strong>:
+    the run was an unsteered residual-ranked Newton, which strengthens the existence claim (nothing
+    pushed it toward the diverted class) while saying nothing about whether margin grading helps.
+    And an inactive penalty is <em>not sufficient</em> — 21978/35 ran at zero penalty too and settled
+    into a clean period-2 cycle, alternating 1.076e-2 and 1.050e-2 to the last promotion. Two
+    references, identical inactive penalty, quadratic convergence against a limit cycle. The
+    exact-margin operand is absent (+∞) on both of those references in both arms: the
+    connectivity-localisation defect measured live on the production cohort. 21989/55 is
+    characterised rather than anomalous — it holds the only negative class margin and the only
+    unsaturated <code>p_diverted</code>, so it is not a diverted configuration at its own label and
+    defecting to limited in both arms is the comparator reporting a boundary case. Batch-two jit+vmap
+    parity: maximum flux relative difference 2.223e-16 against the registered 1e-10, terminal
+    residual difference exactly 0, categorical receipts exact. A weak contraction is evidence a
+    diverted fixed point exists; the
     why of ρ ≈ 0.95–0.98 remains owned by <code>discrete-operator-analytic-error</code> §4's
     perturbation ladder, deliberately not duplicated here.</p>
 

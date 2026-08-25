@@ -1,0 +1,85 @@
+{
+  "artifact": "typed-saddle wall-polygon containment class-margin delta",
+  "measurement_contract": {
+    "before_source": "docs/figures/dual-branch-selection/pinned-branch-contrast.json",
+    "after_source": "/tmp/typed-saddle-containment-fresh.json",
+    "wall_polygon_source": "operator.wall.coordinate, reconstructed from the persisted MAST response carrier",
+    "containment": "fixed-shape ray crossing with boundary inclusion; candidates are masked, never compacted",
+    "before_selector": "argmin normalized level over every finite typed saddle",
+    "after_selector": "argmin normalized level over finite typed saddles inside the wall polygon",
+    "height_band": "effective private-flux-shadow band after extending a one-sided candidate set across the magnetic axis; null bound is named by the adjacent nonfinite field",
+    "bank_preservation": "pinned-branch-contrast.json and every pre-existing figure were read only"
+  },
+  "summary": {
+    "reference_count": 6,
+    "arm_count": 12,
+    "changed_row_count": 8,
+    "unchanged_row_count": 4,
+    "previously_in_vessel_selection_count": 4,
+    "previously_out_of_vessel_selection_count": 8,
+    "references_in_vessel_in_both_arms_all_along": ["21978/35", "22086/43"],
+    "references_out_of_vessel_in_both_arms_before": ["21983/35", "21985/51", "21986/46", "21989/55"]
+  },
+  "rows": [
+    {
+      "reference": "21978/35", "arm": "pure", "changed": false, "selection_was_in_vessel": true,
+      "before": {"selected_x_coordinate_m": [0.5676559771789977, -1.2338307252843705], "selected_level": 0.44252817236845116, "height_band_m": [-1.2338307252843705, 1.2448486718561536], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "SHADOWED", "class_margin": null, "class_margin_nonfinite": "positive_infinity"},
+      "after": {"selected_x_coordinate_m": [0.5676559771789977, -1.2338307252843705], "selected_level": 0.44252817236845116, "height_band_m": [-1.2338307252843705, 1.2448486718561536], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "SHADOWED", "class_margin": null, "class_margin_nonfinite": "positive_infinity"}
+    },
+    {
+      "reference": "21978/35", "arm": "mixed", "changed": false, "selection_was_in_vessel": true,
+      "before": {"selected_x_coordinate_m": [0.5746975883277566, 1.2639851582160506], "selected_level": 0.43580205514567494, "height_band_m": [-1.212691610310149, 1.2639851582160506], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "SHADOWED", "class_margin": null, "class_margin_nonfinite": "positive_infinity"},
+      "after": {"selected_x_coordinate_m": [0.5746975883277566, 1.2639851582160506], "selected_level": 0.43580205514567494, "height_band_m": [-1.212691610310149, 1.2639851582160506], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "SHADOWED", "class_margin": null, "class_margin_nonfinite": "positive_infinity"}
+    },
+    {
+      "reference": "21983/35", "arm": "pure", "changed": true, "selection_was_in_vessel": false,
+      "before": {"selected_x_coordinate_m": [0.4500099684729799, -1.817467111402243], "selected_level": 0.3511402755578827, "height_band_m": [-1.817467111402243, 1.2491324433637334], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "ADMITTED", "class_margin": 0.007232963867134623, "class_margin_nonfinite": null},
+      "after": {"selected_x_coordinate_m": [0.5444663022219217, 1.2491324433637334], "selected_level": 0.44711276921996196, "height_band_m": [-1.223072499546232, 1.2491324433637334], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "SHADOWED", "class_margin": null, "class_margin_nonfinite": "positive_infinity"}
+    },
+    {
+      "reference": "21983/35", "arm": "mixed", "changed": true, "selection_was_in_vessel": false,
+      "before": {"selected_x_coordinate_m": [0.46252017254143946, 1.8036925839708253], "selected_level": 0.34819032364053737, "height_band_m": [-1.8192616189296464, 1.8036925839708253], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "ADMITTED", "class_margin": 0.007732938931290956, "class_margin_nonfinite": null},
+      "after": {"selected_x_coordinate_m": [0.5526016041428223, 1.2740427974363968], "selected_level": 0.43498596505904236, "height_band_m": [-1.1934503726049983, 1.2740427974363968], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "SHADOWED", "class_margin": null, "class_margin_nonfinite": "positive_infinity"}
+    },
+    {
+      "reference": "21985/51", "arm": "pure", "changed": true, "selection_was_in_vessel": false,
+      "before": {"selected_x_coordinate_m": [0.3671413762808958, 1.9085657984623292], "selected_level": 0.007860324366195302, "height_band_m": [-1.8901803527655663, 1.9085657984623292], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "ADMITTED", "class_margin": 0.01971081357477064, "class_margin_nonfinite": null},
+      "after": {"selected_x_coordinate_m": [0.5559167705425359, -1.1178653484963965], "selected_level": 0.2302175019605781, "height_band_m": [-1.1178653484963965, null], "height_band_nonfinite": [null, "positive_infinity"], "wall_shadow_verdict": "ADMITTED", "class_margin": -0.20264636401961217, "class_margin_nonfinite": null}
+    },
+    {
+      "reference": "21985/51", "arm": "mixed", "changed": true, "selection_was_in_vessel": false,
+      "before": {"selected_x_coordinate_m": [0.3655548600942272, 1.9073382489281372], "selected_level": 0.008625882369898441, "height_band_m": [-1.8913584569094444, 1.9073382489281372], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "ADMITTED", "class_margin": 0.019069548355631266, "class_margin_nonfinite": null},
+      "after": {"selected_x_coordinate_m": [0.5420224258014721, -1.09724841742776], "selected_level": 0.2405528515120498, "height_band_m": [-1.09724841742776, null], "height_band_nonfinite": [null, "positive_infinity"], "wall_shadow_verdict": "ADMITTED", "class_margin": -0.2131586614869429, "class_margin_nonfinite": null}
+    },
+    {
+      "reference": "21986/46", "arm": "pure", "changed": true, "selection_was_in_vessel": false,
+      "before": {"selected_x_coordinate_m": [0.3470165730080283, 1.9209132385531178], "selected_level": 0.3043056023189048, "height_band_m": [-1.9349634116700565, 1.9209132385531178], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "ADMITTED", "class_margin": 0.004897134694955785, "class_margin_nonfinite": null},
+      "after": {"selected_x_coordinate_m": [0.6223335197166885, 1.1835211753458317], "selected_level": 0.45530400261733367, "height_band_m": [-1.0815477780063587, 1.1835211753458317], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "SHADOWED", "class_margin": null, "class_margin_nonfinite": "positive_infinity"}
+    },
+    {
+      "reference": "21986/46", "arm": "mixed", "changed": true, "selection_was_in_vessel": false,
+      "before": {"selected_x_coordinate_m": [0.37818174091402484, -1.899385814793523], "selected_level": 0.02787873905363032, "height_band_m": [-2.4201152209073817, null], "height_band_nonfinite": [null, "positive_infinity"], "wall_shadow_verdict": "ADMITTED", "class_margin": -0.006569604899382443, "class_margin_nonfinite": null},
+      "after": {"selected_x_coordinate_m": [0.6065113219001267, 1.1540729900715674], "selected_level": 0.47303559701443026, "height_band_m": [-1.1042118100956635, 1.1540729900715674], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "SHADOWED", "class_margin": null, "class_margin_nonfinite": "positive_infinity"}
+    },
+    {
+      "reference": "21989/55", "arm": "pure", "changed": true, "selection_was_in_vessel": false,
+      "before": {"selected_x_coordinate_m": [0.28629809453607435, 1.9404807531626882], "selected_level": 0.2636875050662909, "height_band_m": [-1.1087630337118628, 1.9404807531626882], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "ADMITTED", "class_margin": -0.003395359754118532, "class_margin_nonfinite": null},
+      "after": {"selected_x_coordinate_m": [0.5820680211861393, 1.1449629505049974], "selected_level": 0.4257047647661227, "height_band_m": [-1.1087630337118628, 1.1449629505049974], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "SHADOWED", "class_margin": null, "class_margin_nonfinite": "positive_infinity"}
+    },
+    {
+      "reference": "21989/55", "arm": "mixed", "changed": true, "selection_was_in_vessel": false,
+      "before": {"selected_x_coordinate_m": [0.28573536236079233, 1.9395703225455745], "selected_level": 0.26180528688502464, "height_band_m": [-1.9254702620560478, 1.9395703225455745], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "ADMITTED", "class_margin": -0.0036330927592678197, "class_margin_nonfinite": null},
+      "after": {"selected_x_coordinate_m": [0.5845553102050248, 1.1496992497787373], "selected_level": 0.4208900327335143, "height_band_m": [-1.1022576980363594, 1.1496992497787373], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "SHADOWED", "class_margin": null, "class_margin_nonfinite": "positive_infinity"}
+    },
+    {
+      "reference": "22086/43", "arm": "pure", "changed": false, "selection_was_in_vessel": true,
+      "before": {"selected_x_coordinate_m": [0.5874171527268778, 1.2123192901859092], "selected_level": 0.4363887681813337, "height_band_m": [-1.189639243938404, 1.2123192901859092], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "SHADOWED", "class_margin": null, "class_margin_nonfinite": "positive_infinity"},
+      "after": {"selected_x_coordinate_m": [0.5874171527268778, 1.2123192901859092], "selected_level": 0.4363887681813337, "height_band_m": [-1.189639243938404, 1.2123192901859092], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "SHADOWED", "class_margin": null, "class_margin_nonfinite": "positive_infinity"}
+    },
+    {
+      "reference": "22086/43", "arm": "mixed", "changed": false, "selection_was_in_vessel": true,
+      "before": {"selected_x_coordinate_m": [0.5870751527016022, 1.2225553064310346], "selected_level": 0.4309790002082113, "height_band_m": [-1.177930653249266, 1.2225553064310346], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "SHADOWED", "class_margin": null, "class_margin_nonfinite": "positive_infinity"},
+      "after": {"selected_x_coordinate_m": [0.5870751527016022, 1.2225553064310346], "selected_level": 0.4309790002082113, "height_band_m": [-1.177930653249266, 1.2225553064310346], "height_band_nonfinite": [null, null], "wall_shadow_verdict": "SHADOWED", "class_margin": null, "class_margin_nonfinite": "positive_infinity"}
+    }
+  ]
+}

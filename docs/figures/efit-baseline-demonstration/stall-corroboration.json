@@ -1,0 +1,325 @@
+{
+  "arms": [
+    {
+      "agreement_with_banked_account": "agrees",
+      "arm": "pure",
+      "banked_saddle_aware_class": "limited",
+      "banked_trajectory_comparison": {
+        "banked_terminal_residual": 0.005167711618738155,
+        "maximum_residual_absolute_difference": 8.290469341249232e-07,
+        "strict_absolute_tolerance": 5e-12,
+        "strict_reproduction_passes": false
+      },
+      "class_agreement_with_efit": false,
+      "converged": false,
+      "efit_class": "diverted",
+      "fixed_point_criterion": 1e-08,
+      "identity": "21985/51",
+      "independent_class_agreement_with_bank": true,
+      "late_outer_iterations": {
+        "adjacent_confined_mask_change_counts": [
+          0,
+          0,
+          0
+        ],
+        "all_adjacent_confined_masks_stable": true,
+        "confined_cell_counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "promotion_indices": [
+          9,
+          10,
+          11,
+          12
+        ],
+        "saddle_aware_class_trajectory": [
+          "limited",
+          "limited",
+          "limited",
+          "limited"
+        ],
+        "total_adjacent_confined_mask_changes": 0
+      },
+      "requested_class": "diverted",
+      "residual_trajectory": [
+        0.006220624215755209,
+        0.006105431401296037,
+        0.005994426873476199,
+        0.005896188007763934,
+        0.005805184610063762,
+        0.005712868611838389,
+        0.0056215050855062745,
+        0.0055289254986136405,
+        0.0054378068729785236,
+        0.005346619072272467,
+        0.005256727793338563,
+        0.005167457766413186
+      ],
+      "saddle_aware_class_margin": -0.2024462675798087,
+      "saddle_aware_terminal_class": "limited",
+      "stalled_versus_misclassified_verdict": "stalled_not_converged_misclassification",
+      "terminal_residual": 0.005167457766413036
+    },
+    {
+      "agreement_with_banked_account": "agrees",
+      "arm": "mixed",
+      "banked_saddle_aware_class": "limited",
+      "banked_trajectory_comparison": {
+        "banked_terminal_residual": 0.0031797107142991737,
+        "maximum_residual_absolute_difference": 4.705437428587089e-16,
+        "strict_absolute_tolerance": 5e-12,
+        "strict_reproduction_passes": true
+      },
+      "class_agreement_with_efit": false,
+      "converged": false,
+      "efit_class": "diverted",
+      "fixed_point_criterion": 1e-08,
+      "identity": "21985/51",
+      "independent_class_agreement_with_bank": true,
+      "late_outer_iterations": {
+        "adjacent_confined_mask_change_counts": [
+          0,
+          0,
+          0
+        ],
+        "all_adjacent_confined_masks_stable": true,
+        "confined_cell_counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "promotion_indices": [
+          9,
+          10,
+          11,
+          12
+        ],
+        "saddle_aware_class_trajectory": [
+          "limited",
+          "limited",
+          "limited",
+          "limited"
+        ],
+        "total_adjacent_confined_mask_changes": 0
+      },
+      "requested_class": "diverted",
+      "residual_trajectory": [
+        0.0034042988185753725,
+        0.0022977908175986043,
+        0.0022006303859943544,
+        0.002730232243699393,
+        0.002104020396997464,
+        0.0025454020729553566,
+        0.002705266273346058,
+        0.002942900581908351,
+        0.0025211264097783083,
+        0.0027420403740000742,
+        0.0030057821461370827,
+        0.003179710714298703
+      ],
+      "saddle_aware_class_margin": -0.2069078631684422,
+      "saddle_aware_terminal_class": "limited",
+      "stalled_versus_misclassified_verdict": "stalled_not_converged_misclassification",
+      "terminal_residual": 0.003179710714298778
+    },
+    {
+      "agreement_with_banked_account": "agrees",
+      "arm": "pure",
+      "banked_saddle_aware_class": "limited",
+      "banked_trajectory_comparison": {
+        "banked_terminal_residual": 0.007425336057810516,
+        "maximum_residual_absolute_difference": 1.3384816533023453e-06,
+        "strict_absolute_tolerance": 5e-12,
+        "strict_reproduction_passes": false
+      },
+      "class_agreement_with_efit": false,
+      "converged": false,
+      "efit_class": "diverted",
+      "fixed_point_criterion": 1e-08,
+      "identity": "21986/46",
+      "independent_class_agreement_with_bank": true,
+      "late_outer_iterations": {
+        "adjacent_confined_mask_change_counts": [
+          0,
+          2,
+          1
+        ],
+        "all_adjacent_confined_masks_stable": false,
+        "confined_cell_counts": [
+          261,
+          261,
+          263,
+          264
+        ],
+        "promotion_indices": [
+          9,
+          10,
+          11,
+          12
+        ],
+        "saddle_aware_class_trajectory": [
+          "limited",
+          "limited",
+          "limited",
+          "limited"
+        ],
+        "total_adjacent_confined_mask_changes": 3
+      },
+      "requested_class": "diverted",
+      "residual_trajectory": [
+        0.009499850952308925,
+        0.0092672952217292,
+        0.009038079944562728,
+        0.008814089597586937,
+        0.00860870082816798,
+        0.008407961430865665,
+        0.0082139841285901,
+        0.008040867479796132,
+        0.00787079627008831,
+        0.00770419552928595,
+        0.007549069887781393,
+        0.0074259888676414315
+      ],
+      "saddle_aware_class_margin": -0.1482235874375123,
+      "saddle_aware_terminal_class": "limited",
+      "stalled_versus_misclassified_verdict": "stalled_not_converged_misclassification",
+      "terminal_residual": 0.0074259888676414315
+    },
+    {
+      "agreement_with_banked_account": "agrees",
+      "arm": "mixed",
+      "banked_saddle_aware_class": "limited",
+      "banked_trajectory_comparison": {
+        "banked_terminal_residual": 0.002763141478038805,
+        "maximum_residual_absolute_difference": 2.47198095326695e-16,
+        "strict_absolute_tolerance": 5e-12,
+        "strict_reproduction_passes": true
+      },
+      "class_agreement_with_efit": false,
+      "converged": false,
+      "efit_class": "diverted",
+      "fixed_point_criterion": 1e-08,
+      "identity": "21989/55",
+      "independent_class_agreement_with_bank": true,
+      "late_outer_iterations": {
+        "adjacent_confined_mask_change_counts": [
+          9,
+          10,
+          10
+        ],
+        "all_adjacent_confined_masks_stable": false,
+        "confined_cell_counts": [
+          271,
+          264,
+          272,
+          264
+        ],
+        "promotion_indices": [
+          9,
+          10,
+          11,
+          12
+        ],
+        "saddle_aware_class_trajectory": [
+          "limited",
+          "limited",
+          "limited",
+          "limited"
+        ],
+        "total_adjacent_confined_mask_changes": 29
+      },
+      "requested_class": "diverted",
+      "residual_trajectory": [
+        0.004774947497175642,
+        0.004576544425792374,
+        0.00448271656775963,
+        0.0023414459925392176,
+        0.0017583033653171237,
+        0.00207043333241453,
+        0.0020827109948037487,
+        0.002442292374464795,
+        0.0025181977987987028,
+        0.002684594305117558,
+        0.0027439835033565116,
+        0.002763141478039031
+      ],
+      "saddle_aware_class_margin": -0.16144185077476353,
+      "saddle_aware_terminal_class": "limited",
+      "stalled_versus_misclassified_verdict": "stalled_not_converged_misclassification",
+      "terminal_residual": 0.002763141478039031
+    }
+  ],
+  "artifact": "independent late-iteration stall corroboration for the four EFIT-disagreeing MAST arms",
+  "evidence_inputs": {
+    "pinned_branch_contrast": {
+      "path": "docs/figures/dual-branch-selection/pinned-branch-contrast.json",
+      "sha256": "89dcb7f971cb13631f26eb9d4c19fd5365ca6bea853ebd3c9d81772f5acda293",
+      "source_commit": "bbb2fcce8e326519de428ede15561722c4baefc8"
+    },
+    "response_carrier": {
+      "carrier": {
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "frozen_reference_count": 6,
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "size_bytes": 645864,
+        "stored_circuit_count": 101,
+        "warm_load_seconds": 0.005981098860502243
+      },
+      "loaded_from_persisted_carrier": true,
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/nova-6c/stall-corroboration/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "direct_green_operator_builder_entries": 0,
+        "passes": true,
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.012950 direct_builders=0 verdict=PASS"
+      }
+    },
+    "saddle_aware_class_bank": {
+      "path": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "sha256": "2860de0fd9e45f92f9e8c108a483f0207f7b1e896720557be91ce176ee29cca5"
+    }
+  },
+  "measurement_contract": {
+    "class_authority": "post-cutover traced_margin_candidate_diagnostics class_margin through the saddle-aware partition; ForwardTopologyState.diverted is not read",
+    "confined_mask": "connectivity confined mask from traced_boundary_read on the production grid",
+    "fixed_point_criterion": 1e-08,
+    "late_window": "last four promoted states, giving three adjacent confined-cell mask comparisons",
+    "mixed_replay": "the established retained-state residual-plus-margin Newton ladder",
+    "pure_replay": "twelve sequential one-promotion production newton_krylov calls, the established retained-state replay of solve_portfolio",
+    "state_source": "fresh deterministic replay from the banked selected references and persisted response carrier at the current checkout; no production files changed"
+  },
+  "qualification": "Late-window mask stability diagnoses only the final three transitions; stable masks there do not exclude an earlier mask crossing or a continuously varying residual mechanism. Current-code replay drift against the older pinned receipt is reported rather than hidden.",
+  "summary": {
+    "arm_count": 4,
+    "banked_account_agreement_count": 4,
+    "efit_disagreement_count": 4,
+    "late_confined_mask_stable_arm_count": 2,
+    "maximum_banked_residual_drift": 1.3384816533023453e-06,
+    "saddle_aware_limited_count": 4,
+    "stalled_count": 4,
+    "strict_banked_trajectory_reproduction_count": 2,
+    "terminal_residual_range": [
+      0.002763141478039031,
+      0.0074259888676414315
+    ],
+    "verdict": "all four are stalled limited terminals, not converged class misclassifications; the independent result agrees with the banked account"
+  }
+}

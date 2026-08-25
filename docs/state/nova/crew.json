@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T20:58:53",
+  "updated": "2026-08-25T21:33:16",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -36691,9 +36691,103 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T171528725190-efit-topology-corroboration",
+        "plan": "primary-xpoint-evidence",
+        "section": "\u00a72",
+        "node": "efit-topology-corroboration",
+        "node_definition": {
+          "done_when": "Read the independent reconstruction through the existing seam - read_efit_referee in nova/imas/mast_efit_referee.py exposes the efm group and lcfs_m per slice, and mast_solve_inputs carries the same RECONSTRUCTION_GROUP - and do not build a second reader. TREAT EFIT AS AN INDEPENDENT RECONSTRUCTION, NOT AS TRUTH: it is magnetics-fitted, so a magnetics-reproduction metric is not a neutral cross-source comparison, and it carries its own COCOS and acquisition-scale conventions. Open the data at the DD version it was written in, state that version, and say which COCOS you resolved and how. OVERLAY per panel: the efm LCFS polyline, the efm X-point if the group carries one, and nova post-cutover binding contour and selected saddle from commit 80706f89. QUANTIFY three distances and report them per slice: nova binding contour to efm LCFS as a sup and an RMS in metres, nova selected saddle to the efm X-point in metres, and nova limiter point to the efm boundary-wall contact if one is identifiable. STATE THE LABEL COMPARISON EXPLICITLY, because it is the sharpest check available: the cohort is described as six frozen MAST DIVERTED-LABEL references, so report for each of the twelve arms the EFIT label against nova achieved class, count the disagreements, and do not present a panel title as the configuration nature when EFIT says otherwise - the current real-equilibria figure titles 21983/35 as limited, and if EFIT labels that slice diverted then the figure is asserting something the independent source contradicts. Redraw the real-equilibria grid with these overlays using POST-CUTOVER classification, since 22086/43 pure moved to zero reachable samples and 21986/46 mixed flipped to admitted, so the banked figure is already stale. If a quantity cannot be sourced from efm - no stored X-point, no contact point - say which and why rather than substituting a nova-derived value, because a nova value in a corroboration figure defeats its purpose.",
+          "estimated_hours": 5.0,
+          "goal": "Corroborate the wall-reachability figures against independent EFIT reconstructions by overlaying the efm LCFS and X-point on each panel and quantifying where nova topology agrees or disagrees, because every figure so far checks nova against its own classification and is therefore circular.",
+          "id": "efit-topology-corroboration",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/efit-topology-corroboration.md",
+          "plan": "primary-xpoint-evidence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py",
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.png",
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "efit-referee",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T17:15:40Z",
+        "completed_at": "2026-08-25T19:26:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 7833,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "bbb2fcce8e326519de428ede15561722c4baefc8",
+        "commits": [
+          "4e8b0e7e"
+        ],
+        "changed_lines": {
+          "added": 14082,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/efit-topology-corroboration.md",
+        "scope_changed": false,
+        "session_id": "01a039eb-aa87-7193-98ff-72afc0ba9566",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 18025472,
+            "cached_input_tokens_cumulative": 18025472,
+            "input_tokens": 18274442,
+            "input_tokens_cumulative": 18274442,
+            "output_tokens": 30301,
+            "output_tokens_cumulative": 30301,
+            "reasoning_output_tokens": 7962,
+            "reasoning_output_tokens_cumulative": 7962
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 874
+    "_version": 875
   }
 }

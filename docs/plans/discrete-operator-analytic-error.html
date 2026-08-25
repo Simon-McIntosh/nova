@@ -26,7 +26,7 @@
 <meta name="plan-commits" content="ae723e28,3dc5155f,f2665b5d,815ca8fe,497b0372">
 <meta name="plan-artifacts" content="benchmarks/analytic_operator_ladder.py,benchmarks/diverted_basin_probe.py,benchmarks/contraction_discriminator.py,docs/figures/discrete-operator-analytic-error/operator-refinement-ladder.json,docs/figures/discrete-operator-analytic-error/diverted-basin-probe.json,docs/figures/discrete-operator-analytic-error/contraction-discriminator.json,docs/evidence/archive/discrete-operator-analytic-error-landed.html">
 <meta name="plan-impl" content="0.875">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="10">
 </head>
 <body>
   <main class="plan-doc">
@@ -336,6 +336,9 @@
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260825T102051495285-receipt-composition-delta" data-who="state-repetition" data-when="2026-08-25T10:27:51Z">
     <div class="r-comment-body"><p>All 26 composition leaves enumerated: 16 identical, 10 differing - 2 SHA-256 digests plus 8 numeric leaves covering 4 quantities across pinned and unpinned anchors. The drift is NOT digest-only, but it is entirely roundoff-scale: axis radius +2.220446049250313e-16 m, which is one eps, axis height +4.163336342344337e-17 m, axis flux -8.673617379884035e-19 Wb, boundary flux +3.231430693775156e-19 Wb. Both digests are SHA-256 over ascontiguousarray tobytes with metadata excluded, so the arrays genuinely are not bitwise identical and metadata-only movement is ruled out. Yet every summary is exactly unchanged: external and source maximum absolute fluxes at 2.8331924006294433 and 0.14172801675859822 Wb, reconstruction and repeat differences exactly 0.0, pinned-versus-unpinned distances and flux differences exactly zero, closure exactly 4.440892098500626e-16 Wb. The five other top-level items are exactly identical and the root verdict is untouched at relative residual 1.5840538799920246e-16. CONCLUSION: this is the fifth expectation problem, not a physics one. Asserting receipt equality including SHA-256 digests over float64 arrays is a bitwise-identity gate on roundoff-scale values, which any code-generator reordering breaks - the same category error I made hours ago in a bitwise gate on a parity diagnostic and had to correct.</p></div>
 </div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260825T102953707430-recovery-expectation-correction" data-who="assertion-sweep" data-when="2026-08-25T10:39:14Z">
+    <div class="r-comment-body"><p>Landed at the designed outcome: 3 passed, 2 failed, no skips, errors, import or collection failures. All three corrections are changes of kind with no rebanking, no production change, no iteration-budget change and no acceptance magnitude relaxed. The vmapped cold diverted branch now asserts the full truthful state - achieves diverted class, remains topology-consistent, and is NOT converged - rather than the stale [0,0]. The perturbation ladder RETAINS and exercises 0.001, 0.01 and 0.05 while requiring recovery only through the banked 0.01, so the 0.05 rung stays visible without being promoted to an established basin claim, which is better than either option I offered. The receipt comparison keeps semantics, classes, flags, counts, convergence, map results, source inputs, derived summaries and the closure at exactly 4.440892098500626e-16 Wb EXACT, and applies an absolute envelope of one binary64 epsilon with ZERO relative tolerance to primitive normalization-anchor coordinates and fluxes only - the tightest envelope admitting the measured drift. Digests remain required fields but are no longer compared for equality, since they encode bitwise float64 identity rather than receipt semantics. The two cold-start failures remain visible and unchanged at residual 1.29980506 and 1.30949372 against an untouched 1e-10 criterion, with no skip or xfail, which matches the repository rule preferring visible failures to hidden tests.</p></div>
+</div>
 </section>
 </main>
 </body>
@@ -481,10 +484,42 @@
     envelope</strong> — and it is a change of kind rather than of magnitude, so it does not violate the
     standing rule against widening a criterion until it passes.</p>
 
-    <p><strong>What this leaves.</strong> Two expectation reviews, not repairs — the vmap [0,0] case and
-    the 0.05 ladder assert things no bank establishes. One robustness decision on whether a ten-step
-    budget should reach a cold start over a full root span. Neither should be conflated with the pinned
-    root receipt.</p>
+    <p><strong>CORRECTED 2026-08-25 by node <code>recovery-expectation-correction</code></strong>,
+    commit <code>95455769</code>, gate PASSED, landing at the designed
+    <strong>3 passed / 2 failed</strong> with no skips, errors, import or collection failures. All three
+    corrections are changes of <em>kind</em>: nothing rebanked, no production code touched, no iteration
+    budget widened and no acceptance magnitude relaxed.</p>
+
+    <ul>
+      <li><strong>The vmapped expectation now asserts the full truthful state</strong> — achieves
+      diverted class, remains topology-consistent, and is <em>not</em> converged — rather than the stale
+      <code>[0,0]</code> that scored an improvement as a failure.</li>
+      <li><strong>The ladder retains all three amplitudes.</strong> It exercises 0.001, 0.01 and 0.05
+      while requiring recovery only through the banked 0.01, so the 0.05 rung stays visible as a
+      measurement without being promoted to an established basin claim. That is better than either
+      option the dispatch offered, both of which would have discarded information.</li>
+      <li><strong>The receipt comparison changed kind, not magnitude.</strong> Semantics, classes, flags,
+      counts, convergence, <code>map</code> results, source inputs, derived summaries and the closure at
+      exactly 4.440892098500626e&minus;16 Wb stay <em>exact</em>. Only primitive normalization-anchor
+      coordinates and fluxes take an absolute envelope of <strong>one binary64 epsilon with zero relative
+      tolerance</strong> — the tightest envelope admitting the measured drift. Digests remain required
+      fields but are no longer compared for equality, since they encode bitwise float64 identity rather
+      than receipt semantics.</li>
+    </ul>
+
+    <p><strong>The two cold-start failures remain visible and unchanged</strong> at residual 1.29980506
+    and 1.30949372 against an untouched 1e&minus;10 criterion, with no skip and no xfail. That is the
+    correct state rather than a defect: this repository prefers a visible failure, which directs effort,
+    to a disabled test, which carries no signal. So the branch stays red by two tests that now document a
+    real limitation instead of concealing it.</p>
+
+    <p><strong>The remaining question is a solver-contract decision for the lead, with a recommendation
+    attached.</strong> A fixed ten-step local Newton&ndash;Krylov solve should not be expected to
+    guarantee recovery from cold seeds 1.15254 and 1.13853 full root spans away. The node recommends
+    retaining the ten-step and 1e&minus;10 gate as it stands and reaching for topology-preserving
+    continuation or a banked warm-start path when recovery from more than one full root span becomes a
+    product requirement — or else defining and measuring a separate cold-start robustness budget before
+    the existing test contract is changed.</p>
 
     <p><strong>What this says about the earlier repair, stated plainly.</strong> The lazy-axes commit was
     itself the fix for a regression I merged, where a diagnostic narrowed a production contract. Gating

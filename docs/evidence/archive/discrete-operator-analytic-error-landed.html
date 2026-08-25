@@ -201,6 +201,53 @@
     it is asked to explain, and both references are well conditioned in absolute terms at roughly 21 and
     37. Conditioning is established as the discriminating direction, not as a sufficient cause.</p>
 
+    <h2 id="red-branch">The red branch: one production regression and five expectation faults</h2>
+
+    <p><strong>Nodes <code>primary-branch-vmap-status</code> (<code>5db3c436</code>),
+    <code>mast-margin-operand-attribution</code> (<code>5cdcaf72</code>),
+    <code>primary-branch-green-check</code> (<code>9a9f031a</code>),
+    <code>recovery-regression-attribution</code>, <code>receipt-composition-delta</code>
+    (<code>33012360</code>) and <code>recovery-expectation-correction</code>
+    (<code>95455769</code>), 2026-08-25.</strong></p>
+
+    <table>
+      <caption>Primary-branch state, measured on clean checkouts</caption>
+      <thead><tr><th scope="col">File</th><th scope="col">Before</th><th scope="col">After container repair</th><th scope="col">After expectation correction</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_equilibrium_forward_solve.py</code></td><td>26 / 2 fail</td><td><strong>28 / 0</strong></td><td>28 / 0</td></tr>
+        <tr><td><code>test_transport_coupled_window.py</code></td><td>11 / 1 fail</td><td><strong>12 / 0</strong></td><td>12 / 0</td></tr>
+        <tr><td><code>test_two_class_recovery.py</code></td><td>0 / 5 fail</td><td>0 / 5 fail</td><td><strong>3 / 2 fail</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>One real production regression.</strong> Commit <code>f2665b5d</code> changed
+    <code>ForwardTopologyState</code> from an automatically PyTree-compatible <code>NamedTuple</code>
+    into an unregistered frozen dataclass carrying a <code>Callable</code>, so it could not cross an
+    inner vmap output — breaking <code>solve_portfolio</code> at <code>forward.py:1402</code>,
+    <code>solve_batch</code> at <code>1444</code>, and production through
+    <code>coupled_window.py:1636</code>. Repaired by a lossless PyTree registration plus a public
+    <code>connectivity_grid_axes</code> contract replacing three deleted private attributes, with both
+    benchmark callers migrated.</p>
+
+    <p><strong>Five expectation faults, none indicting production code.</strong> A stale
+    <code>[0,0]</code> assertion scoring an improvement as failure; a ladder demanding amplitude 0.05
+    against a banked conclusion of only 0.01; two cold-start basin misses 1.15254 and 1.13853 full root
+    spans out; and a whole-receipt equality assertion that gated bitwise identity on roundoff-scale
+    values. The last is the same category error committed and withdrawn elsewhere in this sprint on a
+    parity diagnostic.</p>
+
+    <p><strong>The pinned root was never in doubt.</strong> <code>map</code> sat among the five identical
+    top-level receipt items throughout: class 1/1, topology-consistent, converged in one application,
+    relative residual 1.5840538799920246e&minus;16, absolute difference 4.440892098500626e&minus;16 Wb.
+    Composition drift reached physical anchors but only at roundoff — one epsilon on axis radius,
+    4.163336342344337e&minus;17 m on axis height, 8.673617379884035e&minus;19 Wb on axis flux,
+    3.231430693775156e&minus;19 Wb on boundary flux — while every derived summary and the closure stayed
+    exactly unchanged.</p>
+
+    <p><strong>Two failures remain visible by design</strong>, unskipped and unmarked, documenting that a
+    fixed ten-step Newton&ndash;Krylov budget does not guarantee recovery from a cold seed more than a
+    full root span away.</p>
+
   </main>
 </body>
 </html>

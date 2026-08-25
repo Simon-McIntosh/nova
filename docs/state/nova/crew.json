@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T12:28:05",
+  "updated": "2026-08-25T12:39:21",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -34632,9 +34632,101 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T102953707430-recovery-expectation-correction",
+        "plan": "discrete-operator-analytic-error",
+        "section": "\u00a75",
+        "node": "recovery-expectation-correction",
+        "node_definition": {
+          "done_when": "READ THE BOUNDARY FIRST, because it is the whole point of this node. You are NOT permitted to loosen a criterion until it passes. This repository spent several nodes today enforcing that a repair must be a change of KIND justified by what the quantity can actually be, never a change of MAGNITUDE justified by the value currently measured. Every correction below is a change of kind or a correction of a factually wrong expectation, and if you find yourself relaxing a number to make green, stop and report instead. THREE CORRECTIONS. First, the vmapped achieved_class expectation [0,0] is factually wrong: the diverted branch now ACHIEVES diverted class, which is an improvement, and commit d3093912 introduced that expectation without changing any diverted artifact. Assert the achieved behaviour that the banked diverted root supports. Second, the near-basin ladder demands relative amplitude 0.05 pass, when the only banked conclusion is that the diverted basin is at least 0.01 wide and its edge was NOT found - so either assert what is banked, or bank a 0.05 perturbation receipt and assert that; choose and say which, and do not simply delete the amplitude. Third, the receipt equality assertion compares whole receipts including SHA-256 digests over float64 arrays, which is a bitwise-identity gate on roundoff-scale physical values that any code-generator reordering breaks. Replace it with a comparison of KIND: semantic fields - classes, flags, counts, convergence - exactly identical, and physical values within a stated roundoff envelope you justify and quote. The measured drift to accommodate is one epsilon on axis radius, 4.16e-17 m on axis height, 8.67e-19 Wb on axis flux and 3.23e-19 Wb on boundary flux, while every derived summary and the closure at 4.440892098500626e-16 Wb are exactly unchanged, so the envelope must admit the former and would still catch any change to the latter. LEAVE THE TWO COLD-START LIMITED FAILURES FAILING. Their cold seeds sit 1.15254 and 1.13853 full root spans from the banked roots and terminate at residual 1.29980506 and 1.30949372 within a fixed ten-step Newton-Krylov budget. Do not widen the budget, do not relax the 1e-10 criterion and do not skip or xfail them silently. Report whether a ten-step budget should be expected to reach a cold start over a full root span away, and recommend an option, because that is a decision for the lead and not for this node. Re-run the file and report the exact counts: three previously failing tests should pass and two should still fail, so 3 passed and 2 failed is the expected and CORRECT outcome of this node. Re-bank nothing.",
+          "estimated_hours": 3.0,
+          "goal": "Correct the three tests/test_two_class_recovery.py expectations that assert things no banked evidence establishes, so the primary branch stops being red for reasons unrelated to production code, while leaving the two cold-start convergence failures untouched and reported.",
+          "id": "recovery-expectation-correction",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/recovery-expectation-correction.md",
+          "plan": "discrete-operator-analytic-error",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "tests/test_two_class_recovery.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "assertion-sweep",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T10:30:01Z",
+        "completed_at": "2026-08-25T10:39:14Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 553,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 553,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "dc2d96a7cdf9ad5cf32798d35cac693b6bda96f2",
+        "commits": [
+          "95455769a505ddcb67f6ed44a8e4cf8188fc06d8"
+        ],
+        "changed_lines": {
+          "added": 73,
+          "removed": 10,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/recovery-expectation-correction.md",
+        "scope_changed": false,
+        "session_id": "01a03878-478e-7a01-8dfc-ca23253ef1c0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2856704,
+            "cached_input_tokens_cumulative": 2856704,
+            "input_tokens": 2984003,
+            "input_tokens_cumulative": 2984003,
+            "output_tokens": 11580,
+            "output_tokens_cumulative": 11580,
+            "reasoning_output_tokens": 4295,
+            "reasoning_output_tokens_cumulative": 4295
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 849
+    "_version": 850
   }
 }

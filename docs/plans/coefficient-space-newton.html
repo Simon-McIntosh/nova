@@ -439,9 +439,14 @@
       Saturating at width <strong>512</strong> (8.202 GiB/device) it executes
       <strong>39.647 µs/slice</strong> = <strong>25,222.87 slices/s/device</strong> —
       <strong>541.5×</strong> the banked 46.5776 — scaling across the <em>five</em> cards actually
-      granted at <strong>97.72 %</strong> efficiency. Campaign arithmetic on measured five-card
-      execute alone: <strong>A 10.96 s</strong>, B 20.39 s, C 11.87 s, D 20.30 s for all 1,341,435
-      slices, one-time totals (2.07 / 16.14 / 11.96 / 24.35 s) left unmultiplied. A and B are the only
+      granted at <strong>97.72 %</strong> efficiency. <strong>RETRACTED 2026-08-25 — the campaign
+      extrapolation this card originally carried (A 10.96 s for all 1,341,435 slices) is withdrawn and
+      must not be cited.</strong> The timed quantity is <em>one application of</em>
+      <code>operator.flux_map()</code>, not a converged solve; the batch is
+      <code>np.broadcast_to</code> of a <em>single</em> state, so every slice is byte-identical despite
+      the receipt's <code>independent_slice_batches</code> label; and no IO appears anywhere in the
+      timed region. See §20. The per-map figures below stand as <em>relative arm comparisons</em> and
+      are not campaign throughput. A and B are the only
       float64-converged eligible arms, so this does not promote the stalled carriers, and it agrees
       with the single-frame verdict (an A/B tie). <strong>Arm B's memory is far worse than the shared
       CPU lane suggested:</strong> 66.18 % above A at width 256 and 66.02 % at 512, spanning
@@ -653,6 +658,43 @@
       <code>ee1d725f</code>). Full record:
       <a href="/nova/evidence/archive/coefficient-space-newton-landed#gauge-attribution">§17 landed</a>.</p>
     </section>
+
+    <h2 id="s20">§20 — What §12 measured, and the campaign claim it does not support</h2>
+
+    <p><strong>§12's arm comparison is sound and its campaign extrapolation was wrong. I made that
+    extrapolation and I am withdrawing it.</strong> Three properties of the harness, each of which
+    alone breaks the inference from 39.647 µs to a catalog wall-clock.</p>
+
+    <ul>
+      <li><strong>The timed quantity is one forward-map application, not a solve.</strong>
+      <code>map_function = operator.flux_map()</code> — a single application, jitted and vmapped. Arm A
+      needs ~10 admitted advances and 6.0 Newton-step-equivalents, each with Krylov inner iterations,
+      to reach 2.711e−15. A converged slice therefore costs many map applications, so the per-slice
+      solve cost is one to two orders above the measured per-map figure.</li>
+      <li><strong>The batch is a broadcast of one state.</strong>
+      <code>np.broadcast_to(np.asarray(state), (total_slices, state.shape[0]))</code> — every slice
+      byte-identical. The receipt records <code>"arrangement": "independent_slice_batches"</code>, which
+      the code contradicts: that is a label, not a measured property. Real slices differ and converge at
+      different rates, and a fixed iteration budget must cover the tail, so masked non-converged slices
+      still pay full cost.</li>
+      <li><strong>No IO is in the timed region at all.</strong> The state is <code>device_put</code>
+      before timing and the result is never written. At the claimed 122,410 slices/s aggregate, a
+      1126-node float64 ψ grid alone is ~9 kB per slice, so persisting ψ would demand of order
+      <strong>1 GB/s sustained</strong> before profiles, boundary, labels or diagnostics — none of
+      which was measured.</li>
+    </ul>
+
+    <p><strong>What the figures do support:</strong> a like-for-like ranking of the four arms on
+    per-map execute, saturation width, device memory and card scaling, all measured on the same
+    harness. Arm A's preference over B, C and D stands on that basis, as does the 66 % equal-width
+    memory finding and the 97.72 % five-card scaling of the map application.</p>
+
+    <p><strong>What remains unmeasured, and who owns it.</strong> Campaign throughput belongs to
+    <a href="/nova/mast-catalog-gpu-solve">mast-catalog-gpu-solve</a>, whose L1 stage requires the
+    per-GPU target on converged flat-top slices and whose L2 stage requires sustained aggregate
+    throughput <em>with streamed IO and no IO starvation</em>. <strong>§12 must not be cited as
+    satisfying either.</strong> Nor does it establish that the hour-scale goal is throughput-free: that
+    conclusion was drawn from the retracted extrapolation and is withdrawn with it.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>

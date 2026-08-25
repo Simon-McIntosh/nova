@@ -686,11 +686,19 @@ coverage.</p>
   </tbody>
 </table>
 
-<p><strong>The campaign arithmetic, with build separated from execute as the section required.</strong>
-Applying the 1,341,435-slice count <em>only</em> to measured five-card execute:
-<strong>A 10.96 s</strong>, B 20.39 s, C 11.87 s, D 20.30 s. The one-time totals stay unmultiplied. So
-the full catalog's execute is about <strong>eleven seconds on five cards</strong> — the hour-scale goal
-was never throughput-bound, and the binding constraint is convergence.</p>
+<p><strong>RETRACTED 2026-08-25 — the campaign extrapolation is withdrawn.</strong> This anchor
+originally read the 1,341,435-slice count against measured five-card execute and concluded the full
+catalog executes in about eleven seconds, hence that the hour-scale goal was never throughput-bound.
+<strong>That inference does not hold.</strong> The timed quantity is one application of
+<code>operator.flux_map()</code>, not a converged solve; the batch is <code>np.broadcast_to</code> of a
+single state so every slice is byte-identical despite the receipt's
+<code>independent_slice_batches</code> label; and no IO appears in the timed region at all — the state
+is placed before timing and the result is never written. At the claimed aggregate rate, persisting a
+1126-node float64 &psi; grid alone would demand of order 1 GB/s sustained before profiles, boundary or
+labels. The per-arm figures below stand as a like-for-like ranking on per-map execute and say nothing
+about catalog wall-clock; campaign throughput belongs to
+<a href="/nova/mast-catalog-gpu-solve">mast-catalog-gpu-solve</a> L1 and L2, and this anchor must not
+be cited as satisfying either.</p>
 
 <p><strong>The preference is fenced rather than merely stated.</strong> A and B are the only
 float64-converged eligible arms, so this does not promote the stalled carriers whatever their

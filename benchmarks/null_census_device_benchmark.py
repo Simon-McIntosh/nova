@@ -37,7 +37,7 @@ from nova.jax.config import configure_dtypes
 
 
 DEFAULT_OUTPUT = Path(
-    "docs/figures/primary-xpoint-evidence/dual-sweep-device-lock.json"
+    "docs/figures/primary-xpoint-evidence/subordinate-dual-merge.json"
 )
 GRID_SIZES = (33, 129)
 BATCH_WIDTHS = (1, 4, 16)
@@ -45,7 +45,7 @@ EXECUTION_REPETITIONS = 21
 K_SLOTS = 8
 RATIO_BOUND = 2.0
 COARSE_PER_SLICE_BOUND_MS = 1.0
-DUAL_SWEEP_IMPLEMENTATION_COMMIT = "46e5d9b8"
+DUAL_SWEEP_FOUNDATION_COMMIT = "46e5d9b8"
 
 
 def _source_commit() -> str:
@@ -242,7 +242,7 @@ def _mast_correctness() -> dict[str, Any]:
 
 
 def _lock_rule(
-    timings: list[dict[str, Any]], correctness: dict[str, Any]
+    timings: list[dict[str, Any]], correctness: dict[str, Any], clause_c_passes: bool
 ) -> dict[str, Any]:
     by_key = {
         (tuple(row["grid_size"]), row["batch_width"], row["orbit_families"]): row
@@ -294,8 +294,8 @@ def _lock_rule(
                 "the six named topology files pass with the production default "
                 "temporarily set to dual_sweep=True"
             ),
-            "passes": None,
-            "results": "recorded after the external pytest validation pass",
+            "passes": clause_c_passes,
+            "results": "recorded by the named external pytest validation pass",
         },
         "correctness_guard": {
             "description": (
@@ -306,11 +306,20 @@ def _lock_rule(
             "disagreement_count": correctness["disagreement_count"],
         },
         "timing_comparisons": comparisons,
-        "production_decision": "pending external clause-C validation",
+        "production_decision": (
+            "enable dual sweep by default"
+            if clause_a
+            and clause_b
+            and clause_c_passes
+            and correctness["all_exactly_equal"]
+            else "retain opt-in dual sweep"
+        ),
     }
 
 
-def run(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
+def run(
+    output: Path = DEFAULT_OUTPUT, *, clause_c_passes: bool = False
+) -> dict[str, Any]:
     configure_dtypes()
     if not bool(jax.config.jax_enable_x64):
         raise RuntimeError("the benchmark requires JAX float64")
@@ -336,7 +345,7 @@ def run(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
         },
         "measurement_contract": {
             "device": "reserved H200 on the betelgeuse partition",
-            "dual_sweep_implementation_commit": DUAL_SWEEP_IMPLEMENTATION_COMMIT,
+            "dual_sweep_foundation_commit": DUAL_SWEEP_FOUNDATION_COMMIT,
             "dtype": "float64",
             "timing": (
                 "ahead-of-time compile reported separately; one warm execution; "
@@ -354,7 +363,7 @@ def run(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
         "timings": timings,
         "mast_correctness": correctness,
     }
-    payload["lock_rule"] = _lock_rule(timings, correctness)
+    payload["lock_rule"] = _lock_rule(timings, correctness, clause_c_passes)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(payload, indent=2) + "\n")
     return payload
@@ -363,8 +372,9 @@ def run(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
 def main() -> None:
     parser = ArgumentParser()
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--clause-c-passes", action="store_true")
     arguments = parser.parse_args()
-    payload = run(arguments.output)
+    payload = run(arguments.output, clause_c_passes=arguments.clause_c_passes)
     print(json.dumps(payload["lock_rule"], indent=2))
 
 

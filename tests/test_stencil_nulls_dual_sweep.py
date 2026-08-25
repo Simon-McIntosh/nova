@@ -70,10 +70,23 @@ def test_staggered_orbits_recover_one_saddle_at_each_partition_boundary():
     np.testing.assert_array_equal(np.sum(result["present"], axis=1), 1)
 
 
-def test_generic_interior_saddle_is_merged_without_an_extra_candidate():
+def test_generic_interior_saddle_keeps_the_primal_refinement_exact():
     coordinates = np.arange(-4.0, 5.0)
     field = _saddle(coordinates, coordinates, 0.25, 0.25, (1.0, -1.3, 0.7))
 
+    single = jax.device_get(
+        critical_point_candidates_batch(
+            field[None],
+            coordinates,
+            coordinates,
+            np.ones(field.shape, dtype=bool),
+            k_slots=8,
+            material_dilate=0,
+            target_index=-1,
+            noise_sigma=0.0,
+            dual_sweep=False,
+        )
+    )
     eager = _census(field[None], coordinates, coordinates)
     compiled = jax.device_get(
         jax.jit(
@@ -103,5 +116,6 @@ def test_generic_interior_saddle_is_merged_without_an_extra_candidate():
         assert int(result["cluster_count"][0]) == 1
         assert int(np.sum(result["present"][0])) == 1
         assert int(result["native_signed_index"][0, 0]) == -1
-        np.testing.assert_allclose(result["r"][0, 0], 0.25, atol=2.0e-7)
-        np.testing.assert_allclose(result["z"][0, 0], 0.25, atol=2.0e-7)
+        for key in ("r", "z", "psi"):
+            np.testing.assert_array_equal(result[key][0, 0], single[key][0, 0])
+        np.testing.assert_array_equal(result["orbit_family"][0, 0], 0)

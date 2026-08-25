@@ -800,7 +800,7 @@ def _same_root_clusters(
     orbit_family,
     minimum_spacing,
 ):
-    """Cluster uncertainty-overlapping same-sign evidence on device."""
+    """Cluster primal evidence while retaining only additive dual evidence."""
     count = present.shape[1]
     radial_distance = (radius[:, :, None] - radius[:, None, :]) / minimum_spacing
     vertical_distance = (height[:, :, None] - height[:, None, :]) / minimum_spacing
@@ -811,17 +811,25 @@ def _same_root_clusters(
     shared_fit_center = (fit_rows[:, :, None] == fit_rows[:, None, :]) & (
         fit_columns[:, :, None] == fit_columns[:, None, :]
     )
-    same_family_root = (orbit_family[:, :, None] == orbit_family[:, None, :]) & (
-        shared_fit_center | (distance <= uncertainty_limit)
+    primal = orbit_family == 0
+    primal_root = (
+        primal[:, :, None]
+        & primal[:, None, :]
+        & (shared_fit_center | (distance <= uncertainty_limit))
     )
-    staggered_duplicate = (orbit_family[:, :, None] != orbit_family[:, None, :]) & (
-        distance <= 0.5
+    same_index = native_index[:, :, None] == native_index[:, None, :]
+    dual_near_primal = (~primal[:, :, None]) & primal[:, None, :] & (distance <= 0.5)
+    subordinate_duplicate = jnp.any(
+        present[:, None, :] & same_index & dual_near_primal,
+        axis=-1,
     )
+    local_source = jnp.arange(count, dtype=jnp.int32)[None, :]
+    self_root = local_source[:, :, None] == local_source[:, None, :]
     same_root = (
         present[:, :, None]
         & present[:, None, :]
-        & (native_index[:, :, None] == native_index[:, None, :])
-        & (same_family_root | staggered_duplicate)
+        & same_index
+        & (primal_root | self_root)
     )
     tie = source_cells.astype(score.dtype) * (
         jnp.finfo(score.dtype).eps / max(count, 1)
@@ -838,8 +846,7 @@ def _same_root_clusters(
     parent = jax.lax.fori_loop(0, maximum_hops, compress_parent, parent)
 
     batch = present.shape[0]
-    local_source = jnp.arange(count, dtype=jnp.int32)[None, :]
-    representative = present & (parent == local_source)
+    representative = present & ~subordinate_duplicate & (parent == local_source)
     base = jnp.arange(batch, dtype=jnp.int32)[:, None] * count
     flat_parent = (parent + base).reshape(-1)
     flat_present = present.reshape(-1).astype(jnp.int32)
@@ -1019,8 +1026,27 @@ def _native_candidate_stage(
     packed_score = jnp.concatenate(
         [primal_score.reshape(batch, count), dual_score.reshape(batch, count)], axis=1
     ) - source[None, :] * (jnp.finfo(fields.dtype).eps / packed_count)
+    score_ceiling = jnp.max(
+        jnp.where(packed_candidates, packed_score, -jnp.inf), axis=1, keepdims=True
+    )
+    score_floor = jnp.min(
+        jnp.where(packed_candidates, packed_score, jnp.inf), axis=1, keepdims=True
+    )
+    score_span = jnp.where(
+        jnp.any(packed_candidates, axis=1, keepdims=True),
+        score_ceiling - score_floor + 1.0,
+        1.0,
+    )
+    primal_priority = jnp.concatenate(
+        [
+            jnp.ones((batch, count), dtype=bool),
+            jnp.zeros((batch, count), dtype=bool),
+        ],
+        axis=1,
+    )
+    packed_rank = packed_score + primal_priority.astype(fields.dtype) * score_span
     _ranked_seed_score, ranked_source = jax.lax.top_k(
-        jnp.where(packed_candidates, packed_score, -jnp.inf),
+        jnp.where(packed_candidates, packed_rank, -jnp.inf),
         work_rank_slots,
     )
     work_packed_source = ranked_source[:, :work_slots]
@@ -1479,8 +1505,28 @@ def _cluster_compaction_stage(
         & simple_index
         & (evidence["evidence_score"] >= 1.0)
     )
+    representative_score = evidence["ranking_score"]
+    score_ceiling = jnp.max(
+        jnp.where(representative, representative_score, -jnp.inf),
+        axis=1,
+        keepdims=True,
+    )
+    score_floor = jnp.min(
+        jnp.where(representative, representative_score, jnp.inf),
+        axis=1,
+        keepdims=True,
+    )
+    score_span = jnp.where(
+        jnp.any(representative, axis=1, keepdims=True),
+        score_ceiling - score_floor + 1.0,
+        1.0,
+    )
+    subordinate_rank = (
+        representative_score
+        + (work_orbit_family == 0).astype(output_dtype) * score_span
+    )
     ranked_score, ranked_work_source = jax.lax.top_k(
-        jnp.where(representative, evidence["ranking_score"], -jnp.inf), k_slots + 1
+        jnp.where(representative, subordinate_rank, -jnp.inf), k_slots + 1
     )
     selected_work = ranked_work_source[:, :k_slots]
 
@@ -1714,8 +1760,9 @@ def critical_point_candidates_batch(
     ``state`` then distinguishes resolved and unresolved evidence.  Supplying a
     scalar or per-field sample-noise standard deviation is preferred when the
     acquisition covariance is known; otherwise a quadratic-annihilating robust
-    estimate is used.  ``dual_sweep=True`` adds the centroid-lattice orbit
-    family; it is opt-in so existing production consumers remain unchanged.
+    estimate is used.  ``dual_sweep=True`` preserves the complete primal result
+    and adds only centroid-lattice candidates farther than half the minimum
+    grid pitch from every same-index primal candidate.
     """
     fields = _explicit_float_array(fields)
     if fields.ndim != 3:

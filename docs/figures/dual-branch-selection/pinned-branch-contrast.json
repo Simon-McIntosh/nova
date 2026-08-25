@@ -1,0 +1,814 @@
+{
+  "artifact": "paired pinned-branch and margin-penalty contrast",
+  "direct_green_operator_builder_entries": 0,
+  "driver_sha256": "c434615d1a4cbc218639714ca0554a57f1ec8a0c772ca3cbe7bbee31509b78ad",
+  "jit_vmap_batch_two_parity": {
+    "batch_members": "two identical copies of the first frozen reference",
+    "batch_size": 2,
+    "exact_requested_achieved_and_consistency_receipt_parity": true,
+    "maximum_flux_relative_difference": 2.222628874659796e-16,
+    "maximum_terminal_residual_absolute_difference": 0.0,
+    "passes": true,
+    "reference": {
+      "shot": 21978,
+      "slice_index": 35
+    },
+    "registered_relative_tolerance": 1e-10
+  },
+  "measurement_contract": {
+    "cohort": "six frozen MAST diverted-label references",
+    "contraction_fit": "ordinary least squares of log(residual) against zero-based Newton-promotion index over the twelve retained post-promotion residuals; fitted rho is exp(slope), and rho below one is called contraction",
+    "fixed_point_criterion": 1e-08,
+    "gmres_iterations_per_promotion": 12,
+    "map": "all 101 fitted circuits with declared plasma-current pinning",
+    "mixed_arm": "the same DIVERTED map ranked by relative residual plus the unit-weight penalty max(-class_margin, 0)",
+    "newton_promotions": 12,
+    "nonfinite_margin_policy": "a non-finite terminal class margin is serialized as null with class_margin_nonfinite naming its sign; no numeric sentinel is used",
+    "pure_arm": "DIVERTED branch of production ForwardProfile.solve_portfolio",
+    "seed": "the same labelled reference flux for both arms",
+    "selection": "lowest worst-fraction qualified row per frozen shot",
+    "smooth_class_observable": "p_diverted from traced_smooth_boundary_read at temperature 0.01 using the exact margin comparator's X-point and wall operands",
+    "terminal_comparison_qualification": "margin-terminal comparisons cross two different iterations: the pure production residual policy and the mixed residual-plus-margin merit policy"
+  },
+  "references": [
+    {
+      "mixed_arm": {
+        "accepted_class_margins": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "accepted_topology_penalties": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "achieved_class": "diverted",
+        "class_margin": null,
+        "class_margin_nonfinite": "positive_infinity",
+        "converged": false,
+        "entry_point": "margin-graded fixed-ladder Newton-Krylov",
+        "finite": true,
+        "fitted_contraction": {
+          "contracts": false,
+          "finite_positive_point_count": 12,
+          "fit_r_squared": 0.21346063092292444,
+          "ratio": 1.018509175551526
+        },
+        "iterations": 12,
+        "p_diverted": 1.0,
+        "requested_class": "diverted",
+        "residual_sequence": [
+          0.006490775847303424,
+          0.010724656507622823,
+          0.010729470625705789,
+          0.010516290099811412,
+          0.010766584340180742,
+          0.010502680913983195,
+          0.010762641116952824,
+          0.010504352567664852,
+          0.010762710928760664,
+          0.010504359648235024,
+          0.010762710781425898,
+          0.010504359639162271
+        ],
+        "terminal_residual": 0.010504359639162162,
+        "topology_consistent": true
+      },
+      "pure_arm": {
+        "achieved_class": "diverted",
+        "class_margin": null,
+        "class_margin_nonfinite": "positive_infinity",
+        "converged": false,
+        "entry_point": "ForwardProfile.solve_portfolio",
+        "finite": true,
+        "fitted_contraction": {
+          "contracts": true,
+          "finite_positive_point_count": 12,
+          "fit_r_squared": 0.5483685003042016,
+          "ratio": 0.9503071181832271
+        },
+        "iterations": 12,
+        "p_diverted": 1.0,
+        "requested_class": "diverted",
+        "residual_sequence": [
+          0.006461283148908432,
+          0.011703785642494352,
+          0.006046522151531674,
+          0.005861169937492542,
+          0.005682601762403628,
+          0.005508594942316174,
+          0.005338676367439619,
+          0.005174738890875603,
+          0.005015824963395501,
+          0.004860788300665262,
+          0.004713415464679083,
+          0.0045851673071955965
+        ],
+        "terminal_residual": 0.0045851673071955965,
+        "topology_consistent": true
+      },
+      "reference": {
+        "machine": "MAST",
+        "plasma_current_a": 801493.25,
+        "qualification_before_attribution": {
+          "declared_boundary_to_map_saddle_limit": 0.01,
+          "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 9.890979271575737e-09,
+          "passes": true,
+          "stored_lcfs_contour_limit": 0.006,
+          "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0039565704776983734,
+          "typed_saddle_candidate_count": 2,
+          "typed_saddle_resolved": true
+        },
+        "shot": 21978,
+        "slice_index": 35,
+        "source_coordinate": {
+          "axis_wb": 0.3139541104088807,
+          "boundary_wb": -0.06830239871478015,
+          "support_nodes": 248
+        },
+        "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+        "span_wb": 1.3164269165679459,
+        "time_s": 0.1899999976158142
+      },
+      "same_seed_both_arms": true,
+      "seed_sha256": "51a1340452903c05d65bc4937bb91c64816da2fca49e76bb8ac35e171955ada6",
+      "terminal_residual_ratio_pure_over_mixed": 0.43650136369105824
+    },
+    {
+      "mixed_arm": {
+        "accepted_class_margins": [
+          null,
+          0.007724330131766266,
+          null,
+          0.007665444156168932,
+          null,
+          0.007700153905630891,
+          null,
+          0.007721974773986784,
+          null,
+          0.007750807811865823,
+          null,
+          0.007732938931290956
+        ],
+        "accepted_topology_penalties": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "achieved_class": "diverted",
+        "class_margin": 0.007732938931290956,
+        "class_margin_nonfinite": null,
+        "converged": false,
+        "entry_point": "margin-graded fixed-ladder Newton-Krylov",
+        "finite": true,
+        "fitted_contraction": {
+          "contracts": true,
+          "finite_positive_point_count": 12,
+          "fit_r_squared": 8.613436841953259e-05,
+          "ratio": 0.9997013770254657
+        },
+        "iterations": 12,
+        "p_diverted": 0.6842329978571481,
+        "requested_class": "diverted",
+        "residual_sequence": [
+          0.0017195284621669643,
+          0.001204199470404804,
+          0.0011286069373526286,
+          0.0011390219065089248,
+          0.001293343781830306,
+          0.001234175086905648,
+          0.0014600991413714812,
+          0.0012581984607932335,
+          0.0012820980158476584,
+          0.001365365476518134,
+          0.001400622965460697,
+          0.0012559775222693685
+        ],
+        "terminal_residual": 0.0012559775222693165,
+        "topology_consistent": true
+      },
+      "pure_arm": {
+        "achieved_class": "diverted",
+        "class_margin": 0.007232963867134623,
+        "class_margin_nonfinite": null,
+        "converged": false,
+        "entry_point": "ForwardProfile.solve_portfolio",
+        "finite": true,
+        "fitted_contraction": {
+          "contracts": true,
+          "finite_positive_point_count": 12,
+          "fit_r_squared": 0.9994050325854441,
+          "ratio": 0.9767709093853535
+        },
+        "iterations": 12,
+        "p_diverted": 0.6733324904593083,
+        "requested_class": "diverted",
+        "residual_sequence": [
+          0.008577708247011701,
+          0.008361294483564133,
+          0.008150462806794571,
+          0.007954912532505482,
+          0.007765919818302676,
+          0.0075852619379971516,
+          0.007408601251011721,
+          0.007238205563212328,
+          0.007074017664839237,
+          0.006913774299346375,
+          0.006766201596340195,
+          0.006623820952318563
+        ],
+        "terminal_residual": 0.006623820952318563,
+        "topology_consistent": true
+      },
+      "reference": {
+        "machine": "MAST",
+        "plasma_current_a": 813718.375,
+        "qualification_before_attribution": {
+          "declared_boundary_to_map_saddle_limit": 0.01,
+          "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 5.358574284817005e-09,
+          "passes": true,
+          "stored_lcfs_contour_limit": 0.006,
+          "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.003801441005144457,
+          "typed_saddle_candidate_count": 2,
+          "typed_saddle_resolved": true
+        },
+        "shot": 21983,
+        "slice_index": 35,
+        "source_coordinate": {
+          "axis_wb": 0.3051764380864529,
+          "boundary_wb": -0.1034512467596711,
+          "support_nodes": 257
+        },
+        "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+        "span_wb": 1.3681872286612768,
+        "time_s": 0.1899999976158142
+      },
+      "same_seed_both_arms": true,
+      "seed_sha256": "02dc288308d994a788b0f107814156466204a90ec44c360f2a2e145096e3f566",
+      "terminal_residual_ratio_pure_over_mixed": 5.2738371785114095
+    },
+    {
+      "mixed_arm": {
+        "accepted_class_margins": [
+          0.017685979555872,
+          0.01880426614766146,
+          0.01783207167244557,
+          0.01886724745296466,
+          0.01796129657121712,
+          0.019019548630386005,
+          0.01814760453405969,
+          0.01873079231987464,
+          0.01929388208401138,
+          0.01817175422109081,
+          0.018773457846514505,
+          0.019069548355631266
+        ],
+        "accepted_topology_penalties": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "achieved_class": "diverted",
+        "class_margin": 0.019069548355631266,
+        "class_margin_nonfinite": null,
+        "converged": false,
+        "entry_point": "margin-graded fixed-ladder Newton-Krylov",
+        "finite": true,
+        "fitted_contraction": {
+          "contracts": false,
+          "finite_positive_point_count": 12,
+          "fit_r_squared": 0.48028898367126516,
+          "ratio": 1.0181386256720224
+        },
+        "iterations": 12,
+        "p_diverted": 0.8706766527975703,
+        "requested_class": "diverted",
+        "residual_sequence": [
+          0.00277486987609124,
+          0.002433944765339327,
+          0.0025409824918178003,
+          0.0022621407878116845,
+          0.0025783407707735758,
+          0.0025075886103614665,
+          0.0028904819992963513,
+          0.002684260346554032,
+          0.0030093270456935306,
+          0.003025857071248163,
+          0.002878614498864185,
+          0.0029621938259649276
+        ],
+        "terminal_residual": 0.0029621938259649276,
+        "topology_consistent": true
+      },
+      "pure_arm": {
+        "achieved_class": "diverted",
+        "class_margin": 0.01971081357477064,
+        "class_margin_nonfinite": null,
+        "converged": false,
+        "entry_point": "ForwardProfile.solve_portfolio",
+        "finite": true,
+        "fitted_contraction": {
+          "contracts": true,
+          "finite_positive_point_count": 12,
+          "fit_r_squared": 0.9997012529628372,
+          "ratio": 0.9835225185971592
+        },
+        "iterations": 12,
+        "p_diverted": 0.8777272141991911,
+        "requested_class": "diverted",
+        "residual_sequence": [
+          0.006220624215754909,
+          0.006105428677436531,
+          0.005994424883476731,
+          0.005896528882102819,
+          0.0058058682376395465,
+          0.005713673474078087,
+          0.0056223341324403995,
+          0.005529745394326639,
+          0.00543858736762927,
+          0.005347338191703767,
+          0.005257422302350144,
+          0.005167711618738155
+        ],
+        "terminal_residual": 0.005167711618738155,
+        "topology_consistent": true
+      },
+      "reference": {
+        "machine": "MAST",
+        "plasma_current_a": 934383.875,
+        "qualification_before_attribution": {
+          "declared_boundary_to_map_saddle_limit": 0.01,
+          "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 1.424904549219899e-08,
+          "passes": true,
+          "stored_lcfs_contour_limit": 0.006,
+          "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0026320993551678384,
+          "typed_saddle_candidate_count": 2,
+          "typed_saddle_resolved": true
+        },
+        "shot": 21985,
+        "slice_index": 51,
+        "source_coordinate": {
+          "axis_wb": 0.33908170628553735,
+          "boundary_wb": -0.2193531903351262,
+          "support_nodes": 227
+        },
+        "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+        "span_wb": 1.823353801798901,
+        "time_s": 0.2750000059604645
+      },
+      "same_seed_both_arms": true,
+      "seed_sha256": "8fa2931dc40e2034351c7c9a37e89fd47dd1f005b2263b85b529dfb4f3348c81",
+      "terminal_residual_ratio_pure_over_mixed": 1.7445555295676118
+    },
+    {
+      "mixed_arm": {
+        "accepted_class_margins": [
+          0.0057628767884384535,
+          0.00586979201182064,
+          0.005923204721286268,
+          0.006295445289334678,
+          0.009397839684058884,
+          0.0009183992668984273,
+          0.0086722318472919,
+          0.009631992185782146,
+          0.007675713275614594,
+          0.009971221238248913,
+          -0.0034731413256270487,
+          -0.006569604899382443
+        ],
+        "accepted_topology_penalties": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0034731413256270487,
+          0.006569604899382443
+        ],
+        "achieved_class": "limited",
+        "class_margin": -0.006569604899382443,
+        "class_margin_nonfinite": null,
+        "converged": false,
+        "entry_point": "margin-graded fixed-ladder Newton-Krylov",
+        "finite": true,
+        "fitted_contraction": {
+          "contracts": false,
+          "finite_positive_point_count": 12,
+          "fit_r_squared": 0.07717867556948577,
+          "ratio": 1.0386124822829326
+        },
+        "iterations": 12,
+        "p_diverted": 0.3414227254734074,
+        "requested_class": "diverted",
+        "residual_sequence": [
+          0.005131810121501376,
+          0.005120394967925652,
+          0.005115064931577922,
+          0.016271411752984792,
+          0.015563932236970633,
+          0.008639478569876105,
+          0.00839904863915426,
+          0.010016629817070676,
+          0.0037731426622076318,
+          0.01607413515412624,
+          0.009327184835880643,
+          0.008919581807273527
+        ],
+        "terminal_residual": 0.00891958180727361,
+        "topology_consistent": false
+      },
+      "pure_arm": {
+        "achieved_class": "diverted",
+        "class_margin": 0.004897134694955785,
+        "class_margin_nonfinite": null,
+        "converged": false,
+        "entry_point": "ForwardProfile.solve_portfolio",
+        "finite": true,
+        "fitted_contraction": {
+          "contracts": true,
+          "finite_positive_point_count": 12,
+          "fit_r_squared": 0.9978799230945576,
+          "ratio": 0.9776321113839138
+        },
+        "iterations": 12,
+        "p_diverted": 0.6200389307560134,
+        "requested_class": "diverted",
+        "residual_sequence": [
+          0.009499850952309097,
+          0.009267606072437783,
+          0.009038869606990366,
+          0.00881542807924024,
+          0.008609571930684734,
+          0.008408892527000797,
+          0.008215219179747985,
+          0.008040963063825141,
+          0.007870451754054989,
+          0.007703991339432962,
+          0.007549075134442948,
+          0.007425336057810516
+        ],
+        "terminal_residual": 0.007425336057810516,
+        "topology_consistent": true
+      },
+      "reference": {
+        "machine": "MAST",
+        "plasma_current_a": 874260.4375,
+        "qualification_before_attribution": {
+          "declared_boundary_to_map_saddle_limit": 0.01,
+          "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 1.0428598159594444e-08,
+          "passes": true,
+          "stored_lcfs_contour_limit": 0.006,
+          "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0029569918752245794,
+          "typed_saddle_candidate_count": 2,
+          "typed_saddle_resolved": true
+        },
+        "shot": 21986,
+        "slice_index": 46,
+        "source_coordinate": {
+          "axis_wb": 0.34640685309873315,
+          "boundary_wb": -0.17698577198495025,
+          "support_nodes": 208
+        },
+        "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+        "span_wb": 1.6435873151288796,
+        "time_s": 0.25
+      },
+      "same_seed_both_arms": true,
+      "seed_sha256": "74fe4a83f04bcc7a112c5b6860e440140c2e8de2af171fd3645016e806b743ae",
+      "terminal_residual_ratio_pure_over_mixed": 0.8324758064055662
+    },
+    {
+      "mixed_arm": {
+        "accepted_class_margins": [
+          null,
+          -0.00374627624302476,
+          -0.004955333320817934,
+          -0.0040472107835676785,
+          -0.004652963215021622,
+          -0.003847109368037782,
+          -0.004641230479165037,
+          -0.003676154066521997,
+          -0.004678193098865191,
+          -0.003645274362135631,
+          -0.004702482900869442,
+          -0.0036330927592678197
+        ],
+        "accepted_topology_penalties": [
+          0.0,
+          0.00374627624302476,
+          0.004955333320817934,
+          0.0040472107835676785,
+          0.004652963215021622,
+          0.003847109368037782,
+          0.004641230479165037,
+          0.003676154066521997,
+          0.004678193098865191,
+          0.003645274362135631,
+          0.004702482900869442,
+          0.0036330927592678197
+        ],
+        "achieved_class": "limited",
+        "class_margin": -0.0036330927592678197,
+        "class_margin_nonfinite": null,
+        "converged": false,
+        "entry_point": "margin-graded fixed-ladder Newton-Krylov",
+        "finite": true,
+        "fitted_contraction": {
+          "contracts": true,
+          "finite_positive_point_count": 12,
+          "fit_r_squared": 0.0624400501167498,
+          "ratio": 0.9784248946789167
+        },
+        "iterations": 12,
+        "p_diverted": 0.4101587202649306,
+        "requested_class": "diverted",
+        "residual_sequence": [
+          0.006215617250096388,
+          0.003334532128310552,
+          0.0023492811219006926,
+          0.0017271161557843215,
+          0.0020816584123833203,
+          0.0021445620692093358,
+          0.0024946493657092743,
+          0.0026124386171810085,
+          0.002672430648257921,
+          0.002750453014580249,
+          0.0027687884984503946,
+          0.0028225785455197935
+        ],
+        "terminal_residual": 0.002822578545519869,
+        "topology_consistent": false
+      },
+      "pure_arm": {
+        "achieved_class": "limited",
+        "class_margin": -0.003395359754118532,
+        "class_margin_nonfinite": null,
+        "converged": false,
+        "entry_point": "ForwardProfile.solve_portfolio",
+        "finite": true,
+        "fitted_contraction": {
+          "contracts": true,
+          "finite_positive_point_count": 12,
+          "fit_r_squared": 0.9920206822790919,
+          "ratio": 0.9804337825454631
+        },
+        "iterations": 12,
+        "p_diverted": 0.41592219858646995,
+        "requested_class": "diverted",
+        "residual_sequence": [
+          0.006255280656351586,
+          0.006101458335286858,
+          0.005950095076366573,
+          0.0057905310883624925,
+          0.005677473613024857,
+          0.005570904568068799,
+          0.005460862526126447,
+          0.005366672580442086,
+          0.005271658763950166,
+          0.005182267942898967,
+          0.005098948389213992,
+          0.0050242828634815126
+        ],
+        "terminal_residual": 0.0050242828634815126,
+        "topology_consistent": false
+      },
+      "reference": {
+        "machine": "MAST",
+        "plasma_current_a": 928902.8125,
+        "qualification_before_attribution": {
+          "declared_boundary_to_map_saddle_limit": 0.01,
+          "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 1.396327141354339e-08,
+          "passes": true,
+          "stored_lcfs_contour_limit": 0.006,
+          "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0038093633492954915,
+          "typed_saddle_candidate_count": 2,
+          "typed_saddle_resolved": true
+        },
+        "shot": 21989,
+        "slice_index": 55,
+        "source_coordinate": {
+          "axis_wb": 0.3320751947333506,
+          "boundary_wb": -0.2131394633484559,
+          "support_nodes": 222
+        },
+        "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+        "span_wb": 1.8040098584002995,
+        "time_s": 0.29499998688697815
+      },
+      "same_seed_both_arms": true,
+      "seed_sha256": "766de18620d0983f245eb78ef2fb3a2c54fd68144e4ff71a1e520eac1b1c2baf",
+      "terminal_residual_ratio_pure_over_mixed": 1.7800329671804151
+    },
+    {
+      "mixed_arm": {
+        "accepted_class_margins": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "accepted_topology_penalties": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "achieved_class": "diverted",
+        "class_margin": null,
+        "class_margin_nonfinite": "positive_infinity",
+        "converged": true,
+        "entry_point": "margin-graded fixed-ladder Newton-Krylov",
+        "finite": true,
+        "fitted_contraction": {
+          "contracts": true,
+          "finite_positive_point_count": 12,
+          "fit_r_squared": 0.7229625591706698,
+          "ratio": 0.0775937521523074
+        },
+        "iterations": 12,
+        "p_diverted": 1.0,
+        "requested_class": "diverted",
+        "residual_sequence": [
+          0.0012429458734669195,
+          0.00013567440568508287,
+          1.7302284506582173e-07,
+          7.078079981042375e-14,
+          2.6408406005221203e-14,
+          9.889152884907253e-15,
+          3.830226825184976e-15,
+          1.4335351860341516e-15,
+          7.335668334784153e-16,
+          3.3598480922675544e-16,
+          3.359848092267555e-16,
+          3.583837965085392e-16
+        ],
+        "terminal_residual": 3.583837965085392e-16,
+        "topology_consistent": true
+      },
+      "pure_arm": {
+        "achieved_class": "diverted",
+        "class_margin": null,
+        "class_margin_nonfinite": "positive_infinity",
+        "converged": false,
+        "entry_point": "ForwardProfile.solve_portfolio",
+        "finite": true,
+        "fitted_contraction": {
+          "contracts": true,
+          "finite_positive_point_count": 12,
+          "fit_r_squared": 0.9998439606014675,
+          "ratio": 0.9612924544424534
+        },
+        "iterations": 12,
+        "p_diverted": 1.0,
+        "requested_class": "diverted",
+        "residual_sequence": [
+          0.00780578945926283,
+          0.007483092628095099,
+          0.007180967130561253,
+          0.006892842836340042,
+          0.006626579992455011,
+          0.006374061802843394,
+          0.006131939141735015,
+          0.005895367934888752,
+          0.005667976021084552,
+          0.005448936621861535,
+          0.005245101317544938,
+          0.005049061244965982
+        ],
+        "terminal_residual": 0.005049061244965982,
+        "topology_consistent": true
+      },
+      "reference": {
+        "machine": "MAST",
+        "plasma_current_a": 933034.875,
+        "qualification_before_attribution": {
+          "declared_boundary_to_map_saddle_limit": 0.01,
+          "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 3.1250758187846145e-09,
+          "passes": true,
+          "stored_lcfs_contour_limit": 0.006,
+          "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0034558984831316586,
+          "typed_saddle_candidate_count": 2,
+          "typed_saddle_resolved": true
+        },
+        "shot": 22086,
+        "slice_index": 43,
+        "source_coordinate": {
+          "axis_wb": 0.3423115953376666,
+          "boundary_wb": -0.1292985047045701,
+          "support_nodes": 243
+        },
+        "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+        "span_wb": 1.5839675751331153,
+        "time_s": 0.22999998927116394
+      },
+      "same_seed_both_arms": true,
+      "seed_sha256": "61fecb0c4c498358a44704dd43facb157f7c35e001bab55473d38e283a17162a",
+      "terminal_residual_ratio_pure_over_mixed": 14088419437918.64
+    }
+  ],
+  "response_carrier": {
+    "carrier": {
+      "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+      "frozen_reference_count": 6,
+      "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+      "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+      "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+      "response_shape": [
+        1126,
+        101
+      ],
+      "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+      "size_bytes": 645864,
+      "stored_circuit_count": 101,
+      "warm_load_seconds": 0.006035903934389353
+    },
+    "loaded_from_persisted_carrier": true,
+    "named_cache_only_check": {
+      "command": [
+        "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s-20260825-dual-trace/pinned-branch-contrast/benchmarks/mast_response_carrier_warm.py",
+        "check",
+        "--carrier",
+        "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "--receipt",
+        "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+      ],
+      "direct_green_operator_builder_entries": 0,
+      "passes": true,
+      "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.024208 direct_builders=0 verdict=PASS"
+    }
+  },
+  "source_commit": "ccc37b623d4d526258c0c2991bebc26b78f366fb",
+  "summary": {
+    "mixed_terminal_diverted_count": 4,
+    "mixed_terminal_residual_range": [
+      3.583837965085392e-16,
+      0.010504359639162162
+    ],
+    "pure_fitted_contraction_count": 6,
+    "pure_terminal_diverted_count": 5,
+    "pure_terminal_residual_range": [
+      0.0045851673071955965,
+      0.007425336057810516
+    ],
+    "reference_count": 6
+  }
+}

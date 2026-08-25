@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
+import jax
+import jax.numpy as jnp
+import numpy as np
 import pytest
 
 from nova.equilibrium import (
@@ -14,6 +17,12 @@ from nova.equilibrium import (
     select_forward_branch,
 )
 from nova.equilibrium.forward import ForwardPortfolio
+from nova.equilibrium.branch_selection import (
+    TracedSelectionInput,
+    forward_branch_selection_input,
+    initial_traced_selection_state,
+    scan_forward_branch_selection,
+)
 from nova.equilibrium.topology import TopologyClass
 
 
@@ -33,6 +42,38 @@ def _portfolio(
         residual=residuals,
     )
     return ForwardPortfolio(branches=branches)
+
+
+def _traced_sequence(
+    availability: list[tuple[bool, bool]],
+    admissibility: list[tuple[bool, bool]],
+    *,
+    probabilities: list[float] | None = None,
+    margins: list[float] | None = None,
+) -> TracedSelectionInput:
+    """Build time-major array evidence with distinct branch flux maps."""
+
+    count = len(availability)
+    if probabilities is None:
+        probabilities = [0.25] * count
+    if margins is None:
+        margins = [-0.01] * count
+    flux = jnp.broadcast_to(
+        jnp.asarray([[-1.0, 0.0, 1.0], [1.0, 2.0, 3.0]]),
+        (count, 2, 3),
+    )
+    branches = SimpleNamespace(
+        equilibrium=SimpleNamespace(flux=flux),
+        converged=jnp.asarray(availability),
+        topology_consistent=jnp.ones((count, 2), dtype=bool),
+        residual=jnp.ones((count, 2)) * 1.0e-9,
+    )
+    return forward_branch_selection_input(
+        branches,
+        jnp.asarray(probabilities),
+        jnp.asarray(margins),
+        jnp.asarray(admissibility),
+    )
 
 
 @pytest.fixture
@@ -217,3 +258,122 @@ def test_policy_rejects_a_zero_persistence_threshold():
             cold_start_class=TopologyClass.LIMITED,
             persistence_threshold=0,
         )
+
+
+def test_traced_scan_reproduces_the_host_selector_sequence(policy):
+    admissibility_pairs = [
+        (True, True),
+        (True, True),
+        (False, True),
+        (False, True),
+        (False, True),
+        (True, True),
+    ]
+    evidence = _traced_sequence(
+        [(True, True)] * len(admissibility_pairs), admissibility_pairs
+    )
+    final_state, traced = scan_forward_branch_selection(
+        evidence,
+        initial_traced_selection_state(),
+        jnp.asarray(int(policy.cold_start_class), dtype=jnp.int8),
+        jnp.asarray(policy.persistence_threshold, dtype=jnp.int32),
+    )
+
+    history = SelectionHistory()
+    host_classes = []
+    host_reasons = []
+    for limited, diverted in admissibility_pairs:
+        receipt = select_forward_branch(
+            _portfolio(True, True),
+            history,
+            policy,
+            BranchAdmissibility(limited=limited, diverted=diverted),
+        )
+        host_classes.append(int(receipt.selected_class))
+        host_reasons.append(list(SelectionReason).index(receipt.reason))
+        history = receipt.next_history
+
+    np.testing.assert_array_equal(traced.selected_class, host_classes)
+    np.testing.assert_array_equal(traced.reason_code, host_reasons)
+    assert int(final_state.selected_class) == int(history.selected_class)
+    assert int(final_state.pending_count) == history.pending_count
+    assert int(final_state.sequence_index) == history.sequence_index
+
+
+def test_traced_scan_jits_and_vmaps_array_selector_state():
+    evidence = _traced_sequence(
+        [(True, True), (True, False), (False, True), (False, False)],
+        [(True, True)] * 4,
+        probabilities=[0.2, 0.4, 0.6, 0.8],
+        margins=[-0.02, -0.01, 0.01, 0.02],
+    )
+    state = initial_traced_selection_state()
+    cold_start = jnp.asarray(int(TopologyClass.LIMITED), dtype=jnp.int8)
+    threshold = jnp.asarray(2, dtype=jnp.int32)
+    traced_jaxpr = jax.make_jaxpr(scan_forward_branch_selection)(
+        evidence, state, cold_start, threshold
+    )
+    assert any(equation.primitive.name == "scan" for equation in traced_jaxpr.eqns)
+
+    batch_size = 3
+    batched_evidence = jax.tree.map(
+        lambda value: jnp.broadcast_to(value, (batch_size, *value.shape)), evidence
+    )
+    batched_state = jax.tree.map(
+        lambda value: jnp.broadcast_to(value, (batch_size, *value.shape)), state
+    )
+    compiled = jax.jit(
+        jax.vmap(scan_forward_branch_selection, in_axes=(0, 0, None, None))
+    )
+    final_state, traced = compiled(
+        batched_evidence, batched_state, cold_start, threshold
+    )
+    jax.block_until_ready((final_state, traced))
+
+    assert traced.selected_class.shape == (batch_size, 4)
+    assert final_state.availability.shape == (batch_size, 2)
+    assert final_state.admissibility.shape == (batch_size, 2)
+    np.testing.assert_array_equal(final_state.degrade_path_firings, [2, 2, 2])
+    np.testing.assert_array_equal(final_state.two_qualified_selections, [1, 1, 1])
+
+
+def test_smooth_weight_and_exact_margin_retain_separate_roles():
+    evidence = _traced_sequence(
+        [(True, True), (True, True)],
+        [(True, True), (True, True)],
+        probabilities=[0.25, 0.75],
+        margins=[float("inf"), -1.0],
+    )
+    state = initial_traced_selection_state()
+    cold_start = jnp.asarray(int(TopologyClass.LIMITED), dtype=jnp.int8)
+    threshold = jnp.asarray(2, dtype=jnp.int32)
+    _final_state, traced = jax.jit(scan_forward_branch_selection)(
+        evidence, state, cold_start, threshold
+    )
+
+    np.testing.assert_allclose(traced.diverted_weight, [0.25, 0.75])
+    np.testing.assert_array_equal(traced.comparator_class, [-1, 0])
+    gradient = jax.grad(
+        lambda probabilities: jnp.sum(
+            scan_forward_branch_selection(
+                evidence._replace(p_diverted=probabilities),
+                state,
+                cold_start,
+                threshold,
+            )[1].flux
+        )
+    )(evidence.p_diverted)
+    assert np.all(np.asarray(gradient) != 0.0)
+
+
+def test_host_receipt_counts_degrades_against_two_qualified_selections(policy):
+    history = SelectionHistory()
+    for availability in ((True, True), (True, False), (False, True)):
+        receipt = select_forward_branch(_portfolio(*availability), history, policy)
+        history = receipt.next_history
+
+    data = receipt.as_dict()
+    assert data["selection_cohort"] == {
+        "degrade_path_firings": 2,
+        "two_qualified_selections": 1,
+    }

@@ -134,6 +134,117 @@
   rather than paid twice.</p>
 </section>
 
+<section id="carrier-and-residual">
+<h2>The response carrier, and the residual field it unblocked</h2>
+
+<p><strong>Nodes <code>mast-response-carrier-warm</code> (<code>29e24759</code>) and
+<code>label-seed-residual-field</code> (<code>fac85ead</code>), both gate PASSED, 2026-08-24/25.</strong></p>
+
+<p>The carrier is persisted at 645,864 bytes, response shape <strong>1126 &times; 101</strong> over 101
+stored circuits, semantic identity <code>1d2c4a2b&hellip;</code>. Cold build <strong>492.95 s</strong> on
+betelgeuse (job 1254245, 00:08:49) against two prior attempts truncated at 48:07 and 40:15 by a
+one-hour debug cap. Fresh-process cache-only reload 0.0626 s and 0.0244 s with <strong>zero</strong>
+direct Green-builder entries. The first attempt ran 1:05:56 and published <em>nothing</em>: it inherited
+a moving 95-point verdict grid and produced identity <code>719ecf63&hellip;</code> at 9,062 targets
+instead of 1,126. Atomic publication is what kept a wrong-identity carrier off disk.</p>
+
+<table>
+  <caption>One-application residual at each frozen MAST label on the current-pinned map</caption>
+  <thead><tr><th scope="col">Reference</th><th scope="col">Sup (Wb)</th><th scope="col">L2 (Wb)</th><th scope="col">Closed-flux</th><th scope="col">Scrape-off</th><th scope="col">Boundary band</th><th scope="col">Terminal residual</th></tr></thead>
+  <tbody>
+    <tr><td>21978/35</td><td>6.694e&minus;3</td><td>4.579e&minus;2</td><td>0.2660</td><td>0.7340</td><td>0.0553</td><td>4.585e&minus;3</td></tr>
+    <tr><td>21983/35</td><td>9.320e&minus;3</td><td>6.177e&minus;2</td><td>0.2191</td><td>0.7809</td><td>0.0483</td><td>6.624e&minus;3</td></tr>
+    <tr><td>21985/51</td><td>9.377e&minus;3</td><td>7.021e&minus;2</td><td>0.2907</td><td>0.7093</td><td>0.0566</td><td>5.168e&minus;3</td></tr>
+    <tr><td>21986/46</td><td>1.259e&minus;2</td><td>8.972e&minus;2</td><td>0.2485</td><td>0.7515</td><td>0.0600</td><td>7.425e&minus;3</td></tr>
+    <tr><td>21989/55</td><td>9.413e&minus;3</td><td>7.451e&minus;2</td><td>0.3438</td><td>0.6562</td><td>0.0798</td><td>5.024e&minus;3</td></tr>
+    <tr><td>22086/43</td><td>1.007e&minus;2</td><td>7.376e&minus;2</td><td>0.2857</td><td>0.7143</td><td>0.0612</td><td>5.049e&minus;3</td></tr>
+  </tbody>
+</table>
+
+<p>All six are bounded non-convergent, <strong>none collapses to vacuum</strong>, and every terminal
+plasma-current fraction is exactly 1.0 — superseding the 2026-08-21 vacuum reading, which predated
+current pinning by a day. Between <strong>65.6 % and 78.1 %</strong> of the residual magnitude sits in
+the scrape-off layer and only 4.8&ndash;8.0 % within a stencil width of the boundary. Cohort-mean
+pattern scores: conductor wiring <strong>0.1106</strong>, wall <strong>0.0949</strong>, profiles
+0.0515, discretisation 0.0326 — near-tied at the top and split three-to-three per reference, so
+spatial attribution only.</p>
+</section>
+
+<section id="wall-and-margin">
+<h2>The wall substitution, the margin seam, and the margin re-measurement</h2>
+
+<p><strong>Nodes <code>diiid-wall-topology-surface</code> (<code>7485f6f7</code>),
+<code>topology-margin-seam</code> (<code>9cc2d0f3</code>) and
+<code>margin-frame-remeasure</code> (<code>fdffd8e9</code>), all gate PASSED.</strong></p>
+
+<p><strong>The wall is refuted as the fix.</strong> The governed physical ring became the default
+topology surface (artifact digest <code>sha256:c842fd7d&hellip;</code>, physical digest
+<code>993e2b36&hellip;</code>, DD 4.1.1, 84 closed rows) and put the magnetic axis a mean
+<strong>342.4 mm</strong> from the reconstruction against the banked pseudo-wall <strong>164.6 mm</strong>
+— worse by 177.8 mm, a factor of <strong>2.08</strong>. Two of five frames also went pathological at
+terminal residuals 0.966 and 3.173. The rectangle sweep is worse at every expansion, axis mean 667&ndash;827 mm
+across four expansions and five frames. Retained without tuning.</p>
+
+<p><strong>The margin seam refuted its own premise before reconciling.</strong> The reuse map asserted
+the class-margin sign was definitionally paired with the Boolean classifier; direct wiring disagreed on
+<strong>17 of 19</strong> states. The operand diagnosis showed it is not a sign error: in the
+shadowed-wall family both routes chose the same wall point to 6e&minus;16 m while raw connectivity
+admitted <em>no saddle</em>; in the persistent-saddle family both chose the same saddle to 1e&minus;16 m
+while raw connectivity admitted <em>no reachable wall</em>. Complementary candidate-gating losses. After
+reconciliation — Boolean candidates supplied for class scoring only, no sign clamp,
+<code>Topology.boundary</code> unchanged — agreement is <strong>53 of 53</strong> across three families,
+crossing located at &minus;0.005625009503 Wb inside a bracket 6.1e&minus;8 wide. An adversarial vertex
+with flux closer to the axis than the saddle was correctly never compared, because it lay in the
+vertical private-flux shadow.</p>
+
+<table>
+  <caption>Margin grading against the Boolean predicate, five score-blind frames per surface</caption>
+  <thead><tr><th scope="col">Surface</th><th scope="col">Admitted / 89</th><th scope="col">Newton-step equivalents</th><th scope="col">Terminal residual</th><th scope="col">Diverted terminals</th></tr></thead>
+  <tbody>
+    <tr><td>Pseudo-wall, Boolean</td><td>7&ndash;12</td><td>2.93&ndash;5.19</td><td>0.0865&ndash;0.1526</td><td>&mdash;</td></tr>
+    <tr><td>Pseudo-wall, margin</td><td><strong>16&ndash;89</strong></td><td><strong>8.72&ndash;87.61</strong></td><td>1.75e&minus;16&ndash;0.1869</td><td><strong>0 of 5</strong></td></tr>
+    <tr><td>Physical ring, Boolean</td><td>5&ndash;33</td><td>&mdash;</td><td>0.0572&ndash;3.173</td><td>&mdash;</td></tr>
+    <tr><td>Physical ring, margin</td><td><strong>43&ndash;89</strong></td><td><strong>8.94&ndash;87.12</strong></td><td>2.41e&minus;16&ndash;0.00436</td><td><strong>0 of 5</strong></td></tr>
+  </tbody>
+</table>
+
+<p>Admission rises up to twelvefold, traversal up to thirtyfold, residual falls to machine precision —
+and <strong>every one of the ten terminals is limited where diverted was requested</strong>. Seven
+wrong-class lower residuals close nothing by the section's own rule; the exact terminal gate rejects a
+zero-residual wrong-class state. The physical-ring Boolean replay matched its banked counts and
+residuals exactly, so the comparison is sound. <strong>The Boolean refusal was never what stopped
+convergence.</strong></p>
+</section>
+
+<section id="null-results">
+<h2>Two nulls that close the plan: the control frame, and the wiring signature</h2>
+
+<p><strong>Nodes <code>converged-frame-contrast</code> (<code>c44ebc4f</code>) and
+<code>circuit-projection-arm</code> (<code>8aaa505f</code>), both gate PASSED.</strong></p>
+
+<p><strong>Nothing separates the frame that converged.</strong> 0 of 4 substitution patterns
+distinguish 22086/43 from the five plateauing frames under the declared inclusive-range rule: wall
+0.0951 inside [0.0864, 0.1089], wiring 0.1441 inside [0.0598, 0.1982], profile 0.0494 inside
+[0.0278, 0.0791], discretisation 0.0322 inside [0.0263, 0.0374]. Every supporting property also fails
+to separate it. Historical attribution <strong>declined</strong>: the machine-precision artifact was
+banked without its execution source revision and <strong>32</strong> production Python paths differ
+between that tree and the measured one. Reported as a descriptive null at n = 6.</p>
+
+<p><strong>The wiring signature cannot be a wiring error.</strong> Implied equivalent current
+corrections run <strong>&minus;8.05&times; to &minus;53.99&times;</strong> the driven current, implied
+response scale spanning &minus;52.995 to &minus;7.259 — a span of 45.7 across six references of one
+machine sharing one circuit-definition digest <code>c26682ad&hellip;</code>. A wiring error is a
+<em>fixed</em> factor; one varying sevenfold between frames is not. And every best circuit has one
+section, <code>turns=[1.0]</code>, <code>gains=[1.0]</code>, positive polarity and no series-parallel
+branch — there is nothing to flip. Verdict <code>NONE</code>, no fitted current, no repair.
+Conductor-versus-wall separation <code>NOT_ESTABLISHED</code> at a mean gap of 0.0158.</p>
+
+<p><strong>So none of the four documented substitutions moved the plateau</strong>, and read beside the
+operator ladder — which showed the map admits the analytic fixed point at machine precision with every
+posed term matching the closed form — the surviving question is which fixed point the solver reaches.
+That is carried by <a href="/nova/discrete-operator-analytic-error">discrete-operator-analytic-error</a> §4.</p>
+</section>
+
 </main>
 </body>
 </html>

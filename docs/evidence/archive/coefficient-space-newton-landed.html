@@ -595,6 +595,74 @@ analytic-truth rescore is superseded on this axis: its margins of 6.066e&minus;6
 were two-point comparisons against errors of 0.26 to 0.45.</p>
 </section>
 
+<section id="carrier-step">
+<h2>§19 — a correct Jacobian of the wrong function</h2>
+
+<p><strong>Node <code>carrier-step-attribution</code>, commit <code>d785864c</code>, gate PASSED,
+1 test, 2026-08-25.</strong> SLURM job 1254386 on vega_debug, 00:01:33. Attribution
+<code>PROJECTED_RESIDUAL_DIFFERENTIATED</code>.</p>
+
+<p>The demonstration is symmetric, which is what makes it conclusive. The square 36&times;36 system
+matches central finite differences <em>of the projected residual</em>
+<code>project(exact_map(total) &minus; external) &minus; coefficients</code> to a maximum relative
+column error of <strong>1.018e&minus;7</strong> — a correct Jacobian. Expanding those same columns into
+exact space and comparing against exact-residual finite differences gives <strong>6.899e&minus;2</strong>,
+five orders worse. The corrected 2253&times;36 exact-residual Jacobian matches every carrier-basis
+directional derivative to <strong>5.351e&minus;8</strong> at fitted scale <strong>0.99999998</strong>.</p>
+
+<table>
+  <caption>Step direction before and after the correction</caption>
+  <thead><tr><th scope="col">Comparison</th><th scope="col">Angle</th><th scope="col">Norm ratio</th></tr></thead>
+  <tbody>
+    <tr><td>Projected-residual solve vs projected exact step (banked)</td><td>49.735&deg;</td><td>0.01296</td></tr>
+    <tr><td>Exact-residual least squares vs projected exact step</td><td><strong>6.162&deg;</strong></td><td><strong>0.8923</strong></td></tr>
+  </tbody>
+</table>
+
+<p>Every tested corrected factor from the stalled state is finite, limited <em>and</em>
+residual-improving — the direct refutation of the stall. <strong>And the carrier still does not
+converge:</strong> the four-step corrected arm admits one advance and terminates limited at
+<strong>3.708e&minus;2</strong>, against arm A at <strong>2.711e&minus;15</strong> and only modestly
+below the 3.848e&minus;2 projected-residual stall. Verdict
+<code>CARRIER_QUESTION_CLOSED_CONDITIONING_WON_CONVERGENCE_LOST</code> — the outcome §19 specified in
+advance as complete. Conditioning is won at 119.02 against the banked projected Krylov 4087.41;
+convergence is lost; exact values remain the production route.</p>
+</section>
+
+<section id="contour-order">
+<h2>§15 — nearly fourth order, and an exactly zero tangent jump</h2>
+
+<p><strong>Node <code>higher-order-contour-extraction</code>, commit <code>479667ed</code>, gate
+PASSED, 7 connectivity tests plus 3 characterisation tests, 2026-08-25.</strong></p>
+
+<table>
+  <caption>Global-spline extraction against the linear one, 16&ndash;96 cells per axis</caption>
+  <thead><tr><th scope="col">Measure</th><th scope="col">Linear</th><th scope="col">Global spline</th></tr></thead>
+  <tbody>
+    <tr><td>Fitted crossing order</td><td>1.869 &plusmn; 0.071</td><td><strong>3.745 &plusmn; 0.139</strong></td></tr>
+    <tr><td>Finest crossing RMS</td><td>8.377e&minus;5 m</td><td><strong>1.190e&minus;9 m</strong></td></tr>
+    <tr><td>Max unit-tangent jump, finest (276 joins)</td><td>0.03506</td><td><strong>exactly 0.0</strong></td></tr>
+    <tr><td>Coarse smoke RMS (29 joins)</td><td>2.371e&minus;3 m</td><td>9.151e&minus;7 m (2590&times;)</td></tr>
+  </tbody>
+</table>
+
+<p>The uncertainties on the two fitted orders are nowhere near overlapping, and an exactly zero tangent
+jump is a stronger statement than a small one — reported as measured rather than folded into a
+tolerance. Curvature matching is explicitly <em>not</em> implemented, so no C² claim is made.</p>
+
+<p><strong>The fixed-shape contract passes without masking.</strong> Every inactive edge, segment,
+index, tangent, control and saddle slot is canonical exact zero; eager&harr;jit agrees to
+9.095e&minus;13 and scalar&harr;vmap to 3.331e&minus;16 over <em>every</em> active and padded value.
+Narrowing the comparison to valid slots was refused: a padded fixed-shape output whose inactive
+contents vary is how a result becomes layout-dependent, and canonicalising the padding is what
+<code>separatrix_clip</code> already does to earn its 2.2e&minus;16 area exactness. Two ambiguous saddle
+cells were encountered — one resolved from its measured stationary value, one tie-broken at the exact
+saddle level — both stated rather than averaged. The clip integration path is unchanged
+(<code>working_tree_changed=false</code>) and the characterisation suite is 3/3 green with the STEP
+bounds unchanged at 3.92 % and 6.20 %, which is what those standing assertions were installed to
+catch.</p>
+</section>
+
 </main>
 </body>
 </html>

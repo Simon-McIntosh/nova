@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="discrete-operator-analytic-error-landed">
+  <meta name="plan-evidence-for" content="discrete-operator-analytic-error">
+  <meta name="plan-title" content="The Discrete Fixed Point Is Not the Closed-Form Solution — execution record">
+  <meta name="plan-summary" content="Cumulative execution evidence: the one-application refinement ladder that exonerated both the operator and the posing, and relocated the residue to which fixed point the solver reaches.">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Discrete Operator Analytic Error — execution record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h1>The Discrete Fixed Point Is Not the Closed-Form Solution — execution record</h1>
+
+    <p>Execution evidence for
+    <a href="/nova/discrete-operator-analytic-error">discrete-operator-analytic-error</a>. One anchor
+    per material result, updated as each node lands.</p>
+
+    <h2 id="operator-ladder">§2 — the map admits the analytic fixed point at machine precision</h2>
+
+    <p><strong>Node <code>analytic-operator-refinement-ladder</code>, commit <code>ae723e28</code>,
+    gate PASSED, 2026-08-25.</strong> SLURM job 1254395, 94 s. Verdict
+    <code>posing/operator_admits_analytic_fixed_point</code>.</p>
+
+    <p><strong>The ladder measures the map, not the solve</strong> — one application of the exact
+    production forward map to the independently evaluated closed-form field, with no seed, no solve and
+    no basin. That reshaping is what makes the result mean anything: a ladder built from converged
+    fixed points depends on a seed, a solver route and a basin, and any of those differing between
+    rungs moves the fitted order for reasons unrelated to the operator.</p>
+
+    <table>
+      <caption>One-application residual across four resolutions</caption>
+      <thead>
+        <tr><th scope="col">Requested / realised cells</th><th scope="col">All-carrier relative sup</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>300 / 342</td><td>2.6922745652091497e&minus;15</td></tr>
+        <tr><td>500 / 551</td><td>3.054874184360744e&minus;15</td></tr>
+        <tr><td>750 / 815</td><td>2.83332350384108e&minus;15</td></tr>
+        <tr><td>1000 / 1076</td><td>2.893824705250372e&minus;15</td></tr>
+      </tbody>
+    </table>
+
+    <p>Full-state absolute sup runs 3.997e&minus;15 to 4.885e&minus;15 Wb. Every rung is below the
+    preregistered 4096-binary64-epsilon tolerance, so physical convergence order is below resolution:
+    fitted order <strong>&minus;0.0831 &plusmn; 0.1288</strong>, 95 % interval
+    [&minus;0.6371, 0.4708] — which <em>includes a constant</em> and <em>excludes</em> the 0.5
+    converging-order floor, because there is nothing left to converge.</p>
+
+    <h3 id="posing-terms">Posing exonerated term by term</h3>
+
+    <p>This is a finding rather than an absence of evidence, because each posed term was checked
+    against what the closed form specifies rather than the set being checked in aggregate.</p>
+
+    <table>
+      <caption>Posed inputs against the closed form</caption>
+      <thead><tr><th scope="col">Term</th><th scope="col">Agreement</th></tr></thead>
+      <tbody>
+        <tr><td>External completion</td><td>within 4.440892098500626e&minus;16 Wb</td></tr>
+        <tr><td>Analytic boundary flux</td><td>&minus;8.673617379884035e&minus;19 Wb against closed-form zero, at every rung</td></tr>
+        <tr><td>Absolute source normalisation</td><td>matches</td></tr>
+        <tr><td>Pressure gradient</td><td>&minus;72400.04058623493 Pa/Wb, zero quoted delta</td></tr>
+        <tr><td>FF gradient</td><td>&minus;0.06997315389737607 T&middot;m²/Wb, zero quoted delta</td></tr>
+        <tr><td>Boundary primitives</td><td>0 Pa and 3.4 T&middot;m on both sides</td></tr>
+        <tr><td>Rotation closure, particle mass</td><td>match</td></tr>
+        <tr><td>Current-density relative sup</td><td>disagreement at most 3.8707986461934123e&minus;16</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="relocated">What survives is neither branch the section posed</h3>
+
+    <p>The map admits the solution and the inputs match it, yet the solve does not arrive. The terminal
+    attempts are retained and explicitly excluded as unqualified: requested 300 achieved
+    <strong>1.2549724178436488</strong> and requested 500 achieved <strong>1.2998050585857959</strong>
+    against a 1e&minus;10 criterion. Where the solve does converge, the banked roots sit 19&ndash;38 %
+    from the closed form under a common gauge. <strong>So the residue is in which fixed point the
+    solver reaches.</strong></p>
+
+    <p>That is a materially better position than either branch of §2, and it should be said plainly: a
+    map that admits the right answer with a solver that misses it is a bounded, local problem, whereas
+    an inconsistent operator would have invalidated every forward result in this repository.</p>
+
+    <p>It also retro-explains two results on the plateau lane that were otherwise loose. That plan's
+    four documented input substitutions converged on <em>nothing</em> — no wall, wiring, profile or
+    discretisation candidate accounts for the residual — which is what no-wrong-input-plus-wrong-root
+    predicts. And its §6 showed the same solver reaching <strong>2.409e&minus;16</strong> the moment the
+    class refusal is relaxed, on <strong>0 of 10</strong> diverted terminals: it finds roots easily and
+    finds the wrong class. Both plans now point at the same question, from opposite directions.</p>
+
+  </main>
+</body>
+</html>

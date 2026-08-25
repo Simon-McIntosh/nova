@@ -29,6 +29,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import InitVar, dataclass, field
+from typing import NamedTuple
 
 import jax
 import jax.numpy as jnp
@@ -37,6 +38,7 @@ import numpy as np
 from nova.biot.null import Null2D
 from nova.biot.target import FluxTarget
 from nova.equilibrium.domain import DomainMasks, PlasmaDomain
+from nova.equilibrium.connectivity_boundary import traced_boundary_read
 from nova.equilibrium.observation import (
     ClippedIntegralMeasure,
     clipped_support_quadrature,
@@ -53,7 +55,47 @@ from nova.equilibrium.stencil_mesh import (
 )
 from nova.equilibrium.topology import Topology, TopologyState
 
-__all__ = ["ForwardFluxOperator", "PrescribedCurrentField"]
+__all__ = [
+    "ForwardFluxOperator",
+    "ForwardTopologyState",
+    "PrescribedCurrentField",
+]
+
+
+class ForwardTopologyState(NamedTuple):
+    """Topology landmarks plus the continuous connectivity margin."""
+
+    axis: jax.Array
+    axis_flux: jax.Array
+    boundary: jax.Array
+    boundary_flux: jax.Array
+    x_point: jax.Array
+    x_point_flux: jax.Array
+    wall_point: jax.Array
+    wall_point_flux: jax.Array
+    diverted: jax.Array
+    class_margin: jax.Array
+
+    @property
+    def flux_span(self) -> jax.Array:
+        """Return the total poloidal flux [Wb] from the axis to the boundary."""
+        return self.boundary_flux - self.axis_flux
+
+
+def _structured_grid_axes(coordinate) -> tuple[np.ndarray, np.ndarray]:
+    """Recover the tensor-product axes carried by a forward grid."""
+    points = np.asarray(coordinate, dtype=np.float64)
+    radius = np.unique(points[:, 0])
+    height = np.unique(points[:, 1])
+    expected = np.c_[
+        np.repeat(radius, height.size),
+        np.tile(height, radius.size),
+    ]
+    if points.shape != expected.shape or not np.allclose(
+        points, expected, rtol=0.0, atol=0.0
+    ):
+        raise ValueError("connectivity topology requires a tensor-product forward grid")
+    return radius, height
 
 
 @jax.tree_util.register_pytree_node_class
@@ -244,6 +286,9 @@ class ForwardFluxOperator:
     prescribed_field: PrescribedCurrentField | None = field(
         init=False, repr=False, default=None
     )
+    _connectivity_radius: jnp.ndarray = field(init=False, repr=False)
+    _connectivity_height: jnp.ndarray = field(init=False, repr=False)
+    _connectivity_shape: tuple[int, int] = field(init=False, repr=False)
 
     def __post_init__(self, prescribed_current_field: PrescribedCurrentField | None):
         """Build the topology read and default the material mask."""
@@ -278,6 +323,10 @@ class ForwardFluxOperator:
             raise ValueError("cell-average weights must carry five fixed entries")
         if self.inside_material.shape != (self.grid.node_number,):
             raise ValueError("inside_material must carry one flag per grid node")
+        radius, height = _structured_grid_axes(self.grid.coordinate)
+        self._connectivity_radius = jnp.asarray(radius, dtype=jnp.float64)
+        self._connectivity_height = jnp.asarray(height, dtype=jnp.float64)
+        self._connectivity_shape = (radius.size, height.size)
         if (
             self.prescribed_field is not None
             and self.prescribed_field.response.shape[0] != self.node_number
@@ -370,14 +419,65 @@ class ForwardFluxOperator:
             return object.__getattribute__(self, "prescribed_field")
         return object.__getattribute__(self, name)
 
-    def read(self, psi, requested_class=None) -> tuple[DomainMasks, TopologyState]:
-        """Return one shared domain/topology read, optionally class-pinned."""
-        return self._fixed_design_topology.read(
-            jnp.asarray(psi)[: self.physical_node_number],
+    def _connectivity_class_margin(
+        self, physical, topology: TopologyState
+    ) -> jax.Array:
+        """Read the signed reachable-wall minus X-point flux margin."""
+        grid_flux, wall_flux = self.topology.split_flux_map(physical)
+        _vmap_o, vmap_x = self._fixed_design_topology.grid(grid_flux)
+        classification_wall = jnp.concatenate(
+            (topology.wall_point, topology.wall_point_flux[None])
+        )
+        radial_count, vertical_count = self._connectivity_shape
+        reading = traced_boundary_read(
+            grid_flux.reshape((radial_count, vertical_count)).T,
+            self._connectivity_radius,
+            self._connectivity_height,
+            self.inside_material.reshape((radial_count, vertical_count)).T,
+            topology.axis[0],
+            topology.axis[1],
+            96,
+            18,
+            2,
+            jnp.empty((0,), dtype=self._connectivity_radius.dtype),
+            jnp.asarray(1.0, dtype=grid_flux.dtype),
+            self.wall.coordinate[:, 0],
+            self.wall.coordinate[:, 1],
+            wall_flux,
+            classification_x=vmap_x,
+            classification_wall=classification_wall,
+        )
+        return reading["class_margin"]
+
+    def topology_margin(self, psi) -> jax.Array:
+        """Return the emergent continuous topology margin of one flux map.
+
+        Positive values are diverted, negative values are limited, and zero is
+        the marginal wall/X-point hand-off. A selected wall extremum outside
+        the X-point height band is excluded by the private-flux shadow.
+        """
+        physical = jnp.asarray(psi)[: self.physical_node_number]
+        _masks, topology = self._fixed_design_topology.read(
+            physical,
+            self.polarity,
+            self.inside_material,
+            None,
+        )
+        return self._connectivity_class_margin(physical, topology)
+
+    def read(
+        self, psi, requested_class=None
+    ) -> tuple[DomainMasks, ForwardTopologyState]:
+        """Return domain labels, Boolean class, and continuous topology margin."""
+        physical = jnp.asarray(psi)[: self.physical_node_number]
+        masks, topology = self._fixed_design_topology.read(
+            physical,
             self.polarity,
             self.inside_material,
             requested_class,
         )
+        margin = self._connectivity_class_margin(physical, topology)
+        return masks, ForwardTopologyState(*topology, margin)
 
     def shared_node_flux(self, psi) -> jax.Array:
         """Evaluate the plasma-grid flux on fixed atomic shared nodes."""

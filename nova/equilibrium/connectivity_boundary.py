@@ -22,7 +22,7 @@ Method (the connectivity read, re-expressed on device):
   iterated 4-neighbour dilation (the shipped ``flood_fill_core`` device kernel)
   — the axis-connected component, never a disconnected pocket.
 
-* **The binding level, split by connectivity signature.**  A level is *valid*
+* **The binding level.**  A level is *valid*
   while the axis region stays clear of the wall; each escape transition is the
   largest valid level (monotone → coarse sweep + bisection).  ψ_bnd is read at
   the MEAN of an inner escape test (region touches the innermost in-wall shell,
@@ -32,13 +32,15 @@ Method (the connectivity read, re-expressed on device):
   LIMITED wall tangency is refined SUB-GRID: the minimum interpolated ψ_N over
   the wall boundary points adjacent to the axis region (the cell mean carries the
   sub-cell wall-position error a tangency is sensitive to; the interpolated wall
-  crossing removes it).  Limited and diverted are told apart by the region SIZE
-  RATIO across the binding — a saddle opening merges the region with the SOL /
-  private flux and jumps the size, a tangency grows smoothly — so the sub-grid
-  wall read is applied only to limited plasmas (on a diverted plasma the nearest
-  wall sits outside the separatrix and a min-over-wall would overshoot).  The
-  divertor legs are open branches the closed axis-region never floods, so the
-  lobe — and the radii read off it — are unaffected.
+  crossing removes it).  The wall and saddle candidates are reduced by their
+  normalised flux ordering, so whichever obstruction is reached first closes
+  the boundary.  The divertor legs are open branches the closed axis-region
+  never floods, so the lobe — and the radii read off it — are unaffected.  The
+  Boolean class and its signed margin use that same pair unless an exact
+  comparator candidate table and wall extremum are supplied.  In that case only
+  the class operands are replaced; the connectivity boundary remains unchanged,
+  and a wall extremum outside the X-point height band is removed by the
+  private-flux-shadow rule.
 
 * **LCFS radii.**  Read at ψ_lcfs = ψ_axis + lcfs_norm·(ψ_bnd − ψ_axis) by a
   fixed outward ray-march from the axis at the evaluator's 8 poloidal angles —
@@ -251,6 +253,8 @@ def _read_ingredients(
     wall_psi,
     previous_flood_level,
     use_doubling,
+    classification_x=None,
+    classification_wall=None,
 ) -> dict:
     """Everything the binding needs, up to (but not including) the min/softmin.
 
@@ -259,9 +263,14 @@ def _read_ingredients(
     (:func:`traced_smooth_boundary_read` — the differentiable path, the binding is
     a temperature-controlled softmin and the core mask a sigmoid).  Returns the
     normalised flux ``u``, the flood binding ``s_flood``, the two sub-grid
-    binding candidates ``u_wall_c`` / ``u_x_c`` (``inf`` when absent), and the
-    X-candidate diagnostics.
+    binding candidates ``u_wall_c`` / ``u_x_c`` (``inf`` when absent), the class
+    operands, and the X-candidate diagnostics. ``classification_x`` carries an
+    exact candidate table and ``classification_wall`` its selected wall
+    extremum; they must be supplied together and affect only the class read.
     """
+    if (classification_x is None) != (classification_wall is None):
+        raise ValueError("classification candidates and wall must be supplied together")
+
     nz = zg.shape[0]
     nr = rg.shape[0]
     n_iter = nr + nz  # flood-fill saturation count (≥ the region grid diameter)
@@ -509,6 +518,45 @@ def _read_ingredients(
     x_bind_state = jnp.where(x_bind_valid, xc["state"][kbind], 0)
     u_x_c = jnp.where(x_bind_valid, u_x[kbind], jnp.inf)
 
+    # Exact candidate data can replace the class operands without changing the
+    # connectivity binding. The selected wall extremum is removed when it lies
+    # vertically beyond the X-point band, so an unreachable private-flux wall
+    # point never competes with the saddle.
+    if classification_x is None or classification_wall is None:
+        class_u_wall = u_wall_c
+        class_u_x = u_x_c
+        class_x_valid = x_bind_valid
+        class_x_state = x_bind_state
+        class_wall_shadowed = jnp.asarray(False)
+    else:
+        supplied_x = jnp.asarray(classification_x, dtype=psi2d.dtype)
+        supplied_wall = jnp.asarray(classification_wall, dtype=psi2d.dtype)
+        supplied_x_valid = jnp.all(jnp.isfinite(supplied_x[:, :3]), axis=1)
+        supplied_x_flux = jnp.where(supplied_x_valid, supplied_x[:, 2], psi_axis)
+        supplied_x_level = (supplied_x_flux - psi_axis) / span_safe
+        class_x_index = _argmin_exact(
+            jnp.where(supplied_x_valid, supplied_x_level, jnp.inf)
+        )
+        class_x_valid = supplied_x_valid[class_x_index]
+        class_u_x = jnp.where(class_x_valid, supplied_x_level[class_x_index], jnp.inf)
+        class_x_state = jnp.where(class_x_valid, 2, 0)
+
+        x_height = jnp.where(supplied_x_valid, supplied_x[:, 1], jnp.nan)
+        x_height_min = jnp.nanmin(x_height)
+        x_height_max = jnp.nanmax(x_height)
+        x_height_min = jnp.where(x_height_min > axis_z, -jnp.inf, x_height_min)
+        x_height_max = jnp.where(x_height_max < axis_z, jnp.inf, x_height_max)
+        supplied_wall_valid = jnp.all(jnp.isfinite(supplied_wall[:3]))
+        class_wall_shadowed = supplied_wall_valid & (
+            (supplied_wall[1] < x_height_min) | (supplied_wall[1] > x_height_max)
+        )
+        supplied_wall_level = (supplied_wall[2] - psi_axis) / span_safe
+        class_u_wall = jnp.where(
+            supplied_wall_valid & ~class_wall_shadowed,
+            supplied_wall_level,
+            jnp.inf,
+        )
+
     return {
         "n_iter": n_iter,
         "seed": seed,
@@ -523,6 +571,11 @@ def _read_ingredients(
         "binding_search_evaluations": binding_search_evaluations,
         "u_wall_c": u_wall_c,
         "u_x_c": u_x_c,
+        "class_u_wall": class_u_wall,
+        "class_u_x": class_u_x,
+        "class_x_valid": class_x_valid,
+        "class_x_state": class_x_state,
+        "class_wall_shadowed": class_wall_shadowed,
         "x_bind_valid": x_bind_valid,
         "x_bind_state": x_bind_state,
         "u_x": u_x,
@@ -553,6 +606,8 @@ def traced_boundary_read(
     wall_psi: jnp.ndarray | None = None,
     previous_flood_level=jnp.nan,
     use_doubling: bool = True,
+    classification_x: jnp.ndarray | None = None,
+    classification_wall: jnp.ndarray | None = None,
 ) -> dict:
     """Connectivity LCFS read from ψ — the device-native ``lcfs_contour``.
 
@@ -565,6 +620,11 @@ def traced_boundary_read(
     (the campaign ``g_wall`` GEMM) aligned with those points; each finite entry
     reads its exact flux instead of the O(Δ²) bilinear grid read (the sentinel
     NaN default falls every node back to bilerp, so the read is unchanged).
+    ``classification_x`` and ``classification_wall`` optionally supply the
+    exact saddle table and selected wall extremum used by the Boolean topology
+    read. Their normalised flux difference defines ``class_margin`` after the
+    vertical private-flux shadow is applied; they do not change ``s_star``,
+    ``psi_bnd``, radii, or the connected core.
 
     Returns a dict of fixed-shape arrays: ``found`` (bool — a valid closed
     axis-enclosing level exists), ``psi_axis``, ``psi_out``, ``psi_bnd`` (the
@@ -589,6 +649,8 @@ def traced_boundary_read(
         wall_psi,
         previous_flood_level,
         use_doubling,
+        classification_x,
+        classification_wall,
     )
     n_iter = ing["n_iter"]
     seed = ing["seed"]
@@ -600,8 +662,8 @@ def traced_boundary_read(
     s_flood = ing["s_flood"]
     u_wall_c = ing["u_wall_c"]
     u_x_c = ing["u_x_c"]
-    x_bind_valid = ing["x_bind_valid"]
-    x_bind_state = ing["x_bind_state"]
+    class_x_valid = ing["class_x_valid"]
+    class_x_state = ing["class_x_state"]
     u_x = ing["u_x"]
     x_valid = ing["x_valid"]
     xc = ing["xc"]
@@ -613,9 +675,11 @@ def traced_boundary_read(
     # diverted iff the X-point saddle is the confined-most obstruction; the margin
     # is a SOFT continuous quantity (>0 diverted, <0 limited, ~0 marginal) so the
     # class is never a code-path switch.
-    is_diverted = x_bind_valid & (u_x_c <= u_wall_c)
-    boundary_resolved = (~is_diverted) | (x_bind_state == 2)
-    class_margin = u_wall_c - u_x_c
+    class_u_wall = ing["class_u_wall"]
+    class_u_x = ing["class_u_x"]
+    is_diverted = class_x_valid & (class_u_x <= class_u_wall)
+    boundary_resolved = (~is_diverted) | (class_x_state == 2)
+    class_margin = class_u_wall - class_u_x
 
     psi_bnd = psi_axis + s_star * span
     # Radii are read on the surface the ray-cast sits on, ALWAYS a hair inside the
@@ -692,10 +756,13 @@ def traced_boundary_read(
         "xset_state": sel_state,
         "is_diverted": is_diverted,
         "boundary_resolved": boundary_resolved,
-        "x_binding_state": x_bind_state,
+        "x_binding_state": class_x_state,
         "class_margin": class_margin,
-        "u_wall": u_wall_c,
-        "u_xpoint": u_x_c,
+        "u_wall": class_u_wall,
+        "u_xpoint": class_u_x,
+        "wall_shadowed": ing["class_wall_shadowed"],
+        "binding_u_wall": u_wall_c,
+        "binding_u_xpoint": u_x_c,
         "x_candidate_count": ing["x_candidate_count"],
         "x_overflow": ing["x_overflow"],
         "x_discarded_score_upper_bound": ing["x_discarded_score_upper_bound"],
@@ -732,6 +799,8 @@ def traced_smooth_boundary_read(
     temperature=0.01,
     previous_flood_level=jnp.nan,
     use_doubling: bool = True,
+    classification_x: jnp.ndarray | None = None,
+    classification_wall: jnp.ndarray | None = None,
 ) -> dict:
     """The SMOOTH connectivity boundary read — the end-to-end differentiable path.
 
@@ -744,9 +813,12 @@ def traced_smooth_boundary_read(
       ``min(u_wall, u_x)``; here the binding is the softmin — the softmax-
       weighted mean of the two sub-grid candidates at temperature ``τ``
       (in ψ_N span units).  As τ→0 this reduces to the exact min; at finite τ
-      the limited↔diverted hand-off is a smooth blend instead of a kink, and the
-      X-candidate's softmax weight is returned as ``p_diverted`` (a smooth class
-      probability).
+      the wall/saddle hand-off is a smooth blend instead of a kink.
+
+    * **Smooth class score.** ``p_diverted`` is the saddle weight from a second
+      softmax over the class operands. These are the connectivity candidates by
+      default, or the exact comparator candidates when supplied. Consequently
+      an exact class read does not change the boundary or core construction.
 
     * **Smooth core mask.**  The hard ``(u ≤ s*) ∧ flood`` cell mask becomes
       ``σ((s_soft − u)/τ) · gate`` — a sigmoid cutoff in normalised flux, gated
@@ -780,6 +852,8 @@ def traced_smooth_boundary_read(
         wall_psi,
         previous_flood_level,
         use_doubling,
+        classification_x,
+        classification_wall,
     )
     tau = temperature
     psi_axis = ing["psi_axis"]
@@ -800,7 +874,16 @@ def traced_smooth_boundary_read(
     logits = jnp.where(any_valid, logits, jnp.zeros_like(logits))
     w = jax.nn.softmax(logits)
     s_soft = jnp.where(any_valid, jnp.sum(w * c_safe), s_flood)
-    p_diverted = jnp.where(any_valid, w[1], 0.0)
+    class_cands = jnp.stack([ing["class_u_wall"], ing["class_u_x"]])
+    class_valid = jnp.isfinite(class_cands)
+    class_any_valid = jnp.any(class_valid)
+    class_safe = jnp.where(class_valid, class_cands, _ABSENT_U)
+    class_logits = jnp.where(class_valid, -class_safe / tau, -jnp.inf)
+    class_logits = jnp.where(
+        class_any_valid, class_logits, jnp.zeros_like(class_logits)
+    )
+    class_weight = jax.nn.softmax(class_logits)
+    p_diverted = jnp.where(class_any_valid, class_weight[1], 0.0)
 
     psi_bnd = psi_axis + s_soft * span
     ray_norm = jnp.minimum(lcfs_norm, 0.999)
@@ -842,8 +925,11 @@ def traced_smooth_boundary_read(
         "core_weight": core_weight,
         "n_core_soft": n_core_soft,
         "p_diverted": p_diverted,
-        "u_wall": ing["u_wall_c"],
-        "u_xpoint": ing["u_x_c"],
+        "u_wall": ing["class_u_wall"],
+        "u_xpoint": ing["class_u_x"],
+        "wall_shadowed": ing["class_wall_shadowed"],
+        "binding_u_wall": ing["u_wall_c"],
+        "binding_u_xpoint": ing["u_x_c"],
         "x_candidate_count": ing["x_candidate_count"],
         "x_overflow": ing["x_overflow"],
         "x_discarded_score_upper_bound": ing["x_discarded_score_upper_bound"],

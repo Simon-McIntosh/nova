@@ -160,6 +160,43 @@
     create artifacts in differentiated quantities such as <em>j_total</em>; no <em>j_total</em> result
     is reported here, and that caveat is carried forward unresolved.</p>
 
+    <h2 id="gate-lock">§6 — the suite was green and measuring the wrong route</h2>
+
+    <p><strong>Node <code>clip-gate-regression-lock</code>, commit <code>9317ef50</code>, gate
+    PASSED, 2026-08-25.</strong> 6 passed, 0 failed in 833.20 s; scope clean at the single fenced
+    test file.</p>
+
+    <p><strong>The defect this section existed to find.</strong> The pre-change suite passed — 6
+    tests in 560.13 s — while <code>_nova_geometry</code> called
+    <code>traced_flux_surface_geometry</code> rather than the shipped
+    <code>extract_flux_surface_geometry</code>. So STEP was still characterised against the
+    <em>superseded local reconstruction</em>, at vpr_face 18.14270502 % and g1_face 22.30580450 %. A
+    passing test that pins a route production does not use is worse than no test, because it reads as
+    coverage. Routed through the production entry point — the same one the §4 re-score measured — all
+    <strong>72</strong> affected characterisation constants were replaced by production measurements,
+    with the complete previous / measured / signed-difference receipt retained as 72 per-field
+    rows.</p>
+
+    <table>
+      <caption>Headline bank reconciliations, in percentage points</caption>
+      <thead><tr><th scope="col">Field</th><th scope="col">Previous constant</th><th scope="col">Production measurement</th><th scope="col">Difference</th></tr></thead>
+      <tbody>
+        <tr><td>STEP <em>vpr_face</em></td><td>18.137000000 %</td><td><strong>2.349368719 %</strong></td><td>&minus;15.787631281</td></tr>
+        <tr><td>STEP <em>g1_face</em></td><td>22.306000000 %</td><td><strong>3.884813932 %</strong></td><td>&minus;18.421186068</td></tr>
+        <tr><td>ITER <em>g0_face</em></td><td>1.029600000 %</td><td>0.891520937 %</td><td>&minus;0.138079063</td></tr>
+        <tr><td>ITER <em>g1_face</em></td><td>2.363200000 %</td><td>2.024575120 %</td><td>&minus;0.338624880</td></tr>
+        <tr><td>ITER <em>g2_face</em></td><td>2.313600000 %</td><td>1.886635685 %</td><td>&minus;0.426964315</td></tr>
+        <tr><td>ITER <em>g2g3_over_rhon_face</em></td><td>2.960200000 %</td><td>2.625218535 %</td><td>&minus;0.334981465</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The gates are now standing assertions rather than a receipt.</strong> Independent
+    bounds require STEP <em>vpr_face</em> below 3.92 % and <em>g1_face</em> below 6.20 %, and the
+    final measurements pass with <strong>1.570631281</strong> and <strong>2.315186068</strong>
+    percentage points of headroom. A regression in the curve source now fails a test instead of
+    surviving until someone re-reads a receipt — which is the whole reason a closed gate needed more
+    than §4's number.</p>
+
   </main>
 </body>
 </html>

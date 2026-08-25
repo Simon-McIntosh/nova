@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T14:11:06",
+  "updated": "2026-08-25T14:27:05",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -35374,9 +35374,102 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T120636306390-newton-cycle-mask-switch",
+        "plan": "discrete-operator-analytic-error",
+        "section": "\u00a75",
+        "node": "newton-cycle-mask-switch",
+        "node_definition": {
+          "done_when": "For the two alternating states, which repeat by parity to 6.214e-10 and differ across parity by 9.983e-3, compare every DISCRETE quantity the residual depends on and report which differ: the flood-filled confined and core cell masks cell by cell with a count of differing cells, the binding level s_star, psi_bnd, which typed saddle candidate the argmin selects in connectivity_boundary, whether the selected wall extremum changes, whether the private-flux shadow verdict flips, and the achieved topology class. The hypothesis to confirm or refute is the classic free-boundary one: the domain is determined by the solution, so if the mask differs between the two states while the Jacobian is formed as though the mask were fixed, the linearisation is missing the mask-dependence term and an exact full step overshoots the switching surface each time, producing exactly a 2-cycle. That would also explain why conditioning separates only weakly at 1.947 and why the map spectral radius exceeding one at both references is beside the point. If the masks and all selections are IDENTICAL between the two states, the hypothesis is refuted and the cycle is smooth in the residual - say so plainly and report what else differs, because that is the more surprising result and relocates the question again. Compare against 22086/43 as the control, where no alternation occurs: report whether its mask and selections are stable across its final promotions. Use the banked states rather than re-solving where possible, and change no production code - this is a diagnosis.",
+          "estimated_hours": 3.0,
+          "goal": "Test whether the exact-Newton period-2 cycle on 21978/35 is driven by a DISCRETE switch in the residual definition between the two alternating states, since inner Krylov accuracy is now falsified and an exact full Newton step carries the state from one alternating terminal to the other.",
+          "id": "newton-cycle-mask-switch",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/newton-cycle-mask-switch.md",
+          "plan": "discrete-operator-analytic-error",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/newton_cycle_mask_switch.py",
+            "docs/figures/discrete-operator-analytic-error/newton-cycle-mask-switch.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "manifold-mechanism",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T12:07:02Z",
+        "completed_at": "2026-08-25T12:27:01Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1199,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1199,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "8849869eb6e8250d1c9c8c479863fca9d3810053",
+        "commits": [
+          "c09fda98fcca65c0df5f6d4b1a70a5d80f3ca3fe"
+        ],
+        "changed_lines": {
+          "added": 2252,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/newton-cycle-mask-switch.md",
+        "scope_changed": false,
+        "session_id": "01a038d1-19e9-7f43-9016-f33191b6d5e8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12876288,
+            "cached_input_tokens_cumulative": 12876288,
+            "input_tokens": 13133349,
+            "input_tokens_cumulative": 13133349,
+            "output_tokens": 28544,
+            "output_tokens_cumulative": 28544,
+            "reasoning_output_tokens": 5787,
+            "reasoning_output_tokens_cumulative": 5787
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 857
+    "_version": 858
   }
 }

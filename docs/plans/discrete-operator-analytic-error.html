@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="discrete-operator-analytic-error">
   <meta name="plan-title" content="The Discrete Fixed Point Is Not the Closed-Form Solution">
-  <meta name="plan-summary" content="Two independent forward arms converge to machine precision on their own discrete fixed points and sit 19 to 38 per cent from the closed form under a common gauge, 0.42 to 0.74 Wb in absolute flux. Measured 2026-08-25: the map admits the analytic fixed point at machine precision and every posed term matches the closed form, so the residue is neither the operator nor the inputs but which fixed point the solver reaches.">
+  <meta name="plan-summary" content="The residual&#x27;s domain comes from a flood fill of the state, so a five-cell mask switch breaks the Jacobian and exact Newton cycles.">
   <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="10.0">
@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-commits" content="ae723e28,3dc5155f,f2665b5d,815ca8fe,497b0372,5db3c436,5cdcaf72,9a9f031a,33012360,95455769">
+<meta name="plan-commits" content="ae723e28,3dc5155f,f2665b5d,815ca8fe,497b0372,5db3c436,5cdcaf72,9a9f031a,33012360,95455769,0fb07ac5,c09fda98">
 <meta name="plan-artifacts" content="benchmarks/analytic_operator_ladder.py,benchmarks/diverted_basin_probe.py,benchmarks/contraction_discriminator.py,docs/figures/discrete-operator-analytic-error/operator-refinement-ladder.json,docs/figures/discrete-operator-analytic-error/diverted-basin-probe.json,docs/figures/discrete-operator-analytic-error/contraction-discriminator.json,docs/evidence/archive/discrete-operator-analytic-error-landed.html">
-<meta name="plan-impl" content="0.95">
-<meta name="plan-version" content="12">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-version" content="14">
 </head>
 <body>
   <main class="plan-doc">
@@ -348,10 +348,10 @@
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260825T115247083549-inner-solve-accuracy" data-who="krylov-guard" data-when="2026-08-25T12:05:06Z">
     <div class="r-comment-body"><p>MY HYPOTHESIS IS FALSIFIED, decisively. Reserved H200, job 1254819, 2m00s. Raising only the Krylov budget 10x changes nothing on 21978/35: terminal residuals at GMRES 12, 30, 60 and 120 are 1.0504359639e-2, 1.0504360271e-2, 1.0504360271e-2 and 1.0504360271e-2, with the period-2 alternation persisting at every budget, while 22086/43 stays at machine precision throughout. The angle between the true dense Newton step and the GMRES-12 step on the cycling reference is 9.507e-6 DEGREES - the Krylov step already IS the Newton step - and the decisive result is that the exact dense full Newton action takes 21978/35 from one alternating terminal to the OTHER, 1.0762712e-2 against GMRES-12 at 1.0762711e-2, agreeing to 1.71e-9. So exact Newton itself cycles and the mechanism is structural. Two corrections to my dispatch: the carried state is 1,126 values, not the 4,052 I asserted, so each dense Jacobian was 1126 by 1126 at 10.1 MB rather than 131 MB; and dense 2-norm conditioning separates at 167.917 cycling against 86.251 converged, ratio 1.947, stronger than the projected 1.748 but still modest. Cost recorded against the catalog: production pays gmres_iterations plus 2 forward actions per outer step, so 14, 32, 62 and 122 for those budgets, which is 223, 510, 988 and 1944 catalog-hours per outer step over 1,341,435 slices - paying 2.29x to 8.71x for no measured benefit.</p></div>
 </div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260825T120636306390-newton-cycle-mask-switch" data-who="manifold-mechanism" data-when="2026-08-25T12:27:01Z">
+    <div class="r-comment-body"><p>CONFIRMED: the state-dependent domain is the mechanism. Reserved H200, job 1254873, 2m17s. Across the alternating 21978/35 states the connectivity-confined mask differs at 5 of 1,089 cells, 279 to 276, and the flood-filled core at 3 cells, 245 to 244. The PRODUCTION residual partition switches with it: 1 core, 3 private-flux and 4 common-SOL cells differ, 115 to 116, 164 to 161 and 405 to 407. s_star moves 0.430716222958 to 0.435583736800, a delta of 4.8675e-3, and psi_bnd moves -0.0661545734383 to -0.0645403493964 Wb, 1.6142e-3 Wb. Crucially the SELECTORS DO NOT CHANGE - typed saddle argmin stays slot 2, wall extremum stays cluster 10, shadow verdict stays true, class stays diverted - so this is the cell-mask domain partition switching, not a selector flip. MECHANISM: JAX linearises each Boolean mask as fixed within the current branch, so the Jacobian omits the state-dependent mask jump and the exact full step overshoots into the opposite mask regime. That explains a structural 2-cycle without Krylov accuracy, without the modest 1.947 conditioning ratio, and without the map spectral radius exceeding one. CONTROL: 22086/43 has ZERO differing cells and no selector, shadow or class change over its final four promotions, with s_star and psi_bnd moving at most 1.110e-15 and adjacent state distances at most 2.576e-15.</p></div>
+</div>
 </section>
-</main>
-</body>
-</html>
     <h2 id="lazy-axes-fallout">The lazy-axes repair broke two banked benchmarks</h2>
 
     <p><strong>Found 2026-08-25 while a worker was blocked on an unrelated gate, and it is my
@@ -537,3 +537,58 @@
     is not "test more" but "when a change deletes a name, the search for that name is part of the
     change".</p>
 
+
+
+    <h2 id="mask-switch">ANSWERED — the cycle is a state-dependent domain</h2>
+
+    <p><strong>Node <code>newton-cycle-mask-switch</code>, commit <code>c09fda98</code>, gate PASSED,
+    2026-08-25.</strong> Reserved H200, job 1254873, 2m17s, banked trajectories reproduced first to
+    4.528e&minus;16 and 3.360e&minus;16 against a 5e&minus;12 gate. This closes the question §5 opened.</p>
+
+    <table>
+      <caption>What differs between the two alternating 21978/35 states</caption>
+      <thead><tr><th scope="col">Quantity</th><th scope="col">Change</th></tr></thead>
+      <tbody>
+        <tr><td>Connectivity-confined mask</td><td><strong>5 of 1,089 cells</strong> (279 &rarr; 276)</td></tr>
+        <tr><td>Flood-filled connectivity core</td><td>3 cells (245 &rarr; 244)</td></tr>
+        <tr><td>Production residual partition</td><td>1 core, 3 private-flux, 4 common-SOL (115&rarr;116, 164&rarr;161, 405&rarr;407)</td></tr>
+        <tr><td><code>s_star</code></td><td>0.430716222958 &rarr; 0.435583736800 (&Delta; 4.867514e&minus;3)</td></tr>
+        <tr><td><code>psi_bnd</code></td><td>&minus;0.0661545734383 &rarr; &minus;0.0645403493964 Wb (&Delta; 1.614224e&minus;3 Wb)</td></tr>
+        <tr><td>Saddle argmin, wall extremum, shadow, class</td><td><strong>all unchanged</strong> — slot 2, cluster 10, true, diverted</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The domain partition moves, not a selector.</strong> Five cells out of 1,089 suffices. JAX
+    linearises each Boolean mask as fixed within the current branch, so the Jacobian <em>omits the
+    state-dependent mask jump</em> and the exact full Newton step overshoots into the opposite mask
+    regime, then back. That is the classic free-boundary failure: the domain is determined by the
+    solution and the linearisation cannot see it.</p>
+
+    <p><strong>The control is decisive.</strong> 22086/43 shows <strong>zero</strong> differing cells and
+    no selector, shadow or class change across its final four promotions, with <code>s_star</code> and
+    <code>psi_bnd</code> moving at most 1.110e&minus;15 and adjacent states at most 2.576e&minus;15 apart.
+    A stable domain gives quadratic convergence; a switching domain gives permanent alternation.</p>
+
+    <p><strong>Three earlier findings become downstream symptoms rather than causes.</strong> The fitted
+    &rho; near 0.96&ndash;0.98 describing the promotion policy, the modest 1.947 dense-conditioning ratio,
+    and the map spectral radius exceeding one at both references explain nothing on their own, and all
+    three are what a linearisation that is systematically wrong across a switching surface would produce.
+    The Krylov-accuracy hypothesis was falsified separately.</p>
+
+    <p><strong>The link to the private-mask work, stated precisely.</strong> The residual's domain comes
+    from the flood fill, so the discreteness that made the vertical private-flux band unsound is the
+    <em>same</em> discreteness that breaks the Jacobian. Replacing that band with component labelling
+    fixes the <em>classification</em> and does <strong>not</strong> fix differentiability: a component
+    label is still a step function of the state.</p>
+
+    <p><strong>Treatment is a design decision, deliberately not taken here.</strong> Freeze the domain per
+    outer iteration — an outer fixed point on the mask with an inner Newton on a fixed domain — which is
+    conventional free-boundary practice and makes each inner solve genuinely smooth. Or smooth the cell
+    membership so the Jacobian sees the domain's state dependence, which is idiomatic here since the class
+    observable already uses <code>sigmoid(class_margin/0.01)</code>, and which preserves the gradients and
+    batchability the catalog needs. Or damp steps that would cross a mask boundary, which is cheapest and
+    treats the symptom. No solver behaviour was changed by this node.</p>
+
+</main>
+</body>
+</html>

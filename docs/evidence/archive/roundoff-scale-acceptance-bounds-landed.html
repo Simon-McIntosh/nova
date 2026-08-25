@@ -85,6 +85,41 @@
     decisively, admits both &minus;1 and &minus;2, so cancellation is established as the mechanism
     without the differencing order being pinned.</p>
 
+    <h2 id="acceptance-surface">The acceptance surface is green, and the rescore is 67 &rarr; 69</h2>
+
+    <p><strong>Node <code>acceptance-lane-verify</code>, commit <code>2b77347c</code>, gate PASSED,
+    2026-08-25.</strong> Dispatched because a production bound change had been supported by four focused
+    tests only.</p>
+
+    <table>
+      <caption>Importer-derived acceptance and conservation surface, fresh process per file</caption>
+      <thead><tr><th scope="col">File</th><th scope="col">Passed</th></tr></thead>
+      <tbody>
+        <tr><td><code>tests/test_observable_acceptance.py</code></td><td>12</td></tr>
+        <tr><td><code>tests/test_equilibrium_stencil_mesh.py</code></td><td>19</td></tr>
+        <tr><td><code>tests/test_observable_reduction_parity.py</code></td><td>1</td></tr>
+        <tr><td><code>tests/test_equilibrium_forward.py</code></td><td>35</td></tr>
+        <tr><td><strong>Total</strong></td><td><strong>67 passed, 0 failed, 0 skipped, 0 errors</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p>Run under <code>-m "slow or not slow"</code>. The four files were located by grep for
+    <code>observable_acceptance|conservation_ledger</code> rather than assumed.</p>
+
+    <p><strong>The rescore in full.</strong> The banked baseline was <strong>67 of 69</strong>, and the
+    two changed verdicts are exactly <code>conservation.divergence_b</code> and
+    <code>conservation.divergence_j</code> — the two bounds repaired are the two that had been failing,
+    so the cohort moved <strong>67 &rarr; 69</strong>. Maximum <code>divergence_j</code> differences are
+    1.1641532182693481e&minus;10 at width 1 and 1.4551915228366852e&minus;10 at width 4, both under the
+    1.0536712127723509e&minus;8 envelope. <strong>Limit:</strong> this validates the committed receipt
+    rather than recomputing the cohort from source data.</p>
+
+    <p><strong>Naming defect recorded.</strong>
+    <code>test_the_divergence_floor_is_truncation_and_falls_with_the_mesh</code> passes and is correct
+    for the non-commuting <code>StencilMesh</code> route it asserts, but its name is
+    route-underqualified and reads as describing the production commuting route, where the mechanism is
+    the opposite.</p>
+
   </main>
 </body>
 </html>

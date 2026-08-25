@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T10:38:23",
+  "updated": "2026-08-25T10:43:13",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -33812,9 +33812,101 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T083414048749-acceptance-lane-verify",
+        "plan": "roundoff-scale-acceptance-bounds",
+        "section": "\u00a74",
+        "node": "acceptance-lane-verify",
+        "node_definition": {
+          "done_when": "Report the full result of running tests/test_observable_acceptance.py and tests/test_equilibrium_stencil_mesh.py, each in its own fresh process, under both marker selections so slow tests are included - that is -m \"slow or not slow\" - plus any other test file that imports observable_acceptance or conservation_ledger, which you must find by grep rather than assume. Capture each run to its own log file once and read selectively rather than re-running for formatting. Quote per-file passed, failed, skipped and error counts with the exact command used. Any failure must be reported with its assertion and traceback and NOT fixed, since diagnosis of a production bound change belongs to a separate node with that write scope. State explicitly whether the 69-of-69 cohort rescore reproduces, and whether test_the_divergence_floor_is_truncation_and_falls_with_the_mesh still passes - that test name asserts truncation on the non-commuting mesh route while the landed finding is a commuting cancellation floor on the production route, so confirm it is testing the mesh route and say whether its name still describes what it measures.",
+          "estimated_hours": 1.0,
+          "goal": "Establish whether commit a59932ae, which replaced the divergence_j acceptance bound with sqrt(unit roundoff) = 1.0536712127723509e-8 and touched nova/equilibrium/observable_acceptance.py with nova/equilibrium/conservation.py, leaves the whole acceptance and conservation surface green rather than only the four focused tests its own node ran.",
+          "id": "acceptance-lane-verify",
+          "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/acceptance-lane-verify.md",
+          "plan": "roundoff-scale-acceptance-bounds",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/figures/roundoff-scale-acceptance-bounds/acceptance-lane-verify.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "integration-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T08:34:37Z",
+        "completed_at": "2026-08-25T08:42:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 479,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 479,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "9f0c06456418dbedf207ea71767bc9b6616b5c09",
+        "commits": [
+          "2b77347c85b7d4aa4ae3746c0899656b075bfef8"
+        ],
+        "changed_lines": {
+          "added": 85,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/manifests/acceptance-lane-verify.md",
+        "scope_changed": false,
+        "session_id": "01a0380e-a167-7613-8e80-82b301fe34a4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2031616,
+            "cached_input_tokens_cumulative": 2031616,
+            "input_tokens": 2145421,
+            "input_tokens_cumulative": 2145421,
+            "output_tokens": 12119,
+            "output_tokens_cumulative": 12119,
+            "reasoning_output_tokens": 4731,
+            "reasoning_output_tokens_cumulative": 4731
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "running tests",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 838
+    "_version": 839
   }
 }

@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-commits" content="f1ae4f46,2da77ed9,a59932ae">
-<meta name="plan-artifacts" content="benchmarks/bound_reference_classification.py,benchmarks/divergence_floor_scaling.py,nova/equilibrium/observable_acceptance.py,nova/equilibrium/conservation.py,docs/figures/roundoff-scale-acceptance-bounds/bound-classification.json,docs/figures/roundoff-scale-acceptance-bounds/corrected-criteria.json,docs/figures/roundoff-scale-acceptance-bounds/divergence-floor-scaling.json,docs/figures/roundoff-scale-acceptance-bounds/divergence-floor-scaling.png,docs/evidence/archive/roundoff-scale-acceptance-bounds-landed.html">
-<meta name="plan-impl" content="0.833">
-<meta name="plan-version" content="4">
+<meta name="plan-commits" content="f1ae4f46,2da77ed9,a59932ae,2b77347c">
+<meta name="plan-artifacts" content="benchmarks/bound_reference_classification.py,benchmarks/divergence_floor_scaling.py,nova/equilibrium/observable_acceptance.py,nova/equilibrium/conservation.py,docs/figures/roundoff-scale-acceptance-bounds/bound-classification.json,docs/figures/roundoff-scale-acceptance-bounds/corrected-criteria.json,docs/figures/roundoff-scale-acceptance-bounds/divergence-floor-scaling.json,docs/figures/roundoff-scale-acceptance-bounds/divergence-floor-scaling.png,docs/figures/roundoff-scale-acceptance-bounds/acceptance-lane-verify.md,docs/evidence/archive/roundoff-scale-acceptance-bounds-landed.html">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-version" content="6">
 </head>
 <body>
   <main class="plan-doc">
@@ -228,6 +228,36 @@
     <a href="/nova/evidence/archive/roundoff-scale-acceptance-bounds-landed#divergence-floor">divergence
     floor landed</a>.</p>
 
+    <p><strong>VERIFIED 2026-08-25 by node <code>acceptance-lane-verify</code></strong>, commit
+    <code>2b77347c</code>, gate PASSED — because a production bound change had been supported by four
+    focused tests only. The whole importer-derived surface is green: <strong>67 passed, 0 failed, 0
+    skipped, 0 errors</strong> across <code>tests/test_observable_acceptance.py</code> (12),
+    <code>tests/test_equilibrium_stencil_mesh.py</code> (19),
+    <code>tests/test_observable_reduction_parity.py</code> (1) and
+    <code>tests/test_equilibrium_forward.py</code> (35), each in a fresh process under
+    <code>-m "slow or not slow"</code>. The four files were located by grep for
+    <code>observable_acceptance|conservation_ledger</code> rather than assumed.</p>
+
+    <p><strong>And the rescore reads better than "69/69" alone.</strong> The banked baseline was
+    <strong>67 of 69</strong>, and the two <code>changed_verdicts</code> are exactly
+    <code>conservation.divergence_b</code> (invalid relative criterion removed) and
+    <code>conservation.divergence_j</code> (derived roundoff envelope) — so the repair moved the cohort
+    <strong>67 &rarr; 69</strong> and the two bounds repaired are precisely the two that had been
+    failing. Maximum <code>divergence_j</code> differences are 1.164e&minus;10 at width 1 and
+    1.455e&minus;10 at width 4, both under the 1.0537e&minus;8 envelope.
+    <strong>Stated limit:</strong> this validates the committed receipt and does <em>not</em> recompute
+    the cohort from source data, so it is a consistency check rather than an independent rederivation.</p>
+
+    <p><strong>A naming defect found in passing, and it is the kind this repository's rules exist to
+    catch.</strong> <code>test_the_divergence_floor_is_truncation_and_falls_with_the_mesh</code> passes
+    and is <em>correct for the route it asserts</em> — its truncation floor is populated only from
+    <code>conservation_ledger(mesh, …)</code> on the non-commuting <code>StencilMesh</code>, requiring
+    refinement ratios above 3.0 for <code>divergence_b</code> and 1.5 for <code>divergence_j</code>,
+    while separate <code>conservation_ledger(lattice, …)</code> assertions require the commuting route
+    below 1.0e&minus;12. But the name is <strong>route-underqualified</strong>: read without that
+    context it asserts the mechanism the production route contradicts. It should name the mesh route it
+    measures.</p>
+
     <p><strong>Two things this leaves honest.</strong> 22.63&times; headroom is failable but not tight —
     it would not catch a twentyfold degradation — and that is the accepted cost of a preregistered
     precision-derived scale over a bound fitted to the cohort it scores. And the &minus;1.7203 order,
@@ -251,6 +281,11 @@
     <div class="r-fu-body"><p>DO NOT START BY LOOSENING THE TWO FAILING BOUNDS. A criterion widened until the current value passes is derived from an achieved value of the quantity it scores, which is the standing rule this repository has already spent nodes enforcing elsewhere. The legitimate repair is a change of KIND - absolute rather than relative - justified by the scored quantity having no nonzero exact value, not a change of magnitude justified by the current measurement.</p><p>THE EVIDENCE IS ALREADY BANKED AND SHOULD BE READ, NOT REMEASURED. <code>docs/figures/derived-observable-parity/integrated-acceptance.json</code> carries the maximum absolute differences of 1.3877787807814457e-16 and 2.7755575615628914e-16 against maximum bound ratios 2.967 and 5.341, which is the whole argument in two numbers: one ULP crossing a bound by a factor of three. <code>docs/figures/same-device-label-determinism/executable-boundary-arms.json</code> carries the 11 changing case verdicts and confirms every one belongs to the two divergence residuals. <code>docs/figures/same-device-label-determinism/production-compilation-control.json</code> confirms 69 of 69 observables now bitwise identical across fresh production processes, so the movement is gone and the failure is not.</p><p>CLASSIFY ALL SIXTY-NINE, because the classification is the durable product. Two bounds are broken today; the reason they are broken is a category error that any future registered observable can repeat. A per-bound record of whether its scored quantity has a nonzero exact value, with the reason, plus a test refusing a relative criterion on an exactly-zero quantity, is what stops the third instance.</p><p>THIS IS NOT A CONVERGENCE PLAN. The plateau lane closed with none of four input substitutions moving the residual, and the operator lane showed the map admits an analytic fixed point at machine precision while the solver reaches a different one. Do not let a criterion repair be read as progress on either, and do not let either be cited as a reason to relax a bound.</p></div>
     <pre class="r-fu-prompt">/reckon-ship roundoff-scale-acceptance-bounds</pre>
     </article>
+<article class="r-fu" data-id="f-20260825T084407296780" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship roundoff-scale-acceptance-bounds" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Rename the route-underqualified divergence floor test</h4>
+    <div class="r-fu-body">test_the_divergence_floor_is_truncation_and_falls_with_the_mesh passes and is correct for the assertion it makes — its truncation floor is populated only from conservation_ledger(mesh, ...) on the non-commuting StencilMesh route, requiring refinement ratios above 3.0 for divergence_b and 1.5 for divergence_j. But the name is route-underqualified: read without that context it asserts the mechanism the production FluxLattice route contradicts, where the same observable is a discrete identity at a cancellation floor that GROWS under refinement. Rename it to name the mesh route it measures, and keep the separate commuting-route assertions distinguishable in the name. Small, mechanical, and covered by the naming rule that a test name must describe what it measures.</div>
+    <pre class="r-fu-prompt">/reckon-ship roundoff-scale-acceptance-bounds</pre>
+    </article>
 </section>
 
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -262,6 +297,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260825T080302349716-divergence-floor-attribution" data-who="bound-classify" data-when="2026-08-25T08:27:47Z">
     <div class="r-comment-body"><p>The production observable route commutes, so divergence_j is a discrete identity at a cancellation floor rather than a truncation signal. Measured order over four pitches is -1.7203, CI [-2.6432, -0.7973], excluding +2. The old 9.042e-4 floor had been transferred from a non-commuting mesh route and is inapplicable. Replacement is sqrt(unit roundoff) = 1.0537e-8, preregistered before cohort inspection, proven failable by a one-ppm radial-current scale mismatch reaching 7.568e-8 at 7.18x the bound. Cohort rescores 69/69 with 22.63x headroom, replacing 1.94-million-fold slack.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260825T083414048749-acceptance-lane-verify" data-who="integration-verify" data-when="2026-08-25T08:42:36Z">
+    <div class="r-comment-body"><p>The whole importer-derived surface is green: 67 passed, 0 failed, 0 skipped, 0 errors across tests/test_observable_acceptance.py (12), tests/test_equilibrium_stencil_mesh.py (19), tests/test_observable_reduction_parity.py (1) and tests/test_equilibrium_forward.py (35), each in a fresh process under -m "slow or not slow". The four files were found by grep rather than assumed. The cohort rescore reproduces 69/69 at both frozen widths against a banked 67/69 baseline, so the two repaired bounds are exactly the two that had been failing - but it validates the committed receipt rather than recomputing the cohort from source data. test_the_divergence_floor_is_truncation_and_falls_with_the_mesh passes and is route-correct for the non-commuting mesh, though its name is route-underqualified and must not be read as describing the production commuting route.</p></div>
 </div>
 </section>
 </main>

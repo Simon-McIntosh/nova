@@ -1,0 +1,1733 @@
+{
+  "aggregation": {
+    "measurement_runner_sha256": "dc293f7e37b9cc576e0d847c14171ca4fe68e499fdfdde6b545526f8cd86194e",
+    "qualification": "the H200 child receipts were complete before aggregation; the aggregator treats already bitwise-identical arrays containing non-finite masked values as zero-difference and fails closed if non-finite values differ",
+    "runner_sha256": "fe01ff82a8657e281baacc958c2ad4cd828c41a50f4c3c522db0c56f8a0c9b74"
+  },
+  "allocation": {
+    "backend": {
+      "device": "cuda:0",
+      "device_kind": "NVIDIA H200 NVL",
+      "gpu_identity": "GPU-d20e4d6a-c6d8-0b1b-6ff6-a6a8908e8386, NVIDIA H200 NVL, 595.58.03",
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0",
+      "platform": "gpu",
+      "precision": "float64"
+    },
+    "slurm_job_id": "1254407",
+    "slurm_node_list": "98dci4-gpu-0003",
+    "slurm_partition": "betelgeuse",
+    "slurm_reservation": "gpu_0003_grpA"
+  },
+  "artifact": "production_compilation_control",
+  "cache_off_comparator": {
+    "artifact": "docs/figures/same-device-label-determinism/executable-boundary-arms.json",
+    "changing_case_verdict_count": 11,
+    "changing_observables": [
+      "conservation.divergence_b",
+      "conservation.divergence_j"
+    ],
+    "qualification": "quoted comparator from the cache-off acceptance arm; this run measures the changed production route",
+    "sha256": "a65b76b5a3277dcbc5d7ca08944d754ff5b935c0f5f27015531724a8592f441c"
+  },
+  "child_receipts": [
+    {
+      "array_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054656041195-production-compilation-control/measurement-1254407/invocation-1.npz",
+      "array_sha256": "7cadf5f20cb972efb783e905bded411233668d720b368fc9564eb81de8d851f3",
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054656041195-production-compilation-control/measurement-1254407/invocation-1.json",
+      "sha256": "622928e6285178cc3e4ca28993f8faef2545db4b5c329a5b2a9a5e460ecdd63c"
+    },
+    {
+      "array_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054656041195-production-compilation-control/measurement-1254407/invocation-2.npz",
+      "array_sha256": "7cadf5f20cb972efb783e905bded411233668d720b368fc9564eb81de8d851f3",
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054656041195-production-compilation-control/measurement-1254407/invocation-2.json",
+      "sha256": "0b7f25ab414ae0d6210cf515f7d7c75e99f655522bc670a3dad9527fac5a9834"
+    },
+    {
+      "array_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054656041195-production-compilation-control/measurement-1254407/invocation-3.npz",
+      "array_sha256": "7cadf5f20cb972efb783e905bded411233668d720b368fc9564eb81de8d851f3",
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054656041195-production-compilation-control/measurement-1254407/invocation-3.json",
+      "sha256": "dc3e8b6b0de49cf2f67c9c449440ad5118af6ad5f39385aa607d0912f68a675d"
+    }
+  ],
+  "completed_utc": "2026-08-25T06:43:46.946150+00:00",
+  "fresh_process_determinism": {
+    "all_registered_observable_values_bitwise_identical": true,
+    "bitwise_identical_registered_observable_count": 69,
+    "registered_observable_count": 69,
+    "registered_observables": [
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "cell_current",
+        "sha256_by_invocation": [
+          "28404b32130abb74e4066513290245a15e57bceaa8d4db474f90056a023b3af4",
+          "28404b32130abb74e4066513290245a15e57bceaa8d4db474f90056a023b3af4",
+          "28404b32130abb74e4066513290245a15e57bceaa8d4db474f90056a023b3af4"
+        ],
+        "shape": [
+          1,
+          1089
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "int64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "conservation.checked_cells",
+        "sha256_by_invocation": [
+          "afb5d095a02684ba7c14e8aa030e9ba8c05c13f89250426fb440e0a8d2da7973",
+          "afb5d095a02684ba7c14e8aa030e9ba8c05c13f89250426fb440e0a8d2da7973",
+          "afb5d095a02684ba7c14e8aa030e9ba8c05c13f89250426fb440e0a8d2da7973"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "conservation.divergence_b",
+        "sha256_by_invocation": [
+          "7526b4cec192a179c863700cb5625e4a80b3b752458c697c009bff26079d1259",
+          "7526b4cec192a179c863700cb5625e4a80b3b752458c697c009bff26079d1259",
+          "7526b4cec192a179c863700cb5625e4a80b3b752458c697c009bff26079d1259"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "conservation.divergence_b_scale",
+        "sha256_by_invocation": [
+          "c8ce2ddfe98a56291cfd0168ee0d681c9d449ea9f077eace6370309947128e54",
+          "c8ce2ddfe98a56291cfd0168ee0d681c9d449ea9f077eace6370309947128e54",
+          "c8ce2ddfe98a56291cfd0168ee0d681c9d449ea9f077eace6370309947128e54"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "conservation.divergence_j",
+        "sha256_by_invocation": [
+          "787bb6693d0dd08f66ab87e2fbbe76b5246d4959d6b46c459aa4f345faadf1d8",
+          "787bb6693d0dd08f66ab87e2fbbe76b5246d4959d6b46c459aa4f345faadf1d8",
+          "787bb6693d0dd08f66ab87e2fbbe76b5246d4959d6b46c459aa4f345faadf1d8"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "conservation.divergence_j_scale",
+        "sha256_by_invocation": [
+          "589a6a06ed3c7269572ff52ed3845dc0f620f2be534cd371621e225ebb6e6b7f",
+          "589a6a06ed3c7269572ff52ed3845dc0f620f2be534cd371621e225ebb6e6b7f",
+          "589a6a06ed3c7269572ff52ed3845dc0f620f2be534cd371621e225ebb6e6b7f"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "conservation.force_residual",
+        "sha256_by_invocation": [
+          "5bfe50214b63ea22d7c8524ac150e1f652ad664e654f8eb5501d7239c153ac0e",
+          "5bfe50214b63ea22d7c8524ac150e1f652ad664e654f8eb5501d7239c153ac0e",
+          "5bfe50214b63ea22d7c8524ac150e1f652ad664e654f8eb5501d7239c153ac0e"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "conservation.force_scale",
+        "sha256_by_invocation": [
+          "ccb6643e7f1bfab019fc1437872bd8ab8f0d0c2cd35a7eaaa1f524d258f4a8ca",
+          "ccb6643e7f1bfab019fc1437872bd8ab8f0d0c2cd35a7eaaa1f524d258f4a8ca",
+          "ccb6643e7f1bfab019fc1437872bd8ab8f0d0c2cd35a7eaaa1f524d258f4a8ca"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "conservation.grad_shafranov_residual",
+        "sha256_by_invocation": [
+          "38fd2be4f5649e6666388ae0cd205329fd2e15c1a70dd2eace9b07aee31975e5",
+          "38fd2be4f5649e6666388ae0cd205329fd2e15c1a70dd2eace9b07aee31975e5",
+          "38fd2be4f5649e6666388ae0cd205329fd2e15c1a70dd2eace9b07aee31975e5"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "conservation.grad_shafranov_scale",
+        "sha256_by_invocation": [
+          "806079254606d73065281cac22e6cf33c60a00d479988965098f8c2f3e17c5a5",
+          "806079254606d73065281cac22e6cf33c60a00d479988965098f8c2f3e17c5a5",
+          "806079254606d73065281cac22e6cf33c60a00d479988965098f8c2f3e17c5a5"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "int8",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "continuation.common_sol.continuity",
+        "sha256_by_invocation": [
+          "21f712de5e04a06f70de6b29e914f713c07cebb54efc77c1f9ded1abd86ebbcd",
+          "21f712de5e04a06f70de6b29e914f713c07cebb54efc77c1f9ded1abd86ebbcd",
+          "21f712de5e04a06f70de6b29e914f713c07cebb54efc77c1f9ded1abd86ebbcd"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "continuation.common_sol.decay_width",
+        "sha256_by_invocation": [
+          "e2dc8fa0c4100db57043d5eb6c0937d90af4a238ba618804c9108718808a813d",
+          "e2dc8fa0c4100db57043d5eb6c0937d90af4a238ba618804c9108718808a813d",
+          "e2dc8fa0c4100db57043d5eb6c0937d90af4a238ba618804c9108718808a813d"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "int8",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "continuation.common_sol.domain",
+        "sha256_by_invocation": [
+          "21f712de5e04a06f70de6b29e914f713c07cebb54efc77c1f9ded1abd86ebbcd",
+          "21f712de5e04a06f70de6b29e914f713c07cebb54efc77c1f9ded1abd86ebbcd",
+          "21f712de5e04a06f70de6b29e914f713c07cebb54efc77c1f9ded1abd86ebbcd"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "int8",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "continuation.common_sol.form",
+        "sha256_by_invocation": [
+          "21f712de5e04a06f70de6b29e914f713c07cebb54efc77c1f9ded1abd86ebbcd",
+          "21f712de5e04a06f70de6b29e914f713c07cebb54efc77c1f9ded1abd86ebbcd",
+          "21f712de5e04a06f70de6b29e914f713c07cebb54efc77c1f9ded1abd86ebbcd"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "continuation.common_sol.separatrix_diamagnetic_gradient",
+        "sha256_by_invocation": [
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41",
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41",
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "continuation.common_sol.separatrix_pressure_gradient",
+        "sha256_by_invocation": [
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41",
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41",
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "continuation.common_sol.support",
+        "sha256_by_invocation": [
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41",
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41",
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "continuation.common_sol.truncated_fraction",
+        "sha256_by_invocation": [
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41",
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41",
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "int8",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "continuation.private_flux.continuity",
+        "sha256_by_invocation": [
+          "21f712de5e04a06f70de6b29e914f713c07cebb54efc77c1f9ded1abd86ebbcd",
+          "21f712de5e04a06f70de6b29e914f713c07cebb54efc77c1f9ded1abd86ebbcd",
+          "21f712de5e04a06f70de6b29e914f713c07cebb54efc77c1f9ded1abd86ebbcd"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "continuation.private_flux.decay_width",
+        "sha256_by_invocation": [
+          "e2dc8fa0c4100db57043d5eb6c0937d90af4a238ba618804c9108718808a813d",
+          "e2dc8fa0c4100db57043d5eb6c0937d90af4a238ba618804c9108718808a813d",
+          "e2dc8fa0c4100db57043d5eb6c0937d90af4a238ba618804c9108718808a813d"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "int8",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "continuation.private_flux.domain",
+        "sha256_by_invocation": [
+          "21f712de5e04a06f70de6b29e914f713c07cebb54efc77c1f9ded1abd86ebbcd",
+          "21f712de5e04a06f70de6b29e914f713c07cebb54efc77c1f9ded1abd86ebbcd",
+          "21f712de5e04a06f70de6b29e914f713c07cebb54efc77c1f9ded1abd86ebbcd"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "int8",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "continuation.private_flux.form",
+        "sha256_by_invocation": [
+          "21f712de5e04a06f70de6b29e914f713c07cebb54efc77c1f9ded1abd86ebbcd",
+          "21f712de5e04a06f70de6b29e914f713c07cebb54efc77c1f9ded1abd86ebbcd",
+          "21f712de5e04a06f70de6b29e914f713c07cebb54efc77c1f9ded1abd86ebbcd"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "continuation.private_flux.separatrix_diamagnetic_gradient",
+        "sha256_by_invocation": [
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41",
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41",
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "continuation.private_flux.separatrix_pressure_gradient",
+        "sha256_by_invocation": [
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41",
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41",
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "continuation.private_flux.support",
+        "sha256_by_invocation": [
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41",
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41",
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "continuation.private_flux.truncated_fraction",
+        "sha256_by_invocation": [
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41",
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41",
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "int8",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "domains.label",
+        "sha256_by_invocation": [
+          "d99359d55ebf188d90be8d948d2d8cb211c0b7147f19950e6d058247f7829499",
+          "d99359d55ebf188d90be8d948d2d8cb211c0b7147f19950e6d058247f7829499",
+          "d99359d55ebf188d90be8d948d2d8cb211c0b7147f19950e6d058247f7829499"
+        ],
+        "shape": [
+          1,
+          1089
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "domains.psi_norm",
+        "sha256_by_invocation": [
+          "8178dfe745c97fc6aaf7c74091311d5a0ccc785189fff1612f3c94a932d16dd5",
+          "8178dfe745c97fc6aaf7c74091311d5a0ccc785189fff1612f3c94a932d16dd5",
+          "8178dfe745c97fc6aaf7c74091311d5a0ccc785189fff1612f3c94a932d16dd5"
+        ],
+        "shape": [
+          1,
+          1089
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "bool",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "finite.cell_current",
+        "sha256_by_invocation": [
+          "f9bd55770fde4cdfec4cd33e62e0fb14af041cfede7334d4e1e65582febfd46f",
+          "f9bd55770fde4cdfec4cd33e62e0fb14af041cfede7334d4e1e65582febfd46f",
+          "f9bd55770fde4cdfec4cd33e62e0fb14af041cfede7334d4e1e65582febfd46f"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "bool",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "finite.conservation",
+        "sha256_by_invocation": [
+          "f9bd55770fde4cdfec4cd33e62e0fb14af041cfede7334d4e1e65582febfd46f",
+          "f9bd55770fde4cdfec4cd33e62e0fb14af041cfede7334d4e1e65582febfd46f",
+          "f9bd55770fde4cdfec4cd33e62e0fb14af041cfede7334d4e1e65582febfd46f"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "bool",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "finite.flux",
+        "sha256_by_invocation": [
+          "f9bd55770fde4cdfec4cd33e62e0fb14af041cfede7334d4e1e65582febfd46f",
+          "f9bd55770fde4cdfec4cd33e62e0fb14af041cfede7334d4e1e65582febfd46f",
+          "f9bd55770fde4cdfec4cd33e62e0fb14af041cfede7334d4e1e65582febfd46f"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "bool",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "finite.moments",
+        "sha256_by_invocation": [
+          "f9bd55770fde4cdfec4cd33e62e0fb14af041cfede7334d4e1e65582febfd46f",
+          "f9bd55770fde4cdfec4cd33e62e0fb14af041cfede7334d4e1e65582febfd46f",
+          "f9bd55770fde4cdfec4cd33e62e0fb14af041cfede7334d4e1e65582febfd46f"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "int64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "fixed_point.amplification_observation",
+        "sha256_by_invocation": [
+          "549423cd1bd9685c64a7679bf5241b7964fd0c7958eb3a01de63d96d848f7d0b",
+          "549423cd1bd9685c64a7679bf5241b7964fd0c7958eb3a01de63d96d848f7d0b",
+          "549423cd1bd9685c64a7679bf5241b7964fd0c7958eb3a01de63d96d848f7d0b"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "int32",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "fixed_point.krylov_action_qualification",
+        "sha256_by_invocation": [
+          "7ee0b73f13e3f4eb5ac371b873e2616b361bb5726b345d474d6a342f99f13751",
+          "7ee0b73f13e3f4eb5ac371b873e2616b361bb5726b345d474d6a342f99f13751",
+          "7ee0b73f13e3f4eb5ac371b873e2616b361bb5726b345d474d6a342f99f13751"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "fixed_point.residual",
+        "sha256_by_invocation": [
+          "face40fff0a42bbbc0f004c158f405a308b198d17ae8ff86d2eec84f2e2d5b75",
+          "face40fff0a42bbbc0f004c158f405a308b198d17ae8ff86d2eec84f2e2d5b75",
+          "face40fff0a42bbbc0f004c158f405a308b198d17ae8ff86d2eec84f2e2d5b75"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "fixed_point.state",
+        "sha256_by_invocation": [
+          "e3a28c28ae1133fca73fccda130f63c7d3a548d35a2d588802d4782bf01124f6",
+          "e3a28c28ae1133fca73fccda130f63c7d3a548d35a2d588802d4782bf01124f6",
+          "e3a28c28ae1133fca73fccda130f63c7d3a548d35a2d588802d4782bf01124f6"
+        ],
+        "shape": [
+          1,
+          1126
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "fixed_point.trace",
+        "sha256_by_invocation": [
+          "08ab58fd3b6b8c997585a082f8e0bae3e7b2acece3d3ace914fb8063f1553a20",
+          "08ab58fd3b6b8c997585a082f8e0bae3e7b2acece3d3ace914fb8063f1553a20",
+          "08ab58fd3b6b8c997585a082f8e0bae3e7b2acece3d3ace914fb8063f1553a20"
+        ],
+        "shape": [
+          1,
+          168
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "flux",
+        "sha256_by_invocation": [
+          "e3a28c28ae1133fca73fccda130f63c7d3a548d35a2d588802d4782bf01124f6",
+          "e3a28c28ae1133fca73fccda130f63c7d3a548d35a2d588802d4782bf01124f6",
+          "e3a28c28ae1133fca73fccda130f63c7d3a548d35a2d588802d4782bf01124f6"
+        ],
+        "shape": [
+          1,
+          1126
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "ledger.common_sol",
+        "sha256_by_invocation": [
+          "eecacf7c3c958958f7e2e04ce30bc78c8cd5dab5159bb7df39e8ff9217c47d91",
+          "eecacf7c3c958958f7e2e04ce30bc78c8cd5dab5159bb7df39e8ff9217c47d91",
+          "eecacf7c3c958958f7e2e04ce30bc78c8cd5dab5159bb7df39e8ff9217c47d91"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "ledger.core",
+        "sha256_by_invocation": [
+          "9223cbea3eb407078990b76560cea1bc141d9be3186774b8701b89b4a6a49a4f",
+          "9223cbea3eb407078990b76560cea1bc141d9be3186774b8701b89b4a6a49a4f",
+          "9223cbea3eb407078990b76560cea1bc141d9be3186774b8701b89b4a6a49a4f"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "ledger.excluded_material",
+        "sha256_by_invocation": [
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41",
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41",
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "ledger.private_flux",
+        "sha256_by_invocation": [
+          "6e2b7ba29fe273f66e6853dc7a19375e8fb5dc6f8b82718eee4ca900988dbade",
+          "6e2b7ba29fe273f66e6853dc7a19375e8fb5dc6f8b82718eee4ca900988dbade",
+          "6e2b7ba29fe273f66e6853dc7a19375e8fb5dc6f8b82718eee4ca900988dbade"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "ledger.total",
+        "sha256_by_invocation": [
+          "2cf322c0490c13e9986dc410e00da36502a261e8b796acf7f5ef895ce2b19133",
+          "2cf322c0490c13e9986dc410e00da36502a261e8b796acf7f5ef895ce2b19133",
+          "2cf322c0490c13e9986dc410e00da36502a261e8b796acf7f5ef895ce2b19133"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "moments.flux_span",
+        "sha256_by_invocation": [
+          "c5de0171e86802f10a7a815853736dc6a94eae36ecac721d8fd5385ebdfd5256",
+          "c5de0171e86802f10a7a815853736dc6a94eae36ecac721d8fd5385ebdfd5256",
+          "c5de0171e86802f10a7a815853736dc6a94eae36ecac721d8fd5385ebdfd5256"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "moments.internal_inductance",
+        "sha256_by_invocation": [
+          "8a76d04e7166e39a6b5995c9d64632573215697912cf4731f97606abaf49165b",
+          "8a76d04e7166e39a6b5995c9d64632573215697912cf4731f97606abaf49165b",
+          "8a76d04e7166e39a6b5995c9d64632573215697912cf4731f97606abaf49165b"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "moments.major_radius",
+        "sha256_by_invocation": [
+          "5ccf59dbe587c678fbd8be31a203de853e7d4a08666c36d48f957e1304eb9d04",
+          "5ccf59dbe587c678fbd8be31a203de853e7d4a08666c36d48f957e1304eb9d04",
+          "5ccf59dbe587c678fbd8be31a203de853e7d4a08666c36d48f957e1304eb9d04"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "moments.plasma_current",
+        "sha256_by_invocation": [
+          "9223cbea3eb407078990b76560cea1bc141d9be3186774b8701b89b4a6a49a4f",
+          "9223cbea3eb407078990b76560cea1bc141d9be3186774b8701b89b4a6a49a4f",
+          "9223cbea3eb407078990b76560cea1bc141d9be3186774b8701b89b4a6a49a4f"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "moments.poloidal_beta",
+        "sha256_by_invocation": [
+          "c2f008c3137ae3e5cce3d2c8516c304fe1a50fd177bc4617a27d9d09d74c8b62",
+          "c2f008c3137ae3e5cce3d2c8516c304fe1a50fd177bc4617a27d9d09d74c8b62",
+          "c2f008c3137ae3e5cce3d2c8516c304fe1a50fd177bc4617a27d9d09d74c8b62"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "moments.poloidal_field_integral",
+        "sha256_by_invocation": [
+          "093e325e6cbeca93cfc151bd7c03c4735f3d185eab770e1607c1ba05203966a6",
+          "093e325e6cbeca93cfc151bd7c03c4735f3d185eab770e1607c1ba05203966a6",
+          "093e325e6cbeca93cfc151bd7c03c4735f3d185eab770e1607c1ba05203966a6"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "moments.pressure_integral",
+        "sha256_by_invocation": [
+          "9b28f0b8e6c759c628cf7f3ba9f06f262470a1102e4ec1c0a8d3de15117bf567",
+          "9b28f0b8e6c759c628cf7f3ba9f06f262470a1102e4ec1c0a8d3de15117bf567",
+          "9b28f0b8e6c759c628cf7f3ba9f06f262470a1102e4ec1c0a8d3de15117bf567"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "moments.volume",
+        "sha256_by_invocation": [
+          "07dc492688ad560830081c8bdce5061e3a69e92a11aebbd73490c8aa71c4ec02",
+          "07dc492688ad560830081c8bdce5061e3a69e92a11aebbd73490c8aa71c4ec02",
+          "07dc492688ad560830081c8bdce5061e3a69e92a11aebbd73490c8aa71c4ec02"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "normalisation.amplitude",
+        "sha256_by_invocation": [
+          "5d0ddbcf1766d5b2f7fab054254680e01374c557c91ad9ca5468d95400200757",
+          "5d0ddbcf1766d5b2f7fab054254680e01374c557c91ad9ca5468d95400200757",
+          "5d0ddbcf1766d5b2f7fab054254680e01374c557c91ad9ca5468d95400200757"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "int8",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "normalisation.policy",
+        "sha256_by_invocation": [
+          "e738b949b7efe9562fd527e2088af92129edb1abbdfcb91cdff78ea49610b7a0",
+          "e738b949b7efe9562fd527e2088af92129edb1abbdfcb91cdff78ea49610b7a0",
+          "e738b949b7efe9562fd527e2088af92129edb1abbdfcb91cdff78ea49610b7a0"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "bool",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "normalisation.rescaled",
+        "sha256_by_invocation": [
+          "f9bd55770fde4cdfec4cd33e62e0fb14af041cfede7334d4e1e65582febfd46f",
+          "f9bd55770fde4cdfec4cd33e62e0fb14af041cfede7334d4e1e65582febfd46f",
+          "f9bd55770fde4cdfec4cd33e62e0fb14af041cfede7334d4e1e65582febfd46f"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "rotation.axis_mach_number",
+        "sha256_by_invocation": [
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41",
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41",
+          "888be166fc612a9d18b91f87832ab18a06389a470e701cc0d0d272fc643d2f41"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "int8",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "rotation.closure",
+        "sha256_by_invocation": [
+          "0a01a6f46962b7c4b949a34e45c3e0e7e4cbc274058cb8e53a8bebf9e11ad0f1",
+          "0a01a6f46962b7c4b949a34e45c3e0e7e4cbc274058cb8e53a8bebf9e11ad0f1",
+          "0a01a6f46962b7c4b949a34e45c3e0e7e4cbc274058cb8e53a8bebf9e11ad0f1"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "rotation.maximum_centrifugal_factor",
+        "sha256_by_invocation": [
+          "73b5f7828bafd1da27f2e67ede1d3cf9945993abeb84c4c1aa7f6acb788dc3cc",
+          "73b5f7828bafd1da27f2e67ede1d3cf9945993abeb84c4c1aa7f6acb788dc3cc",
+          "73b5f7828bafd1da27f2e67ede1d3cf9945993abeb84c4c1aa7f6acb788dc3cc"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "rotation.mean_particle_mass",
+        "sha256_by_invocation": [
+          "e2dc8fa0c4100db57043d5eb6c0937d90af4a238ba618804c9108718808a813d",
+          "e2dc8fa0c4100db57043d5eb6c0937d90af4a238ba618804c9108718808a813d",
+          "e2dc8fa0c4100db57043d5eb6c0937d90af4a238ba618804c9108718808a813d"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "rotation.minimum_centrifugal_factor",
+        "sha256_by_invocation": [
+          "73b5f7828bafd1da27f2e67ede1d3cf9945993abeb84c4c1aa7f6acb788dc3cc",
+          "73b5f7828bafd1da27f2e67ede1d3cf9945993abeb84c4c1aa7f6acb788dc3cc",
+          "73b5f7828bafd1da27f2e67ede1d3cf9945993abeb84c4c1aa7f6acb788dc3cc"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "rotation.reference_radius",
+        "sha256_by_invocation": [
+          "e2dc8fa0c4100db57043d5eb6c0937d90af4a238ba618804c9108718808a813d",
+          "e2dc8fa0c4100db57043d5eb6c0937d90af4a238ba618804c9108718808a813d",
+          "e2dc8fa0c4100db57043d5eb6c0937d90af4a238ba618804c9108718808a813d"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "topology.axis",
+        "sha256_by_invocation": [
+          "449adfc0442dd38174695b44e4accd6f926cc7ce5fbc949d65e5753f64be2989",
+          "449adfc0442dd38174695b44e4accd6f926cc7ce5fbc949d65e5753f64be2989",
+          "449adfc0442dd38174695b44e4accd6f926cc7ce5fbc949d65e5753f64be2989"
+        ],
+        "shape": [
+          1,
+          2
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "topology.axis_flux",
+        "sha256_by_invocation": [
+          "299296e445ef24c365c8a95b3833a0cf0345492a5c6303fc160a18b8dee2e020",
+          "299296e445ef24c365c8a95b3833a0cf0345492a5c6303fc160a18b8dee2e020",
+          "299296e445ef24c365c8a95b3833a0cf0345492a5c6303fc160a18b8dee2e020"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "topology.boundary",
+        "sha256_by_invocation": [
+          "23d5d851c3347a2b34d04f156a7d20c2933d2ed8e7836d8dd8061e9225ccee3f",
+          "23d5d851c3347a2b34d04f156a7d20c2933d2ed8e7836d8dd8061e9225ccee3f",
+          "23d5d851c3347a2b34d04f156a7d20c2933d2ed8e7836d8dd8061e9225ccee3f"
+        ],
+        "shape": [
+          1,
+          2
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "topology.boundary_flux",
+        "sha256_by_invocation": [
+          "c1e851b1a383327797694a4e7ee1eb72b6eb0f9f909175f60f6f0f3214ecbfad",
+          "c1e851b1a383327797694a4e7ee1eb72b6eb0f9f909175f60f6f0f3214ecbfad",
+          "c1e851b1a383327797694a4e7ee1eb72b6eb0f9f909175f60f6f0f3214ecbfad"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "bool",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "topology.diverted",
+        "sha256_by_invocation": [
+          "450fe6bdcd24d933cd02f8f0a996321f322cbe5f726b67c179d9d79cd76ab91d",
+          "450fe6bdcd24d933cd02f8f0a996321f322cbe5f726b67c179d9d79cd76ab91d",
+          "450fe6bdcd24d933cd02f8f0a996321f322cbe5f726b67c179d9d79cd76ab91d"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "topology.wall_point",
+        "sha256_by_invocation": [
+          "23d5d851c3347a2b34d04f156a7d20c2933d2ed8e7836d8dd8061e9225ccee3f",
+          "23d5d851c3347a2b34d04f156a7d20c2933d2ed8e7836d8dd8061e9225ccee3f",
+          "23d5d851c3347a2b34d04f156a7d20c2933d2ed8e7836d8dd8061e9225ccee3f"
+        ],
+        "shape": [
+          1,
+          2
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "topology.wall_point_flux",
+        "sha256_by_invocation": [
+          "c1e851b1a383327797694a4e7ee1eb72b6eb0f9f909175f60f6f0f3214ecbfad",
+          "c1e851b1a383327797694a4e7ee1eb72b6eb0f9f909175f60f6f0f3214ecbfad",
+          "c1e851b1a383327797694a4e7ee1eb72b6eb0f9f909175f60f6f0f3214ecbfad"
+        ],
+        "shape": [
+          1
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "topology.x_point",
+        "sha256_by_invocation": [
+          "958cdf309afa295ac228c207b1cf772b585705f70aa588e05ba457f3ff91fff8",
+          "958cdf309afa295ac228c207b1cf772b585705f70aa588e05ba457f3ff91fff8",
+          "958cdf309afa295ac228c207b1cf772b585705f70aa588e05ba457f3ff91fff8"
+        ],
+        "shape": [
+          1,
+          2
+        ]
+      },
+      {
+        "bitwise_identical": true,
+        "bitwise_unequal_element_count_by_invocation": [
+          0,
+          0,
+          0
+        ],
+        "dtype": "float64",
+        "maximum_absolute_difference": 0.0,
+        "maximum_bitwise_unequal_element_count": 0,
+        "maximum_relative_difference": 0.0,
+        "name": "topology.x_point_flux",
+        "sha256_by_invocation": [
+          "dbda8430be72e89d74d49436d9876aa6a6cde66d2ea8269d926f7dc3145100b1",
+          "dbda8430be72e89d74d49436d9876aa6a6cde66d2ea8269d926f7dc3145100b1",
+          "dbda8430be72e89d74d49436d9876aa6a6cde66d2ea8269d926f7dc3145100b1"
+        ],
+        "shape": [
+          1
+        ]
+      }
+    ],
+    "terminal_flux": {
+      "bitwise_identical": true,
+      "bitwise_unequal_element_count_by_invocation": [
+        0,
+        0,
+        0
+      ],
+      "dtype": "float64",
+      "maximum_absolute_difference": 0.0,
+      "maximum_bitwise_unequal_element_count": 0,
+      "maximum_relative_difference": 0.0,
+      "name": "terminal_flux",
+      "sha256_by_invocation": [
+        "e3a28c28ae1133fca73fccda130f63c7d3a548d35a2d588802d4782bf01124f6",
+        "e3a28c28ae1133fca73fccda130f63c7d3a548d35a2d588802d4782bf01124f6",
+        "e3a28c28ae1133fca73fccda130f63c7d3a548d35a2d588802d4782bf01124f6"
+      ],
+      "shape": [
+        1,
+        1126
+      ]
+    },
+    "within_process_cache_toggle_bitwise_identical": true
+  },
+  "measurement_contract": {
+    "device_requirement": "one NVIDIA H200 NVL at float64",
+    "distinct_process_ids": [
+      2332526,
+      2337678,
+      2341548
+    ],
+    "fresh_input_copies_per_execute": true,
+    "frozen_case": {
+      "batch_size": 1,
+      "case_id": "21978/35",
+      "initial_flux_sha256": "2c96dd23bd4b814f4f0f2239b3ab253ebdf7e71dd4fc6d57356a397a2ce5de7b",
+      "shot": 21978,
+      "slice_index": 35,
+      "target_current_sha256": "2cf322c0490c13e9986dc410e00da36502a261e8b796acf7f5ef895ce2b19133",
+      "time_s": 0.1899999976158142
+    },
+    "process_invocations": 3,
+    "registered_observable_count": 69,
+    "route": "ForwardProfile.solve_batch through the production tile evaluator",
+    "steady_timing_pairs_per_process": 7,
+    "timing_separation": "runtime import, production profile/operator preparation, lowering and compile-or-cache-load are timed once per process; steady execute is measured afterward in paired cache-enabled and cache-disabled launches of the same compiled executable"
+  },
+  "production_compilation_cache": {
+    "cache_hits_by_invocation": [
+      0,
+      1,
+      1
+    ],
+    "compile_seconds_saved_by_invocation": [
+      0.0,
+      3.606119466945529,
+      3.6280285455286503
+    ],
+    "explicit_configuration": {
+      "directory": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054656041195-production-compilation-control/measurement-1254407/cache-home/nova/production-forward",
+      "explicit": true,
+      "maximum_bytes": 2147483648,
+      "minimum_compile_seconds": 1.0,
+      "resolved_directory": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054656041195-production-compilation-control/measurement-1254407/cache-home/nova/production-forward",
+      "selection": "fixed_persistent"
+    },
+    "explicit_configuration_proved": true,
+    "inherited_inputs_by_invocation": [
+      {
+        "jax_compilation_cache_dir": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054656041195-production-compilation-control/measurement-1254407/inherited-jax-cache",
+        "nova_compilation_cache": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054656041195-production-compilation-control/measurement-1254407/inherited-nova-cache"
+      },
+      {
+        "jax_compilation_cache_dir": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054656041195-production-compilation-control/measurement-1254407/inherited-jax-cache",
+        "nova_compilation_cache": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054656041195-production-compilation-control/measurement-1254407/inherited-nova-cache"
+      },
+      {
+        "jax_compilation_cache_dir": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054656041195-production-compilation-control/measurement-1254407/inherited-jax-cache",
+        "nova_compilation_cache": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054656041195-production-compilation-control/measurement-1254407/inherited-nova-cache"
+      }
+    ],
+    "persistent_reuse_confirmed": true,
+    "resolved_directory_by_invocation": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054656041195-production-compilation-control/measurement-1254407/cache-home/nova/production-forward",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054656041195-production-compilation-control/measurement-1254407/cache-home/nova/production-forward",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054656041195-production-compilation-control/measurement-1254407/cache-home/nova/production-forward"
+    ],
+    "warm_invocation_cache_hits": [
+      1,
+      1
+    ]
+  },
+  "source_identity": {
+    "commit_sha": "6895952a232c34506ea1008849622c4c5995e8ce",
+    "module_sha256": "55293795c55c4e728222499b956dfa71ce990cffa5afeff971d6b3dac4527ae2",
+    "runner_sha256": "dc293f7e37b9cc576e0d847c14171ca4fe68e499fdfdde6b545526f8cd86194e",
+    "tree_sha": "b02725dd7cf1a2ee5bbcb8fd405748fbbe327e7f"
+  },
+  "status": "complete",
+  "steady_state_cost": {
+    "cache_disabled_execute_seconds_per_slice": [
+      0.041971657425165176,
+      0.04145191237330437,
+      0.04153998475521803,
+      0.04108130373060703,
+      0.040949624963104725,
+      0.04096098616719246,
+      0.04092724807560444,
+      0.040861865505576134,
+      0.04046488832682371,
+      0.040986498817801476,
+      0.04052722733467817,
+      0.04053800832480192,
+      0.04058234393596649,
+      0.04031753819435835,
+      0.04053780157119036,
+      0.04028167389333248,
+      0.04026190657168627,
+      0.04032874759286642,
+      0.04023169353604317,
+      0.04048532620072365,
+      0.04046361614018679
+    ],
+    "cache_enabled_execute_seconds_per_slice": [
+      0.04142709728330374,
+      0.04126639850437641,
+      0.041179072111845016,
+      0.04081995040178299,
+      0.04100134689360857,
+      0.0409394558519125,
+      0.04095398914068937,
+      0.04073624312877655,
+      0.040674347430467606,
+      0.04047823138535023,
+      0.04062184691429138,
+      0.04060504026710987,
+      0.04044191259890795,
+      0.04040359891951084,
+      0.04050252214074135,
+      0.04049593769013882,
+      0.04014069400727749,
+      0.040358519181609154,
+      0.0402994342148304,
+      0.04038037173449993,
+      0.04033766780048609
+    ],
+    "child_elapsed_seconds_before_receipt_write_by_invocation": [
+      32.999850772321224,
+      26.364857668057084,
+      27.18778453860432
+    ],
+    "cold_driver_upper_bound_percent": 2.1971256764727887,
+    "cold_driver_upper_bound_seconds_per_slice": 0.11300887924929537,
+    "cost_within_cold_driver_upper_bound": true,
+    "lowering_seconds_by_invocation": [
+      0.8660578113049269,
+      0.8627193868160248,
+      0.8648979607969522
+    ],
+    "median_cache_disabled_seconds_per_slice": 0.04053800832480192,
+    "median_cache_enabled_seconds_per_slice": 0.04060504026710987,
+    "median_control_delta_percent": -0.08702803099338335,
+    "median_control_delta_seconds_per_slice": -3.527943044900894e-05,
+    "one_time_compile_or_cache_load_seconds_by_invocation": [
+      4.366750932298601,
+      0.41424654703587294,
+      0.3924280721694231
+    ],
+    "one_time_preparation_and_compilation_seconds_by_invocation": [
+      31.770160162821412,
+      25.38360291160643,
+      25.488890314474702
+    ],
+    "paired_control_delta_seconds_per_slice": [
+      -0.0005445601418614388,
+      -0.00018551386892795563,
+      -0.00036091264337301254,
+      -0.0002613533288240433,
+      5.1721930503845215e-05,
+      -2.1530315279960632e-05,
+      2.6741065084934235e-05,
+      -0.00012562237679958344,
+      0.0002094591036438942,
+      -0.0005082674324512482,
+      9.461957961320877e-05,
+      6.703194230794907e-05,
+      -0.00014043133705854416,
+      8.606072515249252e-05,
+      -3.527943044900894e-05,
+      0.00021426379680633545,
+      -0.00012121256440877914,
+      2.9771588742733002e-05,
+      6.774067878723145e-05,
+      -0.00010495446622371674,
+      -0.00012594833970069885
+    ],
+    "production_profile_and_operator_preparation_seconds_by_invocation": [
+      16.396116357296705,
+      16.176605312153697,
+      16.25685495696962
+    ],
+    "qualification": "steady execute toggles only the cache setting after one executable has compiled, isolating per-slice control overhead from lowering, compilation, cache loading and process startup",
+    "runtime_import_seconds_by_invocation": [
+      10.14123506192118,
+      7.930031665600836,
+      7.974709324538708
+    ],
+    "warmup_execute_seconds_by_invocation": [
+      0.36285299342125654,
+      0.10866945143789053,
+      0.0783189395442605
+    ]
+  },
+  "verdict": "PASS"
+}

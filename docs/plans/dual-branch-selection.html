@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 <meta name="plan-commits" content="632a4396,991d5d6e,5cdcaf72,3387739f,0bd3af3d,c64440e8">
 <meta name="plan-artifacts" content="benchmarks/traced_selection_seam.py,benchmarks/pinned_branch_contrast.py,benchmarks/fork_arming_economics.py,benchmarks/two_branch_batch_cost.py,nova/equilibrium/branch_selection.py,docs/figures/dual-branch-selection/traced-selection-continuity.json,docs/figures/dual-branch-selection/pinned-branch-contrast.json,docs/figures/dual-branch-selection/fork-arming-economics.json,docs/figures/dual-branch-selection/two-branch-batch-cost.json,docs/evidence/archive/dual-branch-selection-landed.html">
 <meta name="plan-impl" content="0.6">
@@ -540,6 +540,12 @@
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260825T104524221366-traced-selector-state" data-who="selection-proto" data-when="2026-08-25T10:55:22Z">
     <div class="r-comment-body"><p>The traced path lives in nova/equilibrium/branch_selection.py, its canonical home, with no parallel module - the host selector now DELEGATES its transition semantics to the array core rather than duplicating them, and the host SelectionReceipt remains the provenance egress. All 14 existing semantic-oracle cases pass unchanged, 18 total in the file. The traced property is PROVEN rather than asserted: the test inspects jax.make_jaxpr for a scan primitive and runs jit(vmap(...)) over 3 independent batches by 4 time steps. Degrade-path accounting landed as §5 required and confirms the concern - that cohort records 2 degrade-path firings against 1 genuinely two-qualified selection. Design roles held: p_diverted alone carries the smooth blend and has nonzero gradients, class_margin stays a separate exact comparator, and non-finite margins are explicitly UNCLASSIFIED rather than defaulted, which is the honest handling of the four absent operands. It made no continuity claim at saddle-operand emergence, as fenced, and introduced no private operator attribute access.</p></div>
 </div>
+</section>
+<section data-reckon="questions" id="questions" class="r-questions">
+<h2><span class="sec">§</span> Open questions</h2>
+<div class="r-q" data-id="q-20260825T115513679805" data-section="s4" data-status="open" data-opened-by="Simon McIntosh" data-opened-at="2026-08-25" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body">Is the fork load bearing at all? A converged state's topology class should be determined by the connectivity of its own flood-filled cell map, so a converged limited root cannot be reported diverted, nor a diverted root limited. If that holds, one branch is excludable on topology grounds after a single solve and the fork buys only the chance of landing in a different basin. Three measurements already lean that way. No banked artifact carries two nondegenerate qualified roots AT ONE FRAME - the H200 cost node said so explicitly when declining to claim shared-operator fusion, and the machine-precision diverted root at 3.584e-16 and the machine-precision limited root at 2.409e-16 were reached on DIFFERENT references. The degrade path fires on two of three selections in the traced selector's landing cohort, so the second branch is mostly unused. And the branches are not symmetric under perturbation: diverted held 4/4 and 16/16 while limited converged 1/4 and 1/16 at 1e-4 to 5e-4 and 0/4 and 0/16 at 5e-4 to 1e-3. If no single frame admits two qualified roots of different class, the fork is solving for a root that is not present and the always-fork versus margin-armed decision is moot, because the answer would be neither. Dispatched as node class-coreachability.</p>
+    </div>
 </section>
 </main>
 </body>

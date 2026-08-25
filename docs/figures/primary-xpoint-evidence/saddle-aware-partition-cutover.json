@@ -1,0 +1,202 @@
+{
+  "artifact": "saddle-aware production partition cutover",
+  "method": {
+    "after_partition": "six-neighbour bulk adjacency gated by shared-edge flux strictly on the magnetic-axis side of the binding saddle",
+    "before_partition": "four-neighbour rectangular flood fill",
+    "cohort": "the 12 frozen MAST arms and the first DIII-D physical-ring terminal used by the reachable-wall limiter measurement",
+    "existing_banks_rewritten": false,
+    "reachable_segment_count": "fixed 420-sample production wall reachability mask",
+    "source_before": "docs/figures/primary-xpoint-evidence/reachable-wall-limiter-point.json",
+    "source_reachability": "docs/figures/primary-xpoint-evidence/real-equilibria-reachability-grid.json"
+  },
+  "performance": {
+    "corrected_labelling_median_ms_33x33": 0.674666,
+    "four_neighbour_labelling_median_ms_33x33": 0.4911435,
+    "ratio": 1.373657191,
+    "qualification": "warmed per-slice wall-clock, compilation excluded"
+  },
+  "rows": [
+    {
+      "after_class_margin": 0.02643334256296942,
+      "after_reachable_segment_count": 10,
+      "after_wall_shadowed": true,
+      "arm": "pure",
+      "before_class_margin": 0.02643334256296942,
+      "before_reachable_segment_count": 10,
+      "before_wall_shadowed": true,
+      "changed": false,
+      "identity": "21978/35",
+      "machine": "MAST"
+    },
+    {
+      "after_class_margin": null,
+      "after_class_margin_nonfinite": "positive_infinity",
+      "after_reachable_segment_count": 0,
+      "after_wall_shadowed": true,
+      "arm": "mixed",
+      "before_class_margin": null,
+      "before_class_margin_nonfinite": "positive_infinity",
+      "before_reachable_segment_count": 0,
+      "before_wall_shadowed": true,
+      "changed": false,
+      "identity": "21978/35",
+      "machine": "MAST"
+    },
+    {
+      "after_class_margin": 0.020742069585375056,
+      "after_reachable_segment_count": 17,
+      "after_wall_shadowed": true,
+      "arm": "pure",
+      "before_class_margin": 0.020742069585375056,
+      "before_reachable_segment_count": 17,
+      "before_wall_shadowed": true,
+      "changed": false,
+      "identity": "21983/35",
+      "machine": "MAST"
+    },
+    {
+      "after_class_margin": null,
+      "after_class_margin_nonfinite": "positive_infinity",
+      "after_reachable_segment_count": 0,
+      "after_wall_shadowed": true,
+      "arm": "mixed",
+      "before_class_margin": null,
+      "before_class_margin_nonfinite": "positive_infinity",
+      "before_reachable_segment_count": 0,
+      "before_wall_shadowed": true,
+      "changed": false,
+      "identity": "21983/35",
+      "machine": "MAST"
+    },
+    {
+      "after_class_margin": -0.20244353307105098,
+      "after_reachable_segment_count": 64,
+      "after_wall_shadowed": false,
+      "arm": "pure",
+      "before_class_margin": -0.20883188747508463,
+      "before_reachable_segment_count": 64,
+      "before_wall_shadowed": false,
+      "changed": true,
+      "identity": "21985/51",
+      "machine": "MAST"
+    },
+    {
+      "after_class_margin": -0.20690786316844229,
+      "after_reachable_segment_count": 64,
+      "after_wall_shadowed": false,
+      "arm": "mixed",
+      "before_class_margin": -0.21381259149673346,
+      "before_reachable_segment_count": 64,
+      "before_wall_shadowed": false,
+      "changed": true,
+      "identity": "21985/51",
+      "machine": "MAST"
+    },
+    {
+      "after_class_margin": -0.14822516784583772,
+      "after_reachable_segment_count": 47,
+      "after_wall_shadowed": false,
+      "arm": "pure",
+      "before_class_margin": -0.14822516784583772,
+      "before_reachable_segment_count": 47,
+      "before_wall_shadowed": false,
+      "changed": false,
+      "identity": "21986/46",
+      "machine": "MAST"
+    },
+    {
+      "after_class_margin": -0.1550617259300976,
+      "after_reachable_segment_count": 49,
+      "after_wall_shadowed": false,
+      "arm": "mixed",
+      "before_class_margin": -0.162429664876029,
+      "before_reachable_segment_count": 49,
+      "before_wall_shadowed": true,
+      "changed": true,
+      "identity": "21986/46",
+      "machine": "MAST"
+    },
+    {
+      "after_class_margin": null,
+      "after_class_margin_nonfinite": "positive_infinity",
+      "after_reachable_segment_count": 0,
+      "after_wall_shadowed": true,
+      "arm": "pure",
+      "before_class_margin": null,
+      "before_class_margin_nonfinite": "positive_infinity",
+      "before_reachable_segment_count": 0,
+      "before_wall_shadowed": true,
+      "changed": false,
+      "identity": "21989/55",
+      "machine": "MAST"
+    },
+    {
+      "after_class_margin": -0.16144185077476397,
+      "after_reachable_segment_count": 47,
+      "after_wall_shadowed": false,
+      "arm": "mixed",
+      "before_class_margin": -0.16144185077476403,
+      "before_reachable_segment_count": 47,
+      "before_wall_shadowed": false,
+      "changed": false,
+      "identity": "21989/55",
+      "machine": "MAST"
+    },
+    {
+      "after_class_margin": null,
+      "after_class_margin_nonfinite": "positive_infinity",
+      "after_reachable_segment_count": 0,
+      "after_wall_shadowed": true,
+      "arm": "pure",
+      "before_class_margin": -0.13667745993997593,
+      "before_reachable_segment_count": 43,
+      "before_wall_shadowed": true,
+      "changed": true,
+      "identity": "22086/43",
+      "machine": "MAST"
+    },
+    {
+      "after_class_margin": null,
+      "after_class_margin_nonfinite": "positive_infinity",
+      "after_reachable_segment_count": 0,
+      "after_wall_shadowed": true,
+      "arm": "mixed",
+      "before_class_margin": null,
+      "before_class_margin_nonfinite": "positive_infinity",
+      "before_reachable_segment_count": 0,
+      "before_wall_shadowed": true,
+      "changed": false,
+      "identity": "22086/43",
+      "machine": "MAST"
+    },
+    {
+      "after_class_margin": -0.3322617796735004,
+      "after_reachable_segment_count": 178,
+      "after_wall_shadowed": false,
+      "arm": "physical ring",
+      "before_class_margin": -0.33226177967350057,
+      "before_reachable_segment_count": 178,
+      "before_wall_shadowed": false,
+      "changed": false,
+      "identity": "00000c4a7b/179",
+      "machine": "DIII-D"
+    }
+  ],
+  "summary": {
+    "changed_mast_rows": [
+      "21985/51 pure",
+      "21985/51 mixed",
+      "21986/46 mixed",
+      "22086/43 pure"
+    ],
+    "diiid_absolute_margin_shift": 1.6653345369377348e-16,
+    "diiid_margin_tolerance": 0.001,
+    "diiid_within_tolerance": true,
+    "mast_finite_margins_after": 7,
+    "mast_finite_margins_before": 8,
+    "mast_rows": 12,
+    "wall_shadow_verdict_changes": [
+      "21986/46 mixed: shadowed to admitted"
+    ]
+  }
+}

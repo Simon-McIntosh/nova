@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T22:49:37",
+  "updated": "2026-08-25T22:59:14",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -239,7 +239,10 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a03471-92b4-71b1-80bf-7473d45df689",
-        "created": "2026-08-24"
+        "created": "2026-08-24",
+        "sessions": {
+          "gpt-5.6-sol": "01a03ab5-5338-76b2-9b10-7f8383a1922c"
+        }
       },
       {
         "id": "conditioning-repair",
@@ -413,8 +416,12 @@
         "id": "efit-prior-art",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "created": "2026-08-25"
+        "session_id": "01a03ab5-2ce9-75b0-b3db-7abebb0c9ecc",
+        "created": "2026-08-25",
+        "sessions": {
+          "gpt-5.6-sol": "01a03ab5-2ce9-75b0-b3db-7abebb0c9ecc"
+        },
+        "session_model": "gpt-5.6-sol"
       },
       {
         "id": "efit-referee",
@@ -514,8 +521,12 @@
         "id": "geometry-scout",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "created": "2026-08-21"
+        "session_id": "01a03ab5-aac2-7db1-92fa-1804cf78891f",
+        "created": "2026-08-21",
+        "sessions": {
+          "gpt-5.6-sol": "01a03ab5-aac2-7db1-92fa-1804cf78891f"
+        },
+        "session_model": "gpt-5.6-sol"
       },
       {
         "id": "geometry-solve",
@@ -1003,6 +1014,17 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "stall-witness",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03ab7-ff98-7c11-b0e4-7e7ccc7eaa83",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03ab7-ff98-7c11-b0e4-7e7ccc7eaa83"
+        },
+        "created": "2026-08-25"
       },
       {
         "id": "state-repetition",
@@ -37073,6 +37095,6 @@
       }
     ],
     "holds": [],
-    "_version": 878
+    "_version": 883
   }
 }

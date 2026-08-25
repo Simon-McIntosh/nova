@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T08:47:19",
+  "updated": "2026-08-25T08:58:25",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -32516,9 +32516,202 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T064552364099-s15-reasoning-audit",
+        "plan": "coefficient-space-newton",
+        "section": "",
+        "node": "s15-reasoning-audit",
+        "role": "implement",
+        "spec_level": "",
+        "member": "s15-audit-reasoning",
+        "backend": "claude",
+        "agent": {
+          "backend": "claude",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T06:46:01Z",
+        "completed_at": "2026-08-25T06:56:07.157Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 599,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 606,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "5e3d56ea373dcad8508d312fe41499f8403cd559",
+        "commits": [
+          "d9007600ee27ffa4a54f1fbcb2a9f8e97a0aa6b2"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "unresolvable_revision"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T064552364099-s15-reasoning-audit/manifest.md",
+        "scope_changed": false,
+        "session_id": "b9d16a22-24f3-4c22-998f-707db60ea3b8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 164467,
+            "cache_creation_input_tokens_cumulative": 164467,
+            "cache_read_input_tokens": 4180336,
+            "cache_read_input_tokens_cumulative": 4180336,
+            "inference_geo": "not_available",
+            "input_tokens": 76,
+            "input_tokens_cumulative": 76,
+            "output_tokens": 39954,
+            "output_tokens_cumulative": 39954,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 4.734068000000001,
+          "detail": "rate-limit event carried no numeric utilisation",
+          "cost_usd_cumulative": 4.734068000000001
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260825T064027095403-s15-reasoning-audit",
+          "root_run_id": "r-20260825T064027095403-s15-reasoning-audit"
+        },
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "redispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T064058038020-s15-evidence-audit",
+        "plan": "plateau-input-attribution",
+        "section": "",
+        "node": "s15-evidence-audit",
+        "role": "implement",
+        "spec_level": "",
+        "member": "s15-audit-evidence",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T06:41:09Z",
+        "completed_at": "2026-08-25T06:55:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 889,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 889,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "f243a3e30d34512d207a4efbd07518840938c5a6",
+        "commits": [
+          "82ac02f4cc722ace9ffa7de19468e686f44d6b05"
+        ],
+        "changed_lines": {
+          "added": 241,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T064058038020-s15-evidence-audit/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a037a6-c014-7f80-b406-ff921c7efa09",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7250944,
+            "cached_input_tokens_cumulative": 7250944,
+            "input_tokens": 7569433,
+            "input_tokens_cumulative": 7569433,
+            "output_tokens": 30559,
+            "output_tokens_cumulative": 30559,
+            "reasoning_output_tokens": 8452,
+            "reasoning_output_tokens_cumulative": 8452
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 3199,
+              "log_age_seconds": 769,
+              "log_fresh": true,
+              "manifest_commits": [
+                "479667ed6999c37958c6ad3a3d7e16854b625770"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T054733438043-higher-order-contour-extraction/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260825T054733438043-higher-order-contour-extraction --gate <verdict> --commit 479667ed6999c37958c6ad3a3d7e16854b625770",
+              "node": "higher-order-contour-extraction",
+              "phase": "working",
+              "plan": "coefficient-space-newton",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260825T054733438043-higher-order-contour-extraction",
+              "terminal_age_seconds": 811,
+              "terminal_at": "2026-08-25T06:27:33Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s-20260824-s15/higher-order-contour-extraction"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 809
+    "_version": 811
   }
 }

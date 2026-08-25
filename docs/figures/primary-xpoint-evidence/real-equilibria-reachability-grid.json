@@ -1,0 +1,672 @@
+{
+  "artifact": "real-equilibrium pre-saddle wall reachability grid",
+  "coverage": {
+    "double_null_first_crossing_available_in_reconstructed_bank": false,
+    "machines": [
+      "DIII-D",
+      "ITER",
+      "MAST"
+    ],
+    "mandatory_references_present": true,
+    "panel_count": 4,
+    "topologies": [
+      "diverted",
+      "limited"
+    ]
+  },
+  "mast_axis_seed_audit": [
+    {
+      "arm": "pure",
+      "axis_to_classified_cell_distance_m": 0.010273923011193438,
+      "axis_to_nominal_nearest_cell_distance_m": 0.010273923011193438,
+      "classification_inward_offset_wb": 0.0002037849339989549,
+      "classification_level_wb_from_axis_outward": 0.3837885084463562,
+      "nominal_axis_cell_exclusion_reason": null,
+      "nominal_nearest_axis_cell_confined": true,
+      "nominal_nearest_axis_cell_outward_flux_wb": -0.0,
+      "selected_saddle_level_wb_from_axis_outward": 0.3839922933803552,
+      "shot_slice": "21978/35"
+    },
+    {
+      "arm": "mixed",
+      "axis_to_classified_cell_distance_m": 0.02993790487284452,
+      "axis_to_nominal_nearest_cell_distance_m": 0.02993790487284452,
+      "classification_inward_offset_wb": 0.0002024765698907393,
+      "classification_level_wb_from_axis_outward": 0.37903052443999685,
+      "nominal_axis_cell_exclusion_reason": null,
+      "nominal_nearest_axis_cell_confined": true,
+      "nominal_nearest_axis_cell_outward_flux_wb": -0.0,
+      "selected_saddle_level_wb_from_axis_outward": 0.3792330010098876,
+      "shot_slice": "21978/35"
+    },
+    {
+      "arm": "pure",
+      "axis_to_classified_cell_distance_m": 0.016499409968033656,
+      "axis_to_nominal_nearest_cell_distance_m": 0.016499409968033656,
+      "classification_inward_offset_wb": 0.00021249772257913555,
+      "classification_level_wb_from_axis_outward": 0.40724520590721036,
+      "nominal_axis_cell_exclusion_reason": null,
+      "nominal_nearest_axis_cell_confined": true,
+      "nominal_nearest_axis_cell_outward_flux_wb": -0.0,
+      "selected_saddle_level_wb_from_axis_outward": 0.4074577036297895,
+      "shot_slice": "21983/35"
+    },
+    {
+      "arm": "mixed",
+      "axis_to_classified_cell_distance_m": 0.044146600884222384,
+      "axis_to_nominal_nearest_cell_distance_m": 0.044146600884222384,
+      "classification_inward_offset_wb": 0.00021151063428358322,
+      "classification_level_wb_from_axis_outward": 0.39940883936766647,
+      "nominal_axis_cell_exclusion_reason": null,
+      "nominal_nearest_axis_cell_confined": true,
+      "nominal_nearest_axis_cell_outward_flux_wb": -0.0,
+      "selected_saddle_level_wb_from_axis_outward": 0.39962035000195006,
+      "shot_slice": "21983/35"
+    },
+    {
+      "arm": "pure",
+      "axis_to_classified_cell_distance_m": 0.14132803509327088,
+      "axis_to_nominal_nearest_cell_distance_m": 0.04750638082384214,
+      "classification_inward_offset_wb": 0.0002852413082705959,
+      "classification_level_wb_from_axis_outward": 0.22267493130165428,
+      "nominal_axis_cell_exclusion_reason": "nearest_grid_cell_outside_material_mask",
+      "nominal_nearest_axis_cell_confined": false,
+      "nominal_nearest_axis_cell_outward_flux_wb": -0.0,
+      "selected_saddle_level_wb_from_axis_outward": 0.22296017260992487,
+      "shot_slice": "21985/51"
+    },
+    {
+      "arm": "mixed",
+      "axis_to_classified_cell_distance_m": 0.1400614501097796,
+      "axis_to_nominal_nearest_cell_distance_m": 0.04530182849108573,
+      "classification_inward_offset_wb": 0.0002826325371902693,
+      "classification_level_wb_from_axis_outward": 0.23356149042179647,
+      "nominal_axis_cell_exclusion_reason": "nearest_grid_cell_outside_material_mask",
+      "nominal_nearest_axis_cell_confined": false,
+      "nominal_nearest_axis_cell_outward_flux_wb": -0.0,
+      "selected_saddle_level_wb_from_axis_outward": 0.23384412295898674,
+      "shot_slice": "21985/51"
+    },
+    {
+      "arm": "pure",
+      "axis_to_classified_cell_distance_m": 0.05571643350771628,
+      "axis_to_nominal_nearest_cell_distance_m": 0.05571643350771628,
+      "classification_inward_offset_wb": 0.000256883881641781,
+      "classification_level_wb_from_axis_outward": 0.5270200435768085,
+      "nominal_axis_cell_exclusion_reason": null,
+      "nominal_nearest_axis_cell_confined": true,
+      "nominal_nearest_axis_cell_outward_flux_wb": -0.0,
+      "selected_saddle_level_wb_from_axis_outward": 0.5272769274584503,
+      "shot_slice": "21986/46"
+    },
+    {
+      "arm": "mixed",
+      "axis_to_classified_cell_distance_m": 0.05551871819573854,
+      "axis_to_nominal_nearest_cell_distance_m": 0.05551871819573854,
+      "classification_inward_offset_wb": 0.000253055030920308,
+      "classification_level_wb_from_axis_outward": 0.5421691386603333,
+      "nominal_axis_cell_exclusion_reason": null,
+      "nominal_nearest_axis_cell_confined": true,
+      "nominal_nearest_axis_cell_outward_flux_wb": -0.0,
+      "selected_saddle_level_wb_from_axis_outward": 0.5424221936912537,
+      "shot_slice": "21986/46"
+    },
+    {
+      "arm": "pure",
+      "axis_to_classified_cell_distance_m": 0.022877963285007036,
+      "axis_to_nominal_nearest_cell_distance_m": 0.022877963285007036,
+      "classification_inward_offset_wb": 0.000281222585800967,
+      "classification_level_wb_from_axis_outward": 0.5407889564956211,
+      "nominal_axis_cell_exclusion_reason": null,
+      "nominal_nearest_axis_cell_confined": true,
+      "nominal_nearest_axis_cell_outward_flux_wb": -0.0,
+      "selected_saddle_level_wb_from_axis_outward": 0.5410701790814221,
+      "shot_slice": "21989/55"
+    },
+    {
+      "arm": "mixed",
+      "axis_to_classified_cell_distance_m": 0.029911582959576424,
+      "axis_to_nominal_nearest_cell_distance_m": 0.029911582959576424,
+      "classification_inward_offset_wb": 0.00027919478418222813,
+      "classification_level_wb_from_axis_outward": 0.5364666077181208,
+      "nominal_axis_cell_exclusion_reason": null,
+      "nominal_nearest_axis_cell_confined": true,
+      "nominal_nearest_axis_cell_outward_flux_wb": -0.0,
+      "selected_saddle_level_wb_from_axis_outward": 0.5367458025023031,
+      "shot_slice": "21989/55"
+    },
+    {
+      "arm": "pure",
+      "axis_to_classified_cell_distance_m": 0.014428287036862962,
+      "axis_to_nominal_nearest_cell_distance_m": 0.014428287036862962,
+      "classification_inward_offset_wb": 0.00024576125274482826,
+      "classification_level_wb_from_axis_outward": 0.468926620721921,
+      "nominal_axis_cell_exclusion_reason": null,
+      "nominal_nearest_axis_cell_confined": true,
+      "nominal_nearest_axis_cell_outward_flux_wb": -0.0,
+      "selected_saddle_level_wb_from_axis_outward": 0.4691723819746658,
+      "shot_slice": "22086/43"
+    },
+    {
+      "arm": "mixed",
+      "axis_to_classified_cell_distance_m": 0.02632156891525161,
+      "axis_to_nominal_nearest_cell_distance_m": 0.02632156891525161,
+      "classification_inward_offset_wb": 0.0002436227978103113,
+      "classification_level_wb_from_axis_outward": 0.4634146243712397,
+      "nominal_axis_cell_exclusion_reason": null,
+      "nominal_nearest_axis_cell_confined": true,
+      "nominal_nearest_axis_cell_outward_flux_wb": -0.0,
+      "selected_saddle_level_wb_from_axis_outward": 0.46365824716905,
+      "shot_slice": "22086/43"
+    }
+  ],
+  "method": {
+    "definition": "reachable wall segments touch the magnetic-axis-connected component immediately before selected saddle crossing",
+    "fixture_grid_source_commit": "04a4a6ca",
+    "height_band_used": false,
+    "private_predicate": "positive component label unequal to the magnetic-axis component label",
+    "selection_repair_source_commit": "5acfe07b",
+    "topology_assignment": "limited when the axis component reaches the wall before the selected saddle; otherwise double-null when two or more contained typed saddles enter within the measured inward offset at the first crossing, and diverted when only one does",
+    "wall_segment_sampling": 420
+  },
+  "panels": [
+    {
+      "arm": "pure",
+      "axis_component_label": 240,
+      "axis_coordinate_m": [
+        0.9025945759350246,
+        0.015308209992044118
+      ],
+      "axis_to_classified_cell_distance_m": 0.016499409968033656,
+      "axis_to_nominal_nearest_cell_distance_m": 0.016499409968033656,
+      "class_margin": Infinity,
+      "classification_inward_offset_wb": 0.00021249772257913555,
+      "classification_level_wb_from_axis_outward": 0.40724520590721036,
+      "classified_axis_seed_coordinate_m": [
+        0.9087499992456287,
+        0.0
+      ],
+      "connectivity": 4,
+      "contained_typed_saddle_count": 2,
+      "field_source": "reconstructed terminal state from persisted response carrier",
+      "first_crossing_typed_saddle_count": 1,
+      "grid_shape_height_by_radius": [
+        33,
+        33
+      ],
+      "machine": "MAST",
+      "nominal_axis_cell_exclusion_reason": null,
+      "nominal_nearest_axis_cell_confined": true,
+      "nominal_nearest_axis_cell_coordinate_m": [
+        0.9087499992456287,
+        0.0
+      ],
+      "nominal_nearest_axis_cell_outward_flux_wb": -0.0,
+      "panel": "A",
+      "post_repair_class_margin": null,
+      "post_repair_class_margin_nonfinite": "positive_infinity",
+      "post_repair_selected_x_coordinate_m": [
+        0.5444663022219217,
+        1.2491324433637334
+      ],
+      "pre_repair_class_margin": 0.007232963867134623,
+      "pre_repair_selected_x_coordinate_m": [
+        0.4500099684729799,
+        -1.817467111402243
+      ],
+      "private_region_area_m2": 0.2879687501990702,
+      "private_region_count": 4,
+      "public_region_area_m2": 1.9400000013411045,
+      "reachability_available": true,
+      "reachable_wall_segment_count": 17,
+      "selected_saddle_level_wb_from_axis_outward": 0.4074577036297895,
+      "selected_wall_coordinate_m": [
+        0.2800000011920929,
+        -1.638011343762036
+      ],
+      "selected_x_coordinate_m": [
+        0.5444663022219217,
+        1.2491324433637334
+      ],
+      "selection_changed_by_containment": true,
+      "selection_source_commit": "5acfe07b",
+      "selection_status": "selected_typed_saddle",
+      "shadowed_wall_segment_count": 403,
+      "shot": 21983,
+      "shot_slice": "21983/35",
+      "slice_index": 35,
+      "topology": "limited",
+      "typed_saddle_coordinates_m": [
+        [
+          0.17548220509210422,
+          -0.014056671317487899
+        ],
+        [
+          0.4500099684729799,
+          -1.817467111402243
+        ],
+        [
+          0.5423736361132946,
+          -1.223072499546232
+        ],
+        [
+          0.5444663022219217,
+          1.2491324433637334
+        ],
+        [
+          1.6873632281353028,
+          -0.7941951070191566
+        ]
+      ],
+      "typed_saddle_levels_wb_from_axis_outward": [
+        0.4304845210292126,
+        0.3202595532052554,
+        0.41114133800853436,
+        0.4074577036297895,
+        1.007506909443586
+      ],
+      "wall_segment_count": 420
+    },
+    {
+      "arm": "pure",
+      "axis_component_label": 305,
+      "axis_coordinate_m": [
+        0.9129317239302605,
+        0.02249254060198784
+      ],
+      "axis_to_classified_cell_distance_m": 0.022877963285007036,
+      "axis_to_nominal_nearest_cell_distance_m": 0.022877963285007036,
+      "class_margin": Infinity,
+      "classification_inward_offset_wb": 0.000281222585800967,
+      "classification_level_wb_from_axis_outward": 0.5407889564956211,
+      "classified_axis_seed_coordinate_m": [
+        0.9087499992456287,
+        0.0
+      ],
+      "connectivity": 4,
+      "contained_typed_saddle_count": 2,
+      "field_source": "reconstructed terminal state from persisted response carrier",
+      "first_crossing_typed_saddle_count": 1,
+      "grid_shape_height_by_radius": [
+        33,
+        33
+      ],
+      "machine": "MAST",
+      "nominal_axis_cell_exclusion_reason": null,
+      "nominal_nearest_axis_cell_confined": true,
+      "nominal_nearest_axis_cell_coordinate_m": [
+        0.9087499992456287,
+        0.0
+      ],
+      "nominal_nearest_axis_cell_outward_flux_wb": -0.0,
+      "panel": "B",
+      "post_repair_class_margin": null,
+      "post_repair_class_margin_nonfinite": "positive_infinity",
+      "post_repair_selected_x_coordinate_m": [
+        0.5820680211861393,
+        1.1449629505049974
+      ],
+      "pre_repair_class_margin": -0.003395359754118532,
+      "pre_repair_selected_x_coordinate_m": [
+        0.28629809453607435,
+        1.9404807531626882
+      ],
+      "private_region_area_m2": 0.4471093753090827,
+      "private_region_count": 2,
+      "public_region_area_m2": 1.659609376147273,
+      "reachability_available": true,
+      "reachable_wall_segment_count": 0,
+      "selected_saddle_level_wb_from_axis_outward": 0.5410701790814221,
+      "selected_wall_coordinate_m": [
+        0.5649306774139404,
+        1.7665435105225313
+      ],
+      "selected_x_coordinate_m": [
+        0.5820680211861393,
+        1.1449629505049974
+      ],
+      "selection_changed_by_containment": true,
+      "selection_source_commit": "5acfe07b",
+      "selection_status": "selected_typed_saddle",
+      "shadowed_wall_segment_count": 420,
+      "shot": 21989,
+      "shot_slice": "21989/55",
+      "slice_index": 55,
+      "topology": "diverted",
+      "typed_saddle_coordinates_m": [
+        [
+          0.1872472855150667,
+          0.028664785154031196
+        ],
+        [
+          0.28629809453607435,
+          1.9404807531626882
+        ],
+        [
+          0.5716947882762539,
+          -1.1087630337118628
+        ],
+        [
+          0.5820680211861393,
+          1.1449629505049974
+        ],
+        [
+          1.6973841272261256,
+          -0.7986440519287857
+        ]
+      ],
+      "typed_saddle_levels_wb_from_axis_outward": [
+        0.5876026997165884,
+        0.3359876613966812,
+        0.5530488420494026,
+        0.5410701790814221,
+        1.365476899064622
+      ],
+      "wall_segment_count": 420
+    },
+    {
+      "arm": "physical ring",
+      "axis_component_label": 106,
+      "axis_coordinate_m": [
+        1.5655078990038729,
+        -0.7766537035429293
+      ],
+      "axis_to_classified_cell_distance_m": 0.029628081553120023,
+      "axis_to_nominal_nearest_cell_distance_m": 0.029628081553120023,
+      "class_margin": -0.33499260449858165,
+      "classification_inward_offset_wb": 0.0007287551969848596,
+      "classification_level_wb_from_axis_outward": 2.1925442695392863,
+      "classified_axis_seed_coordinate_m": [
+        1.5837499685585499,
+        -0.800000011920929
+      ],
+      "connectivity": 4,
+      "contained_typed_saddle_count": 1,
+      "field_source": "regenerated terminal behind margin-frame-remeasure.json",
+      "first_crossing_typed_saddle_count": 1,
+      "grid_shape_height_by_radius": [
+        33,
+        33
+      ],
+      "machine": "DIII-D",
+      "nominal_axis_cell_exclusion_reason": null,
+      "nominal_nearest_axis_cell_confined": true,
+      "nominal_nearest_axis_cell_coordinate_m": [
+        1.5837499685585499,
+        -0.800000011920929
+      ],
+      "nominal_nearest_axis_cell_outward_flux_wb": -0.0,
+      "panel": "C",
+      "private_region_area_m2": 0.18062500142492352,
+      "private_region_count": 1,
+      "public_region_area_m2": 1.8009375142073256,
+      "reachability_available": true,
+      "reachable_wall_segment_count": 178,
+      "selected_saddle_level_wb_from_axis_outward": 2.1932730247362713,
+      "selected_wall_coordinate_m": [
+        1.4376001489812287,
+        -1.2447745168988193
+      ],
+      "selected_x_coordinate_m": [
+        1.273397130736346,
+        0.7010464877080773
+      ],
+      "selection_source_commit": "5acfe07b",
+      "selection_status": "selected_typed_saddle",
+      "shadowed_wall_segment_count": 242,
+      "shot": "00000c4a7b",
+      "shot_slice": "00000c4a7b/179",
+      "slice_index": 179,
+      "topology": "limited",
+      "typed_saddle_coordinates_m": [
+        [
+          1.273397130736346,
+          0.7010464877080773
+        ]
+      ],
+      "typed_saddle_levels_wb_from_axis_outward": [
+        2.1932730247362713
+      ],
+      "wall_segment_count": 420
+    },
+    {
+      "arm": "banked EQDSK",
+      "axis_component_label": 547,
+      "axis_coordinate_m": [
+        6.399199375,
+        -4.440086823e-05
+      ],
+      "axis_to_classified_cell_distance_m": 0.00768100089062429,
+      "axis_to_nominal_nearest_cell_distance_m": 0.00768100089062429,
+      "class_margin": null,
+      "classification_inward_offset_wb": 0.027075648200000003,
+      "classification_level_wb_from_axis_outward": 57.7693997418,
+      "classified_axis_seed_coordinate_m": [
+        6.4068803758906245,
+        -4.440086823009892e-05
+      ],
+      "connectivity": 4,
+      "contained_typed_saddle_count": 0,
+      "field_source": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/torax/data/third_party/geo/iterhybrid_cocos17.eqdsk",
+      "first_crossing_typed_saddle_count": 0,
+      "grid_shape_height_by_radius": [
+        129,
+        129
+      ],
+      "machine": "ITER",
+      "nominal_axis_cell_exclusion_reason": null,
+      "nominal_nearest_axis_cell_confined": true,
+      "nominal_nearest_axis_cell_coordinate_m": [
+        6.4068803758906245,
+        -4.440086823009892e-05
+      ],
+      "nominal_nearest_axis_cell_outward_flux_wb": 0.0,
+      "panel": "D",
+      "private_region_area_m2": 0.0,
+      "private_region_count": 0,
+      "public_region_area_m2": 22.321973871880566,
+      "reachability_available": false,
+      "reachability_unavailable_reason": "the banked field resolves its magnetic-axis minimum but no Hessian-typed stationary saddle inside the EQDSK limiter; containment therefore leaves no eligible selected X",
+      "reachable_wall_segment_count": null,
+      "selected_saddle_level_wb_from_axis_outward": 57.79647539,
+      "selected_wall_coordinate_m": [
+        4.014304215,
+        -4.107745091
+      ],
+      "selected_x_coordinate_m": null,
+      "selection_source_commit": "5acfe07b",
+      "selection_status": "no_resolved_hessian_typed_in_limiter_saddle",
+      "shadowed_wall_segment_count": null,
+      "shot": null,
+      "shot_slice": "shot unavailable / slice 0",
+      "slice_index": 0,
+      "topology": "limited",
+      "typed_saddle_coordinates_m": [],
+      "typed_saddle_levels_wb_from_axis_outward": [],
+      "wall_segment_count": 420,
+      "wall_source": "EQDSK limiter contour"
+    }
+  ],
+  "project_absolute_src": "/nova/figures/primary-xpoint-evidence/real-equilibria-reachability-grid.png",
+  "reconstructed_bank_topology_census": [
+    {
+      "arm": "pure",
+      "contained_typed_saddle_count": 2,
+      "first_crossing_typed_saddle_count": 1,
+      "machine": "MAST",
+      "reachability_available": true,
+      "reachable_wall_segment_count": 10,
+      "shot_slice": "21978/35",
+      "topology": "limited"
+    },
+    {
+      "arm": "mixed",
+      "contained_typed_saddle_count": 2,
+      "first_crossing_typed_saddle_count": 1,
+      "machine": "MAST",
+      "reachability_available": true,
+      "reachable_wall_segment_count": 0,
+      "shot_slice": "21978/35",
+      "topology": "diverted"
+    },
+    {
+      "arm": "pure",
+      "contained_typed_saddle_count": 2,
+      "first_crossing_typed_saddle_count": 1,
+      "machine": "MAST",
+      "reachability_available": true,
+      "reachable_wall_segment_count": 17,
+      "shot_slice": "21983/35",
+      "topology": "limited"
+    },
+    {
+      "arm": "mixed",
+      "contained_typed_saddle_count": 2,
+      "first_crossing_typed_saddle_count": 1,
+      "machine": "MAST",
+      "reachability_available": true,
+      "reachable_wall_segment_count": 0,
+      "shot_slice": "21983/35",
+      "topology": "diverted"
+    },
+    {
+      "arm": "pure",
+      "contained_typed_saddle_count": 1,
+      "first_crossing_typed_saddle_count": 1,
+      "machine": "MAST",
+      "reachability_available": true,
+      "reachable_wall_segment_count": 64,
+      "shot_slice": "21985/51",
+      "topology": "limited"
+    },
+    {
+      "arm": "mixed",
+      "contained_typed_saddle_count": 1,
+      "first_crossing_typed_saddle_count": 1,
+      "machine": "MAST",
+      "reachability_available": true,
+      "reachable_wall_segment_count": 124,
+      "shot_slice": "21985/51",
+      "topology": "limited"
+    },
+    {
+      "arm": "pure",
+      "contained_typed_saddle_count": 2,
+      "first_crossing_typed_saddle_count": 1,
+      "machine": "MAST",
+      "reachability_available": true,
+      "reachable_wall_segment_count": 47,
+      "shot_slice": "21986/46",
+      "topology": "limited"
+    },
+    {
+      "arm": "mixed",
+      "contained_typed_saddle_count": 2,
+      "first_crossing_typed_saddle_count": 1,
+      "machine": "MAST",
+      "reachability_available": true,
+      "reachable_wall_segment_count": 49,
+      "shot_slice": "21986/46",
+      "topology": "limited"
+    },
+    {
+      "arm": "pure",
+      "contained_typed_saddle_count": 2,
+      "first_crossing_typed_saddle_count": 1,
+      "machine": "MAST",
+      "reachability_available": true,
+      "reachable_wall_segment_count": 0,
+      "shot_slice": "21989/55",
+      "topology": "diverted"
+    },
+    {
+      "arm": "mixed",
+      "contained_typed_saddle_count": 2,
+      "first_crossing_typed_saddle_count": 1,
+      "machine": "MAST",
+      "reachability_available": true,
+      "reachable_wall_segment_count": 47,
+      "shot_slice": "21989/55",
+      "topology": "limited"
+    },
+    {
+      "arm": "pure",
+      "contained_typed_saddle_count": 2,
+      "first_crossing_typed_saddle_count": 1,
+      "machine": "MAST",
+      "reachability_available": true,
+      "reachable_wall_segment_count": 43,
+      "shot_slice": "22086/43",
+      "topology": "limited"
+    },
+    {
+      "arm": "mixed",
+      "contained_typed_saddle_count": 2,
+      "first_crossing_typed_saddle_count": 1,
+      "machine": "MAST",
+      "reachability_available": true,
+      "reachable_wall_segment_count": 0,
+      "shot_slice": "22086/43",
+      "topology": "diverted"
+    },
+    {
+      "arm": "physical ring",
+      "contained_typed_saddle_count": 1,
+      "first_crossing_typed_saddle_count": 1,
+      "machine": "DIII-D",
+      "reachability_available": true,
+      "reachable_wall_segment_count": 178,
+      "shot_slice": "00000c4a7b/179",
+      "topology": "limited"
+    },
+    {
+      "arm": "banked EQDSK",
+      "contained_typed_saddle_count": 0,
+      "first_crossing_typed_saddle_count": 0,
+      "machine": "ITER",
+      "reachability_available": false,
+      "reachable_wall_segment_count": null,
+      "shot_slice": "shot unavailable / slice 0",
+      "topology": "limited"
+    }
+  ],
+  "source_banks": {
+    "diiid": "docs/figures/plateau-input-attribution/margin-frame-remeasure.json",
+    "diiid_terminal_count_available": 10,
+    "iter": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/torax/data/third_party/geo/iterhybrid_cocos17.eqdsk",
+    "mast": "docs/figures/dual-branch-selection/pinned-branch-contrast.json",
+    "mast_arm_count_reconstructed": 12,
+    "mast_carrier": {
+      "carrier": {
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "frozen_reference_count": 6,
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "size_bytes": 645864,
+        "stored_circuit_count": 101,
+        "warm_load_seconds": 0.005472820019349456
+      },
+      "loaded_from_persisted_carrier": true,
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/topology-and-throughput/real-equilibria-reachability-grid/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "direct_green_operator_builder_entries": 0,
+        "passes": true,
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.031678 direct_builders=0 verdict=PASS"
+      }
+    }
+  }
+}

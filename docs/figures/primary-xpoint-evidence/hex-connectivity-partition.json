@@ -1,0 +1,104 @@
+{
+  "artifact": "hexagonal plasma-mesh component partition",
+  "production_cutover": false,
+  "topology_mismatch": {
+    "rectangular_kernel": "label_connected_components_with_steps propagates through row and column segments and therefore labels 4-connected components.",
+    "production_mesh": "The shipped plasma cells are hexagons on a half-offset tiling, trimmed at the first wall, with centre-first six-neighbour rings shared by the null search and quadratic derivative operator.",
+    "risk": "At a saddle pinch, a diagonal neck is an edge of the hex mesh but not of the rectangular 4-connected lattice, so the inferred public/private partition can change at the X-point."
+  },
+  "kernel": {
+    "component_labels": "label_hex_connected_components_with_steps",
+    "private_mask": "private_flux_mask",
+    "connectivity": 6,
+    "background_label": 0,
+    "component_label": "minimum one-based flat-cell index",
+    "ring_contract": "nova.geometry.hexstencil.hex_stencil centre plus six neighbours; the trimmed tessellation packs the same rows",
+    "implementation": "The four- and six-neighbour routes share one canonical minimum-label fixpoint driver. The hex route changes only the propagation operator: scatter-min over the supplied fixed-shape centre-first rings, with rings centred on unconfined cells closed.",
+    "fixed_shape": true,
+    "jit_safe": true,
+    "vmap_safe": true
+  },
+  "constructed_pinch_disagreement": {
+    "grid_shape": [
+      11,
+      13
+    ],
+    "confined_cell_count": 15,
+    "neck": {
+      "axis_side_cell": [
+        4,
+        5
+      ],
+      "wall_side_cell": [
+        5,
+        4
+      ],
+      "rectangular_relation": "diagonal and therefore disconnected",
+      "hex_relation": "six-neighbour edge with offset (+1, -1)"
+    },
+    "axis_seed": [
+      3,
+      6
+    ],
+    "wall_cell": [
+      6,
+      3
+    ],
+    "four_connected": {
+      "public_cell_count": 9,
+      "private_cell_count": 6,
+      "axis_component_label": 32,
+      "wall_component_label": 69,
+      "wall_side": "PRIVATE",
+      "wall_disposition": "SHADOW"
+    },
+    "six_connected": {
+      "public_cell_count": 15,
+      "private_cell_count": 0,
+      "axis_component_label": 32,
+      "wall_component_label": 32,
+      "wall_side": "PUBLIC",
+      "wall_disposition": "ADMIT"
+    },
+    "differing_public_cell_count": 6,
+    "differing_private_cell_count": 6,
+    "verdict": "The rectangular proxy severs the one-edge hex neck and shadows the wall cell; the physical hex topology keeps the full confined set joined and admits the wall cell."
+  },
+  "same_process_benchmark": {
+    "backend": "gpu",
+    "grid_shape": [
+      33,
+      33
+    ],
+    "production_grid_basis": "The banked MAST connectivity lattice is 33 radial by 33 vertical cells, as recorded by the prior component-labelling evidence.",
+    "input": "A confined elliptical core plus one disconnected pocket, identical for both kernels.",
+    "compilation": "excluded by one warm call per kernel",
+    "synchronization": "each timed call blocked until both labels and step count were ready",
+    "warm_execution_repetitions": 100,
+    "four_connected": {
+      "fixpoint_iterations": 3,
+      "median_wall_clock_ms": 0.4911435,
+      "minimum_wall_clock_ms": 0.168076,
+      "component_count": 2
+    },
+    "six_connected": {
+      "fixpoint_iterations": 16,
+      "median_wall_clock_ms": 0.766596,
+      "minimum_wall_clock_ms": 0.485677,
+      "component_count": 2
+    },
+    "median_time_ratio_six_over_four": 1.5608391437533022,
+    "median_increment_ms_per_slice": 0.2754525,
+    "catalog_slice_count": 1341435,
+    "scalar_catalog_projection": {
+      "six_connected_seconds": 1028.33870526,
+      "increment_over_four_connected_seconds": 369.5016243375,
+      "qualification": "Arithmetic projection of isolated scalar warm calls, not measured batched campaign throughput."
+    },
+    "log": "/tmp/hex-connectivity-partition-benchmark.log"
+  },
+  "validation": {
+    "focused_tests": "11 passed in 34.29 s",
+    "log": "/tmp/hex-connectivity-partition-tests-final.log"
+  }
+}

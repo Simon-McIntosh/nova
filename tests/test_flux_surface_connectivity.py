@@ -24,6 +24,7 @@ import math
 
 import numpy as np
 
+from nova.geometry.hexstencil import HEX_RING, hex_stencil
 from nova.jax.config import configure_dtypes
 from nova.utilities.importmanager import skip_import
 
@@ -269,6 +270,81 @@ def test_connectivity_can_reject_inside_height_band_wall_cell():
     assert connectivity_rule_shadowed
     assert int(labels[seed][0]) == 54
     assert int(labels[wall_cell]) == 98
+
+
+def test_hex_component_labels_match_six_neighbour_reference():
+    """Ring labels match a six-neighbour host reference and remain batchable."""
+    from scipy import ndimage
+
+    confined = np.zeros((19, 27), dtype=bool)
+    confined[2:15, 2:9] = True
+    confined[7:12, 9:17] = True
+    confined[1:5, 20:25] = True
+    confined[14:18, 18:22] = True
+    rings = hex_stencil(confined.shape)
+    structure = np.zeros((3, 3), dtype=bool)
+    structure[1, 1] = True
+    structure[HEX_RING[:, 0] + 1, HEX_RING[:, 1] + 1] = True
+
+    labels, steps = fsc.label_hex_connected_components_with_steps(
+        jnp.asarray(confined), jnp.asarray(rings), confined.size
+    )
+    labels = np.asarray(labels)
+    reference, component_count = ndimage.label(confined, structure=structure)
+
+    assert np.array_equal(labels == 0, reference == 0)
+    assert len(np.unique(labels[labels > 0])) == component_count == 3
+    for reference_label in range(1, component_count + 1):
+        component = reference == reference_label
+        assert np.unique(labels[component]).size == 1
+    assert int(steps) <= confined.size
+
+    batch = jnp.stack((jnp.asarray(confined), jnp.asarray(np.flipud(confined))))
+    batched = jax.vmap(
+        lambda mask: fsc.label_hex_connected_components(
+            mask, jnp.asarray(rings), confined.size
+        )
+    )(batch)
+    per_slice = jnp.stack(
+        [
+            fsc.label_hex_connected_components(mask, jnp.asarray(rings), confined.size)
+            for mask in batch
+        ]
+    )
+    assert np.array_equal(np.asarray(batched), np.asarray(per_slice))
+
+
+def test_hex_neighbour_keeps_a_pinch_joined_that_four_neighbours_sever():
+    """A diagonal hex neck changes the public/private wall partition."""
+    confined = np.zeros((11, 13), dtype=bool)
+    confined[2:5, 5:8] = True
+    confined[5:8, 3:5] = True
+    seed = np.zeros_like(confined)
+    seed[3, 6] = True
+    wall_cell = (6, 3)
+
+    square_labels = fsc.label_connected_components(
+        jnp.asarray(confined), sum(confined.shape)
+    )
+    hex_labels = fsc.label_hex_connected_components(
+        jnp.asarray(confined),
+        jnp.asarray(hex_stencil(confined.shape)),
+        confined.size,
+    )
+    square_labels = np.asarray(square_labels)
+    hex_labels = np.asarray(hex_labels)
+    square_private = np.asarray(fsc.private_flux_mask(square_labels, jnp.asarray(seed)))
+    hex_private = np.asarray(fsc.private_flux_mask(hex_labels, jnp.asarray(seed)))
+
+    assert int(np.count_nonzero(confined & ~square_private)) == 9
+    assert int(np.count_nonzero(square_private)) == 6
+    assert int(np.count_nonzero(confined & ~hex_private)) == 15
+    assert int(np.count_nonzero(hex_private)) == 0
+    assert int(square_labels[seed][0]) == 32
+    assert int(square_labels[wall_cell]) == 69
+    assert int(hex_labels[seed][0]) == int(hex_labels[wall_cell]) == 32
+    assert square_private[wall_cell]
+    assert not hex_private[wall_cell]
 
 
 def test_doubling_fill_matches_fixed_iteration_fixtures_exactly():

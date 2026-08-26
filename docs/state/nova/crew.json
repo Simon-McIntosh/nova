@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T14:17:27",
+  "updated": "2026-08-26T14:22:55",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -920,8 +920,12 @@
         "id": "read-layer",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "created": "2026-08-12"
+        "session_id": "01a03dc8-234c-7f91-8eb4-81a91ece035b",
+        "created": "2026-08-12",
+        "sessions": {
+          "gpt-5.6-sol": "01a03dc8-234c-7f91-8eb4-81a91ece035b"
+        },
+        "session_model": "gpt-5.6-sol"
       },
       {
         "id": "read-wall",
@@ -39460,9 +39464,113 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T111508774749-mcg-probe-axis-adjudication",
+        "plan": "mast-catalog-gpu-solve",
+        "section": "",
+        "node": "mcg-probe-axis-adjudication",
+        "node_definition": {
+          "done_when": "Both named parametrized tests for shots 15000 and 13500 pass, the full focused mast solve-input file exits zero, and source provenance remains explicit",
+          "estimated_hours": 2.0,
+          "goal": "Correct the probe-axis mapping mechanism behind the enabled failures",
+          "id": "mcg-probe-axis-adjudication",
+          "manifest_path": "/home/ITER/mcintos/.codex/scratch/nova-s16-20260826/mcg-probe-axis-manifest.md",
+          "plan": "mast-catalog-gpu-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/imas/mast_solve_inputs.py",
+            "nova/imas/mast_geometry.py",
+            "nova/catalog/mast_geometry.py",
+            "tests/test_mast_solve_inputs.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "read-layer",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T11:15:20Z",
+        "completed_at": "2026-08-26T11:39:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1438,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1438,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "60251ecdd8f9a7b1f8121d3184c807a9311c777a",
+        "commits": [
+          "3472495bf7f2df56516439a5233cc8916bfb78fd",
+          "ea5d17e809eb6fcc6d4f61b683adaa16b23e9210"
+        ],
+        "changed_lines": {
+          "added": 25,
+          "removed": 12,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -vv tests/test_mast_solve_inputs.py::test_each_probe_channel_reads_the_sensor_it_is_mapped_to tests/test_mast_solve_inputs.py::test_a_channel_off_its_own_clock_is_refused_rather_than_aligned tests/calibrate/test_sensor_door_guard.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-probe-axis-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.codex/scratch/nova-s16-20260826/mcg-probe-axis-manifest.md",
+        "scope_changed": true,
+        "session_id": "01a03dc8-234c-7f91-8eb4-81a91ece035b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4945408,
+            "cached_input_tokens_cumulative": 4945408,
+            "input_tokens": 5092847,
+            "input_tokens_cumulative": 5092847,
+            "output_tokens": 14247,
+            "output_tokens_cumulative": 14247,
+            "reasoning_output_tokens": 4365,
+            "reasoning_output_tokens_cumulative": 4365
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 923
+    "_version": 925
   }
 }

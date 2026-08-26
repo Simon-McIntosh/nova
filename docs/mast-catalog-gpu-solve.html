@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S16">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="47">
+<meta name="plan-version" content="49">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -26,7 +26,7 @@
 <meta name="plan-capability-tool-autonomy" content="autonomous">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-commits" content="c0eb0e65bcdfaaa7c6e01161b9771d314fa7dbf6,e00ec926015521b3ee15d1f2edcd750245010bea,93ed6a328b15c22f3eb964c40b6a9a53db870529,c710c3f1b2d44a6ffdbc9f5872bb00290cb4c5ba">
+<meta name="plan-commits" content="c0eb0e65bcdfaaa7c6e01161b9771d314fa7dbf6,e00ec926015521b3ee15d1f2edcd750245010bea,93ed6a328b15c22f3eb964c40b6a9a53db870529,c710c3f1b2d44a6ffdbc9f5872bb00290cb4c5ba,3472495bf7f2df56516439a5233cc8916bfb78fd,ea5d17e809eb6fcc6d4f61b683adaa16b23e9210">
 <meta name="plan-artifacts" content="docs/figures/mast-catalog-gpu-solve/slice-census.json,scripts/mast_slice_census/census.py,scripts/mast_slice_census/report.md,docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json,benchmarks/jitted_eager_parity_gate.py,docs/evidence/archive/mast-catalog-gpu-solve-landed.html">
 <meta name="plan-impl" content="0.23">
 <meta name="plan-effort-hours" content="24.0">
@@ -333,10 +333,11 @@ Done-when
     <div class="r-fu-body">The Newton budget is a fixed count, not a convergence test. PerturbedSeedPolicy carries newton_steps 10 with gmres_iterations 30, the contrast lane's entry point is named a fixed ladder, and the recovery failures confirm it runs to the end, terminating after all ten steps at residual 1.29980506. Production already warm-starts from the neighbouring slice - equilibrium_sweep passes the previous selected flux, so an uninterrupted campaign is 1 cold plus 1341434 warm - and the H200 measurement seeded even tighter, at 1e-6 to 1e-4 of flux span. So typical slices are likely converging well before step ten and paying for the remainder anyway. If they converge in two or three, a fixed ten by thirty spends three to five times the map applications needed, which is the leading candidate for the order-of-magnitude acceleration the catalog wants: per-slice cost is FLAT with batch width, 41.72 ms at width 4 against 42.77 at width 16, so the device is already saturated and more batching is not the lever. Measure the actual step-to-convergence distribution over a representative warm sequence FIRST, because if slices really need ten steps there is no saving here and the effort belongs elsewhere. Then, if the distribution supports it, replace the ladder with lax.while_loop under a convergence predicate and measure the realised per-slice cost - noting that a vmapped while_loop runs every lane to the slowest, so the saving is set by the batch maximum rather than the median, and a long tail can erase it.</div>
     <pre class="r-fu-prompt">/reckon-ship mast-catalog-gpu-solve</pre>
     </article>
-<article class="r-fu" data-id="f-mcg-03" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="sprint-review" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship mast-catalog-gpu-solve" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mcg-03" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="sprint-review" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship mast-catalog-gpu-solve" data-resolved-at="2026-08-26T12:24:08+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Adjudicate the two enabled probe-axis test failures in the MAST solve-input lane</h4>
     <div class="r-fu-body">Re-registered 2026-08-26 from broken-ownership followups f-ncp-003 (nova-calibrate-package) and f-ntlh-006 (nova-test-lane-health), both of which pointed at mast-corrected-read-layer after it had shipped - no active plan carried the work. The defect is live: tests/test_mast_solve_inputs.py test_each_probe_channel_reads_the_sensor_it_is_mapped_to carries two enabled probe-axis failures at [15000] and [13500] with no xfail or skip marker, so every full-lane run inherits them. This catalog plan consumes the corrected read layer and the solve-input join, so it owns the adjudication: either the probe-axis mapping is wrong (fix the read layer), or the test's expectation is wrong (fix the test with the mechanism stated) - never mark-and-forget.</div>
     <pre class="r-fu-prompt">/reckon-ship mast-catalog-gpu-solve</pre>
+    <p class="r-fu-outcome">Resolved by preserving reconstruction probe angles in their measured counter-clockwise convention and applying the sign inversion only at the clockwise DDv4 boundary. Independent verification passed both real-shot probe cases, the shape-mismatch refusal, and both sensor-door guards (5/5); shape-mismatched fl_cc10 remains present-but-unusable and never enters solve samples. Worker commits 3472495b and ea5d17e8 are integrated through merge e745c347. The non-failing SQLite ResourceWarning remains a visible follow-on.</p>
     </article>
 </section>
 
@@ -440,6 +441,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260826T115134251119-mcg-probe-axis-adjudication-verify" data-who="mcg-probe-verify" data-when="2026-08-26T11:59:11Z">
     <div class="r-comment-body"><p>Independent verification confirmed DDv4 probe-angle sign handling and fail-closed shape-mismatch propagation in 5 of 5 cases.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260826T111508774749-mcg-probe-axis-adjudication" data-who="read-layer" data-when="2026-08-26T11:39:18Z">
+    <div class="r-comment-body"><p>Verified probe angles across the reconstruction and DDv4 conventions, and preserved present-but-unusable shape mismatches through the solve-input door.</p></div>
 </div>
 </section>
 </main>

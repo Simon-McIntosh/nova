@@ -49,7 +49,17 @@ from typing import NamedTuple
 import jax
 import jax.numpy as jnp
 
-__all__ = ["DomainMasks", "PlasmaDomain", "classify_domains"]
+from nova.equilibrium.flux_surface_connectivity import (
+    label_saddle_aware_hex_connected_components,
+    private_flux_mask,
+)
+
+__all__ = [
+    "DomainMasks",
+    "PlasmaDomain",
+    "axis_connected_component",
+    "classify_domains",
+]
 
 
 class PlasmaDomain(IntEnum):
@@ -98,6 +108,29 @@ class DomainMasks(NamedTuple):
         )
 
 
+@jax.jit
+def axis_connected_component(
+    confined: jax.Array,
+    rings: jax.Array,
+    link_admissible: jax.Array,
+    axis_seed: jax.Array,
+) -> jax.Array:
+    """Return the saddle-aware hex component containing ``axis_seed``.
+
+    Component propagation remains owned by the shared connectivity kernel. This
+    adapter only selects its magnetic-axis component, preserving the exact
+    centre-first six-neighbour graph and strict shared-edge admissibility used
+    by the boundary read.
+    """
+    labels = label_saddle_aware_hex_connected_components(
+        confined,
+        rings,
+        link_admissible,
+        confined.size,
+    )
+    return (labels > 0) & ~private_flux_mask(labels, axis_seed)
+
+
 def classify_domains(
     psi_norm: jax.Array,
     closed: jax.Array,
@@ -107,7 +140,7 @@ def classify_domains(
     """Return the domain partition of one flux map.
 
     ``closed`` marks cells on the plasma side of the boundary flux itself,
-    ``connected`` marks cells on the axis side of every X-point, and
+    ``connected`` marks cells in the saddle-aware hex component of the axis, and
     ``inside_material`` marks cells the material boundary encloses. The three
     are combined into a single integer label so no downstream selection can
     reconstruct a domain from a flux range alone.

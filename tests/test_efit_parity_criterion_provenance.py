@@ -5,7 +5,11 @@ import json
 import pytest
 
 from benchmarks import efit_parity_criterion_provenance as criterion
-from nova.imas.parity_tolerances import registered_tolerances
+from nova.imas.parity_tolerances import (
+    GEOMETRY_REFERENCE_IDENTITY,
+    ScorecardField,
+    registered_tolerances,
+)
 
 
 @pytest.fixture(scope="module")
@@ -45,6 +49,30 @@ def test_provenance_classifies_physical_and_inherited_bounds(receipt):
         "merely-contains"
     )
     assert rows["x_point_distance_m"]["evidence_read"]["relationship"] == ("supports")
+
+
+def test_registry_geometry_reference_identity_resolves():
+    checked = json.loads(criterion.BOUND_CLASSIFICATION_OUTPUT.read_text())
+    registered = registered_tolerances()
+    geometry_fields = (
+        ScorecardField.MAGNETIC_AXIS_DISTANCE_M,
+        ScorecardField.LCFS_DISTANCE_M,
+    )
+
+    assert {registered[field].evidence for field in geometry_fields} == {
+        GEOMETRY_REFERENCE_IDENTITY
+    }
+    assert checked["semantic_citation_contract"]["pinned_identity"] == (
+        GEOMETRY_REFERENCE_IDENTITY
+    )
+
+    resolved = criterion.resolve_semantic_machine_artifact(
+        checked["semantic_artifact_resolution"]["cache_directory"],
+        GEOMETRY_REFERENCE_IDENTITY,
+    )
+
+    assert resolved["semantic_identity"] == GEOMETRY_REFERENCE_IDENTITY
+    assert resolved["fully_verified"] is True
 
 
 def test_units_audit_refuses_differently_normalised_comparison(receipt):

@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="25">
+<meta name="plan-version" content="26">
 </head>
 <body>
   <main class="plan-doc">
@@ -248,6 +248,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260826T140600847499-sse-terminal-diagnostic-material-verify" data-who="reference-verify" data-when="2026-08-26T14:08:57Z">
     <div class="r-comment-body"><p>Independent verification passed 2 of 2 CPU x64 tests; production connectivity material is reused exactly, a one-ULP mismatch remains fail-closed, serialization is byte-identical, and no JSON artifact changed.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260826T135322231584-sse-terminal-diagnostic-material-repair" data-who="bound-repair" data-when="2026-08-26T13:57:06Z">
+    <div class="r-comment-body"><p>Terminal diagnostics now use production axis-seeded connectivity material; focused and independent verification each passed 2 of 2 CPU x64 tests, exact one-ULP mismatch refusal remains intact, and receipt serialization is unchanged.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260826T125905793456-sse-branch-assembler-verify" data-who="sse-verify" data-when="2026-08-26T13:04:59Z">
     <div class="r-comment-body"><p>Independent verification confirmed deterministic fixed-capacity separation of one axis-enclosing closed branch from saddle-ended open legs, with exact-zero padding, overflow refusal, and eager/JIT/vmap parity.</p></div>

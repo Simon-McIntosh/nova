@@ -18,16 +18,18 @@ compare fairly:
 * :func:`newton_krylov` — exact-tangent Jacobian-free Newton–Krylov: each
   step linearises the map ONCE (``jax.linearize`` — exact tangents, no finite
   differences) and solves ``(I − J) s = f`` with a fixed-shape batched GMRES
-  (no early exit).  Its trace stride remains ``2 + gmres_iterations``; an
-  initial action probe and the achieved linear residual qualify the solve
-  before its step can be promoted.
+  before its step can be promoted.  The bounded outer loop stops at the first
+  finite relative residual at or below the registered criterion while its
+  diagnostic arrays retain their configured padded shapes.
 
-All three are ``jit``-safe and ``vmap``-safe (fixed shapes, no data-dependent
-control flow); map a leading batch axis with ``jax.vmap`` over the initial
-state and any batched map parameters.  The free-boundary maps have multiple
-fixed points (the outboard-corner attractor), so the BASIN is guarded by the
-caller seeding the topology read at the current centroid (the axis-seed pin);
-the accelerators contribute step caps, never basin logic.
+All three are ``jit``-safe and ``vmap``-safe; map a leading batch axis with
+``jax.vmap`` over the initial state and any batched map parameters.  Batched
+Newton solves execute until their slowest active lane terminates while
+preserving each lane's own attempted and accepted promotion counts.  The
+free-boundary maps have multiple fixed points (the outboard-corner attractor),
+so the BASIN is guarded by the caller seeding the topology read at the current
+centroid (the axis-seed pin); the accelerators contribute step caps, never
+basin logic.
 
 The state is a flat 1-D array — the concatenated flux vector both solve maps
 already carry.
@@ -52,7 +54,9 @@ from nova.equilibrium.manifold_advance import (
 
 __all__ = [
     "AmplificationObservation",
+    "FIXED_POINT_RESIDUAL_TOLERANCE",
     "FixedPointResult",
+    "FixedPointTerminationReason",
     "KinkAwareResult",
     "KrylovActionQualification",
     "ManifoldAdvanceQualification",
@@ -66,6 +70,7 @@ __all__ = [
 _BACKTRACKING_FACTORS = (1.0, 0.5, 0.25, 0.125, 0.0625, 0.03125)
 _RECORDED_BACKTRACKING_FACTOR_COUNT = 4
 _PROJECTED_KRYLOV_CONDITION_RATIO_LIMIT = math.e
+FIXED_POINT_RESIDUAL_TOLERANCE = 1.0e-8
 
 
 class AmplificationObservation(IntEnum):
@@ -85,6 +90,17 @@ class KrylovActionQualification(IntEnum):
     NONSUCCESSFUL_GMRES_STATUS = 3
     NONFINITE_ACHIEVED_LINEAR_RESIDUAL = 4
     ZERO_STEP_WITH_MATERIAL_NONLINEAR_RESIDUAL = 5
+
+
+class FixedPointTerminationReason(IntEnum):
+    """Host-readable reason a bounded Newton solve stopped."""
+
+    NOT_APPLICABLE = 0
+    CONVERGED = 1
+    ITERATION_BUDGET_EXHAUSTED = 2
+    NONFINITE_RESIDUAL = 3
+    KRYLOV_ACTION_REFUSED = 4
+    MANIFOLD_ADVANCE_REFUSED = 5
 
 
 class FixedPointResult(NamedTuple):
@@ -109,6 +125,10 @@ class FixedPointResult(NamedTuple):
     state, the trailing arrays record the predictor-corrector attempts in
     state-space arclength.  ``newton_step_equivalents`` is the sum of promoted
     advance length divided by the corresponding qualified Newton-step length.
+    ``attempted_newton_promotions`` counts linearised Newton proposals;
+    ``accepted_newton_promotions`` counts proposals promoted to ``state``.
+    ``converged`` and ``termination_reason`` report why the bounded Newton loop
+    stopped.  They retain not-applicable defaults for non-Newton schemes.
     """
 
     state: jax.Array
@@ -129,6 +149,10 @@ class FixedPointResult(NamedTuple):
     advance_lengths: jax.Array | float = float("nan")
     newton_step_lengths: jax.Array | float = float("nan")
     newton_step_equivalents: jax.Array | float = float("nan")
+    attempted_newton_promotions: jax.Array | int = 0
+    accepted_newton_promotions: jax.Array | int = 0
+    converged: jax.Array | bool = False
+    termination_reason: jax.Array | int = FixedPointTerminationReason.NOT_APPLICABLE
 
 
 class KinkAwareResult(NamedTuple):
@@ -183,6 +207,52 @@ class _AmplificationState(NamedTuple):
     consecutive_growth_ratios: jax.Array
     sustained_growth: jax.Array
     contracted_after_sustained_growth: jax.Array
+
+
+class _NewtonIterationState(NamedTuple):
+    """Carry for one bounded exact-tangent Newton solve."""
+
+    state: jax.Array
+    residual: jax.Array
+    trace: jax.Array
+    qualification: jax.Array
+    amplification: _AmplificationState
+    conditioning_count: jax.Array
+    maximum_condition: jax.Array
+    condition_baseline: jax.Array
+    attempted: jax.Array
+    accepted: jax.Array
+    converged: jax.Array
+    termination_reason: jax.Array
+    active: jax.Array
+    current_measured: jax.Array
+
+
+class _ManifoldNewtonIterationState(NamedTuple):
+    """Carry for one bounded predictor-corrector Newton solve."""
+
+    state: jax.Array
+    previous: jax.Array
+    tangent_orientation: jax.Array
+    residual: jax.Array
+    trace: jax.Array
+    qualification: jax.Array
+    amplification: _AmplificationState
+    conditioning_count: jax.Array
+    maximum_condition: jax.Array
+    condition_baseline: jax.Array
+    advance_qualifications: jax.Array
+    manifold_admissibility: jax.Array
+    predictor_lengths: jax.Array
+    corrector_lengths: jax.Array
+    advance_lengths: jax.Array
+    newton_step_lengths: jax.Array
+    attempted: jax.Array
+    accepted: jax.Array
+    converged: jax.Array
+    termination_reason: jax.Array
+    active: jax.Array
+    current_measured: jax.Array
 
 
 def _initial_amplification_state(dtype) -> _AmplificationState:
@@ -549,6 +619,7 @@ def _manifold_newton_krylov(
     relaxation: float,
     step_cap: float,
     krylov_condition_limit: float,
+    convergence_tolerance: float,
     precision: Precision | str,
 ) -> FixedPointResult:
     """Advance along admitted-state secants and correct in their normal space."""
@@ -597,232 +668,272 @@ def _manifold_newton_krylov(
             step,
         )
 
-    def newton_body(index, carry):
-        (
-            state,
-            previous,
-            tangent_orientation,
-            residual,
-            trace,
-            qualification,
-            amplification,
-            conditioning_count,
-            maximum_condition,
-            condition_baseline,
-            advance_qualifications,
-            manifold_admissibility,
-            predictor_lengths,
-            corrector_lengths,
-            advance_lengths,
-            newton_step_lengths,
-        ) = carry
+    def continue_newton(carry):
+        return (~carry.current_measured) | (
+            carry.active & (carry.attempted < newton_steps)
+        )
+
+    def newton_body(carry):
+        state = carry.state
         mapped, tangent_action = jax.linearize(map_fn, state)
         residual_vector = mapped - state
         current_residual = _relative_residual(mapped, state)
-
-        def linear_action(vector):
-            return vector - tangent_action(vector)
-
-        predictor_action = _qualified_krylov_step(
-            linear_action,
-            residual_vector,
-            current_residual,
-            gmres_iterations=gmres_iterations,
-            condition_ratio_limit=krylov_condition_limit,
-            preceding_condition_baseline=condition_baseline,
+        base = warmup + carry.attempted * stride
+        trace = carry.trace
+        if newton_steps > 0:
+            trace = trace.at[base].set(current_residual)
+        finite_residual = jnp.isfinite(current_residual)
+        current_converged = finite_residual & (
+            current_residual <= convergence_tolerance
         )
-        predictor_step = bounded_step(predictor_action.step, residual_vector)
-        secant = oriented_secant(previous, state, tangent_orientation)
-        predictor_length = jnp.linalg.norm(predictor_step)
-        predictor_accepted = (
-            predictor_action.qualification == KrylovActionQualification.ACCEPTED
+        can_attempt = (
+            finite_residual & ~current_converged & (carry.attempted < newton_steps)
         )
-        secant_accepted = secant.qualification == ManifoldAdvanceQualification.ACCEPTED
-        predictor_enabled = predictor_accepted & secant_accepted
-        predictor = state + jnp.where(
-            predictor_enabled,
-            predictor_length * secant.tangent,
-            jnp.zeros_like(state),
-        )
-
-        predictor_image, predictor_tangent_action = jax.linearize(map_fn, predictor)
-        predictor_residual_vector = predictor_image - predictor
-        normal_residual = normal_component(predictor_residual_vector, secant.tangent)
-        normal_relative_residual = jnp.max(jnp.abs(normal_residual)) / jnp.maximum(
-            jnp.max(jnp.abs(predictor_image)), 1.0e-30
-        )
-
-        def bordered_action(vector):
-            action = vector - predictor_tangent_action(vector)
-            normal_action = normal_component(action, secant.tangent)
-            tangential_constraint = jnp.vdot(vector, secant.tangent) * secant.tangent
-            return normal_action + tangential_constraint
-
-        corrector_action = _qualified_krylov_step(
-            bordered_action,
-            normal_residual,
-            normal_relative_residual,
-            gmres_iterations=gmres_iterations,
-            condition_ratio_limit=krylov_condition_limit,
-            preceding_condition_baseline=predictor_action.condition_baseline,
-        )
-        correction = normal_component(corrector_action.step, secant.tangent)
-        corrector_accepted = (
-            corrector_action.qualification == KrylovActionQualification.ACCEPTED
-        )
-        candidate = predictor + jnp.where(
-            predictor_enabled & corrector_accepted,
-            correction,
-            jnp.zeros_like(correction),
-        )
-        candidate_image = map_fn(candidate)
-        candidate_residual = _relative_residual(candidate_image, candidate)
-        finite_candidate = (
-            jnp.all(jnp.isfinite(candidate))
-            & jnp.all(jnp.isfinite(candidate_image))
-            & jnp.isfinite(candidate_residual)
-        )
-        admitted = jnp.asarray(admissibility_fn(candidate), dtype=jnp.bool_)
-        advance_length = jnp.linalg.norm(candidate - state)
-        material_floor = jnp.sqrt(jnp.finfo(state.dtype).eps) * jnp.maximum(
-            jnp.linalg.norm(state), 1.0
-        )
-        material_advance = advance_length > material_floor
-        actions_accepted = predictor_accepted & corrector_accepted
-        promoted = (
-            secant_accepted
-            & actions_accepted
-            & finite_candidate
-            & admitted
-            & material_advance
-        )
-
-        advance_qualification = jnp.asarray(
-            ManifoldAdvanceQualification.ACCEPTED, dtype=jnp.int32
-        )
-        advance_qualification = jnp.where(
-            ~material_advance,
-            ManifoldAdvanceQualification.ZERO_MATERIAL_ADVANCE,
-            advance_qualification,
-        )
-        advance_qualification = jnp.where(
-            ~admitted,
-            ManifoldAdvanceQualification.INADMISSIBLE_CORRECTED_STATE,
-            advance_qualification,
-        )
-        advance_qualification = jnp.where(
-            ~finite_candidate,
-            ManifoldAdvanceQualification.NONFINITE_CORRECTED_STATE,
-            advance_qualification,
-        )
-        advance_qualification = jnp.where(
-            ~actions_accepted,
-            ManifoldAdvanceQualification.KRYLOV_ACTION_REFUSED,
-            advance_qualification,
-        )
-        advance_qualification = jnp.where(
-            ~secant_accepted,
-            ManifoldAdvanceQualification.DEGENERATE_SECANT,
-            advance_qualification,
-        )
-
-        step_qualification = jnp.where(
-            predictor_accepted,
-            corrector_action.qualification,
-            predictor_action.qualification,
-        )
-        prior_failed = (qualification != KrylovActionQualification.NOT_APPLICABLE) & (
-            qualification != KrylovActionQualification.ACCEPTED
-        )
-        qualification = jnp.where(prior_failed, qualification, step_qualification)
-        amplification = _observe_increment(amplification, state, candidate, promoted)
-        base = warmup + index * stride
-        trace = trace.at[base].set(current_residual)
-        trace = trace.at[base + 1].set(normal_relative_residual)
-        trace = trace.at[base + 2].set(
-            jnp.where(promoted, candidate_residual, current_residual)
-        )
-        previous = jnp.where(promoted, state, previous)
-        tangent_orientation = jnp.where(promoted, secant.tangent, tangent_orientation)
-        state = jnp.where(promoted, candidate, state)
-        residual = jnp.where(promoted, candidate_residual, current_residual)
-        conditioning_count = conditioning_count + jnp.asarray(
-            predictor_accepted & predictor_action.conditioning_applied,
-            dtype=jnp.int32,
-        )
-        conditioning_count = conditioning_count + jnp.asarray(
-            corrector_accepted & corrector_action.conditioning_applied,
-            dtype=jnp.int32,
-        )
-        maximum_condition = jnp.maximum(
-            maximum_condition,
-            jnp.maximum(
-                predictor_action.projected_condition,
-                corrector_action.projected_condition,
+        stopped_reason = jnp.where(
+            ~finite_residual,
+            FixedPointTerminationReason.NONFINITE_RESIDUAL,
+            jnp.where(
+                current_converged,
+                FixedPointTerminationReason.CONVERGED,
+                FixedPointTerminationReason.ITERATION_BUDGET_EXHAUSTED,
             ),
         )
-        advance_qualifications = advance_qualifications.at[index].set(
-            advance_qualification
-        )
-        manifold_admissibility = manifold_admissibility.at[index].set(
-            finite_candidate & admitted
-        )
-        predictor_lengths = predictor_lengths.at[index].set(predictor_length)
-        corrector_lengths = corrector_lengths.at[index].set(jnp.linalg.norm(correction))
-        advance_lengths = advance_lengths.at[index].set(
-            jnp.where(promoted, advance_length, 0.0)
-        )
-        newton_step_lengths = newton_step_lengths.at[index].set(
-            jnp.where(predictor_accepted, predictor_length, 0.0)
-        )
-        return (
-            state,
-            previous,
-            tangent_orientation,
-            residual,
-            trace,
-            qualification,
-            amplification,
-            conditioning_count,
-            maximum_condition,
-            corrector_action.condition_baseline,
-            advance_qualifications,
-            manifold_admissibility,
-            predictor_lengths,
-            corrector_lengths,
-            advance_lengths,
-            newton_step_lengths,
+        measured = carry._replace(
+            residual=current_residual,
+            trace=trace,
+            converged=current_converged,
+            termination_reason=jnp.asarray(stopped_reason, dtype=jnp.int32),
+            active=jnp.asarray(False),
+            current_measured=jnp.asarray(True),
         )
 
-    initial_residual = jnp.where(
-        warmup > 0, trace[jnp.maximum(warmup - 1, 0)], jnp.asarray(jnp.inf)
-    )
-    (
-        state,
-        _previous,
-        _tangent_orientation,
-        residual,
-        trace,
-        qualification,
-        amplification,
-        conditioning_count,
-        maximum_condition,
-        _condition_baseline,
-        advance_qualifications,
-        manifold_admissibility,
-        predictor_lengths,
-        corrector_lengths,
-        advance_lengths,
-        newton_step_lengths,
-    ) = jax.lax.fori_loop(
-        0,
-        newton_steps,
+        def attempt_step(measured):
+            def linear_action(vector):
+                return vector - tangent_action(vector)
+
+            predictor_action = _qualified_krylov_step(
+                linear_action,
+                residual_vector,
+                current_residual,
+                gmres_iterations=gmres_iterations,
+                condition_ratio_limit=krylov_condition_limit,
+                preceding_condition_baseline=measured.condition_baseline,
+            )
+            predictor_step = bounded_step(predictor_action.step, residual_vector)
+            secant = oriented_secant(
+                measured.previous, state, measured.tangent_orientation
+            )
+            predictor_length = jnp.linalg.norm(predictor_step)
+            predictor_accepted = (
+                predictor_action.qualification == KrylovActionQualification.ACCEPTED
+            )
+            secant_accepted = (
+                secant.qualification == ManifoldAdvanceQualification.ACCEPTED
+            )
+            predictor_enabled = predictor_accepted & secant_accepted
+            predictor = state + jnp.where(
+                predictor_enabled,
+                predictor_length * secant.tangent,
+                jnp.zeros_like(state),
+            )
+            predictor_image, predictor_tangent_action = jax.linearize(map_fn, predictor)
+            predictor_residual_vector = predictor_image - predictor
+            normal_residual = normal_component(
+                predictor_residual_vector, secant.tangent
+            )
+            normal_relative_residual = jnp.max(jnp.abs(normal_residual)) / jnp.maximum(
+                jnp.max(jnp.abs(predictor_image)), 1.0e-30
+            )
+
+            def bordered_action(vector):
+                action = vector - predictor_tangent_action(vector)
+                normal_action = normal_component(action, secant.tangent)
+                tangential_constraint = (
+                    jnp.vdot(vector, secant.tangent) * secant.tangent
+                )
+                return normal_action + tangential_constraint
+
+            corrector_action = _qualified_krylov_step(
+                bordered_action,
+                normal_residual,
+                normal_relative_residual,
+                gmres_iterations=gmres_iterations,
+                condition_ratio_limit=krylov_condition_limit,
+                preceding_condition_baseline=predictor_action.condition_baseline,
+            )
+            correction = normal_component(corrector_action.step, secant.tangent)
+            corrector_accepted = (
+                corrector_action.qualification == KrylovActionQualification.ACCEPTED
+            )
+            candidate = predictor + jnp.where(
+                predictor_enabled & corrector_accepted,
+                correction,
+                jnp.zeros_like(correction),
+            )
+            candidate_image = map_fn(candidate)
+            candidate_residual = _relative_residual(candidate_image, candidate)
+            finite_candidate = (
+                jnp.all(jnp.isfinite(candidate))
+                & jnp.all(jnp.isfinite(candidate_image))
+                & jnp.isfinite(candidate_residual)
+            )
+            admitted = jnp.asarray(admissibility_fn(candidate), dtype=jnp.bool_)
+            advance_length = jnp.linalg.norm(candidate - state)
+            material_floor = jnp.sqrt(jnp.finfo(state.dtype).eps) * jnp.maximum(
+                jnp.linalg.norm(state), 1.0
+            )
+            material_advance = advance_length > material_floor
+            actions_accepted = predictor_accepted & corrector_accepted
+            promoted = (
+                secant_accepted
+                & actions_accepted
+                & finite_candidate
+                & admitted
+                & material_advance
+            )
+            advance_qualification = jnp.asarray(
+                ManifoldAdvanceQualification.ACCEPTED, dtype=jnp.int32
+            )
+            advance_qualification = jnp.where(
+                ~material_advance,
+                ManifoldAdvanceQualification.ZERO_MATERIAL_ADVANCE,
+                advance_qualification,
+            )
+            advance_qualification = jnp.where(
+                ~admitted,
+                ManifoldAdvanceQualification.INADMISSIBLE_CORRECTED_STATE,
+                advance_qualification,
+            )
+            advance_qualification = jnp.where(
+                ~finite_candidate,
+                ManifoldAdvanceQualification.NONFINITE_CORRECTED_STATE,
+                advance_qualification,
+            )
+            advance_qualification = jnp.where(
+                ~actions_accepted,
+                ManifoldAdvanceQualification.KRYLOV_ACTION_REFUSED,
+                advance_qualification,
+            )
+            advance_qualification = jnp.where(
+                ~secant_accepted,
+                ManifoldAdvanceQualification.DEGENERATE_SECANT,
+                advance_qualification,
+            )
+            step_qualification = jnp.where(
+                predictor_accepted,
+                corrector_action.qualification,
+                predictor_action.qualification,
+            )
+            prior_failed = (
+                measured.qualification != KrylovActionQualification.NOT_APPLICABLE
+            ) & (measured.qualification != KrylovActionQualification.ACCEPTED)
+            qualification = jnp.where(
+                prior_failed, measured.qualification, step_qualification
+            )
+            amplification = _observe_increment(
+                measured.amplification, state, candidate, promoted
+            )
+            trace = measured.trace.at[base + 1].set(normal_relative_residual)
+            trace = trace.at[base + 2].set(
+                jnp.where(promoted, candidate_residual, current_residual)
+            )
+            previous = jnp.where(promoted, state, measured.previous)
+            tangent_orientation = jnp.where(
+                promoted, secant.tangent, measured.tangent_orientation
+            )
+            terminal_state = jnp.where(promoted, candidate, state)
+            residual = jnp.where(promoted, candidate_residual, current_residual)
+            conditioning_count = measured.conditioning_count + jnp.asarray(
+                predictor_accepted & predictor_action.conditioning_applied,
+                dtype=jnp.int32,
+            )
+            conditioning_count = conditioning_count + jnp.asarray(
+                corrector_accepted & corrector_action.conditioning_applied,
+                dtype=jnp.int32,
+            )
+            maximum_condition = jnp.maximum(
+                measured.maximum_condition,
+                jnp.maximum(
+                    predictor_action.projected_condition,
+                    corrector_action.projected_condition,
+                ),
+            )
+            index = measured.attempted
+            advance_qualifications = measured.advance_qualifications.at[index].set(
+                advance_qualification
+            )
+            manifold_admissibility = measured.manifold_admissibility.at[index].set(
+                finite_candidate & admitted
+            )
+            predictor_lengths = measured.predictor_lengths.at[index].set(
+                predictor_length
+            )
+            corrector_lengths = measured.corrector_lengths.at[index].set(
+                jnp.linalg.norm(correction)
+            )
+            advance_lengths = measured.advance_lengths.at[index].set(
+                jnp.where(promoted, advance_length, 0.0)
+            )
+            newton_step_lengths = measured.newton_step_lengths.at[index].set(
+                jnp.where(predictor_accepted, predictor_length, 0.0)
+            )
+            attempted = measured.attempted + 1
+            accepted = measured.accepted + jnp.asarray(promoted, dtype=jnp.int32)
+            converged = promoted & (candidate_residual <= convergence_tolerance)
+            exhausted = attempted >= newton_steps
+            active = promoted & ~converged & ~exhausted
+            reason = jnp.where(
+                ~finite_candidate,
+                FixedPointTerminationReason.NONFINITE_RESIDUAL,
+                jnp.where(
+                    ~actions_accepted,
+                    FixedPointTerminationReason.KRYLOV_ACTION_REFUSED,
+                    jnp.where(
+                        ~promoted,
+                        FixedPointTerminationReason.MANIFOLD_ADVANCE_REFUSED,
+                        jnp.where(
+                            converged,
+                            FixedPointTerminationReason.CONVERGED,
+                            FixedPointTerminationReason.ITERATION_BUDGET_EXHAUSTED,
+                        ),
+                    ),
+                ),
+            )
+            return _ManifoldNewtonIterationState(
+                terminal_state,
+                previous,
+                tangent_orientation,
+                residual,
+                trace,
+                qualification,
+                amplification,
+                conditioning_count,
+                maximum_condition,
+                corrector_action.condition_baseline,
+                advance_qualifications,
+                manifold_admissibility,
+                predictor_lengths,
+                corrector_lengths,
+                advance_lengths,
+                newton_step_lengths,
+                attempted,
+                accepted,
+                converged,
+                jnp.asarray(reason, dtype=jnp.int32),
+                active,
+                jnp.asarray(True),
+            )
+
+        return jax.lax.cond(can_attempt, attempt_step, lambda value: value, measured)
+
+    loop = jax.lax.while_loop(
+        continue_newton,
         newton_body,
-        (
+        _ManifoldNewtonIterationState(
             state,
             previous,
             tangent_orientation,
-            initial_residual,
+            jnp.asarray(jnp.inf, dtype=initial.dtype),
             trace,
             jnp.asarray(KrylovActionQualification.NOT_APPLICABLE, dtype=jnp.int32),
             amplification,
@@ -839,31 +950,46 @@ def _manifold_newton_krylov(
             jnp.zeros(newton_steps, dtype=initial.dtype),
             jnp.zeros(newton_steps, dtype=initial.dtype),
             jnp.zeros(newton_steps, dtype=initial.dtype),
+            jnp.asarray(0, dtype=jnp.int32),
+            jnp.asarray(0, dtype=jnp.int32),
+            jnp.asarray(False),
+            jnp.asarray(
+                FixedPointTerminationReason.ITERATION_BUDGET_EXHAUSTED,
+                dtype=jnp.int32,
+            ),
+            jnp.asarray(True),
+            jnp.asarray(False),
         ),
     )
     length_floor = jnp.finfo(initial.dtype).tiny
     newton_step_equivalents = jnp.sum(
         jnp.where(
-            newton_step_lengths > length_floor,
-            advance_lengths / jnp.maximum(newton_step_lengths, length_floor),
+            loop.newton_step_lengths > length_floor,
+            loop.advance_lengths / jnp.maximum(loop.newton_step_lengths, length_floor),
             0.0,
         )
     )
     return FixedPointResult(
-        state,
-        residual,
-        trace,
-        qualification,
-        _amplification_result(amplification, qualification),
-        conditioning_count,
-        maximum_condition,
-        advance_qualifications,
-        manifold_admissibility,
-        predictor_lengths,
-        corrector_lengths,
-        advance_lengths,
-        newton_step_lengths,
-        newton_step_equivalents,
+        state=loop.state,
+        residual=loop.residual,
+        trace=loop.trace,
+        krylov_action_qualification=loop.qualification,
+        amplification_observation=_amplification_result(
+            loop.amplification, loop.qualification
+        ),
+        krylov_conditioning_count=loop.conditioning_count,
+        maximum_projected_krylov_condition=loop.maximum_condition,
+        manifold_advance_qualification=loop.advance_qualifications,
+        manifold_admissibility=loop.manifold_admissibility,
+        predictor_lengths=loop.predictor_lengths,
+        corrector_lengths=loop.corrector_lengths,
+        advance_lengths=loop.advance_lengths,
+        newton_step_lengths=loop.newton_step_lengths,
+        newton_step_equivalents=newton_step_equivalents,
+        attempted_newton_promotions=loop.attempted,
+        accepted_newton_promotions=loop.accepted,
+        converged=loop.converged,
+        termination_reason=loop.termination_reason,
     )
 
 
@@ -877,17 +1003,20 @@ def newton_krylov(
     relaxation: float = 0.5,
     step_cap: float = 10.0,
     krylov_condition_limit: float = _PROJECTED_KRYLOV_CONDITION_RATIO_LIMIT,
+    convergence_tolerance: float = FIXED_POINT_RESIDUAL_TOLERANCE,
     admissibility_fn: Callable[[jax.Array], jax.Array] | None = None,
     previous_admitted_state: jax.Array | None = None,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Exact-tangent Jacobian-free Newton–Krylov on the fixed-point residual.
 
-    After ``warmup`` relaxed Picard sweeps (the fixed-shape transient), each
-    Newton step linearises the map once with the exact ``jax.linearize``
-    tangent and solves ``(I − J) s = f`` with a ``gmres_iterations``-step
-    fixed-shape batched GMRES — no early exit, so the whole solve ``vmap``s
-    unchanged.  A step is refused when the initial linear action is non-finite,
+    After ``warmup`` relaxed Picard sweeps, each Newton attempt linearises the
+    map once with the exact ``jax.linearize`` tangent and solves
+    ``(I − J) s = f`` with a ``gmres_iterations``-step fixed-shape batched
+    GMRES.  The bounded outer loop stops before proposing a step when the
+    current finite relative residual is at or below ``convergence_tolerance``;
+    it also stops immediately after the first promoted state meeting that
+    criterion.  A step is refused when the initial linear action is non-finite,
     GMRES reports a non-successful status, the achieved linear residual is
     non-finite, or an exactly-zero step carries a material nonlinear residual.
     Before promotion, the same fixed Krylov projection measures the condition
@@ -906,16 +1035,21 @@ def newton_krylov(
     trajectory control.  A qualified
     step is then capped at
     ``step_cap`` × the relaxed step, bounding excursions while the
-    current-centroid pin holds the basin.  The trace
-    retains its ``2 + gmres_iterations`` stride (one linearisation value,
-    tangent slots, and one promotion read); the qualification actions do not
-    add measured nonlinear-map entries.  Supplying both ``admissibility_fn``
+    current-centroid pin holds the basin.  The trace retains its configured
+    length and ``2 + gmres_iterations`` stride (one linearisation value,
+    tangent slots, and one promotion read); unused iterations remain NaN
+    padding.  Under ``vmap``, the batched while-loop runs to the slowest active
+    lane while preserving each lane's receipt.  Supplying both ``admissibility_fn``
     and ``previous_admitted_state`` selects the topology-manifold mode through
     this same production solver seam.  Its secant predictor uses state-space
     arclength, its bordered corrector is normal to that secant, and promotion
     still requires both shared Krylov qualifications plus the caller's
     existing physical predicate.
     """
+    if newton_steps < 0:
+        raise ValueError("newton_steps must be non-negative")
+    if not math.isfinite(convergence_tolerance) or convergence_tolerance <= 0.0:
+        raise ValueError("convergence_tolerance must be finite and positive")
     if (admissibility_fn is None) != (previous_admitted_state is None):
         raise ValueError(
             "manifold advance requires both admissibility_fn and "
@@ -933,6 +1067,7 @@ def newton_krylov(
             relaxation=relaxation,
             step_cap=step_cap,
             krylov_condition_limit=krylov_condition_limit,
+            convergence_tolerance=convergence_tolerance,
             precision=precision,
         )
     initial = _solver_state(initial, precision)
@@ -958,102 +1093,184 @@ def newton_krylov(
         ),
     )
 
-    def newton_body(index, carry):
-        (
-            state,
-            residual,
-            trace,
-            qualification,
-            amplification,
-            conditioning_count,
-            maximum_condition,
-            condition_baseline,
-        ) = carry
+    def continue_newton(carry):
+        first_measurement = ~carry.current_measured
+        has_budget = carry.attempted < newton_steps
+        return first_measurement | (carry.active & has_budget)
+
+    def newton_body(carry):
+        state = carry.state
         mapped, tangent = jax.linearize(map_fn, state)
-        f = mapped - state
-        base = warmup + index * stride
+        residual_vector = mapped - state
         nonlinear_residual = _relative_residual(mapped, state)
-        trace = trace.at[base].set(nonlinear_residual)
+        base = warmup + carry.attempted * stride
+        trace = carry.trace
+        if newton_steps > 0:
+            trace = trace.at[base].set(nonlinear_residual)
 
-        def linear_action(vector):
-            return vector - tangent(vector)
-
-        qualified_step = _qualified_krylov_step(
-            linear_action,
-            f,
-            nonlinear_residual,
-            gmres_iterations=gmres_iterations,
-            condition_ratio_limit=krylov_condition_limit,
-            preceding_condition_baseline=condition_baseline,
+        finite_residual = jnp.isfinite(nonlinear_residual)
+        current_converged = finite_residual & (
+            nonlinear_residual <= convergence_tolerance
         )
-        step = qualified_step.step
-        step_qualification = qualified_step.qualification
-        norm_step = jnp.max(jnp.abs(step))
-        accepted = step_qualification == KrylovActionQualification.ACCEPTED
-
-        cap = step_cap * jnp.max(jnp.abs(relaxation * f))
-        step = jnp.where(
-            norm_step > cap, step * (cap / jnp.maximum(norm_step, 1.0e-300)), step
+        can_attempt = (
+            finite_residual & ~current_converged & (carry.attempted < newton_steps)
         )
-        candidate = jnp.where(accepted, state + step, state)
-        amplification = _observe_increment(amplification, state, candidate, accepted)
-        state = candidate
-        promoted = map_fn(state)
-        residual = _relative_residual(promoted, state)
-        trace = trace.at[base + stride - 1].set(residual)
-        prior_failed = (qualification != KrylovActionQualification.NOT_APPLICABLE) & (
-            qualification != KrylovActionQualification.ACCEPTED
+        stopped_reason = jnp.where(
+            ~finite_residual,
+            FixedPointTerminationReason.NONFINITE_RESIDUAL,
+            jnp.where(
+                current_converged,
+                FixedPointTerminationReason.CONVERGED,
+                FixedPointTerminationReason.ITERATION_BUDGET_EXHAUSTED,
+            ),
         )
-        qualification = jnp.where(prior_failed, qualification, step_qualification)
-        conditioning_count = conditioning_count + jnp.asarray(
-            accepted & qualified_step.conditioning_applied, dtype=jnp.int32
-        )
-        maximum_condition = jnp.maximum(
-            maximum_condition, qualified_step.projected_condition
-        )
-        return (
-            state,
-            residual,
-            trace,
-            qualification,
-            amplification,
-            conditioning_count,
-            maximum_condition,
-            qualified_step.condition_baseline,
+        measured = carry._replace(
+            residual=nonlinear_residual,
+            trace=trace,
+            converged=current_converged,
+            termination_reason=jnp.asarray(stopped_reason, dtype=jnp.int32),
+            active=jnp.asarray(False),
+            current_measured=jnp.asarray(True),
         )
 
-    (
-        state,
-        residual,
-        trace,
-        qualification,
-        amplification,
-        conditioning_count,
-        maximum_condition,
-        _condition_baseline,
-    ) = jax.lax.fori_loop(
-        0,
-        newton_steps,
+        def attempt_step(measured):
+            def linear_action(vector):
+                return vector - tangent(vector)
+
+            qualified_step = _qualified_krylov_step(
+                linear_action,
+                residual_vector,
+                nonlinear_residual,
+                gmres_iterations=gmres_iterations,
+                condition_ratio_limit=krylov_condition_limit,
+                preceding_condition_baseline=measured.condition_baseline,
+            )
+            step = qualified_step.step
+            step_qualification = qualified_step.qualification
+            action_accepted = step_qualification == KrylovActionQualification.ACCEPTED
+            norm_step = jnp.max(jnp.abs(step))
+            cap = step_cap * jnp.max(jnp.abs(relaxation * residual_vector))
+            step = jnp.where(
+                norm_step > cap,
+                step * (cap / jnp.maximum(norm_step, 1.0e-300)),
+                step,
+            )
+            candidate = jnp.where(action_accepted, state + step, state)
+            amplification = _observe_increment(
+                measured.amplification, state, candidate, action_accepted
+            )
+            attempted = measured.attempted + 1
+            accepted = measured.accepted + jnp.asarray(action_accepted, dtype=jnp.int32)
+            conditioning_count = measured.conditioning_count + jnp.asarray(
+                action_accepted & qualified_step.conditioning_applied,
+                dtype=jnp.int32,
+            )
+            maximum_condition = jnp.maximum(
+                measured.maximum_condition, qualified_step.projected_condition
+            )
+
+            def promoted_state(_):
+                candidate_image = map_fn(candidate)
+                candidate_residual = _relative_residual(candidate_image, candidate)
+                updated_trace = measured.trace.at[base + stride - 1].set(
+                    candidate_residual
+                )
+                finite_candidate_residual = jnp.isfinite(candidate_residual)
+                converged = finite_candidate_residual & (
+                    candidate_residual <= convergence_tolerance
+                )
+                exhausted = attempted >= newton_steps
+                active = finite_candidate_residual & ~converged & ~exhausted
+                reason = jnp.where(
+                    ~finite_candidate_residual,
+                    FixedPointTerminationReason.NONFINITE_RESIDUAL,
+                    jnp.where(
+                        converged,
+                        FixedPointTerminationReason.CONVERGED,
+                        FixedPointTerminationReason.ITERATION_BUDGET_EXHAUSTED,
+                    ),
+                )
+                return _NewtonIterationState(
+                    candidate,
+                    candidate_residual,
+                    updated_trace,
+                    step_qualification,
+                    amplification,
+                    conditioning_count,
+                    maximum_condition,
+                    qualified_step.condition_baseline,
+                    attempted,
+                    accepted,
+                    converged,
+                    jnp.asarray(reason, dtype=jnp.int32),
+                    active,
+                    jnp.asarray(True),
+                )
+
+            def refused_state(_):
+                return _NewtonIterationState(
+                    state,
+                    nonlinear_residual,
+                    measured.trace,
+                    step_qualification,
+                    amplification,
+                    conditioning_count,
+                    maximum_condition,
+                    qualified_step.condition_baseline,
+                    attempted,
+                    accepted,
+                    jnp.asarray(False),
+                    jnp.asarray(
+                        FixedPointTerminationReason.KRYLOV_ACTION_REFUSED,
+                        dtype=jnp.int32,
+                    ),
+                    jnp.asarray(False),
+                    jnp.asarray(True),
+                )
+
+            return jax.lax.cond(
+                action_accepted, promoted_state, refused_state, operand=None
+            )
+
+        return jax.lax.cond(can_attempt, attempt_step, lambda value: value, measured)
+
+    loop = jax.lax.while_loop(
+        continue_newton,
         newton_body,
-        (
+        _NewtonIterationState(
             state,
-            trace[jnp.maximum(warmup - 1, 0)],
+            jnp.asarray(jnp.inf, dtype=initial.dtype),
             trace,
             jnp.asarray(KrylovActionQualification.NOT_APPLICABLE, dtype=jnp.int32),
             amplification,
             jnp.asarray(0, dtype=jnp.int32),
             jnp.asarray(0.0, dtype=initial.dtype),
             jnp.asarray(jnp.nan, dtype=initial.dtype),
+            jnp.asarray(0, dtype=jnp.int32),
+            jnp.asarray(0, dtype=jnp.int32),
+            jnp.asarray(False),
+            jnp.asarray(
+                FixedPointTerminationReason.ITERATION_BUDGET_EXHAUSTED,
+                dtype=jnp.int32,
+            ),
+            jnp.asarray(True),
+            jnp.asarray(False),
         ),
     )
     return FixedPointResult(
-        state,
-        residual,
-        trace,
-        qualification,
-        _amplification_result(amplification, qualification),
-        conditioning_count,
-        maximum_condition,
+        state=loop.state,
+        residual=loop.residual,
+        trace=loop.trace,
+        krylov_action_qualification=loop.qualification,
+        amplification_observation=_amplification_result(
+            loop.amplification, loop.qualification
+        ),
+        krylov_conditioning_count=loop.conditioning_count,
+        maximum_projected_krylov_condition=loop.maximum_condition,
+        attempted_newton_promotions=loop.attempted,
+        accepted_newton_promotions=loop.accepted,
+        converged=loop.converged,
+        termination_reason=loop.termination_reason,
     )
 
 

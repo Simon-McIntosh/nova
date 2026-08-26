@@ -20,6 +20,9 @@ with skip_import("jax"):
     import jax.numpy as jnp
 
     from nova.equilibrium.fixed_point import (
+        FIXED_POINT_RESIDUAL_TOLERANCE,
+        FixedPointTerminationReason,
+        KrylovActionQualification,
         anderson,
         kink_aware_newton_krylov,
         newton_krylov,
@@ -69,6 +72,172 @@ def test_newton_krylov_solves_an_affine_map_in_one_step():
     )
     np.testing.assert_allclose(np.asarray(result.state), fixed_point, atol=1e-9)
     assert float(result.residual) < 1e-10
+    assert int(result.attempted_newton_promotions) == 1
+    assert int(result.accepted_newton_promotions) == 1
+    assert bool(result.converged)
+    assert int(result.termination_reason) == FixedPointTerminationReason.CONVERGED
+
+
+def test_newton_stops_without_a_promotion_at_a_converged_initial_state():
+    def map_fn(state):
+        return 0.5 * state + jnp.ones_like(state)
+
+    result = newton_krylov(
+        map_fn,
+        2.0 * jnp.ones(3),
+        newton_steps=4,
+        gmres_iterations=2,
+        warmup=0,
+    )
+    assert float(result.residual) == 0.0
+    assert int(result.attempted_newton_promotions) == 0
+    assert int(result.accepted_newton_promotions) == 0
+    assert bool(result.converged)
+    assert int(result.termination_reason) == FixedPointTerminationReason.CONVERGED
+    assert np.isfinite(np.asarray(result.trace)[0])
+    assert np.all(np.isnan(np.asarray(result.trace)[1:]))
+
+
+def test_manifold_newton_stops_without_an_attempt_at_a_converged_state():
+    result = newton_krylov(
+        lambda state: 0.5 * state + jnp.ones_like(state),
+        2.0 * jnp.ones(2),
+        previous_admitted_state=jnp.ones(2),
+        admissibility_fn=lambda _state: jnp.asarray(True),
+        newton_steps=3,
+        gmres_iterations=2,
+        warmup=0,
+    )
+    assert float(result.residual) == 0.0
+    assert int(result.attempted_newton_promotions) == 0
+    assert int(result.accepted_newton_promotions) == 0
+    assert bool(result.converged)
+    assert int(result.termination_reason) == FixedPointTerminationReason.CONVERGED
+    assert np.isfinite(np.asarray(result.trace)[0])
+    assert np.all(np.isnan(np.asarray(result.trace)[1:]))
+
+
+def test_newton_stops_at_the_first_passing_promotion_and_pads_diagnostics():
+    result = newton_krylov(
+        lambda state: jnp.ones_like(state),
+        jnp.zeros(2),
+        newton_steps=4,
+        gmres_iterations=2,
+        warmup=0,
+    )
+    trace = np.asarray(result.trace)
+    assert int(result.attempted_newton_promotions) == 1
+    assert int(result.accepted_newton_promotions) == 1
+    assert bool(result.converged)
+    assert float(result.residual) <= FIXED_POINT_RESIDUAL_TOLERANCE
+    assert np.isfinite(trace[0])
+    assert np.isfinite(trace[3])
+    assert np.all(np.isnan(trace[1:3]))
+    assert np.all(np.isnan(trace[4:]))
+
+
+def test_newton_reports_iteration_budget_exhaustion():
+    result = newton_krylov(
+        lambda state: jnp.ones_like(state),
+        jnp.zeros(2),
+        newton_steps=1,
+        gmres_iterations=2,
+        warmup=0,
+        relaxation=0.5,
+        step_cap=0.5,
+    )
+    assert int(result.attempted_newton_promotions) == 1
+    assert int(result.accepted_newton_promotions) == 1
+    assert not bool(result.converged)
+    assert float(result.residual) > FIXED_POINT_RESIDUAL_TOLERANCE
+    assert (
+        int(result.termination_reason)
+        == FixedPointTerminationReason.ITERATION_BUDGET_EXHAUSTED
+    )
+
+
+def test_newton_reports_a_nonfinite_initial_residual_without_attempting():
+    result = newton_krylov(
+        lambda state: jnp.full_like(state, jnp.nan),
+        jnp.zeros(2),
+        newton_steps=3,
+        gmres_iterations=2,
+        warmup=0,
+    )
+    assert int(result.attempted_newton_promotions) == 0
+    assert int(result.accepted_newton_promotions) == 0
+    assert not bool(result.converged)
+    assert not np.isfinite(float(result.residual))
+    assert (
+        int(result.termination_reason) == FixedPointTerminationReason.NONFINITE_RESIDUAL
+    )
+
+
+def test_newton_reports_a_refused_linear_action():
+    def map_fn(state):
+        return jnp.sqrt(state) + jnp.ones_like(state)
+
+    result = newton_krylov(
+        map_fn,
+        jnp.zeros(2),
+        newton_steps=3,
+        gmres_iterations=2,
+        warmup=0,
+    )
+    assert int(result.attempted_newton_promotions) == 1
+    assert int(result.accepted_newton_promotions) == 0
+    assert not bool(result.converged)
+    assert (
+        int(result.krylov_action_qualification)
+        == KrylovActionQualification.NONFINITE_LINEAR_ACTION
+    )
+    assert (
+        int(result.termination_reason)
+        == FixedPointTerminationReason.KRYLOV_ACTION_REFUSED
+    )
+
+
+def test_newton_stopping_is_jittable_and_does_not_require_picard_contraction():
+    def solve(initial):
+        return newton_krylov(
+            lambda state: 1.5 * state + jnp.ones_like(state),
+            initial,
+            newton_steps=4,
+            gmres_iterations=2,
+            warmup=0,
+        )
+
+    result = jax.jit(solve)(jnp.zeros(2))
+    np.testing.assert_allclose(np.asarray(result.state), -2.0, atol=1e-12)
+    assert int(result.attempted_newton_promotions) == 1
+    assert int(result.accepted_newton_promotions) == 1
+    assert bool(result.converged)
+
+
+def test_vmap_stopping_runs_to_the_slowest_lane_with_per_lane_receipts():
+    def solve(slope):
+        return newton_krylov(
+            lambda state: slope * state + jnp.ones_like(state),
+            jnp.zeros(1),
+            newton_steps=5,
+            gmres_iterations=2,
+            warmup=0,
+            relaxation=0.5,
+            step_cap=2.0,
+            convergence_tolerance=0.1,
+        )
+
+    result = jax.jit(jax.vmap(solve))(jnp.asarray([0.0, 0.5]))
+    np.testing.assert_array_equal(
+        np.asarray(result.attempted_newton_promotions), [1, 3]
+    )
+    np.testing.assert_array_equal(np.asarray(result.accepted_newton_promotions), [1, 3])
+    np.testing.assert_array_equal(np.asarray(result.converged), [True, True])
+    assert int(np.max(np.asarray(result.attempted_newton_promotions))) == 3
+    fast_trace, slow_trace = np.asarray(result.trace)
+    assert np.all(np.isnan(fast_trace[4:]))
+    assert np.isfinite(slow_trace[11])
+    assert np.all(np.isnan(slow_trace[12:]))
 
 
 @pytest.mark.parametrize(
@@ -246,11 +415,10 @@ def test_vmap_batch_matches_per_slice_solves():
 
 
 def test_trace_layout_shares_one_evaluation_axis():
-    """Newton tangent passes appear as NaN slots; measured slots are finite."""
-    matrix, offset, _fixed_point = _contraction()
-    gmres_iterations = 5
+    """Completed Newton slots are measured and later slots remain padding."""
+    gmres_iterations = 2
     result = newton_krylov(
-        lambda x: matrix @ x + offset,
+        lambda x: jnp.ones_like(x),
         jnp.zeros(DIMENSION),
         newton_steps=2,
         gmres_iterations=gmres_iterations,
@@ -259,12 +427,12 @@ def test_trace_layout_shares_one_evaluation_axis():
     trace = np.asarray(result.trace)
     stride = 2 + gmres_iterations
     assert trace.size == 3 + 2 * stride
-    assert np.all(np.isfinite(trace[:3]))  # warmup sweeps measured
-    for step in range(2):
-        base = 3 + step * stride
-        assert np.isfinite(trace[base])  # linearisation value
-        assert np.all(np.isnan(trace[base + 1 : base + 1 + gmres_iterations]))
-        assert np.isfinite(trace[base + stride - 1])  # promotion read
+    assert np.all(np.isfinite(trace[:3]))
+    first_base = 3
+    assert np.isfinite(trace[first_base])
+    assert np.all(np.isnan(trace[first_base + 1 : first_base + 1 + gmres_iterations]))
+    assert np.isfinite(trace[first_base + stride - 1])
+    assert np.all(np.isnan(trace[first_base + stride :]))
 
 
 def test_explicit_double_state_keeps_double_solver_scratch():

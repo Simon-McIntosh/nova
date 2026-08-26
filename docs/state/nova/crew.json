@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T22:41:29",
+  "updated": "2026-08-26T22:52:45",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -146,9 +146,11 @@
         "id": "campaign-scout",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03fcf-d01a-7ae1-9ef6-62b4272259f5",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03fcf-d01a-7ae1-9ef6-62b4272259f5"
+        },
         "created": "2026-08-26"
       },
       {
@@ -49925,9 +49927,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T204248200413-ebd-resolve-campaign-map",
+        "plan": "efit-baseline-demonstration",
+        "section": "",
+        "node": "ebd-resolve-campaign-map",
+        "node_definition": {
+          "done_when": "A report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/resolve-campaign-map.md tables every regeneration target with driver path, command line, input artifacts, tracked outputs, last-run lane and wall time reconstructed from the s16-20260826 manifests and SLURM logs, corrected-HEAD deltas required, and a dependency-ordered execution sequence with parallelisable groups marked; it also states where the H200 batched-solve benchmark driver lives and its reservation requirements; no repository file modified",
+          "estimated_hours": null,
+          "goal": "A re-solve campaign map for landing S16 on the corrected topology stack: for each of the 12-arm MAST corroboration bank, the DIII-D five-frame bank, the wall-resolution ladder, the comparator and pinned-branch artifacts, the 17-panel visual evidence, and the demonstration-threshold scoring, the exact driver entry point, its inputs and tracked outputs, the compute lane its last run used with measured wall time, and what if anything must change to run it from the current corrected HEAD",
+          "id": "ebd-resolve-campaign-map",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T204248200413-ebd-resolve-campaign-map/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "",
+          "spec_level": "",
+          "time_budget": "35m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/resolve-campaign-map.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "",
+        "member": "campaign-scout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-26T20:42:58Z",
+        "completed_at": "2026-08-26T20:52:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 566,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 566,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "5e01aaf5e3792639293ab0cee42679a4e234fed4",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "eight regeneration targets reconstructed from s16-20260826 manifests, SLURM metadata and driver source at corrected HEAD 5e01aaf5; worktree clean before and after",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/resolve-campaign-map.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T204248200413-ebd-resolve-campaign-map/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03fcf-d01a-7ae1-9ef6-62b4272259f5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5080320,
+            "cached_input_tokens_cumulative": 5080320,
+            "input_tokens": 5375604,
+            "input_tokens_cumulative": 5375604,
+            "output_tokens": 17447,
+            "output_tokens_cumulative": 17447,
+            "reasoning_output_tokens": 4714,
+            "reasoning_output_tokens_cumulative": 4714
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1043
+    "_version": 1045
   }
 }

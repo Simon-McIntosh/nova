@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T23:41:22",
+  "updated": "2026-08-26T23:58:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -51437,9 +51437,116 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T214907843335-sse-terminal-axis-host-read",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-terminal-axis-host-read",
+        "node_definition": {
+          "done_when": "No production raise of NoQualifiedAxisError executes inside jitted or callback-wrapped code; the terminal disqualified state flows out of the compiled solve as data and the host read raises the named exception; a regression test compiles a frame-shaped solve whose terminal state has no qualified axis and proves the caller catches NoQualifiedAxisError directly (not JaxRuntimeError) while a mid-solve transient still backtracks silently; JAX_PLATFORMS=cpu pytest over tests/test_topology_o_qualification.py tests/test_fixed_point.py tests/test_topology_qualified_admission.py tests/test_jax_topology.py tests/test_topology_domain_partition.py tests/test_hex_flood_geometries.py passes with zero new failures vs current HEAD; no data-dependent while primitive introduced; ruff clean on staged paths",
+          "estimated_hours": null,
+          "goal": "Terminal axis qualification raised on the host side only: compiled solve internals carry the fail-closed disqualification as data all the way out, and NoQualifiedAxisError is raised by the host-side terminal read after the compiled computation returns, so the named exception is catchable by callers instead of surfacing as jax.errors.JaxRuntimeError from a callback",
+          "id": "sse-terminal-axis-host-read",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T214907843335-sse-terminal-axis-host-read/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "nova/equilibrium/topology.py",
+            "nova/equilibrium/fixed_point.py",
+            "nova/equilibrium/forward_operator.py",
+            "tests/test_topology_o_qualification.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T21:49:18Z",
+        "completed_at": "2026-08-26T21:58:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 528,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 528,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "7b68d93132a99fcf67f1f883e33c8f0ee59a4560",
+        "commits": [
+          "c7da7490"
+        ],
+        "changed_lines": {
+          "added": 94,
+          "removed": 43,
+          "files": 3
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu pytest over 6 topology/fixed-point/flood files (60/60; compiled frame-shaped solve raises catchable NoQualifiedAxisError on host, transient ladder still backtracks)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T214907843335-sse-terminal-axis-host-read/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T214907843335-sse-terminal-axis-host-read/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 3108352,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3240674,
+            "output_tokens": 2219,
+            "output_tokens_cumulative": 13122,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 4064
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest over",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1060
+    "_version": 1061
   }
 }

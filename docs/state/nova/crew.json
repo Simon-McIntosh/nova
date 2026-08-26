@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T13:26:12",
+  "updated": "2026-08-26T13:28:48",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -894,7 +894,10 @@
         "harness": "codex",
         "role": "test",
         "session_id": "01a03130-e9b6-7212-8626-f37a2825731b",
-        "created": "2026-08-24"
+        "created": "2026-08-24",
+        "sessions": {
+          "gpt-5.6-sol": "01a03dcf-5590-7da3-a313-132579fd951f"
+        }
       },
       {
         "id": "registry",
@@ -37770,9 +37773,210 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T112303562765-ebd-parity-registry-verify",
+        "plan": "efit-baseline-demonstration",
+        "section": "\u00a73",
+        "node": "ebd-parity-registry-verify",
+        "node_definition": {
+          "done_when": "The named focused pytest command exits zero with 8 tests passing, the semantic identity resolves, both numerical bounds are unchanged, and the commit changes only three authorised paths",
+          "estimated_hours": 0.5,
+          "goal": "Independently verify the parity registry provenance commit",
+          "id": "ebd-parity-registry-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/ebd-parity-registry-verify.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/ebd-parity-registry-verify.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "reference-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T11:23:12Z",
+        "completed_at": "2026-08-26T11:26:21Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 189,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 189,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "ba1f73013873fd2d7434db1b744d742a1b4b042c",
+        "commits": [
+          "ba1f73013873fd2d7434db1b744d742a1b4b042c"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_parity_tolerances.py tests/test_efit_parity_criterion_provenance.py::test_registry_geometry_reference_identity_resolves",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T112303562765-ebd-parity-registry-verify/stream.jsonl",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/ebd-parity-registry-verify.md",
+        "scope_changed": false,
+        "session_id": "01a03dcf-5590-7da3-a313-132579fd951f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1147136,
+            "cached_input_tokens_cumulative": 1147136,
+            "input_tokens": 1229498,
+            "input_tokens_cumulative": 1229498,
+            "output_tokens": 5792,
+            "output_tokens_cumulative": 5792,
+            "reasoning_output_tokens": 2404,
+            "reasoning_output_tokens_cumulative": 2404
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest command",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260826T111455566141-ebd-parity-registry-pin",
+        "plan": "efit-baseline-demonstration",
+        "section": "\u00a73",
+        "node": "ebd-parity-registry-pin",
+        "node_definition": {
+          "done_when": "The registry provenance test resolves the reference identity, the axis and LCFS bounds retain their qualified values, and focused pytest exits zero",
+          "estimated_hours": 1.5,
+          "goal": "Repair the unreachable production parity registry reference identity",
+          "id": "ebd-parity-registry-pin",
+          "manifest_path": "/home/ITER/mcintos/.codex/scratch/nova-s16-20260826/ebd-parity-pin-manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/imas/parity_tolerances.py",
+            "tests/test_parity_tolerances.py",
+            "tests/test_efit_parity_criterion_provenance.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "registry",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T11:15:04Z",
+        "completed_at": "2026-08-26T11:22:05Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 421,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 421,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "60251ecdd8f9a7b1f8121d3184c807a9311c777a",
+        "commits": [
+          "ba1f73013873fd2d7434db1b744d742a1b4b042c"
+        ],
+        "changed_lines": {
+          "added": 47,
+          "removed": 3,
+          "files": 3
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_parity_tolerances.py tests/test_efit_parity_criterion_provenance.py::test_registry_geometry_reference_identity_resolves",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.codex/scratch/nova-s16-20260826/logs/ebd-parity-registry-named-pytest.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.codex/scratch/nova-s16-20260826/ebd-parity-pin-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03dc7-e358-72a1-8d0f-ca22b36b6b42",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2687744,
+            "cached_input_tokens_cumulative": 2687744,
+            "input_tokens": 2816894,
+            "input_tokens_cumulative": 2816894,
+            "output_tokens": 15617,
+            "output_tokens_cumulative": 15617,
+            "reasoning_output_tokens": 8095,
+            "reasoning_output_tokens_cumulative": 8095
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest exits",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 896
+    "_version": 899
   }
 }

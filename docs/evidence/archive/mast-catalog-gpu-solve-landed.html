@@ -199,6 +199,20 @@
     exhausted lane at the declared maximum, with p50/p90/p95/p99/max and measured fixed-versus-
     dynamic wall time. Per-slice medians remain diagnostic and are not accepted as batch savings.</p>
 
+    <h2 id="probe-axis-verification">Probe-axis and waveform-door verification</h2>
+
+    <p><strong>Independent gate PASSED, 5/5 cases in 120.19 s.</strong> The reconstruction source
+    angle is measured counter-clockwise from increasing major radius while DDv4
+    <code>magnetics/b_field_pol_probe/poloidal_angle</code> increases clockwise, so the machine
+    description authors and compares the negated source angle. Both real-shot cases, 15000 and
+    13500, pass under that explicit convention.</p>
+
+    <p>The widened waveform-door repair also fails closed: shape-mismatched channel
+    <code>fl_cc10</code> remains present in provenance, is classified as misaligned, and is excluded
+    from samples and the selected source map without reopening the raw field group. The two sensor-
+    door guards pass. A post-test unclosed-SQLite <code>ResourceWarning</code> remains visible but
+    does not change the five passing semantic gates.</p>
+
   </main>
 </body>
 </html>

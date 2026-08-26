@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S16">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="46">
+<meta name="plan-version" content="47">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -437,6 +437,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260826T085049272652" data-who="sprint-review" data-when="2026-08-26">
     <div class="r-comment-body"><p><strong>State repairs (2026-08-26 review):</strong> impl recalibrated 0.5 to 0.2 - one ladder rung of five is complete (L0 census: 1,341,435 slices from 11,573 shots), and that rung's jitted-vs-eager parity gate closed RETIRED rather than MET; effort recalibrated from the legacy XL letter to 24 worker-hours for the remaining L1-L3 ladder. The live gate is now wired: efit-baseline-demonstration added to depends_on, carrying the solver-basin treatment (profile-owned-solve-domain) that resolves the convergence frontier - previously this gate existed only as prose here and in the S15 summary, invisible to the roadmap. L1 entry is otherwise unblocked: f-mcg-02's other two items are answered by the shipped forward-operator-refinement.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260826T115134251119-mcg-probe-axis-adjudication-verify" data-who="mcg-probe-verify" data-when="2026-08-26T11:59:11Z">
+    <div class="r-comment-body"><p>Independent verification confirmed DDv4 probe-angle sign handling and fail-closed shape-mismatch propagation in 5 of 5 cases.</p></div>
 </div>
 </section>
 </main>

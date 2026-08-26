@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import copy
+from importlib.util import module_from_spec, spec_from_file_location
+from pathlib import Path
 from types import SimpleNamespace
 
+import jax.numpy as jnp
 import numpy as np
 import pytest
 
@@ -15,9 +18,73 @@ from benchmarks.wall_resolution_ladder import (
     _convergence,
     _json_digest,
     _plasma_carrier_digest,
+    _posthoc_margin_read,
     sample_authored_wall,
     validate_receipt,
 )
+
+
+CORROBORATION_SCRIPT = (
+    Path(__file__).parents[1]
+    / "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py"
+)
+
+
+def _corroboration_adapter():
+    spec = spec_from_file_location(
+        "efit_topology_corroboration_adapter", CORROBORATION_SCRIPT
+    )
+    assert spec is not None and spec.loader is not None
+    module = module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _margin_inputs():
+    coordinate = np.asarray(((1.0, -1.0), (1.0, 1.0), (2.0, -1.0), (2.0, 1.0)))
+    connectivity_material = jnp.asarray((True, False, True, True))
+    axis = jnp.asarray((1.5, 0.0))
+    received_axes = []
+
+    def connectivity_axis_seed(received_axis):
+        received_axes.append(received_axis)
+        return jnp.asarray(2), connectivity_material
+
+    operator = SimpleNamespace(
+        physical_node_number=6,
+        grid=SimpleNamespace(coordinate=coordinate),
+        wall=SimpleNamespace(coordinate=jnp.asarray(((0.8, -1.0), (0.8, 1.0)))),
+        topology=SimpleNamespace(
+            split_flux_map=lambda physical: (physical[:4], physical[4:])
+        ),
+        _fixed_design_topology=SimpleNamespace(
+            grid=lambda grid_flux: (jnp.empty((0, 4)), jnp.empty((0, 4)))
+        ),
+        inside_material=jnp.zeros(4, dtype=bool),
+        connectivity_axis_seed=connectivity_axis_seed,
+    )
+    topology = SimpleNamespace(
+        axis=axis,
+        wall_point=jnp.asarray((0.8, 0.0)),
+        wall_point_flux=jnp.asarray(0.5),
+    )
+    return (
+        SimpleNamespace(operator=operator),
+        jnp.arange(6.0),
+        topology,
+        connectivity_material,
+        received_axes,
+    )
+
+
+def _margin_diagnostic(class_margin=0.25):
+    return {
+        "class_margin": jnp.asarray(class_margin),
+        "selected_typed_candidate": jnp.asarray((1.2, -0.6, 0.7, -1.0)),
+        "limiter_coordinate": jnp.asarray((0.8, 0.0)),
+        "limiter_flux": jnp.asarray(0.5),
+        "limiter_arc": jnp.asarray(0.4),
+    }
 
 
 def _authored_wall() -> np.ndarray:
@@ -25,6 +92,52 @@ def _authored_wall() -> np.ndarray:
     wall = np.column_stack((1.0 + 0.4 * np.cos(angle), 0.8 * np.sin(angle)))
     wall[-1] = wall[0]
     return wall
+
+
+def test_wall_margin_read_uses_axis_seeded_connectivity_material(monkeypatch):
+    profile, state, topology, connectivity_material, received_axes = _margin_inputs()
+    captured = {}
+
+    def diagnostics(*args):
+        captured["material"] = args[3]
+        return _margin_diagnostic()
+
+    monkeypatch.setattr(
+        "benchmarks.wall_resolution_ladder.traced_margin_candidate_diagnostics",
+        diagnostics,
+    )
+
+    result = _posthoc_margin_read(profile, state, topology)
+
+    assert len(received_axes) == 1
+    np.testing.assert_array_equal(received_axes[0], topology.axis)
+    np.testing.assert_array_equal(
+        captured["material"], connectivity_material.reshape((2, 2)).T
+    )
+    assert result["class_margin"] == 0.25
+
+
+def test_corroboration_margin_read_uses_axis_seeded_connectivity_material(
+    monkeypatch,
+):
+    adapter = _corroboration_adapter()
+    profile, state, topology, connectivity_material, received_axes = _margin_inputs()
+    captured = {}
+
+    def diagnostics(*args):
+        captured["material"] = args[3]
+        return _margin_diagnostic()
+
+    monkeypatch.setattr(adapter, "traced_margin_candidate_diagnostics", diagnostics)
+
+    result = adapter._post_cutover_geometry(profile, state, topology)
+
+    assert len(received_axes) == 1
+    np.testing.assert_array_equal(received_axes[0], topology.axis)
+    np.testing.assert_array_equal(
+        captured["material"], connectivity_material.reshape((2, 2)).T
+    )
+    assert result["class_margin"] == 0.25
 
 
 def _receipt() -> dict:

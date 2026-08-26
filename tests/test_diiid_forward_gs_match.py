@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -115,3 +116,104 @@ def test_terminal_diagnostic_refuses_any_class_margin_mismatch(monkeypatch):
 
     with pytest.raises(RuntimeError, match="changed the exact class-margin operand"):
         gate._terminal_xpoint_diagnostics(profile, state, topology)
+
+
+def _failed_frame(frame, *, finite_target=False):
+    metrics = gate.MatchMetrics(
+        interior_r_squared=0.5,
+        interior_fractional_rms=0.25,
+        additive_gauge_wb=float("nan"),
+        closed_boundary_symmetric_sup_distance_m=None,
+        closed_boundary_symmetric_rms_distance_m=None,
+        polished_saddle_to_nearest_efit_x_m=None,
+        topology_class_agreement=False,
+        boundary_comparison_failures=("missing_predicted_closed_boundary",),
+        magnetic_axis_displacement_mm=1.5,
+        predicted_q95_nova=4.0 if finite_target else float("nan"),
+        labelled_q95_nova=4.2,
+        signed_relative_q95_error=-0.05,
+    )
+    return gate.FrameResult(
+        shot="qualified-failure.parquet",
+        frame=frame,
+        time_ms=100.0 + frame,
+        geometry_digest="geometry-digest",
+        reliable_flux_surfaces=0,
+        pseudo_wall_expansion=gate.REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION,
+        pseudo_wall_statement="physical wall",
+        fixed_point_relative_residual=float("inf"),
+        residual_tolerance=gate.GATE_RESIDUAL_TOLERANCE,
+        finite=False,
+        achieved_topology_class=None,
+        converged=False,
+        convergence_criterion="finite and converged",
+        solver_termination="nonconverged within budget",
+        residual_history=(1.0, float("nan"), float("inf")),
+        iterations=24,
+        target_current_a=200_000.0 if finite_target else float("nan"),
+        achieved_current_a=float("-inf"),
+        metrics=metrics,
+    )
+
+
+def _nonfinite_paths(value, path="receipt"):
+    if isinstance(value, dict):
+        return [
+            nested
+            for key, item in value.items()
+            for nested in _nonfinite_paths(item, f"{path}.{key}")
+        ]
+    if isinstance(value, list | tuple):
+        return [
+            nested
+            for index, item in enumerate(value)
+            for nested in _nonfinite_paths(item, f"{path}[{index}]")
+        ]
+    if isinstance(value, float | np.floating) and not np.isfinite(value):
+        return [path]
+    return []
+
+
+def test_failed_receipt_normalization_is_strict_and_lossless():
+    frames = [_failed_frame(index, finite_target=index == 0) for index in range(5)]
+    sensitivity = [
+        _failed_frame(20, finite_target=True),
+        gate.FrameResult(
+            **{
+                **frames[0].__dict__,
+                "frame": 21,
+                "pseudo_wall_expansion": 0.05,
+            }
+        ),
+    ]
+    preregistration_hash = "sha256:unchanged-preregistration"
+    unnormalized = {
+        "preregistration": {"sha256": preregistration_hash},
+        "result": gate.summarize(frames, sensitivity, preregistration_hash),
+    }
+
+    assert _nonfinite_paths(unnormalized)
+    receipt = gate._strict_json_value(unnormalized)
+
+    json.dumps(receipt, allow_nan=False)
+    assert _nonfinite_paths(receipt) == []
+    assert len(receipt["result"]["frame_records"]) == 5
+    assert len(receipt["result"]["per_frame_gate"]) == 5
+    assert all(row["verdict"] == "FAIL" for row in receipt["result"]["per_frame_gate"])
+    assert all(
+        row["metrics"]["boundary_comparison_failures"]
+        == ["missing_predicted_closed_boundary"]
+        for row in receipt["result"]["frame_records"]
+    )
+    first = receipt["result"]["frame_records"][0]
+    assert first["target_current_a"] == 200_000.0
+    assert first["metrics"]["predicted_q95_nova"] == 4.0
+    assert first["fixed_point_relative_residual"] is None
+    assert first["achieved_current_a"] is None
+    assert first["residual_history"] == [1.0, None, None]
+    assert receipt["result"]["registered_median_interior_r_squared_bar"] == (
+        gate.REGISTERED_MEDIAN_INTERIOR_R2_BAR
+    )
+    assert receipt["result"]["preregistration_sha256"] == preregistration_hash
+    assert receipt["preregistration"]["sha256"] == preregistration_hash
+    assert receipt["result"]["passed"] is False

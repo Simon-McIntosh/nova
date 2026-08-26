@@ -1528,6 +1528,22 @@ def _extended_distribution(values: np.ndarray) -> dict[str, Any]:
     }
 
 
+def _strict_json_value(value: Any) -> Any:
+    """Return a JSON-shaped tree with non-finite numerics represented by null."""
+
+    if isinstance(value, float | np.floating):
+        return float(value) if np.isfinite(value) else None
+    if isinstance(value, np.generic):
+        return _strict_json_value(value.item())
+    if isinstance(value, np.ndarray):
+        return _strict_json_value(value.tolist())
+    if isinstance(value, dict):
+        return {key: _strict_json_value(item) for key, item in value.items()}
+    if isinstance(value, list | tuple):
+        return [_strict_json_value(item) for item in value]
+    return value
+
+
 def summarize(
     results: list[FrameResult],
     sensitivity: list[FrameResult],
@@ -3441,40 +3457,46 @@ def run(
         capture_output=True,
         text=True,
     ).stdout.splitlines()
-    receipt = {
-        "measurement": "circuit-driven current-pinned forward GS kill gate",
-        "tree_stamp": {
-            "git_head": head,
-            "benchmark_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-            "worktree_status": status,
-        },
-        "preregistration": registered,
-        "preregistration_path": str(preregistration_path),
-        "execution_authority": {
-            "source_split": "development",
-            "cohort_expansion": (
-                "five frames replace the historical three-frame minimum without "
-                "loosening the score bar"
-            ),
-            "polarity_screen": str(POLARITY_RECEIPT),
-            "polarity_population_size": len(affected),
-            "relative_residual_tolerance": GATE_RESIDUAL_TOLERANCE,
-            "requires_terminal_diverted": True,
-            "seed_identity_accepted": False,
-            "vacuum_root_accepted": False,
-            "current_path": (
-                "shipped_current_at plus circuit_current_map fixed wiring, 24 "
-                "conductors, no label-recovered current prescription"
-            ),
-            "target_current_path": "ForwardProfile target_current",
-            "basin_entry": (
-                "ForwardProfile.cold_seed_portfolio plus select_forward_branch"
-            ),
-        },
-        "result": summarize(results, sensitivity, preregistration_hash),
-    }
+    receipt = _strict_json_value(
+        {
+            "measurement": "circuit-driven current-pinned forward GS kill gate",
+            "tree_stamp": {
+                "git_head": head,
+                "benchmark_sha256": hashlib.sha256(
+                    Path(__file__).read_bytes()
+                ).hexdigest(),
+                "worktree_status": status,
+            },
+            "preregistration": registered,
+            "preregistration_path": str(preregistration_path),
+            "execution_authority": {
+                "source_split": "development",
+                "cohort_expansion": (
+                    "five frames replace the historical three-frame minimum without "
+                    "loosening the score bar"
+                ),
+                "polarity_screen": str(POLARITY_RECEIPT),
+                "polarity_population_size": len(affected),
+                "relative_residual_tolerance": GATE_RESIDUAL_TOLERANCE,
+                "requires_terminal_diverted": True,
+                "seed_identity_accepted": False,
+                "vacuum_root_accepted": False,
+                "current_path": (
+                    "shipped_current_at plus circuit_current_map fixed wiring, 24 "
+                    "conductors, no label-recovered current prescription"
+                ),
+                "target_current_path": "ForwardProfile target_current",
+                "basin_entry": (
+                    "ForwardProfile.cold_seed_portfolio plus select_forward_branch"
+                ),
+            },
+            "result": summarize(results, sensitivity, preregistration_hash),
+        }
+    )
     receipt_path = output / RECEIPT_NAME
-    receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+    receipt_path.write_text(
+        json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    )
     frame_figure(results, fields, output / FRAME_FIGURE_NAME)
     cohort_figure(results, output / COHORT_FIGURE_NAME)
     return receipt

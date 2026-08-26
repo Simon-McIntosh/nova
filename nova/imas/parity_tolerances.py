@@ -73,6 +73,9 @@ class MetricTolerance:
         return value >= self.bound
 
 
+GEOMETRY_REFERENCE_IDENTITY = (
+    "sha256:8df7a0a6c3f6162dbe0f226660bc069f37de8eb69f0f7c80bbfedc2bd4be220c"
+)
 REFERENCE_STAMP = "physics-spine-v0-mast-heldout-6-08ae0dee74-98dci4-clu-3141.yaml"
 PRECISION_AUDIT = "docs/figures/jax-dissolution/fieldnull_production_route.json"
 TRANSPORT_CROSS_CHECK = "CurrentDiffusion/TORAX flux-ledger cross-check"
@@ -100,7 +103,7 @@ def _common_tolerances() -> dict[str, MetricTolerance]:
                 "four times the 0.025336 cm committed-stamp axis reference; "
                 "the deterministic reproduction spread was zero"
             ),
-            evidence=REFERENCE_STAMP,
+            evidence=GEOMETRY_REFERENCE_IDENTITY,
         ),
         ScorecardField.LCFS_DISTANCE_M: MetricTolerance(
             field=ScorecardField.LCFS_DISTANCE_M,
@@ -111,7 +114,7 @@ def _common_tolerances() -> dict[str, MetricTolerance]:
                 "four times the 0.008262 cm committed-stamp LCFS reference; "
                 "the deterministic reproduction spread was zero"
             ),
-            evidence=REFERENCE_STAMP,
+            evidence=GEOMETRY_REFERENCE_IDENTITY,
         ),
         ScorecardField.X_POINT_DISTANCE_M: MetricTolerance(
             field=ScorecardField.X_POINT_DISTANCE_M,

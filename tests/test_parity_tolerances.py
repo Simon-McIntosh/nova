@@ -6,6 +6,7 @@ from nova.imas.parity_tolerances import (
     HELD_OUT_CANDIDATE_STRATA,
     HELD_OUT_DRAW_SEED,
     HELD_OUT_EXTENSION,
+    GEOMETRY_REFERENCE_IDENTITY,
     PARITY_TOLERANCES,
     SCORECARD_FIELDS,
     BoundDirection,
@@ -62,6 +63,18 @@ def test_metric_identity_keeps_every_existing_bound_and_registers_solver_health(
 
     assert {field: tolerances[field].bound for field in expected} == expected
     assert tolerances[ScorecardField.FIXED_POINT_DEFECT].bound == 1.0e-8
+
+
+def test_geometry_bounds_cite_the_semantic_machine_identity():
+    tolerances = registered_tolerances()
+    qualified_bounds = {
+        ScorecardField.MAGNETIC_AXIS_DISTANCE_M: 0.00101344,
+        ScorecardField.LCFS_DISTANCE_M: 0.00033047,
+    }
+
+    for field, bound in qualified_bounds.items():
+        assert tolerances[field].bound == bound
+        assert tolerances[field].evidence == GEOMETRY_REFERENCE_IDENTITY
 
 
 def test_a_scorecard_cannot_be_scored_with_missing_or_unregistered_metrics():

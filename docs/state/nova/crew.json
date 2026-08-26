@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T23:24:20",
+  "updated": "2026-08-26T23:32:46",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -50948,9 +50948,134 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T211909388587-sse-diiid-axis-rejection-diagnosis",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-diiid-axis-rejection-diagnosis",
+        "node_definition": {
+          "done_when": "A report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/diiid-axis-rejection-diagnosis.md reproduces the frame-1 rejection read-only from the recorded inputs (or from the job log if reproduction exceeds the budget), names the exact call site that raises with file and line and whether it sits inside the solve loop or a terminal read, tables frame 1's O candidates against the three qualification predicates, states what axis the pre-qualification code would have selected, and gives a verdict (CORRECT-REJECTION-RETAIN-AS-FAIL, MID-SOLVE-OVERSTRICTNESS, or PREDICATE-DEFECT) with the minimal fix for that verdict; no repository file modified",
+          "estimated_hours": null,
+          "goal": "A diagnosis of the NoQualifiedAxisError that aborted DIII-D frame 1 in SLURM job 1258389: whether it fires during Newton iteration or at a terminal topology read, which O candidates frame 1 offers and which qualification predicate rejects each, and whether the pre-qualification stack had anchored an unqualified axis there \u2014 deciding if the correct repair is per-frame FAIL-row retention, mid-solve qualification tolerance, or a qualification-predicate fix",
+          "id": "sse-diiid-axis-rejection-diagnosis",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T211909388587-sse-diiid-axis-rejection-diagnosis/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "",
+          "spec_level": "",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/diiid-axis-rejection-diagnosis.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-26T21:19:16Z",
+        "completed_at": "2026-08-26T21:32:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 786,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 786,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "1b4296d7bc970e3563f54cbc676a8e076c5655bb",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "read-only reproduction from job 1258389 inputs: exception site fixed_point.py map_fn during promotion 5; all 5 frame-1 candidates boundary-resolved, component_size=0, governed_connection=false",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/diiid-axis-rejection-diagnosis.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T211909388587-sse-diiid-axis-rejection-diagnosis/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5455616,
+            "cached_input_tokens_cumulative": 5455616,
+            "input_tokens": 5580623,
+            "input_tokens_cumulative": 5580623,
+            "output_tokens": 20734,
+            "output_tokens_cumulative": 20734,
+            "reasoning_output_tokens": 7554,
+            "reasoning_output_tokens_cumulative": 7554
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: |",
+              "elapsed_seconds": 488,
+              "log_age_seconds": 376,
+              "log_fresh": true,
+              "manifest_commits": [],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T211058255408-sse-mast-bank-resolve/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "reckon crew resume --run r-20260826T211058255408-sse-mast-bank-resolve --advice <answer>",
+              "node": "sse-mast-bank-resolve",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T211058255408-sse-mast-bank-resolve",
+              "terminal_age_seconds": 394,
+              "terminal_at": "2026-08-26T21:12:38Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d8-s16-landing/sse-mast-bank-resolve"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1056
+    "_version": 1057
   }
 }

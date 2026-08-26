@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="39">
+<meta name="plan-version" content="40">
 </head>
 <body>
   <main class="plan-doc">
@@ -220,6 +220,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260826T211330790078-sse-corroboration-convergence-schema" data-who="adapter-seams" data-when="2026-08-26T21:23:56Z">
     <div class="r-comment-body"><p>Per-arm convergence end-to-end: pure keeps portfolio converged+residual+1e-8 tolerance+termination, mixed derives from MarginGradedResult; eligibility excludes non-converged without denominator shrinkage</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260826T211909388587-sse-diiid-axis-rejection-diagnosis" data-who="flood-rca" data-when="2026-08-26T21:32:22Z">
+    <div class="r-comment-body"><p>MID-SOLVE-OVERSTRICTNESS: qualification throws inside Newton trial admission on transient unconverged iterates; predicates themselves correct; fix = non-throwing trial rejection + strict terminal reads + per-frame FAIL retention</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

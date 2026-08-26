@@ -1,0 +1,445 @@
+{
+  "artifact": "continuous magnetic-axis to plasma-cell seed census",
+  "driver_sha256": "de6975ed2203693a2fabe075d7b728c0d780c710b27f95f43bba53d73a06a27f",
+  "earlier_window_21985_51": {
+    "all_repaired_components_nonempty": true,
+    "attribution": "The original centre-derived material mask suppresses the continuous-axis cell on the recovered states; admitting that one owning cell changes an empty flood into a non-empty axis component. This attributes the empty-component mechanism, not convergence of the later residual-domain solve.",
+    "empty_original_to_nonempty_repaired_count": 15,
+    "mixed_promotions": [
+      {
+        "axis_cell_in_original_material": false,
+        "cell_contains_continuous_axis": true,
+        "original_confined_component_cell_count": 0,
+        "promotion_index": 0,
+        "repaired_confined_component_cell_count": 1
+      },
+      {
+        "axis_cell_in_original_material": false,
+        "cell_contains_continuous_axis": true,
+        "original_confined_component_cell_count": 0,
+        "promotion_index": 1,
+        "repaired_confined_component_cell_count": 1
+      },
+      {
+        "axis_cell_in_original_material": false,
+        "cell_contains_continuous_axis": true,
+        "original_confined_component_cell_count": 0,
+        "promotion_index": 2,
+        "repaired_confined_component_cell_count": 1
+      },
+      {
+        "axis_cell_in_original_material": false,
+        "cell_contains_continuous_axis": true,
+        "original_confined_component_cell_count": 0,
+        "promotion_index": 3,
+        "repaired_confined_component_cell_count": 1
+      },
+      {
+        "axis_cell_in_original_material": false,
+        "cell_contains_continuous_axis": true,
+        "original_confined_component_cell_count": 0,
+        "promotion_index": 4,
+        "repaired_confined_component_cell_count": 1
+      },
+      {
+        "axis_cell_in_original_material": false,
+        "cell_contains_continuous_axis": true,
+        "original_confined_component_cell_count": 0,
+        "promotion_index": 5,
+        "repaired_confined_component_cell_count": 1
+      },
+      {
+        "axis_cell_in_original_material": false,
+        "cell_contains_continuous_axis": true,
+        "original_confined_component_cell_count": 0,
+        "promotion_index": 6,
+        "repaired_confined_component_cell_count": 1
+      },
+      {
+        "axis_cell_in_original_material": false,
+        "cell_contains_continuous_axis": true,
+        "original_confined_component_cell_count": 0,
+        "promotion_index": 7,
+        "repaired_confined_component_cell_count": 1
+      },
+      {
+        "axis_cell_in_original_material": false,
+        "cell_contains_continuous_axis": true,
+        "original_confined_component_cell_count": 0,
+        "promotion_index": 8,
+        "repaired_confined_component_cell_count": 1
+      },
+      {
+        "axis_cell_in_original_material": false,
+        "cell_contains_continuous_axis": true,
+        "original_confined_component_cell_count": 0,
+        "promotion_index": 9,
+        "repaired_confined_component_cell_count": 1
+      },
+      {
+        "axis_cell_in_original_material": false,
+        "cell_contains_continuous_axis": true,
+        "original_confined_component_cell_count": 0,
+        "promotion_index": 10,
+        "repaired_confined_component_cell_count": 1
+      },
+      {
+        "axis_cell_in_original_material": false,
+        "cell_contains_continuous_axis": true,
+        "original_confined_component_cell_count": 0,
+        "promotion_index": 11,
+        "repaired_confined_component_cell_count": 1
+      },
+      {
+        "axis_cell_in_original_material": false,
+        "cell_contains_continuous_axis": true,
+        "original_confined_component_cell_count": 0,
+        "promotion_index": 12,
+        "repaired_confined_component_cell_count": 1
+      }
+    ],
+    "pure_endpoints": [
+      {
+        "axis_cell_in_original_material": false,
+        "cell_contains_continuous_axis": true,
+        "original_confined_component_cell_count": 0,
+        "repaired_confined_component_cell_count": 1,
+        "window_position": "initial"
+      },
+      {
+        "axis_cell_in_original_material": false,
+        "cell_contains_continuous_axis": true,
+        "original_confined_component_cell_count": 0,
+        "repaired_confined_component_cell_count": 1,
+        "window_position": "terminal"
+      }
+    ],
+    "states_compared": 15
+  },
+  "evidence_inputs": {
+    "decomposition_bank": "docs/figures/efit-flux-decomposition/native-grid-decomposition.json",
+    "decomposition_bank_sha256": "2b60e2de1caf27e3b2af34e28d3e9ca007b1f992e417fe540d5de84098e5958a",
+    "response_carrier": {
+      "carrier": {
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "frozen_reference_count": 6,
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "size_bytes": 645864,
+        "stored_circuit_count": 101,
+        "warm_load_seconds": 0.005355275236070156
+      },
+      "loaded_from_persisted_carrier": true,
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-seed-repair/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "direct_green_operator_builder_entries": 0,
+        "passes": true,
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.016689 direct_builders=0 verdict=PASS"
+      }
+    }
+  },
+  "headline": {
+    "axis_cells_containing_continuous_axis": 12,
+    "frozen_arm_count": 12,
+    "passes": true,
+    "target_component_count": 2,
+    "target_nonempty_components": 2
+  },
+  "measurement_contract": {
+    "cell_ownership": "production nearest-centre seed independently checked against tensor control-cell midpoint bounds",
+    "component": "production traced_boundary_read axis flood on the saddle-aware hex partition",
+    "material_repair": "logical OR of the immutable material mask with exactly the continuous-axis owning cell"
+  },
+  "rows": [
+    {
+      "arm": "pure_arm",
+      "axis_cell_coordinate_m": [
+        0.9087499992456287,
+        0.0
+      ],
+      "axis_cell_in_original_material": true,
+      "axis_coordinate_m": [
+        0.9025105392850076,
+        0.008162268890433644
+      ],
+      "axis_to_cell_centre_distance_m": 0.01027392301119369,
+      "cell_contains_continuous_axis": true,
+      "identity": "21978/35",
+      "material_cells_admitted": 0,
+      "original_boundary_found": true,
+      "original_confined_component_cell_count": 277,
+      "repaired_boundary_found": true,
+      "repaired_class_margin": 0.026433342562969253,
+      "repaired_confined_component_cell_count": 277,
+      "shot": 21978,
+      "slice_index": 35
+    },
+    {
+      "arm": "mixed_arm",
+      "axis_cell_coordinate_m": [
+        0.9087499992456287,
+        0.0
+      ],
+      "axis_cell_in_original_material": true,
+      "axis_coordinate_m": [
+        0.9039844285928295,
+        0.029556175065942276
+      ],
+      "axis_to_cell_centre_distance_m": 0.029937904872843882,
+      "cell_contains_continuous_axis": true,
+      "identity": "21978/35",
+      "material_cells_admitted": 0,
+      "original_boundary_found": true,
+      "original_confined_component_cell_count": 244,
+      "repaired_boundary_found": true,
+      "repaired_class_margin": null,
+      "repaired_confined_component_cell_count": 244,
+      "shot": 21978,
+      "slice_index": 35
+    },
+    {
+      "arm": "pure_arm",
+      "axis_cell_coordinate_m": [
+        0.9087499992456287,
+        0.0
+      ],
+      "axis_cell_in_original_material": true,
+      "axis_coordinate_m": [
+        0.9025945759350248,
+        0.015308209992043978
+      ],
+      "axis_to_cell_centre_distance_m": 0.01649940996803344,
+      "cell_contains_continuous_axis": true,
+      "identity": "21983/35",
+      "material_cells_admitted": 0,
+      "original_boundary_found": true,
+      "original_confined_component_cell_count": 271,
+      "repaired_boundary_found": true,
+      "repaired_class_margin": 0.020742069585375,
+      "repaired_confined_component_cell_count": 271,
+      "shot": 21983,
+      "slice_index": 35
+    },
+    {
+      "arm": "mixed_arm",
+      "axis_cell_coordinate_m": [
+        0.9087499992456287,
+        0.0
+      ],
+      "axis_cell_in_original_material": true,
+      "axis_coordinate_m": [
+        0.9024907092267834,
+        0.04370061393265366
+      ],
+      "axis_to_cell_centre_distance_m": 0.04414660088422278,
+      "cell_contains_continuous_axis": true,
+      "identity": "21983/35",
+      "material_cells_admitted": 0,
+      "original_boundary_found": true,
+      "original_confined_component_cell_count": 254,
+      "repaired_boundary_found": true,
+      "repaired_class_margin": null,
+      "repaired_confined_component_cell_count": 254,
+      "shot": 21983,
+      "slice_index": 35
+    },
+    {
+      "arm": "pure_arm",
+      "axis_cell_coordinate_m": [
+        0.4843749989522621,
+        1.75
+      ],
+      "axis_cell_in_original_material": false,
+      "axis_coordinate_m": [
+        0.47194120611954293,
+        1.7958503763863825
+      ],
+      "axis_to_cell_centre_distance_m": 0.04750638082384214,
+      "cell_contains_continuous_axis": true,
+      "identity": "21985/51",
+      "material_cells_admitted": 1,
+      "original_boundary_found": false,
+      "original_confined_component_cell_count": 0,
+      "repaired_boundary_found": false,
+      "repaired_class_margin": null,
+      "repaired_confined_component_cell_count": 1,
+      "shot": 21985,
+      "slice_index": 51
+    },
+    {
+      "arm": "mixed_arm",
+      "axis_cell_coordinate_m": [
+        0.4843749989522621,
+        1.75
+      ],
+      "axis_cell_in_original_material": false,
+      "axis_coordinate_m": [
+        0.4722244880728172,
+        1.7940115651056976
+      ],
+      "axis_to_cell_centre_distance_m": 0.045657997959662744,
+      "cell_contains_continuous_axis": true,
+      "identity": "21985/51",
+      "material_cells_admitted": 1,
+      "original_boundary_found": false,
+      "original_confined_component_cell_count": 0,
+      "repaired_boundary_found": false,
+      "repaired_class_margin": null,
+      "repaired_confined_component_cell_count": 1,
+      "shot": 21985,
+      "slice_index": 51
+    },
+    {
+      "arm": "pure_arm",
+      "axis_cell_coordinate_m": [
+        0.9087499992456287,
+        0.125
+      ],
+      "axis_cell_in_original_material": true,
+      "axis_coordinate_m": [
+        0.9119937954067496,
+        0.06937807312502682
+      ],
+      "axis_to_cell_centre_distance_m": 0.055716433507716254,
+      "cell_contains_continuous_axis": true,
+      "identity": "21986/46",
+      "material_cells_admitted": 0,
+      "original_boundary_found": true,
+      "original_confined_component_cell_count": 242,
+      "repaired_boundary_found": true,
+      "repaired_class_margin": -0.14822516784583772,
+      "repaired_confined_component_cell_count": 242,
+      "shot": 21986,
+      "slice_index": 46
+    },
+    {
+      "arm": "mixed_arm",
+      "axis_cell_coordinate_m": [
+        0.4843749989522621,
+        1.75
+      ],
+      "axis_cell_in_original_material": false,
+      "axis_coordinate_m": [
+        0.4766940775032496,
+        1.7915326258134112
+      ],
+      "axis_to_cell_centre_distance_m": 0.042236898101810604,
+      "cell_contains_continuous_axis": true,
+      "identity": "21986/46",
+      "material_cells_admitted": 1,
+      "original_boundary_found": false,
+      "original_confined_component_cell_count": 0,
+      "repaired_boundary_found": false,
+      "repaired_class_margin": null,
+      "repaired_confined_component_cell_count": 1,
+      "shot": 21986,
+      "slice_index": 46
+    },
+    {
+      "arm": "pure_arm",
+      "axis_cell_coordinate_m": [
+        0.9087499992456287,
+        0.0
+      ],
+      "axis_cell_in_original_material": true,
+      "axis_coordinate_m": [
+        0.9129317239302607,
+        0.022492540601988006
+      ],
+      "axis_to_cell_centre_distance_m": 0.022877963285007238,
+      "cell_contains_continuous_axis": true,
+      "identity": "21989/55",
+      "material_cells_admitted": 0,
+      "original_boundary_found": true,
+      "original_confined_component_cell_count": 219,
+      "repaired_boundary_found": true,
+      "repaired_class_margin": null,
+      "repaired_confined_component_cell_count": 219,
+      "shot": 21989,
+      "slice_index": 55
+    },
+    {
+      "arm": "mixed_arm",
+      "axis_cell_coordinate_m": [
+        0.9087499992456287,
+        0.0
+      ],
+      "axis_cell_in_original_material": true,
+      "axis_coordinate_m": [
+        0.9130863680467535,
+        0.04802448829463428
+      ],
+      "axis_to_cell_centre_distance_m": 0.048219866967266024,
+      "cell_contains_continuous_axis": true,
+      "identity": "21989/55",
+      "material_cells_admitted": 0,
+      "original_boundary_found": true,
+      "original_confined_component_cell_count": 240,
+      "repaired_boundary_found": true,
+      "repaired_class_margin": -0.16144185077476364,
+      "repaired_confined_component_cell_count": 240,
+      "shot": 21989,
+      "slice_index": 55
+    },
+    {
+      "arm": "pure_arm",
+      "axis_cell_coordinate_m": [
+        0.9087499992456287,
+        0.0
+      ],
+      "axis_cell_in_original_material": true,
+      "axis_coordinate_m": [
+        0.9028162430306539,
+        0.01315165404043709
+      ],
+      "axis_to_cell_centre_distance_m": 0.01442828703686261,
+      "cell_contains_continuous_axis": true,
+      "identity": "22086/43",
+      "material_cells_admitted": 0,
+      "original_boundary_found": true,
+      "original_confined_component_cell_count": 263,
+      "repaired_boundary_found": true,
+      "repaired_class_margin": null,
+      "repaired_confined_component_cell_count": 263,
+      "shot": 22086,
+      "slice_index": 43
+    },
+    {
+      "arm": "mixed_arm",
+      "axis_cell_coordinate_m": [
+        0.9087499992456287,
+        0.0
+      ],
+      "axis_cell_in_original_material": true,
+      "axis_coordinate_m": [
+        0.9015370805669825,
+        0.02531400391671695
+      ],
+      "axis_to_cell_centre_distance_m": 0.026321568915251333,
+      "cell_contains_continuous_axis": true,
+      "identity": "22086/43",
+      "material_cells_admitted": 0,
+      "original_boundary_found": true,
+      "original_confined_component_cell_count": 234,
+      "repaired_boundary_found": true,
+      "repaired_class_margin": null,
+      "repaired_confined_component_cell_count": 234,
+      "shot": 22086,
+      "slice_index": 43
+    }
+  ]
+}

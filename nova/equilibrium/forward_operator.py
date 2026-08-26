@@ -55,10 +55,31 @@ from nova.equilibrium.stencil_mesh import (
 from nova.equilibrium.topology import Topology, TopologyState
 
 __all__ = [
+    "axis_cell_seed",
     "ForwardFluxOperator",
     "ForwardTopologyState",
     "PrescribedCurrentField",
 ]
+
+
+@jax.jit
+def axis_cell_seed(coordinate, axis, inside_material):
+    """Return the hex cell owning a continuous axis and its usable material mask.
+
+    The topology grid stores one coordinate per plasma cell. Cell ownership is
+    the nearest-centre Voronoi partition of the centre-first hex mesh, including
+    at a wall-trimmed support whose stored material flag was decided from the
+    cell centre. A continuous magnetic axis inside that support must remain an
+    occupiable flood seed even when the centre-only material flag is false.
+    Exactly that owning cell is admitted; no neighbouring material flag changes.
+    """
+    point = jnp.asarray(coordinate)
+    continuous_axis = jnp.asarray(axis, dtype=point.dtype)
+    material = jnp.asarray(inside_material, dtype=bool)
+    distance_squared = jnp.sum((point - continuous_axis) ** 2, axis=1)
+    owner = jnp.argmin(distance_squared)
+    seed = jnp.arange(point.shape[0]) == owner
+    return seed, material | seed
 
 
 @jax.tree_util.register_pytree_node_class
@@ -431,6 +452,28 @@ class ForwardFluxOperator:
             (radius.size, height.size),
         )
 
+    def connectivity_axis_seed(self, axis) -> tuple[jax.Array, jax.Array]:
+        """Return the owning axis cell and the material mask used by its flood."""
+        return axis_cell_seed(self.grid.coordinate, axis, self.inside_material)
+
+    def _fixed_design_read(self, physical, requested_class=None):
+        """Read topology after admitting the continuous-axis owning cell."""
+        _masks, initial, _connected = (
+            self._fixed_design_topology.read_with_connectivity(
+                physical,
+                self.polarity,
+                self.inside_material,
+                requested_class,
+            )
+        )
+        _seed, material = self.connectivity_axis_seed(initial.axis)
+        return self._fixed_design_topology.read_with_connectivity(
+            physical,
+            self.polarity,
+            material,
+            requested_class,
+        )
+
     def _current(self, current) -> jax.Array:
         """Return the conductor currents one evaluation should use."""
         return self.external_current if current is None else jnp.asarray(current)
@@ -467,11 +510,12 @@ class ForwardFluxOperator:
             (topology.wall_point, topology.wall_point_flux[None])
         )
         radial_count, vertical_count = connectivity_shape
+        _axis_seed, connectivity_material = self.connectivity_axis_seed(topology.axis)
         reading = traced_boundary_read(
             grid_flux.reshape((radial_count, vertical_count)).T,
             connectivity_radius,
             connectivity_height,
-            self.inside_material.reshape((radial_count, vertical_count)).T,
+            connectivity_material.reshape((radial_count, vertical_count)).T,
             topology.axis[0],
             topology.axis[1],
             96,
@@ -495,12 +539,7 @@ class ForwardFluxOperator:
         the X-point height band is excluded by the private-flux shadow.
         """
         physical = jnp.asarray(psi)[: self.physical_node_number]
-        _masks, topology = self._fixed_design_topology.read(
-            physical,
-            self.polarity,
-            self.inside_material,
-            None,
-        )
+        _masks, topology, _connected = self._fixed_design_read(physical)
         return self._connectivity_class_margin(physical, topology)
 
     def read(
@@ -508,12 +547,7 @@ class ForwardFluxOperator:
     ) -> tuple[DomainMasks, ForwardTopologyState]:
         """Return domain labels, Boolean class, and continuous topology margin."""
         physical = jnp.asarray(psi)[: self.physical_node_number]
-        masks, topology = self._fixed_design_topology.read(
-            physical,
-            self.polarity,
-            self.inside_material,
-            requested_class,
-        )
+        masks, topology, _connected = self._fixed_design_read(physical, requested_class)
         return masks, ForwardTopologyState(
             *topology,
             lambda: self._connectivity_class_margin(physical, topology),
@@ -622,12 +656,7 @@ class ForwardFluxOperator:
         if self.moment_geometry is None:
             raise ValueError("moment geometry is required for current moments")
         physical = jnp.asarray(psi)[: self.physical_node_number]
-        masks, topology, connected = self._fixed_design_topology.read_with_connectivity(
-            physical,
-            self.polarity,
-            self.inside_material,
-            requested_class,
-        )
+        masks, topology, connected = self._fixed_design_read(physical, requested_class)
         if not self.use_linear_moments:
             raise ValueError("clipped support moments are required")
         shared_flux = self.shared_node_flux(psi)

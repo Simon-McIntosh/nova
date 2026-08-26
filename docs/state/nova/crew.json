@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T15:57:17",
+  "updated": "2026-08-26T15:59:51",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -43685,9 +43685,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T134110216102-pod-achieved-topology-core-verify",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a76",
+        "node": "pod-achieved-topology-core-verify",
+        "node_definition": {
+          "done_when": "One captured CPU pytest invocation over tests/test_connectivity_boundary.py, tests/test_forward_operator_axes.py, and tests/test_equilibrium_forward_solve.py reports exactly 48 passes and zero failures; source and focused assertions confirm one cached connectivity comparator supplies public diverted and class_margin, NaN is explicitly indeterminate, positive infinity is diverted, a pinned requested DIVERTED state with negative margin publishes limited, legacy boundary_is_xpoint stays internal, ForwardEquilibrium.topology is ForwardTopologyState, no JSON bank is changed, the frozen contradiction remains 5 of 12 arms, git diff --exit-code returns 0, and the manifest states PASS or HOLD.",
+          "estimated_hours": 0.8,
+          "goal": "Independently verify commit a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af as the achieved saddle-aware topology authority, without changing repository files.",
+          "id": "pod-achieved-topology-core-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-achieved-topology-core-verify.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a76",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-achieved-topology-core-verify.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "ebd-metric-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T13:41:16Z",
+        "completed_at": "2026-08-26T13:56:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 931,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 931,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv uv run --no-sync pytest -p no:cacheprovider tests/test_connectivity_boundary.py tests/test_forward_operator_axes.py tests/test_equilibrium_forward_solve.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-achieved-topology-core-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-achieved-topology-core-verify.md",
+        "scope_changed": false,
+        "session_id": "01a03dec-0092-7383-b96b-3945d7debdd4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1411072,
+            "cached_input_tokens_cumulative": 3745280,
+            "input_tokens": 1544980,
+            "input_tokens_cumulative": 4071839,
+            "output_tokens": 5481,
+            "output_tokens_cumulative": 15422,
+            "reasoning_output_tokens": 2,
+            "reasoning_output_tokens_cumulative": 3803
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest invocation",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 964
+    "_version": 965
   }
 }

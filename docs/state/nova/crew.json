@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T17:52:04",
+  "updated": "2026-08-26T18:36:52",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -512,6 +512,15 @@
         "role": "implement",
         "session_id": "019ff707-7f0a-7cb1-8202-0d566308bf88",
         "created": "2026-08-12"
+      },
+      {
+        "id": "flood-rca",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-26"
       },
       {
         "id": "flux-loops",
@@ -47358,6 +47367,6 @@
       }
     ],
     "holds": [],
-    "_version": 1009
+    "_version": 1010
   }
 }

@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="23">
+<meta name="plan-version" content="24">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -263,6 +263,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260826-receipt-semantics-repair" data-who="reckon-d8-s16-veracity-review" data-when="2026-08-26T15:16:00+00:00">
     <div class="r-comment-body">pod-receipt-semantics-repair landed — commit 3a7c20cb, merged to main; gate: focused suite 17/17, ruff clean. The wall-ladder receipt now records wall_not_reevaluated_in_fixed_terminal_ladder=true and no longer claims production wall-independence; rung rows (sha 4f468766) and convergence object (sha 4b609bbe) byte-identical, both stop counts still null. This closes the HIGH defect from rev-pod-veracity; the artifact may now be cited as fixed-terminal wall-sensitivity evidence, and still must not be cited as residual-domain evidence until the profile-owned cutover lands.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260826-shadow-flood-pause" data-who="reckon-d8-s16-veracity-review" data-when="2026-08-26T16:42:00+00:00">
+    <div class="r-comment-body">PAUSE (lead directive): the topology visual gate on efit-baseline-demonstration failed — private-flux shadow cells are flooded inside the LCFS on converged MAST panels. The hex flood-fill and connectivity-material machinery this plan's seed, achieved-topology and fixed-trip work builds on is under RCA (f-ebd-shadow-flood-rca on efit-baseline-demonstration). Work consuming the flood mask, connectivity material or achieved-class outputs pauses until the RCA lands and the landed results are re-evaluated against the fix.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260826T111438066261-pod-seed-repair" data-who="fixed-boundary-seed" data-when="2026-08-26T12:33:21Z">
     <div class="r-comment-body"><p>The continuous fitted axis now seeds its owning material cell; frozen and earlier-window empty components recover, while later residual-domain convergence remains open.</p></div>

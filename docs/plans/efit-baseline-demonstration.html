@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 <meta name="plan-commits" content="ba1f73013873fd2d7434db1b744d742a1b4b042c">
 <meta name="plan-artifacts" content="docs/evidence/archive/efit-baseline-demonstration-landed.html,docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json">
 </head>
@@ -230,6 +230,11 @@
     <pre class="r-fu-prompt">/reckon-ship efit-baseline-demonstration §3</pre>
     <p class="r-fu-outcome">Locked report-only-first-pass remains authoritative. Commit 1027d500 replaced the unreachable registry filename with semantic identity sha256:8df7a0a6... for every former stamp consumer; independent verification passed 17/17 tests with all numeric bounds unchanged and seven explicit provenance-only historical receipt differences.</p>
     </article>
+<article class="r-fu" data-id="f-ebd-shadow-flood-rca" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-d8-s16-veracity-review" data-written-at="2026-08-26T16:40:00+00:00" data-recommends-skill="/reckon-ship efit-baseline-demonstration" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Flood-fill shadow RCA gates all dependent S16 work</h4>
+    <div class="r-fu-body">The topology visual gate failed on lead inspection: private-flux shadow cells are flooded inside the LCFS on converged MAST panels, and the 21985/51 panel selects its primary X/O at the top wall notch. Until the RCA identifies the mechanism and the fix lands: no bank regeneration, no comparator scoring, no achieved-class or demonstration-threshold credit, and every S16 result that consumed the hex flood/connectivity material is to be re-evaluated against the fix before further progress. The RCA must decide whether the defect is confined to the evidence generator or lives in the production flood fill.</div>
+    <pre class="r-fu-prompt">/reckon-ship efit-baseline-demonstration</pre>
+    </article>
 </section>
 
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -253,6 +258,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260826-topology-visuals-landed" data-who="reckon-d8-s16-veracity-review" data-when="2026-08-26T15:55:00+00:00">
     <div class="r-comment-body">ebd-topology-visual-evidence landed — commits 54777af7 + 9f214f88, merged to main; gate: generator 17/17 rows EXIT_MARKER=0, audit-doc 0 ERRORs, artifact verifier 17 unique project-absolute PNG sources. docs/evidence/topology-visual-corroboration.html (plan-evidence-for=efit-baseline-demonstration) renders, per geometry across 12 MAST arms and 5 DIII-D frames: the hex flood-fill shadow map, every finite candidate X-point with the selected primary distinguished, the primary O-point, the closest plasma-wall point, and the EFIT-label overlay including the LCFS. All 5 DIII-D frames retain their NONCONVERGED qualification. Lead directive recorded: this visual evidence gates forward demonstration work — review the report before crediting further §3 progress.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260826-visual-gate-failed" data-who="reckon-d8-s16-veracity-review" data-when="2026-08-26T16:40:00+00:00">
+    <div class="r-comment-body">VISUAL GATE FAILED — lead inspection of docs/evidence/topology-visual-corroboration.html found shadow cells flooded WITHIN the LCFS: on converged MAST panels (21978/35 pure and mixed) the entire interior below the midplane inside both the Nova closed boundary and the EFIT LCFS is classified private-flux shadow, with a further shadow band hugging the top inside edge — a flux/half-plane criterion where connectivity is required. On 21985/51 the selected primary X, primary O and a tiny closed boundary sit at the top wall notch (Z≈1.8), the same arm whose bank regeneration failed on the production-vs-diagnostic connectivity-material mismatch. Lead directive: ALL dependent work pauses until the flood-fill/shadow RCA lands and each dependant is re-evaluated against the fix. RCA node dispatched; the decisive question is whether the defect is generator-local or in the production hex flood fill (which would contaminate achieved-class margins and every consumer of the connectivity material).</div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260826T111937959782-ebd-threshold-lock-proposal" data-who="vacuum-diagnosis" data-when="2026-08-26T11:24:20Z">
     <div class="r-comment-body"><p>Derived an outcome-blind, inclusive three-gate demonstration contract from the immutable banked twelve-arm evidence: class agreement at least 7/12, worst eligible closed-boundary RMS at most 0.55 m, and worst polished-saddle distance at most 0.04 m, with fail-closed cohort and nonfinite semantics.</p></div>

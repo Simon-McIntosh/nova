@@ -56,6 +56,7 @@ REFERENCE_SLICE = 51
 SAMPLES_PER_SEGMENT = (1, 2, 4, 8)
 EXPECTED_COUNTS = (36, 72, 144, 288)
 SCHEMA = "isolated-wall-resolution-ladder"
+NO_PREDICTED_CLOSED_BOUNDARY = "no_predicted_closed_boundary"
 
 
 def _array_digest(values: Any) -> str:
@@ -382,6 +383,26 @@ def _strict(value: float) -> float | None:
     return float(value) if np.isfinite(value) else None
 
 
+def _contact_fields(topology, operands: dict[str, Any]) -> dict[str, Any]:
+    """Publish wall contact only when the terminal has a closed boundary."""
+
+    boundary = np.asarray(topology.boundary, dtype=np.float64)
+    if boundary.shape != (2,):
+        raise ValueError("the predicted boundary coordinate must have shape (2,)")
+    if not np.all(np.isfinite(boundary)):
+        return {
+            "contact_coordinate_m": None,
+            "contact_coordinate_absence_reason": NO_PREDICTED_CLOSED_BOUNDARY,
+            "contact_arc_m": None,
+            "contact_arc_absence_reason": NO_PREDICTED_CLOSED_BOUNDARY,
+        }
+    contact = np.asarray(operands["limiter_coordinate"], dtype=np.float64)
+    return {
+        "contact_coordinate_m": contact.tolist(),
+        "contact_arc_m": operands["limiter_arc"],
+    }
+
+
 def _posthoc_margin_read(profile, state: np.ndarray, topology) -> dict[str, Any]:
     """Return exact selected-saddle and reachable-wall limiter operands."""
 
@@ -456,7 +477,6 @@ def _read_rung(
     else:
         boundary_flux = operands["selected_x_flux"]
         boundary_source = "selected_saddle"
-    contact = np.asarray(operands["limiter_coordinate"], dtype=np.float64)
     return {
         "kind": "authored_37_row_control" if samples is None else "count_rung",
         "wall_target_count": int(len(coordinate)),
@@ -472,8 +492,7 @@ def _read_rung(
         },
         "boundary_flux_wb": boundary_flux,
         "boundary_operand": boundary_source,
-        "contact_coordinate_m": contact.tolist(),
-        "contact_arc_m": operands["limiter_arc"],
+        **_contact_fields(topology, operands),
         "achieved_class": achieved,
         "class_margin": _strict(margin),
         "class_margin_nonfinite": (
@@ -496,17 +515,29 @@ def _convergence(rows: list[dict[str, Any]], plasma_pitch: float) -> dict[str, A
 
     counts = [row["wall_target_count"] for row in rows]
     for coarse, fine in zip(rows[:-1], rows[1:], strict=True):
+        coarse_contact = coarse["contact_coordinate_m"]
+        fine_contact = fine["contact_coordinate_m"]
+        if coarse_contact is None or fine_contact is None:
+            contact_change = {
+                "contact_coordinate_distance_m": None,
+                "contact_coordinate_distance_absence_reason": (
+                    NO_PREDICTED_CLOSED_BOUNDARY
+                ),
+            }
+        else:
+            contact_change = {
+                "contact_coordinate_distance_m": float(
+                    np.linalg.norm(
+                        np.asarray(coarse_contact) - np.asarray(fine_contact)
+                    )
+                )
+            }
         coarse["change_to_next_finer"] = {
             "next_finer_wall_target_count": fine["wall_target_count"],
             "boundary_flux_absolute_wb": abs(
                 coarse["boundary_flux_wb"] - fine["boundary_flux_wb"]
             ),
-            "contact_coordinate_distance_m": float(
-                np.linalg.norm(
-                    np.asarray(coarse["contact_coordinate_m"])
-                    - np.asarray(fine["contact_coordinate_m"])
-                )
-            ),
+            **contact_change,
             "class_changed": coarse["achieved_class"] != fine["achieved_class"],
         }
     rows[-1]["change_to_next_finer"] = None
@@ -533,6 +564,14 @@ def _convergence(rows: list[dict[str, Any]], plasma_pitch: float) -> dict[str, A
         ),
         None,
     )
+    fine_contact_distance = fine_step["contact_coordinate_distance_m"]
+    if fine_contact_distance is None:
+        contact_statement = (
+            "contact distance is unavailable because a terminal has no "
+            "predicted closed boundary."
+        )
+    else:
+        contact_statement = f"contact by {fine_contact_distance:.6g} m."
     return {
         "count_sequence": counts,
         "plasma_grid_pitch_m": plasma_pitch,
@@ -542,8 +581,8 @@ def _convergence(rows: list[dict[str, Any]], plasma_pitch: float) -> dict[str, A
         "statement": (
             "The limiter operand does not stop moving by 288 targets; the "
             f"144-to-288 step moves boundary flux by "
-            f"{fine_step['boundary_flux_absolute_wb']:.6g} Wb and contact by "
-            f"{fine_step['contact_coordinate_distance_m']:.6g} m. The finest "
+            f"{fine_step['boundary_flux_absolute_wb']:.6g} Wb and "
+            f"{contact_statement} The finest "
             "maximum wall spacing is "
             f"{rows[-1]['maximum_spacing_in_plasma_pitches']:.6g} "
             "plasma pitches, so no prescribed rung is plasma-equivalent."
@@ -603,6 +642,19 @@ def validate_receipt(payload: dict[str, Any]) -> dict[str, Any]:
     if any(any(name not in row for name in required) for row in rows):
         raise ValueError("a rung omits a required wall convergence operand")
     for row in rows:
+        contact = row["contact_coordinate_m"]
+        absence_reason = row.get("contact_coordinate_absence_reason")
+        if contact is None:
+            if absence_reason != NO_PREDICTED_CLOSED_BOUNDARY:
+                raise ValueError(
+                    "an absent contact must name the missing closed boundary"
+                )
+        else:
+            coordinate = np.asarray(contact, dtype=np.float64)
+            if coordinate.shape != (2,) or not np.all(np.isfinite(coordinate)):
+                raise ValueError("a present contact must be a finite coordinate pair")
+            if absence_reason is not None:
+                raise ValueError("a present contact cannot carry an absence reason")
         recomputed = _json_digest(row["residual_trajectory"])
         if row["residual_trajectory_sha256"] != recomputed:
             raise ValueError("a residual trajectory digest does not match its values")

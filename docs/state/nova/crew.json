@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T15:23:35",
+  "updated": "2026-08-26T15:24:28",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -42740,9 +42740,114 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T130635741218-pod-fixed-trip-hex-primitives",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-fixed-trip-hex-primitives",
+        "node_definition": {
+          "done_when": "_iterate_component_labels and any polish control that must execute a literal fixed trip count use lax.fori_loop or equivalent fixed-cap masked state rather than data-dependent early exit; hex rings and shared-edge arrays keep fixed shapes; custom_root implicit sensitivity remains; inactive lanes preserve exact padding; eager, JIT, vmap, warm-exit, saddle-pinch, manufactured branch, and gradient tests pass in one captured invocation; no residual-domain cutover or receipt field is implemented in this node.",
+          "estimated_hours": 2.0,
+          "goal": "Harden the reusable hex connectivity and stationary-polish primitives to fixed-cap masked execution required by the profile-owned residual cutover, preserving implicit stationary-point differentiation and existing branch semantics.",
+          "id": "pod-fixed-trip-hex-primitives",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-fixed-trip-hex-primitives.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "nova/equilibrium/flux_surface_connectivity.py",
+            "tests/test_flux_surface_connectivity.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "saddle-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T13:06:43Z",
+        "completed_at": "2026-08-26T13:13:03Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 380,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 380,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "c5a111c06a47c8f2c8880272e9f1724bece6a7e4",
+        "commits": [
+          "a251914a1904e3f63afb63bc55dc598213ff0de6"
+        ],
+        "changed_lines": {
+          "added": 80,
+          "removed": 36,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=\"$PWD\" uv run --no-sync pytest -p no:cacheprovider tests/test_flux_surface_connectivity.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/logs/pod-fixed-trip-hex-primitives-pytest.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-fixed-trip-hex-primitives.md",
+        "scope_changed": false,
+        "session_id": "01a03e2e-1bad-7df0-93f5-49418c4cb7df",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1897984,
+            "cached_input_tokens_cumulative": 1897984,
+            "input_tokens": 2001779,
+            "input_tokens_cumulative": 2001779,
+            "output_tokens": 9527,
+            "output_tokens_cumulative": 9527,
+            "reasoning_output_tokens": 1846,
+            "reasoning_output_tokens_cumulative": 1846
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 953
+    "_version": 954
   }
 }

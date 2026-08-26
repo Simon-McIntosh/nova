@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="19">
 <meta name="plan-commits" content="ba1f73013873fd2d7434db1b744d742a1b4b042c">
 <meta name="plan-artifacts" content="docs/evidence/archive/efit-baseline-demonstration-landed.html,docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json">
 </head>
@@ -251,11 +251,17 @@
 <div class="r-comment" data-section="_top" data-id="c-20260826-process-audit" data-who="reckon-d8-s16-veracity-review" data-when="2026-08-26T15:35:00+00:00">
     <div class="r-comment-body">S16 process-conformance audit (rev-process-audit, 72 codex runs tabulated): 67/72 ledger gate rows conform to their manifests; the fleet's failure handling is largely honest (failed banks refused, HOLDs preserved, zero-capacity rows correctly not-run). Five nonconforming rows: three complete static audits under-promoted as not-run (Newton-loop, comparator-seam, profile-domain prior-art — their manifests satisfy their done-whens), one completed producer retroactively rewritten to correct-refusal by a later verifier's added requirement (sse-h200-polish-measurement), one contract-drifted audit. One authority breach: mcg-probe-axis-adjudication commit ea5d17e8 changed undeclared nova/imas/mast_vacuum_cohort.py while the ledger recorded a smaller diff and scope_changed=false. One orphaned verification edge: the renderer verifier audits 94f510b6 with no producer run in the ledger. Six promotion-machinery repairs are named in the report and routed to reckon:execution-orchestration-hardening. Demonstration gate remains correctly open. Report: crew/reports/s16-veracity-20260826/rev-process-audit.md</div>
 </div>
+<div class="r-comment" data-section="_top" data-id="c-20260826-topology-visuals-landed" data-who="reckon-d8-s16-veracity-review" data-when="2026-08-26T15:55:00+00:00">
+    <div class="r-comment-body">ebd-topology-visual-evidence landed — commits 54777af7 + 9f214f88, merged to main; gate: generator 17/17 rows EXIT_MARKER=0, audit-doc 0 ERRORs, artifact verifier 17 unique project-absolute PNG sources. docs/evidence/topology-visual-corroboration.html (plan-evidence-for=efit-baseline-demonstration) renders, per geometry across 12 MAST arms and 5 DIII-D frames: the hex flood-fill shadow map, every finite candidate X-point with the selected primary distinguished, the primary O-point, the closest plasma-wall point, and the EFIT-label overlay including the LCFS. All 5 DIII-D frames retain their NONCONVERGED qualification. Lead directive recorded: this visual evidence gates forward demonstration work — review the report before crediting further §3 progress.</div>
+</div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260826T111937959782-ebd-threshold-lock-proposal" data-who="vacuum-diagnosis" data-when="2026-08-26T11:24:20Z">
     <div class="r-comment-body"><p>Derived an outcome-blind, inclusive three-gate demonstration contract from the immutable banked twelve-arm evidence: class agreement at least 7/12, worst eligible closed-boundary RMS at most 0.55 m, and worst polished-saddle distance at most 0.04 m, with fail-closed cohort and nonfinite semantics.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260826T111800287860-s16-knowledge-envelope-audit" data-who="criteria-scout" data-when="2026-08-26T11:30:17Z">
     <div class="r-comment-body"><p>Audited all four sprint members plus six shipped prerequisites, eleven research inputs and eleven prior evidence records; the twenty-node section DAG is acyclic with zero live path conflicts, while three dangling evidence references and two review-priority inversions remain explicit maintenance findings.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260826T150144859344-ebd-topology-visual-evidence" data-who="topology-visuals" data-when="2026-08-26T15:51:39Z">
+    <div class="r-comment-body"><p>Evidence report with 17 figure rows landed (12 MAST, 5 DIII-D); all topological features and EFIT/LCFS overlays rendered; DIII-D frames keep NONCONVERGED qualification; caches pickle-free after authorized MAST regeneration</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260826T112303562765-ebd-parity-registry-verify" data-who="reference-verify" data-when="2026-08-26T11:26:21Z">
     <div class="r-comment-body"><p>Independently verified the provenance repair: 8 of 8 focused tests passed, the semantic identity resolves fully, both qualified limits are byte-for-byte unchanged, and the commit touches only the three authorized files.</p></div>

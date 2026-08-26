@@ -57,6 +57,10 @@ SAMPLES_PER_SEGMENT = (1, 2, 4, 8)
 EXPECTED_COUNTS = (36, 72, 144, 288)
 SCHEMA = "isolated-wall-resolution-ladder"
 NO_PREDICTED_CLOSED_BOUNDARY = "no_predicted_closed_boundary"
+NONFINITE_LIMITER_COORDINATE = "nonfinite_limiter_coordinate"
+CONTACT_ABSENCE_REASONS = frozenset(
+    (NO_PREDICTED_CLOSED_BOUNDARY, NONFINITE_LIMITER_COORDINATE)
+)
 
 
 def _array_digest(values: Any) -> str:
@@ -384,22 +388,28 @@ def _strict(value: float) -> float | None:
 
 
 def _contact_fields(topology, operands: dict[str, Any]) -> dict[str, Any]:
-    """Publish wall contact only when the terminal has a closed boundary."""
+    """Publish wall contact only when its required operands are finite."""
 
     boundary = np.asarray(topology.boundary, dtype=np.float64)
     if boundary.shape != (2,):
         raise ValueError("the predicted boundary coordinate must have shape (2,)")
-    if not np.all(np.isfinite(boundary)):
-        return {
-            "contact_coordinate_m": None,
-            "contact_coordinate_absence_reason": NO_PREDICTED_CLOSED_BOUNDARY,
-            "contact_arc_m": None,
-            "contact_arc_absence_reason": NO_PREDICTED_CLOSED_BOUNDARY,
-        }
     contact = np.asarray(operands["limiter_coordinate"], dtype=np.float64)
+    if contact.shape != (2,):
+        raise ValueError("the limiter coordinate must have shape (2,)")
+    if not np.all(np.isfinite(contact)):
+        absence_reason = NONFINITE_LIMITER_COORDINATE
+    elif not np.all(np.isfinite(boundary)):
+        absence_reason = NO_PREDICTED_CLOSED_BOUNDARY
+    else:
+        return {
+            "contact_coordinate_m": contact.tolist(),
+            "contact_arc_m": operands["limiter_arc"],
+        }
     return {
-        "contact_coordinate_m": contact.tolist(),
-        "contact_arc_m": operands["limiter_arc"],
+        "contact_coordinate_m": None,
+        "contact_coordinate_absence_reason": absence_reason,
+        "contact_arc_m": None,
+        "contact_arc_absence_reason": absence_reason,
     }
 
 
@@ -518,10 +528,11 @@ def _convergence(rows: list[dict[str, Any]], plasma_pitch: float) -> dict[str, A
         coarse_contact = coarse["contact_coordinate_m"]
         fine_contact = fine["contact_coordinate_m"]
         if coarse_contact is None or fine_contact is None:
+            absent_row = coarse if coarse_contact is None else fine
             contact_change = {
                 "contact_coordinate_distance_m": None,
-                "contact_coordinate_distance_absence_reason": (
-                    NO_PREDICTED_CLOSED_BOUNDARY
+                "contact_coordinate_distance_absence_reason": absent_row.get(
+                    "contact_coordinate_absence_reason"
                 ),
             }
         else:
@@ -645,9 +656,9 @@ def validate_receipt(payload: dict[str, Any]) -> dict[str, Any]:
         contact = row["contact_coordinate_m"]
         absence_reason = row.get("contact_coordinate_absence_reason")
         if contact is None:
-            if absence_reason != NO_PREDICTED_CLOSED_BOUNDARY:
+            if absence_reason not in CONTACT_ABSENCE_REASONS:
                 raise ValueError(
-                    "an absent contact must name the missing closed boundary"
+                    "an absent contact must name its non-finite source operand"
                 )
         else:
             coordinate = np.asarray(contact, dtype=np.float64)

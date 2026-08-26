@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T16:55:02",
+  "updated": "2026-08-26T17:01:24",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1031,9 +1031,11 @@
         "id": "review-prereg",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03e8f-815c-7813-bde5-2541f9e27feb",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03e8f-815c-7813-bde5-2541f9e27feb"
+        },
         "created": "2026-08-26"
       },
       {
@@ -1300,6 +1302,15 @@
         "role": "implement",
         "session_id": "019ffb73-f8a9-7f02-b9ee-19586af8c6e8",
         "created": "2026-08-13"
+      },
+      {
+        "id": "topology-visuals",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-26"
       },
       {
         "id": "transport-cocos",
@@ -46135,9 +46146,136 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T145258976706-rev-prereg-gate",
+        "plan": "efit-baseline-demonstration",
+        "section": "",
+        "node": "rev-prereg-gate",
+        "node_definition": {
+          "done_when": "A written report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-veracity-20260826/rev-prereg-gate.md lists the demonstration-thresholds lock event (commit and timestamp or a finding that it is still unlocked), every ledger run against this plan and its dependents whose gate credit predates the lock, and a PASS or VIOLATION verdict per run quoting the evidence line; no repository file modified",
+          "estimated_hours": null,
+          "goal": "A veracity report on whether S16 fleet work was credited against efit-baseline-demonstration gates while the demonstration-thresholds decision was unlocked, reconstructed from the decision's lock timestamp in the plan HTML git history, the ebd-threshold-lock-proposal and ebd-parity-registry run chain, and the crew ledger gate records in docs/state/nova/crew.json",
+          "id": "rev-prereg-gate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T145258976706-rev-prereg-gate/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "",
+          "spec_level": "",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-veracity-20260826/rev-prereg-gate.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "",
+        "member": "review-prereg",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-26T14:53:06Z",
+        "completed_at": "2026-08-26T14:59:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 392,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 392,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "03b026a5a5a371e290af98f242500743cf03f3fa",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "report-validation assertions over rev-prereg-gate.md (8 verdict headings, 8/8 ledger run IDs, git parent-to-lock transition, clean worktree)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T145258976706-rev-prereg-gate/report-validation.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T145258976706-rev-prereg-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e8f-815c-7813-bde5-2541f9e27feb",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1456640,
+            "cached_input_tokens_cumulative": 1456640,
+            "input_tokens": 1562673,
+            "input_tokens_cumulative": 1562673,
+            "output_tokens": 16787,
+            "output_tokens_cumulative": 16787,
+            "reasoning_output_tokens": 5606,
+            "reasoning_output_tokens_cumulative": 5606
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1294,
+              "log_age_seconds": 696,
+              "log_fresh": true,
+              "manifest_commits": [
+                "94f510b68021345c2eac31fd1143e30a3701687e"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-complete-poloidal-renderer.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T143118798947-sse-diiid-complete-poloidal-renderer --gate <verdict> --commit 94f510b68021345c2eac31fd1143e30a3701687e",
+              "node": "sse-diiid-complete-poloidal-renderer",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T143118798947-sse-diiid-complete-poloidal-renderer",
+              "terminal_age_seconds": 710,
+              "terminal_at": "2026-08-26T14:41:13Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-diiid-complete-poloidal-renderer"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 991
+    "_version": 994
   }
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T22:55:16",
+  "updated": "2026-08-26T22:57:37",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1292,9 +1292,11 @@
         "id": "snowflake-tests",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03fcf-757f-77e3-b9dc-9ecc46cea969",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03fcf-757f-77e3-b9dc-9ecc46cea969"
+        },
         "created": "2026-08-26"
       },
       {
@@ -50129,9 +50131,113 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T204226403307-ebd-flood-snowflake-battery",
+        "plan": "efit-baseline-demonstration",
+        "section": "",
+        "node": "ebd-flood-snowflake-battery",
+        "node_definition": {
+          "done_when": "tests/test_hex_flood_snowflake.py constructs manufactured snowflake-plus (secondary null on the private side) and snowflake-minus (secondary null in the common flux region) fields at three or more resolutions and at least two null separations including one comparable to a cell width, and for every case asserts zero PRIVATE_FLUX inside the analytic LCFS, shadow regions on the analytically correct sides of both nulls, no silent leakage when the pair is near-degenerate (a named fail-closed refusal is acceptable, silent misclassification is not), and eager/JIT identity; passes alongside tests/test_hex_flood_geometries.py with zero new failures vs HEAD; ruff clean",
+          "estimated_hours": null,
+          "goal": "Analytic hex-flood coverage for snowflake-plus and snowflake-minus configurations built from two closely spaced first-order nulls, proving the partition and shadow classification stay correct as the null pair approaches degeneracy",
+          "id": "ebd-flood-snowflake-battery",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T204226403307-ebd-flood-snowflake-battery/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "tests/test_hex_flood_snowflake.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "snowflake-tests",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T20:42:35Z",
+        "completed_at": "2026-08-26T20:57:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 884,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 884,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "5e01aaf5e3792639293ab0cee42679a4e234fed4",
+        "commits": [
+          "1a6bd981"
+        ],
+        "changed_lines": {
+          "added": 189,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 16,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/test_hex_flood_snowflake.py tests/test_hex_flood_geometries.py (28 passed)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T204226403307-ebd-flood-snowflake-battery/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T204226403307-ebd-flood-snowflake-battery/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03fcf-757f-77e3-b9dc-9ecc46cea969",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3644928,
+            "cached_input_tokens_cumulative": 3644928,
+            "input_tokens": 3782923,
+            "input_tokens_cumulative": 3782923,
+            "output_tokens": 17259,
+            "output_tokens_cumulative": 17259,
+            "reasoning_output_tokens": 7081,
+            "reasoning_output_tokens_cumulative": 7081
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1046
+    "_version": 1048
   }
 }

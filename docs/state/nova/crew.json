@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T15:59:51",
+  "updated": "2026-08-26T16:01:05",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -43783,9 +43783,147 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T124538795352-pod-achieved-topology-core",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a76",
+        "node": "pod-achieved-topology-core",
+        "node_definition": {
+          "done_when": "The public diverted Boolean and class_margin come from one connectivity comparator read; NaN is explicitly indeterminate rather than silently limited; positive infinity is diverted; pinned requested DIVERTED with negative margin publishes limited; ForwardEquilibrium.topology has the correct public type; focused connectivity, operator-axis, and forward-solve tests pass in one captured invocation; no old JSON bank is rewritten; the manifest records the 5-of-12 frozen contradiction and compatibility boundary.",
+          "estimated_hours": 3.0,
+          "goal": "Make ForwardTopologyState.diverted an achieved saddle-aware class read derived together with class_margin, while quarantining the legacy request-echo predicate and preserving old banked receipts.",
+          "id": "pod-achieved-topology-core",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-achieved-topology-core.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a76",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/topology.py",
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/forward.py",
+            "tests/test_connectivity_boundary.py",
+            "tests/test_forward_operator_axes.py",
+            "tests/test_equilibrium_forward_solve.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "topology-admission",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T12:45:50Z",
+        "completed_at": "2026-08-26T13:40:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3292,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3292,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "5ae87bb541948150ba9a8c0492bd13f0cadeeed5",
+        "commits": [
+          "a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af"
+        ],
+        "changed_lines": {
+          "added": 135,
+          "removed": 38,
+          "files": 6
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv uv run --no-sync pytest -p no:cacheprovider tests/test_connectivity_boundary.py tests/test_forward_operator_axes.py tests/test_equilibrium_forward_solve.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-achieved-topology-core-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-achieved-topology-core.md",
+        "scope_changed": false,
+        "session_id": "01a03e1a-fbf4-7f53-b259-53928f6d5b98",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15701504,
+            "cached_input_tokens_cumulative": 15701504,
+            "input_tokens": 16066356,
+            "input_tokens_cumulative": 16066356,
+            "output_tokens": 26511,
+            "output_tokens_cumulative": 26511,
+            "reasoning_output_tokens": 6384,
+            "reasoning_output_tokens_cumulative": 6384
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1195,
+              "log_age_seconds": 436,
+              "log_fresh": true,
+              "manifest_commits": [
+                "c4f7e50596522a3dde47c60564de06cfd46c461f b3c4097ed86f7eef881e03bed5b8ff7b761015b8"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.codex/scratch/nova-s16-20260826/pod-wall-manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T111657805648-pod-wall-resolution-ladder --gate <verdict> --commit c4f7e50596522a3dde47c60564de06cfd46c461f b3c4097ed86f7eef881e03bed5b8ff7b761015b8",
+              "node": "pod-wall-resolution-ladder",
+              "phase": "working",
+              "plan": "profile-owned-solve-domain",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T111657805648-pod-wall-resolution-ladder",
+              "terminal_age_seconds": 455,
+              "terminal_at": "2026-08-26T12:38:08Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-wall-resolution-ladder"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 965
+    "_version": 966
   }
 }

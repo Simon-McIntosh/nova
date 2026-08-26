@@ -148,22 +148,25 @@ def _fill_label_segments(
 def _iterate_component_labels(
     confined: jnp.ndarray, n_iter: int, propagate
 ) -> tuple[jnp.ndarray, jnp.ndarray]:
-    """Propagate canonical minimum labels to a fixed point."""
+    """Propagate canonical minimum labels with fixed-cap masked execution."""
     initial = jnp.arange(confined.size, dtype=jnp.int32).reshape(confined.shape) + 1
     initial = jnp.where(confined, initial, 0)
 
-    def condition(state):
-        step, labels, previous = state
-        return (step < n_iter) & jnp.any(labels != previous)
+    def body(_iteration, state):
+        labels, previous, step = state
+        active = jnp.any(labels != previous)
+        propagated = propagate(labels)
+        return (
+            jnp.where(active, propagated, labels),
+            jnp.where(active, labels, previous),
+            step + active.astype(jnp.int32),
+        )
 
-    def body(state):
-        step, labels, _previous = state
-        return step + 1, propagate(labels), labels
-
-    step, labels, _previous = jax.lax.while_loop(
-        condition,
+    labels, _previous, step = jax.lax.fori_loop(
+        0,
+        n_iter,
         body,
-        (jnp.asarray(0, dtype=jnp.int32), initial, jnp.zeros_like(initial)),
+        (initial, jnp.zeros_like(initial), jnp.asarray(0, dtype=jnp.int32)),
     )
     return labels, step
 
@@ -383,11 +386,12 @@ def label_hex_connected_components_with_steps(
     carrying the cells as a rectangular raster.
 
     Every confined cell starts with its one-based flat index. A fixed-shape
-    scatter-min propagates the minimum through each open ring until
-    :func:`jax.lax.while_loop` reaches a fixed point. A ring whose centre is not
-    confined is closed: its neighbours cannot connect through a missing cell.
-    Zero remains reserved for unconfined cells. ``n_iter`` is a static safety
-    cap; the number of cells is sufficient for any finite ring graph.
+    scatter-min propagates the minimum through each open ring for exactly
+    ``n_iter`` masked trips. Once labels reach a fixed point, later trips
+    preserve them bitwise. A ring whose centre is not confined is closed: its
+    neighbours cannot connect through a missing cell. Zero remains reserved for
+    unconfined cells. ``n_iter`` is a static safety cap; the number of cells is
+    sufficient for any finite ring graph.
     """
     return _iterate_component_labels(
         confined,
@@ -639,10 +643,10 @@ def _polish_stationary_points_in_bounds(
 ) -> dict[str, jnp.ndarray]:
     """Polish fixed-slot seeds within caller-supplied coordinate bounds.
 
-    The nonlinear solve exits when every active lane has reached the gradient
-    tolerance or the shared safety cap.  ``custom_root`` differentiates the
-    stationary equation rather than the iteration history, so reverse-mode
-    derivatives remain valid even though the primal solve uses ``while_loop``.
+    The nonlinear solve executes its literal shared safety cap while masking
+    lanes that have reached the gradient tolerance. ``custom_root``
+    differentiates the stationary equation rather than the iteration history,
+    so reverse-mode derivatives remain valid independently of the primal trips.
     """
     seed_rz = jnp.asarray(seed_rz, dtype=spline.coefficients.dtype)
     valid = jnp.asarray(valid, dtype=bool)
@@ -708,12 +712,8 @@ def _polish_stationary_points_in_bounds(
                 & (gradient_norm > gradient_tolerance)
             )
 
-        def continue_iteration(state):
-            iteration, point, _count = state
-            return (iteration < stationary_steps) & jnp.any(needs_step(point))
-
-        def newton_step(state):
-            iteration, point, count = state
+        def newton_step(_iteration, state):
+            point, count = state
             active = needs_step(point)
             evaluation = spline.evaluate(point[..., 0], point[..., 1])
             determinant = (
@@ -743,16 +743,14 @@ def _polish_stationary_points_in_bounds(
                 ),
                 axis=-1,
             )
-            return (
-                iteration + 1,
-                jnp.where(active[..., None], candidate, point),
-                count + active.astype(jnp.int32),
-            )
+            next_point = jnp.where(active[..., None], candidate, point)
+            return next_point, count + active.astype(jnp.int32)
 
-        _iteration, position, count = jax.lax.while_loop(
-            continue_iteration,
+        position, count = jax.lax.fori_loop(
+            0,
+            stationary_steps,
             newton_step,
-            (jnp.asarray(0, jnp.int32), starting_point, initial_count),
+            (starting_point, initial_count),
         )
         return position, count.astype(starting_point.dtype)
 
@@ -843,8 +841,8 @@ def polish_stationary_points(
     ``valid`` has the fixed leading shape of ``seed_rz`` and inactive slots are
     returned as canonical exact-zero padding. Hessian type is ``-1`` for a
     saddle, ``0`` for a degenerate Hessian, and ``1`` for an extremum.  The
-    supplied seeds are also the warm-tracking state: a converged seed exits
-    without a trip, while ``stationary_steps`` remains the shared safety cap.
+    supplied seeds are also the warm-tracking state: a converged seed takes zero
+    active updates while the kernel still executes the shared safety cap.
     """
     lower_rz = jnp.stack((spline.radial[0], spline.vertical[0]))
     upper_rz = jnp.stack((spline.radial[-1], spline.vertical[-1]))

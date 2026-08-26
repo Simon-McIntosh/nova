@@ -315,6 +315,27 @@ def test_hex_component_labels_match_six_neighbour_reference():
     assert np.array_equal(np.asarray(batched), np.asarray(per_slice))
 
 
+def test_component_labels_use_fixed_cap_masked_execution():
+    """Settled labels remain exact while every invocation keeps its static cap."""
+    confined = np.zeros((9, 11), dtype=bool)
+    confined[1:8, 1:5] = True
+    confined[4:7, 5:10] = True
+    rings = jnp.asarray(hex_stencil(confined.shape))
+
+    labels, steps = fsc.label_hex_connected_components_with_steps(
+        jnp.asarray(confined), rings, confined.size
+    )
+    extended_labels, extended_steps = fsc.label_hex_connected_components_with_steps(
+        jnp.asarray(confined), rings, 2 * confined.size
+    )
+
+    np.testing.assert_array_equal(np.asarray(extended_labels), np.asarray(labels))
+    assert int(extended_steps) == int(steps) < confined.size
+    source = inspect.getsource(fsc._iterate_component_labels)
+    assert "lax.fori_loop" in source
+    assert "while_loop" not in source
+
+
 def _ring_shared_edges(shape, rings, half_length=0.45):
     """Return square-index Voronoi edges for a centre-first ring gather."""
     row, column = np.indices(shape)
@@ -590,6 +611,31 @@ def test_stationary_point_polish_warm_exit_and_implicit_gradient():
     assert float(jax.grad(polished_radius)(_f64(0.0))) == pytest.approx(
         1.0, abs=2.0e-13
     )
+
+
+def test_stationary_point_polish_uses_fixed_cap_masked_execution():
+    """Extra trips preserve settled roots and inactive padding exactly."""
+    radial = _f64(np.linspace(0.2, 2.0, 9))
+    vertical = _f64(np.linspace(-1.4, 1.3, 11))
+    mesh_r, mesh_z = jnp.meshgrid(radial, vertical)
+    spline = fsc.fit_tensor_spline(
+        radial, vertical, (mesh_r - 1.13) ** 2 - (mesh_z + 0.27) ** 2
+    )
+    seeds = _f64(np.asarray(((1.06, -0.19), (1.13, -0.27), (8.0, 8.0))))
+    valid = jnp.asarray((True, True, False))
+
+    capped = fsc.polish_stationary_points(spline, seeds, valid, 8)
+    extended = fsc.polish_stationary_points(spline, seeds, valid, 16)
+
+    for key in capped:
+        np.testing.assert_array_equal(
+            np.asarray(extended[key]), np.asarray(capped[key])
+        )
+    assert int(capped["iteration_count"][1]) == 0
+    np.testing.assert_array_equal(np.asarray(capped["position_rz"][-1]), [0.0, 0.0])
+    source = inspect.getsource(fsc._polish_stationary_points_in_bounds)
+    assert "lax.fori_loop" in source
+    assert "while_loop" not in source
 
 
 def test_traced_contour_retains_cell_confined_saddle_polish():

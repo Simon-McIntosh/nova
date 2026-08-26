@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T16:08:35",
+  "updated": "2026-08-26T16:09:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -44170,9 +44170,107 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T134356377837-sse-diiid-bank-regeneration",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a74",
+        "node": "sse-diiid-bank-regeneration",
+        "node_definition": {
+          "done_when": "Before launch and after completion the preregistration SHA-256 is exactly bf3d1cb3ef29d60ddb632454bfdda8914f397421a2a46e2fc16310653c1457f5; a single SLURM CPU debug job with TMPDIR=/tmp, JAX_PLATFORMS=cpu, JAX_ENABLE_X64=true, writable XDG and Numba caches, time limit at most one hour, complete log, and EXIT_MARKER=0 runs the five-frame bank; the tracked receipt contains exactly five declared rows with no duplicates, omissions, NaN, or infinity, retains every nonconverged row with converged=false and overall FAIL, emits metre symmetric sup/RMS/X fields and named failures, commits only forward_gs_receipt.json, removes only its own ignored render scratch, and the manifest reports exact residual/metric ranges plus the unchanged scientific FAIL and scheduler receipt.",
+          "estimated_hours": 1.5,
+          "goal": "Regenerate and audit the tracked five-frame DIII-D forward-match receipt from the verified combined comparator state on a SLURM CPU debug lane, preserving preregistration bytes and every nonconverged scientific failure.",
+          "id": "sse-diiid-bank-regeneration",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-bank-regeneration.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T13:44:14Z",
+        "completed_at": "2026-08-26T14:04:01Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1187,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1187,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "d0eb24481423ba4fe661a4967f44f4d3e88ed70d",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "strict JSON finite-value audit of docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-bank-regeneration.md",
+          "log_digest": null
+        },
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-bank-regeneration.md",
+        "scope_changed": false,
+        "session_id": "01a03e37-51e1-7ca1-aec1-49356e2c6453",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 412160,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 621646,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 1809,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 425
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 968
+    "_version": 969
   }
 }

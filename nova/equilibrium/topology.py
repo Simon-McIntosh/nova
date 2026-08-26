@@ -1,17 +1,20 @@
 """Extract plasma topology from flux map."""
 
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import IntEnum, StrEnum
 from functools import partial
 from typing import NamedTuple
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 
 from nova.graphics.plot import Plot2D
 from nova.biot.null import Null1D, Null2D
-from nova.equilibrium.domain import classify_domains
+from nova.equilibrium.connectivity_boundary import _raster_hex_partition_geometry
+from nova.equilibrium.domain import axis_connected_component, classify_domains
+from nova.equilibrium.flux_surface_connectivity import hex_edge_admissibility
 from nova.jax.tree_util import Pytree
 
 
@@ -160,6 +163,30 @@ class Topology(Pytree):
 
     grid: Null2D
     wall: Null1D
+    connectivity_radius: jax.Array | None = field(default=None, repr=False)
+    connectivity_height: jax.Array | None = field(default=None, repr=False)
+
+    def __post_init__(self):
+        """Cache the tensor axes required by the saddle-aware component read."""
+        if (
+            self.connectivity_radius is not None
+            and self.connectivity_height is not None
+        ):
+            return
+        coordinate = np.asarray(self.grid.coordinate, dtype=np.float64)
+        radius = np.unique(coordinate[:, 0])
+        height = np.unique(coordinate[:, 1])
+        expected = np.c_[
+            np.repeat(radius, height.size),
+            np.tile(height, radius.size),
+        ]
+        if coordinate.shape != expected.shape or not np.array_equal(
+            coordinate, expected
+        ):
+            radius = np.empty(0, dtype=np.float64)
+            height = np.empty(0, dtype=np.float64)
+        self.connectivity_radius = jnp.asarray(radius, dtype=jnp.float64)
+        self.connectivity_height = jnp.asarray(height, dtype=jnp.float64)
 
     @jax.jit
     def x_point_index(self, vmap_x, polarity, o_psi):
@@ -312,6 +339,37 @@ class Topology(Pytree):
         return self.x_mask(data_o, vmap_x) & self.psi_mask(polarity, psi_grid, psi_lcfs)
 
     @jax.jit
+    def axis_component(self, psi_grid, boundary_flux, axis_flux, axis, closed, inside):
+        """Return the closed, in-material hex component containing the axis."""
+        if self.connectivity_radius.size == 0 or self.connectivity_height.size == 0:
+            raise ValueError("topology connectivity requires a tensor-product grid")
+        radial_count = self.connectivity_radius.shape[0]
+        vertical_count = self.connectivity_height.shape[0]
+        shape = (vertical_count, radial_count)
+        flux = psi_grid.reshape((radial_count, vertical_count)).T
+        confined = (closed & inside).reshape((radial_count, vertical_count)).T
+        rings, shared_edges = _raster_hex_partition_geometry(
+            self.connectivity_radius, self.connectivity_height
+        )
+        link_admissible = hex_edge_admissibility(
+            flux,
+            self.connectivity_radius,
+            self.connectivity_height,
+            boundary_flux,
+            axis_flux,
+            shared_edges,
+        )
+        coordinate = jnp.stack(
+            jnp.meshgrid(self.connectivity_radius, self.connectivity_height), axis=-1
+        )
+        distance2 = jnp.sum((coordinate - axis) ** 2, axis=-1)
+        seed_index = jnp.argmin(jnp.where(confined, distance2, jnp.inf))
+        seed = jnp.zeros(shape, dtype=bool).reshape(-1).at[seed_index].set(True)
+        seed = seed.reshape(shape) & jnp.any(confined)
+        component = axis_connected_component(confined, rings, link_admissible, seed)
+        return component.T.reshape(-1)
+
+    @jax.jit
     def split_flux_map(self, psi):
         """Return poloidal flux maps split into grid and wall zones."""
         psi_grid = jax.lax.dynamic_slice_in_dim(psi, 0, self.grid.node_number)
@@ -372,14 +430,18 @@ class Topology(Pytree):
                 TopologyClass.DIVERTED
             )
         psi_norm = self.normalize(data_o[2], data_b[2], psi_grid)
-        connected = self.x_mask(data_o, vmap_x)
-        if requested_class is not None:
-            connected = jnp.where(
-                boundary_is_xpoint, connected, jnp.ones_like(connected)
-            )
+        closed = self.psi_mask(polarity, psi_grid, data_b[2])
+        connected = self.axis_component(
+            psi_grid,
+            data_b[2],
+            data_o[2],
+            data_o[:2],
+            closed,
+            inside_material,
+        )
         masks = classify_domains(
             psi_norm,
-            self.psi_mask(polarity, psi_grid, data_b[2]),
+            closed,
             connected,
             inside_material,
         )
@@ -438,6 +500,11 @@ class Topology(Pytree):
 
     def tree_flatten(self):
         """Return flattened pytree."""
-        children = (self.grid, self.wall)
+        children = (
+            self.grid,
+            self.wall,
+            self.connectivity_radius,
+            self.connectivity_height,
+        )
         aux_data = {}
         return (children, aux_data)

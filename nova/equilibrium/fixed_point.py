@@ -1301,7 +1301,9 @@ def kink_aware_newton_krylov(
     either side of a detected crossing.  ``nonmonotone`` selects the longest
     fixed-ladder proposal admitted by the recent residual envelope;
     when ``admissibility_fn`` is supplied, a trial must also have a finite map
-    evaluation and make that predicate true before it can be selected.
+    evaluation and make that predicate true before it can be selected. The
+    predicate may return a boolean directly or a qualification result carrying
+    an ``admitted`` field.
     ``surface_restricted`` shortens a straddling proposal to just beyond the
     detected surface.  ``damped_hybrid`` blends the Newton and relaxed fixed-
     point proposals with an explicit weight.  Its optional residual-release
@@ -1485,9 +1487,14 @@ def kink_aware_newton_krylov(
                 if admissibility_fn is None:
                     caller_admitted = jnp.ones(factors.shape, dtype=jnp.bool_)
                 else:
-                    caller_admitted = jax.lax.map(admissibility_fn, candidates).astype(
-                        jnp.bool_
-                    )
+
+                    def trial_is_admitted(candidate):
+                        qualification = admissibility_fn(candidate)
+                        if hasattr(qualification, "admitted"):
+                            qualification = qualification.admitted
+                        return jnp.asarray(qualification, dtype=jnp.bool_)
+
+                    caller_admitted = jax.lax.map(trial_is_admitted, candidates)
                 finite_trials = jnp.all(
                     jnp.isfinite(candidates), axis=1
                 ) & jnp.isfinite(scores)

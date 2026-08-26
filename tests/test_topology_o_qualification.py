@@ -14,6 +14,7 @@ with skip_import("jax"):
     import jax.numpy as jnp
 
     from nova.biot.null import Null1D, Null2D
+    from nova.equilibrium.fixed_point import kink_aware_newton_krylov
     from nova.equilibrium.forward_operator import axis_cell_seed
     from nova.equilibrium.topology import Topology
     from nova.geometry.hexstencil import hex_stencil
@@ -120,3 +121,69 @@ def test_committed_wall_notch_cannot_be_selected_without_qualification(compiled)
         else:
             with jax.disable_jit():
                 select(vmap_o, 1, qualified)
+
+
+@pytest.mark.parametrize("compiled", [False, True], ids=["eager", "jit"])
+def test_disqualified_mid_iterate_is_backtracked_without_raising(compiled):
+    """An empty trial component rejects that factor without aborting Newton."""
+    topology, coordinate = _topology_fixture()
+    candidate = np.array([1.0, 0.0, 5.0, 0.0])
+    vmap_o = jnp.asarray(
+        np.vstack((candidate, np.full((4, 4), np.nan))), dtype=jnp.float64
+    )
+    vmap_x = jnp.asarray(
+        np.vstack((np.array([1.0, -1.0, 0.0, 0.0]), np.full((4, 4), np.nan))),
+        dtype=jnp.float64,
+    )
+    data_w = jnp.asarray([2.0, 0.0, -1.0, 0.0], dtype=jnp.float64)
+    central = (np.abs(coordinate[:, 0] - 1.0) <= 0.7) & (
+        np.abs(coordinate[:, 1]) <= 0.7
+    )
+    owner = int(np.argmin(np.sum((coordinate - candidate[:2]) ** 2, axis=1)))
+    material = central.copy()
+    material[owner] = False
+    connected_flux = np.where(central, 1.0, -1.0)
+    connected_flux[owner] = candidate[2]
+    empty_flux = np.full(coordinate.shape[0], -1.0)
+    empty_flux[owner] = candidate[2]
+
+    empty_qualified = topology.qualified_o_candidates(
+        vmap_o,
+        vmap_x,
+        data_w,
+        1,
+        jnp.asarray(empty_flux),
+        jnp.asarray(material),
+    )
+    assert not np.any(np.asarray(empty_qualified))
+    finite_candidates = np.asarray(vmap_o)[np.isfinite(np.asarray(vmap_o)[:, 0])]
+    for data_o in finite_candidates:
+        boundary = topology.boundary(jnp.asarray(data_o), vmap_x, data_w, 1)
+        assert np.all(np.isfinite(np.asarray(boundary)[:3]))
+
+    def trial_qualification(state):
+        flux = jnp.where(state[0] > 1.5, empty_flux, connected_flux)
+        qualified = topology.qualified_o_candidates(
+            vmap_o, vmap_x, data_w, 1, flux, jnp.asarray(material)
+        )
+        return topology.o_point_qualification(vmap_o, 1, qualified)
+
+    def solve():
+        return kink_aware_newton_krylov(
+            lambda state: jnp.full_like(state, 2.0),
+            jnp.zeros(1, dtype=jnp.float64),
+            strategy="nonmonotone",
+            newton_steps=2,
+            gmres_iterations=1,
+            warmup=0,
+            admissibility_fn=trial_qualification,
+        )
+
+    result = jax.jit(solve)() if compiled else solve()
+    np.testing.assert_allclose(np.asarray(result.state), [1.5])
+    np.testing.assert_allclose(np.asarray(result.accepted_factors), [0.5, 0.5])
+    assert np.all(np.asarray(result.candidate_admissibility[:, 1:]))
+    assert not np.any(np.asarray(result.candidate_admissibility[:, 0]))
+
+    with pytest.raises(Exception, match="no qualified magnetic-axis candidate"):
+        topology.o_point_data(vmap_o, 1, empty_qualified).block_until_ready()

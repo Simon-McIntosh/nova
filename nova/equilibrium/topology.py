@@ -67,6 +67,13 @@ class NoQualifiedAxisError(ValueError):
     """No magnetic-axis candidate owns a resolved material component."""
 
 
+class AxisQualification(NamedTuple):
+    """Non-throwing magnetic-axis selection result for trial admission."""
+
+    data: jax.Array
+    admitted: jax.Array
+
+
 @dataclass(frozen=True)
 class TopologySolveReceipt:
     """Host-visible topology history for one forward solve.
@@ -232,10 +239,8 @@ class Topology(Pytree):
     def o_point_data(self, vmap_o, polarity, qualified=None):
         """Return primary o-point data."""
         require_qualified = qualified is not None
-        if qualified is None:
-            qualified = jnp.isfinite(vmap_o[:, 0])
+        result = self.o_point_qualification(vmap_o, polarity, qualified)
         if require_qualified:
-            has_qualified = jnp.any(qualified)
 
             def validate(candidate_exists):
                 if not candidate_exists:
@@ -243,9 +248,16 @@ class Topology(Pytree):
                         "no qualified magnetic-axis candidate has a resolved component"
                     )
 
-            jax.debug.callback(validate, has_qualified)
+            jax.debug.callback(validate, result.admitted)
+        return result.data
+
+    @jax.jit
+    def o_point_qualification(self, vmap_o, polarity, qualified=None):
+        """Return provisional O data and whether a candidate is qualified."""
+        if qualified is None:
+            qualified = jnp.isfinite(vmap_o[:, 0])
         index = self.o_point_index(vmap_o, polarity, qualified)
-        return vmap_o[index]
+        return AxisQualification(vmap_o[index], jnp.any(qualified))
 
     @jax.jit
     def o_point(self, psi_grid, polarity):

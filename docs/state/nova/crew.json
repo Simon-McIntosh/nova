@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T17:08:50",
+  "updated": "2026-08-26T17:14:10",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -974,9 +974,11 @@
         "id": "receipt-semantics",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03e9e-83dd-77a1-9200-e41251d729b1",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03e9e-83dd-77a1-9200-e41251d729b1"
+        },
         "created": "2026-08-26"
       },
       {
@@ -1064,9 +1066,11 @@
         "id": "review-process",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03e91-a807-7070-80e6-d3c6cc38270c",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03e91-a807-7070-80e6-d3c6cc38270c"
+        },
         "created": "2026-08-26"
       },
       {
@@ -46678,9 +46682,327 @@
           "role": "review",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T145517480988-rev-process-audit",
+        "plan": "efit-baseline-demonstration",
+        "section": "",
+        "node": "rev-process-audit",
+        "node_definition": {
+          "done_when": "The report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-veracity-20260826/rev-process-audit.md tabulates every such run with four judged columns (gate verdict vs manifest evidence, failure_classification appropriateness, commit diff-stat conformance to declared write_paths, verifier-member independence from the implementer it verified) followed by a ranked defect list in the orchestration approach; no repository file modified",
+          "estimated_hours": null,
+          "goal": "A single process-conformance audit report over every S16 codex fleet run recorded in docs/state/nova/crew.json since 2026-08-25, judging each run's promotion discipline against the evidence its manifest actually carries",
+          "id": "rev-process-audit",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T145517480988-rev-process-audit/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "",
+          "spec_level": "",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-veracity-20260826/rev-process-audit.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "",
+        "member": "review-process",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-26T14:55:27Z",
+        "completed_at": "2026-08-26T15:10:23Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 896,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 896,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "03b026a5a5a371e290af98f242500743cf03f3fa",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "72-run tabulation of every S16 codex run vs manifests, cumulative base-to-tip diffs, and member identities (docs/state/nova/crew.json snapshot)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-veracity-20260826/rev-process-audit.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T145517480988-rev-process-audit/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e91-a807-7070-80e6-d3c6cc38270c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5151232,
+            "cached_input_tokens_cumulative": 5151232,
+            "input_tokens": 5353460,
+            "input_tokens_cumulative": 5353460,
+            "output_tokens": 35550,
+            "output_tokens_cumulative": 35550,
+            "reasoning_output_tokens": 15051,
+            "reasoning_output_tokens_cumulative": 15051
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 772,
+              "log_age_seconds": 300,
+              "log_fresh": true,
+              "manifest_commits": [
+                "bfc393c251eb72e1b02a3b3539969f555ac16314"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-raw-measurement.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T144216465857-sse-h200-polish-raw-measurement --gate <verdict> --commit bfc393c251eb72e1b02a3b3539969f555ac16314",
+              "node": "sse-h200-polish-raw-measurement",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T144216465857-sse-h200-polish-raw-measurement",
+              "terminal_age_seconds": 322,
+              "terminal_at": "2026-08-26T14:50:00Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-h200-polish-raw-measurement"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260826T150917749358-pod-receipt-semantics-repair",
+        "plan": "profile-owned-solve-domain",
+        "section": "",
+        "node": "pod-receipt-semantics-repair",
+        "node_definition": {
+          "done_when": "benchmarks/wall_resolution_ladder.py emits the renamed field with a docstring stating the fixed-terminal isolation mechanism; docs/figures/efit-baseline-demonstration/wall-resolution-ladder/receipt.json is regenerated or minimally rewritten so no field claims production wall-independence while rung rows, convergence objects and both null stop counts stay byte-identical; tests/test_wall_resolution_ladder.py covers the renamed field; the focused suite passes and ruff adds no findings on staged paths",
+          "estimated_hours": null,
+          "goal": "A truthful wall-ladder receipt semantics field: the committed receipt and its generator stop asserting wall_enters_residual=false and instead carry a mechanism-named field stating the wall was not re-evaluated in the fixed-terminal ladder, staying consistent with the live boundary-flux dependence in ForwardFluxOperator._support_partition",
+          "id": "pod-receipt-semantics-repair",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T150917749358-pod-receipt-semantics-repair/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "write_paths": [
+            "benchmarks/wall_resolution_ladder.py",
+            "tests/test_wall_resolution_ladder.py",
+            "docs/figures/efit-baseline-demonstration/wall-resolution-ladder/receipt.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "receipt-semantics",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T15:09:30Z",
+        "completed_at": "2026-08-26T15:13:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 251,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 251,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "3c8e66333ffefc0269d6e605ec753154f38557cf",
+        "commits": [
+          "3a7c20cb957d90b1f15a6ea00c3b4e4d92a28168"
+        ],
+        "changed_lines": {
+          "added": 23,
+          "removed": 4,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=~/Code/nova/.venv uv run --no-sync pytest -p no:cacheprovider tests/test_wall_resolution_ladder.py",
+          "exit_status": 0,
+          "log_path": "/tmp/pod-receipt-pytest.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T150917749358-pod-receipt-semantics-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e9e-83dd-77a1-9200-e41251d729b1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1633536,
+            "cached_input_tokens_cumulative": 1633536,
+            "input_tokens": 1739477,
+            "input_tokens_cumulative": 1739477,
+            "output_tokens": 8862,
+            "output_tokens_cumulative": 8862,
+            "reasoning_output_tokens": 1933,
+            "reasoning_output_tokens_cumulative": 1933
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1615,
+              "log_age_seconds": 1143,
+              "log_fresh": false,
+              "manifest_commits": [
+                "bfc393c251eb72e1b02a3b3539969f555ac16314"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-raw-measurement.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T144216465857-sse-h200-polish-raw-measurement --gate <verdict> --commit bfc393c251eb72e1b02a3b3539969f555ac16314",
+              "node": "sse-h200-polish-raw-measurement",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T144216465857-sse-h200-polish-raw-measurement",
+              "terminal_age_seconds": 1165,
+              "terminal_at": "2026-08-26T14:50:00Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-h200-polish-raw-measurement"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 1500,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1052,
+              "log_age_seconds": 806,
+              "log_fresh": true,
+              "manifest_commits": [
+                "bfc393c251eb72e1b02a3b3539969f555ac16314"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-raw-verifier.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T145147405375-sse-h200-polish-raw-verifier --gate <verdict> --commit bfc393c251eb72e1b02a3b3539969f555ac16314",
+              "node": "sse-h200-polish-raw-verifier",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T145147405375-sse-h200-polish-raw-verifier",
+              "terminal_age_seconds": 827,
+              "terminal_at": "2026-08-26T14:55:38Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-h200-polish-raw-verifier"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 1500,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 769,
+              "log_age_seconds": 429,
+              "log_fresh": true,
+              "manifest_commits": [
+                "d3550f05c4872ed081b1a67aab1ae5e4dc572989"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-poloidal-publication-path-repair.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T145621948573-sse-diiid-poloidal-publication-path-repair --gate <verdict> --commit d3550f05c4872ed081b1a67aab1ae5e4dc572989",
+              "node": "sse-diiid-poloidal-publication-path-repair",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T145621948573-sse-diiid-poloidal-publication-path-repair",
+              "terminal_age_seconds": 455,
+              "terminal_at": "2026-08-26T15:01:50Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-diiid-poloidal-publication-path-repair"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1002
+    "_version": 1006
   }
 }

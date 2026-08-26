@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="17">
 <meta name="plan-commits" content="ba1f73013873fd2d7434db1b744d742a1b4b042c">
 <meta name="plan-artifacts" content="docs/evidence/archive/efit-baseline-demonstration-landed.html,docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json">
 </head>
@@ -244,6 +244,12 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260826-prereg-review" data-who="reckon-d8-s16-veracity-review" data-when="2026-08-26T15:02:00+00:00">
     <div class="r-comment-body">Independent S16 veracity review (rev-prereg-gate, run r-20260826T145258976706, codex read-only): preregistration ordering UPHELD. demonstration-thresholds locked at 2026-08-26T11:27:11Z (commit b1a02c45), preceding both bank regenerations it scores; the threshold proposal was outcome-blind and completed 2m51s before the lock; all 8 pre-lock gate credits were scoping/provenance/analytic work never scored against the thresholds — 0 violations. Qualified note: stationary-polish (feeder implementation) was credited while the decision was open, permitted under the plan's credited-against-thresholds rule. Full report: crew/reports/s16-veracity-20260826/rev-prereg-gate.md. A visual topology corroboration evidence report (hex flood-fill shadow maps, X/O-point selection, wall proximity, EFIT/LCFS overlay per geometry) has been commissioned by the lead as a gate on forward work.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260826T145517480988-rev-process-audit" data-who="review-process" data-when="2026-08-26T15:10:23Z">
+    <div class="r-comment-body"><p>67/72 gate rows conform; 5 mismatched (3 under-promoted static audits, 1 retroactively rewritten producer, 1 contract-drifted audit); 1 write-scope escape recorded clean (ea5d17e8); 1 orphaned verification edge; 6 ranked repairs named for the promotion machinery</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260826-process-audit" data-who="reckon-d8-s16-veracity-review" data-when="2026-08-26T15:35:00+00:00">
+    <div class="r-comment-body">S16 process-conformance audit (rev-process-audit, 72 codex runs tabulated): 67/72 ledger gate rows conform to their manifests; the fleet's failure handling is largely honest (failed banks refused, HOLDs preserved, zero-capacity rows correctly not-run). Five nonconforming rows: three complete static audits under-promoted as not-run (Newton-loop, comparator-seam, profile-domain prior-art — their manifests satisfy their done-whens), one completed producer retroactively rewritten to correct-refusal by a later verifier's added requirement (sse-h200-polish-measurement), one contract-drifted audit. One authority breach: mcg-probe-axis-adjudication commit ea5d17e8 changed undeclared nova/imas/mast_vacuum_cohort.py while the ledger recorded a smaller diff and scope_changed=false. One orphaned verification edge: the renderer verifier audits 94f510b6 with no producer run in the ledger. Six promotion-machinery repairs are named in the report and routed to reckon:execution-orchestration-hardening. Demonstration gate remains correctly open. Report: crew/reports/s16-veracity-20260826/rev-process-audit.md</div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260826T111937959782-ebd-threshold-lock-proposal" data-who="vacuum-diagnosis" data-when="2026-08-26T11:24:20Z">
     <div class="r-comment-body"><p>Derived an outcome-blind, inclusive three-gate demonstration contract from the immutable banked twelve-arm evidence: class agreement at least 7/12, worst eligible closed-boundary RMS at most 0.55 m, and worst polished-saddle distance at most 0.04 m, with fail-closed cohort and nonfinite semantics.</p></div>

@@ -85,6 +85,23 @@
     observed compile component; it was not executed and is not reported as a measurement. The
     H200 capacity and performance gate remains open.</p>
 
+    <h2 id="polish-tracking-verification">§2b — tolerance exit and stationary tracking verification</h2>
+
+    <p><strong>Independent CPU gate PASSED: 49 passed, one GPU-only skip, zero failed in
+    2,012.41 s.</strong> The bounded Newton refinement exits on tolerance under an eight-trip
+    safety cap, and <code>jax.lax.custom_root</code> supplies the implicit derivative of the
+    stationary equation. The warm-root regression takes zero Newton trips and returns
+    dR*/d(radial shift) = <strong>1.0</strong> within absolute tolerance 2e-13.</p>
+
+    <p>The consumer boundary is fail closed: inactive slots are exact-zero padding; out-of-domain
+    valid seeds are nonconverged; X-point consumers require converged in-domain saddles; O-point
+    consumers require converged in-domain extrema. The global tensor spline is therefore the
+    position/value authority after the fixed-shape stencil census, while rejected or wrong-type
+    polished candidates cannot enter topology classification.</p>
+
+    <p><strong>Qualification:</strong> the skipped test requires a GPU, and this CPU receipt does
+    not replace the still-open reserved-H200 timing measurement.</p>
+
   </main>
 </body>
 </html>

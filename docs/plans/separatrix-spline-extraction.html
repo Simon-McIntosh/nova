@@ -4,28 +4,30 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="separatrix-spline-extraction">
-  <meta name="plan-title"     content="Separatrix Spline Extraction — one curve authority, split at the X-point">
-  <meta name="plan-summary"   content="Spline-Newton null polish, a fixed-capacity closed/open branch assembler over the global spline, and one shared closed-boundary EFIT comparator.">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
-  <meta name="plan-effort-hours" content="12.0">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="separatrix-spline-extraction">
+  <meta name="plan-title" content="Separatrix Spline Extraction — one curve authority, split at the X-point">
+  <meta name="plan-summary" content="Spline-Newton null polish, a fixed-capacity closed/open branch assembler over the global spline, and one shared closed-boundary EFIT comparator.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="18.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="elevated">
-  <meta name="plan-sprint"    content="S16">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-tags"      content="equilibrium,topology,efit,mast,diii-d">
-  <meta name="plan-blocks"    content="efit-baseline-demonstration">
-  <meta name="plan-impl"      content="0.2">
-  <meta name="plan-commits"   content="74f95e41">
+  <meta name="plan-sprint" content="S16">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="equilibrium,topology,efit,mast,diii-d">
+  <meta name="plan-blocks" content="efit-baseline-demonstration">
+  <meta name="plan-impl" content="0.2">
+  <meta name="plan-commits" content="74f95e41">
   <meta name="plan-artifacts" content="nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,docs/evidence/archive/separatrix-spline-extraction-landed.html">
   <title>Separatrix Spline Extraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-26">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -152,42 +154,47 @@
     <a href="/nova/plans/efit-baseline-demonstration">efit-baseline-demonstration</a>.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="curve-authority" data-choice="global-tensor-spline" data-by="Simon McIntosh" data-when="2026-08-26T00:00:00+00:00">
-        <p class="r-dec-q">Which surface supplies every extracted curve, null position, and clip?</p>
-        <p class="r-dec-rat">The global not-a-knot C2 tensor spline fitted to the complete flux map
-        — locked by the lead's direction to use the global spline fit for precise stationary-point
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="curve-authority" data-choice="global-tensor-spline" data-by="Simon McIntosh" data-when="2026-08-26T00:00:00+00:00">
+    <p class="r-dec-q">Which surface supplies every extracted curve, null position, and clip?</p>
+    <p class="r-dec-rat">The global not-a-knot C2 tensor spline fitted to the complete flux map
+        — locked by the lead&#x27;s direction to use the global spline fit for precise stationary-point
         and contour extraction, and by the standing twice-refuted status of local per-cell
         reconstruction. Positions may be refined locally; the field never is.</p>
-      </div>
-      <div class="r-dec" data-key="polish-termination" data-choice="tolerance-exit-capped" data-by="Simon McIntosh" data-when="2026-08-26T00:00:00+00:00">
-        <p class="r-dec-q">Does the stationary polish run a fixed trip count or exit at
+    </div>
+<div class="r-dec" data-key="polish-termination" data-choice="tolerance-exit-capped" data-by="Simon McIntosh" data-when="2026-08-26T00:00:00+00:00">
+    <p class="r-dec-q">Does the stationary polish run a fixed trip count or exit at
         tolerance?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="fixed-count">fixed trip count</button>
-          <button class="r-opt chosen" data-value="tolerance-exit-capped">tolerance exit with a fixed upper cap</button>
-        </p>
-        <p class="r-dec-rat">Lead decision: once the tolerance is reached the loop exits; the fixed
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="fixed-count">fixed trip count</button>
+      <button class="r-opt chosen" data-value="tolerance-exit-capped">tolerance exit with a fixed upper cap</button>
+      </p>
+    <p class="r-dec-rat">Lead decision: once the tolerance is reached the loop exits; the fixed
         count is only the safety cap and cold-start budget, not a requirement. Constraints carried
         in §2a: reverse-mode differentiability of the in-step tracked use comes from implicit
         differentiation at grad psi(x*) = 0 (or a one-trip fixed fallback), never by
         differentiating through the while loop; the vmapped run-to-slowest-lane cost is measured on
         the reserved-H200 rung before any always-on default.</p>
-      </div>
-    </section>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-sse-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship separatrix-spline-extraction">
-        <h4 class="r-fu-title">Implement the polish, the branch assembler, and the shared comparator</h4>
-        <div class="r-fu-body">Dependency order per the reuse map: factor the stationary polish and
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-sse-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship separatrix-spline-extraction" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Implement the polish, the branch assembler, and the shared comparator</h4>
+    <div class="r-fu-body">Dependency order per the reuse map: factor the stationary polish and
         gate it on analytic saddles; assemble closed/open branches over traced_spline_contour and
         pin fixed-shape behaviour; wire the closed branch into both EFIT harnesses through one
         sup/RMS/X metric implementation; regenerate both banks.</div>
-        <pre class="r-fu-prompt">/reckon-ship separatrix-spline-extraction</pre>
-      </article>
-    </section>
+    <pre class="r-fu-prompt">/reckon-ship separatrix-spline-extraction</pre>
+    </article>
+</section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="c-20260826T085315256722" data-who="sprint-review" data-when="2026-08-26">
+    <div class="r-comment-body"><p><strong>Effort recalibration (2026-08-26 review):</strong> 12h to 18h. The original estimate predates s2a, which added the tolerance-exit rewrite required by the locked polish-termination decision (the shipped kernel still runs a fixed-count <code>jax.lax.fori_loop</code> in <code>nova/equilibrium/flux_surface_connectivity.py</code>), the implicit-function-theorem custom VJP, and the reserved-H200 micro-benchmark rung. The 20% impl is current - it was written by this morning's stationary-polish landing (74f95e41, crew run r-20260826T035725483654) minutes after the merge. Note the cross-plan coupling recorded at 97f49d8b: profile-owned-solve-domain s4's tracked-O/X design consumes the warm-started tolerance-exit polish, so s2a gates the solve-domain cutover, not just this plan's own s3/s4.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

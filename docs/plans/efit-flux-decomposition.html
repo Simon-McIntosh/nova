@@ -22,8 +22,8 @@
   <title>EFIT Flux Decomposition | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="21">
+<meta name="plan-modified" content="2026-08-26">
+<meta name="plan-version" content="22">
 <meta name="plan-commits" content="8fffa5c7,971c06e5,e25d1eb4,1164a8e8,c63ab4d7,6f8fd170,92399e7a,8d98a57e,80dd9ebe,17d14f95,c45490c7,766ab2b4,e5acd9a6,a25b3b3c,d82587cd,1b9fb2bf">
 <meta name="plan-artifacts" content="benchmarks/efit_flux_decomposition.py,benchmarks/efit_roundtrip_identity.py,benchmarks/efit_operator_consistency_order.py,benchmarks/efit_analytic_roundtrip_floor.py,benchmarks/efit_filament_truncation_contribution.py,benchmarks/efit_constant_current_attribution.py,benchmarks/efit_cell_current_representation.py,benchmarks/efit_section_shape_zeta_order.py,benchmarks/efit_roundtrip_linear_moments.py,benchmarks/efit_native_grid_decomposition.py,docs/figures/efit-flux-decomposition/native-grid-decomposition.json">
 <meta name="plan-impl" content="1.0">
@@ -250,10 +250,11 @@
     <pre class="r-fu-prompt">/reckon-ship efit-flux-decomposition §4</pre>
     <p class="r-fu-outcome">done - P4-LOWER RETRACTS on the native 65x65 grid with zero interpolation and fcoil_c drive: no global residual peak localises in p4_lower on any of 18 slices (16 in the solenoid conductor, 2 in p5_upper). Reported into mast-misfit-toroidal-harmonics section 3: the flux-map corroboration of the P4-lower survivor evaporates; that verdict now rests on magnetics alone. Early-slice reference defects (declared-boundary-to-map-saddle up to 0.1634 of span, 3/18 slices without a typed saddle) are banked beside the retraction.</p>
     </article>
-<article class="r-fu" data-id="f-efd-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship coil-geometry-inversion" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-efd-003" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship coil-geometry-inversion" data-resolved-at="2026-08-26T08:58:02+00:00" data-resolved-by="sprint-review">
     <h4 class="r-fu-title">Hand the plasma-subtracted maps and residual current fields to the flux-map-space geometry solve (foreign-owner)</h4>
     <div class="r-fu-body"><p>Exemption: foreign-owner - coil-geometry-inversion owns the flux-map-space problem class (currents fixed, match a plasma-subtracted flux map). The section-5 trigger is met: the surviving residual localises on named conductors (16/18 slices in the solenoid, 2/18 in p5_upper; peaks 0.72-3.55 MA/m2, absolute integrals 74.8-282.9 kA). The handoff is the 18-slice receipt docs/figures/efit-flux-decomposition/native-grid-decomposition.json plus the committed benchmark that regenerates the plasma-subtracted maps. Qualification travels with it: early reference slices carry declared-boundary defects up to 0.1634 of span, so a geometry solve should weight late-slice residuals and must not fit the reference's own inconsistency.</p></div>
     <pre class="r-fu-prompt">/reckon-ship coil-geometry-inversion</pre>
+    <p class="r-fu-outcome">Done - no followup: the handoff has no live consumer and is closed as overtaken by events. It was written 2026-08-21 handing the 18-slice plasma-subtracted receipt to coil-geometry-inversion, which had already shipped on 2026-08-16, so no active plan ever carried it; the P4/P5 conductor hunt this fed closed null (mast-p4p5-feeder-candidates: nothing placeable reaches the P4-lower survivor and the array cannot localise a ring to better than 1.5-2.3 m). The receipt and residual current fields remain banked in this plan's evidence for any future plan that reopens a flux-map-space geometry solve.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

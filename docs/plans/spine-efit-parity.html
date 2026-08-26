@@ -22,9 +22,9 @@
   <title>Spine Reconstruction Parity vs EFIT | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-21">
+<meta name="plan-modified" content="2026-08-26">
 <meta name="plan-impl" content="1.0">
-<meta name="plan-version" content="22">
+<meta name="plan-version" content="23">
 <meta name="plan-commits" content="ee60c7d2,27baad59,b46bc103,99dfc6a6,41ddd617,9eb129e4,125c00a2,bdaf0844,73336ac0,43e2a091,f39af125,4c2c1796,dc62e52c,7ddeb717,de672204,c058f214,a23fdcdb,41fb859d,faac79e8">
 <meta name="plan-artifacts" content="nova/imas/mast_parity_chain.py,nova/imas/parity_tolerances.py,nova/imas/mast_efit_referee.py,docs/evidence/archive/spine-efit-parity-landed.html">
 </head>
@@ -289,10 +289,11 @@ Done-when
     <pre class="r-fu-prompt">/reckon-ship spine-efit-parity §8</pre>
     <p class="r-fu-outcome">RETRACTED - drawn from a wrong premise. This followup argued the convergence failure belonged to the accelerator, on the reasoning that accelerator-primary was locked on synthetic self-consistent magnetics and might not generalise to real data. But the convergence it cited is ReconstructProfile's weighted least-squares fit to measured magnetics, not the Grad-Shafranov fixed point, so it attributed an inverse solve's non-convergence to the forward solver. The hypothesis is not disproven, it is untested and untestable by that measurement. It also cannot be tested cheaply until the forward path runs: if the free-boundary fixed point converges on the same machine and slices when given prescribed sources, the accelerator needs no attention at all. Superseded by efit-forward-parity, which runs that test.</p>
     </article>
-<article class="r-fu" data-id="f-sep-006" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship efit-forward-parity §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sep-006" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship efit-forward-parity §2" data-resolved-at="2026-08-26T08:57:56+00:00" data-resolved-by="sprint-review">
     <h4 class="r-fu-title">The forward parity claim now lives in a different plan</h4>
     <div class="r-fu-body"><p><strong>Exemption: foreign-owner — efit-forward-parity owns the forward demonstration and inherits the GPU catalog gate.</strong> This plan's remaining executable work is §8's pre-registered held-out extension, which stays deliberately unspent because it guards against overfitting a pass and this plan produced none. Everything else it can say has been said: the chain assembles, the referee firewall is structural, the twelve-field registry is separated, the 7,500-slice support tally is banked, and the reconstruction verdict is recorded with its mechanism.</p><p>What this plan cannot do is answer whether nova's forward model reproduces EFIT, because it never posed that question — it fitted magnetics instead. That question is now three plans: <code>efit-map-inversion</code> proves the reference is read correctly, <code>efit-flux-decomposition</code> proves the external field can serve as a free-boundary condition, and <code>efit-forward-parity</code> runs the fixed point on prescribed sources with no measurement in the path. Start at the first; the last inherits the <code>mast-catalog-gpu-solve</code> block from here.</p></div>
     <pre class="r-fu-prompt">/reckon-ship efit-forward-parity §2</pre>
+    <p class="r-fu-outcome">Done - no followup: all three named successors exist and two (efit-forward-parity, efit-flux-decomposition) shipped. The only reserved item, the s8 held-out extension, is a deliberate permanent reserve the body itself says stays unspent - a standing posture, not queued work, so it needs no open followup to carry it. Soft call recorded by the 2026-08-26 sprint review; reopen via dissent if the held-out extension is ever commissioned.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

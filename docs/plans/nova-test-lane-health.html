@@ -16,12 +16,12 @@
 <meta name="plan-effort" content="S">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-08-20">
+<meta name="plan-modified" content="2026-08-26">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="general">
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-commits" content="459cecce,1c33c365,80c3b507,a5e1245c,eb242d80,d6998319,dc618673,7b15ed64,cc1f8f2c,ee5f7e02,5d003a26">
 <meta name="plan-artifacts" content="docs/evidence/archive/nova-test-lane-health-landed.html,benchmarks/BASELINE.md,benchmarks/lane_resource_accumulation.py,benchmarks/measurement_provenance.py">
 <meta name="plan-impl" content="1.0">
@@ -123,10 +123,11 @@
     <pre class="r-fu-prompt">/reckon-ship flux-function-forward-equilibrium §6</pre>
     <p class="r-fu-outcome">Closed by 1d89007a in flux-function-forward-equilibrium §6, the plan that owned the measurement. The test assertion was wrong and production was not implicated - it passes now against unchanged production code. The old loop applied one 0.15 flux-scale ceiling to every observable in turn, so the failing 0.4165026973920738 was the coarse-suite l_i CLOSURE DELTA in percentage points, not raw internal inductance (0.797870793326622, dimensionless) and not a reproduction deviation (-0.135265926%). Since the banked closure moves l_i by +0.904734074 pp while moving I_p by 0.030011433 pp, a 0.15 pp ceiling on l_i closure contradicted the measured passive response - the bound described the wrong physics for that row rather than being merely tight. The corrected test keeps 0.15 on the flux-map reproduction move it names (0.098 pp measured), holds I_p and beta_p closure under that same ceiling, and asserts l_i against its own measured behaviour. The lane's enabled failing set is now the two probe-mapping ids alone, carried by f-ntlh-006.</p>
     </article>
-<article class="r-fu" data-id="f-ntlh-006" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship mast-corrected-read-layer" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ntlh-006" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship mast-corrected-read-layer" data-resolved-at="2026-08-26T08:58:07+00:00" data-resolved-by="sprint-review">
     <h4 class="r-fu-title">The probe-to-sensor mapping failures outlive their shipped plan</h4>
     <div class="r-fu-body"><p><strong>Exemption: foreign-owner — mast-corrected-read-layer owns the probe-to-sensor mapping.</strong> The other two enabled failures are <code>tests/test_mast_solve_inputs.py::test_each_probe_channel_reads_the_sensor_it_is_mapped_to</code> at [15000] and [13500]. They are long-standing: earlier gates recorded them as the two pre-existing probe-orientation failures in fenced files, and the classification confirmed they fail in a fresh process rather than being suite-order effects. They belong to the corrected read layer, not to lane health.</p><p><strong>Note the ownership problem rather than papering over it:</strong> mast-corrected-read-layer is status shipped, so no active plan carries this work. Resolving it therefore starts with a decision the lane plan cannot make — reopen that plan to cover the mapping defect, or accept the two failures as a recorded permanent exception with a stated reason. Read its current state before assuming either, and do not reopen a shipped plan without that judgement.</p></div>
     <pre class="r-fu-prompt">/reckon-ship mast-corrected-read-layer</pre>
+    <p class="r-fu-outcome">Done here - re-registered on a live owner: this followup's own body named the defect (mast-corrected-read-layer is shipped, so no active plan carries this work) and the failure is live - tests/test_mast_solve_inputs.py test_each_probe_channel_reads_the_sensor_it_is_mapped_to has two enabled probe-axis failures at [15000] and [13500] with no marker. The adjudication now lives on mast-catalog-gpu-solve as followup f-mcg-03.</p>
     </article>
 <article class="r-fu" data-id="f-ntlh-mp-isolation" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-20" data-recommends-skill="/reckon-ship nova-test-lane-health" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">The scoring-partition multiprocessing test needs resource isolation</h4>

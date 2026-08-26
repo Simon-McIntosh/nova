@@ -4,26 +4,28 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="efit-baseline-demonstration">
-  <meta name="plan-title"     content="EFIT Baseline Demonstration — stable, accurate, precise forward topology on MAST and DIII-D">
-  <meta name="plan-summary"   content="Demonstrate stable, accurate GS forward modelling against MAST and DIII-D EFIT baselines: spline-precise extraction, limited-basin convergence, gates.">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="efit-baseline-demonstration">
+  <meta name="plan-title" content="EFIT Baseline Demonstration — stable, accurate, precise forward topology on MAST and DIII-D">
+  <meta name="plan-summary" content="Demonstrate stable, accurate GS forward modelling against MAST and DIII-D EFIT baselines: spline-precise extraction, limited-basin convergence, gates.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="16.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="elevated">
-  <meta name="plan-sprint"    content="S16">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-tags"      content="equilibrium,topology,efit,mast,diii-d">
+  <meta name="plan-sprint" content="S16">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="equilibrium,topology,efit,mast,diii-d">
   <meta name="plan-depends-on" content="separatrix-spline-extraction,profile-owned-solve-domain">
-  <meta name="plan-impl" content="0.67">
+  <meta name="plan-impl" content="0.5">
   <title>EFIT Baseline Demonstration | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-26">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -143,72 +145,86 @@
     saddle and is excluded from all topology test cases.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="mask-switch-treatment" data-choice="profile-owned-domain" data-by="Simon McIntosh" data-when="2026-08-26T00:00:00+00:00">
-        <p class="r-dec-q">How should the free-boundary solve treat the state-dependent domain so
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="mask-switch-treatment" data-choice="profile-owned-domain" data-by="Simon McIntosh" data-when="2026-08-26T00:00:00+00:00">
+    <p class="r-dec-q">How should the free-boundary solve treat the state-dependent domain so
         Newton stops overshooting the mask switching surface? The Jacobian currently linearises the
         flood-fill Boolean cell masks as fixed; the evidenced consequence is a 2-cycle on 21978/35
         (5 of 1,089 confined cells alternating), and mask switching is directly present on 2 of the
         4 stalled tails.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="freeze-per-outer">freeze the domain per outer iteration</button>
-          <button class="r-opt" data-value="smooth-membership">smooth cell membership</button>
-          <button class="r-opt" data-value="damp-crossing">damp mask-crossing steps</button>
-          <button class="r-opt chosen" data-value="profile-owned-domain">remove the boundary definition from the residual entirely</button>
-        </p>
-        <p class="r-dec-rat">Lead decision superseding all three inherited treatment options: the
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="freeze-per-outer">freeze the domain per outer iteration</button>
+      <button class="r-opt" data-value="smooth-membership">smooth cell membership</button>
+      <button class="r-opt" data-value="damp-crossing">damp mask-crossing steps</button>
+      <button class="r-opt chosen" data-value="profile-owned-domain">remove the boundary definition from the residual entirely</button>
+      </p>
+    <p class="r-dec-rat">Lead decision superseding all three inherited treatment options: the
         Newton solve should not use the boundary definition at all. The flood fill supplies the
         primary X-point and the shadow regions; the O/X pair defines psi_norm; shadows exclude
         disconnected psi_norm &lt; 1 regions; every other cell participates and true exterior cells
-        get j = 0 from the profile, which handles the scrape-off region. Owned and specified by
-        <a href="/nova/plans/profile-owned-solve-domain">profile-owned-solve-domain</a> §2, where
+        get j = 0 from the profile, which handles the scrape-off region. Owned and specified by profile-owned-solve-domain §2, where
         the same decision is locked with its method requirements.</p>
-      </div>
-      <div class="r-dec" data-key="implementation-plan-shape" data-choice="two-plans" data-by="Simon McIntosh" data-when="2026-08-26T00:00:00+00:00">
-        <p class="r-dec-q">Do the two implementation thrusts live as sections on this plan or as two
+    </div>
+<div class="r-dec" data-key="implementation-plan-shape" data-choice="two-plans" data-by="Simon McIntosh" data-when="2026-08-26T00:00:00+00:00">
+    <p class="r-dec-q">Do the two implementation thrusts live as sections on this plan or as two
         dedicated plans linked under this demonstration endpoint?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="sections-here">sections on this plan</button>
-          <button class="r-opt chosen" data-value="two-plans">two dedicated plans, this plan the endpoint</button>
-        </p>
-        <p class="r-dec-rat">Lead decision: two plans organized in an appropriate sprint, with
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="sections-here">sections on this plan</button>
+      <button class="r-opt chosen" data-value="two-plans">two dedicated plans, this plan the endpoint</button>
+      </p>
+    <p class="r-dec-rat">Lead decision: two plans organized in an appropriate sprint, with
         sibling plans updated and corrected in line with the scoping findings. Created as
         separatrix-spline-extraction and profile-owned-solve-domain, both blocking this endpoint.</p>
-      </div>
-      <div class="r-dec" data-key="demonstration-thresholds" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Preregistered gate thresholds for the demonstration: topology-class
+    </div>
+<div class="r-dec" data-key="demonstration-thresholds" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Preregistered gate thresholds for the demonstration: topology-class
         agreement count on the twelve MAST arms, closed-boundary RMS bound on converged arms, and
         saddle-to-EFIT-X distance bound. To be proposed from the §2 corroboration numbers and locked
         before any implementation node is credited against them — never derived from achieved
         values afterwards.</p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-ebd-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship efit-baseline-demonstration §2" data-resolved-at="2026-08-26T04:20:00+00:00" data-resolved-by="reckon-ship">
-        <h4 class="r-fu-title">Run the scoping and corroboration wave</h4>
-        <div class="r-fu-body">Dispatch the four §2 nodes: the capability reuse map, the extraction
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-ebd-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship efit-baseline-demonstration §2" data-resolved-at="2026-08-26T04:20:00+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Run the scoping and corroboration wave</h4>
+    <div class="r-fu-body">Dispatch the four §2 nodes: the capability reuse map, the extraction
         seam map, the independent stall corroboration, and the wall machinery map. Their reports and
         the three open decisions gate the §3 design lock.</div>
-        <pre class="r-fu-prompt">/reckon-ship efit-baseline-demonstration §2</pre>
-        <p class="r-fu-outcome">All four scouts landed with gates passed (commits 4b702960,
+    <pre class="r-fu-prompt">/reckon-ship efit-baseline-demonstration §2</pre>
+    <p class="r-fu-outcome">All four scouts landed with gates passed (commits 4b702960,
         43d03cf6, bbd0f015, c11fe7a2), merged to main, worktrees removed. Two of the three design
         decisions are locked by the lead (profile-owned residual domain; two dedicated plans);
         the demonstration-thresholds decision stays open pending a proposal derived from the
-        regenerated spline-precise banks. The stall corroboration's empty-mask qualification was
-        adopted by the S15 session at 5f2b213c.</p>
-      </article>
-      <article class="r-fu" data-id="f-ebd-002" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship efit-baseline-demonstration §3">
-        <h4 class="r-fu-title">Run the demonstration gate once both implementation plans ship</h4>
-        <div class="r-fu-body">Prerequisites: separatrix-spline-extraction and
+        banked §2 corroboration numbers — locked BEFORE any implementation run is credited, never
+        from the regenerated banks, since deriving thresholds from the geometry they will score is
+        exactly the derived-from-achieved-values violation the decision text forbids. The stall
+        corroboration's empty-mask qualification was adopted by the S15 session at 5f2b213c.</p>
+    </article>
+<article class="r-fu" data-id="f-ebd-002" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship efit-baseline-demonstration §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Run the demonstration gate once both implementation plans ship</h4>
+    <div class="r-fu-body">Prerequisites: separatrix-spline-extraction and
         profile-owned-solve-domain shipped, and the demonstration-thresholds decision locked from
-        the regenerated banks before any run is credited against it.</div>
-        <pre class="r-fu-prompt">/reckon-ship efit-baseline-demonstration §3</pre>
-      </article>
-    </section>
+        the banked §2 corroboration numbers before any run is credited against it. The lock must
+        precede the bank regeneration it will score — anchoring conservatively on the current
+        numbers (class agreement 7/12; agreeing-arm RMS max 0.5413 m, which leg clipping can only
+        shrink; worst saddle-to-EFIT-X 38.661 mm) — never follow it.</div>
+    <pre class="r-fu-prompt">/reckon-ship efit-baseline-demonstration §3</pre>
+    </article>
+<article class="r-fu" data-id="f-ebd-003" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="sprint-review" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship efit-baseline-demonstration §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Own the parity-tolerance instrument: lock metric-disagreement-tolerance and repair the registry pin</h4>
+    <div class="r-fu-body">Re-homed from the shipped equilibrium-metric-parity plan (f-emp-002), following the f-emp-006 precedent of 2026-08-23: an open owner decision on a shipped plan is hidden work. Two coupled items now owned by this endpoint, whose comparator consumes the tolerances. First, lock the metric-disagreement-tolerance decision - it is load-bearing for the axis and LCFS bound classification that scoring-criteria-derivation (S13, shipped) recorded as merely contained, and register cross-code tolerances if report-only is chosen. Second, repair the production registry pin: <code>nova/imas/parity_tolerances.py</code> still sets REFERENCE_STAMP to the unreachable digest physics-spine-v0-mast-heldout-6-08ae0dee74-98dci4-clu-3141.yaml as evidence for the live magnetic-axis (1.01344e-3 m) and LCFS (3.3047e-4 m) bounds; the S13 repin (3c1874d5) touched benchmarks and receipts only, and the candid receipt's verified semantic identity (sha256:8df7a0a6...) is imported nowhere in the scoring path.</div>
+    <pre class="r-fu-prompt">/reckon-ship efit-baseline-demonstration §3</pre>
+    </article>
+</section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="c-20260826T085259406879" data-who="sprint-review" data-when="2026-08-26">
+    <div class="r-comment-body"><p><strong>State recalibration (2026-08-26 review):</strong> impl recalibrated 0.67 to 0.5. The prior figure was section counting (mandate + corroboration + inherited links landed) on a plan whose deliverable - the s3 demonstration gate - has never run and cannot run until both feeder plans land. The 5.28h remaining figure stays credible only while bank regeneration remains charged to separatrix-spline-extraction s4; if that charge moves, re-estimate. The demonstration-thresholds decision is lockable NOW from the banked s2 corroboration numbers (docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json: class agreement 7/12 with all five disagreements being stalls the profile-owned cutover targets; agreeing-arm closed-boundary RMS max 0.5413 m; saddle-to-EFIT-X worst case 38.661 mm, finite on all twelve arms) - the followup texts that deferred the lock until after bank regeneration were corrected this session, since that ordering was the derived-from-achieved-values violation the decision text forbids. One caveat belongs in the lock rationale: the RMS/sup numbers come from the Matplotlib binding-contour estimator with divertor legs unclipped, so anchor the bound at the agreeing-arm maximum, which the comparator change can only shrink.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

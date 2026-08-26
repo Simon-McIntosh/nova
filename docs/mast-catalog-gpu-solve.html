@@ -12,13 +12,13 @@
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="physics-spine-adoption,mast-corrected-read-layer,efit-forward-parity,topology-preserving-continuation,plateau-input-attribution,same-device-label-determinism">
+  <meta name="plan-depends-on" content="physics-spine-adoption,mast-corrected-read-layer,efit-forward-parity,topology-preserving-continuation,plateau-input-attribution,same-device-label-determinism,efit-baseline-demonstration">
   <title>MAST Catalog GPU Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S15">
-<meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="39">
+<meta name="plan-modified" content="2026-08-26">
+<meta name="plan-version" content="42">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -28,7 +28,8 @@
 <meta name="plan-capability-risk" content="elevated">
 <meta name="plan-commits" content="c0eb0e65bcdfaaa7c6e01161b9771d314fa7dbf6,e00ec926015521b3ee15d1f2edcd750245010bea,93ed6a328b15c22f3eb964c40b6a9a53db870529,c710c3f1b2d44a6ffdbc9f5872bb00290cb4c5ba">
 <meta name="plan-artifacts" content="docs/figures/mast-catalog-gpu-solve/slice-census.json,scripts/mast_slice_census/census.py,scripts/mast_slice_census/report.md,docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json,benchmarks/jitted_eager_parity_gate.py">
-<meta name="plan-impl" content="0.5">
+<meta name="plan-impl" content="0.2">
+<meta name="plan-effort-hours" content="24.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -185,20 +186,24 @@
     tested the natural expectation that wall resolution should match plasma resolution, so the limited
     branch's geometric fidelity is currently unquantified.</p>
 
-    <p><strong>THROUGHPUT WORK IS PARKED BEHIND TOPOLOGY, by direction, 2026-08-25.</strong> Two
-    topology defects are open and both sit upstream of every number on this plan. The limiter point is
-    selected from the whole wall polygon rather than from the reachable wall, so seven of twelve banked
-    arms are <em>limited with genuine wall contact</em> yet carry a non-finite class margin; the correct
-    definition is the reachable-wall position minimising |&psi;<sub>wall</sub> &minus;
-    &psi;<sub>axis</sub>|, sub-grid refined. And the component partition is computed 4-connected on a
-    rectangular lattice while the shipped plasma mesh is hexagons on a half-offset tiling with six
-    neighbours, so the public/private split can differ exactly at a pinch — which is where the
-    classification turns.</p>
+    <p><strong>The 2026-08-25 topology parking is LIFTED (2026-08-26): both named defects landed the
+    same day.</strong> The reachable-wall limiter point (sub-grid minimiser of
+    |&psi;<sub>wall</sub> &minus; &psi;<sub>axis</sub>| on the reachable wall) landed via merge
+    <code>62570d9a</code>, and the saddle-aware hexagonal partition replaced the 4-connected
+    rectangular-lattice split via merges <code>ecc9ecc1</code>, <code>b5464fea</code> and
+    <code>5a7e0647</code> — the original parking commit <code>1fc71d50</code> is an ancestor of all
+    four, and the S15 sprint summary independently records the landings.</p>
 
-    <p>Neither the fixed-point work nor the accelerator throughput rungs resume until those are settled,
-    because both consume the classification. The parked items remain the step-to-convergence
-    distribution behind the fixed Newton ladder and the wall-resolution study above; nothing here is
-    withdrawn, only sequenced.</p>
+    <p>What now sequences this plan is the solver-basin treatment, not topology: the confined-mask
+    domain jump the Jacobian cannot see (commit <code>c09fda98</code>: 5 of 1,089 cells alternate and
+    exact dense Newton 2-cycles) is owned by profile-owned-solve-domain under the
+    efit-baseline-demonstration endpoint, now wired as a hard dependency of this plan. The L1
+    single-GPU throughput rung is dispatchable immediately — its two other entry conditions are
+    already answered by the shipped forward-operator-refinement (the one-pass parity criterion, and
+    order-beats-mesh: +7.7% at zero rebuild or memory against +72.9% at 13.6&times; memory) — and L2/L2b
+    follow it; only the final full-catalog rung L3 waits on the basin treatment. The
+    step-to-convergence distribution behind the fixed Newton ladder and the wall-resolution study
+    above remain open items consumed by L1; nothing is withdrawn.</p>
 
 
     <h2 id="s4">§4 — Compute constraints (SDCC)</h2>
@@ -328,6 +333,11 @@ Done-when
     <div class="r-fu-body">The Newton budget is a fixed count, not a convergence test. PerturbedSeedPolicy carries newton_steps 10 with gmres_iterations 30, the contrast lane's entry point is named a fixed ladder, and the recovery failures confirm it runs to the end, terminating after all ten steps at residual 1.29980506. Production already warm-starts from the neighbouring slice - equilibrium_sweep passes the previous selected flux, so an uninterrupted campaign is 1 cold plus 1341434 warm - and the H200 measurement seeded even tighter, at 1e-6 to 1e-4 of flux span. So typical slices are likely converging well before step ten and paying for the remainder anyway. If they converge in two or three, a fixed ten by thirty spends three to five times the map applications needed, which is the leading candidate for the order-of-magnitude acceleration the catalog wants: per-slice cost is FLAT with batch width, 41.72 ms at width 4 against 42.77 at width 16, so the device is already saturated and more batching is not the lever. Measure the actual step-to-convergence distribution over a representative warm sequence FIRST, because if slices really need ten steps there is no saving here and the effort belongs elsewhere. Then, if the distribution supports it, replace the ladder with lax.while_loop under a convergence predicate and measure the realised per-slice cost - noting that a vmapped while_loop runs every lane to the slowest, so the saving is set by the batch maximum rather than the median, and a long tail can erase it.</div>
     <pre class="r-fu-prompt">/reckon-ship mast-catalog-gpu-solve</pre>
     </article>
+<article class="r-fu" data-id="f-mcg-03" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="sprint-review" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship mast-catalog-gpu-solve" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Adjudicate the two enabled probe-axis test failures in the MAST solve-input lane</h4>
+    <div class="r-fu-body">Re-registered 2026-08-26 from broken-ownership followups f-ncp-003 (nova-calibrate-package) and f-ntlh-006 (nova-test-lane-health), both of which pointed at mast-corrected-read-layer after it had shipped - no active plan carried the work. The defect is live: tests/test_mast_solve_inputs.py test_each_probe_channel_reads_the_sensor_it_is_mapped_to carries two enabled probe-axis failures at [15000] and [13500] with no xfail or skip marker, so every full-lane run inherits them. This catalog plan consumes the corrected read layer and the solve-input join, so it owns the adjudication: either the probe-axis mapping is wrong (fix the read layer), or the test's expectation is wrong (fix the test with the mechanism stated) - never mark-and-forget.</div>
+    <pre class="r-fu-prompt">/reckon-ship mast-catalog-gpu-solve</pre>
+    </article>
 </section>
 
   <section data-reckon="research" id="research" class="r-research-list">
@@ -415,6 +425,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260825T072235381782-pinned-branch-contrast" data-who="dual-trace-proto" data-when="2026-08-25T07:43:14Z">
     <div class="r-comment-body"><p>paired pure-vs-mixed contrast on the six frozen MAST references: pure pinned diverted arm weakly contracting but stalled (fitted rho 0.9503-0.9835, below 1 on 6/6; residuals 4.6e-3 to 7.4e-3; converged 0/6; diverted 5/6), against efit prior-art rho 0.33; mixed arm expands on 3/6 (rho up to 1.039) yet converged 22086/43 to 3.58e-16 DIVERTED (rho 0.078); exact-margin operand absent (+inf) on 2/6 references, the operand-dropping defect measured live; batch-two jit+vmap parity 2.2e-16</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260826T085049272652" data-who="sprint-review" data-when="2026-08-26">
+    <div class="r-comment-body"><p><strong>State repairs (2026-08-26 review):</strong> impl recalibrated 0.5 to 0.2 - one ladder rung of five is complete (L0 census: 1,341,435 slices from 11,573 shots), and that rung's jitted-vs-eager parity gate closed RETIRED rather than MET; effort recalibrated from the legacy XL letter to 24 worker-hours for the remaining L1-L3 ladder. The live gate is now wired: efit-baseline-demonstration added to depends_on, carrying the solver-basin treatment (profile-owned-solve-domain) that resolves the convergence frontier - previously this gate existed only as prose here and in the S15 summary, invisible to the roadmap. L1 entry is otherwise unblocked: f-mcg-02's other two items are answered by the shipped forward-operator-refinement.</p></div>
 </div>
 </section>
 </main>

@@ -13,13 +13,6 @@
   "resources": [
     {
       "type": "blocker",
-      "id": "B1",
-      "path": "blockers/B1.html",
-      "sha256": "01ea9fd87d8017095d52eeeb0881fe76cc68743dfe039807472c516f800d2a31",
-      "version": 0
-    },
-    {
-      "type": "blocker",
       "id": "B2",
       "path": "blockers/B2.html",
       "sha256": "f0f46ea49c203893d20a381e1a80969ba35521ae525b10a5f6bac2e05897a227",
@@ -30,13 +23,6 @@
       "id": "B3",
       "path": "blockers/B3.html",
       "sha256": "231cafd194bd0c0d8edd00b4e461ad088036062071a1b1417babb0c00a67eb7a",
-      "version": 0
-    },
-    {
-      "type": "blocker",
-      "id": "B4",
-      "path": "blockers/B4.html",
-      "sha256": "acb8f5ea427537c00f9b11429ea03f78547e047b7dadd8eb4be07ec781fabbb0",
       "version": 0
     },
     {

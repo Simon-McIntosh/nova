@@ -23,11 +23,12 @@
   <title>DIII-D Forward Onboarding | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-23">
-<meta name="plan-version" content="75">
+<meta name="plan-modified" content="2026-08-26">
+<meta name="plan-version" content="77">
 <meta name="plan-commits" content="7d9743fd,92a4a00e,685a7602,11bac959,26a06b78,4ae27c42,52e4ad17,d1aaa089,a6f8bdf4,86f6f38a,10b5c850,e2ffa796,10049a7a,db55fe58,a3d7e947,7af48b66,29d0fcd2,cf2bd3c6,a06b7072,3f654bc9,97a35d9f,fd4637ec,0dfda59a,1df19c16,b14ec670,a672cece,0b54d0bf,5686eb1b,213cc9a4,c3092ace,2d6f9b37,04cc6df2,ddb152e3,99e148ad,4bb375b7,b69a0831,92b68e9d,a9d771d6,6166a404,7c013864,b59e32a7,75a6ff83,05896c67,573a0292,b1807397,7978702b,6b9ff964,8c77ee35,e3e9bc15,0b10e948">
-<meta name="plan-impl" content="0.99">
+<meta name="plan-impl" content="0.8">
 <meta name="plan-artifacts" content="docs/evidence/diiid-forward-onboarding-state.html,docs/figures/diiid-forward-onboarding/state-of-play/machine_state.png,docs/figures/diiid-forward-onboarding/state-of-play/given_versus_extracted_topology.png,docs/figures/diiid-forward-onboarding/state-of-play/tared_flux.png,docs/figures/diiid-forward-onboarding/state-of-play/current_density_patches.png,docs/figures/diiid-forward-onboarding/state-of-play/state_of_play_receipt.json,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/exact-tare/exact_clipped_tare_receipt.json,docs/figures/diiid-forward-onboarding/exact-tare/exact_clipped_tare.png,docs/figures/diiid-forward-onboarding/unclaimed-origin/unclaimed_current_origin_receipt.json,docs/figures/diiid-forward-onboarding/unclaimed-current/unclaimed_current_patches_receipt.json,docs/figures/diiid-forward-onboarding/vessel-mesh/diiid_vessel_self_interaction.npz,docs/figures/diiid-forward-onboarding/vessel-mesh/diiid_vessel_hex_mesh.png,docs/figures/diiid-forward-onboarding/current-polarity/current_polarity_audit_receipt.json,docs/figures/diiid-forward-onboarding/current-polarity/current_polarity_census.png,docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_fixed_boundary_illustration.png,docs/figures/diiid-forward-onboarding/negative-tail/negative_tail_attribution_receipt.json,docs/figures/diiid-forward-onboarding/producer-currents/producer_current_scaling_receipt.json,docs/figures/diiid-forward-onboarding/cocos-ip-sign/receipt.json,docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.csv,docs/figures/diiid-forward-onboarding/limiter-topology/limiter_topology_receipt.json,docs/figures/diiid-forward-onboarding/machine-description/machine_description_receipt.json,/work/projects/imas_gpu/sophelio/vacuum-gate/diiid_plasma_subtraction_gate.json">
+<meta name="plan-effort-hours" content="48.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -147,6 +148,21 @@
     decision locked); MAST vessel model wired from the registry.</p>
 
     <h2 id="s5">§5 — Response-kernel library: sampling and label-map extraction</h2>
+    <p><strong>Gate-state note (2026-08-26 review):</strong> the free-boundary re-solve gate below ran,
+    FAILED 0/5 (terminal residuals 0.0854–0.1644 at both 1e-5 and 1e-6), and is HELD under the locked
+    forward-gate-disposition ruling. Its named precondition — the plasma-cell-resolution refinement and
+    operator-scaling work — shipped 2026-08-23 as forward-operator-refinement (commit
+    <code>d015ac9b</code>; mesh density raised at <code>2e5a7ba6</code>, source-averaging order raised at
+    <code>862e712a</code>), and that lane's gate-derivation adjudication returned
+    <strong>NO_DEFENSIBLE_DIIID_TOLERANCE_DERIVED, bound null</strong>: the 7.9305e-5 anchor was an
+    achieved stall, not an independent discretisation-error estimate, so the bar as written is unpassable
+    by construction. Reinstatement prerequisite, per that adjudication: an independent same-observable
+    discretisation-error estimate from solution differences (or an independently confirmed Richardson
+    model) anchored on the post-conditioning numbers (reference-native 7.3220e-5, coarse 2.1073e-4), then
+    an owner tolerance lock, then the withheld wall-bump reroute (1.97&times;, 132→260) landing with the
+    unchanged gate's re-run in one configuration. The "grid-resolution floor" phrasing in the done-when
+    below is superseded by f-dfo-004's re-scope to the label-representability ceiling (median interior
+    R² 0.949).</p>
     <p>The kernels ambix's measurement models consume: chord→ψ<sub>N</sub> sampling against a solved or
     labeled map; the Δ* operator applied to gridded maps giving j<sub>φ</sub>; per-surface radial
     separation recovering p′(ψ) and FF′(ψ) with conditioning-aware uncertainty (axis degeneracy, X-point
@@ -725,6 +741,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260822T1215" data-who="reckon-ship" data-when="2026-08-22T12:15:00Z">
     <div class="r-comment-body">Context from the shipped coil-circuit-discovery plan (evidence: /nova/evidence/archive/coil-circuit-discovery-landed). Three of this plan's banked verdicts gained a sequel. (1) The §9 boundary-recovery finding that the five recovered currents are not the missing boundary field stands, and its coefficients are now explained: the two-stage full-grid Tikhonov discovery showed the fitted currents track same-frame ECOILA at near-unity slopes (LOSO R² 0.94–0.99) — the published series circuit — and the five conductors are now circuit-driven from shipped channels through pf_active fixed-wiring records (ECOILB exactly 2, E567 pair exactly 1, E89 pair integer + named +4.57% systematic). Label-recovered current prescriptions are superseded for inference paths. (2) The producer-units question is settled corpus-wide: all coil channels are ampere-turns under the blanket kA.turn contract; the netCDF branch-ampere inconsistency remains confined to that record. (3) The §10 exact-tare machinery carried the whole campaign and its 99-cell hex vessel mesh is superseded for pf_passive purposes by a 47-loop slender wall-following polygon basis (operator condition 123.5 vs 372.7) in nova/imas/diiid_passive.py.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260826T085203849172" data-who="sprint-review" data-when="2026-08-26">
+    <div class="r-comment-body"><p><strong>Refinement handback delivered + state recalibrated (2026-08-26 review).</strong> This plan's hold trigger fired on 2026-08-23 and was never recorded here: forward-operator-refinement (S13) shipped with the notification written into its own receipt - NO_DEFENSIBLE_DIIID_TOLERANCE_DERIVED, bound null, 1e-5 and 1e-6 both unpassable (0/5, terminal residuals 0.0854-0.1644) - so the re-evaluation ADDS a prerequisite (an independent same-observable discretisation-error estimate, then an owner tolerance) rather than releasing the gate; the s5 gate-state note now carries the full chain. Order-vs-mesh is answered by the same shipped lane: raised order moves the floor 7.7% at zero rebuild or memory and is preferred over mesh refinement (72.9% at 13.6x memory). impl recalibrated 0.99 to 0.8 and effort from the uncalibrated legacy-L 4h to 48 worker-hours: sections s3/s6/s8/s9/s10 are landed with receipts, s2's kill gate is passed (bar cleared by +0.1440, per-frame R2 quartiles 0.99325/0.99908/0.99967) and s7's artifact is published (216 KB diiid_machine_description.nc with the repaired limiter ring; owner oras push outstanding), while the s5 gate program above is a multi-node remainder (~9.6h), not the 0.04h the old figures implied. Evidence commits not yet in plan-commits: 06b09f5b (exact-tangent repair, cited by the solver-default-route decision), c3a105f7 / fa6ae7cf (repaired limiter ring), c5a66388 / 437bab35 / db81a4a7 (DDv4 authoring), 5cf641a4, 83810648, 3d4fc393. The parked s4 passive-model-order decision stays deferred per its recorded reopen trigger (a converged, branch-retaining forward model reproducing labelled equilibria).</p></div>
 </div>
 </section>
 </main>

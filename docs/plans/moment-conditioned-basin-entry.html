@@ -22,9 +22,9 @@
   <title>Moment-Conditioned Basin Entry | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-23">
+<meta name="plan-modified" content="2026-08-26">
 <meta name="plan-impl" content="1.0">
-<meta name="plan-version" content="20">
+<meta name="plan-version" content="21">
 </head>
 <body>
   <main class="plan-doc">
@@ -145,10 +145,11 @@
     <pre class="r-fu-prompt">/reckon-ship moment-conditioned-basin-entry</pre>
     <p class="r-fu-outcome">§2 ran and landed — commit a3119b61, merged b3713905; gate PASSED. Both holds on §§3–4 are lifted: the tared-control verdict fired stalls-persist and the f-dbs-moment-survey inventory landed. Measured confidence on 6 MAST + 5 DIII-D frames, 5-scale boundary ladder, 55 rows: own-boundary medians — centroid 4.624 cm, RMS width 4.768%, radial second moment 2.558%, nova-internal inductance 16.634%; ladder ranges — radial centroid 1.663 cm, vertical centroid 0.115 cm, RMS width 21.015%, inductance 9.452%. The centroid is the confident, boundary-insensitive moment; width is boundary-sensitive; inductance stays instrument-gated. Continuation is live in the plan: §3 driver design proceeds (newton-warm-ladder baseline in flight, run r-20260822T210506890245) and §4 carries the constraint-support-mapping decision folded from this node's follow_ons. Record: /nova/evidence/archive/moment-conditioned-basin-entry-landed#s2-confidence</p>
     </article>
-<article class="r-fu" data-id="f-mcbe-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-23" data-recommends-skill="/reckon-ship" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mcbe-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-23" data-recommends-skill="/reckon-ship" data-resolved-at="2026-08-26T08:57:52+00:00" data-resolved-by="sprint-review">
     <h4 class="r-fu-title">Operator refinement now owns the reliability frontier — owner to direct the new plan</h4>
     <div class="r-fu-body"><p>Exemption: authority-required — commissioning a new plan and its scientific direction is owner authority. The §5 mesh verdict is unanimous (5/5 floor-scales-with-mesh, observed orders 0.97–3.39): the five MAST stalls are discretisation-limited, so no seeding, continuation, or constraint mechanism closes them — the GS operator's resolution does. The falsifiable exit of the catalog hold (convergence materially above 1/6 under a declared route) is now expected from operator refinement: candidate axes named by the evidence are mesh resolution (the fine mesh alone moves floors up to 10.5x), hexagonal-stencil order, and the fixed-point promotion budget interacting with the finer mesh. Baselines, receipts and the 2/4 split discipline are banked under docs/figures/moment-conditioned-basin-entry/ and the tared benchmark. The owner commissions the operator-refinement plan via reckon-create; this followup is the handoff record.</p></div>
     <pre class="r-fu-prompt">/reckon-ship moment-conditioned-basin-entry</pre>
+    <p class="r-fu-outcome">Done - no followup: the commissioning this handoff recorded happened. forward-operator-refinement exists and shipped 2026-08-23 at impl 1.0 (commit d015ac9b); its outputs (raised mesh density, raised source-averaging order, the gate-derivation adjudication) are consumed by the S10 gate program and the catalog L1 entry.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

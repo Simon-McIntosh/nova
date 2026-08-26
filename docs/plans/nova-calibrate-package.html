@@ -20,8 +20,8 @@
   <title>Nova Calibrate Package | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-12">
-<meta name="plan-version" content="7">
+<meta name="plan-modified" content="2026-08-26">
+<meta name="plan-version" content="8">
 <meta name="plan-impl" content="1.0">
 <meta name="plan-commits" content="623ae5cf,0d1e39d4">
 <meta name="plan-artifacts" content="nova/calibrate/partial.py,nova/calibrate/scale_step.py,nova/calibrate/noise.py,nova/calibrate/pair_state.py,tests/calibrate/">
@@ -206,10 +206,11 @@ Done-when
   3. Followup written into plan + this one resolved</pre>
     <p class="r-fu-outcome">Landed — commit 0d1e39d4 (merge 0e093f9a). partial.py, scale_step.py, noise.py and pair_state.py migrated with arrays-only signatures; 14 synthetic-truth cases green store-free (exact rungs 0.5/1-over-root-2/root-2/2.0; drift 1.3e-3 within 2%; partial slope 0.37 within 0.002; pair-state sequences exact). MAST adapters thinned to compatibility re-exports (mast_acquisition_scale -757 lines, mast_sensor_noise -402) with the vacuum-floor gate unchanged: adapter lane 316 passed / 2 skipped. Full suite 4893 passed / 2 failed against the 4148 baseline; both failures are pre-existing store-backed probe-axis sign assertions in tests/test_mast_solve_inputs.py (shots 15000, 13500) on no changed calibration path, routed to the plan owning that module. The adapter-boundary decision is locked arrays-only, ratifying what shipped.</p>
     </article>
-<article class="r-fu" data-id="f-ncp-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-12" data-recommends-skill="/reckon-ship mast-corrected-read-layer" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ncp-003" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-12" data-recommends-skill="/reckon-ship mast-corrected-read-layer" data-resolved-at="2026-08-26T08:58:34+00:00" data-resolved-by="sprint-review">
     <h4 class="r-fu-title">Probe-axis sign disagreement in the MAST solve-input sensor map (foreign-owner: mast-corrected-read-layer)</h4>
     <div class="r-fu-body">The full-suite run behind the second calibrate slice surfaced two store-backed failures in tests/test_mast_solve_inputs.py: the reconstructed probe axis is +pi/2 where the target is -pi/2, for shots 15000 and 13500. They are pre-existing, traverse no calibration path, and sit in the module whose direct sensor doors mast-corrected-read-layer is closing, so that plan owns the fix. Recorded here only because this suite run is where the evidence was produced.</div>
     <pre class="r-fu-prompt">/reckon-ship mast-corrected-read-layer</pre>
+    <p class="r-fu-outcome">Done - no followup here: re-registered on a live owner. The target this pointed at (mast-corrected-read-layer) shipped 2026-08-20, so no active plan carried the work. The probe-axis adjudication now lives on mast-catalog-gpu-solve as followup f-mcg-03 (the catalog consumes the corrected read layer and the solve-input join), covering the two enabled failures in tests/test_mast_solve_inputs.py.</p>
     </article>
 </section>
 

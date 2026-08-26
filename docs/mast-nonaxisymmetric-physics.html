@@ -11,15 +11,15 @@
   <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
-  <meta name="plan-sprint" content="S3">
+  <meta name="plan-sprint" content="S17">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="nova-3d-native">
   <meta name="plan-blocks" content="">
   <title>MAST Non-axisymmetric Physics | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="3">
+<meta name="plan-modified" content="2026-08-26">
+<meta name="plan-version" content="4">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -27,6 +27,7 @@
 <meta name="plan-capability-tool-autonomy" content="autonomous">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
+<meta name="plan-effort-hours" content="16.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -127,6 +128,11 @@ Done when
     <span class="r-research-title"><a href="/nova/physics-spine-transition-audit.html">Physics Spine Transition Audit</a></span></div>
 <div class="r-research" data-id="r-mast-source-resolution" data-type="resolution-plan" data-source="Nova catalog evidence plus UKAEA machine-description, vacuum-calibration and equilibrium literature" data-added-by="reckon-edit" data-when="2026-08-02" data-url="/nova/mast-source-resolution.html">
     <span class="r-research-title"><a href="/nova/mast-source-resolution.html">MAST source-resolution programme</a></span></div>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="c-20260826T085002040281" data-who="sprint-review" data-when="2026-08-26">
+    <div class="r-comment-body"><p><strong>Scope rescope (2026-08-26 review):</strong> roughly half the scope declared here and in f-mnap-vacuum-refinement was delivered under shipped S5/S6 siblings and must not be re-executed: the evidence-backed nominal parameter model (<code>nova/imas/mast_seed_parameters.py</code>), the vacuum cohort (<code>nova/imas/mast_vacuum_cohort.py</code>), the fitted parameters (<code>nova/imas/mast_fitted_parameters.py</code>) and the error-field screen (<code>nova/imas/mast_error_field_screen.py</code>), plus most of the diagnostic adjudication via the flux-loop and corrected-read-layer plans. What genuinely remains: passive R/L identification (only the nominal seed exists - <code>mast_seed_parameters.py</code> records pf_passive loop resistance as absent), admission of the 36 saddle loops as the n-resolving constraint set (geometry is written into the magnetics IDS but nothing in <code>nova/calibrate/</code> consumes it), the unsourced saddle traversal sign, TF ripple / error-field structure, and productization with the ambix 3D donor cutover - plus the localised-tail-width deliverable owed back to mast-misfit-toroidal-harmonics (f-mth-007). Effort recalibrated 4h to 16h; the plan moved from the closed ordering-artifact sprint S3 to S17, scheduled after the S16 EFIT baseline demonstration per the pinned-axisymmetric-artifact decision.</p></div>
+</div>
 </section>
 </main>
 </body>

@@ -15,8 +15,8 @@
   <title>Nova Spine Refactor | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="22">
+<meta name="plan-modified" content="2026-08-26">
+<meta name="plan-version" content="23">
 <meta name="plan-impl" content="1.0">
 <meta name="plan-sprint" content="S1">
 <meta name="plan-commits" content="0d8bb8ce,25f21429">
@@ -945,7 +945,7 @@ Done-when
      resolved; §10 (ambix adoption) followup queued.</pre>
     <p class="r-fu-outcome">§7 + §9 landed and §5/§6 closed (develop 045e92ec..06f8b91f, 5 workers over 2 waves). §7: nova.io shipped — standard-name resolver over ISN/ISNC, zarr SignalStore keyed by URI+DD, ingest/egress with in-lane validate() round-trip, warm re-read 120-142x AL full-get; git-tag pins in an io extra (test.pypi wheels unpublished — ISN fastmcp weight + missing catalog.db flagged as fork work; beta_normal = genuine ISNC contribution). §5 closed: jit operator primary with numpy fallback + xxhash gating; connectivity/flux-surface/wall-mask ported vmap-safe (batched==per-slice 1e-10); gs_solve re-banked to §10 with closure evidence. §6 closed: Machine key carries DD version (live iter_md validated); MachineGeometryReader seam; compiled frames + solved operators persist as zarr groups with per-group eviction; frame/imas ingest IO pandas-free. §9: default lane 885/78 in 56.4 s, zero exclusions; full lane 1361/0/104; asv baselines in benchmarks/BASELINE.md; core viz leak fixed (f37fa3fa). Archives: s7-landed, s5s6-closed, s9-landed.</p>
     </article>
-<article class="r-fu" data-id="f-int-09" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-spine-refactor §10" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-int-09" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-spine-refactor §10" data-resolved-at="2026-08-26T08:57:26+00:00" data-resolved-by="sprint-review">
     <h4 class="r-fu-title">Ship §10 ambix adoption (nova 2.0 dependency, gs/latent move incl. the gs_solve re-architecture)</h4>
     <div class="r-fu-body"><p>§3–§9 are landed on nova develop (tip <code>06f8b91f</code>; full lane 1361/0/104, fast lane 56 s). §10 executes in the <strong>imas-ambix checkout</strong>: add nova 2.0 as a dependency, move <code>gs/</code> + the latent physics tier onto the spine deleting donor copies, re-point the tokenizer seam, and unify the coupling generators. The re-banked gs_solve lands here — re-architected onto nova.biot's kernels (its ambix closure pulls FAIR-MAST paths + torch current_diffusion; evidence in the §5/§6 archive). Register ambix's imas_geometry reader against nova's MachineGeometryReader seam. Env followups parked in nova: ISN/ISNC fork wheel publish → pin flip; iter_md public-path is_valid layout; dd_version/user threading from Machine to geometry sources.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -985,6 +985,7 @@ Done-when
   2. spine_bench numbers match pre-split baselines; full ambix suite green.
   3. §10 collapsed in this plan with archive HTML; impl advanced; this
      followup resolved; §11 (convergence) followup queued.</pre>
+    <p class="r-fu-outcome">Done - no followup here: executed via physics-spine-adoption (shipped 2026-08-08 at impl 1.0 with all eight followups resolved; this plan's own s10 text records that delegation), and ambix consumes nova.equilibrium, nova.circuit, nova.transport and nova.io.cocos through the editable install. One residual from the followup's TITLE did not land and is re-registered in the cross-repo package assembled by the 2026-08-26 sprint review for a live ambix plan: the gs_solve re-architecture (imas_ambix/latent/gs_solve.py still imports the donor hybrid_greens that nova/biot owns) and the release-pin question (the nova dependency is still an editable path pin).</p>
     </article>
 <article class="r-fu" data-id="f-int-10" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-24T16:20:00+00:00" data-recommends-skill="/reckon-ship nova-spine-refactor §2a" data-resolved-at="2026-07-24T21:18:11+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Stand up norma CI (replay gate) + self-containment install check — clears §2a extraction-gate steps 6–7</h4>

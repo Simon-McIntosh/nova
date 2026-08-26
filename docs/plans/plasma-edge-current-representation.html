@@ -22,11 +22,11 @@
   <title>Plasma Edge Current Representation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-21">
+<meta name="plan-modified" content="2026-08-26">
 <meta name="plan-commits" content="444d4d7d,acea51cb,bdd3120b,ca000f36,1a9bc9ff,7f89b853,6cafed36,070bddd2,02ddf888,dfe8ba70,fbc28097,020c4dc9,260ce85b,b774e696,42b6853b,5aa3056d,4d8e5cd6,61f8ddb9">
 <meta name="plan-artifacts" content="docs/evidence/archive/plasma-edge-current-representation-landed.html,nova/equilibrium/stencil_mesh.py,tests/test_equilibrium_stencil_mesh.py,nova/equilibrium/separatrix_clip.py,tests/test_equilibrium_separatrix_clip.py,nova/biot/polygonanalytic.py,tests/test_biotpolygonmoments.py,nova/biot/polysection.py,benchmarks/steep_edge_moment_demonstration.py,docs/figures/plasma-edge-current-representation/steep_edge_moment_findings.json,docs/figures/plasma-edge-current-representation/steep_edge_moment_convergence.svg">
 <meta name="plan-impl" content="1.0">
-<meta name="plan-version" content="28">
+<meta name="plan-version" content="29">
 <meta name="plan-depends-on" content="boundary-ring-source-completion">
 </head>
 <body>
@@ -268,10 +268,11 @@
     <pre class="r-fu-prompt">/reckon-ship plasma-edge-current-representation</pre>
     <p class="r-fu-outcome">Executed across two plans and shipped: the blocks/clip/stencil landed here (sections 3-5), the solve-path wiring merged to main through the boundary-ring lineage, the coarse-mesh demonstration passed on exact Solov'ev with second-order convergence and 1.2-13x wins over the production rule at the coarsest pitch, and the closed-form oracle programme subsequently proved the composed map exact at the analytic state. Rung 2 redefined as the measured truncation envelope by owner ruling 2026-08-21. Continuation owned by sol-current-demonstration (the section-7 exercise) and dual-basin-solve (the root-finding question).</p>
     </article>
-<article class="r-fu" data-id="f-pecr-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship sol-current-demonstration" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-pecr-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship sol-current-demonstration" data-resolved-at="2026-08-26T08:57:57+00:00" data-resolved-by="sprint-review">
     <h4 class="r-fu-title">The edge machinery&#x27;s remaining exercise lives in the SOL demonstration</h4>
     <div class="r-fu-body"><p>Exemption: foreign-owner - sol-current-demonstration owns the section-7 exercise (exterior supports riding the same moment vectors under the locked Eich closure), and its kickoff condition is met since the routing merge. Dispatch it from the S7 queue on settled defaults.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sol-current-demonstration</pre>
+    <p class="r-fu-outcome">Done - no followup: pointer satisfied. sol-current-demonstration shipped 2026-08-21 at impl 1.0, the same day the pointer was written.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

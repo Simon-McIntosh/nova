@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T01:33:21",
+  "updated": "2026-08-27T01:52:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -52393,9 +52393,113 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T224433327050-pod-wall-ladder-regenerate",
+        "plan": "profile-owned-solve-domain",
+        "section": "",
+        "node": "pod-wall-ladder-regenerate",
+        "node_definition": {
+          "done_when": "The campaign map's exact command regenerates docs/figures/efit-baseline-demonstration/wall-resolution-ladder/receipt.json on current main and the same command with --validate exits zero; the receipt keeps rung rows for counts 36 through 288, exact authored-batch controls, both stop counts reported truthfully (null stays null), the fixed-terminal isolation field, and no NaN or infinity; the manifest states the boundary-flux and contact movements at the finest rung pair beside the prior values and whether the HOLD stands; only the receipt is committed",
+          "estimated_hours": null,
+          "goal": "The wall-resolution ladder receipt regenerated and validated from the corrected 21985/51 terminal state, preserving its scientific HOLD unless the measured convergence evidence genuinely changes it",
+          "id": "pod-wall-ladder-regenerate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T224433327050-pod-wall-ladder-regenerate/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "docs/figures/efit-baseline-demonstration/wall-resolution-ladder/receipt.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "wall-surface",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T22:44:42Z",
+        "completed_at": "2026-08-26T23:50:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3960,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3960,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "3da854df93f87a551af54e46cdb7ff5822f44617",
+        "commits": [
+          "9a299ab951fa88fb40053930083b3774fba19dd9"
+        ],
+        "changed_lines": {
+          "added": 61,
+          "removed": 62,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "campaign generation EXIT_MARKER=0 + --validate exit 0 on the regenerated receipt",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T224433327050-pod-wall-ladder-regenerate/validate-after-limiter-semantics.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T224433327050-pod-wall-ladder-regenerate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0393f-cc5a-7852-89ab-ea49a36244e7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 6607872,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 6649239,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 10239,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1893
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1070
+    "_version": 1071
   }
 }

@@ -213,6 +213,13 @@
     produced no assertion mismatch and was superseded by the repository-appropriate forced-CPU
     run above; the full failed attempt remains in the crew stream rather than being hidden.</p>
 
+    <p><strong>Integrated on the primary branch.</strong> Worker commit
+    <code>9fe3d4c2</code> is reachable through merge commit <code>8859a12d</code>. The fixed-point
+    core now exposes the public 1e-8 stopping criterion, explicit termination reasons, per-lane
+    attempted and accepted promotion counts, and NaN-padded fixed-shape traces for both standard
+    and manifold Newton routes. Catalog-scale iteration and wall-time distributions remain to be
+    measured on real warm sequences.</p>
+
     <h2 id="probe-axis-verification">Probe-axis and waveform-door verification</h2>
 
     <p><strong>Independent gate PASSED, 5/5 cases in 120.19 s.</strong> The reconstruction source

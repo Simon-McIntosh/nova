@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T14:30:04",
+  "updated": "2026-08-26T14:31:37",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -40280,9 +40280,110 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T113536487600-mcg-residual-stopping-core",
+        "plan": "mast-catalog-gpu-solve",
+        "section": "\u00a72",
+        "node": "mcg-residual-stopping-core",
+        "node_definition": {
+          "done_when": "FixedPointResult carries explicit attempted and accepted Newton promotions, convergence and termination reason; the standard and manifold loops stop at the first finite residual at or below the registered 1e-8 criterion while retaining fixed-shape padded diagnostics; zero-step, first-hit, exhaustion, nonfinite, refused-action, jit, vmap and slowest-lane batch tests all pass without a Picard-contraction assumption",
+          "estimated_hours": 4.0,
+          "goal": "Implement residual-driven bounded Newton stopping and observed iteration receipts in the fixed-point core",
+          "id": "mcg-residual-stopping-core",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-stopping-core-manifest.md",
+          "plan": "mast-catalog-gpu-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_fixed_point.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "solve-convergence",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T11:35:53Z",
+        "completed_at": "2026-08-26T11:58:45Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1372,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1372,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "e8dd31b441142e91372bc5a3c1b97402a48ca029",
+        "commits": [
+          "9fe3d4c2340f782c9afab602bc1ab8464a5f2849"
+        ],
+        "changed_lines": {
+          "added": 719,
+          "removed": 334,
+          "files": 2
+        },
+        "tests_added": 9,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/test_fixed_point.py tests/test_manifold_advance.py; independent CPU assertion probe",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-stopping-core-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-stopping-core-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03dca-8afb-7900-8bca-b72dad543550",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 4154112,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 4317547,
+            "output_tokens": 13652,
+            "output_tokens_cumulative": 37282,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 9944
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 931
+    "_version": 932
   }
 }

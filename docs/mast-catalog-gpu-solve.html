@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S16">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="53">
+<meta name="plan-version" content="55">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -26,9 +26,9 @@
 <meta name="plan-capability-tool-autonomy" content="autonomous">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-commits" content="c0eb0e65bcdfaaa7c6e01161b9771d314fa7dbf6,e00ec926015521b3ee15d1f2edcd750245010bea,93ed6a328b15c22f3eb964c40b6a9a53db870529,c710c3f1b2d44a6ffdbc9f5872bb00290cb4c5ba,3472495bf7f2df56516439a5233cc8916bfb78fd,ea5d17e809eb6fcc6d4f61b683adaa16b23e9210,6574bfde4bb629841cfa924b39e74ef6bf8d0ed4">
+<meta name="plan-commits" content="c0eb0e65bcdfaaa7c6e01161b9771d314fa7dbf6,e00ec926015521b3ee15d1f2edcd750245010bea,93ed6a328b15c22f3eb964c40b6a9a53db870529,c710c3f1b2d44a6ffdbc9f5872bb00290cb4c5ba,3472495bf7f2df56516439a5233cc8916bfb78fd,ea5d17e809eb6fcc6d4f61b683adaa16b23e9210,6574bfde4bb629841cfa924b39e74ef6bf8d0ed4,9fe3d4c2340f782c9afab602bc1ab8464a5f2849">
 <meta name="plan-artifacts" content="docs/figures/mast-catalog-gpu-solve/slice-census.json,scripts/mast_slice_census/census.py,scripts/mast_slice_census/report.md,docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json,benchmarks/jitted_eager_parity_gate.py,docs/evidence/archive/mast-catalog-gpu-solve-landed.html,benchmarks/mast_catalog_input_manifest.py,docs/figures/mast-catalog-gpu-solve/mast-catalog-throughput-inputs.json">
-<meta name="plan-impl" content="0.25">
+<meta name="plan-impl" content="0.3">
 <meta name="plan-effort-hours" content="24.0">
 </head>
 <body>
@@ -426,6 +426,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260826T111745596479-mcg-newton-loop-audit" data-who="solve-convergence" data-when="2026-08-26T11:28:19Z">
     <div class="r-comment-body"><p>Classified every package Newton entry point and specified residual-driven stopping, observed iteration receipts, a one-cold-plus-four-neighbour-warm MAST proof, and batch-maximum rather than per-slice-median efficiency statistics; no code gate ran because this was a fenced read-only audit.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260826T113536487600-mcg-residual-stopping-core" data-who="solve-convergence" data-when="2026-08-26T11:58:45Z">
+    <div class="r-comment-body"><p>Implemented residual-driven standard and manifold Newton loops with explicit termination receipts, per-lane counts, and fixed-shape NaN-padded diagnostics.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260825T070435806649-efit-dual-branch-prior-art" data-who="efit-prior-art" data-when="2026-08-25T07:15:54Z">
     <div class="r-comment-body"><p>efit dual-branch prior-art map delivered: 15 commits + 13 symbol groups mapped; identical-seed branch-pure fork with a-posteriori HARD selector (not continuous — the differentiable selector is novel work, not a port); mature architecture avoids forking via continuous basin-escape drag; nova solve_portfolio judged fits-and-substantially-landed; WEST mixed-iteration stall vs branch-pure contraction (rho 0.33) mirrors nova diverted-arm 5e-3 stall</p></div>

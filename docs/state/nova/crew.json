@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T22:58:52",
+  "updated": "2026-08-26T22:59:30",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -50340,9 +50340,114 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T205323759547-ebd-diiid-publication-integrate",
+        "plan": "efit-baseline-demonstration",
+        "section": "",
+        "node": "ebd-diiid-publication-integrate",
+        "node_definition": {
+          "done_when": "benchmarks/diiid_forward_gs_match.py carries the d3550f05 publication-path behaviour on corrected HEAD with its accompanying test; the focused DIII-D test file passes with zero new failures vs the current repository HEAD; the diff is reviewed against git show d3550f05 for semantic equivalence and any divergence is stated in the manifest; ruff adds no findings on staged paths",
+          "estimated_hours": null,
+          "goal": "The orphaned DIII-D stable-publication change d3550f05 integrated onto corrected HEAD so the five-frame driver publishes through the stable path the campaign map requires, reproduced rather than cherry-picked if the commit does not apply cleanly",
+          "id": "ebd-diiid-publication-integrate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T205323759547-ebd-diiid-publication-integrate/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "benchmarks/diiid_forward_gs_match.py",
+            "tests/test_diiid_forward_gs_match.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "adapter-seams",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T20:53:35Z",
+        "completed_at": "2026-08-26T20:58:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 313,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 313,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "d1ccb65f2a8f57bfa510b64424c69ae8d253220b",
+        "commits": [
+          "cde7a42741f866101cc1a4707e4d5d345c9edcb2"
+        ],
+        "changed_lines": {
+          "added": 68,
+          "removed": 3,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/test_diiid_forward_gs_match.py (4 passed)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T205323759547-ebd-diiid-publication-integrate/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T205323759547-ebd-diiid-publication-integrate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-e0cb-7cd1-8925-b9c7f01bcf20",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5580544,
+            "cached_input_tokens_cumulative": 6040576,
+            "input_tokens": 5671393,
+            "input_tokens_cumulative": 6289968,
+            "output_tokens": 7807,
+            "output_tokens_cumulative": 10768,
+            "reasoning_output_tokens": 2690,
+            "reasoning_output_tokens_cumulative": 2980
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1049
+    "_version": 1050
   }
 }

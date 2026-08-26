@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T14:28:29",
+  "updated": "2026-08-26T14:30:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -803,9 +803,11 @@
         "id": "mcg-stopping-verify",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03df5-886c-7213-a567-4c5d96116f08",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03df5-886c-7213-a567-4c5d96116f08"
+        },
         "created": "2026-08-26"
       },
       {
@@ -39977,9 +39979,310 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T120339655512-mcg-residual-stopping-core-verify",
+        "plan": "mast-catalog-gpu-solve",
+        "section": "",
+        "node": "mcg-residual-stopping-core-verify",
+        "node_definition": {
+          "done_when": "One captured pytest invocation over tests/test_fixed_point.py and tests/test_manifold_advance.py exits 0 with 31 passed; independent assertions emit tolerance 1e-8, attempted [1,3], accepted [1,3], batch maximum 3, fixed trace lengths, and NaN padding; manifest states PASS or HOLD",
+          "estimated_hours": 0.7,
+          "goal": "Independent verification receipt for commit 9fe3d4c2",
+          "id": "mcg-residual-stopping-core-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-stopping-core-verify.md",
+          "plan": "mast-catalog-gpu-solve",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-stopping-core-verify.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "mcg-stopping-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T12:04:53Z",
+        "completed_at": "2026-08-26T12:22:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1052,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1052,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "9fe3d4c2340f782c9afab602bc1ab8464a5f2849",
+        "commits": [
+          "9fe3d4c2340f782c9afab602bc1ab8464a5f2849"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/test_fixed_point.py tests/test_manifold_advance.py; independent CPU assertion probe",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-stopping-core-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-stopping-core-verify.md",
+        "scope_changed": false,
+        "session_id": "01a03df5-886c-7213-a567-4c5d96116f08",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5728000,
+            "cached_input_tokens_cumulative": 5728000,
+            "input_tokens": 5918815,
+            "input_tokens_cumulative": 5918815,
+            "output_tokens": 11901,
+            "output_tokens_cumulative": 11901,
+            "reasoning_output_tokens": 5173,
+            "reasoning_output_tokens_cumulative": 5173
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 3100,
+              "log_age_seconds": 1180,
+              "log_fresh": false,
+              "manifest_commits": [
+                "a8927be3"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.codex/scratch/nova-s16-20260826/sse-polish-manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T111246647906-sse-polish-and-tracking --gate <verdict> --commit a8927be3",
+              "node": "sse-polish-and-tracking",
+              "phase": "working",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T111246647906-sse-polish-and-tracking",
+              "terminal_age_seconds": 1203,
+              "terminal_at": "2026-08-26T11:44:30Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-polish-and-tracking"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 2058,
+              "log_age_seconds": 1515,
+              "log_fresh": false,
+              "manifest_commits": [
+                "3472495bf7f2df56516439a5233cc8916bfb78fd; ea5d17e809eb6fcc6d4f61b683adaa16b23e9210"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.codex/scratch/nova-s16-20260826/mcg-probe-axis-manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T111508774749-mcg-probe-axis-adjudication --gate <verdict> --commit 3472495bf7f2df56516439a5233cc8916bfb78fd; ea5d17e809eb6fcc6d4f61b683adaa16b23e9210",
+              "node": "mcg-probe-axis-adjudication",
+              "phase": "working",
+              "plan": "mast-catalog-gpu-solve",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T111508774749-mcg-probe-axis-adjudication",
+              "terminal_age_seconds": 1539,
+              "terminal_at": "2026-08-26T11:38:54Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/mcg-probe-axis-adjudication"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 2847,
+              "log_age_seconds": 1176,
+              "log_fresh": false,
+              "manifest_commits": [
+                "c4f7e50596522a3dde47c60564de06cfd46c461f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.codex/scratch/nova-s16-20260826/pod-wall-manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T111657805648-pod-wall-resolution-ladder --gate <verdict> --commit c4f7e50596522a3dde47c60564de06cfd46c461f",
+              "node": "pod-wall-resolution-ladder",
+              "phase": "working",
+              "plan": "profile-owned-solve-domain",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T111657805648-pod-wall-resolution-ladder",
+              "terminal_age_seconds": 1195,
+              "terminal_at": "2026-08-26T11:44:38Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-wall-resolution-ladder"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1925,
+              "log_age_seconds": 1362,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none \u2014 this audit had no repository write scope; the only durable delivery is this external manifest"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-titan-route-manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T113220081857-sse-titan-route-audit --gate <verdict> --commit none \u2014 this audit had no repository write scope; the only durable delivery is this external manifest",
+              "node": "sse-titan-route-audit",
+              "phase": "working",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T113220081857-sse-titan-route-audit",
+              "terminal_age_seconds": 1386,
+              "terminal_at": "2026-08-26T11:41:27Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-titan-route-audit"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1720,
+              "log_age_seconds": 347,
+              "log_fresh": true,
+              "manifest_commits": [
+                "9fe3d4c2340f782c9afab602bc1ab8464a5f2849"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-stopping-core-manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T113536487600-mcg-residual-stopping-core --gate <verdict> --commit 9fe3d4c2340f782c9afab602bc1ab8464a5f2849",
+              "node": "mcg-residual-stopping-core",
+              "phase": "starting",
+              "plan": "mast-catalog-gpu-solve",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T113536487600-mcg-residual-stopping-core",
+              "terminal_age_seconds": 370,
+              "terminal_at": "2026-08-26T11:58:23Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/mcg-residual-stopping-core"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1672,
+              "log_age_seconds": 1390,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none; this was a read-only investigation and the only authored file is the fenced delivery manifest outside the repository"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/ebd-metric-tolerance-manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T113613685867-ebd-metric-tolerance-adjudication --gate <verdict> --commit none; this was a read-only investigation and the only authored file is the fenced delivery manifest outside the repository",
+              "node": "ebd-metric-tolerance-adjudication",
+              "phase": "starting",
+              "plan": "efit-baseline-demonstration",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T113613685867-ebd-metric-tolerance-adjudication",
+              "terminal_age_seconds": 1411,
+              "terminal_at": "2026-08-26T11:41:01Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/ebd-metric-tolerance-adjudication"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2100,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 749,
+              "log_age_seconds": 321,
+              "log_fresh": true,
+              "manifest_commits": [
+                "3472495bf7f2df56516439a5233cc8916bfb78fd",
+                "ea5d17e809eb6fcc6d4f61b683adaa16b23e9210"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-probe-axis-verify.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T115134251119-mcg-probe-axis-adjudication-verify --gate <verdict> --commit 3472495bf7f2df56516439a5233cc8916bfb78fd --commit ea5d17e809eb6fcc6d4f61b683adaa16b23e9210",
+              "node": "mcg-probe-axis-adjudication-verify",
+              "phase": "starting",
+              "plan": "mast-catalog-gpu-solve",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T115134251119-mcg-probe-axis-adjudication-verify",
+              "terminal_age_seconds": 345,
+              "terminal_at": "2026-08-26T11:58:48Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/mcg-probe-axis-adjudication-verify"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest invocation",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 929
+    "_version": 931
   }
 }

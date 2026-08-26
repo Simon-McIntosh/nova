@@ -16,7 +16,13 @@ from nova.jax.tree_util import Pytree
 
 
 class TopologyState(NamedTuple):
-    """Axis, separatrix and wall-limit state read from one flux map."""
+    """Axis, boundary-selection and wall-limit state read from one flux map.
+
+    ``diverted`` is the legacy boundary-selection predicate. On a pinned read
+    it echoes the requested branch, so it is not an achieved topology class.
+    Forward consumers obtain their achieved class from the saddle-aware
+    connectivity comparator instead.
+    """
 
     axis: jax.Array
     axis_flux: jax.Array
@@ -27,6 +33,12 @@ class TopologyState(NamedTuple):
     wall_point: jax.Array
     wall_point_flux: jax.Array
     diverted: jax.Array
+
+    @property
+    def boundary_is_xpoint(self) -> jax.Array:
+        """Return whether the selected boundary is the requested X-point."""
+
+        return self.diverted
 
     @property
     def flux_span(self) -> jax.Array:
@@ -99,11 +111,11 @@ def _host_point(point: jax.Array) -> tuple[float, float]:
 
 
 def boundary_mode(state: TopologyState) -> BoundaryMode:
-    """Return the named boundary mode of one completed topology read."""
+    """Return the legacy selected-boundary mode of one topology read."""
 
     return (
         BoundaryMode.DIVERTED
-        if bool(jax.device_get(state.diverted))
+        if bool(jax.device_get(state.boundary_is_xpoint))
         else BoundaryMode.LIMITED
     )
 
@@ -353,14 +365,18 @@ class Topology(Pytree):
         emergent_boundary = self.boundary(data_o, vmap_x, data_w, polarity)
         if requested_class is None:
             data_b = emergent_boundary
-            diverted = jnp.equal(data_b[2], data_x[2])
+            boundary_is_xpoint = jnp.equal(data_b[2], data_x[2])
         else:
             data_b = self.pinned_boundary(data_x, data_w, requested_class)
-            diverted = jnp.asarray(requested_class) == int(TopologyClass.DIVERTED)
+            boundary_is_xpoint = jnp.asarray(requested_class) == int(
+                TopologyClass.DIVERTED
+            )
         psi_norm = self.normalize(data_o[2], data_b[2], psi_grid)
         connected = self.x_mask(data_o, vmap_x)
         if requested_class is not None:
-            connected = jnp.where(diverted, connected, jnp.ones_like(connected))
+            connected = jnp.where(
+                boundary_is_xpoint, connected, jnp.ones_like(connected)
+            )
         masks = classify_domains(
             psi_norm,
             self.psi_mask(polarity, psi_grid, data_b[2]),
@@ -376,7 +392,7 @@ class Topology(Pytree):
             x_point_flux=data_x[2],
             wall_point=data_w[:2],
             wall_point_flux=data_w[2],
-            diverted=diverted,
+            diverted=boundary_is_xpoint,
         )
         return masks, state, connected
 

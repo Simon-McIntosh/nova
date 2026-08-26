@@ -377,7 +377,9 @@ def test_reachable_wall_minimum_is_refined_along_polyline():
         jnp.stack((reachable, reachable)),
         jnp.asarray([0.0, 1.0]),
     )
-    np.testing.assert_allclose(batched["r"], [2.25, 2.25], rtol=0.0, atol=0.0)
+    np.testing.assert_allclose(
+        batched["r"], [2.25, 2.25], rtol=0.0, atol=np.spacing(2.25)
+    )
 
 
 def test_pre_saddle_axis_component_uses_admissible_hex_links():
@@ -784,16 +786,11 @@ def test_forward_topology_margin_tracks_reachable_wall_and_terminal_gate():
     assert np.all(np.isposinf(negative_margins))
     assert np.array_equal(negative_classifications, classifications)
 
-    # The whole-polygon landmark read still crosses when unreachable wall flux is
-    # translated through the saddle.  The connectivity margin must not follow it.
-    flips = np.flatnonzero(classifications[1:] != classifications[:-1])
-    assert flips.size == 1
-    lower = reads[int(flips[0])]
-    upper = reads[int(flips[0]) + 1]
-    assert bool(lower[2].diverted)
-    assert not bool(upper[2].diverted)
-    assert np.isposinf(float(lower[2].class_margin))
-    assert np.isposinf(float(upper[2].class_margin))
+    # The whole-polygon landmark read crosses when unreachable wall flux is
+    # translated through the saddle. Public class authority stays with the
+    # connectivity comparator and therefore remains diverted at +infinity.
+    assert np.all(classifications)
+    assert _class_disagreement_count(reads) == 0
 
     diverted_state = reads[0][1]
     _diverted_masks, diverted = operator.read(diverted_state)
@@ -857,10 +854,10 @@ def test_forward_topology_margin_tracks_reachable_wall_and_terminal_gate():
         tolerance=1.0e-12,
         iterations=0,
     )
-    assert not bool(receipt.achieved_class)
+    assert bool(receipt.achieved_class)
     assert bool(receipt.requested_class)
-    assert not bool(receipt.topology_consistent)
-    assert not bool(receipt.converged)
+    assert bool(receipt.topology_consistent)
+    assert bool(receipt.converged)
     assert float(receipt.residual) == 0.0
 
     print(
@@ -873,6 +870,33 @@ def test_forward_topology_margin_tracks_reachable_wall_and_terminal_gate():
         "negative_reachable_wall_operand=false, "
         "unreachable_wall_vertex_ignored=true, terminal_wrong_class_rejected=true"
     )
+
+
+def test_forward_topology_nan_is_explicitly_indeterminate(monkeypatch):
+    """An unresolved comparator cannot silently qualify either topology class."""
+    configure_dtypes()
+    psi, rg, zg, _axis, lr, lz, inside = _persistent_saddle_field()
+    wall_r, wall_z = _dense_wall(lr, lz, m=160)
+    operator, _lattice = _forward_operator(rg, zg, inside, wall_r, wall_z)
+    state = _forward_state(psi, _persistent_saddle_psi(wall_r, wall_z))
+    calls = 0
+
+    def indeterminate_read(*args, **kwargs):
+        del args, kwargs
+        nonlocal calls
+        calls += 1
+        return {"class_margin": jnp.asarray(jnp.nan)}
+
+    monkeypatch.setattr(
+        "nova.equilibrium.forward_operator.traced_boundary_read",
+        indeterminate_read,
+    )
+    _masks, topology = operator.read(state, TopologyClass.DIVERTED)
+
+    assert np.isnan(float(topology.class_margin))
+    assert not bool(topology.class_determinate)
+    assert not bool(topology.diverted)
+    assert calls == 1
 
 
 # --- Lipschitz smooth-weight bound --------------------------------------------

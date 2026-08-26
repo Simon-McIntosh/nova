@@ -89,7 +89,7 @@ from nova.equilibrium.conservation import (
     poloidal_field,
 )
 from nova.equilibrium.domain import DomainMasks
-from nova.equilibrium.forward_operator import ForwardFluxOperator
+from nova.equilibrium.forward_operator import ForwardFluxOperator, ForwardTopologyState
 from nova.equilibrium.moment import (
     CurrentIntegralSupport,
     CurrentCells,
@@ -129,7 +129,7 @@ from nova.equilibrium.stencil_mesh import (
     MomentGeometry,
     StencilMesh,
 )
-from nova.equilibrium.topology import TopologyClass, TopologyState
+from nova.equilibrium.topology import TopologyClass
 from nova.geometry.hexstencil import hex_stencil
 
 __all__ = [
@@ -211,7 +211,7 @@ class ForwardEquilibrium(NamedTuple):
     flux: jax.Array
     cell_current: jax.Array
     domains: DomainMasks
-    topology: TopologyState
+    topology: ForwardTopologyState
     fixed_point: fixed_point.FixedPointResult
     moments: IntegralObservation
     ledger: CurrentLedger

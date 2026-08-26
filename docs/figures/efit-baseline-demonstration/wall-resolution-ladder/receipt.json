@@ -99,7 +99,7 @@
       "prescribed-response wall rows",
       "wall seed suffix"
     ],
-    "wall_enters_residual": false
+    "wall_not_reevaluated_in_fixed_terminal_ladder": true
   },
   "reference": {
     "arm": "passive-inclusive reference-seeded diverted branch",

@@ -70,7 +70,10 @@ def _receipt() -> dict:
             "direct_control_audit": exact_audit,
             "passes": True,
         },
-        "isolation": {"fixed_carrier_digests": digests},
+        "isolation": {
+            "fixed_carrier_digests": digests,
+            "wall_not_reevaluated_in_fixed_terminal_ladder": True,
+        },
         "rows": rows,
     }
 
@@ -165,6 +168,14 @@ def test_receipt_validation_requires_top_level_carrier_identity():
         "seed_field_sha256": "0" * 64,
     }
     with pytest.raises(ValueError, match="differs from the top-level isolation map"):
+        validate_receipt(payload)
+
+
+def test_receipt_validation_requires_fixed_terminal_wall_isolation():
+    payload = _receipt()
+    del payload["isolation"]["wall_not_reevaluated_in_fixed_terminal_ladder"]
+
+    with pytest.raises(ValueError, match="did not re-evaluate the wall"):
         validate_receipt(payload)
 
 

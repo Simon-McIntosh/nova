@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="30">
+<meta name="plan-version" content="31">
 </head>
 <body>
   <main class="plan-doc">
@@ -212,6 +212,9 @@
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T134644784363-sse-h200-polish-performance" data-who="spline-polish" data-when="2026-08-26T13:54:33Z">
     <div class="r-comment-body"><p>The one-GPU H200 benchmark did not start because protected ambix-serve job 1257228 holds all eight reserved GPUs; no H200 timing exists, the P100 rehearsal is not substituted, and the authoritative performance gate remains open.</p></div>
+</div>
+<div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T141042566049-sse-h200-polish-measurement" data-who="spline-polish" data-when="2026-08-26T14:16:02Z">
+    <div class="r-comment-body"><p>The one-H200 measurement completed and established a mixed allocation-specific aggregate result, but bank admission correctly refused commit 5fc7371b because the benchmark discarded the 200 raw latency samples and complete iteration arrays required for independent statistical recomputation. The artifact remains unintegrated pending a raw-sample repair and fresh H200 rerun.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260826T111246647906-sse-polish-and-tracking" data-who="session-9ebe90b7df11b4c3d363" data-when="2026-08-26T11:44:53Z">
     <div class="r-comment-body"><p>Cut topology consumers over to tolerance-bounded global-spline stationary positions with implicit derivatives and fail-closed type admission; reserved-H200 timing remains capacity-blocked with an exact scheduler receipt.</p></div>

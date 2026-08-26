@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T16:29:41",
+  "updated": "2026-08-26T16:31:53",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -45462,9 +45462,142 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T141042566049-sse-h200-polish-measurement",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a72a",
+        "node": "sse-h200-polish-measurement",
+        "node_definition": {
+          "done_when": "One SLURM job runs on betelgeuse with reservation gpu_0003_grpA, exactly gpu:1, isolated CUDA visibility, float64 JAX, TMPDIR=/tmp, and an hours-sized limit. benchmarks/stationary_point_polish.py --repetitions 200 records job host NVIDIA H200 identity JAX device pool source commit and cold tolerance-exit, exact-root warm, 16-field tracked-sequence, and eight-trip fixed-cap median p95 minimum microseconds plus iteration counts in strict JSON. The full log ends EXIT_MARKER=0, the H200 and P100 rows remain separately labelled, and only the tracked JSON is committed.",
+          "estimated_hours": 0.7,
+          "goal": "Bank the authoritative 200-repetition stationary-point polish performance receipt on one reserved H200 while preserving the prior P100 measurement as separately labelled rehearsal context.",
+          "id": "sse-h200-polish-measurement",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-measurement.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72a",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/figures/separatrix-spline-extraction/stationary-point-polish-h200.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "spline-polish",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T14:10:53Z",
+        "completed_at": "2026-08-26T14:16:02Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 309,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 309,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "912606f527fc916327f586ce7726fdc685772c95",
+        "commits": [
+          "5fc7371b0286fad3e283abd8a875d415014c499d"
+        ],
+        "changed_lines": {
+          "added": 102,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "Independent recomputation of all H200 polish quantiles and iteration statistics from persisted raw samples",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-measurement-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-measurement.md",
+        "scope_changed": false,
+        "session_id": "01a03c37-4cb2-7b41-8bdb-2393c4505680",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3722240,
+            "cached_input_tokens_cumulative": 4086016,
+            "input_tokens": 3615686,
+            "input_tokens_cumulative": 4147764,
+            "output_tokens": 8449,
+            "output_tokens_cumulative": 10180,
+            "reasoning_output_tokens": 1865,
+            "reasoning_output_tokens_cumulative": 2159
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1036,
+              "log_age_seconds": 822,
+              "log_fresh": true,
+              "manifest_commits": [
+                "303304e8"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-terminal-diagnostic-material-repair.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T135322231584-sse-terminal-diagnostic-material-repair --gate <verdict> --commit 303304e8",
+              "node": "sse-terminal-diagnostic-material-repair",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T135322231584-sse-terminal-diagnostic-material-repair",
+              "terminal_age_seconds": 845,
+              "terminal_at": "2026-08-26T13:56:43Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-terminal-diagnostic-material-repair"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 980
+    "_version": 981
   }
 }

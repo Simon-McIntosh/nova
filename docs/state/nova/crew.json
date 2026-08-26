@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T14:51:30",
+  "updated": "2026-08-26T14:52:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -41640,9 +41640,107 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T111657805648-pod-wall-resolution-ladder",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a75",
+        "node": "pod-wall-resolution-ladder",
+        "node_definition": {
+          "done_when": "A committed machine-readable receipt reports the 37-row control plus 36 72 144 288 rungs with boundary flux contact coordinate class margin residual trajectory and fixed-carrier digests, and its validation command exits zero",
+          "estimated_hours": 4.0,
+          "goal": "Measure isolated wall-resolution convergence",
+          "id": "pod-wall-resolution-ladder",
+          "manifest_path": "/home/ITER/mcintos/.codex/scratch/nova-s16-20260826/pod-wall-manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/wall_resolution_ladder.py",
+            "tests/test_wall_resolution_ladder.py",
+            "docs/figures/efit-baseline-demonstration/wall-resolution-ladder"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "wall-surface",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T11:17:06Z",
+        "completed_at": "2026-08-26T12:38:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4882,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4882,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "60251ecdd8f9a7b1f8121d3184c807a9311c777a",
+        "commits": [
+          "c4f7e50596522a3dde47c60564de06cfd46c461f",
+          "b3c4097ed86f7eef881e03bed5b8ff7b761015b8"
+        ],
+        "changed_lines": {
+          "added": 2148,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 14,
+        "gate": "failed",
+        "gate_check": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.codex/scratch/nova-s16-20260826/pod-wall-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0393f-cc5a-7852-89ab-ea49a36244e7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 5181696,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 5286479,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 18589,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 6573
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 942
+    "_version": 943
   }
 }

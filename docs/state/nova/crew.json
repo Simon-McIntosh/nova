@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T14:52:17",
+  "updated": "2026-08-26T14:55:10",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -41738,9 +41738,141 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T125019911357-ebd-parity-pin-verify",
+        "plan": "efit-baseline-demonstration",
+        "section": "\u00a73",
+        "node": "ebd-parity-pin-verify",
+        "node_definition": {
+          "done_when": "One captured pytest invocation over tests/test_parity_tolerances.py and tests/test_efit_parity_criterion_provenance.py reports 17 passes; independent source inspection confirms zero unreachable filename occurrences, all seven former stamp consumers plus the magnetics composite cite sha256:8df7a0a6c3f6162dbe0f226660bc069f37de8eb69f0f7c80bbfedc2bd4be220c, axis and LCFS bounds remain exact, historical receipt drift is limited to seven explicit provenance leaves, and merely-contained disagreement remains report-only; manifest states PASS or HOLD.",
+          "estimated_hours": 0.6,
+          "goal": "Independently verify parity provenance commit 1027d500 without changing its report-only policy or numeric tolerances.",
+          "id": "ebd-parity-pin-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/ebd-parity-pin-verify.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "35m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/ebd-parity-pin-verify.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "ebd-metric-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T12:50:28Z",
+        "completed_at": "2026-08-26T12:54:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 268,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 268,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "1027d5008e8376e0c8012c27ba775dc0abc73a1e",
+        "commits": [
+          "1027d5008e8376e0c8012c27ba775dc0abc73a1e"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "PYTHONPATH=\"$PWD\" uv run --no-sync pytest -p no:cacheprovider tests/test_parity_tolerances.py tests/test_efit_parity_criterion_provenance.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/ebd-parity-pin-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/ebd-parity-pin-verify.md",
+        "scope_changed": false,
+        "session_id": "01a03dec-0092-7383-b96b-3945d7debdd4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 380160,
+            "cached_input_tokens_cumulative": 2334208,
+            "input_tokens": 449334,
+            "input_tokens_cumulative": 2526859,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 9941,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3801
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1476,
+              "log_age_seconds": 717,
+              "log_fresh": true,
+              "manifest_commits": [
+                "c4f7e50596522a3dde47c60564de06cfd46c461f b3c4097ed86f7eef881e03bed5b8ff7b761015b8"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.codex/scratch/nova-s16-20260826/pod-wall-manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T111657805648-pod-wall-resolution-ladder --gate <verdict> --commit c4f7e50596522a3dde47c60564de06cfd46c461f b3c4097ed86f7eef881e03bed5b8ff7b761015b8",
+              "node": "pod-wall-resolution-ladder",
+              "phase": "working",
+              "plan": "profile-owned-solve-domain",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T111657805648-pod-wall-resolution-ladder",
+              "terminal_age_seconds": 736,
+              "terminal_at": "2026-08-26T12:38:08Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-wall-resolution-ladder"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest invocation",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 943
+    "_version": 944
   }
 }

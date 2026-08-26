@@ -76,7 +76,6 @@ class MetricTolerance:
 GEOMETRY_REFERENCE_IDENTITY = (
     "sha256:8df7a0a6c3f6162dbe0f226660bc069f37de8eb69f0f7c80bbfedc2bd4be220c"
 )
-REFERENCE_STAMP = "physics-spine-v0-mast-heldout-6-08ae0dee74-98dci4-clu-3141.yaml"
 PRECISION_AUDIT = "docs/figures/jax-dissolution/fieldnull_production_route.json"
 TRANSPORT_CROSS_CHECK = "CurrentDiffusion/TORAX flux-ledger cross-check"
 
@@ -147,7 +146,7 @@ def _common_tolerances() -> dict[str, MetricTolerance]:
                 "four times the 0.018967 committed-stamp profile reference; "
                 "the deterministic reproduction spread was zero"
             ),
-            evidence=REFERENCE_STAMP,
+            evidence=GEOMETRY_REFERENCE_IDENTITY,
         ),
         ScorecardField.FIXED_POINT_DEFECT: MetricTolerance(
             field=ScorecardField.FIXED_POINT_DEFECT,
@@ -170,7 +169,7 @@ def _common_tolerances() -> dict[str, MetricTolerance]:
                 "the frozen stamps score at most six slices per shot, so the "
                 "smallest observed loss is at least 1/6 and exact 1.0 is the only gate"
             ),
-            evidence=REFERENCE_STAMP,
+            evidence=GEOMETRY_REFERENCE_IDENTITY,
         ),
         ScorecardField.CONFINED_FRACTION: MetricTolerance(
             field=ScorecardField.CONFINED_FRACTION,
@@ -181,7 +180,7 @@ def _common_tolerances() -> dict[str, MetricTolerance]:
                 "the frozen stamps score at most six slices per shot, so the "
                 "smallest observed loss is at least 1/6 and exact 1.0 is the only gate"
             ),
-            evidence=REFERENCE_STAMP,
+            evidence=GEOMETRY_REFERENCE_IDENTITY,
         ),
         ScorecardField.ITERATION_COUNT: MetricTolerance(
             field=ScorecardField.ITERATION_COUNT,
@@ -192,7 +191,7 @@ def _common_tolerances() -> dict[str, MetricTolerance]:
                 "the committed frozen-shot runs use the fixed-shape eight-sweep "
                 "profile path; exceeding its registered compute budget is a failure"
             ),
-            evidence=REFERENCE_STAMP,
+            evidence=GEOMETRY_REFERENCE_IDENTITY,
         ),
         ScorecardField.THROUGHPUT_SLICES_PER_CORE_S: MetricTolerance(
             field=ScorecardField.THROUGHPUT_SLICES_PER_CORE_S,
@@ -203,7 +202,7 @@ def _common_tolerances() -> dict[str, MetricTolerance]:
                 "25% below the 0.2515569421 before-path throughput; the allowance "
                 "clears the measured 19.3% shared-node spread"
             ),
-            evidence=REFERENCE_STAMP,
+            evidence=GEOMETRY_REFERENCE_IDENTITY,
         ),
         ScorecardField.CURRENT_DIFFUSION_FLUX_LEDGER_RMS_FRACTION: MetricTolerance(
             field=ScorecardField.CURRENT_DIFFUSION_FLUX_LEDGER_RMS_FRACTION,
@@ -244,7 +243,8 @@ def registered_tolerances(
         unit="whitened RMS",
         basis=basis,
         evidence=(
-            f"{REFERENCE_STAMP}; docs/research/mast-cutover-parity-evidence.html"
+            f"{GEOMETRY_REFERENCE_IDENTITY}; "
+            "docs/research/mast-cutover-parity-evidence.html"
         ),
     )
     if set(tolerances) != SCORECARD_FIELDS:

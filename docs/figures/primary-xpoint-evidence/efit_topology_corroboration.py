@@ -33,7 +33,9 @@ from nova.equilibrium.boundary_comparison import (
     classify_boundary_mode,
     compare_closed_boundaries,
 )
+from nova.equilibrium.observation import ConstraintViolationError
 from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
+from nova.equilibrium.topology import NoQualifiedAxisError
 from nova.imas.mast_efit_referee import read_efit_referee
 from nova.imas.mast_geometry import DD_VERSION
 from nova.imas.mast_solve_inputs import (
@@ -51,7 +53,7 @@ OUTPUT_JSON = HERE / "efit-topology-corroboration.json"
 CACHE_PATH = HERE / ".efit-topology-corroboration-cache.npz"
 REACHABILITY_SCRIPT = HERE / "real_equilibria_reachability.py"
 SELECTION_COMMIT = "80706f89"
-CACHE_SCHEMA_REVISION = 2
+CACHE_SCHEMA_REVISION = 3
 RESAMPLE_POINTS = 2000
 CURVE_SAMPLES_PER_SEGMENT = 9
 
@@ -297,24 +299,24 @@ def _write_operand_cache(
     arrays: dict[str, np.ndarray] = {}
     for index, row in enumerate(rows):
         prefix = f"arm_{index:02d}"
-        metadata_rows.append(
-            {
-                key: row[key]
-                for key in (
-                    "identity",
-                    "shot",
-                    "slice_index",
-                    "time_s",
-                    "arm",
-                    "efit_label",
-                    "nova_achieved_class",
-                    "converged",
-                    "terminal_residual",
-                    "tolerance",
-                    "termination_reason",
-                )
-            }
-        )
+        metadata_row = {
+            key: row[key]
+            for key in (
+                "identity",
+                "shot",
+                "slice_index",
+                "time_s",
+                "arm",
+                "efit_label",
+                "nova_achieved_class",
+                "converged",
+                "terminal_residual",
+                "tolerance",
+                "termination_reason",
+            )
+        }
+        metadata_row["failure_exception_class"] = row.get("failure_exception_class")
+        metadata_rows.append(metadata_row)
         for name in (
             "radius",
             "height",
@@ -419,44 +421,111 @@ def _build_operand_cache(
             else None
         )
         for arm, arm_result in states.items():
-            state = arm_result.state
-            geometry = reachability._grid_geometry(profile, state)
-            _masks, topology = profile.operator.read(state)
-            post_cutover = _post_cutover_geometry(profile, state, topology)
             rows.append(
-                {
-                    "identity": f"{shot}/{slice_index}",
-                    "shot": shot,
-                    "slice_index": slice_index,
-                    "time_s": float(referee.time_s[slice_index]),
-                    "arm": arm,
-                    "converged": arm_result.converged,
-                    "terminal_residual": arm_result.terminal_residual,
-                    "tolerance": arm_result.tolerance,
-                    "termination_reason": arm_result.termination_reason,
-                    "efit_label": efit_label,
-                    "nova_achieved_class": post_cutover["achieved_class"],
-                    "radius": geometry["radius"],
-                    "height": geometry["height"],
-                    "flux": geometry["flux"],
-                    "axis": geometry["axis"],
-                    "wall": geometry["wall"],
-                    "binding_flux": post_cutover["binding_flux"],
-                    "selected_saddle": post_cutover["selected_saddle"],
-                    "limiter_coordinate": post_cutover["limiter_coordinate"],
-                    "class_margin": post_cutover["class_margin"],
-                    "efit_lcfs": efit_lcfs,
-                    "efit_x_points": efit_x_points,
-                }
+                _build_arm_operand(
+                    reachability,
+                    profile,
+                    arm_result,
+                    identity=f"{shot}/{slice_index}",
+                    shot=shot,
+                    slice_index=slice_index,
+                    time_s=float(referee.time_s[slice_index]),
+                    arm=arm,
+                    efit_label=efit_label,
+                    efit_lcfs=efit_lcfs,
+                    efit_x_points=efit_x_points,
+                )
             )
     _write_operand_cache(rows, carrier_evidence)
     print(f"wrote exact operand cache {CACHE_PATH}", flush=True)
     return rows
 
 
+def _build_arm_operand(
+    reachability,
+    profile,
+    arm_result,
+    *,
+    identity: str,
+    shot: int,
+    slice_index: int,
+    time_s: float,
+    arm: str,
+    efit_label: str | None,
+    efit_lcfs: np.ndarray,
+    efit_x_points: np.ndarray,
+) -> dict[str, Any]:
+    """Build one arm operand or retain its named host-side qualification failure."""
+
+    state = arm_result.state
+    common = {
+        "identity": identity,
+        "shot": shot,
+        "slice_index": slice_index,
+        "time_s": time_s,
+        "arm": arm,
+        "tolerance": arm_result.tolerance,
+        "efit_label": efit_label,
+        "efit_lcfs": efit_lcfs,
+        "efit_x_points": efit_x_points,
+    }
+    try:
+        geometry = reachability._grid_geometry(profile, state)
+        _masks, topology = profile.operator.read(state)
+        post_cutover = _post_cutover_geometry(profile, state, topology)
+    except (NoQualifiedAxisError, ConstraintViolationError) as error:
+        exception_class = type(error).__name__
+        return common | {
+            "converged": False,
+            "terminal_residual": None,
+            "termination_reason": exception_class,
+            "failure_exception_class": exception_class,
+            "nova_achieved_class": None,
+            "radius": np.empty(0),
+            "height": np.empty(0),
+            "flux": np.empty((0, 0)),
+            "axis": np.full(2, np.nan),
+            "wall": np.empty((0, 2)),
+            "binding_flux": np.asarray(np.nan),
+            "selected_saddle": np.full(2, np.nan),
+            "limiter_coordinate": np.full(2, np.nan),
+            "class_margin": np.asarray(np.nan),
+        }
+    return common | {
+        "converged": arm_result.converged,
+        "terminal_residual": arm_result.terminal_residual,
+        "termination_reason": arm_result.termination_reason,
+        "failure_exception_class": None,
+        "nova_achieved_class": post_cutover["achieved_class"],
+        "radius": geometry["radius"],
+        "height": geometry["height"],
+        "flux": geometry["flux"],
+        "axis": geometry["axis"],
+        "wall": geometry["wall"],
+        "binding_flux": post_cutover["binding_flux"],
+        "selected_saddle": post_cutover["selected_saddle"],
+        "limiter_coordinate": post_cutover["limiter_coordinate"],
+        "class_margin": post_cutover["class_margin"],
+    }
+
+
 def _draw_panel(axis, row: dict[str, Any]) -> None:
     """Draw one arm with both independent and Nova geometry."""
 
+    if row.get("failure_exception_class") is not None:
+        axis.text(
+            0.5,
+            0.5,
+            f"Geometry unavailable\n{row['failure_exception_class']}",
+            ha="center",
+            va="center",
+            transform=axis.transAxes,
+        )
+        axis.set_title(
+            f"({row['panel']}) {row['identity']} · {row['arm']} · non-converged"
+        )
+        axis.set_axis_off()
+        return
     wall = np.asarray(row["wall_m"], dtype=float)
     efit_lcfs = np.asarray(row["efit_lcfs_m"], dtype=float)
     nova_boundary = np.asarray(row["nova_closed_boundary_m"], dtype=float)
@@ -557,7 +626,10 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(converged_value, bool | np.bool_):
         raise RuntimeError("a corroboration operand lacks an explicit convergence flag")
     converged = bool(converged_value)
-    terminal_residual = _strict_value(float(operand.get("terminal_residual")))
+    terminal_value = operand.get("terminal_residual")
+    terminal_residual = (
+        None if terminal_value is None else _strict_value(float(terminal_value))
+    )
     tolerance = _strict_value(float(operand.get("tolerance")))
     termination_reason = operand.get("termination_reason")
     if tolerance is None or tolerance <= 0.0:
@@ -572,6 +644,45 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
         and terminal_residual <= tolerance
         and termination_reason == "converged"
     )
+    failure_exception_class = operand.get("failure_exception_class")
+    if failure_exception_class is not None:
+        if not isinstance(failure_exception_class, str) or not failure_exception_class:
+            raise RuntimeError("a retained arm failure lacks an exception class")
+        return {
+            "identity": operand.get("identity"),
+            "shot": operand.get("shot"),
+            "slice_index": operand.get("slice_index"),
+            "time_s": operand.get("time_s"),
+            "arm": operand.get("arm"),
+            "converged": False,
+            "terminal_residual": None,
+            "tolerance": tolerance,
+            "termination_reason": termination_reason,
+            "failure_exception_class": failure_exception_class,
+            "qualified_terminal": False,
+            "efit_label": operand.get("efit_label"),
+            "nova_achieved_class": None,
+            "nova_post_cutover_class_margin": None,
+            "nova_post_cutover_class_margin_nonfinite": None,
+            "label_agreement": None,
+            "rms_threshold_eligible": False,
+            "binding_to_efit_lcfs_sup_m": None,
+            "binding_to_efit_lcfs_rms_m": None,
+            "nova_selected_saddle_m": None,
+            "efit_x_points_m": None,
+            "selected_saddle_to_efit_x_point_m": None,
+            "comparison_failures": [
+                f"arm_geometry_exception:{failure_exception_class}"
+            ],
+            "nova_limiter_point_m": None,
+            "efit_boundary_wall_contacts_m": None,
+            "limiter_to_efit_boundary_wall_contact_m": None,
+            "limiter_contact_metric_unavailable_reason": termination_reason,
+            "nova_closed_boundary_m": None,
+            "nova_open_legs_m": None,
+            "efit_lcfs_m": None,
+            "wall_m": None,
+        }
 
     geometry = {
         "radius": operand.get("radius"),
@@ -628,6 +739,7 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
         "terminal_residual": terminal_residual,
         "tolerance": tolerance,
         "termination_reason": termination_reason,
+        "failure_exception_class": None,
         "qualified_terminal": qualified_terminal,
         "efit_label": reference_class,
         "nova_achieved_class": achieved_class,
@@ -757,10 +869,10 @@ def run() -> dict[str, Any]:
     payload = {
         "artifact": "independent EFIT topology corroboration of Nova wall reachability",
         "headline": (
-            "EFIT labels all twelve arms diverted; post-cutover Nova agrees on "
-            "seven and reaches limited on five. Contained saddle selection is "
-            "corroborated to 4.343-38.661 mm, locating the disagreement in the "
-            "solver basin rather than saddle detection or selection."
+            f"All {len(rows)} declared MAST arms are retained: "
+            f"{len(agreements)} agree with the EFIT label, "
+            f"{len(disagreements)} disagree, and {len(unavailable)} carry "
+            "explicitly unavailable comparisons."
         ),
         "qualification": (
             "EFIT efm is an independent magnetics-fitted reconstruction, not truth. "

@@ -63,7 +63,7 @@ from nova.imas.mast_solve_inputs import (
     trace_matched_columns,
     unmapped_current_blocked,
 )
-from nova.imas.mast_vacuum_cohort import ShotWaveforms
+from nova.imas.mast_vacuum_cohort import ShotWaveforms, read_shot_waveforms
 from nova.io.cocos import IP_LIKE, ONE_LIKE, PSI_LIKE
 from nova.utilities.importmanager import mark_import
 
@@ -806,8 +806,10 @@ def test_a_coil_publishing_two_channels_measures_its_own_turn_count(
 @_needs_store
 @_needs_standard_names
 def test_a_channel_off_its_own_clock_is_refused_rather_than_aligned(published_map):
-    """Aligning a channel to a clock it does not fit moves every sample in time."""
+    """The corrected door names a shape refusal before the solve map preserves it."""
 
+    waveforms = read_shot_waveforms(REVERSED_SHOTS[0])
+    assert "fl_cc10" in waveforms.shape_mismatched_sensors
     signals = read_solve_inputs(published_map, REVERSED_SHOTS[0])
     assert "fl_cc10" in signals.misaligned_channels
     assert "fl_cc10" not in signals.samples

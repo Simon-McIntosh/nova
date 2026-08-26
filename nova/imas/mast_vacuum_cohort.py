@@ -850,6 +850,11 @@ class ShotWaveforms:
     to say about it, and letting that test consume the window would leave the
     zero of every channel unmeasurable on exactly the shots with the cleanest
     excitation.
+
+    ``shape_mismatched_sensors`` names field arrays that exist in the archive but
+    cannot be put on its field clock because their sample shapes differ.  They are
+    deliberately absent from ``sensors``; retaining their identities keeps that
+    refusal distinct from a channel the archive does not contain.
     """
 
     shot: int
@@ -863,6 +868,7 @@ class ShotWaveforms:
     excluded: tuple[ExcludedWindow, ...] = ()
     provenance: tuple[SignalProvenance, ...] = field(default_factory=tuple)
     scale_corrections: tuple[ScaleCorrection, ...] = field(default_factory=tuple)
+    shape_mismatched_sensors: tuple[str, ...] = ()
 
     @property
     def sample_count(self) -> int:
@@ -987,16 +993,18 @@ def read_shot_waveforms(
         )
 
     sensors: dict[str, np.ndarray] = {}
+    shape_mismatched_sensors: list[str] = []
     for channel in sorted(field_keys):
         if channel == "time":
             continue
         values = np.asarray(fields[channel][...], dtype=float)
-        if values.shape != time.shape:
-            continue
-        sensors[channel] = values
         provenance.append(
             SignalProvenance(str(root), shot, FIELD_GROUP, channel, field_identity)
         )
+        if values.shape != time.shape:
+            shape_mismatched_sensors.append(channel)
+            continue
+        sensors[channel] = values
     table = promoted_block_scales() if block_scale is None else block_scale
     sensors, corrections = table.normalise(shot, sensors)
     probes = {
@@ -1053,6 +1061,7 @@ def read_shot_waveforms(
         excluded=tuple(excluded),
         provenance=tuple(provenance),
         scale_corrections=corrections,
+        shape_mismatched_sensors=tuple(shape_mismatched_sensors),
     )
 
 
@@ -1065,7 +1074,11 @@ class RawArchiveReader:
     def read_shot_waveforms(
         self, shot: int, *, quiescent_ramp_fraction: float = 0.0
     ) -> ShotWaveforms:
-        """Read a shot without applying any correction document entries."""
+        """Read a shot without applying any correction document entries.
+
+        Field arrays without the field clock's shape remain refused and are named
+        by the returned ``shape_mismatched_sensors`` provenance.
+        """
 
         return read_shot_waveforms(
             shot,

@@ -1231,7 +1231,8 @@ def read_solve_inputs(
         name = _CLOCK_GROUPS[base]
         if base == FIELD_CLOCK:
             raw_source = waveforms.sensors
-            keys = set(raw_source)
+            shape_mismatched = set(waveforms.shape_mismatched_sensors)
+            keys = set(raw_source) | shape_mismatched
             clock = waveforms.time
             identity = next(
                 (
@@ -1242,6 +1243,7 @@ def read_solve_inputs(
                 "",
             )
         else:
+            shape_mismatched = set()
             try:
                 node = zarr.open_group(f"{root}/{shot}.zarr", mode="r")[CURRENT_GROUP]
             except Exception:  # noqa: BLE001 - group absence is reported below
@@ -1255,6 +1257,9 @@ def read_solve_inputs(
         absent.extend(channel for channel in wanted if channel not in keys)
         raw = {}
         for channel in present:
+            if channel in shape_mismatched:
+                misaligned.append(channel)
+                continue
             values = np.asarray(raw_source[channel], dtype=float)
             if values.shape != clock.shape:
                 misaligned.append(channel)

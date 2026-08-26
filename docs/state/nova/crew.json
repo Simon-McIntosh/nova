@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T23:03:23",
+  "updated": "2026-08-26T23:04:51",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -279,9 +279,11 @@
         "id": "coil-null-tests",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03fcf-a392-74c2-bca8-89751e5e1397",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03fcf-a392-74c2-bca8-89751e5e1397"
+        },
         "created": "2026-08-26"
       },
       {
@@ -50649,9 +50651,96 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T205524932339-ebd-coil-shadow-cell-diagnosis",
+        "plan": "efit-baseline-demonstration",
+        "section": "",
+        "node": "ebd-coil-shadow-cell-diagnosis",
+        "node_definition": {
+          "done_when": "A report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/coil-shadow-cell-diagnosis.md reproduces the failing 37x49 case read-only from the blocked worker's uncommitted battery at /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d8-s16-landing/ebd-flood-coil-null-battery/tests/test_hex_flood_coil_nulls.py, identifies the exact cell and the severed or misclassified link with the saddle level and code path responsible cited by file and line, states PRODUCTION-DEFECT or FIELD-ARTIFACT with the evidence, and gives the minimal fix for whichever it is; no repository file modified",
+          "estimated_hours": null,
+          "goal": "A localisation of the single fine-grid coil-induced PRIVATE_FLUX cell inside the coil-free core observed by the blocked coil-null battery, determining whether hex edge admissibility or any other production mechanism evaluates external saddle levels in a way that can sever an interior link, or whether the cell is an artifact of the manufactured field",
+          "id": "ebd-coil-shadow-cell-diagnosis",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T205524932339-ebd-coil-shadow-cell-diagnosis/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "",
+          "spec_level": "",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/coil-shadow-cell-diagnosis.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-26T20:55:37Z",
+        "completed_at": "2026-08-26T21:04:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 531,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 531,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "31cf72f6b618c83d7f2258c66e1b2a5df0efabff",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "read-only reproduction of the 37x49 case from the blocked worker's battery: bridge centroid flat 478 sign flip localised; external X levels shown absent from production connectivity",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/coil-shadow-cell-diagnosis.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T205524932339-ebd-coil-shadow-cell-diagnosis/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1052
+    "_version": 1054
   }
 }

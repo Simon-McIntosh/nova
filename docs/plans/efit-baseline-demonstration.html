@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="29">
+<meta name="plan-version" content="31">
 <meta name="plan-commits" content="ba1f73013873fd2d7434db1b744d742a1b4b042c">
 <meta name="plan-artifacts" content="docs/evidence/archive/efit-baseline-demonstration-landed.html,docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json">
 </head>
@@ -288,6 +288,12 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260826T185605642681-ebd-o-candidate-qualification" data-who="domain-partition" data-when="2026-08-26T19:12:47Z">
     <div class="r-comment-body"><p>O candidates qualified by resolved boundary, &gt;1-cell component, and governed-material connection before selection; 21985/51 top-notch coordinate rejected with NoQualifiedAxisError; 4 new eager/JIT regression cases</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260826T190340454608-ebd-hex-connectivity-ordering-audit" data-who="connectivity-audit" data-when="2026-08-26T19:13:51Z">
+    <div class="r-comment-body"><p>HOLD finding: n_iter=nr+nz caps (66/130/190) do not bound worst-case interior paths (480/1984/4324) at production grids; ordering PASS; jit/vmap determinism PASS conditional on saturation; minimal fix = confined.size cap + reciprocal-edge canonicalisation</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260826T190352495998-ebd-partition-performance-receipt" data-who="flood-performance" data-when="2026-08-26T19:14:01Z">
+    <div class="r-comment-body"><p>Receipt on main: no data-dependent while primitives, jit+vmap compile on CPU and L4 GPU, CPU medians 0.29-17.97 ms, GPU 1.01-8.13 ms, all p95 under the recorded 125 ms budget; re-measure follows the trip-cap fix</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260826T111937959782-ebd-threshold-lock-proposal" data-who="vacuum-diagnosis" data-when="2026-08-26T11:24:20Z">
     <div class="r-comment-body"><p>Derived an outcome-blind, inclusive three-gate demonstration contract from the immutable banked twelve-arm evidence: class agreement at least 7/12, worst eligible closed-boundary RMS at most 0.55 m, and worst polished-saddle distance at most 0.04 m, with fail-closed cohort and nonfinite semantics.</p></div>

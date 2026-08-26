@@ -336,6 +336,38 @@ def _raster_hex_partition_geometry(rg, zg):
     return rings, endpoints.at[:, 0].set(centre[:, 0, None, :])
 
 
+def _canonicalize_reciprocal_hex_edges(rings, link_admissible):
+    """Require both directed evaluations of every shared edge to agree."""
+    centre = rings[:, 0]
+    neighbour = rings[:, 1:]
+    reverse_row = jnp.searchsorted(centre, neighbour)
+    reverse_row = jnp.clip(reverse_row, 0, centre.size - 1)
+    has_reverse_row = centre[reverse_row] == neighbour
+    neighbour_rings = rings[reverse_row]
+    reverse_match = neighbour_rings == centre[:, None, None]
+    reverse_slot = jnp.argmax(reverse_match, axis=2)
+    reverse_link = jnp.take_along_axis(
+        link_admissible[reverse_row], reverse_slot[..., None], axis=2
+    )[..., 0]
+    has_reciprocal = has_reverse_row & jnp.any(reverse_match, axis=2)
+    canonical = link_admissible[:, 1:] & jnp.where(has_reciprocal, reverse_link, True)
+    return link_admissible.at[:, 1:].set(canonical)
+
+
+def _saddle_aware_axis_component(confined, rings, link_admissible, seed):
+    """Return the seeded component after a sufficient fixed-trip label pass."""
+    canonical_links = _canonicalize_reciprocal_hex_edges(rings, link_admissible)
+    labels = label_saddle_aware_hex_connected_components(
+        confined,
+        rings,
+        canonical_links,
+        confined.size,
+    )
+    sentinel = jnp.asarray(jnp.iinfo(labels.dtype).max, dtype=labels.dtype)
+    axis_label = jnp.min(jnp.where(seed & (labels > 0), labels, sentinel))
+    return jnp.any(seed & confined) & (labels == axis_label)
+
+
 def _axis_component_before_level(
     u,
     inside_limiter,
@@ -344,8 +376,6 @@ def _axis_component_before_level(
     axis_r,
     axis_z,
     level,
-    n_iter,
-    use_doubling,
 ):
     """Return the axis component immediately inside a flux obstruction."""
     inside_values = jnp.where(inside_limiter, u, jnp.nan)
@@ -375,15 +405,8 @@ def _axis_component_before_level(
         jnp.asarray(0.0, dtype=u.dtype),
         shared_edges,
     )
-    labels = label_saddle_aware_hex_connected_components(
-        confined,
-        rings,
-        link_admissible,
-        n_iter,
-    )
-    sentinel = jnp.asarray(jnp.iinfo(labels.dtype).max, dtype=labels.dtype)
-    axis_label = jnp.min(jnp.where(seed & (labels > 0), labels, sentinel))
-    return has_seed & (labels == axis_label)
+    component = _saddle_aware_axis_component(confined, rings, link_admissible, seed)
+    return has_seed & component
 
 
 def _wall_nodes_touching_region(region, inside_limiter, rg, zg, wall_r, wall_z):
@@ -984,8 +1007,6 @@ def _read_ingredients(
             axis_r,
             axis_z,
             class_u_x,
-            n_iter,
-            use_doubling,
         )
         class_wall = _select_reachable_wall_limiter(
             psi2d,

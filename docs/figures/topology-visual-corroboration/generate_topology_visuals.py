@@ -53,6 +53,20 @@ DIIID_RENDER_COMMIT = "94f510b6"
 DIIID_SOURCE_PATH = "benchmarks/diiid_forward_gs_match.py"
 EXPECTED_MAST_ROWS = 12
 EXPECTED_DIIID_ROWS = 5
+NUMERIC_ARRAY_DTYPES = {
+    "cell_rz": np.float64,
+    "domain_labels": np.int8,
+    "o_candidates": np.float64,
+    "x_candidates": np.float64,
+    "selected_o": np.float64,
+    "selected_x": np.float64,
+    "wall_point": np.float64,
+    "wall": np.float64,
+    "nova_boundary": np.float64,
+    "efit_axis": np.float64,
+    "efit_x": np.float64,
+    "efit_lcfs": np.float64,
+}
 
 
 def _load_path(path: Path, name: str):
@@ -82,7 +96,11 @@ def _stationary_records(
         & np.asarray(polished["in_domain"], dtype=bool)
         & np.all(np.isfinite(positions), axis=1)
     )
-    positions = np.where(plotted[:, None], positions, np.nan)
+    positions = np.where(
+        plotted[:, None],
+        positions,
+        np.where(valid[:, None], source[:, :2], np.nan),
+    )
     return positions[: len(source_o)], positions[len(source_o) :]
 
 
@@ -168,7 +186,7 @@ def _mast_rows() -> list[dict[str, Any]]:
     _write_cache(
         MAST_CACHE, rows, {"carrier": carrier["carrier"]["semantic_response_identity"]}
     )
-    return rows
+    return _read_cache(MAST_CACHE)
 
 
 def _diiid_module():
@@ -261,12 +279,18 @@ def _diiid_rows() -> list[dict[str, Any]]:
             f"expected {EXPECTED_DIIID_ROWS} DIII-D rows, got {len(rows)}"
         )
     _write_cache(DIIID_CACHE, rows, {"renderer_commit": DIIID_RENDER_COMMIT})
-    return rows
+    return _read_cache(DIIID_CACHE)
 
 
 def _plotted_candidates(records: list[dict[str, Any]]) -> np.ndarray:
     points = [
-        record["polished_coordinate_m"] for record in records if record["plotted"]
+        (
+            record["polished_coordinate_m"]
+            if record["plotted"]
+            else record["source_coordinate_m"]
+        )
+        for record in records
+        if record["source_coordinate_m"] is not None
     ]
     return np.asarray(points, dtype=float).reshape((-1, 2))
 
@@ -276,45 +300,51 @@ def _write_cache(
 ) -> None:
     arrays: dict[str, np.ndarray] = {}
     metadata = []
-    array_fields = (
-        "cell_rz",
-        "domain_labels",
-        "o_candidates",
-        "x_candidates",
-        "selected_o",
-        "selected_x",
-        "wall_point",
-        "wall",
-        "nova_boundary",
-        "efit_axis",
-        "efit_x",
-        "efit_lcfs",
-    )
     for index, row in enumerate(rows):
         metadata.append(
-            {key: value for key, value in row.items() if key not in array_fields}
+            {
+                key: value
+                for key, value in row.items()
+                if key not in NUMERIC_ARRAY_DTYPES
+            }
         )
-        for field in array_fields:
-            arrays[f"row_{index:02d}_{field}"] = np.asarray(row[field])
-    np.savez_compressed(
-        path,
-        metadata=np.asarray(
-            json.dumps({"authority": authority, "rows": metadata}, sort_keys=True)
-        ),
-        **arrays,
+        for field, dtype in NUMERIC_ARRAY_DTYPES.items():
+            value = [] if row[field] is None else row[field]
+            array = np.asarray(value, dtype=dtype)
+            if array.dtype.kind not in "biuf":
+                raise TypeError(
+                    f"cache numeric field {field} has forbidden dtype {array.dtype}"
+                )
+            if field != "domain_labels":
+                array = array.reshape((-1, 2))
+            arrays[f"row_{index:02d}_{field}"] = array
+    np.savez_compressed(path, **arrays)
+    path.with_suffix(".metadata.json").write_text(
+        json.dumps(
+            {"authority": authority, "rows": metadata},
+            indent=2,
+            sort_keys=True,
+            allow_nan=False,
+        )
+        + "\n"
     )
 
 
 def _read_cache(path: Path) -> list[dict[str, Any]]:
+    metadata = json.loads(path.with_suffix(".metadata.json").read_text())
     with np.load(path, allow_pickle=False) as stored:
-        metadata = json.loads(str(stored["metadata"].item()))
         rows = []
         for index, record in enumerate(metadata["rows"]):
             row = dict(record)
-            prefix = f"row_{index:02d}_"
-            for key in stored.files:
-                if key.startswith(prefix):
-                    row[key[len(prefix) :]] = np.array(stored[key], copy=True)
+            for field, dtype in NUMERIC_ARRAY_DTYPES.items():
+                key = f"row_{index:02d}_{field}"
+                array = np.array(stored[key], copy=True)
+                if array.dtype != np.dtype(dtype) or array.dtype.kind not in "biuf":
+                    raise TypeError(
+                        f"cache numeric field {key} violates dtype allowlist: "
+                        f"expected {np.dtype(dtype)}, got {array.dtype}"
+                    )
+                row[field] = array
             rows.append(row)
     return rows
 
@@ -521,10 +551,11 @@ def _write_evidence(rows: list[dict[str, Any]], records: list[dict[str, Any]]) -
     html = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="topology-visual-corroboration">
 <meta name="plan-evidence-for" content="efit-baseline-demonstration"><meta name="plan-verifies" content="efit-baseline-demonstration#s2">
 <meta name="plan-title" content="Topology visual corroboration"><meta name="plan-summary" content="Per-geometry visual corroboration of flood-fill topology operands against MAST and DIII-D EFIT labels.">
 <title>Topology visual corroboration | nova</title><link rel="stylesheet" href="/_shared/foundation.css"><link rel="stylesheet" href="/_shared/dashboard.css">
-<style>.figure-row{{margin:2rem 0 3rem}}.figure-row img{{display:block;max-width:860px;width:100%;height:auto}}figcaption{{max-width:860px;color:var(--muted, #555)}}code{{overflow-wrap:anywhere}}</style></head>
+</head>
 <body><main class="plan"><header class="plan-hero"><p class="eyebrow">Evidence · visual topology audit</p><h1>Topology visual corroboration</h1>
 <p class="lede">All {EXPECTED_MAST_ROWS} MAST arms and all {EXPECTED_DIIID_ROWS} DIII-D demonstration frames are shown exactly once. Every panel exposes the hex-cell flood-fill domains, the complete finite O/X candidate census, selected primary O and X, selected wall point, and EFIT axis/X/LCFS labels.</p></header>
 <section><h2>Authority and interpretation</h2><p>This is corroboration of committed extraction state, not a new score. EFIT is an independent magnetics-fitted reconstruction, not physical truth. MAST operands use the persisted response carrier and the current <code>efit_topology_corroboration</code> extraction route. DIII-D operands use the committed complete-poloidal renderer at <code>{DIIID_RENDER_COMMIT}</code>, the first committed extraction state carrying the full stationary-candidate census; all five nonconverged rows remain visibly qualified. Generated from repository head <code>{head}</code>.</p>

@@ -1,0 +1,127 @@
+{
+  "authority": {
+    "carrier": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994"
+  },
+  "rows": [
+    {
+      "arm": "pure",
+      "converged": true,
+      "frame": 35,
+      "identity": "21978/35 pure",
+      "machine": "MAST",
+      "qualification": "achieved class from committed arm pure",
+      "shot": 21978,
+      "time": 0.1899999976158142
+    },
+    {
+      "arm": "mixed",
+      "converged": true,
+      "frame": 35,
+      "identity": "21978/35 mixed",
+      "machine": "MAST",
+      "qualification": "achieved class from committed arm mixed",
+      "shot": 21978,
+      "time": 0.1899999976158142
+    },
+    {
+      "arm": "pure",
+      "converged": true,
+      "frame": 35,
+      "identity": "21983/35 pure",
+      "machine": "MAST",
+      "qualification": "achieved class from committed arm pure",
+      "shot": 21983,
+      "time": 0.1899999976158142
+    },
+    {
+      "arm": "mixed",
+      "converged": true,
+      "frame": 35,
+      "identity": "21983/35 mixed",
+      "machine": "MAST",
+      "qualification": "achieved class from committed arm mixed",
+      "shot": 21983,
+      "time": 0.1899999976158142
+    },
+    {
+      "arm": "pure",
+      "converged": true,
+      "frame": 51,
+      "identity": "21985/51 pure",
+      "machine": "MAST",
+      "qualification": "achieved class from committed arm pure",
+      "shot": 21985,
+      "time": 0.2750000059604645
+    },
+    {
+      "arm": "mixed",
+      "converged": true,
+      "frame": 51,
+      "identity": "21985/51 mixed",
+      "machine": "MAST",
+      "qualification": "achieved class from committed arm mixed",
+      "shot": 21985,
+      "time": 0.2750000059604645
+    },
+    {
+      "arm": "pure",
+      "converged": true,
+      "frame": 46,
+      "identity": "21986/46 pure",
+      "machine": "MAST",
+      "qualification": "achieved class from committed arm pure",
+      "shot": 21986,
+      "time": 0.25
+    },
+    {
+      "arm": "mixed",
+      "converged": true,
+      "frame": 46,
+      "identity": "21986/46 mixed",
+      "machine": "MAST",
+      "qualification": "achieved class from committed arm mixed",
+      "shot": 21986,
+      "time": 0.25
+    },
+    {
+      "arm": "pure",
+      "converged": true,
+      "frame": 55,
+      "identity": "21989/55 pure",
+      "machine": "MAST",
+      "qualification": "achieved class from committed arm pure",
+      "shot": 21989,
+      "time": 0.29499998688697815
+    },
+    {
+      "arm": "mixed",
+      "converged": true,
+      "frame": 55,
+      "identity": "21989/55 mixed",
+      "machine": "MAST",
+      "qualification": "achieved class from committed arm mixed",
+      "shot": 21989,
+      "time": 0.29499998688697815
+    },
+    {
+      "arm": "pure",
+      "converged": true,
+      "frame": 43,
+      "identity": "22086/43 pure",
+      "machine": "MAST",
+      "qualification": "achieved class from committed arm pure",
+      "shot": 22086,
+      "time": 0.22999998927116394
+    },
+    {
+      "arm": "mixed",
+      "converged": true,
+      "frame": 43,
+      "identity": "22086/43 mixed",
+      "machine": "MAST",
+      "qualification": "achieved class from committed arm mixed",
+      "shot": 22086,
+      "time": 0.22999998927116394
+    }
+  ]
+}

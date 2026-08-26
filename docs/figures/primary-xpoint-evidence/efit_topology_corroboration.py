@@ -51,7 +51,7 @@ OUTPUT_JSON = HERE / "efit-topology-corroboration.json"
 CACHE_PATH = HERE / ".efit-topology-corroboration-cache.npz"
 REACHABILITY_SCRIPT = HERE / "real_equilibria_reachability.py"
 SELECTION_COMMIT = "80706f89"
-CACHE_SCHEMA_REVISION = 1
+CACHE_SCHEMA_REVISION = 2
 RESAMPLE_POINTS = 2000
 CURVE_SAMPLES_PER_SEGMENT = 9
 
@@ -308,6 +308,10 @@ def _write_operand_cache(
                     "arm",
                     "efit_label",
                     "nova_achieved_class",
+                    "converged",
+                    "terminal_residual",
+                    "tolerance",
+                    "termination_reason",
                 )
             }
         )
@@ -414,7 +418,8 @@ def _build_operand_cache(
             if referee_usable
             else None
         )
-        for arm, state in states.items():
+        for arm, arm_result in states.items():
+            state = arm_result.state
             geometry = reachability._grid_geometry(profile, state)
             _masks, topology = profile.operator.read(state)
             post_cutover = _post_cutover_geometry(profile, state, topology)
@@ -425,6 +430,10 @@ def _build_operand_cache(
                     "slice_index": slice_index,
                     "time_s": float(referee.time_s[slice_index]),
                     "arm": arm,
+                    "converged": arm_result.converged,
+                    "terminal_residual": arm_result.terminal_residual,
+                    "tolerance": arm_result.tolerance,
+                    "termination_reason": arm_result.termination_reason,
                     "efit_label": efit_label,
                     "nova_achieved_class": post_cutover["achieved_class"],
                     "radius": geometry["radius"],
@@ -544,6 +553,26 @@ def _finite_points(points: object) -> np.ndarray:
 def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
     """Build one bank row even when one or more comparison inputs are absent."""
 
+    converged_value = operand.get("converged")
+    if not isinstance(converged_value, bool | np.bool_):
+        raise RuntimeError("a corroboration operand lacks an explicit convergence flag")
+    converged = bool(converged_value)
+    terminal_residual = _strict_value(float(operand.get("terminal_residual")))
+    tolerance = _strict_value(float(operand.get("tolerance")))
+    termination_reason = operand.get("termination_reason")
+    if tolerance is None or tolerance <= 0.0:
+        raise RuntimeError(
+            "a corroboration operand lacks a positive residual tolerance"
+        )
+    if not isinstance(termination_reason, str) or not termination_reason:
+        raise RuntimeError("a corroboration operand lacks a termination reason")
+    qualified_terminal = bool(
+        converged
+        and terminal_residual is not None
+        and terminal_residual <= tolerance
+        and termination_reason == "converged"
+    )
+
     geometry = {
         "radius": operand.get("radius"),
         "height": operand.get("height"),
@@ -595,6 +624,11 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
         "slice_index": operand.get("slice_index"),
         "time_s": operand.get("time_s"),
         "arm": operand.get("arm"),
+        "converged": converged,
+        "terminal_residual": terminal_residual,
+        "tolerance": tolerance,
+        "termination_reason": termination_reason,
+        "qualified_terminal": qualified_terminal,
         "efit_label": reference_class,
         "nova_achieved_class": achieved_class,
         "nova_post_cutover_class_margin": _strict_value(margin),
@@ -606,6 +640,11 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
             else None
         ),
         "label_agreement": comparison.topology_class_agreement,
+        "rms_threshold_eligible": bool(
+            qualified_terminal
+            and comparison.topology_class_agreement is True
+            and comparison.symmetric_rms_distance_m is not None
+        ),
         "binding_to_efit_lcfs_sup_m": comparison.symmetric_sup_distance_m,
         "binding_to_efit_lcfs_rms_m": comparison.symmetric_rms_distance_m,
         "nova_selected_saddle_m": _finite_point_list(operand.get("selected_saddle")),
@@ -631,6 +670,23 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
         "nova_open_legs_m": [leg.tolist() for leg in open_legs],
         "efit_lcfs_m": efit_lcfs.tolist(),
         "wall_m": wall.tolist(),
+    }
+
+
+def _rms_threshold_eligibility(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Name RMS-eligible arms while retaining the fixed cohort denominator."""
+
+    return {
+        "eligible_count": sum(row["rms_threshold_eligible"] for row in rows),
+        "declared_arm_denominator": len(rows),
+        "eligible_arms": [
+            f"{row['identity']} {row['arm']}"
+            for row in rows
+            if row["rms_threshold_eligible"]
+        ],
+        "excluded_nonconverged_arms": [
+            f"{row['identity']} {row['arm']}" for row in rows if not row["converged"]
+        ],
     }
 
 
@@ -787,6 +843,7 @@ def run() -> dict[str, Any]:
             "disagreements": [
                 f"{row['identity']} {row['arm']}" for row in disagreements
             ],
+            "rms_threshold_eligibility": _rms_threshold_eligibility(rows),
         },
         "summary": {
             "boundary_sup_m_min": boundary_sup_range[0],

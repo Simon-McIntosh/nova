@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from importlib.util import find_spec
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 import jax
 import jax.numpy as jnp
@@ -59,6 +59,10 @@ from nova.equilibrium.flux_surface_connectivity import (
     label_connected_components,
     private_flux_mask,
 )
+from nova.equilibrium.fixed_point import (
+    FixedPointTerminationReason,
+    KrylovActionQualification,
+)
 from nova.equilibrium.forward import SaddleSeedGeometry
 from nova.equilibrium.topology import TopologyClass
 from nova.imas.mast_solve_inputs import SHOT_STORE
@@ -84,6 +88,21 @@ CLASSIFICATION_OFFSET_FRACTION = 2.0e-4
 MANDATORY_REFERENCES = ((21983, 35), (21989, 55))
 
 
+class MastArmResult(NamedTuple):
+    """One reconstructed MAST state and its terminal qualification."""
+
+    state: jax.Array
+    converged: bool
+    terminal_residual: float
+    tolerance: float
+    termination_reason: str
+
+    def __jax_array__(self) -> jax.Array:
+        """Keep state-only diagnostic consumers source compatible."""
+
+        return self.state
+
+
 def _closed_wall(wall: np.ndarray) -> np.ndarray:
     finite = np.asarray(wall, dtype=float)[np.isfinite(wall).all(axis=1)]
     if not np.array_equal(finite[0], finite[-1]):
@@ -102,7 +121,7 @@ def _densify_wall(wall: np.ndarray) -> np.ndarray:
 
 def _mast_states(
     profile, seed: jax.Array, target_current: float
-) -> dict[str, jax.Array]:
+) -> dict[str, MastArmResult]:
     initial = jnp.stack((seed, seed))
     portfolio = profile.solve_portfolio(
         initial,
@@ -116,19 +135,63 @@ def _mast_states(
         step_cap=STEP_CAP,
     )
     portfolio.branches.equilibrium.flux.block_until_ready()
-    pure = portfolio.branches.equilibrium.flux[int(TopologyClass.DIVERTED)]
+    pure_branch = jax.tree.map(
+        lambda value: value[int(TopologyClass.DIVERTED)], portfolio.branches
+    )
+    pure_reason_value = int(
+        np.asarray(pure_branch.equilibrium.fixed_point.termination_reason)
+    )
+    try:
+        pure_reason = FixedPointTerminationReason(pure_reason_value).name.lower()
+    except ValueError:
+        pure_reason = f"unknown_{pure_reason_value}"
     mapped = profile.flux_map(
         requested_class=TopologyClass.DIVERTED, target_current=target_current
     )
-    mixed = _margin_graded_newton_krylov(
+    mixed_result = _margin_graded_newton_krylov(
         mapped,
         profile.operator.topology_margin,
         seed,
         newton_steps=NEWTON_STEPS,
         gmres_iterations=GMRES_ITERATIONS,
-    ).state
-    mixed.block_until_ready()
-    return {"pure": pure, "mixed": mixed}
+    )
+    mixed_result.state.block_until_ready()
+    mixed_residual = float(np.asarray(mixed_result.residual))
+    mixed_qualification = KrylovActionQualification(
+        int(np.asarray(mixed_result.krylov_action_qualification))
+    )
+    mixed_converged = bool(
+        np.isfinite(mixed_residual) and mixed_residual <= FIXED_POINT_CRITERION
+    )
+    mixed_reason = (
+        FixedPointTerminationReason.CONVERGED
+        if mixed_converged
+        else FixedPointTerminationReason.NONFINITE_RESIDUAL
+        if not np.isfinite(mixed_residual)
+        else FixedPointTerminationReason.KRYLOV_ACTION_REFUSED
+        if mixed_qualification
+        not in {
+            KrylovActionQualification.NOT_APPLICABLE,
+            KrylovActionQualification.ACCEPTED,
+        }
+        else FixedPointTerminationReason.ITERATION_BUDGET_EXHAUSTED
+    )
+    return {
+        "pure": MastArmResult(
+            state=pure_branch.equilibrium.flux,
+            converged=bool(np.asarray(pure_branch.converged)),
+            terminal_residual=float(np.asarray(pure_branch.residual)),
+            tolerance=FIXED_POINT_CRITERION,
+            termination_reason=pure_reason,
+        ),
+        "mixed": MastArmResult(
+            state=mixed_result.state,
+            converged=mixed_converged,
+            terminal_residual=mixed_residual,
+            tolerance=FIXED_POINT_CRITERION,
+            termination_reason=mixed_reason.name.lower(),
+        ),
+    }
 
 
 def _diiid_state(shot_name: str, frame: int) -> tuple[Any, jax.Array]:
@@ -593,8 +656,8 @@ def run() -> dict[str, Any]:
             raise RuntimeError("MAST reconstruction entered a direct response builder")
         seed = jnp.asarray(passive_case["state"])
         target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
-        for arm, state in _mast_states(profile, seed, target_current).items():
-            record, plot = _classify(_grid_geometry(profile, state))
+        for arm, arm_result in _mast_states(profile, seed, target_current).items():
+            record, plot = _classify(_grid_geometry(profile, arm_result.state))
             reference = f"{key[0]}/{key[1]}"
             delta = before[(reference, arm)]
             record.update(
@@ -604,6 +667,10 @@ def run() -> dict[str, Any]:
                     "slice_index": key[1],
                     "shot_slice": reference,
                     "arm": arm,
+                    "converged": arm_result.converged,
+                    "terminal_residual": arm_result.terminal_residual,
+                    "tolerance": arm_result.tolerance,
+                    "termination_reason": arm_result.termination_reason,
                     "field_source": (
                         "reconstructed terminal state from persisted response carrier"
                     ),

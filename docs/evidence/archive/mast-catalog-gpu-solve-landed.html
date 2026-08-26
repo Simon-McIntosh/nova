@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="evidence">
   <meta name="plan-slug" content="mast-catalog-gpu-solve-landed">
   <meta name="plan-title" content="MAST Catalog GPU Solve — landed record">
-  <meta name="plan-summary" content="Cumulative execution evidence for the catalog throughput plan: the measured slice census that replaced the estimated denominator, the parity gate whose failure retired its own requirement, and the entry-gate state that keeps the throughput ladder shut">
+  <meta name="plan-summary" content="Cumulative execution evidence for the catalog throughput plan: exact census, qualified parity state, single-device execution contract, and residual-driven Newton stopping specification.">
   <meta name="plan-evidence-for" content="mast-catalog-gpu-solve">
   <title>MAST Catalog GPU Solve — landed | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
@@ -161,6 +161,43 @@
     physically meaningful terminal-observable bounds, consuming the criterion derivation in
     flight on <code>forward-operator-refinement</code> rather than authoring a fourth untraced
     number.</p>
+
+    <h2 id="single-device-contract">Single-device execution contract — specified, not measured</h2>
+
+    <p><strong>Audit gate PASSED; accelerator result remains pending.</strong> The exact census
+    fixes the per-device gate at <strong>46.577604167 slices/s</strong>, equivalent to
+    <strong>21.469545672950&nbsp;ms/slice</strong>. The one-H200 run must measure distinct real
+    MAST inputs at widths <strong>256, 512, 1024, 2048, and 4096</strong>, retain at least five
+    blocked steady-state execute samples per width, and report solved, converged, non-converged,
+    non-finite, iteration, memory, and input-staging denominators. Interaction build, XLA compile,
+    first execute, warmed execute, host read, transfer, and result fetch are separate ledgers;
+    only warmed execute may satisfy the throughput gate.</p>
+
+    <p>Numeric acceptance is conjunctive at every measured width: exact seed/input identity;
+    one-map relative max difference at most <strong>3.552713678800501e-15</strong>; all
+    <strong>69/69</strong> registered observables and <strong>414/414</strong> six-case
+    observable verdicts passing; zero batch-dependent bounds, branch mismatches, topology
+    mismatches, or non-finite leaves. The current integrated width-1/4 receipt remains
+    <strong>FAIL</strong> at 68/69 bounds for each width, with 412/414 and 410/414 case rows and
+    one batch-dependent bound. Throughput therefore cannot be called passing while parity fails.</p>
+
+    <h2 id="newton-stopping-contract">Residual-driven Newton stopping contract</h2>
+
+    <p><strong>Read-only audit complete; implementation pending.</strong> Every Nova fixed-ladder
+    call was classified: 2/2 direct calls, 5/5 <code>ForwardProfile</code> fixed-shape facades,
+    6/6 package consumers or wrappers, and zero unclassified calls. The shipping solver has
+    several declared fixed budgets rather than one production ten-by-thirty policy, and the
+    present MAST parity chain independently moment-seeds each slice; it is not evidence for
+    neighbour-warm iteration savings.</p>
+
+    <p>The corrective contract uses the registered relative fixed-point defect
+    <strong>r(x) ≤ 1e-8</strong>, records attempted and accepted Newton promotions, map
+    evaluations, Krylov actions and their kind, warmup sweeps, first criterion hit, terminal
+    qualification, and failure reason. It pins the semantics on MAST shot 21978 slices
+    1961&ndash;1965: one cold moment seed followed by four prior-qualified-flux warm seeds.
+    Batch economics use the maximum completed Newton count in each real batch, including an
+    exhausted lane at the declared maximum, with p50/p90/p95/p99/max and measured fixed-versus-
+    dynamic wall time. Per-slice medians remain diagnostic and are not accepted as batch savings.</p>
 
   </main>
 </body>

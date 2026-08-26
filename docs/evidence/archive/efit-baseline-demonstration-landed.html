@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="efit-baseline-demonstration-landed">
   <meta name="plan-evidence-for" content="efit-baseline-demonstration">
   <meta name="plan-title" content="EFIT Baseline Demonstration — execution record">
-  <meta name="plan-summary" content="Cumulative execution evidence: the four-scout scoping wave, the independent stall corroboration and its adopted qualification, and the design lock.">
+  <meta name="plan-summary" content="Cumulative execution evidence: the scoping wave, preregistered demonstration contract, verified parity-registry provenance, and section-level execution graph.">
   <meta name="plan-owner" content="Simon McIntosh">
   <title>EFIT Baseline Demonstration — execution record | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
@@ -63,6 +63,56 @@
     (spline-Newton polish, closed/open branch assembler, shared closed-boundary comparator for both
     EFIT banks). The demonstration gate runs on this plan after both ship, with thresholds locked
     before any credited run.</p>
+
+    <h2 id="threshold-lock">Outcome-blind demonstration thresholds</h2>
+
+    <p><strong>Gate PASSED and decision locked, 2026-08-26.</strong> The immutable
+    pre-implementation bank contains twelve named MAST arms, exactly <strong>7/12</strong>
+    topology-class agreements, a worst agreeing-arm boundary RMS of
+    <strong>0.5413441290633852&nbsp;m</strong>, and a worst polished-saddle distance of
+    <strong>0.03866107162298942&nbsp;m</strong>. Its source identity is
+    <code>sha256:2860de0fd9e45f92f9e8c108a483f0207f7b1e896720557be91ce176ee29cca5</code>.</p>
+
+    <p>The preregistered inclusive contract is therefore: at least <strong>7 of 12</strong>
+    MAST arms agree with the achieved saddle-aware topology class; the worst eligible
+    closed-boundary symmetric RMS is at most <strong>0.55&nbsp;m</strong>; and every declared
+    row's polished saddle lies at most <strong>0.04&nbsp;m</strong> from the nearest finite EFIT
+    X-point. Cohorts are immutable. Missing, duplicate, substituted, nonconverged, empty,
+    non-finite, or silently skipped inputs remain explicit failures and never shrink a
+    denominator. The RMS anchor is conservative because the banked estimator retained open
+    divertor legs; the replacement comparator scores only the typed closed branch. Passing is
+    non-regression against an independent reconstruction, not evidence that EFIT is physical truth.</p>
+
+    <h2 id="parity-registry">Verified parity-registry provenance</h2>
+
+    <p><strong>Commit <code>ba1f7301</code>, independently verified 8/8 focused tests.</strong>
+    The production magnetic-axis and LCFS tolerance entries now cite the fully verified machine
+    semantic identity
+    <code>sha256:8df7a0a6c3f6162dbe0f226660bc069f37de8eb69f0f7c80bbfedc2bd4be220c</code>
+    rather than an unreachable materialisation name. The qualified bounds are unchanged at
+    <strong>0.00101344&nbsp;m</strong> for the magnetic axis and
+    <strong>0.00033047&nbsp;m</strong> for the LCFS. The identity proves that the source values
+    are present in a verified artifact; it does not elevate the inherited four-times multiplier
+    from “merely contained” to cross-code validation.</p>
+
+    <p>The implementation changed exactly
+    <code>nova/imas/parity_tolerances.py</code>,
+    <code>tests/test_parity_tolerances.py</code>, and
+    <code>tests/test_efit_parity_criterion_provenance.py</code>. The independent verifier repeated
+    the named test command with <strong>8 passed in 9.87&nbsp;s</strong>. A broader compatibility
+    probe passed 16 of 17 checks; the sole failure is the intentionally stale exact-regeneration
+    check for <code>docs/figures/efit-forward-parity/convergence-criterion-provenance.json</code>,
+    retained as executable follow-on work rather than worded into a green result.</p>
+
+    <h2 id="execution-graph">Execution-graph and knowledge-envelope audit</h2>
+
+    <p><strong>Audit gate PASSED at its 2026-08-26 snapshot.</strong> All four sprint members,
+    six shipped transitive prerequisites, eleven linked research inputs, and eleven prior
+    evidence records were accounted for. The section-enriched graph contained
+    <strong>20 nodes</strong>, was accepted by <code>tsort</code>, and the live scope snapshot
+    contained <strong>10 claims over 30 unique paths with zero conflicts</strong>. Three dangling
+    evidence references and two review-priority inversions remain named maintenance findings;
+    neither was hidden or promoted into scientific evidence.</p>
 
   </main>
 </body>

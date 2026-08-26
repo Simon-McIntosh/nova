@@ -16,7 +16,7 @@ with skip_import("jax"):
     from nova.biot.null import Null1D, Null2D
     from nova.biot.target import FluxTarget
     from nova.equilibrium.conservation import FluxLattice
-    from nova.equilibrium.domain import classify_domains
+    from nova.equilibrium.domain import PlasmaDomain, classify_domains
     from nova.equilibrium.forward_operator import ForwardFluxOperator
     from nova.equilibrium.topology import Topology, TopologyState
     from nova.geometry import select
@@ -203,8 +203,8 @@ def test_forward_operator_uses_domain_flux_targets():
 #: A main plasma ring with a weaker divertor ring above and below it. The two
 #: outer rings each raise a saddle between themselves and the plasma, so the
 #: flux map carries two X-points of opposite sense about the axis and a
-#: private-flux pocket under each — the arrangement that makes the axis
-#: connectivity cut a conjunction of more than one half-plane test.
+#: private-flux pocket under each — the arrangement that exercises the
+#: saddle-aware axis component with more than one finite X-point.
 DOUBLE_NULL_RING = np.array([[1.0, 0.0], [1.0, -0.62], [1.0, 0.62]])
 DOUBLE_NULL_CURRENT = np.array([1.0e6, 5.0e5, 4.0e5])
 
@@ -313,8 +313,8 @@ def _traversed_nulls(null, psi_grid):
     return jax.vmap(_traversed_interpolate)(number, cluster, origin, scale)
 
 
-def _traversed_x_mask(topology, data_o, vmap_x):
-    """Return the axis connectivity cut, folded one X-point at a time."""
+def _vertical_cut_connectivity(topology, data_o, vmap_x):
+    """Return vertical X-point cuts for regression contrast."""
 
     def narrow(mask, data_x):
         """Apply one X-point's half-plane cut to the surviving cells."""
@@ -335,7 +335,7 @@ def _traversed_x_mask(topology, data_o, vmap_x):
 
 
 def _traversed_read(topology, psi, polarity, inside_material):
-    """Return the domain labels and topology state by the traversed route."""
+    """Return the saddle-aware partition and state with traversed null fits."""
     psi_grid, psi_wall = topology.split_flux_map(psi)
     vmap_o, vmap_x = _traversed_nulls(topology.grid, psi_grid)
     data_o = topology.o_point_data(vmap_o, polarity)
@@ -343,10 +343,25 @@ def _traversed_read(topology, psi, polarity, inside_material):
     data_w = topology.wall(psi_wall, polarity)
     data_b = topology.boundary(data_o, vmap_x, data_w, polarity)
     psi_norm = topology.normalize(data_o[2], data_b[2], psi_grid)
+    closed = topology.psi_mask(polarity, psi_grid, data_b[2])
+    connected = topology.axis_component(
+        psi_grid,
+        data_b[2],
+        data_o[2],
+        data_o[:2],
+        closed,
+        inside_material,
+    )
     masks = classify_domains(
         psi_norm,
-        topology.psi_mask(polarity, psi_grid, data_b[2]),
-        _traversed_x_mask(topology, data_o, vmap_x),
+        closed,
+        connected,
+        inside_material,
+    )
+    half_plane_masks = classify_domains(
+        psi_norm,
+        closed,
+        _vertical_cut_connectivity(topology, data_o, vmap_x),
         inside_material,
     )
     state = TopologyState(
@@ -360,7 +375,7 @@ def _traversed_read(topology, psi, polarity, inside_material):
         wall_point_flux=data_w[2],
         diverted=jnp.equal(data_b[2], data_x[2]),
     )
-    return masks, state
+    return masks, state, half_plane_masks
 
 
 def test_the_double_null_fixture_exercises_every_branch_of_the_read(diverted):
@@ -461,15 +476,17 @@ def _fit_reproducibility_floor(null, psi_grid):
 def test_the_topology_read_matches_a_traversed_formulation(diverted):
     """Every quantity the read publishes matches the traversal it stands for.
 
-    The crossing count, the sub-cell fit selection and the axis connectivity
-    cut are each evaluated over the whole grid at once rather than walked, and
-    every one of those rearrangements is value-preserving by construction: a
-    ring's crossing count depends on no other ring, a cluster's position in the
-    padded selection is known without carrying it, and a half-plane cut can
-    only remove cells. So the labels, the normalised flux and every flux the
-    read publishes are required to be bit-identical, with no tolerance
-    anywhere — a difference in the last bit of any of them would mean one of
-    those three claims is false.
+    The crossing count and sub-cell fit selection are evaluated over the whole
+    grid at once rather than walked, and both rearrangements are
+    value-preserving by construction: a ring's crossing count depends on no
+    other ring, and a cluster's position in the padded selection is known
+    without carrying it. The reference partition independently applies the
+    same saddle-aware axis-component authority as the production read. Labels,
+    normalised flux and every published flux are therefore required to be
+    bit-identical, with no tolerance anywhere.
+
+    The vertical half-plane contrast misclassifies 51 cells as private flux
+    that the saddle-aware hex connectivity identifies as part of the core.
 
     The fitted positions are the exception, and not because the claim is weaker
     there: a least-squares solve is the one step whose last bit the backend
@@ -483,13 +500,22 @@ def test_the_topology_read_matches_a_traversed_formulation(diverted):
     floor = _fit_reproducibility_floor(topology.grid, topology.split_flux_map(psi)[0])
 
     masks, state = topology.read(psi, polarity, inside)
-    reference_masks, reference_state = _traversed_read(topology, psi, polarity, inside)
+    reference_masks, reference_state, half_plane_masks = _traversed_read(
+        topology, psi, polarity, inside
+    )
 
     np.testing.assert_array_equal(
         np.asarray(masks.label), np.asarray(reference_masks.label)
     )
     np.testing.assert_array_equal(
         np.asarray(masks.psi_norm), np.asarray(reference_masks.psi_norm)
+    )
+    changed = np.asarray(masks.label) != np.asarray(half_plane_masks.label)
+    assert masks.label.size == 3195
+    assert int(np.sum(changed)) == 51
+    assert np.all(np.asarray(masks.label)[changed] == int(PlasmaDomain.CORE))
+    assert np.all(
+        np.asarray(half_plane_masks.label)[changed] == int(PlasmaDomain.PRIVATE_FLUX)
     )
     for field in DECIDING_STATE:
         np.testing.assert_array_equal(

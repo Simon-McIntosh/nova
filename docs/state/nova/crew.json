@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T16:18:38",
+  "updated": "2026-08-26T16:19:53",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -44658,9 +44658,136 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T140600847669-sse-diiid-poloidal-evidence-audit",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a74",
+        "node": "sse-diiid-poloidal-evidence-audit",
+        "node_definition": {
+          "done_when": "The manifest inventories every existing relevant HTML PNG receipt and renderer, proves which current documents fail the requirement, identifies the exact production structures carrying all finite typed O/X candidates and wall contacts for each declared frame, specifies distinct plot symbols and visibly qualified nonconverged panels, gives project-absolute artifact paths, and proposes exclusive implementation and verification scopes without editing repository files.",
+          "estimated_hours": 0.6,
+          "goal": "Define the exact data and rendering seam for a five-frame poloidal evidence document comparing the Nova forward solve with EFIT labels while displaying every solved stationary point and wall-contact candidate.",
+          "id": "sse-diiid-poloidal-evidence-audit",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-poloidal-evidence-audit.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "35m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-poloidal-evidence-audit.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "exact",
+        "member": "geometry-scout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-26T14:06:14Z",
+        "completed_at": "2026-08-26T14:16:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 627,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 627,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "127edaa56f01cc88ebc1b5de6cb93585514c04e0",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "PYTHONDONTWRITEBYTECODE=1 JAX_PLATFORMS=cpu PYTHONPATH=$PWD /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/imas/test_diiid_forward_gs_match.py::test_summary_keeps_nonconvergence_visible_and_fail_closed",
+          "exit_status": 4,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-poloidal-evidence-audit.md",
+          "log_digest": null
+        },
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-poloidal-evidence-audit.md",
+        "scope_changed": false,
+        "session_id": "01a03ab5-aac2-7db1-92fa-1804cf78891f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 4396288,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 4857757,
+            "output_tokens": 2664,
+            "output_tokens_cumulative": 22769,
+            "reasoning_output_tokens": 2502,
+            "reasoning_output_tokens_cumulative": 10145
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 758,
+              "log_age_seconds": 544,
+              "log_fresh": true,
+              "manifest_commits": [
+                "303304e8"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-terminal-diagnostic-material-repair.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T135322231584-sse-terminal-diagnostic-material-repair --gate <verdict> --commit 303304e8",
+              "node": "sse-terminal-diagnostic-material-repair",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T135322231584-sse-terminal-diagnostic-material-repair",
+              "terminal_age_seconds": 568,
+              "terminal_at": "2026-08-26T13:56:43Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-terminal-diagnostic-material-repair"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 973
+    "_version": 974
   }
 }

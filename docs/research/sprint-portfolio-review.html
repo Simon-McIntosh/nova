@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sprint-portfolio-review">
+  <meta name="plan-title" content="Sprint Portfolio Review">
+  <meta name="plan-summary" content="Validated status of all 16 sprints against the repository, best-case execution map, blocking relations, and the stale-state repair list">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-informs" content="separatrix-spline-extraction,profile-owned-solve-domain,efit-baseline-demonstration,diiid-forward-onboarding,diiid-pulse-replay,ensemble-forward-seam,dual-branch-selection,mast-catalog-gpu-solve,machine-description-retirement,mast-nonaxisymmetric-physics,forward-profile-validator-set">
+  <meta name="plan-source" content="reckon roadmap and audit over the registered checkout at 97f49d8b, plus seven parallel read-only repository validation reviews">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-reviewed-at" content="2026-08-26">
+  <meta name="plan-tags" content="sprint-review">
+  <title>Sprint Portfolio Review | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Research input · portfolio review · 2026-08-26</p>
+      <h1>Sprint Portfolio Review</h1>
+      <p class="lead">The code is far ahead of the ledger: 55 of 67 plans shipped (82% lifecycle,
+      89.5% recorded implementation), but every open sprint carries recorded state that has drifted
+      behind the repository — most of it in the last five days as solver results landed faster than
+      plans were updated. The highest-leverage lane is S16, which also gates the S15 catalog through
+      an edge the dependency graph does not carry; the recorded 99% on the DIII-D onboarding hides a
+      multi-node gate program with a hard 2026-10-18 deadline behind it; and a cluster of decisions,
+      followups and blockers can be retired today from measurements that already exist.</p>
+    </header>
+
+    <section id="headline">
+      <h2 id="s1">§1 — Headline numbers</h2>
+      <table>
+        <thead><tr><th>Measure</th><th>Value</th><th>Qualification</th></tr></thead>
+        <tbody>
+          <tr><td>Plans shipped</td><td>55 / 67 (82.1% lifecycle, 89.5% recorded impl)</td>
+            <td>107/107 docs schema-conformant; 74 audit hygiene findings</td></tr>
+          <tr><td>Sprints open</td><td>6 — S3, S10, S11, S12, S15, S16</td>
+            <td>holding 11 open plans; <code>active_sprint_id</code> points at the wrong one</td></tr>
+          <tr><td>Recorded remaining effort</td><td>~53 h</td>
+            <td>understated — S10, S11 and S3 carry legacy placeholder efforts, off by up to 10×</td></tr>
+          <tr><td>State defects found</td><td>40+</td>
+            <td>9 sprint/index · 9 plan-state · 16 followup · 3 code-level · 2 stale blockers · 1 unwired gate</td></tr>
+          <tr><td>Roadmap critical path</td><td>profile-owned-solve-domain → efit-baseline-demonstration (23.3 h)</td>
+            <td>correct as computed, but the intra-S16 ordering below refines it</td></tr>
+        </tbody>
+      </table>
+      <p>Validation method: each open plan's recorded status, implementation fraction and blockers were
+      checked against the repository — plan HTML workflow entries cross-checked against commits, banked
+      receipts, artifacts and live code. Verdicts: <strong>CONFIRMED</strong> (recorded state matches the
+      repo), <strong>STALE</strong> (the repo moved and the record did not), <strong>CONFLICTING</strong>
+      (recorded facts disagree with each other or with the repo).</p>
+    </section>
+
+    <section id="sprints">
+      <h2 id="s2">§2 — All sprints, validated</h2>
+      <table>
+        <thead><tr><th>Sprint</th><th>Recorded</th><th>Validated</th><th>Delivered</th><th>Pending / next</th></tr></thead>
+        <tbody>
+          <tr><td>S1</td><td>done</td><td>confirmed</td>
+            <td>Trunk convergence (spine refactor), CPU/GPU arc correctness with the measured 64-corner default, conductor fidelity, heritage recovery. Closed 2026-07-29.</td><td>—</td></tr>
+          <tr><td>S2</td><td>done</td><td>confirmed</td>
+            <td>Native 3D substrate (nova-3d-native) and the five-state MAST registry. Closed 2026-08-04.</td><td>—</td></tr>
+          <tr><td>S3</td><td>planned</td><td><strong>CONFLICTING</strong></td>
+            <td>Nothing — the sole item (mast-nonaxisymmetric-physics) was never started (0% is real), and roughly half its declared scope landed under shipped S5/S6 siblings (vacuum cohort, seed/fitted parameters, error-field screen) without the plan text being updated.</td>
+            <td>Passive R/L identification; admitting the 36 saddle loops (none enter any constraint bank — <code>grep -i saddle nova/calibrate/</code> is empty); TF ripple; ambix 3D donor cutover. Owes f-mth-007 (localised tail width) back to a shipped S6 plan. <strong>Close the sprint as an ordering artifact</strong> — the owner's pinned-axisymmetric-artifact decision retired its gate — and re-sprint the plan with a real effort figure (4 h is a legacy placeholder).</td></tr>
+          <tr><td>S4</td><td>done</td><td>confirmed</td>
+            <td>Empty by design: the H200 catalog item relocated to S8 so the sequence respects the spine-proof gate.</td><td>—</td></tr>
+          <tr><td>S5</td><td>done</td><td>confirmed</td>
+            <td>MAST catalog geometry recovery, vacuum floor recovery, machine description, physics-spine adoption. Closed 2026-08-05 at 99.2%.</td><td>—</td></tr>
+          <tr><td>S6</td><td>done</td><td>confirmed</td>
+            <td>Flux-loop calibration (per-loop gains), misfit toroidal harmonics, P4/P5 circuit provenance, diagnostic-correction schema, calibrate package, vacuum signatures, coil-geometry inversion, corrected read layer.</td><td>—</td></tr>
+          <tr><td>S7</td><td>done</td><td>confirmed*</td>
+            <td>Differentiable boundary as the pinned accelerated spine core plus the assembled forward-equilibrium chain — 16 items.</td>
+            <td>*Capacity double-counts equilibrium-metric-parity's 8 h with S12: commit <code>dd37117c</code> intended a move and executed a copy (repair R6).</td></tr>
+          <tr><td>S8</td><td>done</td><td>confirmed</td>
+            <td>EFIT forward parity, dual-basin solve, device kernel build, coil-circuit discovery, current-constrained forward solve.</td><td>—</td></tr>
+          <tr><td>S9</td><td>done</td><td>confirmed</td>
+            <td>Flux-function forward transport promoted to a public Nova capability.</td><td>—</td></tr>
+          <tr><td>S10</td><td>planned, 99%</td><td><strong>99% NOT CREDIBLE</strong></td>
+            <td>DIII-D onboarded end-to-end: geometry through the machine seam, published DDv4 artifact with the repaired limiter ring, polarity census, exact clipped-cell taring, vacuum kill gate <strong>passed</strong> (+0.144 over the preregistered bar), H200 batched budget 470.6 slices/s. All nine sampled plan-commits and every declared artifact verified. The sprint actually started 2026-08-17 but still reads "planned".</td>
+            <td>The §5 free-boundary gate failed 0/5 and is held; its precondition (forward-operator-refinement, S13) shipped 2026-08-23 with a <strong>negative</strong> adjudication — NO_DEFENSIBLE_DIIID_TOLERANCE_DERIVED, both candidate tolerances unpassable by construction — that was never delivered to this plan (the plan HTML contains zero mentions of the refinement plan). Remaining: an independent same-observable discretisation-error estimate, an owner tolerance lock, the withheld wall-bump reroute (1.97×), the five-frame re-run, then the parked §4 passive-model-order decision. <strong>Deadline 2026-10-18.</strong></td></tr>
+          <tr><td>S11</td><td>planned, draft</td><td><strong>STALE + CONFLICTING</strong></td>
+            <td>Nothing started (0% accurate). But the plan describes a repository that no longer exists: its §3 target file was renamed and generalized on 2026-08-20 (<code>mast_artifact.py</code> → <code>machine_artifact.py</code>, R094), the "unused" OCI helper gained a real DIII-D publisher (513 LOC + tests) and an owner-directed DDv4 publication floor, and ambix still imports and asserts on the module the plan retires.</td>
+            <td>Re-author §2–§4 against current paths before the removal-style decision goes to the owner ("clean deletion in one beat" is no longer an available branch); equivalence demonstration f-mdr-001; resolve the calibrate-package contradiction (§3 keeps a package that imports the registry §2 deletes). Recorded 2 h vs a ~12 kLOC blast radius across 23 test files. <strong>Sequence last — behind S10, S15 and S16 consumers.</strong></td></tr>
+          <tr><td>S12</td><td>planned, no description</td><td><strong>executed, never started</strong></td>
+            <td>3 of 5 items shipped (coupling surface contract, moment-conditioned basin entry, plus metric parity — duplicated from S7). ensemble-forward-seam is nova-side <strong>complete</strong>: all four sections landed, CPU + H200 tree-stamped receipts, 6×4 twin-truth package banked — yet recorded at 90%.</td>
+            <td>Re-home the joint twin gate on a live ambix plan first — it is currently parked against imas-ambix:flux-function-state-interface, which shipped holding zero record of the obligation — then ship the seam with f-efs-joint-gate carried foreign-owner. diiid-pulse-replay stays 0%, blocked behind the S10 gate with a longer chain than S12 assumes. The sprint resource has no description, no dates, and the wrong status.</td></tr>
+          <tr><td>S13</td><td>done</td><td>confirmed</td>
+            <td>Scoring-criteria derivation, test-lane marker policy, forward-operator refinement — whose gate adjudication S10 never received (repair R10).</td><td>—</td></tr>
+          <tr><td>S14</td><td>done</td><td>confirmed</td>
+            <td>Topology-preserving continuation; derived-observable parity.</td><td>—</td></tr>
+          <tr><td>S15</td><td>active, 91%</td><td><strong>91% but the gates moved</strong></td>
+            <td>7 of 9 shipped, including discrete-operator-analytic-error: the diverted attractor <strong>exists</strong> (§4 basin probe, 2026-08-25), the operator admits the analytic fixed point at machine precision (one-application residuals 2.7–3.1e-15 across four rungs), and the fork was measured not load-bearing (class co-reachability negative; 15.9 H200-hours per catalog pass avoidable).</td>
+            <td>dual-branch-selection (70%): all three "open" decisions and the open question are answered by landed receipts — needs lead locks plus ~3.6 h of seam promotion. mast-catalog-gpu-solve: recorded 50% vs one ladder rung of five (~20%); its "parked behind topology" note cites two defects that have since landed (reachable-wall limiter point, saddle-aware hex partition — parking commit <code>1fc71d50</code> is an ancestor of both merges); its real gate is the S16 basin treatment, <strong>unwired in the dependency graph</strong>. The sprint description contradicts its own summary on whether the diverted-root question is open.</td></tr>
+          <tr><td>S16</td><td>planned, 29%</td><td><strong>critical path</strong></td>
+            <td>separatrix-spline-extraction 20% <strong>confirmed current</strong> — the stationary polish landed this morning (74f95e41) and the plan was updated within minutes; profile-owned-solve-domain 0% confirmed (design locked: profile-owned domain, hex flood fill, binding-level normalization; corroboration banked); efit-baseline-demonstration 67% <strong>overstated</strong> — the §3 demonstration gate has never run; 0.67 is section counting on a plan whose deliverable is at zero.</td>
+            <td>separatrix §2a tolerance-exit rewrite + implicit-function VJP (the shipped kernel still runs a fixed-count fori_loop), §3 branch assembler, §4 shared comparator + regeneration of both EFIT banks; profile-owned §3/§5/§6 dispatchable now, §4 after the polish; then the demonstration gate. Lock demonstration-thresholds today (§3 below). Start the sprint — all three items are already active.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="execution-map">
+      <h2 id="s3">§3 — Best-case execution map</h2>
+      <figure>
+        <svg viewBox="0 0 1000 520" role="img" aria-label="Execution lanes: the S16 extraction and solve-domain lanes converge on the demonstration gate, which gates the S15 catalog's final rung; the S10 DIII-D lane runs independently toward its October deadline and unlocks the S12 pulse replay; a lock lane holds decisions closable today with no execution cost." style="max-width:100%;height:auto;background:#ffffff">
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#444444"/>
+            </marker>
+            <marker id="arrA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#0E7A6C"/>
+            </marker>
+          </defs>
+          <g font-family="system-ui,sans-serif" font-size="13" fill="#1a1a1a">
+
+          <line x1="140" y1="26" x2="140" y2="492" stroke="#999999" stroke-dasharray="3 5"/>
+          <text x="140" y="16" text-anchor="middle" fill="#555555" font-size="12">today</text>
+
+          <text x="12" y="64" fill="#555555" font-size="12" font-weight="600">S16 · EXTRACTION</text>
+          <text x="12" y="156" fill="#555555" font-size="12" font-weight="600">S16 · SOLVE DOMAIN</text>
+          <text x="12" y="268" fill="#555555" font-size="12" font-weight="600">S10 · DIII-D</text>
+          <text x="12" y="284" fill="#555555" font-size="11">deadline 18 Oct</text>
+          <text x="12" y="378" fill="#555555" font-size="12" font-weight="600">S15 · CATALOG</text>
+          <text x="12" y="470" fill="#555555" font-size="12" font-weight="600">LEAD LOCKS</text>
+
+          <rect x="152" y="42" width="168" height="40" fill="#ffffff" stroke="#0E7A6C" stroke-width="1.5"/>
+          <text x="236" y="59" text-anchor="middle" font-weight="600">separatrix §2 + §2a</text>
+          <text x="236" y="74" text-anchor="middle" fill="#555555" font-size="11">tolerance-exit polish</text>
+
+          <rect x="372" y="42" width="140" height="40" fill="#ffffff" stroke="#0E7A6C" stroke-width="1.5"/>
+          <text x="442" y="59" text-anchor="middle" font-weight="600">§3 assembler</text>
+          <text x="442" y="74" text-anchor="middle" fill="#555555" font-size="11">split at the X-point</text>
+
+          <rect x="564" y="42" width="180" height="40" fill="#ffffff" stroke="#0E7A6C" stroke-width="1.5"/>
+          <text x="654" y="59" text-anchor="middle" font-weight="600">§4 comparator + banks</text>
+          <text x="654" y="74" text-anchor="middle" fill="#555555" font-size="11">regenerate MAST + DIII-D</text>
+
+          <line x1="320" y1="62" x2="366" y2="62" stroke="#0E7A6C" stroke-width="1.5" marker-end="url(#arrA)"/>
+          <line x1="512" y1="62" x2="558" y2="62" stroke="#0E7A6C" stroke-width="1.5" marker-end="url(#arrA)"/>
+
+          <rect x="800" y="88" width="172" height="50" fill="#0E7A6C" stroke="#0E7A6C"/>
+          <text x="886" y="109" text-anchor="middle" fill="#f5f5f7" font-weight="700">DEMONSTRATION §3</text>
+          <text x="886" y="125" text-anchor="middle" fill="#f5f5f7" font-size="11">preregistered gate, 12 arms + DIII-D</text>
+          <path d="M744,62 L775,62 L775,102 L794,102" fill="none" stroke="#0E7A6C" stroke-width="1.5" marker-end="url(#arrA)"/>
+
+          <rect x="152" y="134" width="168" height="40" fill="#ffffff" stroke="#0E7A6C" stroke-width="1.5"/>
+          <text x="236" y="151" text-anchor="middle" font-weight="600">profile-owned §3</text>
+          <text x="236" y="166" text-anchor="middle" fill="#555555" font-size="11">seed repair — start now</text>
+
+          <rect x="430" y="134" width="150" height="40" fill="#ffffff" stroke="#0E7A6C" stroke-width="1.5"/>
+          <text x="505" y="151" text-anchor="middle" font-weight="600">§4 residual cutover</text>
+          <text x="505" y="166" text-anchor="middle" fill="#555555" font-size="11">domain leaves the boundary</text>
+
+          <rect x="620" y="134" width="150" height="40" fill="#ffffff" stroke="#888888"/>
+          <text x="695" y="151" text-anchor="middle" font-weight="600">§5 wall ladder · §6</text>
+          <text x="695" y="166" text-anchor="middle" fill="#555555" font-size="11">independent — any time</text>
+
+          <line x1="320" y1="154" x2="424" y2="154" stroke="#0E7A6C" stroke-width="1.5" marker-end="url(#arrA)"/>
+          <path d="M236,82 L236,112 L505,112 L505,128" fill="none" stroke="#0E7A6C" stroke-width="1.5" marker-end="url(#arrA)"/>
+          <text x="372" y="106" text-anchor="middle" fill="#0E7A6C" font-size="11">tracked O/X polish feeds the cutover</text>
+          <path d="M580,154 L786,154 L794,140" fill="none" stroke="#0E7A6C" stroke-width="1.5" marker-end="url(#arrA)"/>
+
+          <rect x="152" y="246" width="150" height="40" fill="#ffffff" stroke="#444444"/>
+          <text x="227" y="263" text-anchor="middle" font-weight="600">record handback</text>
+          <text x="227" y="278" text-anchor="middle" fill="#555555" font-size="11">NO_DEFENSIBLE, from S13</text>
+
+          <rect x="340" y="246" width="180" height="40" fill="#ffffff" stroke="#444444"/>
+          <text x="430" y="263" text-anchor="middle" font-weight="600">discretisation-error study</text>
+          <text x="430" y="278" text-anchor="middle" fill="#555555" font-size="11">independent, H200 cost</text>
+
+          <rect x="558" y="246" width="130" height="40" fill="#ffffff" stroke="#444444" stroke-dasharray="5 4"/>
+          <text x="623" y="263" text-anchor="middle" font-weight="600">owner tolerance</text>
+          <text x="623" y="278" text-anchor="middle" fill="#555555" font-size="11">lead lock</text>
+
+          <rect x="726" y="246" width="160" height="40" fill="#ffffff" stroke="#444444"/>
+          <text x="806" y="263" text-anchor="middle" font-weight="600">§5 re-run → ship</text>
+          <text x="806" y="278" text-anchor="middle" fill="#555555" font-size="11">wall-bump + 5 frames, then §4</text>
+
+          <line x1="302" y1="266" x2="334" y2="266" stroke="#444444" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line x1="520" y1="266" x2="552" y2="266" stroke="#444444" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line x1="688" y1="266" x2="720" y2="266" stroke="#444444" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line x1="886" y1="266" x2="914" y2="266" stroke="#444444" stroke-width="1.5" marker-end="url(#arr)"/>
+          <text x="920" y="263" fill="#555555" font-size="11">unlocks pulse</text>
+          <text x="920" y="277" fill="#555555" font-size="11">replay (S12)</text>
+
+          <rect x="152" y="356" width="160" height="40" fill="#ffffff" stroke="#444444"/>
+          <text x="232" y="373" text-anchor="middle" font-weight="600">L1 batched throughput</text>
+          <text x="232" y="388" text-anchor="middle" fill="#555555" font-size="11">unblocked — criteria shipped</text>
+
+          <rect x="350" y="356" width="120" height="40" fill="#ffffff" stroke="#444444"/>
+          <text x="410" y="373" text-anchor="middle" font-weight="600">L2 8×H200</text>
+          <text x="410" y="388" text-anchor="middle" fill="#555555" font-size="11">+ sharding decision</text>
+
+          <rect x="508" y="356" width="150" height="40" fill="#ffffff" stroke="#444444"/>
+          <text x="583" y="373" text-anchor="middle" font-weight="600">L2b DIII-D demo</text>
+          <text x="583" y="388" text-anchor="middle" fill="#555555" font-size="11">same code path</text>
+
+          <rect x="726" y="356" width="160" height="40" fill="#ffffff" stroke="#444444"/>
+          <text x="806" y="373" text-anchor="middle" font-weight="600">L3 full catalog</text>
+          <text x="806" y="388" text-anchor="middle" fill="#555555" font-size="11">1,341,435 slices</text>
+
+          <line x1="312" y1="376" x2="344" y2="376" stroke="#444444" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line x1="470" y1="376" x2="502" y2="376" stroke="#444444" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line x1="658" y1="376" x2="720" y2="376" stroke="#444444" stroke-width="1.5" marker-end="url(#arr)"/>
+          <path d="M886,138 L886,322 L850,322 L850,350" fill="none" stroke="#0E7A6C" stroke-width="1.5" marker-end="url(#arrA)"/>
+          <text x="893" y="230" fill="#0E7A6C" font-size="11">basin treatment</text>
+          <text x="893" y="244" fill="#0E7A6C" font-size="11">gates the frontier</text>
+          <text x="893" y="258" fill="#0E7A6C" font-size="11">(edge missing in DAG)</text>
+
+          <rect x="152" y="448" width="200" height="40" fill="#ffffff" stroke="#444444" stroke-dasharray="5 4"/>
+          <text x="252" y="465" text-anchor="middle" font-weight="600">demonstration-thresholds</text>
+          <text x="252" y="480" text-anchor="middle" fill="#555555" font-size="11">lockable today from banked §2</text>
+
+          <rect x="390" y="448" width="210" height="40" fill="#ffffff" stroke="#444444" stroke-dasharray="5 4"/>
+          <text x="495" y="465" text-anchor="middle" font-weight="600">dual-branch ×3 + question</text>
+          <text x="495" y="480" text-anchor="middle" fill="#555555" font-size="11">receipts landed; fork not load-bearing</text>
+
+          <rect x="638" y="448" width="180" height="40" fill="#ffffff" stroke="#444444" stroke-dasharray="5 4"/>
+          <text x="728" y="465" text-anchor="middle" font-weight="600">f-emp-002 tolerance</text>
+          <text x="728" y="480" text-anchor="middle" fill="#555555" font-size="11">gates shipped S13 classification</text>
+          </g>
+        </svg>
+        <figcaption>Both S16 lanes converge on the preregistered demonstration gate (green = critical
+        path), which is the true gate on the catalog's final rung — an edge the dependency graph does not
+        currently carry. The S10 lane runs independently toward the 2026-10-18 challenge deadline. Dashed
+        boxes are lead locks with no execution cost: their feeding measurements are already banked.</figcaption>
+      </figure>
+
+      <h3>Do next, highest return first</h3>
+      <ol>
+        <li><strong>Lock <code>demonstration-thresholds</code> on efit-baseline-demonstration (decision only).</strong>
+          All three threshold quantities have banked §2 corroboration numbers: class agreement 7/12
+          (disagreements are exactly the stalls the profile-owned cutover targets, so 10/12 or better is the
+          meaningful bar), agreeing-arm closed-boundary RMS max 0.5413 m, worst saddle-to-EFIT-X distance
+          38.661 mm. The decision text requires locking before implementation is credited — and followups
+          f-ebd-001/002 currently contradict it by deferring the lock until after bank regeneration, which is
+          the derived-from-achieved-values violation the decision text forbids. Fix the followup text, anchor
+          the RMS bound conservatively (leg clipping only shrinks the distance population on agreeing arms),
+          lock. Removes a critical-path blocker for the cost of writing.</li>
+        <li><strong>separatrix-spline-extraction §2 remainder + §2a — head of the critical path.</strong>
+          The stationary polish landed this morning; what remains is retiring
+          <code>_refine_selected_vertices</code> as position authority (nova/equilibrium/stencil_nulls.py:1877),
+          the tolerance-exit rewrite the locked polish-termination decision requires (the shipped kernel still
+          runs a fixed-count <code>jax.lax.fori_loop</code>), and the implicit-function-theorem VJP. Since
+          97f49d8b, profile-owned §4's tracked-O/X design depends on this polish, so it gates the solve-domain
+          cutover too.</li>
+        <li><strong>profile-owned-solve-domain §3 seed repair — dispatch in parallel, today.</strong>
+          Recorded as serialized behind separatrix, but §3 (the 21985/51 axis seed sits 1.187 m off; both arms'
+          confined masks are empty), §5 (wall ladder at 36/72/144/288) and §6 (legacy label retirement) are
+          independent of the polish. Treating the whole 18 h plan as blocked idles the sprint's largest budget.</li>
+        <li><strong>Restart the S10 gate program — the only lane with a hard external date (2026-10-18).</strong>
+          First deliver the S13 handback the plan never received, then the independent discretisation-error
+          estimate (a study with its own H200 cost, anchored on the post-conditioning numbers: reference-native
+          7.3220e-5, coarse 2.1073e-4), owner tolerance, the withheld wall-bump reroute, and the five-frame §5
+          re-run. Shipping also unlocks diiid-pulse-replay (S12) and the ambix magnetics-free recovery.</li>
+        <li><strong>Sweep the dual-branch-selection decisions, then close it out (mostly lead locks).</strong>
+          Class co-reachability came back negative on 2026-08-25 — the fork is not load-bearing. Lock
+          selection-observable (receipt: 53/53 exact class agreement, rail continuous at max step 3.5e-4,
+          p_diverted vs sigmoid disagreement 2.2e-16), close fork-arming as superseded (the measured answer —
+          single pinned solve + post-hoc classification — is outside both recorded options), resolve the open
+          question, and decide unqualified-branch-semantics: lock degrade-with-recorded-stall with the S16
+          caveat stated, or explicitly re-gate on S16 — but stop pointing it at a plan that already reported.
+          ~3.6 h of seam promotion remains after the locks (islands 1 and 3: cold_seed_portfolio is still a
+          host method).</li>
+        <li><strong>Ship ensemble-forward-seam after re-homing its ambix gate.</strong> Nova-side work is
+          complete — all four sections landed with CPU + H200 tree-stamped receipts. The last 10% is an ambix
+          twin gate currently parked against an ambix plan that shipped holding zero record of the obligation.
+          One cross-repo registration, then ship with f-efs-joint-gate carried foreign-owner. Shipping before
+          the re-home would close nova's record against an obligation nobody holds.</li>
+        <li><strong>Enter catalog L1.</strong> Two of f-mcg-02's three entry items are already answered by
+          shipped S13 work (the one-pass parity criterion; order-beats-mesh at zero memory, 7.7% for free vs
+          72.9% at 13.6× memory). L1's throughput measurement then feeds the three parked catalog decisions
+          (sharding, output store, convergence policy — all correctly undecidable before L1). The final rung
+          L3 waits on the S16 basin treatment; wire that edge into <code>depends_on</code> so the roadmap can
+          see it.</li>
+      </ol>
+    </section>
+
+    <section id="blocking">
+      <h2 id="s4">§4 — Blocking relationships</h2>
+      <ul>
+        <li><strong>S16 before S15's final rung (L3):</strong> the profile-owned basin treatment resolves the
+          catalog's convergence frontier — the named mechanism (commit <code>c09fda98</code>) is that JAX
+          linearises the Boolean confined mask as fixed, the Jacobian omits the domain jump at 5 of 1,089
+          cells, and exact dense Newton itself 2-cycles. This edge exists only as prose:
+          efit-baseline-demonstration is absent from mast-catalog-gpu-solve's <code>depends_on</code>.</li>
+        <li><strong>Within S16:</strong> separatrix §2a before profile-owned §4 (the tracked-O/X polish feeds
+          the cutover, since 97f49d8b); separatrix §4 and profile-owned §4 before the demonstration §3.
+          profile-owned §3, §5 and §6 are <em>not</em> behind separatrix.</li>
+        <li><strong>S10 before S12's diiid-pulse-replay</strong> — and the chain is longer than recorded:
+          the re-evaluation trigger fired <em>negative</em>, adding a prerequisite rather than releasing the
+          gate.</li>
+        <li><strong>S13 (done) before S10 restart:</strong> administrative — the refinement handback was
+          written into S13's own receipt and never delivered to the gate owner. Fire it first.</li>
+        <li><strong>S10, S15 and S16 before S11:</strong> retirement runs last — DIII-D publishes through the
+          layer today (owner oras push still outstanding) and the catalog's validated forward route is
+          digest-pinned through it (782e9e08).</li>
+        <li><strong>External before S12 ship:</strong> ensemble-forward-seam ships only after the joint twin
+          gate is registered on a live ambix plan.</li>
+        <li><strong>S3 blocks nothing:</strong> its gate was retired by the pinned-axisymmetric-artifact
+          decision; it owes f-mth-007 back to a shipped S6 plan, which is a reason to keep the plan, not the
+          sprint slot.</li>
+      </ul>
+    </section>
+
+    <section id="repairs">
+      <h2 id="s5">§5 — Consistency pass: state to close, mark or correct</h2>
+
+      <h3>Sprint and index state (owner: reckon-sprint)</h3>
+      <table>
+        <thead><tr><th>#</th><th>Defect</th><th>Repair</th></tr></thead>
+        <tbody>
+          <tr><td>R1</td><td><code>active_sprint_id</code> = S3 while S15 carries status active (audit code <code>active-sprint-mismatch</code>)</td><td>Point it at S15; move to S16 when started</td></tr>
+          <tr><td>R2</td><td>S10 reads "planned" though it started 2026-08-17 (window ends 2026-09-20); its done_when still requires passive forwards, retired by the §4 deferral</td><td>Set active; align done_when with the deferral</td></tr>
+          <tr><td>R3</td><td>S12 has no description, no dates, status "planned" with 3/5 shipped, while downstream S13 is already done</td><td>Describe, date, set active — or close it once the seam ships and re-sprint pulse-replay</td></tr>
+          <tr><td>R4</td><td>S15 description says the diverted-root question is open; its own summary records it closed</td><td>Rewrite the description to match the summary</td></tr>
+          <tr><td>R5</td><td>S16 "planned" while all three items are active</td><td>Start it</td></tr>
+          <tr><td>R6</td><td>equilibrium-metric-parity sits in both S7 and S12 — commit <code>dd37117c</code> intended a move, executed a copy; 8 h double-counted</td><td>Remove from S7 (capacity 71→63 h, still 15/15 shipped; one-line note in S7's summary)</td></tr>
+          <tr><td>R7</td><td>Sprint S3 held open at order 3 conveys a gate the owner retired</td><td>Close the sprint; re-sprint mast-nonaxisymmetric-physics later with recalibrated effort</td></tr>
+          <tr><td>R8</td><td>Blocker B1 (develop/main divergence): premise verifiably gone — origin/develop is an ancestor of origin/main and nova-spine-refactor is shipped</td><td>Close B1</td></tr>
+          <tr><td>R9</td><td>Blocker B4 (norma ships a colliding top-level nova package): the rename landed — norma's pyproject packages=["norma"], no nova/ directory</td><td>Verify the registry re-home, then close. B2 and B3 stay live (external ITER provenance questions)</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Plan state (owner: reckon-edit)</h3>
+      <table>
+        <thead><tr><th>#</th><th>Plan</th><th>Defect → repair</th></tr></thead>
+        <tbody>
+          <tr><td>R10</td><td>diiid-forward-onboarding</td><td>Record the NO_DEFENSIBLE handback and its reinstatement prerequisite; re-open §5 as scheduled work with honest effort (impl 0.99 / 0.04 h remaining is 1% of an uncalibrated placeholder, and the roadmap critical path inherits it); collapse landed §2/§7; correct §5's superseded bar text; add the 8 missing plan-commits including the tangent-repair SHA its own solver-default-route decision cites; represent the gate as a blocker so the roadmap can see it (today: gate_blockers and explicit_blockers are both empty).</td></tr>
+          <tr><td>R11</td><td>dual-branch-selection</td><td>Lock selection-observable (both-explicit-roles, per the landed traced receipt); close fork-arming as superseded; resolve question q-20260825T115513679805 (its answer is written in the plan prose — commit <code>157e6465</code> — while the markup still reads open); decide unqualified-branch-semantics with the S16 caveat or an explicit re-gate.</td></tr>
+          <tr><td>R12</td><td>mast-catalog-gpu-solve</td><td>Delete the stale "parked behind topology" note (both named defects landed after the parking commit); wire efit-baseline-demonstration into <code>depends_on</code>; recalibrate impl 50% → ~20% (one rung of five, and that rung's gate closed retired-not-met); consume the two shipped f-mcg-02 entry answers; reconcile the effort record (roadmap reads the plan as uncalibrated 4 h while the plan carries effort_hours=8 calibrated).</td></tr>
+          <tr><td>R13</td><td>efit-baseline-demonstration</td><td>Fix the f-ebd-001/002 "from the regenerated banks" contradiction (a preregistration violation as written); lock demonstration-thresholds now; recalibrate the 67% to a section-honest figure. The 5.28 h remaining is credible only while bank regeneration stays charged to separatrix §4.</td></tr>
+          <tr><td>R14</td><td>separatrix-spline-extraction</td><td>Recalibrate effort — §2a added the tolerance-exit rewrite, the custom VJP and a reserved-H200 micro-benchmark rung after the 12 h estimate; the 9.6 h remaining is understated. The 20% impl itself is current.</td></tr>
+          <tr><td>R15</td><td>machine-description-retirement</td><td>Re-author §2–§4 against machine_artifact.py and the DIII-D publication path before the removal-style decision goes to the owner; recalibrate the 2 h placeholder; resolve the calibrate-package contradiction; decide the DDv4 floor's re-home (an owner directive cannot be dropped with the layer).</td></tr>
+          <tr><td>R16</td><td>ensemble-forward-seam</td><td>Register the joint twin gate on a live ambix plan, then ship with f-efs-joint-gate carried foreign-owner. Nova-side sections are all landed; the recorded 90% understates nova completion and overstates nova's ability to finish the rest.</td></tr>
+          <tr><td>R17</td><td>mast-nonaxisymmetric-physics</td><td>Rescope §2 and f-mnap-vacuum-refinement — decomposition items 1–3 and most of item 5 landed under shipped S5/S6 siblings; recalibrate the 4 h placeholder against the real remainder (passive R/L identification, saddle-loop admission, TF ripple, ambix donor cutover).</td></tr>
+          <tr><td>R18</td><td>equilibrium-metric-parity</td><td>Re-home f-emp-002 (the owner tolerance decision — now load-bearing for a classification already shipped inside done S13) and f-emp-005 (ambix-side) off the shipped plan, matching the f-emp-006 precedent the owner set on 2026-08-23. Note nova/imas/parity_tolerances.py:76 still pins an unreachable digest as evidence for the live axis/LCFS bounds.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Followups — sweep verdicts (48 open enumerated, 19 deep-checked)</h3>
+      <table>
+        <thead><tr><th>Verdict</th><th>Followups</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>Stale — resolve (11 + 1 soft)</td>
+            <td><code>f-int-09</code>, <code>f-dop-002</code>, <code>f-ccfs-basin</code>, <code>f-csn-002</code>, <code>f-boa-12</code>, <code>f-tpc-003</code>, <code>f-pia-002</code>, <code>f-sdd-002</code>, <code>f-mcbe-002</code>, <code>f-sep-006</code>, <code>f-pecr-002</code> (+ <code>f-for-successors</code>, soft)</td>
+            <td>Pointer followups whose targets shipped, or work that landed elsewhere (f-boa-12's complement refactor landed 2026-07-28 under sibling plans and reaches the shipped operator). One residual from f-int-09 needs re-registration on an advancing plan: the ambix gs_solve re-architecture never happened — imas_ambix/latent/gs_solve.py still imports the donor hybrid_greens, and the nova pin is still an editable path pin, not the release pin the followup asked to plan.</td></tr>
+          <tr><td>Still open (6)</td>
+            <td><code>f-mcg-02</code>, <code>f-boa-10</code>, <code>f-boa-13</code>, <code>f-boa-14</code>, <code>f-nrd-001</code>, <code>f-20260825T120420484600</code></td>
+            <td>Premises verified live: the fixed Newton ladder still reads newton_steps=10 / gmres_iterations=30 (nova/equilibrium/forward.py:301); the graded residual quadrature is still 79% of the biot floor; the gpu extra is declared but nothing selects it. f-boa-14's premise now holds only on a non-production comparator — priority drop.</td></tr>
+          <tr><td>Broken ownership (3)</td>
+            <td><code>f-efd-003</code>, <code>f-ncp-003</code>, <code>f-ntlh-006</code></td>
+            <td>Handoffs pointing at plans that had already shipped — no live owner. f-ntlh-006's defect is live in code: tests/test_mast_solve_inputs.py:699 carries two enabled probe-axis failures ([15000], [13500]) with no marker and no plan carrying the work. Each needs a new registration on an advancing plan, not a resolve.</td></tr>
+          <tr><td>Valid hold (1)</td>
+            <td><code>f-flc-005</code></td>
+            <td>Foreign owner (machine-description-retirement) exists and is live in S11.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Code-level defects surfaced by the review</h3>
+      <ul>
+        <li><code>tests/test_mast_solve_inputs.py:699</code> — two probe-axis failures enabled with no
+          xfail/skip marker and no owning plan (via f-ntlh-006's broken handoff).</li>
+        <li><code>nova/imas/parity_tolerances.py:76</code> — REFERENCE_STAMP pins an unreachable digest as
+          evidence for the live axis and LCFS bounds; the S13 repin touched benchmarks and receipts, not the
+          production module. The receipt is candid about it; the registry is not repaired.</li>
+        <li><code>pyproject.toml:74</code> — the gpu extra is declared but nothing in the repo selects it
+          (f-nrd-001's premise, confirmed).</li>
+      </ul>
+    </section>
+
+    <section id="method">
+      <h2 id="s6">§6 — Method, provenance and what was already applied</h2>
+      <p>Sources: <code>roadmap(project="nova")</code> and the schema audit over the registered checkout at
+      <code>97f49d8b</code> (107/107 docs conformant; 74 hygiene findings, dominated by 44 legacy-effort
+      compatibility warnings and 14 unlinked research docs), the discovery read of all plans, sprints,
+      followups, questions and blockers, plus seven parallel read-only validation reviews — one per open
+      sprint and one followup sweep — each cross-checking recorded plan state against commits, banked
+      receipts, artifacts and live code in this repository and, where relationships cross repos, in
+      imas-ambix and norma. Blocker premises B1 and B4 were verified directly (git ancestry;
+      norma's package table).</p>
+      <p>Applied during the review, committed as nova <code>aa21efcb</code>: the dirty crew ledger (the
+      morning's stationary-polish run record) committed and pushed, and <code>docs/.reckon/locks/</code>
+      added to .gitignore matching the reckon repository convention. Everything else in §5 is a dispatch
+      list, deliberately not applied: decision locks are the lead's; sprint and plan repairs route through
+      reckon-sprint and reckon-edit, with execution nodes dispatched as codex crew workers.</p>
+      <p>Caveats retained: implementation percentages quoted here are the reviewers' section-level readings,
+      not recomputed ground truth; the S10 remaining-effort judgement (multi-node, not 0.04 h) is qualitative
+      pending the discretisation-error study being scoped; and the followup sweep deep-checked 19 of 48 open
+      followups — the remaining 29 were not individually verified.</p>
+    </section>
+  </main>
+</body>
+</html>

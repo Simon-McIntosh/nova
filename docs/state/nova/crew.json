@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T14:12:07",
+  "updated": "2026-08-26T14:14:54",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -39091,9 +39091,103 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T113220081857-sse-titan-route-audit",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a72a",
+        "node": "sse-titan-route-audit",
+        "node_definition": {
+          "done_when": "A durable manifest records live Titan queue and device inventory, exact P100 model and memory, CUDA/JAX float64 compatibility with the pending job command, observed embed-service ownership and collision risk, a runtime/memory comparison against the H200 request, and either one non-invasive same-code smoke receipt or a precise reason no smoke is safe; jobs 1256575 and 1256711 remain untouched",
+          "estimated_hours": 1.0,
+          "goal": "Prove or rule out Titan as a safe execution route for the pending stationary-polish workload",
+          "id": "sse-titan-route-audit",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-titan-route-manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72a",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-titan-route-manifest.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "h200-matrix",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T11:32:28Z",
+        "completed_at": "2026-08-26T11:41:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 563,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 563,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "84a846a6344aefec27168f868eb66e6a6a3766cc",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "env -u VIRTUAL_ENV UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync python titan_route_assertions.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T114311314474-sse-titan-route-verify/resume-2.jsonl",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-titan-route-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0358b-83fb-7493-b03c-93b69217d2d5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1766912,
+            "cached_input_tokens_cumulative": 110255360,
+            "input_tokens": 2119372,
+            "input_tokens_cumulative": 112307751,
+            "output_tokens": 15901,
+            "output_tokens_cumulative": 194264,
+            "reasoning_output_tokens": 7437,
+            "reasoning_output_tokens_cumulative": 59935
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 920
+    "_version": 921
   }
 }

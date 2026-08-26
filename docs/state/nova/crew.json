@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T15:12:45",
+  "updated": "2026-08-26T15:14:19",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -781,7 +781,10 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a0358f-4233-72d2-8468-b686a59e5c3a",
-        "created": "2026-08-24"
+        "created": "2026-08-24",
+        "sessions": {
+          "gpt-5.6-sol": "01a03e25-d61a-70c2-b0c4-85ba9e7b81c7"
+        }
       },
       {
         "id": "mcg-input-verify",
@@ -42525,9 +42528,114 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T125732575607-sse-closed-boundary-comparator",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a74",
+        "node": "sse-closed-boundary-comparator",
+        "node_definition": {
+          "done_when": "nova.equilibrium.boundary_comparison exposes BoundaryMode, classify_boundary_mode, frozen ClosedBoundaryComparison, and compare_closed_boundaries with fixed arc-length sampling and point-to-segment symmetric sup/RMS distances in metres; topology class follows class_margin including infinities and refuses NaN; X distance is unordered-set minimum; all six named missing-input failures emit JSON-safe nulls; open legs are not accepted by the API; focused tests cover identical/translated rings, unequal densities, closure forms, point-to-segment behavior, class edge cases, all failure names, X order invariance, and leg-extension exclusion, and one captured pytest invocation exits zero.",
+          "estimated_hours": 2.0,
+          "goal": "Implement the shared host-only NumPy closed-boundary comparator contract from the completed seam audit, without integrating either MAST or DIII-D consumers yet.",
+          "id": "sse-closed-boundary-comparator",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-closed-boundary-comparator.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "nova/equilibrium/boundary_comparison.py",
+            "tests/test_boundary_comparison.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "margin-seam",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T12:57:41Z",
+        "completed_at": "2026-08-26T13:04:30Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 409,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 409,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "40f74640d6b9696b3dc8100f23c3bdce485d6782",
+        "commits": [
+          "e3784a3127d1ca1bc6f07057fb5252d574af3732"
+        ],
+        "changed_lines": {
+          "added": 426,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 18,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu XDG_CACHE_HOME=/run/user/39486/sse-boundary-comparator-xdg NUMBA_CACHE_DIR=/run/user/39486/sse-boundary-comparator-numba UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=\"$PWD\" uv run --no-sync pytest -p no:cacheprovider tests/test_boundary_comparison.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T125732575607-sse-closed-boundary-comparator/logs/test-boundary-comparison-contract.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-closed-boundary-comparator.md",
+        "scope_changed": false,
+        "session_id": "01a03e25-d61a-70c2-b0c4-85ba9e7b81c7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2104832,
+            "cached_input_tokens_cumulative": 2104832,
+            "input_tokens": 2215351,
+            "input_tokens_cumulative": 2215351,
+            "output_tokens": 14052,
+            "output_tokens_cumulative": 14052,
+            "reasoning_output_tokens": 3156,
+            "reasoning_output_tokens_cumulative": 3156
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest invocation",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 949
+    "_version": 951
   }
 }

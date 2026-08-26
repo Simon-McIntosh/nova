@@ -29,6 +29,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import InitVar, dataclass, field
+from functools import cached_property
 
 import jax
 import jax.numpy as jnp
@@ -85,7 +86,7 @@ def axis_cell_seed(coordinate, axis, inside_material):
 @jax.tree_util.register_pytree_node_class
 @dataclass(frozen=True)
 class ForwardTopologyState:
-    """Topology landmarks plus the continuous connectivity margin."""
+    """Topology landmarks plus one achieved connectivity classification."""
 
     axis: jax.Array
     axis_flux: jax.Array
@@ -95,13 +96,37 @@ class ForwardTopologyState:
     x_point_flux: jax.Array
     wall_point: jax.Array
     wall_point_flux: jax.Array
-    diverted: jax.Array
     _class_margin_read: Callable[[], jax.Array] = field(repr=False)
+
+    @cached_property
+    def _class_margin(self) -> jax.Array:
+        """Cache the single saddle-aware connectivity comparator read."""
+
+        return self._class_margin_read()
 
     @property
     def class_margin(self) -> jax.Array:
-        """Derive and return the continuous connectivity margin."""
-        return self._class_margin_read()
+        """Return the continuous saddle-aware connectivity margin."""
+
+        return self._class_margin
+
+    @property
+    def class_determinate(self) -> jax.Array:
+        """Return whether the connectivity comparator resolved a class."""
+
+        return jnp.logical_not(jnp.isnan(self.class_margin))
+
+    @property
+    def diverted(self) -> jax.Array:
+        """Return the achieved saddle-aware class.
+
+        Positive infinity is a resolved diverted result. A NaN margin remains
+        explicitly indeterminate through :attr:`class_determinate`; the
+        Boolean is false so an unresolved class cannot qualify a diverted
+        branch.
+        """
+
+        return self.class_determinate & (self.class_margin >= 0)
 
     @property
     def flux_span(self) -> jax.Array:
@@ -109,7 +134,9 @@ class ForwardTopologyState:
         return self.boundary_flux - self.axis_flux
 
     def tree_flatten(self):
-        """Return topology arrays with the deferred callable evaluated once."""
+        """Return landmarks and both values from one comparator read."""
+
+        class_margin = self.class_margin
         return (
             (
                 self.axis,
@@ -120,8 +147,8 @@ class ForwardTopologyState:
                 self.x_point_flux,
                 self.wall_point,
                 self.wall_point_flux,
-                self.diverted,
-                self.class_margin,
+                self.class_determinate & (class_margin >= 0),
+                class_margin,
             ),
             None,
         )
@@ -130,7 +157,7 @@ class ForwardTopologyState:
     def tree_unflatten(cls, aux_data, children):
         """Rebuild a topology state without carrying a callable as a leaf."""
         del aux_data
-        *landmarks, class_margin = children
+        *landmarks, _diverted, class_margin = children
         return cls(*landmarks, lambda: class_margin)
 
 
@@ -545,12 +572,23 @@ class ForwardFluxOperator:
     def read(
         self, psi, requested_class=None
     ) -> tuple[DomainMasks, ForwardTopologyState]:
-        """Return domain labels, Boolean class, and continuous topology margin."""
+        """Return domain labels and an achieved saddle-aware topology read."""
         physical = jnp.asarray(psi)[: self.physical_node_number]
         masks, topology, _connected = self._fixed_design_read(physical, requested_class)
         return masks, ForwardTopologyState(
-            *topology,
-            lambda: self._connectivity_class_margin(physical, topology),
+            axis=topology.axis,
+            axis_flux=topology.axis_flux,
+            boundary=topology.boundary,
+            boundary_flux=topology.boundary_flux,
+            x_point=topology.x_point,
+            x_point_flux=topology.x_point_flux,
+            wall_point=topology.wall_point,
+            wall_point_flux=topology.wall_point_flux,
+            # The legacy TopologyState.diverted leaf is intentionally not
+            # forwarded: a pinned read may contain only the requested class.
+            _class_margin_read=lambda: self._connectivity_class_margin(
+                physical, topology
+            ),
         )
 
     def shared_node_flux(self, psi) -> jax.Array:

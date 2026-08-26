@@ -41,6 +41,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from types import SimpleNamespace
+from typing import get_type_hints
 
 import numpy as np
 import pytest
@@ -58,7 +59,8 @@ with skip_import("jax"):
     from nova.equilibrium.conservation import FluxLattice
     from nova.equilibrium.domain import PlasmaDomain
     from nova.equilibrium import PrescribedCurrentField
-    from nova.equilibrium.forward import ForwardProfile
+    from nova.equilibrium.forward import ForwardEquilibrium, ForwardProfile
+    from nova.equilibrium.forward_operator import ForwardTopologyState
     from nova.equilibrium.observation import MomentEnforcementError, MomentTargets
     from nova.equilibrium.source import DomainProfile, ForwardSource
     from nova.equilibrium.topology import TopologyClass
@@ -467,6 +469,12 @@ def test_the_accelerated_solve_reaches_its_fixed_point(converged):
     assert abs(float(converged.moments.plasma_current)) > 1.0e5
 
 
+def test_forward_equilibrium_names_the_public_topology_state_type():
+    """The equilibrium receipt exposes the achieved forward topology contract."""
+
+    assert get_type_hints(ForwardEquilibrium)["topology"] is ForwardTopologyState
+
+
 def test_the_receipt_records_an_untouched_absolute_source(converged):
     """The normalisation ledger reports a unit amplitude and no rescale."""
     normalisation = converged.normalisation
@@ -508,7 +516,9 @@ def test_a_terminal_class_contradiction_stays_in_its_branch_receipt(
 
     branch = unavailable_diverted_branch
     assert int(branch.requested_class) == int(TopologyClass.DIVERTED)
-    assert bool(branch.equilibrium.topology.diverted)
+    assert not bool(branch.equilibrium.topology.diverted)
+    assert np.isnan(float(branch.equilibrium.topology.class_margin))
+    assert not bool(branch.equilibrium.topology.class_determinate)
     assert int(branch.achieved_class) == int(TopologyClass.LIMITED)
     assert not bool(branch.topology_consistent)
 

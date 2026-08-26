@@ -10,6 +10,7 @@ from nova.biot.target import FluxTarget
 from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.forward_operator import ForwardFluxOperator
 from nova.equilibrium.source import DomainProfile, ForwardSource
+from nova.equilibrium.topology import TopologyClass
 from nova.geometry.hexstencil import hex_stencil
 from nova.jax.config import configure_dtypes
 
@@ -96,11 +97,15 @@ def test_tensor_product_grid_class_margin_is_unchanged() -> None:
     _masks, topology = operator.read(state)
 
     assert float(topology.class_margin) == pytest.approx(
-        -1.0504591739956404, rel=1.0e-12, abs=1.0e-12
+        -0.9611433885788007, rel=1.0e-12, abs=1.0e-12
     )
     assert float(operator.topology_margin(state)) == pytest.approx(
         float(topology.class_margin), rel=0.0, abs=0.0
     )
+
+    _pinned_masks, pinned = operator.read(state, TopologyClass.DIVERTED)
+    assert float(pinned.class_margin) < 0.0
+    assert not bool(pinned.diverted)
 
 
 def test_forward_topology_state_is_a_vmap_output_pytree() -> None:
@@ -116,7 +121,11 @@ def test_forward_topology_state_is_a_vmap_output_pytree() -> None:
 
     assert topology.axis.shape == (2, 2)
     assert topology.diverted.shape == (2,)
+    assert topology.class_determinate.shape == (2,)
     assert topology.class_margin.shape == (2,)
     np.testing.assert_array_equal(topology.axis[0], topology.axis[1])
     np.testing.assert_array_equal(topology.diverted[0], topology.diverted[1])
+    np.testing.assert_array_equal(
+        topology.class_determinate[0], topology.class_determinate[1]
+    )
     np.testing.assert_array_equal(topology.class_margin[0], topology.class_margin[1])

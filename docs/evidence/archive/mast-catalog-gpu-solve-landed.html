@@ -121,39 +121,47 @@
     reason stated — <code>ForwardProfile.moment_seed</code> has no traced counterpart for that
     host-only polygon construction — rather than quietly dropped.</p>
 
-    <p><strong>Attributed <code>AMPLIFIED_REPRESENTATION_DIFFERENCE</code>, with both
-    alternatives measured out rather than argued away.</strong></p>
+    <p><strong><code>AMPLIFIED_REPRESENTATION_DIFFERENCE</code> is the working diagnosis,
+    not an exclusive causal attribution.</strong> The four named repair commits are excluded,
+    but operation-level semantic equivalence has not yet been independently established.</p>
     <ul>
-      <li><em>Not a regression.</em> A tree at <code>83dc40fb</code>, preceding all four of that
-      day's equilibrium commits and <strong>proven under test by distinct imported-module
-      digests</strong>, reproduces all six divergences <em>exactly</em>.</li>
-      <li><em>Not a semantic difference.</em> Every case's one-map separation is
-      <strong>2.220446049250313e-16</strong> absolute, 1.8900776655575514e-16 relative — pure
-      float64 rounding, no operation exceeding that band before iteration.</li>
-      <li><em>Amplification shown, not asserted.</em> Per-update flux separations for shot
-      21985 slice 51 run 2.16e-15 → 6.11e-15 → 5.31e-13 → 3.84e-12 → 2.37e-11 → 5.94e-11 →
-      3.22e-10 → 1.31e-08 → 1.06e-08 → 3.11e-08 → 8.08e-08 → 1.16e-05, cumulative
-      <strong>5.379792627282051e9</strong>.</li>
+      <li><em>Not caused by the four named repair commits.</em> A tree at
+      <code>83dc40fb</code>, preceding those commits and <strong>proven under test by distinct
+      imported-module digests</strong>, reproduces all six divergences <em>exactly</em>. This
+      historical negative control does not exclude an older regression or longstanding
+      compiler-sensitive formulation.</li>
+      <li><em>Semantic equivalence remains unmeasured.</em> Every case's one-map separation is
+      <strong>2.220446049250313e-16</strong> absolute and 1.8900776655575514e-16 relative,
+      consistent with float64 roundoff at the output. No operation-level trace, IR comparison,
+      controlled common-arithmetic arm, or higher-precision oracle was run.</li>
+      <li><em>Depth-sensitive amplification shown, not asserted.</em> An independently executed
+      solve-depth ladder for shot 21985 slice 51 gives 2.16e-15 → 6.11e-15 → 5.31e-13 →
+      3.84e-12 → 2.37e-11 → 5.94e-11 → 3.22e-10 → 1.31e-08 → 1.06e-08 → 3.11e-08 →
+      8.08e-08 → 1.16e-05, cumulative <strong>5.379792627282051e9</strong>. These are twelve
+      independently compiled solves from the original seed, not internal states captured from
+      one twelve-update execution.</li>
     </ul>
 
-    <p><strong>Independent corroboration from the cluster structure:</strong> of the 38 passing
+    <p><strong>Within-receipt consistency from the cluster structure:</strong> of the 38 passing
     leaves, <strong>35 are exact categorical, policy and structural invariants and are
     bit-identical</strong>; all 31 failures are continuous iterated quantities (14
     state/domain/topology/solver-trace, 9 integrated-moment/current-ledger, 8
-    conservation/source-normalisation). Nothing categorical moves. Iteration is the only
-    difference between the machine-precision seed and the diverging solve.</p>
+    conservation/source-normalisation). Nothing categorical moves. These clusters are derived
+    from the same triggering parity receipt, so they are internally consistent with
+    depth-sensitive spread but do not independently establish its cause.</p>
 
     <p><strong>One measurement kept because it breaks the tidy story.</strong> This is
     <em>not</em> geometric growth at the spectral radius: ρ = 1.1456 over twelve updates
-    predicts ~5.1×, the measurement is 5.4e9 — nine orders larger. Per-update ratios are
+    predicts ~5.1×, the measurement is 5.4e9 — nine orders larger. Adjacent solve-depth ratios are
     irregular (≈2.8, 87, 7.2, 6.2, 2.5, 5.4, 41, <strong>0.81</strong>, 2.9, 2.6, 144) with
-    three bursts and one <em>contracting</em> step. No single dominant eigenvalue produces that;
-    the map is strongly non-normal and its transient growth dominates its asymptote, so a
-    terminal eigenpair is necessary but insufficient to explain the trajectory that reached it.</p>
+    three increases and one adjacent-depth decrease. No single dominant eigenvalue explains that
+    magnitude. Because each depth was compiled and executed independently, this ladder does not
+    itself identify literal update-to-update propagation inside one execution.</p>
 
     <p><strong>What this retires, and what it does not.</strong> §1's claim that the jitted stack
-    pins batched==per-slice at 1e-10 is struck for the solve half: on a non-contractive map that
-    is unmeetable by <em>any</em> implementation, not merely unmet. The
+    pins batched==per-slice at 1e-10 is struck for the solve half: the raw terminal-state bound is
+    <strong>unstable and unmet for the tested fixed-depth eager/JIT implementation and
+    cohort</strong>. The
     batched==per-slice <em>requirement</em> stands unchanged — a 1,341,435-slice catalog must not
     disagree with a per-slice one on any physical observable. Retired is the belief that
     agreement on the raw converged state at a fixed absolute depth expresses it. Successors: a
@@ -190,7 +198,9 @@
     present MAST parity chain independently moment-seeds each slice; it is not evidence for
     neighbour-warm iteration savings.</p>
 
-    <p>The corrective contract uses the registered relative fixed-point defect
+    <p>The audit specified, but did not observe, iteration receipts, the one-cold-plus-four-
+    neighbour-warm MAST proof, or batch-efficiency statistics; catalog-scale real warm-sequence
+    measurement therefore remains open. The corrective contract uses the registered relative fixed-point defect
     <strong>r(x) ≤ 1e-8</strong>, records attempted and accepted Newton promotions, map
     evaluations, Krylov actions and their kind, warmup sweeps, first criterion hit, terminal
     qualification, and failure reason. It pins the semantics on MAST shot 21978 slices
@@ -212,6 +222,12 @@
     <code>RESOURCE_EXHAUSTED</code> graph-allocation errors while nineteen tests passed. It
     produced no assertion mismatch and was superseded by the repository-appropriate forced-CPU
     run above; the full failed attempt remains in the crew stream rather than being hidden.</p>
+
+    <p><strong>The first reserved-H200 scheduling hold is superseded for functional validation,
+    not for performance.</strong> That attempt executed zero tests while protected job 1257228
+    held all eight GPUs. A later one-H200 run passed <strong>24/24</strong> tests with zero skips
+    in <strong>45.40 seconds</strong> at the registered <strong>1e-8</strong> bound. L1 throughput,
+    eight-GPU scaling, and full-catalog gates remain open.</p>
 
     <p><strong>Integrated on the primary branch.</strong> Worker commit
     <code>9fe3d4c2</code> is reachable through merge commit <code>8859a12d</code>. The fixed-point

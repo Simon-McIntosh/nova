@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 from importlib.util import module_from_spec, spec_from_file_location
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -12,7 +13,9 @@ import numpy as np
 import pytest
 
 from benchmarks.wall_resolution_ladder import (
+    NO_PREDICTED_CLOSED_BOUNDARY,
     SCHEMA,
+    _contact_fields,
     _control_batch_coordinates,
     _control_reproduction_passes,
     _convergence,
@@ -330,6 +333,19 @@ def test_receipt_validation_accepts_the_isolated_ladder():
     }
 
 
+def test_receipt_validation_requires_the_named_contact_absence_reason():
+    payload = _receipt()
+    payload["rows"][2]["contact_coordinate_m"] = None
+    payload["rows"][2]["contact_coordinate_absence_reason"] = (
+        NO_PREDICTED_CLOSED_BOUNDARY
+    )
+
+    assert validate_receipt(copy.deepcopy(payload))["valid"] is True
+    del payload["rows"][2]["contact_coordinate_absence_reason"]
+    with pytest.raises(ValueError, match="absent contact must name"):
+        validate_receipt(payload)
+
+
 def test_convergence_reports_unresolved_limiter_motion():
     rows = [
         {
@@ -353,3 +369,58 @@ def test_convergence_reports_unresolved_limiter_motion():
     assert result["limiter_operand_stop_count"] is None
     assert rows[-1]["maximum_spacing_in_plasma_pitches"] == pytest.approx(1.2)
     assert "does not stop moving by 288 targets" in result["statement"]
+
+
+def test_absent_closed_boundary_publishes_named_contact_nulls():
+    operands = {
+        "limiter_coordinate": np.asarray((0.8, 0.0)),
+        "limiter_arc": 0.4,
+    }
+    absent = _contact_fields(
+        SimpleNamespace(boundary=jnp.asarray((jnp.nan, jnp.nan))), operands
+    )
+    present = _contact_fields(
+        SimpleNamespace(boundary=jnp.asarray((1.1, -0.7))), operands
+    )
+    rows = [
+        {
+            "wall_target_count": count,
+            "boundary_flux_wb": -0.03,
+            **(absent if count == 72 else present),
+            "achieved_class": "limited",
+            "spacing": {"maximum_m": 0.1},
+        }
+        for count in (36, 72, 144, 288)
+    ]
+
+    result = _convergence(rows, plasma_pitch=0.125)
+
+    assert absent == {
+        "contact_coordinate_m": None,
+        "contact_coordinate_absence_reason": NO_PREDICTED_CLOSED_BOUNDARY,
+        "contact_arc_m": None,
+        "contact_arc_absence_reason": NO_PREDICTED_CLOSED_BOUNDARY,
+    }
+    for step in (rows[0]["change_to_next_finer"], rows[1]["change_to_next_finer"]):
+        assert step["contact_coordinate_distance_m"] is None
+        assert (
+            step["contact_coordinate_distance_absence_reason"]
+            == NO_PREDICTED_CLOSED_BOUNDARY
+        )
+    assert rows[2]["change_to_next_finer"]["contact_coordinate_distance_m"] == 0.0
+    assert result["limiter_operand_stop_count"] == 144
+    json.dumps({"rows": rows, "convergence": result}, allow_nan=False)
+
+
+def test_finite_closed_boundary_contact_fields_are_byte_stable():
+    operands = {
+        "limiter_coordinate": np.asarray((0.8, 0.0)),
+        "limiter_arc": 0.4,
+    }
+    expected = '{"contact_arc_m":0.4,"contact_coordinate_m":[0.8,0.0]}'
+
+    contact = _contact_fields(
+        SimpleNamespace(boundary=jnp.asarray((1.1, -0.7))), operands
+    )
+
+    assert json.dumps(contact, sort_keys=True, separators=(",", ":")) == expected

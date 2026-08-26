@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T13:30:46",
+  "updated": "2026-08-26T13:34:28",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -284,7 +284,10 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a02ed2-d8f3-7681-b193-eb8d1e9a4e44",
-        "created": "2026-08-23"
+        "created": "2026-08-23",
+        "sessions": {
+          "gpt-5.6-sol": "01a03dca-baa6-7283-825e-3f46c2043915"
+        }
       },
       {
         "id": "criterion-audit",
@@ -38163,9 +38166,103 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T111800287860-s16-knowledge-envelope-audit",
+        "plan": "efit-baseline-demonstration",
+        "section": "\u00a72",
+        "node": "s16-knowledge-envelope-audit",
+        "node_definition": {
+          "done_when": "A manifest accounts for 4 sprint members plus 6 shipped transitive prerequisites, classifies every active section, reports zero missing linked research or names each gap, and emits an acyclic file-conflict graph",
+          "estimated_hours": 2.0,
+          "goal": "Validate the enriched sprint execution graph against all knowledge inputs",
+          "id": "s16-knowledge-envelope-audit",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/knowledge-audit-manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/knowledge-audit-manifest.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "criteria-scout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T11:18:10Z",
+        "completed_at": "2026-08-26T11:30:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 727,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 727,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "60251ecdd8f9a7b1f8121d3184c807a9311c777a",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "reckon roadmap and audit plus local link resolver and tsort over the section-enriched graph",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/knowledge-audit-manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/knowledge-audit-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03dca-baa6-7283-825e-3f46c2043915",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6313728,
+            "cached_input_tokens_cumulative": 6313728,
+            "input_tokens": 6557489,
+            "input_tokens_cumulative": 6557489,
+            "output_tokens": 25140,
+            "output_tokens_cumulative": 25140,
+            "reasoning_output_tokens": 11831,
+            "reasoning_output_tokens_cumulative": 11831
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 903
+    "_version": 905
   }
 }

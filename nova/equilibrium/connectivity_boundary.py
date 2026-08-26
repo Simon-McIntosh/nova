@@ -76,6 +76,7 @@ from nova.equilibrium.flux_surface_connectivity import (
     flood_fill_core,
     hex_edge_admissibility,
     label_saddle_aware_hex_connected_components,
+    polish_stationary_points,
 )
 from nova.equilibrium.stencil_nulls import (
     magnetic_axis_subgrid,
@@ -900,6 +901,20 @@ def _read_ingredients(
         & flood_adjacent
     )
     xc = xpoint_candidates(psi2d, rg, zg, inside_limiter, _K_XCAND, extra_mask=x_mask)
+    census_seed = jnp.stack((xc["r"], xc["z"]), axis=-1)
+    census_seed_valid = xc["present"] & jnp.all(jnp.isfinite(census_seed), axis=-1)
+    polished = polish_stationary_points(global_surface, census_seed, census_seed_valid)
+    polished_saddle = (
+        polished["converged"] & polished["in_domain"] & (polished["hessian_type"] < 0)
+    )
+    xc = dict(xc)
+    xc["r"] = jnp.where(polished_saddle, polished["position_rz"][:, 0], jnp.nan)
+    xc["z"] = jnp.where(polished_saddle, polished["position_rz"][:, 1], jnp.nan)
+    xc["psi"] = jnp.where(polished_saddle, polished["value"], jnp.nan)
+    xc["ntype"] = jnp.where(polished_saddle, 0.0, jnp.nan)
+    xc["polish_converged"] = polished_saddle
+    xc["polish_gradient_norm"] = polished["gradient_norm"]
+    xc["polish_iteration_count"] = polished["iteration_count"]
     # Sanitise the masked-out (NaN) candidate flux to a finite value BEFORE any
     # arithmetic: a NaN numerator would poison the VJP of the /span_safe division
     # (0·NaN into span_safe, which depends on the axis), even though the value is
@@ -907,7 +922,7 @@ def _read_ingredients(
     # The flood-adjacency and binding-flux band are independent connectivity
     # evidence.  They may consume an unresolved native-degree candidate while
     # preserving its state in the returned uncertainty metadata.
-    xc_valid = xc["present"] & jnp.isfinite(xc["psi"])
+    xc_valid = xc["present"] & xc["polish_converged"]
     psi_x_safe = jnp.where(xc_valid, xc["psi"], psi_axis)
     u_x = (psi_x_safe - psi_axis) / span_safe  # (_K_XCAND,), finite everywhere
     x_valid = xc_valid
@@ -1026,6 +1041,7 @@ def _read_ingredients(
         "u_x": u_x,
         "x_valid": x_valid,
         "xc": xc,
+        "global_surface": global_surface,
         "x_candidate_count": xc["candidate_count"],
         "x_overflow": xc["overflow"],
         "x_discarded_score_upper_bound": xc["discarded_score_upper_bound"],
@@ -1148,6 +1164,15 @@ def traced_boundary_read(
     # the saddles sitting ON the boundary (order-invariant, NaN-padded), the device
     # analogue of the host emergent_xpoints soft-margin rule.
     ax = magnetic_axis_subgrid(psi2d, rg, zg, inside_limiter, region=region_star)
+    axis_seed = jnp.stack((ax["r"], ax["z"]))[None, :]
+    axis_polish = polish_stationary_points(
+        ing["global_surface"], axis_seed, jnp.asarray([ax["found"]])
+    )
+    axis_polished = (
+        axis_polish["converged"][0]
+        & axis_polish["in_domain"][0]
+        & (axis_polish["hessian_type"][0] > 0)
+    )
     on_bound = x_valid & (jnp.abs(u_x - s_star) <= _X_ON_RING_U)
     ob_key = jnp.where(on_bound, jnp.abs(u_x - s_star), jnp.inf)
     order = jnp.argsort(ob_key)
@@ -1192,9 +1217,9 @@ def traced_boundary_read(
         "radii": jnp.where(found, radii, jnp.nan),
         "n_core_cells": n_core,
         # classify-after diagnostics (never feed ψ_N)
-        "axis_r": jnp.where(ax["found"], ax["r"], jnp.nan),
-        "axis_z": jnp.where(ax["found"], ax["z"], jnp.nan),
-        "axis_psi_sub": jnp.where(ax["found"], ax["psi"], jnp.nan),
+        "axis_r": jnp.where(axis_polished, axis_polish["position_rz"][0, 0], jnp.nan),
+        "axis_z": jnp.where(axis_polished, axis_polish["position_rz"][0, 1], jnp.nan),
+        "axis_psi_sub": jnp.where(axis_polished, axis_polish["value"][0], jnp.nan),
         "axis_state": ax["state"],
         "axis_confidence": ax["confidence"],
         "axis_candidate_count": ax["candidate_count"],
@@ -1640,18 +1665,28 @@ def _smooth_read_at_stencil_axis(
     wall_psi,
     temperature,
 ):
-    """Stencil O-point first, smooth read seeded at it — the solve-map wiring.
+    """Census the O-point, globally polish it, then seed the smooth read.
 
-    The sub-grid stencil axis is read from the raw field (biquadratic refine,
-    differentiable through the surface fit; falls back to the caller's seed
-    when no in-wall O-point exists), the smooth boundary read floods from that
-    axis, and the axis scalars ride along in the result dict
+    The stencil supplies fixed-shape candidate evidence and the global tensor
+    spline supplies the differentiable stationary position.  The caller's seed
+    remains the fallback when no converged in-wall extremum exists.  The smooth
+    boundary read floods from that axis, and the axis scalars ride along
     (``axis_r``/``axis_z``/``axis_psi_sub``, NaN when absent).  One jitted
     graph per grid shape, so a per-sweep host caller pays no retrace.
     """
     ax = magnetic_axis_subgrid(psi2d, rg, zg, inside_limiter)
-    ax_r = jnp.where(ax["found"], ax["r"], seed_r)
-    ax_z = jnp.where(ax["found"], ax["z"], seed_z)
+    spline = fit_tensor_spline(rg, zg, psi2d)
+    axis_seed = jnp.stack((ax["r"], ax["z"]))[None, :]
+    axis_polish = polish_stationary_points(
+        spline, axis_seed, jnp.asarray([ax["found"]])
+    )
+    axis_polished = (
+        axis_polish["converged"][0]
+        & axis_polish["in_domain"][0]
+        & (axis_polish["hessian_type"][0] > 0)
+    )
+    ax_r = jnp.where(axis_polished, axis_polish["position_rz"][0, 0], seed_r)
+    ax_z = jnp.where(axis_polished, axis_polish["position_rz"][0, 1], seed_z)
     out = traced_smooth_boundary_read(
         psi2d,
         rg,
@@ -1670,9 +1705,9 @@ def _smooth_read_at_stencil_axis(
         temperature,
     )
     out = dict(out)
-    out["axis_r"] = jnp.where(ax["found"], ax["r"], jnp.nan)
-    out["axis_z"] = jnp.where(ax["found"], ax["z"], jnp.nan)
-    out["axis_psi_sub"] = jnp.where(ax["found"], ax["psi"], jnp.nan)
+    out["axis_r"] = jnp.where(axis_polished, ax_r, jnp.nan)
+    out["axis_z"] = jnp.where(axis_polished, ax_z, jnp.nan)
+    out["axis_psi_sub"] = jnp.where(axis_polished, axis_polish["value"][0], jnp.nan)
     return out
 
 

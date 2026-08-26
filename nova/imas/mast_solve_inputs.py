@@ -366,13 +366,14 @@ def reconstruction_probe_poses(
     *,
     store: Path | str = SHOT_STORE,
 ) -> np.ndarray:
-    """Return the reconstruction's own probe positions and sensitive-axis angles.
+    """Return the reconstruction's source probe positions and axis angles.
 
     Columns are the major radius, the height and the poloidal angle in radians;
-    the source states the angle in degrees.  This is the array the description's
-    probe poses were built from, so comparing a channel's matched column against
-    the described probe it is mapped to tests the join against geometry rather
-    than against an index convention.
+    the source states the angle in degrees increasing counter-clockwise from the
+    major radius.  The description is built from this array but authors DDv4
+    ``poloidal_angle``, which increases clockwise, so a geometry comparison must
+    negate this source angle.  Keeping the source value here makes that convention
+    boundary explicit instead of silently rewriting reconstruction evidence.
     """
 
     import zarr
@@ -1230,7 +1231,8 @@ def read_solve_inputs(
         name = _CLOCK_GROUPS[base]
         if base == FIELD_CLOCK:
             raw_source = waveforms.sensors
-            keys = set(raw_source)
+            shape_mismatched = set(waveforms.shape_mismatched_sensors)
+            keys = set(raw_source) | shape_mismatched
             clock = waveforms.time
             identity = next(
                 (
@@ -1241,6 +1243,7 @@ def read_solve_inputs(
                 "",
             )
         else:
+            shape_mismatched = set()
             try:
                 node = zarr.open_group(f"{root}/{shot}.zarr", mode="r")[CURRENT_GROUP]
             except Exception:  # noqa: BLE001 - group absence is reported below
@@ -1254,6 +1257,9 @@ def read_solve_inputs(
         absent.extend(channel for channel in wanted if channel not in keys)
         raw = {}
         for channel in present:
+            if channel in shape_mismatched:
+                misaligned.append(channel)
+                continue
             values = np.asarray(raw_source[channel], dtype=float)
             if values.shape != clock.shape:
                 misaligned.append(channel)

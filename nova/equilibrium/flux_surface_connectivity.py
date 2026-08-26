@@ -85,6 +85,7 @@ __all__ = [
     "label_saddle_aware_hex_connected_components_with_steps",
     "label_connected_components",
     "label_connected_components_with_steps",
+    "polish_stationary_points",
     "private_flux_mask",
     "traced_spline_contour",
     "traced_flux_surface_bins",
@@ -613,6 +614,131 @@ def _paired_edge_values(values: jnp.ndarray, indices: jnp.ndarray) -> jnp.ndarra
     return jnp.take_along_axis(values[..., None, :, :], indices[..., None], axis=-2)
 
 
+@partial(jax.jit, static_argnums=(5,))
+def _polish_stationary_points_in_bounds(
+    spline,
+    seed_rz: jnp.ndarray,
+    valid: jnp.ndarray,
+    lower_rz: jnp.ndarray,
+    upper_rz: jnp.ndarray,
+    stationary_steps: int,
+) -> dict[str, jnp.ndarray]:
+    """Polish fixed-slot seeds within caller-supplied coordinate bounds."""
+    seed_rz = jnp.asarray(seed_rz, dtype=spline.coefficients.dtype)
+    valid = jnp.asarray(valid, dtype=bool)
+    lower_rz = jnp.asarray(lower_rz, dtype=seed_rz.dtype)
+    upper_rz = jnp.asarray(upper_rz, dtype=seed_rz.dtype)
+    radial_seed = seed_rz[..., 0]
+    vertical_seed = seed_rz[..., 1]
+    seed_in_domain = (
+        valid
+        & jnp.isfinite(radial_seed)
+        & jnp.isfinite(vertical_seed)
+        & (radial_seed >= spline.radial[0])
+        & (radial_seed <= spline.radial[-1])
+        & (vertical_seed >= spline.vertical[0])
+        & (vertical_seed <= spline.vertical[-1])
+    )
+    radial_low = lower_rz[..., 0]
+    radial_high = upper_rz[..., 0]
+    vertical_low = lower_rz[..., 1]
+    vertical_high = upper_rz[..., 1]
+    radial_seed = jnp.clip(radial_seed, radial_low, radial_high)
+    vertical_seed = jnp.clip(vertical_seed, vertical_low, vertical_high)
+
+    def newton_step(_iteration, point):
+        evaluation = spline.evaluate(point[..., 0], point[..., 1])
+        determinant = (
+            evaluation.radial_second_derivative * evaluation.vertical_second_derivative
+            - evaluation.mixed_derivative**2
+        )
+        safe_determinant = jnp.where(
+            jnp.abs(determinant) > jnp.finfo(point.dtype).tiny, determinant, 1.0
+        )
+        radial_step = (
+            evaluation.vertical_second_derivative * evaluation.radial_derivative
+            - evaluation.mixed_derivative * evaluation.vertical_derivative
+        ) / safe_determinant
+        vertical_step = (
+            evaluation.radial_second_derivative * evaluation.vertical_derivative
+            - evaluation.mixed_derivative * evaluation.radial_derivative
+        ) / safe_determinant
+        return jnp.stack(
+            (
+                jnp.clip(point[..., 0] - radial_step, radial_low, radial_high),
+                jnp.clip(point[..., 1] - vertical_step, vertical_low, vertical_high),
+            ),
+            axis=-1,
+        )
+
+    initial = jnp.stack((radial_seed, vertical_seed), axis=-1)
+    position = jax.lax.fori_loop(0, stationary_steps, newton_step, initial)
+    evaluation = spline.evaluate(position[..., 0], position[..., 1])
+    determinant = (
+        evaluation.radial_second_derivative * evaluation.vertical_second_derivative
+        - evaluation.mixed_derivative**2
+    )
+    gradient_norm = jnp.hypot(
+        evaluation.radial_derivative,
+        evaluation.vertical_derivative,
+    )
+    field_scale = jnp.maximum(
+        jnp.max(spline.coefficients) - jnp.min(spline.coefficients),
+        jnp.finfo(position.dtype).tiny,
+    )
+    minimum_spacing = jnp.minimum(
+        radial_high - radial_low, vertical_high - vertical_low
+    )
+    gradient_tolerance = (
+        128.0 * jnp.finfo(position.dtype).eps * field_scale / minimum_spacing
+    )
+    finite_result = (
+        jnp.isfinite(evaluation.value)
+        & jnp.isfinite(gradient_norm)
+        & jnp.isfinite(determinant)
+    )
+    in_domain = (
+        seed_in_domain
+        & (position[..., 0] >= spline.radial[0])
+        & (position[..., 0] <= spline.radial[-1])
+        & (position[..., 1] >= spline.vertical[0])
+        & (position[..., 1] <= spline.vertical[-1])
+    )
+    converged = in_domain & finite_result & (gradient_norm <= gradient_tolerance)
+    hessian_type = jnp.sign(determinant).astype(jnp.int8)
+
+    return {
+        "position_rz": jnp.where(valid[..., None], position, 0.0),
+        "value": jnp.where(valid, evaluation.value, 0.0),
+        "gradient_norm": jnp.where(valid, gradient_norm, 0.0),
+        "hessian_type": jnp.where(valid, hessian_type, 0),
+        "converged": valid & converged,
+        "in_domain": valid & in_domain,
+    }
+
+
+@partial(jax.jit, static_argnums=(3,))
+def polish_stationary_points(
+    spline,
+    seed_rz: jnp.ndarray,
+    valid: jnp.ndarray,
+    stationary_steps: int = 8,
+) -> dict[str, jnp.ndarray]:
+    """Polish fixed-slot stationary-point seeds on a global tensor spline.
+
+    Every slot is updated independently within the spline domain, so polishing
+    one candidate never perturbs another candidate's primal coordinates.
+    ``valid`` has the fixed leading shape of ``seed_rz`` and inactive slots are
+    returned as canonical exact-zero padding. Hessian type is ``-1`` for a
+    saddle, ``0`` for a degenerate Hessian, and ``1`` for an extremum.
+    """
+    lower_rz = jnp.stack((spline.radial[0], spline.vertical[0]))
+    upper_rz = jnp.stack((spline.radial[-1], spline.vertical[-1]))
+    return _polish_stationary_points_in_bounds(
+        spline, seed_rz, valid, lower_rz, upper_rz, stationary_steps
+    )
+
+
 @partial(jax.jit, static_argnums=(4, 5))
 def traced_spline_contour(
     values: jnp.ndarray,
@@ -705,39 +831,15 @@ def traced_spline_contour(
     centre_radial = 0.5 * (radial_low + radial_high)
     centre_vertical = 0.5 * (vertical_low + vertical_high)
 
-    def locate_saddle(_iteration, point):
-        evaluation = spline.evaluate(point[..., 0], point[..., 1])
-        determinant = (
-            evaluation.radial_second_derivative * evaluation.vertical_second_derivative
-            - evaluation.mixed_derivative**2
-        )
-        safe_determinant = jnp.where(
-            jnp.abs(determinant) > jnp.finfo(values.dtype).tiny,
-            determinant,
-            1.0,
-        )
-        radial_step = (
-            evaluation.vertical_second_derivative * evaluation.radial_derivative
-            - evaluation.mixed_derivative * evaluation.vertical_derivative
-        ) / safe_determinant
-        vertical_step = (
-            evaluation.radial_second_derivative * evaluation.vertical_derivative
-            - evaluation.mixed_derivative * evaluation.radial_derivative
-        ) / safe_determinant
-        return jnp.stack(
-            (
-                jnp.clip(point[..., 0] - radial_step, radial_low, radial_high),
-                jnp.clip(point[..., 1] - vertical_step, vertical_low, vertical_high),
-            ),
-            axis=-1,
-        )
-
-    saddle_point = jax.lax.fori_loop(
-        0,
-        saddle_steps,
-        locate_saddle,
+    saddle_polish = _polish_stationary_points_in_bounds(
+        spline,
         jnp.stack((centre_radial, centre_vertical), axis=-1),
+        jnp.ones_like(crossing_count, dtype=bool),
+        jnp.stack((radial_low, vertical_low), axis=-1),
+        jnp.stack((radial_high, vertical_high), axis=-1),
+        saddle_steps,
     )
+    saddle_point = saddle_polish["position_rz"]
     saddle_evaluation = spline.evaluate(saddle_point[..., 0], saddle_point[..., 1])
     saddle_hessian_determinant = (
         saddle_evaluation.radial_second_derivative
@@ -751,10 +853,7 @@ def traced_spline_contour(
     gradient_tolerance = (
         jnp.sqrt(jnp.finfo(values.dtype).eps) * field_scale / minimum_spacing
     )
-    saddle_gradient = jnp.hypot(
-        saddle_evaluation.radial_derivative,
-        saddle_evaluation.vertical_derivative,
-    )
+    saddle_gradient = saddle_polish["gradient_norm"]
     saddle_stationary = (
         (saddle_hessian_determinant < 0.0)
         & (saddle_gradient <= gradient_tolerance)

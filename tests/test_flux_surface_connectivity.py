@@ -493,6 +493,105 @@ def test_doubling_fill_matches_fixed_iteration_fixtures_exactly():
         assert int(steps) <= math.ceil(math.log2(sum(confined.shape)))
 
 
+def test_stationary_point_polish_converges_for_saddles_and_extrema():
+    """Fixed-slot spline Newton polish reaches machine-precision stationarity."""
+    radial = _f64(np.linspace(0.2, 2.0, 9))
+    vertical = _f64(np.linspace(-1.4, 1.3, 11))
+    mesh_r, mesh_z = jnp.meshgrid(radial, vertical)
+    stationary_rz = np.asarray((1.13, -0.27))
+    seed_rz = _f64(
+        np.asarray(
+            (
+                (1.06, -0.19),
+                (1.21, -0.36),
+                (0.0, 0.0),
+            )
+        )
+    )
+    valid = jnp.asarray((True, True, False))
+
+    fields_and_types = (
+        ((mesh_r - stationary_rz[0]) ** 2 - (mesh_z - stationary_rz[1]) ** 2, -1),
+        ((mesh_r - stationary_rz[0]) ** 2 + (mesh_z - stationary_rz[1]) ** 2, 1),
+        (-((mesh_r - stationary_rz[0]) ** 2) - (mesh_z - stationary_rz[1]) ** 2, 1),
+    )
+    for values, expected_type in fields_and_types:
+        spline = fsc.fit_tensor_spline(radial, vertical, values)
+        result = fsc.polish_stationary_points(spline, seed_rz, valid)
+        np.testing.assert_allclose(
+            np.asarray(result["position_rz"][:2]),
+            np.broadcast_to(stationary_rz, (2, 2)),
+            atol=2e-15,
+            rtol=0.0,
+        )
+        assert float(jnp.max(result["gradient_norm"][:2])) < 1e-14
+        assert np.array_equal(
+            np.asarray(result["hessian_type"]), [expected_type] * 2 + [0]
+        )
+        assert np.array_equal(np.asarray(result["converged"]), [True, True, False])
+        assert np.array_equal(np.asarray(result["in_domain"]), [True, True, False])
+        assert np.array_equal(np.asarray(result["position_rz"][-1]), [0.0, 0.0])
+        assert float(result["value"][-1]) == 0.0
+        assert float(result["gradient_norm"][-1]) == 0.0
+
+
+def test_stationary_point_polish_has_eager_jit_and_vmap_parity():
+    """The fixed-slot result is identical across JAX execution transforms."""
+    radial = _f64(np.linspace(0.1, 2.1, 10))
+    vertical = _f64(np.linspace(-1.5, 1.5, 12))
+    mesh_r, mesh_z = jnp.meshgrid(radial, vertical)
+    values = (mesh_r - 1.17) ** 2 - 1.3 * (mesh_z + 0.31) ** 2
+    spline = fsc.fit_tensor_spline(radial, vertical, values)
+    seeds = _f64(np.asarray(((1.08, -0.23), (1.24, -0.38), (9.0, 9.0))))
+    valid = jnp.asarray((True, True, True))
+
+    eager = fsc.polish_stationary_points(spline, seeds, valid)
+    compiled = jax.jit(fsc.polish_stationary_points)(spline, seeds, valid)
+    batch_seeds = jnp.stack((seeds, seeds.at[:, 0].add(0.01)))
+    batched = jax.vmap(lambda item: fsc.polish_stationary_points(spline, item, valid))(
+        batch_seeds
+    )
+    per_slice = jax.tree.map(
+        lambda *items: jnp.stack(items),
+        *[fsc.polish_stationary_points(spline, item, valid) for item in batch_seeds],
+    )
+
+    for key in eager:
+        np.testing.assert_array_equal(np.asarray(compiled[key]), np.asarray(eager[key]))
+        np.testing.assert_array_equal(
+            np.asarray(batched[key]), np.asarray(per_slice[key])
+        )
+    assert np.array_equal(np.asarray(eager["in_domain"]), [True, True, False])
+    assert not bool(eager["converged"][-1])
+
+
+def test_traced_contour_retains_cell_confined_saddle_polish():
+    """Contour ambiguity resolution still polishes inside the owning cell."""
+    radial = _f64(np.linspace(0.2, 2.0, 9))
+    vertical = _f64(np.linspace(-1.4, 1.3, 11))
+    stationary_rz = np.asarray(
+        (
+            0.5 * float(radial[4] + radial[5]),
+            0.5 * float(vertical[4] + vertical[5]),
+        )
+    )
+    mesh_r, mesh_z = jnp.meshgrid(radial, vertical)
+    values = (mesh_r - stationary_rz[0]) * (mesh_z - stationary_rz[1])
+
+    result = fsc.traced_spline_contour(values, radial, vertical, _f64(0.0))
+    ambiguous = np.asarray(result["ambiguous_saddle"])
+
+    assert np.count_nonzero(ambiguous) == 1
+    np.testing.assert_allclose(
+        np.asarray(result["saddle_rz"])[ambiguous],
+        stationary_rz[None, :],
+        atol=2e-15,
+        rtol=0.0,
+    )
+    assert bool(np.asarray(result["saddle_stationary"])[ambiguous][0])
+    assert bool(np.asarray(result["ambiguous_tie_broken"])[ambiguous][0])
+
+
 if __name__ == "__main__":
     import pytest
 

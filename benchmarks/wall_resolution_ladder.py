@@ -120,23 +120,39 @@ def _combine_digest(named: dict[str, Any]) -> str:
     return digest.hexdigest()
 
 
+def _plasma_carrier_digest(
+    case: dict[str, Any], profile, terminal_plasma_flux: np.ndarray
+) -> str:
+    """Bind the solved terminal plasma field into the plasma carrier identity."""
+
+    operator = profile.operator
+    grid = operator.grid
+    return _combine_digest(
+        {
+            "grid_coordinate": case["grid_coordinate"],
+            "grid_source_target": grid.source_target,
+            "grid_plasma_target": grid.plasma_target,
+            "grid_plasma_target_r": grid.plasma_target_r,
+            "grid_plasma_target_z": grid.plasma_target_z,
+            "cell_area": operator.area,
+            "inside_material": operator.inside_material,
+            "declared_support": operator.declared_support,
+            "terminal_plasma_flux": terminal_plasma_flux,
+        }
+    )
+
+
 def _fixed_carrier_digests(
-    case: dict[str, Any], profile, current: np.ndarray, context: dict[str, Any]
+    case: dict[str, Any],
+    profile,
+    current: np.ndarray,
+    context: dict[str, Any],
+    terminal_plasma_flux: np.ndarray,
 ) -> dict[str, str]:
     """Return every held-constant carrier identity used by the ladder."""
 
     operator = profile.operator
     grid = operator.grid
-    plasma = {
-        "grid_coordinate": case["grid_coordinate"],
-        "grid_source_target": grid.source_target,
-        "grid_plasma_target": grid.plasma_target,
-        "grid_plasma_target_r": grid.plasma_target_r,
-        "grid_plasma_target_z": grid.plasma_target_z,
-        "cell_area": operator.area,
-        "inside_material": operator.inside_material,
-        "declared_support": operator.declared_support,
-    }
     group = context["group"]
     row = context["row"]
     source_policy = {
@@ -163,7 +179,10 @@ def _fixed_carrier_digests(
         "plasma_prefix": np.asarray(case["state"])[: grid.node_number],
     }
     return {
-        "plasma_carrier_sha256": _combine_digest(plasma),
+        "plasma_carrier_sha256": _plasma_carrier_digest(
+            case, profile, terminal_plasma_flux
+        ),
+        "terminal_plasma_flux_sha256": _array_digest(terminal_plasma_flux),
         "source_policy_sha256": _json_digest(source_policy),
         "conductor_currents_sha256": _array_digest(current),
         "seed_field_sha256": _combine_digest(seed_field),
@@ -466,6 +485,26 @@ def _convergence(rows: list[dict[str, Any]], plasma_pitch: float) -> dict[str, A
     }
 
 
+def _control_reproduction_passes(reproduction: dict[str, Any]) -> bool:
+    """Require exact identity for the control coordinates, seed, and response rows."""
+
+    identity_fields = (
+        "authored_coordinate_exact",
+        "control_operator_wall_coordinate_exact",
+        "control_seed_exact",
+    )
+    audit = reproduction.get("direct_nested_row_audit")
+    response_fields = ("source_to_wall", "plasma_to_wall", "prescribed_wall")
+    return (
+        all(reproduction.get(name) is True for name in identity_fields)
+        and isinstance(audit, dict)
+        and all(
+            isinstance(audit.get(name), dict) and audit[name].get("array_equal") is True
+            for name in response_fields
+        )
+    )
+
+
 def validate_receipt(payload: dict[str, Any]) -> dict[str, Any]:
     """Validate schema, ladder counts, fixed-carrier isolation, and numerics."""
 
@@ -477,22 +516,41 @@ def validate_receipt(payload: dict[str, Any]) -> dict[str, Any]:
     counts = tuple(row.get("wall_target_count") for row in rows)
     if counts != (37, *EXPECTED_COUNTS):
         raise ValueError(f"unexpected wall count sequence: {counts}")
-    trajectory = rows[0]["residual_trajectory_sha256"]
-    fixed = rows[0]["fixed_carrier_digests"]
-    if any(row["residual_trajectory_sha256"] != trajectory for row in rows):
-        raise ValueError("residual trajectory changed across the isolated ladder")
-    if any(row["fixed_carrier_digests"] != fixed for row in rows):
-        raise ValueError("fixed-carrier identity changed across the ladder")
     required = (
         "boundary_flux_wb",
         "contact_coordinate_m",
         "achieved_class",
         "class_margin",
         "residual_trajectory",
+        "residual_trajectory_sha256",
+        "fixed_carrier_digests",
     )
     if any(any(name not in row for name in required) for row in rows):
         raise ValueError("a rung omits a required wall convergence operand")
-    if not payload["control_reproduction"]["passes"]:
+    for row in rows:
+        recomputed = _json_digest(row["residual_trajectory"])
+        if row["residual_trajectory_sha256"] != recomputed:
+            raise ValueError("a residual trajectory digest does not match its values")
+    trajectory = rows[0]["residual_trajectory_sha256"]
+    if any(row["residual_trajectory_sha256"] != trajectory for row in rows):
+        raise ValueError("residual trajectory changed across the isolated ladder")
+    isolation = payload.get("isolation")
+    fixed = (
+        isolation.get("fixed_carrier_digests") if isinstance(isolation, dict) else None
+    )
+    if not isinstance(fixed, dict):
+        raise ValueError("the top-level isolation carrier map is missing")
+    if any(row["fixed_carrier_digests"] != fixed for row in rows):
+        raise ValueError("a row carrier map differs from the top-level isolation map")
+    reproduction = payload.get("control_reproduction")
+    if not isinstance(reproduction, dict):
+        raise ValueError("the control reproduction record is missing")
+    exact_reproduction = _control_reproduction_passes(reproduction)
+    if reproduction.get("passes") is not exact_reproduction:
+        raise ValueError(
+            "the control reproduction pass flag disagrees with exact audits"
+        )
+    if not exact_reproduction:
         raise ValueError("the 37-row control did not reproduce the current operator")
     return {
         "valid": True,
@@ -517,8 +575,10 @@ def run(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
     current = np.asarray(
         base_profile.operator.prescribed_current_field.current, dtype=np.float64
     )
-    fixed_digests = _fixed_carrier_digests(passive_case, base_profile, current, context)
     plasma_flux, trajectory, control_branch = _solve_control(passive_case, base_profile)
+    fixed_digests = _fixed_carrier_digests(
+        passive_case, base_profile, current, context, plasma_flux
+    )
     target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
     authored = np.asarray(base_profile.operator.wall.coordinate, dtype=np.float64)
     fine_coordinate = sample_authored_wall(authored, 8)
@@ -608,14 +668,7 @@ def run(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
             for name, rebuilt in direct_37.items()
         },
     }
-    reproduction["passes"] = all(
-        reproduction[name]
-        for name in (
-            "authored_coordinate_exact",
-            "control_operator_wall_coordinate_exact",
-            "control_seed_exact",
-        )
-    )
+    reproduction["passes"] = _control_reproduction_passes(reproduction)
     plasma_pitch = max(
         float(base_profile.lattice.radial_step),
         float(base_profile.lattice.vertical_step),
@@ -650,8 +703,15 @@ def run(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
         "rows": rows,
         "convergence": _convergence(rows[1:], plasma_pitch),
     }
-    validation = validate_receipt(payload)
-    payload["validation"] = validation
+    try:
+        payload["validation"] = validate_receipt(payload)
+    except ValueError as error:
+        payload["validation"] = {"valid": False, "error": str(error)}
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(
+            json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n"
+        )
+        raise
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(
         json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n"

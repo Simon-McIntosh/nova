@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 import copy
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
 
 from benchmarks.wall_resolution_ladder import (
     SCHEMA,
+    _control_reproduction_passes,
     _convergence,
+    _json_digest,
+    _plasma_carrier_digest,
     sample_authored_wall,
     validate_receipt,
 )
@@ -29,7 +33,9 @@ def _receipt() -> dict:
         "conductor_currents_sha256": "c" * 64,
         "seed_field_sha256": "d" * 64,
         "plasma_seed_prefix_sha256": "e" * 64,
+        "terminal_plasma_flux_sha256": "f" * 64,
     }
+    trajectory = [1.0, 0.5]
     rows = []
     for count in (37, 36, 72, 144, 288):
         rows.append(
@@ -39,14 +45,25 @@ def _receipt() -> dict:
                 "contact_coordinate_m": [0.5, -1.0],
                 "achieved_class": "limited",
                 "class_margin": -0.2,
-                "residual_trajectory": [1.0, 0.5],
-                "residual_trajectory_sha256": "f" * 64,
+                "residual_trajectory": trajectory.copy(),
+                "residual_trajectory_sha256": _json_digest(trajectory),
                 "fixed_carrier_digests": digests,
             }
         )
+    exact_audit = {
+        name: {"array_equal": True}
+        for name in ("source_to_wall", "plasma_to_wall", "prescribed_wall")
+    }
     return {
         "schema": SCHEMA,
-        "control_reproduction": {"passes": True},
+        "control_reproduction": {
+            "authored_coordinate_exact": True,
+            "control_operator_wall_coordinate_exact": True,
+            "control_seed_exact": True,
+            "direct_nested_row_audit": exact_audit,
+            "passes": True,
+        },
+        "isolation": {"fixed_carrier_digests": digests},
         "rows": rows,
     }
 
@@ -71,13 +88,66 @@ def test_the_unique_baseline_removes_only_the_closure_duplicate():
     np.testing.assert_array_equal(sample_authored_wall(wall, 1), wall[:-1])
 
 
-def test_receipt_validation_requires_fixed_carrier_identity():
+def test_terminal_plasma_flux_is_part_of_carrier_identity():
+    grid = SimpleNamespace(
+        source_target=np.arange(4.0).reshape(2, 2),
+        plasma_target=np.arange(6.0).reshape(2, 3),
+        plasma_target_r=np.array([0.5, 0.6]),
+        plasma_target_z=np.array([-0.1, 0.1]),
+    )
+    profile = SimpleNamespace(
+        operator=SimpleNamespace(
+            grid=grid,
+            area=np.array([0.1, 0.2]),
+            inside_material=np.array([False, True]),
+            declared_support=np.array([True, True]),
+        )
+    )
+    case = {"grid_coordinate": np.array([[0.5, -0.1], [0.6, 0.1]])}
+    terminal = np.array([0.01, 0.02])
+
+    original = _plasma_carrier_digest(case, profile, terminal)
+    changed = _plasma_carrier_digest(case, profile, terminal + [0.0, 1.0e-12])
+
+    assert original != changed
+
+
+def test_receipt_validation_recomputes_each_residual_trajectory_digest():
+    payload = _receipt()
+    payload["rows"][2]["residual_trajectory"][1] = 0.4
+    with pytest.raises(ValueError, match="digest does not match its values"):
+        validate_receipt(payload)
+
+
+def test_receipt_validation_requires_top_level_carrier_identity():
     payload = _receipt()
     payload["rows"][3]["fixed_carrier_digests"] = {
         **payload["rows"][3]["fixed_carrier_digests"],
         "seed_field_sha256": "0" * 64,
     }
-    with pytest.raises(ValueError, match="fixed-carrier identity changed"):
+    with pytest.raises(ValueError, match="differs from the top-level isolation map"):
+        validate_receipt(payload)
+
+
+def test_nonexact_response_row_fails_control_reproduction():
+    payload = _receipt()
+    payload["control_reproduction"]["direct_nested_row_audit"]["prescribed_wall"][
+        "array_equal"
+    ] = False
+    payload["control_reproduction"]["passes"] = False
+
+    assert not _control_reproduction_passes(payload["control_reproduction"])
+    with pytest.raises(ValueError, match="37-row control did not reproduce"):
+        validate_receipt(payload)
+
+
+def test_validation_does_not_trust_a_control_pass_flag():
+    payload = _receipt()
+    payload["control_reproduction"]["direct_nested_row_audit"]["source_to_wall"][
+        "array_equal"
+    ] = False
+
+    with pytest.raises(ValueError, match="pass flag disagrees with exact audits"):
         validate_receipt(payload)
 
 

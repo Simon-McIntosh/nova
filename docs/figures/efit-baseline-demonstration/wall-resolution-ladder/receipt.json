@@ -21,7 +21,7 @@
         "maximum_relative_difference": 1.6948392191765903e-14
       }
     },
-    "passes": true
+    "passes": false
   },
   "convergence": {
     "count_sequence": [
@@ -45,10 +45,11 @@
     "direct_wall_section_kernel_evaluations": 938,
     "fixed_carrier_digests": {
       "conductor_currents_sha256": "c4aaaa00509a89ecf1b2940e80c32f239381ecd2d93cf08f233873d143c62e58",
-      "plasma_carrier_sha256": "0f3c861c9549bdab13e8a18a9a29d32ff0bd1eda37a4f847d86616ce2f301064",
+      "plasma_carrier_sha256": "03985049adc54fdfe75b439086ba73e7c3d74d9a2b95e976e52664c82ba03ef1",
       "plasma_seed_prefix_sha256": "3fbd20dc9ac4002b36ed1805c497b1167e2fa66ce5f5ad7fdccf1fba3d6570a1",
       "seed_field_sha256": "26f41cc0311b8454e5d45d876ec02eec3fe5689e496cc4df1dfe8ec0b20f1139",
-      "source_policy_sha256": "efb4827e0d114c76a4036d91fd72fd4fef0b0dc199d6013d05c200d45e2dc1e7"
+      "source_policy_sha256": "efb4827e0d114c76a4036d91fd72fd4fef0b0dc199d6013d05c200d45e2dc1e7",
+      "terminal_plasma_flux_sha256": "f11ed32ec16d5596683505467c9952b4f5cdf8917af4c374e30eafb2567e13fc"
     },
     "plasma_terminal_held_fixed": true,
     "residual_trajectory_held_fixed": true,
@@ -66,7 +67,7 @@
         "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
         "size_bytes": 645864,
         "stored_circuit_count": 101,
-        "warm_load_seconds": 0.07298905309289694
+        "warm_load_seconds": 0.006055684993043542
       },
       "loaded_from_persisted_carrier": true,
       "named_cache_only_check": {
@@ -81,7 +82,7 @@
         ],
         "direct_green_operator_builder_entries": 0,
         "passes": true,
-        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.075154 direct_builders=0 verdict=PASS"
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.013424 direct_builders=0 verdict=PASS"
       }
     },
     "varying_inputs": [
@@ -114,10 +115,11 @@
       ],
       "fixed_carrier_digests": {
         "conductor_currents_sha256": "c4aaaa00509a89ecf1b2940e80c32f239381ecd2d93cf08f233873d143c62e58",
-        "plasma_carrier_sha256": "0f3c861c9549bdab13e8a18a9a29d32ff0bd1eda37a4f847d86616ce2f301064",
+        "plasma_carrier_sha256": "03985049adc54fdfe75b439086ba73e7c3d74d9a2b95e976e52664c82ba03ef1",
         "plasma_seed_prefix_sha256": "3fbd20dc9ac4002b36ed1805c497b1167e2fa66ce5f5ad7fdccf1fba3d6570a1",
         "seed_field_sha256": "26f41cc0311b8454e5d45d876ec02eec3fe5689e496cc4df1dfe8ec0b20f1139",
-        "source_policy_sha256": "efb4827e0d114c76a4036d91fd72fd4fef0b0dc199d6013d05c200d45e2dc1e7"
+        "source_policy_sha256": "efb4827e0d114c76a4036d91fd72fd4fef0b0dc199d6013d05c200d45e2dc1e7",
+        "terminal_plasma_flux_sha256": "f11ed32ec16d5596683505467c9952b4f5cdf8917af4c374e30eafb2567e13fc"
       },
       "fixed_plasma_terminal_relative_residual": 0.005167711618738154,
       "kind": "authored_37_row_control",
@@ -336,10 +338,11 @@
       ],
       "fixed_carrier_digests": {
         "conductor_currents_sha256": "c4aaaa00509a89ecf1b2940e80c32f239381ecd2d93cf08f233873d143c62e58",
-        "plasma_carrier_sha256": "0f3c861c9549bdab13e8a18a9a29d32ff0bd1eda37a4f847d86616ce2f301064",
+        "plasma_carrier_sha256": "03985049adc54fdfe75b439086ba73e7c3d74d9a2b95e976e52664c82ba03ef1",
         "plasma_seed_prefix_sha256": "3fbd20dc9ac4002b36ed1805c497b1167e2fa66ce5f5ad7fdccf1fba3d6570a1",
         "seed_field_sha256": "26f41cc0311b8454e5d45d876ec02eec3fe5689e496cc4df1dfe8ec0b20f1139",
-        "source_policy_sha256": "efb4827e0d114c76a4036d91fd72fd4fef0b0dc199d6013d05c200d45e2dc1e7"
+        "source_policy_sha256": "efb4827e0d114c76a4036d91fd72fd4fef0b0dc199d6013d05c200d45e2dc1e7",
+        "terminal_plasma_flux_sha256": "f11ed32ec16d5596683505467c9952b4f5cdf8917af4c374e30eafb2567e13fc"
       },
       "fixed_plasma_terminal_relative_residual": 0.005167711618738154,
       "kind": "count_rung",
@@ -559,10 +562,11 @@
       ],
       "fixed_carrier_digests": {
         "conductor_currents_sha256": "c4aaaa00509a89ecf1b2940e80c32f239381ecd2d93cf08f233873d143c62e58",
-        "plasma_carrier_sha256": "0f3c861c9549bdab13e8a18a9a29d32ff0bd1eda37a4f847d86616ce2f301064",
+        "plasma_carrier_sha256": "03985049adc54fdfe75b439086ba73e7c3d74d9a2b95e976e52664c82ba03ef1",
         "plasma_seed_prefix_sha256": "3fbd20dc9ac4002b36ed1805c497b1167e2fa66ce5f5ad7fdccf1fba3d6570a1",
         "seed_field_sha256": "26f41cc0311b8454e5d45d876ec02eec3fe5689e496cc4df1dfe8ec0b20f1139",
-        "source_policy_sha256": "efb4827e0d114c76a4036d91fd72fd4fef0b0dc199d6013d05c200d45e2dc1e7"
+        "source_policy_sha256": "efb4827e0d114c76a4036d91fd72fd4fef0b0dc199d6013d05c200d45e2dc1e7",
+        "terminal_plasma_flux_sha256": "f11ed32ec16d5596683505467c9952b4f5cdf8917af4c374e30eafb2567e13fc"
       },
       "fixed_plasma_terminal_relative_residual": 0.005167711618738154,
       "kind": "count_rung",
@@ -782,10 +786,11 @@
       ],
       "fixed_carrier_digests": {
         "conductor_currents_sha256": "c4aaaa00509a89ecf1b2940e80c32f239381ecd2d93cf08f233873d143c62e58",
-        "plasma_carrier_sha256": "0f3c861c9549bdab13e8a18a9a29d32ff0bd1eda37a4f847d86616ce2f301064",
+        "plasma_carrier_sha256": "03985049adc54fdfe75b439086ba73e7c3d74d9a2b95e976e52664c82ba03ef1",
         "plasma_seed_prefix_sha256": "3fbd20dc9ac4002b36ed1805c497b1167e2fa66ce5f5ad7fdccf1fba3d6570a1",
         "seed_field_sha256": "26f41cc0311b8454e5d45d876ec02eec3fe5689e496cc4df1dfe8ec0b20f1139",
-        "source_policy_sha256": "efb4827e0d114c76a4036d91fd72fd4fef0b0dc199d6013d05c200d45e2dc1e7"
+        "source_policy_sha256": "efb4827e0d114c76a4036d91fd72fd4fef0b0dc199d6013d05c200d45e2dc1e7",
+        "terminal_plasma_flux_sha256": "f11ed32ec16d5596683505467c9952b4f5cdf8917af4c374e30eafb2567e13fc"
       },
       "fixed_plasma_terminal_relative_residual": 0.005167711618738154,
       "kind": "count_rung",
@@ -1000,10 +1005,11 @@
       ],
       "fixed_carrier_digests": {
         "conductor_currents_sha256": "c4aaaa00509a89ecf1b2940e80c32f239381ecd2d93cf08f233873d143c62e58",
-        "plasma_carrier_sha256": "0f3c861c9549bdab13e8a18a9a29d32ff0bd1eda37a4f847d86616ce2f301064",
+        "plasma_carrier_sha256": "03985049adc54fdfe75b439086ba73e7c3d74d9a2b95e976e52664c82ba03ef1",
         "plasma_seed_prefix_sha256": "3fbd20dc9ac4002b36ed1805c497b1167e2fa66ce5f5ad7fdccf1fba3d6570a1",
         "seed_field_sha256": "26f41cc0311b8454e5d45d876ec02eec3fe5689e496cc4df1dfe8ec0b20f1139",
-        "source_policy_sha256": "efb4827e0d114c76a4036d91fd72fd4fef0b0dc199d6013d05c200d45e2dc1e7"
+        "source_policy_sha256": "efb4827e0d114c76a4036d91fd72fd4fef0b0dc199d6013d05c200d45e2dc1e7",
+        "terminal_plasma_flux_sha256": "f11ed32ec16d5596683505467c9952b4f5cdf8917af4c374e30eafb2567e13fc"
       },
       "fixed_plasma_terminal_relative_residual": 0.005167711618738154,
       "kind": "count_rung",
@@ -1206,14 +1212,7 @@
   ],
   "schema": "isolated-wall-resolution-ladder",
   "validation": {
-    "row_count": 5,
-    "valid": true,
-    "wall_target_counts": [
-      37,
-      36,
-      72,
-      144,
-      288
-    ]
+    "error": "the 37-row control did not reproduce the current operator",
+    "valid": false
   }
 }

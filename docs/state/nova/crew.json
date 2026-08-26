@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T15:05:53",
+  "updated": "2026-08-26T15:12:45",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -42422,9 +42422,112 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T130711588252-sse-closed-boundary-comparator-verify",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a74",
+        "node": "sse-closed-boundary-comparator-verify",
+        "node_definition": {
+          "done_when": "One captured CPU pytest invocation over tests/test_boundary_comparison.py reports 18 passes; independent assertions confirm the four-symbol public surface, 2000-point default arc-length sampling, point-to-segment symmetric sup and combined RMS in metres, correct finite/infinite/NaN class handling, unordered X-set minimum, all six deterministic missing-input failures, strict-JSON nulls with no NaN, rejection of invalid geometry, and API-level exclusion of open legs; manifest states PASS or HOLD.",
+          "estimated_hours": 0.6,
+          "goal": "Independently verify commit e3784a31 as the shared host-only closed-boundary comparison authority.",
+          "id": "sse-closed-boundary-comparator-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-closed-boundary-comparator-verify.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "35m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-closed-boundary-comparator-verify.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "integration-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T13:07:21Z",
+        "completed_at": "2026-08-26T13:10:39Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 198,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 198,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "e3784a3127d1ca1bc6f07057fb5252d574af3732",
+        "commits": [
+          "e3784a3127d1ca1bc6f07057fb5252d574af3732"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "env -u VIRTUAL_ENV JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=\"$PWD\" uv run --no-sync pytest tests/test_boundary_comparison.py -q",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T130711588252-sse-closed-boundary-comparator-verify/stream.jsonl",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-closed-boundary-comparator-verify.md",
+        "scope_changed": false,
+        "session_id": "01a03de1-cbad-7f72-a60f-76343dd3508e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 701696,
+            "cached_input_tokens_cumulative": 1554944,
+            "input_tokens": 729347,
+            "input_tokens_cumulative": 1599036,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 6871,
+            "reasoning_output_tokens": 784,
+            "reasoning_output_tokens_cumulative": 2814
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest invocation",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 948
+    "_version": 949
   }
 }

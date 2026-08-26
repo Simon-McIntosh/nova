@@ -395,11 +395,12 @@ def _posthoc_margin_read(profile, state: np.ndarray, topology) -> dict[str, Any]
     classification_wall = jnp.concatenate(
         (topology.wall_point, topology.wall_point_flux[None])
     )
+    _axis_seed, connectivity_material = operator.connectivity_axis_seed(topology.axis)
     reading = traced_margin_candidate_diagnostics(
         grid_flux.reshape((radius.size, height.size)).T,
         jnp.asarray(radius, dtype=jnp.float64),
         jnp.asarray(height, dtype=jnp.float64),
-        operator.inside_material.reshape((radius.size, height.size)).T,
+        connectivity_material.reshape((radius.size, height.size)).T,
         topology.axis[0],
         topology.axis[1],
         96,

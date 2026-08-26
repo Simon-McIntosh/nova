@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T16:21:34",
+  "updated": "2026-08-26T16:22:41",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -44914,9 +44914,170 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T135026317772-pod-wall-control-batch-repair",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-wall-control-batch-repair",
+        "node_definition": {
+          "done_when": "np.array_equal passes for source, prescribed, and plasma direct controls; exact 37x2 and 1126x2 batching/order contracts are asserted; the perturbed-row fail-closed case remains; receipt validation passes while first_plasma_equivalent_wall_count and limiter_operand_stop_count remain explicit nulls unless separately measured. If any same-host original-batch control remains unequal, stop without tolerance or shared-kernel edits and report the first checkpointed unequal boundary.",
+          "estimated_hours": 1.0,
+          "goal": "Implement the benchmark-only direct-control reconstruction on the original authored 37-target source batch and original grid-before-wall 1126-target prescribed batch while leaving the shared polygon kernel and every experimental ladder rung unchanged.",
+          "id": "pod-wall-control-batch-repair",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-wall-control-batch-repair.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/wall_resolution_ladder.py",
+            "tests/test_wall_resolution_ladder.py",
+            "docs/figures/efit-baseline-demonstration/wall-resolution-ladder/receipt.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "wall-surface",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T13:50:37Z",
+        "completed_at": "2026-08-26T14:13:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1347,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1347,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "d0eb24481423ba4fe661a4967f44f4d3e88ed70d",
+        "commits": [
+          "378a034047ac17ad16edcfcad2a31fa7e71c2dd1"
+        ],
+        "changed_lines": {
+          "added": 182,
+          "removed": 32,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_wall_resolution_ladder.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T141743951031-pod-wall-control-batch-verify/test-wall-control-batch.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-wall-control-batch-repair.md",
+        "scope_changed": false,
+        "session_id": "01a0393f-cc5a-7852-89ab-ea49a36244e7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6066688,
+            "cached_input_tokens_cumulative": 11248384,
+            "input_tokens": 6466039,
+            "input_tokens_cumulative": 11752518,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 15351,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 4024
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 284,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 3884,
+              "log_age_seconds": 592,
+              "log_fresh": true,
+              "manifest_commits": [
+                "a85b597f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-achieved-topology-core.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T124538795352-pod-achieved-topology-core --gate <verdict> --commit a85b597f",
+              "node": "pod-achieved-topology-core",
+              "phase": "complete",
+              "plan": "profile-owned-solve-domain",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T124538795352-pod-achieved-topology-core",
+              "terminal_age_seconds": 624,
+              "terminal_at": "2026-08-26T13:40:09Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-achieved-topology-core"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 960,
+              "budget_seconds": 2100,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: |",
+              "elapsed_seconds": 3060,
+              "log_age_seconds": 345,
+              "log_fresh": true,
+              "manifest_commits": [],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-wall-control-identity-audit.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "reckon crew resume --run r-20260826T125257080148-pod-wall-control-identity-audit --advice <answer>",
+              "node": "pod-wall-control-identity-audit",
+              "phase": "working",
+              "plan": "profile-owned-solve-domain",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T125257080148-pod-wall-control-identity-audit",
+              "terminal_age_seconds": 364,
+              "terminal_at": "2026-08-26T13:44:29Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-wall-control-identity-audit"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 976
+    "_version": 977
   }
 }

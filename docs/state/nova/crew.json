@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T23:02:44",
+  "updated": "2026-08-26T23:03:23",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -50551,9 +50551,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T205402071978-ebd-wall-coordinate-verify",
+        "plan": "efit-baseline-demonstration",
+        "section": "",
+        "node": "ebd-wall-coordinate-verify",
+        "node_definition": {
+          "done_when": "A report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/wall-coordinate-verify.md states where the preregistered wall coordinate payload and its digest live, reconstructs NOVA_DIIID_PHYSICAL_WALL_COORDINATE_BASE64 and shows its digest matches the preregistration record, confirms the repaired-ring cache identity sha256:c842... is reproducible or names exactly what is missing, and gives the verified export lines a compute node must use; no repository file modified",
+          "estimated_hours": null,
+          "goal": "Verification that the preregistered DIII-D transported wall-coordinate payload and the governed repaired-ring artifact identity can be reconstructed exactly as the recorded five-frame job used them, so compute is not reserved against an unverifiable input authority",
+          "id": "ebd-wall-coordinate-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T205402071978-ebd-wall-coordinate-verify/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "",
+          "spec_level": "",
+          "time_budget": "20m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/wall-coordinate-verify.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "",
+        "member": "campaign-scout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-26T20:54:13Z",
+        "completed_at": "2026-08-26T21:02:50Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 517,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 517,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "d1ccb65f2a8f57bfa510b64424c69ae8d253220b",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "digest reconstruction: repaired-ring manifest sha256:c842fd7d reproducible, netCDF sha256:11a12df0 matched, 84x2 wall digest a4513551 matched, canonical base64 round-trip verified",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/wall-coordinate-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T205402071978-ebd-wall-coordinate-verify/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03fcf-d01a-7ae1-9ef6-62b4272259f5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 3926272,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 4174218,
+            "output_tokens": 2287,
+            "output_tokens_cumulative": 19734,
+            "reasoning_output_tokens": 1085,
+            "reasoning_output_tokens_cumulative": 5799
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1051
+    "_version": 1052
   }
 }

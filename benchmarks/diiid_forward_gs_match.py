@@ -33,11 +33,11 @@ import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
-from contourpy import contour_generator
 from matplotlib.path import Path as PolygonPath
 from scipy.constants import mu_0
 from scipy.interpolate import RectBivariateSpline
-from scipy.spatial import cKDTree
+
+from benchmarks.diiid_state_of_play_figures import boundary_gradient_minimum
 
 from benchmarks.diiid_corpus_conventions import (
     CORPUS_COCOS,
@@ -58,6 +58,10 @@ from nova.equilibrium.branch_selection import (
     SelectionPolicy,
     select_forward_branch,
 )
+from nova.equilibrium.boundary_comparison import (
+    BoundaryMode,
+    compare_closed_boundaries,
+)
 from nova.equilibrium.flux_surface_geometry import (
     FluxSurfaceGeometry,
     SurfaceGeometryError,
@@ -69,6 +73,7 @@ from nova.equilibrium.fixed_point import (
 )
 from nova.equilibrium import fixed_point as fixed_point_solver
 from nova.equilibrium.map_extraction import extract_flux_functions
+from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.topology import TopologyClass
 from nova.equilibrium.wall_mask import inside_polygon
@@ -211,8 +216,11 @@ class MatchMetrics:
     interior_r_squared: float
     interior_fractional_rms: float
     additive_gauge_wb: float
-    separatrix_mean_radial_separation_mm: float
-    separatrix_maximum_radial_separation_mm: float
+    closed_boundary_symmetric_sup_distance_m: float | None
+    closed_boundary_symmetric_rms_distance_m: float | None
+    polished_saddle_to_nearest_efit_x_m: float | None
+    topology_class_agreement: bool | None
+    boundary_comparison_failures: tuple[str, ...]
     magnetic_axis_displacement_mm: float
     predicted_q95_nova: float
     labelled_q95_nova: float
@@ -233,7 +241,7 @@ class FrameResult:
     fixed_point_relative_residual: float
     residual_tolerance: float
     finite: bool
-    diverted: bool
+    achieved_topology_class: str | None
     converged: bool
     convergence_criterion: str
     solver_termination: str
@@ -1103,23 +1111,59 @@ def build_profile(
     )
 
 
-def _separatrix(
+def _sample_cubic_branch(
+    controls_rz: np.ndarray,
+    valid: np.ndarray,
+    *,
+    samples_per_segment: int = 8,
+) -> np.ndarray:
+    """Sample only valid ordered spline segments for host comparison or plotting."""
+
+    controls = np.asarray(controls_rz, dtype=float)[np.asarray(valid, dtype=bool)]
+    if not len(controls):
+        return np.empty((0, 2), dtype=float)
+    parameter = np.linspace(0.0, 1.0, samples_per_segment, endpoint=False)
+    one_minus = 1.0 - parameter
+    weights = np.column_stack(
+        (
+            one_minus**3,
+            3.0 * one_minus**2 * parameter,
+            3.0 * one_minus * parameter**2,
+            parameter**3,
+        )
+    )
+    sampled = np.einsum("tc,scd->std", weights, controls).reshape(-1, 2)
+    return np.vstack((sampled, controls[-1, -1]))
+
+
+def _assembled_boundary_geometry(
+    flux: np.ndarray,
     radius: np.ndarray,
     height: np.ndarray,
-    flux: np.ndarray,
-    axis: float,
-    boundary: float,
-) -> np.ndarray:
-    normalised = (flux - axis) / (boundary - axis)
-    lines = contour_generator(x=radius, y=height, z=normalised.T).lines(1.0)
-    finite = [line[np.all(np.isfinite(line), axis=1)] for line in lines]
-    finite = [line for line in finite if len(line) >= 4]
-    if not finite:
-        return np.empty((0, 2))
-    return max(
-        finite,
-        key=lambda line: np.sum(np.linalg.norm(np.diff(line, axis=0), axis=1)),
+    boundary_flux: float,
+    axis_rz: np.ndarray,
+) -> tuple[np.ndarray, tuple[np.ndarray, ...]]:
+    """Return the spline-assembled closed boundary and separately typed legs."""
+
+    branches = jax.device_get(
+        assemble_separatrix_branches(
+            jnp.asarray(flux).T,
+            jnp.asarray(radius),
+            jnp.asarray(height),
+            jnp.asarray(boundary_flux),
+            jnp.asarray(axis_rz),
+        )
     )
+    closed = _sample_cubic_branch(
+        branches["closed_controls_rz"], branches["closed_valid"]
+    )
+    open_branches = tuple(
+        _sample_cubic_branch(
+            branches["open_controls_rz"][index], branches["open_valid"][index]
+        )
+        for index in np.flatnonzero(branches["open_branch_valid"])
+    )
+    return closed, open_branches
 
 
 def gauge_metrics(
@@ -1137,20 +1181,6 @@ def gauge_metrics(
     reference_rms = float(np.sqrt(np.mean((actual - np.mean(actual)) ** 2)))
     fractional_rms = float(np.sqrt(np.mean(residual**2)) / reference_rms)
     return r_squared, fractional_rms, gauge, predicted + gauge
-
-
-def contour_separation(
-    predicted: np.ndarray, labelled: np.ndarray
-) -> tuple[float, float]:
-    """Return symmetric nearest-contour radial separations in millimetres."""
-
-    if len(predicted) < 2 or len(labelled) < 2:
-        return float("nan"), float("nan")
-    distances = np.r_[
-        cKDTree(labelled).query(predicted)[0],
-        cKDTree(predicted).query(labelled)[0],
-    ]
-    return 1000.0 * float(np.mean(distances)), 1000.0 * float(np.max(distances))
 
 
 def _solve_registered(
@@ -1327,20 +1357,32 @@ def solve_frame(
         label, predicted, interior
     )
     topology = equilibrium.topology
-    predicted_contour = _separatrix(
+    predicted_closed_boundary, predicted_open_branches = _assembled_boundary_geometry(
+        predicted,
         radius,
         height,
-        predicted,
-        float(topology.axis_flux),
         float(topology.boundary_flux),
+        np.asarray(topology.axis, dtype=float),
     )
     count = int(row["efit_lcfs_n"][frame])
-    labelled_contour = np.c_[
+    labelled_closed_boundary = np.c_[
         np.asarray(row["efit_lcfs_r"][frame][:count], dtype=float),
         np.asarray(row["efit_lcfs_z"][frame][:count], dtype=float),
     ]
-    separation_mean, separation_maximum = contour_separation(
-        predicted_contour, labelled_contour
+    full_radius, full_height = canonical_axes(row)
+    labelled_x_point = boundary_gradient_minimum(
+        full_radius,
+        full_height,
+        np.asarray(row["efit_psirz"][frame], dtype=float),
+        labelled_closed_boundary,
+    )
+    boundary_comparison = compare_closed_boundaries(
+        predicted_closed_boundary,
+        labelled_closed_boundary,
+        class_margin=float(topology.class_margin),
+        reference_mode=BoundaryMode.DIVERTED,
+        predicted_saddle_rz_m=np.asarray(topology.x_point, dtype=float),
+        reference_x_points_rz_m=labelled_x_point[None, :],
     )
     labelled_axis = np.asarray(
         [row["efit_r_axis"][frame], row["efit_z_axis"][frame]], dtype=float
@@ -1363,14 +1405,18 @@ def solve_frame(
     q95_error = (predicted_q95 - labelled_q95) / abs(labelled_q95)
     residual = float(equilibrium.fixed_point.residual)
     finite = bool(equilibrium.finite.passed)
-    diverted = bool(topology.diverted)
+    achieved_topology_class = (
+        boundary_comparison.achieved_mode.value
+        if boundary_comparison.achieved_mode is not None
+        else None
+    )
     achieved_current_a = float(np.sum(np.asarray(equilibrium.cell_current)))
     current_relative_error = abs(achieved_current_a - target_current_a) / abs(
         target_current_a
     )
     converged = bool(
         finite
-        and diverted
+        and boundary_comparison.achieved_mode is BoundaryMode.DIVERTED
         and branch_converged
         and not seed_identity
         and np.isfinite(residual)
@@ -1393,10 +1439,11 @@ def solve_frame(
         fixed_point_relative_residual=residual,
         residual_tolerance=GATE_RESIDUAL_TOLERANCE,
         finite=finite,
-        diverted=diverted,
+        achieved_topology_class=achieved_topology_class,
         converged=converged,
         convergence_criterion=(
-            "finite receipt AND diverted topology AND fixed-point relative residual "
+            "finite receipt AND margin-derived diverted topology AND fixed-point "
+            "relative residual "
             f"<= {GATE_RESIDUAL_TOLERANCE:g} AND target-current relative error "
             "<= 1e-10 AND cold seed is not label identity"
         ),
@@ -1410,8 +1457,17 @@ def solve_frame(
             interior_r_squared=r_squared,
             interior_fractional_rms=fractional_rms,
             additive_gauge_wb=gauge,
-            separatrix_mean_radial_separation_mm=separation_mean,
-            separatrix_maximum_radial_separation_mm=separation_maximum,
+            closed_boundary_symmetric_sup_distance_m=(
+                boundary_comparison.symmetric_sup_distance_m
+            ),
+            closed_boundary_symmetric_rms_distance_m=(
+                boundary_comparison.symmetric_rms_distance_m
+            ),
+            polished_saddle_to_nearest_efit_x_m=(
+                boundary_comparison.x_point_distance_m
+            ),
+            topology_class_agreement=boundary_comparison.topology_class_agreement,
+            boundary_comparison_failures=boundary_comparison.failures,
             magnetic_axis_displacement_mm=axis_displacement,
             predicted_q95_nova=predicted_q95,
             labelled_q95_nova=labelled_q95,
@@ -1426,8 +1482,9 @@ def solve_frame(
         "labelled": label,
         "predicted": aligned,
         "difference": aligned - label,
-        "labelled_contour": labelled_contour,
-        "predicted_contour": predicted_contour,
+        "labelled_closed_boundary": labelled_closed_boundary,
+        "predicted_closed_boundary": predicted_closed_boundary,
+        "predicted_open_branches": predicted_open_branches,
         "pseudo_wall": wall,
     }
     return result, fields
@@ -1441,6 +1498,18 @@ def _distribution(values: list[float]) -> dict[str, float]:
         "maximum": float(np.nanmax(array)),
         "mean": float(np.nanmean(array)),
     }
+
+
+def _optional_distribution(
+    values: list[float | None],
+) -> dict[str, float | None]:
+    """Summarize available comparison metrics without fabricating missing values."""
+
+    finite = np.asarray([value for value in values if value is not None], dtype=float)
+    finite = finite[np.isfinite(finite)]
+    if not len(finite):
+        return {key: None for key in ("minimum", "median", "maximum", "mean")}
+    return _distribution(finite.tolist())
 
 
 def _extended_distribution(values: np.ndarray) -> dict[str, Any]:
@@ -1522,11 +1591,17 @@ def summarize(
                 "frame": item.frame,
                 "interior_r_squared": item.metrics.interior_r_squared,
                 "iterations": item.iterations,
-                "terminal_topology": "diverted" if item.diverted else "limited",
+                "achieved_topology_class": item.achieved_topology_class,
+                "topology_class_agreement": item.metrics.topology_class_agreement,
+                "boundary_comparison_failures": list(
+                    item.metrics.boundary_comparison_failures
+                ),
                 "converged": item.converged,
                 "verdict": (
                     "PASS"
                     if item.converged
+                    and not item.metrics.boundary_comparison_failures
+                    and item.metrics.topology_class_agreement is True
                     and item.metrics.interior_r_squared
                     >= REGISTERED_MEDIAN_INTERIOR_R2_BAR
                     else "FAIL"
@@ -1539,14 +1614,20 @@ def summarize(
             "interior_fractional_rms": _distribution(
                 [item.metrics.interior_fractional_rms for item in results]
             ),
-            "separatrix_mean_radial_separation_mm": _distribution(
-                [item.metrics.separatrix_mean_radial_separation_mm for item in results]
-            ),
-            "separatrix_maximum_radial_separation_mm": _distribution(
+            "closed_boundary_symmetric_sup_distance_m": _optional_distribution(
                 [
-                    item.metrics.separatrix_maximum_radial_separation_mm
+                    item.metrics.closed_boundary_symmetric_sup_distance_m
                     for item in results
                 ]
+            ),
+            "closed_boundary_symmetric_rms_distance_m": _optional_distribution(
+                [
+                    item.metrics.closed_boundary_symmetric_rms_distance_m
+                    for item in results
+                ]
+            ),
+            "polished_saddle_to_nearest_efit_x_m": _optional_distribution(
+                [item.metrics.polished_saddle_to_nearest_efit_x_m for item in results]
             ),
             "magnetic_axis_displacement_mm": _distribution(
                 [item.metrics.magnetic_axis_displacement_mm for item in results]
@@ -1559,6 +1640,11 @@ def summarize(
         "passed": bool(
             len(results) >= EXECUTION_FRAME_COUNT
             and all_converged
+            and all(
+                not item.metrics.boundary_comparison_failures
+                and item.metrics.topology_class_agreement is True
+                for item in results
+            )
             and median_r_squared >= REGISTERED_MEDIAN_INTERIOR_R2_BAR
         ),
         "frame_records": [asdict(item) for item in results],
@@ -1585,20 +1671,29 @@ def frame_figure(
                 radius, height, frame[name].T, shading="auto", cmap=colour
             )
             axis.plot(
-                frame["labelled_contour"][:, 0],
-                frame["labelled_contour"][:, 1],
+                frame["labelled_closed_boundary"][:, 0],
+                frame["labelled_closed_boundary"][:, 1],
                 color="black",
                 linewidth=0.8,
                 label="label LCFS",
             )
-            if len(frame["predicted_contour"]):
+            if len(frame["predicted_closed_boundary"]):
                 axis.plot(
-                    frame["predicted_contour"][:, 0],
-                    frame["predicted_contour"][:, 1],
+                    frame["predicted_closed_boundary"][:, 0],
+                    frame["predicted_closed_boundary"][:, 1],
                     color="tab:red",
                     linestyle="--",
                     linewidth=0.9,
-                    label="forward separatrix",
+                    label="forward closed boundary",
+                )
+            for branch in frame["predicted_open_branches"]:
+                axis.plot(
+                    branch[:, 0],
+                    branch[:, 1],
+                    color="tab:red",
+                    linestyle=":",
+                    linewidth=0.7,
+                    label="forward open leg",
                 )
             axis.set_aspect("equal")
             axis.set_xlabel("R [m]")
@@ -1649,18 +1744,24 @@ def cohort_figure(results: list[FrameResult], path: Path) -> None:
     twin.set_ylabel("fractional RMS")
     axes[0, 1].plot(
         index,
-        [item.metrics.separatrix_mean_radial_separation_mm for item in results],
+        [item.metrics.closed_boundary_symmetric_rms_distance_m for item in results],
         "o-",
-        label="mean",
+        label="symmetric RMS",
     )
     axes[0, 1].plot(
         index,
-        [item.metrics.separatrix_maximum_radial_separation_mm for item in results],
+        [item.metrics.closed_boundary_symmetric_sup_distance_m for item in results],
         "s-",
-        label="maximum",
+        label="symmetric sup",
     )
-    axes[0, 1].set_title("Separatrix separation")
-    axes[0, 1].set_ylabel("mm")
+    axes[0, 1].plot(
+        index,
+        [item.metrics.polished_saddle_to_nearest_efit_x_m for item in results],
+        "^:",
+        label="saddle to EFIT X",
+    )
+    axes[0, 1].set_title("Closed-boundary and X-point separation")
+    axes[0, 1].set_ylabel("m")
     axes[0, 1].legend(fontsize=8)
     axes[1, 0].plot(
         index,

@@ -1,4 +1,5 @@
 import importlib.util
+import inspect
 import json
 import sys
 from pathlib import Path
@@ -96,12 +97,73 @@ def test_flux_score_removes_only_the_additive_gauge():
     np.testing.assert_allclose(aligned, labelled)
 
 
-def test_contour_separation_is_symmetric_and_reported_in_millimetres():
-    labelled = np.array([[1.0, 0.0], [1.0, 1.0]])
-    predicted = labelled + np.array([0.002, 0.0])
-    mean, maximum = gate.contour_separation(predicted, labelled)
-    assert mean == pytest.approx(2.0)
-    assert maximum == pytest.approx(2.0)
+def test_valid_closed_branch_rows_feed_shared_metre_comparator_only():
+    controls = np.array(
+        [
+            [[0.0, 0.0], [1 / 3, 0.0], [2 / 3, 0.0], [1.0, 0.0]],
+            [[1.0, 0.0], [1.0, 1 / 3], [1.0, 2 / 3], [1.0, 1.0]],
+            [[1.0, 1.0], [2 / 3, 1.0], [1 / 3, 1.0], [0.0, 1.0]],
+            [[0.0, 1.0], [0.0, 2 / 3], [0.0, 1 / 3], [0.0, 0.0]],
+            np.full((4, 2), 1000.0),
+        ]
+    )
+    closed = gate._sample_cubic_branch(
+        controls, np.array([True, True, True, True, False])
+    )
+    reference = closed + np.array([0.002, 0.0])
+    comparison = gate.compare_closed_boundaries(
+        closed,
+        reference,
+        class_margin=0.25,
+        reference_mode=gate.BoundaryMode.DIVERTED,
+        predicted_saddle_rz_m=np.array([0.5, 0.0]),
+        reference_x_points_rz_m=np.array([[0.503, 0.004]]),
+    )
+
+    assert comparison.symmetric_sup_distance_m == pytest.approx(0.002)
+    assert comparison.symmetric_rms_distance_m == pytest.approx(np.sqrt(2.0e-6))
+    assert comparison.x_point_distance_m == pytest.approx(0.005)
+    assert comparison.topology_class_agreement is True
+    assert comparison.failures == ()
+    assert np.max(np.abs(closed)) == pytest.approx(1.0)
+
+
+def test_scoring_uses_gradient_reference_x_and_margin_classification():
+    source = inspect.getsource(gate.solve_frame)
+    assert "boundary_gradient_minimum(" in source
+    assert "reference_x_points_rz_m=labelled_x_point[None, :]" in source
+    assert "class_margin=float(topology.class_margin)" in source
+    assert "topology.diverted" not in source
+
+
+def test_assembled_closed_and_open_plotting_geometry_stay_separate(monkeypatch):
+    closed = np.array([[[0.0, 0.0]] * 4, [[1.0, 0.0]] * 4, [[0.0, 0.0]] * 4])
+    open_controls = np.zeros((2, 3, 4, 2))
+    open_controls[0, 0] = np.array([[2.0, 0.0], [1.5, 0.0], [1.0, 0.0], [0.5, 0.0]])
+    monkeypatch.setattr(
+        gate,
+        "assemble_separatrix_branches",
+        lambda *args, **kwargs: {
+            "closed_controls_rz": closed,
+            "closed_valid": np.array([True, True, False]),
+            "open_controls_rz": open_controls,
+            "open_valid": np.array([[True, False, False], [False, False, False]]),
+            "open_branch_valid": np.array([True, False]),
+        },
+    )
+
+    sampled_closed, sampled_open = gate._assembled_boundary_geometry(
+        np.zeros((3, 3)),
+        np.arange(3.0),
+        np.arange(3.0),
+        0.0,
+        np.array([0.5, 0.5]),
+    )
+
+    assert len(sampled_closed) == 17
+    assert len(sampled_open) == 1
+    assert len(sampled_open[0]) == 9
+    assert np.max(sampled_open[0][:, 0]) == pytest.approx(2.0)
 
 
 def _frame(*, r_squared: float, converged: bool, expansion: float = 0.02):
@@ -109,8 +171,11 @@ def _frame(*, r_squared: float, converged: bool, expansion: float = 0.02):
         interior_r_squared=r_squared,
         interior_fractional_rms=np.sqrt(max(0.0, 1.0 - r_squared)),
         additive_gauge_wb=0.0,
-        separatrix_mean_radial_separation_mm=2.0,
-        separatrix_maximum_radial_separation_mm=4.0,
+        closed_boundary_symmetric_sup_distance_m=0.004,
+        closed_boundary_symmetric_rms_distance_m=0.002,
+        polished_saddle_to_nearest_efit_x_m=0.001,
+        topology_class_agreement=True,
+        boundary_comparison_failures=(),
         magnetic_axis_displacement_mm=1.0,
         predicted_q95_nova=-4.2,
         labelled_q95_nova=-4.0,
@@ -127,7 +192,7 @@ def _frame(*, r_squared: float, converged: bool, expansion: float = 0.02):
         fixed_point_relative_residual=1.0e-7 if converged else 1.0e-3,
         residual_tolerance=gate.REGISTERED_RESIDUAL_TOLERANCE,
         finite=True,
-        diverted=True,
+        achieved_topology_class="diverted",
         converged=converged,
         convergence_criterion="declared criterion",
         solver_termination="returned within budget",

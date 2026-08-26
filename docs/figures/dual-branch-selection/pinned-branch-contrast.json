@@ -1,7 +1,7 @@
 {
   "artifact": "paired pinned-branch and margin-penalty contrast",
   "direct_green_operator_builder_entries": 0,
-  "driver_sha256": "61c26a5ecb2d562338d17ae7543ed657f2b5652cd7c3fa3c227f018cba4c73dd",
+  "driver_sha256": "6ac9c5a4ecf69a5aeca76072b46027c43e985f9b6e7205117289a43eaf637a7f",
   "jit_vmap_batch_two_parity": {
     "batch_members": "two identical copies of the first frozen reference",
     "batch_size": 2,
@@ -66,6 +66,7 @@
         "class_margin_nonfinite": "positive_infinity",
         "converged": false,
         "entry_point": "margin-graded fixed-ladder Newton-Krylov",
+        "failure_exception_class": null,
         "finite": true,
         "fitted_contraction": {
           "contracts": false,
@@ -104,11 +105,11 @@
                 "class_margin": 11.960893402501071,
                 "confidence": 0.747555837656317,
                 "coordinate_m": [
-                  0.579790176256586,
-                  1.2653957853608075
+                  0.575572404876134,
+                  1.2590808655000065
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.06454034939636871,
+                "flux_wb": -0.06467134627446271,
                 "resolved": false,
                 "root_support_cell": 0.5738585591316223,
                 "state": "unresolved"
@@ -119,11 +120,11 @@
                 "class_margin": 11.473070228204591,
                 "confidence": 0.7170668892627869,
                 "coordinate_m": [
-                  0.5598349272653976,
-                  -1.2165816068417628
+                  0.5566727048333838,
+                  -1.2120217249141156
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.07680602149324711,
+                "flux_wb": -0.07679481126644747,
                 "resolved": false,
                 "root_support_cell": 0.7553000450134277,
                 "state": "unresolved"
@@ -134,11 +135,11 @@
                 "class_margin": 2.120917165108595,
                 "confidence": 0.1325573228192872,
                 "coordinate_m": [
-                  0.16996698689952192,
-                  -0.034513517232346386
+                  0.16693958709094173,
+                  -0.04462574708490678
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.09793592251979776,
+                "flux_wb": -0.09878985779290159,
                 "resolved": false,
                 "root_support_cell": 0.7238916754722595,
                 "state": "unresolved"
@@ -222,6 +223,7 @@
             "status": "wall_extremum_rejected_by_private_flux_shadow"
           }
         },
+        "termination_reason": "terminal_observation_complete",
         "topology_consistent": true
       },
       "pure_arm": {
@@ -230,28 +232,29 @@
         "class_margin_nonfinite": null,
         "converged": false,
         "entry_point": "ForwardProfile.solve_portfolio",
+        "failure_exception_class": null,
         "finite": true,
         "fitted_contraction": {
           "contracts": true,
           "finite_positive_point_count": 12,
-          "fit_r_squared": 0.5483685003042016,
-          "ratio": 0.9503071181832271
+          "fit_r_squared": 0.5483685003041361,
+          "ratio": 0.9503071181832321
         },
         "iterations": 12,
         "p_diverted": 0.933598960514718,
         "requested_class": "diverted",
         "residual_sequence": [
-          0.006461283148908432,
-          0.011703785642494352,
-          0.006046522151531674,
+          0.0064612831489082095,
+          0.01170378564249435,
+          0.006046522151531451,
           0.005861169937492542,
-          0.005682601762403628,
-          0.005508594942316174,
-          0.005338676367439619,
-          0.005174738890875603,
-          0.005015824963395501,
-          0.004860788300665262,
-          0.004713415464679083,
+          0.005682601762403738,
+          0.005508594942316287,
+          0.00533867636743973,
+          0.005174738890875825,
+          0.005015824963395612,
+          0.004860788300665485,
+          0.004713415464679304,
           0.0045851673071955965
         ],
         "terminal_residual": 0.0045851673071955965,
@@ -264,45 +267,45 @@
             "candidates": [
               {
                 "admitted": true,
-                "boundary_snr": 9.111942775539037,
+                "boundary_snr": 9.111942775538225,
                 "class_margin": 11.665930190955715,
                 "confidence": 0.7291206369347322,
                 "coordinate_m": [
-                  0.5697424145307858,
-                  -1.236645760010353
+                  0.5667530598808627,
+                  -1.232024087264165
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.07027854777741613,
+                "flux_wb": -0.07023449908737452,
                 "resolved": false,
                 "root_support_cell": 0.5918777585029602,
                 "state": "unresolved"
               },
               {
                 "admitted": true,
-                "boundary_snr": 9.023769955148223,
+                "boundary_snr": 9.0237699551474,
                 "class_margin": 11.589183151781873,
                 "confidence": 0.724323946986367,
                 "coordinate_m": [
-                  0.5709178874301616,
-                  1.2452648089406515
+                  0.5673633798015815,
+                  1.240069177281043
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.07119184351202487,
+                "flux_wb": -0.07109988476049314,
                 "resolved": false,
                 "root_support_cell": 0.5724883675575256,
                 "state": "unresolved"
               },
               {
                 "admitted": true,
-                "boundary_snr": 4.061841826712257,
+                "boundary_snr": 4.061841826711897,
                 "class_margin": 2.1052634285030702,
                 "confidence": 0.1315789642814419,
                 "coordinate_m": [
-                  0.17001871914786,
-                  -0.05504708563210507
+                  0.16683846332397254,
+                  -0.06612991170474498
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.09781520941868396,
+                "flux_wb": -0.09864131815922307,
                 "resolved": false,
                 "root_support_cell": 0.5596227645874023,
                 "state": "unresolved"
@@ -313,8 +316,8 @@
             "retained_candidate_count": 3
           },
           "selected_x_coordinate_m": [
-            0.5676559771789977,
-            -1.2338307252843705
+            0.5676559771789974,
+            -1.2338307252843699
           ],
           "selected_x_flux_wb": -0.07017520665944828,
           "selected_x_normalized_flux_operand": 0.44252817236845116,
@@ -325,7 +328,7 @@
             {
               "coordinate_m": [
                 0.17017746207619464,
-                -0.036722093106734674
+                -0.03672209310673367
               ],
               "fitted_null_type": 0.0,
               "flux_wb": -0.09800702266762255,
@@ -334,8 +337,8 @@
             },
             {
               "coordinate_m": [
-                0.5676559771789977,
-                -1.2338307252843705
+                0.5676559771789974,
+                -1.2338307252843699
               ],
               "fitted_null_type": 0.0,
               "flux_wb": -0.07017520665944828,
@@ -344,32 +347,32 @@
             },
             {
               "coordinate_m": [
-                0.5671919415395772,
+                0.5671919415395776,
                 1.2448486718561536
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.07102968579560504,
+              "flux_wb": -0.07102968579560505,
               "normalized_flux_operand": 0.4435149461162674,
               "selected": false
             },
             {
               "coordinate_m": [
-                1.6855021638017933,
-                -0.7932570004684139
+                1.685502163801793,
+                -0.7932570004684137
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.6510961195536765,
-              "normalized_flux_operand": 1.1133900836139008,
+              "flux_wb": -0.6510961195536766,
+              "normalized_flux_operand": 1.113390083613901,
               "selected": false
             },
             {
               "coordinate_m": [
-                1.6822015855248313,
-                0.7916440006893248
+                1.6822015855248316,
+                0.7916440006893247
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.6566903971928161,
-              "normalized_flux_operand": 1.119850494498978,
+              "flux_wb": -0.6566903971928162,
+              "normalized_flux_operand": 1.1198504944989782,
               "selected": false
             }
           ],
@@ -378,14 +381,15 @@
               0.5649306774139404,
               -1.7451425858451193
             ],
-            "flux_wb": 0.026376759281969905,
+            "flux_wb": 0.026376759281969926,
             "normalized_flux": 0.4689615149314206,
-            "normalized_flux_before_shadow": 0.3310275619269073,
+            "normalized_flux_before_shadow": 0.33102756192690724,
             "normalized_flux_nonfinite": null,
             "shadowed": true,
             "status": "wall_extremum_rejected_by_private_flux_shadow"
           }
         },
+        "termination_reason": "terminal_observation_complete",
         "topology_consistent": true
       },
       "reference": {
@@ -450,6 +454,7 @@
         "class_margin_nonfinite": "positive_infinity",
         "converged": false,
         "entry_point": "margin-graded fixed-ladder Newton-Krylov",
+        "failure_exception_class": null,
         "finite": true,
         "fitted_contraction": {
           "contracts": true,
@@ -488,11 +493,11 @@
                 "class_margin": 12.431702403283033,
                 "confidence": 0.7769814002051896,
                 "coordinate_m": [
-                  0.5617421912862784,
-                  1.2762901895928163
+                  0.5549844651103418,
+                  1.2701343980724047
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.0948642933923858,
+                "flux_wb": -0.09457135214264899,
                 "resolved": false,
                 "root_support_cell": 0.7238401174545288,
                 "state": "unresolved"
@@ -503,11 +508,11 @@
                 "class_margin": 11.891208603125099,
                 "confidence": 0.7432005376953187,
                 "coordinate_m": [
-                  0.5314867497159467,
-                  -1.2010794305137487
+                  0.5269203363708318,
+                  -1.1927315168240316
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.11436201207983765,
+                "flux_wb": -0.11443261013641534,
                 "resolved": false,
                 "root_support_cell": 0.7771011590957642,
                 "state": "unresolved"
@@ -518,11 +523,11 @@
                 "class_margin": 1.8772519853984106,
                 "confidence": 0.11732824908740067,
                 "coordinate_m": [
-                  0.1754866150036265,
-                  0.015194236198942132
+                  0.17111255074649018,
+                  -0.00883519952630448
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.12527551993584116,
+                "flux_wb": -0.1259595731949394,
                 "resolved": false,
                 "root_support_cell": 0.1215539500117302,
                 "state": "unresolved"
@@ -606,41 +611,43 @@
             "status": "wall_extremum_rejected_by_private_flux_shadow"
           }
         },
+        "termination_reason": "terminal_observation_complete",
         "topology_consistent": true
       },
       "pure_arm": {
         "achieved_class": "diverted",
-        "class_margin": 0.020742069585375056,
+        "class_margin": 0.02074206958537511,
         "class_margin_nonfinite": null,
         "converged": false,
         "entry_point": "ForwardProfile.solve_portfolio",
+        "failure_exception_class": null,
         "finite": true,
         "fitted_contraction": {
           "contracts": true,
           "finite_positive_point_count": 12,
           "fit_r_squared": 0.9994050325854441,
-          "ratio": 0.9767709093853535
+          "ratio": 0.9767709093853519
         },
         "iterations": 12,
-        "p_diverted": 0.8883708396279236,
+        "p_diverted": 0.8883708396279245,
         "requested_class": "diverted",
         "residual_sequence": [
-          0.008577708247011701,
-          0.008361294483564133,
-          0.008150462806794571,
-          0.007954912532505482,
-          0.007765919818302676,
-          0.0075852619379971516,
-          0.007408601251011721,
-          0.007238205563212328,
+          0.008577708247011808,
+          0.008361294483564027,
+          0.008150462806794675,
+          0.007954912532505272,
+          0.007765919818302569,
+          0.007585261937997048,
+          0.007408601251011931,
+          0.007238205563212013,
           0.007074017664839237,
-          0.006913774299346375,
-          0.006766201596340195,
-          0.006623820952318563
+          0.006913774299346372,
+          0.006766201596340193,
+          0.006623820952318352
         ],
-        "terminal_residual": 0.006623820952318563,
+        "terminal_residual": 0.006623820952318352,
         "terminal_xpoint_diagnostics": {
-          "class_margin_from_operands": 0.020742069585375056,
+          "class_margin_from_operands": 0.02074206958537511,
           "class_margin_from_operands_nonfinite": null,
           "connectivity_admission": {
             "admitted_candidate_count": 3,
@@ -648,45 +655,45 @@
             "candidates": [
               {
                 "admitted": true,
-                "boundary_snr": 8.479789720598022,
+                "boundary_snr": 8.479789720597687,
                 "class_margin": 11.888741160674002,
                 "confidence": 0.7430463225421251,
                 "coordinate_m": [
-                  0.5433794148102175,
-                  -1.2322901519279064
+                  0.5422053700169673,
+                  -1.22078972724631
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.10609784313268009,
+                "flux_wb": -0.10610197240462704,
                 "resolved": false,
                 "root_support_cell": 0.9732688069343567,
                 "state": "unresolved"
               },
               {
                 "admitted": true,
-                "boundary_snr": 6.6685707875490525,
+                "boundary_snr": 6.668570787548796,
                 "class_margin": 11.83088512513242,
                 "confidence": 0.7394303203207763,
                 "coordinate_m": [
-                  0.5482534441255474,
-                  1.2493801738643762
+                  0.5463840336179583,
+                  1.2452750403732786
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.10235479897030685,
+                "flux_wb": -0.10236459716307265,
                 "resolved": false,
                 "root_support_cell": 0.053665079176425934,
                 "state": "unresolved"
               },
               {
                 "admitted": true,
-                "boundary_snr": 3.750812496358817,
+                "boundary_snr": 3.7508124963586744,
                 "class_margin": 1.9029555424778364,
                 "confidence": 0.11893472140486477,
                 "coordinate_m": [
-                  0.17523888258731696,
-                  -0.030933946667911646
+                  0.1711462777462257,
+                  -0.04228942216643006
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.12519909882075544,
+                "flux_wb": -0.12594516645637388,
                 "resolved": false,
                 "root_support_cell": 0.7525280714035034,
                 "state": "unresolved"
@@ -697,11 +704,11 @@
             "retained_candidate_count": 3
           },
           "selected_x_coordinate_m": [
-            0.5444663022219217,
-            1.2491324433637334
+            0.5444663022219216,
+            1.2491324433637336
           ],
-          "selected_x_flux_wb": -0.10235202822469194,
-          "selected_x_normalized_flux_operand": 0.44711276921996196,
+          "selected_x_flux_wb": -0.10235202822469193,
+          "selected_x_normalized_flux_operand": 0.4471127692199619,
           "selected_x_normalized_flux_operand_nonfinite": null,
           "selection_status": "selected_typed_saddle_with_connectivity_support",
           "typed_saddle_candidate_count": 5,
@@ -722,37 +729,37 @@
                 -1.817467111402243
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.015153877800157861,
+              "flux_wb": -0.015153877800157863,
               "normalized_flux_operand": 0.3511402755578827,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.5423736361132946,
+                0.542373636113295,
                 -1.223072499546232
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.10603566260343686,
-              "normalized_flux_operand": 0.45116707054798694,
+              "flux_wb": -0.10603566260343687,
+              "normalized_flux_operand": 0.451167070547987,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.5444663022219217,
-                1.2491324433637334
+                0.5444663022219216,
+                1.2491324433637336
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.10235202822469194,
-              "normalized_flux_operand": 0.44711276921996196,
+              "flux_wb": -0.10235202822469193,
+              "normalized_flux_operand": 0.4471127692199619,
               "selected": true
             },
             {
               "coordinate_m": [
                 1.6873632281353028,
-                -0.7941951070191566
+                -0.7941951070191569
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.7024012340384884,
+              "flux_wb": -0.7024012340384885,
               "normalized_flux_operand": 1.1075421283465663,
               "selected": false
             }
@@ -762,7 +769,7 @@
               0.2800000011920929,
               -1.638011343762036
             ],
-            "flux_wb": -0.021725563574233234,
+            "flux_wb": -0.021725563574233248,
             "normalized_flux": 0.467854838805337,
             "normalized_flux_before_shadow": 0.3583732394250173,
             "normalized_flux_nonfinite": null,
@@ -770,6 +777,7 @@
             "status": "wall_extremum_rejected_by_private_flux_shadow"
           }
         },
+        "termination_reason": "terminal_observation_complete",
         "topology_consistent": true
       },
       "reference": {
@@ -797,189 +805,208 @@
       },
       "same_seed_both_arms": true,
       "seed_sha256": "02dc288308d994a788b0f107814156466204a90ec44c360f2a2e145096e3f566",
-      "terminal_residual_ratio_pure_over_mixed": 5.2738371785114095
+      "terminal_residual_ratio_pure_over_mixed": 5.273837178511242
     },
     {
       "mixed_arm": {
         "accepted_class_margins": [
-          -0.20878525221181118,
-          -0.21501597994071087,
-          -0.21048228820014286,
-          -0.20529104463978645,
-          -0.2120593601501681,
-          -0.20754090311196702,
-          -0.21245270788453358,
-          -0.2066175728922409,
-          -0.21313496404044788,
-          -0.20799184551024202,
-          -0.21315118135727976,
-          -0.20690786316844229
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
         ],
         "accepted_topology_penalties": [
-          0.20878525221181118,
-          0.21501597994071087,
-          0.21048228820014286,
-          0.20529104463978645,
-          0.2120593601501681,
-          0.20754090311196702,
-          0.21245270788453358,
-          0.2066175728922409,
-          0.21313496404044788,
-          0.20799184551024202,
-          0.21315118135727976,
-          0.20690786316844229
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
         ],
         "achieved_class": "diverted",
-        "class_margin": -0.20690786316844229,
-        "class_margin_nonfinite": null,
+        "class_margin": null,
+        "class_margin_nonfinite": "positive_infinity",
         "converged": false,
         "entry_point": "margin-graded fixed-ladder Newton-Krylov",
+        "failure_exception_class": null,
         "finite": true,
         "fitted_contraction": {
           "contracts": false,
           "finite_positive_point_count": 12,
-          "fit_r_squared": 0.11094029695016216,
-          "ratio": 1.0136426570117612
+          "fit_r_squared": 0.48028898367126516,
+          "ratio": 1.0181386256720224
         },
         "iterations": 12,
-        "p_diverted": 1.0330127358649232e-09,
+        "p_diverted": 8.524571899922761e-10,
         "requested_class": "diverted",
         "residual_sequence": [
-          0.0034042988185754484,
-          0.0022977908175984556,
-          0.0022006303859945044,
-          0.0027302322436997886,
-          0.0021040203969977995,
-          0.0025454020729554325,
-          0.0027052662733462072,
-          0.0029429005819083137,
-          0.002521126409778365,
-          0.00274204037399985,
-          0.003005782146136786,
-          0.0031797107142991737
+          0.00277486987609124,
+          0.002433944765339327,
+          0.0025409824918178003,
+          0.0022621407878116845,
+          0.0025783407707735758,
+          0.0025075886103614665,
+          0.0028904819992963513,
+          0.002684260346554032,
+          0.0030093270456935306,
+          0.003025857071248163,
+          0.002878614498864185,
+          0.0029621938259649276
         ],
-        "terminal_residual": 0.0031797107142991737,
+        "terminal_residual": 0.0029621938259649276,
         "terminal_xpoint_diagnostics": {
-          "class_margin_from_operands": -0.20690786316844229,
-          "class_margin_from_operands_nonfinite": null,
+          "class_margin_from_operands": null,
+          "class_margin_from_operands_nonfinite": "positive_infinity",
           "connectivity_admission": {
-            "admitted_candidate_count": 0,
-            "candidate_count_before_capacity": 0,
-            "candidates": [],
+            "admitted_candidate_count": 1,
+            "candidate_count_before_capacity": 1,
+            "candidates": [
+              {
+                "admitted": true,
+                "boundary_snr": 2.9942726856395963,
+                "class_margin": 2.9184029207038678,
+                "confidence": 0.0,
+                "coordinate_m": [
+                  0.3629692601448847,
+                  -1.8810350847186679
+                ],
+                "fitted_null_type": 0.0,
+                "flux_wb": -0.01495796527173713,
+                "resolved": false,
+                "root_support_cell": 0.747142493724823,
+                "state": "unresolved"
+              }
+            ],
             "discarded_score_upper_bound": null,
             "overflow": false,
-            "retained_candidate_count": 0
+            "retained_candidate_count": 1
           },
           "selected_x_coordinate_m": [
-            0.5501755974182085,
-            -1.1108815031067991
+            0.5474306244273942,
+            -1.1061848439386657
           ],
-          "selected_x_flux_wb": -0.22623522798447812,
-          "selected_x_normalized_flux_operand": 0.23504441675654295,
+          "selected_x_flux_wb": -0.22819418961280125,
+          "selected_x_normalized_flux_operand": 0.22892968794914112,
           "selected_x_normalized_flux_operand_nonfinite": null,
-          "selection_status": "selected_typed_saddle_not_connectivity_reachable",
+          "selection_status": "selected_typed_saddle_with_connectivity_support",
           "typed_saddle_candidate_count": 5,
           "typed_saddle_candidates": [
             {
               "coordinate_m": [
-                0.1861920856927084,
-                0.006913319628590019
+                0.1861961982371324,
+                0.015413727467207917
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.25010235355429755,
-              "normalized_flux_operand": 0.26050436291226964,
+              "flux_wb": -0.25013300768309454,
+              "normalized_flux_operand": 0.25255578601358564,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.39254644886236684,
-                -1.8918445074160075
+                0.3937955593340532,
+                -1.8913584569094444
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.014627934246019467,
-              "normalized_flux_operand": 0.009315085045445119,
+              "flux_wb": -0.014850955204156689,
+              "normalized_flux_operand": -0.0008214390885347152,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.36655966191450495,
-                1.9068209780846652
+                0.3655548600942272,
+                1.9073382489281372
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.013734183324506823,
-              "normalized_flux_operand": 0.008361687860192233,
+              "flux_wb": -0.01352643446348236,
+              "normalized_flux_operand": -0.0022478266362730166,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.33885014163550586,
-                -1.8235586603509142
+                0.339759819713522,
+                -1.823470031263025
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.014662360112870492,
-              "normalized_flux_operand": 0.009351808391699249,
+              "flux_wb": -0.014855890601295857,
+              "normalized_flux_operand": -0.0008161241177635754,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.5501755974182085,
-                -1.1108815031067991
+                0.5474306244273942,
+                -1.1061848439386657
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.22623522798447812,
-              "normalized_flux_operand": 0.23504441675654295,
+              "flux_wb": -0.22819418961280125,
+              "normalized_flux_operand": 0.22892968794914112,
               "selected": true
             }
           ],
           "wall_operand": {
             "coordinate_m": [
               0.5649306774139404,
-              1.7909206993145423
+              1.7887500931430351
             ],
-            "flux_wb": -0.031984946338893705,
-            "normalized_flux": 0.028136553588100667,
-            "normalized_flux_before_shadow": 0.027830452219265125,
-            "normalized_flux_nonfinite": null,
-            "shadowed": false,
-            "status": "wall_extremum_admitted"
+            "flux_wb": -0.03142833659782118,
+            "normalized_flux": null,
+            "normalized_flux_before_shadow": 0.017030882636524355,
+            "normalized_flux_nonfinite": "positive_infinity",
+            "shadowed": true,
+            "status": "wall_extremum_rejected_by_private_flux_shadow"
           }
         },
+        "termination_reason": "terminal_observation_complete",
         "topology_consistent": true
       },
       "pure_arm": {
         "achieved_class": "diverted",
-        "class_margin": -0.20244353307105098,
-        "class_margin_nonfinite": null,
+        "class_margin": null,
+        "class_margin_nonfinite": "positive_infinity",
         "converged": false,
         "entry_point": "ForwardProfile.solve_portfolio",
+        "failure_exception_class": null,
         "finite": true,
         "fitted_contraction": {
           "contracts": true,
           "finite_positive_point_count": 12,
-          "fit_r_squared": 0.9997012529628372,
-          "ratio": 0.9835225185971592
+          "fit_r_squared": 0.9997012529628403,
+          "ratio": 0.9835225185971582
         },
         "iterations": 12,
-        "p_diverted": 1.6143179221317777e-09,
+        "p_diverted": 1.0,
         "requested_class": "diverted",
         "residual_sequence": [
           0.006220624215754909,
-          0.006105428677436531,
-          0.005994424883476731,
-          0.005896528882102819,
+          0.006105428677436532,
+          0.005994424883476881,
+          0.005896528882102817,
           0.0058058682376395465,
           0.005713673474078087,
           0.0056223341324403995,
-          0.005529745394326639,
-          0.00543858736762927,
-          0.005347338191703767,
+          0.00552974539432664,
+          0.005438587367629119,
+          0.005347338191703766,
           0.005257422302350144,
           0.005167711618738155
         ],
         "terminal_residual": 0.005167711618738155,
         "terminal_xpoint_diagnostics": {
-          "class_margin_from_operands": -0.20244353307105098,
-          "class_margin_from_operands_nonfinite": null,
+          "class_margin_from_operands": null,
+          "class_margin_from_operands_nonfinite": "positive_infinity",
           "connectivity_admission": {
             "admitted_candidate_count": 0,
             "candidate_count_before_capacity": 0,
@@ -989,11 +1016,11 @@
             "retained_candidate_count": 0
           },
           "selected_x_coordinate_m": [
-            0.5559167705425359,
-            -1.1178653484963965
+            0.5559167705425362,
+            -1.1178653484963967
           ],
           "selected_x_flux_wb": -0.22264827596557216,
-          "selected_x_normalized_flux_operand": 0.2302175019605781,
+          "selected_x_normalized_flux_operand": -0.07993304792641832,
           "selected_x_normalized_flux_operand_nonfinite": null,
           "selection_status": "selected_typed_saddle_not_connectivity_reachable",
           "typed_saddle_candidate_count": 5,
@@ -1005,7 +1032,7 @@
               ],
               "fitted_null_type": 0.0,
               "flux_wb": -0.2501376041787571,
-              "normalized_flux_operand": 0.25950163255813,
+              "normalized_flux_operand": -0.03885014399883389,
               "selected": false
             },
             {
@@ -1015,53 +1042,54 @@
               ],
               "fitted_null_type": 0.0,
               "flux_wb": -0.014308689010814939,
-              "normalized_flux_operand": 0.008275240377887095,
+              "normalized_flux_operand": -0.3912973406001695,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.3671413762808958,
+                0.36714137628089577,
                 1.9085657984623292
               ],
               "fitted_null_type": 0.0,
               "flux_wb": -0.013919202890053859,
-              "normalized_flux_operand": 0.007860324366195302,
+              "normalized_flux_operand": -0.3918794290657828,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.3371897786961564,
+                0.3371897786961563,
                 -1.8230257854611887
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.014165133094600164,
-              "normalized_flux_operand": 0.008122311569809918,
+              "flux_wb": -0.014165133094600173,
+              "normalized_flux_operand": -0.391511885454389,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.5559167705425359,
-                -1.1178653484963965
+                0.5559167705425362,
+                -1.1178653484963967
               ],
               "fitted_null_type": 0.0,
               "flux_wb": -0.22264827596557216,
-              "normalized_flux_operand": 0.2302175019605781,
+              "normalized_flux_operand": -0.07993304792641832,
               "selected": true
             }
           ],
           "wall_operand": {
             "coordinate_m": [
               0.5649306774139404,
-              1.7974382727145057
+              1.7974382727145062
             ],
-            "flux_wb": -0.03242195549528459,
-            "normalized_flux": 0.02777396888952713,
-            "normalized_flux_before_shadow": 0.027571137940965943,
-            "normalized_flux_nonfinite": null,
-            "shadowed": false,
-            "status": "wall_extremum_admitted"
+            "flux_wb": -0.03242195549528476,
+            "normalized_flux": null,
+            "normalized_flux_before_shadow": -0.3642269960277151,
+            "normalized_flux_nonfinite": "positive_infinity",
+            "shadowed": true,
+            "status": "wall_extremum_rejected_by_private_flux_shadow"
           }
         },
+        "termination_reason": "terminal_observation_complete",
         "topology_consistent": true
       },
       "reference": {
@@ -1089,7 +1117,7 @@
       },
       "same_seed_both_arms": true,
       "seed_sha256": "8fa2931dc40e2034351c7c9a37e89fd47dd1f005b2263b85b529dfb4f3348c81",
-      "terminal_residual_ratio_pure_over_mixed": 1.6252143930889473
+      "terminal_residual_ratio_pure_over_mixed": 1.7445555295676118
     },
     {
       "mixed_arm": {
@@ -1099,13 +1127,13 @@
           -0.15034333957913554,
           -0.15180538366871565,
           null,
-          -0.1577893995091707,
-          -0.15418024664792307,
-          -0.16112645880050463,
-          -0.15414714653803363,
-          -0.15338708242033383,
-          -0.15965522079120015,
-          -0.1550617259300976
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
         ],
         "accepted_topology_penalties": [
           0.0,
@@ -1113,28 +1141,29 @@
           0.15034333957913554,
           0.15180538366871565,
           0.0,
-          0.1577893995091707,
-          0.15418024664792307,
-          0.16112645880050463,
-          0.15414714653803363,
-          0.15338708242033383,
-          0.15965522079120015,
-          0.1550617259300976
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
         ],
-        "achieved_class": "diverted",
-        "class_margin": -0.1550617259300976,
+        "achieved_class": null,
+        "class_margin": null,
         "class_margin_nonfinite": null,
         "converged": false,
         "entry_point": "margin-graded fixed-ladder Newton-Krylov",
+        "failure_exception_class": "NoQualifiedAxisError",
         "finite": true,
         "fitted_contraction": {
-          "contracts": true,
+          "contracts": false,
           "finite_positive_point_count": 12,
-          "fit_r_squared": 0.08669270648881655,
-          "ratio": 0.9505766900502326
+          "fit_r_squared": 0.14610827110833857,
+          "ratio": 1.0911364524210474
         },
         "iterations": 12,
-        "p_diverted": 1.8439737202677893e-07,
+        "p_diverted": null,
         "requested_class": "diverted",
         "residual_sequence": [
           0.008535766477595982,
@@ -1142,181 +1171,53 @@
           0.006364997195892771,
           0.0060433950159621205,
           0.028376110278349614,
-          0.004375993128630506,
-          0.00396486785183584,
-          0.004471894183078319,
-          0.0037498310657785015,
-          0.0037501302549479802,
-          0.014168379254939772,
-          0.004274844625307489
+          0.019036025551388544,
+          0.05673062301771108,
+          0.02035837543130247,
+          0.003189586391100101,
+          0.01561952249507534,
+          0.02745121287983686,
+          0.023131437967826584
         ],
-        "terminal_residual": 0.004274844625307489,
-        "terminal_xpoint_diagnostics": {
-          "class_margin_from_operands": -0.1550617259300976,
-          "class_margin_from_operands_nonfinite": null,
-          "connectivity_admission": {
-            "admitted_candidate_count": 3,
-            "candidate_count_before_capacity": 3,
-            "candidates": [
-              {
-                "admitted": true,
-                "boundary_snr": 9.86780112741319,
-                "class_margin": 13.081234872032208,
-                "confidence": 0.817577179502013,
-                "coordinate_m": [
-                  0.5888663987590517,
-                  -1.093402872643946
-                ],
-                "fitted_null_type": 0.0,
-                "flux_wb": -0.21868027970875314,
-                "resolved": false,
-                "root_support_cell": 0.7235695123672485,
-                "state": "unresolved"
-              },
-              {
-                "admitted": true,
-                "boundary_snr": 8.94002562511267,
-                "class_margin": 11.045204141915963,
-                "confidence": 0.6903252588697477,
-                "coordinate_m": [
-                  0.6220720132971223,
-                  1.1684145154177616
-                ],
-                "fitted_null_type": 0.0,
-                "flux_wb": -0.19069586467264368,
-                "resolved": false,
-                "root_support_cell": 0.7287089824676514,
-                "state": "unresolved"
-              },
-              {
-                "admitted": true,
-                "boundary_snr": 11.948784711011118,
-                "class_margin": 1.7637439721750863,
-                "confidence": 0.11023399826094289,
-                "coordinate_m": [
-                  0.18646041372570996,
-                  0.04139133083358913
-                ],
-                "fitted_null_type": 0.0,
-                "flux_wb": -0.24921635477477735,
-                "resolved": false,
-                "root_support_cell": 0.33113038539886475,
-                "state": "unresolved"
-              }
-            ],
-            "discarded_score_upper_bound": null,
-            "overflow": false,
-            "retained_candidate_count": 3
-          },
-          "selected_x_coordinate_m": [
-            0.613205589806735,
-            1.169184132897963
-          ],
-          "selected_x_flux_wb": -0.19044900253659325,
-          "selected_x_normalized_flux_operand": 0.4637935609925778,
-          "selected_x_normalized_flux_operand_nonfinite": null,
-          "selection_status": "selected_typed_saddle_with_connectivity_support",
-          "typed_saddle_candidate_count": 5,
-          "typed_saddle_candidates": [
-            {
-              "coordinate_m": [
-                0.18630038732299453,
-                0.05220204771272933
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.24921100005337746,
-              "normalized_flux_operand": 0.515080360655834,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.3501679424190732,
-                -1.9331586018446285
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.008624867413211553,
-              "normalized_flux_operand": 0.30509953447732596,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.3489368254687434,
-                1.9215629368565157
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.008668948456053132,
-              "normalized_flux_operand": 0.30513800790758194,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.5864796157231276,
-                -1.0909871838489043
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.21886189889270577,
-              "normalized_flux_operand": 0.48859201211487974,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.613205589806735,
-                1.169184132897963
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.19044900253659325,
-              "normalized_flux_operand": 0.4637935609925778,
-              "selected": true
-            }
-          ],
-          "wall_operand": {
-            "coordinate_m": [
-              0.5649306774139404,
-              1.7751596610076703
-            ],
-            "flux_wb": -0.015831012577498818,
-            "normalized_flux": 0.3087318350624802,
-            "normalized_flux_before_shadow": 0.31138897559579,
-            "normalized_flux_nonfinite": null,
-            "shadowed": false,
-            "status": "wall_extremum_admitted"
-          }
-        },
-        "topology_consistent": true
+        "terminal_residual": 0.023131437967826584,
+        "terminal_xpoint_diagnostics": null,
+        "termination_reason": "NoQualifiedAxisError",
+        "topology_consistent": null
       },
       "pure_arm": {
-        "achieved_class": "diverted",
-        "class_margin": -0.14822516784583772,
+        "achieved_class": "limited",
+        "class_margin": -0.14822516784583778,
         "class_margin_nonfinite": null,
         "converged": false,
         "entry_point": "ForwardProfile.solve_portfolio",
+        "failure_exception_class": null,
         "finite": true,
         "fitted_contraction": {
           "contracts": true,
           "finite_positive_point_count": 12,
-          "fit_r_squared": 0.9978799230945576,
-          "ratio": 0.9776321113839138
+          "fit_r_squared": 0.9978799230945563,
+          "ratio": 0.9776321113839168
         },
         "iterations": 12,
         "p_diverted": 3.6531086902408756e-07,
         "requested_class": "diverted",
         "residual_sequence": [
-          0.009499850952309097,
-          0.009267606072437783,
-          0.009038869606990366,
-          0.00881542807924024,
-          0.008609571930684734,
-          0.008408892527000797,
-          0.008215219179747985,
-          0.008040963063825141,
+          0.009499850952308752,
+          0.009267606072437784,
+          0.009038869606990196,
+          0.008815428079240066,
+          0.008609571930684906,
+          0.008408892527000793,
+          0.008215219179747815,
+          0.008040963063825315,
           0.007870451754054989,
-          0.007703991339432962,
-          0.007549075134442948,
-          0.007425336057810516
+          0.0077039913394327895,
+          0.00754907513444312,
+          0.007425336057810689
         ],
-        "terminal_residual": 0.007425336057810516,
+        "terminal_residual": 0.007425336057810689,
         "terminal_xpoint_diagnostics": {
-          "class_margin_from_operands": -0.14822516784583772,
+          "class_margin_from_operands": -0.14822516784583778,
           "class_margin_from_operands_nonfinite": null,
           "connectivity_admission": {
             "admitted_candidate_count": 3,
@@ -1324,45 +1225,45 @@
             "candidates": [
               {
                 "admitted": true,
-                "boundary_snr": 5.209477811257949,
+                "boundary_snr": 5.209477811257821,
                 "class_margin": 13.488473637122556,
                 "confidence": 0.8430296023201598,
                 "coordinate_m": [
-                  0.5803595695612485,
-                  -1.0853767063456032
+                  0.5779512156076975,
+                  -1.0830662214335347
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.2234850138890937,
+                "flux_wb": -0.22344860419713408,
                 "resolved": false,
                 "root_support_cell": 0.4167494475841522,
                 "state": "unresolved"
               },
               {
                 "admitted": true,
-                "boundary_snr": 11.200999310624114,
+                "boundary_snr": 11.200999310623954,
                 "class_margin": 12.63105744325362,
                 "confidence": 0.7894410902033513,
                 "coordinate_m": [
-                  0.6275362628782066,
-                  1.183303695822801
+                  0.6198441135477201,
+                  1.1822756575310247
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.1828385945068932,
+                "flux_wb": -0.18247345687042776,
                 "resolved": false,
                 "root_support_cell": 0.6385771632194519,
                 "state": "unresolved"
               },
               {
                 "admitted": true,
-                "boundary_snr": 11.899370309605146,
+                "boundary_snr": 11.899370309604935,
                 "class_margin": 1.739660739488592,
                 "confidence": 0.108728796218037,
                 "coordinate_m": [
-                  0.1864420652774257,
-                  0.056094250855967774
+                  0.179787795087467,
+                  0.03434444832039345
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.24932471948331972,
+                "flux_wb": -0.24921791806985247,
                 "resolved": false,
                 "root_support_cell": 0.44875437021255493,
                 "state": "unresolved"
@@ -1373,11 +1274,11 @@
             "retained_candidate_count": 3
           },
           "selected_x_coordinate_m": [
-            0.6223335197166885,
+            0.6223335197166878,
             1.1835211753458317
           ],
-          "selected_x_flux_wb": -0.18276541160703863,
-          "selected_x_normalized_flux_operand": 0.45530400261733367,
+          "selected_x_flux_wb": -0.18276541160703866,
+          "selected_x_normalized_flux_operand": 0.4553040026173338,
           "selected_x_normalized_flux_operand_nonfinite": null,
           "selection_status": "selected_typed_saddle_with_connectivity_support",
           "typed_saddle_candidate_count": 5,
@@ -1389,16 +1290,16 @@
               ],
               "fitted_null_type": 0.0,
               "flux_wb": -0.24930352842564452,
-              "normalized_flux_operand": 0.512869308997866,
+              "normalized_flux_operand": 0.5128693089978661,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.3515316368027045,
+                0.35153163680270466,
                 -1.9349634116700565
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.00900470479650802,
+              "flux_wb": -0.009004704796508018,
               "normalized_flux_operand": 0.30497530678551776,
               "selected": false
             },
@@ -1408,28 +1309,28 @@
                 1.9209132385531178
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.008230612259957153,
-              "normalized_flux_operand": 0.3043056023189048,
+              "flux_wb": -0.008230612259957155,
+              "normalized_flux_operand": 0.30430560231890486,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.5785660502207142,
+                0.5785660502207141,
                 -1.0815477780063587
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.22350460103134,
+              "flux_wb": -0.22350460103133998,
               "normalized_flux_operand": 0.49054942333306817,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.6223335197166885,
+                0.6223335197166878,
                 1.1835211753458317
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.18276541160703863,
-              "normalized_flux_operand": 0.45530400261733367,
+              "flux_wb": -0.18276541160703866,
+              "normalized_flux_operand": 0.4553040026173338,
               "selected": true
             }
           ],
@@ -1438,15 +1339,16 @@
               0.5649306774139404,
               1.7704750160685998
             ],
-            "flux_wb": -0.01389107236861052,
-            "normalized_flux": 0.30707883477149595,
+            "flux_wb": -0.013891072368610511,
+            "normalized_flux": 0.307078834771496,
             "normalized_flux_before_shadow": 0.3092027370138606,
             "normalized_flux_nonfinite": null,
             "shadowed": false,
             "status": "wall_extremum_admitted"
           }
         },
-        "topology_consistent": true
+        "termination_reason": "terminal_observation_complete",
+        "topology_consistent": false
       },
       "reference": {
         "machine": "MAST",
@@ -1473,7 +1375,7 @@
       },
       "same_seed_both_arms": true,
       "seed_sha256": "74fe4a83f04bcc7a112c5b6860e440140c2e8de2af171fd3645016e806b743ae",
-      "terminal_residual_ratio_pure_over_mixed": 1.736983845881045
+      "terminal_residual_ratio_pure_over_mixed": 0.3210062456185628
     },
     {
       "mixed_arm": {
@@ -1510,6 +1412,7 @@
         "class_margin_nonfinite": null,
         "converged": false,
         "entry_point": "margin-graded fixed-ladder Newton-Krylov",
+        "failure_exception_class": null,
         "finite": true,
         "fitted_contraction": {
           "contracts": true,
@@ -1548,11 +1451,11 @@
                 "class_margin": 13.60731287751823,
                 "confidence": 0.8504570548448894,
                 "coordinate_m": [
-                  0.5959241823620449,
-                  1.1677585144738192
+                  0.5904127945843421,
+                  1.1616080594186187
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.19944419235851435,
+                "flux_wb": -0.19985041283012225,
                 "resolved": false,
                 "root_support_cell": 0.8399865031242371,
                 "state": "unresolved"
@@ -1563,11 +1466,11 @@
                 "class_margin": 11.57764772017774,
                 "confidence": 0.7236029825111088,
                 "coordinate_m": [
-                  0.5620014640244193,
-                  -1.092702531147149
+                  0.5564957666591371,
+                  -1.0887030816241083
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.23148407589922482,
+                "flux_wb": -0.23126911195004693,
                 "resolved": false,
                 "root_support_cell": 0.7195636630058289,
                 "state": "unresolved"
@@ -1578,11 +1481,11 @@
                 "class_margin": 1.5959279445861676,
                 "confidence": 0.09974549653663548,
                 "coordinate_m": [
-                  0.18729185702428408,
-                  0.05005181978855337
+                  0.18044297711852236,
+                  0.03989780294316293
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.25604118036146456,
+                "flux_wb": -0.25571770139993566,
                 "resolved": false,
                 "root_support_cell": 0.4004150629043579,
                 "state": "unresolved"
@@ -1666,39 +1569,41 @@
             "status": "wall_extremum_admitted"
           }
         },
+        "termination_reason": "terminal_observation_complete",
         "topology_consistent": false
       },
       "pure_arm": {
-        "achieved_class": "limited",
+        "achieved_class": "diverted",
         "class_margin": null,
         "class_margin_nonfinite": "positive_infinity",
         "converged": false,
         "entry_point": "ForwardProfile.solve_portfolio",
+        "failure_exception_class": null,
         "finite": true,
         "fitted_contraction": {
           "contracts": true,
           "finite_positive_point_count": 12,
-          "fit_r_squared": 0.9920206822790919,
-          "ratio": 0.9804337825454631
+          "fit_r_squared": 0.9920206822791247,
+          "ratio": 0.9804337825454583
         },
         "iterations": 12,
         "p_diverted": 1.0,
         "requested_class": "diverted",
         "residual_sequence": [
-          0.006255280656351586,
-          0.006101458335286858,
-          0.005950095076366573,
-          0.0057905310883624925,
-          0.005677473613024857,
-          0.005570904568068799,
-          0.005460862526126447,
-          0.005366672580442086,
-          0.005271658763950166,
-          0.005182267942898967,
-          0.005098948389213992,
-          0.0050242828634815126
+          0.006255280656351585,
+          0.00610145833528716,
+          0.00595009507636627,
+          0.005790531088362265,
+          0.005677473613025009,
+          0.005570904568068725,
+          0.005460862526126296,
+          0.005366672580442313,
+          0.0052716587639503945,
+          0.005182267942898892,
+          0.005098948389213613,
+          0.005024282863481058
         ],
-        "terminal_residual": 0.0050242828634815126,
+        "terminal_residual": 0.005024282863481058,
         "terminal_xpoint_diagnostics": {
           "class_margin_from_operands": null,
           "class_margin_from_operands_nonfinite": "positive_infinity",
@@ -1708,45 +1613,45 @@
             "candidates": [
               {
                 "admitted": true,
-                "boundary_snr": 12.288552150376107,
+                "boundary_snr": 12.288552150375626,
                 "class_margin": 13.29515658235711,
                 "confidence": 0.8309472863973194,
                 "coordinate_m": [
-                  0.5872731924741911,
-                  1.1473616418823946
+                  0.5815986741422217,
+                  1.1429802354444798
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.20924281645331874,
+                "flux_wb": -0.2095369241684152,
                 "resolved": false,
                 "root_support_cell": 0.6972898244857788,
                 "state": "unresolved"
               },
               {
                 "admitted": true,
-                "boundary_snr": 3.1607402561161235,
+                "boundary_snr": 3.1607402561160023,
                 "class_margin": 11.281396825230283,
                 "confidence": 0.7050873015768927,
                 "coordinate_m": [
-                  0.5746210755605988,
-                  -1.1124236418825872
+                  0.570124092224125,
+                  -1.1089804487473482
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.2217801338828066,
+                "flux_wb": -0.2216185270784513,
                 "resolved": false,
                 "root_support_cell": 0.5114049315452576,
                 "state": "unresolved"
               },
               {
                 "admitted": true,
-                "boundary_snr": 14.187135816582403,
+                "boundary_snr": 14.187135816581906,
                 "class_margin": 1.590137955698391,
                 "confidence": 0.09938362223114944,
                 "coordinate_m": [
-                  0.18740559825906078,
-                  0.015442944351448475
+                  0.18048590769647835,
+                  0.006536027071212071
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.25616229874021984,
+                "flux_wb": -0.2557851559102169,
                 "resolved": false,
                 "root_support_cell": 0.12354341149330139,
                 "state": "unresolved"
@@ -1757,11 +1662,11 @@
             "retained_candidate_count": 3
           },
           "selected_x_coordinate_m": [
-            0.5820680211861393,
+            0.5820680211861392,
             1.1449629505049974
           ],
-          "selected_x_flux_wb": -0.20962926651531572,
-          "selected_x_normalized_flux_operand": 0.4257047647661227,
+          "selected_x_flux_wb": -0.20962926651531574,
+          "selected_x_normalized_flux_operand": 0.42570476476612273,
           "selected_x_normalized_flux_operand_nonfinite": null,
           "selection_status": "selected_typed_saddle_with_connectivity_support",
           "typed_saddle_candidate_count": 5,
@@ -1788,7 +1693,7 @@
             },
             {
               "coordinate_m": [
-                0.5716947882762539,
+                0.5716947882762542,
                 -1.1087630337118628
               ],
               "fitted_null_type": 0.0,
@@ -1798,18 +1703,18 @@
             },
             {
               "coordinate_m": [
-                0.5820680211861393,
+                0.5820680211861392,
                 1.1449629505049974
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.20962926651531572,
-              "normalized_flux_operand": 0.4257047647661227,
+              "flux_wb": -0.20962926651531574,
+              "normalized_flux_operand": 0.42570476476612273,
               "selected": true
             },
             {
               "coordinate_m": [
-                1.6973841272261256,
-                -0.7986440519287857
+                1.6973841272261252,
+                -0.7986440519287854
               ],
               "fitted_null_type": 0.0,
               "flux_wb": -1.0340359864985156,
@@ -1820,9 +1725,9 @@
           "wall_operand": {
             "coordinate_m": [
               0.5649306774139404,
-              1.7665435105225313
+              1.7665435105225311
             ],
-            "flux_wb": -0.0002488800225839095,
+            "flux_wb": -0.00024888002258391644,
             "normalized_flux": null,
             "normalized_flux_before_shadow": 0.2602921453121724,
             "normalized_flux_nonfinite": "positive_infinity",
@@ -1830,7 +1735,8 @@
             "status": "wall_extremum_rejected_by_private_flux_shadow"
           }
         },
-        "topology_consistent": false
+        "termination_reason": "terminal_observation_complete",
+        "topology_consistent": true
       },
       "reference": {
         "machine": "MAST",
@@ -1857,7 +1763,7 @@
       },
       "same_seed_both_arms": true,
       "seed_sha256": "766de18620d0983f245eb78ef2fb3a2c54fd68144e4ff71a1e520eac1b1c2baf",
-      "terminal_residual_ratio_pure_over_mixed": 1.8183226966168948
+      "terminal_residual_ratio_pure_over_mixed": 1.8183226966167305
     },
     {
       "mixed_arm": {
@@ -1894,6 +1800,7 @@
         "class_margin_nonfinite": "positive_infinity",
         "converged": true,
         "entry_point": "margin-graded fixed-ladder Newton-Krylov",
+        "failure_exception_class": null,
         "finite": true,
         "fitted_contraction": {
           "contracts": true,
@@ -1932,11 +1839,11 @@
                 "class_margin": 16.45953385583092,
                 "confidence": 1.0,
                 "coordinate_m": [
-                  0.5946685421429755,
-                  1.2235863054608815
+                  0.5898973673057749,
+                  1.2204363955069697
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.12241064376718935,
+                "flux_wb": -0.1227037676831272,
                 "resolved": true,
                 "root_support_cell": 0.8192750215530396,
                 "state": "resolved"
@@ -1947,11 +1854,11 @@
                 "class_margin": 10.371817857263979,
                 "confidence": 0.6482386160789987,
                 "coordinate_m": [
-                  0.5802971726207939,
-                  -1.1778918028496745
+                  0.5751037453894411,
+                  -1.1777487649019591
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.13854208047372302,
+                "flux_wb": -0.13838015671265833,
                 "resolved": false,
                 "root_support_cell": 0.423134446144104,
                 "state": "unresolved"
@@ -1962,11 +1869,11 @@
                 "class_margin": 1.7727745451425925,
                 "confidence": 0.11079840907141203,
                 "coordinate_m": [
-                  0.1792384175459699,
-                  0.0027786253046799526
+                  0.17410518643532785,
+                  -0.01623087235190377
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.17125743679115094,
+                "flux_wb": -0.17180935193538238,
                 "resolved": false,
                 "root_support_cell": 0.03318072110414505,
                 "state": "unresolved"
@@ -2050,6 +1957,7 @@
             "status": "wall_extremum_rejected_by_private_flux_shadow"
           }
         },
+        "termination_reason": "terminal_observation_complete",
         "topology_consistent": true
       },
       "pure_arm": {
@@ -2058,31 +1966,32 @@
         "class_margin_nonfinite": "positive_infinity",
         "converged": false,
         "entry_point": "ForwardProfile.solve_portfolio",
+        "failure_exception_class": null,
         "finite": true,
         "fitted_contraction": {
           "contracts": true,
           "finite_positive_point_count": 12,
-          "fit_r_squared": 0.9998439606014675,
-          "ratio": 0.9612924544424534
+          "fit_r_squared": 0.9998439606014671,
+          "ratio": 0.9612924544424577
         },
         "iterations": 12,
         "p_diverted": 1.0,
         "requested_class": "diverted",
         "residual_sequence": [
-          0.00780578945926283,
-          0.007483092628095099,
+          0.007805789459262831,
+          0.007483092628095097,
           0.007180967130561253,
           0.006892842836340042,
-          0.006626579992455011,
-          0.006374061802843394,
-          0.006131939141735015,
-          0.005895367934888752,
-          0.005667976021084552,
+          0.006626579992455192,
+          0.0063740618028433945,
+          0.006131939141735193,
+          0.005895367934889111,
+          0.005667976021084911,
           0.005448936621861535,
-          0.005245101317544938,
-          0.005049061244965982
+          0.0052451013175449385,
+          0.005049061244966342
         ],
-        "terminal_residual": 0.005049061244965982,
+        "terminal_residual": 0.005049061244966342,
         "terminal_xpoint_diagnostics": {
           "class_margin_from_operands": null,
           "class_margin_from_operands_nonfinite": "positive_infinity",
@@ -2092,45 +2001,45 @@
             "candidates": [
               {
                 "admitted": true,
-                "boundary_snr": 12.490018523577298,
+                "boundary_snr": 12.490018523577302,
                 "class_margin": 16.023443943823324,
                 "confidence": 1.0,
                 "coordinate_m": [
-                  0.5895390442407095,
-                  1.2123817054698844
+                  0.5858079159548536,
+                  1.2099970174579944
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.12723981803019363,
+                "flux_wb": -0.12750358328415862,
                 "resolved": true,
                 "root_support_cell": 0.7346646785736084,
                 "state": "resolved"
               },
               {
                 "admitted": true,
-                "boundary_snr": 13.443018284468911,
+                "boundary_snr": 13.443018284468875,
                 "class_margin": 15.298058450380639,
                 "confidence": 0.9561286531487899,
                 "coordinate_m": [
-                  0.584143699139807,
-                  -1.1949130489293276
+                  0.582134182257811,
+                  -1.1888742045493872
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.13280805373759277,
+                "flux_wb": -0.1329475567285211,
                 "resolved": false,
                 "root_support_cell": 0.6456692218780518,
                 "state": "unresolved"
               },
               {
                 "admitted": true,
-                "boundary_snr": 2.2231208949415207,
+                "boundary_snr": 2.2231208949415175,
                 "class_margin": 1.760521110576526,
                 "confidence": 0.11003256941103287,
                 "coordinate_m": [
-                  0.17927307045132562,
-                  -0.012626732734255349
+                  0.17412904301445956,
+                  -0.03059287675171916
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.1713015253122059,
+                "flux_wb": -0.17182281956308654,
                 "resolved": false,
                 "root_support_cell": 0.10101386159658432,
                 "state": "unresolved"
@@ -2141,8 +2050,8 @@
             "retained_candidate_count": 3
           },
           "selected_x_coordinate_m": [
-            0.5874171527268778,
-            1.2123192901859092
+            0.5874171527268781,
+            1.2123192901859094
           ],
           "selected_x_flux_wb": -0.12728627524409405,
           "selected_x_normalized_flux_operand": 0.4363887681813337,
@@ -2153,7 +2062,7 @@
             {
               "coordinate_m": [
                 0.1791756622689386,
-                -0.00482102928753253
+                -0.00482102928753261
               ],
               "fitted_null_type": 0.0,
               "flux_wb": -0.17134979905157952,
@@ -2162,8 +2071,8 @@
             },
             {
               "coordinate_m": [
-                0.5874171527268778,
-                1.2123192901859092
+                0.5874171527268781,
+                1.2123192901859094
               ],
               "fitted_null_type": 0.0,
               "flux_wb": -0.12728627524409405,
@@ -2172,12 +2081,12 @@
             },
             {
               "coordinate_m": [
-                0.5822688220360777,
-                -1.189639243938404
+                0.5822688220360775,
+                -1.1896392439384043
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.13280373635809145,
-              "normalized_flux_operand": 0.44153536293769635,
+              "flux_wb": -0.13280373635809142,
+              "normalized_flux_operand": 0.4415353629376963,
               "selected": false
             },
             {
@@ -2193,7 +2102,7 @@
             {
               "coordinate_m": [
                 1.6852685972368617,
-                0.7940527894817155
+                0.7940527894817156
               ],
               "fitted_null_type": 0.0,
               "flux_wb": -0.844512201982118,
@@ -2206,7 +2115,7 @@
               0.5649306774139404,
               -1.7536177684350878
             ],
-            "flux_wb": 0.016893800962936495,
+            "flux_wb": 0.01689380096293648,
             "normalized_flux": null,
             "normalized_flux_before_shadow": 0.30190002257031606,
             "normalized_flux_nonfinite": "positive_infinity",
@@ -2214,6 +2123,7 @@
             "status": "wall_extremum_rejected_by_private_flux_shadow"
           }
         },
+        "termination_reason": "terminal_observation_complete",
         "topology_consistent": true
       },
       "reference": {
@@ -2241,7 +2151,7 @@
       },
       "same_seed_both_arms": true,
       "seed_sha256": "61fecb0c4c498358a44704dd43facb157f7c35e001bab55473d38e283a17162a",
-      "terminal_residual_ratio_pure_over_mixed": 14088419437918.64
+      "terminal_residual_ratio_pure_over_mixed": 14088419437919.645
     }
   ],
   "response_carrier": {
@@ -2258,13 +2168,13 @@
       "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
       "size_bytes": 645864,
       "stored_circuit_count": 101,
-      "warm_load_seconds": 0.09825278003700078
+      "warm_load_seconds": 0.005685844924300909
     },
     "loaded_from_persisted_carrier": true,
     "named_cache_only_check": {
       "command": [
         "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/margin-artifact-regeneration/benchmarks/mast_response_carrier_warm.py",
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d8-s16-landing/sse-pinned-branch-regenerate/benchmarks/mast_response_carrier_warm.py",
         "check",
         "--carrier",
         "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
@@ -2273,245 +2183,66 @@
       ],
       "direct_green_operator_builder_entries": 0,
       "passes": true,
-      "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.196002 direct_builders=0 verdict=PASS"
+      "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.017564 direct_builders=0 verdict=PASS"
     }
   },
   "semantic_rebaseline": {
-    "contract": {
-      "classification_overlay_fields_may_change": [
-        "class_margin",
-        "class_margin_nonfinite",
-        "p_diverted",
-        "accepted_class_margins",
-        "accepted_topology_penalties",
-        "terminal_xpoint_diagnostics"
-      ],
-      "mixed_arm_residual_change_requires_penalty_change": true,
-      "mixed_arm_semantic_change_requires_penalty_change": true,
-      "pure_arm_exact_fields": [
-        "entry_point",
-        "requested_class",
-        "terminal_residual",
-        "converged",
-        "topology_consistent",
-        "achieved_class",
-        "finite",
-        "iterations",
-        "residual_sequence",
-        "fitted_contraction"
-      ]
-    },
-    "efit_agreement": {
-      "banked_agreement_count": 7,
-      "changed_reference": {
+    "retained_failure_count": 1,
+    "retained_failures": [
+      {
+        "arm": "mixed_arm",
+        "exception_class": "NoQualifiedAxisError",
         "shot": 21986,
         "slice_index": 46
-      },
-      "cohort_terminal_count": 12,
-      "interpretation": "the corrected mixed arm is diverted and topology-consistent, matching the independent EFIT reconstruction label",
-      "regenerated_agreement_count": 8
-    },
-    "gate_driver_sha256": "d15f7eaea0ec643c4219a4db28e0eb0ec31df64d78e2875a3870f448c8e9bad3",
-    "mixed_arm": {
-      "changed_penalty_reference_count": 3,
-      "changed_penalty_references": [
-        {
-          "banked_penalties": [
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0
-          ],
-          "regenerated_penalties": [
-            0.20878525221181118,
-            0.21501597994071087,
-            0.21048228820014286,
-            0.20529104463978645,
-            0.2120593601501681,
-            0.20754090311196702,
-            0.21245270788453358,
-            0.2066175728922409,
-            0.21313496404044788,
-            0.20799184551024202,
-            0.21315118135727976,
-            0.20690786316844229
-          ],
-          "residual_sequence_difference_count": 12,
-          "shot": 21985,
-          "slice_index": 51
-        },
-        {
-          "banked_penalties": [
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0034731413256270487,
-            0.006569604899382443
-          ],
-          "regenerated_penalties": [
-            0.0,
-            0.14656636865998107,
-            0.15034333957913554,
-            0.15180538366871565,
-            0.0,
-            0.1577893995091707,
-            0.15418024664792307,
-            0.16112645880050463,
-            0.15414714653803363,
-            0.15338708242033383,
-            0.15965522079120015,
-            0.1550617259300976
-          ],
-          "residual_sequence_difference_count": 12,
-          "shot": 21986,
-          "slice_index": 46
-        },
-        {
-          "banked_penalties": [
-            0.0,
-            0.00374627624302476,
-            0.004955333320817934,
-            0.0040472107835676785,
-            0.004652963215021622,
-            0.003847109368037782,
-            0.004641230479165037,
-            0.003676154066521997,
-            0.004678193098865191,
-            0.003645274362135631,
-            0.004702482900869442,
-            0.0036330927592678197
-          ],
-          "regenerated_penalties": [
-            0.0,
-            0.0,
-            0.0,
-            0.16062835744718573,
-            0.16414297305286513,
-            0.161552166459348,
-            0.16475672451878526,
-            0.16161729928932034,
-            0.16539787502543485,
-            0.16151618116983768,
-            0.1656864246300881,
-            0.16144185077476397
-          ],
-          "residual_sequence_difference_count": 12,
-          "shot": 21989,
-          "slice_index": 55
-        }
-      ],
-      "residual_sequence_difference_count": 36,
-      "residual_sequence_value_count": 72,
-      "semantic_change_count": 3,
-      "semantic_changes": [
-        {
-          "banked_value": false,
-          "explanation": "the continuously graded arm selects proposals using relative_residual + max(-class_margin, 0), so the corrected penalty changes its trajectory",
-          "field": "topology_consistent",
-          "regenerated_value": true,
-          "shot": 21986,
-          "slice_index": 46
-        },
-        {
-          "banked_value": "limited",
-          "explanation": "the continuously graded arm selects proposals using relative_residual + max(-class_margin, 0), so the corrected penalty changes its trajectory",
-          "field": "achieved_class",
-          "regenerated_value": "diverted",
-          "shot": 21986,
-          "slice_index": 46
-        },
-        {
-          "banked_value": false,
-          "explanation": "the contraction verdict is derived from the mixed-arm trajectory selected by the corrected margin penalty",
-          "field": "fitted_contraction.contracts",
-          "regenerated_value": true,
-          "shot": 21986,
-          "slice_index": 46
-        }
-      ]
-    },
-    "pure_arm": {
-      "reference_count": 6,
-      "residual_sequence_difference_count": 0,
-      "residual_sequence_value_count": 72,
-      "semantic_difference_count": 0
-    }
+      }
+    ],
+    "status": "unavailable_due_to_retained_terminal_failure"
   },
-  "source_commit": "bbb2fcce8e326519de428ede15561722c4baefc8",
+  "source_commit": "93b08c1ae542274128ef5e6145dbd08f5c30a138",
   "summary": {
-    "mixed_terminal_diverted_count": 5,
+    "arm_count": 12,
+    "mixed_terminal_diverted_count": 4,
     "mixed_terminal_residual_range": [
       3.583837965085392e-16,
-      0.010504359639162162
+      0.023131437967826584
     ],
     "pure_fitted_contraction_count": 6,
     "pure_terminal_diverted_count": 5,
     "pure_terminal_residual_range": [
       0.0045851673071955965,
-      0.007425336057810516
+      0.007425336057810689
     ],
-    "reference_count": 6
+    "reference_count": 6,
+    "retained_failure_arm_count": 1,
+    "retained_failure_arms": [
+      {
+        "arm": "mixed_arm",
+        "exception_class": "NoQualifiedAxisError",
+        "shot": 21986,
+        "slice_index": 46
+      }
+    ]
   },
   "xpoint_diagnostic_enrichment": {
     "absent_class_margin_selection_status_counts": {
-      "selected_typed_saddle_with_connectivity_support": 5
+      "selected_typed_saddle_not_connectivity_reachable": 1,
+      "selected_typed_saddle_with_connectivity_support": 6
     },
-    "absent_class_margin_terminal_count": 5,
+    "absent_class_margin_terminal_count": 7,
     "all_terminal_selection_status_counts": {
-      "selected_typed_saddle_not_connectivity_reachable": 2,
+      "selected_typed_saddle_not_connectivity_reachable": 1,
       "selected_typed_saddle_with_connectivity_support": 10
-    },
-    "benchmark_regression_findings": {
-      "forward_topology_state_pytree": {
-        "introduced_by_commit": "f2665b5d",
-        "production_batching_consumer": "nova/transport/coupled_window.py",
-        "production_repair": "register a lossless PyTree whose tenth array leaf is class_margin while keeping the callable out of the leaves",
-        "regression": "ForwardTopologyState changed from an automatically registered NamedTuple to an unregistered dataclass carrying a callable, so ForwardProfile.solve_portfolio failed when vmap returned it"
-      },
-      "removed_structured_axis_attributes": {
-        "attributes": [
-          "_connectivity_radius",
-          "_connectivity_height",
-          "_connectivity_shape"
-        ],
-        "benchmark_expectation": "cached tensor-product radius and height arrays plus their shape",
-        "introduced_by_commit": "f2665b5d",
-        "migrated_python_caller_count": 2,
-        "migrated_python_callers": [
-          "benchmarks/pinned_branch_contrast.py",
-          "benchmarks/traced_selection_seam.py"
-        ],
-        "product_module_caller_count": 0,
-        "public_repair": "consume ForwardFluxOperator.connectivity_grid_axes",
-        "remaining_private_attribute_caller_count": 0
-      }
     },
     "connectivity_support_terminal_count": 10,
     "leading_hypothesis": {
       "holds": false,
       "interpretation": "the MAST categories do not isolate connectivity reachability",
-      "mast_absent_not_connectivity_reachable_count": 0,
-      "mast_absent_terminal_count": 5,
+      "mast_absent_not_connectivity_reachable_count": 1,
+      "mast_absent_terminal_count": 7,
       "prior_diiid_connectivity_support_count": 0,
       "prior_diiid_not_connectivity_reachable_count": 10,
       "prior_diiid_terminal_count": 10
     },
-    "preservation_policy": "pure-arm solve authority is exact; mixed-arm trajectories may change only where the corrected class-margin penalty changes",
     "reference_count": 6,
     "reference_diagnostics": [
       {
@@ -2534,7 +2265,7 @@
             "selected_x_normalized_flux_operand_nonfinite": null,
             "selection_status": "selected_typed_saddle_with_connectivity_support",
             "wall_normalized_flux": 0.4689615149314206,
-            "wall_normalized_flux_before_shadow": 0.3310275619269073,
+            "wall_normalized_flux_before_shadow": 0.33102756192690724,
             "wall_normalized_flux_nonfinite": null,
             "wall_status": "wall_extremum_rejected_by_private_flux_shadow"
           }
@@ -2556,9 +2287,9 @@
             "wall_status": "wall_extremum_rejected_by_private_flux_shadow"
           },
           "pure_arm": {
-            "class_margin": 0.020742069585375056,
+            "class_margin": 0.02074206958537511,
             "class_margin_nonfinite": null,
-            "selected_x_normalized_flux_operand": 0.44711276921996196,
+            "selected_x_normalized_flux_operand": 0.4471127692199619,
             "selected_x_normalized_flux_operand_nonfinite": null,
             "selection_status": "selected_typed_saddle_with_connectivity_support",
             "wall_normalized_flux": 0.467854838805337,
@@ -2573,26 +2304,26 @@
       {
         "arms": {
           "mixed_arm": {
-            "class_margin": -0.20690786316844229,
-            "class_margin_nonfinite": null,
-            "selected_x_normalized_flux_operand": 0.23504441675654295,
+            "class_margin": null,
+            "class_margin_nonfinite": "positive_infinity",
+            "selected_x_normalized_flux_operand": 0.22892968794914112,
             "selected_x_normalized_flux_operand_nonfinite": null,
-            "selection_status": "selected_typed_saddle_not_connectivity_reachable",
-            "wall_normalized_flux": 0.028136553588100667,
-            "wall_normalized_flux_before_shadow": 0.027830452219265125,
-            "wall_normalized_flux_nonfinite": null,
-            "wall_status": "wall_extremum_admitted"
+            "selection_status": "selected_typed_saddle_with_connectivity_support",
+            "wall_normalized_flux": null,
+            "wall_normalized_flux_before_shadow": 0.017030882636524355,
+            "wall_normalized_flux_nonfinite": "positive_infinity",
+            "wall_status": "wall_extremum_rejected_by_private_flux_shadow"
           },
           "pure_arm": {
-            "class_margin": -0.20244353307105098,
-            "class_margin_nonfinite": null,
-            "selected_x_normalized_flux_operand": 0.2302175019605781,
+            "class_margin": null,
+            "class_margin_nonfinite": "positive_infinity",
+            "selected_x_normalized_flux_operand": -0.07993304792641832,
             "selected_x_normalized_flux_operand_nonfinite": null,
             "selection_status": "selected_typed_saddle_not_connectivity_reachable",
-            "wall_normalized_flux": 0.02777396888952713,
-            "wall_normalized_flux_before_shadow": 0.027571137940965943,
-            "wall_normalized_flux_nonfinite": null,
-            "wall_status": "wall_extremum_admitted"
+            "wall_normalized_flux": null,
+            "wall_normalized_flux_before_shadow": -0.3642269960277151,
+            "wall_normalized_flux_nonfinite": "positive_infinity",
+            "wall_status": "wall_extremum_rejected_by_private_flux_shadow"
           }
         },
         "shot": 21985,
@@ -2601,23 +2332,24 @@
       {
         "arms": {
           "mixed_arm": {
-            "class_margin": -0.1550617259300976,
+            "class_margin": null,
             "class_margin_nonfinite": null,
-            "selected_x_normalized_flux_operand": 0.4637935609925778,
+            "failure_exception_class": "NoQualifiedAxisError",
+            "selected_x_normalized_flux_operand": null,
             "selected_x_normalized_flux_operand_nonfinite": null,
-            "selection_status": "selected_typed_saddle_with_connectivity_support",
-            "wall_normalized_flux": 0.3087318350624802,
-            "wall_normalized_flux_before_shadow": 0.31138897559579,
+            "selection_status": null,
+            "wall_normalized_flux": null,
+            "wall_normalized_flux_before_shadow": null,
             "wall_normalized_flux_nonfinite": null,
-            "wall_status": "wall_extremum_admitted"
+            "wall_status": null
           },
           "pure_arm": {
-            "class_margin": -0.14822516784583772,
+            "class_margin": -0.14822516784583778,
             "class_margin_nonfinite": null,
-            "selected_x_normalized_flux_operand": 0.45530400261733367,
+            "selected_x_normalized_flux_operand": 0.4553040026173338,
             "selected_x_normalized_flux_operand_nonfinite": null,
             "selection_status": "selected_typed_saddle_with_connectivity_support",
-            "wall_normalized_flux": 0.30707883477149595,
+            "wall_normalized_flux": 0.307078834771496,
             "wall_normalized_flux_before_shadow": 0.3092027370138606,
             "wall_normalized_flux_nonfinite": null,
             "wall_status": "wall_extremum_admitted"
@@ -2642,7 +2374,7 @@
           "pure_arm": {
             "class_margin": null,
             "class_margin_nonfinite": "positive_infinity",
-            "selected_x_normalized_flux_operand": 0.4257047647661227,
+            "selected_x_normalized_flux_operand": 0.42570476476612273,
             "selected_x_normalized_flux_operand_nonfinite": null,
             "selection_status": "selected_typed_saddle_with_connectivity_support",
             "wall_normalized_flux": null,
@@ -2683,8 +2415,7 @@
         "slice_index": 43
       }
     ],
-    "source_diagnostic": "traced_margin_candidate_diagnostics via the shared terminal serializer",
-    "source_diagnostic_commit": "597417af",
+    "retained_terminal_failure_count": 1,
     "terminal_count": 12
   }
 }

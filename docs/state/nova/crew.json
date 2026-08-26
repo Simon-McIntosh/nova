@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T13:34:28",
+  "updated": "2026-08-26T13:56:38",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -395,6 +395,15 @@
         "created": "2026-08-25"
       },
       {
+        "id": "ebd-metric-verify",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-26"
+      },
+      {
         "id": "edge-clip",
         "harness": "codex",
         "role": "implement",
@@ -602,8 +611,12 @@
         "id": "integration-verify",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
-        "created": "2026-08-23"
+        "session_id": "01a03de1-cbad-7f72-a60f-76343dd3508e",
+        "created": "2026-08-23",
+        "sessions": {
+          "gpt-5.6-sol": "01a03de1-cbad-7f72-a60f-76343dd3508e"
+        },
+        "session_model": "gpt-5.6-sol"
       },
       {
         "id": "iso-accuracy",
@@ -753,6 +766,15 @@
         "created": "2026-08-24"
       },
       {
+        "id": "mcg-probe-verify",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-26"
+      },
+      {
         "id": "moment-blocks",
         "harness": "codex",
         "role": "implement",
@@ -835,6 +857,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-13"
+      },
+      {
+        "id": "pod-wall-verify",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-26"
       },
       {
         "id": "profile-route-scout",
@@ -1040,6 +1071,15 @@
         "sessions": {
           "gpt-5.6-sol": "01a03c37-4cb2-7b41-8bdb-2393c4505680"
         },
+        "created": "2026-08-26"
+      },
+      {
+        "id": "sse-verify",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-08-26"
       },
       {
@@ -38260,9 +38300,136 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T114324172877-pod-legacy-label-census-verify",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a76",
+        "node": "pod-legacy-label-census-verify",
+        "node_definition": {
+          "done_when": "A durable manifest records a fresh AST and text census command exiting zero with 135 matching lines, 137 textual matches, 133 executable attributes, 103 public-field appearances, 8 upstream legacy appearances, 22 safe homonyms, 4 strings, zero unclassified hits, and exactly 5 of 12 frozen-arm class contradictions; no source or banked artifact changes",
+          "estimated_hours": 0.5,
+          "goal": "Independently verify the exhaustive legacy-label census",
+          "id": "pod-legacy-label-census-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-label-audit-verify.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a76",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-label-audit-verify.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "reference-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T11:43:36Z",
+        "completed_at": "2026-08-26T11:48:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 315,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 315,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "489c725535343c645e1faf4cf1a173d51929ad67",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "PYTHONDONTWRITEBYTECODE=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync python -B census_assertions.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T114324172877-pod-legacy-label-census-verify/stream.jsonl",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-label-audit-verify.md",
+        "scope_changed": false,
+        "session_id": "01a03dcf-5590-7da3-a313-132579fd951f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2829568,
+            "cached_input_tokens_cumulative": 3976704,
+            "input_tokens": 2873831,
+            "input_tokens_cumulative": 4103329,
+            "output_tokens": 4187,
+            "output_tokens_cumulative": 9979,
+            "reasoning_output_tokens": 1406,
+            "reasoning_output_tokens_cumulative": 3810
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1437,
+              "log_age_seconds": 496,
+              "log_fresh": true,
+              "manifest_commits": [
+                "none \u2014 investigate-only node; source worktree was read-only at 60251ecdd8f9a7b1f8121d3184c807a9311c777a"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-label-audit-manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T111927307098-pod-legacy-label-census --gate <verdict> --commit none \u2014 investigate-only node; source worktree was read-only at 60251ecdd8f9a7b1f8121d3184c807a9311c777a",
+              "node": "pod-legacy-label-census",
+              "phase": "working",
+              "plan": "profile-owned-solve-domain",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T111927307098-pod-legacy-label-census",
+              "terminal_age_seconds": 509,
+              "terminal_at": "2026-08-26T11:35:03Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-legacy-label-census"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 905
+    "_version": 911
   }
 }

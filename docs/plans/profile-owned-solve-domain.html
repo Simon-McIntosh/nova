@@ -4,26 +4,30 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="profile-owned-solve-domain">
-  <meta name="plan-title"     content="Profile-Owned Solve Domain — the Newton solve stops consuming the boundary">
-  <meta name="plan-summary"   content="Remove the boundary definition from the residual: psi_norm from the O/X pair, shadow-only masking, profile-decayed exterior current, seed repair, wall ladder.">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="profile-owned-solve-domain">
+  <meta name="plan-title" content="Profile-Owned Solve Domain — the Newton solve stops consuming the boundary">
+  <meta name="plan-summary" content="Remove the boundary definition from the residual: psi_norm from the O/X pair, shadow-only masking, profile-decayed exterior current, seed repair, wall ladder.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="18.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="elevated">
-  <meta name="plan-sprint"    content="S16">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-tags"      content="equilibrium,topology,efit,mast,diii-d">
-  <meta name="plan-informs"   content="">
-  <meta name="plan-blocks"    content="efit-baseline-demonstration">
+  <meta name="plan-sprint" content="S16">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="equilibrium,topology,efit,mast,diii-d">
+  <meta name="plan-informs" content="">
+  <meta name="plan-blocks" content="efit-baseline-demonstration">
   <title>Profile-Owned Solve Domain | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-26">
+<meta name="plan-version" content="2">
+<meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html">
+<meta name="plan-impl" content="0.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -163,71 +167,76 @@
     achieved saddle-aware class, and no receipt semantics change silently.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="residual-domain-authority" data-choice="profile-owned-domain" data-by="Simon McIntosh" data-when="2026-08-26T00:00:00+00:00">
-        <p class="r-dec-q">How should the free-boundary solve treat the state-dependent domain —
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="residual-domain-authority" data-choice="profile-owned-domain" data-by="Simon McIntosh" data-when="2026-08-26T00:00:00+00:00">
+    <p class="r-dec-q">How should the free-boundary solve treat the state-dependent domain —
         freeze it per outer iteration, smooth cell membership, damp mask-crossing steps, or remove
         the boundary definition from the residual entirely?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="freeze-per-outer">freeze per outer iteration</button>
-          <button class="r-opt" data-value="smooth-membership">smooth cell membership</button>
-          <button class="r-opt" data-value="damp-crossing">damp mask-crossing steps</button>
-          <button class="r-opt chosen" data-value="profile-owned-domain">remove the boundary from the residual; the profile owns the exterior</button>
-        </p>
-        <p class="r-dec-rat">Lead decision, superseding the three treatment options inherited from
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="freeze-per-outer">freeze per outer iteration</button>
+      <button class="r-opt" data-value="smooth-membership">smooth cell membership</button>
+      <button class="r-opt" data-value="damp-crossing">damp mask-crossing steps</button>
+      <button class="r-opt chosen" data-value="profile-owned-domain">remove the boundary from the residual; the profile owns the exterior</button>
+      </p>
+    <p class="r-dec-rat">Lead decision, superseding the three treatment options inherited from
         discrete-operator-analytic-error. The solve should not use the boundary definition at all:
         the flood fill supplies the primary X-point and the shadow regions; the O/X pair defines
         psi_norm; shadows exclude disconnected psi_norm &lt; 1 regions; every other cell
         participates and true exterior cells get j = 0 from the profile, which handles the
         scrape-off region. Treating the domain is unnecessary once the domain discontinuity itself
         is removed from the residual.</p>
-      </div>
-      <div class="r-dec" data-key="flood-fill-geometry" data-choice="hex-plasma-cells" data-by="Simon McIntosh" data-when="2026-08-26T00:00:00+00:00">
-        <p class="r-dec-q">What geometry does the topology flood fill operate on?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="rect-lattice">rectangular proxy lattice</button>
-          <button class="r-opt chosen" data-value="hex-plasma-cells">the hex plasma cells, on already-computed centroid/node flux</button>
-        </p>
-        <p class="r-dec-rat">Lead directive: flux is already computed on the hex cell centroids and
+    </div>
+<div class="r-dec" data-key="flood-fill-geometry" data-choice="hex-plasma-cells" data-by="Simon McIntosh" data-when="2026-08-26T00:00:00+00:00">
+    <p class="r-dec-q">What geometry does the topology flood fill operate on?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="rect-lattice">rectangular proxy lattice</button>
+      <button class="r-opt chosen" data-value="hex-plasma-cells">the hex plasma cells, on already-computed centroid/node flux</button>
+      </p>
+    <p class="r-dec-rat">Lead directive: flux is already computed on the hex cell centroids and
         nodes; repeating that computation on a rectangular lattice for a topology pass is wasted
-        effort, and the rect kernel's 4-connectivity was only ever accidentally correct at the
+        effort, and the rect kernel&#x27;s 4-connectivity was only ever accidentally correct at the
         saddle. The flood fill uses the hex mesh with shared-edge admissibility from the global
         spline, sharing one partition between the residual mask and the classification read.</p>
-      </div>
-      <div class="r-dec" data-key="limited-configuration-normalization" data-choice="binding-level-min-wall-x" data-by="Simon McIntosh" data-when="2026-08-26T00:00:00+00:00">
-        <p class="r-dec-q">Under the profile-owned domain, how does a limited configuration
+    </div>
+<div class="r-dec" data-key="limited-configuration-normalization" data-choice="binding-level-min-wall-x" data-by="Simon McIntosh" data-when="2026-08-26T00:00:00+00:00">
+    <p class="r-dec-q">Under the profile-owned domain, how does a limited configuration
         normalize flux? The locked design defines psi_norm from the O/X pair. On the DIII-D limited
-        reference the wall binds well before the X-surface (margin about &minus;0.335), so an O/X
+        reference the wall binds well before the X-surface (margin about −0.335), so an O/X
         normalization admits profile current in the in-vessel region between the wall-contact
         surface and the X-surface unless the profile decays there.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="ox-always">O/X always; the profile owns the edge</button>
-          <button class="r-opt chosen" data-value="binding-level-min-wall-x">normalize by the binding level min(wall, X)</button>
-          <button class="r-opt" data-value="measure-both">decide from a measurement</button>
-        </p>
-        <p class="r-dec-rat">Lead decision: normalize by the binding level — wall-contact where the
-        wall binds first, X otherwise — <strong>with the selection expressed convention-safely</strong>.
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="ox-always">O/X always; the profile owns the edge</button>
+      <button class="r-opt chosen" data-value="binding-level-min-wall-x">normalize by the binding level min(wall, X)</button>
+      <button class="r-opt" data-value="measure-both">decide from a measurement</button>
+      </p>
+    <p class="r-dec-rat">Lead decision: normalize by the binding level — wall-contact where the
+        wall binds first, X otherwise — with the selection expressed convention-safely .
         Nova is COCOS 17, so the sense of increasing flux from axis to edge depends on the sign of
         the plasma current: a naive min() on raw psi picks the wrong operand on one current sign.
         Select the level nearest the axis flux along the confinement direction (equivalently,
         compare in axis-anchored normalized flux), never by raw-psi ordering. The binding level is
         a post-selection scalar; the residual domain itself stays boundary-free per the locked
         profile-owned-domain decision.</p>
-      </div>
-    </section>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-pod-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship profile-owned-solve-domain">
-        <h4 class="r-fu-title">Repair the seed, cut over the residual domain, run the ladder</h4>
-        <div class="r-fu-body">Execution order: §3 seed/material-mask repair gates §4; §4 requires
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-pod-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship profile-owned-solve-domain" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Repair the seed, cut over the residual domain, run the ladder</h4>
+    <div class="r-fu-body">Execution order: §3 seed/material-mask repair gates §4; §4 requires
         the limited-configuration-normalization decision locked; §5 and §6 are independent of §4 and
         may run in parallel lanes. The §2 X-point polish dependency arrives from
         separatrix-spline-extraction.</div>
-        <pre class="r-fu-prompt">/reckon-ship profile-owned-solve-domain</pre>
-      </article>
-    </section>
+    <pre class="r-fu-prompt">/reckon-ship profile-owned-solve-domain</pre>
+    </article>
+</section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s6" data-id="c-run-r-20260826T114324172877-pod-legacy-label-census-verify" data-who="reference-verify" data-when="2026-08-26T11:48:51Z">
+    <div class="r-comment-body"><p>Independent census reproduced 133 executable label consumers and 5 of 12 frozen-bank contradictions with zero unclassified hits.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

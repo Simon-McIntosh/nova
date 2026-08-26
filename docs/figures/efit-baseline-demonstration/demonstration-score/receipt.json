@@ -1,0 +1,110 @@
+{
+  "artifact": "fixed-cohort EFIT baseline demonstration score",
+  "contract": "banked-inclusive-three-gate-contract",
+  "inputs": {
+    "diiid": {
+      "declared_identities": [
+        {
+          "frame": 179,
+          "shot": "d3d_shot_00000c4a7b.parquet"
+        },
+        {
+          "frame": 44,
+          "shot": "d3d_shot_0003ff34e7.parquet"
+        },
+        {
+          "frame": 144,
+          "shot": "d3d_shot_001554e054.parquet"
+        },
+        {
+          "frame": 146,
+          "shot": "d3d_shot_002495e835.parquet"
+        },
+        {
+          "frame": 137,
+          "shot": "d3d_shot_0040ca9bdc.parquet"
+        }
+      ],
+      "path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+      "sha256": "38dd1e5263efcd429ff3cf17ab3685739f0f80fd9b65696f266986287ae83700"
+    },
+    "mast": {
+      "declared_identities": [
+        {
+          "arm": "pure",
+          "shot": 21978,
+          "slice_index": 35
+        },
+        {
+          "arm": "mixed",
+          "shot": 21978,
+          "slice_index": 35
+        },
+        {
+          "arm": "pure",
+          "shot": 21983,
+          "slice_index": 35
+        },
+        {
+          "arm": "mixed",
+          "shot": 21983,
+          "slice_index": 35
+        },
+        {
+          "arm": "pure",
+          "shot": 21985,
+          "slice_index": 51
+        },
+        {
+          "arm": "mixed",
+          "shot": 21985,
+          "slice_index": 51
+        },
+        {
+          "arm": "pure",
+          "shot": 21986,
+          "slice_index": 46
+        },
+        {
+          "arm": "mixed",
+          "shot": 21986,
+          "slice_index": 46
+        },
+        {
+          "arm": "pure",
+          "shot": 21989,
+          "slice_index": 55
+        },
+        {
+          "arm": "mixed",
+          "shot": 21989,
+          "slice_index": 55
+        },
+        {
+          "arm": "pure",
+          "shot": 22086,
+          "slice_index": 43
+        },
+        {
+          "arm": "mixed",
+          "shot": 22086,
+          "slice_index": 43
+        }
+      ],
+      "path": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "sha256": "2860de0fd9e45f92f9e8c108a483f0207f7b1e896720557be91ce176ee29cca5"
+    }
+  },
+  "refusal": {
+    "reason": "MAST row (21978, 35, 'pure') convergence must be an explicit Boolean",
+    "type": "ScoreRefusal"
+  },
+  "thresholds": {
+    "declared_row_saddle_distance_denominator": 17,
+    "declared_row_saddle_distance_maximum_inclusive_m": 0.04,
+    "mast_class_agreement_denominator": 12,
+    "mast_class_agreement_minimum_inclusive": 7,
+    "mast_closed_boundary_symmetric_rms_maximum_inclusive_m": 0.55
+  },
+  "verdict": "FAIL"
+}

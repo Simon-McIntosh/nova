@@ -17,9 +17,7 @@ import jax.numpy as jnp
 import jax
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-from matplotlib.path import Path as MplPath
 import numpy as np
-from scipy.spatial import cKDTree
 
 from benchmarks import mast_response_carrier_warm as response_carrier
 from benchmarks.efit_forward_parity_slice import (
@@ -30,6 +28,12 @@ from benchmarks.efit_forward_parity_slice import (
 )
 from benchmarks.label_seed_residual_field import _persisted_response_cache
 from nova.equilibrium.connectivity_boundary import traced_margin_candidate_diagnostics
+from nova.equilibrium.boundary_comparison import (
+    BoundaryMode,
+    classify_boundary_mode,
+    compare_closed_boundaries,
+)
+from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
 from nova.imas.mast_efit_referee import read_efit_referee
 from nova.imas.mast_geometry import DD_VERSION
 from nova.imas.mast_solve_inputs import (
@@ -49,6 +53,7 @@ REACHABILITY_SCRIPT = HERE / "real_equilibria_reachability.py"
 SELECTION_COMMIT = "80706f89"
 CACHE_SCHEMA_REVISION = 1
 RESAMPLE_POINTS = 2000
+CURVE_SAMPLES_PER_SEGMENT = 9
 
 
 def _reachability_module():
@@ -74,72 +79,82 @@ def _finite_polyline(points: np.ndarray, *, close: bool) -> np.ndarray:
     return result
 
 
-def _resample(points: np.ndarray, count: int = RESAMPLE_POINTS) -> np.ndarray:
-    """Sample a polyline uniformly in arc length."""
+def _sample_cubic_controls(controls: np.ndarray) -> np.ndarray | None:
+    """Sample ordered cubic controls without joining separate branches."""
 
-    segment = np.linalg.norm(np.diff(points, axis=0), axis=1)
-    retained = np.r_[True, segment > np.finfo(float).eps]
-    points = points[retained]
-    distance = np.r_[0.0, np.cumsum(np.linalg.norm(np.diff(points, axis=0), axis=1))]
-    query = np.linspace(0.0, distance[-1], count)
-    return np.column_stack(
+    controls = np.asarray(controls, dtype=float)
+    if controls.ndim != 3 or controls.shape[1:] != (4, 2) or not len(controls):
+        return None
+    coordinate = np.linspace(
+        0.0, 1.0, CURVE_SAMPLES_PER_SEGMENT, endpoint=False, dtype=float
+    )
+    basis = np.column_stack(
         (
-            np.interp(query, distance, points[:, 0]),
-            np.interp(query, distance, points[:, 1]),
+            (1.0 - coordinate) ** 3,
+            3.0 * (1.0 - coordinate) ** 2 * coordinate,
+            3.0 * (1.0 - coordinate) * coordinate**2,
+            coordinate**3,
         )
     )
+    points = np.einsum("tk,skd->std", basis, controls).reshape(-1, 2)
+    return np.vstack((points, controls[-1, -1]))
 
 
-def _boundary_distances(first: np.ndarray, second: np.ndarray) -> tuple[float, float]:
-    """Return branch-wise Hausdorff and RMS nearest-boundary distances."""
+def _assembled_branch_polylines(
+    geometry: dict[str, Any],
+) -> tuple[np.ndarray | None, list[np.ndarray]]:
+    """Return the valid closed branch and separately typed valid open legs."""
 
-    first_dense = _resample(_finite_polyline(first, close=False))
-    second_dense = _resample(_finite_polyline(second, close=True))
-    first_to_second = cKDTree(second_dense).query(first_dense, k=1)[0]
-    second_to_first = cKDTree(first_dense).query(second_dense, k=1)[0]
-    combined = np.r_[first_to_second, second_to_first]
-    return float(np.max(combined)), float(np.sqrt(np.mean(combined**2)))
+    required = ("radius", "height", "flux", "axis", "boundary_flux")
+    if any(name not in geometry for name in required):
+        return None, []
+    try:
+        radius = np.asarray(geometry["radius"], dtype=float)
+        height = np.asarray(geometry["height"], dtype=float)
+        flux = np.asarray(geometry["flux"], dtype=float)
+        axis = np.asarray(geometry["axis"], dtype=float)
+        level = float(geometry["boundary_flux"])
+    except TypeError, ValueError:
+        return None, []
+    if (
+        radius.ndim != 1
+        or height.ndim != 1
+        or flux.shape != (height.size, radius.size)
+        or axis.shape != (2,)
+        or not np.isfinite(radius).all()
+        or not np.isfinite(height).all()
+        or not np.isfinite(flux).all()
+        or not np.isfinite(axis).all()
+        or not np.isfinite(level)
+    ):
+        return None, []
 
-
-def _binding_contour(
-    geometry: dict[str, Any], boundary_point: np.ndarray
-) -> np.ndarray:
-    """Extract the closed binding contour selected by the production read."""
-
-    figure, axis = plt.subplots()
-    contours = axis.contour(
-        geometry["radius"],
-        geometry["height"],
-        geometry["flux"],
-        levels=[float(geometry["boundary_flux"])],
-    )
-    candidates: list[np.ndarray] = []
-    for path in contours.get_paths():
-        vertices = path.vertices
-        codes = path.codes
-        if codes is None:
-            if len(vertices) >= 4:
-                candidates.append(vertices.copy())
-            continue
-        starts = np.flatnonzero(codes == MplPath.MOVETO)
-        for start, stop in zip(starts, np.r_[starts[1:], len(vertices)], strict=True):
-            component = vertices[start:stop]
-            if len(component) >= 4:
-                candidates.append(component.copy())
-    plt.close(figure)
-    if not candidates:
-        raise RuntimeError("production binding flux produced no drawable contour")
-    axis_point = np.asarray(geometry["axis"], dtype=float)
-
-    def rank(vertices: np.ndarray) -> tuple[int, float, float]:
-        contains_axis = int(MplPath(vertices, closed=True).contains_point(axis_point))
-        boundary_distance = float(
-            np.min(np.linalg.norm(vertices - boundary_point, axis=1))
+    assembled = jax.device_get(
+        assemble_separatrix_branches(
+            jnp.asarray(flux),
+            jnp.asarray(radius),
+            jnp.asarray(height),
+            jnp.asarray(level),
+            jnp.asarray(axis),
         )
-        length = float(np.sum(np.linalg.norm(np.diff(vertices, axis=0), axis=1)))
-        return contains_axis, -boundary_distance, length
-
-    return max(candidates, key=rank)
+    )
+    if not bool(assembled["well_formed"]):
+        return None, []
+    closed = _sample_cubic_controls(
+        np.asarray(assembled["closed_controls_rz"])[
+            np.asarray(assembled["closed_valid"], dtype=bool)
+        ]
+    )
+    legs = []
+    for index in np.flatnonzero(np.asarray(assembled["open_branch_valid"], dtype=bool)):
+        leg = _sample_cubic_controls(
+            np.asarray(assembled["open_controls_rz"])[index][
+                np.asarray(assembled["open_valid"], dtype=bool)[index]
+            ]
+        )
+        if leg is not None:
+            legs.append(leg)
+    return closed, legs
 
 
 def _segment_intersection(
@@ -229,12 +244,18 @@ def _post_cutover_geometry(profile, state, topology) -> dict[str, Any]:
     margin = float(host["class_margin"])
     limiter = np.asarray(host["limiter_coordinate"], dtype=float)
     limiter_flux = float(host["limiter_flux"])
-    if not np.isfinite(selected[:3]).all():
-        raise RuntimeError("the post-cutover class read carries no selected saddle")
-    if np.isnan(margin):
-        raise RuntimeError("the post-cutover achieved class is indeterminate")
-    achieved_class = "diverted" if margin >= 0.0 else "limited"
-    binding_flux = float(selected[2]) if achieved_class == "diverted" else limiter_flux
+    try:
+        achieved_mode = classify_boundary_mode(margin)
+    except ValueError:
+        achieved_mode = None
+    achieved_class = achieved_mode.value if achieved_mode is not None else None
+    binding_flux = (
+        float(selected[2])
+        if achieved_mode is BoundaryMode.DIVERTED and np.isfinite(selected[2])
+        else limiter_flux
+        if achieved_mode is BoundaryMode.LIMITED and np.isfinite(limiter_flux)
+        else float("nan")
+    )
     return {
         "achieved_class": achieved_class,
         "class_margin": margin,
@@ -382,12 +403,16 @@ def _build_operand_cache(
             profile, jnp.asarray(passive_case["state"]), target_current
         )
         referee = read_efit_referee(shot, store=SHOT_STORE)
-        if not bool(referee.usable[slice_index]):
-            raise RuntimeError(f"EFIT referee slice {shot}/{slice_index} is unusable")
-        efit_lcfs = _finite_polyline(referee.lcfs_m[slice_index], close=True)
+        referee_usable = bool(referee.usable[slice_index])
+        efit_lcfs = np.asarray(referee.lcfs_m[slice_index], dtype=float)
+        efit_lcfs = efit_lcfs[np.isfinite(efit_lcfs).all(axis=1)]
         efit_x_points = referee.x_points_m[slice_index]
         efit_x_points = efit_x_points[np.isfinite(efit_x_points).all(axis=1)]
-        efit_label = "diverted" if bool(referee.diverted[slice_index]) else "limited"
+        efit_label = (
+            ("diverted" if bool(referee.diverted[slice_index]) else "limited")
+            if referee_usable
+            else None
+        )
         for arm, state in states.items():
             geometry = reachability._grid_geometry(profile, state)
             _masks, topology = profile.operator.read(state)
@@ -424,22 +449,40 @@ def _draw_panel(axis, row: dict[str, Any]) -> None:
 
     wall = np.asarray(row["wall_m"], dtype=float)
     efit_lcfs = np.asarray(row["efit_lcfs_m"], dtype=float)
-    nova_boundary = np.asarray(row["nova_binding_contour_m"], dtype=float)
+    nova_boundary = np.asarray(row["nova_closed_boundary_m"], dtype=float)
     axis.plot(wall[:, 0], wall[:, 1], color="#8a8a8a", linewidth=1.0)
-    axis.plot(efit_lcfs[:, 0], efit_lcfs[:, 1], color="#087e8b", linewidth=1.8)
-    axis.plot(nova_boundary[:, 0], nova_boundary[:, 1], color="#d1495b", linewidth=1.35)
+    if efit_lcfs.ndim == 2 and len(efit_lcfs):
+        axis.plot(efit_lcfs[:, 0], efit_lcfs[:, 1], color="#087e8b", linewidth=1.8)
+    if nova_boundary.ndim == 2 and len(nova_boundary):
+        axis.plot(
+            nova_boundary[:, 0], nova_boundary[:, 1], color="#d1495b", linewidth=1.35
+        )
+    for leg in row["nova_open_legs_m"]:
+        leg = np.asarray(leg, dtype=float)
+        axis.plot(leg[:, 0], leg[:, 1], color="#d1495b", linewidth=1.0, alpha=0.7)
     for point in row["efit_x_points_m"]:
         axis.scatter(
             *point, marker="+", s=48, color="#087e8b", linewidths=1.6, zorder=5
         )
-    axis.scatter(
-        *row["nova_selected_saddle_m"], marker="X", s=34, color="#d1495b", zorder=6
-    )
+    if row["nova_selected_saddle_m"] is not None:
+        axis.scatter(
+            *row["nova_selected_saddle_m"],
+            marker="X",
+            s=34,
+            color="#d1495b",
+            zorder=6,
+        )
     if row["nova_limiter_point_m"] is not None:
         axis.scatter(
             *row["nova_limiter_point_m"], marker="D", s=24, color="#f2c14e", zorder=6
         )
-    agreement = "AGREE" if row["label_agreement"] else "DISAGREE"
+    agreement = (
+        "AGREE"
+        if row["label_agreement"] is True
+        else "DISAGREE"
+        if row["label_agreement"] is False
+        else "UNAVAILABLE"
+    )
     axis.set_title(
         f"{row['panel']}  MAST {row['identity']} {row['arm']}\n"
         f"EFIT {row['efit_label']} · Nova {row['nova_achieved_class']} · {agreement}",
@@ -447,12 +490,19 @@ def _draw_panel(axis, row: dict[str, Any]) -> None:
         fontsize=8.3,
         fontweight="semibold",
     )
+    metric_text = (
+        f"LCFS sup {row['binding_to_efit_lcfs_sup_m']:.3f} m · "
+        f"RMS {row['binding_to_efit_lcfs_rms_m']:.3f} m\n"
+        f"X nearest {row['selected_saddle_to_efit_x_point_m']:.3f} m"
+        if row["binding_to_efit_lcfs_sup_m"] is not None
+        and row["binding_to_efit_lcfs_rms_m"] is not None
+        and row["selected_saddle_to_efit_x_point_m"] is not None
+        else "comparison unavailable: " + ", ".join(row["comparison_failures"])
+    )
     axis.text(
         0.02,
         0.02,
-        f"LCFS sup {row['binding_to_efit_lcfs_sup_m']:.3f} m · "
-        f"RMS {row['binding_to_efit_lcfs_rms_m']:.3f} m\n"
-        f"X nearest {row['selected_saddle_to_efit_x_point_m']:.3f} m",
+        metric_text,
         transform=axis.transAxes,
         fontsize=6.8,
         va="bottom",
@@ -464,6 +514,123 @@ def _draw_panel(axis, row: dict[str, Any]) -> None:
     axis.set_xlabel("R [m]")
     axis.set_ylabel("Z [m]")
     axis.spines[["top", "right"]].set_visible(False)
+
+
+def _finite_point_list(point: object) -> list[float] | None:
+    """Serialize one finite physical point without emitting non-finite JSON."""
+
+    try:
+        result = np.asarray(point, dtype=float)
+    except TypeError, ValueError:
+        return None
+    return (
+        result.tolist() if result.shape == (2,) and np.isfinite(result).all() else None
+    )
+
+
+def _finite_points(points: object) -> np.ndarray:
+    """Return finite physical points for strict serialization and plotting."""
+
+    try:
+        result = np.asarray(points, dtype=float)
+    except TypeError, ValueError:
+        return np.empty((0, 2), dtype=float)
+    if result.ndim != 2 or result.shape[1] != 2:
+        return np.empty((0, 2), dtype=float)
+    return result[np.isfinite(result).all(axis=1)]
+
+
+def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
+    """Build one bank row even when one or more comparison inputs are absent."""
+
+    geometry = {
+        "radius": operand.get("radius"),
+        "height": operand.get("height"),
+        "flux": operand.get("flux"),
+        "axis": operand.get("axis"),
+        "boundary_flux": operand.get("binding_flux"),
+    }
+    closed_boundary, open_legs = _assembled_branch_polylines(geometry)
+    comparison = compare_closed_boundaries(
+        closed_boundary,
+        operand.get("efit_lcfs"),
+        class_margin=operand.get("class_margin"),
+        reference_mode=operand.get("efit_label"),
+        predicted_saddle_rz_m=operand.get("selected_saddle"),
+        reference_x_points_rz_m=operand.get("efit_x_points"),
+        sample_count=RESAMPLE_POINTS,
+    )
+
+    efit_lcfs = _finite_points(operand.get("efit_lcfs"))
+    wall = _finite_points(operand.get("wall"))
+    try:
+        contacts = _boundary_wall_contacts(efit_lcfs, wall)
+    except RuntimeError, TypeError, ValueError, IndexError:
+        contacts = np.empty((0, 2), dtype=float)
+    limiter = _finite_point_list(operand.get("limiter_coordinate"))
+    contact_distance = (
+        float(
+            np.min(np.linalg.norm(contacts - np.asarray(limiter, dtype=float), axis=1))
+        )
+        if len(contacts) and limiter is not None
+        else None
+    )
+    class_margin = operand.get("class_margin")
+    try:
+        margin = float(class_margin)
+    except TypeError, ValueError:
+        margin = float("nan")
+    achieved_class = (
+        comparison.achieved_mode.value if comparison.achieved_mode is not None else None
+    )
+    reference_class = (
+        comparison.reference_mode.value
+        if comparison.reference_mode is not None
+        else operand.get("efit_label")
+    )
+    return {
+        "identity": operand.get("identity"),
+        "shot": operand.get("shot"),
+        "slice_index": operand.get("slice_index"),
+        "time_s": operand.get("time_s"),
+        "arm": operand.get("arm"),
+        "efit_label": reference_class,
+        "nova_achieved_class": achieved_class,
+        "nova_post_cutover_class_margin": _strict_value(margin),
+        "nova_post_cutover_class_margin_nonfinite": (
+            "positive_infinity"
+            if np.isposinf(margin)
+            else "negative_infinity"
+            if np.isneginf(margin)
+            else None
+        ),
+        "label_agreement": comparison.topology_class_agreement,
+        "binding_to_efit_lcfs_sup_m": comparison.symmetric_sup_distance_m,
+        "binding_to_efit_lcfs_rms_m": comparison.symmetric_rms_distance_m,
+        "nova_selected_saddle_m": _finite_point_list(operand.get("selected_saddle")),
+        "efit_x_points_m": _finite_points(operand.get("efit_x_points")).tolist(),
+        "selected_saddle_to_efit_x_point_m": comparison.x_point_distance_m,
+        "comparison_failures": list(comparison.failures),
+        "nova_limiter_point_m": limiter,
+        "efit_boundary_wall_contacts_m": contacts.tolist(),
+        "limiter_to_efit_boundary_wall_contact_m": contact_distance,
+        "limiter_contact_metric_unavailable_reason": (
+            None
+            if contact_distance is not None
+            else (
+                "the stored EFIT LCFS has no geometric intersection "
+                "with the governed wall"
+                if limiter is not None
+                else "the Nova limiter coordinate is unavailable"
+            )
+        ),
+        "nova_closed_boundary_m": (
+            closed_boundary.tolist() if closed_boundary is not None else None
+        ),
+        "nova_open_legs_m": [leg.tolist() for leg in open_legs],
+        "efit_lcfs_m": efit_lcfs.tolist(),
+        "wall_m": wall.tolist(),
+    }
 
 
 def run() -> dict[str, Any]:
@@ -485,80 +652,7 @@ def run() -> dict[str, Any]:
     else:
         operand_rows = _build_operand_cache(response_cache, carrier_evidence)
 
-    rows: list[dict[str, Any]] = []
-    for operand in operand_rows:
-        geometry = {
-            "radius": operand["radius"],
-            "height": operand["height"],
-            "flux": operand["flux"],
-            "axis": operand["axis"],
-            "boundary_flux": float(operand["binding_flux"]),
-        }
-        nova_label = operand["nova_achieved_class"]
-        selected_saddle = operand["selected_saddle"]
-        nova_limiter = operand["limiter_coordinate"]
-        boundary_point = selected_saddle if nova_label == "diverted" else nova_limiter
-        binding_contour = _binding_contour(geometry, boundary_point)
-        efit_lcfs = operand["efit_lcfs"]
-        efit_x_points = operand["efit_x_points"]
-        wall = operand["wall"]
-        sup_distance, rms_distance = _boundary_distances(binding_contour, efit_lcfs)
-        x_distance = (
-            float(np.min(np.linalg.norm(efit_x_points - selected_saddle, axis=1)))
-            if len(efit_x_points)
-            else float("nan")
-        )
-        contacts = _boundary_wall_contacts(efit_lcfs, wall)
-        contact_distance = (
-            float(np.min(np.linalg.norm(contacts - nova_limiter, axis=1)))
-            if len(contacts)
-            else float("nan")
-        )
-        class_margin = float(operand["class_margin"])
-        efit_label = operand["efit_label"]
-        rows.append(
-            {
-                "identity": operand["identity"],
-                "shot": operand["shot"],
-                "slice_index": operand["slice_index"],
-                "time_s": operand["time_s"],
-                "arm": operand["arm"],
-                "efit_label": efit_label,
-                "nova_achieved_class": nova_label,
-                "nova_post_cutover_class_margin": _strict_value(class_margin),
-                "nova_post_cutover_class_margin_nonfinite": (
-                    "positive_infinity"
-                    if np.isposinf(class_margin)
-                    else "negative_infinity"
-                    if np.isneginf(class_margin)
-                    else None
-                ),
-                "label_agreement": efit_label == nova_label,
-                "binding_to_efit_lcfs_sup_m": sup_distance,
-                "binding_to_efit_lcfs_rms_m": rms_distance,
-                "nova_selected_saddle_m": selected_saddle.tolist(),
-                "efit_x_points_m": efit_x_points.tolist(),
-                "selected_saddle_to_efit_x_point_m": _strict_value(x_distance),
-                "nova_limiter_point_m": (
-                    nova_limiter.tolist() if np.isfinite(nova_limiter).all() else None
-                ),
-                "efit_boundary_wall_contacts_m": contacts.tolist(),
-                "limiter_to_efit_boundary_wall_contact_m": _strict_value(
-                    contact_distance
-                ),
-                "limiter_contact_metric_unavailable_reason": (
-                    None
-                    if len(contacts)
-                    else (
-                        "the stored EFIT LCFS has no geometric intersection "
-                        "with the governed wall"
-                    )
-                ),
-                "nova_binding_contour_m": binding_contour.tolist(),
-                "efit_lcfs_m": efit_lcfs.tolist(),
-                "wall_m": wall.tolist(),
-            }
-        )
+    rows = [_score_operand(operand) for operand in operand_rows]
 
     for index, row in enumerate(rows):
         row["panel"] = chr(ord("A") + index)
@@ -592,7 +686,17 @@ def run() -> dict[str, Any]:
     figure.savefig(OUTPUT_PNG, dpi=180, bbox_inches="tight")
     plt.close(figure)
 
-    disagreements = [row for row in rows if not row["label_agreement"]]
+    agreements = [row for row in rows if row["label_agreement"] is True]
+    disagreements = [row for row in rows if row["label_agreement"] is False]
+    unavailable = [row for row in rows if row["label_agreement"] is None]
+
+    def metric_range(name: str) -> tuple[float | None, float | None]:
+        values = [row[name] for row in rows if row[name] is not None]
+        return (min(values), max(values)) if values else (None, None)
+
+    boundary_sup_range = metric_range("binding_to_efit_lcfs_sup_m")
+    boundary_rms_range = metric_range("binding_to_efit_lcfs_rms_m")
+    x_point_range = metric_range("selected_saddle_to_efit_x_point_m")
     payload = {
         "artifact": "independent EFIT topology corroboration of Nova wall reachability",
         "headline": (
@@ -653,18 +757,17 @@ def run() -> dict[str, Any]:
         },
         "distance_method": {
             "boundary_sup_m": (
-                "symmetric sampled Hausdorff distance after 2000-point arc-length "
-                "resampling of the selected disconnected contour branch and the "
-                "closed EFIT polyline"
+                "shared symmetric sampled Hausdorff distance after 2000-point "
+                "arc-length resampling of the valid spline-assembled closed branch "
+                "and the closed EFIT polyline"
             ),
             "boundary_rms_m": (
                 "root mean square of both directed nearest-polyline sample "
                 "distances on the same per-branch resampling"
             ),
             "compound_path_rule": (
-                "Matplotlib compound paths are split at every MOVETO and scored "
-                "per disconnected branch; distances are never evaluated across "
-                "a synthetic chord between branches"
+                "the spline assembler types one axis-enclosing closed branch and "
+                "separate open legs; only the valid closed branch enters metrics"
             ),
             "x_point_m": "Nova selected saddle to the nearest finite EFIT efm X-point",
             "limiter_contact_m": (
@@ -677,31 +780,20 @@ def run() -> dict[str, Any]:
                 "six frozen MAST DIVERTED-LABEL EFIT references, two Nova arms each"
             ),
             "arm_count": len(rows),
-            "agreement_count": len(rows) - len(disagreements),
+            "agreement_count": len(agreements),
             "disagreement_count": len(disagreements),
+            "unavailable_count": len(unavailable),
             "disagreements": [
                 f"{row['identity']} {row['arm']}" for row in disagreements
             ],
         },
         "summary": {
-            "boundary_sup_m_min": min(
-                row["binding_to_efit_lcfs_sup_m"] for row in rows
-            ),
-            "boundary_sup_m_max": max(
-                row["binding_to_efit_lcfs_sup_m"] for row in rows
-            ),
-            "boundary_rms_m_min": min(
-                row["binding_to_efit_lcfs_rms_m"] for row in rows
-            ),
-            "boundary_rms_m_max": max(
-                row["binding_to_efit_lcfs_rms_m"] for row in rows
-            ),
-            "x_point_distance_m_min": min(
-                row["selected_saddle_to_efit_x_point_m"] for row in rows
-            ),
-            "x_point_distance_m_max": max(
-                row["selected_saddle_to_efit_x_point_m"] for row in rows
-            ),
+            "boundary_sup_m_min": boundary_sup_range[0],
+            "boundary_sup_m_max": boundary_sup_range[1],
+            "boundary_rms_m_min": boundary_rms_range[0],
+            "boundary_rms_m_max": boundary_rms_range[1],
+            "x_point_distance_m_min": x_point_range[0],
+            "x_point_distance_m_max": x_point_range[1],
             "identifiable_efit_boundary_wall_contact_count": sum(
                 bool(row["efit_boundary_wall_contacts_m"]) for row in rows
             ),

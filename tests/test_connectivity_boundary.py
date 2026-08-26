@@ -612,7 +612,27 @@ def test_x_point_termination_binds_at_synthetic_saddle():
     xset = np.asarray(out.xset, dtype=np.float64)
     finite = xset[np.isfinite(xset).all(axis=1)]
     assert finite.shape[0] >= 1
-    # measured 1.2e-5 m position error on this grid
+    spline = cb.fit_tensor_spline(jnp.asarray(rg), jnp.asarray(zg), jnp.asarray(psi))
+    polished = spline.evaluate(
+        jnp.asarray(finite[0, 0], dtype=spline.coefficients.dtype),
+        jnp.asarray(finite[0, 1], dtype=spline.coefficients.dtype),
+    )
+    assert (
+        float(jnp.hypot(polished.radial_derivative, polished.vertical_derivative))
+        < 1.0e-12
+    )
+    polished_axis = spline.evaluate(
+        jnp.asarray(out.axis[0], dtype=spline.coefficients.dtype),
+        jnp.asarray(out.axis[1], dtype=spline.coefficients.dtype),
+    )
+    assert (
+        float(
+            jnp.hypot(
+                polished_axis.radial_derivative, polished_axis.vertical_derivative
+            )
+        )
+        < 1.0e-12
+    )
     assert np.hypot(*(finite[0] - saddle)) < 1e-3
 
 

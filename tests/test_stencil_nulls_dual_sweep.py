@@ -8,6 +8,8 @@ from nova.equilibrium.stencil_nulls import (
     critical_point_candidates_batch,
     gradient_cell_degree,
 )
+from nova.equilibrium.flux_surface_connectivity import polish_stationary_points
+from nova.linalg.tensor_spline import fit_tensor_spline
 
 
 def _saddle(radius, height, centre_radius, centre_height, coefficients):
@@ -119,3 +121,24 @@ def test_generic_interior_saddle_keeps_the_primal_refinement_exact():
         for key in ("r", "z", "psi"):
             np.testing.assert_array_equal(result[key][0, 0], single[key][0, 0])
         np.testing.assert_array_equal(result["orbit_family"][0, 0], 0)
+
+
+def test_polishing_union_slots_never_perturbs_a_primal_candidate():
+    """Every census family remains an independent stationary-polish lane."""
+    coordinates = jnp.arange(-4.0, 5.0)
+    field = _saddle(coordinates, coordinates, 0.25, 0.25, (1.0, -1.3, 0.7))
+    census = _census(field[None], coordinates, coordinates)
+    seeds = jnp.stack((census["r"][0], census["z"][0]), axis=-1)
+    present = jnp.asarray(census["present"][0])
+    spline = fit_tensor_spline(coordinates, coordinates, jnp.asarray(field))
+
+    union = polish_stationary_points(spline, seeds, present)
+    primal_slot = int(np.flatnonzero(np.asarray(census["orbit_family"][0]) == 0)[0])
+    primal = polish_stationary_points(
+        spline, seeds[primal_slot : primal_slot + 1], jnp.asarray([True])
+    )
+
+    np.testing.assert_array_equal(
+        np.asarray(union["position_rz"][primal_slot]),
+        np.asarray(primal["position_rz"][0]),
+    )

@@ -23,6 +23,7 @@ import inspect
 import math
 
 import numpy as np
+import pytest
 
 from nova.geometry.hexstencil import HEX_RING, hex_stencil
 from nova.jax.config import configure_dtypes
@@ -563,6 +564,32 @@ def test_stationary_point_polish_has_eager_jit_and_vmap_parity():
         )
     assert np.array_equal(np.asarray(eager["in_domain"]), [True, True, False])
     assert not bool(eager["converged"][-1])
+
+
+def test_stationary_point_polish_warm_exit_and_implicit_gradient():
+    """Warm roots cost zero trips and expose the stationary solution derivative."""
+    radial = _f64(np.linspace(0.2, 2.0, 9))
+    vertical = _f64(np.linspace(-1.4, 1.3, 11))
+    mesh_r, mesh_z = jnp.meshgrid(radial, vertical)
+    seed = _f64(np.asarray(((1.13, -0.27),)))
+    valid = jnp.asarray((True,))
+
+    def polished_radius(radial_shift):
+        values = (mesh_r - (1.13 + radial_shift)) ** 2 - (mesh_z + 0.27) ** 2
+        spline = fsc.fit_tensor_spline(radial, vertical, values)
+        return fsc.polish_stationary_points(spline, seed, valid)["position_rz"][0, 0]
+
+    result = fsc.polish_stationary_points(
+        fsc.fit_tensor_spline(
+            radial, vertical, (mesh_r - 1.13) ** 2 - (mesh_z + 0.27) ** 2
+        ),
+        seed,
+        valid,
+    )
+    assert int(result["iteration_count"][0]) == 0
+    assert float(jax.grad(polished_radius)(_f64(0.0))) == pytest.approx(
+        1.0, abs=2.0e-13
+    )
 
 
 def test_traced_contour_retains_cell_confined_saddle_polish():

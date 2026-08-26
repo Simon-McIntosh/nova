@@ -623,7 +623,13 @@ def _polish_stationary_points_in_bounds(
     upper_rz: jnp.ndarray,
     stationary_steps: int,
 ) -> dict[str, jnp.ndarray]:
-    """Polish fixed-slot seeds within caller-supplied coordinate bounds."""
+    """Polish fixed-slot seeds within caller-supplied coordinate bounds.
+
+    The nonlinear solve exits when every active lane has reached the gradient
+    tolerance or the shared safety cap.  ``custom_root`` differentiates the
+    stationary equation rather than the iteration history, so reverse-mode
+    derivatives remain valid even though the primal solve uses ``while_loop``.
+    """
     seed_rz = jnp.asarray(seed_rz, dtype=spline.coefficients.dtype)
     valid = jnp.asarray(valid, dtype=bool)
     lower_rz = jnp.asarray(lower_rz, dtype=seed_rz.dtype)
@@ -643,36 +649,137 @@ def _polish_stationary_points_in_bounds(
     radial_high = upper_rz[..., 0]
     vertical_low = lower_rz[..., 1]
     vertical_high = upper_rz[..., 1]
-    radial_seed = jnp.clip(radial_seed, radial_low, radial_high)
-    vertical_seed = jnp.clip(vertical_seed, vertical_low, vertical_high)
+    radial_seed = jnp.where(
+        jnp.isfinite(radial_seed),
+        jnp.clip(radial_seed, radial_low, radial_high),
+        radial_low,
+    )
+    vertical_seed = jnp.where(
+        jnp.isfinite(vertical_seed),
+        jnp.clip(vertical_seed, vertical_low, vertical_high),
+        vertical_low,
+    )
 
-    def newton_step(_iteration, point):
+    field_scale = jnp.maximum(
+        jnp.max(spline.coefficients) - jnp.min(spline.coefficients),
+        jnp.finfo(seed_rz.dtype).tiny,
+    )
+    minimum_spacing = jnp.minimum(
+        radial_high - radial_low, vertical_high - vertical_low
+    )
+    gradient_tolerance = (
+        128.0 * jnp.finfo(seed_rz.dtype).eps * field_scale / minimum_spacing
+    )
+
+    initial = jnp.stack((radial_seed, vertical_seed), axis=-1)
+
+    def stationary_equation(point):
         evaluation = spline.evaluate(point[..., 0], point[..., 1])
+        gradient = jnp.stack(
+            (evaluation.radial_derivative, evaluation.vertical_derivative), axis=-1
+        )
+        return jnp.where(seed_in_domain[..., None], gradient, point - initial)
+
+    def solve(_equation, starting_point):
+        initial_count = jnp.zeros(valid.shape, dtype=jnp.int32)
+
+        def needs_step(point):
+            evaluation = spline.evaluate(point[..., 0], point[..., 1])
+            gradient_norm = jnp.hypot(
+                evaluation.radial_derivative, evaluation.vertical_derivative
+            )
+            return (
+                seed_in_domain
+                & jnp.isfinite(gradient_norm)
+                & (gradient_norm > gradient_tolerance)
+            )
+
+        def continue_iteration(state):
+            iteration, point, _count = state
+            return (iteration < stationary_steps) & jnp.any(needs_step(point))
+
+        def newton_step(state):
+            iteration, point, count = state
+            active = needs_step(point)
+            evaluation = spline.evaluate(point[..., 0], point[..., 1])
+            determinant = (
+                evaluation.radial_second_derivative
+                * evaluation.vertical_second_derivative
+                - evaluation.mixed_derivative**2
+            )
+            safe_determinant = jnp.where(
+                jnp.abs(determinant) > jnp.finfo(point.dtype).tiny,
+                determinant,
+                1.0,
+            )
+            radial_step = (
+                evaluation.vertical_second_derivative * evaluation.radial_derivative
+                - evaluation.mixed_derivative * evaluation.vertical_derivative
+            ) / safe_determinant
+            vertical_step = (
+                evaluation.radial_second_derivative * evaluation.vertical_derivative
+                - evaluation.mixed_derivative * evaluation.radial_derivative
+            ) / safe_determinant
+            candidate = jnp.stack(
+                (
+                    jnp.clip(point[..., 0] - radial_step, radial_low, radial_high),
+                    jnp.clip(
+                        point[..., 1] - vertical_step, vertical_low, vertical_high
+                    ),
+                ),
+                axis=-1,
+            )
+            return (
+                iteration + 1,
+                jnp.where(active[..., None], candidate, point),
+                count + active.astype(jnp.int32),
+            )
+
+        _iteration, position, count = jax.lax.while_loop(
+            continue_iteration,
+            newton_step,
+            (jnp.asarray(0, jnp.int32), starting_point, initial_count),
+        )
+        return position, count.astype(starting_point.dtype)
+
+    def tangent_solve(linear_equation, right_hand_side):
+        radial_basis = jnp.zeros_like(right_hand_side).at[..., 0].set(1.0)
+        vertical_basis = jnp.zeros_like(right_hand_side).at[..., 1].set(1.0)
+        radial_column = linear_equation(radial_basis)
+        vertical_column = linear_equation(vertical_basis)
+        hessian = jnp.stack((radial_column, vertical_column), axis=-1)
         determinant = (
-            evaluation.radial_second_derivative * evaluation.vertical_second_derivative
-            - evaluation.mixed_derivative**2
+            hessian[..., 0, 0] * hessian[..., 1, 1]
+            - hessian[..., 0, 1] * hessian[..., 1, 0]
         )
         safe_determinant = jnp.where(
-            jnp.abs(determinant) > jnp.finfo(point.dtype).tiny, determinant, 1.0
+            jnp.abs(determinant) > jnp.finfo(right_hand_side.dtype).tiny,
+            determinant,
+            1.0,
         )
-        radial_step = (
-            evaluation.vertical_second_derivative * evaluation.radial_derivative
-            - evaluation.mixed_derivative * evaluation.vertical_derivative
-        ) / safe_determinant
-        vertical_step = (
-            evaluation.radial_second_derivative * evaluation.vertical_derivative
-            - evaluation.mixed_derivative * evaluation.radial_derivative
-        ) / safe_determinant
         return jnp.stack(
             (
-                jnp.clip(point[..., 0] - radial_step, radial_low, radial_high),
-                jnp.clip(point[..., 1] - vertical_step, vertical_low, vertical_high),
+                (
+                    hessian[..., 1, 1] * right_hand_side[..., 0]
+                    - hessian[..., 0, 1] * right_hand_side[..., 1]
+                )
+                / safe_determinant,
+                (
+                    hessian[..., 0, 0] * right_hand_side[..., 1]
+                    - hessian[..., 1, 0] * right_hand_side[..., 0]
+                )
+                / safe_determinant,
             ),
             axis=-1,
         )
 
-    initial = jnp.stack((radial_seed, vertical_seed), axis=-1)
-    position = jax.lax.fori_loop(0, stationary_steps, newton_step, initial)
+    position, iteration_count = jax.lax.custom_root(
+        stationary_equation,
+        initial,
+        solve,
+        tangent_solve,
+        has_aux=True,
+    )
     evaluation = spline.evaluate(position[..., 0], position[..., 1])
     determinant = (
         evaluation.radial_second_derivative * evaluation.vertical_second_derivative
@@ -681,16 +788,6 @@ def _polish_stationary_points_in_bounds(
     gradient_norm = jnp.hypot(
         evaluation.radial_derivative,
         evaluation.vertical_derivative,
-    )
-    field_scale = jnp.maximum(
-        jnp.max(spline.coefficients) - jnp.min(spline.coefficients),
-        jnp.finfo(position.dtype).tiny,
-    )
-    minimum_spacing = jnp.minimum(
-        radial_high - radial_low, vertical_high - vertical_low
-    )
-    gradient_tolerance = (
-        128.0 * jnp.finfo(position.dtype).eps * field_scale / minimum_spacing
     )
     finite_result = (
         jnp.isfinite(evaluation.value)
@@ -714,6 +811,7 @@ def _polish_stationary_points_in_bounds(
         "hessian_type": jnp.where(valid, hessian_type, 0),
         "converged": valid & converged,
         "in_domain": valid & in_domain,
+        "iteration_count": jnp.where(valid, iteration_count, 0).astype(jnp.int32),
     }
 
 
@@ -730,7 +828,9 @@ def polish_stationary_points(
     one candidate never perturbs another candidate's primal coordinates.
     ``valid`` has the fixed leading shape of ``seed_rz`` and inactive slots are
     returned as canonical exact-zero padding. Hessian type is ``-1`` for a
-    saddle, ``0`` for a degenerate Hessian, and ``1`` for an extremum.
+    saddle, ``0`` for a degenerate Hessian, and ``1`` for an extremum.  The
+    supplied seeds are also the warm-tracking state: a converged seed exits
+    without a trip, while ``stationary_steps`` remains the shared safety cap.
     """
     lower_rz = jnp.stack((spline.radial[0], spline.vertical[0]))
     upper_rz = jnp.stack((spline.radial[-1], spline.vertical[-1]))

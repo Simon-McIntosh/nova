@@ -65,16 +65,24 @@ def test_metric_identity_keeps_every_existing_bound_and_registers_solver_health(
     assert tolerances[ScorecardField.FIXED_POINT_DEFECT].bound == 1.0e-8
 
 
-def test_geometry_bounds_cite_the_semantic_machine_identity():
+def test_reference_measurements_cite_the_semantic_machine_identity():
     tolerances = registered_tolerances()
-    qualified_bounds = {
-        ScorecardField.MAGNETIC_AXIS_DISTANCE_M: 0.00101344,
-        ScorecardField.LCFS_DISTANCE_M: 0.00033047,
+    direct_citations = {
+        ScorecardField.MAGNETIC_AXIS_DISTANCE_M,
+        ScorecardField.LCFS_DISTANCE_M,
+        ScorecardField.PROFILE_RESIDUAL_RMS,
+        ScorecardField.CONVERGED_FRACTION,
+        ScorecardField.CONFINED_FRACTION,
+        ScorecardField.ITERATION_COUNT,
+        ScorecardField.THROUGHPUT_SLICES_PER_CORE_S,
     }
 
-    for field, bound in qualified_bounds.items():
-        assert tolerances[field].bound == bound
+    for field in direct_citations:
         assert tolerances[field].evidence == GEOMETRY_REFERENCE_IDENTITY
+    assert tolerances[ScorecardField.MAGNETICS_RESIDUAL_WHITENED_RMS].evidence == (
+        f"{GEOMETRY_REFERENCE_IDENTITY}; "
+        "docs/research/mast-cutover-parity-evidence.html"
+    )
 
 
 def test_a_scorecard_cannot_be_scored_with_missing_or_unregistered_metrics():

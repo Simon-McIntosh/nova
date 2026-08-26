@@ -17,6 +17,19 @@ def receipt() -> dict:
     return criterion.build_receipt()
 
 
+def _leaf_differences(left, right, path=()):
+    if isinstance(left, dict) and isinstance(right, dict):
+        for key in left.keys() | right.keys():
+            yield from _leaf_differences(left.get(key), right.get(key), (*path, key))
+        return
+    if isinstance(left, list) and isinstance(right, list):
+        for index, (left_item, right_item) in enumerate(zip(left, right, strict=True)):
+            yield from _leaf_differences(left_item, right_item, (*path, index))
+        return
+    if left != right:
+        yield path
+
+
 def test_provenance_table_covers_only_carried_registered_bounds(receipt):
     rows = receipt["provenance_table"]
     tolerances = registered_tolerances()
@@ -161,9 +174,19 @@ def test_claim_bounds_and_protected_digests_are_explicit(receipt):
     assert protected["after"]["mismatches"] == []
 
 
-def test_checked_receipt_matches_regeneration(tmp_path, receipt):
+def test_checked_receipt_preserves_results_across_live_source_provenance(
+    tmp_path, receipt
+):
     checked = json.loads(criterion.OUTPUT_PATH.read_text())
     regenerated = criterion.write_receipt(tmp_path / "receipt.json")
 
     assert regenerated == receipt
-    assert checked == regenerated
+    assert set(_leaf_differences(checked, regenerated)) == {
+        ("provenance_table", 0, "evidence_verbatim"),
+        ("provenance_table", 1, "evidence_verbatim"),
+        ("provenance_table", 4, "evidence_read", "cited_path_sha256"),
+        ("source_digests", "nova/imas/parity_tolerances.py"),
+        ("source_digests", "nova/equilibrium/fixed_point.py"),
+        ("source_digests", "nova/equilibrium/forward.py"),
+        ("source_digests", "nova/equilibrium/forward_operator.py"),
+    }

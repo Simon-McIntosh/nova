@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T23:32:46",
+  "updated": "2026-08-26T23:36:05",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -51073,9 +51073,108 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T211058255408-sse-mast-bank-resolve",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-mast-bank-resolve",
+        "node_definition": {
+          "done_when": "A single SLURM CPU debug job (per the campaign map lane: 16 CPUs, JAX_PLATFORMS=cpu, JAX_ENABLE_X64=true, TMPDIR=/tmp, time limit at most one hour, complete log ending EXIT_MARKER=0) runs docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py after deleting the transient .efit-topology-corroboration-cache.npz; the tracked JSON carries exactly 12 declared arms once each with explicit per-arm convergence and no NaN or infinity, named failures retained with null dependent metrics, class derived from class_margin, and reports class agreement, worst eligible symmetric RMS, and worst saddle distance against the locked 7-of-12, 0.55 m, 0.04 m thresholds; the PNG is redrawn and visually inspected at original resolution; if 21985/51 fails to reach a qualified terminal state the run stops as a named campaign HOLD rather than substituting or shrinking the bank; only the JSON and PNG are committed; scheduler receipt in the manifest",
+          "estimated_hours": null,
+          "goal": "The twelve-arm MAST corroboration bank regenerated on corrected main through the campaign map's exact driver invocation, with the transient cache removed so all six identities solve fresh in pure and mixed form, retaining every failure row and reporting the locked thresholds without assuming they pass",
+          "id": "sse-mast-bank-resolve",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T211058255408-sse-mast-bank-resolve/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "margin-remeasure",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T21:11:05Z",
+        "completed_at": "2026-08-26T21:35:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1484,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1484,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "1b4296d7bc970e3563f54cbc676a8e076c5655bb",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "SLURM job 1258402 (16 CPUs, x64, 00:55 limit): exact campaign driver; EXIT_MARKER=1 at 21985/51 NoQualifiedAxisError after 2 arms solved",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T211058255408-sse-mast-bank-resolve/logs/regeneration-1258402.log",
+          "log_digest": null
+        },
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T211058255408-sse-mast-bank-resolve/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03818-636e-7632-bc6e-05c3a7131c93",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 943104,
+            "cached_input_tokens_cumulative": 1316096,
+            "input_tokens": 1213328,
+            "input_tokens_cumulative": 1759251,
+            "output_tokens": 8615,
+            "output_tokens_cumulative": 9780,
+            "reasoning_output_tokens": 1882,
+            "reasoning_output_tokens_cumulative": 1977
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1057
+    "_version": 1058
   }
 }

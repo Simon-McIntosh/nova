@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T16:01:05",
+  "updated": "2026-08-26T16:07:41",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -43921,9 +43921,131 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T134654495038-mcg-h200-residual-stopping-test",
+        "plan": "mast-catalog-gpu-solve",
+        "section": "\u00a72",
+        "node": "mcg-h200-residual-stopping-test",
+        "node_definition": {
+          "done_when": "One SLURM job runs on betelgeuse with reservation gpu_0003_grpA, exactly one gpu:1 allocation, isolated CUDA visibility, float64 JAX enabled, TMPDIR=/tmp, and an hours-sized time request; it records the NVIDIA H200 identity and runs tests/test_fixed_point.py plus tests/test_stencil_nulls.py::test_cpu_gpu_candidate_metadata_and_coordinates_match in one captured invocation with every collected test passing and the GPU parity test not skipped; independent assertions recover residual tolerance 1e-8, attempted and accepted promotions [1,3], batch maximum 3, fixed diagnostic shapes and NaN padding; the complete log ends EXIT_MARKER=0, git diff --exit-code returns 0, and the manifest states PASS or HOLD without claiming full-catalog throughput.",
+          "estimated_hours": 0.7,
+          "goal": "Use the second currently free reserved H200 to verify the landed residual-stopping and CPU/GPU candidate-parity contracts on the real accelerator, without changing repository files.",
+          "id": "mcg-h200-residual-stopping-test",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-h200-residual-stopping-test.md",
+          "plan": "mast-catalog-gpu-solve",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-h200-residual-stopping-test.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "mcg-stopping-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T13:47:14Z",
+        "completed_at": "2026-08-26T14:04:00Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1006,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1006,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "d0eb24481423ba4fe661a4967f44f4d3e88ed70d",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-h200-residual-stopping-test.md",
+        "scope_changed": false,
+        "session_id": "01a03df5-886c-7213-a567-4c5d96116f08",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 256256,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 261109,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 2067,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 412
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 80,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 3680,
+              "log_age_seconds": 388,
+              "log_fresh": true,
+              "manifest_commits": [
+                "a85b597f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-achieved-topology-core.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T124538795352-pod-achieved-topology-core --gate <verdict> --commit a85b597f",
+              "node": "pod-achieved-topology-core",
+              "phase": "complete",
+              "plan": "profile-owned-solve-domain",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T124538795352-pod-achieved-topology-core",
+              "terminal_age_seconds": 421,
+              "terminal_at": "2026-08-26T13:40:09Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-achieved-topology-core"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "runs tests",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 966
+    "_version": 967
   }
 }

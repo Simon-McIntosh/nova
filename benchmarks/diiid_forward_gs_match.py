@@ -2175,11 +2175,12 @@ def _terminal_xpoint_diagnostics(profile, state, topology) -> dict[str, Any]:
     )
     radial_count = radius.size
     vertical_count = height.size
+    _axis_seed, connectivity_material = operator.connectivity_axis_seed(topology.axis)
     diagnostic = traced_margin_candidate_diagnostics(
         grid_flux.reshape((radial_count, vertical_count)).T,
         jnp.asarray(radius, dtype=jnp.float64),
         jnp.asarray(height, dtype=jnp.float64),
-        operator.inside_material.reshape((radial_count, vertical_count)).T,
+        connectivity_material.reshape((radial_count, vertical_count)).T,
         topology.axis[0],
         topology.axis[1],
         96,

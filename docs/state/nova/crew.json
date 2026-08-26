@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T14:34:30",
+  "updated": "2026-08-26T14:36:20",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -40655,9 +40655,116 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T111246647906-sse-polish-and-tracking",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a72",
+        "node": "sse-polish-and-tracking",
+        "node_definition": {
+          "done_when": "Candidate census consumers use polished positions, manufactured and topology pins pass under eager jit and vmap, and the reserved-H200 cost receipt is banked or an exact capacity blocker is reported",
+          "estimated_hours": 5.0,
+          "goal": "Complete the stationary-point authority cutover and the tolerance-exit warm-tracked differentiable polish required by section 2 and subsection 2a",
+          "id": "sse-polish-and-tracking",
+          "manifest_path": "/home/ITER/mcintos/.codex/scratch/nova-s16-20260826/sse-polish-manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/flux_surface_connectivity.py",
+            "nova/equilibrium/connectivity_boundary.py",
+            "tests/test_flux_surface_connectivity.py",
+            "tests/test_connectivity_boundary.py",
+            "tests/test_stencil_nulls.py",
+            "tests/test_stencil_nulls_dual_sweep.py",
+            "benchmarks/stationary_point_polish.py",
+            "docs/figures/separatrix-spline-extraction"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "session-9ebe90b7df11b4c3d363",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T11:12:53Z",
+        "completed_at": "2026-08-26T11:44:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1920,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1920,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "60251ecdd8f9a7b1f8121d3184c807a9311c777a",
+        "commits": [
+          "a8927be3a0fc5fc387a2e64dfc97c6621ce1eb56"
+        ],
+        "changed_lines": {
+          "added": 411,
+          "removed": 45,
+          "files": 6
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/test_flux_surface_connectivity.py tests/test_connectivity_boundary.py tests/test_stencil_nulls.py tests/test_stencil_nulls_dual_sweep.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-polish-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.codex/scratch/nova-s16-20260826/sse-polish-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03dc5-e396-7b53-b00e-6208282e2a82",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13357568,
+            "cached_input_tokens_cumulative": 13357568,
+            "input_tokens": 13578589,
+            "input_tokens_cumulative": 13578589,
+            "output_tokens": 32337,
+            "output_tokens_cumulative": 32337,
+            "reasoning_output_tokens": 7656,
+            "reasoning_output_tokens_cumulative": 7656
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 934
+    "_version": 935
   }
 }

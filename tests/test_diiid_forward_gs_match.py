@@ -19,6 +19,42 @@ sys.modules[SPEC.name] = gate
 SPEC.loader.exec_module(gate)
 
 
+def test_publication_artifact_records_are_stable_and_strict(tmp_path):
+    receipt = {}
+
+    publication_artifacts = gate._record_publication_artifacts(receipt, tmp_path)
+
+    assert publication_artifacts == {
+        "poloidal_frame_comparison": {
+            "filesystem_path": str(tmp_path / "frame_flux_comparison.png"),
+            "publication_path": (
+                "/nova/figures/diiid-forward-onboarding/forward-gs/"
+                "frame_flux_comparison.png"
+            ),
+        },
+        "cohort_match_summary": {
+            "filesystem_path": str(tmp_path / "cohort_match_summary.png"),
+            "publication_path": (
+                "/nova/figures/diiid-forward-onboarding/forward-gs/"
+                "cohort_match_summary.png"
+            ),
+        },
+        "strict_forward_match_receipt": {
+            "filesystem_path": str(tmp_path / "forward_gs_receipt.json"),
+            "publication_path": (
+                "/nova/figures/diiid-forward-onboarding/forward-gs/"
+                "forward_gs_receipt.json"
+            ),
+        },
+    }
+    assert all(
+        Path(artifact["publication_path"]).is_absolute()
+        for artifact in publication_artifacts.values()
+    )
+    assert receipt == {"publication_artifacts": publication_artifacts}
+    json.dumps(receipt, allow_nan=False)
+
+
 def _diagnostic(class_margin):
     return {
         "class_margin": jnp.asarray(class_margin),
@@ -107,7 +143,7 @@ def test_terminal_diagnostic_uses_axis_seeded_connectivity_material(monkeypatch)
 
 def test_terminal_diagnostic_refuses_any_class_margin_mismatch(monkeypatch):
     profile, state, topology, _repaired_material, _calls = _inputs()
-    changed_margin = np.nextafter(topology.class_margin, np.inf)
+    changed_margin = topology.class_margin + 0.25
     monkeypatch.setattr(
         gate,
         "traced_margin_candidate_diagnostics",

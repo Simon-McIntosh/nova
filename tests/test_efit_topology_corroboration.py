@@ -174,22 +174,29 @@ def test_all_missing_comparator_inputs_remain_one_strict_json_bank_row(monkeypat
 def test_post_cutover_geometry_routes_class_through_public_classifier(monkeypatch):
     adapter = _adapter()
     observed = []
+    observed_material = []
     monkeypatch.setattr(
         adapter,
         "classify_boundary_mode",
         lambda margin: observed.append(margin) or BoundaryMode.LIMITED,
     )
-    monkeypatch.setattr(
-        adapter,
-        "traced_margin_candidate_diagnostics",
-        lambda *args: {
+
+    def diagnostics(*args):
+        observed_material.append(args[3])
+        return {
             "selected_typed_candidate": jnp.asarray((0.8, -0.6, 3.0)),
             "class_margin": jnp.asarray(0.75),
             "limiter_coordinate": jnp.asarray((0.4, 1.1)),
             "limiter_flux": jnp.asarray(2.0),
-        },
+        }
+
+    monkeypatch.setattr(
+        adapter,
+        "traced_margin_candidate_diagnostics",
+        diagnostics,
     )
     coordinate = np.asarray(((0.0, 0.0), (1.0, 0.0), (0.0, 1.0), (1.0, 1.0)))
+    connectivity_material = jnp.asarray((True, False, False, True))
     operator = SimpleNamespace(
         physical_node_number=4,
         grid=SimpleNamespace(coordinate=coordinate),
@@ -199,6 +206,7 @@ def test_post_cutover_geometry_routes_class_through_public_classifier(monkeypatc
         _fixed_design_topology=SimpleNamespace(
             grid=lambda flux: (None, jnp.zeros((1, 4)))
         ),
+        connectivity_axis_seed=lambda axis: (axis, connectivity_material),
         inside_material=jnp.zeros(4, dtype=bool),
         wall=SimpleNamespace(coordinate=np.asarray(((0.0, 0.0), (1.0, 0.0)))),
     )
@@ -212,5 +220,8 @@ def test_post_cutover_geometry_routes_class_through_public_classifier(monkeypatc
     result = adapter._post_cutover_geometry(profile, jnp.arange(4.0), topology)
 
     assert observed == [0.75]
+    np.testing.assert_array_equal(
+        observed_material, connectivity_material.reshape((2, 2)).T[None]
+    )
     assert result["achieved_class"] == "limited"
     assert result["binding_flux"] == 2.0

@@ -4,24 +4,31 @@
     "authored_coordinate_exact": true,
     "control_operator_wall_coordinate_exact": true,
     "control_seed_exact": true,
-    "direct_nested_row_audit": {
+    "direct_control_audit": {
       "plasma_to_wall": {
         "array_equal": true,
         "maximum_absolute_difference": 0.0,
         "maximum_relative_difference": 0.0
       },
-      "prescribed_wall": {
-        "array_equal": false,
-        "maximum_absolute_difference": 1.128917041771059e-16,
-        "maximum_relative_difference": 1.3998361220582847e-11
+      "prescribed_full": {
+        "array_equal": true,
+        "maximum_absolute_difference": 0.0,
+        "maximum_relative_difference": 0.0
       },
       "source_to_wall": {
-        "array_equal": false,
-        "maximum_absolute_difference": 9.190307477709159e-20,
-        "maximum_relative_difference": 1.6948392191765903e-14
+        "array_equal": true,
+        "maximum_absolute_difference": 0.0,
+        "maximum_relative_difference": 0.0
       }
     },
-    "passes": false
+    "direct_control_section_kernel_evaluations": 938,
+    "original_batch_contract": {
+      "prescribed_grid_before_wall_order_exact": true,
+      "prescribed_shape_1126_by_2": true,
+      "source_authored_order_exact": true,
+      "source_shape_37_by_2": true
+    },
+    "passes": true
   },
   "convergence": {
     "count_sequence": [
@@ -67,13 +74,13 @@
         "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
         "size_bytes": 645864,
         "stored_circuit_count": 101,
-        "warm_load_seconds": 0.006055684993043542
+        "warm_load_seconds": 0.005971002858132124
       },
       "loaded_from_persisted_carrier": true,
       "named_cache_only_check": {
         "command": [
           "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
-          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-wall-resolution-ladder/benchmarks/mast_response_carrier_warm.py",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-wall-control-batch-repair/benchmarks/mast_response_carrier_warm.py",
           "check",
           "--carrier",
           "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
@@ -82,7 +89,7 @@
         ],
         "direct_green_operator_builder_entries": 0,
         "passes": true,
-        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.013424 direct_builders=0 verdict=PASS"
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.012049 direct_builders=0 verdict=PASS"
       }
     },
     "varying_inputs": [
@@ -1212,7 +1219,14 @@
   ],
   "schema": "isolated-wall-resolution-ladder",
   "validation": {
-    "error": "the 37-row control did not reproduce the current operator",
-    "valid": false
+    "row_count": 5,
+    "valid": true,
+    "wall_target_counts": [
+      37,
+      36,
+      72,
+      144,
+      288
+    ]
   }
 }

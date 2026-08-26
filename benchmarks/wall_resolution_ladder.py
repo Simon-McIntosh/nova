@@ -264,6 +264,71 @@ def _build_wall_responses(
     }
 
 
+def _control_batch_coordinates(
+    case: dict[str, Any], authored: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return the exact target batches used to author the stored control."""
+
+    source_targets = np.asarray(authored, dtype=np.float64)
+    stored_wall = np.asarray(case["wall_coordinate"], dtype=np.float64)
+    grid_targets = np.asarray(case["grid_coordinate"], dtype=np.float64)
+    if source_targets.shape != (37, 2):
+        raise ValueError("the direct source control requires exactly 37 by 2 targets")
+    if not np.array_equal(source_targets, stored_wall):
+        raise ValueError("the direct source control changed authored wall order")
+    prescribed_targets = np.vstack((grid_targets, source_targets))
+    if prescribed_targets.shape != (1126, 2):
+        raise ValueError(
+            "the direct prescribed control requires exactly 1126 by 2 targets"
+        )
+    grid_number = len(grid_targets)
+    if not np.array_equal(prescribed_targets[:grid_number], grid_targets):
+        raise ValueError("the direct prescribed control changed grid-prefix order")
+    if not np.array_equal(prescribed_targets[grid_number:], source_targets):
+        raise ValueError("the direct prescribed control changed wall-suffix order")
+    return source_targets, prescribed_targets
+
+
+def _build_control_responses(
+    case: dict[str, Any], context: dict[str, Any], base_profile, authored: np.ndarray
+) -> dict[str, Any]:
+    """Reconstruct the control at its original source and prescribed batches."""
+
+    source_targets, prescribed_targets = _control_batch_coordinates(case, authored)
+    group = context["group"]
+    row = context["row"]
+    geometry = (
+        MachineGeometryRegistry.default()
+        .select(int(case["reference"]["shot"]))
+        .configuration.geometry
+    )
+    families, _drive, active_mapping = _circuit_drives(group, row, geometry, "fcoil_c")
+    source = _source_response(geometry, source_targets, families)
+    lattice = base_profile.lattice
+    plasma = _plasma_response(
+        source_targets,
+        lattice.coordinate,
+        float(lattice.radial_step),
+        float(lattice.vertical_step),
+    )
+    circuits, audit = _stored_circuit_fields(
+        group, row, prescribed_targets, geometry, active_mapping
+    )
+    prescribed = np.column_stack([circuit["response_wb_per_a"] for circuit in circuits])
+    current = np.asarray(
+        [circuit["fitted_current_a"] for circuit in circuits], dtype=np.float64
+    )
+    return {
+        "source": source,
+        "plasma": plasma,
+        "prescribed": prescribed,
+        "current": current,
+        "audit": audit,
+        "source_targets": source_targets,
+        "prescribed_targets": prescribed_targets,
+    }
+
+
 def _rung_profile(
     base_profile,
     coordinate: np.ndarray,
@@ -493,10 +558,19 @@ def _control_reproduction_passes(reproduction: dict[str, Any]) -> bool:
         "control_operator_wall_coordinate_exact",
         "control_seed_exact",
     )
-    audit = reproduction.get("direct_nested_row_audit")
-    response_fields = ("source_to_wall", "plasma_to_wall", "prescribed_wall")
+    batch_contract = reproduction.get("original_batch_contract")
+    batch_fields = (
+        "source_shape_37_by_2",
+        "source_authored_order_exact",
+        "prescribed_shape_1126_by_2",
+        "prescribed_grid_before_wall_order_exact",
+    )
+    audit = reproduction.get("direct_control_audit")
+    response_fields = ("source_to_wall", "plasma_to_wall", "prescribed_full")
     return (
         all(reproduction.get(name) is True for name in identity_fields)
+        and isinstance(batch_contract, dict)
+        and all(batch_contract.get(name) is True for name in batch_fields)
         and isinstance(audit, dict)
         and all(
             isinstance(audit.get(name), dict) and audit[name].get("array_equal") is True
@@ -628,22 +702,25 @@ def run(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
         )
         rung_profiles.append(profile)
 
+    control_response = _build_control_responses(
+        passive_case, context, base_profile, authored
+    )
+    if not np.array_equal(control_response["current"], current):
+        raise RuntimeError("direct control rows changed the prescribed current vector")
     unique_profile = rung_profiles[0]
-    control_prescribed = np.asarray(
-        base_profile.operator.prescribed_current_field.response
-    )[base_profile.operator.grid.node_number :]
-    direct_37 = {
-        "source_to_wall": np.vstack((response["source"][::8], response["source"][0])),
-        "plasma_to_wall": np.vstack((response["plasma"][::8], response["plasma"][0])),
-        "prescribed_wall": np.vstack(
-            (response["prescribed"][::8], response["prescribed"][0])
-        ),
+    direct_control = {
+        "source_to_wall": control_response["source"],
+        "plasma_to_wall": control_response["plasma"],
+        "prescribed_full": control_response["prescribed"],
     }
     control_arrays = {
         "source_to_wall": np.asarray(base_profile.operator.wall.source_target),
         "plasma_to_wall": np.asarray(base_profile.operator.wall.plasma_target),
-        "prescribed_wall": control_prescribed,
+        "prescribed_full": np.asarray(
+            base_profile.operator.prescribed_current_field.response
+        ),
     }
+    grid_number = base_profile.operator.grid.node_number
     reproduction = {
         "authored_coordinate_exact": bool(
             np.array_equal(authored[:-1], unique_profile.operator.wall.coordinate)
@@ -654,7 +731,27 @@ def run(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
         "control_seed_exact": bool(
             np.array_equal(case["state"], passive_case["state"])
         ),
-        "direct_nested_row_audit": {
+        "original_batch_contract": {
+            "source_shape_37_by_2": control_response["source_targets"].shape == (37, 2),
+            "source_authored_order_exact": bool(
+                np.array_equal(control_response["source_targets"], authored)
+            ),
+            "prescribed_shape_1126_by_2": control_response["prescribed_targets"].shape
+            == (1126, 2),
+            "prescribed_grid_before_wall_order_exact": bool(
+                np.array_equal(
+                    control_response["prescribed_targets"][:grid_number],
+                    passive_case["grid_coordinate"],
+                )
+                and np.array_equal(
+                    control_response["prescribed_targets"][grid_number:], authored
+                )
+            ),
+        },
+        "direct_control_section_kernel_evaluations": control_response["audit"][
+            "section_kernel_evaluations"
+        ],
+        "direct_control_audit": {
             name: {
                 "array_equal": bool(np.array_equal(control_arrays[name], rebuilt)),
                 "maximum_absolute_difference": float(
@@ -665,7 +762,7 @@ def run(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
                     / max(float(np.max(np.abs(control_arrays[name]))), 1.0e-300)
                 ),
             }
-            for name, rebuilt in direct_37.items()
+            for name, rebuilt in direct_control.items()
         },
     }
     reproduction["passes"] = _control_reproduction_passes(reproduction)

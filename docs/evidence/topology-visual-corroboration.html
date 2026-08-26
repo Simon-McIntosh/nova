@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="topology-visual-corroboration">
+<meta name="plan-evidence-for" content="efit-baseline-demonstration"><meta name="plan-verifies" content="efit-baseline-demonstration#s2">
+<meta name="plan-title" content="Topology visual corroboration"><meta name="plan-summary" content="Per-geometry visual corroboration of flood-fill topology operands against MAST and DIII-D EFIT labels.">
+<title>Topology visual corroboration | nova</title><link rel="stylesheet" href="/_shared/foundation.css"><link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan"><header class="plan-hero"><p class="eyebrow">Evidence · visual topology audit</p><h1>Topology visual corroboration</h1>
+<p class="lede">All 12 MAST arms and all 5 DIII-D demonstration frames are shown exactly once. Every panel exposes the hex-cell flood-fill domains, the complete finite O/X candidate census, selected primary O and X, selected wall point, and EFIT axis/X/LCFS labels.</p></header>
+<section><h2>Authority and interpretation</h2><p>This is corroboration of committed extraction state, not a new score. EFIT is an independent magnetics-fitted reconstruction, not physical truth. MAST operands use the persisted response carrier and the current <code>efit_topology_corroboration</code> extraction route. DIII-D operands use the committed complete-poloidal renderer at <code>94f510b6</code>, the first committed extraction state carrying the full stationary-candidate census; all five nonconverged rows remain visibly qualified. Generated from repository head <code>54777af79de6cf8721d5694e10366a40f3860ad3</code>.</p>
+<p>The purple cells are the exact <code>PRIVATE_FLUX</code> labels from Nova's domain partition: closed-flux cells disconnected from the primary O-point by the X-point flood-fill cut. Pale blue is axis-connected core, grey-green is common SOL, and pale grey is excluded material. The selected wall marker is Nova's governed closest plasma-wall candidate; it is shown even when the topology class is diverted and it does not bind the LCFS.</p></section>
+<section><h2>Coverage</h2><p><strong>17 of 17 declared geometries rendered.</strong> 12 MAST and 5 DIII-D; 5 nonconverged rows retained. Figure rows below are the quantitative completeness ledger.</p></section>
+<section><h2>Per-geometry corroboration</h2><article class="figure-row" id="geometry-01">
+  <h3>01. MAST — 21978/35 pure</h3>
+  <figure><img src="/nova/figures/topology-visual-corroboration/01-mast-21978-35-pure.png" alt="Topology evidence for MAST 21978/35 pure: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>179 private-flux shadow cells; 5 plotted O candidates; 5 plotted X candidates; selected O/X/wall markers 1/1/1; EFIT axis/X/LCFS vertices 1/2/153. <strong>Converged.</strong></figcaption></figure>
+</article><article class="figure-row" id="geometry-02">
+  <h3>02. MAST — 21978/35 mixed</h3>
+  <figure><img src="/nova/figures/topology-visual-corroboration/02-mast-21978-35-mixed.png" alt="Topology evidence for MAST 21978/35 mixed: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>161 private-flux shadow cells; 5 plotted O candidates; 5 plotted X candidates; selected O/X/wall markers 1/1/1; EFIT axis/X/LCFS vertices 1/2/153. <strong>Converged.</strong></figcaption></figure>
+</article><article class="figure-row" id="geometry-03">
+  <h3>03. MAST — 21983/35 pure</h3>
+  <figure><img src="/nova/figures/topology-visual-corroboration/03-mast-21983-35-pure.png" alt="Topology evidence for MAST 21983/35 pure: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>76 private-flux shadow cells; 5 plotted O candidates; 5 plotted X candidates; selected O/X/wall markers 1/1/1; EFIT axis/X/LCFS vertices 1/2/155. <strong>Converged.</strong></figcaption></figure>
+</article><article class="figure-row" id="geometry-04">
+  <h3>04. MAST — 21983/35 mixed</h3>
+  <figure><img src="/nova/figures/topology-visual-corroboration/04-mast-21983-35-mixed.png" alt="Topology evidence for MAST 21983/35 mixed: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>88 private-flux shadow cells; 5 plotted O candidates; 5 plotted X candidates; selected O/X/wall markers 1/1/1; EFIT axis/X/LCFS vertices 1/2/155. <strong>Converged.</strong></figcaption></figure>
+</article><article class="figure-row" id="geometry-05">
+  <h3>05. MAST — 21985/51 pure</h3>
+  <figure><img src="/nova/figures/topology-visual-corroboration/05-mast-21985-51-pure.png" alt="Topology evidence for MAST 21985/51 pure: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>59 private-flux shadow cells; 5 plotted O candidates; 5 plotted X candidates; selected O/X/wall markers 1/1/1; EFIT axis/X/LCFS vertices 1/2/147. <strong>Converged.</strong></figcaption></figure>
+</article><article class="figure-row" id="geometry-06">
+  <h3>06. MAST — 21985/51 mixed</h3>
+  <figure><img src="/nova/figures/topology-visual-corroboration/06-mast-21985-51-mixed.png" alt="Topology evidence for MAST 21985/51 mixed: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>56 private-flux shadow cells; 5 plotted O candidates; 5 plotted X candidates; selected O/X/wall markers 1/1/1; EFIT axis/X/LCFS vertices 1/2/147. <strong>Converged.</strong></figcaption></figure>
+</article><article class="figure-row" id="geometry-07">
+  <h3>07. MAST — 21986/46 pure</h3>
+  <figure><img src="/nova/figures/topology-visual-corroboration/07-mast-21986-46-pure.png" alt="Topology evidence for MAST 21986/46 pure: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>56 private-flux shadow cells; 5 plotted O candidates; 5 plotted X candidates; selected O/X/wall markers 1/1/1; EFIT axis/X/LCFS vertices 1/2/139. <strong>Converged.</strong></figcaption></figure>
+</article><article class="figure-row" id="geometry-08">
+  <h3>08. MAST — 21986/46 mixed</h3>
+  <figure><img src="/nova/figures/topology-visual-corroboration/08-mast-21986-46-mixed.png" alt="Topology evidence for MAST 21986/46 mixed: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>56 private-flux shadow cells; 5 plotted O candidates; 5 plotted X candidates; selected O/X/wall markers 1/1/1; EFIT axis/X/LCFS vertices 1/2/139. <strong>Converged.</strong></figcaption></figure>
+</article><article class="figure-row" id="geometry-09">
+  <h3>09. MAST — 21989/55 pure</h3>
+  <figure><img src="/nova/figures/topology-visual-corroboration/09-mast-21989-55-pure.png" alt="Topology evidence for MAST 21989/55 pure: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>49 private-flux shadow cells; 5 plotted O candidates; 5 plotted X candidates; selected O/X/wall markers 1/1/1; EFIT axis/X/LCFS vertices 1/2/145. <strong>Converged.</strong></figcaption></figure>
+</article><article class="figure-row" id="geometry-10">
+  <h3>10. MAST — 21989/55 mixed</h3>
+  <figure><img src="/nova/figures/topology-visual-corroboration/10-mast-21989-55-mixed.png" alt="Topology evidence for MAST 21989/55 mixed: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>51 private-flux shadow cells; 5 plotted O candidates; 5 plotted X candidates; selected O/X/wall markers 1/1/1; EFIT axis/X/LCFS vertices 1/2/145. <strong>Converged.</strong></figcaption></figure>
+</article><article class="figure-row" id="geometry-11">
+  <h3>11. MAST — 22086/43 pure</h3>
+  <figure><img src="/nova/figures/topology-visual-corroboration/11-mast-22086-43-pure.png" alt="Topology evidence for MAST 22086/43 pure: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>171 private-flux shadow cells; 5 plotted O candidates; 5 plotted X candidates; selected O/X/wall markers 1/1/1; EFIT axis/X/LCFS vertices 1/2/151. <strong>Converged.</strong></figcaption></figure>
+</article><article class="figure-row" id="geometry-12">
+  <h3>12. MAST — 22086/43 mixed</h3>
+  <figure><img src="/nova/figures/topology-visual-corroboration/12-mast-22086-43-mixed.png" alt="Topology evidence for MAST 22086/43 mixed: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>181 private-flux shadow cells; 5 plotted O candidates; 5 plotted X candidates; selected O/X/wall markers 1/1/1; EFIT axis/X/LCFS vertices 1/2/151. <strong>Converged.</strong></figcaption></figure>
+</article><article class="figure-row" id="geometry-13">
+  <h3>13. DIII-D — d3d_shot_00000c4a7b:179</h3>
+  <figure><img src="/nova/figures/topology-visual-corroboration/13-diiid-d3d_shot_00000c4a7b-179.png" alt="Topology evidence for DIII-D d3d_shot_00000c4a7b:179: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>0 private-flux shadow cells; 5 plotted O candidates; 4 plotted X candidates; selected O/X/wall markers 1/1/1; EFIT axis/X/LCFS vertices 1/1/84. <strong>NONCONVERGED — retained as a scientific failure.</strong></figcaption></figure>
+</article><article class="figure-row" id="geometry-14">
+  <h3>14. DIII-D — d3d_shot_0003ff34e7:44</h3>
+  <figure><img src="/nova/figures/topology-visual-corroboration/14-diiid-d3d_shot_0003ff34e7-44.png" alt="Topology evidence for DIII-D d3d_shot_0003ff34e7:44: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>13 private-flux shadow cells; 5 plotted O candidates; 3 plotted X candidates; selected O/X/wall markers 1/1/1; EFIT axis/X/LCFS vertices 1/1/88. <strong>NONCONVERGED — retained as a scientific failure.</strong></figcaption></figure>
+</article><article class="figure-row" id="geometry-15">
+  <h3>15. DIII-D — d3d_shot_001554e054:144</h3>
+  <figure><img src="/nova/figures/topology-visual-corroboration/15-diiid-d3d_shot_001554e054-144.png" alt="Topology evidence for DIII-D d3d_shot_001554e054:144: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>43 private-flux shadow cells; 5 plotted O candidates; 3 plotted X candidates; selected O/X/wall markers 1/1/1; EFIT axis/X/LCFS vertices 1/1/83. <strong>NONCONVERGED — retained as a scientific failure.</strong></figcaption></figure>
+</article><article class="figure-row" id="geometry-16">
+  <h3>16. DIII-D — d3d_shot_002495e835:146</h3>
+  <figure><img src="/nova/figures/topology-visual-corroboration/16-diiid-d3d_shot_002495e835-146.png" alt="Topology evidence for DIII-D d3d_shot_002495e835:146: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>5 private-flux shadow cells; 5 plotted O candidates; 3 plotted X candidates; selected O/X/wall markers 1/1/1; EFIT axis/X/LCFS vertices 1/1/90. <strong>NONCONVERGED — retained as a scientific failure.</strong></figcaption></figure>
+</article><article class="figure-row" id="geometry-17">
+  <h3>17. DIII-D — d3d_shot_0040ca9bdc:137</h3>
+  <figure><img src="/nova/figures/topology-visual-corroboration/17-diiid-d3d_shot_0040ca9bdc-137.png" alt="Topology evidence for DIII-D d3d_shot_0040ca9bdc:137: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>6 private-flux shadow cells; 5 plotted O candidates; 3 plotted X candidates; selected O/X/wall markers 1/1/1; EFIT axis/X/LCFS vertices 1/1/90. <strong>NONCONVERGED — retained as a scientific failure.</strong></figcaption></figure>
+</article></section>
+<section><h2>Reproduction</h2><p>Run <code>UV_PROJECT_ENVIRONMENT=~/Code/nova/.venv PYTHONPATH="$PWD" uv run --no-sync python docs/figures/topology-visual-corroboration/generate_topology_visuals.py</code>. The committed <code>generation.log</code> records the successful run and ends with <code>EXIT_MARKER=0</code>. The scoped NPZ files retain the exact plotted operands so ordinary regeneration does not repeat the expensive solves; delete them only when intentionally refreshing from a newly committed extraction state.</p></section>
+</main></body></html>

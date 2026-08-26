@@ -1,0 +1,4 @@
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+VERIFY rows=17 unique_srcs=17 png_min_bytes>100000 png_min_dimensions=600x600
+VERIFY mast_rows=12 diiid_rows=5 npz_object_dtypes=0 allow_pickle_required=false
+EXIT_MARKER=0

@@ -1,0 +1,33 @@
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+MAST_OPERANDS 21978/35
+MAST_OPERANDS 21983/35
+MAST_OPERANDS 21985/51
+MAST_OPERANDS 21986/46
+MAST_OPERANDS 21989/55
+MAST_OPERANDS 22086/43
+DIIID_OPERANDS 1/5 d3d_shot_00000c4a7b.parquet:179
+17:41:50 INFO     Parsing data dictionary version 3.41.0 [90m@dd_zip.py:89[0m
+INFO:imas.dd_zip:Parsing data dictionary version 3.41.0
+DIIID_OPERANDS 2/5 d3d_shot_0003ff34e7.parquet:44
+DIIID_OPERANDS 3/5 d3d_shot_001554e054.parquet:144
+DIIID_OPERANDS 4/5 d3d_shot_002495e835.parquet:146
+DIIID_OPERANDS 5/5 d3d_shot_0040ca9bdc.parquet:137
+RENDERED 01/17 MAST 21978/35 pure
+RENDERED 02/17 MAST 21978/35 mixed
+RENDERED 03/17 MAST 21983/35 pure
+RENDERED 04/17 MAST 21983/35 mixed
+RENDERED 05/17 MAST 21985/51 pure
+RENDERED 06/17 MAST 21985/51 mixed
+RENDERED 07/17 MAST 21986/46 pure
+RENDERED 08/17 MAST 21986/46 mixed
+RENDERED 09/17 MAST 21989/55 pure
+RENDERED 10/17 MAST 21989/55 mixed
+RENDERED 11/17 MAST 22086/43 pure
+RENDERED 12/17 MAST 22086/43 mixed
+RENDERED 13/17 DIII-D d3d_shot_00000c4a7b:179
+RENDERED 14/17 DIII-D d3d_shot_0003ff34e7:44
+RENDERED 15/17 DIII-D d3d_shot_001554e054:144
+RENDERED 16/17 DIII-D d3d_shot_002495e835:146
+RENDERED 17/17 DIII-D d3d_shot_0040ca9bdc:137
+{"diiid": 5, "evidence_sha256": "1cf64eee5bb445ec3912ff104fe30e7f53d95cc217a3231de8d4a83e647b8ec4", "mast": 12, "rows": 17}
+EXIT_MARKER=0

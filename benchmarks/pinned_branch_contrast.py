@@ -44,7 +44,7 @@ from benchmarks.label_seed_residual_field import (
     _source_revision,
 )
 from nova.equilibrium.connectivity_boundary import traced_smooth_boundary_read
-from nova.equilibrium.topology import TopologyClass
+from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
 from nova.imas.mast_solve_inputs import SHOT_STORE
 from nova.jax.config import configure_dtypes
 
@@ -175,6 +175,31 @@ def _terminal_observables(profile, state: jax.Array) -> dict[str, Any]:
     }
 
 
+def _terminal_observables_retaining_axis_failure(
+    profile, state: jax.Array
+) -> dict[str, Any]:
+    """Retain a host-side axis disqualification as a null topology receipt."""
+
+    try:
+        observables = _terminal_observables(profile, state)
+    except NoQualifiedAxisError as error:
+        exception_class = type(error).__name__
+        return {
+            "achieved_class": None,
+            "topology_consistent": None,
+            "class_margin": None,
+            "class_margin_nonfinite": None,
+            "p_diverted": None,
+            "terminal_xpoint_diagnostics": None,
+            "termination_reason": exception_class,
+            "failure_exception_class": exception_class,
+        }
+    return observables | {
+        "termination_reason": "terminal_observation_complete",
+        "failure_exception_class": None,
+    }
+
+
 def _diagnostic_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
     """Summarize all terminal operands and test the reachability hypothesis."""
 
@@ -183,12 +208,28 @@ def _diagnostic_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
     all_status_counts: dict[str, int] = {}
     connectivity_support_count = 0
     absent_terminal_count = 0
+    retained_failure_count = 0
     for record in records:
         reference = record["reference"]
         arms = {}
         for arm_name in ("pure_arm", "mixed_arm"):
             arm = record[arm_name]
             diagnostics = arm["terminal_xpoint_diagnostics"]
+            if diagnostics is None:
+                retained_failure_count += 1
+                arms[arm_name] = {
+                    "class_margin": None,
+                    "class_margin_nonfinite": None,
+                    "selection_status": None,
+                    "selected_x_normalized_flux_operand": None,
+                    "selected_x_normalized_flux_operand_nonfinite": None,
+                    "wall_status": None,
+                    "wall_normalized_flux_before_shadow": None,
+                    "wall_normalized_flux": None,
+                    "wall_normalized_flux_nonfinite": None,
+                    "failure_exception_class": arm["failure_exception_class"],
+                }
+                continue
             status = diagnostics["selection_status"]
             all_status_counts[status] = all_status_counts.get(status, 0) + 1
             connectivity_support_count += int(
@@ -237,6 +278,7 @@ def _diagnostic_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
         "all_terminal_selection_status_counts": all_status_counts,
         "connectivity_support_terminal_count": connectivity_support_count,
         "absent_class_margin_terminal_count": absent_terminal_count,
+        "retained_terminal_failure_count": retained_failure_count,
         "absent_class_margin_selection_status_counts": absent_status_counts,
         "leading_hypothesis": {
             "prior_diiid_terminal_count": 10,
@@ -273,6 +315,29 @@ def _merge_terminal_diagnostics(
     }
     if banked_records.keys() != regenerated_records.keys():
         raise RuntimeError("regenerated reference cohort changed")
+
+    retained_failures = [
+        {
+            "shot": int(record["reference"]["shot"]),
+            "slice_index": int(record["reference"]["slice_index"]),
+            "arm": arm_name,
+            "exception_class": record[arm_name]["failure_exception_class"],
+        }
+        for record in regenerated["references"]
+        for arm_name in ("pure_arm", "mixed_arm")
+        if record[arm_name]["failure_exception_class"] is not None
+    ]
+    if retained_failures:
+        merged = json.loads(json.dumps(regenerated, allow_nan=False))
+        merged["xpoint_diagnostic_enrichment"] = _diagnostic_summary(
+            regenerated["references"]
+        )
+        merged["semantic_rebaseline"] = {
+            "status": "unavailable_due_to_retained_terminal_failure",
+            "retained_failure_count": len(retained_failures),
+            "retained_failures": retained_failures,
+        }
+        return merged
 
     pure_exact_fields = (
         "entry_point",
@@ -515,8 +580,13 @@ def _pure_arm(profile, seed: jax.Array, target_current: float) -> tuple[dict, An
         "iterations": int(branch.iterations),
         "residual_sequence": sequence,
         "fitted_contraction": _fit_contraction(sequence),
-        **_terminal_observables(profile, branch.equilibrium.flux),
+        **_terminal_observables_retaining_axis_failure(
+            profile, branch.equilibrium.flux
+        ),
     }
+    record["converged"] = bool(
+        record["converged"] and record["failure_exception_class"] is None
+    )
     return record, portfolio
 
 
@@ -540,7 +610,7 @@ def _mixed_arm(profile, seed: jax.Array, target_current: float) -> dict[str, Any
         jnp.max(jnp.abs(image - result.state))
         / jnp.maximum(jnp.max(jnp.abs(image)), jnp.asarray(1.0e-30))
     )
-    observables = _terminal_observables(profile, result.state)
+    observables = _terminal_observables_retaining_axis_failure(profile, result.state)
     return {
         "entry_point": "margin-graded fixed-ladder Newton-Krylov",
         "requested_class": "diverted",
@@ -559,6 +629,51 @@ def _mixed_arm(profile, seed: jax.Array, target_current: float) -> dict[str, Any
             result.accepted_topology_penalties
         ),
         **observables,
+    }
+
+
+def _receipt_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
+    """Summarize all declared arms without dropping terminal failures."""
+
+    arms = [
+        (record, arm_name, record[arm_name])
+        for record in records
+        for arm_name in ("pure_arm", "mixed_arm")
+    ]
+    retained_failures = [
+        {
+            "shot": int(record["reference"]["shot"]),
+            "slice_index": int(record["reference"]["slice_index"]),
+            "arm": arm_name,
+            "exception_class": arm["failure_exception_class"],
+        }
+        for record, arm_name, arm in arms
+        if arm["failure_exception_class"] is not None
+    ]
+    pure_arms = [record["pure_arm"] for record in records]
+    mixed_arms = [record["mixed_arm"] for record in records]
+    return {
+        "reference_count": len(records),
+        "arm_count": len(arms),
+        "retained_failure_arm_count": len(retained_failures),
+        "retained_failure_arms": retained_failures,
+        "pure_fitted_contraction_count": sum(
+            bool(arm["fitted_contraction"]["contracts"]) for arm in pure_arms
+        ),
+        "pure_terminal_diverted_count": sum(
+            arm["achieved_class"] == "diverted" for arm in pure_arms
+        ),
+        "mixed_terminal_diverted_count": sum(
+            arm["achieved_class"] == "diverted" for arm in mixed_arms
+        ),
+        "pure_terminal_residual_range": [
+            min(arm["terminal_residual"] for arm in pure_arms),
+            max(arm["terminal_residual"] for arm in pure_arms),
+        ],
+        "mixed_terminal_residual_range": [
+            min(arm["terminal_residual"] for arm in mixed_arms),
+            max(arm["terminal_residual"] for arm in mixed_arms),
+        ],
     }
 
 
@@ -696,16 +811,6 @@ def run(
     if parity is None or not parity["passes"]:
         raise RuntimeError("the batch-two parity assertion did not run")
 
-    pure_contracting = sum(
-        bool(record["pure_arm"]["fitted_contraction"]["contracts"])
-        for record in records
-    )
-    pure_diverted = sum(
-        record["pure_arm"]["achieved_class"] == "diverted" for record in records
-    )
-    mixed_diverted = sum(
-        record["mixed_arm"]["achieved_class"] == "diverted" for record in records
-    )
     receipt = {
         "artifact": "paired pinned-branch and margin-penalty contrast",
         "source_commit": source_revision,
@@ -748,20 +853,7 @@ def run(
         "response_carrier": carrier_evidence,
         "direct_green_operator_builder_entries": direct_builder_entries,
         "jit_vmap_batch_two_parity": parity,
-        "summary": {
-            "reference_count": len(records),
-            "pure_fitted_contraction_count": pure_contracting,
-            "pure_terminal_diverted_count": pure_diverted,
-            "mixed_terminal_diverted_count": mixed_diverted,
-            "pure_terminal_residual_range": [
-                min(record["pure_arm"]["terminal_residual"] for record in records),
-                max(record["pure_arm"]["terminal_residual"] for record in records),
-            ],
-            "mixed_terminal_residual_range": [
-                min(record["mixed_arm"]["terminal_residual"] for record in records),
-                max(record["mixed_arm"]["terminal_residual"] for record in records),
-            ],
-        },
+        "summary": _receipt_summary(records),
         "references": records,
     }
     if banked_receipt is not None:

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T23:40:11",
+  "updated": "2026-08-26T23:41:22",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -51304,9 +51304,142 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T213255356729-sse-newton-trial-axis-admission",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-newton-trial-axis-admission",
+        "node_definition": {
+          "done_when": "The qualification path exposes a non-throwing disqualified result consumed by the Newton promotion in fixed_point.py as trial inadmissibility; terminal reads still raise NoQualifiedAxisError; a regression test reproduces the diagnosed frame-1 shape (all candidates boundary-resolved with empty components mid-iterate) and proves the solve continues past it while a terminally unqualified field still raises; existing topology, O-qualification, domain-partition and hex-flood focused files pass eager and JIT with zero new failures vs current HEAD; no data-dependent while primitive introduced; ruff clean",
+          "estimated_hours": null,
+          "goal": "O-point qualification made non-throwing inside Newton trial admission: a trial iterate whose best candidate fails qualification is rejected or backtracked by the promotion logic instead of aborting the solve, while terminal topology reads keep raising the named failure when no qualified axis exists",
+          "id": "sse-newton-trial-axis-admission",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T213255356729-sse-newton-trial-axis-admission/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "nova/equilibrium/topology.py",
+            "tests/test_topology_o_qualification.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T21:33:04Z",
+        "completed_at": "2026-08-26T21:40:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 442,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 442,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "ae24e83f2bd95577781f086a8b2e39f47a959339",
+        "commits": [
+          "c09d9db6"
+        ],
+        "changed_lines": {
+          "added": 95,
+          "removed": 9,
+          "files": 3
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu pytest over 6 topology/fixed-point/flood files (60/60 passed incl. diagnosed frame-1 shape regression)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T213255356729-sse-newton-trial-axis-admission/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T213255356729-sse-newton-trial-axis-admission/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1077504,
+            "cached_input_tokens_cumulative": 5344000,
+            "input_tokens": 1192086,
+            "input_tokens_cumulative": 5554640,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 10903,
+            "reasoning_output_tokens": 173,
+            "reasoning_output_tokens_cumulative": 4066
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the required single job did not end EXIT_MARKER=0 and could not write a strict five-row receipt or either figure; `NoQualifiedAxisError` escaped from the first frame; and repairing that behavior requires source paths outside this node's exclusive scope",
+              "elapsed_seconds": 1340,
+              "log_age_seconds": 881,
+              "log_fresh": true,
+              "manifest_commits": [],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T211033978049-sse-diiid-bank-resolve/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "reckon crew resume --run r-20260826T211033978049-sse-diiid-bank-resolve --advice <answer>",
+              "node": "sse-diiid-bank-resolve",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T211033978049-sse-diiid-bank-resolve",
+              "terminal_age_seconds": 910,
+              "terminal_at": "2026-08-26T21:17:50Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d8-s16-landing/sse-diiid-bank-resolve"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1059
+    "_version": 1060
   }
 }

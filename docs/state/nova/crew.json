@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T15:42:41",
+  "updated": "2026-08-26T15:55:13",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -43371,9 +43371,102 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T125257080148-pod-wall-control-identity-audit",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a75",
+        "node": "pod-wall-control-identity-audit",
+        "node_definition": {
+          "done_when": "The manifest reproduces both maximum absolute differences, traces each differing array through dtype, shape, operation ordering, cache, and serialization boundaries, identifies the first bitwise divergence, states an exact construction that makes the control identical or proves a named external blocker, and proposes the minimal exclusive repair and test scope; plasma-to-wall exactness and both null stopping counts remain visible.",
+          "estimated_hours": 0.8,
+          "goal": "Determine the exact computational reason the persisted 37-row source-to-wall and prescribed-wall response rows differ bitwise from their direct nested reconstruction, without introducing a tolerance or changing any repository file.",
+          "id": "pod-wall-control-identity-audit",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-wall-control-identity-audit.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "35m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-wall-control-identity-audit.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "exact",
+        "member": "vacuum-diagnosis",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-26T12:53:15Z",
+        "completed_at": "2026-08-26T13:51:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3506,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3506,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "040382980ed15b192349b1d432e5296ce4c97e46",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-wall-control-identity-audit.md",
+        "scope_changed": false,
+        "session_id": "01a03dcc-3724-75b1-98e0-135745444a8d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 240128,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 267338,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 1047,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 234
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 961
+    "_version": 962
   }
 }

@@ -16,7 +16,11 @@ with skip_import("jax"):
     from nova.biot.null import Null1D, Null2D
     from nova.equilibrium.fixed_point import kink_aware_newton_krylov
     from nova.equilibrium.forward_operator import axis_cell_seed
-    from nova.equilibrium.topology import Topology
+    from nova.equilibrium.topology import (
+        NoQualifiedAxisError,
+        Topology,
+        require_qualified_axis,
+    )
     from nova.geometry.hexstencil import hex_stencil
     from nova.jax.config import configure_dtypes
 
@@ -111,16 +115,17 @@ def test_committed_wall_notch_cannot_be_selected_without_qualification(compiled)
         dtype=jnp.float64,
     )
     qualified = jnp.zeros(5, dtype=bool)
-    select = topology.o_point_data
-    if compiled:
-        select = jax.jit(select)
 
-    with pytest.raises(Exception, match="no qualified magnetic-axis candidate"):
-        if compiled:
-            select(vmap_o, 1, qualified).block_until_ready()
-        else:
+    with pytest.raises(
+        NoQualifiedAxisError, match="no qualified magnetic-axis candidate"
+    ) as raised:
+        if not compiled:
             with jax.disable_jit():
-                select(vmap_o, 1, qualified)
+                topology.o_point_data(vmap_o, 1, qualified)
+        else:
+            selection = jax.jit(topology.o_point_qualification)(vmap_o, 1, qualified)
+            require_qualified_axis(selection.admitted)
+    assert not isinstance(raised.value, jax.errors.JaxRuntimeError)
 
 
 @pytest.mark.parametrize("compiled", [False, True], ids=["eager", "jit"])
@@ -179,11 +184,22 @@ def test_disqualified_mid_iterate_is_backtracked_without_raising(compiled):
             admissibility_fn=trial_qualification,
         )
 
-    result = jax.jit(solve)() if compiled else solve()
+    def solve_with_terminal_qualification():
+        result = solve()
+        terminal = topology.o_point_qualification(vmap_o, 1, empty_qualified)
+        return result, terminal
+
+    if compiled:
+        result, terminal = jax.jit(solve_with_terminal_qualification)()
+    else:
+        result, terminal = solve_with_terminal_qualification()
     np.testing.assert_allclose(np.asarray(result.state), [1.5])
     np.testing.assert_allclose(np.asarray(result.accepted_factors), [0.5, 0.5])
     assert np.all(np.asarray(result.candidate_admissibility[:, 1:]))
     assert not np.any(np.asarray(result.candidate_admissibility[:, 0]))
 
-    with pytest.raises(Exception, match="no qualified magnetic-axis candidate"):
-        topology.o_point_data(vmap_o, 1, empty_qualified).block_until_ready()
+    with pytest.raises(
+        NoQualifiedAxisError, match="no qualified magnetic-axis candidate"
+    ) as raised:
+        require_qualified_axis(terminal.admitted)
+    assert not isinstance(raised.value, jax.errors.JaxRuntimeError)

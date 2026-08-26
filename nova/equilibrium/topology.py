@@ -13,7 +13,11 @@ import numpy as np
 from nova.graphics.plot import Plot2D
 from nova.biot.null import Null1D, Null2D
 from nova.equilibrium.connectivity_boundary import _raster_hex_partition_geometry
-from nova.equilibrium.domain import axis_connected_component, classify_domains
+from nova.equilibrium.domain import (
+    DomainMasks,
+    axis_connected_component,
+    classify_domains,
+)
 from nova.equilibrium.flux_surface_connectivity import hex_edge_admissibility
 from nova.jax.tree_util import Pytree
 
@@ -72,6 +76,26 @@ class AxisQualification(NamedTuple):
 
     data: jax.Array
     admitted: jax.Array
+
+
+class TopologyQualification(NamedTuple):
+    """Device topology read with an explicit magnetic-axis admission bit."""
+
+    masks: DomainMasks
+    state: TopologyState
+    connected: jax.Array
+    axis_admitted: jax.Array
+
+
+def require_qualified_axis(admitted: jax.Array) -> None:
+    """Raise on the host when a completed topology read has no valid axis."""
+
+    if isinstance(admitted, jax.core.Tracer):
+        return
+    if not bool(np.asarray(jax.device_get(admitted))):
+        raise NoQualifiedAxisError(
+            "no qualified magnetic-axis candidate has a resolved component"
+        )
 
 
 @dataclass(frozen=True)
@@ -235,20 +259,12 @@ class Topology(Pytree):
             qualified = jnp.isfinite(vmap_o[:, 0])
         return jnp.argmax(jnp.where(qualified, score, -jnp.inf))
 
-    @jax.jit
     def o_point_data(self, vmap_o, polarity, qualified=None):
         """Return primary o-point data."""
         require_qualified = qualified is not None
         result = self.o_point_qualification(vmap_o, polarity, qualified)
         if require_qualified:
-
-            def validate(candidate_exists):
-                if not candidate_exists:
-                    raise NoQualifiedAxisError(
-                        "no qualified magnetic-axis candidate has a resolved component"
-                    )
-
-            jax.debug.callback(validate, result.admitted)
+            require_qualified_axis(result.admitted)
         return result.data
 
     @jax.jit
@@ -460,10 +476,8 @@ class Topology(Pytree):
         return psi_norm, ionize
 
     @jax.jit
-    def read_with_connectivity(
-        self, psi, polarity, inside_material, requested_class=None
-    ):
-        """Return domain labels, separatrix state, and axis connectivity.
+    def read_qualification(self, psi, polarity, inside_material, requested_class=None):
+        """Return device topology data and magnetic-axis qualification.
 
         The same axis, X-point set and wall-limit read that :meth:`update`
         performs, published as a labelled domain partition instead of a single
@@ -491,7 +505,8 @@ class Topology(Pytree):
             psi_grid,
             inside_material,
         )
-        data_o = self.o_point_data(vmap_o, polarity, qualified_o)
+        selection = self.o_point_qualification(vmap_o, polarity, qualified_o)
+        data_o = selection.data
         data_x = self.x_point_data(vmap_x, polarity, data_o[2])
         emergent_boundary = self.boundary(data_o, vmap_x, data_w, polarity)
         if requested_class is None:
@@ -529,9 +544,19 @@ class Topology(Pytree):
             wall_point_flux=data_w[2],
             diverted=boundary_is_xpoint,
         )
-        return masks, state, connected
+        return TopologyQualification(masks, state, connected, selection.admitted)
 
-    @jax.jit
+    def read_with_connectivity(
+        self, psi, polarity, inside_material, requested_class=None
+    ):
+        """Return the host-qualified saddle-aware ``axis_component`` read."""
+
+        result = self.read_qualification(
+            psi, polarity, inside_material, requested_class
+        )
+        require_qualified_axis(result.axis_admitted)
+        return result.masks, result.state, result.connected
+
     def read(self, psi, polarity, inside_material, requested_class=None):
         """Return the domain labels and axis/separatrix state of one flux map."""
         masks, state, _connected = self.read_with_connectivity(

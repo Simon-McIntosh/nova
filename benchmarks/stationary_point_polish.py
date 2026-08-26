@@ -61,9 +61,12 @@ def _latencies(function, argument, repetitions):
         samples.append((time.perf_counter_ns() - started) / 1.0e3)
     values = np.asarray(samples)
     return {
+        "samples_us": values.tolist(),
         "median_us": float(np.median(values)),
         "p95_us": float(np.percentile(values, 95)),
         "minimum_us": float(np.min(values)),
+        "maximum_us": float(np.max(values)),
+        "mean_us": float(np.mean(values)),
     }
 
 
@@ -125,17 +128,20 @@ def run(repetitions):
         "repetitions": repetitions,
         "cold_tolerance_exit": {
             **_latencies(cold, cold_seeds, repetitions),
+            "iteration_counts": cold_counts.tolist(),
             "maximum_iterations": int(cold_counts.max()),
             "mean_iterations": float(cold_counts.mean()),
         },
         "warm_tolerance_exit": {
             **_latencies(warm, warm_seeds, repetitions),
+            "iteration_counts": warm_counts.tolist(),
             "maximum_iterations": int(warm_counts.max()),
             "mean_iterations": float(warm_counts.mean()),
         },
         "tracked_sequence": {
             **_latencies(tracked, sequence_splines, repetitions),
             "fields": int(shifts.size),
+            "iteration_counts": tracked_counts.tolist(),
             "maximum_iterations_per_field": tracked_counts.max(axis=1).tolist(),
             "mean_iterations": float(tracked_counts.mean()),
         },
@@ -153,8 +159,9 @@ def main():
     arguments = parser.parse_args()
     result = run(arguments.repetitions)
     arguments.output.parent.mkdir(parents=True, exist_ok=True)
-    arguments.output.write_text(json.dumps(result, indent=2) + "\n")
-    print(json.dumps(result, indent=2))
+    serialized = json.dumps(result, indent=2, allow_nan=False)
+    arguments.output.write_text(serialized + "\n")
+    print(serialized)
 
 
 if __name__ == "__main__":

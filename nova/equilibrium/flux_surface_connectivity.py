@@ -614,6 +614,20 @@ def _paired_edge_values(values: jnp.ndarray, indices: jnp.ndarray) -> jnp.ndarra
     return jnp.take_along_axis(values[..., None, :, :], indices[..., None], axis=-2)
 
 
+def _structured_edge_nodes(radial_size: int, vertical_size: int) -> jnp.ndarray:
+    """Return canonical global node ids for each cell's four physical edges."""
+    cell_radial = radial_size - 1
+    cell_vertical = vertical_size - 1
+    row = jnp.arange(cell_vertical, dtype=jnp.int32)[:, None]
+    column = jnp.arange(cell_radial, dtype=jnp.int32)[None, :]
+    horizontal_count = vertical_size * cell_radial
+    bottom = row * cell_radial + column
+    right = horizontal_count + row * radial_size + column + 1
+    top = (row + 1) * cell_radial + column
+    left = horizontal_count + row * radial_size + column
+    return jnp.stack((bottom, right, top, left), axis=-1)
+
+
 @partial(jax.jit, static_argnums=(5,))
 def _polish_stationary_points_in_bounds(
     spline,
@@ -972,6 +986,7 @@ def traced_spline_contour(
     )
 
     packed = _ordered_crossing_indices(edge_crossing)
+    edge_node = _structured_edge_nodes(radial.size, vertical.size)
     regular_pairs = jnp.stack(
         (
             jnp.stack((packed[..., 0], packed[..., 1]), axis=-1),
@@ -994,6 +1009,7 @@ def traced_spline_contour(
     )
 
     segment_point = _paired_edge_values(edge_point, pair_indices)
+    segment_node = jnp.take_along_axis(edge_node[..., None, :], pair_indices, axis=-1)
     segment_tangent = _paired_edge_values(edge_tangent, pair_indices)
     chord = segment_point[..., 1, :] - segment_point[..., 0, :]
     reverse = (
@@ -1045,6 +1061,7 @@ def traced_spline_contour(
     canonical_segment_point = jnp.where(
         segment_valid[..., None, None], segment_point, 0.0
     )
+    canonical_segment_node = jnp.where(segment_valid[..., None], segment_node, 0)
     canonical_segment_tangent = jnp.where(
         segment_valid[..., None, None], segment_tangent, 0.0
     )
@@ -1060,6 +1077,7 @@ def traced_spline_contour(
         "segment_valid": segment_valid,
         "segment_edge_indices": canonical_pair_indices,
         "segment_endpoints_rz": canonical_segment_point,
+        "segment_node_indices": canonical_segment_node,
         "segment_endpoint_tangents_rz": canonical_segment_tangent,
         "segment_controls_rz": canonical_controls,
         "cell_crossing_count": crossing_count,
@@ -1069,6 +1087,19 @@ def traced_spline_contour(
         "saddle_stationary": ambiguous & saddle_stationary,
         "saddle_rz": canonical_saddle_point,
         "saddle_value": canonical_saddle_value,
+        "segment_saddle_rz": jnp.where(
+            (segment_valid & (ambiguous & decision_tie & saddle_stationary)[..., None])[
+                ..., None
+            ],
+            saddle_point[..., None, :],
+            0.0,
+        ),
+        "segment_at_saddle": segment_valid
+        & (ambiguous & decision_tie & saddle_stationary)[..., None],
+        "edge_node_capacity": jnp.asarray(
+            vertical.size * (radial.size - 1) + (vertical.size - 1) * radial.size,
+            dtype=jnp.int32,
+        ),
         "well_formed": jnp.all(
             (crossing_count == 0) | (crossing_count == 2) | (crossing_count == 4)
         ),

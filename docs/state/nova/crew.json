@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T15:36:49",
+  "updated": "2026-08-26T15:37:27",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -43159,9 +43159,114 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T131624536707-sse-mast-comparator-integration",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a74",
+        "node": "sse-mast-comparator-integration",
+        "node_definition": {
+          "done_when": "The adapter removes _binding_contour and _boundary_distances, consumes only valid closed branch rows for shared metre sup/RMS/X metrics, routes margin-derived class through classify_boundary_mode, retains separately typed open legs without metric influence, emits every named failure as a bank row rather than dropping or raising, and one captured focused CPU pytest invocation over the new adapter tests and shared comparator tests exits zero; commit changes only the two authorized source/test paths and the manifest states complete or HOLD.",
+          "estimated_hours": 2.0,
+          "goal": "Replace the MAST frozen-arm adapter\u2019s private grid-contour and distance implementations with the landed spline branch assembler and shared closed-boundary comparator, while retaining open legs only for plotting and serialization and keeping regeneration out of this code node.",
+          "id": "sse-mast-comparator-integration",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-mast-comparator-integration.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py",
+            "tests/test_efit_topology_corroboration.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "margin-remeasure",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T13:16:44Z",
+        "completed_at": "2026-08-26T13:28:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 724,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 724,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "dc189b8b99e9ee68595252d533e527305a640197",
+        "commits": [
+          "b5666c5422fb9e708496993a4fe7f2f7e2e31036"
+        ],
+        "changed_lines": {
+          "added": 490,
+          "removed": 182,
+          "files": 2
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu JAX_ENABLE_X64=true XDG_CACHE_HOME=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T131624536707-sse-mast-comparator-integration/cache/xdg NUMBA_CACHE_DIR=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T131624536707-sse-mast-comparator-integration/cache/numba UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=\"$PWD\" uv run --no-sync pytest -p no:cacheprovider tests/test_boundary_comparison.py tests/test_efit_topology_corroboration.py tests/imas/test_diiid_forward_gs_match.py tests/test_flux_surface_connectivity.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T131624536707-sse-mast-comparator-integration/logs/focused-cpu-pytest-final.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-mast-comparator-integration.md",
+        "scope_changed": false,
+        "session_id": "01a03818-636e-7632-bc6e-05c3a7131c93",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 3760384,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 4128627,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 21740,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3945
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest invocation",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 958
+    "_version": 959
   }
 }

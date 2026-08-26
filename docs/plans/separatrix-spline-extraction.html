@@ -20,14 +20,14 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,topology,efit,mast,diii-d">
   <meta name="plan-blocks" content="efit-baseline-demonstration">
-  <meta name="plan-impl" content="0.75">
-  <meta name="plan-commits" content="74f95e41,a8927be3a0fc5fc387a2e64dfc97c6621ce1eb56,e3784a3127d1ca1bc6f07057fb5252d574af3732,130d84e3322a114d7c25f9d675ac23619cf9a640">
-  <meta name="plan-artifacts" content="nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,docs/evidence/archive/separatrix-spline-extraction-landed.html,benchmarks/stationary_point_polish.py,nova/equilibrium/boundary_comparison.py,tests/test_boundary_comparison.py,benchmarks/diiid_forward_gs_match.py,tests/imas/test_diiid_forward_gs_match.py">
+  <meta name="plan-impl" content="0.8">
+  <meta name="plan-commits" content="74f95e41,a8927be3a0fc5fc387a2e64dfc97c6621ce1eb56,e3784a3127d1ca1bc6f07057fb5252d574af3732,130d84e3322a114d7c25f9d675ac23619cf9a640,b5666c5422fb9e708496993a4fe7f2f7e2e31036">
+  <meta name="plan-artifacts" content="nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,docs/evidence/archive/separatrix-spline-extraction-landed.html,benchmarks/stationary_point_polish.py,nova/equilibrium/boundary_comparison.py,tests/test_boundary_comparison.py,benchmarks/diiid_forward_gs_match.py,tests/imas/test_diiid_forward_gs_match.py,docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py,tests/test_efit_topology_corroboration.py">
   <title>Separatrix Spline Extraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="19">
 </head>
 <body>
   <main class="plan-doc">
@@ -223,6 +223,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260826T132936159576-sse-mast-comparator-integration-verify" data-who="sse-verify" data-when="2026-08-26T13:35:56Z">
     <div class="r-comment-body"><p>Independent verification passed the MAST adapter cutover with 47 CPU tests; one non-failing float64-to-float32 warning is retained, and bank/figure regeneration remains open.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260826T131624536707-sse-mast-comparator-integration" data-who="margin-remeasure" data-when="2026-08-26T13:28:48Z">
+    <div class="r-comment-body"><p>Landed the MAST adapter cutover with 47 focused CPU tests; one non-failing precision warning is retained, and the 12-row bank plus figure regeneration remain open.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260826T125905793456-sse-branch-assembler-verify" data-who="sse-verify" data-when="2026-08-26T13:04:59Z">
     <div class="r-comment-body"><p>Independent verification confirmed deterministic fixed-capacity separation of one axis-enclosing closed branch from saddle-ended open legs, with exact-zero padding, overflow refusal, and eager/JIT/vmap parity.</p></div>

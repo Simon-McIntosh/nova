@@ -9,11 +9,13 @@ spatial operands behind those scores, including negative and nonconverged rows.
 from __future__ import annotations
 
 import hashlib
+from html import escape
 import importlib.util
 import json
 from pathlib import Path
 import subprocess
 import sys
+import textwrap
 import types
 from typing import Any
 
@@ -145,42 +147,39 @@ def _mast_rows() -> list[dict[str, Any]]:
             profile, jnp.asarray(passive_case["state"]), target_current
         )
         referee = read_efit_referee(shot, store=SHOT_STORE)
-        for arm, state in states.items():
-            physical = jnp.asarray(state)[: profile.operator.physical_node_number]
-            grid_flux, _wall_flux = profile.operator.topology.split_flux_map(physical)
-            source_o, source_x = jax.device_get(
-                profile.operator._fixed_design_topology.grid(grid_flux)
-            )
-            masks, topology = profile.operator.read(state)
-            geometry = reachability._grid_geometry(profile, state)
-            flux = np.asarray(geometry["flux"], dtype=float)
-            radius = np.asarray(geometry["radius"], dtype=float)
-            height = np.asarray(geometry["height"], dtype=float)
-            o_candidates, x_candidates = _stationary_records(
-                np.asarray(source_o), np.asarray(source_x), radius, height, flux
-            )
-            assembled = jax.device_get(
-                assemble_separatrix_branches(
-                    jnp.asarray(flux),
-                    jnp.asarray(radius),
-                    jnp.asarray(height),
-                    topology.boundary_flux,
-                    topology.axis,
+        for arm, arm_result in states.items():
+            state = arm_result.state
+            try:
+                physical = jnp.asarray(state)[: profile.operator.physical_node_number]
+                grid_flux, _wall_flux = profile.operator.topology.split_flux_map(
+                    physical
                 )
-            )
-            closed = authority._sample_cubic_controls(
-                np.asarray(assembled["closed_controls_rz"])[
-                    np.asarray(assembled["closed_valid"], dtype=bool)
-                ]
-            )
-            rows.append(
-                {
-                    "machine": "MAST",
-                    "identity": f"{shot}/{slice_index} {arm}",
-                    "shot": shot,
-                    "frame": slice_index,
-                    "arm": arm,
-                    "time": float(referee.time_s[slice_index]),
+                source_o, source_x = jax.device_get(
+                    profile.operator._fixed_design_topology.grid(grid_flux)
+                )
+                masks, topology = profile.operator.read(state)
+                geometry = reachability._grid_geometry(profile, state)
+                flux = np.asarray(geometry["flux"], dtype=float)
+                radius = np.asarray(geometry["radius"], dtype=float)
+                height = np.asarray(geometry["height"], dtype=float)
+                o_candidates, x_candidates = _stationary_records(
+                    np.asarray(source_o), np.asarray(source_x), radius, height, flux
+                )
+                assembled = jax.device_get(
+                    assemble_separatrix_branches(
+                        jnp.asarray(flux),
+                        jnp.asarray(radius),
+                        jnp.asarray(height),
+                        topology.boundary_flux,
+                        topology.axis,
+                    )
+                )
+                closed = authority._sample_cubic_controls(
+                    np.asarray(assembled["closed_controls_rz"])[
+                        np.asarray(assembled["closed_valid"], dtype=bool)
+                    ]
+                )
+                visual = {
                     "cell_rz": np.asarray(profile.lattice.coordinate, dtype=float),
                     "domain_labels": np.asarray(masks.label, dtype=np.int8),
                     "o_candidates": o_candidates,
@@ -190,11 +189,39 @@ def _mast_rows() -> list[dict[str, Any]]:
                     "wall_point": np.asarray(topology.wall_point, dtype=float),
                     "wall": np.asarray(geometry["wall"], dtype=float),
                     "nova_boundary": closed,
+                    "converged": bool(arm_result.converged),
+                    "qualification": str(arm_result.termination_reason),
+                }
+            except (
+                authority.NoQualifiedAxisError,
+                authority.ConstraintViolationError,
+            ) as error:
+                empty_points = np.empty((0, 2), dtype=float)
+                visual = {
+                    "cell_rz": empty_points,
+                    "domain_labels": np.empty(0, dtype=np.int8),
+                    "o_candidates": empty_points,
+                    "x_candidates": empty_points,
+                    "selected_o": empty_points,
+                    "selected_x": empty_points,
+                    "wall_point": empty_points,
+                    "wall": empty_points,
+                    "nova_boundary": empty_points,
+                    "converged": False,
+                    "qualification": type(error).__name__,
+                }
+            rows.append(
+                {
+                    "machine": "MAST",
+                    "identity": f"{shot}/{slice_index} {arm}",
+                    "shot": shot,
+                    "frame": slice_index,
+                    "arm": arm,
+                    "time": float(referee.time_s[slice_index]),
+                    **visual,
                     "efit_axis": np.asarray(referee.magnetic_axis_m[slice_index]),
                     "efit_x": np.asarray(referee.x_points_m[slice_index]),
                     "efit_lcfs": np.asarray(referee.lcfs_m[slice_index]),
-                    "converged": True,
-                    "qualification": f"achieved class from committed arm {arm}",
                 }
             )
     if len(rows) != EXPECTED_MAST_ROWS:
@@ -212,11 +239,46 @@ def _mast_rows() -> list[dict[str, Any]]:
 
 def _diiid_module():
     source = DIIID_AUTHORITY.read_text()
-    needle = "    fields.update(\n        _terminal_plotting_geometry(profile, equilibrium, predicted, radius, height)\n    )\n"
-    injection = needle + (
-        "    visual_masks, _visual_topology = profile.operator.read(equilibrium.flux)\n"
-        "    fields['domain_labels'] = np.asarray(visual_masks.label, dtype=np.int8)\n"
-        "    fields['cell_rz'] = np.asarray(profile.lattice.coordinate, dtype=float)\n"
+    needle = "    return result, fields\n\n\ndef _retained_solve_failure("
+    injection = (
+        "    try:\n"
+        "        visual_physical = equilibrium.flux[: profile.operator.physical_node_number]\n"
+        "        visual_grid_flux, _visual_wall_flux = "
+        "profile.operator.topology.split_flux_map(visual_physical)\n"
+        "        visual_source_o, visual_source_x = "
+        "profile.operator._fixed_design_topology.grid(visual_grid_flux)\n"
+        "        visual_source_o, visual_source_x = "
+        "jax.device_get((visual_source_o, visual_source_x))\n"
+        "        visual_masks, _visual_topology = profile.operator.read(equilibrium.flux)\n"
+        "        fields.update({\n"
+        "            'domain_labels': np.asarray(visual_masks.label, dtype=np.int8),\n"
+        "            'cell_rz': np.asarray(profile.lattice.coordinate, dtype=float),\n"
+        "            'nova_source_o': np.asarray(visual_source_o, dtype=float),\n"
+        "            'nova_source_x': np.asarray(visual_source_x, dtype=float),\n"
+        "            'nova_selected_axis_rz': np.asarray(topology.axis, dtype=float),\n"
+        "            'nova_selected_x_rz': np.asarray(topology.x_point, dtype=float),\n"
+        "            'nova_selected_wall_rz': np.asarray(topology.wall_point, dtype=float),\n"
+        "            'efit_axis_rz': labelled_axis,\n"
+        "            'efit_x_points_rz': labelled_x_point[None, :],\n"
+        "            'visual_flux': np.asarray(predicted.T, dtype=float),\n"
+        "            'visual_failure_exception_class': None,\n"
+        "        })\n"
+        "    except (NoQualifiedAxisError, ConstraintViolationError) as visual_error:\n"
+        "        visual_empty = np.empty((0, 2), dtype=float)\n"
+        "        fields.update({\n"
+        "            'domain_labels': np.empty(0, dtype=np.int8),\n"
+        "            'cell_rz': visual_empty,\n"
+        "            'nova_source_o': visual_empty,\n"
+        "            'nova_source_x': visual_empty,\n"
+        "            'nova_selected_axis_rz': visual_empty,\n"
+        "            'nova_selected_x_rz': visual_empty,\n"
+        "            'nova_selected_wall_rz': visual_empty,\n"
+        "            'efit_axis_rz': labelled_axis,\n"
+        "            'efit_x_points_rz': labelled_x_point[None, :],\n"
+        "            'visual_flux': np.empty((0, 0), dtype=float),\n"
+        "            'visual_failure_exception_class': type(visual_error).__name__,\n"
+        "        })\n"
+        + needle
     )
     if source.count(needle) != 1:
         raise RuntimeError("DIII-D renderer injection seam changed")
@@ -260,8 +322,20 @@ def _diiid_rows() -> list[dict[str, Any]]:
         result, fields = module["solve_frame"](
             record,
             selected_frame.frame,
-            module["REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION"],
+            None,
         )
+        visual_failure = fields["visual_failure_exception_class"]
+        if visual_failure is None:
+            o_candidates, x_candidates = _stationary_records(
+                np.asarray(fields["nova_source_o"], dtype=float),
+                np.asarray(fields["nova_source_x"], dtype=float),
+                np.asarray(fields["radius"], dtype=float),
+                np.asarray(fields["height"], dtype=float),
+                np.asarray(fields["visual_flux"], dtype=float),
+            )
+        else:
+            o_candidates = np.empty((0, 2), dtype=float)
+            x_candidates = np.empty((0, 2), dtype=float)
         rows.append(
             {
                 "machine": "DIII-D",
@@ -272,22 +346,24 @@ def _diiid_rows() -> list[dict[str, Any]]:
                 "time": result.time_ms,
                 "cell_rz": np.asarray(fields["cell_rz"], dtype=float),
                 "domain_labels": np.asarray(fields["domain_labels"], dtype=np.int8),
-                "o_candidates": _plotted_candidates(fields["nova_o_candidates"]),
-                "x_candidates": _plotted_candidates(fields["nova_x_candidates"]),
+                "o_candidates": o_candidates,
+                "x_candidates": x_candidates,
                 "selected_o": np.asarray(fields["nova_selected_axis_rz"], dtype=float),
                 "selected_x": np.asarray(fields["nova_selected_x_rz"], dtype=float),
                 "wall_point": np.asarray(fields["nova_selected_wall_rz"], dtype=float),
                 "wall": np.asarray(fields["pseudo_wall"], dtype=float),
-                "nova_boundary": np.asarray(
-                    fields["predicted_closed_boundary"], dtype=float
+                "nova_boundary": (
+                    np.asarray(fields["predicted_closed_boundary"], dtype=float)
+                    if visual_failure is None
+                    else np.empty((0, 2), dtype=float)
                 ),
                 "efit_axis": np.asarray(fields["efit_axis_rz"], dtype=float),
                 "efit_x": np.asarray(fields["efit_x_points_rz"], dtype=float),
                 "efit_lcfs": np.asarray(
                     fields["labelled_closed_boundary"], dtype=float
                 ),
-                "converged": bool(result.converged),
-                "qualification": result.solver_termination,
+                "converged": bool(result.converged) and visual_failure is None,
+                "qualification": visual_failure or result.solver_termination,
             }
         )
     if len(rows) != EXPECTED_DIIID_ROWS:
@@ -296,19 +372,6 @@ def _diiid_rows() -> list[dict[str, Any]]:
         )
     _write_cache(DIIID_CACHE, rows, source_authority)
     return _read_cache(DIIID_CACHE, source_authority["source_identity"])
-
-
-def _plotted_candidates(records: list[dict[str, Any]]) -> np.ndarray:
-    points = [
-        (
-            record["polished_coordinate_m"]
-            if record["plotted"]
-            else record["source_coordinate_m"]
-        )
-        for record in records
-        if record["source_coordinate_m"] is not None
-    ]
-    return np.asarray(points, dtype=float).reshape((-1, 2))
 
 
 def _write_cache(
@@ -512,7 +575,11 @@ def _draw_row(row: dict[str, Any], path: Path) -> dict[str, Any]:
             label="EFIT X label",
             zorder=9,
         )
-    verdict = "converged" if row["converged"] else "NONCONVERGED — retained"
+    if row["converged"]:
+        verdict = "converged"
+    else:
+        qualification = textwrap.fill(str(row["qualification"]), width=64)
+        verdict = f"NONCONVERGED — retained\nRetained failure: {qualification}"
     axis.set_title(f"{row['machine']} · {row['identity']} · {verdict}")
     axis.set_xlabel("R [m]")
     axis.set_ylabel("Z [m]")
@@ -558,10 +625,25 @@ def _write_evidence(rows: list[dict[str, Any]], records: list[dict[str, Any]]) -
     figure_rows = []
     for index, (row, record) in enumerate(zip(rows, records, strict=True), start=1):
         filename = f"{index:02d}-{row['machine'].lower().replace('-', '')}-{row['identity'].replace('/', '-').replace(':', '-').replace(' ', '-')}.png"
+        unavailable = len(row["cell_rz"]) == 0
+        status = (
+            "Converged."
+            if row["converged"]
+            else (
+                f"NONCONVERGED — retained failure: "
+                f"{escape(str(row['qualification']))}."
+                + (
+                    " Nova partition and landmarks are unavailable; EFIT labels, "
+                    "LCFS, and governed first wall are retained."
+                    if unavailable
+                    else ""
+                )
+            )
+        )
         figure_rows.append(
             f"""<article class="figure-row" id="geometry-{index:02d}">
   <h3>{index:02d}. {row["machine"]} — {row["identity"]}</h3>
-  <figure><img src="/nova/figures/topology-visual-corroboration/{filename}" alt="Topology evidence for {row["machine"]} {row["identity"]}: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>{record["private_flux_cells"]} private-flux shadow cells; {record["o_candidates"]} plotted O candidates; {record["x_candidates"]} plotted X candidates; selected O/X/wall markers {record["selected_o"]}/{record["selected_x"]}/{record["wall_point"]}; EFIT axis/X/LCFS vertices {record["efit_axis"]}/{record["efit_x"]}/{record["efit_lcfs_vertices"]}. <strong>{"Converged." if row["converged"] else "NONCONVERGED — retained as a scientific failure."}</strong></figcaption></figure>
+  <figure><img src="/nova/figures/topology-visual-corroboration/{filename}" alt="Topology evidence for {row["machine"]} {row["identity"]}: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>{record["private_flux_cells"]} private-flux shadow cells; {record["o_candidates"]} plotted O candidates; {record["x_candidates"]} plotted X candidates; selected O/X/wall markers {record["selected_o"]}/{record["selected_x"]}/{record["wall_point"]}; EFIT axis/X/LCFS vertices {record["efit_axis"]}/{record["efit_x"]}/{record["efit_lcfs_vertices"]}. <strong>{status}</strong></figcaption></figure>
 </article>"""
         )
     head = subprocess.run(
@@ -571,6 +653,7 @@ def _write_evidence(rows: list[dict[str, Any]], records: list[dict[str, Any]]) -
         capture_output=True,
         text=True,
     ).stdout.strip()
+    mast_source = _source_authority(MAST_AUTHORITY)
     diiid_source = _source_authority(DIIID_AUTHORITY)
     html = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -582,7 +665,7 @@ def _write_evidence(rows: list[dict[str, Any]], records: list[dict[str, Any]]) -
 </head>
 <body><main class="plan"><header class="plan-hero"><p class="eyebrow">Evidence · visual topology audit</p><h1>Topology visual corroboration</h1>
 <p class="lede">All {EXPECTED_MAST_ROWS} MAST arms and all {EXPECTED_DIIID_ROWS} DIII-D demonstration frames are shown exactly once. Every panel exposes the hex-cell flood-fill domains, the complete finite O/X candidate census, selected primary O and X, selected wall point, and EFIT axis/X/LCFS labels.</p></header>
-<section><h2>Authority and interpretation</h2><p>This is corroboration of committed extraction state, not a new score. EFIT is an independent magnetics-fitted reconstruction, not physical truth. MAST operands use the persisted response carrier and the current <code>efit_topology_corroboration</code> extraction route. DIII-D operands use the current integrated benchmark source <code>{diiid_source["source_path"]}</code> at content identity <code>{diiid_source["source_identity"]}</code>; all five nonconverged rows remain visibly qualified. Generated from repository head <code>{head}</code>.</p>
+<section><h2>Authority and interpretation</h2><p>This is corroboration of committed extraction state, not a new score. EFIT is an independent magnetics-fitted reconstruction, not physical truth. MAST operands use the persisted response carrier and current source <code>{mast_source["source_path"]}</code> at content identity <code>{mast_source["source_identity"]}</code>. DIII-D operands use the current integrated benchmark source <code>{diiid_source["source_path"]}</code> at content identity <code>{diiid_source["source_identity"]}</code>. Every nonconverged row remains visibly qualified by its recorded termination name. Generated from repository head <code>{head}</code>.</p>
 <p>The purple cells are the exact <code>PRIVATE_FLUX</code> labels from Nova's domain partition: closed-flux cells disconnected from the primary O-point by the X-point flood-fill cut. Pale blue is axis-connected core, grey-green is common SOL, and pale grey is excluded material. The selected wall marker is Nova's governed closest plasma-wall candidate; it is shown even when the topology class is diverted and it does not bind the LCFS.</p></section>
 <section><h2>Coverage</h2><p><strong>{len(rows)} of {EXPECTED_MAST_ROWS + EXPECTED_DIIID_ROWS} declared geometries rendered.</strong> {sum(row["machine"] == "MAST" for row in rows)} MAST and {sum(row["machine"] == "DIII-D" for row in rows)} DIII-D; {sum(not row["converged"] for row in rows)} nonconverged rows retained. Figure rows below are the quantitative completeness ledger.</p></section>
 <section><h2>Per-geometry corroboration</h2>{"".join(figure_rows)}</section>

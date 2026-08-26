@@ -1,115 +1,117 @@
 {
   "authority": {
-    "carrier": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994"
+    "carrier": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+    "source_identity": "sha256:bbf865f5a9f22df5611825084fe8c49e693989565bd9e318f797c192476b1fc6",
+    "source_path": "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py"
   },
   "rows": [
     {
       "arm": "pure",
-      "converged": true,
+      "converged": false,
       "frame": 35,
       "identity": "21978/35 pure",
       "machine": "MAST",
-      "qualification": "achieved class from committed arm pure",
+      "qualification": "iteration_budget_exhausted",
       "shot": 21978,
       "time": 0.1899999976158142
     },
     {
       "arm": "mixed",
-      "converged": true,
+      "converged": false,
       "frame": 35,
       "identity": "21978/35 mixed",
       "machine": "MAST",
-      "qualification": "achieved class from committed arm mixed",
+      "qualification": "iteration_budget_exhausted",
       "shot": 21978,
       "time": 0.1899999976158142
     },
     {
       "arm": "pure",
-      "converged": true,
+      "converged": false,
       "frame": 35,
       "identity": "21983/35 pure",
       "machine": "MAST",
-      "qualification": "achieved class from committed arm pure",
+      "qualification": "iteration_budget_exhausted",
       "shot": 21983,
       "time": 0.1899999976158142
     },
     {
       "arm": "mixed",
-      "converged": true,
+      "converged": false,
       "frame": 35,
       "identity": "21983/35 mixed",
       "machine": "MAST",
-      "qualification": "achieved class from committed arm mixed",
+      "qualification": "iteration_budget_exhausted",
       "shot": 21983,
       "time": 0.1899999976158142
     },
     {
       "arm": "pure",
-      "converged": true,
+      "converged": false,
       "frame": 51,
       "identity": "21985/51 pure",
       "machine": "MAST",
-      "qualification": "achieved class from committed arm pure",
+      "qualification": "iteration_budget_exhausted",
       "shot": 21985,
       "time": 0.2750000059604645
     },
     {
       "arm": "mixed",
-      "converged": true,
+      "converged": false,
       "frame": 51,
       "identity": "21985/51 mixed",
       "machine": "MAST",
-      "qualification": "achieved class from committed arm mixed",
+      "qualification": "iteration_budget_exhausted",
       "shot": 21985,
       "time": 0.2750000059604645
     },
     {
       "arm": "pure",
-      "converged": true,
+      "converged": false,
       "frame": 46,
       "identity": "21986/46 pure",
       "machine": "MAST",
-      "qualification": "achieved class from committed arm pure",
+      "qualification": "iteration_budget_exhausted",
       "shot": 21986,
       "time": 0.25
     },
     {
       "arm": "mixed",
-      "converged": true,
+      "converged": false,
       "frame": 46,
       "identity": "21986/46 mixed",
       "machine": "MAST",
-      "qualification": "achieved class from committed arm mixed",
+      "qualification": "NoQualifiedAxisError",
       "shot": 21986,
       "time": 0.25
     },
     {
       "arm": "pure",
-      "converged": true,
+      "converged": false,
       "frame": 55,
       "identity": "21989/55 pure",
       "machine": "MAST",
-      "qualification": "achieved class from committed arm pure",
+      "qualification": "iteration_budget_exhausted",
       "shot": 21989,
       "time": 0.29499998688697815
     },
     {
       "arm": "mixed",
-      "converged": true,
+      "converged": false,
       "frame": 55,
       "identity": "21989/55 mixed",
       "machine": "MAST",
-      "qualification": "achieved class from committed arm mixed",
+      "qualification": "iteration_budget_exhausted",
       "shot": 21989,
       "time": 0.29499998688697815
     },
     {
       "arm": "pure",
-      "converged": true,
+      "converged": false,
       "frame": 43,
       "identity": "22086/43 pure",
       "machine": "MAST",
-      "qualification": "achieved class from committed arm pure",
+      "qualification": "iteration_budget_exhausted",
       "shot": 22086,
       "time": 0.22999998927116394
     },
@@ -119,7 +121,7 @@
       "frame": 43,
       "identity": "22086/43 mixed",
       "machine": "MAST",
-      "qualification": "achieved class from committed arm mixed",
+      "qualification": "converged",
       "shot": 22086,
       "time": 0.22999998927116394
     }

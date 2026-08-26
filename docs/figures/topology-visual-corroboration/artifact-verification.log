@@ -1,4 +1,6 @@
-warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
-VERIFY rows=17 unique_srcs=17 png_min_bytes>100000 png_min_dimensions=600x600
-VERIFY mast_rows=12 diiid_rows=5 npz_object_dtypes=0 allow_pickle_required=false
+VERIFY rows=17 mast=12 diiid=5 mast_converged=1 mast_retained_failures=11 diiid_retained_failures=5
+VERIFY 22086/43_mixed private_flux_inside_closed_boundary=0
+VERIFY diiid_exception_rows nova_partition_landmarks_empty=1/1 efit_axis_x_lcfs_wall_retained=1/1
+VERIFY annotations mast_retained=11/11 diiid_retained=5/5 source_identities=2/2 npz_object_dtypes=0
+VERIFY pngs=17 min_dimensions=699x1316
 EXIT_MARKER=0

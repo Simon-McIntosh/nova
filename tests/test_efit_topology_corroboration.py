@@ -7,6 +7,7 @@ from types import SimpleNamespace
 
 import jax.numpy as jnp
 import numpy as np
+import pytest
 
 from nova.equilibrium.boundary_comparison import BoundaryMode
 
@@ -285,3 +286,129 @@ def test_post_cutover_geometry_routes_class_through_public_classifier(monkeypatc
     )
     assert result["achieved_class"] == "limited"
     assert result["binding_flux"] == 2.0
+
+
+@pytest.mark.parametrize(
+    "exception_type",
+    ("NoQualifiedAxisError", "ConstraintViolationError"),
+)
+def test_named_arm_failure_retains_twelve_row_census(
+    monkeypatch, tmp_path, exception_type
+):
+    adapter = _adapter()
+    exception_class = getattr(adapter, exception_type)
+    ring = _ring()
+
+    def grid_geometry(_profile, state):
+        if state == 5 and exception_type == "NoQualifiedAxisError":
+            raise exception_class("synthetic axis disqualification")
+        return {
+            "radius": np.linspace(0.0, 1.0, 3),
+            "height": np.linspace(0.0, 1.0, 3),
+            "flux": np.zeros((3, 3)),
+            "axis": np.asarray((0.5, 0.5)),
+            "wall": ring,
+        }
+
+    def operator_read(state):
+        if state == 5 and exception_type == "ConstraintViolationError":
+            raise exception_class("synthetic constraint violation")
+        return None, SimpleNamespace()
+
+    reachability = SimpleNamespace(_grid_geometry=grid_geometry)
+    profile = SimpleNamespace(operator=SimpleNamespace(read=operator_read))
+    monkeypatch.setattr(
+        adapter,
+        "_post_cutover_geometry",
+        lambda *_args: {
+            "achieved_class": "diverted",
+            "binding_flux": 0.0,
+            "selected_saddle": np.asarray((1.0, 0.0)),
+            "limiter_coordinate": np.asarray((0.0, 1.0)),
+            "class_margin": 0.25,
+        },
+    )
+    monkeypatch.setattr(
+        adapter, "_assembled_branch_polylines", lambda _geometry: (ring, [])
+    )
+    monkeypatch.setattr(adapter, "CACHE_PATH", tmp_path / "operands.npz")
+
+    operands = [
+        adapter._build_arm_operand(
+            reachability,
+            profile,
+            SimpleNamespace(
+                state=index,
+                converged=True,
+                terminal_residual=1.0e-9,
+                tolerance=1.0e-8,
+                termination_reason="converged",
+            ),
+            identity=f"synthetic/{index // 2}",
+            shot=20_000 + index // 2,
+            slice_index=index // 2,
+            time_s=0.1 * index,
+            arm="pure" if index % 2 == 0 else "mixed",
+            efit_label="diverted",
+            efit_lcfs=ring,
+            efit_x_points=np.asarray(((1.0, 0.0),)),
+        )
+        for index in range(12)
+    ]
+    carrier = {"carrier": {"semantic_response_identity": "synthetic-carrier"}}
+    adapter._write_operand_cache(operands, carrier)
+    rows = [
+        adapter._score_operand(operand)
+        for operand in adapter._read_operand_cache(carrier)
+    ]
+    eligibility = adapter._rms_threshold_eligibility(rows)
+    failed = rows[5]
+
+    assert len(rows) == 12
+    assert [(row["identity"], row["arm"]) for row in rows] == [
+        (f"synthetic/{index // 2}", "pure" if index % 2 == 0 else "mixed")
+        for index in range(12)
+    ]
+    assert failed["converged"] is False
+    assert failed["termination_reason"] == exception_type
+    assert failed["failure_exception_class"] == exception_type
+    assert failed["terminal_residual"] is None
+    assert failed["nova_achieved_class"] is None
+    assert failed["nova_closed_boundary_m"] is None
+    assert failed["binding_to_efit_lcfs_rms_m"] is None
+    assert failed["label_agreement"] is None
+    assert eligibility["declared_arm_denominator"] == 12
+    assert eligibility["eligible_count"] == 11
+    assert eligibility["excluded_nonconverged_arms"] == ["synthetic/2 mixed"]
+    json.dumps(rows, allow_nan=False)
+
+
+def test_unrelated_arm_geometry_exception_propagates(monkeypatch):
+    adapter = _adapter()
+    reachability = SimpleNamespace(
+        _grid_geometry=lambda *_args: (_ for _ in ()).throw(
+            RuntimeError("unrelated failure")
+        )
+    )
+    arm_result = SimpleNamespace(
+        state=0,
+        converged=True,
+        terminal_residual=1.0e-9,
+        tolerance=1.0e-8,
+        termination_reason="converged",
+    )
+
+    with pytest.raises(RuntimeError, match="unrelated failure"):
+        adapter._build_arm_operand(
+            reachability,
+            SimpleNamespace(),
+            arm_result,
+            identity="synthetic/0",
+            shot=20_000,
+            slice_index=0,
+            time_s=0.0,
+            arm="pure",
+            efit_label="diverted",
+            efit_lcfs=_ring(),
+            efit_x_points=np.asarray(((1.0, 0.0),)),
+        )

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T15:37:27",
+  "updated": "2026-08-26T15:42:41",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1235,8 +1235,12 @@
         "id": "topology-admission",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "created": "2026-08-23"
+        "session_id": "01a03e1a-fbf4-7f53-b259-53928f6d5b98",
+        "created": "2026-08-23",
+        "sessions": {
+          "gpt-5.6-sol": "01a03e1a-fbf4-7f53-b259-53928f6d5b98"
+        },
+        "session_model": "gpt-5.6-sol"
       },
       {
         "id": "topology-parity",
@@ -43264,9 +43268,112 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T133813903510-sse-combined-adapter-matrix",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a74",
+        "node": "sse-combined-adapter-matrix",
+        "node_definition": {
+          "done_when": "One captured CPU x64 pytest invocation over tests/test_boundary_comparison.py, tests/test_efit_topology_corroboration.py, tests/imas/test_diiid_forward_gs_match.py, and tests/test_flux_surface_connectivity.py reports exactly 51 passes, zero failures, and zero precision warnings; preregistration SHA-256 remains bf3d1cb3ef29d60ddb632454bfdda8914f397421a2a46e2fc16310653c1457f5, both tracked MAST bank artifact digests remain unchanged, git diff --exit-code returns 0, and the manifest states PASS or HOLD.",
+          "estimated_hours": 0.8,
+          "goal": "Verify the combined main-branch state after both MAST and DIII-D comparator adapters landed, before any bank regeneration.",
+          "id": "sse-combined-adapter-matrix",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-combined-adapter-matrix.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-combined-adapter-matrix.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "reference-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T13:38:22Z",
+        "completed_at": "2026-08-26T13:42:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 222,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 222,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "269cde0cc9b718c645d38ba9c081594e410c815f",
+        "commits": [
+          "269cde0cc9b718c645d38ba9c081594e410c815f"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "env VIRTUAL_ENV=/home/ITER/mcintos/Code/nova/.venv UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=\"$PWD\" PYTHONDONTWRITEBYTECODE=1 JAX_PLATFORMS=cpu JAX_ENABLE_X64=true uv run --no-sync pytest -p no:cacheprovider tests/test_boundary_comparison.py tests/test_efit_topology_corroboration.py tests/imas/test_diiid_forward_gs_match.py tests/test_flux_surface_connectivity.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T133813903510-sse-combined-adapter-matrix/stream.jsonl",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-combined-adapter-matrix.md",
+        "scope_changed": false,
+        "session_id": "01a03dcf-5590-7da3-a313-132579fd951f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 1788928,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 1848269,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 6521,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2406
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest invocation",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 959
+    "_version": 961
   }
 }

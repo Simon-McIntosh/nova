@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T16:09:33",
+  "updated": "2026-08-26T16:14:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -44268,9 +44268,136 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T140600847499-sse-terminal-diagnostic-material-verify",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a74",
+        "node": "sse-terminal-diagnostic-material-verify",
+        "node_definition": {
+          "done_when": "One captured CPU x64 invocation passes tests/test_diiid_forward_gs_match.py with exactly two tests and zero failures. Independent inspection confirms connectivity_axis_seed(topology.axis) is called once, its material mask is tensor-reshaped and passed to traced_margin_candidate_diagnostics, a one-ULP mismatch still raises, no receipt schema or JSON artifact changes, and git diff --exit-code plus git diff --cached --exit-code both return 0.",
+          "estimated_hours": 0.5,
+          "goal": "Independently verify commit 303304e8 aligns the terminal X-point diagnostic with production axis-seeded connectivity material while preserving exact serialized operands and fail-closed margin equality.",
+          "id": "sse-terminal-diagnostic-material-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-terminal-diagnostic-material-verify.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-terminal-diagnostic-material-verify.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "reference-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T14:06:14Z",
+        "completed_at": "2026-08-26T14:08:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 163,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 163,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "303304e8c0107cf393f126ee0df5e659ff18a597",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "env VIRTUAL_ENV=/home/ITER/mcintos/Code/nova/.venv JAX_PLATFORMS=cpu JAX_ENABLE_X64=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD PYTHONDONTWRITEBYTECODE=1 uv run --no-sync pytest -o addopts= tests/test_diiid_forward_gs_match.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-terminal-diagnostic-material-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-terminal-diagnostic-material-verify.md",
+        "scope_changed": false,
+        "session_id": "01a03dcf-5590-7da3-a313-132579fd951f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 272640,
+            "cached_input_tokens_cumulative": 2061568,
+            "input_tokens": 257080,
+            "input_tokens_cumulative": 2105349,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 5959,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1615
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 758,
+              "log_age_seconds": 544,
+              "log_fresh": true,
+              "manifest_commits": [
+                "303304e8"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-terminal-diagnostic-material-repair.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T135322231584-sse-terminal-diagnostic-material-repair --gate <verdict> --commit 303304e8",
+              "node": "sse-terminal-diagnostic-material-repair",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T135322231584-sse-terminal-diagnostic-material-repair",
+              "terminal_age_seconds": 568,
+              "terminal_at": "2026-08-26T13:56:43Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-terminal-diagnostic-material-repair"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 969
+    "_version": 970
   }
 }

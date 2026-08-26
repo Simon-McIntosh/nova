@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T15:14:19",
+  "updated": "2026-08-26T15:23:35",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1045,8 +1045,12 @@
         "id": "saddle-partition",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "created": "2026-08-21"
+        "session_id": "01a03e2e-1bad-7df0-93f5-49418c4cb7df",
+        "created": "2026-08-21",
+        "sessions": {
+          "gpt-5.6-sol": "01a03e2e-1bad-7df0-93f5-49418c4cb7df"
+        },
+        "session_model": "gpt-5.6-sol"
       },
       {
         "id": "seam-scout",
@@ -42633,9 +42637,112 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T131733198094-pod-fixed-trip-hex-primitives-verify",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-fixed-trip-hex-primitives-verify",
+        "node_definition": {
+          "done_when": "One captured CPU pytest invocation over tests/test_flux_surface_connectivity.py reports 19 passes; source and focused assertions confirm literal fixed trip counts with masked settled lanes, unchanged centre-first cells-by-seven and shared-edge fixed shapes, doubled-cap bitwise identity, warm roots with zero active updates, exact zero inactive padding, preserved custom_root implicit sensitivity of 1.0 within 2e-13, and no residual-domain cutover or receipt field; git diff --exit-code returns 0 and the manifest states PASS or HOLD.",
+          "estimated_hours": 0.6,
+          "goal": "Independently verify commit a251914a1904e3f63afb63bc55dc598213ff0de6 as fixed-cap masked hex-connectivity and stationary-polish substrate, without changing repository files.",
+          "id": "pod-fixed-trip-hex-primitives-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-fixed-trip-hex-primitives-verify.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "35m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-fixed-trip-hex-primitives-verify.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "sse-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T13:17:46Z",
+        "completed_at": "2026-08-26T13:23:21Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 335,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 335,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "a251914a1904e3f63afb63bc55dc598213ff0de6",
+        "commits": [
+          "a251914a1904e3f63afb63bc55dc598213ff0de6"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=\"$PWD\" uv run --no-sync pytest tests/test_flux_surface_connectivity.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-fixed-trip-hex-primitives-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-fixed-trip-hex-primitives-verify.md",
+        "scope_changed": false,
+        "session_id": "01a03de9-44ed-7070-a85e-ae33242a3e47",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 1852416,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 1966430,
+            "output_tokens": 1136,
+            "output_tokens_cumulative": 8121,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1758
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest invocation",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 951
+    "_version": 953
   }
 }

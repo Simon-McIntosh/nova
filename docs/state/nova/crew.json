@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T16:07:41",
+  "updated": "2026-08-26T16:08:35",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -44043,9 +44043,136 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T135839697027-mcg-titan-residual-stopping-rehearsal",
+        "plan": "mast-catalog-gpu-solve",
+        "section": "\u00a72",
+        "node": "mcg-titan-residual-stopping-rehearsal",
+        "node_definition": {
+          "done_when": "One Titan job requests gpu:p100:1, records job host GPU identity CUDA visibility float64 JAX and TMPDIR=/tmp, and runs tests/test_fixed_point.py plus tests/test_stencil_nulls.py::test_cpu_gpu_candidate_metadata_and_coordinates_match in one captured invocation. All collected tests pass, the GPU parity test does not skip, residual tolerance 1e-8 and attempted/accepted trip bounds [1,3] with batch maximum 3 are independently checked, fixed shapes and NaN padding remain asserted, and the manifest explicitly states P100 rehearsal only.",
+          "estimated_hours": 0.6,
+          "goal": "Run the residual-stopping and CPU/GPU candidate-parity focused tests on one scheduler-isolated Titan P100 as functional rehearsal evidence without representing it as H200 performance or full-catalog throughput.",
+          "id": "mcg-titan-residual-stopping-rehearsal",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-titan-residual-stopping-rehearsal.md",
+          "plan": "mast-catalog-gpu-solve",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-titan-residual-stopping-rehearsal.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "integration-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T13:59:01Z",
+        "completed_at": "2026-08-26T14:06:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 454,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 454,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "16ef8998d51b02468d83f69b033cfc8f48a65956",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/test_fixed_point.py tests/test_stencil_nulls.py::test_cpu_gpu_candidate_metadata_and_coordinates_match -q -ra",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-titan-residual-stopping-rehearsal.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-titan-residual-stopping-rehearsal.md",
+        "scope_changed": false,
+        "session_id": "01a03de1-cbad-7f72-a60f-76343dd3508e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1231104,
+            "cached_input_tokens_cumulative": 4125184,
+            "input_tokens": 1279295,
+            "input_tokens_cumulative": 4272365,
+            "output_tokens": 7240,
+            "output_tokens_cumulative": 15086,
+            "reasoning_output_tokens": 4128,
+            "reasoning_output_tokens_cumulative": 6242
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 783,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 4383,
+              "log_age_seconds": 1091,
+              "log_fresh": false,
+              "manifest_commits": [
+                "a85b597f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-achieved-topology-core.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T124538795352-pod-achieved-topology-core --gate <verdict> --commit a85b597f",
+              "node": "pod-achieved-topology-core",
+              "phase": "complete",
+              "plan": "profile-owned-solve-domain",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T124538795352-pod-achieved-topology-core",
+              "terminal_age_seconds": 1124,
+              "terminal_at": "2026-08-26T13:40:09Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-achieved-topology-core"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "runs tests",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 967
+    "_version": 968
   }
 }

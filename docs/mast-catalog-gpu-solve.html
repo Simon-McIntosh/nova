@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S16">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="56">
+<meta name="plan-version" content="57">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -432,6 +432,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260826T134654495038-mcg-h200-residual-stopping-test" data-who="mcg-stopping-verify" data-when="2026-08-26T14:04:00Z">
     <div class="r-comment-body"><p>The reserved-H200 validation executed zero tests because protected job 1257228 holds all eight GPUs; no H200 parity evidence or throughput claim exists and the H200 gate remains open.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260826T135839697027-mcg-titan-residual-stopping-rehearsal" data-who="integration-verify" data-when="2026-08-26T14:06:35Z">
+    <div class="r-comment-body"><p>A scheduler-isolated Titan P100 ran the focused residual-stopping and CPU/GPU candidate-parity gate: 24 of 24 passed with no skips in 65.20 seconds; this is functional rehearsal only, not H200 performance or full-catalog throughput.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260825T070435806649-efit-dual-branch-prior-art" data-who="efit-prior-art" data-when="2026-08-25T07:15:54Z">
     <div class="r-comment-body"><p>efit dual-branch prior-art map delivered: 15 commits + 13 symbol groups mapped; identical-seed branch-pure fork with a-posteriori HARD selector (not continuous — the differentiable selector is novel work, not a port); mature architecture avoids forking via continuous basin-escape drag; nova solve_portfolio judged fits-and-substantially-landed; WEST mixed-iteration stall vs branch-pure contraction (rho 0.33) mirrors nova diverted-arm 5e-3 stall</p></div>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T20:42:22",
+  "updated": "2026-08-26T20:51:22",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -8,9 +8,11 @@
         "id": "adapter-seams",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03f62-e0cb-7cd1-8925-b9c7f01bcf20",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03f62-e0cb-7cd1-8925-b9c7f01bcf20"
+        },
         "created": "2026-08-26"
       },
       {
@@ -523,6 +525,15 @@
         "sessions": {
           "gpt-5.6-sol": "01a03dc7-96ba-71a0-b74d-58012aee5fd6"
         }
+      },
+      {
+        "id": "fixture-align",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-26"
       },
       {
         "id": "flood-fill",
@@ -47579,6 +47590,6 @@
       }
     ],
     "holds": [],
-    "_version": 1015
+    "_version": 1017
   }
 }

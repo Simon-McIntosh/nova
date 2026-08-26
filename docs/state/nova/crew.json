@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T01:24:49",
+  "updated": "2026-08-27T01:33:21",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -52288,9 +52288,114 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T232834523182-pod-ladder-limiter-absence",
+        "plan": "profile-owned-solve-domain",
+        "section": "",
+        "node": "pod-ladder-limiter-absence",
+        "node_definition": {
+          "done_when": "_contact_fields in benchmarks/wall_resolution_ladder.py treats a non-finite limiter coordinate as absent contact with named nulls for the coordinate and every dependent step distance regardless of boundary finiteness; a regression test pins the exact finite-boundary non-finite-limiter combination alongside the existing boundary-less and finite cases; tests/test_wall_resolution_ladder.py passes in full; validate_receipt semantics unchanged for genuinely present finite contacts; no tracked receipt regenerated; ruff clean on staged paths",
+          "estimated_hours": null,
+          "goal": "Contact absence keyed on the contact operand itself: a non-finite limiter coordinate publishes as absent contact with a mechanism-named reason stating which operand was non-finite, even when topology.boundary is finite, so a present contact is always a finite coordinate pair and strict JSON always publishes",
+          "id": "pod-ladder-limiter-absence",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T232834523182-pod-ladder-limiter-absence/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "write_paths": [
+            "benchmarks/wall_resolution_ladder.py",
+            "tests/test_wall_resolution_ladder.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "receipt-semantics",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T23:28:43Z",
+        "completed_at": "2026-08-26T23:33:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 269,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 269,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "e1cf5ddf89f73aaebd29d1ad58ac63f926b65cce",
+        "commits": [
+          "a8d42b679e4e875429a900053bb13f87bb4586c5"
+        ],
+        "changed_lines": {
+          "added": 70,
+          "removed": 13,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/test_wall_resolution_ladder.py (finite-boundary non-finite-limiter combination pinned)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T232834523182-pod-ladder-limiter-absence/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T232834523182-pod-ladder-limiter-absence/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e9e-83dd-77a1-9200-e41251d729b1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1440512,
+            "cached_input_tokens_cumulative": 3137024,
+            "input_tokens": 1199423,
+            "input_tokens_cumulative": 3215291,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 9360,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2341
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1069
+    "_version": 1070
   }
 }

@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -193,6 +193,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-20260826T085315256722" data-who="sprint-review" data-when="2026-08-26">
     <div class="r-comment-body"><p><strong>Effort recalibration (2026-08-26 review):</strong> 12h to 18h. The original estimate predates s2a, which added the tolerance-exit rewrite required by the locked polish-termination decision (the shipped kernel still runs a fixed-count <code>jax.lax.fori_loop</code> in <code>nova/equilibrium/flux_surface_connectivity.py</code>), the implicit-function-theorem custom VJP, and the reserved-H200 micro-benchmark rung. The 20% impl is current - it was written by this morning's stationary-polish landing (74f95e41, crew run r-20260826T035725483654) minutes after the merge. Note the cross-plan coupling recorded at 97f49d8b: profile-owned-solve-domain s4's tracked-O/X design consumes the warm-started tolerance-exit polish, so s2a gates the solve-domain cutover, not just this plan's own s3/s4.</p></div>
+</div>
+<div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
+    <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>
 </div>
 </section>
 </main>

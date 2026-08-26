@@ -49,6 +49,36 @@
     The authority swap is the section's remaining half, owned by the sprint's clean execution
     session so the cutover lands with its consumer census in one auditable beat.</p>
 
+    <h2 id="titan-route-verification">§2a — Titan P100 rehearsal-route verification</h2>
+
+    <p><strong>Independent gate PASSED, 2026-08-26.</strong> Three jobs ran only on partition
+    <code>titan</code> and exited <code>0:0</code>. The accelerator was
+    <strong>Tesla P100-PCIE-16GB</strong>; JAX 0.11.0 compiled and executed float64 with
+    <code>jax_enable_x64=True</code>. The verified artifact digest is
+    <code>sha256:b588ad151d3f9b05bc41777f575b687158ef765c6767078b28d381a50fecbc01</code>
+    and peak device allocation was <strong>45,907,712 bytes</strong>.</p>
+
+    <table>
+      <caption>Ten-repetition P100 rehearsal medians</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Median</th></tr></thead>
+      <tbody>
+        <tr><td>Cold tolerance exit</td><td>4,916.878 µs</td></tr>
+        <tr><td>Warm tolerance exit</td><td>1,119.4905 µs</td></tr>
+        <tr><td>Tracked sixteen-field sequence</td><td>34,040.694 µs total</td></tr>
+        <tr><td>Eight-trip fixed cap</td><td>3,833.7305 µs</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Isolation and authority:</strong> embed-server job <code>1242909</code> remained
+    on physical P100 index 0; the smoke received physical index 1, exposed locally as CUDA device 0.
+    The audit issued exactly three scheduler actions, all Titan-only submissions, and neither audit
+    nor verifier controlled the unrelated H200 job. That job independently ended failed with exit
+    1:0. The reserved-H200 timing job remained priority-blocked and was cancelled by its owning
+    worker after banking the scheduler receipt.</p>
+
+    <p><strong>Qualification:</strong> this is P100-labelled rehearsal evidence. It proves a safe
+    Titan execution route and does not replace the plan-required reserved-H200 timing measurement.</p>
+
   </main>
 </body>
 </html>

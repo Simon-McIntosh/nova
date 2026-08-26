@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T14:09:21",
+  "updated": "2026-08-26T14:12:07",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -38964,9 +38964,136 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T114311314474-sse-titan-route-verify",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a72a",
+        "node": "sse-titan-route-verify",
+        "node_definition": {
+          "done_when": "A durable manifest records commands that exit zero while matching the three Titan job logs and JSON digest, confirms the P100 model, x64 execution, 45907712-byte peak, physical GPU isolation from job 1242909, and unchanged states for protected jobs 1256575 and 1256711; no source file changes",
+          "estimated_hours": 0.5,
+          "goal": "Independently verify the Titan route receipt",
+          "id": "sse-titan-route-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-titan-route-verify.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a72a",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-titan-route-verify.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "integration-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T11:43:22Z",
+        "completed_at": "2026-08-26T12:05:23Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1321,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1321,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "489c725535343c645e1faf4cf1a173d51929ad67",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "env -u VIRTUAL_ENV UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync python titan_route_assertions.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T114311314474-sse-titan-route-verify/resume-2.jsonl",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-titan-route-verify.md",
+        "scope_changed": false,
+        "session_id": "01a03de1-cbad-7f72-a60f-76343dd3508e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 853248,
+            "cached_input_tokens_cumulative": 853248,
+            "input_tokens": 869689,
+            "input_tokens_cumulative": 869689,
+            "output_tokens": 7171,
+            "output_tokens_cumulative": 7171,
+            "reasoning_output_tokens": 2030,
+            "reasoning_output_tokens_cumulative": 2030
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1423,
+              "log_age_seconds": 482,
+              "log_fresh": true,
+              "manifest_commits": [
+                "none \u2014 investigate-only node; source worktree was read-only at 60251ecdd8f9a7b1f8121d3184c807a9311c777a"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-label-audit-manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T111927307098-pod-legacy-label-census --gate <verdict> --commit none \u2014 investigate-only node; source worktree was read-only at 60251ecdd8f9a7b1f8121d3184c807a9311c777a",
+              "node": "pod-legacy-label-census",
+              "phase": "working",
+              "plan": "profile-owned-solve-domain",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T111927307098-pod-legacy-label-census",
+              "terminal_age_seconds": 495,
+              "terminal_at": "2026-08-26T11:35:03Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-legacy-label-census"
+            }
+          ]
+        },
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 919
+    "_version": 920
   }
 }

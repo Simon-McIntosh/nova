@@ -73,9 +73,10 @@ from nova.equilibrium.fixed_point import (
 )
 from nova.equilibrium import fixed_point as fixed_point_solver
 from nova.equilibrium.map_extraction import extract_flux_functions
+from nova.equilibrium.observation import ConstraintViolationError
 from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
 from nova.equilibrium.source import DomainProfile, ForwardSource
-from nova.equilibrium.topology import TopologyClass
+from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
 from nova.equilibrium.wall_mask import inside_polygon
 from nova.imas.diiid_description import (
     POLOIDAL_CONDUCTORS,
@@ -254,6 +255,7 @@ class FrameResult:
     seed_identity_detected: bool = False
     branch_selection: dict[str, Any] = field(default_factory=dict)
     conductor_current_receipt: dict[str, Any] = field(default_factory=dict)
+    solve_exception_class: str | None = None
 
 
 @dataclass(frozen=True)
@@ -1491,6 +1493,63 @@ def solve_frame(
     return result, fields
 
 
+def _retained_solve_failure(
+    row: dict[str, Any], frame: int, expansion: float, error: Exception
+) -> tuple[FrameResult, dict[str, Any]]:
+    """Represent a qualified solve exception without dropping its frame."""
+
+    exception_class = type(error).__name__
+    result = FrameResult(
+        shot=Path(row["_source_path"]).name,
+        frame=frame,
+        time_ms=float(np.asarray(row["efit_times"])[frame]),
+        geometry_digest=geometry_digest(row),
+        reliable_flux_surfaces=0,
+        pseudo_wall_expansion=expansion,
+        pseudo_wall_statement="solve failed before topology geometry was available",
+        fixed_point_relative_residual=float("nan"),
+        residual_tolerance=GATE_RESIDUAL_TOLERANCE,
+        finite=False,
+        achieved_topology_class=None,
+        converged=False,
+        convergence_criterion=(
+            "finite receipt AND margin-derived diverted topology AND fixed-point "
+            "relative residual "
+            f"<= {GATE_RESIDUAL_TOLERANCE:g} AND target-current relative error "
+            "<= 1e-10 AND cold seed is not label identity"
+        ),
+        solver_termination=f"{exception_class}: {error}",
+        residual_history=(),
+        metrics=MatchMetrics(
+            interior_r_squared=float("nan"),
+            interior_fractional_rms=float("nan"),
+            additive_gauge_wb=float("nan"),
+            closed_boundary_symmetric_sup_distance_m=None,
+            closed_boundary_symmetric_rms_distance_m=None,
+            polished_saddle_to_nearest_efit_x_m=None,
+            topology_class_agreement=None,
+            boundary_comparison_failures=("solve_exception_before_geometry",),
+            magnetic_axis_displacement_mm=float("nan"),
+            predicted_q95_nova=float("nan"),
+            labelled_q95_nova=float("nan"),
+            signed_relative_q95_error=float("nan"),
+        ),
+        solve_exception_class=exception_class,
+    )
+    return result, {"plot_unavailable_reason": exception_class}
+
+
+def _solve_frame_retaining_failure(
+    row: dict[str, Any], frame: int, expansion: float
+) -> tuple[FrameResult, dict[str, Any]]:
+    """Solve one frame, retaining named topology failures as evidence rows."""
+
+    try:
+        return solve_frame(row, frame, expansion)
+    except (NoQualifiedAxisError, ConstraintViolationError) as error:
+        return _retained_solve_failure(row, frame, expansion, error)
+
+
 def _distribution(values: list[float]) -> dict[str, float]:
     array = np.asarray(values, dtype=float)
     return {
@@ -1641,6 +1700,8 @@ def summarize(
                     item.metrics.boundary_comparison_failures
                 ),
                 "converged": item.converged,
+                "solve_exception_class": item.solve_exception_class,
+                "solver_termination": item.solver_termination,
                 "verdict": (
                     "PASS"
                     if item.converged
@@ -1696,7 +1757,7 @@ def summarize(
 
 
 def frame_figure(
-    results: list[FrameResult], fields: list[dict[str, np.ndarray]], path: Path
+    results: list[FrameResult], fields: list[dict[str, Any]], path: Path
 ) -> None:
     """Plot labelled, predicted, and difference maps for every scored frame."""
 
@@ -1704,6 +1765,32 @@ def frame_figure(
         len(results), 3, figsize=(11, 2.5 * len(results)), constrained_layout=True
     )
     for row_axes, result, frame in zip(axes, results, fields, strict=True):
+        unavailable_reason = frame.get("plot_unavailable_reason")
+        if unavailable_reason is not None:
+            for axis, title in zip(
+                row_axes,
+                ("Labelled psi", "Forward psi", "Forward - label"),
+                strict=True,
+            ):
+                axis.text(
+                    0.5,
+                    0.5,
+                    f"Unavailable: {unavailable_reason}",
+                    ha="center",
+                    va="center",
+                    transform=axis.transAxes,
+                )
+                axis.set_title(title)
+                axis.set_axis_off()
+            row_axes[0].text(
+                0.01,
+                0.99,
+                f"{result.shot} frame {result.frame}\nconverged=False",
+                transform=row_axes[0].transAxes,
+                va="top",
+                fontsize=7,
+            )
+            continue
         radius, height = frame["radius"], frame["height"]
         columns = (
             ("labelled", "Labelled psi", "viridis"),
@@ -3414,7 +3501,7 @@ def run(
             + _PLASMA_CURRENT_COLUMNS,
         )
         row["_source_path"] = str(selected_frame.path)
-        result, frame_fields = solve_frame(
+        result, frame_fields = _solve_frame_retaining_failure(
             row, selected_frame.frame, baseline_expansion
         )
         print(
@@ -3454,7 +3541,9 @@ def run(
         if expansion == baseline_expansion:
             sensitivity.append(results[0])
         else:
-            expanded = solve_frame(first_row, first.frame, expansion)[0]
+            expanded = _solve_frame_retaining_failure(
+                first_row, first.frame, expansion
+            )[0]
             print(
                 "RESIDUAL_HISTORY "
                 + json.dumps(

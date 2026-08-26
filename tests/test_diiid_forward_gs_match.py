@@ -253,3 +253,87 @@ def test_failed_receipt_normalization_is_strict_and_lossless():
     assert receipt["result"]["preregistration_sha256"] == preregistration_hash
     assert receipt["preregistration"]["sha256"] == preregistration_hash
     assert receipt["result"]["passed"] is False
+
+
+@pytest.mark.parametrize(
+    "exception_type",
+    (gate.NoQualifiedAxisError, gate.ConstraintViolationError),
+)
+def test_named_solve_failure_retains_all_frame_identities(monkeypatch, exception_type):
+    selected = [
+        SimpleNamespace(path=Path(f"shot-{index}.parquet"), frame=index)
+        for index in range(gate.EXECUTION_FRAME_COUNT)
+    ]
+    calls = []
+
+    def synthetic_solve(row, frame, expansion):
+        calls.append(frame)
+        if frame == 2:
+            raise exception_type("synthetic qualification failure")
+        result = _failed_frame(frame, finite_target=True)
+        metrics = gate.MatchMetrics(
+            **{
+                **result.metrics.__dict__,
+                "topology_class_agreement": True,
+                "boundary_comparison_failures": (),
+            }
+        )
+        return (
+            gate.FrameResult(
+                **{
+                    **result.__dict__,
+                    "shot": Path(row["_source_path"]).name,
+                    "finite": True,
+                    "achieved_topology_class": "diverted",
+                    "converged": True,
+                    "metrics": metrics,
+                }
+            ),
+            {"radius": np.ones(1)},
+        )
+
+    monkeypatch.setattr(gate, "solve_frame", synthetic_solve)
+    monkeypatch.setattr(gate, "geometry_digest", lambda row: "geometry-digest")
+
+    results = []
+    fields = []
+    for item in selected:
+        row = {
+            "_source_path": str(item.path),
+            "efit_times": np.arange(gate.EXECUTION_FRAME_COUNT, dtype=float),
+        }
+        result, frame_fields = gate._solve_frame_retaining_failure(
+            row, item.frame, gate.REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION
+        )
+        results.append(result)
+        fields.append(frame_fields)
+
+    sensitivity = [
+        results[0],
+        gate.FrameResult(
+            **{
+                **results[0].__dict__,
+                "pseudo_wall_expansion": gate.PSEUDO_WALL_EXPANSIONS[1],
+            }
+        ),
+    ]
+    receipt = gate._strict_json_value(
+        gate.summarize(results, sensitivity, "sha256:synthetic")
+    )
+    receipt_rows = receipt["frame_records"]
+    failed = receipt_rows[2]
+
+    assert calls == list(range(gate.EXECUTION_FRAME_COUNT))
+    assert [(row["shot"], row["frame"]) for row in receipt_rows] == [
+        (item.path.name, item.frame) for item in selected
+    ]
+    assert failed["converged"] is False
+    assert failed["solve_exception_class"] == exception_type.__name__
+    assert failed["fixed_point_relative_residual"] is None
+    assert failed["metrics"]["interior_r_squared"] is None
+    assert failed["metrics"]["topology_class_agreement"] is None
+    assert receipt["per_frame_gate"][2]["verdict"] == "FAIL"
+    assert receipt["per_frame_gate"][2]["solve_exception_class"] == (
+        exception_type.__name__
+    )
+    assert fields[2] == {"plot_unavailable_reason": exception_type.__name__}

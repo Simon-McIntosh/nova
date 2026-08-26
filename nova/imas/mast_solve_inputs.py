@@ -366,13 +366,14 @@ def reconstruction_probe_poses(
     *,
     store: Path | str = SHOT_STORE,
 ) -> np.ndarray:
-    """Return the reconstruction's own probe positions and sensitive-axis angles.
+    """Return the reconstruction's source probe positions and axis angles.
 
     Columns are the major radius, the height and the poloidal angle in radians;
-    the source states the angle in degrees.  This is the array the description's
-    probe poses were built from, so comparing a channel's matched column against
-    the described probe it is mapped to tests the join against geometry rather
-    than against an index convention.
+    the source states the angle in degrees increasing counter-clockwise from the
+    major radius.  The description is built from this array but authors DDv4
+    ``poloidal_angle``, which increases clockwise, so a geometry comparison must
+    negate this source angle.  Keeping the source value here makes that convention
+    boundary explicit instead of silently rewriting reconstruction evidence.
     """
 
     import zarr

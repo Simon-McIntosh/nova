@@ -703,10 +703,12 @@ def test_each_probe_channel_reads_the_sensor_it_is_mapped_to(
 
     The outer arrays are co-located pairs -- a radial and an axial probe at each of
     nineteen positions -- so an index correspondence alone would not distinguish
-    them.  Position and sensitive axis together do.
+    them.  Position and sensitive axis together do.  The reconstruction angle
+    increases counter-clockwise while DDv4 ``poloidal_angle`` increases clockwise,
+    so the same directed axis has the opposite numerical angle in the description.
     """
 
-    poses = reconstruction_probe_poses(shot)
+    source_poses = reconstruction_probe_poses(shot)
     described = description.machine.probe_poses
     rows = {
         row.source_channel: row.target_index
@@ -722,8 +724,11 @@ def test_each_probe_channel_reads_the_sensor_it_is_mapped_to(
         if runner_up <= DISCRIMINATING_MARGIN * residual:
             continue
         target = described[rows[channel]]
-        assert np.hypot(*(poses[column, :2] - target[:2])) <= PROBE_POSITION_TOLERANCE
-        assert poses[column, 2] == pytest.approx(target[2], abs=1e-4)
+        assert (
+            np.hypot(*(source_poses[column, :2] - target[:2]))
+            <= PROBE_POSITION_TOLERANCE
+        )
+        assert -source_poses[column, 2] == pytest.approx(target[2], abs=1e-4)
         checked += 1
     assert checked >= 30
 

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T13:28:48",
+  "updated": "2026-08-26T13:30:46",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1023,7 +1023,10 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "019ffa72-15c7-78b1-bee8-5f074cebc901",
-        "created": "2026-08-13"
+        "created": "2026-08-13",
+        "sessions": {
+          "gpt-5.6-sol": "01a03dca-8afb-7900-8bca-b72dad543550"
+        }
       },
       {
         "id": "spline-polish",
@@ -1115,7 +1118,10 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a020fb-2c64-70d1-8adc-c298b0dbd365",
-        "created": "2026-08-20"
+        "created": "2026-08-20",
+        "sessions": {
+          "gpt-5.6-sol": "01a03dca-50ca-7233-a120-2bf4dfb2e5e1"
+        }
       },
       {
         "id": "tier-seam",
@@ -37974,9 +37980,192 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T111733441760-mcg-l1-execution-audit",
+        "plan": "mast-catalog-gpu-solve",
+        "section": "\u00a73",
+        "node": "mcg-l1-execution-audit",
+        "node_definition": {
+          "done_when": "A manifest traces the exact command and artifacts for at least four batch widths, preserves the 46.577604167 slices-per-second-per-device bound, separates build compile and execute costs, and defines a numeric batch-parity gate",
+          "estimated_hours": 2.0,
+          "goal": "Specify the executable single-GPU throughput rung",
+          "id": "mcg-l1-execution-audit",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-l1-audit-manifest.md",
+          "plan": "mast-catalog-gpu-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-l1-audit-manifest.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "throughput-budget",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T11:17:43Z",
+        "completed_at": "2026-08-26T11:26:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 544,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 544,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "60251ecdd8f9a7b1f8121d3184c807a9311c777a",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "python -c 'assert 1341435 / (3600 * 8) == 46.577604166666664; print(\"PASS: census=1341435 target=46.577604167 one_map=3.552713678800501e-15 seed=0 bounds=69 current_acceptance=FAIL@1,4\")'",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "65a2727e27dff746fecd2c0b86787b1617bfda70d5df10294d9ccda297d000d9"
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-l1-audit-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03dca-50ca-7233-a120-2bf4dfb2e5e1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5397248,
+            "cached_input_tokens_cumulative": 5397248,
+            "input_tokens": 5681170,
+            "input_tokens_cumulative": 5681170,
+            "output_tokens": 20369,
+            "output_tokens_cumulative": 20369,
+            "reasoning_output_tokens": 9035,
+            "reasoning_output_tokens_cumulative": 9035
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260826T111745596479-mcg-newton-loop-audit",
+        "plan": "mast-catalog-gpu-solve",
+        "section": "\u00a72",
+        "node": "mcg-newton-loop-audit",
+        "node_definition": {
+          "done_when": "A manifest traces all production fixed-ladder call sites with zero unclassified calls, defines a representative warm sequence and batch-maximum statistic, and names exact corrective files and focused tests without assuming Picard contraction",
+          "estimated_hours": 2.0,
+          "goal": "Specify the production Newton stopping measurement",
+          "id": "mcg-newton-loop-audit",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-loop-audit-manifest.md",
+          "plan": "mast-catalog-gpu-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-loop-audit-manifest.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "solve-convergence",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T11:17:58Z",
+        "completed_at": "2026-08-26T11:28:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 621,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 621,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "60251ecdd8f9a7b1f8121d3184c807a9311c777a",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-loop-audit-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03dca-8afb-7900-8bca-b72dad543550",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5079040,
+            "cached_input_tokens_cumulative": 5079040,
+            "input_tokens": 5288090,
+            "input_tokens_cumulative": 5288090,
+            "output_tokens": 23630,
+            "output_tokens_cumulative": 23630,
+            "reasoning_output_tokens": 12764,
+            "reasoning_output_tokens_cumulative": 12764
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 899
+    "_version": 903
   }
 }

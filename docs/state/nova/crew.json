@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T15:56:24",
+  "updated": "2026-08-26T15:57:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -43563,9 +43563,131 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T134644784363-sse-h200-polish-performance",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a72a",
+        "node": "sse-h200-polish-performance",
+        "node_definition": {
+          "done_when": "One SLURM job runs on betelgeuse with reservation gpu_0003_grpA, exactly one gpu:1 allocation, isolated CUDA visibility, float64 JAX enabled, TMPDIR=/tmp, and an hours-sized time request; the job records host, job, NVIDIA H200 identity, JAX/device pool, source commit, 200 repetitions, cold tolerance-exit, exact-root warm, 16-field tracked-sequence, and eight-trip fixed-cap median/p95/minimum microseconds plus iteration counts in strict JSON; the complete log ends EXIT_MARKER=0, no P100 or login-GPU number is substituted, the tracked JSON alone is committed, and the manifest compares the measured H200 rows to the provisional P100 receipt without relabelling either.",
+          "estimated_hours": 0.7,
+          "goal": "Use one currently free reserved H200 to bank the authoritative 200-repetition stationary-point polish performance receipt, replacing the capacity-only evidence while preserving the P100 rehearsal as separately labelled context.",
+          "id": "sse-h200-polish-performance",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-performance.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72a",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/figures/separatrix-spline-extraction/stationary-point-polish-h200.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "spline-polish",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T13:47:05Z",
+        "completed_at": "2026-08-26T13:54:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 448,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 448,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "d0eb24481423ba4fe661a4967f44f4d3e88ed70d",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-performance.md",
+        "scope_changed": false,
+        "session_id": "01a03c37-4cb2-7b41-8bdb-2393c4505680",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 363776,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 532078,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 1731,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 294
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 65,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 3665,
+              "log_age_seconds": 373,
+              "log_fresh": true,
+              "manifest_commits": [
+                "a85b597f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-achieved-topology-core.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T124538795352-pod-achieved-topology-core --gate <verdict> --commit a85b597f",
+              "node": "pod-achieved-topology-core",
+              "phase": "complete",
+              "plan": "profile-owned-solve-domain",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T124538795352-pod-achieved-topology-core",
+              "terminal_age_seconds": 406,
+              "terminal_at": "2026-08-26T13:40:09Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-achieved-topology-core"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 963
+    "_version": 964
   }
 }

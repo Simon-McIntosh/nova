@@ -20,6 +20,9 @@
   <meta name="plan-owner"     content="Simon McIntosh">
   <meta name="plan-tags"      content="equilibrium,topology,efit,mast,diii-d">
   <meta name="plan-blocks"    content="efit-baseline-demonstration">
+  <meta name="plan-impl"      content="0.2">
+  <meta name="plan-commits"   content="74f95e41">
+  <meta name="plan-artifacts" content="nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,docs/evidence/archive/separatrix-spline-extraction-landed.html">
   <title>Separatrix Spline Extraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -65,6 +68,16 @@
     JIT/eager/vmap parity held. The polished null feeds the O/X pair that
     <a href="/nova/plans/profile-owned-solve-domain">profile-owned-solve-domain</a> normalizes flux
     with, so precision here is solve-facing, not cosmetic.</p>
+
+    <p><strong>Kernel landed 2026-08-26, commit <code>74f95e41</code>, gate PASSED.</strong>
+    <code>polish_stationary_points</code> ships as a fixed-slot API: all six valid manufactured
+    saddle/extremum seeds reach gradient norm below 1e-14 of field scale after the fixed eight
+    trips, inactive slots exact zero, eager/JIT/vmap outputs exactly equal, out-of-domain slots
+    fail closed, and the traced-contour owning-cell saddle regression passes — 32 passed, 0 failed
+    across the three topology test files. The candidate-census consumer cutover (position authority
+    off the local quadratic) remains this section's open half, deferred to the sprint's clean
+    execution session. Full record:
+    <a href="/nova/evidence/archive/separatrix-spline-extraction-landed#polish">polish landed</a>.</p>
 
     <h2 id="s3">§3 — Closed/open branch assembly at extraction resolution</h2>
 

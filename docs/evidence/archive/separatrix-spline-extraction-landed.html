@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="separatrix-spline-extraction-landed">
+  <meta name="plan-evidence-for" content="separatrix-spline-extraction">
+  <meta name="plan-title" content="Separatrix Spline Extraction — execution record">
+  <meta name="plan-summary" content="Cumulative execution evidence: the seedable fixed-slot spline-Newton stationary polish.">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Separatrix Spline Extraction — execution record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h1>Separatrix Spline Extraction — execution record</h1>
+
+    <p>Execution evidence for
+    <a href="/nova/separatrix-spline-extraction">separatrix-spline-extraction</a>. One anchor per
+    material result.</p>
+
+    <h2 id="polish">§2 — the stationary polish kernel</h2>
+
+    <p><strong>Node <code>stationary-polish</code>, commit <code>74f95e41</code>, gate PASSED,
+    2026-08-26.</strong> The bounded gradient/Hessian Newton iteration embedded in
+    <code>traced_spline_contour</code> is factored into
+    <code>polish_stationary_points(spline, seed_rz, valid)</code> — a seedable fixed-slot kernel
+    returning <code>position_rz</code>, <code>value</code>, <code>gradient_norm</code>, signed
+    <code>hessian_type</code> (&minus;1 saddle, 0 degenerate, 1 extremum), <code>converged</code>,
+    and <code>in_domain</code>, preserving the traced contour's cell-confined Newton semantics.</p>
+
+    <table>
+      <caption>Gate measures</caption>
+      <thead><tr><th scope="col">Measure</th><th scope="col">Result</th></tr></thead>
+      <tbody>
+        <tr><td>Manufactured C2 saddle/extremum seeds</td><td><strong>6 of 6</strong> valid slots reach gradient norm below 1e-14 of field scale after the fixed 8 trips</td></tr>
+        <tr><td>Fixed-shape discipline</td><td>Inactive slots exact zero; out-of-domain slots fail closed</td></tr>
+        <tr><td>Transform parity</td><td>Eager, JIT, and vmap outputs exactly equal</td></tr>
+        <tr><td>Regression</td><td>Traced-contour owning-cell saddle regression passes; 32 passed, 1 skipped (GPU unavailable), 0 failed across <code>test_flux_surface_connectivity.py</code>, <code>test_stencil_nulls.py</code>, <code>test_stencil_nulls_dual_sweep.py</code> in 73.87 s</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Deliberately not done here:</strong> no candidate consumer was cut over — the
+    census (<code>stencil_nulls.xpoint_candidates</code>) still refines through its local quadratic.
+    The authority swap is the section's remaining half, owned by the sprint's clean execution
+    session so the cutover lands with its consumer census in one auditable beat.</p>
+
+  </main>
+</body>
+</html>

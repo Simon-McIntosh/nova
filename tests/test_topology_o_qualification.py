@@ -1,0 +1,122 @@
+"""Material and connectivity qualification of magnetic-axis candidates."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+from nova.utilities.importmanager import skip_import
+
+with skip_import("jax"):
+    import jax
+    import jax.numpy as jnp
+
+    from nova.biot.null import Null1D, Null2D
+    from nova.equilibrium.forward_operator import axis_cell_seed
+    from nova.equilibrium.topology import Topology
+    from nova.geometry.hexstencil import hex_stencil
+    from nova.jax.config import configure_dtypes
+
+
+OPERANDS = (
+    Path(__file__).parents[1]
+    / "docs/figures/topology-visual-corroboration/mast-topology-operands.npz"
+)
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _double_precision():
+    """Match production topology precision."""
+    configure_dtypes()
+
+
+def _topology_fixture():
+    radius = np.linspace(0.0, 2.0, 7)
+    height = np.linspace(-2.0, 2.0, 7)
+    radial, vertical = np.meshgrid(radius, height, indexing="ij")
+    coordinate = np.c_[radial.ravel(), vertical.ravel()]
+    grid = Null2D.from_coordinates(coordinate, hex_stencil((7, 7)), maxsize=5)
+    wall = Null1D(
+        jnp.asarray(
+            [[0.0, -2.0], [2.0, -2.0], [2.0, 2.0], [0.0, 2.0]],
+            dtype=jnp.float64,
+        )
+    )
+    return Topology(grid, wall), coordinate
+
+
+@pytest.mark.parametrize("compiled", [False, True], ids=["eager", "jit"])
+def test_isolated_wall_candidate_loses_to_connected_trimmed_owner(compiled):
+    """Owner admission validates only a candidate joined to governed material."""
+    topology, coordinate = _topology_fixture()
+    top = np.array([1.0, 2.0, 10.0, 0.0])
+    interior = np.array([1.0, 0.0, 5.0, 0.0])
+    vmap_o = jnp.asarray(
+        np.vstack((top, interior, np.full((3, 4), np.nan))), dtype=jnp.float64
+    )
+    vmap_x = jnp.asarray(
+        np.vstack((np.array([1.0, -1.0, 0.0, 0.0]), np.full((4, 4), np.nan))),
+        dtype=jnp.float64,
+    )
+    data_w = jnp.asarray([2.0, 0.0, -1.0, 0.0], dtype=jnp.float64)
+    central = (np.abs(coordinate[:, 0] - 1.0) <= 0.7) & (
+        np.abs(coordinate[:, 1]) <= 0.7
+    )
+    flux = np.where(central, 1.0, -1.0)
+    top_owner = int(np.argmin(np.sum((coordinate - top[:2]) ** 2, axis=1)))
+    interior_owner = int(np.argmin(np.sum((coordinate - interior[:2]) ** 2, axis=1)))
+    flux[top_owner] = top[2]
+    flux[interior_owner] = interior[2]
+    material = central.copy()
+    material[top_owner] = False
+    material[interior_owner] = False
+
+    qualify = topology.qualified_o_candidates
+    if compiled:
+        qualify = jax.jit(qualify)
+        qualified = qualify(
+            vmap_o, vmap_x, data_w, 1, jnp.asarray(flux), jnp.asarray(material)
+        )
+    else:
+        with jax.disable_jit():
+            qualified = qualify(
+                vmap_o, vmap_x, data_w, 1, jnp.asarray(flux), jnp.asarray(material)
+            )
+    np.testing.assert_array_equal(
+        np.asarray(qualified), [False, True, False, False, False]
+    )
+
+    selected = topology.o_point_data(vmap_o, 1, qualified)
+    np.testing.assert_array_equal(np.asarray(selected), interior)
+    seed, admitted = axis_cell_seed(
+        jnp.asarray(coordinate), selected[:2], jnp.asarray(material)
+    )
+    assert int(np.sum(seed)) == 1
+    assert bool(np.asarray(seed)[interior_owner])
+    assert int(np.sum(np.asarray(admitted) != material)) == 1
+
+
+@pytest.mark.parametrize("compiled", [False, True], ids=["eager", "jit"])
+def test_committed_wall_notch_cannot_be_selected_without_qualification(compiled):
+    """The committed top-notch axis produces a named fail-closed result."""
+    topology, _coordinate = _topology_fixture()
+    with np.load(OPERANDS, allow_pickle=False) as stored:
+        wall_notch = stored["row_04_selected_o"][0]
+    np.testing.assert_allclose(wall_notch, [0.47194121, 1.79585038], atol=5.0e-9)
+    vmap_o = jnp.asarray(
+        np.vstack((np.r_[wall_notch, 10.0, 0.0], np.full((4, 4), np.nan))),
+        dtype=jnp.float64,
+    )
+    qualified = jnp.zeros(5, dtype=bool)
+    select = topology.o_point_data
+    if compiled:
+        select = jax.jit(select)
+
+    with pytest.raises(Exception, match="no qualified magnetic-axis candidate"):
+        if compiled:
+            select(vmap_o, 1, qualified).block_until_ready()
+        else:
+            with jax.disable_jit():
+                select(vmap_o, 1, qualified)

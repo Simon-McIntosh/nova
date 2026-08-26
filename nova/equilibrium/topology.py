@@ -63,6 +63,10 @@ class TopologyClass(IntEnum):
     DIVERTED = 1
 
 
+class NoQualifiedAxisError(ValueError):
+    """No magnetic-axis candidate owns a resolved material component."""
+
+
 @dataclass(frozen=True)
 class TopologySolveReceipt:
     """Host-visible topology history for one forward solve.
@@ -216,16 +220,31 @@ class Topology(Pytree):
         return self.x_point_data(vmap_x, polarity, data_o[2])[2]
 
     @jax.jit
-    def o_point_index(self, vmap_o, polarity):
+    def o_point_index(self, vmap_o, polarity, qualified=None):
         """Return primary o-point index."""
         o_psi = vmap_o[:, 2]
         score = jnp.asarray(polarity * o_psi, dtype=self.grid.fit_dtype)
-        return jnp.nanargmax(score)
+        if qualified is None:
+            qualified = jnp.isfinite(vmap_o[:, 0])
+        return jnp.argmax(jnp.where(qualified, score, -jnp.inf))
 
     @jax.jit
-    def o_point_data(self, vmap_o, polarity):
+    def o_point_data(self, vmap_o, polarity, qualified=None):
         """Return primary o-point data."""
-        index = self.o_point_index(vmap_o, polarity)
+        require_qualified = qualified is not None
+        if qualified is None:
+            qualified = jnp.isfinite(vmap_o[:, 0])
+        if require_qualified:
+            has_qualified = jnp.any(qualified)
+
+            def validate(candidate_exists):
+                if not candidate_exists:
+                    raise NoQualifiedAxisError(
+                        "no qualified magnetic-axis candidate has a resolved component"
+                    )
+
+            jax.debug.callback(validate, has_qualified)
+        index = self.o_point_index(vmap_o, polarity, qualified)
         return vmap_o[index]
 
     @jax.jit
@@ -370,6 +389,40 @@ class Topology(Pytree):
         return component.T.reshape(-1)
 
     @jax.jit
+    def qualified_o_candidates(
+        self, vmap_o, vmap_x, data_w, polarity, psi_grid, inside_material
+    ):
+        """Return O candidates that own a resolved material component."""
+        coordinate = self.grid.coordinate
+
+        def qualify(data_o):
+            distance2 = jnp.sum((coordinate - data_o[:2]) ** 2, axis=1)
+            owner_index = jnp.argmin(distance2)
+            owner = jnp.arange(coordinate.shape[0]) == owner_index
+            admitted_material = inside_material | owner
+            data_b = self.boundary(data_o, vmap_x, data_w, polarity)
+            closed = self.psi_mask(polarity, psi_grid, data_b[2])
+            component = self.axis_component(
+                psi_grid,
+                data_b[2],
+                data_o[2],
+                data_o[:2],
+                closed,
+                admitted_material,
+            )
+            component_size = jnp.sum(component)
+            governed_connection = jnp.any(component & inside_material)
+            resolved = jnp.all(jnp.isfinite(data_b[:3]))
+            return (
+                jnp.all(jnp.isfinite(data_o[:3]))
+                & resolved
+                & governed_connection
+                & (component_size > 1)
+            )
+
+        return jax.vmap(qualify)(vmap_o)
+
+    @jax.jit
     def split_flux_map(self, psi):
         """Return poloidal flux maps split into grid and wall zones."""
         psi_grid = jax.lax.dynamic_slice_in_dim(psi, 0, self.grid.node_number)
@@ -417,9 +470,17 @@ class Topology(Pytree):
         """
         psi_grid, psi_wall = self.split_flux_map(psi)
         vmap_o, vmap_x = self.grid(psi_grid)
-        data_o = self.o_point_data(vmap_o, polarity)
-        data_x = self.x_point_data(vmap_x, polarity, data_o[2])
         data_w = self.wall(psi_wall, polarity)
+        qualified_o = self.qualified_o_candidates(
+            vmap_o,
+            vmap_x,
+            data_w,
+            polarity,
+            psi_grid,
+            inside_material,
+        )
+        data_o = self.o_point_data(vmap_o, polarity, qualified_o)
+        data_x = self.x_point_data(vmap_x, polarity, data_o[2])
         emergent_boundary = self.boundary(data_o, vmap_x, data_w, polarity)
         if requested_class is None:
             data_b = emergent_boundary

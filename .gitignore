@@ -177,3 +177,6 @@ nova/_version.py
 
 # Reference papers and literature (local only)
 /research/
+
+# Reckon runtime lock files (session-scoped, never committed)
+docs/.reckon/locks/

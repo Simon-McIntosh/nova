@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T23:24:23",
+  "updated": "2026-08-26T05:44:06",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -37186,9 +37186,378 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T205540469662-reuse-map",
+        "plan": "efit-baseline-demonstration",
+        "section": "\u00a72",
+        "node": "reuse-map",
+        "node_definition": {
+          "done_when": "docs/figures/efit-baseline-demonstration/reuse-map.md names modules, symbols, tests with a one-line fitness verdict per candidate, covering contour tracing from the global tensor spline, stationary-point Newton polish on a C2 surface, separatrix splitting at a saddle, EFIT-baseline comparison harnesses, searched across nova plus imas-ambix",
+          "estimated_hours": null,
+          "goal": "Deliver the capability reuse map for spline-based topology extraction scoped by plan section 2",
+          "id": "reuse-map",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T205540469662-reuse-map/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "open",
+          "time_budget": "25m",
+          "write_paths": [
+            "docs/figures/efit-baseline-demonstration/reuse-map.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "open",
+        "member": "efit-prior-art",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T20:55:46Z",
+        "completed_at": "2026-08-25T21:03:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 451,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 451,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "8564b05079e6d279ac959b2a9137d5d3c90e203b",
+        "commits": [
+          "4b702960b67b7dc90fe465081294e95d2f85a447"
+        ],
+        "changed_lines": {
+          "added": 175,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T205540469662-reuse-map/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03ab5-2ce9-75b0-b3db-7abebb0c9ecc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6185728,
+            "cached_input_tokens_cumulative": 6185728,
+            "input_tokens": 6435239,
+            "input_tokens_cumulative": 6435239,
+            "output_tokens": 19253,
+            "output_tokens_cumulative": 19253,
+            "reasoning_output_tokens": 5178,
+            "reasoning_output_tokens_cumulative": 5178
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T205608264707-wall-machinery-map",
+        "plan": "efit-baseline-demonstration",
+        "section": "\u00a72",
+        "node": "wall-machinery-map",
+        "node_definition": {
+          "done_when": "docs/figures/efit-baseline-demonstration/wall-machinery-map.md names where the 37 MAST wall segments enter, how g_wall is assembled, the exact inputs a wall ladder varies versus holds fixed per the isolation requirement, a feasibility verdict for element count plus order sweeps without plasma-carrier changes",
+          "estimated_hours": null,
+          "goal": "Deliver the wall sampling machinery map required to design the isolated wall-resolution ladder",
+          "id": "wall-machinery-map",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T205608264707-wall-machinery-map/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "open",
+          "time_budget": "25m",
+          "write_paths": [
+            "docs/figures/efit-baseline-demonstration/wall-machinery-map.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "open",
+        "member": "geometry-scout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T20:56:18Z",
+        "completed_at": "2026-08-25T21:08:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 758,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 758,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "8564b05079e6d279ac959b2a9137d5d3c90e203b",
+        "commits": [
+          "c11fe7a235ce2dc4181b196abab40fab53bba2d9"
+        ],
+        "changed_lines": {
+          "added": 238,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T205608264707-wall-machinery-map/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03ab5-aac2-7db1-92fa-1804cf78891f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7088640,
+            "cached_input_tokens_cumulative": 7088640,
+            "input_tokens": 7338169,
+            "input_tokens_cumulative": 7338169,
+            "output_tokens": 20105,
+            "output_tokens_cumulative": 20105,
+            "reasoning_output_tokens": 7643,
+            "reasoning_output_tokens_cumulative": 7643
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T205547885434-extraction-seam-map",
+        "plan": "efit-baseline-demonstration",
+        "section": "\u00a72",
+        "node": "extraction-seam-map",
+        "node_definition": {
+          "done_when": "docs/figures/efit-baseline-demonstration/extraction-seam-map.md anchors every seam with file:line references, stating which consumer sees grid-resolution polylines versus global-spline geometry, where the quadratic-current plasma cells consume the clipped boundary inside the Newton residual, where the corroboration figure takes its LCFS polyline from, where an X-point split of the separatrix would attach",
+          "estimated_hours": null,
+          "goal": "Deliver the extraction seam map distinguishing spline from chord contour consumers scoped by plan section 2",
+          "id": "extraction-seam-map",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T205547885434-extraction-seam-map/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "open",
+          "time_budget": "25m",
+          "write_paths": [
+            "docs/figures/efit-baseline-demonstration/extraction-seam-map.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "open",
+        "member": "clip-surface-scout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T20:55:56Z",
+        "completed_at": "2026-08-25T21:02:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 381,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 381,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "8564b05079e6d279ac959b2a9137d5d3c90e203b",
+        "commits": [
+          "43d03cf6c3f7a399c5a7c25da018ee747ced463b"
+        ],
+        "changed_lines": {
+          "added": 255,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T205547885434-extraction-seam-map/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03ab5-5338-76b2-9b10-7f8383a1922c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3778560,
+            "cached_input_tokens_cumulative": 3778560,
+            "input_tokens": 4031683,
+            "input_tokens_cumulative": 4031683,
+            "output_tokens": 15687,
+            "output_tokens_cumulative": 15687,
+            "reasoning_output_tokens": 4837,
+            "reasoning_output_tokens_cumulative": 4837
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T205842269223-stall-corroboration",
+        "plan": "efit-baseline-demonstration",
+        "section": "\u00a72",
+        "node": "stall-corroboration",
+        "node_definition": {
+          "done_when": "docs/figures/efit-baseline-demonstration/stall-corroboration.md carries a per-arm table for 21985/51 pure, 21985/51 mixed, 21986/46 pure, 21989/55 mixed with terminal residuals, achieved topology class read through the saddle-aware partition never ForwardTopologyState.diverted, evidence on confined-cell mask stability across late outer iterations, an explicit stalled-versus-misclassified verdict per arm that states agreement or disagreement with the banked account rather than quoting it",
+          "estimated_hours": null,
+          "goal": "Independently corroborate the convergence state of the four EFIT-disagreeing MAST arms from the current banked artifacts",
+          "id": "stall-corroboration",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T205842269223-stall-corroboration/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "open",
+          "time_budget": "40m",
+          "write_paths": [
+            "docs/figures/efit-baseline-demonstration/stall-corroboration.md",
+            "docs/figures/efit-baseline-demonstration/stall-corroboration.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "open",
+        "member": "stall-witness",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T20:58:51Z",
+        "completed_at": "2026-08-25T21:12:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 846,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 846,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "8564b05079e6d279ac959b2a9137d5d3c90e203b",
+        "commits": [
+          "bbd0f015d3133e23deb9e12f5dad56ed49f7e2f8"
+        ],
+        "changed_lines": {
+          "added": 364,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T205842269223-stall-corroboration/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03ab7-ff98-7c11-b0e4-7e7ccc7eaa83",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7372288,
+            "cached_input_tokens_cumulative": 7372288,
+            "input_tokens": 7578611,
+            "input_tokens_cumulative": 7578611,
+            "output_tokens": 26056,
+            "output_tokens_cumulative": 26056,
+            "reasoning_output_tokens": 7980,
+            "reasoning_output_tokens_cumulative": 7980
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 884
+    "_version": 888
   }
 }

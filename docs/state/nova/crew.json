@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T16:38:49",
+  "updated": "2026-08-26T16:40:45",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -45693,9 +45693,171 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T142637219628-sse-polish-raw-sample-persistence",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a72",
+        "node": "sse-polish-raw-sample-persistence",
+        "node_definition": {
+          "done_when": "Focused CPU tests prove a small-repetition receipt contains exact latency arrays for all four arms and complete iteration arrays, strict JSON serialization succeeds, median p95 minimum maximum and mean fields recompute exactly from those arrays, existing aggregate field meanings remain unchanged, no hardware-specific claim is added, and one captured pytest invocation exits zero.",
+          "estimated_hours": 0.75,
+          "goal": "Persist every per-repetition latency sample and the complete cold, warm, and tracked iteration-count arrays in the stationary-point polish receipt so an independent verifier can recompute all aggregate statistics.",
+          "id": "sse-polish-raw-sample-persistence",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-polish-raw-sample-persistence.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "benchmarks/stationary_point_polish.py",
+            "tests/test_stationary_point_polish.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "xpoint-map",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T14:26:49Z",
+        "completed_at": "2026-08-26T14:31:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 308,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 308,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "dda91c92f39b8c2151e26ed746c12c4944e09b9d",
+        "commits": [
+          "dd236c6ad0900a0fd52ec2c74f077a8879bcb2d3"
+        ],
+        "changed_lines": {
+          "added": 112,
+          "removed": 2,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu JAX_ENABLE_X64=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/test_stationary_point_polish.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-polish-raw-sample-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-polish-raw-sample-persistence.md",
+        "scope_changed": false,
+        "session_id": "01a037ef-13e9-76a1-a117-d5aa565eb4b7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 1247232,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 1539781,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 8217,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1735
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 952,
+              "log_age_seconds": 643,
+              "log_fresh": true,
+              "manifest_commits": [
+                "5fc7371b"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-measurement.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T141042566049-sse-h200-polish-measurement --gate <verdict> --commit 5fc7371b",
+              "node": "sse-h200-polish-measurement",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T141042566049-sse-h200-polish-measurement",
+              "terminal_age_seconds": 667,
+              "terminal_at": "2026-08-26T14:15:38Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-h200-polish-measurement"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 600,
+              "log_age_seconds": 360,
+              "log_fresh": true,
+              "manifest_commits": [
+                "a31563e6"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-strict-json-nonfinite-normalization.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T141636929757-sse-strict-json-nonfinite-normalization --gate <verdict> --commit a31563e6",
+              "node": "sse-strict-json-nonfinite-normalization",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T141636929757-sse-strict-json-nonfinite-normalization",
+              "terminal_age_seconds": 394,
+              "terminal_at": "2026-08-26T14:20:11Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-strict-json-nonfinite-normalization"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest invocation",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 982
+    "_version": 983
   }
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T20:51:22",
+  "updated": "2026-08-26T20:52:38",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -989,9 +989,11 @@
         "id": "rca-doc",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03f63-110b-7823-844e-ee780f4c7419",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03f63-110b-7823-844e-ee780f4c7419"
+        },
         "created": "2026-08-26"
       },
       {
@@ -47587,9 +47589,389 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T184400548290-ebd-shadow-rca-doc",
+        "plan": "efit-baseline-demonstration",
+        "section": "",
+        "node": "ebd-shadow-rca-doc",
+        "node_definition": {
+          "done_when": "docs/research/domain-partition-shadow-rca.html exists with reckon-type=research and plan-informs=efit-baseline-demonstration, carries the mechanism trace with file-line citations, the quantitative reproduction (118/179 and 116/161 vs hex 277/244), the separate 21985/51 unqualified-O finding, the full contamination ledger table, the minimal fixes and the five-step rerun order, and embeds at least the 21978/35 pure and 21985/51 panels by project-absolute src as the observed defect; reckon audit-doc reports no ERRORs; committed in the worktree",
+          "estimated_hours": null,
+          "goal": "A durable HTML research record of the domain-partition RCA in the repository, authored from crew/reports/s16-veracity-20260826/rca-shadow-flood.md, so the root cause, the mechanism trace, the contamination ledger and the rerun order survive outside the crew reports directory",
+          "id": "ebd-shadow-rca-doc",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T184400548290-ebd-shadow-rca-doc/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "docs/research/domain-partition-shadow-rca.html"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "rca-doc",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T18:44:11Z",
+        "completed_at": "2026-08-26T18:51:37Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 446,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 446,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "082bc68d797898ef8f6eff5ce925e99b4ba9b136",
+        "commits": [
+          "b119f63cc072d8a37311c75b4c815d1d2bdd2be7"
+        ],
+        "changed_lines": {
+          "added": 536,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "reckon audit-doc docs/research/domain-partition-shadow-rca.html --project nova",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T184400548290-ebd-shadow-rca-doc/audit-doc.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T184400548290-ebd-shadow-rca-doc/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f63-110b-7823-844e-ee780f4c7419",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2720000,
+            "cached_input_tokens_cumulative": 2720000,
+            "input_tokens": 2888557,
+            "input_tokens_cumulative": 2888557,
+            "output_tokens": 19181,
+            "output_tokens_cumulative": 19181,
+            "reasoning_output_tokens": 5419,
+            "reasoning_output_tokens_cumulative": 5419
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 11797,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 14497,
+              "log_age_seconds": 14024,
+              "log_fresh": false,
+              "manifest_commits": [
+                "bfc393c251eb72e1b02a3b3539969f555ac16314"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-raw-measurement.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T144216465857-sse-h200-polish-raw-measurement --gate <verdict> --commit bfc393c251eb72e1b02a3b3539969f555ac16314",
+              "node": "sse-h200-polish-raw-measurement",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T144216465857-sse-h200-polish-raw-measurement",
+              "terminal_age_seconds": 14047,
+              "terminal_at": "2026-08-26T14:50:00Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-h200-polish-raw-measurement"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 12434,
+              "budget_seconds": 1500,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 13934,
+              "log_age_seconds": 13688,
+              "log_fresh": false,
+              "manifest_commits": [
+                "bfc393c251eb72e1b02a3b3539969f555ac16314"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-raw-verifier.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T145147405375-sse-h200-polish-raw-verifier --gate <verdict> --commit bfc393c251eb72e1b02a3b3539969f555ac16314",
+              "node": "sse-h200-polish-raw-verifier",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T145147405375-sse-h200-polish-raw-verifier",
+              "terminal_age_seconds": 13709,
+              "terminal_at": "2026-08-26T14:55:38Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-h200-polish-raw-verifier"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 12151,
+              "budget_seconds": 1500,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 13651,
+              "log_age_seconds": 13311,
+              "log_fresh": false,
+              "manifest_commits": [
+                "d3550f05c4872ed081b1a67aab1ae5e4dc572989"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-poloidal-publication-path-repair.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T145621948573-sse-diiid-poloidal-publication-path-repair --gate <verdict> --commit d3550f05c4872ed081b1a67aab1ae5e4dc572989",
+              "node": "sse-diiid-poloidal-publication-path-repair",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T145621948573-sse-diiid-poloidal-publication-path-repair",
+              "terminal_age_seconds": 13337,
+              "terminal_at": "2026-08-26T15:01:50Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-diiid-poloidal-publication-path-repair"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260826T184349259128-ebd-adapter-material-seams",
+        "plan": "efit-baseline-demonstration",
+        "section": "",
+        "node": "ebd-adapter-material-seams",
+        "node_definition": {
+          "done_when": "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py _post_cutover_geometry and benchmarks/wall_resolution_ladder.py _posthoc_margin_read both obtain material via connectivity_axis_seed with fail-closed diagnostic-versus-production equality retained; focused tests for both files pass with no new failures vs base; no committed JSON or PNG artifact is regenerated by this node; ruff adds no findings on staged paths",
+          "estimated_hours": null,
+          "goal": "Both named exact-margin adapter seams route their diagnostic material through connectivity_axis_seed(topology.axis) before reshaping, matching the pattern already used by the DIII-D exact diagnostic, so no adapter passes raw operator.inside_material to a margin read",
+          "id": "ebd-adapter-material-seams",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T184349259128-ebd-adapter-material-seams/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py",
+            "benchmarks/wall_resolution_ladder.py",
+            "tests/test_wall_resolution_ladder.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "adapter-seams",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T18:43:59Z",
+        "completed_at": "2026-08-26T18:52:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 506,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 506,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "082bc68d797898ef8f6eff5ce925e99b4ba9b136",
+        "commits": [
+          "9e34457f51d42116c85a089ea4c14ea4151b5921"
+        ],
+        "changed_lines": {
+          "added": 117,
+          "removed": 2,
+          "files": 3
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=~/Code/nova/.venv uv run --no-sync pytest -p no:cacheprovider tests/test_wall_resolution_ladder.py (both new seam tests pass; the single corroboration-fixture failure is the cross-node dependency owned by ebd-corroboration-fixture-align)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T184349259128-ebd-adapter-material-seams/focused-tests.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T184349259128-ebd-adapter-material-seams/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-e0cb-7cd1-8925-b9c7f01bcf20",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 460032,
+            "cached_input_tokens_cumulative": 460032,
+            "input_tokens": 618575,
+            "input_tokens_cumulative": 618575,
+            "output_tokens": 2961,
+            "output_tokens_cumulative": 2961,
+            "reasoning_output_tokens": 290,
+            "reasoning_output_tokens_cumulative": 290
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 11784,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 14484,
+              "log_age_seconds": 14012,
+              "log_fresh": false,
+              "manifest_commits": [
+                "bfc393c251eb72e1b02a3b3539969f555ac16314"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-raw-measurement.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T144216465857-sse-h200-polish-raw-measurement --gate <verdict> --commit bfc393c251eb72e1b02a3b3539969f555ac16314",
+              "node": "sse-h200-polish-raw-measurement",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T144216465857-sse-h200-polish-raw-measurement",
+              "terminal_age_seconds": 14035,
+              "terminal_at": "2026-08-26T14:50:00Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-h200-polish-raw-measurement"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 12421,
+              "budget_seconds": 1500,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 13921,
+              "log_age_seconds": 13676,
+              "log_fresh": false,
+              "manifest_commits": [
+                "bfc393c251eb72e1b02a3b3539969f555ac16314"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-raw-verifier.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T145147405375-sse-h200-polish-raw-verifier --gate <verdict> --commit bfc393c251eb72e1b02a3b3539969f555ac16314",
+              "node": "sse-h200-polish-raw-verifier",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T145147405375-sse-h200-polish-raw-verifier",
+              "terminal_age_seconds": 13697,
+              "terminal_at": "2026-08-26T14:55:38Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-h200-polish-raw-verifier"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 12138,
+              "budget_seconds": 1500,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 13638,
+              "log_age_seconds": 13298,
+              "log_fresh": false,
+              "manifest_commits": [
+                "d3550f05c4872ed081b1a67aab1ae5e4dc572989"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-poloidal-publication-path-repair.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T145621948573-sse-diiid-poloidal-publication-path-repair --gate <verdict> --commit d3550f05c4872ed081b1a67aab1ae5e4dc572989",
+              "node": "sse-diiid-poloidal-publication-path-repair",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T145621948573-sse-diiid-poloidal-publication-path-repair",
+              "terminal_age_seconds": 13325,
+              "terminal_at": "2026-08-26T15:01:50Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-diiid-poloidal-publication-path-repair"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1017
+    "_version": 1020
   }
 }

@@ -97,6 +97,7 @@ PREREGISTRATION_NAME = "forward_gs_preregistration.json"
 RECEIPT_NAME = "forward_gs_receipt.json"
 FRAME_FIGURE_NAME = "frame_flux_comparison.png"
 COHORT_FIGURE_NAME = "cohort_match_summary.png"
+PUBLICATION_DIRECTORY = "/nova/figures/diiid-forward-onboarding/forward-gs"
 DEFAULT_WALL_TOPOLOGY_OUTPUT = Path(
     "docs/figures/plateau-input-attribution/wall-topology-surface.json"
 )
@@ -1542,6 +1543,33 @@ def _strict_json_value(value: Any) -> Any:
     if isinstance(value, list | tuple):
         return [_strict_json_value(item) for item in value]
     return value
+
+
+def _publication_artifact_records(output: Path) -> dict[str, dict[str, str]]:
+    """Separate rendered destinations from stable project publication identities."""
+
+    filenames = {
+        "poloidal_frame_comparison": FRAME_FIGURE_NAME,
+        "cohort_match_summary": COHORT_FIGURE_NAME,
+        "strict_forward_match_receipt": RECEIPT_NAME,
+    }
+    return {
+        identity: {
+            "filesystem_path": str(output / filename),
+            "publication_path": f"{PUBLICATION_DIRECTORY}/{filename}",
+        }
+        for identity, filename in filenames.items()
+    }
+
+
+def _record_publication_artifacts(
+    receipt: dict[str, Any], output: Path
+) -> dict[str, dict[str, str]]:
+    """Add stable publication identities to the strict receipt."""
+
+    artifacts = _publication_artifact_records(output)
+    receipt["publication_artifacts"] = artifacts
+    return artifacts
 
 
 def summarize(
@@ -3493,12 +3521,13 @@ def run(
             "result": summarize(results, sensitivity, preregistration_hash),
         }
     )
+    _record_publication_artifacts(receipt, output)
+    frame_figure(results, fields, output / FRAME_FIGURE_NAME)
+    cohort_figure(results, output / COHORT_FIGURE_NAME)
     receipt_path = output / RECEIPT_NAME
     receipt_path.write_text(
         json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n"
     )
-    frame_figure(results, fields, output / FRAME_FIGURE_NAME)
-    cohort_figure(results, output / COHORT_FIGURE_NAME)
     return receipt
 
 

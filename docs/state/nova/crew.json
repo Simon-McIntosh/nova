@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T15:03:23",
+  "updated": "2026-08-26T15:05:16",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -42155,9 +42155,112 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T125905793456-sse-branch-assembler-verify",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a73",
+        "node": "sse-branch-assembler-verify",
+        "node_definition": {
+          "done_when": "One captured CPU pytest invocation over tests/test_flux_surface_connectivity.py and tests/test_separatrix_branches.py reports 22 passes; independent manufactured-field assertions confirm diverted 1 closed plus 2 legs, limited 1 plus 0, double-null 1 plus 4 deterministic legs, every leg terminates exactly at its polished saddle, inactive padding is exact zero, capacity overflow invalidates and zeros all geometry, closed controls are invariant to leg extension, and eager/JIT/vmap agreement preserves all discrete fields; manifest states PASS or HOLD.",
+          "estimated_hours": 0.8,
+          "goal": "Independently verify commit abdd87fe as the fixed-capacity closed/open separatrix branch authority.",
+          "id": "sse-branch-assembler-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-branch-assembler-verify.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-branch-assembler-verify.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "sse-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T12:59:13Z",
+        "completed_at": "2026-08-26T13:04:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 346,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 346,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "abdd87fecf6df2d009b9a20e9e22a45e08816611",
+        "commits": [
+          "abdd87fecf6df2d009b9a20e9e22a45e08816611"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu PYTHONPATH=\"$PWD\" uv run --no-sync pytest tests/test_flux_surface_connectivity.py tests/test_separatrix_branches.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-branch-assembler-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-branch-assembler-verify.md",
+        "scope_changed": false,
+        "session_id": "01a03de9-44ed-7070-a85e-ae33242a3e47",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2409728,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2473770,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 6985,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3285
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest invocation",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 946
+    "_version": 947
   }
 }

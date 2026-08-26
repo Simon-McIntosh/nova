@@ -53,7 +53,11 @@ from nova.equilibrium.stencil_mesh import (
     MomentGeometry,
     StencilMesh,
 )
-from nova.equilibrium.topology import Topology, TopologyState
+from nova.equilibrium.topology import (
+    Topology,
+    TopologyState,
+    require_qualified_axis,
+)
 
 __all__ = [
     "axis_cell_seed",
@@ -484,22 +488,22 @@ class ForwardFluxOperator:
         return axis_cell_seed(self.grid.coordinate, axis, self.inside_material)
 
     def _fixed_design_read(self, physical, requested_class=None):
-        """Read topology after admitting the continuous-axis owning cell."""
-        _masks, initial, _connected = (
-            self._fixed_design_topology.read_with_connectivity(
-                physical,
-                self.polarity,
-                self.inside_material,
-                requested_class,
-            )
+        """Read topology data after admitting the continuous-axis owner."""
+        initial = self._fixed_design_topology.read_qualification(
+            physical,
+            self.polarity,
+            self.inside_material,
+            requested_class,
         )
-        _seed, material = self.connectivity_axis_seed(initial.axis)
-        return self._fixed_design_topology.read_with_connectivity(
+        _seed, material = self.connectivity_axis_seed(initial.state.axis)
+        result = self._fixed_design_topology.read_qualification(
             physical,
             self.polarity,
             material,
             requested_class,
         )
+        admitted = initial.axis_admitted & result.axis_admitted
+        return result.masks, result.state, result.connected, admitted
 
     def _current(self, current) -> jax.Array:
         """Return the conductor currents one evaluation should use."""
@@ -566,7 +570,8 @@ class ForwardFluxOperator:
         the X-point height band is excluded by the private-flux shadow.
         """
         physical = jnp.asarray(psi)[: self.physical_node_number]
-        _masks, topology, _connected = self._fixed_design_read(physical)
+        _masks, topology, _connected, admitted = self._fixed_design_read(physical)
+        require_qualified_axis(admitted)
         return self._connectivity_class_margin(physical, topology)
 
     def read(
@@ -574,7 +579,10 @@ class ForwardFluxOperator:
     ) -> tuple[DomainMasks, ForwardTopologyState]:
         """Return domain labels and an achieved saddle-aware topology read."""
         physical = jnp.asarray(psi)[: self.physical_node_number]
-        masks, topology, _connected = self._fixed_design_read(physical, requested_class)
+        masks, topology, _connected, admitted = self._fixed_design_read(
+            physical, requested_class
+        )
+        require_qualified_axis(admitted)
         return masks, ForwardTopologyState(
             axis=topology.axis,
             axis_flux=topology.axis_flux,
@@ -694,7 +702,9 @@ class ForwardFluxOperator:
         if self.moment_geometry is None:
             raise ValueError("moment geometry is required for current moments")
         physical = jnp.asarray(psi)[: self.physical_node_number]
-        masks, topology, connected = self._fixed_design_read(physical, requested_class)
+        masks, topology, connected, _admitted = self._fixed_design_read(
+            physical, requested_class
+        )
         if not self.use_linear_moments:
             raise ValueError("clipped support moments are required")
         shared_flux = self.shared_node_flux(psi)

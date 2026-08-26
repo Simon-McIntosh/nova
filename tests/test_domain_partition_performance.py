@@ -28,6 +28,7 @@ def test_receipt_records_fixed_trip_cpu_and_explicit_gpu_status():
     receipt = json.loads(RECEIPT.read_text(), parse_constant=_reject_nonfinite)
     assert receipt["schema_version"] == 1
     assert receipt["policy"]["repetitions"] >= MINIMUM_REPETITIONS
+    assert receipt["policy"]["labelling_cap_rule"] == "confined.size"
     assert receipt["static_control_flow"]["passed"] is True
     assert receipt["static_control_flow"]["data_dependent_while_loop_count"] == 0
 
@@ -46,6 +47,7 @@ def test_receipt_records_fixed_trip_cpu_and_explicit_gpu_status():
         assert sum(row["kind"] == "committed_cache" for row in platform["cases"]) == 2
         assert sum(row["kind"] == "synthetic" for row in platform["cases"]) >= 3
         for row in platform["cases"]:
+            assert row["labelling_cap"] == row["cell_count"]
             assert row["eager"]["repetitions"] >= MINIMUM_REPETITIONS
             assert row["jit"]["repetitions"] >= MINIMUM_REPETITIONS
             assert math.isfinite(row["eager"]["median_ms"])
@@ -67,6 +69,7 @@ def test_partition_trace_uses_static_scan_not_data_dependent_while():
     record = static_control_flow_record(_synthetic_case((9, 9)))
     assert record["data_dependent_while_loop_count"] == 0
     assert record["expected_partition_trip_count"] == 81
+    assert record["labelling_cap"] == 81
     assert 81 in record["scan_lengths"]
     assert record["fixed_trip_match"] is True
     assert record["passed"] is True

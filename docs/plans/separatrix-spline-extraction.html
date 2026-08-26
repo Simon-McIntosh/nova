@@ -20,14 +20,14 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,topology,efit,mast,diii-d">
   <meta name="plan-blocks" content="efit-baseline-demonstration">
-  <meta name="plan-impl" content="0.7">
-  <meta name="plan-commits" content="74f95e41,a8927be3a0fc5fc387a2e64dfc97c6621ce1eb56,e3784a3127d1ca1bc6f07057fb5252d574af3732">
-  <meta name="plan-artifacts" content="nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,docs/evidence/archive/separatrix-spline-extraction-landed.html,benchmarks/stationary_point_polish.py,nova/equilibrium/boundary_comparison.py,tests/test_boundary_comparison.py">
+  <meta name="plan-impl" content="0.75">
+  <meta name="plan-commits" content="74f95e41,a8927be3a0fc5fc387a2e64dfc97c6621ce1eb56,e3784a3127d1ca1bc6f07057fb5252d574af3732,130d84e3322a114d7c25f9d675ac23619cf9a640">
+  <meta name="plan-artifacts" content="nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,docs/evidence/archive/separatrix-spline-extraction-landed.html,benchmarks/stationary_point_polish.py,nova/equilibrium/boundary_comparison.py,tests/test_boundary_comparison.py,benchmarks/diiid_forward_gs_match.py,tests/imas/test_diiid_forward_gs_match.py">
   <title>Separatrix Spline Extraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="16">
 </head>
 <body>
   <main class="plan-doc">
@@ -217,6 +217,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260826T132736261779-sse-diiid-comparator-integration-verify" data-who="integration-verify" data-when="2026-08-26T13:32:24Z">
     <div class="r-comment-body"><p>Independent verification passed the DIII-D adapter cutover with 9 CPU tests and an unchanged preregistration digest; full bank regeneration and the existing scientific FAIL remain open.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260826T131636148702-sse-diiid-comparator-integration" data-who="diiid-forward-gs" data-when="2026-08-26T13:26:28Z">
+    <div class="r-comment-body"><p>Landed the DIII-D adapter cutover with 9 focused CPU tests and byte-identical preregistration; bank regeneration and all nonconverged scientific failures remain open.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260826T125905793456-sse-branch-assembler-verify" data-who="sse-verify" data-when="2026-08-26T13:04:59Z">
     <div class="r-comment-body"><p>Independent verification confirmed deterministic fixed-capacity separation of one axis-enclosing closed branch from saddle-ended open legs, with exact-zero padding, overflow refusal, and eager/JIT/vmap parity.</p></div>

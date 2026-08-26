@@ -609,6 +609,14 @@ def validate_receipt(payload: dict[str, Any]) -> dict[str, Any]:
     if any(row["residual_trajectory_sha256"] != trajectory for row in rows):
         raise ValueError("residual trajectory changed across the isolated ladder")
     isolation = payload.get("isolation")
+    if (
+        not isinstance(isolation, dict)
+        or isolation.get("wall_not_reevaluated_in_fixed_terminal_ladder") is not True
+    ):
+        raise ValueError(
+            "the receipt must state that the fixed-terminal ladder did not "
+            "re-evaluate the wall"
+        )
     fixed = (
         isolation.get("fixed_carrier_digests") if isinstance(isolation, dict) else None
     )
@@ -634,7 +642,7 @@ def validate_receipt(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 def run(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
-    """Generate and validate the isolated wall-resolution receipt."""
+    """Generate a ladder that re-reads wall diagnostics on one fixed terminal."""
 
     configure_dtypes()
     case, context = _reference_case()
@@ -782,7 +790,7 @@ def run(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
         "isolation": {
             "plasma_terminal_held_fixed": True,
             "residual_trajectory_held_fixed": True,
-            "wall_enters_residual": False,
+            "wall_not_reevaluated_in_fixed_terminal_ladder": True,
             "varying_inputs": [
                 "wall coordinate",
                 "source-to-wall rows",

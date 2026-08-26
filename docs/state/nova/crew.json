@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T14:36:20",
+  "updated": "2026-08-26T14:40:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -40762,9 +40762,169 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T123348271456-pod-seed-repair-verify",
+        "plan": "profile-owned-solve-domain",
+        "section": "",
+        "node": "pod-seed-repair-verify",
+        "node_definition": {
+          "done_when": "One captured CPU pytest invocation over tests/test_equilibrium_source.py and tests/test_topology_boundary.py exits zero with 14 passed; an independent artifact validator confirms all 12 frozen arms map the continuous axis into the selected owning cell, all 15 earlier-window states recover empty components, the repair changes exactly one material-mask cell, and the receipt preserves that convergence is unclaimed; manifest states PASS or HOLD.",
+          "estimated_hours": 0.8,
+          "goal": "Independently verify the magnetic-axis owning-cell repair and frozen-cohort census in commit c48e13c1.",
+          "id": "pod-seed-repair-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-seed-verify.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-seed-verify.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "mcg-input-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T12:33:55Z",
+        "completed_at": "2026-08-26T12:38:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 257,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 257,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "c48e13c1bd7aa5d34b2112602a69a33091fba25e",
+        "commits": [
+          "c48e13c1bd7aa5d34b2112602a69a33091fba25e"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu PYTHONPATH=\"$PWD\" uv run --no-sync pytest -p no:cacheprovider tests/test_equilibrium_source.py tests/test_topology_boundary.py",
+          "exit_status": 0,
+          "log_path": "/tmp/pod-seed-repair-verify-pytest.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-seed-verify.md",
+        "scope_changed": false,
+        "session_id": "01a03df6-bb0c-7310-92c6-3f799a425060",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 673024,
+            "cached_input_tokens_cumulative": 3686144,
+            "input_tokens": 613554,
+            "input_tokens_cumulative": 3763657,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 7482,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2377
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 1259,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 4859,
+              "log_age_seconds": 2939,
+              "log_fresh": false,
+              "manifest_commits": [
+                "a8927be3"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.codex/scratch/nova-s16-20260826/sse-polish-manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T111246647906-sse-polish-and-tracking --gate <verdict> --commit a8927be3",
+              "node": "sse-polish-and-tracking",
+              "phase": "working",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T111246647906-sse-polish-and-tracking",
+              "terminal_age_seconds": 2962,
+              "terminal_at": "2026-08-26T11:44:30Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-polish-and-tracking"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 340,
+              "budget_seconds": 2100,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: HOLD because the machine-readable receipt does not immutably bind the solved terminal plasma carrier and declares the 37-row control reproduced despite two direct response-row audits being non-exact and excluded from the pass predicate. The named tests and validation command pass; but they do not test or enforce these requirements; the limiter operand also remains numerically unresolved at 288 targets as explicitly banked above.",
+              "elapsed_seconds": 2440,
+              "log_age_seconds": 1856,
+              "log_fresh": false,
+              "manifest_commits": [
+                "c4f7e50596522a3dde47c60564de06cfd46c461f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-wall-verify.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-wall-verify.md; resolve the blocker before resuming the run",
+              "node": "pod-wall-resolution-ladder-verify",
+              "phase": "starting",
+              "plan": "profile-owned-solve-domain",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T115222145326-pod-wall-resolution-ladder-verify",
+              "terminal_age_seconds": 1883,
+              "terminal_at": "2026-08-26T12:02:28Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-wall-resolution-ladder-verify"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest invocation",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 935
+    "_version": 936
   }
 }

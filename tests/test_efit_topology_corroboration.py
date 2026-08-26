@@ -42,7 +42,12 @@ def _operand(**overrides):
         "slice_index": 43,
         "time_s": 0.25,
         "arm": "pure",
+        "converged": True,
+        "terminal_residual": 1.0e-9,
+        "tolerance": 1.0e-8,
+        "termination_reason": "converged",
         "efit_label": "diverted",
+        "nova_achieved_class": "diverted",
         "radius": np.linspace(0.0, 1.0, 3),
         "height": np.linspace(0.0, 1.0, 3),
         "flux": np.zeros((3, 3)),
@@ -169,6 +174,61 @@ def test_all_missing_comparator_inputs_remain_one_strict_json_bank_row(monkeypat
     assert row["binding_to_efit_lcfs_sup_m"] is None
     assert row["label_agreement"] is None
     json.dumps(row, allow_nan=False)
+
+
+def test_convergence_receipts_qualify_rms_without_shrinking_cohort(
+    monkeypatch, tmp_path
+):
+    adapter = _adapter()
+    monkeypatch.setattr(
+        adapter, "_assembled_branch_polylines", lambda geometry: (_ring(), [])
+    )
+    monkeypatch.setattr(adapter, "CACHE_PATH", tmp_path / "operands.npz")
+
+    operand_rows = [_operand()]
+    operand_rows.append(
+        _operand(
+            identity="22086/43",
+            arm="mixed",
+            converged=False,
+            terminal_residual=2.5e-3,
+            tolerance=1.0e-8,
+            termination_reason="iteration_budget_exhausted",
+        )
+    )
+    operand_rows.extend(
+        _operand(identity=f"synthetic/{index}", arm="pure") for index in range(10)
+    )
+    carrier = {"carrier": {"semantic_response_identity": "synthetic-carrier"}}
+    adapter._write_operand_cache(operand_rows, carrier)
+    restored = adapter._read_operand_cache(carrier)
+    assert all(
+        {"converged", "terminal_residual", "tolerance", "termination_reason"}
+        <= row.keys()
+        for row in restored
+    )
+    converged, nonconverged = [adapter._score_operand(row) for row in restored[:2]]
+    eligibility = adapter._rms_threshold_eligibility([converged, nonconverged])
+
+    assert converged["converged"] is True
+    assert converged["terminal_residual"] == 1.0e-9
+    assert converged["tolerance"] == 1.0e-8
+    assert converged["termination_reason"] == "converged"
+    assert converged["qualified_terminal"] is True
+    assert converged["rms_threshold_eligible"] is True
+    assert nonconverged["converged"] is False
+    assert nonconverged["terminal_residual"] == 2.5e-3
+    assert nonconverged["tolerance"] == 1.0e-8
+    assert nonconverged["termination_reason"] == "iteration_budget_exhausted"
+    assert nonconverged["qualified_terminal"] is False
+    assert nonconverged["rms_threshold_eligible"] is False
+    assert eligibility == {
+        "eligible_count": 1,
+        "declared_arm_denominator": 2,
+        "eligible_arms": ["22086/43 pure"],
+        "excluded_nonconverged_arms": ["22086/43 mixed"],
+    }
+    json.dumps([converged, nonconverged], allow_nan=False)
 
 
 def test_post_cutover_geometry_routes_class_through_public_classifier(monkeypatch):

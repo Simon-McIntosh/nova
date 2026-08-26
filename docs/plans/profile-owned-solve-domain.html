@@ -178,17 +178,25 @@
         saddle. The flood fill uses the hex mesh with shared-edge admissibility from the global
         spline, sharing one partition between the residual mask and the classification read.</p>
       </div>
-      <div class="r-dec" data-key="limited-configuration-normalization" data-choice="" data-by="" data-when="">
+      <div class="r-dec" data-key="limited-configuration-normalization" data-choice="binding-level-min-wall-x" data-by="Simon McIntosh" data-when="2026-08-26T00:00:00+00:00">
         <p class="r-dec-q">Under the profile-owned domain, how does a limited configuration
         normalize flux? The locked design defines psi_norm from the O/X pair. On the DIII-D limited
         reference the wall binds well before the X-surface (margin about &minus;0.335), so an O/X
         normalization admits profile current in the in-vessel region between the wall-contact
-        surface and the X-surface unless the profile decays there. Options: keep O/X normalization
-        always and let the profile's scrape-off closure own that region; or normalize by the binding
-        level min(wall, X) as a post-selection scalar outside the Jacobian; or make it
-        configuration-dependent. This decision gates the §4 cutover's treatment of the protected
-        DIII-D baseline.</p>
-        <p class="r-dec-rat"></p>
+        surface and the X-surface unless the profile decays there.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="ox-always">O/X always; the profile owns the edge</button>
+          <button class="r-opt chosen" data-value="binding-level-min-wall-x">normalize by the binding level min(wall, X)</button>
+          <button class="r-opt" data-value="measure-both">decide from a measurement</button>
+        </p>
+        <p class="r-dec-rat">Lead decision: normalize by the binding level — wall-contact where the
+        wall binds first, X otherwise — <strong>with the selection expressed convention-safely</strong>.
+        Nova is COCOS 17, so the sense of increasing flux from axis to edge depends on the sign of
+        the plasma current: a naive min() on raw psi picks the wrong operand on one current sign.
+        Select the level nearest the axis flux along the confinement direction (equivalently,
+        compare in axis-anchored normalized flux), never by raw-psi ordering. The binding level is
+        a post-selection scalar; the residual domain itself stays boundary-free per the locked
+        profile-owned-domain decision.</p>
       </div>
     </section>
 

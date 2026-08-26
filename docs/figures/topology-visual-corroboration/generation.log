@@ -1,0 +1,26 @@
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d8-s16-veracity/ebd-topology-visual-evidence/docs/figures/topology-visual-corroboration/generate_topology_visuals.py", line 568, in <module>
+    main()
+    ~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d8-s16-veracity/ebd-topology-visual-evidence/docs/figures/topology-visual-corroboration/generate_topology_visuals.py", line 542, in main
+    mast = _read_cache(MAST_CACHE) if MAST_CACHE.exists() else _mast_rows()
+           ~~~~~~~~~~~^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d8-s16-veracity/ebd-topology-visual-evidence/docs/figures/topology-visual-corroboration/generate_topology_visuals.py", line 317, in _read_cache
+    row[key[len(prefix) :]] = np.array(stored[key], copy=True)
+                                       ~~~~~~^^^^^
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/numpy/lib/_npyio_impl.py", line 257, in __getitem__
+    return format.read_array(
+           ~~~~~~~~~~~~~~~~~^
+        bytes,
+        ^^^^^^
+    ...<2 lines>...
+        max_header_size=self.max_header_size
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/numpy/lib/_format_impl.py", line 833, in read_array
+    raise ValueError("Object arrays cannot be loaded when "
+                     "allow_pickle=False")
+ValueError: Object arrays cannot be loaded when allow_pickle=False
+EXIT_MARKER=1

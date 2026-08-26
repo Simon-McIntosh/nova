@@ -619,6 +619,29 @@ def test_traced_contour_retains_cell_confined_saddle_polish():
     assert bool(np.asarray(result["ambiguous_tie_broken"])[ambiguous][0])
 
 
+def test_traced_contour_assigns_shared_edge_nodes_and_saddle_segments():
+    """Contour arcs expose canonical graph nodes and exact-level saddle slots."""
+    radial = _f64(np.linspace(-2.0, 2.0, 34))
+    vertical = radial
+    mesh_r, mesh_z = jnp.meshgrid(radial, vertical)
+    rotated_radius = (mesh_r + mesh_z) / np.sqrt(2.0)
+    rotated_height = (mesh_z - mesh_r) / np.sqrt(2.0)
+    values = rotated_height**2 - rotated_radius**2 + rotated_radius**3
+
+    result = fsc.traced_spline_contour(values, radial, vertical, _f64(0.0))
+    valid = np.asarray(result["segment_valid"]).reshape(-1)
+    nodes = np.asarray(result["segment_node_indices"]).reshape(-1, 2)[valid]
+    saddle_segment = np.asarray(result["segment_at_saddle"])
+
+    unique, counts = np.unique(nodes.reshape(-1), return_counts=True)
+    assert np.count_nonzero(counts == 1) == 2
+    assert np.count_nonzero(counts == 2) == unique.size - 2
+    assert np.count_nonzero(saddle_segment) == 2
+    np.testing.assert_array_equal(
+        np.asarray(result["segment_saddle_rz"])[~saddle_segment], 0.0
+    )
+
+
 if __name__ == "__main__":
     import pytest
 

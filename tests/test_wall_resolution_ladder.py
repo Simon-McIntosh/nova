@@ -13,6 +13,7 @@ import numpy as np
 import pytest
 
 from benchmarks.wall_resolution_ladder import (
+    NONFINITE_LIMITER_COORDINATE,
     NO_PREDICTED_CLOSED_BOUNDARY,
     SCHEMA,
     _contact_fields,
@@ -424,3 +425,48 @@ def test_finite_closed_boundary_contact_fields_are_byte_stable():
     )
 
     assert json.dumps(contact, sort_keys=True, separators=(",", ":")) == expected
+
+
+def test_nonfinite_limiter_is_absent_with_a_finite_closed_boundary():
+    operands = {
+        "limiter_coordinate": np.asarray((np.nan, 0.0)),
+        "limiter_arc": np.nan,
+    }
+    absent = _contact_fields(
+        SimpleNamespace(boundary=jnp.asarray((1.1, -0.7))), operands
+    )
+    present = {
+        "contact_coordinate_m": [0.8, 0.0],
+        "contact_arc_m": 0.4,
+    }
+    rows = [
+        {
+            "wall_target_count": count,
+            "boundary_flux_wb": -0.03,
+            **(absent if count == 72 else present),
+            "achieved_class": "limited",
+            "spacing": {"maximum_m": 0.1},
+        }
+        for count in (36, 72, 144, 288)
+    ]
+
+    result = _convergence(rows, plasma_pitch=0.125)
+
+    assert absent == {
+        "contact_coordinate_m": None,
+        "contact_coordinate_absence_reason": NONFINITE_LIMITER_COORDINATE,
+        "contact_arc_m": None,
+        "contact_arc_absence_reason": NONFINITE_LIMITER_COORDINATE,
+    }
+    for step in (rows[0]["change_to_next_finer"], rows[1]["change_to_next_finer"]):
+        assert step["contact_coordinate_distance_m"] is None
+        assert (
+            step["contact_coordinate_distance_absence_reason"]
+            == NONFINITE_LIMITER_COORDINATE
+        )
+    payload = _receipt()
+    payload["rows"][2].update(absent)
+    assert validate_receipt(payload)["valid"] is True
+    json.dumps(
+        {"receipt": payload, "rows": rows, "convergence": result}, allow_nan=False
+    )

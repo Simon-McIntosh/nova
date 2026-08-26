@@ -20,14 +20,14 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,topology,efit,mast,diii-d">
   <meta name="plan-blocks" content="efit-baseline-demonstration">
-  <meta name="plan-impl" content="0.4">
+  <meta name="plan-impl" content="0.6">
   <meta name="plan-commits" content="74f95e41,a8927be3a0fc5fc387a2e64dfc97c6621ce1eb56">
   <meta name="plan-artifacts" content="nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,docs/evidence/archive/separatrix-spline-extraction-landed.html,benchmarks/stationary_point_polish.py">
   <title>Separatrix Spline Extraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="10">
 </head>
 <body>
   <main class="plan-doc">
@@ -211,6 +211,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260826T125905793456-sse-branch-assembler-verify" data-who="sse-verify" data-when="2026-08-26T13:04:59Z">
     <div class="r-comment-body"><p>Independent verification confirmed deterministic fixed-capacity separation of one axis-enclosing closed branch from saddle-ended open legs, with exact-zero padding, overflow refusal, and eager/JIT/vmap parity.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260826T123744574236-sse-branch-assembler" data-who="boundary-arms" data-when="2026-08-26T12:58:21Z">
+    <div class="r-comment-body"><p>The production spline graph now emits one topologically selected closed branch separately from deterministic saddle-ended open legs with fixed capacity, exact-zero padding, and fail-closed overflow.</p></div>
 </div>
 </section>
 </main>

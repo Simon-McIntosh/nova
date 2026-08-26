@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T15:05:16",
+  "updated": "2026-08-26T15:05:53",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -42258,9 +42258,173 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T123744574236-sse-branch-assembler",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a73",
+        "node": "sse-branch-assembler",
+        "node_definition": {
+          "done_when": "Manufactured diverted, limited, and double-null fields emit deterministic closed branches and separately typed open legs with saddle-exact endpoints; eager, JIT, and vmap agree with exact-zero inactive padding and fail-closed overflow; closed-branch metrics are invariant to open-leg extension; focused tests pass and a durable manifest records exact counts and caveats.",
+          "estimated_hours": 5.0,
+          "goal": "Implement the fixed-capacity closed/open separatrix branch assembler over the global spline.",
+          "id": "sse-branch-assembler",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-branch-assembler.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/flux_surface_connectivity.py",
+            "nova/equilibrium/separatrix_branches.py",
+            "tests/test_flux_surface_connectivity.py",
+            "tests/test_separatrix_branches.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "boundary-arms",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T12:37:52Z",
+        "completed_at": "2026-08-26T12:58:21Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1229,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1229,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "1586b37d0a370fe7c9420c1837453ca0561ff29a",
+        "commits": [
+          "abdd87fecf6df2d009b9a20e9e22a45e08816611"
+        ],
+        "changed_lines": {
+          "added": 607,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu PYTHONPATH=\"$PWD\" uv run --no-sync pytest tests/test_flux_surface_connectivity.py tests/test_separatrix_branches.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-branch-assembler-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-branch-assembler.md",
+        "scope_changed": false,
+        "session_id": "01a03e13-aedc-7463-99ac-2aa10cc51e87",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5767936,
+            "cached_input_tokens_cumulative": 5767936,
+            "input_tokens": 5938668,
+            "input_tokens_cumulative": 5938668,
+            "output_tokens": 30524,
+            "output_tokens_cumulative": 30524,
+            "reasoning_output_tokens": 10002,
+            "reasoning_output_tokens_cumulative": 10002
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 707,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 4307,
+              "log_age_seconds": 267,
+              "log_fresh": true,
+              "manifest_commits": [
+                "c48e13c1"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.codex/scratch/nova-s16-20260826/pod-seed-manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T111438066261-pod-seed-repair --gate <verdict> --commit c48e13c1",
+              "node": "pod-seed-repair",
+              "phase": "working",
+              "plan": "profile-owned-solve-domain",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T111438066261-pod-seed-repair",
+              "terminal_age_seconds": 303,
+              "terminal_at": "2026-08-26T12:32:45Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-seed-repair"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 576,
+              "budget_seconds": 2100,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: HOLD because the machine-readable receipt does not immutably bind the solved terminal plasma carrier and declares the 37-row control reproduced despite two direct response-row audits being non-exact and excluded from the pass predicate. The named tests and validation command pass; but they do not test or enforce these requirements; the limiter operand also remains numerically unresolved at 288 targets as explicitly banked above.",
+              "elapsed_seconds": 2676,
+              "log_age_seconds": 2092,
+              "log_fresh": false,
+              "manifest_commits": [
+                "c4f7e50596522a3dde47c60564de06cfd46c461f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-wall-verify.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-wall-verify.md; resolve the blocker before resuming the run",
+              "node": "pod-wall-resolution-ladder-verify",
+              "phase": "starting",
+              "plan": "profile-owned-solve-domain",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T115222145326-pod-wall-resolution-ladder-verify",
+              "terminal_age_seconds": 2119,
+              "terminal_at": "2026-08-26T12:02:28Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-wall-resolution-ladder-verify"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 947
+    "_version": 948
   }
 }

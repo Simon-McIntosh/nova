@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T00:20:53",
+  "updated": "2026-08-27T00:28:39",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -51649,9 +51649,115 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T211033978049-sse-diiid-bank-resolve",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-diiid-bank-resolve",
+        "node_definition": {
+          "done_when": "A single SLURM CPU debug job (per the campaign map lane: 16 CPUs 128 GiB, JAX_PLATFORMS=cpu, JAX_ENABLE_X64=true, complete log ending EXIT_MARKER=0) runs python -m benchmarks.diiid_forward_gs_match --frames 5 with NOVA_DIIID_PHYSICAL_WALL_COORDINATE_BASE64 reconstructed exactly per crew/reports/s16-landing-20260826/wall-coordinate-verify.md and the governed repaired-ring cache digest verified before compute; the receipt is strict JSON with exactly the five declared frame identities once each, non-finite values normalised to null, every non-converged row retained as FAIL rather than dropped; both figures render before the receipt is written; the receipt, frame_flux_comparison.png and cohort_match_summary.png are committed; scheduler receipt in the manifest",
+          "estimated_hours": null,
+          "goal": "The DIII-D five-frame forward-GS bank regenerated on corrected main through the campaign map's exact driver invocation with the verified transported-wall authority, publishing through the reproduced stable path and retaining all five declared rows whatever their convergence",
+          "id": "sse-diiid-bank-resolve",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T211033978049-sse-diiid-bank-resolve/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+            "docs/figures/diiid-forward-onboarding/forward-gs/frame_flux_comparison.png",
+            "docs/figures/diiid-forward-onboarding/forward-gs/cohort_match_summary.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T21:10:40Z",
+        "completed_at": "2026-08-26T22:23:54Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4394,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4394,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "1b4296d7bc970e3563f54cbc676a8e076c5655bb",
+        "commits": [
+          "c741b4cf61efc2c108b1421b48f04178a4fb9a69"
+        ],
+        "changed_lines": {
+          "added": 468,
+          "removed": 415,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "SLURM job 1258409 EXIT_MARKER=0 + independent strict-JSON/five-row/retention/publication/PNG/write-order audit EXIT_MARKER=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T211033978049-sse-diiid-bank-resolve/audit-bank.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T211033978049-sse-diiid-bank-resolve/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e37-51e1-7ca1-aec1-49356e2c6453",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12144896,
+            "cached_input_tokens_cumulative": 12557056,
+            "input_tokens": 12055549,
+            "input_tokens_cumulative": 12677195,
+            "output_tokens": 17014,
+            "output_tokens_cumulative": 18823,
+            "reasoning_output_tokens": 2826,
+            "reasoning_output_tokens_cumulative": 3251
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1062
+    "_version": 1063
   }
 }

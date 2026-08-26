@@ -49,8 +49,7 @@ DIIID_CACHE = HERE / "diiid-topology-operands.npz"
 MAST_AUTHORITY = (
     ROOT / "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py"
 )
-DIIID_RENDER_COMMIT = "94f510b6"
-DIIID_SOURCE_PATH = "benchmarks/diiid_forward_gs_match.py"
+DIIID_AUTHORITY = ROOT / "benchmarks/diiid_forward_gs_match.py"
 EXPECTED_MAST_ROWS = 12
 EXPECTED_DIIID_ROWS = 5
 NUMERIC_ARRAY_DTYPES = {
@@ -67,6 +66,22 @@ NUMERIC_ARRAY_DTYPES = {
     "efit_x": np.float64,
     "efit_lcfs": np.float64,
 }
+
+
+class StaleOperandCacheError(RuntimeError):
+    """Refuse operands produced by a source that is no longer authoritative."""
+
+
+def _source_authority(path: Path) -> dict[str, str]:
+    resolved = path.resolve(strict=True)
+    try:
+        source_path = resolved.relative_to(ROOT.resolve()).as_posix()
+    except ValueError:
+        source_path = str(resolved)
+    return {
+        "source_path": source_path,
+        "source_identity": f"sha256:{hashlib.sha256(resolved.read_bytes()).hexdigest()}",
+    }
 
 
 def _load_path(path: Path, name: str):
@@ -105,6 +120,7 @@ def _stationary_records(
 
 
 def _mast_rows() -> list[dict[str, Any]]:
+    source_authority = _source_authority(MAST_AUTHORITY)
     authority = _load_path(MAST_AUTHORITY, "mast_visual_authority")
     reachability = authority._reachability_module()
     response_cache, carrier = _persisted_response_cache(
@@ -184,19 +200,18 @@ def _mast_rows() -> list[dict[str, Any]]:
     if len(rows) != EXPECTED_MAST_ROWS:
         raise RuntimeError(f"expected {EXPECTED_MAST_ROWS} MAST rows, got {len(rows)}")
     _write_cache(
-        MAST_CACHE, rows, {"carrier": carrier["carrier"]["semantic_response_identity"]}
+        MAST_CACHE,
+        rows,
+        {
+            **source_authority,
+            "carrier": carrier["carrier"]["semantic_response_identity"],
+        },
     )
-    return _read_cache(MAST_CACHE)
+    return _read_cache(MAST_CACHE, source_authority["source_identity"])
 
 
 def _diiid_module():
-    source = subprocess.run(
-        ["git", "show", f"{DIIID_RENDER_COMMIT}:{DIIID_SOURCE_PATH}"],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout
+    source = DIIID_AUTHORITY.read_text()
     needle = "    fields.update(\n        _terminal_plotting_geometry(profile, equilibrium, predicted, radius, height)\n    )\n"
     injection = needle + (
         "    visual_masks, _visual_topology = profile.operator.read(equilibrium.flux)\n"
@@ -204,15 +219,15 @@ def _diiid_module():
         "    fields['cell_rz'] = np.asarray(profile.lattice.coordinate, dtype=float)\n"
     )
     if source.count(needle) != 1:
-        raise RuntimeError("DIII-D committed renderer injection seam changed")
+        raise RuntimeError("DIII-D renderer injection seam changed")
     loaded = types.ModuleType("diiid_visual_authority")
-    loaded.__file__ = str(ROOT / DIIID_SOURCE_PATH)
+    loaded.__file__ = str(DIIID_AUTHORITY)
     loaded.__package__ = "benchmarks"
     sys.modules[loaded.__name__] = loaded
     namespace = loaded.__dict__
     exec(
         compile(
-            source.replace(needle, injection), str(ROOT / DIIID_SOURCE_PATH), "exec"
+            source.replace(needle, injection), str(DIIID_AUTHORITY), "exec"
         ),
         namespace,
     )
@@ -220,6 +235,7 @@ def _diiid_module():
 
 
 def _diiid_rows() -> list[dict[str, Any]]:
+    source_authority = _source_authority(DIIID_AUTHORITY)
     module = _diiid_module()
     module["configure_dtypes"]()
     paths = sorted(module["DEFAULT_DATA"].glob("*.parquet"))
@@ -278,8 +294,8 @@ def _diiid_rows() -> list[dict[str, Any]]:
         raise RuntimeError(
             f"expected {EXPECTED_DIIID_ROWS} DIII-D rows, got {len(rows)}"
         )
-    _write_cache(DIIID_CACHE, rows, {"renderer_commit": DIIID_RENDER_COMMIT})
-    return _read_cache(DIIID_CACHE)
+    _write_cache(DIIID_CACHE, rows, source_authority)
+    return _read_cache(DIIID_CACHE, source_authority["source_identity"])
 
 
 def _plotted_candidates(records: list[dict[str, Any]]) -> np.ndarray:
@@ -330,8 +346,15 @@ def _write_cache(
     )
 
 
-def _read_cache(path: Path) -> list[dict[str, Any]]:
+def _read_cache(path: Path, source_identity: str) -> list[dict[str, Any]]:
     metadata = json.loads(path.with_suffix(".metadata.json").read_text())
+    recorded_identity = metadata.get("authority", {}).get("source_identity")
+    if recorded_identity != source_identity:
+        raise StaleOperandCacheError(
+            f"stale operand cache {path}: recorded source identity "
+            f"{recorded_identity!r} does not match current authority "
+            f"{source_identity!r}"
+        )
     with np.load(path, allow_pickle=False) as stored:
         rows = []
         for index, record in enumerate(metadata["rows"]):
@@ -548,6 +571,7 @@ def _write_evidence(rows: list[dict[str, Any]], records: list[dict[str, Any]]) -
         capture_output=True,
         text=True,
     ).stdout.strip()
+    diiid_source = _source_authority(DIIID_AUTHORITY)
     html = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
@@ -558,7 +582,7 @@ def _write_evidence(rows: list[dict[str, Any]], records: list[dict[str, Any]]) -
 </head>
 <body><main class="plan"><header class="plan-hero"><p class="eyebrow">Evidence · visual topology audit</p><h1>Topology visual corroboration</h1>
 <p class="lede">All {EXPECTED_MAST_ROWS} MAST arms and all {EXPECTED_DIIID_ROWS} DIII-D demonstration frames are shown exactly once. Every panel exposes the hex-cell flood-fill domains, the complete finite O/X candidate census, selected primary O and X, selected wall point, and EFIT axis/X/LCFS labels.</p></header>
-<section><h2>Authority and interpretation</h2><p>This is corroboration of committed extraction state, not a new score. EFIT is an independent magnetics-fitted reconstruction, not physical truth. MAST operands use the persisted response carrier and the current <code>efit_topology_corroboration</code> extraction route. DIII-D operands use the committed complete-poloidal renderer at <code>{DIIID_RENDER_COMMIT}</code>, the first committed extraction state carrying the full stationary-candidate census; all five nonconverged rows remain visibly qualified. Generated from repository head <code>{head}</code>.</p>
+<section><h2>Authority and interpretation</h2><p>This is corroboration of committed extraction state, not a new score. EFIT is an independent magnetics-fitted reconstruction, not physical truth. MAST operands use the persisted response carrier and the current <code>efit_topology_corroboration</code> extraction route. DIII-D operands use the current integrated benchmark source <code>{diiid_source["source_path"]}</code> at content identity <code>{diiid_source["source_identity"]}</code>; all five nonconverged rows remain visibly qualified. Generated from repository head <code>{head}</code>.</p>
 <p>The purple cells are the exact <code>PRIVATE_FLUX</code> labels from Nova's domain partition: closed-flux cells disconnected from the primary O-point by the X-point flood-fill cut. Pale blue is axis-connected core, grey-green is common SOL, and pale grey is excluded material. The selected wall marker is Nova's governed closest plasma-wall candidate; it is shown even when the topology class is diverted and it does not bind the LCFS.</p></section>
 <section><h2>Coverage</h2><p><strong>{len(rows)} of {EXPECTED_MAST_ROWS + EXPECTED_DIIID_ROWS} declared geometries rendered.</strong> {sum(row["machine"] == "MAST" for row in rows)} MAST and {sum(row["machine"] == "DIII-D" for row in rows)} DIII-D; {sum(not row["converged"] for row in rows)} nonconverged rows retained. Figure rows below are the quantitative completeness ledger.</p></section>
 <section><h2>Per-geometry corroboration</h2>{"".join(figure_rows)}</section>
@@ -570,8 +594,16 @@ def _write_evidence(rows: list[dict[str, Any]], records: list[dict[str, Any]]) -
 def main() -> None:
     configure_dtypes()
     HERE.mkdir(parents=True, exist_ok=True)
-    mast = _read_cache(MAST_CACHE) if MAST_CACHE.exists() else _mast_rows()
-    diiid = _read_cache(DIIID_CACHE) if DIIID_CACHE.exists() else _diiid_rows()
+    mast_identity = _source_authority(MAST_AUTHORITY)["source_identity"]
+    diiid_identity = _source_authority(DIIID_AUTHORITY)["source_identity"]
+    mast = (
+        _read_cache(MAST_CACHE, mast_identity) if MAST_CACHE.exists() else _mast_rows()
+    )
+    diiid = (
+        _read_cache(DIIID_CACHE, diiid_identity)
+        if DIIID_CACHE.exists()
+        else _diiid_rows()
+    )
     rows = mast + diiid
     if len(rows) != EXPECTED_MAST_ROWS + EXPECTED_DIIID_ROWS:
         raise RuntimeError("demonstration-bank coverage is incomplete")

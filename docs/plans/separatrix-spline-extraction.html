@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="35">
+<meta name="plan-version" content="37">
 </head>
 <body>
   <main class="plan-doc">
@@ -195,6 +195,11 @@
         sup/RMS/X metric implementation; regenerate both banks.</div>
     <pre class="r-fu-prompt">/reckon-ship separatrix-spline-extraction</pre>
     </article>
+<article class="r-fu" data-id="f-sse-dissent-polish-termination" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-d8-s16-veracity-review" data-written-at="2026-08-26T15:20:00+00:00" data-recommends-skill="/reckon-edit separatrix-spline-extraction --reopen polish-termination" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Adjudicate the fixed-cap reversal of the locked polish-termination decision</h4>
+    <div class="r-fu-body">Dissent-reopen (§07): the locked choice was tolerance-exit while_loop with an eight-trip safety cap. Changed evidence: commit a251914a (profile-owned-solve-domain substrate work) replaced the integrated polish with literal fixed-cap masked fori_loop execution to guarantee JIT/vmap-safe fixed trip counts; its independent verifier proved 19/19 numerical identity but the reversal was never adjudicated against this plan's locked authority, and both H200 performance receipts measured the new semantics under the old labels. Adjudicate via /reckon-edit separatrix-spline-extraction --reopen polish-termination: either restore tolerance-exit as the locked authority (re-landing the substrate work behind it), or re-lock to fixed-cap masked execution with an explicit performance/scientific rationale and relabel/rerun the P100+H200 measurements from one reachable commit. Do not keep both descriptions.</div>
+    <pre class="r-fu-prompt">/reckon-ship separatrix-spline-extraction</pre>
+    </article>
 </section>
 
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -203,6 +208,12 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260826T115109558722-sse-polish-and-tracking-verify" data-who="sse-verify" data-when="2026-08-26T12:30:06Z">
     <div class="r-comment-body"><p>Independently verified tolerance-bounded spline stationary-point refinement, implicit-root differentiation, and fail-closed X/O-point admission on CPU; the GPU-only test and H200 timing remain open.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260826T145327368904-rev-sse-veracity" data-who="review-sse" data-when="2026-08-26T15:06:02Z">
+    <div class="r-comment-body"><p>SSE HOLD: 19 claims judged (2 critical defects: locked tolerance-exit decision silently reversed by a251914a; H200 evidence measures mislabeled fixed-cap arms); substrate claims upheld, banks not admitted, impl=0.8 overstated, demonstration consumption must stay blocked</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260826-sse-veracity-review" data-who="reckon-d8-s16-veracity-review" data-when="2026-08-26T15:20:00+00:00">
+    <div class="r-comment-body">Independent S16 veracity review (rev-sse-veracity, codex read-only, 19 claims judged): substrate claims (polish accuracy, implicit derivative, branch assembler, shared comparator, both adapter cutovers) UPHELD by independent execution/audit. CRITICAL-1: the locked polish-termination decision (tolerance-exit while_loop) was silently reversed by reachable commit a251914a (literal fixed-cap masked fori_loop) without adjudication against this plan's authority — dissent followup filed. CRITICAL-2: both H200 receipt source commits contain the reversal, so 'cold/warm tolerance exit' arms measured masked fixed-cap execution; raw-sample repair restores statistical reproducibility, not construct validity, and P100/H200 ratios span different source semantics. Also: neither EFIT bank freshly admitted (MAST stale hashes, DIII-D 0/5 qualified FAIL retained), poloidal evidence package absent from HEAD (94f510b6 unreachable), bfc393c2 receipt outside history, plan-impl 0.8 OVERSTATED with no auditable denominator, commit metadata omits abdd87fe/a251914a/repairs. The plan's own failure comments are candid and survive review. Demonstration consumption must remain blocked until banks re-admit. Report: crew/reports/s16-veracity-20260826/rev-sse-veracity.md</div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

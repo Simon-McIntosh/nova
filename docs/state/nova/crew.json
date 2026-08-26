@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T14:55:53",
+  "updated": "2026-08-26T15:03:23",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -42033,9 +42033,131 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T124538795373-pod-profile-domain-prior-art",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-profile-domain-prior-art",
+        "node_definition": {
+          "done_when": "The manifest cites exact source and test paths in all three repositories or explicitly records no reusable seam; separates existing reusable mechanisms from missing code; proposes mutually exclusive write scopes and ordered implementation/test nodes; identifies fixed-shape JAX constraints, receipt fields, conservation gates, and DIII-D reference commands without modifying any repository.",
+          "estimated_hours": 0.8,
+          "goal": "Map reusable profile-owned residual-domain, exterior-current, shadow-mask, O/X tracking, conservation-rescore, and DIII-D protection seams across nova, imas-ambix, and reckon before the residual cutover is dispatched.",
+          "id": "pod-profile-domain-prior-art",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-profile-domain-prior-art.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-profile-domain-prior-art.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "dataset-census",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-26T12:45:46Z",
+        "completed_at": "2026-08-26T13:03:15Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1049,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1049,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "5ae87bb541948150ba9a8c0492bd13f0cadeeed5",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-profile-domain-prior-art.md",
+        "scope_changed": false,
+        "session_id": "01a03dcc-08af-7990-8683-3bf7345f4e65",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5633792,
+            "cached_input_tokens_cumulative": 10685952,
+            "input_tokens": 5960865,
+            "input_tokens_cumulative": 11195939,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 27753,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 10448
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1194,
+              "log_age_seconds": 435,
+              "log_fresh": true,
+              "manifest_commits": [
+                "c4f7e50596522a3dde47c60564de06cfd46c461f b3c4097ed86f7eef881e03bed5b8ff7b761015b8"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.codex/scratch/nova-s16-20260826/pod-wall-manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T111657805648-pod-wall-resolution-ladder --gate <verdict> --commit c4f7e50596522a3dde47c60564de06cfd46c461f b3c4097ed86f7eef881e03bed5b8ff7b761015b8",
+              "node": "pod-wall-resolution-ladder",
+              "phase": "working",
+              "plan": "profile-owned-solve-domain",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T111657805648-pod-wall-resolution-ladder",
+              "terminal_age_seconds": 454,
+              "terminal_at": "2026-08-26T12:38:08Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-wall-resolution-ladder"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 945
+    "_version": 946
   }
 }

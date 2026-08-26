@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T06:13:30",
+  "updated": "2026-08-26T13:26:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -901,7 +901,10 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "019ff73b-a1b5-73a2-9252-011b64d1ab64",
-        "created": "2026-08-12"
+        "created": "2026-08-12",
+        "sessions": {
+          "gpt-5.6-sol": "01a03dc7-e358-72a1-8d0f-ca22b36b6b42"
+        }
       },
       {
         "id": "residual-field",
@@ -979,6 +982,17 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-25"
+      },
+      {
+        "id": "session-9ebe90b7df11b4c3d363",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03dc5-e396-7b53-b00e-6208282e2a82",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03dc5-e396-7b53-b00e-6208282e2a82"
+        },
+        "created": "2026-08-26"
       },
       {
         "id": "sol-closure",
@@ -1196,7 +1210,10 @@
         "harness": "codex",
         "role": "investigate",
         "session_id": "01a010a3-85c7-71d0-a7c2-bdabe4fe49f8",
-        "created": "2026-08-17"
+        "created": "2026-08-17",
+        "sessions": {
+          "gpt-5.6-sol": "01a03dcc-3724-75b1-98e0-135745444a8d"
+        }
       },
       {
         "id": "vacuum-windows",
@@ -37659,9 +37676,103 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T111937959782-ebd-threshold-lock-proposal",
+        "plan": "efit-baseline-demonstration",
+        "section": "\u00a72",
+        "node": "ebd-threshold-lock-proposal",
+        "node_definition": {
+          "done_when": "A manifest reproduces the banked 7 of 12 class agreement, 0.5413 metre agreeing-arm RMS maximum and 0.038661 metre saddle-distance maximum, then states exact conservative lock values and failure semantics without reading regenerated outcomes",
+          "estimated_hours": 1.5,
+          "goal": "Derive preregistered demonstration threshold choices from banked evidence",
+          "id": "ebd-threshold-lock-proposal",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/ebd-thresholds-manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/ebd-thresholds-manifest.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "vacuum-diagnosis",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-26T11:19:48Z",
+        "completed_at": "2026-08-26T11:24:20Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 272,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 272,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "60251ecdd8f9a7b1f8121d3184c807a9311c777a",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "jq -e '(.rows|length)==12 and ([.rows[]|select(.label_agreement==true)]|length)==7 and ([.rows[]|select(.label_agreement==true)|.binding_to_efit_lcfs_rms_m]|max)==0.5413441290633852 and ([.rows[].selected_saddle_to_efit_x_point_m]|max)==0.03866107162298942 and ([.rows[]|select(.label_agreement==true)|.binding_to_efit_lcfs_rms_m]|max)<=0.55 and ([.rows[].selected_saddle_to_efit_x_point_m]|max)<=0.04' docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "a17fcf0a2f50e2d495e4f90ce263410edc183add6c62699a2facbccf60410f74"
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/ebd-thresholds-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03dcc-3724-75b1-98e0-135745444a8d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1070848,
+            "cached_input_tokens_cumulative": 1070848,
+            "input_tokens": 1168873,
+            "input_tokens_cumulative": 1168873,
+            "output_tokens": 10535,
+            "output_tokens_cumulative": 10535,
+            "reasoning_output_tokens": 4944,
+            "reasoning_output_tokens_cumulative": 4944
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 891
+    "_version": 896
   }
 }

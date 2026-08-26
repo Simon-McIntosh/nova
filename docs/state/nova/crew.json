@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T14:26:15",
+  "updated": "2026-08-26T14:28:29",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -161,8 +161,12 @@
         "id": "catalog-census",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "created": "2026-08-23"
+        "session_id": "01a03ddc-5dd3-7713-ab33-437b6bcab40e",
+        "created": "2026-08-23",
+        "sessions": {
+          "gpt-5.6-sol": "01a03ddc-5dd3-7713-ab33-437b6bcab40e"
+        },
+        "session_model": "gpt-5.6-sol"
       },
       {
         "id": "ccfs-scout",
@@ -39871,9 +39875,111 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T113645272634-mcg-distinct-input-manifest",
+        "plan": "mast-catalog-gpu-solve",
+        "section": "\u00a73",
+        "node": "mcg-distinct-input-manifest",
+        "node_definition": {
+          "done_when": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_mast_catalog_input_manifest.py exits zero and a separate validator reports at least 4096 unique eligible real flat-top slices, zero duplicate state digests, complete shot index time campaign configuration machine-artifact and input-array provenance, and no broadcast or tiled state",
+          "estimated_hours": 3.0,
+          "goal": "Produce the real MAST input manifest for the single-device throughput ladder",
+          "id": "mcg-distinct-input-manifest",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-input-manifest.md",
+          "plan": "mast-catalog-gpu-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/mast_catalog_input_manifest.py",
+            "tests/test_mast_catalog_input_manifest.py",
+            "docs/figures/mast-catalog-gpu-solve/mast-catalog-throughput-inputs.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "catalog-census",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T11:37:25Z",
+        "completed_at": "2026-08-26T12:02:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1507,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1507,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "e8dd31b441142e91372bc5a3c1b97402a48ca029",
+        "commits": [
+          "6574bfde4bb629841cfa924b39e74ef6bf8d0ed4"
+        ],
+        "changed_lines": {
+          "added": 283143,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 7,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_mast_catalog_input_manifest.py; independent manifest validator",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-input-manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/mcg-input-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03ddc-5dd3-7713-ab33-437b6bcab40e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11643392,
+            "cached_input_tokens_cumulative": 11643392,
+            "input_tokens": 11901318,
+            "input_tokens_cumulative": 11901318,
+            "output_tokens": 31254,
+            "output_tokens_cumulative": 31254,
+            "reasoning_output_tokens": 8700,
+            "reasoning_output_tokens_cumulative": 8700
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 927
+    "_version": 929
   }
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T21:01:50",
+  "updated": "2026-08-26T21:03:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -270,6 +270,15 @@
         "role": "implement",
         "session_id": "01a030a6-bf48-73c1-8393-1a3224d34818",
         "created": "2026-08-23"
+      },
+      {
+        "id": "connectivity-audit",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-26"
       },
       {
         "id": "contour-order",
@@ -545,6 +554,24 @@
         "role": "implement",
         "session_id": "019ff707-7f0a-7cb1-8202-0d566308bf88",
         "created": "2026-08-12"
+      },
+      {
+        "id": "flood-geometry-tests",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-26"
+      },
+      {
+        "id": "flood-performance",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-26"
       },
       {
         "id": "flood-rca",
@@ -48556,6 +48583,6 @@
       }
     ],
     "holds": [],
-    "_version": 1027
+    "_version": 1030
   }
 }

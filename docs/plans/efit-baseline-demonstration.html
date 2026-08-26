@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="10">
 <meta name="plan-commits" content="ba1f73013873fd2d7434db1b744d742a1b4b042c">
 <meta name="plan-artifacts" content="docs/evidence/archive/efit-baseline-demonstration-landed.html,docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json">
 </head>
@@ -186,6 +186,15 @@
         values afterwards.</p>
     <p class="r-dec-rat">Locked before regenerated-bank scoring from the immutable pre-implementation twelve-arm evidence. PASS requires all twelve named MAST arms and every declared DIII-D row exactly once; at least 7 of 12 MAST arms must agree with the achieved saddle-aware topology class; the worst closed-boundary symmetric RMS over every converged class-agreeing eligible row must be at most 0.55 m; and the worst polished-saddle distance to the nearest finite EFIT X-point over every declared row must be at most 0.04 m. Bounds are inclusive, in metres, and use worst-row maxima. Missing, duplicate, substituted, nonconverged, empty, NaN, or infinite inputs remain explicit failures and may not shrink a denominator. The RMS anchor is deliberately conservative because the banked 0.541344129 m value used a marching-squares binding contour with open divertor legs left unclipped; the replacement comparator measures only the typed closed branch. EFIT is an independent reconstruction, so passing establishes non-regression against this comparison contract, not physical truth.</p>
     </div>
+<div class="r-dec" data-key="metric-disagreement-tolerance" data-choice="report-only-first-pass" data-by="reckon-ship" data-when="2026-08-26T12:10:00+00:00">
+    <p class="r-dec-q">What tolerance does a paired metric have to meet? The existing record&#x27;s columns were landed 5–130× inside pre-registered analytic tolerances, but a cross-code comparison on real data has no such basis and the reference is not ground truth.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="inherit-analytic-class">inherit each column&#x27;s own analytic tolerance class</button>
+      <button class="r-opt chosen" data-value="report-only-first-pass">report distributions unbounded on the first pass, register tolerances from the measured spread</button>
+      <button class="r-opt" data-value="cross-source-budget">score under the cross-source budget class used for geometry comparisons</button>
+      </p>
+    <p class="r-dec-rat">Independent adjudication verified that the completed six-shot, seventeen-quantity, 102-profile bank is an unbounded calibration pass with no registered cross-code thresholds. Analytic tolerance classes and the cross-source geometry budget are different authorities and cannot be inherited. Keep UNBOUNDED_FIRST_PASS report-only; before any validation claim, preregister finite unit- and domain-specific bounds for every eligible quantity, fail closed on incomplete or nonfinite comparisons, and score a held-out cohort not used to calibrate those bounds. The magnetic-axis and LCFS production bounds remain merely contained and are not cross-code disagreement tolerances.</p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -243,6 +252,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260826-landing-reconcile" data-who="reckon-ship" data-when="2026-08-26T11:42:00+00:00">
     <div class="r-comment-body">Landing record reconciled to the cumulative evidence contract: 6 of 9 identified executable nodes complete; threshold gate locked at 7/12, 0.55 m and 0.04 m; provenance commit ba1f7301 independently verified 8/8; artifacts docs/evidence/archive/efit-baseline-demonstration-landed.html and docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json. Metric-authority adjudication, provenance-receipt refresh and the feeder-gated demonstration remain open.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260826T113613685867-ebd-metric-tolerance-adjudication" data-who="criterion-audit" data-when="2026-08-26T11:41:22Z">
+    <div class="r-comment-body"><p>Adjudicated metric authority to report-only-first-pass while retaining the unbounded calibration verdict and merely-contained geometry bounds.</p></div>
 </div>
 </section>
 </main>

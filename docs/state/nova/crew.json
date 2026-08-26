@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T14:06:53",
+  "updated": "2026-08-26T14:09:21",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -294,7 +294,10 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a02dc4-02aa-7361-89bb-b81825853567",
-        "created": "2026-08-23"
+        "created": "2026-08-23",
+        "sessions": {
+          "gpt-5.6-sol": "01a03ddb-b18e-7ad1-b85b-25f6dd100332"
+        }
       },
       {
         "id": "dataset-census",
@@ -38867,9 +38870,103 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T113613685867-ebd-metric-tolerance-adjudication",
+        "plan": "efit-baseline-demonstration",
+        "section": "\u00a73",
+        "node": "ebd-metric-tolerance-adjudication",
+        "node_definition": {
+          "done_when": "A durable manifest records a Python assertion command that exits zero while reproducing the exact axis and closed-boundary bounds plus their evidence identity, distinguishes report-only containment from cross-code validation, and recommends one fail-closed lock choice without reading regenerated demonstration outcomes",
+          "estimated_hours": 1.0,
+          "goal": "Adjudicate the metric-disagreement-tolerance authority",
+          "id": "ebd-metric-tolerance-adjudication",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/ebd-metric-tolerance-manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/ebd-metric-tolerance-manifest.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "criterion-audit",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-26T11:36:41Z",
+        "completed_at": "2026-08-26T11:41:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 281,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 281,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "e8dd31b441142e91372bc5a3c1b97402a48ca029",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "PYTHONPATH=$PWD /home/ITER/mcintos/Code/nova/.venv/bin/python metric_tolerance_assertions.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/ebd-metric-tolerance-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/ebd-metric-tolerance-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03ddb-b18e-7ad1-b85b-25f6dd100332",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1120512,
+            "cached_input_tokens_cumulative": 1120512,
+            "input_tokens": 1232983,
+            "input_tokens_cumulative": 1232983,
+            "output_tokens": 10107,
+            "output_tokens_cumulative": 10107,
+            "reasoning_output_tokens": 4479,
+            "reasoning_output_tokens_cumulative": 4479
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 917
+    "_version": 919
   }
 }

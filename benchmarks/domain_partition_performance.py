@@ -172,6 +172,7 @@ def static_control_flow_record(case: PartitionCase) -> dict[str, Any]:
         "case": case.name,
         "shape": list(case.shape),
         "cell_count": expected_trips,
+        "labelling_cap": expected_trips,
         "data_dependent_while_loop_count": while_count,
         "scan_lengths": scan_lengths,
         "expected_partition_trip_count": expected_trips,
@@ -259,6 +260,7 @@ def _device_case(
         "kind": case.kind,
         "shape": list(case.shape),
         "cell_count": int(case.confined.size),
+        "labelling_cap": int(case.confined.size),
         "component_cells": component_cells,
         "private_cells": private_cells,
         "expected_partition_match": expected_match,
@@ -372,6 +374,7 @@ def run(repetitions: int, budget_ms: float) -> dict[str, Any]:
             "repetitions": repetitions,
             "minimum_repetitions": MINIMUM_REPETITIONS,
             "interactive_p95_budget_ms": budget_ms,
+            "labelling_cap_rule": "confined.size",
             "eager_definition": (
                 "Python-level production adapter with its existing inner device kernels"
             ),

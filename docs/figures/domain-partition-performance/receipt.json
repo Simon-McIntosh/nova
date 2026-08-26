@@ -3,7 +3,7 @@
     "jax": "0.11.0",
     "python": "3.14.2"
   },
-  "generated_at_utc": "2026-08-26T19:12:00.687149+00:00",
+  "generated_at_utc": "2026-08-26T19:25:56.687522+00:00",
   "overall": {
     "all_measured_jit_compile_success": true,
     "all_measured_p95_within_interactive_budget": true,
@@ -21,23 +21,24 @@
           "cell_count": 1089,
           "component_cells": 277,
           "eager": {
-            "maximum_ms": 18.278113,
-            "median_ms": 17.8155795,
-            "minimum_ms": 17.575001,
-            "p95_ms": 18.0491933,
+            "maximum_ms": 18.164181,
+            "median_ms": 17.691682,
+            "minimum_ms": 17.561577,
+            "p95_ms": 17.97959375,
             "repetitions": 50
           },
           "eager_jit_equal": true,
           "expected_partition_match": true,
           "jit": {
-            "maximum_ms": 19.10729,
-            "median_ms": 17.7322335,
-            "minimum_ms": 17.464914,
-            "p95_ms": 18.2628593,
+            "maximum_ms": 19.392556,
+            "median_ms": 17.696768499999997,
+            "minimum_ms": 17.519359,
+            "p95_ms": 18.05854835,
             "repetitions": 50
           },
           "jit_compile_success": true,
           "kind": "committed_cache",
+          "labelling_cap": 1089,
           "private_cells": 20,
           "shape": [
             33,
@@ -51,23 +52,24 @@
           "cell_count": 1089,
           "component_cells": 244,
           "eager": {
-            "maximum_ms": 18.755021,
-            "median_ms": 17.872644,
-            "minimum_ms": 17.695484,
-            "p95_ms": 18.2685745,
+            "maximum_ms": 18.637767,
+            "median_ms": 17.794898,
+            "minimum_ms": 17.563802,
+            "p95_ms": 18.41783375,
             "repetitions": 50
           },
           "eager_jit_equal": true,
           "expected_partition_match": true,
           "jit": {
-            "maximum_ms": 20.560091,
-            "median_ms": 17.9716455,
-            "minimum_ms": 17.630533,
-            "p95_ms": 19.58825745,
+            "maximum_ms": 20.630614,
+            "median_ms": 17.803711999999997,
+            "minimum_ms": 17.521832,
+            "p95_ms": 18.487546,
             "repetitions": 50
           },
           "jit_compile_success": true,
           "kind": "committed_cache",
+          "labelling_cap": 1089,
           "private_cells": 33,
           "shape": [
             33,
@@ -81,23 +83,24 @@
           "cell_count": 81,
           "component_cells": 19,
           "eager": {
-            "maximum_ms": 0.520509,
-            "median_ms": 0.32488399999999995,
-            "minimum_ms": 0.157819,
-            "p95_ms": 0.50549565,
+            "maximum_ms": 0.488062,
+            "median_ms": 0.339937,
+            "minimum_ms": 0.163985,
+            "p95_ms": 0.46395234999999996,
             "repetitions": 50
           },
           "eager_jit_equal": true,
           "expected_partition_match": true,
           "jit": {
-            "maximum_ms": 0.532641,
-            "median_ms": 0.292639,
-            "minimum_ms": 0.129973,
-            "p95_ms": 0.4530566,
+            "maximum_ms": 0.466878,
+            "median_ms": 0.29839499999999997,
+            "minimum_ms": 0.131121,
+            "p95_ms": 0.41757694999999995,
             "repetitions": 50
           },
           "jit_compile_success": true,
           "kind": "synthetic",
+          "labelling_cap": 81,
           "private_cells": 26,
           "shape": [
             9,
@@ -111,23 +114,24 @@
           "cell_count": 289,
           "component_cells": 83,
           "eager": {
-            "maximum_ms": 1.554315,
-            "median_ms": 1.4480695,
-            "minimum_ms": 1.244156,
-            "p95_ms": 1.5077331999999999,
+            "maximum_ms": 1.568824,
+            "median_ms": 1.4542585,
+            "minimum_ms": 1.245675,
+            "p95_ms": 1.52611475,
             "repetitions": 50
           },
           "eager_jit_equal": true,
           "expected_partition_match": true,
           "jit": {
-            "maximum_ms": 1.424594,
-            "median_ms": 1.3903065,
-            "minimum_ms": 1.287116,
-            "p95_ms": 1.4208448,
+            "maximum_ms": 1.431047,
+            "median_ms": 1.380169,
+            "minimum_ms": 1.275773,
+            "p95_ms": 1.41072185,
             "repetitions": 50
           },
           "jit_compile_success": true,
           "kind": "synthetic",
+          "labelling_cap": 289,
           "private_cells": 98,
           "shape": [
             17,
@@ -141,23 +145,24 @@
           "cell_count": 1089,
           "component_cells": 347,
           "eager": {
-            "maximum_ms": 20.138815,
-            "median_ms": 17.8769985,
-            "minimum_ms": 17.640644,
-            "p95_ms": 18.98770865,
+            "maximum_ms": 18.9944,
+            "median_ms": 17.799547,
+            "minimum_ms": 17.64866,
+            "p95_ms": 18.4236485,
             "repetitions": 50
           },
           "eager_jit_equal": true,
           "expected_partition_match": true,
           "jit": {
-            "maximum_ms": 20.360918,
-            "median_ms": 17.8385525,
-            "minimum_ms": 17.581271,
-            "p95_ms": 18.6564244,
+            "maximum_ms": 18.331078,
+            "median_ms": 17.729658999999998,
+            "minimum_ms": 17.522989,
+            "p95_ms": 17.986831249999998,
             "repetitions": 50
           },
           "jit_compile_success": true,
           "kind": "synthetic",
+          "labelling_cap": 1089,
           "private_cells": 378,
           "shape": [
             33,
@@ -180,23 +185,24 @@
           "cell_count": 1089,
           "component_cells": 277,
           "eager": {
-            "maximum_ms": 8.608639,
-            "median_ms": 8.126977,
-            "minimum_ms": 7.669109,
-            "p95_ms": 8.512617,
+            "maximum_ms": 8.532683,
+            "median_ms": 8.1851075,
+            "minimum_ms": 7.727521,
+            "p95_ms": 8.3643935,
             "repetitions": 50
           },
           "eager_jit_equal": true,
           "expected_partition_match": true,
           "jit": {
-            "maximum_ms": 8.299605,
-            "median_ms": 7.8429035,
-            "minimum_ms": 7.368581,
-            "p95_ms": 8.1346316,
+            "maximum_ms": 8.435344,
+            "median_ms": 8.096529,
+            "minimum_ms": 7.551049,
+            "p95_ms": 8.2566476,
             "repetitions": 50
           },
           "jit_compile_success": true,
           "kind": "committed_cache",
+          "labelling_cap": 1089,
           "private_cells": 20,
           "shape": [
             33,
@@ -210,23 +216,24 @@
           "cell_count": 1089,
           "component_cells": 244,
           "eager": {
-            "maximum_ms": 8.638828,
-            "median_ms": 8.123177,
-            "minimum_ms": 7.557325,
-            "p95_ms": 8.52825905,
+            "maximum_ms": 8.434991,
+            "median_ms": 8.1725445,
+            "minimum_ms": 7.5449,
+            "p95_ms": 8.42347945,
             "repetitions": 50
           },
           "eager_jit_equal": true,
           "expected_partition_match": true,
           "jit": {
-            "maximum_ms": 8.463031,
-            "median_ms": 7.817268,
-            "minimum_ms": 7.157445,
-            "p95_ms": 8.23245215,
+            "maximum_ms": 8.299447,
+            "median_ms": 8.085859,
+            "minimum_ms": 7.506378,
+            "p95_ms": 8.26271485,
             "repetitions": 50
           },
           "jit_compile_success": true,
           "kind": "committed_cache",
+          "labelling_cap": 1089,
           "private_cells": 33,
           "shape": [
             33,
@@ -240,23 +247,24 @@
           "cell_count": 81,
           "component_cells": 19,
           "eager": {
-            "maximum_ms": 1.729856,
-            "median_ms": 1.0144965,
-            "minimum_ms": 0.72687,
-            "p95_ms": 1.5313516499999997,
+            "maximum_ms": 2.045454,
+            "median_ms": 1.707894,
+            "minimum_ms": 0.987357,
+            "p95_ms": 2.0060354499999997,
             "repetitions": 50
           },
           "eager_jit_equal": true,
           "expected_partition_match": true,
           "jit": {
-            "maximum_ms": 1.757472,
-            "median_ms": 1.049732,
-            "minimum_ms": 0.678035,
-            "p95_ms": 1.5376559999999997,
+            "maximum_ms": 1.931008,
+            "median_ms": 1.5759210000000001,
+            "minimum_ms": 1.141505,
+            "p95_ms": 1.85748575,
             "repetitions": 50
           },
           "jit_compile_success": true,
           "kind": "synthetic",
+          "labelling_cap": 81,
           "private_cells": 26,
           "shape": [
             9,
@@ -270,23 +278,24 @@
           "cell_count": 289,
           "component_cells": 83,
           "eager": {
-            "maximum_ms": 2.971269,
-            "median_ms": 2.4964915000000003,
-            "minimum_ms": 2.067611,
-            "p95_ms": 2.7573146,
+            "maximum_ms": 3.157164,
+            "median_ms": 2.935158,
+            "minimum_ms": 2.470526,
+            "p95_ms": 3.1019842,
             "repetitions": 50
           },
           "eager_jit_equal": true,
           "expected_partition_match": true,
           "jit": {
-            "maximum_ms": 3.171435,
-            "median_ms": 2.8518445,
-            "minimum_ms": 2.424143,
-            "p95_ms": 3.1378585500000002,
+            "maximum_ms": 3.285202,
+            "median_ms": 3.0109645,
+            "minimum_ms": 2.680322,
+            "p95_ms": 3.17217845,
             "repetitions": 50
           },
           "jit_compile_success": true,
           "kind": "synthetic",
+          "labelling_cap": 289,
           "private_cells": 98,
           "shape": [
             17,
@@ -300,23 +309,24 @@
           "cell_count": 1089,
           "component_cells": 347,
           "eager": {
-            "maximum_ms": 8.537498,
-            "median_ms": 8.072495499999999,
-            "minimum_ms": 7.458041,
-            "p95_ms": 8.421211099999999,
+            "maximum_ms": 8.373508,
+            "median_ms": 8.0341235,
+            "minimum_ms": 7.593721,
+            "p95_ms": 8.3354241,
             "repetitions": 50
           },
           "eager_jit_equal": true,
           "expected_partition_match": true,
           "jit": {
-            "maximum_ms": 8.271404,
-            "median_ms": 8.016473,
-            "minimum_ms": 7.686897,
-            "p95_ms": 8.18935125,
+            "maximum_ms": 8.36258,
+            "median_ms": 7.9912665,
+            "minimum_ms": 7.712541,
+            "p95_ms": 8.268352499999999,
             "repetitions": 50
           },
           "jit_compile_success": true,
           "kind": "synthetic",
+          "labelling_cap": 1089,
           "private_cells": 378,
           "shape": [
             33,
@@ -337,6 +347,7 @@
     "eager_definition": "Python-level production adapter with its existing inner device kernels",
     "interactive_p95_budget_ms": 125.0,
     "jit_definition": "one outer jax.jit over the production adapter",
+    "labelling_cap_rule": "confined.size",
     "minimum_repetitions": 50,
     "repetitions": 50,
     "timing_scope": "warm synchronized calls; compilation excluded"
@@ -345,7 +356,7 @@
   "source": {
     "committed_operands": "docs/figures/topology-visual-corroboration/mast-topology-operands.npz",
     "generator": "benchmarks/domain_partition_performance.py",
-    "git_commit": "36725e1b48cbe678da03830af53e7364e9cbd621",
+    "git_commit": "3582c078be11c7e4e7961127f6290c1db5989508",
     "production_callable": "nova.equilibrium.domain.axis_connected_component"
   },
   "static_control_flow": {
@@ -356,6 +367,7 @@
         "data_dependent_while_loop_count": 0,
         "expected_partition_trip_count": 1089,
         "fixed_trip_match": true,
+        "labelling_cap": 1089,
         "passed": true,
         "scan_lengths": [
           1089
@@ -371,6 +383,7 @@
         "data_dependent_while_loop_count": 0,
         "expected_partition_trip_count": 1089,
         "fixed_trip_match": true,
+        "labelling_cap": 1089,
         "passed": true,
         "scan_lengths": [
           1089
@@ -386,6 +399,7 @@
         "data_dependent_while_loop_count": 0,
         "expected_partition_trip_count": 81,
         "fixed_trip_match": true,
+        "labelling_cap": 81,
         "passed": true,
         "scan_lengths": [
           81
@@ -401,6 +415,7 @@
         "data_dependent_while_loop_count": 0,
         "expected_partition_trip_count": 289,
         "fixed_trip_match": true,
+        "labelling_cap": 289,
         "passed": true,
         "scan_lengths": [
           289
@@ -416,6 +431,7 @@
         "data_dependent_while_loop_count": 0,
         "expected_partition_trip_count": 1089,
         "fixed_trip_match": true,
+        "labelling_cap": 1089,
         "passed": true,
         "scan_lengths": [
           1089

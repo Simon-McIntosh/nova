@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="domain-partition-shadow-rca">
+  <meta name="plan-title" content="Domain Partition Shadow Root-cause Analysis">
+  <meta name="plan-summary" content="Production half-plane partition RCA, separate wall-notch O-point defect, contamination ledger, fixes, and controlled rerun order">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-informs" content="efit-baseline-demonstration">
+  <meta name="plan-source" content="crew/reports/s16-veracity-20260826/rca-shadow-flood.md">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-reviewed-at" content="2026-08-26">
+  <meta name="plan-read" content="1">
+  <meta name="plan-tags" content="equilibrium,topology,efit,mast,diii-d">
+  <title>Domain Partition Shadow Root-cause Analysis | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Research record &middot; production topology partition</p>
+      <h1>Domain partition shadow root-cause analysis</h1>
+      <p class="lead">
+        The false private-flux shadow in the MAST topology panels is a production
+        domain-partition defect, not a rendering error and not a defect in the
+        saddle-aware hex flood. The 21985/51 wall-notch O/X pair is a second,
+        upstream selection defect. Both must be corrected before dependent
+        end-to-end results can receive scientific credit.
+      </p>
+    </header>
+
+    <aside>
+      <p>
+        <strong>Current disposition: HOLD.</strong> Do not regenerate banks, score
+        the comparator, credit achieved classes, or score the demonstration
+        thresholds from the affected terminal states. The production repairs and
+        the complete rerun sequence in <a href="#rerun-order">Required rerun
+        order</a> must land first.
+      </p>
+    </aside>
+
+    <section id="verdict">
+      <h2>Headline verdict</h2>
+      <p>
+        <strong>Root cause found in the production domain partition.</strong>
+        The visual generator faithfully plots
+        <code>profile.operator.read(state).masks.label</code>. That production read
+        reaches <code>Topology.read_with_connectivity</code>, where the
+        <code>connected</code> operand is still <code>Topology.x_mask</code>: a
+        conjunction of horizontal half-plane tests at every finite X-point. It is
+        not a graph-connectivity flood. Closed cells rejected by those cuts are
+        labelled <code>PRIVATE_FLUX</code>, and the same mask qualifies the core
+        support used by the production residual.
+      </p>
+      <p>
+        The actual saddle-aware hex flood used for connectivity material,
+        reachable-wall selection, and <code>ForwardTopologyState.class_margin</code>
+        is a separate mechanism and is clean with respect to the half-plane defect.
+        Its existing MAST results are nevertheless not clean for credit, because
+        they consume terminal fields produced through the defective residual
+        partition.
+      </p>
+      <p>
+        <strong>The 21985/51 top-wall primary O/X selection has a separate root
+        cause.</strong> O and X are selected before either the legacy mask or the hex
+        flood. The O-point selector takes an unqualified global extremum at the
+        upper wall notch; admitting the nearest excluded material cell prevents an
+        empty seed, but it does not validate that candidate as the plasma axis.
+      </p>
+    </section>
+
+    <section id="observed-defect">
+      <h2>Observed defect</h2>
+      <p>
+        The panels below are intentionally retained as defect evidence. Purple is
+        the serialized production <code>PRIVATE_FLUX</code> label, not a
+        post-processing reconstruction. The first panel shows the false horizontal
+        shadow within the closed plasma region; the second shows the independently
+        defective top-wall O/X selection and its tiny unresolved component.
+      </p>
+      <figure>
+        <img src="/nova/figures/topology-visual-corroboration/01-mast-21978-35-pure.png"
+             alt="MAST 21978/35 pure topology panel showing a large purple private-flux region horizontally cutting through the plasma interior inside the EFIT LCFS.">
+        <figcaption>
+          MAST 21978/35 pure. The production label contains 118 core cells and
+          179 private-flux cells, while the independently banked saddle-aware hex
+          axis component contains 277 cells. Of the private cells, 132 have
+          centroids inside the EFIT LCFS.
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="/nova/figures/topology-visual-corroboration/05-mast-21985-51-pure.png"
+             alt="MAST 21985/51 pure topology panel showing the selected primary O-point and X-point at the upper wall notch with a tiny closed region.">
+        <figcaption>
+          MAST 21985/51 pure. The selected O is approximately
+          <code>(R,Z)=(0.472,1.795) m</code> and the selected X approximately
+          <code>(0.366,1.908) m</code>. Its owner cell is force-admitted, yet the
+          repaired hex component contains only one cell and still has no resolved
+          boundary.
+        </figcaption>
+      </figure>
+    </section>
+
+    <section id="mechanism-trace">
+      <h2>Mechanism trace: field to false interior shadow</h2>
+      <ol>
+        <li>
+          <p>
+            The figure generator calls <code>profile.operator.read(state)</code>,
+            stores <code>masks.label</code> as <code>domain_labels</code>, and plots
+            every value equal to <code>PlasmaDomain.PRIVATE_FLUX</code> in purple.
+            It performs no renderer-side spatial classification.
+            <strong>Citation:</strong>
+            <code>docs/figures/topology-visual-corroboration/generate_topology_visuals.py:133&ndash;139,168&ndash;173,357&ndash;385</code>.
+          </p>
+        </li>
+        <li>
+          <p>
+            <code>ForwardFluxOperator.read</code> slices the physical field and
+            delegates mask construction to <code>_fixed_design_read</code>. That
+            helper performs a second read after admitting the axis-owning material
+            cell, but both reads still call
+            <code>Topology.read_with_connectivity</code>.
+            <strong>Citation:</strong>
+            <code>nova/equilibrium/forward_operator.py:486&ndash;502,572&ndash;590</code>.
+          </p>
+        </li>
+        <li>
+          <p>
+            <code>Topology.read_with_connectivity</code> selects O, X, wall, and
+            boundary landmarks, then sets
+            <code>connected = self.x_mask(data_o, vmap_x)</code>. Despite the
+            method name, this operand has neither a seed nor an adjacency graph.
+            <strong>Citation:</strong>
+            <code>nova/equilibrium/topology.py:360&ndash;385</code>.
+          </p>
+        </li>
+        <li>
+          <p>
+            <code>x_mask</code> loops over every finite X candidate. For a
+            candidate below the O-point it keeps cells with
+            <code>Z &gt; Z_X</code>; for one above the O-point it keeps cells with
+            <code>Z &lt; Z_X</code>. Logical AND combines all cuts. Radial position,
+            separatrix contours, shared hex edges, and axis reachability are absent,
+            so any finite interior or side-wall saddle casts an infinite horizontal
+            shadow across the machine.
+            <strong>Citation:</strong>
+            <code>nova/equilibrium/topology.py:277&ndash;297</code>.
+          </p>
+        </li>
+        <li>
+          <p>
+            <code>classify_domains</code> maps <code>closed &amp; connected</code> to
+            <code>CORE</code> and <code>closed &amp; ~connected</code> to
+            <code>PRIVATE_FLUX</code>. This converts the half-plane rejection
+            directly into the false purple region.
+            <strong>Citation:</strong>
+            <code>nova/equilibrium/domain.py:101&ndash;124</code>.
+          </p>
+        </li>
+        <li>
+          <p>
+            The path is production-active. <code>_support_partition</code>
+            receives the same <code>connected</code> operand, applies
+            <code>core_support.qualify(connected)</code>, and passes the masks and
+            qualified support into <code>source.current_moments</code>. The
+            converged terminal state is therefore a root of a residual whose
+            source participation already used the false partition.
+            <strong>Citation:</strong>
+            <code>nova/equilibrium/forward_operator.py:692&ndash;718</code>.
+          </p>
+        </li>
+      </ol>
+    </section>
+
+    <section id="quantitative-reproduction">
+      <h2>Quantitative reproduction</h2>
+      <p>
+        An independent reconstruction of the exact half-plane conjunction from
+        the committed MAST operand cache reproduced the serialized core mask with
+        <strong>zero cell mismatches</strong> on both 21978/35 arms. This rules out
+        antialiasing, cache reshaping, and Matplotlib polygon handling as causes.
+      </p>
+      <table>
+        <caption>Legacy production partition versus the independent saddle-aware hex component</caption>
+        <thead>
+          <tr>
+            <th scope="col">Arm</th>
+            <th scope="col">Legacy core</th>
+            <th scope="col">Legacy private</th>
+            <th scope="col">Private centroids inside EFIT LCFS</th>
+            <th scope="col">Hex axis component</th>
+            <th scope="col">Half-plane mismatches</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">21978/35 pure</th>
+            <td>118</td>
+            <td>179</td>
+            <td>132</td>
+            <td>277</td>
+            <td>0</td>
+          </tr>
+          <tr>
+            <th scope="row">21978/35 mixed</th>
+            <td>116</td>
+            <td>161</td>
+            <td>124</td>
+            <td>244</td>
+            <td>0</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="hex-path">
+      <h2>The saddle-aware hex path: clean mechanism, contaminated terminal inputs</h2>
+      <p>
+        The true connectivity implementation propagates the axis component over a
+        half-offset hex graph and blocks shared-edge links that cross the saddle
+        level. At the binding level it forms <code>confined_star</code>, floods
+        from the seed, and counts the connected region. Reachable-wall selection
+        separately constructs the pre-saddle axis component and keeps only wall
+        nodes reachable from it.
+        <strong>Citation:</strong>
+        <code>nova/equilibrium/connectivity_boundary.py:20&ndash;45,339&ndash;386,979&ndash;1014,1157&ndash;1159</code>.
+      </p>
+      <table>
+        <caption>Disposition of the current connectivity and topology outputs</caption>
+        <thead>
+          <tr><th scope="col">Item</th><th scope="col">Mechanism verdict</th><th scope="col">Qualification</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Connectivity material</th>
+            <td><strong>Clean relative to the visual defect</strong></td>
+            <td>
+              <code>axis_cell_seed</code> admits exactly the nearest owner cell;
+              <code>_connectivity_class_margin</code> passes the repaired material
+              to <code>traced_boundary_read</code>.
+              <code>nova/equilibrium/forward_operator.py:66&ndash;83,527&ndash;559</code>.
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Achieved-class margin algorithm</th>
+            <td><strong>Clean relative to the visual defect</strong></td>
+            <td>
+              <code>class_margin</code> comes from the separate connectivity
+              callback, not from <code>masks.label</code> or the legacy diverted
+              flag. <code>nova/equilibrium/forward_operator.py:88&ndash;129,572&ndash;590</code>.
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">End-to-end MAST margin results</th>
+            <td><strong>Not clean for credit</strong></td>
+            <td>
+              A clean comparator evaluated on a terminal field generated by the
+              defective half-plane residual does not validate that field. Every
+              frozen MAST arm must be re-solved after repair; 21985/51 also carries
+              the independently bad wall-notch axis.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="wall-notch-selection">
+      <h2>Separate 21985/51 root cause: unqualified global O-point selection</h2>
+      <p>
+        <code>Topology.o_point_index</code> selects
+        <code>nanargmax(polarity * o_psi)</code> across all O candidates without
+        material, wall-polygon, component-size, or resolved-boundary qualification.
+        <code>x_point_index</code> then selects the X candidate relative to that
+        already chosen O. Both decisions precede the legacy mask and the true
+        connectivity read.
+        <strong>Citation:</strong>
+        <code>nova/equilibrium/topology.py:164&ndash;175,192&ndash;202,360&ndash;385</code>.
+      </p>
+      <p>
+        For both 21985/51 arms, the selected continuous axis owns the cell centred
+        at approximately <code>(0.484375,1.75) m</code>. The original material
+        excludes that cell, so one cell is admitted. The original connected
+        component contains zero cells, the repaired component contains only one,
+        and neither read finds a boundary. Other central and lower stationary
+        candidates exist, so the top-wall pair is a selection result rather than
+        an absence of alternatives.
+      </p>
+      <p>
+        <strong>Relationship verdict:</strong> this is a separate upstream
+        selection defect. It shares downstream seed and comparator machinery only
+        after the invalid O is chosen. Correcting the 21978 half-plane shadow will
+        not correct the 21985/51 wall-notch selection.
+      </p>
+    </section>
+
+    <section id="contamination-ledger">
+      <h2>Artifact contamination ledger</h2>
+      <table>
+        <caption>Authority retained or withdrawn for affected artifacts and results</caption>
+        <thead>
+          <tr>
+            <th scope="col">Artifact or result</th>
+            <th scope="col">Verdict</th>
+            <th scope="col">Evidence and scope</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">
+              <code>docs/evidence/topology-visual-corroboration.html</code>,
+              17 panels, and both operand caches
+            </th>
+            <td><strong>Contaminated domain layer</strong></td>
+            <td>
+              Every MAST row and injected DIII-D row serializes
+              <code>operator.read(...).masks.label</code>, so the domain labels are
+              the legacy half-plane partition. O/X, boundary, and EFIT coordinates
+              remain useful as raw landmarks, but the claimed hex-flood domains and
+              purple counts are false. The 21985 overlay also exposes the separate
+              selection defect.
+              <code>docs/figures/topology-visual-corroboration/generate_topology_visuals.py:133&ndash;139,200&ndash;205,257&ndash;263</code>.
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">
+              <code>docs/figures/profile-owned-solve-domain/axis-seed-census.json</code>
+              and its panel
+            </th>
+            <td><strong>Clean diagnostic and control</strong></td>
+            <td>
+              The census deliberately compares original and repaired material,
+              calls the actual <code>traced_boundary_read</code>, and reconstructs
+              the flood at its returned binding level. Its claims remain narrow:
+              12/12 owner containment, three one-cell repairs, 15/15
+              empty-to-nonempty recoveries, and no convergence claim. It also
+              proves the 21985 repaired component is only one cell with no boundary.
+              <code>benchmarks/axis_seed_census.py:91&ndash;197</code>.
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">
+              MAST primary-X/LCFS corroboration bank
+              <code>docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json</code>
+              and its panel
+            </th>
+            <td><strong>Contaminated and stale; inadmissible</strong></td>
+            <td>
+              Its adapter discards <code>_masks</code>, while
+              <code>_post_cutover_geometry</code> passes raw
+              <code>operator.inside_material</code> instead of the repaired
+              connectivity material. Regeneration failed closed at 21985/51 on
+              production-versus-diagnostic material mismatch; prior hashes stayed
+              unchanged and all demonstration thresholds remained unscored. Even
+              after the adapter seam is repaired, 21978 must be re-solved and 21985
+              requires qualified O selection.
+              <code>docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py:214&ndash;244,416&ndash;440</code>.
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">DIII-D forward and corroboration bank</th>
+            <td><strong>No new clean scientific credit</strong></td>
+            <td>
+              Its visual domain overlays use the same half-plane label path. The
+              exact current class-margin path is mechanically clean, but all five
+              declared rows remain <strong>NONCONVERGED</strong> and no current
+              comparator-regenerated bank was admitted. This RCA converts no
+              DIII-D failure into a pass.
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">
+              Current production <code>ForwardTopologyState.diverted</code> and
+              <code>class_margin</code> comparator
+            </th>
+            <td><strong>Mechanism clean; result re-evaluation required</strong></td>
+            <td>
+              The public Boolean is derived from the repaired-material,
+              saddle-aware margin rather than the legacy labels. Existing frozen
+              class strings are not current authority: five of twelve legacy
+              strings contradict the comparator. MAST fields must be recomputed
+              because the residual used the bad partition; 21985 margins also use
+              the invalid wall-notch axis.
+              <code>nova/equilibrium/forward_operator.py:88&ndash;129,527&ndash;590</code>.
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">
+              <code>docs/figures/dual-branch-selection/pinned-branch-contrast.json</code>
+            </th>
+            <td><strong>Mixed: margins diagnostic, class strings contaminated</strong></td>
+            <td>
+              Exact margin diagnostics use current repaired material through
+              <code>_terminal_xpoint_diagnostics</code>, but smooth
+              <code>p_diverted</code> still receives raw material. The bank already
+              contains five of twelve legacy-class contradictions. Remeasure all
+              MAST observables after both production fixes.
+              <code>benchmarks/pinned_branch_contrast.py:113&ndash;174</code>.
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">
+              Wall-resolution ladder receipt
+              <code>docs/figures/efit-baseline-demonstration/wall-resolution-ladder/receipt.json</code>
+            </th>
+            <td><strong>Contaminated topology operands; independent HOLD retained</strong></td>
+            <td>
+              <code>_posthoc_margin_read</code> passes raw material for the 21985
+              reference, and the terminal field was solved through the bad residual
+              partition. Regenerate its margin, class, boundary operand and flux,
+              and contact coordinate after both fixes. Carrier and trajectory
+              identities remain valid provenance for the old experiment, not
+              topology validation. The independent exact-control and stopping-count
+              disposition remains HOLD.
+              <code>benchmarks/wall_resolution_ladder.py:385&ndash;421</code>.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="minimal-fixes">
+      <h2>Minimal correct fixes</h2>
+      <h3>Replace the 21978 half-plane partition at production authority</h3>
+      <p>
+        Replace <code>Topology.x_mask</code> as the <code>connected</code> authority
+        in <code>Topology.read_with_connectivity</code> with the actual
+        saddle-aware hex axis component at the selected boundary level, reusing
+        the existing connectivity primitives. Do not create a second flood
+        implementation and do not patch only the visual generator. The corrected
+        <code>DomainMasks</code> must be the single partition consumed by
+        <code>_support_partition</code>, current moments, observations, and
+        evidence.
+      </p>
+      <p>
+        Add a regression over the committed 21978 operands requiring the public
+        core/private partition to equal the hex component and explicitly rejecting
+        the current <code>118/179</code> and <code>116/161</code> half-plane
+        partitions. Once repaired, the generator may continue plotting
+        <code>operator.read(...).masks.label</code>, guarded by an assertion that
+        the label partition derives from the same hex component.
+      </p>
+
+      <h3>Qualify O candidates before 21985/51 selection</h3>
+      <p>
+        Before <code>o_point_data</code> may select an O candidate, require it to
+        lie inside the governed material geometry and seed a nontrivial
+        axis-connected component with a resolved boundary. Fix the primary O first,
+        then select the primary X relative to it. One owner-cell admission may
+        remain for a geometrically valid wall-trimmed candidate; it cannot serve as
+        the candidate-validation mechanism.
+      </p>
+
+      <h3>Repair adapter material consistency</h3>
+      <p>
+        Route every exact margin diagnostic through
+        <code>connectivity_axis_seed(topology.axis)</code> before reshaping the
+        material, matching the current exact diagnostic path at
+        <code>benchmarks/diiid_forward_gs_match.py:2173&ndash;2215</code>. At minimum,
+        repair <code>efit_topology_corroboration._post_cutover_geometry</code> and
+        <code>wall_resolution_ladder._posthoc_margin_read</code>. Keep diagnostic
+        versus production equality fail-closed.
+      </p>
+    </section>
+
+    <section id="rerun-order">
+      <h2>Required five-step rerun order</h2>
+      <ol>
+        <li>
+          <p>
+            Re-solve all 12 frozen MAST arms from their original banked seeds with
+            the corrected production domain partition. No old convergence,
+            residual, branch, or achieved-class credit transfers automatically.
+          </p>
+        </li>
+        <li>
+          <p>
+            Require 21985/51 to select a qualified non-wall-notch O and produce a
+            nontrivial resolved hex component. Otherwise retain a named failure row.
+          </p>
+        </li>
+        <li>
+          <p>
+            Regenerate the axis census as a no-regression control, then the MAST
+            and DIII-D corroboration banks, then all 17 topology panels. Preserve
+            every DIII-D <strong>NONCONVERGED</strong> qualification unless a fresh
+            solve independently clears it.
+          </p>
+        </li>
+        <li>
+          <p>
+            Regenerate comparator-class and pinned-branch artifacts and the wall
+            ladder from corrected terminal states. Retain the wall ladder's
+            independent exact-control and resolution HOLD unless those gates
+            separately clear.
+          </p>
+        </li>
+        <li>
+          <p>
+            Only after the preceding evidence is admitted, score the locked
+            demonstration gates: class agreement at least <strong>7/12</strong>,
+            worst eligible closed-boundary RMS at most <strong>0.55 m</strong>, and
+            worst polished-saddle distance at most <strong>0.04 m</strong>.
+          </p>
+        </li>
+      </ol>
+    </section>
+
+    <section id="provenance">
+      <h2>Evidence provenance and limits</h2>
+      <p>
+        This durable record was authored from
+        <code>crew/reports/s16-veracity-20260826/rca-shadow-flood.md</code>. The
+        originating investigation audited repository commit
+        <code>4361778cfe5b9d27c857f71330133da568f87e5e</code> read-only. Its cached-mask
+        audit reproduced both 21978/35 arms with zero mismatches; its landmark
+        census retained candidate coordinates, label counts, EFIT containment,
+        and vertical ranges. The observed PNGs above are retained as failure
+        evidence, not accepted topology authority.
+      </p>
+      <p>
+        The analysis distinguishes mechanism integrity from end-to-end scientific
+        validity. A clean hex flood and class-margin implementation do not make a
+        result clean when the terminal field was solved under the defective
+        partition. Likewise, correcting the partition does not validate the
+        independent 21985/51 wall-notch O-point. Both repairs and the ordered rerun
+        are required.
+      </p>
+    </section>
+  </main>
+</body>
+</html>

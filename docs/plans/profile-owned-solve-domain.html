@@ -79,6 +79,18 @@
     topology-domain selection at <code>nova/equilibrium/source.py:608-679</code>, per the
     extraction seam map.</p>
 
+    <p><strong>The flood fill runs on the hex plasma cells.</strong> Lead directive, 2026-08-26:
+    topology labelling operates on the production hexagonal plasma mesh, consuming the flux already
+    evaluated at hex cell centroids and nodes by the solve — never on a separate rectangular lattice,
+    and never re-evaluating flux for a topology pass. The machinery exists: centre-first
+    six-neighbour rings from <code>hex_stencil</code>, physical shared-edge segments from the
+    existing tensor axes, and <code>hex_edge_admissibility</code> evaluated from the global tensor
+    spline are the production classification partition (commit <code>80706f89</code>) — plain
+    six-neighbour adjacency bridges the saddle and must not return. What this section retires is any
+    remaining rectangular-proxy component labelling on the primary-X/shadow path, including the
+    4-connected rect kernel, so the solve's residual mask and the classification read share one hex
+    partition fed by one flux evaluation.</p>
+
     <p><strong>Method requirements.</strong> GPU fixed shapes throughout: fixed trip counts, no
     data-dependent compaction, no host callbacks. The conservation acceptance registry must be
     rescored — divergence identities live on the commuting production route with failable envelopes
@@ -153,6 +165,18 @@
         participates and true exterior cells get j = 0 from the profile, which handles the
         scrape-off region. Treating the domain is unnecessary once the domain discontinuity itself
         is removed from the residual.</p>
+      </div>
+      <div class="r-dec" data-key="flood-fill-geometry" data-choice="hex-plasma-cells" data-by="Simon McIntosh" data-when="2026-08-26T00:00:00+00:00">
+        <p class="r-dec-q">What geometry does the topology flood fill operate on?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="rect-lattice">rectangular proxy lattice</button>
+          <button class="r-opt chosen" data-value="hex-plasma-cells">the hex plasma cells, on already-computed centroid/node flux</button>
+        </p>
+        <p class="r-dec-rat">Lead directive: flux is already computed on the hex cell centroids and
+        nodes; repeating that computation on a rectangular lattice for a topology pass is wasted
+        effort, and the rect kernel's 4-connectivity was only ever accidentally correct at the
+        saddle. The flood fill uses the hex mesh with shared-edge admissibility from the global
+        spline, sharing one partition between the residual mask and the classification read.</p>
       </div>
       <div class="r-dec" data-key="limited-configuration-normalization" data-choice="" data-by="" data-when="">
         <p class="r-dec-q">Under the profile-owned domain, how does a limited configuration

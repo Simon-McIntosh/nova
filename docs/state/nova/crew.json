@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T14:44:46",
+  "updated": "2026-08-26T14:49:43",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -173,7 +173,10 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a0297c-1e24-71b2-b0d7-59d69aba6e9e",
-        "created": "2026-08-22"
+        "created": "2026-08-22",
+        "sessions": {
+          "gpt-5.6-sol": "01a03e14-411d-7ed1-9878-34896255aa65"
+        }
       },
       {
         "id": "chain-factory",
@@ -41326,9 +41329,159 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T123822398891-sse-comparator-seam-audit",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a74",
+        "node": "sse-comparator-seam-audit",
+        "node_definition": {
+          "done_when": "A durable read-only manifest names both current comparator implementations and bank artifacts, the minimal shared module API for topology class plus symmetric sup/RMS/X distances, exact consumer write paths and tests, regeneration commands and data prerequisites, and any authority or capacity blockers; no repository files change.",
+          "estimated_hours": 0.5,
+          "goal": "Map the exact shared closed-boundary comparator seam and regeneration commands for the MAST and DIII-D EFIT banks.",
+          "id": "sse-comparator-seam-audit",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-comparator-seam-audit.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-comparator-seam-audit.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "exact",
+        "member": "ccfs-scout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-26T12:38:29Z",
+        "completed_at": "2026-08-26T12:48:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 622,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 622,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "1586b37d0a370fe7c9420c1837453ca0561ff29a",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-comparator-seam-audit.md",
+        "scope_changed": false,
+        "session_id": "01a03e14-411d-7ed1-9878-34896255aa65",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5678336,
+            "cached_input_tokens_cumulative": 5678336,
+            "input_tokens": 5892051,
+            "input_tokens_cumulative": 5892051,
+            "output_tokens": 22525,
+            "output_tokens_cumulative": 22525,
+            "reasoning_output_tokens": 8170,
+            "reasoning_output_tokens_cumulative": 8170
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 745,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 4345,
+              "log_age_seconds": 304,
+              "log_fresh": true,
+              "manifest_commits": [
+                "c48e13c1"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.codex/scratch/nova-s16-20260826/pod-seed-manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T111438066261-pod-seed-repair --gate <verdict> --commit c48e13c1",
+              "node": "pod-seed-repair",
+              "phase": "working",
+              "plan": "profile-owned-solve-domain",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T111438066261-pod-seed-repair",
+              "terminal_age_seconds": 340,
+              "terminal_at": "2026-08-26T12:32:45Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-seed-repair"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 614,
+              "budget_seconds": 2100,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: HOLD because the machine-readable receipt does not immutably bind the solved terminal plasma carrier and declares the 37-row control reproduced despite two direct response-row audits being non-exact and excluded from the pass predicate. The named tests and validation command pass; but they do not test or enforce these requirements; the limiter operand also remains numerically unresolved at 288 targets as explicitly banked above.",
+              "elapsed_seconds": 2714,
+              "log_age_seconds": 2129,
+              "log_fresh": false,
+              "manifest_commits": [
+                "c4f7e50596522a3dde47c60564de06cfd46c461f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-wall-verify.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-wall-verify.md; resolve the blocker before resuming the run",
+              "node": "pod-wall-resolution-ladder-verify",
+              "phase": "starting",
+              "plan": "profile-owned-solve-domain",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T115222145326-pod-wall-resolution-ladder-verify",
+              "terminal_age_seconds": 2157,
+              "terminal_at": "2026-08-26T12:02:28Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-wall-resolution-ladder-verify"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 939
+    "_version": 941
   }
 }

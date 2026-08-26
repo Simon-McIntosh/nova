@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T14:49:43",
+  "updated": "2026-08-26T14:51:30",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -41479,9 +41479,170 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T124314350815-pod-wall-ladder-hold-reverify",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a75",
+        "node": "pod-wall-ladder-hold-reverify",
+        "node_definition": {
+          "done_when": "One captured CPU pytest invocation reports 14 passing tests; standalone receipt validation exits 1 specifically because the source-to-wall and prescribed-wall direct control rows are not bitwise exact; independent recomputation confirms the bound terminal plasma-flux digest, identical row/top-level carrier maps, exact residual-trajectory digests, no numerical tolerance, and null limiter-stop and plasma-equivalent counts; manifest states PASS for verification or HOLD if any authority check fails.",
+          "estimated_hours": 1.0,
+          "goal": "Independently verify the repaired wall-resolution ladder, its fail-closed carrier and trajectory identities, and the retained scientific HOLD in commits c4f7e505 and b3c4097e.",
+          "id": "pod-wall-ladder-hold-reverify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-wall-reverify.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-wall-reverify.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "reference-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T12:43:20Z",
+        "completed_at": "2026-08-26T12:49:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 387,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 387,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "b3c4097ed86f7eef881e03bed5b8ff7b761015b8",
+        "commits": [
+          "c4f7e50596522a3dde47c60564de06cfd46c461f",
+          "b3c4097ed86f7eef881e03bed5b8ff7b761015b8"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu PYTHONPATH=\"$PWD\" uv run --no-sync pytest -p no:cacheprovider tests/test_wall_resolution_ladder.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T124314350815-pod-wall-ladder-hold-reverify/stream.jsonl",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-wall-reverify.md",
+        "scope_changed": false,
+        "session_id": "01a03dcf-5590-7da3-a313-132579fd951f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2117888,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2266046,
+            "output_tokens": 1254,
+            "output_tokens_cumulative": 11233,
+            "reasoning_output_tokens": 20,
+            "reasoning_output_tokens_cumulative": 3830
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1048,
+              "log_age_seconds": 289,
+              "log_fresh": true,
+              "manifest_commits": [
+                "c4f7e50596522a3dde47c60564de06cfd46c461f b3c4097ed86f7eef881e03bed5b8ff7b761015b8"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.codex/scratch/nova-s16-20260826/pod-wall-manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T111657805648-pod-wall-resolution-ladder --gate <verdict> --commit c4f7e50596522a3dde47c60564de06cfd46c461f b3c4097ed86f7eef881e03bed5b8ff7b761015b8",
+              "node": "pod-wall-resolution-ladder",
+              "phase": "working",
+              "plan": "profile-owned-solve-domain",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T111657805648-pod-wall-resolution-ladder",
+              "terminal_age_seconds": 309,
+              "terminal_at": "2026-08-26T12:38:08Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-wall-resolution-ladder"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 905,
+              "budget_seconds": 2100,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: HOLD because the machine-readable receipt does not immutably bind the solved terminal plasma carrier and declares the 37-row control reproduced despite two direct response-row audits being non-exact and excluded from the pass predicate. The named tests and validation command pass; but they do not test or enforce these requirements; the limiter operand also remains numerically unresolved at 288 targets as explicitly banked above.",
+              "elapsed_seconds": 3005,
+              "log_age_seconds": 2421,
+              "log_fresh": false,
+              "manifest_commits": [
+                "c4f7e50596522a3dde47c60564de06cfd46c461f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-wall-verify.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-wall-verify.md; resolve the blocker before resuming the run",
+              "node": "pod-wall-resolution-ladder-verify",
+              "phase": "starting",
+              "plan": "profile-owned-solve-domain",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T115222145326-pod-wall-resolution-ladder-verify",
+              "terminal_age_seconds": 2448,
+              "terminal_at": "2026-08-26T12:02:28Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-wall-resolution-ladder-verify"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest invocation",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 941
+    "_version": 942
   }
 }

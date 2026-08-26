@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T16:25:18",
+  "updated": "2026-08-26T16:28:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -45230,9 +45230,136 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T142338886281-sse-strict-json-nonfinite-verify",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a74",
+        "node": "sse-strict-json-nonfinite-verify",
+        "node_definition": {
+          "done_when": "One captured CPU x64 invocation passes tests/test_diiid_forward_gs_match.py with exactly three tests; independent inspection proves recursive normalization maps only non-finite numeric leaves to null, json.dumps uses allow_nan=False, five failed frame rows and failure reasons survive, finite values remain numeric, registered thresholds and supplied preregistration hashes remain exact, no JSON artifact changes, and the worktree stays clean.",
+          "estimated_hours": 0.5,
+          "goal": "Independently verify commit a31563e6 makes the DIII-D forward-GS receipt strict JSON without dropping failed frames, changing finite values, weakening scientific FAILs, or changing thresholds and preregistration identity.",
+          "id": "sse-strict-json-nonfinite-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-strict-json-nonfinite-verify.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-strict-json-nonfinite-verify.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "reference-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T14:23:49Z",
+        "completed_at": "2026-08-26T14:28:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 264,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 264,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "a31563e67bc8f474b53d92552f0ef9a77deba016",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "env VIRTUAL_ENV=/home/ITER/mcintos/Code/nova/.venv JAX_PLATFORMS=cpu JAX_ENABLE_X64=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD PYTHONDONTWRITEBYTECODE=1 uv run --no-sync pytest -o addopts= tests/test_diiid_forward_gs_match.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-strict-json-nonfinite-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-strict-json-nonfinite-verify.md",
+        "scope_changed": false,
+        "session_id": "01a03dcf-5590-7da3-a313-132579fd951f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 1521152,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 1614617,
+            "output_tokens": 1932,
+            "output_tokens_cumulative": 7891,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1462
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 774,
+              "log_age_seconds": 464,
+              "log_fresh": true,
+              "manifest_commits": [
+                "5fc7371b"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-measurement.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T141042566049-sse-h200-polish-measurement --gate <verdict> --commit 5fc7371b",
+              "node": "sse-h200-polish-measurement",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T141042566049-sse-h200-polish-measurement",
+              "terminal_age_seconds": 488,
+              "terminal_at": "2026-08-26T14:15:38Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-h200-polish-measurement"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 978
+    "_version": 979
   }
 }

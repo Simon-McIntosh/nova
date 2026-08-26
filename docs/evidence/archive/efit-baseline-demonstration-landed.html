@@ -114,6 +114,32 @@
     evidence references and two review-priority inversions remain named maintenance findings;
     neither was hidden or promoted into scientific evidence.</p>
 
+    <h2 id="metric-tolerance-verification">Metric-tolerance adjudication verification</h2>
+
+    <p><strong>Independent gate PASSED, 2026-08-26.</strong> The bank contains exactly
+    <strong>6 unique frozen shots × 17 unique paired quantities = 102 profiles</strong> and retains
+    <code>UNBOUNDED_FIRST_PASS</code>, <code>pass_fail_applied=false</code>, and
+    <code>tolerance_registered=false</code>. The verified decision recommendation is
+    <strong><code>report-only-first-pass</code></strong>; this gate verifies the adjudication and
+    provenance wiring, not cross-code validation.</p>
+
+    <table>
+      <caption>Verified tolerance facts and qualifications</caption>
+      <thead><tr><th scope="col">Item</th><th scope="col">Verified result</th></tr></thead>
+      <tbody>
+        <tr><td>Magnetic-axis distance</td><td>Inclusive ≤ 0.00101344 m; equality passes and the next larger binary64 value fails</td></tr>
+        <tr><td>Closed-boundary/LCFS distance</td><td>Inclusive ≤ 0.00033047 m; equality passes and the next larger binary64 value fails</td></tr>
+        <tr><td>Semantic identity</td><td><code>sha256:8df7a0a6c3f6162dbe0f226660bc069f37de8eb69f0f7c80bbfedc2bd4be220c</code></td></tr>
+        <tr><td>Geometry-bound authority</td><td>Both remain <strong>merely contained</strong>; neither four-times multiplier is derived by the cited artifact</td></tr>
+        <tr><td>Validation authority</td><td>No validation claim until a complete preregistered per-quantity contract passes on a held-out cohort</td></tr>
+      </tbody>
+    </table>
+
+    <p>The LCFS source-precision caveat remains visible: the displayed rounded basis
+    <code>0.008262 cm</code> multiplies to <code>0.00033048 m</code>, one <code>1e-8 m</code>
+    digit above the registered bound. The receipt contains but does not derive the exact registered
+    value; this verification does not authorize changing it.</p>
+
   </main>
 </body>
 </html>

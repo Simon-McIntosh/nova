@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S16">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="60">
+<meta name="plan-version" content="62">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -471,6 +471,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260826-mcg-veracity-review" data-who="reckon-d8-s16-veracity-review" data-when="2026-08-26T15:08:00+00:00">
     <div class="r-comment-body">Independent S16 veracity review (rev-mcg-veracity, codex read-only): AMPLIFIED_REPRESENTATION_DIFFERENCE is supported as a working diagnosis, NOT an exclusive causal attribution. Upheld: the 1e-10 gate was preregistered and failed (31/69, worst 1.1647e-05); the four named repairs are narrowly excluded (identical historical/current payloads); depth-sensitive eager/JIT amplification is real (one-map 2.22e-16 → depth-12 1.1647e-05). Overstated: SEMANTIC_DIFFERENCE was never measured out (semantic discriminator null; no operation-level trace, IR comparison, or higher-precision oracle); 'Not a regression' should read 'not caused by the four named repairs'; 'unmeetable by any implementation' should read 'unstable and unmet for the tested fixed-depth route/cohort'; the depth ladder is twelve independently compiled solves, not one traced execution; the 35-invariant corroboration is internal consistency, not independent; the spectral-radius mechanism (predicts ~5.1x) cannot explain the observed 5.38e9 growth. Also: the Newton-loop audit comment states three specified-but-unexecuted measurements as observed, and two runs were promoted with gate not-run. Wording corrections to be applied per the report. Report: crew/reports/s16-veracity-20260826/rev-mcg-veracity.md</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260826T150931467854-mcg-attribution-wording" data-who="plan-wording" data-when="2026-08-26T15:19:35Z">
+    <div class="r-comment-body"><p>All seven attribution wording corrections applied to the plan and landed evidence; every headline number and negative finding retained (31/69, 1.1647e-05, 5.38e9 growth, one-H200 24/24)</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260826-wording-corrections-landed" data-who="reckon-d8-s16-veracity-review" data-when="2026-08-26T15:22:00+00:00">
+    <div class="r-comment-body">mcg-attribution-wording landed — commit e08de304, merged to main; gate: audit-doc 0 ERRORs on plan and landed evidence, 14/14 wording+retention assertions. All seven corrections from rev-mcg-veracity applied: attribution is now a working diagnosis; regression exclusion narrowed to the four named repair commits; the ladder is described as independently compiled depth executions; clustering as within-receipt consistency; the Newton audit uses specification language; the first H200 hold is marked superseded for one-H200 functional validation only (L1 throughput, 8-GPU, full-catalog gates stay open); the 1e-10 bound reads unstable-and-unmet for the tested route/cohort. Every headline number and negative finding retained.</div>
 </div>
 </section>
 </main>

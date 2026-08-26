@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T17:14:10",
+  "updated": "2026-08-26T17:20:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1335,9 +1335,11 @@
         "id": "topology-visuals",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03e97-9cbb-7f42-a9b6-77efed646626",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03e97-9cbb-7f42-a9b6-77efed646626"
+        },
         "created": "2026-08-26"
       },
       {
@@ -47000,9 +47002,199 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T150931467854-mcg-attribution-wording",
+        "plan": "mast-catalog-gpu-solve",
+        "section": "",
+        "node": "mcg-attribution-wording",
+        "node_definition": {
+          "done_when": "All seven corrections are present (working-diagnosis qualifier; 'not caused by the four named repair commits'; 'independently executed solve-depth ladder'; 'within-receipt consistency'; specification language on the Newton-audit comment; first H200 hold marked superseded with L1 throughput and eight-GPU gates kept open; 'unstable and unmet for the tested fixed-depth eager/JIT implementation and cohort'); no numeric result, gate verdict, or negative finding is weakened or removed; reckon audit-doc on both files reports no ERRORs; changes committed in the worktree",
+          "estimated_hours": null,
+          "goal": "The seven wording corrections from the recommended-writeback section of crew/reports/s16-veracity-20260826/rev-mcg-veracity.md applied verbatim in spirit to docs/mast-catalog-gpu-solve.html and docs/evidence/archive/mast-catalog-gpu-solve-landed.html so every attribution claim states exactly what its evidence measured",
+          "id": "mcg-attribution-wording",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T150931467854-mcg-attribution-wording/manifest.md",
+          "plan": "mast-catalog-gpu-solve",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "20m",
+          "write_paths": [
+            "docs/mast-catalog-gpu-solve.html",
+            "docs/evidence/archive/mast-catalog-gpu-solve-landed.html"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "exact",
+        "member": "plan-wording",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T15:09:45Z",
+        "completed_at": "2026-08-26T15:19:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 590,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 590,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "3c8e66333ffefc0269d6e605ec753154f38557cf",
+        "commits": [
+          "e08de304db67bec11dbe8610db044542b39b7655"
+        ],
+        "changed_lines": {
+          "added": 46,
+          "removed": 30,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "reckon audit-doc on both files (0 ERRORs) plus 14/14 required-wording and retained-evidence assertions",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T150931467854-mcg-attribution-wording/wording-evidence-check.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T150931467854-mcg-attribution-wording/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e9e-be79-7510-b625-02d446968eb8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4511744,
+            "cached_input_tokens_cumulative": 4511744,
+            "input_tokens": 4689608,
+            "input_tokens_cumulative": 4689608,
+            "output_tokens": 23140,
+            "output_tokens_cumulative": 23140,
+            "reasoning_output_tokens": 5184,
+            "reasoning_output_tokens_cumulative": 5184
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1630,
+              "log_age_seconds": 1158,
+              "log_fresh": false,
+              "manifest_commits": [
+                "bfc393c251eb72e1b02a3b3539969f555ac16314"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-raw-measurement.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T144216465857-sse-h200-polish-raw-measurement --gate <verdict> --commit bfc393c251eb72e1b02a3b3539969f555ac16314",
+              "node": "sse-h200-polish-raw-measurement",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T144216465857-sse-h200-polish-raw-measurement",
+              "terminal_age_seconds": 1181,
+              "terminal_at": "2026-08-26T14:50:00Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-h200-polish-raw-measurement"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 1500,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1067,
+              "log_age_seconds": 822,
+              "log_fresh": true,
+              "manifest_commits": [
+                "bfc393c251eb72e1b02a3b3539969f555ac16314"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-raw-verifier.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T145147405375-sse-h200-polish-raw-verifier --gate <verdict> --commit bfc393c251eb72e1b02a3b3539969f555ac16314",
+              "node": "sse-h200-polish-raw-verifier",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T145147405375-sse-h200-polish-raw-verifier",
+              "terminal_age_seconds": 842,
+              "terminal_at": "2026-08-26T14:55:38Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-h200-polish-raw-verifier"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 1500,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 784,
+              "log_age_seconds": 444,
+              "log_fresh": true,
+              "manifest_commits": [
+                "d3550f05c4872ed081b1a67aab1ae5e4dc572989"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-poloidal-publication-path-repair.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T145621948573-sse-diiid-poloidal-publication-path-repair --gate <verdict> --commit d3550f05c4872ed081b1a67aab1ae5e4dc572989",
+              "node": "sse-diiid-poloidal-publication-path-repair",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T145621948573-sse-diiid-poloidal-publication-path-repair",
+              "terminal_age_seconds": 470,
+              "terminal_at": "2026-08-26T15:01:50Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-diiid-poloidal-publication-path-repair"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1006
+    "_version": 1008
   }
 }

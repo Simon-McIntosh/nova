@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T15:24:28",
+  "updated": "2026-08-26T15:32:52",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -349,7 +349,10 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a01bd8-2268-7ff3-bcd9-eb3700561ec8",
-        "created": "2026-08-19"
+        "created": "2026-08-19",
+        "sessions": {
+          "gpt-5.6-sol": "01a03e37-51e1-7ca1-aec1-49356e2c6453"
+        }
       },
       {
         "id": "diiid-ids-read",
@@ -42845,9 +42848,112 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T132736261779-sse-diiid-comparator-integration-verify",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a74",
+        "node": "sse-diiid-comparator-integration-verify",
+        "node_definition": {
+          "done_when": "One captured CPU pytest invocation over tests/imas/test_diiid_forward_gs_match.py reports 9 passes; source and focused assertions confirm removal of _separatrix and contour_separation, metre sup/RMS/X receipt fields from compare_closed_boundaries, valid closed rows only, open branches retained only for plotting, singleton reference X from boundary_gradient_minimum, class_margin rather than topology.diverted or requested class, named missing-input failures, preservation of nonconverged rows and overall FAIL, and byte-identical preregistration SHA-256 bf3d1cb3ef29d60ddb632454bfdda8914f397421a2a46e2fc16310653c1457f5; git diff --exit-code returns 0 and the manifest states PASS or HOLD.",
+          "estimated_hours": 0.7,
+          "goal": "Independently verify commit 130d84e3322a114d7c25f9d675ac23619cf9a640 as the DIII-D adapter cutover to assembled closed branches and the shared comparator, without changing repository files.",
+          "id": "sse-diiid-comparator-integration-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-comparator-integration-verify.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "35m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-comparator-integration-verify.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "integration-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T13:27:47Z",
+        "completed_at": "2026-08-26T13:32:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 277,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 277,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "130d84e3322a114d7c25f9d675ac23619cf9a640",
+        "commits": [
+          "130d84e3322a114d7c25f9d675ac23619cf9a640"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "env -u VIRTUAL_ENV JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=\"$PWD\" uv run --no-sync pytest tests/imas/test_diiid_forward_gs_match.py -q",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T132736261779-sse-diiid-comparator-integration-verify/stream.jsonl",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-comparator-integration-verify.md",
+        "scope_changed": false,
+        "session_id": "01a03de1-cbad-7f72-a60f-76343dd3508e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1339136,
+            "cached_input_tokens_cumulative": 2894080,
+            "input_tokens": 1394034,
+            "input_tokens_cumulative": 2993070,
+            "output_tokens": 975,
+            "output_tokens_cumulative": 7846,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2114
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest invocation",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 954
+    "_version": 956
   }
 }

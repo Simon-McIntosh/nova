@@ -10,6 +10,7 @@ import pytest
 
 from benchmarks.wall_resolution_ladder import (
     SCHEMA,
+    _control_batch_coordinates,
     _control_reproduction_passes,
     _convergence,
     _json_digest,
@@ -52,7 +53,7 @@ def _receipt() -> dict:
         )
     exact_audit = {
         name: {"array_equal": True}
-        for name in ("source_to_wall", "plasma_to_wall", "prescribed_wall")
+        for name in ("source_to_wall", "plasma_to_wall", "prescribed_full")
     }
     return {
         "schema": SCHEMA,
@@ -60,7 +61,13 @@ def _receipt() -> dict:
             "authored_coordinate_exact": True,
             "control_operator_wall_coordinate_exact": True,
             "control_seed_exact": True,
-            "direct_nested_row_audit": exact_audit,
+            "original_batch_contract": {
+                "source_shape_37_by_2": True,
+                "source_authored_order_exact": True,
+                "prescribed_shape_1126_by_2": True,
+                "prescribed_grid_before_wall_order_exact": True,
+            },
+            "direct_control_audit": exact_audit,
             "passes": True,
         },
         "isolation": {"fixed_carrier_digests": digests},
@@ -86,6 +93,38 @@ def test_the_count_clouds_are_nested_in_the_finest_cloud():
 def test_the_unique_baseline_removes_only_the_closure_duplicate():
     wall = _authored_wall()
     np.testing.assert_array_equal(sample_authored_wall(wall, 1), wall[:-1])
+
+
+def test_control_batches_preserve_original_shapes_and_order():
+    wall = _authored_wall()
+    grid = np.column_stack(
+        (
+            np.linspace(0.2, 1.8, 1089),
+            np.linspace(-1.5, 1.5, 1089),
+        )
+    )
+
+    source, prescribed = _control_batch_coordinates(
+        {"grid_coordinate": grid, "wall_coordinate": wall}, wall
+    )
+
+    assert source.shape == (37, 2)
+    assert prescribed.shape == (1126, 2)
+    np.testing.assert_array_equal(source, wall)
+    np.testing.assert_array_equal(prescribed[:1089], grid)
+    np.testing.assert_array_equal(prescribed[1089:], wall)
+
+
+def test_control_batch_rejects_a_perturbed_authored_row():
+    wall = _authored_wall()
+    perturbed = wall.copy()
+    perturbed[18, 0] += 1.0e-12
+    grid = np.zeros((1089, 2))
+
+    with pytest.raises(ValueError, match="changed authored wall order"):
+        _control_batch_coordinates(
+            {"grid_coordinate": grid, "wall_coordinate": wall}, perturbed
+        )
 
 
 def test_terminal_plasma_flux_is_part_of_carrier_identity():
@@ -131,7 +170,7 @@ def test_receipt_validation_requires_top_level_carrier_identity():
 
 def test_nonexact_response_row_fails_control_reproduction():
     payload = _receipt()
-    payload["control_reproduction"]["direct_nested_row_audit"]["prescribed_wall"][
+    payload["control_reproduction"]["direct_control_audit"]["prescribed_full"][
         "array_equal"
     ] = False
     payload["control_reproduction"]["passes"] = False
@@ -143,7 +182,7 @@ def test_nonexact_response_row_fails_control_reproduction():
 
 def test_validation_does_not_trust_a_control_pass_flag():
     payload = _receipt()
-    payload["control_reproduction"]["direct_nested_row_audit"]["source_to_wall"][
+    payload["control_reproduction"]["direct_control_audit"]["source_to_wall"][
         "array_equal"
     ] = False
 

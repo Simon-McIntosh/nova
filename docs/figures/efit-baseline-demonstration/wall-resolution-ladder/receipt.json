@@ -38,15 +38,16 @@
       288
     ],
     "finest_observed_step": {
-      "boundary_flux_absolute_wb": 4.606259317276387e-05,
+      "boundary_flux_absolute_wb": 0.0,
       "class_changed": false,
-      "contact_coordinate_distance_m": 0.0010230182617327888,
+      "contact_coordinate_distance_absence_reason": "nonfinite_limiter_coordinate",
+      "contact_coordinate_distance_m": null,
       "next_finer_wall_target_count": 288
     },
     "first_plasma_equivalent_wall_count": null,
     "limiter_operand_stop_count": null,
     "plasma_grid_pitch_m": 0.125,
-    "statement": "The limiter operand does not stop moving by 288 targets; the 144-to-288 step moves boundary flux by 4.60626e-05 Wb and contact by 0.00102302 m. The finest maximum wall spacing is 2.167 plasma pitches, so no prescribed rung is plasma-equivalent."
+    "statement": "The limiter operand does not stop moving by 288 targets; the 144-to-288 step moves boundary flux by 0 Wb and contact distance is unavailable because a terminal has no predicted closed boundary. The finest maximum wall spacing is 2.167 plasma pitches, so no prescribed rung is plasma-equivalent."
   },
   "isolation": {
     "direct_wall_section_kernel_evaluations": 938,
@@ -74,13 +75,13 @@
         "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
         "size_bytes": 645864,
         "stored_circuit_count": 101,
-        "warm_load_seconds": 0.005971002858132124
+        "warm_load_seconds": 0.005415274063125253
       },
       "loaded_from_persisted_carrier": true,
       "named_cache_only_check": {
         "command": [
           "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
-          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-wall-control-batch-repair/benchmarks/mast_response_carrier_warm.py",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d8-s16-landing/pod-wall-ladder-regenerate/benchmarks/mast_response_carrier_warm.py",
           "check",
           "--carrier",
           "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
@@ -89,7 +90,7 @@
         ],
         "direct_green_operator_builder_entries": 0,
         "passes": true,
-        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.012049 direct_builders=0 verdict=PASS"
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.021186 direct_builders=0 verdict=PASS"
       }
     },
     "varying_inputs": [
@@ -109,17 +110,16 @@
   },
   "rows": [
     {
-      "achieved_class": "limited",
+      "achieved_class": "diverted",
       "authored_segment_count": 36,
-      "boundary_flux_wb": -0.03261235508724844,
-      "boundary_operand": "reachable_wall_limiter",
-      "class_margin": -0.202443533071051,
-      "class_margin_nonfinite": null,
-      "contact_arc_m": 4.475207179784775,
-      "contact_coordinate_m": [
-        0.5649306774139404,
-        1.8250000476837158
-      ],
+      "boundary_flux_wb": -0.2226482759655722,
+      "boundary_operand": "selected_saddle",
+      "class_margin": null,
+      "class_margin_nonfinite": "positive_infinity",
+      "contact_arc_absence_reason": "nonfinite_limiter_coordinate",
+      "contact_arc_m": null,
+      "contact_coordinate_absence_reason": "nonfinite_limiter_coordinate",
+      "contact_coordinate_m": null,
       "fixed_carrier_digests": {
         "conductor_currents_sha256": "c4aaaa00509a89ecf1b2940e80c32f239381ecd2d93cf08f233873d143c62e58",
         "plasma_carrier_sha256": "03985049adc54fdfe75b439086ba73e7c3d74d9a2b95e976e52664c82ba03ef1",
@@ -326,23 +326,23 @@
       "wall_target_count": 37
     },
     {
-      "achieved_class": "limited",
+      "achieved_class": "diverted",
       "authored_segment_count": 36,
-      "boundary_flux_wb": -0.03287189988203148,
-      "boundary_operand": "reachable_wall_limiter",
+      "boundary_flux_wb": -0.2226482759655722,
+      "boundary_operand": "selected_saddle",
       "change_to_next_finer": {
-        "boundary_flux_absolute_wb": 0.006588106493819083,
+        "boundary_flux_absolute_wb": 0.0,
         "class_changed": false,
-        "contact_coordinate_distance_m": 0.04612112044001848,
+        "contact_coordinate_distance_absence_reason": "nonfinite_limiter_coordinate",
+        "contact_coordinate_distance_m": null,
         "next_finer_wall_target_count": 72
       },
-      "class_margin": -0.2021670423686447,
-      "class_margin_nonfinite": null,
-      "contact_arc_m": 4.475207179784775,
-      "contact_coordinate_m": [
-        0.5649306774139404,
-        1.8250000476837158
-      ],
+      "class_margin": null,
+      "class_margin_nonfinite": "positive_infinity",
+      "contact_arc_absence_reason": "nonfinite_limiter_coordinate",
+      "contact_arc_m": null,
+      "contact_coordinate_absence_reason": "nonfinite_limiter_coordinate",
+      "contact_coordinate_m": null,
       "fixed_carrier_digests": {
         "conductor_currents_sha256": "c4aaaa00509a89ecf1b2940e80c32f239381ecd2d93cf08f233873d143c62e58",
         "plasma_carrier_sha256": "03985049adc54fdfe75b439086ba73e7c3d74d9a2b95e976e52664c82ba03ef1",
@@ -550,23 +550,23 @@
       "wall_target_count": 36
     },
     {
-      "achieved_class": "limited",
+      "achieved_class": "diverted",
       "authored_segment_count": 36,
-      "boundary_flux_wb": -0.026283793388212396,
-      "boundary_operand": "reachable_wall_limiter",
+      "boundary_flux_wb": -0.2226482759655722,
+      "boundary_operand": "selected_saddle",
       "change_to_next_finer": {
-        "boundary_flux_absolute_wb": 0.00016474329822331255,
+        "boundary_flux_absolute_wb": 0.0,
         "class_changed": false,
-        "contact_coordinate_distance_m": 0.0053400443108493345,
+        "contact_coordinate_distance_absence_reason": "nonfinite_limiter_coordinate",
+        "contact_coordinate_distance_m": null,
         "next_finer_wall_target_count": 144
       },
-      "class_margin": -0.20918529212212694,
-      "class_margin_nonfinite": null,
-      "contact_arc_m": 4.521328300224793,
-      "contact_coordinate_m": [
-        0.5649306774139404,
-        1.7788789272436973
-      ],
+      "class_margin": null,
+      "class_margin_nonfinite": "positive_infinity",
+      "contact_arc_absence_reason": "nonfinite_limiter_coordinate",
+      "contact_arc_m": null,
+      "contact_coordinate_absence_reason": "nonfinite_limiter_coordinate",
+      "contact_coordinate_m": null,
       "fixed_carrier_digests": {
         "conductor_currents_sha256": "c4aaaa00509a89ecf1b2940e80c32f239381ecd2d93cf08f233873d143c62e58",
         "plasma_carrier_sha256": "03985049adc54fdfe75b439086ba73e7c3d74d9a2b95e976e52664c82ba03ef1",
@@ -774,23 +774,23 @@
       "wall_target_count": 72
     },
     {
-      "achieved_class": "limited",
+      "achieved_class": "diverted",
       "authored_segment_count": 36,
-      "boundary_flux_wb": -0.02644853668643571,
-      "boundary_operand": "reachable_wall_limiter",
+      "boundary_flux_wb": -0.2226482759655722,
+      "boundary_operand": "selected_saddle",
       "change_to_next_finer": {
-        "boundary_flux_absolute_wb": 4.606259317276387e-05,
+        "boundary_flux_absolute_wb": 0.0,
         "class_changed": false,
-        "contact_coordinate_distance_m": 0.0010230182617327888,
+        "contact_coordinate_distance_absence_reason": "nonfinite_limiter_coordinate",
+        "contact_coordinate_distance_m": null,
         "next_finer_wall_target_count": 288
       },
-      "class_margin": -0.2090097925892599,
-      "class_margin_nonfinite": null,
-      "contact_arc_m": 4.526668344535643,
-      "contact_coordinate_m": [
-        0.5649306774139404,
-        1.773538882932848
-      ],
+      "class_margin": null,
+      "class_margin_nonfinite": "positive_infinity",
+      "contact_arc_absence_reason": "nonfinite_limiter_coordinate",
+      "contact_arc_m": null,
+      "contact_coordinate_absence_reason": "nonfinite_limiter_coordinate",
+      "contact_coordinate_m": null,
       "fixed_carrier_digests": {
         "conductor_currents_sha256": "c4aaaa00509a89ecf1b2940e80c32f239381ecd2d93cf08f233873d143c62e58",
         "plasma_carrier_sha256": "03985049adc54fdfe75b439086ba73e7c3d74d9a2b95e976e52664c82ba03ef1",
@@ -998,18 +998,17 @@
       "wall_target_count": 144
     },
     {
-      "achieved_class": "limited",
+      "achieved_class": "diverted",
       "authored_segment_count": 36,
-      "boundary_flux_wb": -0.026494599279608472,
-      "boundary_operand": "reachable_wall_limiter",
+      "boundary_flux_wb": -0.2226482759655722,
+      "boundary_operand": "selected_saddle",
       "change_to_next_finer": null,
-      "class_margin": -0.20896072252891967,
-      "class_margin_nonfinite": null,
-      "contact_arc_m": 4.527691362797375,
-      "contact_coordinate_m": [
-        0.5649306774139404,
-        1.7725158646711152
-      ],
+      "class_margin": null,
+      "class_margin_nonfinite": "positive_infinity",
+      "contact_arc_absence_reason": "nonfinite_limiter_coordinate",
+      "contact_arc_m": null,
+      "contact_coordinate_absence_reason": "nonfinite_limiter_coordinate",
+      "contact_coordinate_m": null,
       "fixed_carrier_digests": {
         "conductor_currents_sha256": "c4aaaa00509a89ecf1b2940e80c32f239381ecd2d93cf08f233873d143c62e58",
         "plasma_carrier_sha256": "03985049adc54fdfe75b439086ba73e7c3d74d9a2b95e976e52664c82ba03ef1",

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T16:47:28",
+  "updated": "2026-08-26T16:52:22",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -45900,9 +45900,107 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T144306555956-sse-diiid-complete-poloidal-renderer-verify",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a74",
+        "node": "sse-diiid-complete-poloidal-renderer-verify",
+        "node_definition": {
+          "done_when": "One captured CPU invocation passes all 12 tests in tests/imas/test_diiid_forward_gs_match.py; independent source and synthetic artifact inspection proves exactly five equal-aspect data panels plus one legend cell, every finite polished O/X and wall candidate plotted without spatial deduplication, all EFIT axes and label-derived X markers present with distinct identities, selected landmark membership retained as cross-check only, every failed or missing-geometry frame visible with FAIL NONCONVERGED qualification, strict receipt records and project-absolute figure paths, unchanged thresholds and preregistration digest, zero generated bank changes, and a clean worktree.",
+          "estimated_hours": 0.6,
+          "goal": "Independently verify commit 94f510b68021345c2eac31fd1143e30a3701687e implements the complete five-frame poloidal candidate census and fail-visible renderer without changing solve or scoring authority.",
+          "id": "sse-diiid-complete-poloidal-renderer-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-complete-poloidal-renderer-verify.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "35m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-complete-poloidal-renderer-verify.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "reference-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T14:43:17Z",
+        "completed_at": "2026-08-26T14:51:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 471,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 471,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "94f510b68021345c2eac31fd1143e30a3701687e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "independent CPU suite plus synthetic renderer authority audit",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-complete-poloidal-renderer-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-complete-poloidal-renderer-verify.md",
+        "scope_changed": false,
+        "session_id": "01a03dcf-5590-7da3-a313-132579fd951f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2008576,
+            "cached_input_tokens_cumulative": 3529728,
+            "input_tokens": 2044434,
+            "input_tokens_cumulative": 3659051,
+            "output_tokens": 9982,
+            "output_tokens_cumulative": 17873,
+            "reasoning_output_tokens": 4113,
+            "reasoning_output_tokens_cumulative": 5575
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 988
+    "_version": 989
   }
 }

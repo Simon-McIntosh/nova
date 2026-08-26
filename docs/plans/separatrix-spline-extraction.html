@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="33">
+<meta name="plan-version" content="34">
 </head>
 <body>
   <main class="plan-doc">
@@ -272,6 +272,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260826T141636929757-sse-strict-json-nonfinite-normalization" data-who="bound-repair" data-when="2026-08-26T14:20:45Z">
     <div class="r-comment-body"><p>DIII-D forward-GS receipt serialization now recursively maps non-finite numeric leaves to null and rejects any remaining NaN or Infinity; focused and independent CPU x64 suites each passed exactly 3 of 3 tests while all five failed rows, reasons, thresholds, hashes, and the scientific false verdict remain intact.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260826T144306555956-sse-diiid-complete-poloidal-renderer-verify" data-who="reference-verify" data-when="2026-08-26T14:51:08Z">
+    <div class="r-comment-body"><p>Independent verification passed 12/12 tests and complete candidate/failure visibility, but correctly held promotion because the receipt still used a repository-relative figure path instead of the required project-absolute identity.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260826T125905793456-sse-branch-assembler-verify" data-who="sse-verify" data-when="2026-08-26T13:04:59Z">
     <div class="r-comment-body"><p>Independent verification confirmed deterministic fixed-capacity separation of one axis-enclosing closed branch from saddle-ended open legs, with exact-zero padding, overflow refusal, and eager/JIT/vmap parity.</p></div>

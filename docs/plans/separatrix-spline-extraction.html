@@ -26,8 +26,8 @@
   <title>Separatrix Spline Extraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="44">
+<meta name="plan-modified" content="2026-08-27">
+<meta name="plan-version" content="45">
 </head>
 <body>
   <main class="plan-doc">
@@ -235,6 +235,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260826T214907843335-sse-terminal-axis-host-read" data-who="domain-partition" data-when="2026-08-26T21:58:06Z">
     <div class="r-comment-body"><p>One host-side raise in require_qualified_axis after device_get; zero callback raises; named exception now catchable by the frame-fail retention path</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260826T221227329659-sse-mast-arm-fail-retention" data-who="adapter-seams" data-when="2026-08-26T22:20:32Z">
+    <div class="r-comment-body"><p>Per-arm exception-to-row retention in the MAST adapter; named failure rows with null dependent metrics; other exceptions still propagate</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

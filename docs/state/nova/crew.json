@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T23:58:33",
+  "updated": "2026-08-27T00:20:53",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -51544,9 +51544,114 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T221227329659-sse-mast-arm-fail-retention",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-mast-arm-fail-retention",
+        "node_definition": {
+          "done_when": "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py wraps each arm's _grid_geometry and operator.read in an exception-to-row boundary catching NoQualifiedAxisError and constraint violations while every other exception still propagates; the retained row carries identity, arm, converged=false, the exception class as termination reason, and null geometry/class/metric fields; a test proves a synthetic raising arm yields the retained row while the remaining arms still publish and the denominator stays twelve; tests/test_efit_topology_corroboration.py passes in full; no tracked JSON or PNG regenerated; ruff clean",
+          "estimated_hours": null,
+          "goal": "Per-arm failure retention in the MAST corroboration adapter: an arm whose geometry build or operator read raises the named host-side axis disqualification or a constraint violation becomes an explicit retained non-converged failure row with the exception class recorded and null dependent metrics, so one terminally unqualified arm can never abort the twelve-arm census",
+          "id": "sse-mast-arm-fail-retention",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T221227329659-sse-mast-arm-fail-retention/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py",
+            "tests/test_efit_topology_corroboration.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "adapter-seams",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T22:12:36Z",
+        "completed_at": "2026-08-26T22:20:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 476,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 476,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "1299b1909a5fb71b4a8f8ef6572bdf5fadbe78c0",
+        "commits": [
+          "507e35c2"
+        ],
+        "changed_lines": {
+          "added": 291,
+          "removed": 52,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/test_efit_topology_corroboration.py (9 passed)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T221227329659-sse-mast-arm-fail-retention/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T221227329659-sse-mast-arm-fail-retention/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-e0cb-7cd1-8925-b9c7f01bcf20",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1256960,
+            "cached_input_tokens_cumulative": 4801024,
+            "input_tokens": 1295190,
+            "input_tokens_cumulative": 4985267,
+            "output_tokens": 2904,
+            "output_tokens_cumulative": 15025,
+            "reasoning_output_tokens": 1816,
+            "reasoning_output_tokens_cumulative": 3569
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1061
+    "_version": 1062
   }
 }

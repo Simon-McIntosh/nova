@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="34">
+<meta name="plan-version" content="35">
 </head>
 <body>
   <main class="plan-doc">
@@ -275,6 +275,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260826T144306555956-sse-diiid-complete-poloidal-renderer-verify" data-who="reference-verify" data-when="2026-08-26T14:51:08Z">
     <div class="r-comment-body"><p>Independent verification passed 12/12 tests and complete candidate/failure visibility, but correctly held promotion because the receipt still used a repository-relative figure path instead of the required project-absolute identity.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260826T143118798947-sse-diiid-complete-poloidal-renderer" data-who="diiid-poloidal-figures" data-when="2026-08-26T14:41:27Z">
+    <div class="r-comment-body"><p>Renderer implementation passed 12/12 focused tests and the complete five-frame candidate census, but integration was rejected because its receipt publication identity remained repository-relative; the commit is retained as the base for a narrow repair.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260826T125905793456-sse-branch-assembler-verify" data-who="sse-verify" data-when="2026-08-26T13:04:59Z">
     <div class="r-comment-body"><p>Independent verification confirmed deterministic fixed-capacity separation of one axis-enclosing closed branch from saddle-ended open legs, with exact-zero padding, overflow refusal, and eager/JIT/vmap parity.</p></div>

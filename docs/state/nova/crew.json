@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T16:52:22",
+  "updated": "2026-08-26T16:55:02",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -375,7 +375,10 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a01f36-5f8a-7212-a4d6-18ab97d716ca",
-        "created": "2026-08-20"
+        "created": "2026-08-20",
+        "sessions": {
+          "gpt-5.6-sol": "01a03e7b-b9f0-70a0-bf97-ee4cd1c88ee5"
+        }
       },
       {
         "id": "diiid-vacuum",
@@ -45998,9 +46001,143 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T143118798947-sse-diiid-complete-poloidal-renderer",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a74",
+        "node": "sse-diiid-complete-poloidal-renderer",
+        "node_definition": {
+          "done_when": "The previously blocked focused nonconvergence test passes first in the execution-capable worktree; one captured CPU invocation of tests/imas/test_diiid_forward_gs_match.py exits zero; synthetic five-frame coverage proves exactly five equal-aspect data panels plus one legend cell, 100 percent of finite polished O/X and wall candidates represented with distinct symbols, five EFIT axes and label-derived X markers, exact cohort and panel-record identity, selected-landmark membership, visible FAIL NONCONVERGED banners with red qualification, strict-JSON candidate counts and missing-geometry reasons, unchanged thresholds and preregistration identity, and no generated bank artifact is modified.",
+          "estimated_hours": 1.0,
+          "goal": "Implement the five-frame DIII-D plotting data seam and renderer so every panel overlays Nova forward-GS and EFIT label geometry and displays every finite polished Nova O point, every finite polished Nova X point, every finite Nova wall-contact candidate, the EFIT axis, and the label-derived EFIT X marker.",
+          "id": "sse-diiid-complete-poloidal-renderer",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-complete-poloidal-renderer.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/diiid_forward_gs_match.py",
+            "tests/imas/test_diiid_forward_gs_match.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "diiid-poloidal-figures",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T14:31:30Z",
+        "completed_at": "2026-08-26T14:41:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 597,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 597,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "2bfa4c39397ba9b17ae05596b32b87d738625b5f",
+        "commits": [
+          "94f510b68021345c2eac31fd1143e30a3701687e"
+        ],
+        "changed_lines": {
+          "added": 597,
+          "removed": 55,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "independent CPU suite plus synthetic renderer authority audit",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-complete-poloidal-renderer-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": "work-rejected",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-complete-poloidal-renderer.md",
+        "scope_changed": false,
+        "session_id": "01a03e7b-b9f0-70a0-bf97-ee4cd1c88ee5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3029760,
+            "cached_input_tokens_cumulative": 3029760,
+            "input_tokens": 3186851,
+            "input_tokens_cumulative": 3186851,
+            "output_tokens": 23812,
+            "output_tokens_cumulative": 23812,
+            "reasoning_output_tokens": 2602,
+            "reasoning_output_tokens_cumulative": 2602
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1233,
+              "log_age_seconds": 924,
+              "log_fresh": false,
+              "manifest_commits": [
+                "5fc7371b"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-measurement.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T141042566049-sse-h200-polish-measurement --gate <verdict> --commit 5fc7371b",
+              "node": "sse-h200-polish-measurement",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T141042566049-sse-h200-polish-measurement",
+              "terminal_age_seconds": 948,
+              "terminal_at": "2026-08-26T14:15:38Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-h200-polish-measurement"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 989
+    "_version": 991
   }
 }

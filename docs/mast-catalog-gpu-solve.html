@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S16">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="57">
+<meta name="plan-version" content="58">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -435,6 +435,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260826T135839697027-mcg-titan-residual-stopping-rehearsal" data-who="integration-verify" data-when="2026-08-26T14:06:35Z">
     <div class="r-comment-body"><p>A scheduler-isolated Titan P100 ran the focused residual-stopping and CPU/GPU candidate-parity gate: 24 of 24 passed with no skips in 65.20 seconds; this is functional rehearsal only, not H200 performance or full-catalog throughput.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260826T141042566051-mcg-h200-residual-stopping-measurement" data-who="mcg-stopping-verify" data-when="2026-08-26T14:15:38Z">
+    <div class="r-comment-body"><p>Reserved one-H200 functional validation passed 24 of 24 tests with zero skips in 45.40 seconds; residual stopping, fixed-shape traces, NaN padding, and CPU/GPU candidate metadata and coordinates met the registered 1e-8 bound. This is not L1 throughput, eight-GPU scaling, or full-catalog evidence.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260825T070435806649-efit-dual-branch-prior-art" data-who="efit-prior-art" data-when="2026-08-25T07:15:54Z">
     <div class="r-comment-body"><p>efit dual-branch prior-art map delivered: 15 commits + 13 symbol groups mapped; identical-seed branch-pure fork with a-posteriori HARD selector (not continuous — the differentiable selector is novel work, not a port); mature architecture avoids forking via continuous basin-escape drag; nova solve_portfolio judged fits-and-substantially-landed; WEST mixed-iteration stall vs branch-pure contraction (rho 0.33) mirrors nova diverted-arm 5e-3 stall</p></div>

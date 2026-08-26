@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="31">
+<meta name="plan-version" content="32">
 </head>
 <body>
   <main class="plan-doc">
@@ -221,6 +221,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260826T142045845277-sse-h200-polish-measurement-verify" data-who="sse-verify" data-when="2026-08-26T14:24:45Z">
     <div class="r-comment-body"><p>Allocation, strict JSON, commit scope, aggregate ratios, and the mixed H200/P100 interpretation verified, but independent statistical verification correctly refused because the benchmark persisted no per-repetition latency samples or complete iteration arrays. Raw samples must be banked and the one-H200 measurement rerun.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260826T143312633260-sse-polish-raw-sample-verify" data-who="sse-verify" data-when="2026-08-26T14:38:15Z">
+    <div class="r-comment-body"><p>Independent verification passed exactly 2 of 2 CPU tests and recomputed 41 of 41 latency and iteration aggregates from persisted raw arrays; all four timing arms retain repetitions-length samples, complete cold/warm 32-lane counts and tracked 16-by-32 counts, with strict JSON and hardware-neutral additive schema.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260826T123822398891-sse-comparator-seam-audit" data-who="ccfs-scout" data-when="2026-08-26T12:48:51Z">
     <div class="r-comment-body"><p>Mapped one shared host-only closed-boundary comparator for MAST and DIII-D, with exact consumer scopes, fail-closed metrics, regeneration inputs, and preserved DIII-D nonconvergence; implementation is ordered after the branch assembler.</p></div>

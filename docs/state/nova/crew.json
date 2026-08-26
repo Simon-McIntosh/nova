@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T16:31:53",
+  "updated": "2026-08-26T16:38:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -45595,9 +45595,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T143312633260-sse-polish-raw-sample-verify",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a72",
+        "node": "sse-polish-raw-sample-verify",
+        "node_definition": {
+          "done_when": "One captured CPU invocation passes exactly two focused tests; independent inspection proves all four arms persist repetitions-length latency arrays, cold and warm persist complete 32-lane iteration arrays, tracked persists a complete 16-by-32 matrix, strict JSON succeeds, every existing aggregate recomputes exactly from raw arrays, changes are additive and hardware-neutral, the commit changes exactly the benchmark and focused test, and the worktree remains clean.",
+          "estimated_hours": 0.5,
+          "goal": "Independently verify commit dd236c6ad0900a0fd52ec2c74f077a8879bcb2d3 persists enough stationary-point polish evidence to recompute every latency and iteration aggregate exactly.",
+          "id": "sse-polish-raw-sample-verify",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-polish-raw-sample-verify.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-polish-raw-sample-verify.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "sse-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T14:33:21Z",
+        "completed_at": "2026-08-26T14:38:15Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 294,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 294,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "dd236c6ad0900a0fd52ec2c74f077a8879bcb2d3",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu JAX_ENABLE_X64=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/test_stationary_point_polish.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-polish-raw-sample-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-polish-raw-sample-verify.md",
+        "scope_changed": false,
+        "session_id": "01a03de9-44ed-7070-a85e-ae33242a3e47",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 1087232,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 1199731,
+            "output_tokens": 682,
+            "output_tokens_cumulative": 9683,
+            "reasoning_output_tokens": 269,
+            "reasoning_output_tokens_cumulative": 2757
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 981
+    "_version": 982
   }
 }

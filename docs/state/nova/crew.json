@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T15:55:13",
+  "updated": "2026-08-26T15:56:24",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -43464,9 +43464,108 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T134345597068-sse-mast-bank-regeneration",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a74",
+        "node": "sse-mast-bank-regeneration",
+        "node_definition": {
+          "done_when": "A single SLURM CPU debug job with TMPDIR=/tmp, JAX_PLATFORMS=cpu, JAX_ENABLE_X64=true, writable XDG and Numba caches, time limit at most one hour, and complete log plus EXIT_MARKER=0 runs efit_topology_corroboration.py; the tracked JSON contains exactly 12 declared arms with no duplicates, omissions, NaN, or infinity, keeps named failures and null dependent metrics rather than dropping rows, serializes closed boundaries separately from open legs, derives class from class_margin, reports exact achieved-class agreement, worst eligible symmetric RMS, and worst saddle-to-X distance against the locked 7-of-12, 0.55 m, and 0.04 m inclusive thresholds, redraws the tracked PNG, visually inspects it at original resolution, commits only the JSON and PNG, removes only its own ignored cache scratch, and the manifest states scientific PASS or HOLD with the full scheduler receipt.",
+          "estimated_hours": 1.5,
+          "goal": "Regenerate and audit the tracked 12-arm MAST corroboration JSON and PNG from the verified combined comparator state on a SLURM CPU debug lane, preserving all rows and reporting the preregistered scientific thresholds without assuming they pass.",
+          "id": "sse-mast-bank-regeneration",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-mast-bank-regeneration.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "margin-remeasure",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T13:43:54Z",
+        "completed_at": "2026-08-26T13:54:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 637,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 637,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "d0eb24481423ba4fe661a4967f44f4d3e88ed70d",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T134345597068-sse-mast-bank-regeneration/logs/regeneration-1257226.log",
+          "log_digest": null
+        },
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-mast-bank-regeneration.md",
+        "scope_changed": false,
+        "session_id": "01a03818-636e-7632-bc6e-05c3a7131c93",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 372992,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 545923,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 1165,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 95
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 962
+    "_version": 963
   }
 }

@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="profile-owned-solve-domain">
+  <meta name="plan-title"     content="Profile-Owned Solve Domain — the Newton solve stops consuming the boundary">
+  <meta name="plan-summary"   content="Remove the boundary definition from the residual: psi_norm from the O/X pair, shadow-only masking, profile-decayed exterior current, seed repair, wall ladder.">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="18.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-tags"      content="equilibrium,topology,efit,mast,diii-d">
+  <meta name="plan-informs"   content="">
+  <meta name="plan-blocks"    content="efit-baseline-demonstration">
+  <title>Profile-Owned Solve Domain | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The stalls are real, and their mechanisms are plural</h2>
+
+    <p>Independent corroboration
+    (<code>docs/figures/efit-baseline-demonstration/stall-corroboration.md</code>, commit
+    <code>bbd0f015</code>) confirms all four EFIT-disagreeing MAST arms are stalled limited
+    terminals, not converged misclassifications: residuals 2.76e-3 to 7.43e-3 against a 1e-8
+    criterion, saddle-aware class limited on 4/4 via <code>class_margin</code>. The mechanisms are
+    plural. Late confined-mask switching is directly present on 21986/46 pure (3 cells over the
+    final three transitions) and 21989/55 mixed (29 cells, coinciding with the residual's
+    post-minimum rise) — consistent with the proven state-dependent-domain 2-cycle on 21978/35,
+    where the Jacobian linearises flood-fill Boolean masks as fixed and an exact Newton step
+    overshoots the switching surface. But <strong>both 21985/51 arms hold a stable and EMPTY
+    confined mask</strong>: the flood fill finds no confined plasma at all, pointing at the
+    axis-cell material-mask-to-grid mismatch (classified seed 1.187 m from the continuous axis). No
+    domain treatment can help a solve whose confined region is empty, which fixes the §3-before-§4
+    ordering below.</p>
+
+    <p>Ruled out by banked negative results, not to be re-run: inner Krylov accuracy (dense Newton
+    itself cycles), fixed-point map contraction as a discriminator (spectral radius exceeds one at
+    both cycling and converged references), and scalar homotopies for cold basin reachability. The
+    mechanism artifacts live on
+    <a href="/nova/plans/discrete-operator-analytic-error">discrete-operator-analytic-error</a>
+    (shipped) and its evidence record.</p>
+
+    <h2 id="s2">§2 — The design: the residual never sees a boundary</h2>
+
+    <p><strong>Lead design, locked 2026-08-26.</strong> The Newton solve stops consuming the
+    boundary definition altogether. The flood fill's product is exactly two things: the
+    identification of the primary X-point (the first saddle obstruction reached from the axis) and
+    the definition of the shadow regions. The O-point and primary X-point pair — both polished on
+    the global spline by
+    <a href="/nova/plans/separatrix-spline-extraction">separatrix-spline-extraction</a> §2 — define
+    <code>psi_norm</code>. The only mask applied to the residual domain excludes
+    <strong>disconnected psi_norm &lt; 1 regions</strong> (the shadows). Every other in-vessel cell
+    participates in the solve, and true exterior cells receive j = 0 from the profile itself,
+    because the current density is a function of psi_norm that closes beyond the boundary — which
+    handles the scrape-off region without any geometric clip.</p>
+
+    <p>What this removes: the binding-level chord clip inside the residual
+    (<code>_traced_clip</code> consumed at
+    <code>nova/equilibrium/forward_operator.py:620-640</code> via signed flux against
+    <code>boundary_flux</code>), the limiter operand's participation in the solve, and with them
+    the bulk of the state-dependent Boolean domain — the discrete dependence shrinks to the shadow
+    mask and the primary-X selection, both far better conditioned than a per-cell boundary clip.
+    What this keeps: the static material mask (state-independent), the quadratic in-cell flux
+    reconstruction and current-moment quadrature (now over full cell supports except shadowed
+    cells), and the reachable-wall limiter as a <em>post-hoc classification and diagnostic</em>
+    quantity only. The seam is <code>ForwardFluxOperator._support_partition</code> plus the
+    topology-domain selection at <code>nova/equilibrium/source.py:608-679</code>, per the
+    extraction seam map.</p>
+
+    <p><strong>Method requirements.</strong> GPU fixed shapes throughout: fixed trip counts, no
+    data-dependent compaction, no host callbacks. The conservation acceptance registry must be
+    rescored — divergence identities live on the commuting production route with failable envelopes
+    that must not be widened to fit. Mask-change-per-outer-iteration (shadow mask, under this
+    design) is instrumented as a first-class receipt field regardless of how small the residual
+    domain dependence becomes. The DIII-D reference — currently converging with a stable margin and
+    one-ulp partition sensitivity — is a protected baseline: it re-solves under the new residual
+    and its geometric agreement must not degrade.</p>
+
+    <h2 id="s3">§3 — Seed and material-mask repair before any domain change</h2>
+
+    <p>On 21985/51 the classified axis seed sits 1.187 m from the continuous axis — a
+    material-mask-to-grid mismatch — and the confined flood-fill component is empty on both arms.
+    The flood fill this design keeps (primary-X identification and shadow definition) requires a
+    correct axis seed, so this repair precedes and gates §4. <strong>Done when:</strong> the
+    classified seed lands in the cell containing the continuous magnetic axis on all twelve frozen
+    arms, the 21985/51 confined component is non-empty, and an earlier-window mask census attributes
+    the 21985/51 stalls (the corroboration's named follow-on).</p>
+
+    <h2 id="s4">§4 — Cut the residual over to the profile-owned domain</h2>
+
+    <p>Implement §2 at the named seam with the conservation rescore and the instrumented receipts,
+    then re-solve the four disagreeing arms and the full frozen cohort. <strong>Done when:</strong>
+    convergence receipts show the four stalled arms either converged to the fixed-point criterion or
+    failed with a named, instrumented cause that is not the removed boundary clip; the DIII-D
+    reference remains converged with geometric agreement preserved; conservation acceptance rescored
+    with no widened envelope; achieved classes read through the saddle-aware partition.</p>
+
+    <h2 id="s5">§5 — The isolated wall-resolution ladder</h2>
+
+    <p>Inherited from <a href="/nova/mast-catalog-gpu-solve">mast-catalog-gpu-solve</a> with its
+    isolation requirement, and scoped by the wall machinery map
+    (<code>docs/figures/efit-baseline-demonstration/wall-machinery-map.md</code>, commit
+    <code>c11fe7a2</code>): MAST carries 37 stored limiter rows, 36 unique physical segments; the
+    wall enters as FluxTarget images <code>Gs@Is + Gc@Ic + Gp@J(psi)</code>; no interpolation-order
+    knob exists today (geometry hard-coded piecewise-linear, extremum fit hard-coded quadratic).
+    Under the §2 design the wall no longer enters the residual, so the ladder measures what the wall
+    still owns: the limiter operand, the post-hoc class margin, and contact location. Run counts
+    36/72/144/288 with an exact 37-row reproduction control, holding plasma carrier, source
+    treatment, and seed fixed; an order sweep requires the wall-only selector policy the map
+    specifies. <strong>Done when:</strong> per-rung boundary flux, contact coordinate, achieved
+    class/margin, and residual trajectory are banked with fixed-carrier digests, and the count at
+    which the limiter operand stops moving is stated against plasma-equivalent resolution. The
+    confounded 165-to-330 comparison is never cited.</p>
+
+    <h2 id="s6">§6 — Retire the legacy diverted label</h2>
+
+    <p>Inherited from <a href="/nova/plans/primary-xpoint-evidence">primary-xpoint-evidence</a>:
+    <code>ForwardTopologyState.diverted</code> echoes the requested class on one route and has
+    misled three consumers in one day. Consumer census first — banked receipts serialize the flag —
+    then either derive the field from the class-margin comparator so its name becomes true, or
+    rename it to what it measures and route consumers to the achieved class.
+    <strong>Done when:</strong> the census is quoted in the manifest, every consumer reads the
+    achieved saddle-aware class, and no receipt semantics change silently.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="residual-domain-authority" data-choice="profile-owned-domain" data-by="Simon McIntosh" data-when="2026-08-26T00:00:00+00:00">
+        <p class="r-dec-q">How should the free-boundary solve treat the state-dependent domain —
+        freeze it per outer iteration, smooth cell membership, damp mask-crossing steps, or remove
+        the boundary definition from the residual entirely?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="freeze-per-outer">freeze per outer iteration</button>
+          <button class="r-opt" data-value="smooth-membership">smooth cell membership</button>
+          <button class="r-opt" data-value="damp-crossing">damp mask-crossing steps</button>
+          <button class="r-opt chosen" data-value="profile-owned-domain">remove the boundary from the residual; the profile owns the exterior</button>
+        </p>
+        <p class="r-dec-rat">Lead decision, superseding the three treatment options inherited from
+        discrete-operator-analytic-error. The solve should not use the boundary definition at all:
+        the flood fill supplies the primary X-point and the shadow regions; the O/X pair defines
+        psi_norm; shadows exclude disconnected psi_norm &lt; 1 regions; every other cell
+        participates and true exterior cells get j = 0 from the profile, which handles the
+        scrape-off region. Treating the domain is unnecessary once the domain discontinuity itself
+        is removed from the residual.</p>
+      </div>
+      <div class="r-dec" data-key="limited-configuration-normalization" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Under the profile-owned domain, how does a limited configuration
+        normalize flux? The locked design defines psi_norm from the O/X pair. On the DIII-D limited
+        reference the wall binds well before the X-surface (margin about &minus;0.335), so an O/X
+        normalization admits profile current in the in-vessel region between the wall-contact
+        surface and the X-surface unless the profile decays there. Options: keep O/X normalization
+        always and let the profile's scrape-off closure own that region; or normalize by the binding
+        level min(wall, X) as a post-selection scalar outside the Jacobian; or make it
+        configuration-dependent. This decision gates the §4 cutover's treatment of the protected
+        DIII-D baseline.</p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-pod-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship profile-owned-solve-domain">
+        <h4 class="r-fu-title">Repair the seed, cut over the residual domain, run the ladder</h4>
+        <div class="r-fu-body">Execution order: §3 seed/material-mask repair gates §4; §4 requires
+        the limited-configuration-normalization decision locked; §5 and §6 are independent of §4 and
+        may run in parallel lanes. The §2 X-point polish dependency arrives from
+        separatrix-spline-extraction.</div>
+        <pre class="r-fu-prompt">/reckon-ship profile-owned-solve-domain</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>

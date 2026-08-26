@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="efit-baseline-demonstration-landed">
+  <meta name="plan-evidence-for" content="efit-baseline-demonstration">
+  <meta name="plan-title" content="EFIT Baseline Demonstration — execution record">
+  <meta name="plan-summary" content="Cumulative execution evidence: the four-scout scoping wave, the independent stall corroboration and its adopted qualification, and the design lock.">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>EFIT Baseline Demonstration — execution record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h1>EFIT Baseline Demonstration — execution record</h1>
+
+    <p>Execution evidence for
+    <a href="/nova/efit-baseline-demonstration">efit-baseline-demonstration</a>. One anchor per
+    material result.</p>
+
+    <h2 id="scoping">§2 — the four-scout scoping wave</h2>
+
+    <p><strong>Four codex nodes, all gates PASSED, 2026-08-26.</strong> Dispatched under §2, merged
+    to main, worktrees removed. The stall-corroboration node ran on a deliberately fresh roster
+    member with no session resume, so its agreement with the prior session's account is independent
+    rather than inherited.</p>
+
+    <table>
+      <caption>Nodes, commits, and the finding each banked</caption>
+      <thead><tr><th scope="col">Node</th><th scope="col">Commit</th><th scope="col">Headline finding</th></tr></thead>
+      <tbody>
+        <tr><td><code>reuse-map</code></td><td><code>4b702960</code></td><td>25 candidates over nova and imas-ambix across four capability classes. The spline surface authority (<code>fit_tensor_spline</code> / <code>TensorBSpline.evaluate</code>), the fixed-shape contour primitive (<code>traced_spline_contour</code>), both saddle-cell mechanisms, and both EFIT harnesses exist. Exactly ONE missing contract: fixed-capacity assembly of per-cell spline arcs into one axis-enclosing closed branch plus retained open legs. The embedded Hessian-Newton loop in <code>traced_spline_contour</code> is the donor for a seedable stationary polish; the local quadratic must stop being position authority.</td></tr>
+        <tr><td><code>extraction-seam-map</code></td><td><code>43d03cf6</code></td><td>Four different boundary contracts where there should be one. The corroboration figure's wavy curve is Matplotlib marching squares on grid flux; the production label is an eight-vertex bilinear ray-march ring; the transport route consumes spline Bernstein corrections but emits no polyline; and the Newton residual clips plasma cells with STRAIGHT CHORDS (<code>_traced_clip</code> at forward_operator.py:620-640) — the global spline never reaches the residual. 55 validated file:line anchors; the X-point split attaches after <code>_post_cutover_geometry</code>; a residual-domain change attaches at <code>ForwardFluxOperator._support_partition</code>.</td></tr>
+        <tr><td><code>stall-corroboration</code></td><td><code>bbd0f015</code></td><td>Independent replay: 4/4 disagreeing arms non-converged (terminal residuals 2.763141e-3 to 7.425989e-3 against 1e-8), 4/4 limited via <code>class_margin</code> (&minus;0.2024463, &minus;0.2069079, &minus;0.1482236, &minus;0.1614419), agreeing with the banked stalled-not-misclassified account. QUALIFICATION: late mask switching present on only 2/4 tails (21986/46 pure 3 cells; 21989/55 mixed 29 cells); both 21985/51 arms hold a stable EMPTY confined mask, pointing at the axis-seed material-mask mismatch (seed 1.187 m off axis). Mixed-arm trajectories reproduce the pinned receipt within 5e-12; pure-arm drift at most 1.338e-6, verdicts unchanged.</td></tr>
+        <tr><td><code>wall-machinery-map</code></td><td><code>c11fe7a2</code></td><td>37 stored MAST limiter rows are 36 unique physical segments; the wall enters as FluxTarget images <code>Gs@Is + Gc@Ic + Gp@J(psi)</code>. An isolated ladder is feasible at counts 36/72/144/288 with an exact 37-row reproduction control and no plasma-carrier change; no interpolation-order knob exists (geometry hard-coded piecewise-linear, extremum fit hard-coded quadratic), so an order sweep needs a wall-only selector policy.</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The qualification was adopted upstream.</strong> The S15 session amended its sprint
+    record at commit <code>5f2b213c</code>: the stall mechanisms are plural — state-dependent domain
+    proven on the cycling reference and present on two arms, empty-confined-mask seed fault on
+    21985/51 — citing <code>bbd0f015</code>. It also corrected its reported MAST agreement from
+    8/12 to the margin-derived <strong>7/12</strong> (disagreements 21985/51 both, 21986/46 both,
+    21989/55 mixed) after finding the receipt's top-level achieved-class strings still consume the
+    legacy <code>ForwardTopologyState.diverted</code> leaf — the third consumer that leaf misled in
+    one day.</p>
+
+    <h2 id="design-lock">The design lock</h2>
+
+    <p><strong>Lead decisions, 2026-08-26.</strong> The state-dependent-domain treatment question
+    was superseded rather than chosen among: the Newton solve stops consuming the boundary
+    definition entirely — flood fill supplies the primary X-point and shadow regions, the polished
+    O/X pair defines psi_norm, shadows exclude disconnected psi_norm &lt; 1 regions, every other
+    cell participates, and exterior current vanishes through the profile. Implementation is owned
+    by <a href="/nova/plans/profile-owned-solve-domain">profile-owned-solve-domain</a> (with the
+    21985/51 seed repair gating the cutover, the isolated wall ladder, and the legacy-label
+    retirement) and <a href="/nova/plans/separatrix-spline-extraction">separatrix-spline-extraction</a>
+    (spline-Newton polish, closed/open branch assembler, shared closed-boundary comparator for both
+    EFIT banks). The demonstration gate runs on this plan after both ship, with thresholds locked
+    before any credited run.</p>
+
+  </main>
+</body>
+</html>

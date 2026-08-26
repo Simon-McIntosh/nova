@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="separatrix-spline-extraction">
+  <meta name="plan-title"     content="Separatrix Spline Extraction — one curve authority, split at the X-point">
+  <meta name="plan-summary"   content="Spline-Newton null polish, a fixed-capacity closed/open branch assembler over the global spline, and one shared closed-boundary EFIT comparator.">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="12.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-tags"      content="equilibrium,topology,efit,mast,diii-d">
+  <meta name="plan-blocks"    content="efit-baseline-demonstration">
+  <title>Separatrix Spline Extraction | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Four boundary contracts where there should be one</h2>
+
+    <p>The extraction seam map
+    (<code>docs/figures/efit-baseline-demonstration/extraction-seam-map.md</code>, commit
+    <code>43d03cf6</code>) established that no single LCFS polyline is shared by the solve, the
+    production MAST scorecard, transport geometry, and the EFIT corroboration figure. The figure
+    draws a Matplotlib marching-squares path on grid flux — the coarse, wavy curve visible in the
+    twelve panels, with divertor legs running unclipped past the X-point. The production label is an
+    eight-vertex ring from bilinear ray marches. The transport route consumes global-spline
+    Bernstein-block corrections but emits no ordered polyline. Only the transport route touches the
+    sanctioned curve source: the global not-a-knot C2 tensor spline, the authority the twice-refuted
+    local reconstructions were replaced by
+    (<a href="/nova/plans/curved-clip-global-surface">curved-clip-global-surface</a>).</p>
+
+    <p>The capability reuse map (<code>docs/figures/efit-baseline-demonstration/reuse-map.md</code>,
+    commit <code>4b702960</code>, 25 candidates over nova and imas-ambix) found every ingredient in
+    reach and exactly one missing contract: <strong>fixed-capacity assembly of per-cell
+    global-spline arcs into one axis-enclosing closed branch plus separately retained open
+    legs</strong>. This plan builds that one thing and factors two existing mechanisms; it adds no
+    second spline representation and inherits no grid-resolution contour as geometry authority.</p>
+
+    <h2 id="s2">§2 — Stationary-point polish on the global spline</h2>
+
+    <p>Factor the fixed-iteration gradient/Hessian Newton loop embedded in
+    <code>traced_spline_contour</code> (<code>nova/equilibrium/flux_surface_connectivity.py</code>)
+    into a seedable fixed-slot kernel <code>polish_stationary_points(spline, seed_rz, valid)</code>
+    returning polished position, value, gradient norm, Hessian type, convergence, and in-domain
+    validity. <code>stencil_nulls.xpoint_candidates</code> remains the candidate census and scoring
+    boundary; its local quadratic <code>_refine_selected_vertices</code> stops being the position
+    authority. The subordinate-union semantics of the dual sweep (commit <code>00006fda</code>) are
+    a contract to preserve: candidates in, polish out, primal coordinates never perturbed by the
+    polish of another family's candidate.</p>
+
+    <p><strong>Done when:</strong> polished saddles and extrema on manufactured C2 fields converge
+    grad-psi to machine precision within fixed trip counts; existing candidate tests unchanged;
+    JIT/eager/vmap parity held. The polished null feeds the O/X pair that
+    <a href="/nova/plans/profile-owned-solve-domain">profile-owned-solve-domain</a> normalizes flux
+    with, so precision here is solve-facing, not cosmetic.</p>
+
+    <h2 id="s3">§3 — Closed/open branch assembly at extraction resolution</h2>
+
+    <p>Assemble a fixed-capacity graph whose nodes are canonical shared edge crossings plus the
+    polished saddle, and whose edges are the valid cubic segments from
+    <code>traced_spline_contour</code>. From the axis side, identify exactly one closed component as
+    the boundary; emit saddle-connected remainders as separately typed open legs. Never select the
+    closed boundary by longest-polyline ranking — that can pick a long open leg. Reuse the
+    padding/overflow conventions of <code>TracedClippedSupports</code>; extraction resolution is
+    independent of solve resolution. For limited states return the single closed boundary and empty
+    leg slots.</p>
+
+    <p><strong>Done when</strong> the five tests the reuse map enumerated pass: a manufactured
+    diverted field (one closed lobe, two open legs, saddle-exact endpoints and branch identity); a
+    limited field (one closed branch, zero legs); a double-null field (deterministic fixed slots, no
+    leg merge); JIT/eager/vmap parity with exact-zero inactive padding and fail-closed capacity; and
+    closed-branch metrics invariant when leg extent is extended beyond the X-point.</p>
+
+    <h2 id="s4">§4 — One comparator for both EFIT banks</h2>
+
+    <p>One shared metric implementation, evaluated on the closed branch only, wired into the MAST
+    frozen-arm corroboration harness (replacing its Matplotlib <code>_binding_contour</code>) and
+    the DIII-D preregistered match (replacing the longest-<code>contourpy</code>-line
+    <code>_separatrix</code>): topology-class agreement from the achieved saddle-aware read via
+    <code>class_margin</code> — never <code>ForwardTopologyState.diverted</code> or a requested
+    class — symmetric sup and symmetric RMS nearest-polyline distances in metres, and nearest
+    polished saddle to the unordered EFIT X-point set in metres. Missing boundaries, classes, or
+    X-points score as explicit named failures; nonconverged solves stay failed rows. EFIT remains an
+    independent magnetics-fitted reconstruction: geometric comparison only, COCOS 3 to 17 with unit
+    geometric factor on MAST.</p>
+
+    <p><strong>Done when:</strong> both banks regenerate through the shared comparator with
+    spline-precise closed boundaries, legs retained for plotting but excluded from every metric, and
+    the twelve-panel figure redrawn with the clipped curves. These regenerated banks are the
+    geometry input to the demonstration gate on
+    <a href="/nova/plans/efit-baseline-demonstration">efit-baseline-demonstration</a>.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="curve-authority" data-choice="global-tensor-spline" data-by="Simon McIntosh" data-when="2026-08-26T00:00:00+00:00">
+        <p class="r-dec-q">Which surface supplies every extracted curve, null position, and clip?</p>
+        <p class="r-dec-rat">The global not-a-knot C2 tensor spline fitted to the complete flux map
+        — locked by the lead's direction to use the global spline fit for precise stationary-point
+        and contour extraction, and by the standing twice-refuted status of local per-cell
+        reconstruction. Positions may be refined locally; the field never is.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-sse-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship separatrix-spline-extraction">
+        <h4 class="r-fu-title">Implement the polish, the branch assembler, and the shared comparator</h4>
+        <div class="r-fu-body">Dependency order per the reuse map: factor the stationary polish and
+        gate it on analytic saddles; assemble closed/open branches over traced_spline_contour and
+        pin fixed-shape behaviour; wire the closed branch into both EFIT harnesses through one
+        sup/RMS/X metric implementation; regenerate both banks.</div>
+        <pre class="r-fu-prompt">/reckon-ship separatrix-spline-extraction</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>

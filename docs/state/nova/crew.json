@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T21:03:00",
+  "updated": "2026-08-26T21:12:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -559,9 +559,11 @@
         "id": "flood-geometry-tests",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03f74-e3c6-7113-9d05-7d28aec22372",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03f74-e3c6-7113-9d05-7d28aec22372"
+        },
         "created": "2026-08-26"
       },
       {
@@ -48580,9 +48582,198 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T190329645513-ebd-flood-geometry-battery",
+        "plan": "efit-baseline-demonstration",
+        "section": "",
+        "node": "ebd-flood-geometry-battery",
+        "node_definition": {
+          "done_when": "tests/test_hex_flood_geometries.py constructs manufactured flux maps with analytically known topology (at minimum a limited circular plasma, a lower single-null with a private-flux region, an upper-lower double-null, and an interior saddle beside a wall notch) at three or more grid resolutions each, and for every case and resolution asserts zero PRIVATE_FLUX cells inside the analytic LCFS, a core component matching the analytic interior within a one-cell boundary band, private-flux cells confined to the analytic private side of the X-point, and eager versus JIT label identity; the full new file passes with no new failures vs the current repository HEAD; ruff adds no findings on the staged path",
+          "estimated_hours": null,
+          "goal": "An analytic-geometry unit battery that pins the saddle-aware hex flood partition against manufactured flux fields whose topology is known in closed form, across grid resolutions, so any future regression that floods shadow inside the LCFS fails a named unit test rather than a visual inspection",
+          "id": "ebd-flood-geometry-battery",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T190329645513-ebd-flood-geometry-battery/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "tests/test_hex_flood_geometries.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "flood-geometry-tests",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T19:03:39Z",
+        "completed_at": "2026-08-26T19:12:37Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 538,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 538,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "36725e1b48cbe678da03830af53e7364e9cbd621",
+        "commits": [
+          "1cb61cac"
+        ],
+        "changed_lines": {
+          "added": 213,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 12,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest -p no:cacheprovider tests/test_hex_flood_geometries.py (12 passed: 4 analytic families x 3 resolutions)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T190329645513-ebd-flood-geometry-battery/logs/test_hex_flood_geometries_after_fix.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T190329645513-ebd-flood-geometry-battery/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f74-e3c6-7113-9d05-7d28aec22372",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3434240,
+            "cached_input_tokens_cumulative": 3434240,
+            "input_tokens": 3561689,
+            "input_tokens_cumulative": 3561689,
+            "output_tokens": 15204,
+            "output_tokens_cumulative": 15204,
+            "reasoning_output_tokens": 5660,
+            "reasoning_output_tokens_cumulative": 5660
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 12964,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 15664,
+              "log_age_seconds": 15192,
+              "log_fresh": false,
+              "manifest_commits": [
+                "bfc393c251eb72e1b02a3b3539969f555ac16314"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-raw-measurement.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T144216465857-sse-h200-polish-raw-measurement --gate <verdict> --commit bfc393c251eb72e1b02a3b3539969f555ac16314",
+              "node": "sse-h200-polish-raw-measurement",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T144216465857-sse-h200-polish-raw-measurement",
+              "terminal_age_seconds": 15215,
+              "terminal_at": "2026-08-26T14:50:00Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-h200-polish-raw-measurement"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 13601,
+              "budget_seconds": 1500,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 15101,
+              "log_age_seconds": 14855,
+              "log_fresh": false,
+              "manifest_commits": [
+                "bfc393c251eb72e1b02a3b3539969f555ac16314"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-raw-verifier.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T145147405375-sse-h200-polish-raw-verifier --gate <verdict> --commit bfc393c251eb72e1b02a3b3539969f555ac16314",
+              "node": "sse-h200-polish-raw-verifier",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T145147405375-sse-h200-polish-raw-verifier",
+              "terminal_age_seconds": 14876,
+              "terminal_at": "2026-08-26T14:55:38Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-h200-polish-raw-verifier"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 13318,
+              "budget_seconds": 1500,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 14818,
+              "log_age_seconds": 14478,
+              "log_fresh": false,
+              "manifest_commits": [
+                "d3550f05c4872ed081b1a67aab1ae5e4dc572989"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-poloidal-publication-path-repair.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T145621948573-sse-diiid-poloidal-publication-path-repair --gate <verdict> --commit d3550f05c4872ed081b1a67aab1ae5e4dc572989",
+              "node": "sse-diiid-poloidal-publication-path-repair",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T145621948573-sse-diiid-poloidal-publication-path-repair",
+              "terminal_age_seconds": 14504,
+              "terminal_at": "2026-08-26T15:01:50Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-diiid-poloidal-publication-path-repair"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1030
+    "_version": 1032
   }
 }

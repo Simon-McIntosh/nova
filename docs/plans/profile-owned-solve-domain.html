@@ -79,6 +79,22 @@
     topology-domain selection at <code>nova/equilibrium/source.py:608-679</code>, per the
     extraction seam map.</p>
 
+    <p><strong>The O/X pair is tracked state, refined in step with the solve.</strong> Lead design,
+    2026-08-26: the null positions that define <code>psi_norm</code> are carried as solve state and
+    refined each outer iteration by the warm-started spline polish from
+    <a href="/nova/plans/separatrix-spline-extraction">separatrix-spline-extraction</a> §2a
+    (tolerance exit under a fixed cap), so the nulls co-converge with the flux map instead of being
+    re-detected cold or polished to machine precision on an unconverged field. Because the tracked
+    polish is a smooth function of the field — with reverse-mode sensitivity supplied by implicit
+    differentiation at grad&nbsp;psi(x*)&nbsp;=&nbsp;0 — the Jacobian sees the null's dependence on
+    the state, avoiding at the null exactly the linearised-as-fixed pathology this plan retires at
+    the masks. Warm tracking also stabilises primary-X <em>selection</em>: a tracked point cannot
+    flap between near-degenerate candidates the way a per-iteration argmin can. The guard: the
+    winding-degree census keeps running as the discrete detector, and the tracked null re-seeds
+    from it when its Hessian type degrades, its gradient norm stops contracting, or the census's
+    primary candidate moves cells (a mid-solve topology change or a primary-X exchange in a
+    near-double-null field).</p>
+
     <p><strong>The flood fill runs on the hex plasma cells.</strong> Lead directive, 2026-08-26:
     topology labelling operates on the production hexagonal plasma mesh, consuming the flux already
     evaluated at hex cell centroids and nodes by the solve — never on a separate rectangular lattice,

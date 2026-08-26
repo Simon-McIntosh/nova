@@ -79,6 +79,42 @@
     execution session. Full record:
     <a href="/nova/evidence/archive/separatrix-spline-extraction-landed#polish">polish landed</a>.</p>
 
+    <h3 id="s2-in-step">§2a — The polish runs in step with the converging flux map</h3>
+
+    <p><strong>Lead design, 2026-08-26.</strong> The isolated eight-trip form is a cold-start and
+    extraction budget, never an architectural requirement. One kernel serves three call sites:
+    the winding-degree census <em>detects</em> (discrete, guarded); a warm-started tracked polish
+    <em>refines in step with the solve</em>, seeded from the previous outer iteration's null, so
+    the null error stays slaved to the field error and everything co-converges — Newton on a
+    stationary point contracts quadratically, so the tracked null converges faster than the map
+    once in the basin and the terminal state carries a machine-precision null at no extra cost;
+    and the full-budget polish serves cold seeds and post-solve extraction on the frozen field.
+    Polishing to 1e-14 on an iterate whose field error is 1e-3 buys nothing, so precision is spent
+    only where the field can support it.</p>
+
+    <p><strong>Termination is a tolerance exit with a fixed upper cap.</strong> The fixed trip
+    count is not required by the hardware or by JAX — <code>lax.while_loop</code> under a
+    convergence predicate is jit-safe and shape-fixed — so the loop exits at tolerance and the
+    count survives only as the safety cap and cold-start default. Two known costs shape the
+    implementation. Reverse-mode AD does not pass through <code>while_loop</code>: where the
+    in-step tracked use must be differentiable so the Jacobian sees the null's dependence on the
+    field, differentiate the <em>solution</em> via the implicit function theorem at
+    grad&nbsp;psi(x*)&nbsp;=&nbsp;0 (custom VJP), which makes the iteration count irrelevant to the
+    derivative; a single fixed trip per outer iteration is the differentiable fallback. And a
+    vmapped <code>while_loop</code> runs every lane to the slowest, so the batched saving is set by
+    the batch maximum — expected to be noise here because the per-trip body is microseconds, but
+    that expectation is measured, not asserted, by the rung below.</p>
+
+    <p><strong>GPU cost: estimated, then measured.</strong> No device measurement of this kernel
+    exists yet (the landing node's GPU parity test skipped on a CPU lane). From banked H200
+    measurements — device loop overhead near 7.6&nbsp;&micro;s per iteration regardless of body,
+    against the 42.77&nbsp;ms slice cost — a cold eight-trip polish estimates at roughly
+    60&nbsp;&micro;s and an in-step single trip at roughly 8&nbsp;&micro;s per outer iteration,
+    about 0.1&ndash;0.2&nbsp;% of a slice either way. A reserved-H200 micro-benchmark rung
+    (isolated cold polish; in-step tracked polish over a representative warm sequence; batched
+    tolerance-exit tail against the fixed-cap form) replaces this estimate with numbers before any
+    always-on default is set, under the same preregistered discipline as the dual-sweep lock.</p>
+
     <h2 id="s3">§3 — Closed/open branch assembly at extraction resolution</h2>
 
     <p>Assemble a fixed-capacity graph whose nodes are canonical shared edge crossings plus the
@@ -123,6 +159,20 @@
         — locked by the lead's direction to use the global spline fit for precise stationary-point
         and contour extraction, and by the standing twice-refuted status of local per-cell
         reconstruction. Positions may be refined locally; the field never is.</p>
+      </div>
+      <div class="r-dec" data-key="polish-termination" data-choice="tolerance-exit-capped" data-by="Simon McIntosh" data-when="2026-08-26T00:00:00+00:00">
+        <p class="r-dec-q">Does the stationary polish run a fixed trip count or exit at
+        tolerance?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="fixed-count">fixed trip count</button>
+          <button class="r-opt chosen" data-value="tolerance-exit-capped">tolerance exit with a fixed upper cap</button>
+        </p>
+        <p class="r-dec-rat">Lead decision: once the tolerance is reached the loop exits; the fixed
+        count is only the safety cap and cold-start budget, not a requirement. Constraints carried
+        in §2a: reverse-mode differentiability of the in-step tracked use comes from implicit
+        differentiation at grad psi(x*) = 0 (or a one-trip fixed fallback), never by
+        differentiating through the while loop; the vmapped run-to-slowest-lane cost is measured on
+        the reserved-H200 rung before any always-on default.</p>
       </div>
     </section>
 

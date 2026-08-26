@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="20">
+<meta name="plan-version" content="22">
 <meta name="plan-commits" content="ba1f73013873fd2d7434db1b744d742a1b4b042c">
 <meta name="plan-artifacts" content="docs/evidence/archive/efit-baseline-demonstration-landed.html,docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json">
 </head>
@@ -261,6 +261,12 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260826-visual-gate-failed" data-who="reckon-d8-s16-veracity-review" data-when="2026-08-26T16:40:00+00:00">
     <div class="r-comment-body">VISUAL GATE FAILED — lead inspection of docs/evidence/topology-visual-corroboration.html found shadow cells flooded WITHIN the LCFS: on converged MAST panels (21978/35 pure and mixed) the entire interior below the midplane inside both the Nova closed boundary and the EFIT LCFS is classified private-flux shadow, with a further shadow band hugging the top inside edge — a flux/half-plane criterion where connectivity is required. On 21985/51 the selected primary X, primary O and a tiny closed boundary sit at the top wall notch (Z≈1.8), the same arm whose bank regeneration failed on the production-vs-diagnostic connectivity-material mismatch. Lead directive: ALL dependent work pauses until the flood-fill/shadow RCA lands and each dependant is re-evaluated against the fix. RCA node dispatched; the decisive question is whether the defect is generator-local or in the production hex flood fill (which would contaminate achieved-class margins and every consumer of the connectivity material).</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260826T163713599980-rca-shadow-flood" data-who="flood-rca" data-when="2026-08-26T16:47:17Z">
+    <div class="r-comment-body"><p>Root cause: Topology.x_mask half-plane conjunction is the production connected authority (topology.py:277-297,360-385) feeding _support_partition, so all 12 frozen MAST terminal states need re-solving; 21985/51 is a separate unqualified-O selection defect; hex flood itself clean; 2 adapter material seams named; full contamination ledger + rerun order in report</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260826-shadow-rca-verdict" data-who="reckon-d8-s16-veracity-review" data-when="2026-08-26T16:52:00+00:00">
+    <div class="r-comment-body">RCA COMPLETE (rca-shadow-flood): the false interior shadow is a PRODUCTION defect, not the renderer. Topology.x_mask is a conjunction of horizontal half-planes at every finite X-point (topology.py:277-297) and read_with_connectivity uses it as the connected authority (topology.py:360-385); closed & ~connected becomes PRIVATE_FLUX. Reproduced with 0 cell mismatches on both committed 21978/35 caches (118/179 pure, 116/161 mixed vs true hex component 277/244). The same mask qualifies the residual's core support via _support_partition, so ALL 12 frozen MAST terminal states require re-solving before any end-to-end credit. 21985/51 is a SEPARATE defect: o_point_index selects an unqualified global extremum at the top wall notch before any material/component validation. The saddle-aware hex flood, connectivity material and class-margin mechanisms are clean; two adapter seams (_post_cutover_geometry, _posthoc_margin_read) pass raw material and need connectivity_axis_seed routing. Contamination ledger, minimal fixes and the five-step rerun order (re-solve arms → qualified 21985 → census → banks+panels → comparator/wall ladder → only then score thresholds) are in crew/reports/s16-veracity-20260826/rca-shadow-flood.md. Fix nodes dispatched; the pause on dependent work stands until the rerun order completes.</div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260826T111937959782-ebd-threshold-lock-proposal" data-who="vacuum-diagnosis" data-when="2026-08-26T11:24:20Z">
     <div class="r-comment-body"><p>Derived an outcome-blind, inclusive three-gate demonstration contract from the immutable banked twelve-arm evidence: class agreement at least 7/12, worst eligible closed-boundary RMS at most 0.55 m, and worst polished-saddle distance at most 0.04 m, with fail-closed cohort and nonfinite semantics.</p></div>

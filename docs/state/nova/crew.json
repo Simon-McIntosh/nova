@@ -1,9 +1,18 @@
 {
-  "updated": "2026-08-26T18:36:52",
+  "updated": "2026-08-26T20:42:22",
   "project": "nova",
   "doc": "crew",
   "data": {
     "members": [
+      {
+        "id": "adapter-seams",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-26"
+      },
       {
         "id": "alignment-power",
         "harness": "codex",
@@ -409,6 +418,15 @@
         "created": "2026-08-12"
       },
       {
+        "id": "domain-partition",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-26"
+      },
+      {
         "id": "dual-trace-proto",
         "harness": "codex",
         "role": "implement",
@@ -517,9 +535,11 @@
         "id": "flood-rca",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03eee-f255-7522-9dd6-f2b59a1c4c30"
+        },
         "created": "2026-08-26"
       },
       {
@@ -953,6 +973,15 @@
         "role": "implement",
         "session_id": "019ff77b-c354-79d1-ac11-737302ec3513",
         "created": "2026-08-12"
+      },
+      {
+        "id": "rca-doc",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-26"
       },
       {
         "id": "read-ingest",
@@ -47364,9 +47393,192 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T163713599980-rca-shadow-flood",
+        "plan": "efit-baseline-demonstration",
+        "section": "",
+        "node": "rca-shadow-flood",
+        "node_definition": {
+          "done_when": "A report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-veracity-20260826/rca-shadow-flood.md names the root cause with file and line citations and a step-by-step mechanism trace from flood seed to the interior shadow cells observed on the converged 21978/35 panels, states with evidence whether production connectivity material and achieved-class margins are contaminated or clean, enumerates every S16 artifact that consumed the defective mask (axis-seed census, corroboration banks, comparator classes, wall-ladder receipt) with a contaminated-or-clean verdict each, gives the minimal correct fix, and modifies no repository file",
+          "estimated_hours": null,
+          "goal": "A root-cause analysis of why private-flux shadow cells are flooded inside the LCFS in the committed topology visual evidence, locating the defective mechanism to either the evidence generator docs/figures/topology-visual-corroboration/generate_topology_visuals.py or the production hex flood-fill and connectivity-material machinery it consumes, and determining whether the 21985/51 top-wall primary X/O selection shares that root cause",
+          "id": "rca-shadow-flood",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T163713599980-rca-shadow-flood/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "",
+          "spec_level": "",
+          "time_budget": "35m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-veracity-20260826/rca-shadow-flood.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-26T16:37:21Z",
+        "completed_at": "2026-08-26T16:47:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 596,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 596,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "4361778cfe5b9d27c857f71330133da568f87e5e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "read-only cached-mask audit: legacy half-plane rule reproduces both committed 21978/35 masks with 0 cell mismatches (118/179 pure, 116/161 mixed vs true hex 277/244)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T163713599980-rca-shadow-flood/final-evidence-audit.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T163713599980-rca-shadow-flood/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5951232,
+            "cached_input_tokens_cumulative": 5951232,
+            "input_tokens": 6197783,
+            "input_tokens_cumulative": 6197783,
+            "output_tokens": 23757,
+            "output_tokens_cumulative": 23757,
+            "reasoning_output_tokens": 8585,
+            "reasoning_output_tokens_cumulative": 8585
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 4187,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 6887,
+              "log_age_seconds": 6415,
+              "log_fresh": false,
+              "manifest_commits": [
+                "bfc393c251eb72e1b02a3b3539969f555ac16314"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-raw-measurement.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T144216465857-sse-h200-polish-raw-measurement --gate <verdict> --commit bfc393c251eb72e1b02a3b3539969f555ac16314",
+              "node": "sse-h200-polish-raw-measurement",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T144216465857-sse-h200-polish-raw-measurement",
+              "terminal_age_seconds": 6438,
+              "terminal_at": "2026-08-26T14:50:00Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-h200-polish-raw-measurement"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 4824,
+              "budget_seconds": 1500,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 6324,
+              "log_age_seconds": 6078,
+              "log_fresh": false,
+              "manifest_commits": [
+                "bfc393c251eb72e1b02a3b3539969f555ac16314"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-h200-polish-raw-verifier.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T145147405375-sse-h200-polish-raw-verifier --gate <verdict> --commit bfc393c251eb72e1b02a3b3539969f555ac16314",
+              "node": "sse-h200-polish-raw-verifier",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T145147405375-sse-h200-polish-raw-verifier",
+              "terminal_age_seconds": 6099,
+              "terminal_at": "2026-08-26T14:55:38Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-h200-polish-raw-verifier"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 4541,
+              "budget_seconds": 1500,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 6041,
+              "log_age_seconds": 5701,
+              "log_fresh": false,
+              "manifest_commits": [
+                "d3550f05c4872ed081b1a67aab1ae5e4dc572989"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-diiid-poloidal-publication-path-repair.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T145621948573-sse-diiid-poloidal-publication-path-repair --gate <verdict> --commit d3550f05c4872ed081b1a67aab1ae5e4dc572989",
+              "node": "sse-diiid-poloidal-publication-path-repair",
+              "phase": "starting",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T145621948573-sse-diiid-poloidal-publication-path-repair",
+              "terminal_age_seconds": 5727,
+              "terminal_at": "2026-08-26T15:01:50Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/sse-diiid-poloidal-publication-path-repair"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1010
+    "_version": 1015
   }
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T22:59:30",
+  "updated": "2026-08-26T23:02:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -50445,9 +50445,115 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T205350362325-ebd-demonstration-scorer",
+        "plan": "efit-baseline-demonstration",
+        "section": "",
+        "node": "ebd-demonstration-scorer",
+        "node_definition": {
+          "done_when": "benchmarks/demonstration_threshold_score.py reads both bank artifacts, requires exactly the twelve declared MAST arm identities and every declared DIII-D row exactly once, rejects missing, duplicate, substituted, non-converged-where-convergence-is-required, empty, or non-finite rows without reducing the denominator, computes MAST class agreement against the locked 7-of-12, worst eligible converged class-agreeing MAST closed-boundary symmetric RMS against 0.55 m, and worst declared-row saddle distance against 0.04 m, writes docs/figures/efit-baseline-demonstration/demonstration-score/receipt.json as strict JSON naming the exact input identities and digests plus the endpoint verdict, and a test file proves each refusal class and a synthetic pass and fail; all tests green; ruff clean",
+          "estimated_hours": null,
+          "goal": "A tracked fail-closed demonstration-threshold scorer that joins the fresh MAST twelve-arm and DIII-D five-frame banks and publishes one endpoint receipt against the locked banked-inclusive-three-gate-contract, refusing every form of denominator shrinkage",
+          "id": "ebd-demonstration-scorer",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T205350362325-ebd-demonstration-scorer/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "benchmarks/demonstration_threshold_score.py",
+            "tests/test_demonstration_threshold_score.py",
+            "docs/figures/efit-baseline-demonstration/demonstration-score"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "receipt-semantics",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T20:54:00Z",
+        "completed_at": "2026-08-26T21:02:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 511,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 511,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "d1ccb65f2a8f57bfa510b64424c69ae8d253220b",
+        "commits": [
+          "9506114075b1c48e447d3d38beab389e10489980"
+        ],
+        "changed_lines": {
+          "added": 647,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 12,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/test_demonstration_threshold_score.py (12 passed: each refusal class plus synthetic pass and fail)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T205350362325-ebd-demonstration-scorer/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T205350362325-ebd-demonstration-scorer/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e9e-83dd-77a1-9200-e41251d729b1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4470528,
+            "cached_input_tokens_cumulative": 6104064,
+            "input_tokens": 4602091,
+            "input_tokens_cumulative": 6341568,
+            "output_tokens": 12075,
+            "output_tokens_cumulative": 20937,
+            "reasoning_output_tokens": 3283,
+            "reasoning_output_tokens_cumulative": 5216
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1050
+    "_version": 1051
   }
 }

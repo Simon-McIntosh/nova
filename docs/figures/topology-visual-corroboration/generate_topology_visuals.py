@@ -241,26 +241,43 @@ def _diiid_module():
     source = DIIID_AUTHORITY.read_text()
     needle = "    return result, fields\n\n\ndef _retained_solve_failure("
     injection = (
-        "    visual_physical = equilibrium.flux[: profile.operator.physical_node_number]\n"
-        "    visual_grid_flux, _visual_wall_flux = "
+        "    try:\n"
+        "        visual_physical = equilibrium.flux[: profile.operator.physical_node_number]\n"
+        "        visual_grid_flux, _visual_wall_flux = "
         "profile.operator.topology.split_flux_map(visual_physical)\n"
-        "    visual_source_o, visual_source_x = "
+        "        visual_source_o, visual_source_x = "
         "profile.operator._fixed_design_topology.grid(visual_grid_flux)\n"
-        "    visual_source_o, visual_source_x = "
+        "        visual_source_o, visual_source_x = "
         "jax.device_get((visual_source_o, visual_source_x))\n"
-        "    visual_masks, _visual_topology = profile.operator.read(equilibrium.flux)\n"
-        "    fields.update({\n"
-        "        'domain_labels': np.asarray(visual_masks.label, dtype=np.int8),\n"
-        "        'cell_rz': np.asarray(profile.lattice.coordinate, dtype=float),\n"
-        "        'nova_source_o': np.asarray(visual_source_o, dtype=float),\n"
-        "        'nova_source_x': np.asarray(visual_source_x, dtype=float),\n"
-        "        'nova_selected_axis_rz': np.asarray(topology.axis, dtype=float),\n"
-        "        'nova_selected_x_rz': np.asarray(topology.x_point, dtype=float),\n"
-        "        'nova_selected_wall_rz': np.asarray(topology.wall_point, dtype=float),\n"
-        "        'efit_axis_rz': labelled_axis,\n"
-        "        'efit_x_points_rz': labelled_x_point[None, :],\n"
-        "        'visual_flux': np.asarray(predicted.T, dtype=float),\n"
-        "    })\n"
+        "        visual_masks, _visual_topology = profile.operator.read(equilibrium.flux)\n"
+        "        fields.update({\n"
+        "            'domain_labels': np.asarray(visual_masks.label, dtype=np.int8),\n"
+        "            'cell_rz': np.asarray(profile.lattice.coordinate, dtype=float),\n"
+        "            'nova_source_o': np.asarray(visual_source_o, dtype=float),\n"
+        "            'nova_source_x': np.asarray(visual_source_x, dtype=float),\n"
+        "            'nova_selected_axis_rz': np.asarray(topology.axis, dtype=float),\n"
+        "            'nova_selected_x_rz': np.asarray(topology.x_point, dtype=float),\n"
+        "            'nova_selected_wall_rz': np.asarray(topology.wall_point, dtype=float),\n"
+        "            'efit_axis_rz': labelled_axis,\n"
+        "            'efit_x_points_rz': labelled_x_point[None, :],\n"
+        "            'visual_flux': np.asarray(predicted.T, dtype=float),\n"
+        "            'visual_failure_exception_class': None,\n"
+        "        })\n"
+        "    except (NoQualifiedAxisError, ConstraintViolationError) as visual_error:\n"
+        "        visual_empty = np.empty((0, 2), dtype=float)\n"
+        "        fields.update({\n"
+        "            'domain_labels': np.empty(0, dtype=np.int8),\n"
+        "            'cell_rz': visual_empty,\n"
+        "            'nova_source_o': visual_empty,\n"
+        "            'nova_source_x': visual_empty,\n"
+        "            'nova_selected_axis_rz': visual_empty,\n"
+        "            'nova_selected_x_rz': visual_empty,\n"
+        "            'nova_selected_wall_rz': visual_empty,\n"
+        "            'efit_axis_rz': labelled_axis,\n"
+        "            'efit_x_points_rz': labelled_x_point[None, :],\n"
+        "            'visual_flux': np.empty((0, 0), dtype=float),\n"
+        "            'visual_failure_exception_class': type(visual_error).__name__,\n"
+        "        })\n"
         + needle
     )
     if source.count(needle) != 1:
@@ -305,15 +322,20 @@ def _diiid_rows() -> list[dict[str, Any]]:
         result, fields = module["solve_frame"](
             record,
             selected_frame.frame,
-            module["REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION"],
+            None,
         )
-        o_candidates, x_candidates = _stationary_records(
-            np.asarray(fields["nova_source_o"], dtype=float),
-            np.asarray(fields["nova_source_x"], dtype=float),
-            np.asarray(fields["radius"], dtype=float),
-            np.asarray(fields["height"], dtype=float),
-            np.asarray(fields["visual_flux"], dtype=float),
-        )
+        visual_failure = fields["visual_failure_exception_class"]
+        if visual_failure is None:
+            o_candidates, x_candidates = _stationary_records(
+                np.asarray(fields["nova_source_o"], dtype=float),
+                np.asarray(fields["nova_source_x"], dtype=float),
+                np.asarray(fields["radius"], dtype=float),
+                np.asarray(fields["height"], dtype=float),
+                np.asarray(fields["visual_flux"], dtype=float),
+            )
+        else:
+            o_candidates = np.empty((0, 2), dtype=float)
+            x_candidates = np.empty((0, 2), dtype=float)
         rows.append(
             {
                 "machine": "DIII-D",
@@ -330,16 +352,18 @@ def _diiid_rows() -> list[dict[str, Any]]:
                 "selected_x": np.asarray(fields["nova_selected_x_rz"], dtype=float),
                 "wall_point": np.asarray(fields["nova_selected_wall_rz"], dtype=float),
                 "wall": np.asarray(fields["pseudo_wall"], dtype=float),
-                "nova_boundary": np.asarray(
-                    fields["predicted_closed_boundary"], dtype=float
+                "nova_boundary": (
+                    np.asarray(fields["predicted_closed_boundary"], dtype=float)
+                    if visual_failure is None
+                    else np.empty((0, 2), dtype=float)
                 ),
                 "efit_axis": np.asarray(fields["efit_axis_rz"], dtype=float),
                 "efit_x": np.asarray(fields["efit_x_points_rz"], dtype=float),
                 "efit_lcfs": np.asarray(
                     fields["labelled_closed_boundary"], dtype=float
                 ),
-                "converged": bool(result.converged),
-                "qualification": result.solver_termination,
+                "converged": bool(result.converged) and visual_failure is None,
+                "qualification": visual_failure or result.solver_termination,
             }
         )
     if len(rows) != EXPECTED_DIIID_ROWS:
@@ -601,10 +625,25 @@ def _write_evidence(rows: list[dict[str, Any]], records: list[dict[str, Any]]) -
     figure_rows = []
     for index, (row, record) in enumerate(zip(rows, records, strict=True), start=1):
         filename = f"{index:02d}-{row['machine'].lower().replace('-', '')}-{row['identity'].replace('/', '-').replace(':', '-').replace(' ', '-')}.png"
+        unavailable = len(row["cell_rz"]) == 0
+        status = (
+            "Converged."
+            if row["converged"]
+            else (
+                f"NONCONVERGED — retained failure: "
+                f"{escape(str(row['qualification']))}."
+                + (
+                    " Nova partition and landmarks are unavailable; EFIT labels, "
+                    "LCFS, and governed first wall are retained."
+                    if unavailable
+                    else ""
+                )
+            )
+        )
         figure_rows.append(
             f"""<article class="figure-row" id="geometry-{index:02d}">
   <h3>{index:02d}. {row["machine"]} — {row["identity"]}</h3>
-  <figure><img src="/nova/figures/topology-visual-corroboration/{filename}" alt="Topology evidence for {row["machine"]} {row["identity"]}: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>{record["private_flux_cells"]} private-flux shadow cells; {record["o_candidates"]} plotted O candidates; {record["x_candidates"]} plotted X candidates; selected O/X/wall markers {record["selected_o"]}/{record["selected_x"]}/{record["wall_point"]}; EFIT axis/X/LCFS vertices {record["efit_axis"]}/{record["efit_x"]}/{record["efit_lcfs_vertices"]}. <strong>{"Converged." if row["converged"] else f"NONCONVERGED — retained failure: {escape(str(row['qualification']))}."}</strong></figcaption></figure>
+  <figure><img src="/nova/figures/topology-visual-corroboration/{filename}" alt="Topology evidence for {row["machine"]} {row["identity"]}: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>{record["private_flux_cells"]} private-flux shadow cells; {record["o_candidates"]} plotted O candidates; {record["x_candidates"]} plotted X candidates; selected O/X/wall markers {record["selected_o"]}/{record["selected_x"]}/{record["wall_point"]}; EFIT axis/X/LCFS vertices {record["efit_axis"]}/{record["efit_x"]}/{record["efit_lcfs_vertices"]}. <strong>{status}</strong></figcaption></figure>
 </article>"""
         )
     head = subprocess.run(

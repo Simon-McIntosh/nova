@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T16:28:17",
+  "updated": "2026-08-26T16:29:41",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -45357,9 +45357,114 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T141636929757-sse-strict-json-nonfinite-normalization",
+        "plan": "separatrix-spline-extraction",
+        "section": "\u00a74",
+        "node": "sse-strict-json-nonfinite-normalization",
+        "node_definition": {
+          "done_when": "Focused CPU x64 tests prove json.dumps(..., allow_nan=False) succeeds, every formerly non-finite receipt field is null, finite values remain numeric, all frame rows and failure reasons remain present, scientific thresholds and preregistration hashes are unchanged, and one captured pytest invocation exits zero.",
+          "estimated_hours": 0.75,
+          "goal": "Make DIII-D forward-GS receipts strict JSON by serializing every non-finite failed-solve numeric value as explicit null while preserving all frame rows, scientific FAIL qualifications, finite values, thresholds, and preregistration identity.",
+          "id": "sse-strict-json-nonfinite-normalization",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-strict-json-nonfinite-normalization.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "benchmarks/diiid_forward_gs_match.py",
+            "tests/test_diiid_forward_gs_match.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "bound-repair",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T14:16:45Z",
+        "completed_at": "2026-08-26T14:20:45Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 240,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 240,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "c22fb4be41718effe528f7edb4e45dc23de32665",
+        "commits": [
+          "a31563e67bc8f474b53d92552f0ef9a77deba016"
+        ],
+        "changed_lines": {
+          "added": 157,
+          "removed": 33,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "env VIRTUAL_ENV=/home/ITER/mcintos/Code/nova/.venv JAX_PLATFORMS=cpu JAX_ENABLE_X64=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD PYTHONDONTWRITEBYTECODE=1 uv run --no-sync pytest -o addopts= tests/test_diiid_forward_gs_match.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-strict-json-nonfinite-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/sse-strict-json-nonfinite-normalization.md",
+        "scope_changed": false,
+        "session_id": "01a03e58-fd02-7182-a10d-371bc8889f0f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 741632,
+            "cached_input_tokens_cumulative": 2080512,
+            "input_tokens": 722948,
+            "input_tokens_cumulative": 2146228,
+            "output_tokens": 1475,
+            "output_tokens_cumulative": 9481,
+            "reasoning_output_tokens": 1140,
+            "reasoning_output_tokens_cumulative": 2899
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest invocation",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 979
+    "_version": 980
   }
 }

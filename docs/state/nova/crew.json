@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T22:52:45",
+  "updated": "2026-08-26T22:55:16",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -50025,9 +50025,113 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T204215274442-ebd-flood-sn-secondary-battery",
+        "plan": "efit-baseline-demonstration",
+        "section": "",
+        "node": "ebd-flood-sn-secondary-battery",
+        "node_definition": {
+          "done_when": "tests/test_hex_flood_sn_secondary.py constructs manufactured flux for SN-up and SN-down, each with a secondary null at a small flux separation on the far side, at three or more resolutions, and for every case asserts the primary and secondary private-flux shadow regions are each nonempty and confined past their own X-point, zero PRIVATE_FLUX cells sit inside the analytic LCFS, the selected primary X matches the analytic primary, and eager and JIT labels are identical; the file passes alongside tests/test_hex_flood_geometries.py with zero new failures vs the current repository HEAD; ruff adds no findings",
+          "estimated_hours": null,
+          "goal": "Analytic hex-flood coverage for single-null-up and single-null-down configurations that each carry a nearby secondary null, proving both private-flux shadow regions past each X-point are labelled while neither leaks inside the LCFS",
+          "id": "ebd-flood-sn-secondary-battery",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T204215274442-ebd-flood-sn-secondary-battery/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "tests/test_hex_flood_sn_secondary.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "flood-geometry-tests",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T20:42:25Z",
+        "completed_at": "2026-08-26T20:53:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 657,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 657,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "5e01aaf5e3792639293ab0cee42679a4e234fed4",
+        "commits": [
+          "17b67097"
+        ],
+        "changed_lines": {
+          "added": 122,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu pytest tests/test_hex_flood_sn_secondary.py tests/test_hex_flood_geometries.py (18 passed)",
+          "exit_status": 0,
+          "log_path": "/tmp/ebd-flood-coil-null-focused.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T204215274442-ebd-flood-sn-secondary-battery/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f74-e3c6-7113-9d05-7d28aec22372",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3304704,
+            "cached_input_tokens_cumulative": 6738944,
+            "input_tokens": 3407126,
+            "input_tokens_cumulative": 6968815,
+            "output_tokens": 739,
+            "output_tokens_cumulative": 15943,
+            "reasoning_output_tokens": 804,
+            "reasoning_output_tokens_cumulative": 6464
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1045
+    "_version": 1046
   }
 }

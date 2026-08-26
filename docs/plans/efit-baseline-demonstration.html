@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="13">
 <meta name="plan-commits" content="ba1f73013873fd2d7434db1b744d742a1b4b042c">
 <meta name="plan-artifacts" content="docs/evidence/archive/efit-baseline-demonstration-landed.html,docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json">
 </head>
@@ -224,10 +224,11 @@
         shrink; worst saddle-to-EFIT-X 38.661 mm) — never follow it.</div>
     <pre class="r-fu-prompt">/reckon-ship efit-baseline-demonstration §3</pre>
     </article>
-<article class="r-fu" data-id="f-ebd-003" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="sprint-review" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship efit-baseline-demonstration §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ebd-003" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="sprint-review" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship efit-baseline-demonstration §3" data-resolved-at="2026-08-26T12:56:13+00:00" data-resolved-by="Simon McIntosh">
     <h4 class="r-fu-title">Own the parity-tolerance instrument: lock metric-disagreement-tolerance and repair the registry pin</h4>
     <div class="r-fu-body">Re-homed from the shipped equilibrium-metric-parity plan (f-emp-002), following the f-emp-006 precedent of 2026-08-23: an open owner decision on a shipped plan is hidden work. Two coupled items now owned by this endpoint, whose comparator consumes the tolerances. First, lock the metric-disagreement-tolerance decision - it is load-bearing for the axis and LCFS bound classification that scoring-criteria-derivation (S13, shipped) recorded as merely contained, and register cross-code tolerances if report-only is chosen. Second, repair the production registry pin: <code>nova/imas/parity_tolerances.py</code> still sets REFERENCE_STAMP to the unreachable digest physics-spine-v0-mast-heldout-6-08ae0dee74-98dci4-clu-3141.yaml as evidence for the live magnetic-axis (1.01344e-3 m) and LCFS (3.3047e-4 m) bounds; the S13 repin (3c1874d5) touched benchmarks and receipts only, and the candid receipt's verified semantic identity (sha256:8df7a0a6...) is imported nowhere in the scoring path.</div>
     <pre class="r-fu-prompt">/reckon-ship efit-baseline-demonstration §3</pre>
+    <p class="r-fu-outcome">Locked report-only-first-pass remains authoritative. Commit 1027d500 replaced the unreachable registry filename with semantic identity sha256:8df7a0a6... for every former stamp consumer; independent verification passed 17/17 tests with all numeric bounds unchanged and seven explicit provenance-only historical receipt differences.</p>
     </article>
 </section>
 
@@ -258,6 +259,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260826T125019911357-ebd-parity-pin-verify" data-who="ebd-metric-verify" data-when="2026-08-26T12:54:56Z">
     <div class="r-comment-body"><p>Independent verification confirmed the reachable semantic provenance pin, unchanged numeric bounds, exactly seven explicit historical provenance differences, and the retained report-only classification.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260826T124408962289-ebd-parity-pin-repair" data-who="registry" data-when="2026-08-26T12:48:49Z">
+    <div class="r-comment-body"><p>The production tolerance registry now cites the reachable semantic identity for every former stamp consumer; all numeric bounds and the report-only-first-pass policy remain unchanged.</p></div>
 </div>
 </section>
 </main>

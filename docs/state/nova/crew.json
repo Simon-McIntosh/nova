@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T14:55:10",
+  "updated": "2026-08-26T14:55:53",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -41870,9 +41870,172 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T124408962289-ebd-parity-pin-repair",
+        "plan": "efit-baseline-demonstration",
+        "section": "\u00a73",
+        "node": "ebd-parity-pin-repair",
+        "node_definition": {
+          "done_when": "The string physics-spine-v0-mast-heldout-6-08ae0dee74-98dci4-clu-3141.yaml is absent from nova/imas/parity_tolerances.py; every tolerance currently using REFERENCE_STAMP instead cites sha256:8df7a0a6c3f6162dbe0f226660bc069f37de8eb69f0f7c80bbfedc2bd4be220c; axis and LCFS bounds remain 1.01344e-3 m and 3.3047e-4 m; one captured pytest invocation over tests/test_parity_tolerances.py and tests/test_efit_parity_criterion_provenance.py exits zero; the manifest states that merely-contained cross-code disagreement remains report-only and is not converted into a pass/fail gate.",
+          "estimated_hours": 1.0,
+          "goal": "Replace the unreachable production parity-tolerance evidence filename with the verified semantic geometry identity already declared in nova.imas.parity_tolerances, without changing any numeric bound or the locked report-only-first-pass policy.",
+          "id": "ebd-parity-pin-repair",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/ebd-parity-registry-pin.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "nova/imas/parity_tolerances.py",
+            "tests/test_parity_tolerances.py",
+            "tests/test_efit_parity_criterion_provenance.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "registry",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T12:44:18Z",
+        "completed_at": "2026-08-26T12:48:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 271,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 271,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "a8af4baebde903c58c380ff939da1cd1cf6a4fdb",
+        "commits": [
+          "1027d5008e8376e0c8012c27ba775dc0abc73a1e"
+        ],
+        "changed_lines": {
+          "added": 46,
+          "removed": 15,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "PYTHONPATH=\"$PWD\" uv run --no-sync pytest -p no:cacheprovider tests/test_parity_tolerances.py tests/test_efit_parity_criterion_provenance.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/ebd-parity-pin-verify.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/ebd-parity-registry-pin.md",
+        "scope_changed": false,
+        "session_id": "01a03dc7-e358-72a1-8d0f-ca22b36b6b42",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 138240,
+            "cached_input_tokens_cumulative": 2825984,
+            "input_tokens": 199016,
+            "input_tokens_cumulative": 3015910,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 10236,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 4099
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1104,
+              "log_age_seconds": 345,
+              "log_fresh": true,
+              "manifest_commits": [
+                "c4f7e50596522a3dde47c60564de06cfd46c461f b3c4097ed86f7eef881e03bed5b8ff7b761015b8"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.codex/scratch/nova-s16-20260826/pod-wall-manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260826T111657805648-pod-wall-resolution-ladder --gate <verdict> --commit c4f7e50596522a3dde47c60564de06cfd46c461f b3c4097ed86f7eef881e03bed5b8ff7b761015b8",
+              "node": "pod-wall-resolution-ladder",
+              "phase": "working",
+              "plan": "profile-owned-solve-domain",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T111657805648-pod-wall-resolution-ladder",
+              "terminal_age_seconds": 364,
+              "terminal_at": "2026-08-26T12:38:08Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-wall-resolution-ladder"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 961,
+              "budget_seconds": 2100,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: HOLD because the machine-readable receipt does not immutably bind the solved terminal plasma carrier and declares the 37-row control reproduced despite two direct response-row audits being non-exact and excluded from the pass predicate. The named tests and validation command pass; but they do not test or enforce these requirements; the limiter operand also remains numerically unresolved at 288 targets as explicitly banked above.",
+              "elapsed_seconds": 3061,
+              "log_age_seconds": 2476,
+              "log_fresh": false,
+              "manifest_commits": [
+                "c4f7e50596522a3dde47c60564de06cfd46c461f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-wall-verify.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/reports/s16-20260826/pod-wall-verify.md; resolve the blocker before resuming the run",
+              "node": "pod-wall-resolution-ladder-verify",
+              "phase": "starting",
+              "plan": "profile-owned-solve-domain",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260826T115222145326-pod-wall-resolution-ladder-verify",
+              "terminal_age_seconds": 2504,
+              "terminal_at": "2026-08-26T12:02:28Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-20260826-crew/pod-wall-resolution-ladder-verify"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest invocation",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 944
+    "_version": 945
   }
 }

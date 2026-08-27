@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="67">
+<meta name="plan-version" content="68">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -438,6 +438,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260827T120356384209-pod-continuous-anchor-h200-ladder" data-who="flood-performance" data-when="2026-08-27T12:22:42Z">
     <div class="r-comment-body"><p>PLATEAU-BROKEN: FD/JVP discrepancy 172.8 -&gt; 1.54e-7 (derivative now consistent), minimum 3.9478e-4 at attempt 99 versus the 8.0010e-4 five-strategy plateau and below the 4.5397e-4 unguarded minimum, 95 accepted promotions; still ends SUFFICIENT_DECREASE_REFUSED at 3.95e4x criterion, so root existence versus search failure is now the open question</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260827T120035923065-pod-continuous-anchor-cpu-ladder" data-who="flood-rca" data-when="2026-08-27T12:34:20Z">
+    <div class="r-comment-body"><p>PLATEAU-BROKEN, independently reproduced on CPU: minimum 3.9478172210853836e-4 at promotion 99 matches the H200 3.9478172210857267e-4 to twelve significant figures; 50.66% below the five-strategy plateau and 13.04% below the unguarded minimum; FD/JVP 2.72e-7; trajectory falls through attempt 99 then flat to 150</p></div>
 </div>
 </section>
 </main>

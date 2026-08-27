@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T14:23:11",
+  "updated": "2026-08-27T14:34:25",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -56870,9 +56870,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T120035923065-pod-continuous-anchor-cpu-ladder",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-continuous-anchor-cpu-ladder",
+        "node_definition": {
+          "done_when": "One SLURM all_debug CPU job (16 CPUs, JAX_PLATFORMS=cpu, JAX_ENABLE_X64=true, TMPDIR=/tmp, writable caches, at most one hour, EXIT_MARKER=0) runs the staged observer a60efd9a with its ceiling reduced to at least 150 promotions on current origin/main; the report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md gains a continuous-anchor CPU section with the minimum residual and its attempt beside the 8.0e4x five-strategy plateau, whether the trajectory is still flat after attempt 58, the terminal finite-difference versus JVP discrepancy beside the previous 172.9, and the verdict PLATEAU-BROKEN, PLATEAU-UNCHANGED, or CONVERGED, stating explicitly that a reduced ceiling cannot prove full 1e-8 convergence and naming what the H200 confirmation would add; no repository file modified",
+          "estimated_hours": null,
+          "goal": "The plateau test on the continuous declared anchor executed on a CPU debug lane at a ceiling sufficient to decide plateau versus progress, since every prior strategy plateaued by attempt 58 and the H200 lane is held by an unrelated allocation",
+          "id": "pod-continuous-anchor-cpu-ladder",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T120035923065-pod-continuous-anchor-cpu-ladder/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T12:00:41Z",
+        "completed_at": "2026-08-27T12:34:20Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2019,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2019,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "f2a67f4d316f7271e046a9a9917aed90ad219679",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "150-ceiling CPU debug ladder on the continuous anchor; EXIT_MARKER=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T120035923065-pod-continuous-anchor-cpu-ladder/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T120035923065-pod-continuous-anchor-cpu-ladder/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7435264,
+            "cached_input_tokens_cumulative": 10571520,
+            "input_tokens": 7416486,
+            "input_tokens_cumulative": 10688928,
+            "output_tokens": 6105,
+            "output_tokens_cumulative": 22876,
+            "reasoning_output_tokens": 98,
+            "reasoning_output_tokens_cumulative": 3314
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1115
+    "_version": 1116
   }
 }

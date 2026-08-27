@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T03:06:07",
+  "updated": "2026-08-27T03:09:58",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -53119,9 +53119,107 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T010613896261-pod-residual-stall-trajectory",
+        "plan": "profile-owned-solve-domain",
+        "section": "",
+        "node": "pod-residual-stall-trajectory",
+        "node_definition": {
+          "done_when": "One SLURM all_debug CPU job (16 CPUs, JAX_PLATFORMS=cpu, x64, writable caches, at most one hour, log ending EXIT_MARKER=0) executes the staged measure_stall.py diagnostic from the prior run directory against 21978/35 pure on current origin/main; the report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md is completed with the reproduced endpoint checked against 0.0045851673071955965 (stopping to reconcile bank semantics if it differs), the full residual trajectory, the dominant residual components by mechanism at the stall, the boundary-coupling versus profile-domain versus discretization versus stopping-criterion verdict, and remediation paths ranked against the live plan's locked design; no repository file modified",
+          "estimated_hours": null,
+          "goal": "The full corrected-stack residual trajectory and origin verdict for the demonstration-blocking stall, completing the partial characterization by running the already-staged run-directory diagnostic on a scheduler lane instead of the exhausted local fence",
+          "id": "pod-residual-stall-trajectory",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T010613896261-pod-residual-stall-trajectory/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "",
+          "spec_level": "",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-27T01:06:20Z",
+        "completed_at": "2026-08-27T01:09:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 193,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 193,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "cea289b27873449546bd9cb5b907b3f0dd0dca77",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "investigate-role sandbox denies the SLURM stream socket; no job submitted",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T010613896261-pod-residual-stall-trajectory/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T010613896261-pod-residual-stall-trajectory/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 1697536,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 1731503,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 7193,
+            "reasoning_output_tokens": 1001,
+            "reasoning_output_tokens_cumulative": 2013
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1077
+    "_version": 1078
   }
 }

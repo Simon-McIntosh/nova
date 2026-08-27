@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="27">
+<meta name="plan-version" content="28">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -275,6 +275,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260826T224433327050-pod-wall-ladder-regenerate" data-who="wall-surface" data-when="2026-08-26T23:50:42Z">
     <div class="r-comment-body"><p>Ladder regenerated on corrected 21985/51: boundary_flux -0.22265 Wb, finest movement 0.0 Wb (was 4.6e-05), contact truthfully null; HOLD stands. Manifest carried a corrupted full SHA (second occurrence); promotion guard caught it and the verified SHA is recorded</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260827T000717924799-pod-residual-stall-characterization" data-who="flood-rca" data-when="2026-08-27T01:05:28Z">
+    <div class="r-comment-body"><p>Partial: corrected stack improves the 21978/35 pure endpoint 13.48% (4.585e-3 vs 5.300e-3) without clearing the stall; full trajectory needs a SLURM lane beyond the local fence</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260826T111438066261-pod-seed-repair" data-who="fixed-boundary-seed" data-when="2026-08-26T12:33:21Z">
     <div class="r-comment-body"><p>The continuous fitted axis now seeds its owning material cell; frozen and earlier-window empty components recover, while later residual-domain convergence remains open.</p></div>

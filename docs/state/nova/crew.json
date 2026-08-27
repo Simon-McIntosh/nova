@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T09:35:07",
+  "updated": "2026-08-27T09:50:09",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -55268,9 +55268,107 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260827T073534194811-pod-augmented-mask-measurement",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-augmented-mask-measurement",
+        "node_definition": {
+          "done_when": "The staged observer's coordinate attribution handles the full residual mask (grid plus wall plus optional samples) with the change and both file hashes stated in the manifest; one H200 SLURM job (betelgeuse, gpu_0003_grpA, at most 3 hours, EXIT_MARKER=0) runs the 650-ceiling ladder on current origin/main; the report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md gains an augmented-mask section with total and per-promotion flip counts beside 923 and 1.42, the excursion count beside 69, the minimum residual beside the 4.54e4x, 6.38e5x and 8.0e4x baselines, whether 1e-8 was reached and at which promotion, and the verdict CONVERGED, IMPROVED-BUT-SHORT, or UNCHANGED; no repository file modified",
+          "estimated_hours": null,
+          "goal": "The augmented-mask measurement section of the stall report: flip reduction against the 923-total 1.42-mean baseline plus the convergence verdict for 21978/35 pure on the composed grid-plus-wall mask",
+          "id": "pod-augmented-mask-measurement",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T073534194811-pod-augmented-mask-measurement/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T07:35:42Z",
+        "completed_at": "2026-08-27T07:49:54Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 852,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 852,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "002278c1a64f406c9423d0e385de771ffb658e60",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "full-mask observer (derivative a65215e0, attribution reconciled with production receipts) + 650-ceiling H200 ladder EXIT_MARKER=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T073534194811-pod-augmented-mask-measurement/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T073534194811-pod-augmented-mask-measurement/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4861184,
+            "cached_input_tokens_cumulative": 6251264,
+            "input_tokens": 4829690,
+            "input_tokens_cumulative": 6418373,
+            "output_tokens": 13992,
+            "output_tokens_cumulative": 21240,
+            "reasoning_output_tokens": 4489,
+            "reasoning_output_tokens_cumulative": 5203
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1098
+    "_version": 1099
   }
 }

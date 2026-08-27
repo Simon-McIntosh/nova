@@ -11,9 +11,9 @@ separately.
 from __future__ import annotations
 
 import argparse
+from dataclasses import replace
 import hashlib
 import json
-import math
 import os
 from pathlib import Path
 import platform
@@ -25,8 +25,9 @@ from typing import Any, Callable
 import jax
 import numpy as np
 
-from benchmarks.portfolio_warm_start import _problem
-from nova.equilibrium import FluxLattice, ForwardProfile
+from nova.equilibrium import FluxLattice, ForwardProfile, SaddleSeedGeometry
+from nova.equilibrium.convention import toroidal_current_density
+from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.stencil_mesh import MomentGeometry, StencilMesh
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import configure_dtypes
@@ -41,10 +42,12 @@ from scripts.analytic_oracle_fixtures.measure import (
     forward_operator,
     limiter_contour,
 )
+from scripts.dual_basin_fixtures.build_diverted_fixture import flux as diverted_flux
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / "docs/figures/dual-branch-selection/two-branch-batch-cost.json"
+DIVERTED_FIXTURE = ROOT / "scripts/dual_basin_fixtures/diverted-receipt.json"
 BATCH_WIDTHS = (4, 16)
 NEWTON_PROMOTIONS = 2
 GMRES_ITERATIONS = 30
@@ -56,7 +59,7 @@ SEED_COHORTS = {
     "close_neighbour": (1.0e-5, 5.0e-5),
     "outer_qualified_neighbour": (5.0e-5, 1.0e-4),
 }
-LIMITED_LATTICE_SHAPE = (13, 17)
+ANALYTIC_LATTICE_SHAPE = (17, 29)
 
 
 def _strict(value: Any) -> Any:
@@ -107,18 +110,19 @@ def _source_revision() -> str:
     ).stdout.strip()
 
 
-def _limited_tensor_machine() -> OracleMachine:
-    """Construct the limited analytic carrier on a tensor-product lattice."""
+def _analytic_tensor_machine() -> OracleMachine:
+    """Construct the analytic carrier on a tensor-product lattice."""
     case = analytic_case()
-    inboard, outboard = case.boundary_midplane_radii()
-    half_height = math.sqrt(case.axis_flux / case.field_coefficient)
+    fixture = json.loads(DIVERTED_FIXTURE.read_text(encoding="utf-8"))
+    axis = np.asarray(fixture["analytic_stationary_points"]["axis"]["coordinate_m"])
+    saddle = np.asarray(
+        fixture["analytic_stationary_points"]["x_point"]["coordinate_m"]
+    )
+    radial_step = (axis[0] - saddle[0]) / 8.0
+    vertical_step = (axis[1] - saddle[1]) / 6.0
     lattice = FluxLattice(
-        np.linspace(inboard - 0.12, outboard + 0.12, LIMITED_LATTICE_SHAPE[0]),
-        np.linspace(
-            -1.18 * half_height,
-            1.18 * half_height,
-            LIMITED_LATTICE_SHAPE[1],
-        ),
+        saddle[0] + radial_step * np.arange(-2, ANALYTIC_LATTICE_SHAPE[0] - 2),
+        saddle[1] + vertical_step * np.arange(-7, ANALYTIC_LATTICE_SHAPE[1] - 7),
     )
     node = lattice.coordinate
     radial_half_step = 0.5 * lattice.radial_step
@@ -133,7 +137,7 @@ def _limited_tensor_machine() -> OracleMachine:
     )
     polygons = tuple(centre + offsets for centre in node)
     sampling = np.asarray(polygons)
-    stencil = _square_stencils(*LIMITED_LATTICE_SHAPE)
+    stencil = _square_stencils(*ANALYTIC_LATTICE_SHAPE)
     area = lattice.cell_area
     mesh = StencilMesh(node, stencil, area)
     moment_geometry = MomentGeometry.from_cells(
@@ -170,7 +174,7 @@ def _limited_tensor_machine() -> OracleMachine:
 def _limited_fine_problem() -> tuple[ForwardProfile, Any, np.ndarray]:
     """Construct the non-empty fine limited fixture and its cold seed."""
     case = analytic_case()
-    machine = _limited_tensor_machine()
+    machine = _analytic_tensor_machine()
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )
@@ -194,6 +198,69 @@ def _limited_fine_problem() -> tuple[ForwardProfile, Any, np.ndarray]:
         current_centroid,
     )
     return profile, cold, oracle
+
+
+def _constant_profile(value: float) -> Callable[[jax.Array], jax.Array]:
+    """Return one constant flux function."""
+
+    def profile(psi_norm: jax.Array) -> jax.Array:
+        return jax.numpy.full_like(jax.numpy.asarray(psi_norm), value)
+
+    return profile
+
+
+def _diverted_tensor_problem() -> tuple[ForwardProfile, Any, np.ndarray]:
+    """Construct the diverted polynomial fixture on the tensor carrier."""
+    case = analytic_case()
+    machine = _analytic_tensor_machine()
+    fixture = json.loads(DIVERTED_FIXTURE.read_text(encoding="utf-8"))
+    coefficients = np.asarray(fixture["closed_form"]["coefficients"])
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    root = diverted_flux(coordinates, coefficients)
+    gradients = fixture["closed_form"]["constant_flux_functions"]
+    source = ForwardSource(
+        core=DomainProfile(
+            p_prime=_constant_profile(gradients["p_prime_pa_per_wb"]),
+            ff_prime=_constant_profile(gradients["ff_prime_t2_m2_per_wb"]),
+        ),
+        boundary_pressure=0.0,
+        boundary_field_function=5.0,
+    )
+    empty = replace(forward_operator(case, machine), source=source)
+    exterior = root - np.asarray(empty.internal(root, TopologyClass.DIVERTED))
+    operator = replace(forward_operator(case, machine, exterior), source=source)
+    profile = ForwardProfile(
+        operator,
+        StencilMesh(machine.node, machine.stencil, machine.area),
+        newton_steps=10,
+    )
+
+    axis = np.asarray(fixture["analytic_stationary_points"]["axis"]["coordinate_m"])
+    saddle = np.asarray(
+        fixture["analytic_stationary_points"]["x_point"]["coordinate_m"]
+    )
+    geometry = SaddleSeedGeometry(tuple(axis), tuple(saddle))
+    seed_radius = 0.9 * np.linalg.norm(saddle - axis)
+    supported = np.linalg.norm(machine.node - axis, axis=1) < seed_radius
+    cell_current = (
+        toroidal_current_density(
+            machine.node[:, 0],
+            gradients["p_prime_pa_per_wb"],
+            gradients["ff_prime_t2_m2_per_wb"],
+        )
+        * machine.area
+        * supported
+    )
+    total_current = float(cell_current.sum())
+    centroid = np.sum(machine.node * cell_current[:, None], axis=0) / total_current
+    cold = profile.cold_seed_portfolio(
+        total_current,
+        centroid,
+        diverted_geometry=geometry,
+    )
+    return profile, cold, root
 
 
 def _state_qualification(
@@ -568,7 +635,7 @@ def _run(output: Path) -> dict[str, Any]:
 
     setup_started = time.perf_counter()
     limited_profile, limited_cold, limited_root = _limited_fine_problem()
-    diverted_profile, diverted_cold, diverted_root = _problem()
+    diverted_profile, diverted_cold, diverted_root = _diverted_tensor_problem()
     profiles = (limited_profile, diverted_profile)
     roots = (limited_root, diverted_root)
     cold_flux = (

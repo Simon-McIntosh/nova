@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T05:19:19",
+  "updated": "2026-08-27T05:36:38",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -53736,9 +53736,119 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T031124955449-sse-mast-bank-resolve",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-mast-bank-resolve",
+        "node_definition": {
+          "done_when": "A single SLURM CPU debug job (16 CPUs, JAX_PLATFORMS=cpu, JAX_ENABLE_X64=true, TMPDIR=/tmp, at most one hour, EXIT_MARKER=0) runs the exact campaign driver on current origin/main with no transient cache; the tracked JSON carries exactly 12 declared arms once each with explicit per-arm convergence and termination, retained named failures, class from class_margin, and the locked 7-of-12, 0.55 m, 0.04 m thresholds reported as measured; the PNG is redrawn and visually inspected; the manifest tables per-arm convergence deltas against the pre-cutover bank; only the JSON and PNG committed; scheduler receipt in the manifest",
+          "estimated_hours": null,
+          "goal": "The twelve-arm MAST corroboration bank regenerated on the cut-over residual so the per-arm convergence, classes and metrics measure the profile-owned solve, superseding the pre-cutover bank as the section-4 re-solve requires",
+          "id": "sse-mast-bank-resolve",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T031124955449-sse-mast-bank-resolve/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "margin-remeasure",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T03:11:34Z",
+        "completed_at": "2026-08-27T03:36:09Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1475,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1475,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "5a968855870d98e0384042414eed7763458230bc",
+        "commits": [
+          "6fe8401cd21b7e85b362e9b9aba13786912f2f9d"
+        ],
+        "changed_lines": {
+          "added": 2,
+          "removed": 2,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "SLURM 1258477 EXIT_MARKER=0; strict audit 12/12 rows; per-arm delta table vs preserved pre-cutover bank (all zero)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T031124955449-sse-mast-bank-resolve/logs/scheduler-receipt.txt",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T031124955449-sse-mast-bank-resolve/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03818-636e-7632-bc6e-05c3a7131c93",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3257216,
+            "cached_input_tokens_cumulative": 9962880,
+            "input_tokens": 3414843,
+            "input_tokens_cumulative": 10185164,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 16277,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2045
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": {
+          "attempt": 6,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260826T214129366947-sse-mast-bank-resolve",
+          "root_run_id": "r-20260826T211058255408-sse-mast-bank-resolve"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 6,
+        "attempt_kind": "redispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1083
+    "_version": 1084
   }
 }

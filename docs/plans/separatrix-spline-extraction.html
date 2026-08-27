@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="50">
+<meta name="plan-version" content="51">
 </head>
 <body>
   <main class="plan-doc">
@@ -253,6 +253,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260827-s16-landing" data-who="reckon-d8-s16-landing" data-when="2026-08-27T01:32:00+00:00">
     <div class="r-comment-body">S16 landing state: both EFIT banks are regenerated through the shared comparator on corrected topology — MAST 12/12 rows with explicit per-arm convergence (cabb4ed6; class agreement 9/12, worst eligible RMS 0.0294 m, 11/12 arms honestly iteration_budget_exhausted, 21986/46 mixed retained as a named axis-disqualification failure), DIII-D 5/5 rows through the stable publication path with the digest-verified transported wall (c741b4cf; honest FAIL, non-converged frames retained). The MAST figure and all 17 topology panels are redrawn and verified. Retention contracts now cover all three drivers, and per-arm convergence is serialized end to end. Open on this plan: the dissent adjudication f-sse-dissent-polish-termination (lead-owned) and the H200 polish-timing rerun, which is downstream of that adjudication because the receipts must be measured on whichever termination semantics the lead locks.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260827T031124955449-sse-mast-bank-resolve" data-who="margin-remeasure" data-when="2026-08-27T03:36:09Z">
+    <div class="r-comment-body"><p>Post-cutover MAST bank: deltas exactly 0 on every arm (bypass confirmed at scale); MAST gates PASS (class 9/12, RMS 0.0294 m, saddle 0.0387 m); awaits the point-cell routing fix for a real re-measure</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

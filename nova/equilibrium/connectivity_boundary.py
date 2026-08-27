@@ -231,22 +231,65 @@ __all__ = [
 
 
 @jax.jit
-def wall_height_shadow_mask(wall_height, axis_height, x_points):
-    """Return wall nodes vertically beyond the nearest X-point on each side.
+def wall_height_shadow_mask(
+    wall_height,
+    axis_height,
+    primary_x_point,
+    qualified_x_points,
+    private_wall,
+    previous_shadow,
+    hysteresis_height,
+    qualification_distance,
+):
+    """Return the hysteretic private-wall exclusion from qualified saddles.
 
-    Every finite X-point below the axis supplies a lower height limit and every
-    finite X-point above the axis supplies an upper one.  Taking the nearest
-    limit on each side reproduces the conjunction of the corresponding
-    half-plane tests without applying those tests to the interior grid.  A
-    missing limit leaves that side open.
+    The primary saddle must occur in ``qualified_x_points``.  At most one
+    additional qualified saddle on the opposite side of the axis contributes
+    the other height limit.  A missing side retains its promoted wall bits,
+    while a finite side changes a bit only after crossing the declared height
+    band.  Connectivity-proven common wall nodes always participate.
     """
     wall_height = jnp.asarray(wall_height)
-    x_points = jnp.asarray(x_points)
-    x_height = x_points[:, 1]
-    finite = jnp.all(jnp.isfinite(x_points[:, :2]), axis=1)
-    lower = jnp.max(jnp.where(finite & (x_height < axis_height), x_height, -jnp.inf))
-    upper = jnp.min(jnp.where(finite & (x_height > axis_height), x_height, jnp.inf))
-    return (wall_height < lower) | (wall_height > upper)
+    primary_x_point = jnp.asarray(primary_x_point)
+    qualified_x_points = jnp.asarray(qualified_x_points)
+    private_wall = jnp.asarray(private_wall, dtype=bool)
+    previous_shadow = jnp.asarray(previous_shadow, dtype=bool)
+    band = jnp.asarray(hysteresis_height, dtype=wall_height.dtype)
+
+    finite = jnp.all(jnp.isfinite(qualified_x_points[:, :2]), axis=1)
+    primary_finite = jnp.all(jnp.isfinite(primary_x_point[:2]))
+    distance2 = jnp.sum((qualified_x_points[:, :2] - primary_x_point[:2]) ** 2, axis=1)
+    primary_index = jnp.argmin(jnp.where(finite, distance2, jnp.inf))
+    primary_valid = (
+        primary_finite
+        & finite[primary_index]
+        & (distance2[primary_index] <= qualification_distance**2)
+    )
+    primary_height = qualified_x_points[primary_index, 1]
+    primary_lower = primary_valid & (primary_height < axis_height - band)
+    primary_upper = primary_valid & (primary_height > axis_height + band)
+
+    opposite = finite & (jnp.arange(qualified_x_points.shape[0]) != primary_index)
+    opposite_lower = (
+        opposite & primary_upper & (qualified_x_points[:, 1] < axis_height - band)
+    )
+    opposite_upper = (
+        opposite & primary_lower & (qualified_x_points[:, 1] > axis_height + band)
+    )
+    lower_values = jnp.where(opposite_lower, qualified_x_points[:, 1], -jnp.inf)
+    upper_values = jnp.where(opposite_upper, qualified_x_points[:, 1], jnp.inf)
+    lower = jnp.where(primary_lower, primary_height, jnp.max(lower_values))
+    upper = jnp.where(primary_upper, primary_height, jnp.min(upper_values))
+    lower_valid = primary_lower | jnp.any(opposite_lower)
+    upper_valid = primary_upper | jnp.any(opposite_upper)
+
+    lower_enter = wall_height < lower - band
+    lower_stay = previous_shadow & (wall_height < lower + band)
+    upper_enter = wall_height > upper + band
+    upper_stay = previous_shadow & (wall_height > upper - band)
+    proposed = jnp.where(lower_valid, lower_enter | lower_stay, previous_shadow)
+    proposed = jnp.where(upper_valid, proposed | upper_enter | upper_stay, proposed)
+    return proposed & private_wall
 
 
 def _bilerp(field: jnp.ndarray, rg: jnp.ndarray, zg: jnp.ndarray, r, z):
@@ -1197,6 +1240,10 @@ def traced_boundary_read(
 
     confined_star = (u <= s_star) & inside_limiter
     region_star = _flood_fill(confined_star, seed, n_iter, use_doubling)
+    private_star = confined_star & ~(region_star > 0)
+    private_wall_node_mask = _wall_nodes_touching_region(
+        private_star, inside_limiter, rg, zg, wall_r, wall_z
+    )
     n_core = jnp.sum(region_star)
 
     # --- classify-after: sub-grid axis O-point + emergent X-set ----------------
@@ -1275,6 +1322,7 @@ def traced_boundary_read(
         "u_xpoint": class_u_x,
         "wall_shadowed": ing["class_wall_shadowed"],
         "reachable_wall_node_mask": ing["class_wall"]["reachable"],
+        "private_wall_node_mask": private_wall_node_mask,
         "reachable_wall_sample_mask": ing["class_wall"]["reachable_samples"],
         "limiter_wall_node_index": ing["class_wall"]["node_index"],
         "limiter_wall_node_arc": ing["class_wall"]["node_arc"],

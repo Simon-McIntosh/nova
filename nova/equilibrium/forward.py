@@ -1125,9 +1125,23 @@ class ForwardProfile:
     ) -> ForwardEquilibrium:
         """Drive the map with the shared fixed-point ladder."""
         mapped = self.flux_map(current, requested_class, target_current)
+        shadowed_map = self.operator.flux_map_with_shadow(
+            current, requested_class, target_current
+        )
 
         def shadow_mask(state):
             return self.operator.residual_shadow_mask(state, requested_class)
+
+        def promoted_shadow_mask(state, previous):
+            return self.operator.residual_shadow_mask(
+                state, requested_class, previous_shadow=previous
+            )
+
+        shadow_options = {
+            "shadow_mask_fn": shadow_mask,
+            "promoted_shadow_mask_fn": promoted_shadow_mask,
+            "shadowed_map_fn": shadowed_map,
+        }
 
         if route == "newton_krylov":
             history = fixed_point.newton_krylov(
@@ -1135,7 +1149,7 @@ class ForwardProfile:
                 initial_flux,
                 **{
                     "newton_steps": self.newton_steps,
-                    "shadow_mask_fn": shadow_mask,
+                    **shadow_options,
                     **options,
                 },
             )
@@ -1147,7 +1161,7 @@ class ForwardProfile:
                 **{
                     "evaluations": self.evaluations,
                     "relaxation": self.relaxation,
-                    "shadow_mask_fn": shadow_mask,
+                    **shadow_options,
                     **options,
                 },
             )

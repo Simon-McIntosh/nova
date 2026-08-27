@@ -24,6 +24,8 @@ with skip_import("jax"):
         FixedPointTerminationReason,
         KrylovActionQualification,
         RecoveryOutcome,
+        _RELATIVE_SUP_MERIT_EXPONENT,
+        _smooth_relative_sup_merit,
         anderson,
         kink_aware_newton_krylov,
         newton_krylov,
@@ -358,31 +360,83 @@ def test_newton_rebuilds_the_model_after_recovery_radius_collapse():
         assert np.all(np.diff(finite_trace) <= 0.0)
 
 
-def test_newton_selects_squared_residual_descent_after_recovery_exhaustion():
-    """The measured descent scale survives a stricter relative-sup increase."""
-    initial_l2 = 4.8129016439e-3
-    l2_decrease = 7.6510321531e-4
-    descended_l2 = initial_l2 - l2_decrease
-    origin_slope = initial_l2 / 0.1
+def test_smooth_merit_brackets_relative_sup_for_distributed_residuals():
+    measured_quantiles = jnp.asarray(
+        [
+            -3.8742501982385463e-4,
+            -2.682776232677767e-4,
+            -2.1051726610709937e-4,
+            -1.7238390827297063e-4,
+            -1.470195253852058e-4,
+            -1.2664132496964173e-4,
+            -1.1114186443574557e-4,
+            -9.794013628257152e-5,
+            -8.572186652996971e-5,
+            -7.431935524456965e-5,
+            -6.42818544910129e-5,
+            -4.668286596231741e-5,
+            -3.0140138226639884e-5,
+            -1.544293343364901e-5,
+            -4.206634072404913e-6,
+            0.0,
+            0.0,
+            2.3513021458157913e-6,
+            1.1087826871126051e-5,
+            2.6184621262131643e-5,
+            4.143897302521897e-5,
+            6.379210939060813e-5,
+            7.834513935710882e-5,
+            9.18914662653386e-5,
+            1.0479989246683225e-4,
+            1.1795426050502725e-4,
+            1.2823912133279325e-4,
+            1.4563870527644382e-4,
+            1.6822089537990928e-4,
+            1.9292779464753166e-4,
+            2.2341288537852666e-4,
+            2.771717095587363e-4,
+            3.8903708712179075e-4,
+        ]
+    )
+    sampled_residuals = (
+        jnp.asarray([0.25, -1.0, 0.5]),
+        jnp.linspace(-2.0, 3.0, 19),
+        measured_quantiles,
+    )
+
+    for residual_vector in sampled_residuals:
+        mapped = jnp.full_like(residual_vector, 1.0033884365377101)
+        state = mapped - residual_vector
+        relative_sup = float(jnp.max(jnp.abs(residual_vector)) / jnp.max(mapped))
+        merit = float(_smooth_relative_sup_merit(mapped, state))
+        factor = (residual_vector.size + 1) ** (1.0 / _RELATIVE_SUP_MERIT_EXPONENT)
+        assert relative_sup / factor <= merit <= relative_sup * factor
+
+
+def test_newton_selects_relative_sup_descent_after_recovery_exhaustion():
+    initial_residual = 4.8129016439e-3
+    descended_residual = initial_residual - 7.6510321531e-4
+    origin_slope = initial_residual / 0.1
 
     def map_fn(state):
-        at_origin = state[0] == 0.0
-        origin_residual = initial_l2 + origin_slope * state
-        in_descent_basin = (state[0] > -1.5e-4) & (state[0] < -0.5e-4)
-        displaced_residual = jnp.where(in_descent_basin, descended_l2, -1.5 * state)
-        return state + jnp.where(at_origin, origin_residual, displaced_residual)
+        displacement = state - 1.0
+        at_origin = displacement[0] == 0.0
+        origin = initial_residual + origin_slope * displacement
+        in_descent_basin = (displacement[0] > -1.5e-4) & (displacement[0] < -0.5e-4)
+        displaced = jnp.where(in_descent_basin, descended_residual, 2.0e-2)
+        return state + jnp.where(at_origin, origin, displaced)
 
     def solve():
         return newton_krylov(
             map_fn,
-            jnp.zeros(1),
+            jnp.ones(1),
             newton_steps=5,
             gmres_iterations=1,
             warmup=0,
         )
 
     for result in (solve(), jax.jit(solve)()):
-        np.testing.assert_allclose(result.state, [-1.0e-4])
+        np.testing.assert_allclose(result.state, [1.0 - 1.0e-4])
         np.testing.assert_array_equal(
             result.promotion_descent_activations, [0, 0, 0, 0, 1]
         )
@@ -391,12 +445,38 @@ def test_newton_selects_squared_residual_descent_after_recovery_exhaustion():
             [np.nan, np.nan, np.nan, np.nan, 1.0e-4],
             equal_nan=True,
         )
-        selected_l2 = float(jnp.linalg.norm(map_fn(result.state) - result.state))
-        np.testing.assert_allclose(initial_l2 - selected_l2, l2_decrease)
-        merit_reduction = (initial_l2**2 - selected_l2**2) / initial_l2**2
-        np.testing.assert_allclose(merit_reduction, 0.29266722536)
-        assert float(result.residual) > 1.0
+        initial_relative_sup = float(
+            jnp.max(jnp.abs(map_fn(jnp.ones(1)) - jnp.ones(1)))
+            / jnp.max(jnp.abs(map_fn(jnp.ones(1))))
+        )
+        assert float(result.residual) < initial_relative_sup
         assert int(result.accepted_newton_promotions) == 1
+
+
+def test_newton_returns_the_best_observed_relative_sup_iterate():
+    def map_fn(state):
+        mapped = jnp.where(
+            state < 0.5,
+            1.0,
+            jnp.where(state < 1.05, 1.1, jnp.where(state < 1.5, 2.1, state + 1.0)),
+        )
+        return mapped
+
+    def solve():
+        return newton_krylov(
+            map_fn,
+            jnp.zeros(1),
+            newton_steps=1,
+            gmres_iterations=1,
+            warmup=3,
+            relaxation=1.0,
+        )
+
+    for result in (solve(), jax.jit(solve)()):
+        finite_trace = np.asarray(result.trace)[np.isfinite(result.trace)]
+        np.testing.assert_allclose(result.state, [1.0])
+        np.testing.assert_allclose(result.residual, np.min(finite_trace))
+        assert float(finite_trace[-1]) > float(result.residual)
 
 
 def test_newton_does_not_try_descent_while_its_full_step_is_sufficient():

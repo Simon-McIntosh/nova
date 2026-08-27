@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T11:05:10",
+  "updated": "2026-08-27T11:08:45",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -55667,9 +55667,109 @@
           "role": "review",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T090526590078-pod-height-mask-guards",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-height-mask-guards",
+        "node_definition": {
+          "done_when": "tests/test_wall_height_exclusion.py gains residual-level cases for disconnected double-null, snowflake-minus, wall-notch saddle, coil-null column and axis-crossing proving zero false exclusions in every one (the review's 19/37, 38/84, 35/37, 77/84 and 37/37 false-exclusion counts all become 0), a transiently missing candidate changes no wall participation for the carried window, and an equality-hovering X produces zero chatter flips; the composed mask stays fixed-shape with no data-dependent while; all seven analytic geometry batteries and the focused fixed-point, forward-operator, domain and wall-ladder files pass eager and JIT with zero new failures vs current HEAD; conservation acceptance unchanged; ruff zero findings on staged paths",
+          "estimated_hours": null,
+          "goal": "The height mask hardened per the safety review's minimal repair: limits derive only from the qualified primary and qualified opposite-side candidates, a flood-derived private-versus-common wall-membership veto prevents excluding common-flux wall nodes, missing sides carry the last finite limit with promotion-owned hysteresis instead of opening wholesale, and equality chatter is removed by a hysteresis band",
+          "id": "pod-height-mask-guards",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T090526590078-pod-height-mask-guards/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/connectivity_boundary.py",
+            "nova/equilibrium/forward_operator.py",
+            "tests/test_wall_height_exclusion.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T09:05:32Z",
+        "completed_at": "2026-08-27T09:08:05Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 153,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 153,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "698d64cd8db0dfb9b388ba05dc972257b6df59dc",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "seam inspection: hysteresis state lives in fixed_point.py and callback wiring in forward.py, both outside the fence",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T090526590078-pod-height-mask-guards/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T090526590078-pod-height-mask-guards/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 859648,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 971436,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 3323,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 816
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1102
+    "_version": 1103
   }
 }

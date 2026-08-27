@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="55">
+<meta name="plan-version" content="56">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -402,6 +402,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260827T084713500294-pod-height-mask-safety-review" data-who="connectivity-audit" data-when="2026-08-27T09:04:39Z">
     <div class="r-comment-body"><p>Overall GAP: raw-saddle candidate set (wall-notch falsely excludes 19/37 MAST, 38/84 DIII-D; snowflake up to 37/37), no hysteresis on missing sides, equality chatter, axis-inversion mass flips, zero-residual rows still feeding topology; safe on current demonstration states; minimal repair = qualified candidates + flood-membership veto + promotion-owned hysteresis</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260827T090526590078-pod-height-mask-guards" data-who="domain-partition" data-when="2026-08-27T09:08:05Z">
+    <div class="r-comment-body"><p>Under-scoped fence; redispatched with the state and wiring owners included</p></div>
 </div>
 </section>
 </main>

@@ -8,9 +8,11 @@ to those measurements.
 
 from __future__ import annotations
 
+import gc
 import json
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
+import time
 from typing import Any
 
 import jax.numpy as jnp
@@ -397,48 +399,77 @@ def _build_operand_cache(
         shot = int(selected_row["shot"])
         slice_index = int(selected_row["slice_index"])
         print(f"solving MAST {shot}/{slice_index}", flush=True)
-        case, context = _mast_case_from_selection(
-            SHOT_STORE, selected_row, qualification
-        )
-        passive_case, profile, policy = _passive_inclusive_case(
-            case, context, response_cache
-        )
-        if policy["section_kernel_evaluations_this_shot"] != 0:
-            raise RuntimeError("MAST reconstruction entered a direct response builder")
-        target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
-        states = reachability._mast_states(
-            profile, jnp.asarray(passive_case["state"]), target_current
-        )
-        referee = read_efit_referee(shot, store=SHOT_STORE)
-        referee_usable = bool(referee.usable[slice_index])
-        efit_lcfs = np.asarray(referee.lcfs_m[slice_index], dtype=float)
-        efit_lcfs = efit_lcfs[np.isfinite(efit_lcfs).all(axis=1)]
-        efit_x_points = referee.x_points_m[slice_index]
-        efit_x_points = efit_x_points[np.isfinite(efit_x_points).all(axis=1)]
-        efit_label = (
-            ("diverted" if bool(referee.diverted[slice_index]) else "limited")
-            if referee_usable
-            else None
-        )
-        for arm, arm_result in states.items():
-            rows.append(
-                _build_arm_operand(
+        started = time.perf_counter()
+        try:
+            rows.extend(
+                _build_identity_operands(
                     reachability,
-                    profile,
-                    arm_result,
-                    identity=f"{shot}/{slice_index}",
-                    shot=shot,
-                    slice_index=slice_index,
-                    time_s=float(referee.time_s[slice_index]),
-                    arm=arm,
-                    efit_label=efit_label,
-                    efit_lcfs=efit_lcfs,
-                    efit_x_points=efit_x_points,
+                    response_cache,
+                    selected_row,
+                    qualification,
                 )
             )
+        finally:
+            jax.clear_caches()
+            gc.collect()
+        elapsed = time.perf_counter() - started
+        print(
+            f"completed MAST {shot}/{slice_index} in {elapsed:.3f} s; "
+            "released compilation caches",
+            flush=True,
+        )
     _write_operand_cache(rows, carrier_evidence)
     print(f"wrote exact operand cache {CACHE_PATH}", flush=True)
     return rows
+
+
+def _build_identity_operands(
+    reachability,
+    response_cache,
+    selected_row: dict[str, Any],
+    qualification,
+) -> list[dict[str, Any]]:
+    """Build both arms while one identity's solve objects have bounded lifetime."""
+
+    shot = int(selected_row["shot"])
+    slice_index = int(selected_row["slice_index"])
+    case, context = _mast_case_from_selection(SHOT_STORE, selected_row, qualification)
+    passive_case, profile, policy = _passive_inclusive_case(
+        case, context, response_cache
+    )
+    if policy["section_kernel_evaluations_this_shot"] != 0:
+        raise RuntimeError("MAST reconstruction entered a direct response builder")
+    target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
+    states = reachability._mast_states(
+        profile, jnp.asarray(passive_case["state"]), target_current
+    )
+    referee = read_efit_referee(shot, store=SHOT_STORE)
+    referee_usable = bool(referee.usable[slice_index])
+    efit_lcfs = np.asarray(referee.lcfs_m[slice_index], dtype=float)
+    efit_lcfs = efit_lcfs[np.isfinite(efit_lcfs).all(axis=1)]
+    efit_x_points = referee.x_points_m[slice_index]
+    efit_x_points = efit_x_points[np.isfinite(efit_x_points).all(axis=1)]
+    efit_label = (
+        ("diverted" if bool(referee.diverted[slice_index]) else "limited")
+        if referee_usable
+        else None
+    )
+    return [
+        _build_arm_operand(
+            reachability,
+            profile,
+            arm_result,
+            identity=f"{shot}/{slice_index}",
+            shot=shot,
+            slice_index=slice_index,
+            time_s=float(referee.time_s[slice_index]),
+            arm=arm,
+            efit_label=efit_label,
+            efit_lcfs=efit_lcfs,
+            efit_x_points=efit_x_points,
+        )
+        for arm, arm_result in states.items()
+    ]
 
 
 def _build_arm_operand(

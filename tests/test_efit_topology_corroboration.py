@@ -412,3 +412,47 @@ def test_unrelated_arm_geometry_exception_propagates(monkeypatch):
             efit_lcfs=_ring(),
             efit_x_points=np.asarray(((1.0, 0.0),)),
         )
+
+
+def test_operand_build_releases_compilation_state_between_identities(monkeypatch):
+    adapter = _adapter()
+    selected = [
+        ({"shot": 20_001, "slice_index": 3}, "first"),
+        ({"shot": 20_002, "slice_index": 5}, "second"),
+    ]
+    events = []
+
+    monkeypatch.setattr(adapter, "select_slices_by_shot", lambda _bank: selected)
+    monkeypatch.setattr(adapter, "_reachability_module", lambda: "reachability")
+
+    def build_identity(reachability, response_cache, selected_row, qualification):
+        assert reachability == "reachability"
+        assert response_cache == "responses"
+        identity = f"{selected_row['shot']}/{selected_row['slice_index']}"
+        events.append(("build", identity, qualification))
+        return [{"identity": identity, "arm": "pure"}]
+
+    monkeypatch.setattr(adapter, "_build_identity_operands", build_identity)
+    monkeypatch.setattr(adapter.jax, "clear_caches", lambda: events.append(("clear",)))
+    monkeypatch.setattr(adapter.gc, "collect", lambda: events.append(("collect",)))
+    monkeypatch.setattr(
+        adapter,
+        "_write_operand_cache",
+        lambda rows, carrier: events.append(("write", list(rows), carrier)),
+    )
+
+    rows = adapter._build_operand_cache("responses", {"carrier": "evidence"})
+
+    assert rows == [
+        {"identity": "20001/3", "arm": "pure"},
+        {"identity": "20002/5", "arm": "pure"},
+    ]
+    assert events == [
+        ("build", "20001/3", "first"),
+        ("clear",),
+        ("collect",),
+        ("build", "20002/5", "second"),
+        ("clear",),
+        ("collect",),
+        ("write", rows, {"carrier": "evidence"}),
+    ]

@@ -77,6 +77,7 @@ _RECOVERY_RADIUS_UPDATE_TRIPS = 6
 _MODEL_REBUILD_DAMPING_INITIAL = 1.0e-3
 _MODEL_REBUILD_DAMPING_GROWTH = 10.0
 _MODEL_REBUILD_DAMPING_TRIPS = 6
+_STEEPEST_DESCENT_SCALES = (1.0e-4, 1.0e-5, 1.0e-6, 1.0e-7, 1.0e-8)
 _PROJECTED_KRYLOV_CONDITION_RATIO_LIMIT = math.e
 _SUFFICIENT_DECREASE_SLOPE = 1.0e-4
 FIXED_POINT_RESIDUAL_TOLERANCE = 1.0e-8
@@ -161,6 +162,10 @@ class FixedPointResult(NamedTuple):
     ``promotion_model_rebuild_activations`` is one when radius exhaustion
     triggers a fresh linearization, and ``promotion_model_rebuild_damping``
     records its accepted Levenberg damping or the last refused value.
+    ``promotion_descent_activations`` is one when both recovery models exhaust
+    and the squared-residual gradient ladder runs.  Its selected absolute step
+    scale is recorded in ``promotion_descent_scales``, with zero for a refused
+    ladder and NaN where the fallback was not evaluated.
     """
 
     state: jax.Array
@@ -192,6 +197,8 @@ class FixedPointResult(NamedTuple):
     promotion_recovery_outcomes: jax.Array | int = -1
     promotion_model_rebuild_activations: jax.Array | int = -1
     promotion_model_rebuild_damping: jax.Array | float = float("nan")
+    promotion_descent_activations: jax.Array | int = -1
+    promotion_descent_scales: jax.Array | float = float("nan")
 
 
 class KinkAwareResult(NamedTuple):
@@ -274,6 +281,8 @@ class _NewtonIterationState(NamedTuple):
     promotion_recovery_outcomes: jax.Array
     promotion_model_rebuild_activations: jax.Array
     promotion_model_rebuild_damping: jax.Array
+    promotion_descent_activations: jax.Array
+    promotion_descent_scales: jax.Array
 
 
 class _BacktrackedPromotion(NamedTuple):
@@ -296,6 +305,15 @@ class _RebuiltModelPromotion(NamedTuple):
     residual: jax.Array
     accepted: jax.Array
     damping: jax.Array
+
+
+class _SteepestDescentPromotion(NamedTuple):
+    """One fixed-scale search along the squared-residual gradient."""
+
+    state: jax.Array
+    residual: jax.Array
+    accepted: jax.Array
+    scale: jax.Array
 
 
 class _ManifoldNewtonIterationState(NamedTuple):
@@ -475,6 +493,11 @@ def _relative_residual(mapped: jax.Array, state: jax.Array) -> jax.Array:
     return jnp.max(jnp.abs(mapped - state)) / jnp.maximum(
         jnp.max(jnp.abs(mapped)), 1.0e-30
     )
+
+
+def _squared_residual_merit(residual_vector: jax.Array) -> jax.Array:
+    """One half the squared L2 norm of the fixed-point residual vector."""
+    return 0.5 * jnp.sum(residual_vector**2)
 
 
 def _backtracked_promotion(
@@ -661,6 +684,63 @@ def _rebuilt_model_promotion(
         residual=residual,
         accepted=accepted,
         damping=recorded_damping,
+    )
+
+
+def _steepest_descent_promotion(
+    map_fn: Callable[[jax.Array], jax.Array],
+    state: jax.Array,
+    current_residual: jax.Array,
+    residual_vector: jax.Array,
+    tangent: Callable[[jax.Array], jax.Array],
+) -> _SteepestDescentPromotion:
+    """Seek Armijo decrease of the squared-residual merit on a fixed ladder."""
+
+    def residual_tangent(vector):
+        return tangent(vector) - vector
+
+    transpose = jax.linear_transpose(residual_tangent, jnp.zeros_like(state))
+    gradient = transpose(residual_vector)[0]
+    gradient_norm = jnp.max(jnp.abs(gradient))
+    finite_gradient = jnp.all(jnp.isfinite(gradient)) & jnp.isfinite(gradient_norm)
+    direction = jnp.where(
+        finite_gradient & (gradient_norm > 0.0),
+        -gradient / jnp.maximum(gradient_norm, 1.0e-300),
+        jnp.zeros_like(gradient),
+    )
+    scales = jnp.asarray(_STEEPEST_DESCENT_SCALES, dtype=state.dtype)
+    candidates = state[None, :] + scales[:, None] * direction[None, :]
+
+    def score(candidate):
+        mapped = map_fn(candidate)
+        candidate_vector = mapped - candidate
+        return (
+            _squared_residual_merit(candidate_vector),
+            _relative_residual(mapped, candidate),
+        )
+
+    merits, residuals = jax.lax.map(score, candidates)
+    current_merit = _squared_residual_merit(residual_vector)
+    directional_derivative = jnp.sum(gradient * direction)
+    required = current_merit + (
+        _SUFFICIENT_DECREASE_SLOPE * scales * directional_derivative
+    )
+    sufficient = (
+        finite_gradient
+        & (gradient_norm > 0.0)
+        & jnp.isfinite(merits)
+        & jnp.isfinite(residuals)
+        & (merits <= required)
+    )
+    accepted = jnp.any(sufficient)
+    selected = jnp.argmax(sufficient)
+    return _SteepestDescentPromotion(
+        state=jnp.where(accepted, candidates[selected], state),
+        residual=jnp.where(accepted, residuals[selected], current_residual),
+        accepted=accepted,
+        scale=jnp.where(
+            accepted, scales[selected], jnp.asarray(0.0, dtype=state.dtype)
+        ),
     )
 
 
@@ -1400,7 +1480,11 @@ def newton_krylov(
     local linearization at the unchanged iterate and solves a fixed ladder of
     Levenberg-damped normal models.  That fresh-model step is promoted only on
     strict residual decrease; its activation and selected damping are retained
-    in the promotion receipts.  The
+    in the promotion receipts.  If both recovery models exhaust, a final fixed
+    ladder follows the negative gradient of one-half the squared L2 residual,
+    normalized to unit infinity norm.  Its Armijo test uses that same merit,
+    independently of the relative sup residual retained as the convergence
+    criterion.  The
     trace retains its configured length and ``2 + gmres_iterations`` stride
     (one linearisation value, tangent slots, and one promotion read); unused
     iterations remain NaN padding.  Under ``vmap``, the batched while-loop runs
@@ -1598,11 +1682,45 @@ def newton_krylov(
                 rebuilt = jax.lax.cond(
                     rebuild_activated, rebuild_model, skip_rebuild, operand=None
                 )
-                candidate = jnp.where(rebuilt.accepted, rebuilt.state, promotion.state)
-                candidate_residual = jnp.where(
-                    rebuilt.accepted, rebuilt.residual, promotion.residual
+                descent_activated = rebuild_activated & ~rebuilt.accepted
+
+                def descend(_):
+                    return _steepest_descent_promotion(
+                        frozen_map,
+                        state,
+                        nonlinear_residual,
+                        residual_vector,
+                        tangent,
+                    )
+
+                def skip_descent(_):
+                    return _SteepestDescentPromotion(
+                        state=state,
+                        residual=nonlinear_residual,
+                        accepted=jnp.asarray(False),
+                        scale=jnp.asarray(jnp.nan, dtype=state.dtype),
+                    )
+
+                descent = jax.lax.cond(
+                    descent_activated, descend, skip_descent, operand=None
                 )
-                promotion_accepted = promotion.accepted | rebuilt.accepted
+                rebuilt_or_descent = jnp.where(
+                    rebuilt.accepted, rebuilt.state, descent.state
+                )
+                rebuilt_or_descent_residual = jnp.where(
+                    rebuilt.accepted, rebuilt.residual, descent.residual
+                )
+                candidate = jnp.where(
+                    promotion.accepted, promotion.state, rebuilt_or_descent
+                )
+                candidate_residual = jnp.where(
+                    promotion.accepted,
+                    promotion.residual,
+                    rebuilt_or_descent_residual,
+                )
+                promotion_accepted = (
+                    promotion.accepted | rebuilt.accepted | descent.accepted
+                )
                 accepted = measured.accepted + jnp.asarray(
                     promotion_accepted, dtype=jnp.int32
                 )
@@ -1684,6 +1802,18 @@ def newton_krylov(
                         jnp.asarray(jnp.nan, dtype=state.dtype),
                     )
                 )
+                descent_activations = measured.promotion_descent_activations.at[
+                    measured.attempted
+                ].set(jnp.asarray(descent_activated, dtype=jnp.int32))
+                descent_scales = measured.promotion_descent_scales.at[
+                    measured.attempted
+                ].set(
+                    jnp.where(
+                        descent_activated,
+                        descent.scale,
+                        jnp.asarray(jnp.nan, dtype=state.dtype),
+                    )
+                )
                 return _NewtonIterationState(
                     candidate,
                     candidate_residual,
@@ -1708,6 +1838,8 @@ def newton_krylov(
                     recovery_outcomes,
                     rebuild_activations,
                     rebuild_damping,
+                    descent_activations,
+                    descent_scales,
                 )
 
             def refused_state(_):
@@ -1746,6 +1878,10 @@ def newton_krylov(
                         measured.attempted
                     ].set(0),
                     measured.promotion_model_rebuild_damping,
+                    measured.promotion_descent_activations.at[measured.attempted].set(
+                        0
+                    ),
+                    measured.promotion_descent_scales,
                 )
 
             return jax.lax.cond(
@@ -1784,6 +1920,8 @@ def newton_krylov(
             jnp.full(newton_steps, -1, dtype=jnp.int32),
             jnp.full(newton_steps, -1, dtype=jnp.int32),
             jnp.full(newton_steps, jnp.nan, dtype=initial.dtype),
+            jnp.full(newton_steps, -1, dtype=jnp.int32),
+            jnp.full(newton_steps, jnp.nan, dtype=initial.dtype),
         ),
     )
     return FixedPointResult(
@@ -1807,6 +1945,8 @@ def newton_krylov(
         promotion_recovery_outcomes=loop.promotion_recovery_outcomes,
         promotion_model_rebuild_activations=(loop.promotion_model_rebuild_activations),
         promotion_model_rebuild_damping=loop.promotion_model_rebuild_damping,
+        promotion_descent_activations=loop.promotion_descent_activations,
+        promotion_descent_scales=loop.promotion_descent_scales,
     )
 
 

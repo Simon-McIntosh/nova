@@ -698,47 +698,48 @@ class ForwardFluxOperator:
         return DomainMasks(label=label, psi_norm=psi_norm)
 
     def _support_partition(self, psi, requested_class=None):
-        """Trace the complementary supports and sampling state once."""
+        """Trace the profile-owned support and sampling state once."""
         if self.moment_geometry is None:
             raise ValueError("moment geometry is required for current moments")
         physical = jnp.asarray(psi)[: self.physical_node_number]
-        masks, topology, connected, _admitted = self._fixed_design_read(
+        masks, topology, _connected, _admitted = self._fixed_design_read(
             physical, requested_class
         )
         if not self.use_linear_moments:
             raise ValueError("clipped support moments are required")
-        shared_flux = self.shared_node_flux(psi)
         sample_flux = self.sample_node_flux(psi)
         sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
-        signed_flux = self.polarity * (shared_flux - topology.boundary_flux)
-        core_support = self.moment_geometry.atomic_mesh.traced_clip(signed_flux)
-        core_support = core_support.qualify(connected)
-        common_support = self.moment_geometry.atomic_mesh.traced_clip(-signed_flux)
-        return masks, topology, sample_psi_norm, core_support, common_support
+        profile_support = self.moment_geometry.atomic_mesh.traced_clip(
+            jnp.ones(
+                len(self.moment_geometry.atomic_mesh.node_coordinates),
+                dtype=physical.dtype,
+            )
+        ).qualify(masks.profile_participation)
+        return masks, topology, sample_psi_norm, profile_support
 
     def _partitioned_current_moments(self, partition) -> CellCurrentMoments:
-        masks, _topology, sample_psi_norm, core_support, common_support = partition
+        masks, _topology, sample_psi_norm, profile_support = partition
         moments = self.source.current_moments(
             masks,
             self.support_current_moments,
-            core_support,
-            common_support,
+            profile_support,
             sample_flux=sample_psi_norm,
         )
         return self.coupling_current_moments(moments)
 
     def _clipped_integral_measure(self, partition) -> ClippedIntegralMeasure:
         """Build the observation measure from one already-traced partition."""
-        masks, topology, sample_psi_norm, core_support, _common_support = partition
-        closed_branch = masks.core | masks.common_sol
-        core_moments = self.support_current_moments(
-            self.source.core,
-            masks.psi_norm,
-            sample_psi_norm,
-            core_support,
+        masks, topology, sample_psi_norm, profile_support = partition
+        profile_moments = self.source.current_moments(
+            masks,
+            self.support_current_moments,
+            profile_support,
+            sample_flux=sample_psi_norm,
         )
-        cell_current = jnp.where(closed_branch, core_moments.cell_current, 0.0)
-        points, weights = clipped_support_quadrature(core_support, closed_branch)
+        cell_current = jnp.where(
+            masks.profile_participation, profile_moments.cell_current, 0.0
+        )
+        points, weights = clipped_support_quadrature(profile_support, masks.core)
         psi_norm, radial_gradient, vertical_gradient = self.sample_flux_field(
             masks.psi_norm, sample_psi_norm, points
         )
@@ -754,13 +755,13 @@ class ForwardFluxOperator:
         )
         field_squared = total_flux_gradient_squared / (2.0 * jnp.pi * radius) ** 2
         volume_weight = 2.0 * jnp.pi * radius * weights
-        area = jnp.where(closed_branch, core_support.area, 0.0)
-        centre_radius = core_support.centroids[:, 0]
+        area = jnp.where(masks.core, profile_support.area, 0.0)
+        centre_radius = profile_support.centroids[:, 0]
         radial_first = jnp.where(
-            closed_branch, core_support.first_area_moment[:, 0], 0.0
+            masks.core, profile_support.first_area_moment[:, 0], 0.0
         )
         radial_second = jnp.where(
-            closed_branch, core_support.second_area_moment[:, 0, 0], 0.0
+            masks.core, profile_support.second_area_moment[:, 0, 0], 0.0
         )
         volume = 2.0 * jnp.pi * (centre_radius * area + radial_first)
         radial_volume = (
@@ -772,11 +773,6 @@ class ForwardFluxOperator:
                 + radial_second
             )
         )
-        label = jnp.where(
-            closed_branch & core_support.included,
-            jnp.asarray(int(PlasmaDomain.CORE), dtype=masks.label.dtype),
-            masks.label,
-        )
         return ClippedIntegralMeasure(
             area=area,
             volume=volume,
@@ -784,7 +780,7 @@ class ForwardFluxOperator:
             cell_current=cell_current,
             pressure_volume=jnp.sum(pressure * volume_weight, axis=1),
             field_volume=jnp.sum(field_squared * volume_weight, axis=1),
-            masks=DomainMasks(label=label, psi_norm=masks.psi_norm),
+            masks=masks,
         )
 
     def cell_current_moments(self, psi, requested_class=None) -> CellCurrentMoments:
@@ -886,20 +882,19 @@ class ForwardFluxOperator:
         )
 
     def current_domain_masks(self, psi, requested_class=None) -> DomainMasks:
-        """Return domain labels following the shared-node clip partition."""
-        masks, topology = self.read(psi, requested_class)
-        if not self.use_linear_moments:
-            return masks
-        shared_flux = self.shared_node_flux(psi)
-        support = self.moment_geometry.atomic_mesh.traced_clip(
-            self.polarity * (shared_flux - topology.boundary_flux)
+        """Return the achieved saddle-aware domain labels."""
+
+        masks, _topology = self.read(psi, requested_class)
+        return masks
+
+    def residual_shadow_mask(self, psi, requested_class=None) -> jax.Array:
+        """Return the sole state-dependent exclusion in the residual domain."""
+
+        physical = jnp.asarray(psi)[: self.physical_node_number]
+        masks, _topology, _connected, _admitted = self._fixed_design_read(
+            physical, requested_class
         )
-        label = jnp.where(
-            support.included,
-            jnp.asarray(int(PlasmaDomain.CORE), dtype=masks.label.dtype),
-            masks.label,
-        )
-        return DomainMasks(label=label, psi_norm=masks.psi_norm)
+        return masks.private_flux
 
     def cell_current(self, psi, requested_class=None, target_current=None) -> jax.Array:
         """Return the per-cell plasma current [A] a trial flux drives."""

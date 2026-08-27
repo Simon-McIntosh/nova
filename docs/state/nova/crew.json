@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T12:17:39",
+  "updated": "2026-08-27T12:51:48",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -56286,9 +56286,107 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260827T101746884446-pod-continuous-residual-convergence",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-continuous-residual-convergence",
+        "node_definition": {
+          "done_when": "One H200 SLURM job (betelgeuse, gpu_0003_grpA, at most 3 hours, EXIT_MARKER=0) runs the full-mask 650-ceiling ladder on current origin/main; the report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md gains a continuous-residual section with whether 1e-8 was reached and at which promotion, the minimum residual beside the 4.54e4x unguarded, 6.38e5x guard-only, 8.0e4x fixed-recovery, augmented-mask and rebuilt-model baselines, grid and wall flip counts beside 49 and 0, rebuild and recovery activation counts, and the verdict CONVERGED, IMPROVED-BUT-SHORT, or UNCHANGED; no repository file modified",
+          "estimated_hours": null,
+          "goal": "The 650-ceiling convergence measurement on the fully continuous residual: whether closing the whole-moment switching defect moves 21978/35 pure off the 8.0e4x plateau toward the locked 1e-8 criterion",
+          "id": "pod-continuous-residual-convergence",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T101746884446-pod-continuous-residual-convergence/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T10:17:52Z",
+        "completed_at": "2026-08-27T10:51:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1992,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1992,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "5fe7df831689d77340280ce0f40f0db1eed18fdc",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "full-mask 650-ceiling H200 ladder on the continuous residual (job 1258634, 00:12:52); EXIT_MARKER=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T101746884446-pod-continuous-residual-convergence/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T101746884446-pod-continuous-residual-convergence/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 8340608,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 8550081,
+            "output_tokens": 1715,
+            "output_tokens_cumulative": 23857,
+            "reasoning_output_tokens": 1477,
+            "reasoning_output_tokens_cumulative": 6039
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1108
+    "_version": 1109
   }
 }

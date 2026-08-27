@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="61">
+<meta name="plan-version" content="62">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -420,6 +420,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260827T100139572819-pod-moment-selection-continuity" data-who="domain-partition" data-when="2026-08-27T10:17:03Z">
     <div class="r-comment-body"><p>Whole-moment switching repaired: per-cell participation gating restores 16/16 continuity ratios to exactly 2.0; the residual discontinuity introduced at the cutover merge is closed</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260827T101746884446-pod-continuous-residual-convergence" data-who="flood-rca" data-when="2026-08-27T10:51:04Z">
+    <div class="r-comment-body"><p>UNCHANGED plateau: 8.0019e-4 vs 8.0010e-4 (+0.011%), attempts 57-650 exactly flat; continuity was a real defect but not the plateau cause; five independent step strategies now share one plateau value, which points at derivative-versus-function inconsistency or a genuine residual floor</p></div>
 </div>
 </section>
 </main>

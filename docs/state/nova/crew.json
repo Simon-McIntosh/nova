@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T18:37:19",
+  "updated": "2026-08-27T18:45:06",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -58245,9 +58245,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T161553203543-pod-grid-stride-consistency",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-grid-stride-consistency",
+        "node_definition": {
+          "done_when": "A report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/grid-stride-consistency.md enumerates every quantity the MAST forward problem takes from the stored 65-point axes (profile samples, declared anchor support and coefficients, wall and limiter geometry, decomposition bank operators, response carrier rows) and states for each, with file and line citations, whether it is subsampled by the same stride and offset as the grid, resampled independently, or consumed at full resolution against a strided grid; it computes for at least the declared anchor support and the wall geometry the actual index mapping at GRID_STRIDE values 1, 2 and 4 and reports any misalignment in cells or metres; and it gives a verdict STRIDE-CONSISTENT or STRIDE-MISALIGNED naming the offending quantity and the minimal repair; no repository file modified",
+          "estimated_hours": null,
+          "goal": "Whether the stride-2 production grid construction is self-consistent, by comparing every stored quantity that is defined on the 65-point axes against how it is subsampled onto the 33-point production grid, since a coarser 17x17 grid converges to the locked criterion while production stalls four orders above it",
+          "id": "pod-grid-stride-consistency",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T161553203543-pod-grid-stride-consistency/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a74",
+          "spec_level": "",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/grid-stride-consistency.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "",
+        "member": "connectivity-audit",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-27T16:16:03Z",
+        "completed_at": "2026-08-27T16:44:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1702,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1702,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "b4b5d4113f184db7635e5c837d15cec517912961",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "mapping census hung at five minutes on all three attempts including the NumPy-only variant; static census and carrier proof completed",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T161553203543-pod-grid-stride-consistency/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T161553203543-pod-grid-stride-consistency/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f75-0f36-7192-bb27-6710c52ac3e1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2878976,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2906486,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 10009,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1593
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1128
+    "_version": 1129
   }
 }

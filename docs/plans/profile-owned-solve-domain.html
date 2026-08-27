@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="78">
+<meta name="plan-version" content="79">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -471,6 +471,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260827T143053469957-pod-mesh-resolution-floor" data-who="flood-rca" data-when="2026-08-27T16:37:19Z">
     <div class="r-comment-body"><p>Two rows durable and decisive on their own: 17x17 reaches the locked criterion at 9.909e-9 on promotion 141 while production 33x33 stalls at 2.672e-4 after 650 attempts, a 26968x degradation for a 2x refinement that refutes a discretization-order limit; the stride-1 mechanism is unresolved and the comparison is additionally confounded by the persisted carrier being digest-bound to the 33x33 grid</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260827T161553203543-pod-grid-stride-consistency" data-who="connectivity-audit" data-when="2026-08-27T16:44:25Z">
+    <div class="r-comment-body"><p>Partial but load-bearing: 5/5 input families statically classified with zero-offset stride slicing consistent across axes and reference, support recomputed on selected coordinates, 37 wall targets exact, and the carrier target-count proved for 3/3 strides; the decisive finding is that the persisted 1126x101 carrier is digest-bound to the 1089-cell production grid and fails closed elsewhere, so the mesh comparison is confounded; the 0/2 index mappings are superseded by the running carrier-confound experiment</p></div>
 </div>
 </section>
 </main>

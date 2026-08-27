@@ -786,7 +786,10 @@ class ForwardFluxOperator:
     def cell_current_moments(self, psi, requested_class=None) -> CellCurrentMoments:
         """Return the current and first moments driven by one trial flux."""
         if not self.use_linear_moments:
-            masks, _topology = self.read(psi, requested_class)
+            physical = jnp.asarray(psi)[: self.physical_node_number]
+            masks, _topology, _connected, _admitted = self._fixed_design_read(
+                physical, requested_class
+            )
             point_current = self.source.cell_current(self.radius, self.area, masks)
             density = point_current / self.area
             if self.cell_average_stencil is None:
@@ -795,7 +798,7 @@ class ForwardFluxOperator:
                 gathered = density[self.cell_average_stencil]
                 average = jnp.einsum("ni,i->n", gathered, self.cell_average_weight)
                 current = jnp.where(
-                    self.source.declared_support(masks), average * self.area, 0.0
+                    masks.profile_participation, average * self.area, 0.0
                 )
             zero = jnp.zeros_like(current)
             return CellCurrentMoments(current, zero, zero)
@@ -927,9 +930,21 @@ class ForwardFluxOperator:
         self, psi, current=None, requested_class=None, target_current=None
     ) -> jax.Array:
         """Return the total poloidal flux [Wb] one write-then-read cycle gives."""
-        return self.external(current) + self.internal(
+        mapped = self.external(current) + self.internal(
             psi, requested_class, target_current
         )
+        return self._exclude_shadow_residual(psi, mapped, requested_class)
+
+    def _exclude_shadow_residual(self, psi, mapped, requested_class=None) -> jax.Array:
+        """Copy trial flux through cells excluded from the residual domain."""
+
+        shadow = self.residual_shadow_mask(psi, requested_class)
+        residual_shadow = jnp.pad(
+            shadow,
+            (0, self.node_number - self.grid.node_number),
+            constant_values=False,
+        )
+        return jnp.where(residual_shadow, psi, mapped)
 
     def residual(
         self, psi, current=None, requested_class=None, target_current=None
@@ -949,6 +964,7 @@ class ForwardFluxOperator:
 
         def mapped(psi: jax.Array) -> jax.Array:
             """Return the free-boundary flux map of one trial flux."""
-            return external + self.internal(psi, requested_class, target_current)
+            image = external + self.internal(psi, requested_class, target_current)
+            return self._exclude_shadow_residual(psi, image, requested_class)
 
         return mapped

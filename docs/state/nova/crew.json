@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T16:04:29",
+  "updated": "2026-08-27T16:30:31",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -57577,9 +57577,107 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260827T140437647686-pod-aligned-merit-convergence",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-aligned-merit-convergence",
+        "node_definition": {
+          "done_when": "One SLURM job (betelgeuse with reservation gpu_0003_grpA requesting one H200, 8 CPUs, 64 GiB and a one-hour walltime, or an all_debug CPU lane, whichever allocates first, EXIT_MARKER=0) runs the staged observer a60efd9a byte-for-byte at its full 650 ceiling on current origin/main; a report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/aligned-merit-convergence.md states whether the locked 1e-8 criterion was reached and at which promotion, the minimum and terminal relative-sup residuals beside the 3.8772e-4 minimum and 4.1777e-4 terminal of the previous run, confirmation that terminal now equals minimum, counts of Newton acceptances, backtracks, continuation recoveries, model rebuilds and steepest-descent activations, the terminal gradient norm, and the verdict CONVERGED, PLATEAU-BROKEN or PLATEAU-UNCHANGED; no repository file modified",
+          "estimated_hours": null,
+          "goal": "The 650-ceiling convergence measurement with the sup-aligned merit and best-iterate return: whether 21978/35 pure now reaches the locked 1e-8 criterion",
+          "id": "pod-aligned-merit-convergence",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T140437647686-pod-aligned-merit-convergence/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/aligned-merit-convergence.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "flood-performance",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T14:04:45Z",
+        "completed_at": "2026-08-27T14:29:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1493,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1493,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "fdbde437c7ce74137b1a36a43e47d7e30bebd990",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "full 650-ceiling H200 ladder (job 1258840, 00:15:10) with the sup-aligned merit and best-iterate return; EXIT_MARKER=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T140437647686-pod-aligned-merit-convergence/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T140437647686-pod-aligned-merit-convergence/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f75-721b-73f1-bd97-eeffb0481cdc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 4797952,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 4955546,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 13096,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1879
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1122
+    "_version": 1123
   }
 }

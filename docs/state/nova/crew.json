@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T12:05:36",
+  "updated": "2026-08-27T12:17:39",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -56180,9 +56180,115 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260827T100139572819-pod-moment-selection-continuity",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-moment-selection-continuity",
+        "node_definition": {
+          "done_when": "JAX_PLATFORMS=cpu pytest tests/test_domain_participation_continuity.py passes with its 16 ratios at the expected 2.0 rather than 0.999980, and a new case proves a single non-crossing achieved-label flip changes the source moment by at most the affected cell's own contribution; JAX_PLATFORMS=cpu pytest over tests/test_fixed_point.py tests/test_forward_operator_domain.py tests/test_wall_height_exclusion.py tests/test_hex_flood_geometries.py tests/test_hex_flood_sn_secondary.py tests/test_hex_flood_snowflake.py tests/test_hex_flood_coil_nulls.py tests/test_wall_resolution_ladder.py reports zero new failures vs current HEAD in eager and JIT; the conservation acceptance test passes with unchanged envelopes; no data-dependent while primitive is introduced; ruff reports zero findings on the staged paths",
+          "estimated_hours": null,
+          "goal": "The whole-moment switching defect repaired: a non-crossing achieved-label flip must not switch the entire source moment, so ForwardSource.current_moments selects participation per cell rather than selecting one whole-moment branch on a label bit, restoring continuity of the residual under small perturbations",
+          "id": "pod-moment-selection-continuity",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T100139572819-pod-moment-selection-continuity/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/source.py",
+            "nova/equilibrium/forward_operator.py",
+            "tests/test_domain_participation_continuity.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T10:01:46Z",
+        "completed_at": "2026-08-27T10:17:03Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 917,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 917,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "ce42735a692812589adf3a01cbb83b72f75573a4",
+        "commits": [
+          "15fbcf2f67ed0e5153971ad5f03885b3d3f8edfb"
+        ],
+        "changed_lines": {
+          "added": 54,
+          "removed": 5,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/test_domain_participation_continuity.py 4/4 with all 16 ratios exactly 2.000000000 (was 0.999980); focused suites zero new failures; conservation unchanged",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T100139572819-pod-moment-selection-continuity/logs/continuity-ratios.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T100139572819-pod-moment-selection-continuity/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 8283392,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 8415370,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 12002,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3051
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/test_domain_participation_continuity.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1107
+    "_version": 1108
   }
 }

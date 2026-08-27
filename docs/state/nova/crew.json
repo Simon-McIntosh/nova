@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T06:07:33",
+  "updated": "2026-08-27T06:17:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -54161,9 +54161,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T040743551350-pod-extended-budget-diagnostic",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-extended-budget-diagnostic",
+        "node_definition": {
+          "done_when": "One SLURM job on betelgeuse with --reservation=gpu_0003_grpA and one H200 (no exclusivity or occupancy gates; this is a convergence diagnostic, not a timing row; time limit 3 hours) runs the staged diagnostic with a promotion budget of at least 600, logging every promotion's residual; the report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md gains an extended-budget section stating whether 1e-8 was reached, at which promotion, the full q evolution over the trajectory, and the verdict budget-bounded versus rate-degrading, explicitly marked diagnostic-only and never a production budget recommendation; no repository file modified",
+          "estimated_hours": null,
+          "goal": "The plan-sanctioned extended-budget diagnostic: one solve of 21978/35 pure with a promotion budget large enough to test whether the measured tail contraction holds to the 1e-8 criterion near the extrapolated 426 promotions, settling whether the stall is purely budget-bounded or the rate degrades before convergence",
+          "id": "pod-extended-budget-diagnostic",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T040743551350-pod-extended-budget-diagnostic/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T04:07:48Z",
+        "completed_at": "2026-08-27T04:17:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 559,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 559,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "00d1b82aea02104575eb516697cf127212003298",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 extended-budget solve: 650 accepted promotions logged per-residual; EXIT_MARKER=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T040743551350-pod-extended-budget-diagnostic/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T040743551350-pod-extended-budget-diagnostic/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 3827968,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3910213,
+            "output_tokens": 4230,
+            "output_tokens_cumulative": 19727,
+            "reasoning_output_tokens": 2657,
+            "reasoning_output_tokens_cumulative": 4068
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1087
+    "_version": 1088
   }
 }

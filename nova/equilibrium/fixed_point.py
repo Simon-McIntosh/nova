@@ -134,6 +134,9 @@ class FixedPointResult(NamedTuple):
     ``promotion_backtrack_counts`` records how many fixed half-step reductions
     preceded each accepted promotion, the ladder length for a rejected
     promotion, and -1 in unused slots.
+    ``promotion_recovery_activations`` is one when the damped-continuation
+    fallback was evaluated after backtracking exhaustion, zero when the Newton
+    ladder decided the promotion, and -1 in unused slots.
     """
 
     state: jax.Array
@@ -160,6 +163,7 @@ class FixedPointResult(NamedTuple):
     termination_reason: jax.Array | int = FixedPointTerminationReason.NOT_APPLICABLE
     shadow_mask_changes: jax.Array | int = -1
     promotion_backtrack_counts: jax.Array | int = -1
+    promotion_recovery_activations: jax.Array | int = -1
 
 
 class KinkAwareResult(NamedTuple):
@@ -236,6 +240,7 @@ class _NewtonIterationState(NamedTuple):
     shadow_mask: jax.Array
     shadow_mask_changes: jax.Array
     promotion_backtrack_counts: jax.Array
+    promotion_recovery_activations: jax.Array
 
 
 class _BacktrackedPromotion(NamedTuple):
@@ -245,6 +250,7 @@ class _BacktrackedPromotion(NamedTuple):
     residual: jax.Array
     accepted: jax.Array
     backtrack_count: jax.Array
+    recovery_activated: jax.Array
 
 
 class _ManifoldNewtonIterationState(NamedTuple):
@@ -430,9 +436,10 @@ def _backtracked_promotion(
     map_fn: Callable[[jax.Array], jax.Array],
     state: jax.Array,
     step: jax.Array,
+    continuation_step: jax.Array,
     current_residual: jax.Array,
 ) -> _BacktrackedPromotion:
-    """Select the first fixed-ladder trial with sufficient residual decrease."""
+    """Select a decreasing Newton trial or fixed-trip continuation fallback."""
 
     factors = jnp.asarray(_BACKTRACKING_FACTORS, dtype=state.dtype)
     candidates = state[None, :] + factors[:, None] * step[None, :]
@@ -443,14 +450,47 @@ def _backtracked_promotion(
     residuals = jax.lax.map(score, candidates)
     required = current_residual * (1.0 - _SUFFICIENT_DECREASE_SLOPE * factors)
     sufficient = jnp.isfinite(residuals) & (residuals <= required)
-    accepted = jnp.any(sufficient)
-    selected = jnp.argmax(sufficient)
-    count = jnp.where(accepted, selected, factors.size)
-    return _BacktrackedPromotion(
-        state=jnp.where(accepted, candidates[selected], state),
-        residual=jnp.where(accepted, residuals[selected], current_residual),
-        accepted=accepted,
-        backtrack_count=jnp.asarray(count, dtype=jnp.int32),
+    ladder_accepted = jnp.any(sufficient)
+    ladder_selected = jnp.argmax(sufficient)
+
+    def accept_newton_ladder(_):
+        return _BacktrackedPromotion(
+            state=candidates[ladder_selected],
+            residual=residuals[ladder_selected],
+            accepted=jnp.asarray(True),
+            backtrack_count=jnp.asarray(ladder_selected, dtype=jnp.int32),
+            recovery_activated=jnp.asarray(False),
+        )
+
+    def recover_with_continuation(_):
+        recovery_candidates = (
+            state[None, :] + factors[:, None] * continuation_step[None, :]
+        )
+        recovery_residuals = jax.lax.map(score, recovery_candidates)
+        decreasing = jnp.isfinite(recovery_residuals) & (
+            recovery_residuals < current_residual
+        )
+        recovery_accepted = jnp.any(decreasing)
+        recovery_selected = jnp.argmax(decreasing)
+        return _BacktrackedPromotion(
+            state=jnp.where(
+                recovery_accepted, recovery_candidates[recovery_selected], state
+            ),
+            residual=jnp.where(
+                recovery_accepted,
+                recovery_residuals[recovery_selected],
+                current_residual,
+            ),
+            accepted=recovery_accepted,
+            backtrack_count=jnp.asarray(factors.size, dtype=jnp.int32),
+            recovery_activated=jnp.asarray(True),
+        )
+
+    return jax.lax.cond(
+        ladder_accepted,
+        accept_newton_ladder,
+        recover_with_continuation,
+        operand=None,
     )
 
 
@@ -1144,8 +1184,10 @@ def newton_krylov(
     step is then capped at ``step_cap`` × the relaxed step, bounding excursions
     while the current-centroid pin holds the basin.  Promotion selects the
     first of six fixed half-step factors that provides sufficient nonlinear
-    residual decrease; every factor is evaluated through a fixed-shape
-    ``lax.map`` and the receipt records the selected reduction count.  The
+    residual decrease.  If that ladder exhausts, a second fixed ladder follows
+    the existing relaxed Picard direction and may promote only a strictly
+    decreasing residual.  Both ladders use fixed-shape ``lax.map`` evaluation,
+    and the receipts record the Newton reductions and recovery activation.  The
     trace retains its configured length and ``2 + gmres_iterations`` stride
     (one linearisation value, tangent slots, and one promotion read); unused
     iterations remain NaN padding.  Under ``vmap``, the batched while-loop runs
@@ -1290,7 +1332,11 @@ def newton_krylov(
 
             def promoted_state(_):
                 promotion = _backtracked_promotion(
-                    map_fn, state, step, nonlinear_residual
+                    map_fn,
+                    state,
+                    step,
+                    relaxation * residual_vector,
+                    nonlinear_residual,
                 )
                 candidate = promotion.state
                 candidate_residual = promotion.residual
@@ -1340,6 +1386,9 @@ def newton_krylov(
                 backtrack_counts = measured.promotion_backtrack_counts.at[
                     measured.attempted
                 ].set(promotion.backtrack_count)
+                recovery_activations = measured.promotion_recovery_activations.at[
+                    measured.attempted
+                ].set(jnp.asarray(promotion.recovery_activated, dtype=jnp.int32))
                 return _NewtonIterationState(
                     candidate,
                     candidate_residual,
@@ -1358,6 +1407,7 @@ def newton_krylov(
                     candidate_shadow,
                     shadow_changes,
                     backtrack_counts,
+                    recovery_activations,
                 )
 
             def refused_state(_):
@@ -1384,6 +1434,9 @@ def newton_krylov(
                         jnp.where(observe_shadows, 0, -1)
                     ),
                     measured.promotion_backtrack_counts,
+                    measured.promotion_recovery_activations.at[measured.attempted].set(
+                        0
+                    ),
                 )
 
             return jax.lax.cond(
@@ -1416,6 +1469,7 @@ def newton_krylov(
             current_shadow,
             shadow_changes,
             jnp.full(newton_steps, -1, dtype=jnp.int32),
+            jnp.full(newton_steps, -1, dtype=jnp.int32),
         ),
     )
     return FixedPointResult(
@@ -1434,6 +1488,7 @@ def newton_krylov(
         termination_reason=loop.termination_reason,
         shadow_mask_changes=loop.shadow_mask_changes,
         promotion_backtrack_counts=loop.promotion_backtrack_counts,
+        promotion_recovery_activations=loop.promotion_recovery_activations,
     )
 
 

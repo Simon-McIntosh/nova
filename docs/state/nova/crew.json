@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T08:19:58",
+  "updated": "2026-08-27T08:35:37",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -54868,9 +54868,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T062005584069-pod-adaptive-globalization-convergence",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-adaptive-globalization-convergence",
+        "node_definition": {
+          "done_when": "One SLURM job (betelgeuse one H200 or all_debug CPU, at most 3 hours, EXIT_MARKER=0) reruns the staged 650-ceiling diagnostic on current origin/main; the report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md gains an adaptive-globalization section with whether 1e-8 was reached and at which promotion, the radius trajectory summary, backtrack and recovery histograms, the minimum residual beside the unguarded 4.54e4x, guard-only 6.38e5x and fixed-recovery 8.0e4x baselines, and the verdict CONVERGED, IMPROVED-BUT-SHORT, or UNCHANGED with the numbers; no repository file modified",
+          "estimated_hours": null,
+          "goal": "The extended-budget convergence measurement on the adaptive globalization: whether the 21978/35 pure arm now reaches the locked 1e-8 criterion with the radius carried across promotions",
+          "id": "pod-adaptive-globalization-convergence",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T062005584069-pod-adaptive-globalization-convergence/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T06:20:11Z",
+        "completed_at": "2026-08-27T06:34:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 873,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 873,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "46b550211ebc900a581061cdc3f35e0c7023efd6",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "650-ceiling diagnostic on the adaptive globalization; EXIT_MARKER=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T062005584069-pod-adaptive-globalization-convergence/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T062005584069-pod-adaptive-globalization-convergence/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 3204352,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3357751,
+            "output_tokens": 2523,
+            "output_tokens_cumulative": 15749,
+            "reasoning_output_tokens": 488,
+            "reasoning_output_tokens_cumulative": 1825
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1094
+    "_version": 1095
   }
 }

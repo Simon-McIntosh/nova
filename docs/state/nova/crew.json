@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T17:04:09",
+  "updated": "2026-08-27T17:56:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -57912,9 +57912,119 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260827T114934899950-sse-mast-bank-resolve",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-mast-bank-resolve",
+        "node_definition": {
+          "done_when": "A single SLURM CPU debug job (16 CPUs, JAX_PLATFORMS=cpu, JAX_ENABLE_X64=true, TMPDIR=/tmp, at most one hour, EXIT_MARKER=0) runs the exact campaign driver on current origin/main with no transient cache; the tracked JSON carries exactly 12 declared arms once each with explicit per-arm convergence, terminal residual, tolerance and termination, retained named failures, class from class_margin, and the locked 7-of-12, 0.55 m and 0.04 m thresholds reported as measured; the PNG is redrawn and visually inspected; the manifest tables per-arm convergence and residual deltas against the pre-anchor bank; only the JSON and PNG are committed; the scheduler receipt appears in the manifest",
+          "estimated_hours": null,
+          "goal": "The twelve-arm MAST corroboration bank regenerated on the continuous declared anchor, since the anchor repair changes the declared problem semantics and the current bank encodes the discontinuous definition",
+          "id": "sse-mast-bank-resolve",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T114934899950-sse-mast-bank-resolve/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "margin-remeasure",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T11:49:41Z",
+        "completed_at": "2026-08-27T15:54:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 14692,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "b3fe4764537196c2be6b558dfbdcba6d88d9539a",
+        "commits": [
+          "f461991f7dd9874ee77be431114c1f5d43b06760"
+        ],
+        "changed_lines": {
+          "added": 4499,
+          "removed": 7311,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "full twelve-arm campaign driver on the repaired stack, EXIT_MARKER=0, strict audit and original-resolution visual inspection",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T114934899950-sse-mast-bank-resolve/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T114934899950-sse-mast-bank-resolve/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03818-636e-7632-bc6e-05c3a7131c93",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2519680,
+            "cached_input_tokens_cumulative": 12482560,
+            "input_tokens": 2402697,
+            "input_tokens_cumulative": 12587861,
+            "output_tokens": 8064,
+            "output_tokens_cumulative": 24341,
+            "reasoning_output_tokens": 3026,
+            "reasoning_output_tokens_cumulative": 5071
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": {
+          "attempt": 7,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260827T031124955449-sse-mast-bank-resolve",
+          "root_run_id": "r-20260826T211058255408-sse-mast-bank-resolve"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 10,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1125
+    "_version": 1126
   }
 }

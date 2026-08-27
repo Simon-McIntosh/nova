@@ -60,6 +60,7 @@ __all__ = [
     "KinkAwareResult",
     "KrylovActionQualification",
     "ManifoldAdvanceQualification",
+    "RecoveryOutcome",
     "anderson",
     "kink_aware_newton_krylov",
     "newton_krylov",
@@ -69,6 +70,10 @@ __all__ = [
 
 _BACKTRACKING_FACTORS = (1.0, 0.5, 0.25, 0.125, 0.0625, 0.03125)
 _RECORDED_BACKTRACKING_FACTOR_COUNT = 4
+_RECOVERY_RADIUS_INITIAL = 1.0
+_RECOVERY_RADIUS_GROWTH = 2.0
+_RECOVERY_RADIUS_SHRINKAGE = 0.5
+_RECOVERY_RADIUS_UPDATE_TRIPS = 6
 _PROJECTED_KRYLOV_CONDITION_RATIO_LIMIT = math.e
 _SUFFICIENT_DECREASE_SLOPE = 1.0e-4
 FIXED_POINT_RESIDUAL_TOLERANCE = 1.0e-8
@@ -91,6 +96,14 @@ class KrylovActionQualification(IntEnum):
     NONSUCCESSFUL_GMRES_STATUS = 3
     NONFINITE_ACHIEVED_LINEAR_RESIDUAL = 4
     ZERO_STEP_WITH_MATERIAL_NONLINEAR_RESIDUAL = 5
+
+
+class RecoveryOutcome(IntEnum):
+    """Host-readable outcome of an exhausted Newton promotion's recovery."""
+
+    NOT_APPLICABLE = 0
+    ACCEPTED = 1
+    REFUSED = 2
 
 
 class FixedPointTerminationReason(IntEnum):
@@ -137,6 +150,11 @@ class FixedPointResult(NamedTuple):
     ``promotion_recovery_activations`` is one when the damped-continuation
     fallback was evaluated after backtracking exhaustion, zero when the Newton
     ladder decided the promotion, and -1 in unused slots.
+    ``promotion_recovery_radii`` records the carried radius before and after
+    each activated recovery.  A refused recovery shrinks its radius for the
+    next promotion; an accepted recovery grows from the accepted radius.
+    ``promotion_recovery_outcomes`` names that result and is not-applicable for
+    promotions decided by the Newton ladder.
     """
 
     state: jax.Array
@@ -164,6 +182,8 @@ class FixedPointResult(NamedTuple):
     shadow_mask_changes: jax.Array | int = -1
     promotion_backtrack_counts: jax.Array | int = -1
     promotion_recovery_activations: jax.Array | int = -1
+    promotion_recovery_radii: jax.Array | float = float("nan")
+    promotion_recovery_outcomes: jax.Array | int = -1
 
 
 class KinkAwareResult(NamedTuple):
@@ -241,6 +261,9 @@ class _NewtonIterationState(NamedTuple):
     shadow_mask_changes: jax.Array
     promotion_backtrack_counts: jax.Array
     promotion_recovery_activations: jax.Array
+    recovery_radius: jax.Array
+    promotion_recovery_radii: jax.Array
+    promotion_recovery_outcomes: jax.Array
 
 
 class _BacktrackedPromotion(NamedTuple):
@@ -251,6 +274,9 @@ class _BacktrackedPromotion(NamedTuple):
     accepted: jax.Array
     backtrack_count: jax.Array
     recovery_activated: jax.Array
+    recovery_radius: jax.Array
+    recovery_radius_before: jax.Array
+    recovery_outcome: jax.Array
 
 
 class _ManifoldNewtonIterationState(NamedTuple):
@@ -438,8 +464,9 @@ def _backtracked_promotion(
     step: jax.Array,
     continuation_step: jax.Array,
     current_residual: jax.Array,
+    recovery_radius: jax.Array,
 ) -> _BacktrackedPromotion:
-    """Select a decreasing Newton trial or fixed-trip continuation fallback."""
+    """Select a decreasing Newton trial or adaptive continuation recovery."""
 
     factors = jnp.asarray(_BACKTRACKING_FACTORS, dtype=state.dtype)
     candidates = state[None, :] + factors[:, None] * step[None, :]
@@ -460,30 +487,72 @@ def _backtracked_promotion(
             accepted=jnp.asarray(True),
             backtrack_count=jnp.asarray(ladder_selected, dtype=jnp.int32),
             recovery_activated=jnp.asarray(False),
+            recovery_radius=recovery_radius,
+            recovery_radius_before=jnp.asarray(jnp.nan, dtype=state.dtype),
+            recovery_outcome=jnp.asarray(
+                RecoveryOutcome.NOT_APPLICABLE, dtype=jnp.int32
+            ),
         )
 
     def recover_with_continuation(_):
-        recovery_candidates = (
-            state[None, :] + factors[:, None] * continuation_step[None, :]
+        minimum_radius = jnp.sqrt(jnp.finfo(state.dtype).eps)
+        initial_radius = jnp.clip(
+            recovery_radius, minimum_radius, _RECOVERY_RADIUS_INITIAL
         )
-        recovery_residuals = jax.lax.map(score, recovery_candidates)
-        decreasing = jnp.isfinite(recovery_residuals) & (
-            recovery_residuals < current_residual
+
+        def recovery_trial(_index, carry):
+            selected_state, selected_residual, accepted, radius = carry
+            candidate = state + radius * continuation_step
+            candidate_residual = score(candidate)
+            select = (
+                ~accepted
+                & jnp.isfinite(candidate_residual)
+                & (candidate_residual < current_residual)
+            )
+            return (
+                jnp.where(select, candidate, selected_state),
+                jnp.where(select, candidate_residual, selected_residual),
+                accepted | select,
+                jnp.where(
+                    accepted | select,
+                    radius,
+                    jnp.maximum(radius * _RECOVERY_RADIUS_SHRINKAGE, minimum_radius),
+                ),
+            )
+
+        candidate, candidate_residual, recovery_accepted, trial_radius = (
+            jax.lax.fori_loop(
+                0,
+                _RECOVERY_RADIUS_UPDATE_TRIPS,
+                recovery_trial,
+                (
+                    state,
+                    current_residual,
+                    jnp.asarray(False),
+                    initial_radius,
+                ),
+            )
         )
-        recovery_accepted = jnp.any(decreasing)
-        recovery_selected = jnp.argmax(decreasing)
+        next_radius = jnp.where(
+            recovery_accepted,
+            jnp.minimum(
+                trial_radius * _RECOVERY_RADIUS_GROWTH, _RECOVERY_RADIUS_INITIAL
+            ),
+            trial_radius,
+        )
         return _BacktrackedPromotion(
-            state=jnp.where(
-                recovery_accepted, recovery_candidates[recovery_selected], state
-            ),
-            residual=jnp.where(
-                recovery_accepted,
-                recovery_residuals[recovery_selected],
-                current_residual,
-            ),
+            state=candidate,
+            residual=candidate_residual,
             accepted=recovery_accepted,
             backtrack_count=jnp.asarray(factors.size, dtype=jnp.int32),
             recovery_activated=jnp.asarray(True),
+            recovery_radius=next_radius,
+            recovery_radius_before=initial_radius,
+            recovery_outcome=jnp.where(
+                recovery_accepted,
+                RecoveryOutcome.ACCEPTED,
+                RecoveryOutcome.REFUSED,
+            ).astype(jnp.int32),
         )
 
     return jax.lax.cond(
@@ -1184,10 +1253,12 @@ def newton_krylov(
     step is then capped at ``step_cap`` × the relaxed step, bounding excursions
     while the current-centroid pin holds the basin.  Promotion selects the
     first of six fixed half-step factors that provides sufficient nonlinear
-    residual decrease.  If that ladder exhausts, a second fixed ladder follows
-    the existing relaxed Picard direction and may promote only a strictly
-    decreasing residual.  Both ladders use fixed-shape ``lax.map`` evaluation,
-    and the receipts record the Newton reductions and recovery activation.  The
+    residual decrease.  If that ladder exhausts, a bounded trust-region update
+    follows the existing relaxed Picard direction and may promote only a
+    strictly decreasing residual.  Its radius is carried across promotions,
+    shrinks after refused trials, and grows after an accepted re-shape.  The
+    update uses a fixed-trip masked loop, and the receipts record the Newton
+    reductions, recovery activation, outcome, and radius trajectory.  The
     trace retains its configured length and ``2 + gmres_iterations`` stride
     (one linearisation value, tangent slots, and one promotion read); unused
     iterations remain NaN padding.  Under ``vmap``, the batched while-loop runs
@@ -1337,6 +1408,7 @@ def newton_krylov(
                     step,
                     relaxation * residual_vector,
                     nonlinear_residual,
+                    measured.recovery_radius,
                 )
                 candidate = promotion.state
                 candidate_residual = promotion.residual
@@ -1357,11 +1429,12 @@ def newton_krylov(
                     & (candidate_residual <= convergence_tolerance)
                 )
                 exhausted = attempted >= newton_steps
+                recovery_retry = promotion.recovery_activated & ~promotion_accepted
                 active = (
-                    promotion_accepted
-                    & finite_candidate_residual
+                    finite_candidate_residual
                     & ~converged
                     & ~exhausted
+                    & (promotion_accepted | recovery_retry)
                 )
                 reason = jnp.where(
                     ~promotion_accepted,
@@ -1389,6 +1462,23 @@ def newton_krylov(
                 recovery_activations = measured.promotion_recovery_activations.at[
                     measured.attempted
                 ].set(jnp.asarray(promotion.recovery_activated, dtype=jnp.int32))
+                recovery_radii = measured.promotion_recovery_radii.at[
+                    measured.attempted
+                ].set(
+                    jnp.where(
+                        promotion.recovery_activated,
+                        jnp.stack(
+                            (
+                                promotion.recovery_radius_before,
+                                promotion.recovery_radius,
+                            )
+                        ),
+                        jnp.full(2, jnp.nan, dtype=state.dtype),
+                    )
+                )
+                recovery_outcomes = measured.promotion_recovery_outcomes.at[
+                    measured.attempted
+                ].set(promotion.recovery_outcome)
                 return _NewtonIterationState(
                     candidate,
                     candidate_residual,
@@ -1408,6 +1498,9 @@ def newton_krylov(
                     shadow_changes,
                     backtrack_counts,
                     recovery_activations,
+                    promotion.recovery_radius,
+                    recovery_radii,
+                    recovery_outcomes,
                 )
 
             def refused_state(_):
@@ -1436,6 +1529,11 @@ def newton_krylov(
                     measured.promotion_backtrack_counts,
                     measured.promotion_recovery_activations.at[measured.attempted].set(
                         0
+                    ),
+                    measured.recovery_radius,
+                    measured.promotion_recovery_radii,
+                    measured.promotion_recovery_outcomes.at[measured.attempted].set(
+                        RecoveryOutcome.NOT_APPLICABLE
                     ),
                 )
 
@@ -1470,6 +1568,9 @@ def newton_krylov(
             shadow_changes,
             jnp.full(newton_steps, -1, dtype=jnp.int32),
             jnp.full(newton_steps, -1, dtype=jnp.int32),
+            jnp.asarray(_RECOVERY_RADIUS_INITIAL, dtype=initial.dtype),
+            jnp.full((newton_steps, 2), jnp.nan, dtype=initial.dtype),
+            jnp.full(newton_steps, -1, dtype=jnp.int32),
         ),
     )
     return FixedPointResult(
@@ -1489,6 +1590,8 @@ def newton_krylov(
         shadow_mask_changes=loop.shadow_mask_changes,
         promotion_backtrack_counts=loop.promotion_backtrack_counts,
         promotion_recovery_activations=loop.promotion_recovery_activations,
+        promotion_recovery_radii=loop.promotion_recovery_radii,
+        promotion_recovery_outcomes=loop.promotion_recovery_outcomes,
     )
 
 

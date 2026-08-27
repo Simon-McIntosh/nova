@@ -23,6 +23,7 @@ with skip_import("jax"):
         FIXED_POINT_RESIDUAL_TOLERANCE,
         FixedPointTerminationReason,
         KrylovActionQualification,
+        RecoveryOutcome,
         anderson,
         kink_aware_newton_krylov,
         newton_krylov,
@@ -223,6 +224,14 @@ def test_newton_continues_with_damped_operator_recovery_after_ladder_exhaustion(
         np.testing.assert_allclose(np.asarray(result.state), 1.0)
         np.testing.assert_array_equal(result.promotion_backtrack_counts, [6, 0])
         np.testing.assert_array_equal(result.promotion_recovery_activations, [1, 0])
+        np.testing.assert_allclose(
+            result.promotion_recovery_radii,
+            [[1.0, 1.0], [np.nan, np.nan]],
+        )
+        np.testing.assert_array_equal(
+            result.promotion_recovery_outcomes,
+            [RecoveryOutcome.ACCEPTED, RecoveryOutcome.NOT_APPLICABLE],
+        )
         np.testing.assert_array_equal(result.shadow_mask_changes, [1, 0])
         assert finite_trace[1] < finite_trace[0]
         assert np.all(np.diff(finite_trace) <= 0.0)
@@ -254,6 +263,10 @@ def test_newton_refuses_when_backtracking_and_continuation_are_exhausted():
     np.testing.assert_array_equal(result.state, [0.0])
     np.testing.assert_array_equal(result.promotion_backtrack_counts, [6])
     np.testing.assert_array_equal(result.promotion_recovery_activations, [1])
+    np.testing.assert_allclose(result.promotion_recovery_radii, [[1.0, 1.0 / 64.0]])
+    np.testing.assert_array_equal(
+        result.promotion_recovery_outcomes, [RecoveryOutcome.REFUSED]
+    )
     np.testing.assert_array_equal(result.shadow_mask_changes, [0])
     assert int(result.attempted_newton_promotions) == 1
     assert int(result.accepted_newton_promotions) == 0
@@ -261,6 +274,44 @@ def test_newton_refuses_when_backtracking_and_continuation_are_exhausted():
         int(result.termination_reason)
         == FixedPointTerminationReason.SUFFICIENT_DECREASE_REFUSED
     )
+
+
+def test_newton_carries_a_smaller_recovery_radius_after_exhaustion():
+    """A refused re-shape changes the radius used by the next promotion."""
+
+    def map_fn(state):
+        return jnp.where(
+            state[0] == 0.0,
+            jnp.ones_like(state),
+            jnp.where(state[0] < 0.01, 2.0 * state, state / 2.1),
+        )
+
+    def solve():
+        return newton_krylov(
+            map_fn,
+            jnp.zeros(1),
+            newton_steps=2,
+            gmres_iterations=1,
+            warmup=0,
+        )
+
+    for result in (solve(), jax.jit(solve)()):
+        finite_trace = np.asarray(result.trace)[np.isfinite(np.asarray(result.trace))]
+        np.testing.assert_allclose(result.state, [1.0 / 128.0])
+        np.testing.assert_array_equal(result.promotion_backtrack_counts, [6, 6])
+        np.testing.assert_array_equal(result.promotion_recovery_activations, [1, 1])
+        np.testing.assert_allclose(
+            result.promotion_recovery_radii,
+            [[1.0, 1.0 / 64.0], [1.0 / 64.0, 1.0 / 32.0]],
+        )
+        np.testing.assert_array_equal(
+            result.promotion_recovery_outcomes,
+            [RecoveryOutcome.REFUSED, RecoveryOutcome.ACCEPTED],
+        )
+        assert int(result.attempted_newton_promotions) == 2
+        assert int(result.accepted_newton_promotions) == 1
+        assert np.all(np.diff(finite_trace) <= 0.0)
+        assert finite_trace[-1] < finite_trace[0]
 
 
 def test_newton_reports_a_nonfinite_initial_residual_without_attempting():

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T13:05:18",
+  "updated": "2026-08-27T13:27:53",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -56482,9 +56482,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T110529361278-pod-primal-branch-jump-localization",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-primal-branch-jump-localization",
+        "node_definition": {
+          "done_when": "One SLURM job (H200 or all_debug CPU, at most 3 hours, EXIT_MARKER=0) reconstructs the plateau iterate and evaluates, at the unperturbed state and at the perturbed states that produced the jump, each candidate intermediate in turn: selected O and X indices and coordinates, achieved domain labels, profile branch selection, and current normalization, plus any further intermediate the trace implicates; the report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md gains a branch-localization section naming which single intermediate changes discontinuously with its before and after values, the file and line of the branch, the resulting residual jump attributed to it summing to the observed 0.0297677 within 10 percent, confirmation that the composed shadow mask is unchanged across the same perturbation, and the minimal continuity repair for that branch; no repository file modified",
+          "estimated_hours": null,
+          "goal": "The non-shadow primal branch responsible for the 0.0297677 residual jump identified by name and code location, by evaluating every candidate intermediate across the same perturbation that produces the jump",
+          "id": "pod-primal-branch-jump-localization",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T110529361278-pod-primal-branch-jump-localization/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T11:05:34Z",
+        "completed_at": "2026-08-27T11:27:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1303,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1303,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "c629488a28f28f242612b4e0627f0f2e3d45a6fd",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "per-intermediate evaluation across the jump-producing perturbation at the plateau iterate; attribution closed to 5 significant figures",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T110529361278-pod-primal-branch-jump-localization/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T110529361278-pod-primal-branch-jump-localization/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1360640,
+            "cached_input_tokens_cumulative": 7710720,
+            "input_tokens": 1494791,
+            "input_tokens_cumulative": 7951911,
+            "output_tokens": 13329,
+            "output_tokens_cumulative": 37188,
+            "reasoning_output_tokens": 2007,
+            "reasoning_output_tokens_cumulative": 9438
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1110
+    "_version": 1111
   }
 }

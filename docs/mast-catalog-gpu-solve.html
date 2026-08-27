@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S16">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="66">
+<meta name="plan-version" content="67">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -489,6 +489,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260827T000828025764-mcg-h200-batched-solve-benchmark" data-who="throughput-budget" data-when="2026-08-27T01:22:53Z">
     <div class="r-comment-body"><p>H200 batched-solve receipt banked as negative evidence: execute ratios 1.88 (w4) / 1.78 (w16), 8.5-18.7 ms/slice, verified-clean node; 230/600 single and 140/600 dual converged under corrected fixtures vs the distrusted 600/600 pre-fix claim</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260827-s16-landing" data-who="reckon-d8-s16-landing" data-when="2026-08-27T01:32:00+00:00">
+    <div class="r-comment-body">S16 landing state: the H200 batched-solve benchmark ran on corrected fixtures under a verified-clean exclusive window (job 1258440, 859 occupancy samples, 0 foreign jobs): dual-vs-single execute ratios 1.88 (width 4) and 1.78 (width 16), 8.5–18.7 ms/slice — banked as an explicitly negative receipt (b31c1ac9) because only 230/600 single and 140/600 dual timed slices converge within the fixed two-promotion budget on the corrected stack; the prior 600/600 claim was an artifact of the retired defective partition and is superseded. Both benchmark fixtures now construct on tensor-product grids (limited + benchmark-local diverted). Open: seed-cohort/solve-budget reconciliation before the next timing claim, and the L1 throughput and 8-card scaling gates — all downstream of the solver-rate remediation on efit-baseline-demonstration.</div>
 </div>
 </section>
 </main>

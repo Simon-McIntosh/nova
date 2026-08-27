@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="48">
+<meta name="plan-version" content="49">
 <meta name="plan-commits" content="ba1f73013873fd2d7434db1b744d742a1b4b042c">
 <meta name="plan-artifacts" content="docs/evidence/archive/efit-baseline-demonstration-landed.html,docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json">
 </head>
@@ -214,7 +214,7 @@
         exactly the derived-from-achieved-values violation the decision text forbids. The stall
         corroboration's empty-mask qualification was adopted by the S15 session at 5f2b213c.</p>
     </article>
-<article class="r-fu" data-id="f-ebd-002" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship efit-baseline-demonstration §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ebd-002" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship efit-baseline-demonstration §3" data-resolved-at="2026-08-27T01:28:42+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Run the demonstration gate once both implementation plans ship</h4>
     <div class="r-fu-body">Prerequisites: separatrix-spline-extraction and
         profile-owned-solve-domain shipped, and the demonstration-thresholds decision locked from
@@ -223,6 +223,7 @@
         numbers (class agreement 7/12; agreeing-arm RMS max 0.5413 m, which leg clipping can only
         shrink; worst saddle-to-EFIT-X 38.661 mm) — never follow it.</div>
     <pre class="r-fu-prompt">/reckon-ship efit-baseline-demonstration §3</pre>
+    <p class="r-fu-outcome">The demonstration gate ran fail-closed on fresh corrected banks: class agreement 9/12 PASS, worst eligible RMS 0.0294 m PASS, worst declared-row saddle 2.612 m FAIL vs 0.04 m; endpoint verdict FAIL. Receipt: docs/figures/efit-baseline-demonstration/demonstration-score/receipt.json; consolidated record: docs/evidence/forward-gs-validation.html. The failure is solver convergence (11/12 MAST arms budget-exhausted, 5/5 DIII-D non-converged), not topology and not preregistration.</p>
     </article>
 <article class="r-fu" data-id="f-ebd-003" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="sprint-review" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship efit-baseline-demonstration §3" data-resolved-at="2026-08-26T12:56:13+00:00" data-resolved-by="Simon McIntosh">
     <h4 class="r-fu-title">Own the parity-tolerance instrument: lock metric-disagreement-tolerance and repair the registry pin</h4>
@@ -230,9 +231,15 @@
     <pre class="r-fu-prompt">/reckon-ship efit-baseline-demonstration §3</pre>
     <p class="r-fu-outcome">Locked report-only-first-pass remains authoritative. Commit 1027d500 replaced the unreachable registry filename with semantic identity sha256:8df7a0a6... for every former stamp consumer; independent verification passed 17/17 tests with all numeric bounds unchanged and seven explicit provenance-only historical receipt differences.</p>
     </article>
-<article class="r-fu" data-id="f-ebd-shadow-flood-rca" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-d8-s16-veracity-review" data-written-at="2026-08-26T16:40:00+00:00" data-recommends-skill="/reckon-ship efit-baseline-demonstration" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ebd-shadow-flood-rca" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-d8-s16-veracity-review" data-written-at="2026-08-26T16:40:00+00:00" data-recommends-skill="/reckon-ship efit-baseline-demonstration" data-resolved-at="2026-08-27T01:28:42+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Flood-fill shadow RCA gates all dependent S16 work</h4>
     <div class="r-fu-body">The topology visual gate failed on lead inspection: private-flux shadow cells are flooded inside the LCFS on converged MAST panels, and the 21985/51 panel selects its primary X/O at the top wall notch. Until the RCA identifies the mechanism and the fix lands: no bank regeneration, no comparator scoring, no achieved-class or demonstration-threshold credit, and every S16 result that consumed the hex flood/connectivity material is to be re-evaluated against the fix before further progress. The RCA must decide whether the defect is confined to the evidence generator or lives in the production flood fill.</div>
+    <pre class="r-fu-prompt">/reckon-ship efit-baseline-demonstration</pre>
+    <p class="r-fu-outcome">Rerun order completed end to end on the corrected stack: both banks regenerated (MAST 12/12 rows cabb4ed6, DIII-D 5/5 rows c741b4cf), pinned-branch and wall-ladder receipts regenerated, all 17 panels rebuilt and visually verified (zero shadow inside the converged boundary), and the fail-closed endpoint scorer ran. The pause on dependent work lifts into the measured verdict: endpoint FAIL on solver convergence, carried by f-ebd-solver-rate.</p>
+    </article>
+<article class="r-fu" data-id="f-ebd-solver-rate" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-d8-s16-landing" data-written-at="2026-08-27T01:30:00+00:00" data-recommends-skill="/reckon-ship efit-baseline-demonstration" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Clear the demonstration gate by fixing solver rate, not thresholds</h4>
+    <div class="r-fu-body">The measured stall verdict (crew/reports/s16-landing-20260826/residual-stall-characterization.md): the corrected solver converges monotonically with tail contraction q~0.970 per promotion, needing ~425 further promotions to 1e-8 — a rate-and-budget problem, not a stationary floor. Remediation order per the ranked verdict: land the locked profile-owned residual-domain cutover (profile-owned-solve-domain), repeat the exact trace and a matched mesh ladder, then continuation/globalization or preconditioning if the tail rate stands. The locked thresholds are not to be relaxed; the H200 batched receipt's convergence shortfall (230/600, 140/600) is the same finding at scale.</div>
     <pre class="r-fu-prompt">/reckon-ship efit-baseline-demonstration</pre>
     </article>
 </section>
@@ -336,6 +343,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260826T224443297253-ebd-topology-panels-regenerate" data-who="topology-visuals" data-when="2026-08-26T23:23:16Z">
     <div class="r-comment-body"><p>17/17 panels on corrected banks: converged 22086/43 shows shadow only past X-points with Nova/EFIT boundary agreement; 11 MAST + 5 DIII-D retained failures bannered by exact failure class</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260827-sprint-landing" data-who="reckon-d8-s16-landing" data-when="2026-08-27T01:30:00+00:00">
+    <div class="r-comment-body">S16 LANDING COMPLETE on the corrected topology stack — no prior-orchestrator conclusion carried forward unverified. Landed this session: 3 extended geometry batteries (SN±secondary, SF+/SF−, coil columns; with the earlier 4 families, 7 analytic families now gate the flood in CI), the group-1 source gate (publication path, visual authority un-pin, fail-closed scorer, wall authority), both banks regenerated with explicit per-arm convergence, pinned-branch and wall-ladder receipts, 17 verified panels, the endpoint receipt (FAIL as measured), the forward-GS validation record (docs/evidence/forward-gs-validation.html), the H200 batched-solve negative receipt (ratios 1.88/1.78; convergence shortfall named), and the stall trajectory verdict (rate-and-budget, q~0.970, pre-fix two-cycle eliminated). Ten harness/driver defects were found and fixed by the campaign's own fail-closed fences. The demonstration endpoint is honestly open on solver rate; f-ebd-solver-rate carries the chain.</div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260826T111937959782-ebd-threshold-lock-proposal" data-who="vacuum-diagnosis" data-when="2026-08-26T11:24:20Z">
     <div class="r-comment-body"><p>Derived an outcome-blind, inclusive three-gate demonstration contract from the immutable banked twelve-arm evidence: class agreement at least 7/12, worst eligible closed-boundary RMS at most 0.55 m, and worst polished-saddle distance at most 0.04 m, with fail-closed cohort and nonfinite semantics.</p></div>

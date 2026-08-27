@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T15:16:34",
+  "updated": "2026-08-27T15:40:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -57269,9 +57269,114 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T132413055829-pod-anchor-closure-compile-cost",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-anchor-closure-compile-cost",
+        "node_definition": {
+          "done_when": "A compile-and-run smoke of the single 22086/43 identity through docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py completes with EXIT_MARKER=0 inside 16 CPUs and 64 GiB on a debug lane, where three prior jobs at 64 and 192 GiB and at 16 and 8 CPUs all aborted with LLVM executable-section allocation at exactly that identity; tests/test_efit_forward_parity_slice.py still passes with centered finite-difference versus JVP agreement below 1e-4 at both flux-normal crossings; a new test samples the closure across flux-normal values spanning -0.2 to 1.2 and asserts the reshaped implementation matches the current one within 1e-12 so the physics is provably unchanged; JAX_PLATFORMS=cpu pytest over tests/test_fixed_point.py tests/test_forward_operator_domain.py tests/test_domain_participation_continuity.py and the seven analytic geometry files reports zero new failures vs current HEAD; ruff reports zero findings on the staged paths",
+          "estimated_hours": null,
+          "goal": "The declared-anchor continuous closure made compile-cheap so the corroboration driver can compile the identity that now exhausts LLVM executable sections, preserving the closure's measured continuity and its numerical output exactly",
+          "id": "pod-anchor-closure-compile-cost",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T132413055829-pod-anchor-closure-compile-cost/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "benchmarks/efit_forward_parity_slice.py",
+            "tests/test_efit_forward_parity_slice.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "adapter-seams",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T13:24:21Z",
+        "completed_at": "2026-08-27T13:40:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 974,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 974,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "261461813ad03e766f927664178e0d48fc975dc1",
+        "commits": [
+          "4a9daf1fa7bede4d7e2a98c34cefa3a948c3f8af"
+        ],
+        "changed_lines": {
+          "added": 73,
+          "removed": 30,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "81/81 coupled focused tests; numerical identity pinned within 1e-12 across the crossing range; single-identity 22086/43 smoke completed on job 1258825 at 16 CPUs and 64 GiB where three prior jobs aborted",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T132413055829-pod-anchor-closure-compile-cost/logs/single-identity-1258825.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T132413055829-pod-anchor-closure-compile-cost/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-e0cb-7cd1-8925-b9c7f01bcf20",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1037824,
+            "cached_input_tokens_cumulative": 8025088,
+            "input_tokens": 894321,
+            "input_tokens_cumulative": 8267711,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 16125,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3492
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest over",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1119
+    "_version": 1120
   }
 }

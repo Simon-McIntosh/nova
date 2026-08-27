@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="71">
+<meta name="plan-version" content="72">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -450,6 +450,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260827T125752357983-pod-full-globalization-convergence" data-who="flood-performance" data-when="2026-08-27T13:15:50Z">
     <div class="r-comment-body"><p>PLATEAU-BROKEN further, still short: 606 of 650 promotions accepted (was 95), minimum 3.8772e-4 at promotion 249 (51.5% below the five-strategy plateau), termination now ITERATION_BUDGET_EXHAUSTED rather than refusal; terminal 4.1777e-4 sits 7.75% ABOVE the run minimum because the fallback descends the squared-residual merit while the locked criterion measures relative sup</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260827T132413055829-pod-anchor-closure-compile-cost" data-who="adapter-seams" data-when="2026-08-27T13:40:35Z">
+    <div class="r-comment-body"><p>Compile cost closed at unchanged physics: one mirrored quintic with shared Horner bases replaces two graphs and four nested selects; the LLVM-exhausting identity compiles inside the original 64 GiB envelope</p></div>
 </div>
 </section>
 </main>

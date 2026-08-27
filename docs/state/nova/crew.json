@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T08:35:37",
+  "updated": "2026-08-27T09:11:16",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -54966,9 +54966,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T063546885979-pod-mask-flip-excursion-correlation",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-mask-flip-excursion-correlation",
+        "node_definition": {
+          "done_when": "A report section in /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md tabulates, from the recorded receipts and traces of the prior diagnostic runs (re-running at most one instrumented solve if the recorded data is insufficient), every excursion or exhaustion promotion beside its shadow_mask_changes count and participation-flip identity, computes the correlation, and states MASK-FLIP-CAUSE, SMOOTH-NONLINEARITY-CAUSE, or MIXED with the evidence, plus which remediation option that verdict selects among damping or smoothing mask crossings, trust-region model rebuilding, pseudo-arclength continuation, or a re-conditioned tangent; no repository file modified",
+          "estimated_hours": null,
+          "goal": "A correlation between residual excursions and shadow-mask participation flips from the already-recorded diagnostics: whether the promotions where the smooth model predicted decrease but the true residual jumped are exactly the promotions where cell participation changed, discriminating piecewise-smoothness from generic nonlinearity before any direction-model rebuild is chosen",
+          "id": "pod-mask-flip-excursion-correlation",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T063546885979-pod-mask-flip-excursion-correlation/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a74",
+          "spec_level": "",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-27T06:35:52Z",
+        "completed_at": "2026-08-27T07:10:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2072,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2072,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "bcdd461f52f70e13144c2cc95d95858046abf9a4",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "recorded artifacts lack shadow_mask_changes identities; staged observer requires an execution lane the investigate sandbox denies",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T063546885979-pod-mask-flip-excursion-correlation/submission-failure.log",
+          "log_digest": null
+        },
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T063546885979-pod-mask-flip-excursion-correlation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8732416,
+            "cached_input_tokens_cumulative": 11936768,
+            "input_tokens": 8807189,
+            "input_tokens_cumulative": 12164940,
+            "output_tokens": 9071,
+            "output_tokens_cumulative": 24820,
+            "reasoning_output_tokens": 6628,
+            "reasoning_output_tokens_cumulative": 8453
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1095
+    "_version": 1096
   }
 }

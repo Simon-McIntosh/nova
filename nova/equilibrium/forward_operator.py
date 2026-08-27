@@ -38,7 +38,10 @@ import numpy as np
 from nova.biot.null import Null2D
 from nova.biot.target import FluxTarget
 from nova.equilibrium.domain import DomainMasks, PlasmaDomain
-from nova.equilibrium.connectivity_boundary import traced_boundary_read
+from nova.equilibrium.connectivity_boundary import (
+    traced_boundary_read,
+    wall_height_shadow_mask,
+)
 from nova.equilibrium.observation import (
     ClippedIntegralMeasure,
     clipped_support_quadrature,
@@ -891,13 +894,31 @@ class ForwardFluxOperator:
         return masks
 
     def residual_shadow_mask(self, psi, requested_class=None) -> jax.Array:
-        """Return the sole state-dependent exclusion in the residual domain."""
+        """Return the composed flood and wall-height residual exclusion."""
+
+        flood_shadow, wall_shadow = self.residual_shadow_components(
+            psi, requested_class
+        )
+        direct_sample_shadow = jnp.zeros(
+            self.node_number - self.physical_node_number, dtype=bool
+        )
+        return jnp.concatenate((flood_shadow, wall_shadow, direct_sample_shadow))
+
+    def residual_shadow_components(
+        self, psi, requested_class=None
+    ) -> tuple[jax.Array, jax.Array]:
+        """Return independent interior-flood and wall-height shadow components."""
 
         physical = jnp.asarray(psi)[: self.physical_node_number]
-        masks, _topology, _connected, _admitted = self._fixed_design_read(
+        masks, topology, _connected, _admitted = self._fixed_design_read(
             physical, requested_class
         )
-        return masks.private_flux
+        grid_flux, _wall_flux = self.topology.split_flux_map(physical)
+        _vmap_o, vmap_x = self._fixed_design_topology.grid(grid_flux)
+        wall_shadow = wall_height_shadow_mask(
+            self.wall.coordinate[:, 1], topology.axis[1], vmap_x
+        )
+        return masks.private_flux, wall_shadow
 
     def cell_current(self, psi, requested_class=None, target_current=None) -> jax.Array:
         """Return the per-cell plasma current [A] a trial flux drives."""
@@ -939,12 +960,7 @@ class ForwardFluxOperator:
         """Copy trial flux through cells excluded from the residual domain."""
 
         shadow = self.residual_shadow_mask(psi, requested_class)
-        residual_shadow = jnp.pad(
-            shadow,
-            (0, self.node_number - self.grid.node_number),
-            constant_values=False,
-        )
-        return jnp.where(residual_shadow, psi, mapped)
+        return jnp.where(shadow, psi, mapped)
 
     def residual(
         self, psi, current=None, requested_class=None, target_current=None

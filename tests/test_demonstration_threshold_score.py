@@ -47,7 +47,12 @@ def _diiid_bank() -> dict:
                     "frame": frame,
                     "finite": True,
                     "converged": True,
-                    "metrics": {"polished_saddle_to_nearest_efit_x_m": 0.025},
+                    "metrics": {
+                        "topology_class_agreement": True,
+                        "boundary_comparison_failures": [],
+                        "closed_boundary_symmetric_rms_distance_m": 0.3,
+                        "polished_saddle_to_nearest_efit_x_m": 0.025,
+                    },
                 }
                 for shot, frame in EXPECTED_DIIID_ROWS
             ]
@@ -59,12 +64,20 @@ def test_synthetic_complete_banks_pass_all_three_gates():
     result = score_payloads(_mast_bank(), _diiid_bank())
 
     assert result["verdict"] == "PASS"
-    assert result["gates"]["mast_class_agreement"]["value"] == 7
-    assert result["gates"]["mast_class_agreement"]["denominator"] == 12
+    assert result["gates"]["mast_class_agreement"]["measured"] == {
+        "agreement_count": 7,
+        "declared_denominator": 12,
+    }
     assert (
-        result["gates"]["declared_row_saddle_distance"]["declared_row_denominator"]
+        result["gates"]["declared_row_saddle_distance"]["measured"][
+            "declared_denominator"
+        ]
         == 17
     )
+    assert all(gate["passes"] for gate in result["gates"].values())
+    assert all("threshold" in gate for gate in result["gates"].values())
+    assert all("contributing_rows" in gate for gate in result["gates"].values())
+    assert all("excluded_rows" in gate for gate in result["gates"].values())
 
 
 def test_a_complete_bank_can_fail_a_locked_threshold_without_refusal():
@@ -74,7 +87,7 @@ def test_a_complete_bank_can_fail_a_locked_threshold_without_refusal():
     result = score_payloads(mast, _diiid_bank())
 
     assert result["verdict"] == "FAIL"
-    assert not result["gates"]["mast_closed_boundary_symmetric_rms"]["passes"]
+    assert not result["gates"]["closed_boundary_symmetric_rms"]["passes"]
 
 
 def test_missing_mast_identity_is_refused():
@@ -101,20 +114,73 @@ def test_substituted_diiid_identity_is_refused():
         score_payloads(_mast_bank(), diiid)
 
 
-def test_nonconverged_required_row_is_refused():
+def test_null_class_agreement_counts_against_fixed_denominator():
+    mast = _mast_bank()
+    mast["rows"][0]["nova_achieved_class"] = None
+    mast["rows"][0]["label_agreement"] = None
+
+    result = score_payloads(mast, _diiid_bank())
+    gate = result["gates"]["mast_class_agreement"]
+
+    assert result["verdict"] == "FAIL"
+    assert gate["measured"] == {"agreement_count": 6, "declared_denominator": 12}
+    assert gate["contributing_rows"][0]["reason"] == "class_agreement_unavailable"
+    assert gate["contributing_rows"][0]["value"] is None
+
+
+def test_null_rms_is_excluded_without_shrinking_declared_denominator():
+    mast = _mast_bank()
+    mast["rows"][0]["binding_to_efit_lcfs_rms_m"] = None
+
+    result = score_payloads(mast, _diiid_bank())
+    gate = result["gates"]["closed_boundary_symmetric_rms"]
+
+    assert result["verdict"] == "FAIL"
+    assert gate["measured"]["declared_denominator"] == 17
+    assert gate["measured"]["eligible_row_count"] == 11
+    assert gate["excluded_rows"][0]["identity"] == {
+        "machine": "MAST",
+        "shot": EXPECTED_MAST_ARMS[0][0],
+        "slice_index": EXPECTED_MAST_ARMS[0][1],
+        "arm": EXPECTED_MAST_ARMS[0][2],
+    }
+    assert gate["excluded_rows"][0]["reason"] == "closed_boundary_rms_unavailable"
+
+
+def test_nonconverged_row_is_rms_ineligible_without_refusal():
     mast = _mast_bank()
     mast["rows"][0]["converged"] = False
 
-    with pytest.raises(ScoreRefusal, match="cannot be removed from the RMS gate"):
-        score_payloads(mast, _diiid_bank())
+    result = score_payloads(mast, _diiid_bank())
+    gate = result["gates"]["closed_boundary_symmetric_rms"]
+
+    assert result["verdict"] == "FAIL"
+    assert gate["measured"]["declared_denominator"] == 17
+    assert gate["excluded_rows"][0]["reason"] == "non_converged"
 
 
-def test_nonconverged_declared_diiid_row_is_refused():
+def test_null_saddle_fails_gate_and_names_declared_row():
     diiid = _diiid_bank()
-    diiid["result"]["frame_records"][3]["converged"] = False
+    diiid["result"]["frame_records"][3]["metrics"][
+        "polished_saddle_to_nearest_efit_x_m"
+    ] = None
 
-    with pytest.raises(ScoreRefusal, match="cannot be removed from the saddle gate"):
-        score_payloads(_mast_bank(), diiid)
+    result = score_payloads(_mast_bank(), diiid)
+    gate = result["gates"]["declared_row_saddle_distance"]
+
+    assert result["verdict"] == "FAIL"
+    assert gate["measured"]["declared_denominator"] == 17
+    assert gate["excluded_rows"] == [
+        {
+            "identity": {
+                "machine": "DIII-D",
+                "shot": EXPECTED_DIIID_ROWS[3][0],
+                "frame": EXPECTED_DIIID_ROWS[3][1],
+            },
+            "value": None,
+            "reason": "saddle_distance_unavailable",
+        }
+    ]
 
 
 def test_empty_bank_is_refused():
@@ -123,14 +189,19 @@ def test_empty_bank_is_refused():
 
 
 @pytest.mark.parametrize("value", [float("nan"), float("inf"), -float("inf")])
-def test_nonfinite_declared_row_metric_is_refused(value):
+def test_nonfinite_declared_row_metric_fails_saddle_gate(value):
     diiid = _diiid_bank()
     diiid["result"]["frame_records"][2]["metrics"][
         "polished_saddle_to_nearest_efit_x_m"
     ] = value
 
-    with pytest.raises(ScoreRefusal, match="non-finite"):
-        score_payloads(_mast_bank(), diiid)
+    result = score_payloads(_mast_bank(), diiid)
+
+    assert result["verdict"] == "FAIL"
+    assert (
+        result["gates"]["declared_row_saddle_distance"]["excluded_rows"][0]["reason"]
+        == "saddle_distance_unavailable"
+    )
 
 
 def test_run_writes_strict_json_with_input_digests_and_fail_verdict(tmp_path):

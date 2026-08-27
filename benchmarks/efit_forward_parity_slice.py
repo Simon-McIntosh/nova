@@ -165,11 +165,8 @@ class DeclaredAnchorOperator(ForwardFluxOperator):
         psi_norm = (grid_flux - self.declared_axis_flux) / (
             self.declared_boundary_flux - self.declared_axis_flux
         )
-        bounded = self.declared_support & (psi_norm >= 0.0) & (psi_norm <= 1.0)
-        density = self.source.core.current_density(
-            self.radius, jnp.where(bounded, psi_norm, 1.0)
-        )
-        current = jnp.where(bounded, density * self.area, 0.0)
+        density = self.source.core.current_density(self.radius, psi_norm)
+        current = jnp.where(self.declared_support, density * self.area, 0.0)
         zero = jnp.zeros_like(current)
         return CellCurrentMoments(current, zero, zero)
 
@@ -266,13 +263,50 @@ def select_slices_by_shot(bank: Path) -> list[tuple[dict[str, Any], dict[str, An
 
 
 def _profile_function(nodes: np.ndarray, values: np.ndarray):
-    """Return a traced interpolation of one stored 65-point profile."""
+    """Return a traced interpolation with slope-matched exterior closure."""
     grid = jnp.asarray(nodes, dtype=jnp.float64)
     samples = jnp.asarray(values, dtype=jnp.float64)
+    edge_width = grid[1] - grid[0]
+    lower_slope = (samples[1] - samples[0]) / edge_width
+    upper_slope = (samples[-1] - samples[-2]) / edge_width
+
+    def edge_decay(value, slope, coordinate, *, outward):
+        """Join one endpoint to zero over one stored profile interval."""
+        if outward:
+            parameter = coordinate / edge_width
+            value_basis = (
+                1.0 - 10.0 * parameter**3 + 15.0 * parameter**4 - 6.0 * parameter**5
+            )
+            slope_basis = (
+                parameter - 6.0 * parameter**3 + 8.0 * parameter**4 - 3.0 * parameter**5
+            )
+        else:
+            parameter = (coordinate + edge_width) / edge_width
+            value_basis = 10.0 * parameter**3 - 15.0 * parameter**4 + 6.0 * parameter**5
+            slope_basis = -4.0 * parameter**3 + 7.0 * parameter**4 - 3.0 * parameter**5
+        return value_basis * value + slope_basis * edge_width * slope
 
     def function(psi_norm):
         """Evaluate the stored profile on its declared normalized coordinate."""
-        return jnp.interp(jnp.asarray(psi_norm), grid, samples)
+        coordinate = jnp.asarray(psi_norm)
+        interior = jnp.interp(coordinate, grid, samples)
+        below = edge_decay(samples[0], lower_slope, coordinate - grid[0], outward=False)
+        above = edge_decay(
+            samples[-1], upper_slope, coordinate - grid[-1], outward=True
+        )
+        return jnp.where(
+            coordinate < grid[0] - edge_width,
+            0.0,
+            jnp.where(
+                coordinate < grid[0],
+                below,
+                jnp.where(
+                    coordinate <= grid[-1],
+                    interior,
+                    jnp.where(coordinate <= grid[-1] + edge_width, above, 0.0),
+                ),
+            ),
+        )
 
     return function
 

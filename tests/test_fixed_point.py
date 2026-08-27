@@ -190,16 +190,49 @@ def test_newton_backtracks_residual_excursions_and_keeps_contracting_steps(
 
         np.testing.assert_allclose(np.asarray(backtracked.state), 0.5)
         np.testing.assert_array_equal(backtracked.promotion_backtrack_counts, [1])
+        np.testing.assert_array_equal(backtracked.promotion_recovery_activations, [0])
         np.testing.assert_array_equal(backtracked.shadow_mask_changes, [0])
         assert int(backtracked.accepted_newton_promotions) == 1
 
         np.testing.assert_allclose(np.asarray(contracting.state), 1.0)
         np.testing.assert_array_equal(contracting.promotion_backtrack_counts, [0])
+        np.testing.assert_array_equal(contracting.promotion_recovery_activations, [0])
         np.testing.assert_array_equal(contracting.shadow_mask_changes, [1])
         assert int(contracting.accepted_newton_promotions) == 1
 
 
-def test_newton_rejects_a_step_when_the_fixed_backtracking_ladder_is_exhausted():
+def test_newton_continues_with_damped_operator_recovery_after_ladder_exhaustion():
+    def map_fn(state):
+        negative_branch = 1.0 + 2.0 * state + 2.0 * state**2
+        positive_branch = 0.5 * state + 0.5
+        return jnp.where(state <= 0.0, negative_branch, positive_branch)
+
+    def solve():
+        return newton_krylov(
+            map_fn,
+            jnp.zeros(1),
+            newton_steps=2,
+            gmres_iterations=1,
+            warmup=0,
+            relaxation=0.5,
+            shadow_mask_fn=lambda state: state > 0.0,
+        )
+
+    for result in (solve(), jax.jit(solve)()):
+        finite_trace = np.asarray(result.trace)[np.isfinite(np.asarray(result.trace))]
+        np.testing.assert_allclose(np.asarray(result.state), 1.0)
+        np.testing.assert_array_equal(result.promotion_backtrack_counts, [6, 0])
+        np.testing.assert_array_equal(result.promotion_recovery_activations, [1, 0])
+        np.testing.assert_array_equal(result.shadow_mask_changes, [1, 0])
+        assert finite_trace[1] < finite_trace[0]
+        assert np.all(np.diff(finite_trace) <= 0.0)
+        assert int(result.attempted_newton_promotions) == 2
+        assert int(result.accepted_newton_promotions) == 2
+        assert bool(result.converged)
+        assert float(result.residual) <= FIXED_POINT_RESIDUAL_TOLERANCE
+
+
+def test_newton_refuses_when_backtracking_and_continuation_are_exhausted():
     def map_fn(state):
         return jnp.where(
             state[0] == 0.0,
@@ -220,6 +253,7 @@ def test_newton_rejects_a_step_when_the_fixed_backtracking_ladder_is_exhausted()
 
     np.testing.assert_array_equal(result.state, [0.0])
     np.testing.assert_array_equal(result.promotion_backtrack_counts, [6])
+    np.testing.assert_array_equal(result.promotion_recovery_activations, [1])
     np.testing.assert_array_equal(result.shadow_mask_changes, [0])
     assert int(result.attempted_newton_promotions) == 1
     assert int(result.accepted_newton_promotions) == 0

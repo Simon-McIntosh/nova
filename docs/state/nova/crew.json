@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T18:45:06",
+  "updated": "2026-08-27T18:52:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -58343,9 +58343,134 @@
           "role": "review",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T144857491772-pod-nonmonotone-convergence",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-nonmonotone-convergence",
+        "node_definition": {
+          "done_when": "One SLURM job (betelgeuse with reservation gpu_0003_grpA requesting one H200, 8 CPUs, 64 GiB and a one-hour walltime, or an all_debug CPU lane, whichever allocates first, EXIT_MARKER=0) runs the staged observer a60efd9a byte-for-byte at its full 650 ceiling on current origin/main using the shared environment interpreter directly; a report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/nonmonotone-convergence.md states whether the locked 1e-8 criterion was reached and at which promotion, the minimum and terminal relative-sup residuals beside the 2.6722e-4 of the previous run and the 8.0010e-4 five-strategy plateau, the accepted-promotion count beside 257, how many acceptances used the window rather than strict decrease, the largest single merit increase tolerated, the terminal gradient norm, and the verdict CONVERGED, PLATEAU-BROKEN or PLATEAU-UNCHANGED; no repository file modified",
+          "estimated_hours": null,
+          "goal": "The 650-ceiling convergence measurement with windowed nonmonotone acceptance: whether relaxing the strict per-step guard lets 21978/35 pure reach the locked 1e-8 criterion",
+          "id": "pod-nonmonotone-convergence",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T144857491772-pod-nonmonotone-convergence/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/nonmonotone-convergence.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "flood-performance",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T14:49:04Z",
+        "completed_at": "2026-08-27T16:51:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 7373,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "d61465cf267a6f459cad30e362b9377ffaad1d2c",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "full 650-ceiling H200 ladder with windowed nonmonotone acceptance (job 1258875, 00:12:46); EXIT_MARKER=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T144857491772-pod-nonmonotone-convergence/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T144857491772-pod-nonmonotone-convergence/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f75-721b-73f1-bd97-eeffb0481cdc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8004352,
+            "cached_input_tokens_cumulative": 12802304,
+            "input_tokens": 8034207,
+            "input_tokens_cumulative": 12989753,
+            "output_tokens": 8723,
+            "output_tokens_cumulative": 21819,
+            "reasoning_output_tokens": 2032,
+            "reasoning_output_tokens_cumulative": 3911
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 478,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: |",
+              "elapsed_seconds": 4078,
+              "log_age_seconds": 1961,
+              "log_fresh": false,
+              "manifest_commits": [],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T114934899950-sse-mast-bank-resolve/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "reckon crew resume --run r-20260827T114934899950-sse-mast-bank-resolve --advice <answer>",
+              "node": "sse-mast-bank-resolve",
+              "phase": "working",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260827T114934899950-sse-mast-bank-resolve",
+              "terminal_age_seconds": 1993,
+              "terminal_at": "2026-08-27T14:15:48Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d8-s16-landing/sse-mast-bank-resolve"
+            }
+          ]
+        },
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1129
+    "_version": 1130
   }
 }

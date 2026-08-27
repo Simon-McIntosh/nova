@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T18:52:12",
+  "updated": "2026-08-27T19:24:15",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -58468,9 +58468,114 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T165126514673-sse-contrast-compile-lifetime",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-contrast-compile-lifetime",
+        "node_definition": {
+          "done_when": "A six-identity terminal-observation smoke that imports the contrast driver's own path and processes all six declared MAST identities in one process completes on an all_debug lane at 16 CPUs and 64 GiB within one hour ending EXIT_MARKER=0, where two prior full-campaign attempts aborted with LLVM status 134 at that envelope; the smoke writes no tracked JSON; the boundary mirrors the corroboration driver's clear-and-collect in a finally block with a single final publication, and a regression pins that ordering across identities exactly as the sibling test does; the manifest reports per-identity wall times so the recompilation cost is visible; JAX_PLATFORMS=cpu pytest tests/test_pinned_branch_contrast.py passes with zero new failures vs current HEAD; ruff reports zero findings on the staged paths",
+          "estimated_hours": null,
+          "goal": "The pinned-branch contrast driver given the same bounded compile lifetime that made the corroboration driver complete, so accumulated executable state cannot exhaust LLVM before publication",
+          "id": "sse-contrast-compile-lifetime",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T165126514673-sse-contrast-compile-lifetime/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "benchmarks/pinned_branch_contrast.py",
+            "tests/test_pinned_branch_contrast.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "adapter-seams",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T16:51:37Z",
+        "completed_at": "2026-08-27T17:23:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1887,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1887,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "78358fbd85b34d3570d3f838ddc65a96822053ae",
+        "commits": [
+          "119f5854dacf6765cf5e61786362150aadc15b1b"
+        ],
+        "changed_lines": {
+          "added": 179,
+          "removed": 37,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "failed",
+        "gate_check": {
+          "command": "six-identity smoke required by the done-when was cut at the 45-minute fence with the fourth identity running; 3/3 focused tests and ordering regression passed, no LLVM error observed",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T165126514673-sse-contrast-compile-lifetime/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T165126514673-sse-contrast-compile-lifetime/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-e0cb-7cd1-8925-b9c7f01bcf20",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1221632,
+            "cached_input_tokens_cumulative": 10798848,
+            "input_tokens": 1253220,
+            "input_tokens_cumulative": 11005165,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 19813,
+            "reasoning_output_tokens": 602,
+            "reasoning_output_tokens_cumulative": 3628
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/test_pinned_branch_contrast.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1130
+    "_version": 1131
   }
 }

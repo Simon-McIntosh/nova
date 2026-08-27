@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T12:01:14",
+  "updated": "2026-08-27T12:05:36",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -56076,9 +56076,113 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T100147425926-pod-partition-cache-pin-alignment",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-partition-cache-pin-alignment",
+        "node_definition": {
+          "done_when": "JAX_PLATFORMS=cpu pytest tests/test_topology_domain_partition.py passes in full eager and JIT with the retired 118/179 and 116/161 half-plane expectations removed and the corrected 277/20 and 244/33 partition expectations retained as the pinned contract; only that test file changes; ruff reports zero findings on the staged path",
+          "estimated_hours": null,
+          "goal": "The stale half-plane assertion removed from the partition regression so it pins the corrected refreshed cache instead of the retired legacy labels",
+          "id": "pod-partition-cache-pin-alignment",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T100147425926-pod-partition-cache-pin-alignment/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "tests/test_topology_domain_partition.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "legacy-parity-test",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T10:01:55Z",
+        "completed_at": "2026-08-27T10:05:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 214,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 214,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "ce42735a692812589adf3a01cbb83b72f75573a4",
+        "commits": [
+          "5fb23c9fc7bfb72278c328352c4b2e913c7c2905"
+        ],
+        "changed_lines": {
+          "added": 13,
+          "removed": 15,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu pytest tests/test_topology_domain_partition.py eager+JIT",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T100147425926-pod-partition-cache-pin-alignment/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T100147425926-pod-partition-cache-pin-alignment/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f6e-40d1-7260-a8c1-ac1b173b0699",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 3097856,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3294322,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 7379,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1928
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/test_topology_domain_partition.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1106
+    "_version": 1107
   }
 }

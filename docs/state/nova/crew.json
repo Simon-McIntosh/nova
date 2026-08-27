@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T16:48:50",
+  "updated": "2026-08-27T17:04:09",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -57807,9 +57807,114 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260827T141710934374-sse-corroboration-compile-lifetime",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-corroboration-compile-lifetime",
+        "node_definition": {
+          "done_when": "A six-identity operand-build smoke that imports the driver's build path and processes all six declared MAST identities in one process completes on an all_debug lane at 16 CPUs and 64 GiB within one hour ending EXIT_MARKER=0, where the equivalent full-driver runs aborted with LLVM executable-section allocation at the sixth identity; the smoke writes no tracked JSON, PNG or transient operand cache; the manifest reports the peak resident memory and the per-identity wall times so the recompilation cost of the change is visible; JAX_PLATFORMS=cpu pytest tests/test_efit_topology_corroboration.py passes in full with zero new failures vs current HEAD; ruff reports zero findings on the staged paths",
+          "estimated_hours": null,
+          "goal": "The corroboration driver stopped from accumulating compiled executables across identities, so a six-identity run no longer exhausts the LLVM executable-section pool that a single identity alone fits within",
+          "id": "sse-corroboration-compile-lifetime",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T141710934374-sse-corroboration-compile-lifetime/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py",
+            "tests/test_efit_topology_corroboration.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "adapter-seams",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T14:17:20Z",
+        "completed_at": "2026-08-27T15:03:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2789,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2789,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "fdbde437c7ce74137b1a36a43e47d7e30bebd990",
+        "commits": [
+          "84db8895a6518bc6deb4124e9a970b32c5fd5c76"
+        ],
+        "changed_lines": {
+          "added": 111,
+          "removed": 36,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "six-identity operand-build smoke job 1258845 COMPLETED EXIT_MARKER=0 in 00:41:35 with 12/12 arms and 6/6 identities; focused tests 10/10; ruff clean",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T141710934374-sse-corroboration-compile-lifetime/six-identity-smoke.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T141710934374-sse-corroboration-compile-lifetime/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-e0cb-7cd1-8925-b9c7f01bcf20",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1552128,
+            "cached_input_tokens_cumulative": 9577216,
+            "input_tokens": 1484234,
+            "input_tokens_cumulative": 9751945,
+            "output_tokens": 7013,
+            "output_tokens_cumulative": 23138,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3026
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/test_efit_topology_corroboration.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1124
+    "_version": 1125
   }
 }

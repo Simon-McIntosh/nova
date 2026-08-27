@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T11:20:40",
+  "updated": "2026-08-27T12:01:14",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -55865,9 +55865,220 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T090854206024-pod-height-mask-guards",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-height-mask-guards",
+        "node_definition": {
+          "done_when": "tests/test_wall_height_exclusion.py gains residual-level cases for disconnected double-null, snowflake-minus, wall-notch saddle, coil-null column and axis-crossing proving zero false exclusions in every one (the review's 19/37, 38/84, 35/37, 77/84 and 37/37 false-exclusion counts all become 0), a transiently missing candidate changes no wall participation for the carried window, and an equality-hovering X produces zero chatter flips; the composed mask stays fixed-shape with no data-dependent while; all seven analytic geometry batteries and the focused fixed-point, forward-operator, domain and wall-ladder files pass eager and JIT with zero new failures vs current HEAD; conservation acceptance unchanged; ruff zero findings on staged paths",
+          "estimated_hours": null,
+          "goal": "The height mask hardened per the safety review's minimal repair: limits derive only from the qualified primary and qualified opposite-side candidates, a flood-derived private-versus-common wall-membership veto prevents excluding common-flux wall nodes, missing sides carry the last finite limit with promotion-owned hysteresis instead of opening wholesale, and equality chatter is removed by a hysteresis band",
+          "id": "pod-height-mask-guards",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T090854206024-pod-height-mask-guards/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/connectivity_boundary.py",
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/fixed_point.py",
+            "nova/equilibrium/forward.py",
+            "tests/test_wall_height_exclusion.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T09:09:00Z",
+        "completed_at": "2026-08-27T09:36:00Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1620,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1620,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "d8c27c59f7615862d129f2372b5f1d963d74d28a",
+        "commits": [
+          "db3f68f0d5eea5acace1be46bda52c3a2912a872"
+        ],
+        "changed_lines": {
+          "added": 382,
+          "removed": 92,
+          "files": 5
+        },
+        "tests_added": 10,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/test_wall_height_exclusion.py 13/13 eager+JIT (all review false-exclusion counts to zero); coupled 107 passed with 5 failures now attributed to a stale pin and a cutover defect, not to this change; conservation unchanged",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T090854206024-pod-height-mask-guards/logs/coupled-cpu-final.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T090854206024-pod-height-mask-guards/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12830464,
+            "cached_input_tokens_cumulative": 13690112,
+            "input_tokens": 12855576,
+            "input_tokens_cumulative": 13827012,
+            "output_tokens": 26384,
+            "output_tokens_cumulative": 29707,
+            "reasoning_output_tokens": 6148,
+            "reasoning_output_tokens_cumulative": 6964
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260827T090526590078-pod-height-mask-guards",
+          "root_run_id": "r-20260827T090526590078-pod-height-mask-guards"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "redispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260827T093623405601-pod-partition-regression-anchor",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-partition-regression-anchor",
+        "node_definition": {
+          "done_when": "tests/test_topology_domain_partition.py and tests/test_domain_participation_continuity.py are executed at current origin/main capturing the exact failing assertions to a log; the first-parent merge chain from ece5fde3 to current main is walked (build-free checkout per merge, focused tests only) until the first merge where each failure appears, naming that commit and quoting the assertion delta (expected vs actual partition counts); a report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/partition-regression-anchor.md states per failing case the introducing merge, whether the change is a genuine partition regression or a stale cache-pin against intentionally moved semantics, and the implied repair owner; no repository file modified",
+          "estimated_hours": null,
+          "goal": "The introducing commit for the 21978/35 committed partition-cache test failures found: these cases were green at the combined verification ece5fde3 and now fail at current main, with every intermediate landing calling them pre-existing against its own moving base",
+          "id": "pod-partition-regression-anchor",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T093623405601-pod-partition-regression-anchor/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/partition-regression-anchor.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "",
+        "member": "legacy-parity-test",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T09:36:30Z",
+        "completed_at": "2026-08-27T10:00:09Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1419,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1419,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "8f68090f36bbd6cffebecf382fcec7b5585da469",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "first-parent merge-boundary walk from ece5fde3 to main with focused tests at each boundary",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/partition-regression-anchor.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T093623405601-pod-partition-regression-anchor/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f6e-40d1-7260-a8c1-ac1b173b0699",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4426752,
+            "cached_input_tokens_cumulative": 4426752,
+            "input_tokens": 4782396,
+            "input_tokens_cumulative": 4782396,
+            "output_tokens": 19164,
+            "output_tokens_cumulative": 19164,
+            "reasoning_output_tokens": 7073,
+            "reasoning_output_tokens_cumulative": 7073
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1104
+    "_version": 1106
   }
 }

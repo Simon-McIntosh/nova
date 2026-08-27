@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="57">
+<meta name="plan-version" content="59">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -408,6 +408,12 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260827T085346622628-pod-plateau-fold-probe" data-who="flood-rca" data-when="2026-08-27T09:20:15Z">
     <div class="r-comment-body"><p>NO-FOLD: sigma_min 0.0330 at the plateau vs 0.0338 healthy median (0.976x), condition ~130 stable; pseudo-arclength refuted; the weak direction is a vertical-antisymmetric core/SOL grid mode; next: re-conditioned tangent targeting that mode, mesh spectral comparison secondary</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260827T090854206024-pod-height-mask-guards" data-who="domain-partition" data-when="2026-08-27T09:36:00Z">
+    <div class="r-comment-body"><p>Height mask hardened: qualified-only candidates within one stencil footprint, common-wall veto from traced_boundary_read, hysteretic last-finite carry, equality band; every safety-review false-exclusion count is zero</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260827T093623405601-pod-partition-regression-anchor" data-who="legacy-parity-test" data-when="2026-08-27T10:00:09Z">
+    <div class="r-comment-body"><p>Two causes separated: the four partition cases are a STALE PIN at merge 71282e9d (cache legitimately refreshed to corrected 277/20 and 244/33 while the test still asserts retired 118/179 and 116/161); the continuity case is a REAL DEFECT at cutover merge d8436666 where a non-crossing achieved-label flip switches the whole source moment (16 ratios 0.999980 vs expected 2.0)</p></div>
 </div>
 </section>
 </main>

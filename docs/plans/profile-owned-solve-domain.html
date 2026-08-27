@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="39">
+<meta name="plan-version" content="40">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -346,6 +346,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260827T040743551350-pod-extended-budget-diagnostic" data-who="flood-rca" data-when="2026-08-27T04:17:07Z">
     <div class="r-comment-body"><p>RATE-DEGRADING-BEFORE-CONVERGENCE: minimum at promotion 259 still 4.54e4x criterion; block-q 0.973-&gt;0.984-&gt;0.990 then &gt;1 with recurrent excursions (promotion 260 +22x); the ~426-promotion extrapolation is falsified; remediation order: residual-aware globalization first, then preconditioning; traces at promotions 26 and 259/260 discriminate the cause</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260827T044640953345-pod-promotion-discriminating-traces" data-who="flood-rca" data-when="2026-08-27T05:06:21Z">
+    <div class="r-comment-body"><p>LINE-SEARCH-CAUSE: at promotions 26 and 260 conditioning is stable (34.3/43.1) and GMRES converged, predicted decrease negative, actual change flips +7.6e-3 and +9.5e-3; implied method: residual-aware sufficient-decrease backtracking at the qualified-action promotion seam, condition damping retained</p></div>
 </div>
 </section>
 </main>

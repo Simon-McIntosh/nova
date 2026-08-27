@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T19:55:09",
+  "updated": "2026-08-27T20:28:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -58769,9 +58769,118 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T155524402383-sse-pinned-branch-regenerate",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-pinned-branch-regenerate",
+        "node_definition": {
+          "done_when": "The campaign command runs on current origin/main with /usr/bin/time recording WALL_SECONDS and a complete log; docs/figures/dual-branch-selection/pinned-branch-contrast.json is regenerated as strict JSON with twelve arms whose achieved classes derive from the current comparator; the manifest tables every class flip and margin change against the previous receipt with old and new values side by side; only that JSON is committed",
+          "estimated_hours": null,
+          "goal": "The pinned-branch contrast receipt regenerated from the repaired-stack MAST terminal states, with semantic movement against the previous receipt tabled rather than masked",
+          "id": "sse-pinned-branch-regenerate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T155524402383-sse-pinned-branch-regenerate/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "docs/figures/dual-branch-selection/pinned-branch-contrast.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "dual-trace-proto",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T15:55:33Z",
+        "completed_at": "2026-08-27T18:28:01Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 9148,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "75372e6acfce6c6d82ad1b9ea0f1518260447b69",
+        "commits": [
+          "2c47fad899f6dfb4aa817705d33e3dc74bbf25c3"
+        ],
+        "changed_lines": {
+          "added": 794,
+          "removed": 780,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "rigel job 1258894 COMPLETED 00:59:51 ExitCode 0:0, inner campaign WALL_SECONDS=3590.17 EXIT_MARKER=0, strict twelve-arm receipt validated",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T155524402383-sse-pinned-branch-regenerate/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T155524402383-sse-pinned-branch-regenerate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0403f-1b46-7db2-90c0-d32cdd5941f2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11831808,
+            "cached_input_tokens_cumulative": 15777024,
+            "input_tokens": 11936095,
+            "input_tokens_cumulative": 16043178,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 16719,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2587
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": {
+          "attempt": 3,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260826T224423479711-sse-pinned-branch-regenerate",
+          "root_run_id": "r-20260826T224423479711-sse-pinned-branch-regenerate"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 4,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1133
+    "_version": 1134
   }
 }

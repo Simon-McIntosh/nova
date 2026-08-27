@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T02:06:31",
+  "updated": "2026-08-27T02:20:28",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -52706,9 +52706,113 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T000725654110-ebd-forward-gs-validation-record",
+        "plan": "efit-baseline-demonstration",
+        "section": "\u00a73",
+        "node": "ebd-forward-gs-validation-record",
+        "node_definition": {
+          "done_when": "docs/evidence/forward-gs-validation.html exists with reckon-type=evidence and plan-evidence-for=efit-baseline-demonstration, presents per-machine sections with the governed first-wall geometry named and shown via existing panel figures by project-absolute src, tables the three demonstration gates with their measured figures and the honest FAIL verdict, quotes per-arm and per-frame convergence states, links every consumed artifact by path and digest, and states the solver-convergence remediation as the open path without weakening any negative result; reckon audit-doc reports 0 ERRORs; committed",
+          "estimated_hours": null,
+          "goal": "One consolidated forward-GS validation evidence record against MAST and DIII-D EFIT results including first-wall geometries, joining the fresh corrected artifacts: the twelve-arm MAST bank, the five-frame DIII-D receipt with its transported physical wall, the seventeen topology panels, the wall-resolution ladder, and the endpoint demonstration receipt with its three quoted gates",
+          "id": "ebd-forward-gs-validation-record",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T000725654110-ebd-forward-gs-validation-record/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/evidence/forward-gs-validation.html"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "rca-doc",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T00:07:33Z",
+        "completed_at": "2026-08-27T00:20:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 754,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 754,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "bb8bc41ee01a1a148ea8d33e27b180c5439d84f2",
+        "commits": [
+          "d0cd5ee038c5ef1736a2288f7c02dc0a5f658ba1"
+        ],
+        "changed_lines": {
+          "added": 274,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "reckon audit-doc 0 ERRORs + independent verification",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T000725654110-ebd-forward-gs-validation-record/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T000725654110-ebd-forward-gs-validation-record/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f63-110b-7823-844e-ee780f4c7419",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3140864,
+            "cached_input_tokens_cumulative": 5860864,
+            "input_tokens": 3385109,
+            "input_tokens_cumulative": 6273666,
+            "output_tokens": 12393,
+            "output_tokens_cumulative": 31574,
+            "reasoning_output_tokens": 1638,
+            "reasoning_output_tokens_cumulative": 7057
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1073
+    "_version": 1074
   }
 }

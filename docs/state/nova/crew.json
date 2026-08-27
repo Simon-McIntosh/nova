@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T14:35:30",
+  "updated": "2026-08-27T14:57:45",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -57066,9 +57066,114 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T123540063264-pod-steepest-descent-fallback",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-steepest-descent-fallback",
+        "node_definition": {
+          "done_when": "JAX_PLATFORMS=cpu pytest tests/test_fixed_point.py passes with new cases proving that at the measured terminal signature, where the Newton and recovery directions fail every ladder factor while the negative-gradient direction at scale 1e-4 reduces the squared-residual merit by 7.65e-4, the promotion selects that descent instead of terminating, and proving the fallback is never selected while an ordinary Newton step still satisfies sufficient decrease; the locked 1e-8 convergence criterion and its metric are unchanged and the manifest states explicitly which quantity is the acceptance merit and which is the criterion; JAX_PLATFORMS=cpu pytest over tests/test_forward_operator_domain.py tests/test_domain_participation_continuity.py tests/test_wall_height_exclusion.py tests/test_efit_forward_parity_slice.py and all seven analytic geometry files reports zero new failures vs current HEAD in eager and JIT; the conservation acceptance test passes with unchanged envelopes; no data-dependent while primitive; ruff reports zero findings on staged paths",
+          "estimated_hours": null,
+          "goal": "A steepest-descent fallback that lets the promotion accept the descent the probe demonstrated: when the Newton direction and the recovery re-shape both fail sufficient decrease, the ladder tries the negative gradient of the squared-residual merit with its own scale sequence reaching at least 1e-6, and the acceptance merit is the same quantity whose gradient is taken so a genuine merit decrease cannot be refused by a stricter unrelated norm",
+          "id": "pod-steepest-descent-fallback",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T123540063264-pod-steepest-descent-fallback/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_fixed_point.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T12:35:47Z",
+        "completed_at": "2026-08-27T12:57:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1284,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1284,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "1b39ac6125599ee7d559623f1b5f24df8aa1a65d",
+        "commits": [
+          "8af9a6e5253091a239b2a0a845dd72015dc9200a"
+        ],
+        "changed_lines": {
+          "added": 203,
+          "removed": 4,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/test_fixed_point.py 31/31 incl. the measured terminal-signature regression; coupled focused suites zero new failures; conservation unchanged",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T123540063264-pod-steepest-descent-fallback/logs/targeted-final.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T123540063264-pod-steepest-descent-fallback/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3164928,
+            "cached_input_tokens_cumulative": 11448320,
+            "input_tokens": 3290528,
+            "input_tokens_cumulative": 11705898,
+            "output_tokens": 12303,
+            "output_tokens_cumulative": 24305,
+            "reasoning_output_tokens": 3407,
+            "reasoning_output_tokens_cumulative": 6458
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/test_fixed_point.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1117
+    "_version": 1118
   }
 }

@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="69">
+<meta name="plan-version" content="70">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -443,7 +443,10 @@
     <div class="r-comment-body"><p>PLATEAU-BROKEN, independently reproduced on CPU: minimum 3.9478172210853836e-4 at promotion 99 matches the H200 3.9478172210857267e-4 to twelve significant figures; 50.66% below the five-strategy plateau and 13.04% below the unguarded minimum; FD/JVP 2.72e-7; trajectory falls through attempt 99 then flat to 150</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260827T122321835509-pod-terminal-stationarity-classification" data-who="flood-performance" data-when="2026-08-27T12:34:35Z">
-    <div class="r-comment-body"><p>DESCENT-EXISTS-SEARCH-FAILS: terminal gradient 8.2602e-3 matches a healthy iterate&#x27;s 8.2638e-3 so the point is NOT stationary; 23 of 40 probes reduce the L2 residual, best -7.651e-4 along the negative gradient at scale 1e-4, with zero shadow-mask changes; the solver refuses reachable descent because it never tries the steepest-descent direction</p></div>
+    <div class="r-comment-body"><p>DESCENT-EXISTS-SEARCH-FAILS: terminal gradient 8.2602e-3 matches a healthy iterate's 8.2638e-3 so the point is NOT stationary; 23 of 40 probes reduce the L2 residual, best -7.651e-4 along the negative gradient at scale 1e-4, with zero shadow-mask changes; the solver refuses reachable descent because it never tries the steepest-descent direction</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260827T123540063264-pod-steepest-descent-fallback" data-who="domain-partition" data-when="2026-08-27T12:57:11Z">
+    <div class="r-comment-body"><p>Steepest-descent fallback landed: negative gradient of the same merit it accepts on, scales 1e-4 to 1e-8, activating only after Newton, continuation and model rebuild all fail; merit/gradient mismatch closed and the 1e-8 criterion untouched</p></div>
 </div>
 </section>
 </main>

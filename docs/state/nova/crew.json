@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T03:27:48",
+  "updated": "2026-08-27T03:36:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -53424,9 +53424,109 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T013115418350-pod-residual-domain-cutover",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-residual-domain-cutover",
+        "node_definition": {
+          "done_when": "The residual path in nova/equilibrium/forward_operator.py contains no boundary-flux clip in support participation and implements the plan's section-2 design at the named seam; instrumented convergence receipts record per-iteration cause data; the conservation acceptance is rescored with no widened envelope; focused suites pass eager and JIT with zero new failures vs current HEAD across the forward-operator, topology, domain-partition, hex-flood and wall-ladder test files; a regression proves the removed clip is gone while the saddle-aware partition still supplies achieved classes; no data-dependent while primitive introduced; ruff clean on staged paths",
+          "estimated_hours": null,
+          "goal": "The residual cut over to the profile-owned domain at the named seam per the plan's locked residual-domain-authority decision: _support_partition stops clipping core support against topology.boundary_flux and derives participation from the profile-owned domain, with the conservation rescore and instrumented receipts the section requires",
+          "id": "pod-residual-domain-cutover",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T013115418350-pod-residual-domain-cutover/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/domain.py",
+            "tests/test_forward_operator_domain.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T01:31:25Z",
+        "completed_at": "2026-08-27T01:36:16Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 291,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 291,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "9d174d6f22f2dce599be48e5d1a5dd8480237f80",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "fence audit against plan section 2: seam requires source.py:608-679 and the convergence-receipt owner, both outside the assigned scope",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T013115418350-pod-residual-domain-cutover/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T013115418350-pod-residual-domain-cutover/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2788864,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2994783,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 7544,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3678
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1080
+    "_version": 1081
   }
 }

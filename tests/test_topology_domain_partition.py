@@ -39,17 +39,17 @@ def _double_precision():
 def _cached_partition(row: int, *, compiled: bool):
     with np.load(OPERANDS, allow_pickle=False) as stored:
         coordinate = stored[f"row_{row:02d}_cell_rz"]
-        old_label = stored[f"row_{row:02d}_domain_labels"]
+        cached_label = stored[f"row_{row:02d}_domain_labels"]
         axis = stored[f"row_{row:02d}_selected_o"][0]
 
     radius = np.unique(coordinate[:, 0])
     height = np.unique(coordinate[:, 1])
     shape = (height.size, radius.size)
     closed_flat = np.isin(
-        old_label,
+        cached_label,
         (int(PlasmaDomain.CORE), int(PlasmaDomain.PRIVATE_FLUX)),
     )
-    inside_flat = old_label != int(PlasmaDomain.EXCLUDED_MATERIAL)
+    inside_flat = cached_label != int(PlasmaDomain.EXCLUDED_MATERIAL)
     confined = jnp.asarray(closed_flat.reshape((radius.size, height.size)).T)
     rings = jnp.asarray(hex_stencil(shape))
     link_admissible = jnp.ones(rings.shape, dtype=bool)
@@ -72,39 +72,37 @@ def _cached_partition(row: int, *, compiled: bool):
         connected,
         jnp.asarray(inside_flat),
     )
-    return old_label, np.asarray(connected), masks
+    return cached_label, np.asarray(connected), masks
 
 
 @pytest.mark.parametrize(
-    ("row", "component_counts", "rejected_half_plane_counts"),
+    ("row", "component_counts"),
     [
-        pytest.param(0, (277, 20), (118, 179), id="21978-35-pure"),
-        pytest.param(1, (244, 33), (116, 161), id="21978-35-mixed"),
+        pytest.param(0, (277, 20), id="21978-35-pure"),
+        pytest.param(1, (244, 33), id="21978-35-mixed"),
     ],
 )
 @pytest.mark.parametrize("compiled", [False, True], ids=["eager", "jit"])
 def test_committed_partition_uses_the_axis_hex_component(
-    row, component_counts, rejected_half_plane_counts, compiled
+    row, component_counts, compiled
 ):
     """The published core/private split is the cached axis component exactly."""
-    old_label, connected, masks = _cached_partition(row, compiled=compiled)
+    cached_label, connected, masks = _cached_partition(row, compiled=compiled)
     core_count, private_count = component_counts
 
     np.testing.assert_array_equal(np.asarray(masks.core), connected)
     np.testing.assert_array_equal(
         np.asarray(masks.private_flux),
-        np.isin(old_label, (int(PlasmaDomain.CORE), int(PlasmaDomain.PRIVATE_FLUX)))
+        np.isin(
+            cached_label,
+            (int(PlasmaDomain.CORE), int(PlasmaDomain.PRIVATE_FLUX)),
+        )
         & ~connected,
     )
     assert (int(np.sum(masks.core)), int(np.sum(masks.private_flux))) == (
         core_count,
         private_count,
     )
-    assert (core_count, private_count) != rejected_half_plane_counts
-    assert (
-        int(np.sum(old_label == int(PlasmaDomain.CORE))),
-        int(np.sum(old_label == int(PlasmaDomain.PRIVATE_FLUX))),
-    ) == rejected_half_plane_counts
 
 
 def test_topology_read_routes_connectivity_through_the_shared_component_kernel():

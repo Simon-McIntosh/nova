@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T09:11:16",
+  "updated": "2026-08-27T09:28:07",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -55064,9 +55064,107 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T071122798195-pod-mask-flip-observer-run",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-mask-flip-observer-run",
+        "node_definition": {
+          "done_when": "submit_mask_flip_correlation.sbatch from run directory r-20260827T063546885979 runs once (one H200, betelgeuse, gpu_0003_grpA, at most 3 hours, EXIT_MARKER=0) executing measure_mask_flip_correlation.py unchanged; the report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md gains the every-excursion table with per-promotion mask-change counts and cell identities, the phi or Pearson correlation, the MASK-FLIP-CAUSE, SMOOTH-NONLINEARITY-CAUSE or MIXED verdict, and the per-promotion binary flip-count baseline the height-limit augmentation must beat; no repository file modified",
+          "estimated_hours": null,
+          "goal": "The staged mask-flip correlation observer executed once on an H200 so the excursion-versus-participation-flip verdict rests on measured identities rather than inference",
+          "id": "pod-mask-flip-observer-run",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T071122798195-pod-mask-flip-observer-run/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T07:11:29Z",
+        "completed_at": "2026-08-27T07:27:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 988,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 988,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "bf00a6d1c5a7db95af2c074c7449b4dbc3962ce2",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "acceptance-preserving 650-promotion H200 observer (byte-identical db03759b) via GPFS-cache launcher; EXIT_MARKER=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T071122798195-pod-mask-flip-observer-run/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T071122798195-pod-mask-flip-observer-run/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 1390080,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 1588683,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 7248,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 714
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1096
+    "_version": 1097
   }
 }

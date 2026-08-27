@@ -337,3 +337,49 @@ def test_named_solve_failure_retains_all_frame_identities(monkeypatch, exception
         exception_type.__name__
     )
     assert fields[2] == {"plot_unavailable_reason": exception_type.__name__}
+
+
+def test_frame_solves_release_compilation_state_between_identities(monkeypatch):
+    selected = [
+        SimpleNamespace(path=Path(f"shot-{index}.parquet"), frame=index)
+        for index in range(gate.EXECUTION_FRAME_COUNT)
+    ]
+    events = []
+
+    def read_frame(path, _columns):
+        events.append(("read", path.name))
+        return {}
+
+    def solve_frame(row, frame, expansion):
+        events.append(("solve", frame, expansion, row["_source_path"]))
+        return _failed_frame(frame, finite_target=True), {"frame": frame}
+
+    monkeypatch.setattr(gate, "_read", read_frame)
+    monkeypatch.setattr(gate, "_solve_frame_retaining_failure", solve_frame)
+    monkeypatch.setattr(gate.jax, "clear_caches", lambda: events.append(("clear",)))
+    monkeypatch.setattr(gate.gc, "collect", lambda: events.append(("collect",)))
+
+    results, fields = gate._solve_selected_frames(
+        selected, gate.REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION
+    )
+
+    assert [result.frame for result in results] == list(
+        range(gate.EXECUTION_FRAME_COUNT)
+    )
+    assert fields == [{"frame": index} for index in range(gate.EXECUTION_FRAME_COUNT)]
+    expected_events = []
+    for index in range(gate.EXECUTION_FRAME_COUNT):
+        expected_events.extend(
+            (
+                ("read", f"shot-{index}.parquet"),
+                (
+                    "solve",
+                    index,
+                    gate.REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION,
+                    str(selected[index].path),
+                ),
+                ("clear",),
+                ("collect",),
+            )
+        )
+    assert events == expected_events

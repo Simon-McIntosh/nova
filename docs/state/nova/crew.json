@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T15:42:56",
+  "updated": "2026-08-27T16:04:29",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -57472,9 +57472,114 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T134305997877-pod-sup-aligned-merit",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-sup-aligned-merit",
+        "node_definition": {
+          "done_when": "JAX_PLATFORMS=cpu pytest tests/test_fixed_point.py passes with new cases proving three things: the smooth surrogate brackets the relative sup residual within a stated constant factor on sampled residual vectors including the measured promotion-249 distribution, so descending it cannot systematically trade sup away; at the promotion-249 signature the accepted step reduces the relative sup residual and not only the squared-residual norm; and the returned state equals the best observed iterate in the locked relative-sup metric on a synthetic trajectory whose terminal attempt is worse than its minimum, closing the measured 7.75 percent terminal regression; the locked 1e-8 criterion and its metric are unchanged and the manifest states the surrogate, its factor bound and its temperature or exponent explicitly; JAX_PLATFORMS=cpu pytest over tests/test_forward_operator_domain.py tests/test_domain_participation_continuity.py tests/test_wall_height_exclusion.py tests/test_efit_forward_parity_slice.py and the seven analytic geometry files reports zero new failures vs current HEAD in eager and JIT; the conservation acceptance test passes with unchanged envelopes; no data-dependent while primitive; ruff reports zero findings on staged paths",
+          "estimated_hours": null,
+          "goal": "The globalization merit aligned with the locked relative-sup criterion so the search optimises what the gate measures: a smooth surrogate for the relative sup residual supplies both the steepest-descent gradient and the sufficient-decrease test, and the solver returns its best iterate in the locked metric so the terminal state can never be worse than the best it observed",
+          "id": "pod-sup-aligned-merit",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T134305997877-pod-sup-aligned-merit/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_fixed_point.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T13:43:14Z",
+        "completed_at": "2026-08-27T14:03:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1245,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1245,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "919b3ce87c89c4719b7627a25f1763db2d21a050",
+        "commits": [
+          "28758ea96ab8555ad0a95ab28ef22bb0ee57db37"
+        ],
+        "changed_lines": {
+          "added": 204,
+          "removed": 51,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "tests/test_fixed_point.py 33/33; coupled lane 62/62 eager+JIT; conservation acceptance unchanged; bracketing, sup-reduction and best-iterate regressions all green",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T134305997877-pod-sup-aligned-merit/fixed-point-full.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T134305997877-pod-sup-aligned-merit/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 7814144,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 8006473,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 15145,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2066
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/test_fixed_point.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1121
+    "_version": 1122
   }
 }

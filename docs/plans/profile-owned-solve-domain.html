@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="73">
+<meta name="plan-version" content="74">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -456,6 +456,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260827T131644969629-pod-sup-residual-localization" data-who="flood-rca" data-when="2026-08-27T13:42:52Z">
     <div class="r-comment-body"><p>DISTRIBUTED: sup 3.8772e-4 against RMS 1.3982e-4 (ratio 2.77), top 20 cells hold only 12.06% of squared residual, all inside support and LCFS rather than at a feature, identities stable across 240-260 (Jaccard 0.886); no local discretization wall, so a sup-aligned merit is the productive fix and any refinement would have to be global</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260827T134305997877-pod-sup-aligned-merit" data-who="domain-partition" data-when="2026-08-27T14:03:59Z">
+    <div class="r-comment-body"><p>Merit aligned with the locked criterion: p=8 relative p-norm surrogate with two-sided (n+1)^(1/8) bracket drives both acceptance and the fallback gradient, exact relative-sup non-amplification retained, and best-iterate carry closes the 7.75% terminal regression; criterion metric unchanged</p></div>
 </div>
 </section>
 </main>

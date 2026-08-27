@@ -1,6 +1,6 @@
 {
   "authority": {
-    "source_identity": "sha256:3ac5d1ee4ac9258e663b7eee5e2ce0bc0bb039f03fb962e2245bb86c172bf6a3",
+    "source_identity": "sha256:1eb41c7728bab9cdf4daf8f9c088fb689ceb47677367656f6d789f0425cb3b00",
     "source_path": "benchmarks/diiid_forward_gs_match.py"
   },
   "rows": [
@@ -10,7 +10,7 @@
       "frame": 179,
       "identity": "d3d_shot_00000c4a7b:179",
       "machine": "DIII-D",
-      "qualification": "NoQualifiedAxisError",
+      "qualification": "public branch selector found no convergence-qualified diverted root",
       "shot": "d3d_shot_00000c4a7b.parquet",
       "time": 3740.0
     },

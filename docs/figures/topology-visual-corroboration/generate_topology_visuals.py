@@ -149,6 +149,9 @@ def _mast_rows() -> list[dict[str, Any]]:
         referee = read_efit_referee(shot, store=SHOT_STORE)
         for arm, arm_result in states.items():
             state = arm_result.state
+            governed_wall = reachability._closed_wall(
+                np.asarray(profile.operator.wall.coordinate, dtype=float)
+            )
             try:
                 physical = jnp.asarray(state)[: profile.operator.physical_node_number]
                 grid_flux, _wall_flux = profile.operator.topology.split_flux_map(
@@ -187,7 +190,7 @@ def _mast_rows() -> list[dict[str, Any]]:
                     "selected_o": np.asarray(topology.axis, dtype=float),
                     "selected_x": np.asarray(topology.x_point, dtype=float),
                     "wall_point": np.asarray(topology.wall_point, dtype=float),
-                    "wall": np.asarray(geometry["wall"], dtype=float),
+                    "wall": governed_wall,
                     "nova_boundary": closed,
                     "converged": bool(arm_result.converged),
                     "qualification": str(arm_result.termination_reason),
@@ -205,7 +208,7 @@ def _mast_rows() -> list[dict[str, Any]]:
                     "selected_o": empty_points,
                     "selected_x": empty_points,
                     "wall_point": empty_points,
-                    "wall": empty_points,
+                    "wall": governed_wall,
                     "nova_boundary": empty_points,
                     "converged": False,
                     "qualification": type(error).__name__,
@@ -277,8 +280,7 @@ def _diiid_module():
         "            'efit_x_points_rz': labelled_x_point[None, :],\n"
         "            'visual_flux': np.empty((0, 0), dtype=float),\n"
         "            'visual_failure_exception_class': type(visual_error).__name__,\n"
-        "        })\n"
-        + needle
+        "        })\n" + needle
     )
     if source.count(needle) != 1:
         raise RuntimeError("DIII-D renderer injection seam changed")
@@ -288,9 +290,7 @@ def _diiid_module():
     sys.modules[loaded.__name__] = loaded
     namespace = loaded.__dict__
     exec(
-        compile(
-            source.replace(needle, injection), str(DIIID_AUTHORITY), "exec"
-        ),
+        compile(source.replace(needle, injection), str(DIIID_AUTHORITY), "exec"),
         namespace,
     )
     return namespace
@@ -580,7 +580,10 @@ def _draw_row(row: dict[str, Any], path: Path) -> dict[str, Any]:
     else:
         qualification = textwrap.fill(str(row["qualification"]), width=64)
         verdict = f"NONCONVERGED — retained\nRetained failure: {qualification}"
-    axis.set_title(f"{row['machine']} · {row['identity']} · {verdict}")
+    axis.set_title(
+        f"{row['machine']} · {row['identity']} · {verdict}",
+        fontsize=9.5 if not row["converged"] else None,
+    )
     axis.set_xlabel("R [m]")
     axis.set_ylabel("Z [m]")
     axis.set_aspect("equal", adjustable="box")

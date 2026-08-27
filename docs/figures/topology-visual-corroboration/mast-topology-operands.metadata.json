@@ -1,7 +1,7 @@
 {
   "authority": {
     "carrier": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
-    "source_identity": "sha256:bbf865f5a9f22df5611825084fe8c49e693989565bd9e318f797c192476b1fc6",
+    "source_identity": "sha256:7285bd6b0472eeb71328ab7aecc7b55f068c91bf8f2f7a4fd58b7156f02ea9bf",
     "source_path": "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py"
   },
   "rows": [
@@ -57,11 +57,11 @@
     },
     {
       "arm": "mixed",
-      "converged": false,
+      "converged": true,
       "frame": 51,
       "identity": "21985/51 mixed",
       "machine": "MAST",
-      "qualification": "iteration_budget_exhausted",
+      "qualification": "converged",
       "shot": 21985,
       "time": 0.2750000059604645
     },

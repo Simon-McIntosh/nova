@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T03:36:56",
+  "updated": "2026-08-27T05:10:31",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -53524,9 +53524,123 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T013735817555-pod-residual-domain-cutover",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-residual-domain-cutover",
+        "node_definition": {
+          "done_when": "forward_operator.py support participation and source.py current moments (the section-2 seam at source.py:608-679) carry no boundary-flux clip, with declared common-SOL current neither suppressed nor double-counted proven by a conservation rescore with no widened envelope; the convergence receipt owner publishes per-iteration shadow-mask cause data; focused suites pass eager and JIT with zero new failures vs current HEAD across the forward-operator, source, fixed-point, topology, domain-partition, hex-flood and wall-ladder test files; a regression proves the removed clips are gone while the saddle-aware partition still supplies achieved classes; no data-dependent while primitive; ruff clean on staged paths",
+          "estimated_hours": null,
+          "goal": "The residual cut over to the profile-owned domain across the full coupled seam the plan's section 2 names: _support_partition and the source current moments stop interpreting core and common-SOL support as complementary boundary clips, participation derives from the profile-owned domain, and the convergence receipts publish per-iteration cause data",
+          "id": "pod-residual-domain-cutover",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T013735817555-pod-residual-domain-cutover/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/domain.py",
+            "nova/equilibrium/source.py",
+            "nova/equilibrium/fixed_point.py",
+            "nova/equilibrium/forward.py",
+            "tests/test_forward_operator_domain.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T01:37:44Z",
+        "completed_at": "2026-08-27T03:09:54Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 5530,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 5530,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "67c82b4cc92f79efd447ac63de0e017e1d5069e4",
+        "commits": [
+          "c9a89e5886897fc1e7c50e0c2187dadf6bcf72c5"
+        ],
+        "changed_lines": {
+          "added": 372,
+          "removed": 115,
+          "files": 6
+        },
+        "tests_added": 7,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused eager 77 pass / JIT 80 pass with identical 6 pre-existing failures (zero new vs base); conservation acceptance 1/1 with unchanged envelopes; domain regression 4/4; fixed-point 23/23",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T013735817555-pod-residual-domain-cutover/focused-eager.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T013735817555-pod-residual-domain-cutover/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11517440,
+            "cached_input_tokens_cumulative": 14306304,
+            "input_tokens": 11429904,
+            "input_tokens_cumulative": 14424687,
+            "output_tokens": 13935,
+            "output_tokens_cumulative": 21479,
+            "reasoning_output_tokens": 2589,
+            "reasoning_output_tokens_cumulative": 6267
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260827T013115418350-pod-residual-domain-cutover",
+          "root_run_id": "r-20260827T013115418350-pod-residual-domain-cutover"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 4,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1081
+    "_version": 1082
   }
 }

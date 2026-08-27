@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T19:43:45",
+  "updated": "2026-08-27T19:55:09",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -58671,9 +58671,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T172720601341-pod-response-basis-adequacy",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-response-basis-adequacy",
+        "node_definition": {
+          "done_when": "One SLURM job (all_debug or a non-debug CPU lane, at most two hours, EXIT_MARKER=0) builds or loads the response carrier at the 17x17 and production 33x33 grids on current origin/main and a report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/response-basis-adequacy.md gives, per grid, the carrier dimensions as targets by modes, the targets-per-mode ratio, the least-squares residual of the carrier's own fit expressed in the same relative-sup metric the solver criterion uses, the singular-value spectrum summary including the smallest and the condition number, and the fraction of target variance the basis leaves unexplained; it then compares each grid's carrier fit residual against that grid's achieved solver floor of 9.90891922230742e-9 at 17x17 and 2.672198717217985e-4 at 33x33 and states the verdict BASIS-LIMITED if the fit residual explains the floor within one order of magnitude, or BASIS-ADEQUATE if the floor sits well above the fit residual, naming the implied owner either way; no repository file modified",
+          "estimated_hours": null,
+          "goal": "Whether the response basis can represent the required field at production resolution, measured as the carrier's own least-squares fit residual per grid, since the carrier is 1126 targets by 101 modes at production against about 326 by 101 at the coarse grid that converges",
+          "id": "pod-response-basis-adequacy",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T172720601341-pod-response-basis-adequacy/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/response-basis-adequacy.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T17:27:29Z",
+        "completed_at": "2026-08-27T17:55:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1657,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1657,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "879fd876c680c2ff3264f570bde111b81b4eaa31",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "carrier spectra and least-squares fit residuals measured at both grids; EXIT_MARKER=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T172720601341-pod-response-basis-adequacy/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T172720601341-pod-response-basis-adequacy/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 893312,
+            "cached_input_tokens_cumulative": 6228096,
+            "input_tokens": 1024989,
+            "input_tokens_cumulative": 6403475,
+            "output_tokens": 9526,
+            "output_tokens_cumulative": 17641,
+            "reasoning_output_tokens": 3219,
+            "reasoning_output_tokens_cumulative": 4577
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1132
+    "_version": 1133
   }
 }

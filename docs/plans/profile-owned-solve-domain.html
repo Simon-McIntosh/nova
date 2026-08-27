@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="81">
+<meta name="plan-version" content="82">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -480,6 +480,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260827T163532292300-pod-persisted-carrier-confound" data-who="margin-remeasure" data-when="2026-08-27T17:43:38Z">
     <div class="r-comment-body"><p>CARRIER-EQUIVALENT on decisive input-side evidence: fresh and persisted 1126x101 carriers share SHA-256 79afd30b with max absolute and relative differences exactly 0.0, so the persisted artifact is not stale and cannot explain the production floor; carrier rebuild or republication is not warranted and the owner moves downstream to grid-scale representation or solve conditioning</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260827T172720601341-pod-response-basis-adequacy" data-who="flood-rca" data-when="2026-08-27T17:55:06Z">
+    <div class="r-comment-body"><p>BASIS-ADEQUATE, hypothesis refuted in the opposite direction: both carriers are full rank 101; production 1126x101 at 11.15 targets per mode has a BETTER condition number (315622 vs 398888) and 56% LOWER unexplained variance than coarse 326x101; the fit residual sits 23x below the production floor and 579544x below the coarse one, and the prescribed-current path performs no inverse fit at all</p></div>
 </div>
 </section>
 </main>

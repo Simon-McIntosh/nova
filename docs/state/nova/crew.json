@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T21:27:47",
+  "updated": "2026-08-27T23:57:52",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -59284,9 +59284,115 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T215300942906-sse-diiid-bank-harvest",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-diiid-bank-harvest",
+        "node_definition": {
+          "done_when": "The durable outputs of job 1258918 in run directory r-20260827T192212160951 are audited and, if admissible, copied into the worktree and committed: the scheduler receipt shows COMPLETED with ExitCode 0:0 and the job log ends EXIT_MARKER=0; the receipt is strict JSON with exactly the five declared frame identities once each, no NaN or infinity, and every non-converged or exception frame retained as a named FAIL row; both figures are present, non-empty and were written before the receipt; the manifest tables per-frame convergence and terminal residuals against the previous receipt b057db7f and against the interrupted run's values 0.1598, 0.0852, 0.1219, 0.0433 and 0.0492, and records the digests of the three committed files; the manifest states explicitly that this run is the five-frame confirmation of compile-lifetime repair 05ae2224 including whether publication completed without an LLVM abort; if any audit check fails, nothing is committed and the failure is reported with the offending value",
+          "estimated_hours": null,
+          "goal": "The completed DIII-D five-frame regeneration reconciled from its durable outputs into the repository, after a strict audit that the receipt is admissible",
+          "id": "sse-diiid-bank-harvest",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T215300942906-sse-diiid-bank-harvest/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+            "docs/figures/diiid-forward-onboarding/forward-gs/frame_flux_comparison.png",
+            "docs/figures/diiid-forward-onboarding/forward-gs/cohort_match_summary.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T21:53:11Z",
+        "completed_at": "2026-08-27T21:57:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 251,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 251,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "0d1a7fe86007d59a068c791e1fa55d53ce7b81ab",
+        "commits": [
+          "46e9ef886db73be3ff58cbbc43c55150917ef690"
+        ],
+        "changed_lines": {
+          "added": 419,
+          "removed": 376,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "durable outputs of job 1258918 audited (COMPLETED 0:0, EXIT_MARKER=0, strict JSON, five identities once each, figures before receipt) then committed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T215300942906-sse-diiid-bank-harvest/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T215300942906-sse-diiid-bank-harvest/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e37-51e1-7ca1-aec1-49356e2c6453",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 503808,
+            "cached_input_tokens_cumulative": 1809152,
+            "input_tokens": 330783,
+            "input_tokens_cumulative": 1939137,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 10505,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2143
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1138
+    "_version": 1139
   }
 }

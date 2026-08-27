@@ -308,10 +308,54 @@ def test_newton_carries_a_smaller_recovery_radius_after_exhaustion():
             result.promotion_recovery_outcomes,
             [RecoveryOutcome.REFUSED, RecoveryOutcome.ACCEPTED],
         )
+        np.testing.assert_array_equal(
+            result.promotion_model_rebuild_activations, [0, 0]
+        )
+        assert np.all(np.isnan(result.promotion_model_rebuild_damping))
         assert int(result.attempted_newton_promotions) == 2
         assert int(result.accepted_newton_promotions) == 1
         assert np.all(np.diff(finite_trace) <= 0.0)
         assert finite_trace[-1] < finite_trace[0]
+
+
+def test_newton_rebuilds_the_model_after_recovery_radius_collapse():
+    """A fresh damped model crosses a plateau that repeats stale directions."""
+    tangent = jnp.asarray([[1.0, -1.0], [-1.0, 1.0]])
+
+    def map_fn(state):
+        at_origin = jnp.all(state == 0.0)
+        origin_model = jnp.asarray([1.0, 0.0]) + tangent @ state
+        inside_damped_basin = (
+            (state[1] > 0.0) & (state[1] < 0.02) & (jnp.abs(state[0]) < 1.0e-12)
+        )
+        candidate_model = jnp.where(inside_damped_basin, state, -state)
+        return jnp.where(at_origin, origin_model, candidate_model)
+
+    def solve():
+        return newton_krylov(
+            map_fn,
+            jnp.zeros(2),
+            newton_steps=6,
+            gmres_iterations=2,
+            warmup=0,
+        )
+
+    for result in (solve(), jax.jit(solve)()):
+        finite_trace = np.asarray(result.trace)[np.isfinite(np.asarray(result.trace))]
+        np.testing.assert_allclose(result.state, [0.0, 1.0 / 101.0])
+        np.testing.assert_array_equal(
+            result.promotion_model_rebuild_activations, [0, 0, 0, 0, 1, -1]
+        )
+        np.testing.assert_allclose(
+            result.promotion_model_rebuild_damping[:5],
+            [np.nan, np.nan, np.nan, np.nan, 100.0],
+            equal_nan=True,
+        )
+        assert int(result.attempted_newton_promotions) == 5
+        assert int(result.accepted_newton_promotions) == 1
+        assert bool(result.converged)
+        assert float(result.residual) <= FIXED_POINT_RESIDUAL_TOLERANCE
+        assert np.all(np.diff(finite_trace) <= 0.0)
 
 
 def test_newton_reports_a_nonfinite_initial_residual_without_attempting():

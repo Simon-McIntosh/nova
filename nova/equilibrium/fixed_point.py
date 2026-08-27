@@ -74,6 +74,9 @@ _RECOVERY_RADIUS_INITIAL = 1.0
 _RECOVERY_RADIUS_GROWTH = 2.0
 _RECOVERY_RADIUS_SHRINKAGE = 0.5
 _RECOVERY_RADIUS_UPDATE_TRIPS = 6
+_MODEL_REBUILD_DAMPING_INITIAL = 1.0e-3
+_MODEL_REBUILD_DAMPING_GROWTH = 10.0
+_MODEL_REBUILD_DAMPING_TRIPS = 6
 _PROJECTED_KRYLOV_CONDITION_RATIO_LIMIT = math.e
 _SUFFICIENT_DECREASE_SLOPE = 1.0e-4
 FIXED_POINT_RESIDUAL_TOLERANCE = 1.0e-8
@@ -155,6 +158,9 @@ class FixedPointResult(NamedTuple):
     next promotion; an accepted recovery grows from the accepted radius.
     ``promotion_recovery_outcomes`` names that result and is not-applicable for
     promotions decided by the Newton ladder.
+    ``promotion_model_rebuild_activations`` is one when radius exhaustion
+    triggers a fresh linearization, and ``promotion_model_rebuild_damping``
+    records its accepted Levenberg damping or the last refused value.
     """
 
     state: jax.Array
@@ -184,13 +190,15 @@ class FixedPointResult(NamedTuple):
     promotion_recovery_activations: jax.Array | int = -1
     promotion_recovery_radii: jax.Array | float = float("nan")
     promotion_recovery_outcomes: jax.Array | int = -1
+    promotion_model_rebuild_activations: jax.Array | int = -1
+    promotion_model_rebuild_damping: jax.Array | float = float("nan")
 
 
 class KinkAwareResult(NamedTuple):
     """Result of an explicitly selected derivative-hand-off policy.
 
     ``trace`` records the residual at each relaxed warmup state and each
-    accepted nonlinear state.  ``crossings`` identifies nonlinear steps whose
+    accepted nonlinear state.  ``crossings`` identifies nonlinear moves whose
     unconstrained Newton proposal straddled the caller's detected surface.
     ``candidate_admissibility`` preserves the established diagnostic contract
     for the four largest nonmonotone factors.  ``accepted_factors`` records the
@@ -264,6 +272,8 @@ class _NewtonIterationState(NamedTuple):
     recovery_radius: jax.Array
     promotion_recovery_radii: jax.Array
     promotion_recovery_outcomes: jax.Array
+    promotion_model_rebuild_activations: jax.Array
+    promotion_model_rebuild_damping: jax.Array
 
 
 class _BacktrackedPromotion(NamedTuple):
@@ -277,6 +287,15 @@ class _BacktrackedPromotion(NamedTuple):
     recovery_radius: jax.Array
     recovery_radius_before: jax.Array
     recovery_outcome: jax.Array
+
+
+class _RebuiltModelPromotion(NamedTuple):
+    """One fixed-trip Levenberg search on a freshly linearized model."""
+
+    state: jax.Array
+    residual: jax.Array
+    accepted: jax.Array
+    damping: jax.Array
 
 
 class _ManifoldNewtonIterationState(NamedTuple):
@@ -560,6 +579,88 @@ def _backtracked_promotion(
         accept_newton_ladder,
         recover_with_continuation,
         operand=None,
+    )
+
+
+def _rebuilt_model_promotion(
+    map_fn: Callable[[jax.Array], jax.Array],
+    state: jax.Array,
+    current_residual: jax.Array,
+    *,
+    gmres_iterations: int,
+    maximum_step: jax.Array,
+) -> _RebuiltModelPromotion:
+    """Re-linearize and seek a non-amplifying Levenberg-damped step."""
+    mapped, tangent = jax.linearize(map_fn, state)
+    residual_vector = mapped - state
+
+    def linear_action(vector):
+        return vector - tangent(vector)
+
+    transpose_action = jax.linear_transpose(linear_action, jnp.zeros_like(state))
+
+    def transpose(vector):
+        return transpose_action(vector)[0]
+
+    normal_rhs = transpose(residual_vector)
+
+    def damping_trial(_index, carry):
+        selected_state, selected_residual, accepted, damping, recorded = carry
+
+        def damped_normal_action(vector):
+            return transpose(linear_action(vector)) + damping * vector
+
+        step, info = jax.scipy.sparse.linalg.gmres(
+            damped_normal_action,
+            normal_rhs,
+            maxiter=gmres_iterations,
+            restart=gmres_iterations,
+            solve_method="batched",
+        )
+        norm_step = jnp.max(jnp.abs(step))
+        bounded_step = jnp.where(
+            norm_step > maximum_step,
+            step * (maximum_step / jnp.maximum(norm_step, 1.0e-300)),
+            step,
+        )
+        candidate = state + bounded_step
+        candidate_residual = _relative_residual(map_fn(candidate), candidate)
+        select = (
+            ~accepted
+            & (jnp.asarray(info) == 0)
+            & jnp.all(jnp.isfinite(step))
+            & jnp.isfinite(candidate_residual)
+            & (candidate_residual < current_residual)
+        )
+        return (
+            jnp.where(select, candidate, selected_state),
+            jnp.where(select, candidate_residual, selected_residual),
+            accepted | select,
+            jnp.where(
+                accepted | select,
+                damping,
+                damping * _MODEL_REBUILD_DAMPING_GROWTH,
+            ),
+            jnp.where(select | ~accepted, damping, recorded),
+        )
+
+    candidate, residual, accepted, _next_damping, recorded_damping = jax.lax.fori_loop(
+        0,
+        _MODEL_REBUILD_DAMPING_TRIPS,
+        damping_trial,
+        (
+            state,
+            current_residual,
+            jnp.asarray(False),
+            jnp.asarray(_MODEL_REBUILD_DAMPING_INITIAL, dtype=state.dtype),
+            jnp.asarray(jnp.nan, dtype=state.dtype),
+        ),
+    )
+    return _RebuiltModelPromotion(
+        state=candidate,
+        residual=residual,
+        accepted=accepted,
+        damping=recorded_damping,
     )
 
 
@@ -1258,7 +1359,12 @@ def newton_krylov(
     strictly decreasing residual.  Its radius is carried across promotions,
     shrinks after refused trials, and grows after an accepted re-shape.  The
     update uses a fixed-trip masked loop, and the receipts record the Newton
-    reductions, recovery activation, outcome, and radius trajectory.  The
+    reductions, recovery activation, outcome, and radius trajectory.  Once the
+    carried radius reaches its numerical floor, the recovery rebuilds the
+    local linearization at the unchanged iterate and solves a fixed ladder of
+    Levenberg-damped normal models.  That fresh-model step is promoted only on
+    strict residual decrease; its activation and selected damping are retained
+    in the promotion receipts.  The
     trace retains its configured length and ``2 + gmres_iterations`` stride
     (one linearisation value, tangent slots, and one promotion read); unused
     iterations remain NaN padding.  Under ``vmap``, the batched while-loop runs
@@ -1410,9 +1516,38 @@ def newton_krylov(
                     nonlinear_residual,
                     measured.recovery_radius,
                 )
-                candidate = promotion.state
-                candidate_residual = promotion.residual
-                promotion_accepted = promotion.accepted
+                minimum_radius = jnp.sqrt(jnp.finfo(state.dtype).eps)
+                rebuild_activated = (
+                    promotion.recovery_activated
+                    & ~promotion.accepted
+                    & (promotion.recovery_radius <= minimum_radius)
+                )
+
+                def rebuild_model(_):
+                    return _rebuilt_model_promotion(
+                        map_fn,
+                        state,
+                        nonlinear_residual,
+                        gmres_iterations=gmres_iterations,
+                        maximum_step=cap,
+                    )
+
+                def skip_rebuild(_):
+                    return _RebuiltModelPromotion(
+                        state=state,
+                        residual=nonlinear_residual,
+                        accepted=jnp.asarray(False),
+                        damping=jnp.asarray(jnp.nan, dtype=state.dtype),
+                    )
+
+                rebuilt = jax.lax.cond(
+                    rebuild_activated, rebuild_model, skip_rebuild, operand=None
+                )
+                candidate = jnp.where(rebuilt.accepted, rebuilt.state, promotion.state)
+                candidate_residual = jnp.where(
+                    rebuilt.accepted, rebuilt.residual, promotion.residual
+                )
+                promotion_accepted = promotion.accepted | rebuilt.accepted
                 accepted = measured.accepted + jnp.asarray(
                     promotion_accepted, dtype=jnp.int32
                 )
@@ -1479,6 +1614,18 @@ def newton_krylov(
                 recovery_outcomes = measured.promotion_recovery_outcomes.at[
                     measured.attempted
                 ].set(promotion.recovery_outcome)
+                rebuild_activations = measured.promotion_model_rebuild_activations.at[
+                    measured.attempted
+                ].set(jnp.asarray(rebuild_activated, dtype=jnp.int32))
+                rebuild_damping = measured.promotion_model_rebuild_damping.at[
+                    measured.attempted
+                ].set(
+                    jnp.where(
+                        rebuild_activated,
+                        rebuilt.damping,
+                        jnp.asarray(jnp.nan, dtype=state.dtype),
+                    )
+                )
                 return _NewtonIterationState(
                     candidate,
                     candidate_residual,
@@ -1501,6 +1648,8 @@ def newton_krylov(
                     promotion.recovery_radius,
                     recovery_radii,
                     recovery_outcomes,
+                    rebuild_activations,
+                    rebuild_damping,
                 )
 
             def refused_state(_):
@@ -1535,6 +1684,10 @@ def newton_krylov(
                     measured.promotion_recovery_outcomes.at[measured.attempted].set(
                         RecoveryOutcome.NOT_APPLICABLE
                     ),
+                    measured.promotion_model_rebuild_activations.at[
+                        measured.attempted
+                    ].set(0),
+                    measured.promotion_model_rebuild_damping,
                 )
 
             return jax.lax.cond(
@@ -1571,6 +1724,8 @@ def newton_krylov(
             jnp.asarray(_RECOVERY_RADIUS_INITIAL, dtype=initial.dtype),
             jnp.full((newton_steps, 2), jnp.nan, dtype=initial.dtype),
             jnp.full(newton_steps, -1, dtype=jnp.int32),
+            jnp.full(newton_steps, -1, dtype=jnp.int32),
+            jnp.full(newton_steps, jnp.nan, dtype=initial.dtype),
         ),
     )
     return FixedPointResult(
@@ -1592,6 +1747,8 @@ def newton_krylov(
         promotion_recovery_activations=loop.promotion_recovery_activations,
         promotion_recovery_radii=loop.promotion_recovery_radii,
         promotion_recovery_outcomes=loop.promotion_recovery_outcomes,
+        promotion_model_rebuild_activations=(loop.promotion_model_rebuild_activations),
+        promotion_model_rebuild_damping=loop.promotion_model_rebuild_damping,
     )
 
 

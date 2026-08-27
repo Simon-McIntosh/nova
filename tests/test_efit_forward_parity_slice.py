@@ -45,6 +45,66 @@ def _flux_state(psi_norm: jax.Array) -> jax.Array:
     return -0.4 + jnp.asarray(psi_norm)
 
 
+def _expanded_closure_values(
+    nodes: np.ndarray, values: np.ndarray, coordinate: np.ndarray
+) -> np.ndarray:
+    """Evaluate the algebraically expanded two-edge closure."""
+    edge_width = nodes[1] - nodes[0]
+    lower_slope = (values[1] - values[0]) / edge_width
+    upper_slope = (values[-1] - values[-2]) / edge_width
+    lower_parameter = (coordinate - nodes[0] + edge_width) / edge_width
+    lower_value_basis = (
+        10.0 * lower_parameter**3 - 15.0 * lower_parameter**4 + 6.0 * lower_parameter**5
+    )
+    lower_slope_basis = (
+        -4.0 * lower_parameter**3 + 7.0 * lower_parameter**4 - 3.0 * lower_parameter**5
+    )
+    lower = lower_value_basis * values[0] + lower_slope_basis * edge_width * lower_slope
+    upper_parameter = (coordinate - nodes[-1]) / edge_width
+    upper_value_basis = (
+        1.0
+        - 10.0 * upper_parameter**3
+        + 15.0 * upper_parameter**4
+        - 6.0 * upper_parameter**5
+    )
+    upper_slope_basis = (
+        upper_parameter
+        - 6.0 * upper_parameter**3
+        + 8.0 * upper_parameter**4
+        - 3.0 * upper_parameter**5
+    )
+    upper = (
+        upper_value_basis * values[-1] + upper_slope_basis * edge_width * upper_slope
+    )
+    interior = np.interp(coordinate, nodes, values)
+    return np.where(
+        coordinate < nodes[0] - edge_width,
+        0.0,
+        np.where(
+            coordinate < nodes[0],
+            lower,
+            np.where(
+                coordinate <= nodes[-1],
+                interior,
+                np.where(coordinate <= nodes[-1] + edge_width, upper, 0.0),
+            ),
+        ),
+    )
+
+
+def test_shared_horner_closure_matches_expanded_edges() -> None:
+    """The smaller traced expression preserves the declared profile exactly."""
+    configure_dtypes()
+    nodes = np.linspace(0.0, 1.0, 65)
+    values = -1.1 + 0.35 * nodes - 0.08 * nodes**2
+    coordinate = np.linspace(-0.2, 1.2, 1401)
+
+    expected = _expanded_closure_values(nodes, values, coordinate)
+    observed = np.asarray(_profile_function(nodes, values)(jnp.asarray(coordinate)))
+
+    np.testing.assert_allclose(observed, expected, rtol=0.0, atol=1.0e-12)
+
+
 def test_declared_anchor_tangent_matches_centered_difference_at_both_edges() -> None:
     """Endpoint crossings retain the derivative represented by the JVP."""
     configure_dtypes()

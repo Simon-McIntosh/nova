@@ -270,42 +270,25 @@ def _profile_function(nodes: np.ndarray, values: np.ndarray):
     lower_slope = (samples[1] - samples[0]) / edge_width
     upper_slope = (samples[-1] - samples[-2]) / edge_width
 
-    def edge_decay(value, slope, coordinate, *, outward):
-        """Join one endpoint to zero over one stored profile interval."""
-        if outward:
-            parameter = coordinate / edge_width
-            value_basis = (
-                1.0 - 10.0 * parameter**3 + 15.0 * parameter**4 - 6.0 * parameter**5
-            )
-            slope_basis = (
-                parameter - 6.0 * parameter**3 + 8.0 * parameter**4 - 3.0 * parameter**5
-            )
-        else:
-            parameter = (coordinate + edge_width) / edge_width
-            value_basis = 10.0 * parameter**3 - 15.0 * parameter**4 + 6.0 * parameter**5
-            slope_basis = -4.0 * parameter**3 + 7.0 * parameter**4 - 3.0 * parameter**5
-        return value_basis * value + slope_basis * edge_width * slope
-
     def function(psi_norm):
         """Evaluate the stored profile on its declared normalized coordinate."""
         coordinate = jnp.asarray(psi_norm)
         interior = jnp.interp(coordinate, grid, samples)
-        below = edge_decay(samples[0], lower_slope, coordinate - grid[0], outward=False)
-        above = edge_decay(
-            samples[-1], upper_slope, coordinate - grid[-1], outward=True
+        below = coordinate < grid[0]
+        edge_value = jnp.where(below, samples[0], samples[-1])
+        outward_slope = jnp.where(below, -lower_slope, upper_slope)
+        outward_distance = jnp.where(below, grid[0] - coordinate, coordinate - grid[-1])
+        parameter = jnp.clip(outward_distance / edge_width, 0.0, 1.0)
+        parameter_cubed = parameter * parameter * parameter
+        value_basis = 1.0 + parameter_cubed * (
+            -10.0 + parameter * (15.0 - 6.0 * parameter)
         )
+        slope_basis = parameter + parameter_cubed * (
+            -6.0 + parameter * (8.0 - 3.0 * parameter)
+        )
+        exterior = value_basis * edge_value + slope_basis * edge_width * outward_slope
         return jnp.where(
-            coordinate < grid[0] - edge_width,
-            0.0,
-            jnp.where(
-                coordinate < grid[0],
-                below,
-                jnp.where(
-                    coordinate <= grid[-1],
-                    interior,
-                    jnp.where(coordinate <= grid[-1] + edge_width, above, 0.0),
-                ),
-            ),
+            (coordinate >= grid[0]) & (coordinate <= grid[-1]), interior, exterior
         )
 
     return function

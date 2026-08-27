@@ -358,6 +358,65 @@ def test_newton_rebuilds_the_model_after_recovery_radius_collapse():
         assert np.all(np.diff(finite_trace) <= 0.0)
 
 
+def test_newton_selects_squared_residual_descent_after_recovery_exhaustion():
+    """The measured descent scale survives a stricter relative-sup increase."""
+    initial_l2 = 4.8129016439e-3
+    l2_decrease = 7.6510321531e-4
+    descended_l2 = initial_l2 - l2_decrease
+    origin_slope = initial_l2 / 0.1
+
+    def map_fn(state):
+        at_origin = state[0] == 0.0
+        origin_residual = initial_l2 + origin_slope * state
+        in_descent_basin = (state[0] > -1.5e-4) & (state[0] < -0.5e-4)
+        displaced_residual = jnp.where(in_descent_basin, descended_l2, -1.5 * state)
+        return state + jnp.where(at_origin, origin_residual, displaced_residual)
+
+    def solve():
+        return newton_krylov(
+            map_fn,
+            jnp.zeros(1),
+            newton_steps=5,
+            gmres_iterations=1,
+            warmup=0,
+        )
+
+    for result in (solve(), jax.jit(solve)()):
+        np.testing.assert_allclose(result.state, [-1.0e-4])
+        np.testing.assert_array_equal(
+            result.promotion_descent_activations, [0, 0, 0, 0, 1]
+        )
+        np.testing.assert_allclose(
+            result.promotion_descent_scales,
+            [np.nan, np.nan, np.nan, np.nan, 1.0e-4],
+            equal_nan=True,
+        )
+        selected_l2 = float(jnp.linalg.norm(map_fn(result.state) - result.state))
+        np.testing.assert_allclose(initial_l2 - selected_l2, l2_decrease)
+        merit_reduction = (initial_l2**2 - selected_l2**2) / initial_l2**2
+        np.testing.assert_allclose(merit_reduction, 0.29266722536)
+        assert float(result.residual) > 1.0
+        assert int(result.accepted_newton_promotions) == 1
+
+
+def test_newton_does_not_try_descent_while_its_full_step_is_sufficient():
+    def solve():
+        return newton_krylov(
+            lambda state: 0.5 * state + 1.0,
+            jnp.zeros(1),
+            newton_steps=1,
+            gmres_iterations=1,
+            warmup=0,
+        )
+
+    for result in (solve(), jax.jit(solve)()):
+        np.testing.assert_allclose(result.state, [2.0])
+        np.testing.assert_array_equal(result.promotion_backtrack_counts, [0])
+        np.testing.assert_array_equal(result.promotion_descent_activations, [0])
+        assert np.isnan(float(result.promotion_descent_scales[0]))
+        assert bool(result.converged)
+
+
 def test_newton_reports_a_nonfinite_initial_residual_without_attempting():
     result = newton_krylov(
         lambda state: jnp.full_like(state, jnp.nan),

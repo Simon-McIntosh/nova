@@ -15,7 +15,7 @@
         "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
         "size_bytes": 645864,
         "stored_circuit_count": 101,
-        "warm_load_seconds": 0.009786460548639297
+        "warm_load_seconds": 0.009953243657946587
       },
       "loaded_from_persisted_carrier": true,
       "named_cache_only_check": {
@@ -30,7 +30,7 @@
         ],
         "direct_green_operator_builder_entries": 0,
         "passes": true,
-        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.021086 direct_builders=0 verdict=PASS"
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.034870 direct_builders=0 verdict=PASS"
       }
     },
     "catalogue_format_qualification": "efm is a raw read-only Zarr catalogue group rather than an IMAS IDS, so it has no DD version to infer or open; the governed machine-description seam it is compared within is authored and reopened at its written DD version",

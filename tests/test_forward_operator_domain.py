@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import inspect
+from types import SimpleNamespace
 
 import jax
 import jax.numpy as jnp
@@ -100,6 +101,98 @@ def test_profile_owned_moments_count_common_sol_current_once() -> None:
     np.testing.assert_allclose(moments.radial_moment, 2.0 * expected)
     np.testing.assert_allclose(moments.vertical_moment, 3.0 * expected)
     assert float(moments.cell_current[1]) != float(core_density + common_density)
+
+
+def _point_cell_operator(masks: DomainMasks) -> ForwardFluxOperator:
+    """Return a fixed-label point-cell operator with one owner per stencil."""
+
+    operator = object.__new__(ForwardFluxOperator)
+    operator.grid = SimpleNamespace(
+        coordinate=jnp.c_[jnp.ones(4), jnp.arange(4, dtype=jnp.float64)],
+        node_number=4,
+    )
+    operator.wall = SimpleNamespace(node_number=0)
+    operator.sample = None
+    operator.source = ForwardSource(core=_core_profile())
+    operator.area = jnp.ones(4)
+    operator.cell_average_stencil = jnp.zeros((4, 5), dtype=jnp.int32)
+    operator.cell_average_weight = jnp.asarray([1.0, 0.0, 0.0, 0.0, 0.0])
+    operator.use_linear_moments = False
+    operator._fixed_design_read = lambda _psi, _requested=None: (
+        masks,
+        None,
+        masks.core,
+        jnp.asarray(True),
+    )
+    return operator
+
+
+def test_point_cell_arm_uses_profile_owned_support_eager_and_jit() -> None:
+    """Point-cell averaging admits common SOL and excludes both shadow classes."""
+
+    configure_dtypes()
+    masks = DomainMasks(
+        label=jnp.asarray(
+            [
+                PlasmaDomain.CORE,
+                PlasmaDomain.COMMON_SOL,
+                PlasmaDomain.PRIVATE_FLUX,
+                PlasmaDomain.EXCLUDED_MATERIAL,
+            ],
+            dtype=jnp.int8,
+        ),
+        psi_norm=jnp.asarray([0.5, 1.25, 0.5, 1.25]),
+    )
+    operator = _point_cell_operator(masks)
+
+    for evaluate in (
+        operator.cell_current_moments,
+        jax.jit(operator.cell_current_moments),
+    ):
+        moments = evaluate(jnp.zeros(4))
+        owner_current = float(moments.cell_current[0])
+        assert owner_current != 0.0
+        np.testing.assert_allclose(
+            moments.cell_current,
+            [owner_current, owner_current, 0.0, 0.0],
+        )
+
+    implementation = inspect.getsource(ForwardFluxOperator.cell_current_moments)
+    assert "profile_participation" in implementation
+    assert "declared_support" not in implementation
+    assert "boundary_flux" not in implementation
+
+
+def test_shadow_cell_has_zero_residual_sensitivity_eager_and_jit() -> None:
+    """A shadowed trial component contributes neither residual nor tangent."""
+
+    masks = DomainMasks(
+        label=jnp.asarray(
+            [
+                PlasmaDomain.CORE,
+                PlasmaDomain.COMMON_SOL,
+                PlasmaDomain.PRIVATE_FLUX,
+                PlasmaDomain.EXCLUDED_MATERIAL,
+            ],
+            dtype=jnp.int8,
+        ),
+        psi_norm=jnp.zeros(4),
+    )
+    operator = _point_cell_operator(masks)
+    operator.external = lambda _current=None: jnp.zeros(4)
+    operator.internal = lambda psi, *_args: 2.0 * psi
+    operator.residual_shadow_mask = lambda _psi, _requested=None: masks.private_flux
+    state = jnp.arange(4, dtype=jnp.float64)
+    shadow_direction = jnp.asarray([0.0, 0.0, 1.0, 0.0])
+
+    for residual in (operator.residual, jax.jit(operator.residual)):
+        value, sensitivity = jax.jvp(
+            residual,
+            (state,),
+            (shadow_direction,),
+        )
+        assert float(value[2]) == 0.0
+        np.testing.assert_array_equal(sensitivity, jnp.zeros(4))
 
 
 def test_profile_domain_change_attributes_shadow_transitions_eager_and_jit() -> None:

@@ -597,13 +597,18 @@ class ForwardSource:
     def cell_current(
         self, radius: jax.Array, area: jax.Array, masks: DomainMasks
     ) -> jax.Array:
-        """Return the per-cell toroidal current [A] on the declared support.
+        """Return per-cell toroidal current [A] on profile-owned support.
 
-        The current density is evaluated from the supplied gradients without
-        any amplitude change and is selected by domain label, so a cell
-        outside the declared support carries exactly zero.
+        Domain labels choose the declared closure while profile participation
+        is the sole geometric support. A participating cell with no declared
+        closure receives zero from :meth:`current_density`; shadow and
+        excluded-material cells are removed explicitly.
         """
-        return self.current_density(radius, masks) * area
+        return jnp.where(
+            masks.profile_participation,
+            self.current_density(radius, masks) * area,
+            0.0,
+        )
 
     def current_moments(
         self,

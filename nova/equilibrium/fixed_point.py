@@ -153,6 +153,7 @@ class FixedPointResult(NamedTuple):
     accepted_newton_promotions: jax.Array | int = 0
     converged: jax.Array | bool = False
     termination_reason: jax.Array | int = FixedPointTerminationReason.NOT_APPLICABLE
+    shadow_mask_changes: jax.Array | int = -1
 
 
 class KinkAwareResult(NamedTuple):
@@ -226,6 +227,8 @@ class _NewtonIterationState(NamedTuple):
     termination_reason: jax.Array
     active: jax.Array
     current_measured: jax.Array
+    shadow_mask: jax.Array
+    shadow_mask_changes: jax.Array
 
 
 class _ManifoldNewtonIterationState(NamedTuple):
@@ -508,24 +511,45 @@ def picard(
     *,
     evaluations: int,
     relaxation: float = 0.5,
+    shadow_mask_fn: Callable[[jax.Array], jax.Array] | None = None,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Relaxed Picard iteration with per-evaluation residual accounting."""
     initial = _solver_state(initial, precision)
 
+    observe_shadows = shadow_mask_fn is not None
+
+    def shadow_mask(state):
+        if observe_shadows:
+            return jnp.ravel(jnp.asarray(shadow_mask_fn(state), dtype=bool))
+        return jnp.zeros(1, dtype=bool)
+
     def body(index, carry):
-        state, trace = carry
+        state, trace, previous_shadow, shadow_changes = carry
         mapped = map_fn(state)
         trace = trace.at[index].set(_relative_residual(mapped, state))
-        return state + relaxation * (mapped - state), trace
+        candidate = state + relaxation * (mapped - state)
+        current_shadow = shadow_mask(candidate)
+        changed = jnp.sum(current_shadow != previous_shadow, dtype=jnp.int32)
+        shadow_changes = shadow_changes.at[index].set(
+            jnp.where(observe_shadows, changed, -1)
+        )
+        return candidate, trace, current_shadow, shadow_changes
 
-    state, trace = jax.lax.fori_loop(
+    state, trace, _shadow, shadow_changes = jax.lax.fori_loop(
         0,
         evaluations,
         body,
-        (initial, jnp.full(evaluations, jnp.nan, dtype=initial.dtype)),
+        (
+            initial,
+            jnp.full(evaluations, jnp.nan, dtype=initial.dtype),
+            shadow_mask(initial),
+            jnp.full(evaluations, -1, dtype=jnp.int32),
+        ),
     )
-    return FixedPointResult(state, trace[evaluations - 1], trace)
+    return FixedPointResult(
+        state, trace[evaluations - 1], trace, shadow_mask_changes=shadow_changes
+    )
 
 
 def anderson(
@@ -538,6 +562,7 @@ def anderson(
     warmup: int = 6,
     step_cap: float = 2.0,
     ridge: float = 1.0e-10,
+    shadow_mask_fn: Callable[[jax.Array], jax.Array] | None = None,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Safeguarded Anderson acceleration of the relaxed iteration.
@@ -556,9 +581,25 @@ def anderson(
     """
     initial = _solver_state(initial, precision)
     n_flat = initial.shape[0]
+    observe_shadows = shadow_mask_fn is not None
+
+    def shadow_mask(state):
+        if observe_shadows:
+            return jnp.ravel(jnp.asarray(shadow_mask_fn(state), dtype=bool))
+        return jnp.zeros(1, dtype=bool)
 
     def body(index, carry):
-        state, dx, df, f_prev, x_prev, norm_prev, trace = carry
+        (
+            state,
+            dx,
+            df,
+            f_prev,
+            x_prev,
+            norm_prev,
+            trace,
+            previous_shadow,
+            shadow_changes,
+        ) = carry
         mapped = map_fn(state)
         f = mapped - state
         trace = trace.at[index].set(_relative_residual(mapped, state))
@@ -592,7 +633,22 @@ def anderson(
         )
         accept = (index >= warmup) & ~grew & jnp.all(jnp.isfinite(mixed))
         state_next = jnp.where(accept, mixed, relaxed)
-        return state_next, dx, df, f, state, norm_f, trace
+        current_shadow = shadow_mask(state_next)
+        changed = jnp.sum(current_shadow != previous_shadow, dtype=jnp.int32)
+        shadow_changes = shadow_changes.at[index].set(
+            jnp.where(observe_shadows, changed, -1)
+        )
+        return (
+            state_next,
+            dx,
+            df,
+            f,
+            state,
+            norm_f,
+            trace,
+            current_shadow,
+            shadow_changes,
+        )
 
     init = (
         initial,
@@ -602,9 +658,16 @@ def anderson(
         initial,
         jnp.asarray(jnp.inf, dtype=initial.dtype),
         jnp.full(evaluations, jnp.nan, dtype=initial.dtype),
+        shadow_mask(initial),
+        jnp.full(evaluations, -1, dtype=jnp.int32),
     )
-    state, *_, trace = jax.lax.fori_loop(0, evaluations, body, init)
-    return FixedPointResult(state, trace[evaluations - 1], trace)
+    state, *middle, trace, _shadow, shadow_changes = jax.lax.fori_loop(
+        0, evaluations, body, init
+    )
+    del middle
+    return FixedPointResult(
+        state, trace[evaluations - 1], trace, shadow_mask_changes=shadow_changes
+    )
 
 
 def _manifold_newton_krylov(
@@ -1006,6 +1069,7 @@ def newton_krylov(
     convergence_tolerance: float = FIXED_POINT_RESIDUAL_TOLERANCE,
     admissibility_fn: Callable[[jax.Array], jax.Array] | None = None,
     previous_admitted_state: jax.Array | None = None,
+    shadow_mask_fn: Callable[[jax.Array], jax.Array] | None = None,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Exact-tangent Jacobian-free Newton–Krylov on the fixed-point residual.
@@ -1073,16 +1137,28 @@ def newton_krylov(
     initial = _solver_state(initial, precision)
     stride = 2 + gmres_iterations
     trace_length = warmup + newton_steps * stride
+    change_length = warmup + newton_steps
+    observe_shadows = shadow_mask_fn is not None
+
+    def shadow_mask(state):
+        if observe_shadows:
+            return jnp.ravel(jnp.asarray(shadow_mask_fn(state), dtype=bool))
+        return jnp.zeros(1, dtype=bool)
 
     def warm_body(index, carry):
-        state, trace, amplification = carry
+        state, trace, amplification, previous_shadow, shadow_changes = carry
         mapped = map_fn(state)
         trace = trace.at[index].set(_relative_residual(mapped, state))
         candidate = state + relaxation * (mapped - state)
         amplification = _observe_increment(amplification, state, candidate, True)
-        return candidate, trace, amplification
+        current_shadow = shadow_mask(candidate)
+        changed = jnp.sum(current_shadow != previous_shadow, dtype=jnp.int32)
+        shadow_changes = shadow_changes.at[index].set(
+            jnp.where(observe_shadows, changed, -1)
+        )
+        return candidate, trace, amplification, current_shadow, shadow_changes
 
-    state, trace, amplification = jax.lax.fori_loop(
+    state, trace, amplification, current_shadow, shadow_changes = jax.lax.fori_loop(
         0,
         warmup,
         warm_body,
@@ -1090,6 +1166,8 @@ def newton_krylov(
             initial,
             jnp.full(trace_length, jnp.nan, dtype=initial.dtype),
             _initial_amplification_state(initial.dtype),
+            shadow_mask(initial),
+            jnp.full(change_length, -1, dtype=jnp.int32),
         ),
     )
 
@@ -1190,6 +1268,13 @@ def newton_krylov(
                         FixedPointTerminationReason.ITERATION_BUDGET_EXHAUSTED,
                     ),
                 )
+                candidate_shadow = shadow_mask(candidate)
+                changed = jnp.sum(
+                    candidate_shadow != measured.shadow_mask, dtype=jnp.int32
+                )
+                shadow_changes = measured.shadow_mask_changes.at[
+                    warmup + measured.attempted
+                ].set(jnp.where(observe_shadows, changed, -1))
                 return _NewtonIterationState(
                     candidate,
                     candidate_residual,
@@ -1205,6 +1290,8 @@ def newton_krylov(
                     jnp.asarray(reason, dtype=jnp.int32),
                     active,
                     jnp.asarray(True),
+                    candidate_shadow,
+                    shadow_changes,
                 )
 
             def refused_state(_):
@@ -1226,6 +1313,10 @@ def newton_krylov(
                     ),
                     jnp.asarray(False),
                     jnp.asarray(True),
+                    measured.shadow_mask,
+                    measured.shadow_mask_changes.at[warmup + measured.attempted].set(
+                        jnp.where(observe_shadows, 0, -1)
+                    ),
                 )
 
             return jax.lax.cond(
@@ -1255,6 +1346,8 @@ def newton_krylov(
             ),
             jnp.asarray(True),
             jnp.asarray(False),
+            current_shadow,
+            shadow_changes,
         ),
     )
     return FixedPointResult(
@@ -1271,6 +1364,7 @@ def newton_krylov(
         accepted_newton_promotions=loop.accepted,
         converged=loop.converged,
         termination_reason=loop.termination_reason,
+        shadow_mask_changes=loop.shadow_mask_changes,
     )
 
 

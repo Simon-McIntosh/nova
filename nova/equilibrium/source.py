@@ -609,71 +609,42 @@ class ForwardSource:
         self,
         masks: DomainMasks,
         support_moments,
-        core_support,
-        common_support,
-        *,
+        profile_support,
+        *_,
         sample_flux=None,
     ) -> CellCurrentMoments:
-        """Return current moments selected by the shared-node clip partition.
+        """Return profile-owned current moments without a boundary clip.
 
-        The complementary core and common-SOL clips decide participation for
-        every cell. One clip-independent own-node density is integrated over the actual
-        support at every fill fraction; there is no separate full-cell and
-        clipped evaluation path. Centroid domain labels remain available for
-        closure identity and receipts, but never switch geometric
-        participation on or off.
+        The static material boundary and the saddle-aware private-flux shadow
+        are the only geometric participation decisions. Achieved domain labels
+        select the core or declared common-SOL flux function, and the latter's
+        declared support owns where its exterior current becomes exactly zero.
         """
 
-        def partitioned_moments(
-            profile,
-            centroid_flux,
-            direct_flux,
-            support,
-            selection,
-        ):
-            moments = support_moments(
-                profile,
-                centroid_flux,
-                direct_flux,
-                support,
-            )
-            return CellCurrentMoments(
-                *(jnp.where(selection, entry, 0.0) for entry in moments)
-            )
-
-        closed_branch = masks.core | masks.common_sol
-
-        core = partitioned_moments(
+        core = support_moments(
             self.core,
             masks.psi_norm,
             sample_flux,
-            core_support,
-            closed_branch,
+            profile_support,
         )
-        total = jnp.stack(core)
+        total = jnp.stack(
+            CellCurrentMoments(*(jnp.where(masks.core, entry, 0.0) for entry in core))
+        )
+        if self.common_sol is None:
+            return CellCurrentMoments(*total)
 
-        if self.common_sol is not None:
-            common = partitioned_moments(
-                self.common_sol,
-                masks.psi_norm,
-                sample_flux,
-                common_support,
-                closed_branch,
+        common = support_moments(
+            self.common_sol,
+            masks.psi_norm,
+            sample_flux,
+            profile_support,
+        )
+        record = self.common_sol.continuation_record(masks.psi_norm.dtype)
+        common_distance = jnp.maximum(masks.psi_norm - 1.0, 0.0)
+        common_selection = masks.common_sol & (common_distance <= record.support)
+        total = total + jnp.stack(
+            CellCurrentMoments(
+                *(jnp.where(common_selection, entry, 0.0) for entry in common)
             )
-            total = total + jnp.stack(common)
-
-        if self.private_flux is not None:
-            centroid_selection = masks.private_flux
-            private = support_moments(
-                self.private_flux,
-                jnp.maximum(masks.psi_norm, 1.0),
-                jnp.maximum(sample_flux, 1.0),
-                common_support,
-            )
-            total = total + jnp.stack(
-                CellCurrentMoments(
-                    *(jnp.where(centroid_selection, entry, 0.0) for entry in private)
-                )
-            )
-
+        )
         return CellCurrentMoments(*total)

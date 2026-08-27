@@ -57,8 +57,10 @@ from nova.equilibrium.flux_surface_connectivity import (
 __all__ = [
     "DomainMasks",
     "PlasmaDomain",
+    "ProfileDomainChange",
     "axis_connected_component",
     "classify_domains",
+    "profile_domain_change",
 ]
 
 
@@ -97,6 +99,12 @@ class DomainMasks(NamedTuple):
         """Return the mask of cells outside the material boundary."""
         return self.label == PlasmaDomain.EXCLUDED_MATERIAL
 
+    @property
+    def profile_participation(self) -> jax.Array:
+        """Return the boundary-free solve domain owned by the flux profile."""
+
+        return ~(self.private_flux | self.excluded_material)
+
     def mask(self, domain: PlasmaDomain) -> jax.Array:
         """Return the selection mask of one named domain."""
         return self.label == domain
@@ -106,6 +114,36 @@ class DomainMasks(NamedTuple):
         return jnp.stack(
             [jnp.sum(self.mask(domain)) for domain in PlasmaDomain],
         )
+
+
+class ProfileDomainChange(NamedTuple):
+    """Fixed-shape cause counts between two residual-domain reads."""
+
+    shadow_entered: jax.Array
+    shadow_left: jax.Array
+    material_changed: jax.Array
+
+    @property
+    def shadow_changed(self) -> jax.Array:
+        """Return the total number of cells whose shadow state changed."""
+
+        return self.shadow_entered + self.shadow_left
+
+
+@jax.jit
+def profile_domain_change(
+    previous: DomainMasks, current: DomainMasks
+) -> ProfileDomainChange:
+    """Attribute a profile-domain transition to shadow or material changes."""
+
+    entered = current.private_flux & ~previous.private_flux
+    left = previous.private_flux & ~current.private_flux
+    material = previous.excluded_material != current.excluded_material
+    return ProfileDomainChange(
+        shadow_entered=jnp.sum(entered, dtype=jnp.int32),
+        shadow_left=jnp.sum(left, dtype=jnp.int32),
+        material_changed=jnp.sum(material, dtype=jnp.int32),
+    )
 
 
 @jax.jit

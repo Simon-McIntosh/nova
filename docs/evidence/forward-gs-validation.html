@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="forward-gs-validation">
+  <meta name="plan-title" content="Forward Grad–Shafranov validation against MAST and DIII-D EFIT">
+  <meta name="plan-summary" content="Consolidated fail-closed evidence for the corrected MAST and DIII-D forward banks, governed walls, topology panels, wall ladder, and endpoint score.">
+  <meta name="plan-evidence-for" content="efit-baseline-demonstration">
+  <meta name="plan-verifies" content="efit-baseline-demonstration#s3">
+  <meta name="plan-recorded-at" content="2026-08-27">
+  <meta name="plan-verdict" content="failed">
+  <meta name="plan-tags" content="equilibrium,grad-shafranov,efit,mast,diii-d,topology,first-wall">
+  <title>Forward Grad–Shafranov validation | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan">
+    <header class="plan-hero">
+      <p class="eyebrow">Evidence · fixed-cohort forward validation</p>
+      <h1>Forward Grad–Shafranov validation against MAST and DIII-D EFIT</h1>
+      <p class="lede"><strong>FAIL.</strong> All 12 MAST arms, all 5 DIII-D frames, and all 17
+      topology panels are retained. MAST class agreement passes at <strong>9/12</strong>. The one
+      convergence-eligible boundary comparison measures <strong>0.029447 m</strong>, but the full
+      boundary-RMS gate fails because only <strong>1/17</strong> declared rows is eligible. The
+      declared-row polished-saddle gate fails at <strong>2.612246 m</strong> against a
+      <strong>0.04 m</strong> ceiling.</p>
+    </header>
+
+    <section id="verdict">
+      <h2>Endpoint verdict and fixed gates</h2>
+      <p>The score is the banked-inclusive, three-gate contract. Missing, nonconverged, empty,
+      non-finite, substituted, or duplicate operands remain failures; they cannot make a denominator
+      smaller. EFIT is an independent magnetics-fitted reconstruction rather than physical truth, so
+      this is a non-regression comparison against EFIT geometry, not a claim that EFIT is exact.</p>
+      <table>
+        <caption>Quoted endpoint gates from the committed demonstration receipt. Bounds are inclusive.</caption>
+        <thead>
+          <tr><th>Gate</th><th>Threshold</th><th>Measured figure</th><th>Receipt verdict</th><th>Interpretation</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>MAST achieved-class agreement</td>
+            <td>At least 7 of 12</td>
+            <td><strong>9/12</strong></td>
+            <td><strong>PASS</strong></td>
+            <td>Nine agree, two disagree, and one is unavailable; all twelve stay in the denominator.</td>
+          </tr>
+          <tr>
+            <td>Worst closed-boundary symmetric RMS</td>
+            <td>At most 0.55 m over convergence-eligible rows, without denominator shrinkage</td>
+            <td><strong>0.029447466 m</strong> on the sole eligible row; <strong>1/17</strong> eligible</td>
+            <td><strong>FAIL</strong></td>
+            <td>The numeric value is below the ceiling, but sixteen declared rows are excluded by
+            convergence or comparison-operand failures. The full fail-closed gate therefore does not pass.</td>
+          </tr>
+          <tr>
+            <td>Worst declared-row polished-saddle distance to finite EFIT X</td>
+            <td>At most 0.04 m across all 17 declared rows</td>
+            <td><strong>2.612246340 m</strong>; 16 finite, 1 unavailable</td>
+            <td><strong>FAIL</strong></td>
+            <td>The worst row is DIII-D <code>d3d_shot_0003ff34e7:44</code>. The unavailable MAST
+            row also remains a failure rather than leaving the cohort.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p><strong>Conjunctive outcome: FAIL.</strong> One passing gate cannot compensate for either
+      failing gate. In particular, the 0.029447 m eligible RMS is not reported as a passed full gate.</p>
+    </section>
+
+    <section id="method">
+      <h2>What is compared</h2>
+      <p>The MAST bank contains two source arms—<em>pure</em> and <em>mixed</em>—for each of six
+      frozen shot/slice identities. Geometry is converted from measured source COCOS 3 to DD COCOS 17;
+      R and Z are unit-like quantities, so their geometric conversion factor is exactly one. The DIII-D
+      cohort is the five declared competition frames. The comparison uses the achieved class derived
+      from the saddle-aware <code>class_margin</code>, the typed closed-boundary symmetric RMS, and the
+      polished Nova saddle to the nearest finite EFIT X point. It does not use the legacy diverted label.</p>
+      <p>The topology panels expose Nova's corrected saddle-aware hex domain partition, all finite O/X
+      candidates, selected landmarks, the selected wall point, the governed first-wall outline, and the
+      EFIT axis/X/LCFS overlay. Purple is <code>PRIVATE_FLUX</code>, pale blue is axis-connected core,
+      grey-green is common SOL, and pale grey is excluded material.</p>
+    </section>
+
+    <section id="mast">
+      <h2>MAST — twelve-arm bank and governed first walls</h2>
+      <p><strong>Governed geometry:</strong> the per-shot MAST machine-description first wall at
+      <code>wall.description_2d[0].limiter.unit[0].outline</code>, reopened at its written DD version
+      4.1.1 and serialized in each bank row as the 37-coordinate <code>wall_m</code> polyline. Pure and
+      mixed arms share the machine geometry for their shot; the wall is physical machine identity, not
+      an EFIT filament count, mesh, AMM subdivision, or solver-representation hash.</p>
+      <p>The bank retains <strong>1/12 converged</strong> and <strong>11/12 nonconverged</strong> arms:
+      ten quote <q><code>iteration_budget_exhausted</code></q>, one quotes
+      <q><code>NoQualifiedAxisError</code></q>, and 22086/43 mixed quotes
+      <q><code>converged</code></q>. The table reports raw comparisons even where convergence makes them
+      ineligible for the endpoint RMS gate.</p>
+      <table>
+        <caption>MAST convergence and comparison ledger. “Unavailable” is retained, never dropped.</caption>
+        <thead>
+          <tr><th>Shot/slice</th><th>Arm</th><th>Convergence state</th><th>Class agrees</th><th>Closed RMS (m)</th><th>Saddle to EFIT X (m)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>21978/35</td><td>pure</td><td><q><code>iteration_budget_exhausted</code></q></td><td>yes</td><td>unavailable</td><td>0.004343</td></tr>
+          <tr><td>21978/35</td><td>mixed</td><td><q><code>iteration_budget_exhausted</code></q></td><td>yes</td><td>0.033666</td><td>0.029953</td></tr>
+          <tr><td>21983/35</td><td>pure</td><td><q><code>iteration_budget_exhausted</code></q></td><td>yes</td><td>0.012418</td><td>0.012642</td></tr>
+          <tr><td>21983/35</td><td>mixed</td><td><q><code>iteration_budget_exhausted</code></q></td><td>yes</td><td>unavailable</td><td>0.038661</td></tr>
+          <tr><td>21985/51</td><td>pure</td><td><q><code>iteration_budget_exhausted</code></q></td><td>yes</td><td>unavailable</td><td>0.008112</td></tr>
+          <tr><td>21985/51</td><td>mixed</td><td><q><code>iteration_budget_exhausted</code></q></td><td>yes</td><td>unavailable</td><td>0.022407</td></tr>
+          <tr><td>21986/46</td><td>pure</td><td><q><code>iteration_budget_exhausted</code></q></td><td>no</td><td>0.181506</td><td>0.009637</td></tr>
+          <tr><td>21986/46</td><td>mixed</td><td><q><code>NoQualifiedAxisError</code></q></td><td>unavailable</td><td>unavailable</td><td>unavailable</td></tr>
+          <tr><td>21989/55</td><td>pure</td><td><q><code>iteration_budget_exhausted</code></q></td><td>yes</td><td>unavailable</td><td>0.010801</td></tr>
+          <tr><td>21989/55</td><td>mixed</td><td><q><code>iteration_budget_exhausted</code></q></td><td>no</td><td>0.236247</td><td>0.030354</td></tr>
+          <tr><td>22086/43</td><td>pure</td><td><q><code>iteration_budget_exhausted</code></q></td><td>yes</td><td>unavailable</td><td>0.011063</td></tr>
+          <tr><td>22086/43</td><td>mixed</td><td><q><code>converged</code></q></td><td>yes</td><td><strong>0.029447</strong></td><td>0.020559</td></tr>
+        </tbody>
+      </table>
+
+      <h3>MAST walls and topology, shown</h3>
+      <p>Each panel draws that row's governed first wall in black. The converged 22086/43 mixed panel is
+      the only row eligible for the RMS gate; the other eleven retain their failure banners.</p>
+      <div class="dashgrid even">
+        <figure><img src="/nova/figures/topology-visual-corroboration/01-mast-21978-35-pure.png" alt="MAST 21978/35 pure topology panel with the governed first wall, corrected hex domains, Nova landmarks, and EFIT geometry."><figcaption>21978/35 pure — nonconverged, iteration budget exhausted.</figcaption></figure>
+        <figure><img src="/nova/figures/topology-visual-corroboration/02-mast-21978-35-mixed.png" alt="MAST 21978/35 mixed topology panel with the governed first wall, corrected hex domains, Nova landmarks, and EFIT geometry."><figcaption>21978/35 mixed — nonconverged, iteration budget exhausted.</figcaption></figure>
+        <figure><img src="/nova/figures/topology-visual-corroboration/03-mast-21983-35-pure.png" alt="MAST 21983/35 pure topology panel with the governed first wall, corrected hex domains, Nova landmarks, and EFIT geometry."><figcaption>21983/35 pure — nonconverged, iteration budget exhausted.</figcaption></figure>
+        <figure><img src="/nova/figures/topology-visual-corroboration/04-mast-21983-35-mixed.png" alt="MAST 21983/35 mixed topology panel with the governed first wall, corrected hex domains, Nova landmarks, and EFIT geometry."><figcaption>21983/35 mixed — nonconverged, iteration budget exhausted.</figcaption></figure>
+        <figure><img src="/nova/figures/topology-visual-corroboration/05-mast-21985-51-pure.png" alt="MAST 21985/51 pure topology panel with the governed first wall, corrected hex domains, Nova landmarks, and EFIT geometry."><figcaption>21985/51 pure — nonconverged, iteration budget exhausted.</figcaption></figure>
+        <figure><img src="/nova/figures/topology-visual-corroboration/06-mast-21985-51-mixed.png" alt="MAST 21985/51 mixed topology panel with the governed first wall, corrected hex domains, Nova landmarks, and EFIT geometry."><figcaption>21985/51 mixed — nonconverged, iteration budget exhausted.</figcaption></figure>
+        <figure><img src="/nova/figures/topology-visual-corroboration/07-mast-21986-46-pure.png" alt="MAST 21986/46 pure topology panel with the governed first wall, corrected hex domains, Nova landmarks, and EFIT geometry."><figcaption>21986/46 pure — nonconverged, iteration budget exhausted.</figcaption></figure>
+        <figure><img src="/nova/figures/topology-visual-corroboration/08-mast-21986-46-mixed.png" alt="MAST 21986/46 mixed failure panel retaining the governed first wall and EFIT geometry when Nova landmarks are unavailable."><figcaption>21986/46 mixed — nonconverged, no qualified axis.</figcaption></figure>
+        <figure><img src="/nova/figures/topology-visual-corroboration/09-mast-21989-55-pure.png" alt="MAST 21989/55 pure topology panel with the governed first wall, corrected hex domains, Nova landmarks, and EFIT geometry."><figcaption>21989/55 pure — nonconverged, iteration budget exhausted.</figcaption></figure>
+        <figure><img src="/nova/figures/topology-visual-corroboration/10-mast-21989-55-mixed.png" alt="MAST 21989/55 mixed topology panel with the governed first wall, corrected hex domains, Nova landmarks, and EFIT geometry."><figcaption>21989/55 mixed — nonconverged, iteration budget exhausted.</figcaption></figure>
+        <figure><img src="/nova/figures/topology-visual-corroboration/11-mast-22086-43-pure.png" alt="MAST 22086/43 pure topology panel with the governed first wall, corrected hex domains, Nova landmarks, and EFIT geometry."><figcaption>22086/43 pure — nonconverged, iteration budget exhausted.</figcaption></figure>
+        <figure><img src="/nova/figures/topology-visual-corroboration/12-mast-22086-43-mixed.png" alt="Converged MAST 22086/43 mixed topology panel with the governed first wall, corrected hex domains, Nova landmarks, and EFIT geometry."><figcaption>22086/43 mixed — <strong>converged</strong>; shadow lies beyond the X-point cuts and the Nova and EFIT boundaries agree.</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="diiid">
+      <h2>DIII-D — five-frame bank and transported physical wall</h2>
+      <p><strong>Governed geometry:</strong> the repaired physical limiter ring in the DD 4.1.1 DIII-D
+      machine description, occurrence 0 at
+      <code>wall.description_2d[0].limiter.unit[0].outline</code>. It contains 84 R–Z coordinates,
+      has coordinate identity <code>sha256:a45135511161237ad38db8e6515b66bf79471b9eb719779281a37dbda9bfffd8</code>,
+      physical identity <code>993e2b368200bc74f58725ec41066f86022db84d91b9e835e4355fca425e8318</code>,
+      and semantic identity <code>sha256:35242df9c7860d9f190479d77cb6e68b1f2b2b0fbca8677643b42071a87e4d77</code>.
+      The exact digest-qualified coordinates were transported to the compute node because its private
+      machine-artifact cache mount was unavailable.</p>
+      <p><strong>Surface distinction:</strong> the five-frame forward solve receipt remains the
+      preregistered rectangular pseudo-wall arm with expansion 0.02. That fallback is not renamed or
+      credited as the DIII-D first wall. The governed repaired physical ring above is the wall used for
+      the topology operands and the panels below. This record joins both authorities without conflating them.</p>
+      <p>The bank retains <strong>0/5 converged</strong> frames. Frame 179 quotes
+      <q><code>NoQualifiedAxisError</code></q>; the other four quote
+      <q>public branch selector found no convergence-qualified diverted root</q>. Their available raw
+      geometry metrics remain visible but do not earn convergence-qualified credit.</p>
+      <table>
+        <caption>DIII-D convergence and comparison ledger.</caption>
+        <thead>
+          <tr><th>Shot/frame</th><th>Convergence state</th><th>Finite receipt</th><th>Class agrees</th><th>Closed RMS (m)</th><th>Saddle to EFIT X (m)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>00000c4a7b:179</code></td><td><q><code>NoQualifiedAxisError</code></q></td><td>no</td><td>yes</td><td>unavailable</td><td>1.528319</td></tr>
+          <tr><td><code>0003ff34e7:44</code></td><td><q>no convergence-qualified diverted root</q></td><td>yes</td><td>yes</td><td>unavailable</td><td><strong>2.612246</strong></td></tr>
+          <tr><td><code>001554e054:144</code></td><td><q>no convergence-qualified diverted root</q></td><td>yes</td><td>yes</td><td>unavailable</td><td>0.049187</td></tr>
+          <tr><td><code>002495e835:146</code></td><td><q>no convergence-qualified diverted root</q></td><td>yes</td><td>yes</td><td>0.206933</td><td>0.426666</td></tr>
+          <tr><td><code>0040ca9bdc:137</code></td><td><q>no convergence-qualified diverted root</q></td><td>yes</td><td>yes</td><td>0.231449</td><td>0.429621</td></tr>
+        </tbody>
+      </table>
+
+      <h3>DIII-D repaired wall and topology, shown</h3>
+      <p>The black outline in every panel is the governed repaired physical limiter ring. Frame 179
+      deliberately keeps the wall and EFIT geometry visible even though Nova's partition and landmarks
+      are unavailable.</p>
+      <div class="dashgrid even">
+        <figure><img src="/nova/figures/topology-visual-corroboration/13-diiid-d3d_shot_00000c4a7b-179.png" alt="DIII-D frame 00000c4a7b:179 failure panel with the transported repaired physical wall and EFIT geometry retained."><figcaption><code>00000c4a7b:179</code> — no qualified axis; governed wall and EFIT labels retained.</figcaption></figure>
+        <figure><img src="/nova/figures/topology-visual-corroboration/14-diiid-d3d_shot_0003ff34e7-44.png" alt="DIII-D frame 0003ff34e7:44 topology panel with the transported repaired physical wall, Nova landmarks, and EFIT geometry."><figcaption><code>0003ff34e7:44</code> — nonconverged and the worst saddle distance.</figcaption></figure>
+        <figure><img src="/nova/figures/topology-visual-corroboration/15-diiid-d3d_shot_001554e054-144.png" alt="DIII-D frame 001554e054:144 topology panel with the transported repaired physical wall, Nova landmarks, and EFIT geometry."><figcaption><code>001554e054:144</code> — nonconverged.</figcaption></figure>
+        <figure><img src="/nova/figures/topology-visual-corroboration/16-diiid-d3d_shot_002495e835-146.png" alt="DIII-D frame 002495e835:146 topology panel with the transported repaired physical wall, Nova landmarks, and EFIT geometry."><figcaption><code>002495e835:146</code> — nonconverged.</figcaption></figure>
+        <figure><img src="/nova/figures/topology-visual-corroboration/17-diiid-d3d_shot_0040ca9bdc-137.png" alt="DIII-D frame 0040ca9bdc:137 topology panel with the transported repaired physical wall, Nova landmarks, and EFIT geometry."><figcaption><code>0040ca9bdc:137</code> — nonconverged.</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="wall-ladder">
+      <h2>MAST wall-resolution ladder</h2>
+      <p>The isolated 21985/51 passive-inclusive, reference-seeded diverted terminal holds the plasma
+      terminal, residual trajectory, conductor currents, plasma carrier, seed field, and source policy
+      fixed while changing only the wall coordinate and its response rows. The authored 37-row control
+      reproduces its coordinate, seed, and three operator blocks exactly. The count ladder is valid at
+      36, 72, 144, and 288 targets.</p>
+      <table>
+        <caption>Wall-only resolution ladder from the committed receipt.</caption>
+        <thead><tr><th>Wall targets</th><th>Samples / authored segment</th><th>Maximum spacing / plasma pitch</th><th>Class</th><th>Boundary flux (Wb)</th><th>Contact movement</th></tr></thead>
+        <tbody>
+          <tr><td>37 authored control</td><td>authored</td><td>not applicable</td><td>diverted</td><td>−0.222648276</td><td>unavailable</td></tr>
+          <tr><td>36</td><td>1</td><td>17.336</td><td>diverted</td><td>−0.222648276</td><td>unavailable</td></tr>
+          <tr><td>72</td><td>2</td><td>8.668</td><td>diverted</td><td>−0.222648276</td><td>unavailable</td></tr>
+          <tr><td>144</td><td>4</td><td>4.334</td><td>diverted</td><td>−0.222648276</td><td>unavailable</td></tr>
+          <tr><td>288</td><td>8</td><td>2.167</td><td>diverted</td><td>−0.222648276</td><td>unavailable</td></tr>
+        </tbody>
+      </table>
+      <p>The topology class and boundary flux are unchanged through the prescribed ladder, but no rung is
+      plasma-equivalent: the finest maximum spacing is still 2.167 plasma pitches. Contact-distance
+      convergence is unavailable because the held terminal has no finite limiter coordinate or predicted
+      closed boundary. The receipt therefore does not claim that the limiter operand has converged by 288 targets.</p>
+    </section>
+
+    <section id="remediation">
+      <h2>Open path: solver convergence, with no result weakening</h2>
+      <p>The corrected hex topology authority is no longer the open mechanism: the 17 regenerated panels
+      show the repaired domain partition, and the one converged MAST arm has no private-flux labels inside
+      its Nova closed boundary. The endpoint remains failed because the fixed cohort has insufficient
+      convergence and one extreme DIII-D saddle mismatch.</p>
+      <p>The remediation is to recover convergence for the declared rows—ten MAST iteration-budget
+      exhaustions, the MAST no-qualified-axis row, the DIII-D no-qualified-axis row, and the four DIII-D
+      rows for which the public selector found no convergence-qualified diverted root—then regenerate the
+      bank, topology operands, panels, wall ladder where its terminal changes, and the endpoint receipt in
+      that order. The path does <strong>not</strong> permit looser thresholds, row removal or substitution,
+      denominator shrinkage, label-identity seeds, conversion of unavailable operands to zeros, or calling
+      a raw metric from a nonconverged row a passing gate.</p>
+    </section>
+
+    <section id="artifacts">
+      <h2>Consumed artifact ledger</h2>
+      <p>Every artifact consumed by this record is linked below with its full SHA-256. The score receipt's
+      input hashes exactly match the MAST and DIII-D bank hashes listed here.</p>
+      <table>
+        <caption>Inputs, governed wall authority, panel operands, and endpoint evidence.</caption>
+        <thead><tr><th>Artifact</th><th>Role</th><th>SHA-256</th></tr></thead>
+        <tbody>
+          <tr><td><a href="/nova/figures/primary-xpoint-evidence/efit-topology-corroboration.json"><code>docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json</code></a></td><td>Fresh twelve-arm MAST bank</td><td><code>2420281423dcd7181f264ada0d13a087aa2213ebdfbc5f5ee9c1c1fa97d87725</code></td></tr>
+          <tr><td><a href="/nova/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json"><code>docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json</code></a></td><td>Fresh five-frame DIII-D bank; preregistered pseudo-wall solve surface retained</td><td><code>3f6afda791080bce66d473c56b079c93c0480f2de89e9d9b13cb2442c1b75ad9</code></td></tr>
+          <tr><td><a href="/nova/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.receipt.json"><code>docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.receipt.json</code></a></td><td>Repaired physical-ring authority and semantic identity</td><td><code>d763f910ab4b6e11892e698499b25476fc09776f49f5ce81ab10b9690dd78108</code></td></tr>
+          <tr><td><a href="/nova/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.manifest.json"><code>docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.manifest.json</code></a></td><td>Governed DD 4.1.1 machine-artifact manifest</td><td><code>c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e</code></td></tr>
+          <tr><td><a href="/nova/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc"><code>docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc</code></a></td><td>Machine-description IDS containing the repaired wall</td><td><code>11a12df0c2bd70d6dd7a461d2da11181479b16c6cf89602f226ffa353b0879e0</code></td></tr>
+          <tr><td><a href="/nova/evidence/topology-visual-corroboration.html"><code>docs/evidence/topology-visual-corroboration.html</code></a></td><td>Seventeen-row visual evidence bundle</td><td><code>31db3018a2b06b87064cf5e86949f08f0a5111545c662ea48c8194ce3d178fcf</code></td></tr>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/mast-topology-operands.metadata.json"><code>docs/figures/topology-visual-corroboration/mast-topology-operands.metadata.json</code></a></td><td>MAST row identities and convergence quotations</td><td><code>a0f5eba6e5d447e43e4f74c7e81962d4796d3cae91a43d659a948e1c3f838f89</code></td></tr>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/mast-topology-operands.npz"><code>docs/figures/topology-visual-corroboration/mast-topology-operands.npz</code></a></td><td>Exact MAST panel operands</td><td><code>c4f7178cbee88d18bb7dc522b9c2aecebaedaa4f7acfc6d689025d006a92d3cd</code></td></tr>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/diiid-topology-operands.metadata.json"><code>docs/figures/topology-visual-corroboration/diiid-topology-operands.metadata.json</code></a></td><td>DIII-D row identities and convergence quotations</td><td><code>6631fde540f700968e0ea168e500f5914133f0759ba277855a78c6fb5be1350c</code></td></tr>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/diiid-topology-operands.npz"><code>docs/figures/topology-visual-corroboration/diiid-topology-operands.npz</code></a></td><td>Exact DIII-D panel operands including the governed wall</td><td><code>504b0490c633f54229ab8104be371abb5431c013066c66d55fb33729aaa5b3b4</code></td></tr>
+          <tr><td><a href="/nova/figures/efit-baseline-demonstration/wall-resolution-ladder/receipt.json"><code>docs/figures/efit-baseline-demonstration/wall-resolution-ladder/receipt.json</code></a></td><td>Isolated MAST wall-resolution ladder</td><td><code>a06ff6ff8e002a316d1ed7b1a232c5982583fb266ce69fcf6c09d2b2f4ac363a</code></td></tr>
+          <tr><td><a href="/nova/figures/efit-baseline-demonstration/demonstration-score/receipt.json"><code>docs/figures/efit-baseline-demonstration/demonstration-score/receipt.json</code></a></td><td>Three-gate endpoint receipt and FAIL verdict</td><td><code>dddcbde0f612914450e7c4fb3079ff0be4fe3585ca160772f590f1540f67c577</code></td></tr>
+        </tbody>
+      </table>
+
+      <h3>Seventeen panel files</h3>
+      <table>
+        <caption>Every rendered panel consumed above, in declared cohort order.</caption>
+        <thead><tr><th>Panel artifact</th><th>SHA-256</th></tr></thead>
+        <tbody>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/01-mast-21978-35-pure.png"><code>01-mast-21978-35-pure.png</code></a></td><td><code>65f37af07c1919e322fffcb2e0b3c48639bd707b15e875d916ce3358a97dd223</code></td></tr>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/02-mast-21978-35-mixed.png"><code>02-mast-21978-35-mixed.png</code></a></td><td><code>fed8693ebfe69303f119e64e3beb50f6032ab9c71c5ce5be2a48a9b1903025e2</code></td></tr>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/03-mast-21983-35-pure.png"><code>03-mast-21983-35-pure.png</code></a></td><td><code>c6c4f267ec5a5299b73530ee9b88af97d3b9990b75aad2ac2826b830e9dd62ca</code></td></tr>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/04-mast-21983-35-mixed.png"><code>04-mast-21983-35-mixed.png</code></a></td><td><code>afa5ccc2942dfaf1f3bd75f436e00eee96f35debdb14730933dbb33145f14713</code></td></tr>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/05-mast-21985-51-pure.png"><code>05-mast-21985-51-pure.png</code></a></td><td><code>84477e8deecddcb0e6abc4a942b514caff7e974ca6c15fb476342d3876bd92a5</code></td></tr>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/06-mast-21985-51-mixed.png"><code>06-mast-21985-51-mixed.png</code></a></td><td><code>46c0551bae9e640e9b49815cac0dee72b17da9cbf107f2a5a0375891dc8555bc</code></td></tr>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/07-mast-21986-46-pure.png"><code>07-mast-21986-46-pure.png</code></a></td><td><code>58d52e9adb4e656febd79c0da0b430e8c243457fc0f0cf7fc019b1c9e3072a81</code></td></tr>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/08-mast-21986-46-mixed.png"><code>08-mast-21986-46-mixed.png</code></a></td><td><code>5f20494796e36e8329e13e4f0c3c98e77f8eee384c06f5ee9e8d8fe953d61b6b</code></td></tr>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/09-mast-21989-55-pure.png"><code>09-mast-21989-55-pure.png</code></a></td><td><code>0f9924dc83007ba14e797e021485d37b0553e45d3be33d4bff13c8c81bf9b5af</code></td></tr>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/10-mast-21989-55-mixed.png"><code>10-mast-21989-55-mixed.png</code></a></td><td><code>f58341181f9d74a0caf5ac7ac3cbb42eec1bdcac10eae122645acfba8ac1c35b</code></td></tr>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/11-mast-22086-43-pure.png"><code>11-mast-22086-43-pure.png</code></a></td><td><code>b28b8552bca63fa4f15617e15697a30fe2a7a41efd9278c3c41aefb490e6f49e</code></td></tr>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/12-mast-22086-43-mixed.png"><code>12-mast-22086-43-mixed.png</code></a></td><td><code>2c47719f6af31a00ff5605b62db5c03ff8f4503d881e9349211f12a31af93e63</code></td></tr>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/13-diiid-d3d_shot_00000c4a7b-179.png"><code>13-diiid-d3d_shot_00000c4a7b-179.png</code></a></td><td><code>1b25a557e979f8be8785f356adaa9e7602fa13730cd537d7786d13a3ceedecb0</code></td></tr>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/14-diiid-d3d_shot_0003ff34e7-44.png"><code>14-diiid-d3d_shot_0003ff34e7-44.png</code></a></td><td><code>89f05efa51ebafd8ad570d972600b04250afe590be1a2cda39d88f69fe3ad642</code></td></tr>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/15-diiid-d3d_shot_001554e054-144.png"><code>15-diiid-d3d_shot_001554e054-144.png</code></a></td><td><code>a0ffbba095c2ec796bedf43a0bd4909b9463a093be41818c77e3735bf057c1b3</code></td></tr>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/16-diiid-d3d_shot_002495e835-146.png"><code>16-diiid-d3d_shot_002495e835-146.png</code></a></td><td><code>12e9dad218cb44a03e6f054b49e66013befac803d13524a0bb0520b69d8a0ad9</code></td></tr>
+          <tr><td><a href="/nova/figures/topology-visual-corroboration/17-diiid-d3d_shot_0040ca9bdc-137.png"><code>17-diiid-d3d_shot_0040ca9bdc-137.png</code></a></td><td><code>c03f23c9985018a823e136b75bd5af257aac65eed519da4f2a5b7b4a2cd23c74</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>

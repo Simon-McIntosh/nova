@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T15:40:56",
+  "updated": "2026-08-27T15:42:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -57374,9 +57374,107 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260827T131644969629-pod-sup-residual-localization",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-sup-residual-localization",
+        "node_definition": {
+          "done_when": "One SLURM job (H200 sized to share or an all_debug CPU lane, at most two hours, EXIT_MARKER=0) reconstructs the promotion-249 minimum iterate on current origin/main and a report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/sup-residual-localization.md gives the twenty largest residual cells with their flat indices, R and Z coordinates, residual magnitudes and their positions relative to the magnetic axis, the selected primary X-point, the plasma boundary and the declared support edge; the ratio of the sup residual to the residual root-mean-square as a concentration measure beside the same ratio at three healthy earlier iterates; whether the top cells are the same cells across promotions 240 to 260 or migrate; and the verdict CONCENTRATED-AT-FEATURE naming the feature, or DISTRIBUTED, together with its implication for whether targeting the sup norm in the merit or refining the discretization at that feature is the productive next step; no repository file modified",
+          "estimated_hours": null,
+          "goal": "The spatial character of the residual that the locked relative-sup criterion measures, at the promotion-249 minimum iterate, deciding whether the remaining error is concentrated at one resolvable feature or distributed across the domain",
+          "id": "pod-sup-residual-localization",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T131644969629-pod-sup-residual-localization/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/sup-residual-localization.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T13:16:52Z",
+        "completed_at": "2026-08-27T13:42:52Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1560,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1560,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "261461813ad03e766f927664178e0d48fc975dc1",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "promotion-249 iterate reconstructed and checkpointed; top-20 census, sup-over-RMS concentration and 240-260 migration measured; EXIT_MARKER=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T131644969629-pod-sup-residual-localization/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T131644969629-pod-sup-residual-localization/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 3763456,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3926345,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 16389,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2146
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1120
+    "_version": 1121
   }
 }

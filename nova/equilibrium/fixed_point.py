@@ -766,24 +766,41 @@ def picard(
     evaluations: int,
     relaxation: float = 0.5,
     shadow_mask_fn: Callable[[jax.Array], jax.Array] | None = None,
+    promoted_shadow_mask_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
+    shadowed_map_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Relaxed Picard iteration with per-evaluation residual accounting."""
     initial = _solver_state(initial, precision)
 
     observe_shadows = shadow_mask_fn is not None
+    carry_shadows = promoted_shadow_mask_fn is not None
+    if carry_shadows != (shadowed_map_fn is not None):
+        raise ValueError("promoted shadow masks require a shadowed map")
+    if carry_shadows and not observe_shadows:
+        raise ValueError("promoted shadow masks require an initial shadow mask")
 
     def shadow_mask(state):
         if observe_shadows:
             return jnp.ravel(jnp.asarray(shadow_mask_fn(state), dtype=bool))
         return jnp.zeros(1, dtype=bool)
 
+    def mapped_with_shadow(state, shadow):
+        if carry_shadows:
+            return shadowed_map_fn(state, shadow)
+        return map_fn(state)
+
+    def promoted_shadow(state, previous):
+        if carry_shadows:
+            return jnp.ravel(promoted_shadow_mask_fn(state, previous))
+        return shadow_mask(state)
+
     def body(index, carry):
         state, trace, previous_shadow, shadow_changes = carry
-        mapped = map_fn(state)
+        mapped = mapped_with_shadow(state, previous_shadow)
         trace = trace.at[index].set(_relative_residual(mapped, state))
         candidate = state + relaxation * (mapped - state)
-        current_shadow = shadow_mask(candidate)
+        current_shadow = promoted_shadow(candidate, previous_shadow)
         changed = jnp.sum(current_shadow != previous_shadow, dtype=jnp.int32)
         shadow_changes = shadow_changes.at[index].set(
             jnp.where(observe_shadows, changed, -1)
@@ -817,6 +834,8 @@ def anderson(
     step_cap: float = 2.0,
     ridge: float = 1.0e-10,
     shadow_mask_fn: Callable[[jax.Array], jax.Array] | None = None,
+    promoted_shadow_mask_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
+    shadowed_map_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Safeguarded Anderson acceleration of the relaxed iteration.
@@ -836,11 +855,26 @@ def anderson(
     initial = _solver_state(initial, precision)
     n_flat = initial.shape[0]
     observe_shadows = shadow_mask_fn is not None
+    carry_shadows = promoted_shadow_mask_fn is not None
+    if carry_shadows != (shadowed_map_fn is not None):
+        raise ValueError("promoted shadow masks require a shadowed map")
+    if carry_shadows and not observe_shadows:
+        raise ValueError("promoted shadow masks require an initial shadow mask")
 
     def shadow_mask(state):
         if observe_shadows:
             return jnp.ravel(jnp.asarray(shadow_mask_fn(state), dtype=bool))
         return jnp.zeros(1, dtype=bool)
+
+    def mapped_with_shadow(state, shadow):
+        if carry_shadows:
+            return shadowed_map_fn(state, shadow)
+        return map_fn(state)
+
+    def promoted_shadow(state, previous):
+        if carry_shadows:
+            return jnp.ravel(promoted_shadow_mask_fn(state, previous))
+        return shadow_mask(state)
 
     def body(index, carry):
         (
@@ -854,7 +888,7 @@ def anderson(
             previous_shadow,
             shadow_changes,
         ) = carry
-        mapped = map_fn(state)
+        mapped = mapped_with_shadow(state, previous_shadow)
         f = mapped - state
         trace = trace.at[index].set(_relative_residual(mapped, state))
         relaxed = state + relaxation * f
@@ -887,7 +921,7 @@ def anderson(
         )
         accept = (index >= warmup) & ~grew & jnp.all(jnp.isfinite(mixed))
         state_next = jnp.where(accept, mixed, relaxed)
-        current_shadow = shadow_mask(state_next)
+        current_shadow = promoted_shadow(state_next, previous_shadow)
         changed = jnp.sum(current_shadow != previous_shadow, dtype=jnp.int32)
         shadow_changes = shadow_changes.at[index].set(
             jnp.where(observe_shadows, changed, -1)
@@ -1324,6 +1358,8 @@ def newton_krylov(
     admissibility_fn: Callable[[jax.Array], jax.Array] | None = None,
     previous_admitted_state: jax.Array | None = None,
     shadow_mask_fn: Callable[[jax.Array], jax.Array] | None = None,
+    promoted_shadow_mask_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
+    shadowed_map_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Exact-tangent Jacobian-free Newton–Krylov on the fixed-point residual.
@@ -1404,19 +1440,34 @@ def newton_krylov(
     trace_length = warmup + newton_steps * stride
     change_length = warmup + newton_steps
     observe_shadows = shadow_mask_fn is not None
+    carry_shadows = promoted_shadow_mask_fn is not None
+    if carry_shadows != (shadowed_map_fn is not None):
+        raise ValueError("promoted shadow masks require a shadowed map")
+    if carry_shadows and not observe_shadows:
+        raise ValueError("promoted shadow masks require an initial shadow mask")
 
     def shadow_mask(state):
         if observe_shadows:
             return jnp.ravel(jnp.asarray(shadow_mask_fn(state), dtype=bool))
         return jnp.zeros(1, dtype=bool)
 
+    def mapped_with_shadow(state, shadow):
+        if carry_shadows:
+            return shadowed_map_fn(state, shadow)
+        return map_fn(state)
+
+    def promoted_shadow(state, previous):
+        if carry_shadows:
+            return jnp.ravel(promoted_shadow_mask_fn(state, previous))
+        return shadow_mask(state)
+
     def warm_body(index, carry):
         state, trace, amplification, previous_shadow, shadow_changes = carry
-        mapped = map_fn(state)
+        mapped = mapped_with_shadow(state, previous_shadow)
         trace = trace.at[index].set(_relative_residual(mapped, state))
         candidate = state + relaxation * (mapped - state)
         amplification = _observe_increment(amplification, state, candidate, True)
-        current_shadow = shadow_mask(candidate)
+        current_shadow = promoted_shadow(candidate, previous_shadow)
         changed = jnp.sum(current_shadow != previous_shadow, dtype=jnp.int32)
         shadow_changes = shadow_changes.at[index].set(
             jnp.where(observe_shadows, changed, -1)
@@ -1443,7 +1494,11 @@ def newton_krylov(
 
     def newton_body(carry):
         state = carry.state
-        mapped, tangent = jax.linearize(map_fn, state)
+
+        def frozen_map(candidate):
+            return mapped_with_shadow(candidate, carry.shadow_mask)
+
+        mapped, tangent = jax.linearize(frozen_map, state)
         residual_vector = mapped - state
         nonlinear_residual = _relative_residual(mapped, state)
         base = warmup + carry.attempted * stride
@@ -1509,7 +1564,7 @@ def newton_krylov(
 
             def promoted_state(_):
                 promotion = _backtracked_promotion(
-                    map_fn,
+                    frozen_map,
                     state,
                     step,
                     relaxation * residual_vector,
@@ -1525,7 +1580,7 @@ def newton_krylov(
 
                 def rebuild_model(_):
                     return _rebuilt_model_promotion(
-                        map_fn,
+                        frozen_map,
                         state,
                         nonlinear_residual,
                         gmres_iterations=gmres_iterations,
@@ -1584,7 +1639,10 @@ def newton_krylov(
                         ),
                     ),
                 )
-                candidate_shadow = shadow_mask(candidate)
+                proposed_shadow = promoted_shadow(candidate, measured.shadow_mask)
+                candidate_shadow = jnp.where(
+                    promotion_accepted, proposed_shadow, measured.shadow_mask
+                )
                 changed = jnp.sum(
                     candidate_shadow != measured.shadow_mask, dtype=jnp.int32
                 )

@@ -406,6 +406,25 @@ class ForwardFluxOperator:
             raise ValueError("cell-average weights must carry five fixed entries")
         if self.inside_material.shape != (self.grid.node_number,):
             raise ValueError("inside_material must carry one flag per grid node")
+        wall_heights = np.unique(np.asarray(self.wall.coordinate[:, 1]))
+        wall_steps = np.diff(wall_heights)
+        positive_steps = wall_steps[wall_steps > 0.0]
+        self._wall_height_hysteresis = jnp.asarray(
+            0.25 * np.min(positive_steps)
+            if positive_steps.size
+            else np.sqrt(np.finfo(np.float64).eps),
+            dtype=self.area.dtype,
+        )
+        grid_coordinate = np.asarray(self.grid.coordinate)
+        radial_steps = np.diff(np.unique(grid_coordinate[:, 0]))
+        vertical_steps = np.diff(np.unique(grid_coordinate[:, 1]))
+        grid_steps = np.concatenate(
+            (radial_steps[radial_steps > 0.0], vertical_steps[vertical_steps > 0.0])
+        )
+        self._x_qualification_distance = jnp.asarray(
+            1.5 * np.max(grid_steps) if grid_steps.size else 0.0,
+            dtype=self.area.dtype,
+        )
         if (
             self.prescribed_field is not None
             and self.prescribed_field.response.shape[0] != self.node_number
@@ -535,6 +554,12 @@ class ForwardFluxOperator:
         self, physical, topology: TopologyState
     ) -> jax.Array:
         """Read the signed reachable-wall minus X-point flux margin."""
+        return self._connectivity_read(physical, topology, classify=True)[
+            "class_margin"
+        ]
+
+    def _connectivity_read(self, physical, topology: TopologyState, *, classify):
+        """Return one saddle-aware boundary read for classification or masking."""
         connectivity_radius, connectivity_height, connectivity_shape = (
             self.connectivity_grid_axes()
         )
@@ -545,7 +570,15 @@ class ForwardFluxOperator:
         )
         radial_count, vertical_count = connectivity_shape
         _axis_seed, connectivity_material = self.connectivity_axis_seed(topology.axis)
-        reading = traced_boundary_read(
+        options = (
+            {
+                "classification_x": vmap_x,
+                "classification_wall": classification_wall,
+            }
+            if classify
+            else {}
+        )
+        return traced_boundary_read(
             grid_flux.reshape((radial_count, vertical_count)).T,
             connectivity_radius,
             connectivity_height,
@@ -560,10 +593,8 @@ class ForwardFluxOperator:
             self.wall.coordinate[:, 0],
             self.wall.coordinate[:, 1],
             wall_flux,
-            classification_x=vmap_x,
-            classification_wall=classification_wall,
+            **options,
         )
-        return reading["class_margin"]
 
     def topology_margin(self, psi) -> jax.Array:
         """Return the emergent continuous topology margin of one flux map.
@@ -893,11 +924,13 @@ class ForwardFluxOperator:
         masks, _topology = self.read(psi, requested_class)
         return masks
 
-    def residual_shadow_mask(self, psi, requested_class=None) -> jax.Array:
+    def residual_shadow_mask(
+        self, psi, requested_class=None, previous_shadow=None
+    ) -> jax.Array:
         """Return the composed flood and wall-height residual exclusion."""
 
         flood_shadow, wall_shadow = self.residual_shadow_components(
-            psi, requested_class
+            psi, requested_class, previous_shadow
         )
         direct_sample_shadow = jnp.zeros(
             self.node_number - self.physical_node_number, dtype=bool
@@ -905,7 +938,7 @@ class ForwardFluxOperator:
         return jnp.concatenate((flood_shadow, wall_shadow, direct_sample_shadow))
 
     def residual_shadow_components(
-        self, psi, requested_class=None
+        self, psi, requested_class=None, previous_shadow=None
     ) -> tuple[jax.Array, jax.Array]:
         """Return independent interior-flood and wall-height shadow components."""
 
@@ -913,10 +946,22 @@ class ForwardFluxOperator:
         masks, topology, _connected, _admitted = self._fixed_design_read(
             physical, requested_class
         )
-        grid_flux, _wall_flux = self.topology.split_flux_map(physical)
-        _vmap_o, vmap_x = self._fixed_design_topology.grid(grid_flux)
+        reading = self._connectivity_read(physical, topology, classify=False)
+        if previous_shadow is None:
+            previous_wall_shadow = jnp.zeros(self.wall.node_number, dtype=bool)
+        else:
+            previous_wall_shadow = jnp.asarray(previous_shadow, dtype=bool)[
+                self.grid.node_number : self.physical_node_number
+            ]
         wall_shadow = wall_height_shadow_mask(
-            self.wall.coordinate[:, 1], topology.axis[1], vmap_x
+            self.wall.coordinate[:, 1],
+            topology.axis[1],
+            topology.x_point,
+            reading["xset"],
+            reading["private_wall_node_mask"],
+            previous_wall_shadow,
+            self._wall_height_hysteresis,
+            self._x_qualification_distance,
         )
         return masks.private_flux, wall_shadow
 
@@ -956,10 +1001,13 @@ class ForwardFluxOperator:
         )
         return self._exclude_shadow_residual(psi, mapped, requested_class)
 
-    def _exclude_shadow_residual(self, psi, mapped, requested_class=None) -> jax.Array:
+    def _exclude_shadow_residual(
+        self, psi, mapped, requested_class=None, shadow=None
+    ) -> jax.Array:
         """Copy trial flux through cells excluded from the residual domain."""
 
-        shadow = self.residual_shadow_mask(psi, requested_class)
+        if shadow is None:
+            shadow = self.residual_shadow_mask(psi, requested_class)
         return jnp.where(shadow, psi, mapped)
 
     def residual(
@@ -982,5 +1030,19 @@ class ForwardFluxOperator:
             """Return the free-boundary flux map of one trial flux."""
             image = external + self.internal(psi, requested_class, target_current)
             return self._exclude_shadow_residual(psi, image, requested_class)
+
+        return mapped
+
+    def flux_map_with_shadow(
+        self, current=None, requested_class=None, target_current=None
+    ) -> Callable[[jax.Array, jax.Array], jax.Array]:
+        """Return a fixed-point map evaluated with one promoted shadow mask."""
+        external = self.external(current)
+
+        def mapped(psi: jax.Array, shadow: jax.Array) -> jax.Array:
+            image = external + self.internal(psi, requested_class, target_current)
+            return self._exclude_shadow_residual(
+                psi, image, requested_class, shadow=shadow
+            )
 
         return mapped

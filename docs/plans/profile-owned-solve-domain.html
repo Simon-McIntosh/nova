@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="76">
+<meta name="plan-version" content="77">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -315,6 +315,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260827-height-limit-directive" data-who="reckon-d8-s16-landing" data-when="2026-08-27T06:45:00+00:00">
     <div class="r-comment-body">LEAD DESIGN DIRECTIVE (2026-08-27): with the free boundary now supplied by the flood/shadow approach, augment the shadow with the previous height limits on the WALL side — every wall node above an upper X-point or below a lower X-point is excluded — to stabilize the solve. Objective: as few binary mask changes per promotion as possible; the mask is the likely stall cause since these convergence issues did not exist before the fine-grained participation. Scope guard: the height limits augment wall-node exclusion only; the saddle-aware hex flood remains the sole interior/topology authority, and the analytic geometry batteries pin that no interior regression can ride in. Implementation gates: per-promotion binary flip-count telemetry must show a measured reduction against the recorded baselines, and the 650-ceiling convergence diagnostic re-runs on the augmented mask. The running mask-flip/excursion correlation supplies the causal evidence for the record.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260827T155535082294-pod-wall-ladder-regenerate" data-who="wall-surface" data-when="2026-08-27T16:16:11Z">
+    <div class="r-comment-body"><p>Ladder regenerated on the repaired stack: terminal boundary flux moved to -0.22265922 Wb with a new plasma-flux digest, finest-pair movement still 0.0 Wb and contact still truthfully null; HOLD stands</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260826T111438066261-pod-seed-repair" data-who="fixed-boundary-seed" data-when="2026-08-26T12:33:21Z">
     <div class="r-comment-body"><p>The continuous fitted axis now seeds its owning material cell; frozen and earlier-window empty components recover, while later residual-domain convergence remains open.</p></div>

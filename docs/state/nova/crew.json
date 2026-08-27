@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T23:57:52",
+  "updated": "2026-08-28T01:13:48",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -59390,9 +59390,114 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T215815329436-ebd-panels-repaired-stack",
+        "plan": "efit-baseline-demonstration",
+        "section": "",
+        "node": "ebd-panels-repaired-stack",
+        "node_definition": {
+          "done_when": "Both operand caches are removed and rebuilt from the current bank authorities with their source identities recorded; the generator runs to EXIT_MARKER=0 rendering 17 of 17 panels, each showing the hex flood shadow, every candidate X-point with the selected primary distinguished, the primary O-point, the closest wall point and the EFIT and LCFS overlay, with every retained failure row bannered by its exact failure class; docs/evidence/topology-visual-corroboration.html names the current source identities and reckon audit-doc reports no ERRORs; representative panels are visually inspected at original resolution confirming no private-flux label inside any converged closed boundary; if the run cannot finish inside one hour it is submitted to a non-debug lane admitting four hours instead; caches, PNGs, HTML and logs are committed",
+          "estimated_hours": null,
+          "goal": "All seventeen topology panels and the evidence document regenerated from the freshly landed repaired-stack banks, so the visual gate reflects the corrected anchor, partition, mask and solver rather than the superseded state",
+          "id": "ebd-panels-repaired-stack",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T215815329436-ebd-panels-repaired-stack/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "docs/evidence/topology-visual-corroboration.html",
+            "docs/figures/topology-visual-corroboration"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "topology-visuals",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T21:58:23Z",
+        "completed_at": "2026-08-27T23:12:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4470,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4470,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "6e83161ffb894caa9e0577d8af1ac84c3f6ab685",
+        "commits": [
+          "4de75e7a3295d23c747ea8f0b081aca60466f199"
+        ],
+        "changed_lines": {
+          "added": 42,
+          "removed": 94,
+          "files": 27
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "generator 17/17 EXIT_MARKER=0 from empty caches; verification 2/2 identities, 204/204 numeric arrays, 17/17 project-absolute sources, 15/15 failure annotations, 0 private-flux inside the converged boundary; audit-doc 0 ERRORs; coordinator visual inspection",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/topology-visual-corroboration/artifact-verification.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T215815329436-ebd-panels-repaired-stack/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e97-9cbb-7f42-a9b6-77efed646626",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11486720,
+            "cached_input_tokens_cumulative": 19248000,
+            "input_tokens": 11749538,
+            "input_tokens_cumulative": 19731047,
+            "output_tokens": 8463,
+            "output_tokens_cumulative": 27296,
+            "reasoning_output_tokens": 893,
+            "reasoning_output_tokens_cumulative": 5132
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1139
+    "_version": 1140
   }
 }

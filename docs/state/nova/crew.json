@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T07:35:01",
+  "updated": "2026-08-27T07:53:15",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -54560,9 +54560,114 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T053511341561-pod-exhaustion-recovery-path",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-exhaustion-recovery-path",
+        "node_definition": {
+          "done_when": "The promotion seam in nova/equilibrium/fixed_point.py gains a fixed-trip masked recovery branch (no data-dependent while) that activates only on ladder exhaustion, produces a re-shaped candidate (trust-region radius reduction or continuation damping of the operator, whichever the existing machinery supports with the smaller change, stated in the manifest), and still refuses any candidate that amplifies; receipts record recovery activations per promotion; a regression built from the exhaustion signature (all factors to 1/32 failing) proves the solve continues past it without amplification; focused fixed-point and coupled files pass eager and JIT with zero new failures vs current HEAD; conservation acceptance unchanged; ruff clean",
+          "estimated_hours": null,
+          "goal": "A recovery path after backtracking exhaustion completing the locked globalization: when no factor down the fixed ladder satisfies sufficient decrease, the promotion re-shapes the step through a fixed-shape trust-region or damped-continuation fallback instead of terminating, preserving the no-amplification invariant, the locked 1e-8 criterion, and the profile-owned support",
+          "id": "pod-exhaustion-recovery-path",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T053511341561-pod-exhaustion-recovery-path/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_fixed_point.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T05:35:18Z",
+        "completed_at": "2026-08-27T05:52:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1061,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1061,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "3785215fd9d830663e669df2a4e7a60f7cb30960",
+        "commits": [
+          "c84df8f789c090867a1c0d112439eb9923a533ba"
+        ],
+        "changed_lines": {
+          "added": 102,
+          "removed": 13,
+          "files": 2
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/test_fixed_point.py (27) + recovery/refusal contracts (4) + monotone-recovery assertion + focused lanes zero new failures + conservation unchanged",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T053511341561-pod-exhaustion-recovery-path/logs/test-recovery-targeted.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T053511341561-pod-exhaustion-recovery-path/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1786368,
+            "cached_input_tokens_cumulative": 8986112,
+            "input_tokens": 1810726,
+            "input_tokens_cumulative": 9292323,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 17418,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 4618
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1091
+    "_version": 1092
   }
 }

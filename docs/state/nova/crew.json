@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T01:13:48",
+  "updated": "2026-08-28T01:18:59",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -59495,9 +59495,113 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T231356858629-ebd-endpoint-rescore",
+        "plan": "efit-baseline-demonstration",
+        "section": "\u00a73",
+        "node": "ebd-endpoint-rescore",
+        "node_definition": {
+          "done_when": "benchmarks/demonstration_threshold_score.py runs on current origin/main against the fresh MAST and DIII-D bank artifacts with a complete log; docs/figures/efit-baseline-demonstration/demonstration-score/receipt.json is regenerated as strict JSON naming both input digests, the twelve MAST and five DIII-D identities, and per-gate objects each carrying the measured figure, the locked threshold, contributing and excluded rows with named reasons, and a pass flag, with the endpoint verdict as their conjunction; the manifest quotes all three gate figures beside the previous scoring run's class 9/12, worst eligible RMS 0.0294 m and worst saddle 2.612 m, and states which rows changed eligibility; the receipt is committed",
+          "estimated_hours": null,
+          "goal": "The demonstration endpoint re-scored against both freshly regenerated banks, so the locked three-gate contract is measured on the repaired stack rather than on superseded artifacts",
+          "id": "ebd-endpoint-rescore",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T231356858629-ebd-endpoint-rescore/manifest.md",
+          "plan": "efit-baseline-demonstration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "docs/figures/efit-baseline-demonstration/demonstration-score/receipt.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "receipt-semantics",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T23:14:06Z",
+        "completed_at": "2026-08-27T23:18:46Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 280,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 280,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "a8faf98d916808fcdc7a652ed85588feae945abf",
+        "commits": [
+          "2e43fc9724ba242272349a979a167ce9a496b520"
+        ],
+        "changed_lines": {
+          "added": 64,
+          "removed": 60,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "scorer run against fresh MAST 7a9cd3b9 and DIII-D ea113fc8 banks with per-gate objects published",
+          "exit_status": 1,
+          "log_path": null,
+          "log_digest": null
+        },
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T231356858629-ebd-endpoint-rescore/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e9e-83dd-77a1-9200-e41251d729b1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1010688,
+            "cached_input_tokens_cumulative": 2845952,
+            "input_tokens": 895379,
+            "input_tokens_cumulative": 2989615,
+            "output_tokens": 2922,
+            "output_tokens_cumulative": 11611,
+            "reasoning_output_tokens": 1460,
+            "reasoning_output_tokens_cumulative": 3698
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1140
+    "_version": 1141
   }
 }

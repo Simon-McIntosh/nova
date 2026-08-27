@@ -19,12 +19,14 @@ from __future__ import annotations
 
 import argparse
 import base64
+import gc
 import hashlib
 import json
 import math
 import os
 import subprocess
 import sys
+import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, NamedTuple
@@ -1548,6 +1550,67 @@ def _solve_frame_retaining_failure(
         return solve_frame(row, frame, expansion)
     except (NoQualifiedAxisError, ConstraintViolationError) as error:
         return _retained_solve_failure(row, frame, expansion, error)
+
+
+def _solve_selected_frames(
+    selected,
+    baseline_expansion: float,
+) -> tuple[list[FrameResult], list[dict[str, Any]]]:
+    """Solve declared frames while bounding each frame's compilation lifetime."""
+
+    results: list[FrameResult] = []
+    fields: list[dict[str, Any]] = []
+    for number, selected_frame in enumerate(selected, start=1):
+        started = time.perf_counter()
+        try:
+            row = _read(
+                selected_frame.path,
+                _LABEL_COLUMNS
+                + _GEOMETRY_COLUMNS
+                + _CURRENT_COLUMNS
+                + _PLASMA_CURRENT_COLUMNS,
+            )
+            row["_source_path"] = str(selected_frame.path)
+            result, frame_fields = _solve_frame_retaining_failure(
+                row, selected_frame.frame, baseline_expansion
+            )
+            print(
+                "RESIDUAL_HISTORY "
+                + json.dumps(
+                    {
+                        "shot": result.shot,
+                        "frame": result.frame,
+                        "route": REGISTERED_SOLVER_ROUTE,
+                        "relative_residual": list(result.residual_history),
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
+            results.append(result)
+            fields.append(frame_fields)
+            frame_passed = bool(
+                result.converged
+                and result.metrics.interior_r_squared
+                >= REGISTERED_MEDIAN_INTERIOR_R2_BAR
+            )
+            print(
+                f"SOLVED {number}/{len(selected)} {result.shot}:{result.frame} "
+                f"residual={result.fixed_point_relative_residual:.6e} "
+                f"converged={result.converged} "
+                f"verdict={'PASS' if frame_passed else 'FAIL'}",
+                flush=True,
+            )
+        finally:
+            jax.clear_caches()
+            gc.collect()
+        elapsed = time.perf_counter() - started
+        print(
+            f"completed DIII-D frame {number}/{len(selected)} in {elapsed:.3f} s; "
+            "released compilation caches",
+            flush=True,
+        )
+    return results, fields
 
 
 def _distribution(values: list[float]) -> dict[str, float]:
@@ -3489,47 +3552,8 @@ def run(
     paths = sorted(data.glob("*.parquet"))
     affected = polarity_population()
     selected = select_frames(paths, frames, affected)
-    results: list[FrameResult] = []
-    fields: list[dict[str, np.ndarray]] = []
     baseline_expansion = REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION
-    for number, selected_frame in enumerate(selected, start=1):
-        row = _read(
-            selected_frame.path,
-            _LABEL_COLUMNS
-            + _GEOMETRY_COLUMNS
-            + _CURRENT_COLUMNS
-            + _PLASMA_CURRENT_COLUMNS,
-        )
-        row["_source_path"] = str(selected_frame.path)
-        result, frame_fields = _solve_frame_retaining_failure(
-            row, selected_frame.frame, baseline_expansion
-        )
-        print(
-            "RESIDUAL_HISTORY "
-            + json.dumps(
-                {
-                    "shot": result.shot,
-                    "frame": result.frame,
-                    "route": REGISTERED_SOLVER_ROUTE,
-                    "relative_residual": list(result.residual_history),
-                },
-                sort_keys=True,
-            ),
-            flush=True,
-        )
-        results.append(result)
-        fields.append(frame_fields)
-        frame_passed = bool(
-            result.converged
-            and result.metrics.interior_r_squared >= REGISTERED_MEDIAN_INTERIOR_R2_BAR
-        )
-        print(
-            f"SOLVED {number}/{len(selected)} {result.shot}:{result.frame} "
-            f"residual={result.fixed_point_relative_residual:.6e} "
-            f"converged={result.converged} "
-            f"verdict={'PASS' if frame_passed else 'FAIL'}",
-            flush=True,
-        )
+    results, fields = _solve_selected_frames(selected, baseline_expansion)
     first = selected[0]
     first_row = _read(
         first.path,
@@ -3541,24 +3565,35 @@ def run(
         if expansion == baseline_expansion:
             sensitivity.append(results[0])
         else:
-            expanded = _solve_frame_retaining_failure(
-                first_row, first.frame, expansion
-            )[0]
+            started = time.perf_counter()
+            try:
+                expanded = _solve_frame_retaining_failure(
+                    first_row, first.frame, expansion
+                )[0]
+                print(
+                    "RESIDUAL_HISTORY "
+                    + json.dumps(
+                        {
+                            "shot": expanded.shot,
+                            "frame": expanded.frame,
+                            "route": REGISTERED_SOLVER_ROUTE,
+                            "pseudo_wall_expansion": expansion,
+                            "relative_residual": list(expanded.residual_history),
+                        },
+                        sort_keys=True,
+                    ),
+                    flush=True,
+                )
+                sensitivity.append(expanded)
+            finally:
+                jax.clear_caches()
+                gc.collect()
+            elapsed = time.perf_counter() - started
             print(
-                "RESIDUAL_HISTORY "
-                + json.dumps(
-                    {
-                        "shot": expanded.shot,
-                        "frame": expanded.frame,
-                        "route": REGISTERED_SOLVER_ROUTE,
-                        "pseudo_wall_expansion": expansion,
-                        "relative_residual": list(expanded.residual_history),
-                    },
-                    sort_keys=True,
-                ),
+                f"completed DIII-D sensitivity {expansion:.6f} in "
+                f"{elapsed:.3f} s; released compilation caches",
                 flush=True,
             )
-            sensitivity.append(expanded)
     after_hash = require_preregistration(preregistration_path)
     if after_hash != preregistration_hash:
         raise RuntimeError("the preregistration changed during scoring")

@@ -213,6 +213,7 @@ _WARM_BRACKET_OFFSETS = (-2, -1, 0, 1, 2, 3)
 
 __all__ = [
     "ConnectivityBoundary",
+    "wall_height_shadow_mask",
     "traced_boundary_read",
     "traced_emit_boundary_read",
     "traced_iteration_boundary_read",
@@ -227,6 +228,25 @@ __all__ = [
 # ---------------------------------------------------------------------------
 # device primitives
 # ---------------------------------------------------------------------------
+
+
+@jax.jit
+def wall_height_shadow_mask(wall_height, axis_height, x_points):
+    """Return wall nodes vertically beyond the nearest X-point on each side.
+
+    Every finite X-point below the axis supplies a lower height limit and every
+    finite X-point above the axis supplies an upper one.  Taking the nearest
+    limit on each side reproduces the conjunction of the corresponding
+    half-plane tests without applying those tests to the interior grid.  A
+    missing limit leaves that side open.
+    """
+    wall_height = jnp.asarray(wall_height)
+    x_points = jnp.asarray(x_points)
+    x_height = x_points[:, 1]
+    finite = jnp.all(jnp.isfinite(x_points[:, :2]), axis=1)
+    lower = jnp.max(jnp.where(finite & (x_height < axis_height), x_height, -jnp.inf))
+    upper = jnp.min(jnp.where(finite & (x_height > axis_height), x_height, jnp.inf))
+    return (wall_height < lower) | (wall_height > upper)
 
 
 def _bilerp(field: jnp.ndarray, rg: jnp.ndarray, zg: jnp.ndarray, r, z):

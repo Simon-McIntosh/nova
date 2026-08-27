@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T10:53:37",
+  "updated": "2026-08-27T11:05:10",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -55569,9 +55569,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T084713500294-pod-height-mask-safety-review",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-height-mask-safety-review",
+        "node_definition": {
+          "done_when": "A report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/height-mask-safety-review.md answers each of the following with file-line citations and, where checkable, a read-only computation: (1) which candidate set supplies the upper and lower limits \u2014 all finite saddles, qualified saddles, or the selected primary plus opposite-side qualified \u2014 and whether an unqualified wall-notch or coil saddle can supply a limit; (2) what happens when an X-point disqualifies transiently mid-solve \u2014 does the height limit vanish wholesale in one promotion, is any hysteresis or last-finite-limit carrying present, and what flip magnitude results; (3) chatter when an X-point height hovers at a wall-node height across promotions; (4) axis-side inversion if the qualified axis crosses an X height; (5) JVP semantics \u2014 is the height mask stop-gradient constant per promotion or differentiated through the flip; (6) over-exclusion versus the flood: for each of the seven analytic battery families and both machine wall geometries, compute wall nodes excluded by height but participating under the flood, and state the physical consequence since exclusion alters the discrete residual; (7) disconnected double-null and snowflake-minus specifically, where a region beyond one null is common flux rather than private; each answer graded SAFE, GUARDED-BY (naming the guard), or GAP with the minimal fix; no repository file modified",
+          "estimated_hours": null,
+          "goal": "An adversarial safety review of the wall-height shadow augmentation as implemented: every edge case where the vertical X-point mask could misbehave, judged against the topological flood shadow as the correctness reference",
+          "id": "pod-height-mask-safety-review",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T084713500294-pod-height-mask-safety-review/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a74",
+          "spec_level": "",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/height-mask-safety-review.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "",
+        "member": "connectivity-audit",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-27T08:47:19Z",
+        "completed_at": "2026-08-27T09:04:39Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1040,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1040,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "814b03770079981ce00210f1f1fa046630cda43b",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "seven property verdicts with file-line citations plus 14 family-by-machine false-exclusion computations",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/height-mask-safety-review.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T084713500294-pod-height-mask-safety-review/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f75-0f36-7192-bb27-6710c52ac3e1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3745024,
+            "cached_input_tokens_cumulative": 6838528,
+            "input_tokens": 3971413,
+            "input_tokens_cumulative": 7253060,
+            "output_tokens": 7278,
+            "output_tokens_cumulative": 33197,
+            "reasoning_output_tokens": 259,
+            "reasoning_output_tokens_cumulative": 10908
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1101
+    "_version": 1102
   }
 }

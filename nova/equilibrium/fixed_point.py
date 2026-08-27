@@ -70,6 +70,7 @@ __all__ = [
 _BACKTRACKING_FACTORS = (1.0, 0.5, 0.25, 0.125, 0.0625, 0.03125)
 _RECORDED_BACKTRACKING_FACTOR_COUNT = 4
 _PROJECTED_KRYLOV_CONDITION_RATIO_LIMIT = math.e
+_SUFFICIENT_DECREASE_SLOPE = 1.0e-4
 FIXED_POINT_RESIDUAL_TOLERANCE = 1.0e-8
 
 
@@ -101,6 +102,7 @@ class FixedPointTerminationReason(IntEnum):
     NONFINITE_RESIDUAL = 3
     KRYLOV_ACTION_REFUSED = 4
     MANIFOLD_ADVANCE_REFUSED = 5
+    SUFFICIENT_DECREASE_REFUSED = 6
 
 
 class FixedPointResult(NamedTuple):
@@ -129,6 +131,9 @@ class FixedPointResult(NamedTuple):
     ``accepted_newton_promotions`` counts proposals promoted to ``state``.
     ``converged`` and ``termination_reason`` report why the bounded Newton loop
     stopped.  They retain not-applicable defaults for non-Newton schemes.
+    ``promotion_backtrack_counts`` records how many fixed half-step reductions
+    preceded each accepted promotion, the ladder length for a rejected
+    promotion, and -1 in unused slots.
     """
 
     state: jax.Array
@@ -154,6 +159,7 @@ class FixedPointResult(NamedTuple):
     converged: jax.Array | bool = False
     termination_reason: jax.Array | int = FixedPointTerminationReason.NOT_APPLICABLE
     shadow_mask_changes: jax.Array | int = -1
+    promotion_backtrack_counts: jax.Array | int = -1
 
 
 class KinkAwareResult(NamedTuple):
@@ -229,6 +235,16 @@ class _NewtonIterationState(NamedTuple):
     current_measured: jax.Array
     shadow_mask: jax.Array
     shadow_mask_changes: jax.Array
+    promotion_backtrack_counts: jax.Array
+
+
+class _BacktrackedPromotion(NamedTuple):
+    """One fixed-ladder nonlinear promotion and its sufficient-decrease receipt."""
+
+    state: jax.Array
+    residual: jax.Array
+    accepted: jax.Array
+    backtrack_count: jax.Array
 
 
 class _ManifoldNewtonIterationState(NamedTuple):
@@ -407,6 +423,34 @@ def _relative_residual(mapped: jax.Array, state: jax.Array) -> jax.Array:
     """Relative sup-norm fixed-point residual ``max|g−x| / max|g|``."""
     return jnp.max(jnp.abs(mapped - state)) / jnp.maximum(
         jnp.max(jnp.abs(mapped)), 1.0e-30
+    )
+
+
+def _backtracked_promotion(
+    map_fn: Callable[[jax.Array], jax.Array],
+    state: jax.Array,
+    step: jax.Array,
+    current_residual: jax.Array,
+) -> _BacktrackedPromotion:
+    """Select the first fixed-ladder trial with sufficient residual decrease."""
+
+    factors = jnp.asarray(_BACKTRACKING_FACTORS, dtype=state.dtype)
+    candidates = state[None, :] + factors[:, None] * step[None, :]
+
+    def score(candidate):
+        return _relative_residual(map_fn(candidate), candidate)
+
+    residuals = jax.lax.map(score, candidates)
+    required = current_residual * (1.0 - _SUFFICIENT_DECREASE_SLOPE * factors)
+    sufficient = jnp.isfinite(residuals) & (residuals <= required)
+    accepted = jnp.any(sufficient)
+    selected = jnp.argmax(sufficient)
+    count = jnp.where(accepted, selected, factors.size)
+    return _BacktrackedPromotion(
+        state=jnp.where(accepted, candidates[selected], state),
+        residual=jnp.where(accepted, residuals[selected], current_residual),
+        accepted=accepted,
+        backtrack_count=jnp.asarray(count, dtype=jnp.int32),
     )
 
 
@@ -1097,18 +1141,20 @@ def newton_krylov(
     needs no projection-dimension calibration.  Damping releases below the
     fourth root of machine precision so local convergence can finish without
     trajectory control.  A qualified
-    step is then capped at
-    ``step_cap`` × the relaxed step, bounding excursions while the
-    current-centroid pin holds the basin.  The trace retains its configured
-    length and ``2 + gmres_iterations`` stride (one linearisation value,
-    tangent slots, and one promotion read); unused iterations remain NaN
-    padding.  Under ``vmap``, the batched while-loop runs to the slowest active
-    lane while preserving each lane's receipt.  Supplying both ``admissibility_fn``
-    and ``previous_admitted_state`` selects the topology-manifold mode through
-    this same production solver seam.  Its secant predictor uses state-space
-    arclength, its bordered corrector is normal to that secant, and promotion
-    still requires both shared Krylov qualifications plus the caller's
-    existing physical predicate.
+    step is then capped at ``step_cap`` × the relaxed step, bounding excursions
+    while the current-centroid pin holds the basin.  Promotion selects the
+    first of six fixed half-step factors that provides sufficient nonlinear
+    residual decrease; every factor is evaluated through a fixed-shape
+    ``lax.map`` and the receipt records the selected reduction count.  The
+    trace retains its configured length and ``2 + gmres_iterations`` stride
+    (one linearisation value, tangent slots, and one promotion read); unused
+    iterations remain NaN padding.  Under ``vmap``, the batched while-loop runs
+    to the slowest active lane while preserving each lane's receipt.  Supplying
+    both ``admissibility_fn`` and ``previous_admitted_state`` selects the
+    topology-manifold mode through this same production solver seam.  Its
+    secant predictor uses state-space arclength, its bordered corrector is
+    normal to that secant, and promotion still requires both shared Krylov
+    qualifications plus the caller's existing physical predicate.
     """
     if newton_steps < 0:
         raise ValueError("newton_steps must be non-negative")
@@ -1233,12 +1279,7 @@ def newton_krylov(
                 step * (cap / jnp.maximum(norm_step, 1.0e-300)),
                 step,
             )
-            candidate = jnp.where(action_accepted, state + step, state)
-            amplification = _observe_increment(
-                measured.amplification, state, candidate, action_accepted
-            )
             attempted = measured.attempted + 1
-            accepted = measured.accepted + jnp.asarray(action_accepted, dtype=jnp.int32)
             conditioning_count = measured.conditioning_count + jnp.asarray(
                 action_accepted & qualified_step.conditioning_applied,
                 dtype=jnp.int32,
@@ -1248,24 +1289,45 @@ def newton_krylov(
             )
 
             def promoted_state(_):
-                candidate_image = map_fn(candidate)
-                candidate_residual = _relative_residual(candidate_image, candidate)
+                promotion = _backtracked_promotion(
+                    map_fn, state, step, nonlinear_residual
+                )
+                candidate = promotion.state
+                candidate_residual = promotion.residual
+                promotion_accepted = promotion.accepted
+                accepted = measured.accepted + jnp.asarray(
+                    promotion_accepted, dtype=jnp.int32
+                )
+                amplification = _observe_increment(
+                    measured.amplification, state, candidate, promotion_accepted
+                )
                 updated_trace = measured.trace.at[base + stride - 1].set(
                     candidate_residual
                 )
                 finite_candidate_residual = jnp.isfinite(candidate_residual)
-                converged = finite_candidate_residual & (
-                    candidate_residual <= convergence_tolerance
+                converged = (
+                    promotion_accepted
+                    & finite_candidate_residual
+                    & (candidate_residual <= convergence_tolerance)
                 )
                 exhausted = attempted >= newton_steps
-                active = finite_candidate_residual & ~converged & ~exhausted
+                active = (
+                    promotion_accepted
+                    & finite_candidate_residual
+                    & ~converged
+                    & ~exhausted
+                )
                 reason = jnp.where(
-                    ~finite_candidate_residual,
-                    FixedPointTerminationReason.NONFINITE_RESIDUAL,
+                    ~promotion_accepted,
+                    FixedPointTerminationReason.SUFFICIENT_DECREASE_REFUSED,
                     jnp.where(
-                        converged,
-                        FixedPointTerminationReason.CONVERGED,
-                        FixedPointTerminationReason.ITERATION_BUDGET_EXHAUSTED,
+                        ~finite_candidate_residual,
+                        FixedPointTerminationReason.NONFINITE_RESIDUAL,
+                        jnp.where(
+                            converged,
+                            FixedPointTerminationReason.CONVERGED,
+                            FixedPointTerminationReason.ITERATION_BUDGET_EXHAUSTED,
+                        ),
                     ),
                 )
                 candidate_shadow = shadow_mask(candidate)
@@ -1275,6 +1337,9 @@ def newton_krylov(
                 shadow_changes = measured.shadow_mask_changes.at[
                     warmup + measured.attempted
                 ].set(jnp.where(observe_shadows, changed, -1))
+                backtrack_counts = measured.promotion_backtrack_counts.at[
+                    measured.attempted
+                ].set(promotion.backtrack_count)
                 return _NewtonIterationState(
                     candidate,
                     candidate_residual,
@@ -1292,6 +1357,7 @@ def newton_krylov(
                     jnp.asarray(True),
                     candidate_shadow,
                     shadow_changes,
+                    backtrack_counts,
                 )
 
             def refused_state(_):
@@ -1300,12 +1366,12 @@ def newton_krylov(
                     nonlinear_residual,
                     measured.trace,
                     step_qualification,
-                    amplification,
+                    measured.amplification,
                     conditioning_count,
                     maximum_condition,
                     qualified_step.condition_baseline,
                     attempted,
-                    accepted,
+                    measured.accepted,
                     jnp.asarray(False),
                     jnp.asarray(
                         FixedPointTerminationReason.KRYLOV_ACTION_REFUSED,
@@ -1317,6 +1383,7 @@ def newton_krylov(
                     measured.shadow_mask_changes.at[warmup + measured.attempted].set(
                         jnp.where(observe_shadows, 0, -1)
                     ),
+                    measured.promotion_backtrack_counts,
                 )
 
             return jax.lax.cond(
@@ -1348,6 +1415,7 @@ def newton_krylov(
             jnp.asarray(False),
             current_shadow,
             shadow_changes,
+            jnp.full(newton_steps, -1, dtype=jnp.int32),
         ),
     )
     return FixedPointResult(
@@ -1365,6 +1433,7 @@ def newton_krylov(
         converged=loop.converged,
         termination_reason=loop.termination_reason,
         shadow_mask_changes=loop.shadow_mask_changes,
+        promotion_backtrack_counts=loop.promotion_backtrack_counts,
     )
 
 

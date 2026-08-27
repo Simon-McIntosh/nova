@@ -156,6 +156,79 @@ def test_newton_reports_iteration_budget_exhaustion():
     )
 
 
+@pytest.mark.parametrize(
+    "residual_rise",
+    (7.571e-3, 9.545e-3),
+    ids=("promotion-26", "promotion-260"),
+)
+def test_newton_backtracks_residual_excursions_and_keeps_contracting_steps(
+    residual_rise,
+):
+    """Measured residual excursions backtrack while adjacent contractions do not."""
+
+    def solve(full_step_residual):
+        def map_fn(state):
+            mapped_full_step = state / (1.0 + full_step_residual)
+            return jnp.where(
+                state[0] == 0.0,
+                jnp.ones_like(state),
+                jnp.where(state[0] > 0.75, mapped_full_step, state),
+            )
+
+        return newton_krylov(
+            map_fn,
+            jnp.zeros(1),
+            newton_steps=1,
+            gmres_iterations=1,
+            warmup=0,
+            shadow_mask_fn=lambda state: state > 0.75,
+        )
+
+    for evaluate in (lambda value: solve(value), jax.jit(solve)):
+        backtracked = evaluate(1.0 + residual_rise)
+        contracting = evaluate(0.75)
+
+        np.testing.assert_allclose(np.asarray(backtracked.state), 0.5)
+        np.testing.assert_array_equal(backtracked.promotion_backtrack_counts, [1])
+        np.testing.assert_array_equal(backtracked.shadow_mask_changes, [0])
+        assert int(backtracked.accepted_newton_promotions) == 1
+
+        np.testing.assert_allclose(np.asarray(contracting.state), 1.0)
+        np.testing.assert_array_equal(contracting.promotion_backtrack_counts, [0])
+        np.testing.assert_array_equal(contracting.shadow_mask_changes, [1])
+        assert int(contracting.accepted_newton_promotions) == 1
+
+
+def test_newton_rejects_a_step_when_the_fixed_backtracking_ladder_is_exhausted():
+    def map_fn(state):
+        return jnp.where(
+            state[0] == 0.0,
+            jnp.ones_like(state),
+            state / 2.1,
+        )
+
+    result = jax.jit(
+        lambda: newton_krylov(
+            map_fn,
+            jnp.zeros(1),
+            newton_steps=1,
+            gmres_iterations=1,
+            warmup=0,
+            shadow_mask_fn=lambda state: state > 0.0,
+        )
+    )()
+
+    np.testing.assert_array_equal(result.state, [0.0])
+    np.testing.assert_array_equal(result.promotion_backtrack_counts, [6])
+    np.testing.assert_array_equal(result.shadow_mask_changes, [0])
+    assert int(result.attempted_newton_promotions) == 1
+    assert int(result.accepted_newton_promotions) == 0
+    assert (
+        int(result.termination_reason)
+        == FixedPointTerminationReason.SUFFICIENT_DECREASE_REFUSED
+    )
+
+
 def test_newton_reports_a_nonfinite_initial_residual_without_attempting():
     result = newton_krylov(
         lambda state: jnp.full_like(state, jnp.nan),

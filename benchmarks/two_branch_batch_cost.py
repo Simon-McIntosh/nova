@@ -1,11 +1,11 @@
 """Measure single-branch and dual-branch converged solve cost on one H200.
 
 The benchmark pairs independent, non-empty limited and diverted analytic
-fixtures with the same 4,052-value state shape.  Every batch member is a
-distinct near-root state and every root and seed carries topology, map-residual,
-flux-span, and physical-observable qualification.  Input-file read,
-host-to-device transfer, compilation, warm-up, resident execution, and the
-read-inclusive total are timed and reported separately.
+fixtures. Every batch member is a distinct near-root state and every root and
+seed carries topology, map-residual, flux-span, and physical-observable
+qualification. Input-file read, host-to-device transfer, compilation, warm-up,
+resident execution, and the read-inclusive total are timed and reported
+separately.
 """
 
 from __future__ import annotations
@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import platform
@@ -24,19 +25,21 @@ from typing import Any, Callable
 import jax
 import numpy as np
 
-from benchmarks.portfolio_warm_start import LIMITED_BANK, _problem
-from nova.equilibrium import ForwardProfile
-from nova.equilibrium.stencil_mesh import StencilMesh
+from benchmarks.portfolio_warm_start import _problem
+from nova.equilibrium import FluxLattice, ForwardProfile
+from nova.equilibrium.stencil_mesh import MomentGeometry, StencilMesh
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import configure_dtypes
 from scripts.analytic_oracle_fixtures.measure import (
-    FIXTURE_REQUESTS,
+    OracleMachine,
     WALL_POINT_COUNT,
+    _flux_blocks,
+    _square_stencils,
     analytic_case,
-    cached_machine,
     exact_current_moments,
     exact_state,
     forward_operator,
+    limiter_contour,
 )
 
 
@@ -53,6 +56,7 @@ SEED_COHORTS = {
     "close_neighbour": (1.0e-5, 5.0e-5),
     "outer_qualified_neighbour": (5.0e-5, 1.0e-4),
 }
+LIMITED_LATTICE_SHAPE = (13, 17)
 
 
 def _strict(value: Any) -> Any:
@@ -103,14 +107,70 @@ def _source_revision() -> str:
     ).stdout.strip()
 
 
-def _limited_fine_problem() -> tuple[ForwardProfile, Any, np.ndarray]:
-    """Reconstruct the non-empty fine limited fixture and its cold seed."""
+def _limited_tensor_machine() -> OracleMachine:
+    """Construct the limited analytic carrier on a tensor-product lattice."""
     case = analytic_case()
-    machine = cached_machine(
-        case,
-        FIXTURE_REQUESTS["fine"],
-        wall_nodes=WALL_POINT_COUNT,
+    inboard, outboard = case.boundary_midplane_radii()
+    half_height = math.sqrt(case.axis_flux / case.field_coefficient)
+    lattice = FluxLattice(
+        np.linspace(inboard - 0.12, outboard + 0.12, LIMITED_LATTICE_SHAPE[0]),
+        np.linspace(
+            -1.18 * half_height,
+            1.18 * half_height,
+            LIMITED_LATTICE_SHAPE[1],
+        ),
     )
+    node = lattice.coordinate
+    radial_half_step = 0.5 * lattice.radial_step
+    vertical_half_step = 0.5 * lattice.vertical_step
+    offsets = np.asarray(
+        [
+            [-radial_half_step, -vertical_half_step],
+            [radial_half_step, -vertical_half_step],
+            [radial_half_step, vertical_half_step],
+            [-radial_half_step, vertical_half_step],
+        ]
+    )
+    polygons = tuple(centre + offsets for centre in node)
+    sampling = np.asarray(polygons)
+    stencil = _square_stencils(*LIMITED_LATTICE_SHAPE)
+    area = lattice.cell_area
+    mesh = StencilMesh(node, stencil, area)
+    moment_geometry = MomentGeometry.from_cells(
+        mesh, polygons, sampling_vertices=sampling
+    )
+    sample = moment_geometry.sample_node_coordinates
+    wall = limiter_contour(case, points=WALL_POINT_COUNT)
+    grid_blocks = _flux_blocks(node, polygons, moment_geometry.atomic_mesh.centroids)
+    wall_blocks = _flux_blocks(wall, polygons, moment_geometry.atomic_mesh.centroids)
+    sample_blocks = _flux_blocks(
+        sample, polygons, moment_geometry.atomic_mesh.centroids
+    )
+    return OracleMachine(
+        node=node,
+        area=area,
+        cell_polygons=polygons,
+        stencil=stencil,
+        interior_stencil=stencil,
+        wall_node=wall,
+        sampling_vertices=sampling,
+        sample_coordinates=sample,
+        plasma_to_grid=grid_blocks[0],
+        plasma_to_grid_r=grid_blocks[1],
+        plasma_to_grid_z=grid_blocks[2],
+        plasma_to_wall=wall_blocks[0],
+        plasma_to_wall_r=wall_blocks[1],
+        plasma_to_wall_z=wall_blocks[2],
+        plasma_to_sample=sample_blocks[0],
+        plasma_to_sample_r=sample_blocks[1],
+        plasma_to_sample_z=sample_blocks[2],
+    )
+
+
+def _limited_fine_problem() -> tuple[ForwardProfile, Any, np.ndarray]:
+    """Construct the non-empty fine limited fixture and its cold seed."""
+    case = analytic_case()
+    machine = _limited_tensor_machine()
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )
@@ -124,24 +184,16 @@ def _limited_fine_problem() -> tuple[ForwardProfile, Any, np.ndarray]:
         StencilMesh(machine.node, machine.stencil, machine.area),
         newton_steps=10,
     )
-    receipt = json.loads(
-        (LIMITED_BANK / "receipt-fine.json").read_text(encoding="utf-8")
+    cell_current = np.asarray(physical.cell_current)
+    declared_current = float(np.sum(cell_current))
+    current_centroid = (
+        np.sum(machine.node * cell_current[:, None], axis=0) / declared_current
     )
-    with np.load(LIMITED_BANK / "root-fine.npz", allow_pickle=False) as bank:
-        root = np.asarray(bank["root_state"], dtype=np.float64)
-        banked_seed = np.asarray(bank["seed_state"], dtype=np.float64)
-    aggregate = receipt["seed"]["aggregate_moment"]
     cold = profile.cold_seed_portfolio(
-        aggregate["declared_current_a"],
-        aggregate["current_centroid_m"],
+        declared_current,
+        current_centroid,
     )
-    np.testing.assert_allclose(
-        np.asarray(cold.branches.flux[int(TopologyClass.LIMITED)]),
-        banked_seed,
-        rtol=0.0,
-        atol=16.0 * np.finfo(np.float64).eps * np.max(np.abs(banked_seed)),
-    )
-    return profile, cold, root
+    return profile, cold, oracle
 
 
 def _state_qualification(
@@ -233,7 +285,8 @@ def _distinct_inputs(
     limited_digests = [_digest(row) for row in limited]
     diverted_digests = [_digest(row) for row in diverted]
     paired_digests = [
-        _digest(np.stack((limited[index], diverted[index]))) for index in range(count)
+        _digest(np.concatenate((limited[index], diverted[index])))
+        for index in range(count)
     ]
     if any(
         len(set(digests)) != count
@@ -352,16 +405,19 @@ def _terminal_summary(
             tuple(np.asarray(branch.residual, dtype=np.float64) for branch in result),
             axis=1,
         )
-        flux = np.stack(
+        root_error = np.stack(
             tuple(
-                np.asarray(branch.equilibrium.flux, dtype=np.float64)
-                for branch in result
+                np.max(
+                    np.abs(
+                        np.asarray(branch.equilibrium.flux, dtype=np.float64) - root
+                    ),
+                    axis=1,
+                )
+                / max(float(np.max(np.abs(root))), np.finfo(float).tiny)
+                for branch, root in zip(result, roots, strict=True)
             ),
             axis=1,
         )
-        root_array = np.stack(roots)
-        scale = np.maximum(np.max(np.abs(root_array), axis=1), np.finfo(float).tiny)
-        root_error = np.max(np.abs(flux - root_array[None, :, :]), axis=2) / scale
         slice_converged = np.all(converged, axis=1)
         branches_attempted = 2 * batch_width
         branches_converged = int(np.sum(converged))
@@ -525,10 +581,6 @@ def _run(output: Path) -> dict[str, Any]:
             dtype=np.float64,
         ),
     )
-    if roots[0].shape != roots[1].shape:
-        raise RuntimeError(
-            f"branch state shapes must match, got {roots[0].shape} and {roots[1].shape}"
-        )
     root_qualification = {
         "limited": _state_qualification(
             limited_profile, limited_root, TopologyClass.LIMITED
@@ -764,7 +816,7 @@ def _run(output: Path) -> dict[str, Any]:
             "solver_entry_points": {
                 "single": "ForwardProfile.solve_branch pinned LIMITED",
                 "dual_branch": (
-                    "one compiled callable containing matched-shape production "
+                    "one compiled callable containing independent production "
                     "ForwardProfile.solve_branch LIMITED and DIVERTED lanes"
                 ),
             },
@@ -797,8 +849,8 @@ def _run(output: Path) -> dict[str, Any]:
         },
         "fixture": {
             "definition": (
-                "independent analytic production profiles with matched 4,052-value "
-                "states: the fine banked limited root and the qualified diverted root"
+                "independent analytic production profiles: a tensor-product limited "
+                "carrier and the qualified diverted root"
             ),
             "root_qualification": root_qualification,
             "root_shapes": [list(root.shape) for root in roots],

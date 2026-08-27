@@ -1,6 +1,11 @@
-VERIFY rows=17 mast=12 diiid=5 mast_converged=1 mast_retained_failures=11 diiid_retained_failures=5
-VERIFY 22086/43_mixed private_flux_inside_closed_boundary=0
-VERIFY diiid_exception_rows nova_partition_landmarks_empty=1/1 efit_axis_x_lcfs_wall_retained=1/1
-VERIFY annotations mast_retained=11/11 diiid_retained=5/5 source_identities=2/2 npz_object_dtypes=0
-VERIFY pngs=17 min_dimensions=699x1316
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+CACHE_IDENTITIES=2/2 current
+NPZ_NUMERIC_ONLY=204/204 arrays allow_pickle=False
+ROWS=17/17 MAST=12/12 DIII-D=5/5
+CONVERGED=2 CONVERGED_CLOSED_BOUNDARIES=1 RETAINED_FAILURES=15 ANNOTATED=15/15
+GOVERNED_WALL_OVERLAYS=17/17
+PRIVATE_FLUX_INSIDE_CONVERGED_CLOSED_BOUNDARIES={"22086/43 mixed": 0}
+PROJECT_ABSOLUTE_PNG_SRCS=17/17 unique
+PNG_FILES=17/17
+ARTIFACT_VERIFICATION=PASS
 EXIT_MARKER=0

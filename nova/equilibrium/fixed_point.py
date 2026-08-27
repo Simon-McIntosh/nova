@@ -78,6 +78,7 @@ _MODEL_REBUILD_DAMPING_INITIAL = 1.0e-3
 _MODEL_REBUILD_DAMPING_GROWTH = 10.0
 _MODEL_REBUILD_DAMPING_TRIPS = 6
 _STEEPEST_DESCENT_SCALES = (1.0e-4, 1.0e-5, 1.0e-6, 1.0e-7, 1.0e-8)
+_RELATIVE_SUP_MERIT_EXPONENT = 8
 _PROJECTED_KRYLOV_CONDITION_RATIO_LIMIT = math.e
 _SUFFICIENT_DECREASE_SLOPE = 1.0e-4
 FIXED_POINT_RESIDUAL_TOLERANCE = 1.0e-8
@@ -128,7 +129,9 @@ class FixedPointResult(NamedTuple):
     ``trace`` holds one entry per map evaluation: the relative sup-norm
     residual where the scheme measured one, NaN where the evaluation was a
     Newton tangent pass — so ladder plots of different schemes share one
-    x-axis.  ``residual`` is the residual at the last measured evaluation.
+    x-axis.  Exact-tangent Newton returns the best measured ``state`` and
+    ``residual`` in that relative sup metric; the other schemes retain their
+    terminal measured iterate.
     ``krylov_action_qualification`` names the first refused linear-action
     condition, reports ``ACCEPTED`` when every Newton action passed, and is
     ``NOT_APPLICABLE`` for the non-Krylov schemes.
@@ -163,7 +166,7 @@ class FixedPointResult(NamedTuple):
     triggers a fresh linearization, and ``promotion_model_rebuild_damping``
     records its accepted Levenberg damping or the last refused value.
     ``promotion_descent_activations`` is one when both recovery models exhaust
-    and the squared-residual gradient ladder runs.  Its selected absolute step
+    and the smooth relative-sup gradient ladder runs.  Its selected absolute step
     scale is recorded in ``promotion_descent_scales``, with zero for a refused
     ladder and NaN where the fallback was not evaluated.
     """
@@ -260,6 +263,8 @@ class _NewtonIterationState(NamedTuple):
 
     state: jax.Array
     residual: jax.Array
+    best_state: jax.Array
+    best_residual: jax.Array
     trace: jax.Array
     qualification: jax.Array
     amplification: _AmplificationState
@@ -308,7 +313,7 @@ class _RebuiltModelPromotion(NamedTuple):
 
 
 class _SteepestDescentPromotion(NamedTuple):
-    """One fixed-scale search along the squared-residual gradient."""
+    """One fixed-scale search along the smooth relative-sup gradient."""
 
     state: jax.Array
     residual: jax.Array
@@ -495,9 +500,22 @@ def _relative_residual(mapped: jax.Array, state: jax.Array) -> jax.Array:
     )
 
 
-def _squared_residual_merit(residual_vector: jax.Array) -> jax.Array:
-    """One half the squared L2 norm of the fixed-point residual vector."""
-    return 0.5 * jnp.sum(residual_vector**2)
+def _smooth_relative_sup_merit(mapped: jax.Array, state: jax.Array) -> jax.Array:
+    """Smooth p-norm surrogate for the relative sup fixed-point residual.
+
+    The denominator includes the same finite floor as :func:`_relative_residual`.
+    For ``n`` residual entries and even exponent ``p``, norm equivalence gives
+    ``rho / (n + 1) ** (1 / p) <= merit <= rho * (n + 1) ** (1 / p)``,
+    where ``rho`` is the relative sup residual.
+    """
+    residual_vector = jnp.ravel(mapped - state)
+    mapped_vector = jnp.ravel(mapped)
+    denominator_vector = jnp.concatenate(
+        (mapped_vector, jnp.asarray([1.0e-30], dtype=mapped_vector.dtype))
+    )
+    return jnp.linalg.vector_norm(
+        residual_vector, ord=_RELATIVE_SUP_MERIT_EXPONENT
+    ) / jnp.linalg.vector_norm(denominator_vector, ord=_RELATIVE_SUP_MERIT_EXPONENT)
 
 
 def _backtracked_promotion(
@@ -514,11 +532,22 @@ def _backtracked_promotion(
     candidates = state[None, :] + factors[:, None] * step[None, :]
 
     def score(candidate):
-        return _relative_residual(map_fn(candidate), candidate)
+        mapped = map_fn(candidate)
+        return (
+            _smooth_relative_sup_merit(mapped, candidate),
+            _relative_residual(mapped, candidate),
+        )
 
-    residuals = jax.lax.map(score, candidates)
-    required = current_residual * (1.0 - _SUFFICIENT_DECREASE_SLOPE * factors)
-    sufficient = jnp.isfinite(residuals) & (residuals <= required)
+    merits, residuals = jax.lax.map(score, candidates)
+    current_mapped = map_fn(state)
+    current_merit = _smooth_relative_sup_merit(current_mapped, state)
+    required = current_merit * (1.0 - _SUFFICIENT_DECREASE_SLOPE * factors)
+    sufficient = (
+        jnp.isfinite(merits)
+        & jnp.isfinite(residuals)
+        & (merits <= required)
+        & (residuals <= current_residual)
+    )
     ladder_accepted = jnp.any(sufficient)
     ladder_selected = jnp.argmax(sufficient)
 
@@ -545,7 +574,7 @@ def _backtracked_promotion(
         def recovery_trial(_index, carry):
             selected_state, selected_residual, accepted, radius = carry
             candidate = state + radius * continuation_step
-            candidate_residual = score(candidate)
+            _candidate_merit, candidate_residual = score(candidate)
             select = (
                 ~accepted
                 & jnp.isfinite(candidate_residual)
@@ -691,16 +720,13 @@ def _steepest_descent_promotion(
     map_fn: Callable[[jax.Array], jax.Array],
     state: jax.Array,
     current_residual: jax.Array,
-    residual_vector: jax.Array,
-    tangent: Callable[[jax.Array], jax.Array],
 ) -> _SteepestDescentPromotion:
-    """Seek Armijo decrease of the squared-residual merit on a fixed ladder."""
+    """Seek Armijo decrease of the smooth relative-sup merit on a fixed ladder."""
 
-    def residual_tangent(vector):
-        return tangent(vector) - vector
+    def merit(candidate):
+        return _smooth_relative_sup_merit(map_fn(candidate), candidate)
 
-    transpose = jax.linear_transpose(residual_tangent, jnp.zeros_like(state))
-    gradient = transpose(residual_vector)[0]
+    current_merit, gradient = jax.value_and_grad(merit)(state)
     gradient_norm = jnp.max(jnp.abs(gradient))
     finite_gradient = jnp.all(jnp.isfinite(gradient)) & jnp.isfinite(gradient_norm)
     direction = jnp.where(
@@ -713,14 +739,12 @@ def _steepest_descent_promotion(
 
     def score(candidate):
         mapped = map_fn(candidate)
-        candidate_vector = mapped - candidate
         return (
-            _squared_residual_merit(candidate_vector),
+            _smooth_relative_sup_merit(mapped, candidate),
             _relative_residual(mapped, candidate),
         )
 
     merits, residuals = jax.lax.map(score, candidates)
-    current_merit = _squared_residual_merit(residual_vector)
     directional_derivative = jnp.sum(gradient * direction)
     required = current_merit + (
         _SUFFICIENT_DECREASE_SLOPE * scales * directional_derivative
@@ -731,6 +755,7 @@ def _steepest_descent_promotion(
         & jnp.isfinite(merits)
         & jnp.isfinite(residuals)
         & (merits <= required)
+        & (residuals <= current_residual)
     )
     accepted = jnp.any(sufficient)
     selected = jnp.argmax(sufficient)
@@ -1481,10 +1506,10 @@ def newton_krylov(
     Levenberg-damped normal models.  That fresh-model step is promoted only on
     strict residual decrease; its activation and selected damping are retained
     in the promotion receipts.  If both recovery models exhaust, a final fixed
-    ladder follows the negative gradient of one-half the squared L2 residual,
-    normalized to unit infinity norm.  Its Armijo test uses that same merit,
-    independently of the relative sup residual retained as the convergence
-    criterion.  The
+    ladder follows the negative gradient of the relative eighth-norm merit,
+    normalized to unit infinity norm.  Its Armijo test uses that same smooth
+    merit, while exact relative-sup non-amplification protects the unchanged
+    convergence criterion.  The
     trace retains its configured length and ``2 + gmres_iterations`` stride
     (one linearisation value, tangent slots, and one promotion read); unused
     iterations remain NaN padding.  Under ``vmap``, the batched while-loop runs
@@ -1546,9 +1571,21 @@ def newton_krylov(
         return shadow_mask(state)
 
     def warm_body(index, carry):
-        state, trace, amplification, previous_shadow, shadow_changes = carry
+        (
+            state,
+            trace,
+            amplification,
+            previous_shadow,
+            shadow_changes,
+            best_state,
+            best_residual,
+        ) = carry
         mapped = mapped_with_shadow(state, previous_shadow)
-        trace = trace.at[index].set(_relative_residual(mapped, state))
+        residual = _relative_residual(mapped, state)
+        trace = trace.at[index].set(residual)
+        is_best = jnp.isfinite(residual) & (residual < best_residual)
+        best_state = jnp.where(is_best, state, best_state)
+        best_residual = jnp.where(is_best, residual, best_residual)
         candidate = state + relaxation * (mapped - state)
         amplification = _observe_increment(amplification, state, candidate, True)
         current_shadow = promoted_shadow(candidate, previous_shadow)
@@ -1556,9 +1593,25 @@ def newton_krylov(
         shadow_changes = shadow_changes.at[index].set(
             jnp.where(observe_shadows, changed, -1)
         )
-        return candidate, trace, amplification, current_shadow, shadow_changes
+        return (
+            candidate,
+            trace,
+            amplification,
+            current_shadow,
+            shadow_changes,
+            best_state,
+            best_residual,
+        )
 
-    state, trace, amplification, current_shadow, shadow_changes = jax.lax.fori_loop(
+    (
+        state,
+        trace,
+        amplification,
+        current_shadow,
+        shadow_changes,
+        best_state,
+        best_residual,
+    ) = jax.lax.fori_loop(
         0,
         warmup,
         warm_body,
@@ -1568,6 +1621,8 @@ def newton_krylov(
             _initial_amplification_state(initial.dtype),
             shadow_mask(initial),
             jnp.full(change_length, -1, dtype=jnp.int32),
+            initial,
+            jnp.asarray(jnp.inf, dtype=initial.dtype),
         ),
     )
 
@@ -1606,8 +1661,13 @@ def newton_krylov(
                 FixedPointTerminationReason.ITERATION_BUDGET_EXHAUSTED,
             ),
         )
+        current_is_best = finite_residual & (nonlinear_residual < carry.best_residual)
         measured = carry._replace(
             residual=nonlinear_residual,
+            best_state=jnp.where(current_is_best, state, carry.best_state),
+            best_residual=jnp.where(
+                current_is_best, nonlinear_residual, carry.best_residual
+            ),
             trace=trace,
             converged=current_converged,
             termination_reason=jnp.asarray(stopped_reason, dtype=jnp.int32),
@@ -1689,8 +1749,6 @@ def newton_krylov(
                         frozen_map,
                         state,
                         nonlinear_residual,
-                        residual_vector,
-                        tangent,
                     )
 
                 def skip_descent(_):
@@ -1814,9 +1872,20 @@ def newton_krylov(
                         jnp.asarray(jnp.nan, dtype=state.dtype),
                     )
                 )
+                candidate_is_best = (
+                    promotion_accepted
+                    & finite_candidate_residual
+                    & (candidate_residual < measured.best_residual)
+                )
                 return _NewtonIterationState(
                     candidate,
                     candidate_residual,
+                    jnp.where(candidate_is_best, candidate, measured.best_state),
+                    jnp.where(
+                        candidate_is_best,
+                        candidate_residual,
+                        measured.best_residual,
+                    ),
                     updated_trace,
                     step_qualification,
                     amplification,
@@ -1846,6 +1915,8 @@ def newton_krylov(
                 return _NewtonIterationState(
                     state,
                     nonlinear_residual,
+                    measured.best_state,
+                    measured.best_residual,
                     measured.trace,
                     step_qualification,
                     measured.amplification,
@@ -1896,6 +1967,8 @@ def newton_krylov(
         _NewtonIterationState(
             state,
             jnp.asarray(jnp.inf, dtype=initial.dtype),
+            best_state,
+            best_residual,
             trace,
             jnp.asarray(KrylovActionQualification.NOT_APPLICABLE, dtype=jnp.int32),
             amplification,
@@ -1925,8 +1998,8 @@ def newton_krylov(
         ),
     )
     return FixedPointResult(
-        state=loop.state,
-        residual=loop.residual,
+        state=loop.best_state,
+        residual=loop.best_residual,
         trace=loop.trace,
         krylov_action_qualification=loop.qualification,
         amplification_observation=_amplification_result(

@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="35">
+<meta name="plan-version" content="36">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -326,6 +326,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260827T031934780761-pod-point-cell-support-routing" data-who="domain-partition" data-when="2026-08-27T03:56:21Z">
     <div class="r-comment-body"><p>Point-cell path under the profile-owned contract; shadow exclusion enters residual and JVP; zero new failures vs base; conservation unchanged</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260827T035653997558-pod-cutover-stall-retrace-2" data-who="flood-rca" data-when="2026-08-27T04:06:42Z">
+    <div class="r-comment-body"><p>Cutover is rate-neutral: seam exercised (hash moved) but endpoint and tail-q statistically unchanged; stall is a nonlinear rate problem (~426 promotions to 1e-8); remediation ranking: continuation/globalization or preconditioning, then matched-mesh ladder; larger budget diagnostic-only</p></div>
 </div>
 </section>
 </main>

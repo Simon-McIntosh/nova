@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T05:56:46",
+  "updated": "2026-08-27T06:07:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -54063,9 +54063,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T035653997558-pod-cutover-stall-retrace-2",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-cutover-stall-retrace-2",
+        "node_definition": {
+          "done_when": "One SLURM all_debug CPU job (16 CPUs, x64, writable caches, at most one hour, EXIT_MARKER=0) reruns the staged measure_stall.py diagnostic from run directory r-20260827T000717924799 against 21978/35 pure on current origin/main; the report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md gains a post-routing section with the new endpoint, new tail contraction, whether the trajectory hash finally differs from 097bf19f, whether the arm converges to 1e-8 within the diagnostic budget, and the deltas against all prior baselines; no repository file modified",
+          "estimated_hours": null,
+          "goal": "The stall trajectory re-measured now that the point-cell path routes through the profile-owned support, so the cutover's true effect on the contraction rate and endpoint is a number beside the q~0.970 and 4.585e-3 baselines",
+          "id": "pod-cutover-stall-retrace-2",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T035653997558-pod-cutover-stall-retrace-2/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T03:57:00Z",
+        "completed_at": "2026-08-27T04:06:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 582,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 582,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "a6f3db2b3a02aa974716d94d613ce7df5ba1fbf7",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "SLURM retrace on routing-fixed HEAD: hash differs from 097bf19f (seam exercised); endpoint +0.111% vs pre-routing, q +0.0097%",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T035653997558-pod-cutover-stall-retrace-2/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T035653997558-pod-cutover-stall-retrace-2/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 202752,
+            "cached_input_tokens_cumulative": 4035328,
+            "input_tokens": 141025,
+            "input_tokens_cumulative": 4338363,
+            "output_tokens": 1397,
+            "output_tokens_cumulative": 15497,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1411
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1086
+    "_version": 1087
   }
 }

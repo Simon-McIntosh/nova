@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T09:50:09",
+  "updated": "2026-08-27T10:37:38",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -55366,9 +55366,114 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T081445864626-pod-trust-region-model-rebuild",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-trust-region-model-rebuild",
+        "node_definition": {
+          "done_when": "The exhaustion path in nova/equilibrium/fixed_point.py gains a model-rebuild branch with bounded fixed-trip Levenberg damping updates and no data-dependent while; receipts record rebuild activations and damping values per promotion; a regression built from the plateau signature proves a rebuilt-model step is accepted past a state where the adaptive radius terminated, without amplification; the excursion, exhaustion and adaptive-radius regressions still pass; JAX_PLATFORMS=cpu pytest tests/test_fixed_point.py and the focused forward-operator, domain, topology and hex-flood files pass eager and JIT with zero new failures vs current HEAD; conservation acceptance passes with unchanged envelopes; ruff reports zero findings on staged paths",
+          "estimated_hours": null,
+          "goal": "The locked trust-region model rebuild at recovery exhaustion: when the adaptive-radius recovery exhausts, the promotion rebuilds the local linearization at the current iterate and takes a Levenberg-damped step on the fresh model, preserving non-amplification, the locked 1e-8 criterion, the composed wall-height mask, the profile-owned support, and fixed-shape execution",
+          "id": "pod-trust-region-model-rebuild",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T081445864626-pod-trust-region-model-rebuild/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_fixed_point.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T08:14:52Z",
+        "completed_at": "2026-08-27T08:37:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1353,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1353,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "a90ae3d18b5c41dcda889010ee944e697e1218b1",
+        "commits": [
+          "008f4d48ff392fad034b18e182ff578286d9f28e"
+        ],
+        "changed_lines": {
+          "added": 206,
+          "removed": 5,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/test_fixed_point.py (29/29) incl. model-rebuild and carried-radius regressions; focused lanes zero new failures; conservation unchanged",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T081445864626-pod-trust-region-model-rebuild/logs/fixed-point.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T081445864626-pod-trust-region-model-rebuild/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4298240,
+            "cached_input_tokens_cumulative": 11954432,
+            "input_tokens": 4213778,
+            "input_tokens_cumulative": 12100511,
+            "output_tokens": 1019,
+            "output_tokens_cumulative": 22371,
+            "reasoning_output_tokens": 1472,
+            "reasoning_output_tokens_cumulative": 8205
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/test_fixed_point.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1099
+    "_version": 1100
   }
 }

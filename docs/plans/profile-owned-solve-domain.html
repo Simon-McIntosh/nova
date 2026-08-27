@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="51">
+<meta name="plan-version" content="52">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -229,6 +229,17 @@
       <button class="r-opt" data-value="mesh-ladder-first">Matched-mesh ladder first: rule discretization interplay in or out before solver-method work</button>
       </p>
     <p class="r-dec-rat">Instrument before committing to a method: focused traces at promotions 26 and 259/260 discriminate line-search from conditioning causes at the cost of one diagnostic cycle, so the globalization-vs-preconditioning choice is made on direct evidence rather than ranked inference. The profile-owned support and the 1e-8 criterion stay locked; a larger production budget remains rejected by the extended-budget evidence.</p>
+    </div>
+<div class="r-dec" data-key="recovery-direction-rebuild" data-choice="trust-region-model-rebuild" data-by="Simon McIntosh" data-when="2026-08-27T08:14:20+00:00">
+    <p class="r-dec-q">How is the recovery direction rebuilt when backtracking exhausts on smooth ground?</p>
+    <p class="r-dec-ctx">With the height augmentation eliminating mask-flip excursions (923→49 flips, 69→0 excursions), the solve plateaus at 8.0e4x criterion because the recovery direction exhausts while conditioning stays stable (~43). Non-amplification, the 1e-8 criterion, the composed wall-height mask and the profile-owned support are locked and unaffected.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="trust-region-model-rebuild">Rebuild the local linearization at the stalled iterate and take a Levenberg-damped step on the fresh model</button>
+      <button class="r-opt" data-value="pseudo-arclength-continuation">Continue in arclength through a suspected solution-path fold</button>
+      <button class="r-opt" data-value="mesh-ladder-first">Measure the plateau against grid resolution before method work</button>
+      <button class="r-opt" data-value="reconditioned-tangent">Precondition or re-derive the tangent operator</button>
+      </p>
+    <p class="r-dec-rat">The observed signature is a betrayed model under stable conditioning: rebuild the local linearization at the current iterate and take a Levenberg-damped step on the fresh model rather than re-scaling the stale direction. Measurable by the same 650-ceiling ladder; pseudo-arclength stays the fallback if the rebuilt model also exhausts.</p>
     </div>
 </section>
 

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T18:17:12",
+  "updated": "2026-08-27T18:37:19",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -58120,9 +58120,134 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T143053469957-pod-mesh-resolution-floor",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-mesh-resolution-floor",
+        "node_definition": {
+          "done_when": "One SLURM job (H200 sized to share or an all_debug CPU lane, at most two hours, EXIT_MARKER=0) solves the same 21978/35 pure configuration at three or more grid resolutions spanning at least a factor of two in linear cell count with the solver, criterion, masks and anchor identical, and a report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/mesh-resolution-floor.md tabulates per resolution the achieved minimum relative-sup residual, the promotion at which it occurred, the accepted-promotion count and the terminal gradient norm, fits the floor against cell size to estimate an observed order, and gives the verdict DISCRETIZATION-LIMITED with the implied attainable tolerance, or RESOLUTION-INDEPENDENT meaning the floor is a solver property; no repository file modified",
+          "estimated_hours": null,
+          "goal": "Whether the residual floor is discretization-limited, measured by running the same solve at several grid resolutions with everything else fixed, so the question of whether the locked 1e-8 criterion is attainable on this grid is answered by evidence rather than by continued solver iteration",
+          "id": "pod-mesh-resolution-floor",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T143053469957-pod-mesh-resolution-floor/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/mesh-resolution-floor.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T14:31:02Z",
+        "completed_at": "2026-08-27T16:37:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 7577,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "5560e7aa30e62e716893dbb5d46fe223e7caca6f",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "three-resolution sweep job 1258847 exhausted its two-hour limit with 2 of 3 rows durable; 65x65 produced no atomic receipt",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T143053469957-pod-mesh-resolution-floor/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T143053469957-pod-mesh-resolution-floor/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1571328,
+            "cached_input_tokens_cumulative": 5334784,
+            "input_tokens": 1452141,
+            "input_tokens_cumulative": 5378486,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 8115,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1358
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: |",
+              "elapsed_seconds": 2995,
+              "log_age_seconds": 878,
+              "log_fresh": true,
+              "manifest_commits": [],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T114934899950-sse-mast-bank-resolve/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "reckon crew resume --run r-20260827T114934899950-sse-mast-bank-resolve --advice <answer>",
+              "node": "sse-mast-bank-resolve",
+              "phase": "working",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260827T114934899950-sse-mast-bank-resolve",
+              "terminal_age_seconds": 910,
+              "terminal_at": "2026-08-27T14:15:48Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d8-s16-landing/sse-mast-bank-resolve"
+            }
+          ]
+        },
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1127
+    "_version": 1128
   }
 }

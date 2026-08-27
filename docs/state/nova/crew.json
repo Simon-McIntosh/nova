@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T16:30:31",
+  "updated": "2026-08-27T16:48:50",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -57675,9 +57675,141 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T143043108901-pod-nonmonotone-acceptance",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-nonmonotone-acceptance",
+        "node_definition": {
+          "done_when": "JAX_PLATFORMS=cpu pytest tests/test_fixed_point.py passes with new cases proving that a synthetic trajectory whose next step increases the merit slightly but decreases it against the recent-window maximum is accepted, that a step amplifying beyond the window maximum is still refused, and that the returned state remains the best observed in the locked relative-sup metric so no nonmonotone excursion can worsen the reported result; the window length and the sufficient-decrease constant are stated in the manifest and the locked 1e-8 criterion and its metric are unchanged; JAX_PLATFORMS=cpu pytest over tests/test_forward_operator_domain.py tests/test_domain_participation_continuity.py tests/test_wall_height_exclusion.py tests/test_efit_forward_parity_slice.py and the seven analytic geometry files reports zero new failures vs current HEAD in eager and JIT; the conservation acceptance test passes with unchanged envelopes; no data-dependent while primitive; ruff reports zero findings on staged paths",
+          "estimated_hours": null,
+          "goal": "The strict per-step non-amplification invariant relaxed to a windowed nonmonotone acceptance so the search can cross small barriers, safe because the solve already returns its best observed iterate: a step is admissible when it sufficiently decreases against the maximum merit over a bounded recent window rather than against the immediately previous merit alone",
+          "id": "pod-nonmonotone-acceptance",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T143043108901-pod-nonmonotone-acceptance/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_fixed_point.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T14:30:52Z",
+        "completed_at": "2026-08-27T14:48:16Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1044,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1044,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "5560e7aa30e62e716893dbb5d46fe223e7caca6f",
+        "commits": [
+          "c7d6775b98b4310f62ed850ea8e8a52c056b3541"
+        ],
+        "changed_lines": {
+          "added": 147,
+          "removed": 25,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/test_fixed_point.py 35/35; coupled focused lane 62 passed; window-acceptance, over-window refusal and best-observed regressions green eager+JIT",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T143043108901-pod-nonmonotone-acceptance/fixed-point.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T143043108901-pod-nonmonotone-acceptance/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 6210816,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 6418920,
+            "output_tokens": 1865,
+            "output_tokens_cumulative": 17010,
+            "reasoning_output_tokens": 3198,
+            "reasoning_output_tokens_cumulative": 5264
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: |",
+              "elapsed_seconds": 2984,
+              "log_age_seconds": 867,
+              "log_fresh": true,
+              "manifest_commits": [],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T114934899950-sse-mast-bank-resolve/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "reckon crew resume --run r-20260827T114934899950-sse-mast-bank-resolve --advice <answer>",
+              "node": "sse-mast-bank-resolve",
+              "phase": "working",
+              "plan": "separatrix-spline-extraction",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260827T114934899950-sse-mast-bank-resolve",
+              "terminal_age_seconds": 899,
+              "terminal_at": "2026-08-27T14:15:48Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d8-s16-landing/sse-mast-bank-resolve"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/test_fixed_point.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1123
+    "_version": 1124
   }
 }

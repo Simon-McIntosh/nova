@@ -1,6 +1,572 @@
 {
   "artifact": "fixed-cohort EFIT baseline demonstration score",
   "contract": "banked-inclusive-three-gate-contract",
+  "diiid": {
+    "declared_row_count": 5,
+    "rows": [
+      {
+        "class_agreement": true,
+        "closed_boundary_symmetric_rms_m": null,
+        "comparison_failures": [
+          "missing_predicted_closed_boundary"
+        ],
+        "converged": false,
+        "finite": false,
+        "identity": {
+          "frame": 179,
+          "shot": "d3d_shot_00000c4a7b.parquet"
+        },
+        "saddle_distance_m": 1.5283189850512469
+      },
+      {
+        "class_agreement": true,
+        "closed_boundary_symmetric_rms_m": null,
+        "comparison_failures": [
+          "missing_predicted_closed_boundary"
+        ],
+        "converged": false,
+        "finite": true,
+        "identity": {
+          "frame": 44,
+          "shot": "d3d_shot_0003ff34e7.parquet"
+        },
+        "saddle_distance_m": 2.612246340224187
+      },
+      {
+        "class_agreement": true,
+        "closed_boundary_symmetric_rms_m": null,
+        "comparison_failures": [
+          "missing_predicted_closed_boundary"
+        ],
+        "converged": false,
+        "finite": true,
+        "identity": {
+          "frame": 144,
+          "shot": "d3d_shot_001554e054.parquet"
+        },
+        "saddle_distance_m": 0.0491874554368486
+      },
+      {
+        "class_agreement": true,
+        "closed_boundary_symmetric_rms_m": 0.20693296684264334,
+        "comparison_failures": [],
+        "converged": false,
+        "finite": true,
+        "identity": {
+          "frame": 146,
+          "shot": "d3d_shot_002495e835.parquet"
+        },
+        "saddle_distance_m": 0.4266664023585057
+      },
+      {
+        "class_agreement": true,
+        "closed_boundary_symmetric_rms_m": 0.2314487959281542,
+        "comparison_failures": [],
+        "converged": false,
+        "finite": true,
+        "identity": {
+          "frame": 137,
+          "shot": "d3d_shot_0040ca9bdc.parquet"
+        },
+        "saddle_distance_m": 0.4296210515340697
+      }
+    ]
+  },
+  "gates": {
+    "closed_boundary_symmetric_rms": {
+      "contributing_rows": [
+        {
+          "identity": {
+            "arm": "mixed",
+            "machine": "MAST",
+            "shot": 22086,
+            "slice_index": 43
+          },
+          "reason": "eligible_converged_class_agreement",
+          "value": 0.029447466045738484
+        }
+      ],
+      "excluded_rows": [
+        {
+          "identity": {
+            "arm": "pure",
+            "machine": "MAST",
+            "shot": 21978,
+            "slice_index": 35
+          },
+          "reason": "non_converged;comparison_operand_failure:missing_predicted_closed_boundary;closed_boundary_rms_unavailable",
+          "value": null
+        },
+        {
+          "identity": {
+            "arm": "mixed",
+            "machine": "MAST",
+            "shot": 21978,
+            "slice_index": 35
+          },
+          "reason": "non_converged",
+          "value": null
+        },
+        {
+          "identity": {
+            "arm": "pure",
+            "machine": "MAST",
+            "shot": 21983,
+            "slice_index": 35
+          },
+          "reason": "non_converged",
+          "value": null
+        },
+        {
+          "identity": {
+            "arm": "mixed",
+            "machine": "MAST",
+            "shot": 21983,
+            "slice_index": 35
+          },
+          "reason": "non_converged;comparison_operand_failure:missing_predicted_closed_boundary;closed_boundary_rms_unavailable",
+          "value": null
+        },
+        {
+          "identity": {
+            "arm": "pure",
+            "machine": "MAST",
+            "shot": 21985,
+            "slice_index": 51
+          },
+          "reason": "non_converged;comparison_operand_failure:missing_predicted_closed_boundary;closed_boundary_rms_unavailable",
+          "value": null
+        },
+        {
+          "identity": {
+            "arm": "mixed",
+            "machine": "MAST",
+            "shot": 21985,
+            "slice_index": 51
+          },
+          "reason": "non_converged;comparison_operand_failure:missing_predicted_closed_boundary;closed_boundary_rms_unavailable",
+          "value": null
+        },
+        {
+          "identity": {
+            "arm": "pure",
+            "machine": "MAST",
+            "shot": 21986,
+            "slice_index": 46
+          },
+          "reason": "class_disagreement",
+          "value": null
+        },
+        {
+          "identity": {
+            "arm": "mixed",
+            "machine": "MAST",
+            "shot": 21986,
+            "slice_index": 46
+          },
+          "reason": "class_agreement_unavailable;non_converged;comparison_operand_failure:arm_geometry_exception:NoQualifiedAxisError;closed_boundary_rms_unavailable",
+          "value": null
+        },
+        {
+          "identity": {
+            "arm": "pure",
+            "machine": "MAST",
+            "shot": 21989,
+            "slice_index": 55
+          },
+          "reason": "non_converged;comparison_operand_failure:missing_predicted_closed_boundary;closed_boundary_rms_unavailable",
+          "value": null
+        },
+        {
+          "identity": {
+            "arm": "mixed",
+            "machine": "MAST",
+            "shot": 21989,
+            "slice_index": 55
+          },
+          "reason": "class_disagreement",
+          "value": null
+        },
+        {
+          "identity": {
+            "arm": "pure",
+            "machine": "MAST",
+            "shot": 22086,
+            "slice_index": 43
+          },
+          "reason": "non_converged;comparison_operand_failure:missing_predicted_closed_boundary;closed_boundary_rms_unavailable",
+          "value": null
+        },
+        {
+          "identity": {
+            "frame": 179,
+            "machine": "DIII-D",
+            "shot": "d3d_shot_00000c4a7b.parquet"
+          },
+          "reason": "non_converged;non_finite_receipt;comparison_operand_failure:missing_predicted_closed_boundary;closed_boundary_rms_unavailable",
+          "value": null
+        },
+        {
+          "identity": {
+            "frame": 44,
+            "machine": "DIII-D",
+            "shot": "d3d_shot_0003ff34e7.parquet"
+          },
+          "reason": "non_converged;comparison_operand_failure:missing_predicted_closed_boundary;closed_boundary_rms_unavailable",
+          "value": null
+        },
+        {
+          "identity": {
+            "frame": 144,
+            "machine": "DIII-D",
+            "shot": "d3d_shot_001554e054.parquet"
+          },
+          "reason": "non_converged;comparison_operand_failure:missing_predicted_closed_boundary;closed_boundary_rms_unavailable",
+          "value": null
+        },
+        {
+          "identity": {
+            "frame": 146,
+            "machine": "DIII-D",
+            "shot": "d3d_shot_002495e835.parquet"
+          },
+          "reason": "non_converged",
+          "value": null
+        },
+        {
+          "identity": {
+            "frame": 137,
+            "machine": "DIII-D",
+            "shot": "d3d_shot_0040ca9bdc.parquet"
+          },
+          "reason": "non_converged",
+          "value": null
+        }
+      ],
+      "measured": {
+        "declared_denominator": 17,
+        "eligible_row_count": 1,
+        "worst_closed_boundary_symmetric_rms_m": 0.029447466045738484
+      },
+      "passes": false,
+      "threshold": {
+        "maximum_inclusive_m": 0.55
+      }
+    },
+    "declared_row_saddle_distance": {
+      "contributing_rows": [
+        {
+          "identity": {
+            "arm": "pure",
+            "machine": "MAST",
+            "shot": 21978,
+            "slice_index": 35
+          },
+          "reason": "finite_saddle_distance",
+          "value": 0.0043433645381540835
+        },
+        {
+          "identity": {
+            "arm": "mixed",
+            "machine": "MAST",
+            "shot": 21978,
+            "slice_index": 35
+          },
+          "reason": "finite_saddle_distance",
+          "value": 0.02995334546338346
+        },
+        {
+          "identity": {
+            "arm": "pure",
+            "machine": "MAST",
+            "shot": 21983,
+            "slice_index": 35
+          },
+          "reason": "finite_saddle_distance",
+          "value": 0.012641732137253057
+        },
+        {
+          "identity": {
+            "arm": "mixed",
+            "machine": "MAST",
+            "shot": 21983,
+            "slice_index": 35
+          },
+          "reason": "finite_saddle_distance",
+          "value": 0.03866107162298942
+        },
+        {
+          "identity": {
+            "arm": "pure",
+            "machine": "MAST",
+            "shot": 21985,
+            "slice_index": 51
+          },
+          "reason": "finite_saddle_distance",
+          "value": 0.008111714663847119
+        },
+        {
+          "identity": {
+            "arm": "mixed",
+            "machine": "MAST",
+            "shot": 21985,
+            "slice_index": 51
+          },
+          "reason": "finite_saddle_distance",
+          "value": 0.02240718374696622
+        },
+        {
+          "identity": {
+            "arm": "pure",
+            "machine": "MAST",
+            "shot": 21986,
+            "slice_index": 46
+          },
+          "reason": "finite_saddle_distance",
+          "value": 0.009636757020171397
+        },
+        {
+          "identity": {
+            "arm": "pure",
+            "machine": "MAST",
+            "shot": 21989,
+            "slice_index": 55
+          },
+          "reason": "finite_saddle_distance",
+          "value": 0.010800806966728055
+        },
+        {
+          "identity": {
+            "arm": "mixed",
+            "machine": "MAST",
+            "shot": 21989,
+            "slice_index": 55
+          },
+          "reason": "finite_saddle_distance",
+          "value": 0.030353697201806973
+        },
+        {
+          "identity": {
+            "arm": "pure",
+            "machine": "MAST",
+            "shot": 22086,
+            "slice_index": 43
+          },
+          "reason": "finite_saddle_distance",
+          "value": 0.011062797623398
+        },
+        {
+          "identity": {
+            "arm": "mixed",
+            "machine": "MAST",
+            "shot": 22086,
+            "slice_index": 43
+          },
+          "reason": "finite_saddle_distance",
+          "value": 0.020558786247469613
+        },
+        {
+          "identity": {
+            "frame": 179,
+            "machine": "DIII-D",
+            "shot": "d3d_shot_00000c4a7b.parquet"
+          },
+          "reason": "finite_saddle_distance",
+          "value": 1.5283189850512469
+        },
+        {
+          "identity": {
+            "frame": 44,
+            "machine": "DIII-D",
+            "shot": "d3d_shot_0003ff34e7.parquet"
+          },
+          "reason": "finite_saddle_distance",
+          "value": 2.612246340224187
+        },
+        {
+          "identity": {
+            "frame": 144,
+            "machine": "DIII-D",
+            "shot": "d3d_shot_001554e054.parquet"
+          },
+          "reason": "finite_saddle_distance",
+          "value": 0.0491874554368486
+        },
+        {
+          "identity": {
+            "frame": 146,
+            "machine": "DIII-D",
+            "shot": "d3d_shot_002495e835.parquet"
+          },
+          "reason": "finite_saddle_distance",
+          "value": 0.4266664023585057
+        },
+        {
+          "identity": {
+            "frame": 137,
+            "machine": "DIII-D",
+            "shot": "d3d_shot_0040ca9bdc.parquet"
+          },
+          "reason": "finite_saddle_distance",
+          "value": 0.4296210515340697
+        }
+      ],
+      "excluded_rows": [
+        {
+          "identity": {
+            "arm": "mixed",
+            "machine": "MAST",
+            "shot": 21986,
+            "slice_index": 46
+          },
+          "reason": "saddle_distance_unavailable",
+          "value": null
+        }
+      ],
+      "measured": {
+        "declared_denominator": 17,
+        "worst_saddle_distance_m": 2.612246340224187
+      },
+      "passes": false,
+      "threshold": {
+        "maximum_inclusive_m": 0.04
+      }
+    },
+    "mast_class_agreement": {
+      "contributing_rows": [
+        {
+          "identity": {
+            "arm": "pure",
+            "machine": "MAST",
+            "shot": 21978,
+            "slice_index": 35
+          },
+          "reason": "class_agreement",
+          "value": true
+        },
+        {
+          "identity": {
+            "arm": "mixed",
+            "machine": "MAST",
+            "shot": 21978,
+            "slice_index": 35
+          },
+          "reason": "class_agreement",
+          "value": true
+        },
+        {
+          "identity": {
+            "arm": "pure",
+            "machine": "MAST",
+            "shot": 21983,
+            "slice_index": 35
+          },
+          "reason": "class_agreement",
+          "value": true
+        },
+        {
+          "identity": {
+            "arm": "mixed",
+            "machine": "MAST",
+            "shot": 21983,
+            "slice_index": 35
+          },
+          "reason": "class_agreement",
+          "value": true
+        },
+        {
+          "identity": {
+            "arm": "pure",
+            "machine": "MAST",
+            "shot": 21985,
+            "slice_index": 51
+          },
+          "reason": "class_agreement",
+          "value": true
+        },
+        {
+          "identity": {
+            "arm": "mixed",
+            "machine": "MAST",
+            "shot": 21985,
+            "slice_index": 51
+          },
+          "reason": "class_agreement",
+          "value": true
+        },
+        {
+          "identity": {
+            "arm": "pure",
+            "machine": "MAST",
+            "shot": 21986,
+            "slice_index": 46
+          },
+          "reason": "class_disagreement",
+          "value": false
+        },
+        {
+          "identity": {
+            "arm": "mixed",
+            "machine": "MAST",
+            "shot": 21986,
+            "slice_index": 46
+          },
+          "reason": "class_agreement_unavailable",
+          "value": null
+        },
+        {
+          "identity": {
+            "arm": "pure",
+            "machine": "MAST",
+            "shot": 21989,
+            "slice_index": 55
+          },
+          "reason": "class_agreement",
+          "value": true
+        },
+        {
+          "identity": {
+            "arm": "mixed",
+            "machine": "MAST",
+            "shot": 21989,
+            "slice_index": 55
+          },
+          "reason": "class_disagreement",
+          "value": false
+        },
+        {
+          "identity": {
+            "arm": "pure",
+            "machine": "MAST",
+            "shot": 22086,
+            "slice_index": 43
+          },
+          "reason": "class_agreement",
+          "value": true
+        },
+        {
+          "identity": {
+            "arm": "mixed",
+            "machine": "MAST",
+            "shot": 22086,
+            "slice_index": 43
+          },
+          "reason": "class_agreement",
+          "value": true
+        }
+      ],
+      "excluded_rows": [],
+      "measured": {
+        "agreement_count": 9,
+        "declared_denominator": 12
+      },
+      "passes": true,
+      "threshold": {
+        "declared_denominator": 12,
+        "minimum_inclusive": 7
+      }
+    }
+  },
   "inputs": {
     "diiid": {
       "declared_identities": [
@@ -26,7 +592,7 @@
         }
       ],
       "path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
-      "sha256": "38dd1e5263efcd429ff3cf17ab3685739f0f80fd9b65696f266986287ae83700"
+      "sha256": "3f6afda791080bce66d473c56b079c93c0480f2de89e9d9b13cb2442c1b75ad9"
     },
     "mast": {
       "declared_identities": [
@@ -92,19 +658,178 @@
         }
       ],
       "path": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
-      "sha256": "2860de0fd9e45f92f9e8c108a483f0207f7b1e896720557be91ce176ee29cca5"
+      "sha256": "2420281423dcd7181f264ada0d13a087aa2213ebdfbc5f5ee9c1c1fa97d87725"
     }
   },
-  "refusal": {
-    "reason": "MAST row (21978, 35, 'pure') convergence must be an explicit Boolean",
-    "type": "ScoreRefusal"
+  "mast": {
+    "declared_row_count": 12,
+    "rows": [
+      {
+        "class_agreement": true,
+        "closed_boundary_symmetric_rms_m": null,
+        "comparison_failures": [
+          "missing_predicted_closed_boundary"
+        ],
+        "converged": false,
+        "identity": {
+          "arm": "pure",
+          "shot": 21978,
+          "slice_index": 35
+        },
+        "saddle_distance_m": 0.0043433645381540835
+      },
+      {
+        "class_agreement": true,
+        "closed_boundary_symmetric_rms_m": 0.0336656808773463,
+        "comparison_failures": [],
+        "converged": false,
+        "identity": {
+          "arm": "mixed",
+          "shot": 21978,
+          "slice_index": 35
+        },
+        "saddle_distance_m": 0.02995334546338346
+      },
+      {
+        "class_agreement": true,
+        "closed_boundary_symmetric_rms_m": 0.012418351862010178,
+        "comparison_failures": [],
+        "converged": false,
+        "identity": {
+          "arm": "pure",
+          "shot": 21983,
+          "slice_index": 35
+        },
+        "saddle_distance_m": 0.012641732137253057
+      },
+      {
+        "class_agreement": true,
+        "closed_boundary_symmetric_rms_m": null,
+        "comparison_failures": [
+          "missing_predicted_closed_boundary"
+        ],
+        "converged": false,
+        "identity": {
+          "arm": "mixed",
+          "shot": 21983,
+          "slice_index": 35
+        },
+        "saddle_distance_m": 0.03866107162298942
+      },
+      {
+        "class_agreement": true,
+        "closed_boundary_symmetric_rms_m": null,
+        "comparison_failures": [
+          "missing_predicted_closed_boundary"
+        ],
+        "converged": false,
+        "identity": {
+          "arm": "pure",
+          "shot": 21985,
+          "slice_index": 51
+        },
+        "saddle_distance_m": 0.008111714663847119
+      },
+      {
+        "class_agreement": true,
+        "closed_boundary_symmetric_rms_m": null,
+        "comparison_failures": [
+          "missing_predicted_closed_boundary"
+        ],
+        "converged": false,
+        "identity": {
+          "arm": "mixed",
+          "shot": 21985,
+          "slice_index": 51
+        },
+        "saddle_distance_m": 0.02240718374696622
+      },
+      {
+        "class_agreement": false,
+        "closed_boundary_symmetric_rms_m": 0.1815060576558718,
+        "comparison_failures": [],
+        "converged": false,
+        "identity": {
+          "arm": "pure",
+          "shot": 21986,
+          "slice_index": 46
+        },
+        "saddle_distance_m": 0.009636757020171397
+      },
+      {
+        "class_agreement": null,
+        "closed_boundary_symmetric_rms_m": null,
+        "comparison_failures": [
+          "arm_geometry_exception:NoQualifiedAxisError"
+        ],
+        "converged": false,
+        "identity": {
+          "arm": "mixed",
+          "shot": 21986,
+          "slice_index": 46
+        },
+        "saddle_distance_m": null
+      },
+      {
+        "class_agreement": true,
+        "closed_boundary_symmetric_rms_m": null,
+        "comparison_failures": [
+          "missing_predicted_closed_boundary"
+        ],
+        "converged": false,
+        "identity": {
+          "arm": "pure",
+          "shot": 21989,
+          "slice_index": 55
+        },
+        "saddle_distance_m": 0.010800806966728055
+      },
+      {
+        "class_agreement": false,
+        "closed_boundary_symmetric_rms_m": 0.23624747036996224,
+        "comparison_failures": [],
+        "converged": false,
+        "identity": {
+          "arm": "mixed",
+          "shot": 21989,
+          "slice_index": 55
+        },
+        "saddle_distance_m": 0.030353697201806973
+      },
+      {
+        "class_agreement": true,
+        "closed_boundary_symmetric_rms_m": null,
+        "comparison_failures": [
+          "missing_predicted_closed_boundary"
+        ],
+        "converged": false,
+        "identity": {
+          "arm": "pure",
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "saddle_distance_m": 0.011062797623398
+      },
+      {
+        "class_agreement": true,
+        "closed_boundary_symmetric_rms_m": 0.029447466045738484,
+        "comparison_failures": [],
+        "converged": true,
+        "identity": {
+          "arm": "mixed",
+          "shot": 22086,
+          "slice_index": 43
+        },
+        "saddle_distance_m": 0.020558786247469613
+      }
+    ]
   },
   "thresholds": {
+    "closed_boundary_symmetric_rms_maximum_inclusive_m": 0.55,
     "declared_row_saddle_distance_denominator": 17,
     "declared_row_saddle_distance_maximum_inclusive_m": 0.04,
     "mast_class_agreement_denominator": 12,
-    "mast_class_agreement_minimum_inclusive": 7,
-    "mast_closed_boundary_symmetric_rms_maximum_inclusive_m": 0.55
+    "mast_class_agreement_minimum_inclusive": 7
   },
   "verdict": "FAIL"
 }

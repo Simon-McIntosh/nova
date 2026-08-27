@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T17:56:00",
+  "updated": "2026-08-27T18:17:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -58022,9 +58022,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T155535082294-pod-wall-ladder-regenerate",
+        "plan": "profile-owned-solve-domain",
+        "section": "",
+        "node": "pod-wall-ladder-regenerate",
+        "node_definition": {
+          "done_when": "The campaign generation command regenerates docs/figures/efit-baseline-demonstration/wall-resolution-ladder/receipt.json on current origin/main and the same command with --validate exits zero; the receipt keeps rung rows for counts 36 through 288, exact authored-batch controls, both stop counts reported truthfully, the fixed-terminal isolation field and the named contact-absence semantics, with no NaN or infinity; the manifest states the finest-pair boundary-flux and contact movements beside the previous values and whether the HOLD stands; only the receipt is committed",
+          "estimated_hours": null,
+          "goal": "The wall-resolution ladder receipt regenerated from the repaired-stack terminal state, preserving its scientific HOLD unless the measured convergence evidence genuinely changes it",
+          "id": "pod-wall-ladder-regenerate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T155535082294-pod-wall-ladder-regenerate/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/figures/efit-baseline-demonstration/wall-resolution-ladder/receipt.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "wall-surface",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T15:55:46Z",
+        "completed_at": "2026-08-27T16:17:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1281,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1281,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "75372e6acfce6c6d82ad1b9ea0f1518260447b69",
+        "commits": [
+          "9d6317b685460c1699a599f9bc9e9265272d2df8"
+        ],
+        "changed_lines": {
+          "added": 124,
+          "removed": 124,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "campaign generation plus --validate exit 0 on the regenerated receipt",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T155535082294-pod-wall-ladder-regenerate/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T155535082294-pod-wall-ladder-regenerate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0393f-cc5a-7852-89ab-ea49a36244e7",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": {
+          "attempt": 4,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260826T224433327050-pod-wall-ladder-regenerate",
+          "root_run_id": "r-20260826T224433327050-pod-wall-ladder-regenerate"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 4,
+        "attempt_kind": "redispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1126
+    "_version": 1127
   }
 }

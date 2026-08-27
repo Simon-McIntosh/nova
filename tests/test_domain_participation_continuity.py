@@ -115,6 +115,53 @@ def test_non_crossing_cell_participation_is_continuous_through_label_flip():
     np.testing.assert_allclose(ratios, 2.0, rtol=2.0e-2, atol=0.0, err_msg=message)
 
 
+def test_one_achieved_label_flip_cannot_switch_other_cell_moments():
+    """A participating label hand-off is bounded by that cell's contribution."""
+    source = ForwardSource(
+        core=DomainProfile(
+            p_prime=lambda psi: -(1.0 + 0.25 * psi),
+            ff_prime=lambda psi: jnp.zeros_like(psi),
+        )
+    )
+    radius = jnp.asarray([1.2, 1.5, 1.8])
+    area = jnp.asarray([0.07, 0.11, 0.09])
+
+    def support_moments(profile, centroid_flux, _sample_flux, _support):
+        current = profile.current_density(radius, centroid_flux) * area
+        return CellCurrentMoments(current, 0.2 * current, -0.3 * current)
+
+    before = DomainMasks(
+        label=jnp.asarray([PlasmaDomain.CORE] * 3, dtype=jnp.int8),
+        psi_norm=jnp.asarray([0.4, 1.0 - 1.0e-5, 0.7]),
+    )
+    after = DomainMasks(
+        label=jnp.asarray(
+            [PlasmaDomain.CORE, PlasmaDomain.COMMON_SOL, PlasmaDomain.CORE],
+            dtype=jnp.int8,
+        ),
+        psi_norm=jnp.asarray([0.4, 1.0 + 1.0e-5, 0.7]),
+    )
+
+    def evaluate(masks):
+        return jnp.stack(
+            source.current_moments(
+                masks,
+                support_moments,
+                object(),
+                sample_flux=masks.psi_norm,
+            )
+        )
+
+    for call in (evaluate, jax.jit(evaluate)):
+        before_moments = call(before)
+        after_moments = call(after)
+        difference = jnp.abs(after_moments - before_moments)
+        np.testing.assert_array_equal(difference[:, [0, 2]], 0.0)
+        assert float(jnp.max(difference[:, 1])) <= float(
+            jnp.max(jnp.abs(before_moments[:, 1]))
+        )
+
+
 def test_clipped_evaluation_converges_to_full_stencil_limit():
     """Every moment and assembled field shares the full-cell path limit."""
     centre = np.asarray([1.5, 0.0])

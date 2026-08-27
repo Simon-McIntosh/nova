@@ -633,7 +633,9 @@ class ForwardSource:
             profile_support,
         )
         total = jnp.stack(
-            CellCurrentMoments(*(jnp.where(masks.core, entry, 0.0) for entry in core))
+            CellCurrentMoments(
+                *(jnp.where(masks.profile_participation, entry, 0.0) for entry in core)
+            )
         )
         if self.common_sol is None:
             return CellCurrentMoments(*total)
@@ -647,9 +649,9 @@ class ForwardSource:
         record = self.common_sol.continuation_record(masks.psi_norm.dtype)
         common_distance = jnp.maximum(masks.psi_norm - 1.0, 0.0)
         common_selection = masks.common_sol & (common_distance <= record.support)
-        total = total + jnp.stack(
-            CellCurrentMoments(
-                *(jnp.where(common_selection, entry, 0.0) for entry in common)
-            )
+        total = jnp.where(
+            common_selection[None, :],
+            jnp.stack(common),
+            jnp.where(masks.common_sol[None, :], 0.0, total),
         )
         return CellCurrentMoments(*total)

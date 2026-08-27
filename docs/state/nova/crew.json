@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T12:51:48",
+  "updated": "2026-08-27T13:05:18",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -56384,9 +56384,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T105159219217-pod-derivative-consistency-probe",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-derivative-consistency-probe",
+        "node_definition": {
+          "done_when": "One SLURM job (H200 or all_debug CPU, at most 3 hours, EXIT_MARKER=0) reconstructs the plateau iterate and reports three measurements: first, a finite-difference versus JVP consistency check along the last attempted step direction and at least two random directions at four epsilon values spanning 1e-4 to 1e-8, giving the relative discrepancy per direction; second, the gradient norm of one half the squared residual, J transpose F, at the plateau beside its value at three healthy earlier iterates; third, whether any of eight probe directions (the JVP-implied Newton direction, the negative J transpose F direction, and six random directions) achieves any residual decrease at any of five step scales; the report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md gains a derivative-consistency section with those numbers and the verdict INCONSISTENT-DERIVATIVE, TRUE-LOCAL-MINIMUM, or DESCENT-EXISTS-SEARCH-FAILS, each with its implied repair owner; no repository file modified",
+          "estimated_hours": null,
+          "goal": "The decisive classification of the shared plateau: whether the linearized operator is the true derivative of the evaluated residual at the plateau iterate, and whether that iterate is a stationary point of the residual norm, separating a wrong-direction defect from a genuine residual floor with no root at this discretization",
+          "id": "pod-derivative-consistency-probe",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T105159219217-pod-derivative-consistency-probe/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/residual-stall-characterization.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T10:52:04Z",
+        "completed_at": "2026-08-27T11:04:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 773,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 773,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "d4dade4686bf0e1bdaee6c12d21cebafff772424",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 job 1258642 (00:04:17): centered FD vs JVP at four epsilons on the Newton and random directions, J^T F stationarity, eight-direction descent sweep; EXIT_MARKER=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T105159219217-pod-derivative-consistency-probe/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T105159219217-pod-derivative-consistency-probe/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 6350080,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 6457120,
+            "output_tokens": 2,
+            "output_tokens_cumulative": 23859,
+            "reasoning_output_tokens": 1392,
+            "reasoning_output_tokens_cumulative": 7431
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1109
+    "_version": 1110
   }
 }

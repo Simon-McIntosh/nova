@@ -3,8 +3,9 @@
 import numpy as np
 
 from benchmarks.two_branch_batch_cost import (
-    LIMITED_LATTICE_SHAPE,
-    _limited_tensor_machine,
+    ANALYTIC_LATTICE_SHAPE,
+    _analytic_tensor_machine,
+    _diverted_tensor_problem,
 )
 from nova.equilibrium.topology import TopologyClass
 from scripts.analytic_oracle_fixtures.measure import (
@@ -17,10 +18,10 @@ from scripts.analytic_oracle_fixtures.measure import (
 def test_limited_fixture_support_partition_uses_a_tensor_product_grid() -> None:
     """One analytic slice reaches the production support partition on CPU."""
     case = analytic_case()
-    machine = _limited_tensor_machine()
+    machine = _analytic_tensor_machine()
     radius = np.unique(machine.node[:, 0])
     height = np.unique(machine.node[:, 1])
-    assert (len(radius), len(height)) == LIMITED_LATTICE_SHAPE
+    assert (len(radius), len(height)) == ANALYTIC_LATTICE_SHAPE
     np.testing.assert_array_equal(
         machine.node,
         np.c_[np.repeat(radius, len(height)), np.tile(height, len(radius))],
@@ -36,3 +37,15 @@ def test_limited_fixture_support_partition_uses_a_tensor_product_grid() -> None:
 
     assert partition[3].vertex_count.shape == (len(machine.node),)
     assert np.all(np.isfinite(state))
+
+
+def test_diverted_fixture_support_partition_uses_the_tensor_product_grid() -> None:
+    """The benchmark's diverted slice reaches its pinned support partition."""
+    profile, _cold, root = _diverted_tensor_problem()
+
+    partition = profile.operator._support_partition(root, TopologyClass.DIVERTED)
+    _masks, topology = profile.operator.read(root)
+
+    assert partition[3].vertex_count.shape == (profile.lattice.node_count,)
+    assert bool(topology.diverted)
+    assert np.all(np.isfinite(root))

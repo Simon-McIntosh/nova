@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T09:28:07",
+  "updated": "2026-08-27T09:35:07",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -55162,9 +55162,115 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T071205719534-pod-wall-height-shadow-augmentation",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-wall-height-shadow-augmentation",
+        "node_definition": {
+          "done_when": "JAX_PLATFORMS=cpu pytest tests/test_wall_height_exclusion.py passes with new cases proving the height component flips only when an X-point height crosses a wall node, the flood component is bitwise unchanged by the augmentation, and a synthetic promotion sequence records strictly fewer per-promotion binary participation flips with the augmentation than without it; pytest over tests/test_hex_flood_geometries.py tests/test_hex_flood_sn_secondary.py tests/test_hex_flood_snowflake.py tests/test_hex_flood_coil_nulls.py tests/test_topology_domain_partition.py tests/test_fixed_point.py tests/test_forward_operator_domain.py tests/test_wall_resolution_ladder.py reports zero new failures vs current HEAD in eager and JIT; the conservation acceptance test passes with unchanged envelopes; ruff check reports zero findings on the three staged paths",
+          "estimated_hours": null,
+          "goal": "The lead-directed height-limit shadow augmentation: wall nodes above the selected upper X-point height or below the selected lower X-point height are excluded from residual participation, composed with the saddle-aware flood shadow which remains the sole interior and topology authority, so per-promotion binary mask changes drop to the coarse X-point-height crossings",
+          "id": "pod-wall-height-shadow-augmentation",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T071205719534-pod-wall-height-shadow-augmentation/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/connectivity_boundary.py",
+            "nova/equilibrium/forward_operator.py",
+            "tests/test_wall_height_exclusion.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T07:12:14Z",
+        "completed_at": "2026-08-27T07:34:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1337,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1337,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "bf00a6d1c5a7db95af2c074c7449b4dbc3962ce2",
+        "commits": [
+          "1da145b8f23b99163b9550ae565fc386d2029216"
+        ],
+        "changed_lines": {
+          "added": 163,
+          "removed": 10,
+          "files": 3
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/test_wall_height_exclusion.py (3/3 eager+JIT: height flips only on X-height crossings, flood component bitwise unchanged, fewer flips on the synthetic promotion sequence) + 94 focused passes with only pre-existing failures + conservation unchanged",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T071205719534-pod-wall-height-shadow-augmentation/logs/wall-height-final.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T071205719534-pod-wall-height-shadow-augmentation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1240064,
+            "cached_input_tokens_cumulative": 7656192,
+            "input_tokens": 1278262,
+            "input_tokens_cumulative": 7886733,
+            "output_tokens": 3637,
+            "output_tokens_cumulative": 21352,
+            "reasoning_output_tokens": 1840,
+            "reasoning_output_tokens_cumulative": 6733
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/test_wall_height_exclusion.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1097
+    "_version": 1098
   }
 }

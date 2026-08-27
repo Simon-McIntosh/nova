@@ -1,13 +1,13 @@
 {
   "artifact": "paired pinned-branch and margin-penalty contrast",
   "direct_green_operator_builder_entries": 0,
-  "driver_sha256": "6ac9c5a4ecf69a5aeca76072b46027c43e985f9b6e7205117289a43eaf637a7f",
+  "driver_sha256": "e6eeab89114a4ace73ec1b9c8e1d4903e14d1c27e1219ac090271de7e66a6cd0",
   "jit_vmap_batch_two_parity": {
     "batch_members": "two identical copies of the first frozen reference",
     "batch_size": 2,
     "exact_requested_achieved_and_consistency_receipt_parity": true,
-    "maximum_flux_relative_difference": 2.222628874659796e-16,
-    "maximum_terminal_residual_absolute_difference": 0.0,
+    "maximum_flux_relative_difference": 2.2225561652260123e-16,
+    "maximum_terminal_residual_absolute_difference": 1.1102230246251565e-16,
     "passes": true,
     "reference": {
       "shot": 21978,
@@ -34,8 +34,8 @@
     {
       "mixed_arm": {
         "accepted_class_margins": [
-          0.028350323427507484,
-          0.028628783842235606,
+          0.028492028502107802,
+          null,
           null,
           null,
           null,
@@ -69,29 +69,29 @@
         "failure_exception_class": null,
         "finite": true,
         "fitted_contraction": {
-          "contracts": false,
+          "contracts": true,
           "finite_positive_point_count": 12,
-          "fit_r_squared": 0.21346063092292444,
-          "ratio": 1.018509175551526
+          "fit_r_squared": 0.13132816799817693,
+          "ratio": 0.6897048217461231
         },
         "iterations": 12,
         "p_diverted": 1.0,
         "requested_class": "diverted",
         "residual_sequence": [
-          0.006490775847303424,
-          0.010724656507622823,
-          0.010729470625705789,
-          0.010516290099811412,
-          0.010766584340180742,
-          0.010502680913983195,
-          0.010762641116952824,
-          0.010504352567664852,
-          0.010762710928760664,
-          0.010504359648235024,
-          0.010762710781425898,
-          0.010504359639162271
+          0.0017133092451209733,
+          0.0013696247959048581,
+          0.0012297544628886608,
+          0.0034570319069270054,
+          0.0034705249315329363,
+          0.0030352465682676444,
+          0.005102945270150713,
+          0.004964867473720528,
+          0.004509043771518778,
+          0.006139654393319402,
+          0.0051767424949461785,
+          1.01591761528722e-08
         ],
-        "terminal_residual": 0.010504359639162162,
+        "terminal_residual": 1.01591761528722e-08,
         "terminal_xpoint_diagnostics": {
           "class_margin_from_operands": null,
           "class_margin_from_operands_nonfinite": "positive_infinity",
@@ -101,47 +101,47 @@
             "candidates": [
               {
                 "admitted": true,
-                "boundary_snr": 12.546806128657062,
-                "class_margin": 11.960893402501071,
-                "confidence": 0.747555837656317,
+                "boundary_snr": 11.691214914587476,
+                "class_margin": 11.963557601743696,
+                "confidence": 0.747722350108981,
                 "coordinate_m": [
-                  0.575572404876134,
-                  1.2590808655000065
+                  0.5754456459553275,
+                  1.2590073812675284
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.06467134627446271,
+                "flux_wb": -0.06470779140041326,
                 "resolved": false,
-                "root_support_cell": 0.5738585591316223,
+                "root_support_cell": 0.5714936852455139,
                 "state": "unresolved"
               },
               {
                 "admitted": true,
-                "boundary_snr": 8.692542666322408,
-                "class_margin": 11.473070228204591,
-                "confidence": 0.7170668892627869,
+                "boundary_snr": 10.00193911518761,
+                "class_margin": 11.113875252156447,
+                "confidence": 0.6946172032597779,
                 "coordinate_m": [
-                  0.5566727048333838,
-                  -1.2120217249141156
+                  0.551825499837118,
+                  -1.2073573011660044
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.07679481126644747,
+                "flux_wb": -0.07757344367094433,
                 "resolved": false,
-                "root_support_cell": 0.7553000450134277,
+                "root_support_cell": 0.6738563776016235,
                 "state": "unresolved"
               },
               {
                 "admitted": true,
-                "boundary_snr": 4.8810708623932975,
-                "class_margin": 2.120917165108595,
-                "confidence": 0.1325573228192872,
+                "boundary_snr": 4.564119605721694,
+                "class_margin": 2.1242778766221133,
+                "confidence": 0.13276736728888208,
                 "coordinate_m": [
-                  0.16693958709094173,
-                  -0.04462574708490678
+                  0.16692380869911236,
+                  -0.04444089785999231
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.09878985779290159,
+                "flux_wb": -0.09877204079459288,
                 "resolved": false,
-                "root_support_cell": 0.7238916754722595,
+                "root_support_cell": 0.7247833609580994,
                 "state": "unresolved"
               }
             ],
@@ -150,74 +150,74 @@
             "retained_candidate_count": 3
           },
           "selected_x_coordinate_m": [
-            0.5746975883277566,
-            1.2639851582160506
+            0.5745728043195221,
+            1.2639235024258293
           ],
-          "selected_x_flux_wb": -0.06472970545236578,
-          "selected_x_normalized_flux_operand": 0.43580205514567494,
+          "selected_x_flux_wb": -0.06476591131502228,
+          "selected_x_normalized_flux_operand": 0.43554404375876893,
           "selected_x_normalized_flux_operand_nonfinite": null,
           "selection_status": "selected_typed_saddle_with_connectivity_support",
           "typed_saddle_candidate_count": 5,
           "typed_saddle_candidates": [
             {
               "coordinate_m": [
-                0.1702814957055705,
-                -0.011405138660077785
+                0.1702619451519363,
+                -0.011225451320480804
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.09810642674632143,
-              "normalized_flux_operand": 0.4742837954620715,
+              "flux_wb": -0.09808744460401805,
+              "normalized_flux_operand": 0.4739487216811469,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.5570193658423369,
-                -1.212691610310149
+                0.5598935808236026,
+                -1.2040634431806336
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.07673000040611355,
-              "normalized_flux_operand": 0.44963781301006156,
+              "flux_wb": -0.07754765356487105,
+              "normalized_flux_operand": 0.4502756195879761,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.5746975883277566,
-                1.2639851582160506
+                0.5745728043195221,
+                1.2639235024258293
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.06472970545236578,
-              "normalized_flux_operand": 0.43580205514567494,
+              "flux_wb": -0.06476591131502228,
+              "normalized_flux_operand": 0.43554404375876893,
               "selected": true
             },
             {
               "coordinate_m": [
-                1.6838771869968456,
-                -0.7941684084022272
+                1.6838572877503617,
+                -0.7942388081381215
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.6578126995183227,
-              "normalized_flux_operand": 1.119597972746791,
+              "flux_wb": -0.6582201898841614,
+              "normalized_flux_operand": 1.119528788171227,
               "selected": false
             },
             {
               "coordinate_m": [
-                1.6835629354929453,
-                0.7898828210954957
+                1.6835614413363105,
+                0.78996326870545
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.6471324396258082,
-              "normalized_flux_operand": 1.1072841512639784,
+              "flux_wb": -0.647541336925593,
+              "normalized_flux_operand": 1.1072208939066586,
               "selected": false
             }
           ],
           "wall_operand": {
             "coordinate_m": [
               0.5649306774139404,
-              1.747484634297699
+              -1.7437600812044993
             ],
-            "flux_wb": 0.026129778671619773,
+            "flux_wb": 0.02712888755449066,
             "normalized_flux": null,
-            "normalized_flux_before_shadow": 0.3310454781725451,
+            "normalized_flux_before_shadow": 0.32963084574603385,
             "normalized_flux_nonfinite": "positive_infinity",
             "shadowed": true,
             "status": "wall_extremum_rejected_by_private_flux_shadow"
@@ -228,7 +228,7 @@
       },
       "pure_arm": {
         "achieved_class": "diverted",
-        "class_margin": 0.02643334256296942,
+        "class_margin": 0.0264469702359863,
         "class_margin_nonfinite": null,
         "converged": false,
         "entry_point": "ForwardProfile.solve_portfolio",
@@ -237,29 +237,29 @@
         "fitted_contraction": {
           "contracts": true,
           "finite_positive_point_count": 12,
-          "fit_r_squared": 0.5483685003041361,
-          "ratio": 0.9503071181832321
+          "fit_r_squared": 0.9980491246569885,
+          "ratio": 0.9688453684196375
         },
         "iterations": 12,
-        "p_diverted": 0.933598960514718,
+        "p_diverted": 0.9336833912027871,
         "requested_class": "diverted",
         "residual_sequence": [
-          0.0064612831489082095,
-          0.01170378564249435,
-          0.006046522151531451,
-          0.005861169937492542,
-          0.005682601762403738,
-          0.005508594942316287,
-          0.00533867636743973,
-          0.005174738890875825,
-          0.005015824963395612,
-          0.004860788300665485,
-          0.004713415464679304,
-          0.0045851673071955965
+          0.006462024936480675,
+          0.006233151914907099,
+          0.006014107793662806,
+          0.005807045122506728,
+          0.005615191464221159,
+          0.005436724906504425,
+          0.0052690902488065645,
+          0.005113033305242559,
+          0.004966550034060978,
+          0.004823326485383319,
+          0.0046864647036745834,
+          0.004555147794085345
         ],
-        "terminal_residual": 0.0045851673071955965,
+        "terminal_residual": 0.004555147794085345,
         "terminal_xpoint_diagnostics": {
-          "class_margin_from_operands": 0.02643334256296942,
+          "class_margin_from_operands": 0.0264469702359863,
           "class_margin_from_operands_nonfinite": null,
           "connectivity_admission": {
             "admitted_candidate_count": 3,
@@ -267,47 +267,47 @@
             "candidates": [
               {
                 "admitted": true,
-                "boundary_snr": 9.111942775538225,
-                "class_margin": 11.665930190955715,
-                "confidence": 0.7291206369347322,
+                "boundary_snr": 3.316161707423604,
+                "class_margin": 11.578756022327848,
+                "confidence": 0.7236722513954905,
                 "coordinate_m": [
-                  0.5667530598808627,
-                  -1.232024087264165
+                  0.5672884403952254,
+                  -1.2302340238919713
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.07023449908737452,
+                "flux_wb": -0.07023337750610498,
                 "resolved": false,
-                "root_support_cell": 0.5918777585029602,
+                "root_support_cell": 0.5610779523849487,
                 "state": "unresolved"
               },
               {
                 "admitted": true,
-                "boundary_snr": 9.0237699551474,
-                "class_margin": 11.589183151781873,
-                "confidence": 0.724323946986367,
+                "boundary_snr": 8.706118172063771,
+                "class_margin": 11.53806956941577,
+                "confidence": 0.7211293480884856,
                 "coordinate_m": [
-                  0.5673633798015815,
-                  1.240069177281043
+                  0.5650918320767335,
+                  1.2450274156024015
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.07109988476049314,
+                "flux_wb": -0.07111923021226949,
                 "resolved": false,
-                "root_support_cell": 0.5724883675575256,
+                "root_support_cell": 0.6277427077293396,
                 "state": "unresolved"
               },
               {
                 "admitted": true,
-                "boundary_snr": 4.061841826711897,
-                "class_margin": 2.1052634285030702,
-                "confidence": 0.1315789642814419,
+                "boundary_snr": 4.034752851688037,
+                "class_margin": 2.10553575533699,
+                "confidence": 0.13159598470856188,
                 "coordinate_m": [
-                  0.16683846332397254,
-                  -0.06612991170474498
+                  0.16683720653155207,
+                  -0.06637517361956569
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.09864131815922307,
+                "flux_wb": -0.09863944184864369,
                 "resolved": false,
-                "root_support_cell": 0.5596227645874023,
+                "root_support_cell": 0.5577273964881897,
                 "state": "unresolved"
               }
             ],
@@ -316,74 +316,74 @@
             "retained_candidate_count": 3
           },
           "selected_x_coordinate_m": [
-            0.5676559771789974,
-            -1.2338307252843699
+            0.5688828741180098,
+            -1.2319611227004759
           ],
-          "selected_x_flux_wb": -0.07017520665944828,
-          "selected_x_normalized_flux_operand": 0.44252817236845116,
+          "selected_x_flux_wb": -0.07015500871062873,
+          "selected_x_normalized_flux_operand": 0.4426927626120263,
           "selected_x_normalized_flux_operand_nonfinite": null,
           "selection_status": "selected_typed_saddle_with_connectivity_support",
           "typed_saddle_candidate_count": 5,
           "typed_saddle_candidates": [
             {
               "coordinate_m": [
-                0.17017746207619464,
-                -0.03672209310673367
+                0.17017582262013248,
+                -0.03700736924157045
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.09800702266762255,
-              "normalized_flux_operand": 0.4746690453620786,
+              "flux_wb": -0.09800567536851731,
+              "normalized_flux_operand": 0.47484677600176634,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.5676559771789974,
-                -1.2338307252843699
+                0.5688828741180098,
+                -1.2319611227004759
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.07017520665944828,
-              "normalized_flux_operand": 0.44252817236845116,
+              "flux_wb": -0.07015500871062873,
+              "normalized_flux_operand": 0.4426927626120263,
               "selected": true
             },
             {
               "coordinate_m": [
-                0.5671919415395776,
-                1.2448486718561536
+                0.5646620318334821,
+                1.248486850237661
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.07102968579560505,
-              "normalized_flux_operand": 0.4435149461162674,
+              "flux_wb": -0.07109006526494621,
+              "normalized_flux_operand": 0.44377229946250857,
               "selected": false
             },
             {
               "coordinate_m": [
-                1.685502163801793,
-                -0.7932570004684137
+                1.685527717964153,
+                -0.7932491514440183
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.6510961195536766,
-              "normalized_flux_operand": 1.113390083613901,
+              "flux_wb": -0.6509435311183239,
+              "normalized_flux_operand": 1.1132218438544987,
               "selected": false
             },
             {
               "coordinate_m": [
-                1.6822015855248316,
-                0.7916440006893247
+                1.68217461763781,
+                0.7916185607332723
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.6566903971928162,
-              "normalized_flux_operand": 1.1198504944989782,
+              "flux_wb": -0.6566973867681608,
+              "normalized_flux_operand": 1.1198647567111317,
               "selected": false
             }
           ],
           "wall_operand": {
             "coordinate_m": [
               0.5649306774139404,
-              -1.7451425858451193
+              -1.744811180188827
             ],
-            "flux_wb": 0.026376759281969926,
-            "normalized_flux": 0.4689615149314206,
-            "normalized_flux_before_shadow": 0.33102756192690724,
+            "flux_wb": 0.026561090081601395,
+            "normalized_flux": 0.4691397328480126,
+            "normalized_flux_before_shadow": 0.33103257243528766,
             "normalized_flux_nonfinite": null,
             "shadowed": true,
             "status": "wall_extremum_rejected_by_private_flux_shadow"
@@ -417,22 +417,22 @@
       },
       "same_seed_both_arms": true,
       "seed_sha256": "51a1340452903c05d65bc4937bb91c64816da2fca49e76bb8ac35e171955ada6",
-      "terminal_residual_ratio_pure_over_mixed": 0.43650136369105824
+      "terminal_residual_ratio_pure_over_mixed": 448377.67605767073
     },
     {
       "mixed_arm": {
         "accepted_class_margins": [
-          0.026876670403717273,
+          0.02687667040371755,
           null,
-          0.02686091416265929,
-          0.02844935964294293,
-          0.026492020742808597,
+          0.026775110651221068,
           null,
-          0.026589165935107906,
+          0.026455920971856395,
           null,
-          0.02687731440804314,
+          0.026601278761304137,
           null,
-          0.026855802321531952,
+          0.026716023300145053,
+          null,
+          0.026831461490827158,
           null
         ],
         "accepted_topology_penalties": [
@@ -459,27 +459,27 @@
         "fitted_contraction": {
           "contracts": true,
           "finite_positive_point_count": 12,
-          "fit_r_squared": 8.613436841953259e-05,
-          "ratio": 0.9997013770254657
+          "fit_r_squared": 0.007068061623845434,
+          "ratio": 0.9977784363043737
         },
         "iterations": 12,
         "p_diverted": 1.0,
         "requested_class": "diverted",
         "residual_sequence": [
-          0.0017195284621669643,
-          0.001204199470404804,
-          0.0011286069373526286,
-          0.0011390219065089248,
-          0.001293343781830306,
-          0.001234175086905648,
-          0.0014600991413714812,
-          0.0012581984607932335,
-          0.0012820980158476584,
-          0.001365365476518134,
-          0.001400622965460697,
-          0.0012559775222693685
+          0.0016843238992855245,
+          0.0011720329902699523,
+          0.0012735281819326893,
+          0.001266314975975973,
+          0.0015320274742726598,
+          0.0014237230984813463,
+          0.001477634707358025,
+          0.0014024771415029425,
+          0.0014108730523355805,
+          0.0013398933421687263,
+          0.0013503116546455913,
+          0.001332349205152944
         ],
-        "terminal_residual": 0.0012559775222693165,
+        "terminal_residual": 0.001332349205152944,
         "terminal_xpoint_diagnostics": {
           "class_margin_from_operands": null,
           "class_margin_from_operands_nonfinite": "positive_infinity",
@@ -489,47 +489,47 @@
             "candidates": [
               {
                 "admitted": true,
-                "boundary_snr": 8.229456718693498,
-                "class_margin": 12.431702403283033,
-                "confidence": 0.7769814002051896,
+                "boundary_snr": 8.265108495636367,
+                "class_margin": 12.437067041523857,
+                "confidence": 0.7773166900952411,
                 "coordinate_m": [
-                  0.5549844651103418,
-                  1.2701343980724047
+                  0.5550788366427301,
+                  1.2704386247464314
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.09457135214264899,
+                "flux_wb": -0.09448098579008,
                 "resolved": false,
-                "root_support_cell": 0.7238401174545288,
+                "root_support_cell": 0.7219465970993042,
                 "state": "unresolved"
               },
               {
                 "admitted": true,
-                "boundary_snr": 10.869755786959594,
-                "class_margin": 11.891208603125099,
-                "confidence": 0.7432005376953187,
+                "boundary_snr": 10.904366695128202,
+                "class_margin": 11.928501405256196,
+                "confidence": 0.7455313378285122,
                 "coordinate_m": [
-                  0.5269203363708318,
-                  -1.1927315168240316
+                  0.5268152167114839,
+                  -1.1926083263281944
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.11443261013641534,
+                "flux_wb": -0.11447711777299639,
                 "resolved": false,
-                "root_support_cell": 0.7771011590957642,
+                "root_support_cell": 0.7728258967399597,
                 "state": "unresolved"
               },
               {
                 "admitted": true,
-                "boundary_snr": 3.5727382234522596,
-                "class_margin": 1.8772519853984106,
-                "confidence": 0.11732824908740067,
+                "boundary_snr": 3.570724520023576,
+                "class_margin": 1.8773135917024002,
+                "confidence": 0.11733209948140001,
                 "coordinate_m": [
-                  0.17111255074649018,
-                  -0.00883519952630448
+                  0.17111481704938897,
+                  -0.008346577426358071
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.1259595731949394,
+                "flux_wb": -0.12596386312239843,
                 "resolved": false,
-                "root_support_cell": 0.1215539500117302,
+                "root_support_cell": 0.12535326182842255,
                 "state": "unresolved"
               }
             ],
@@ -538,74 +538,74 @@
             "retained_candidate_count": 3
           },
           "selected_x_coordinate_m": [
-            0.5526016041428223,
-            1.2740427974363968
+            0.5526865426840638,
+            1.2743472087241126
           ],
-          "selected_x_flux_wb": -0.09466841630521576,
-          "selected_x_normalized_flux_operand": 0.43498596505904236,
+          "selected_x_flux_wb": -0.09457945058715635,
+          "selected_x_normalized_flux_operand": 0.4348383197139636,
           "selected_x_normalized_flux_operand_nonfinite": null,
           "selection_status": "selected_typed_saddle_with_connectivity_support",
           "typed_saddle_candidate_count": 5,
           "typed_saddle_candidates": [
             {
               "coordinate_m": [
-                0.17538427808307588,
-                0.022013545800514473
+                0.1753855768447521,
+                0.022505632226811862
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.12530565851631342,
-              "normalized_flux_operand": 0.46845102019330365,
+              "flux_wb": -0.12530889709468057,
+              "normalized_flux_operand": 0.46840141093659504,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.4654222108295216,
-                -1.8192616189296464
+                0.4655739827616291,
+                -1.8192508536753125
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.0169366214025433,
-              "normalized_flux_operand": 0.3500795369876293,
+              "flux_wb": -0.01695074338234774,
+              "normalized_flux_operand": 0.35005126112597446,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.46252017254143946,
-                1.8036925839708253
+                0.46231429587305417,
+                1.8039565361604462
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.015207047473228714,
-              "normalized_flux_operand": 0.34819032364053737,
+              "flux_wb": -0.015186330687491333,
+              "normalized_flux_operand": 0.34812414720228774,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.5271348763700971,
-                -1.1934503726049983
+                0.5269977573250029,
+                -1.1933050949684973
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.11435284864509407,
-              "normalized_flux_operand": 0.4564872675914893,
+              "flux_wb": -0.11439740516622855,
+              "normalized_flux_operand": 0.45648374105991923,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.5526016041428223,
-                1.2740427974363968
+                0.5526865426840638,
+                1.2743472087241126
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.09466841630521576,
-              "normalized_flux_operand": 0.43498596505904236,
+              "flux_wb": -0.09457945058715635,
+              "normalized_flux_operand": 0.4348383197139636,
               "selected": true
             }
           ],
           "wall_operand": {
             "coordinate_m": [
               0.2800000011920929,
-              1.6409891353985715
+              1.6410213403970155
             ],
-            "flux_wb": -0.022286549422085092,
+            "flux_wb": -0.02227803823710802,
             "normalized_flux": null,
-            "normalized_flux_before_shadow": 0.3559232625718283,
+            "normalized_flux_before_shadow": 0.35586980013338526,
             "normalized_flux_nonfinite": "positive_infinity",
             "shadowed": true,
             "status": "wall_extremum_rejected_by_private_flux_shadow"
@@ -616,7 +616,7 @@
       },
       "pure_arm": {
         "achieved_class": "diverted",
-        "class_margin": 0.02074206958537511,
+        "class_margin": 0.020594402390937405,
         "class_margin_nonfinite": null,
         "converged": false,
         "entry_point": "ForwardProfile.solve_portfolio",
@@ -625,29 +625,29 @@
         "fitted_contraction": {
           "contracts": true,
           "finite_positive_point_count": 12,
-          "fit_r_squared": 0.9994050325854441,
-          "ratio": 0.9767709093853519
+          "fit_r_squared": 0.9989373740255463,
+          "ratio": 0.976143229549222
         },
         "iterations": 12,
-        "p_diverted": 0.8883708396279245,
+        "p_diverted": 0.8868980325195974,
         "requested_class": "diverted",
         "residual_sequence": [
           0.008577708247011808,
           0.008361294483564027,
           0.008150462806794675,
-          0.007954912532505272,
-          0.007765919818302569,
-          0.007585261937997048,
-          0.007408601251011931,
-          0.007238205563212013,
-          0.007074017664839237,
-          0.006913774299346372,
-          0.006766201596340193,
-          0.006623820952318352
+          0.00794620697490834,
+          0.007749450459591982,
+          0.007556512744364965,
+          0.007371381968375263,
+          0.007194029115144701,
+          0.00702869902667315,
+          0.00687610598768035,
+          0.0067298315484582575,
+          0.006589467341992797
         ],
-        "terminal_residual": 0.006623820952318352,
+        "terminal_residual": 0.006589467341992797,
         "terminal_xpoint_diagnostics": {
-          "class_margin_from_operands": 0.02074206958537511,
+          "class_margin_from_operands": 0.020594402390937405,
           "class_margin_from_operands_nonfinite": null,
           "connectivity_admission": {
             "admitted_candidate_count": 3,
@@ -655,47 +655,47 @@
             "candidates": [
               {
                 "admitted": true,
-                "boundary_snr": 8.479789720597687,
-                "class_margin": 11.888741160674002,
-                "confidence": 0.7430463225421251,
+                "boundary_snr": 8.45709057362909,
+                "class_margin": 11.87892477348242,
+                "confidence": 0.7424327983426513,
                 "coordinate_m": [
-                  0.5422053700169673,
-                  -1.22078972724631
+                  0.5424666080538292,
+                  -1.221291339716985
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.10610197240462704,
+                "flux_wb": -0.1059723063709464,
                 "resolved": false,
-                "root_support_cell": 0.9732688069343567,
+                "root_support_cell": 0.9762063026428223,
                 "state": "unresolved"
               },
               {
                 "admitted": true,
-                "boundary_snr": 6.668570787548796,
-                "class_margin": 11.83088512513242,
-                "confidence": 0.7394303203207763,
+                "boundary_snr": 6.665795302703663,
+                "class_margin": 11.821079259702826,
+                "confidence": 0.7388174537314266,
                 "coordinate_m": [
-                  0.5463840336179583,
-                  1.2452750403732786
+                  0.5462448824614053,
+                  1.2447673196644784
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.10236459716307265,
+                "flux_wb": -0.1024960760709536,
                 "resolved": false,
-                "root_support_cell": 0.053665079176425934,
+                "root_support_cell": 0.051100485026836395,
                 "state": "unresolved"
               },
               {
                 "admitted": true,
-                "boundary_snr": 3.7508124963586744,
-                "class_margin": 1.9029555424778364,
-                "confidence": 0.11893472140486477,
+                "boundary_snr": 3.7717394458264084,
+                "class_margin": 1.9029993599449755,
+                "confidence": 0.11893745999656097,
                 "coordinate_m": [
-                  0.1711462777462257,
-                  -0.04228942216643006
+                  0.17114499572306385,
+                  -0.0429168132011644
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.12594516645637388,
+                "flux_wb": -0.12594197962813747,
                 "resolved": false,
-                "root_support_cell": 0.7525280714035034,
+                "root_support_cell": 0.7476388216018677,
                 "state": "unresolved"
               }
             ],
@@ -704,74 +704,74 @@
             "retained_candidate_count": 3
           },
           "selected_x_coordinate_m": [
-            0.5444663022219216,
-            1.2491324433637336
+            0.5443305326618351,
+            1.2486240032617923
           ],
-          "selected_x_flux_wb": -0.10235202822469193,
-          "selected_x_normalized_flux_operand": 0.4471127692199619,
+          "selected_x_flux_wb": -0.10248128446477187,
+          "selected_x_normalized_flux_operand": 0.44731356914726783,
           "selected_x_normalized_flux_operand_nonfinite": null,
           "selection_status": "selected_typed_saddle_with_connectivity_support",
           "typed_saddle_candidate_count": 5,
           "typed_saddle_candidates": [
             {
               "coordinate_m": [
-                0.17548220509210422,
-                -0.014056671317487899
+                0.1754809829800082,
+                -0.014748062891041698
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.12537884562411505,
-              "normalized_flux_operand": 0.472456667871076,
+              "flux_wb": -0.1253770806228138,
+              "normalized_flux_operand": 0.47251126759029904,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.4500099684729799,
-                -1.817467111402243
+                0.44967517022827275,
+                -1.8175074819105228
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.015153877800157863,
-              "normalized_flux_operand": 0.3511402755578827,
+              "flux_wb": -0.01512472300216534,
+              "normalized_flux_operand": 0.3511743356582531,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.542373636113295,
-                -1.223072499546232
+                0.5426535711156804,
+                -1.2235841845157804
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.10603566260343687,
-              "normalized_flux_operand": 0.451167070547987,
+              "flux_wb": -0.10590722048054624,
+              "normalized_flux_operand": 0.4510839426260814,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.5444663022219216,
-                1.2491324433637336
+                0.5443305326618351,
+                1.2486240032617923
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.10235202822469193,
-              "normalized_flux_operand": 0.4471127692199619,
+              "flux_wb": -0.10248128446477187,
+              "normalized_flux_operand": 0.44731356914726783,
               "selected": true
             },
             {
               "coordinate_m": [
-                1.6873632281353028,
-                -0.7941951070191569
+                1.687417283611695,
+                -0.7941968166657909
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.7024012340384885,
-              "normalized_flux_operand": 1.1075421283465663,
+              "flux_wb": -0.7020950338488992,
+              "normalized_flux_operand": 1.1072114095623815,
               "selected": false
             }
           ],
           "wall_operand": {
             "coordinate_m": [
               0.2800000011920929,
-              -1.638011343762036
+              -1.6380526796308474
             ],
-            "flux_wb": -0.021725563574233248,
-            "normalized_flux": 0.467854838805337,
-            "normalized_flux_before_shadow": 0.3583732394250173,
+            "flux_wb": -0.02171548677674208,
+            "normalized_flux": 0.46790797153820524,
+            "normalized_flux_before_shadow": 0.3584277230030172,
             "normalized_flux_nonfinite": null,
             "shadowed": true,
             "status": "wall_extremum_rejected_by_private_flux_shadow"
@@ -805,965 +805,7 @@
       },
       "same_seed_both_arms": true,
       "seed_sha256": "02dc288308d994a788b0f107814156466204a90ec44c360f2a2e145096e3f566",
-      "terminal_residual_ratio_pure_over_mixed": 5.273837178511242
-    },
-    {
-      "mixed_arm": {
-        "accepted_class_margins": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
-        "accepted_topology_penalties": [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        "achieved_class": "diverted",
-        "class_margin": null,
-        "class_margin_nonfinite": "positive_infinity",
-        "converged": false,
-        "entry_point": "margin-graded fixed-ladder Newton-Krylov",
-        "failure_exception_class": null,
-        "finite": true,
-        "fitted_contraction": {
-          "contracts": false,
-          "finite_positive_point_count": 12,
-          "fit_r_squared": 0.48028898367126516,
-          "ratio": 1.0181386256720224
-        },
-        "iterations": 12,
-        "p_diverted": 8.524571899922761e-10,
-        "requested_class": "diverted",
-        "residual_sequence": [
-          0.00277486987609124,
-          0.002433944765339327,
-          0.0025409824918178003,
-          0.0022621407878116845,
-          0.0025783407707735758,
-          0.0025075886103614665,
-          0.0028904819992963513,
-          0.002684260346554032,
-          0.0030093270456935306,
-          0.003025857071248163,
-          0.002878614498864185,
-          0.0029621938259649276
-        ],
-        "terminal_residual": 0.0029621938259649276,
-        "terminal_xpoint_diagnostics": {
-          "class_margin_from_operands": null,
-          "class_margin_from_operands_nonfinite": "positive_infinity",
-          "connectivity_admission": {
-            "admitted_candidate_count": 1,
-            "candidate_count_before_capacity": 1,
-            "candidates": [
-              {
-                "admitted": true,
-                "boundary_snr": 2.9942726856395963,
-                "class_margin": 2.9184029207038678,
-                "confidence": 0.0,
-                "coordinate_m": [
-                  0.3629692601448847,
-                  -1.8810350847186679
-                ],
-                "fitted_null_type": 0.0,
-                "flux_wb": -0.01495796527173713,
-                "resolved": false,
-                "root_support_cell": 0.747142493724823,
-                "state": "unresolved"
-              }
-            ],
-            "discarded_score_upper_bound": null,
-            "overflow": false,
-            "retained_candidate_count": 1
-          },
-          "selected_x_coordinate_m": [
-            0.5474306244273942,
-            -1.1061848439386657
-          ],
-          "selected_x_flux_wb": -0.22819418961280125,
-          "selected_x_normalized_flux_operand": 0.22892968794914112,
-          "selected_x_normalized_flux_operand_nonfinite": null,
-          "selection_status": "selected_typed_saddle_with_connectivity_support",
-          "typed_saddle_candidate_count": 5,
-          "typed_saddle_candidates": [
-            {
-              "coordinate_m": [
-                0.1861961982371324,
-                0.015413727467207917
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.25013300768309454,
-              "normalized_flux_operand": 0.25255578601358564,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.3937955593340532,
-                -1.8913584569094444
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.014850955204156689,
-              "normalized_flux_operand": -0.0008214390885347152,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.3655548600942272,
-                1.9073382489281372
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.01352643446348236,
-              "normalized_flux_operand": -0.0022478266362730166,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.339759819713522,
-                -1.823470031263025
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.014855890601295857,
-              "normalized_flux_operand": -0.0008161241177635754,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.5474306244273942,
-                -1.1061848439386657
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.22819418961280125,
-              "normalized_flux_operand": 0.22892968794914112,
-              "selected": true
-            }
-          ],
-          "wall_operand": {
-            "coordinate_m": [
-              0.5649306774139404,
-              1.7887500931430351
-            ],
-            "flux_wb": -0.03142833659782118,
-            "normalized_flux": null,
-            "normalized_flux_before_shadow": 0.017030882636524355,
-            "normalized_flux_nonfinite": "positive_infinity",
-            "shadowed": true,
-            "status": "wall_extremum_rejected_by_private_flux_shadow"
-          }
-        },
-        "termination_reason": "terminal_observation_complete",
-        "topology_consistent": true
-      },
-      "pure_arm": {
-        "achieved_class": "diverted",
-        "class_margin": null,
-        "class_margin_nonfinite": "positive_infinity",
-        "converged": false,
-        "entry_point": "ForwardProfile.solve_portfolio",
-        "failure_exception_class": null,
-        "finite": true,
-        "fitted_contraction": {
-          "contracts": true,
-          "finite_positive_point_count": 12,
-          "fit_r_squared": 0.9997012529628403,
-          "ratio": 0.9835225185971582
-        },
-        "iterations": 12,
-        "p_diverted": 1.0,
-        "requested_class": "diverted",
-        "residual_sequence": [
-          0.006220624215754909,
-          0.006105428677436532,
-          0.005994424883476881,
-          0.005896528882102817,
-          0.0058058682376395465,
-          0.005713673474078087,
-          0.0056223341324403995,
-          0.00552974539432664,
-          0.005438587367629119,
-          0.005347338191703766,
-          0.005257422302350144,
-          0.005167711618738155
-        ],
-        "terminal_residual": 0.005167711618738155,
-        "terminal_xpoint_diagnostics": {
-          "class_margin_from_operands": null,
-          "class_margin_from_operands_nonfinite": "positive_infinity",
-          "connectivity_admission": {
-            "admitted_candidate_count": 0,
-            "candidate_count_before_capacity": 0,
-            "candidates": [],
-            "discarded_score_upper_bound": null,
-            "overflow": false,
-            "retained_candidate_count": 0
-          },
-          "selected_x_coordinate_m": [
-            0.5559167705425362,
-            -1.1178653484963967
-          ],
-          "selected_x_flux_wb": -0.22264827596557216,
-          "selected_x_normalized_flux_operand": -0.07993304792641832,
-          "selected_x_normalized_flux_operand_nonfinite": null,
-          "selection_status": "selected_typed_saddle_not_connectivity_reachable",
-          "typed_saddle_candidate_count": 5,
-          "typed_saddle_candidates": [
-            {
-              "coordinate_m": [
-                0.1862049802500162,
-                0.001027577485379154
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.2501376041787571,
-              "normalized_flux_operand": -0.03885014399883389,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.3920786982565388,
-                -1.8901803527655663
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.014308689010814939,
-              "normalized_flux_operand": -0.3912973406001695,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.36714137628089577,
-                1.9085657984623292
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.013919202890053859,
-              "normalized_flux_operand": -0.3918794290657828,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.3371897786961563,
-                -1.8230257854611887
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.014165133094600173,
-              "normalized_flux_operand": -0.391511885454389,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.5559167705425362,
-                -1.1178653484963967
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.22264827596557216,
-              "normalized_flux_operand": -0.07993304792641832,
-              "selected": true
-            }
-          ],
-          "wall_operand": {
-            "coordinate_m": [
-              0.5649306774139404,
-              1.7974382727145062
-            ],
-            "flux_wb": -0.03242195549528476,
-            "normalized_flux": null,
-            "normalized_flux_before_shadow": -0.3642269960277151,
-            "normalized_flux_nonfinite": "positive_infinity",
-            "shadowed": true,
-            "status": "wall_extremum_rejected_by_private_flux_shadow"
-          }
-        },
-        "termination_reason": "terminal_observation_complete",
-        "topology_consistent": true
-      },
-      "reference": {
-        "machine": "MAST",
-        "plasma_current_a": 934383.875,
-        "qualification_before_attribution": {
-          "declared_boundary_to_map_saddle_limit": 0.01,
-          "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 1.424904549219899e-08,
-          "passes": true,
-          "stored_lcfs_contour_limit": 0.006,
-          "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0026320993551678384,
-          "typed_saddle_candidate_count": 2,
-          "typed_saddle_resolved": true
-        },
-        "shot": 21985,
-        "slice_index": 51,
-        "source_coordinate": {
-          "axis_wb": 0.33908170628553735,
-          "boundary_wb": -0.2193531903351262,
-          "support_nodes": 227
-        },
-        "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
-        "span_wb": 1.823353801798901,
-        "time_s": 0.2750000059604645
-      },
-      "same_seed_both_arms": true,
-      "seed_sha256": "8fa2931dc40e2034351c7c9a37e89fd47dd1f005b2263b85b529dfb4f3348c81",
-      "terminal_residual_ratio_pure_over_mixed": 1.7445555295676118
-    },
-    {
-      "mixed_arm": {
-        "accepted_class_margins": [
-          null,
-          -0.14656636865998107,
-          -0.15034333957913554,
-          -0.15180538366871565,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
-        "accepted_topology_penalties": [
-          0.0,
-          0.14656636865998107,
-          0.15034333957913554,
-          0.15180538366871565,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
-        "achieved_class": null,
-        "class_margin": null,
-        "class_margin_nonfinite": null,
-        "converged": false,
-        "entry_point": "margin-graded fixed-ladder Newton-Krylov",
-        "failure_exception_class": "NoQualifiedAxisError",
-        "finite": true,
-        "fitted_contraction": {
-          "contracts": false,
-          "finite_positive_point_count": 12,
-          "fit_r_squared": 0.14610827110833857,
-          "ratio": 1.0911364524210474
-        },
-        "iterations": 12,
-        "p_diverted": null,
-        "requested_class": "diverted",
-        "residual_sequence": [
-          0.008535766477595982,
-          0.008273425413884998,
-          0.006364997195892771,
-          0.0060433950159621205,
-          0.028376110278349614,
-          0.019036025551388544,
-          0.05673062301771108,
-          0.02035837543130247,
-          0.003189586391100101,
-          0.01561952249507534,
-          0.02745121287983686,
-          0.023131437967826584
-        ],
-        "terminal_residual": 0.023131437967826584,
-        "terminal_xpoint_diagnostics": null,
-        "termination_reason": "NoQualifiedAxisError",
-        "topology_consistent": null
-      },
-      "pure_arm": {
-        "achieved_class": "limited",
-        "class_margin": -0.14822516784583778,
-        "class_margin_nonfinite": null,
-        "converged": false,
-        "entry_point": "ForwardProfile.solve_portfolio",
-        "failure_exception_class": null,
-        "finite": true,
-        "fitted_contraction": {
-          "contracts": true,
-          "finite_positive_point_count": 12,
-          "fit_r_squared": 0.9978799230945563,
-          "ratio": 0.9776321113839168
-        },
-        "iterations": 12,
-        "p_diverted": 3.6531086902408756e-07,
-        "requested_class": "diverted",
-        "residual_sequence": [
-          0.009499850952308752,
-          0.009267606072437784,
-          0.009038869606990196,
-          0.008815428079240066,
-          0.008609571930684906,
-          0.008408892527000793,
-          0.008215219179747815,
-          0.008040963063825315,
-          0.007870451754054989,
-          0.0077039913394327895,
-          0.00754907513444312,
-          0.007425336057810689
-        ],
-        "terminal_residual": 0.007425336057810689,
-        "terminal_xpoint_diagnostics": {
-          "class_margin_from_operands": -0.14822516784583778,
-          "class_margin_from_operands_nonfinite": null,
-          "connectivity_admission": {
-            "admitted_candidate_count": 3,
-            "candidate_count_before_capacity": 3,
-            "candidates": [
-              {
-                "admitted": true,
-                "boundary_snr": 5.209477811257821,
-                "class_margin": 13.488473637122556,
-                "confidence": 0.8430296023201598,
-                "coordinate_m": [
-                  0.5779512156076975,
-                  -1.0830662214335347
-                ],
-                "fitted_null_type": 0.0,
-                "flux_wb": -0.22344860419713408,
-                "resolved": false,
-                "root_support_cell": 0.4167494475841522,
-                "state": "unresolved"
-              },
-              {
-                "admitted": true,
-                "boundary_snr": 11.200999310623954,
-                "class_margin": 12.63105744325362,
-                "confidence": 0.7894410902033513,
-                "coordinate_m": [
-                  0.6198441135477201,
-                  1.1822756575310247
-                ],
-                "fitted_null_type": 0.0,
-                "flux_wb": -0.18247345687042776,
-                "resolved": false,
-                "root_support_cell": 0.6385771632194519,
-                "state": "unresolved"
-              },
-              {
-                "admitted": true,
-                "boundary_snr": 11.899370309604935,
-                "class_margin": 1.739660739488592,
-                "confidence": 0.108728796218037,
-                "coordinate_m": [
-                  0.179787795087467,
-                  0.03434444832039345
-                ],
-                "fitted_null_type": 0.0,
-                "flux_wb": -0.24921791806985247,
-                "resolved": false,
-                "root_support_cell": 0.44875437021255493,
-                "state": "unresolved"
-              }
-            ],
-            "discarded_score_upper_bound": null,
-            "overflow": false,
-            "retained_candidate_count": 3
-          },
-          "selected_x_coordinate_m": [
-            0.6223335197166878,
-            1.1835211753458317
-          ],
-          "selected_x_flux_wb": -0.18276541160703866,
-          "selected_x_normalized_flux_operand": 0.4553040026173338,
-          "selected_x_normalized_flux_operand_nonfinite": null,
-          "selection_status": "selected_typed_saddle_with_connectivity_support",
-          "typed_saddle_candidate_count": 5,
-          "typed_saddle_candidates": [
-            {
-              "coordinate_m": [
-                0.18625959361050795,
-                0.06807686713492477
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.24930352842564452,
-              "normalized_flux_operand": 0.5128693089978661,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.35153163680270466,
-                -1.9349634116700565
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.009004704796508018,
-              "normalized_flux_operand": 0.30497530678551776,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.3470165730080283,
-                1.9209132385531178
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.008230612259957155,
-              "normalized_flux_operand": 0.30430560231890486,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.5785660502207141,
-                -1.0815477780063587
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.22350460103133998,
-              "normalized_flux_operand": 0.49054942333306817,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.6223335197166878,
-                1.1835211753458317
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.18276541160703866,
-              "normalized_flux_operand": 0.4553040026173338,
-              "selected": true
-            }
-          ],
-          "wall_operand": {
-            "coordinate_m": [
-              0.5649306774139404,
-              1.7704750160685998
-            ],
-            "flux_wb": -0.013891072368610511,
-            "normalized_flux": 0.307078834771496,
-            "normalized_flux_before_shadow": 0.3092027370138606,
-            "normalized_flux_nonfinite": null,
-            "shadowed": false,
-            "status": "wall_extremum_admitted"
-          }
-        },
-        "termination_reason": "terminal_observation_complete",
-        "topology_consistent": false
-      },
-      "reference": {
-        "machine": "MAST",
-        "plasma_current_a": 874260.4375,
-        "qualification_before_attribution": {
-          "declared_boundary_to_map_saddle_limit": 0.01,
-          "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 1.0428598159594444e-08,
-          "passes": true,
-          "stored_lcfs_contour_limit": 0.006,
-          "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0029569918752245794,
-          "typed_saddle_candidate_count": 2,
-          "typed_saddle_resolved": true
-        },
-        "shot": 21986,
-        "slice_index": 46,
-        "source_coordinate": {
-          "axis_wb": 0.34640685309873315,
-          "boundary_wb": -0.17698577198495025,
-          "support_nodes": 208
-        },
-        "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
-        "span_wb": 1.6435873151288796,
-        "time_s": 0.25
-      },
-      "same_seed_both_arms": true,
-      "seed_sha256": "74fe4a83f04bcc7a112c5b6860e440140c2e8de2af171fd3645016e806b743ae",
-      "terminal_residual_ratio_pure_over_mixed": 0.3210062456185628
-    },
-    {
-      "mixed_arm": {
-        "accepted_class_margins": [
-          null,
-          null,
-          null,
-          -0.16062835744718573,
-          -0.16414297305286513,
-          -0.161552166459348,
-          -0.16475672451878526,
-          -0.16161729928932034,
-          -0.16539787502543485,
-          -0.16151618116983768,
-          -0.1656864246300881,
-          -0.16144185077476397
-        ],
-        "accepted_topology_penalties": [
-          0.0,
-          0.0,
-          0.0,
-          0.16062835744718573,
-          0.16414297305286513,
-          0.161552166459348,
-          0.16475672451878526,
-          0.16161729928932034,
-          0.16539787502543485,
-          0.16151618116983768,
-          0.1656864246300881,
-          0.16144185077476397
-        ],
-        "achieved_class": "limited",
-        "class_margin": -0.16144185077476397,
-        "class_margin_nonfinite": null,
-        "converged": false,
-        "entry_point": "margin-graded fixed-ladder Newton-Krylov",
-        "failure_exception_class": null,
-        "finite": true,
-        "fitted_contraction": {
-          "contracts": true,
-          "finite_positive_point_count": 12,
-          "fit_r_squared": 0.23935030864949847,
-          "ratio": 0.9560499249889988
-        },
-        "iterations": 12,
-        "p_diverted": 9.74247867194161e-08,
-        "requested_class": "diverted",
-        "residual_sequence": [
-          0.004774947497175487,
-          0.00457654442579237,
-          0.004482716567759629,
-          0.002341445992539216,
-          0.0017583033653171603,
-          0.0020704333324145286,
-          0.0020827109948036338,
-          0.0024422923744647374,
-          0.002518197798798513,
-          0.002684594305117445,
-          0.0027439835033562644,
-          0.002763141478038805
-        ],
-        "terminal_residual": 0.002763141478038805,
-        "terminal_xpoint_diagnostics": {
-          "class_margin_from_operands": -0.16144185077476397,
-          "class_margin_from_operands_nonfinite": null,
-          "connectivity_admission": {
-            "admitted_candidate_count": 3,
-            "candidate_count_before_capacity": 3,
-            "candidates": [
-              {
-                "admitted": true,
-                "boundary_snr": 12.466875044270722,
-                "class_margin": 13.60731287751823,
-                "confidence": 0.8504570548448894,
-                "coordinate_m": [
-                  0.5904127945843421,
-                  1.1616080594186187
-                ],
-                "fitted_null_type": 0.0,
-                "flux_wb": -0.19985041283012225,
-                "resolved": false,
-                "root_support_cell": 0.8399865031242371,
-                "state": "unresolved"
-              },
-              {
-                "admitted": true,
-                "boundary_snr": 7.960908477807111,
-                "class_margin": 11.57764772017774,
-                "confidence": 0.7236029825111088,
-                "coordinate_m": [
-                  0.5564957666591371,
-                  -1.0887030816241083
-                ],
-                "fitted_null_type": 0.0,
-                "flux_wb": -0.23126911195004693,
-                "resolved": false,
-                "root_support_cell": 0.7195636630058289,
-                "state": "unresolved"
-              },
-              {
-                "admitted": true,
-                "boundary_snr": 13.399160437025266,
-                "class_margin": 1.5959279445861676,
-                "confidence": 0.09974549653663548,
-                "coordinate_m": [
-                  0.18044297711852236,
-                  0.03989780294316293
-                ],
-                "fitted_null_type": 0.0,
-                "flux_wb": -0.25571770139993566,
-                "resolved": false,
-                "root_support_cell": 0.4004150629043579,
-                "state": "unresolved"
-              }
-            ],
-            "discarded_score_upper_bound": null,
-            "overflow": false,
-            "retained_candidate_count": 3
-          },
-          "selected_x_coordinate_m": [
-            0.5899385460397589,
-            1.1628726852556768
-          ],
-          "selected_x_flux_wb": -0.1999530223115222,
-          "selected_x_normalized_flux_operand": 0.41460069037242153,
-          "selected_x_normalized_flux_operand_nonfinite": null,
-          "selection_status": "selected_typed_saddle_with_connectivity_support",
-          "typed_saddle_candidate_count": 5,
-          "typed_saddle_candidates": [
-            {
-              "coordinate_m": [
-                0.1870942136953943,
-                0.0649344071997834
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.25599005077939124,
-              "normalized_flux_operand": 0.45860426891036205,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.31289286601557625,
-                -1.9252165002294015
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.005819680428222557,
-              "normalized_flux_operand": 0.2621557447719811,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.28282604127663263,
-                1.9401809845741804
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.004043939868172844,
-              "normalized_flux_operand": 0.26076132859158074,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.5571684575715563,
-                -1.0876823742812924
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.23132056469758033,
-              "normalized_flux_operand": 0.4392323339956826,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.5899385460397589,
-                1.1628726852556768
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.1999530223115222,
-              "normalized_flux_operand": 0.41460069037242153,
-              "selected": true
-            }
-          ],
-          "wall_operand": {
-            "coordinate_m": [
-              0.5649306774139404,
-              1.7647929111717349
-            ],
-            "flux_wb": 0.0019472124764064024,
-            "normalized_flux": 0.25315883959765756,
-            "normalized_flux_before_shadow": 0.25605672254919176,
-            "normalized_flux_nonfinite": null,
-            "shadowed": false,
-            "status": "wall_extremum_admitted"
-          }
-        },
-        "termination_reason": "terminal_observation_complete",
-        "topology_consistent": false
-      },
-      "pure_arm": {
-        "achieved_class": "diverted",
-        "class_margin": null,
-        "class_margin_nonfinite": "positive_infinity",
-        "converged": false,
-        "entry_point": "ForwardProfile.solve_portfolio",
-        "failure_exception_class": null,
-        "finite": true,
-        "fitted_contraction": {
-          "contracts": true,
-          "finite_positive_point_count": 12,
-          "fit_r_squared": 0.9920206822791247,
-          "ratio": 0.9804337825454583
-        },
-        "iterations": 12,
-        "p_diverted": 1.0,
-        "requested_class": "diverted",
-        "residual_sequence": [
-          0.006255280656351585,
-          0.00610145833528716,
-          0.00595009507636627,
-          0.005790531088362265,
-          0.005677473613025009,
-          0.005570904568068725,
-          0.005460862526126296,
-          0.005366672580442313,
-          0.0052716587639503945,
-          0.005182267942898892,
-          0.005098948389213613,
-          0.005024282863481058
-        ],
-        "terminal_residual": 0.005024282863481058,
-        "terminal_xpoint_diagnostics": {
-          "class_margin_from_operands": null,
-          "class_margin_from_operands_nonfinite": "positive_infinity",
-          "connectivity_admission": {
-            "admitted_candidate_count": 3,
-            "candidate_count_before_capacity": 3,
-            "candidates": [
-              {
-                "admitted": true,
-                "boundary_snr": 12.288552150375626,
-                "class_margin": 13.29515658235711,
-                "confidence": 0.8309472863973194,
-                "coordinate_m": [
-                  0.5815986741422217,
-                  1.1429802354444798
-                ],
-                "fitted_null_type": 0.0,
-                "flux_wb": -0.2095369241684152,
-                "resolved": false,
-                "root_support_cell": 0.6972898244857788,
-                "state": "unresolved"
-              },
-              {
-                "admitted": true,
-                "boundary_snr": 3.1607402561160023,
-                "class_margin": 11.281396825230283,
-                "confidence": 0.7050873015768927,
-                "coordinate_m": [
-                  0.570124092224125,
-                  -1.1089804487473482
-                ],
-                "fitted_null_type": 0.0,
-                "flux_wb": -0.2216185270784513,
-                "resolved": false,
-                "root_support_cell": 0.5114049315452576,
-                "state": "unresolved"
-              },
-              {
-                "admitted": true,
-                "boundary_snr": 14.187135816581906,
-                "class_margin": 1.590137955698391,
-                "confidence": 0.09938362223114944,
-                "coordinate_m": [
-                  0.18048590769647835,
-                  0.006536027071212071
-                ],
-                "fitted_null_type": 0.0,
-                "flux_wb": -0.2557851559102169,
-                "resolved": false,
-                "root_support_cell": 0.12354341149330139,
-                "state": "unresolved"
-              }
-            ],
-            "discarded_score_upper_bound": null,
-            "overflow": false,
-            "retained_candidate_count": 3
-          },
-          "selected_x_coordinate_m": [
-            0.5820680211861392,
-            1.1449629505049974
-          ],
-          "selected_x_flux_wb": -0.20962926651531574,
-          "selected_x_normalized_flux_operand": 0.42570476476612273,
-          "selected_x_normalized_flux_operand_nonfinite": null,
-          "selection_status": "selected_typed_saddle_with_connectivity_support",
-          "typed_saddle_candidate_count": 5,
-          "typed_saddle_candidates": [
-            {
-              "coordinate_m": [
-                0.1872472855150667,
-                0.028664785154031196
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.25616178715048205,
-              "normalized_flux_operand": 0.46246592590919394,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.28629809453607435,
-                1.9404807531626882
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.004546748830574805,
-              "normalized_flux_operand": 0.2636875050662909,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.5716947882762542,
-                -1.1087630337118628
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.22160792948329633,
-              "normalized_flux_operand": 0.43516802946001265,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                0.5820680211861392,
-                1.1449629505049974
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.20962926651531574,
-              "normalized_flux_operand": 0.42570476476612273,
-              "selected": true
-            },
-            {
-              "coordinate_m": [
-                1.6973841272261252,
-                -0.7986440519287854
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -1.0340359864985156,
-              "normalized_flux_operand": 1.0769943976305367,
-              "selected": false
-            }
-          ],
-          "wall_operand": {
-            "coordinate_m": [
-              0.5649306774139404,
-              1.7665435105225311
-            ],
-            "flux_wb": -0.00024888002258391644,
-            "normalized_flux": null,
-            "normalized_flux_before_shadow": 0.2602921453121724,
-            "normalized_flux_nonfinite": "positive_infinity",
-            "shadowed": true,
-            "status": "wall_extremum_rejected_by_private_flux_shadow"
-          }
-        },
-        "termination_reason": "terminal_observation_complete",
-        "topology_consistent": true
-      },
-      "reference": {
-        "machine": "MAST",
-        "plasma_current_a": 928902.8125,
-        "qualification_before_attribution": {
-          "declared_boundary_to_map_saddle_limit": 0.01,
-          "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 1.396327141354339e-08,
-          "passes": true,
-          "stored_lcfs_contour_limit": 0.006,
-          "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0038093633492954915,
-          "typed_saddle_candidate_count": 2,
-          "typed_saddle_resolved": true
-        },
-        "shot": 21989,
-        "slice_index": 55,
-        "source_coordinate": {
-          "axis_wb": 0.3320751947333506,
-          "boundary_wb": -0.2131394633484559,
-          "support_nodes": 222
-        },
-        "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
-        "span_wb": 1.8040098584002995,
-        "time_s": 0.29499998688697815
-      },
-      "same_seed_both_arms": true,
-      "seed_sha256": "766de18620d0983f245eb78ef2fb3a2c54fd68144e4ff71a1e520eac1b1c2baf",
-      "terminal_residual_ratio_pure_over_mixed": 1.8183226966167305
+      "terminal_residual_ratio_pure_over_mixed": 4.945750946154071
     },
     {
       "mixed_arm": {
@@ -1805,153 +847,123 @@
         "fitted_contraction": {
           "contracts": true,
           "finite_positive_point_count": 12,
-          "fit_r_squared": 0.7229625591706698,
-          "ratio": 0.0775937521523074
+          "fit_r_squared": 0.6111915023341117,
+          "ratio": 0.07708738233499053
         },
         "iterations": 12,
-        "p_diverted": 1.0,
+        "p_diverted": 4.467499780160608e-10,
         "requested_class": "diverted",
         "residual_sequence": [
-          0.0012429458734669195,
-          0.00013567440568508287,
-          1.7302284506582173e-07,
-          7.078079981042375e-14,
-          2.6408406005221203e-14,
-          9.889152884907253e-15,
-          3.830226825184976e-15,
-          1.4335351860341516e-15,
-          7.335668334784153e-16,
-          3.3598480922675544e-16,
-          3.359848092267555e-16,
-          3.583837965085392e-16
+          0.00277482319542338,
+          0.0009122885629400769,
+          8.59735481659571e-09,
+          5.411430715955258e-15,
+          3.172218005904801e-16,
+          2.612414828392189e-16,
+          1.8660105917087065e-16,
+          1.8660105917087065e-16,
+          1.5861090029524006e-16,
+          2.9856169467339305e-16,
+          1.539458738159683e-16,
+          2.9856169467339305e-16
         ],
-        "terminal_residual": 3.583837965085392e-16,
+        "terminal_residual": 2.9856169467339305e-16,
         "terminal_xpoint_diagnostics": {
           "class_margin_from_operands": null,
           "class_margin_from_operands_nonfinite": "positive_infinity",
           "connectivity_admission": {
-            "admitted_candidate_count": 3,
-            "candidate_count_before_capacity": 3,
+            "admitted_candidate_count": 1,
+            "candidate_count_before_capacity": 1,
             "candidates": [
               {
                 "admitted": true,
-                "boundary_snr": 11.635924479412504,
-                "class_margin": 16.45953385583092,
-                "confidence": 1.0,
+                "boundary_snr": 3.095247906005262,
+                "class_margin": 2.110777675006227,
+                "confidence": 0.1319236046878892,
                 "coordinate_m": [
-                  0.5898973673057749,
-                  1.2204363955069697
+                  0.3643146158873792,
+                  -1.880057672376277
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.1227037676831272,
-                "resolved": true,
-                "root_support_cell": 0.8192750215530396,
-                "state": "resolved"
-              },
-              {
-                "admitted": true,
-                "boundary_snr": 6.918015499677256,
-                "class_margin": 10.371817857263979,
-                "confidence": 0.6482386160789987,
-                "coordinate_m": [
-                  0.5751037453894411,
-                  -1.1777487649019591
-                ],
-                "fitted_null_type": 0.0,
-                "flux_wb": -0.13838015671265833,
+                "flux_wb": -0.015330061106017817,
                 "resolved": false,
-                "root_support_cell": 0.423134446144104,
-                "state": "unresolved"
-              },
-              {
-                "admitted": true,
-                "boundary_snr": 2.2722483518192047,
-                "class_margin": 1.7727745451425925,
-                "confidence": 0.11079840907141203,
-                "coordinate_m": [
-                  0.17410518643532785,
-                  -0.01623087235190377
-                ],
-                "fitted_null_type": 0.0,
-                "flux_wb": -0.17180935193538238,
-                "resolved": false,
-                "root_support_cell": 0.03318072110414505,
+                "root_support_cell": 0.20414069294929504,
                 "state": "unresolved"
               }
             ],
             "discarded_score_upper_bound": null,
             "overflow": false,
-            "retained_candidate_count": 3
+            "retained_candidate_count": 1
           },
           "selected_x_coordinate_m": [
-            0.5870751527016022,
-            1.2225553064310346
+            0.5424844830714616,
+            -1.097506685806954
           ],
-          "selected_x_flux_wb": -0.12254674397700278,
-          "selected_x_normalized_flux_operand": 0.4309790002082113,
+          "selected_x_flux_wb": -0.23162845453731243,
+          "selected_x_normalized_flux_operand": 0.23106109413970494,
           "selected_x_normalized_flux_operand_nonfinite": null,
           "selection_status": "selected_typed_saddle_with_connectivity_support",
           "typed_saddle_candidate_count": 5,
           "typed_saddle_candidates": [
             {
               "coordinate_m": [
-                0.17912925838170454,
-                0.011203606905552948
+                0.18618655199773798,
+                0.0374282398816047
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.17129542547282273,
-              "normalized_flux_operand": 0.47646985832963906,
+              "flux_wb": -0.25020785497559833,
+              "normalized_flux_operand": 0.2509678033881345,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.5753762702835118,
-                -1.177930653249266
+                0.3961569574996226,
+                -1.8904035407782975
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.13825931481509016,
-              "normalized_flux_operand": 0.445641516378615,
+              "flux_wb": -0.015276769868021234,
+              "normalized_flux_operand": -0.0007467134601853038,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.5870751527016022,
-                1.2225553064310346
+                0.363519504833484,
+                1.9083560646567448
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.12254674397700278,
-              "normalized_flux_operand": 0.4309790002082113,
+              "flux_wb": -0.013107056981615873,
+              "normalized_flux_operand": -0.0030714302197874343,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                0.34147745954746733,
+                -1.8232995174203064
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.015222457816466996,
+              "normalized_flux_operand": -0.0008049055543041207,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                0.5424844830714616,
+                -1.097506685806954
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.23162845453731243,
+              "normalized_flux_operand": 0.23106109413970494,
               "selected": true
-            },
-            {
-              "coordinate_m": [
-                1.6893860323565006,
-                -0.7993986905973909
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.8400251608971396,
-              "normalized_flux_operand": 1.1005090852854709,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                1.6856786011079532,
-                0.7927020826182529
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.8405224822301671,
-              "normalized_flux_operand": 1.1009731711542026,
-              "selected": false
             }
           ],
           "wall_operand": {
             "coordinate_m": [
               0.5649306774139404,
-              1.756137557477899
+              1.7840893171280534
             ],
-            "flux_wb": 0.017721585802837322,
+            "flux_wb": -0.03028521160848685,
             "normalized_flux": null,
-            "normalized_flux_before_shadow": 0.3000846561326388,
+            "normalized_flux_before_shadow": 0.015333928484738886,
             "normalized_flux_nonfinite": "positive_infinity",
             "shadowed": true,
             "status": "wall_extremum_rejected_by_private_flux_shadow"
@@ -1971,27 +983,643 @@
         "fitted_contraction": {
           "contracts": true,
           "finite_positive_point_count": 12,
-          "fit_r_squared": 0.9998439606014671,
-          "ratio": 0.9612924544424577
+          "fit_r_squared": 0.9994354729694921,
+          "ratio": 0.9826429480134015
+        },
+        "iterations": 12,
+        "p_diverted": 7.183056632870045e-10,
+        "requested_class": "diverted",
+        "residual_sequence": [
+          0.006220624215754909,
+          0.006105428677436532,
+          0.005992635597995789,
+          0.005882466128012896,
+          0.005777675166414434,
+          0.005675984950654121,
+          0.0055779692178961875,
+          0.005482492847442127,
+          0.005390661413120504,
+          0.005301229458443864,
+          0.005214554977723734,
+          0.005130774300911727
+        ],
+        "terminal_residual": 0.005130774300911727,
+        "terminal_xpoint_diagnostics": {
+          "class_margin_from_operands": null,
+          "class_margin_from_operands_nonfinite": "positive_infinity",
+          "connectivity_admission": {
+            "admitted_candidate_count": 1,
+            "candidate_count_before_capacity": 1,
+            "candidates": [
+              {
+                "admitted": true,
+                "boundary_snr": 2.9604292297419974,
+                "class_margin": 2.8990349708095815,
+                "confidence": 0.0,
+                "coordinate_m": [
+                  0.3607523151806421,
+                  -1.880181292544035
+                ],
+                "fitted_null_type": 0.0,
+                "flux_wb": -0.014418770825022924,
+                "resolved": false,
+                "root_support_cell": 0.18178187310695648,
+                "state": "unresolved"
+              }
+            ],
+            "discarded_score_upper_bound": null,
+            "overflow": false,
+            "retained_candidate_count": 1
+          },
+          "selected_x_coordinate_m": [
+            0.5560179116414656,
+            -1.1178689095813896
+          ],
+          "selected_x_flux_wb": -0.22265922095382523,
+          "selected_x_normalized_flux_operand": 0.22313451460470746,
+          "selected_x_normalized_flux_operand_nonfinite": null,
+          "selection_status": "selected_typed_saddle_with_connectivity_support",
+          "typed_saddle_candidate_count": 5,
+          "typed_saddle_candidates": [
+            {
+              "coordinate_m": [
+                0.18620399775473603,
+                0.0008465550356997608
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.2501351104403967,
+              "normalized_flux_operand": 0.25267497462791283,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                0.3920539418745694,
+                -1.8902091007880546
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.014305840038324412,
+              "normalized_flux_operand": -0.000874783534380901,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                0.367157631863906,
+                1.9085442068028817
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.013921947660645875,
+              "normalized_flux_operand": -0.001287522035224287,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                0.337182258665898,
+                -1.8230327373323014
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.014164564091597652,
+              "normalized_flux_operand": -0.0010266751213143105,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                0.5560179116414656,
+                -1.1178689095813896
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.22265922095382523,
+              "normalized_flux_operand": 0.22313451460470746,
+              "selected": true
+            }
+          ],
+          "wall_operand": {
+            "coordinate_m": [
+              0.5649306774139404,
+              1.7974372178035851
+            ],
+            "flux_wb": -0.032429658241248493,
+            "normalized_flux": null,
+            "normalized_flux_before_shadow": 0.01861087960868074,
+            "normalized_flux_nonfinite": "positive_infinity",
+            "shadowed": true,
+            "status": "wall_extremum_rejected_by_private_flux_shadow"
+          }
+        },
+        "termination_reason": "terminal_observation_complete",
+        "topology_consistent": true
+      },
+      "reference": {
+        "machine": "MAST",
+        "plasma_current_a": 934383.875,
+        "qualification_before_attribution": {
+          "declared_boundary_to_map_saddle_limit": 0.01,
+          "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 1.424904549219899e-08,
+          "passes": true,
+          "stored_lcfs_contour_limit": 0.006,
+          "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0026320993551678384,
+          "typed_saddle_candidate_count": 2,
+          "typed_saddle_resolved": true
+        },
+        "shot": 21985,
+        "slice_index": 51,
+        "source_coordinate": {
+          "axis_wb": 0.33908170628553735,
+          "boundary_wb": -0.2193531903351262,
+          "support_nodes": 227
+        },
+        "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+        "span_wb": 1.823353801798901,
+        "time_s": 0.2750000059604645
+      },
+      "same_seed_both_arms": true,
+      "seed_sha256": "8fa2931dc40e2034351c7c9a37e89fd47dd1f005b2263b85b529dfb4f3348c81",
+      "terminal_residual_ratio_pure_over_mixed": 17184971791255.602
+    },
+    {
+      "mixed_arm": {
+        "accepted_class_margins": [
+          null,
+          -0.14656144991377706,
+          -0.15383142843257913,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "accepted_topology_penalties": [
+          0.0,
+          0.14656144991377706,
+          0.15383142843257913,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "achieved_class": null,
+        "class_margin": null,
+        "class_margin_nonfinite": null,
+        "converged": false,
+        "entry_point": "margin-graded fixed-ladder Newton-Krylov",
+        "failure_exception_class": "NoQualifiedAxisError",
+        "finite": true,
+        "fitted_contraction": {
+          "contracts": true,
+          "finite_positive_point_count": 12,
+          "fit_r_squared": 0.874090988168856,
+          "ratio": 0.021724198541854384
+        },
+        "iterations": 12,
+        "p_diverted": null,
+        "requested_class": "diverted",
+        "residual_sequence": [
+          0.00853671776181862,
+          0.008273767033499144,
+          0.004609480800021934,
+          0.005002015577112175,
+          0.00026555955923949554,
+          1.1904372458190918e-06,
+          2.5467127657797416e-11,
+          2.56737154882885e-16,
+          1.9255286616216376e-16,
+          1.7115810325525664e-16,
+          1.7115810325525666e-16,
+          1.7115810325525666e-16
+        ],
+        "terminal_residual": 1.7115810325525666e-16,
+        "terminal_xpoint_diagnostics": null,
+        "termination_reason": "NoQualifiedAxisError",
+        "topology_consistent": null
+      },
+      "pure_arm": {
+        "achieved_class": "limited",
+        "class_margin": -0.14833345488803468,
+        "class_margin_nonfinite": null,
+        "converged": false,
+        "entry_point": "ForwardProfile.solve_portfolio",
+        "failure_exception_class": null,
+        "finite": true,
+        "fitted_contraction": {
+          "contracts": true,
+          "finite_positive_point_count": 12,
+          "fit_r_squared": 0.9991037543266773,
+          "ratio": 0.9763413491175346
+        },
+        "iterations": 12,
+        "p_diverted": 3.6137636832373205e-07,
+        "requested_class": "diverted",
+        "residual_sequence": [
+          0.009499850952308752,
+          0.009267606072437784,
+          0.009038869606990196,
+          0.00881553953318925,
+          0.008596771664804439,
+          0.008384643835117377,
+          0.008181688449754438,
+          0.007988489295629252,
+          0.007805321480527043,
+          0.007632490973168859,
+          0.00746889367088317,
+          0.007319118647204544
+        ],
+        "terminal_residual": 0.007319118647204544,
+        "terminal_xpoint_diagnostics": {
+          "class_margin_from_operands": -0.14833345488803468,
+          "class_margin_from_operands_nonfinite": null,
+          "connectivity_admission": {
+            "admitted_candidate_count": 3,
+            "candidate_count_before_capacity": 3,
+            "candidates": [
+              {
+                "admitted": true,
+                "boundary_snr": 5.190322538303691,
+                "class_margin": 13.49541503666354,
+                "confidence": 0.8434634397914712,
+                "coordinate_m": [
+                  0.5779411631704131,
+                  -1.0829823732114012
+                ],
+                "fitted_null_type": 0.0,
+                "flux_wb": -0.22346165213052263,
+                "resolved": false,
+                "root_support_cell": 0.41694343090057373,
+                "state": "unresolved"
+              },
+              {
+                "admitted": true,
+                "boundary_snr": 11.096953381546356,
+                "class_margin": 12.598798962974,
+                "confidence": 0.787424935185875,
+                "coordinate_m": [
+                  0.6198521969831349,
+                  1.1818873521340891
+                ],
+                "fitted_null_type": 0.0,
+                "flux_wb": -0.18259595682739455,
+                "resolved": false,
+                "root_support_cell": 0.6379586458206177,
+                "state": "unresolved"
+              },
+              {
+                "admitted": true,
+                "boundary_snr": 11.836650527103652,
+                "class_margin": 1.7398587569336499,
+                "confidence": 0.10874117230835312,
+                "coordinate_m": [
+                  0.1797867835304722,
+                  0.03455836186068121
+                ],
+                "fitted_null_type": 0.0,
+                "flux_wb": -0.24921578412874187,
+                "resolved": false,
+                "root_support_cell": 0.45040762424468994,
+                "state": "unresolved"
+              }
+            ],
+            "discarded_score_upper_bound": null,
+            "overflow": false,
+            "retained_candidate_count": 3
+          },
+          "selected_x_coordinate_m": [
+            0.6223237983539592,
+            1.183309908418151
+          ],
+          "selected_x_flux_wb": -0.1828947079904113,
+          "selected_x_normalized_flux_operand": 0.45546606271452683,
+          "selected_x_normalized_flux_operand_nonfinite": null,
+          "selection_status": "selected_typed_saddle_with_connectivity_support",
+          "typed_saddle_candidate_count": 5,
+          "typed_saddle_candidates": [
+            {
+              "coordinate_m": [
+                0.18625751058661924,
+                0.06828533002336176
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.24930039238546833,
+              "normalized_flux_operand": 0.5129164925305052,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                0.3515735905070012,
+                -1.9349378555915089
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.009005331696389094,
+              "normalized_flux_operand": 0.3050268420434185,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                0.34701988443938947,
+                1.920944274862828
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.008231630338065538,
+              "normalized_flux_operand": 0.30435747953341924,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                0.5785514400615681,
+                -1.0814627437100097
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.2235177673609016,
+              "normalized_flux_operand": 0.4906108284455821,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                0.6223237983539592,
+                1.183309908418151
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.1828947079904113,
+              "normalized_flux_operand": 0.45546606271452683,
+              "selected": true
+            }
+          ],
+          "wall_operand": {
+            "coordinate_m": [
+              0.5649306774139404,
+              1.7705413441038818
+            ],
+            "flux_wb": -0.013904632140324173,
+            "normalized_flux": 0.30713260782649215,
+            "normalized_flux_before_shadow": 0.30926543876696394,
+            "normalized_flux_nonfinite": null,
+            "shadowed": false,
+            "status": "wall_extremum_admitted"
+          }
+        },
+        "termination_reason": "terminal_observation_complete",
+        "topology_consistent": false
+      },
+      "reference": {
+        "machine": "MAST",
+        "plasma_current_a": 874260.4375,
+        "qualification_before_attribution": {
+          "declared_boundary_to_map_saddle_limit": 0.01,
+          "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 1.0428598159594444e-08,
+          "passes": true,
+          "stored_lcfs_contour_limit": 0.006,
+          "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0029569918752245794,
+          "typed_saddle_candidate_count": 2,
+          "typed_saddle_resolved": true
+        },
+        "shot": 21986,
+        "slice_index": 46,
+        "source_coordinate": {
+          "axis_wb": 0.34640685309873315,
+          "boundary_wb": -0.17698577198495025,
+          "support_nodes": 208
+        },
+        "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+        "span_wb": 1.6435873151288796,
+        "time_s": 0.25
+      },
+      "same_seed_both_arms": true,
+      "seed_sha256": "74fe4a83f04bcc7a112c5b6860e440140c2e8de2af171fd3645016e806b743ae",
+      "terminal_residual_ratio_pure_over_mixed": 42762326223545.34
+    },
+    {
+      "mixed_arm": {
+        "accepted_class_margins": [
+          null,
+          null,
+          null,
+          -0.16055849811259348,
+          -0.1641105715552152,
+          -0.16135140443335788,
+          -0.16455556858243942,
+          -0.16162428632040576,
+          -0.16533613737551095,
+          -0.1616730165885778,
+          -0.16600180569337963,
+          -0.16160168168209876
+        ],
+        "accepted_topology_penalties": [
+          0.0,
+          0.0,
+          0.0,
+          0.16055849811259348,
+          0.1641105715552152,
+          0.16135140443335788,
+          0.16455556858243942,
+          0.16162428632040576,
+          0.16533613737551095,
+          0.1616730165885778,
+          0.16600180569337963,
+          0.16160168168209876
+        ],
+        "achieved_class": "limited",
+        "class_margin": -0.16160168168209876,
+        "class_margin_nonfinite": null,
+        "converged": false,
+        "entry_point": "margin-graded fixed-ladder Newton-Krylov",
+        "failure_exception_class": null,
+        "finite": true,
+        "fitted_contraction": {
+          "contracts": true,
+          "finite_positive_point_count": 12,
+          "fit_r_squared": 0.20849202351660878,
+          "ratio": 0.9593255384809329
+        },
+        "iterations": 12,
+        "p_diverted": 9.588001565627835e-08,
+        "requested_class": "diverted",
+        "residual_sequence": [
+          0.004766971061809474,
+          0.004548919577456874,
+          0.004449933558136134,
+          0.002356809221650335,
+          0.0018851364195925104,
+          0.0020688389777949344,
+          0.0019712283037119386,
+          0.0023988910717945245,
+          0.002420054118767538,
+          0.0027941462478427524,
+          0.002865024125823158,
+          0.002953792135897771
+        ],
+        "terminal_residual": 0.002953792135897771,
+        "terminal_xpoint_diagnostics": {
+          "class_margin_from_operands": -0.16160168168209876,
+          "class_margin_from_operands_nonfinite": null,
+          "connectivity_admission": {
+            "admitted_candidate_count": 3,
+            "candidate_count_before_capacity": 3,
+            "candidates": [
+              {
+                "admitted": true,
+                "boundary_snr": 12.499582402478474,
+                "class_margin": 13.600850205088946,
+                "confidence": 0.8500531378180591,
+                "coordinate_m": [
+                  0.5902175105399352,
+                  1.1611644545667674
+                ],
+                "fitted_null_type": 0.0,
+                "flux_wb": -0.20007688712306113,
+                "resolved": false,
+                "root_support_cell": 0.8371018171310425,
+                "state": "unresolved"
+              },
+              {
+                "admitted": true,
+                "boundary_snr": 8.028137354084704,
+                "class_margin": 11.632796470810831,
+                "confidence": 0.727049779425677,
+                "coordinate_m": [
+                  0.55729288726424,
+                  -1.090416541381553
+                ],
+                "fitted_null_type": 0.0,
+                "flux_wb": -0.23078168026747245,
+                "resolved": false,
+                "root_support_cell": 0.7056633234024048,
+                "state": "unresolved"
+              },
+              {
+                "admitted": true,
+                "boundary_snr": 13.479921462326697,
+                "class_margin": 1.5945431467915532,
+                "confidence": 0.09965894667447207,
+                "coordinate_m": [
+                  0.18044983330597192,
+                  0.039013934487838985
+                ],
+                "fitted_null_type": 0.0,
+                "flux_wb": -0.25573421251063533,
+                "resolved": false,
+                "root_support_cell": 0.3932796120643616,
+                "state": "unresolved"
+              }
+            ],
+            "discarded_score_upper_bound": null,
+            "overflow": false,
+            "retained_candidate_count": 3
+          },
+          "selected_x_coordinate_m": [
+            0.5897718401840838,
+            1.1624392892547308
+          ],
+          "selected_x_flux_wb": -0.20017906756578602,
+          "selected_x_normalized_flux_operand": 0.4146991083644694,
+          "selected_x_normalized_flux_operand_nonfinite": null,
+          "selection_status": "selected_typed_saddle_with_connectivity_support",
+          "typed_saddle_candidate_count": 5,
+          "typed_saddle_candidates": [
+            {
+              "coordinate_m": [
+                0.1871066277706753,
+                0.06400173966323357
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.25601070692444095,
+              "normalized_flux_operand": 0.45854952706422475,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                0.3127233154246319,
+                -1.925218843184854
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.005797993847418173,
+              "normalized_flux_operand": 0.2620313456447791,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                0.28292649885615745,
+                1.940161343313788
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.0040567304482105535,
+              "normalized_flux_operand": 0.2606637496006916,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                0.5581825326744355,
+                -1.0890569579717542
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.2308460477655662,
+              "normalized_flux_operand": 0.43878509146410427,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                0.5897718401840838,
+                1.1624392892547308
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.20017906756578602,
+              "normalized_flux_operand": 0.4146991083644694,
+              "selected": true
+            }
+          ],
+          "wall_operand": {
+            "coordinate_m": [
+              0.5649306774139404,
+              1.7648231991530308
+            ],
+            "flux_wb": 0.0018862828311046465,
+            "normalized_flux": 0.2530974266823706,
+            "normalized_flux_before_shadow": 0.2559960804505509,
+            "normalized_flux_nonfinite": null,
+            "shadowed": false,
+            "status": "wall_extremum_admitted"
+          }
+        },
+        "termination_reason": "terminal_observation_complete",
+        "topology_consistent": false
+      },
+      "pure_arm": {
+        "achieved_class": "diverted",
+        "class_margin": null,
+        "class_margin_nonfinite": "positive_infinity",
+        "converged": false,
+        "entry_point": "ForwardProfile.solve_portfolio",
+        "failure_exception_class": null,
+        "finite": true,
+        "fitted_contraction": {
+          "contracts": true,
+          "finite_positive_point_count": 12,
+          "fit_r_squared": 0.9941882361296037,
+          "ratio": 0.9783009254832757
         },
         "iterations": 12,
         "p_diverted": 1.0,
         "requested_class": "diverted",
         "residual_sequence": [
-          0.007805789459262831,
-          0.007483092628095097,
-          0.007180967130561253,
-          0.006892842836340042,
-          0.006626579992455192,
-          0.0063740618028433945,
-          0.006131939141735193,
-          0.005895367934889111,
-          0.005667976021084911,
-          0.005448936621861535,
-          0.0052451013175449385,
-          0.005049061244966342
+          0.006255280656351435,
+          0.0061014583352873115,
+          0.00595009507636627,
+          0.005798064994493571,
+          0.00565192084046409,
+          0.005520733552358378,
+          0.005401188843251311,
+          0.0052914349340223085,
+          0.005188386270650995,
+          0.0050940610138299125,
+          0.005006258085394723,
+          0.004924486881829257
         ],
-        "terminal_residual": 0.005049061244966342,
+        "terminal_residual": 0.004924486881829257,
         "terminal_xpoint_diagnostics": {
           "class_margin_from_operands": null,
           "class_margin_from_operands_nonfinite": "positive_infinity",
@@ -2001,47 +1629,47 @@
             "candidates": [
               {
                 "admitted": true,
-                "boundary_snr": 12.490018523577302,
-                "class_margin": 16.023443943823324,
-                "confidence": 1.0,
+                "boundary_snr": 12.29305935223127,
+                "class_margin": 13.297499889997312,
+                "confidence": 0.831093743124832,
                 "coordinate_m": [
-                  0.5858079159548536,
-                  1.2099970174579944
+                  0.5814697569563172,
+                  1.1427637557455932
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.12750358328415862,
-                "resolved": true,
-                "root_support_cell": 0.7346646785736084,
-                "state": "resolved"
-              },
-              {
-                "admitted": true,
-                "boundary_snr": 13.443018284468875,
-                "class_margin": 15.298058450380639,
-                "confidence": 0.9561286531487899,
-                "coordinate_m": [
-                  0.582134182257811,
-                  -1.1888742045493872
-                ],
-                "fitted_null_type": 0.0,
-                "flux_wb": -0.1329475567285211,
+                "flux_wb": -0.20962990487659294,
                 "resolved": false,
-                "root_support_cell": 0.6456692218780518,
+                "root_support_cell": 0.6950049996376038,
                 "state": "unresolved"
               },
               {
                 "admitted": true,
-                "boundary_snr": 2.2231208949415175,
-                "class_margin": 1.760521110576526,
-                "confidence": 0.11003256941103287,
+                "boundary_snr": 3.162564868959498,
+                "class_margin": 11.268681313725631,
+                "confidence": 0.704292582107852,
                 "coordinate_m": [
-                  0.17412904301445956,
-                  -0.03059287675171916
+                  0.5701857048886356,
+                  -1.108860518711171
                 ],
                 "fitted_null_type": 0.0,
-                "flux_wb": -0.17182281956308654,
+                "flux_wb": -0.22165568709659203,
                 "resolved": false,
-                "root_support_cell": 0.10101386159658432,
+                "root_support_cell": 0.5104653239250183,
+                "state": "unresolved"
+              },
+              {
+                "admitted": true,
+                "boundary_snr": 14.178688069192384,
+                "class_margin": 1.5911019353420848,
+                "confidence": 0.0994438709588803,
+                "coordinate_m": [
+                  0.18048067417150745,
+                  0.006292838695917662
+                ],
+                "fitted_null_type": 0.0,
+                "flux_wb": -0.2557709941179412,
+                "resolved": false,
+                "root_support_cell": 0.12139932811260223,
                 "state": "unresolved"
               }
             ],
@@ -2050,74 +1678,462 @@
             "retained_candidate_count": 3
           },
           "selected_x_coordinate_m": [
-            0.5874171527268781,
-            1.2123192901859094
+            0.5819485935865284,
+            1.1447539927754349
           ],
-          "selected_x_flux_wb": -0.12728627524409405,
-          "selected_x_normalized_flux_operand": 0.4363887681813337,
+          "selected_x_flux_wb": -0.20972192464931014,
+          "selected_x_normalized_flux_operand": 0.4256869228070294,
           "selected_x_normalized_flux_operand_nonfinite": null,
           "selection_status": "selected_typed_saddle_with_connectivity_support",
           "typed_saddle_candidate_count": 5,
           "typed_saddle_candidates": [
             {
               "coordinate_m": [
-                0.1791756622689386,
-                -0.00482102928753261
+                0.1872410578495582,
+                0.028389219882827825
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.17134979905157952,
-              "normalized_flux_operand": 0.477490480706167,
+              "flux_wb": -0.25614722115326094,
+              "normalized_flux_operand": 0.46235595024075055,
               "selected": false
             },
             {
               "coordinate_m": [
-                0.5874171527268781,
-                1.2123192901859094
+                0.2863658516015192,
+                1.9404456288906444
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.12728627524409405,
-              "normalized_flux_operand": 0.4363887681813337,
+              "flux_wb": -0.004553995536139631,
+              "normalized_flux_operand": 0.2636350031056578,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                0.5716629072642072,
+                -1.1086785525994367
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.2216450951387552,
+              "normalized_flux_operand": 0.4351044408133428,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                0.5819485935865284,
+                1.1447539927754349
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.20972192464931014,
+              "normalized_flux_operand": 0.4256869228070294,
               "selected": true
             },
             {
               "coordinate_m": [
-                0.5822688220360775,
-                -1.1896392439384043
+                1.6973951561392526,
+                -0.7987283336935109
               ],
               "fitted_null_type": 0.0,
-              "flux_wb": -0.13280373635809142,
-              "normalized_flux_operand": 0.4415353629376963,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                1.690288221927904,
-                -0.7974798438205051
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.8321595576747556,
-              "normalized_flux_operand": 1.0938826887192787,
-              "selected": false
-            },
-            {
-              "coordinate_m": [
-                1.6852685972368617,
-                0.7940527894817156
-              ],
-              "fitted_null_type": 0.0,
-              "flux_wb": -0.844512201982118,
-              "normalized_flux_operand": 1.10540502718365,
+              "flux_wb": -1.034248759268679,
+              "normalized_flux_operand": 1.0769395672769237,
               "selected": false
             }
           ],
           "wall_operand": {
             "coordinate_m": [
               0.5649306774139404,
-              -1.7536177684350878
+              1.7665451698946695
             ],
-            "flux_wb": 0.01689380096293648,
+            "flux_wb": -0.0002861412032160865,
             "normalized_flux": null,
-            "normalized_flux_before_shadow": 0.30190002257031606,
+            "normalized_flux_before_shadow": 0.260264037718204,
+            "normalized_flux_nonfinite": "positive_infinity",
+            "shadowed": true,
+            "status": "wall_extremum_rejected_by_private_flux_shadow"
+          }
+        },
+        "termination_reason": "terminal_observation_complete",
+        "topology_consistent": true
+      },
+      "reference": {
+        "machine": "MAST",
+        "plasma_current_a": 928902.8125,
+        "qualification_before_attribution": {
+          "declared_boundary_to_map_saddle_limit": 0.01,
+          "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 1.396327141354339e-08,
+          "passes": true,
+          "stored_lcfs_contour_limit": 0.006,
+          "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0038093633492954915,
+          "typed_saddle_candidate_count": 2,
+          "typed_saddle_resolved": true
+        },
+        "shot": 21989,
+        "slice_index": 55,
+        "source_coordinate": {
+          "axis_wb": 0.3320751947333506,
+          "boundary_wb": -0.2131394633484559,
+          "support_nodes": 222
+        },
+        "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+        "span_wb": 1.8040098584002995,
+        "time_s": 0.29499998688697815
+      },
+      "same_seed_both_arms": true,
+      "seed_sha256": "766de18620d0983f245eb78ef2fb3a2c54fd68144e4ff71a1e520eac1b1c2baf",
+      "terminal_residual_ratio_pure_over_mixed": 1.6671744846163712
+    },
+    {
+      "mixed_arm": {
+        "accepted_class_margins": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "accepted_topology_penalties": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "achieved_class": "diverted",
+        "class_margin": null,
+        "class_margin_nonfinite": "positive_infinity",
+        "converged": true,
+        "entry_point": "margin-graded fixed-ladder Newton-Krylov",
+        "failure_exception_class": null,
+        "finite": true,
+        "fitted_contraction": {
+          "contracts": true,
+          "finite_positive_point_count": 12,
+          "fit_r_squared": 0.9029608653566361,
+          "ratio": 0.12610936546032292
+        },
+        "iterations": 12,
+        "p_diverted": 1.0,
+        "requested_class": "diverted",
+        "residual_sequence": [
+          0.005455804516604553,
+          2.0441251056588756e-05,
+          1.339228718156502e-08,
+          2.969018177381189e-09,
+          6.582220907571503e-10,
+          1.4592679974356889e-10,
+          3.235197940461185e-11,
+          7.17251917165993e-12,
+          1.5901637716661139e-12,
+          3.5253821027603567e-13,
+          7.808539867871157e-14,
+          1.7364758673167596e-14
+        ],
+        "terminal_residual": 1.7364758673167596e-14,
+        "terminal_xpoint_diagnostics": {
+          "class_margin_from_operands": null,
+          "class_margin_from_operands_nonfinite": "positive_infinity",
+          "connectivity_admission": {
+            "admitted_candidate_count": 3,
+            "candidate_count_before_capacity": 3,
+            "candidates": [
+              {
+                "admitted": true,
+                "boundary_snr": 11.231582161476613,
+                "class_margin": 15.58747908415448,
+                "confidence": 0.974217442759655,
+                "coordinate_m": [
+                  0.584970793663387,
+                  1.2305167028321737
+                ],
+                "fitted_null_type": 0.0,
+                "flux_wb": -0.1223672818037608,
+                "resolved": false,
+                "root_support_cell": 0.806011438369751,
+                "state": "unresolved"
+              },
+              {
+                "admitted": true,
+                "boundary_snr": 6.736272581329851,
+                "class_margin": 10.337200021535368,
+                "confidence": 0.6460750013459605,
+                "coordinate_m": [
+                  0.5755894621815204,
+                  -1.17793284586825
+                ],
+                "fitted_null_type": 0.0,
+                "flux_wb": -0.13815245020259542,
+                "resolved": false,
+                "root_support_cell": 0.4269352853298187,
+                "state": "unresolved"
+              },
+              {
+                "admitted": true,
+                "boundary_snr": 2.1837238415808957,
+                "class_margin": 1.7733094435070607,
+                "confidence": 0.11083184021919129,
+                "coordinate_m": [
+                  0.17410294963250453,
+                  -0.01706708001671691
+                ],
+                "fitted_null_type": 0.0,
+                "flux_wb": -0.17180323579097348,
+                "resolved": false,
+                "root_support_cell": 0.03321611136198044,
+                "state": "unresolved"
+              }
+            ],
+            "discarded_score_upper_bound": null,
+            "overflow": false,
+            "retained_candidate_count": 3
+          },
+          "selected_x_coordinate_m": [
+            0.5853011730723603,
+            1.2333806492436514
+          ],
+          "selected_x_flux_wb": -0.12239191397875906,
+          "selected_x_normalized_flux_operand": 0.4310356983536194,
+          "selected_x_normalized_flux_operand_nonfinite": null,
+          "selection_status": "selected_typed_saddle_with_connectivity_support",
+          "typed_saddle_candidate_count": 5,
+          "typed_saddle_candidates": [
+            {
+              "coordinate_m": [
+                0.17912780304865122,
+                0.010317074191541889
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.17129126275397827,
+              "normalized_flux_operand": 0.4766763548923761,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                0.5853011730723603,
+                1.2333806492436514
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.12239191397875906,
+              "normalized_flux_operand": 0.4310356983536194,
+              "selected": true
+            },
+            {
+              "coordinate_m": [
+                0.5753342787019396,
+                -1.1783218404203395
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.13803801205186714,
+              "normalized_flux_operand": 0.44563912776960196,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                1.6894556310995592,
+                -0.7993853512974975
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.8395915630763405,
+              "normalized_flux_operand": 1.1004405815280132,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                1.6856166912101007,
+                0.7926763677539082
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.8406576997780509,
+              "normalized_flux_operand": 1.1014356700157926,
+              "selected": false
+            }
+          ],
+          "wall_operand": {
+            "coordinate_m": [
+              0.5649306774139404,
+              1.7586903387278676
+            ],
+            "flux_wb": 0.01588426105070167,
+            "normalized_flux": null,
+            "normalized_flux_before_shadow": 0.30197435970424114,
+            "normalized_flux_nonfinite": "positive_infinity",
+            "shadowed": true,
+            "status": "wall_extremum_rejected_by_private_flux_shadow"
+          }
+        },
+        "termination_reason": "terminal_observation_complete",
+        "topology_consistent": true
+      },
+      "pure_arm": {
+        "achieved_class": "diverted",
+        "class_margin": null,
+        "class_margin_nonfinite": "positive_infinity",
+        "converged": false,
+        "entry_point": "ForwardProfile.solve_portfolio",
+        "failure_exception_class": null,
+        "finite": true,
+        "fitted_contraction": {
+          "contracts": true,
+          "finite_positive_point_count": 12,
+          "fit_r_squared": 0.9997656830343316,
+          "ratio": 0.9599467352775317
+        },
+        "iterations": 12,
+        "p_diverted": 1.0,
+        "requested_class": "diverted",
+        "residual_sequence": [
+          0.0078053624208404525,
+          0.007479295615166,
+          0.007169193916977883,
+          0.006873246116560001,
+          0.006589241377327655,
+          0.006322353270676292,
+          0.006070092203348848,
+          0.005832319312029077,
+          0.005602785680182637,
+          0.00538433379561253,
+          0.00517630521403154,
+          0.004978825358904305
+        ],
+        "terminal_residual": 0.004978825358904305,
+        "terminal_xpoint_diagnostics": {
+          "class_margin_from_operands": null,
+          "class_margin_from_operands_nonfinite": "positive_infinity",
+          "connectivity_admission": {
+            "admitted_candidate_count": 3,
+            "candidate_count_before_capacity": 3,
+            "candidates": [
+              {
+                "admitted": true,
+                "boundary_snr": 12.244306831245911,
+                "class_margin": 16.02445075235385,
+                "confidence": 1.0,
+                "coordinate_m": [
+                  0.5877229726452452,
+                  1.2112749873167925
+                ],
+                "fitted_null_type": 0.0,
+                "flux_wb": -0.12756041324617823,
+                "resolved": true,
+                "root_support_cell": 0.7454906702041626,
+                "state": "resolved"
+              },
+              {
+                "admitted": true,
+                "boundary_snr": 13.707558815629625,
+                "class_margin": 10.514498912779226,
+                "confidence": 0.6571561820487016,
+                "coordinate_m": [
+                  0.578781382390289,
+                  -1.1813032758075315
+                ],
+                "fitted_null_type": 0.0,
+                "flux_wb": -0.13271289478352566,
+                "resolved": false,
+                "root_support_cell": 0.6356965899467468,
+                "state": "unresolved"
+              },
+              {
+                "admitted": true,
+                "boundary_snr": 2.179795451161752,
+                "class_margin": 1.7606950532956591,
+                "confidence": 0.1100434408309787,
+                "coordinate_m": [
+                  0.17412754594843763,
+                  -0.030829440744793435
+                ],
+                "fitted_null_type": 0.0,
+                "flux_wb": -0.17181942037889608,
+                "resolved": false,
+                "root_support_cell": 0.10295086354017258,
+                "state": "unresolved"
+              }
+            ],
+            "discarded_score_upper_bound": null,
+            "overflow": false,
+            "retained_candidate_count": 3
+          },
+          "selected_x_coordinate_m": [
+            0.5898097349189504,
+            1.213610549913405
+          ],
+          "selected_x_flux_wb": -0.12740390488941564,
+          "selected_x_normalized_flux_operand": 0.43657801449026507,
+          "selected_x_normalized_flux_operand_nonfinite": null,
+          "selection_status": "selected_typed_saddle_with_connectivity_support",
+          "typed_saddle_candidate_count": 5,
+          "typed_saddle_candidates": [
+            {
+              "coordinate_m": [
+                0.17917391590747647,
+                -0.0050713928433355464
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.17134681988136477,
+              "normalized_flux_operand": 0.4775672928703259,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                0.5898097349189504,
+                1.213610549913405
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.12740390488941564,
+              "normalized_flux_operand": 0.43657801449026507,
+              "selected": true
+            },
+            {
+              "coordinate_m": [
+                0.5791152896704524,
+                -1.1837060754397655
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.13272811780257246,
+              "normalized_flux_operand": 0.4415443587869983,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                1.6903208655526443,
+                -0.7974843918418031
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.8319613617370677,
+              "normalized_flux_operand": 1.09377842413007,
+              "selected": false
+            },
+            {
+              "coordinate_m": [
+                1.6852415585366902,
+                0.7940116000939043
+              ],
+              "fitted_null_type": 0.0,
+              "flux_wb": -0.8444588226028324,
+              "normalized_flux_operand": 1.1054358643013604,
+              "selected": false
+            }
+          ],
+          "wall_operand": {
+            "coordinate_m": [
+              0.5649306774139404,
+              -1.7525803107955416
+            ],
+            "flux_wb": 0.01753189685807824,
+            "normalized_flux": null,
+            "normalized_flux_before_shadow": 0.301384117450122,
             "normalized_flux_nonfinite": "positive_infinity",
             "shadowed": true,
             "status": "wall_extremum_rejected_by_private_flux_shadow"
@@ -2151,7 +2167,7 @@
       },
       "same_seed_both_arms": true,
       "seed_sha256": "61fecb0c4c498358a44704dd43facb157f7c35e001bab55473d38e283a17162a",
-      "terminal_residual_ratio_pure_over_mixed": 14088419437919.645
+      "terminal_residual_ratio_pure_over_mixed": 286720100901.70123
     }
   ],
   "response_carrier": {
@@ -2168,7 +2184,7 @@
       "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
       "size_bytes": 645864,
       "stored_circuit_count": 101,
-      "warm_load_seconds": 0.005685844924300909
+      "warm_load_seconds": 0.009867675998975756
     },
     "loaded_from_persisted_carrier": true,
     "named_cache_only_check": {
@@ -2183,7 +2199,7 @@
       ],
       "direct_green_operator_builder_entries": 0,
       "passes": true,
-      "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.017564 direct_builders=0 verdict=PASS"
+      "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.033720 direct_builders=0 verdict=PASS"
     }
   },
   "semantic_rebaseline": {
@@ -2198,19 +2214,19 @@
     ],
     "status": "unavailable_due_to_retained_terminal_failure"
   },
-  "source_commit": "93b08c1ae542274128ef5e6145dbd08f5c30a138",
+  "source_commit": "879fd876c680c2ff3264f570bde111b81b4eaa31",
   "summary": {
     "arm_count": 12,
     "mixed_terminal_diverted_count": 4,
     "mixed_terminal_residual_range": [
-      3.583837965085392e-16,
-      0.023131437967826584
+      1.7115810325525666e-16,
+      0.002953792135897771
     ],
     "pure_fitted_contraction_count": 6,
     "pure_terminal_diverted_count": 5,
     "pure_terminal_residual_range": [
-      0.0045851673071955965,
-      0.007425336057810689
+      0.004555147794085345,
+      0.007319118647204544
     ],
     "reference_count": 6,
     "retained_failure_arm_count": 1,
@@ -2225,19 +2241,17 @@
   },
   "xpoint_diagnostic_enrichment": {
     "absent_class_margin_selection_status_counts": {
-      "selected_typed_saddle_not_connectivity_reachable": 1,
-      "selected_typed_saddle_with_connectivity_support": 6
+      "selected_typed_saddle_with_connectivity_support": 7
     },
     "absent_class_margin_terminal_count": 7,
     "all_terminal_selection_status_counts": {
-      "selected_typed_saddle_not_connectivity_reachable": 1,
-      "selected_typed_saddle_with_connectivity_support": 10
+      "selected_typed_saddle_with_connectivity_support": 11
     },
-    "connectivity_support_terminal_count": 10,
+    "connectivity_support_terminal_count": 11,
     "leading_hypothesis": {
       "holds": false,
       "interpretation": "the MAST categories do not isolate connectivity reachability",
-      "mast_absent_not_connectivity_reachable_count": 1,
+      "mast_absent_not_connectivity_reachable_count": 0,
       "mast_absent_terminal_count": 7,
       "prior_diiid_connectivity_support_count": 0,
       "prior_diiid_not_connectivity_reachable_count": 10,
@@ -2250,22 +2264,22 @@
           "mixed_arm": {
             "class_margin": null,
             "class_margin_nonfinite": "positive_infinity",
-            "selected_x_normalized_flux_operand": 0.43580205514567494,
+            "selected_x_normalized_flux_operand": 0.43554404375876893,
             "selected_x_normalized_flux_operand_nonfinite": null,
             "selection_status": "selected_typed_saddle_with_connectivity_support",
             "wall_normalized_flux": null,
-            "wall_normalized_flux_before_shadow": 0.3310454781725451,
+            "wall_normalized_flux_before_shadow": 0.32963084574603385,
             "wall_normalized_flux_nonfinite": "positive_infinity",
             "wall_status": "wall_extremum_rejected_by_private_flux_shadow"
           },
           "pure_arm": {
-            "class_margin": 0.02643334256296942,
+            "class_margin": 0.0264469702359863,
             "class_margin_nonfinite": null,
-            "selected_x_normalized_flux_operand": 0.44252817236845116,
+            "selected_x_normalized_flux_operand": 0.4426927626120263,
             "selected_x_normalized_flux_operand_nonfinite": null,
             "selection_status": "selected_typed_saddle_with_connectivity_support",
-            "wall_normalized_flux": 0.4689615149314206,
-            "wall_normalized_flux_before_shadow": 0.33102756192690724,
+            "wall_normalized_flux": 0.4691397328480126,
+            "wall_normalized_flux_before_shadow": 0.33103257243528766,
             "wall_normalized_flux_nonfinite": null,
             "wall_status": "wall_extremum_rejected_by_private_flux_shadow"
           }
@@ -2278,22 +2292,22 @@
           "mixed_arm": {
             "class_margin": null,
             "class_margin_nonfinite": "positive_infinity",
-            "selected_x_normalized_flux_operand": 0.43498596505904236,
+            "selected_x_normalized_flux_operand": 0.4348383197139636,
             "selected_x_normalized_flux_operand_nonfinite": null,
             "selection_status": "selected_typed_saddle_with_connectivity_support",
             "wall_normalized_flux": null,
-            "wall_normalized_flux_before_shadow": 0.3559232625718283,
+            "wall_normalized_flux_before_shadow": 0.35586980013338526,
             "wall_normalized_flux_nonfinite": "positive_infinity",
             "wall_status": "wall_extremum_rejected_by_private_flux_shadow"
           },
           "pure_arm": {
-            "class_margin": 0.02074206958537511,
+            "class_margin": 0.020594402390937405,
             "class_margin_nonfinite": null,
-            "selected_x_normalized_flux_operand": 0.4471127692199619,
+            "selected_x_normalized_flux_operand": 0.44731356914726783,
             "selected_x_normalized_flux_operand_nonfinite": null,
             "selection_status": "selected_typed_saddle_with_connectivity_support",
-            "wall_normalized_flux": 0.467854838805337,
-            "wall_normalized_flux_before_shadow": 0.3583732394250173,
+            "wall_normalized_flux": 0.46790797153820524,
+            "wall_normalized_flux_before_shadow": 0.3584277230030172,
             "wall_normalized_flux_nonfinite": null,
             "wall_status": "wall_extremum_rejected_by_private_flux_shadow"
           }
@@ -2306,22 +2320,22 @@
           "mixed_arm": {
             "class_margin": null,
             "class_margin_nonfinite": "positive_infinity",
-            "selected_x_normalized_flux_operand": 0.22892968794914112,
+            "selected_x_normalized_flux_operand": 0.23106109413970494,
             "selected_x_normalized_flux_operand_nonfinite": null,
             "selection_status": "selected_typed_saddle_with_connectivity_support",
             "wall_normalized_flux": null,
-            "wall_normalized_flux_before_shadow": 0.017030882636524355,
+            "wall_normalized_flux_before_shadow": 0.015333928484738886,
             "wall_normalized_flux_nonfinite": "positive_infinity",
             "wall_status": "wall_extremum_rejected_by_private_flux_shadow"
           },
           "pure_arm": {
             "class_margin": null,
             "class_margin_nonfinite": "positive_infinity",
-            "selected_x_normalized_flux_operand": -0.07993304792641832,
+            "selected_x_normalized_flux_operand": 0.22313451460470746,
             "selected_x_normalized_flux_operand_nonfinite": null,
-            "selection_status": "selected_typed_saddle_not_connectivity_reachable",
+            "selection_status": "selected_typed_saddle_with_connectivity_support",
             "wall_normalized_flux": null,
-            "wall_normalized_flux_before_shadow": -0.3642269960277151,
+            "wall_normalized_flux_before_shadow": 0.01861087960868074,
             "wall_normalized_flux_nonfinite": "positive_infinity",
             "wall_status": "wall_extremum_rejected_by_private_flux_shadow"
           }
@@ -2344,13 +2358,13 @@
             "wall_status": null
           },
           "pure_arm": {
-            "class_margin": -0.14822516784583778,
+            "class_margin": -0.14833345488803468,
             "class_margin_nonfinite": null,
-            "selected_x_normalized_flux_operand": 0.4553040026173338,
+            "selected_x_normalized_flux_operand": 0.45546606271452683,
             "selected_x_normalized_flux_operand_nonfinite": null,
             "selection_status": "selected_typed_saddle_with_connectivity_support",
-            "wall_normalized_flux": 0.307078834771496,
-            "wall_normalized_flux_before_shadow": 0.3092027370138606,
+            "wall_normalized_flux": 0.30713260782649215,
+            "wall_normalized_flux_before_shadow": 0.30926543876696394,
             "wall_normalized_flux_nonfinite": null,
             "wall_status": "wall_extremum_admitted"
           }
@@ -2361,24 +2375,24 @@
       {
         "arms": {
           "mixed_arm": {
-            "class_margin": -0.16144185077476397,
+            "class_margin": -0.16160168168209876,
             "class_margin_nonfinite": null,
-            "selected_x_normalized_flux_operand": 0.41460069037242153,
+            "selected_x_normalized_flux_operand": 0.4146991083644694,
             "selected_x_normalized_flux_operand_nonfinite": null,
             "selection_status": "selected_typed_saddle_with_connectivity_support",
-            "wall_normalized_flux": 0.25315883959765756,
-            "wall_normalized_flux_before_shadow": 0.25605672254919176,
+            "wall_normalized_flux": 0.2530974266823706,
+            "wall_normalized_flux_before_shadow": 0.2559960804505509,
             "wall_normalized_flux_nonfinite": null,
             "wall_status": "wall_extremum_admitted"
           },
           "pure_arm": {
             "class_margin": null,
             "class_margin_nonfinite": "positive_infinity",
-            "selected_x_normalized_flux_operand": 0.42570476476612273,
+            "selected_x_normalized_flux_operand": 0.4256869228070294,
             "selected_x_normalized_flux_operand_nonfinite": null,
             "selection_status": "selected_typed_saddle_with_connectivity_support",
             "wall_normalized_flux": null,
-            "wall_normalized_flux_before_shadow": 0.2602921453121724,
+            "wall_normalized_flux_before_shadow": 0.260264037718204,
             "wall_normalized_flux_nonfinite": "positive_infinity",
             "wall_status": "wall_extremum_rejected_by_private_flux_shadow"
           }
@@ -2391,22 +2405,22 @@
           "mixed_arm": {
             "class_margin": null,
             "class_margin_nonfinite": "positive_infinity",
-            "selected_x_normalized_flux_operand": 0.4309790002082113,
+            "selected_x_normalized_flux_operand": 0.4310356983536194,
             "selected_x_normalized_flux_operand_nonfinite": null,
             "selection_status": "selected_typed_saddle_with_connectivity_support",
             "wall_normalized_flux": null,
-            "wall_normalized_flux_before_shadow": 0.3000846561326388,
+            "wall_normalized_flux_before_shadow": 0.30197435970424114,
             "wall_normalized_flux_nonfinite": "positive_infinity",
             "wall_status": "wall_extremum_rejected_by_private_flux_shadow"
           },
           "pure_arm": {
             "class_margin": null,
             "class_margin_nonfinite": "positive_infinity",
-            "selected_x_normalized_flux_operand": 0.4363887681813337,
+            "selected_x_normalized_flux_operand": 0.43657801449026507,
             "selected_x_normalized_flux_operand_nonfinite": null,
             "selection_status": "selected_typed_saddle_with_connectivity_support",
             "wall_normalized_flux": null,
-            "wall_normalized_flux_before_shadow": 0.30190002257031606,
+            "wall_normalized_flux_before_shadow": 0.301384117450122,
             "wall_normalized_flux_nonfinite": "positive_infinity",
             "wall_status": "wall_extremum_rejected_by_private_flux_shadow"
           }

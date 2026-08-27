@@ -112,3 +112,86 @@ def test_unrelated_terminal_observation_exception_propagates(monkeypatch):
 
     with pytest.raises(RuntimeError, match="unrelated failure"):
         driver._terminal_observables_retaining_axis_failure(None, 0)
+
+
+def test_campaign_releases_compilation_state_before_single_publication(
+    monkeypatch, tmp_path
+):
+    driver = _driver()
+    selected = [
+        ({"shot": 20_001 + index, "slice_index": 2 * index + 3}, f"row-{index}")
+        for index in range(6)
+    ]
+    events = []
+
+    def build_reference(
+        store,
+        response_cache,
+        selected_row,
+        qualification,
+        *,
+        include_parity,
+    ):
+        assert store == "store"
+        assert response_cache == "responses"
+        identity = f"{selected_row['shot']}/{selected_row['slice_index']}"
+        events.append(("build", identity, qualification, include_parity))
+        record = {"reference": identity}
+        parity = {"passes": True} if include_parity else None
+        return record, 0, parity
+
+    monkeypatch.setattr(driver, "_build_reference_contrast", build_reference)
+    monkeypatch.setattr(driver.jax, "clear_caches", lambda: events.append(("clear",)))
+    monkeypatch.setattr(driver.gc, "collect", lambda: events.append(("collect",)))
+    monkeypatch.setattr(driver, "configure_dtypes", lambda: None)
+    monkeypatch.setattr(driver, "_source_revision", lambda: "revision")
+    monkeypatch.setattr(
+        driver,
+        "_persisted_response_cache",
+        lambda *_args: ("responses", {"carrier": "evidence"}),
+    )
+    monkeypatch.setattr(driver, "select_slices_by_shot", lambda _bank: selected)
+    monkeypatch.setattr(
+        driver,
+        "_receipt_summary",
+        lambda records: {"reference_count": len(records)},
+    )
+    monkeypatch.setattr(
+        driver,
+        "_publish_receipt",
+        lambda output, receipt: events.append(
+            ("write", output, list(receipt["references"]))
+        ),
+    )
+
+    output = tmp_path / "receipt.json"
+    receipt = driver.run(
+        store="store",
+        bank=tmp_path / "bank.json",
+        output=output,
+        carrier=tmp_path / "carrier.npz",
+        carrier_receipt=tmp_path / "carrier-receipt.json",
+    )
+
+    records = [
+        {"reference": f"{20_001 + index}/{2 * index + 3}"} for index in range(6)
+    ]
+    assert receipt["references"] == records
+    assert receipt["direct_green_operator_builder_entries"] == 0
+    assert receipt["jit_vmap_batch_two_parity"] == {"passes": True}
+    expected_events = []
+    for index in range(6):
+        expected_events.extend(
+            (
+                (
+                    "build",
+                    f"{20_001 + index}/{2 * index + 3}",
+                    f"row-{index}",
+                    index == 0,
+                ),
+                ("clear",),
+                ("collect",),
+            )
+        )
+    expected_events.append(("write", output, records))
+    assert events == expected_events

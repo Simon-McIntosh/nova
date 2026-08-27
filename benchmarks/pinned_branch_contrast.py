@@ -12,9 +12,11 @@ the margin value alone.
 from __future__ import annotations
 
 import argparse
+import gc
 import hashlib
 import json
 from pathlib import Path
+import time
 from typing import Any
 
 import jax
@@ -754,6 +756,96 @@ def _batch_two_parity(profile, seed: jax.Array, target_current: float) -> dict:
     }
 
 
+def _build_reference_contrast(
+    store: Path,
+    response_cache,
+    selected_row: dict[str, Any],
+    qualification,
+    *,
+    include_parity: bool,
+) -> tuple[dict[str, Any], int, dict[str, Any] | None]:
+    """Build one paired reference while its solve objects have bounded lifetime."""
+
+    case, context = _mast_case_from_selection(store, selected_row, qualification)
+    passive_case, profile, policy = _passive_inclusive_case(
+        case, context, response_cache
+    )
+    direct_builder_entries = int(policy["section_kernel_evaluations_this_shot"])
+    reference = passive_case["reference"]
+    seed = jnp.asarray(passive_case["state"])
+    target_current = abs(float(reference["plasma_current_a"]))
+    pure, _portfolio = _pure_arm(profile, seed, target_current)
+    mixed = _mixed_arm(profile, seed, target_current)
+    parity = (
+        _batch_two_parity(profile, seed, target_current) if include_parity else None
+    )
+    if parity is not None:
+        parity["reference"] = {
+            "shot": int(reference["shot"]),
+            "slice_index": int(reference["slice_index"]),
+        }
+    record = {
+        "reference": reference,
+        "seed_sha256": _digest(seed),
+        "same_seed_both_arms": True,
+        "pure_arm": pure,
+        "mixed_arm": mixed,
+        "terminal_residual_ratio_pure_over_mixed": float(
+            pure["terminal_residual"]
+            / max(mixed["terminal_residual"], np.finfo(float).tiny)
+        ),
+    }
+    return record, direct_builder_entries, parity
+
+
+def _build_campaign_records(
+    store: Path,
+    response_cache,
+    selected,
+) -> tuple[list[dict[str, Any]], int, dict[str, Any] | None]:
+    """Build all references while releasing compilation state between identities."""
+
+    records = []
+    direct_builder_entries = 0
+    parity = None
+    for selected_row, qualification in selected:
+        shot = int(selected_row["shot"])
+        slice_index = int(selected_row["slice_index"])
+        print(f"solving MAST {shot}/{slice_index}", flush=True)
+        started = time.perf_counter()
+        try:
+            record, builder_entries, reference_parity = _build_reference_contrast(
+                store,
+                response_cache,
+                selected_row,
+                qualification,
+                include_parity=parity is None,
+            )
+            records.append(record)
+            direct_builder_entries += builder_entries
+            if reference_parity is not None:
+                parity = reference_parity
+        finally:
+            jax.clear_caches()
+            gc.collect()
+        elapsed = time.perf_counter() - started
+        print(
+            f"completed MAST {shot}/{slice_index} in {elapsed:.3f} s; "
+            "released compilation caches",
+            flush=True,
+        )
+    return records, direct_builder_entries, parity
+
+
+def _publish_receipt(output: Path, receipt: dict[str, Any]) -> None:
+    """Publish one strict receipt after every reference has completed."""
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
+        json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    )
+
+
 def run(
     *,
     store: Path = SHOT_STORE,
@@ -770,39 +862,9 @@ def run(
         carrier, carrier_receipt
     )
     selected = select_slices_by_shot(bank)
-    records = []
-    direct_builder_entries = 0
-    parity = None
-    for selected_row, qualification in selected:
-        case, context = _mast_case_from_selection(store, selected_row, qualification)
-        passive_case, profile, policy = _passive_inclusive_case(
-            case, context, response_cache
-        )
-        direct_builder_entries += int(policy["section_kernel_evaluations_this_shot"])
-        reference = passive_case["reference"]
-        seed = jnp.asarray(passive_case["state"])
-        target_current = abs(float(reference["plasma_current_a"]))
-        pure, _portfolio = _pure_arm(profile, seed, target_current)
-        mixed = _mixed_arm(profile, seed, target_current)
-        if parity is None:
-            parity = _batch_two_parity(profile, seed, target_current)
-            parity["reference"] = {
-                "shot": int(reference["shot"]),
-                "slice_index": int(reference["slice_index"]),
-            }
-        records.append(
-            {
-                "reference": reference,
-                "seed_sha256": _digest(seed),
-                "same_seed_both_arms": True,
-                "pure_arm": pure,
-                "mixed_arm": mixed,
-                "terminal_residual_ratio_pure_over_mixed": float(
-                    pure["terminal_residual"]
-                    / max(mixed["terminal_residual"], np.finfo(float).tiny)
-                ),
-            }
-        )
+    records, direct_builder_entries, parity = _build_campaign_records(
+        store, response_cache, selected
+    )
 
     if len(records) != 6:
         raise RuntimeError(f"expected six frozen references, measured {len(records)}")
@@ -858,10 +920,7 @@ def run(
     }
     if banked_receipt is not None:
         receipt = _merge_terminal_diagnostics(banked_receipt, receipt)
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(
-        json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n"
-    )
+    _publish_receipt(output, receipt)
     return receipt
 
 

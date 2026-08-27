@@ -11,26 +11,24 @@
           "missing_predicted_closed_boundary"
         ],
         "converged": false,
-        "finite": false,
+        "finite": true,
         "identity": {
           "frame": 179,
           "shot": "d3d_shot_00000c4a7b.parquet"
         },
-        "saddle_distance_m": 1.5283189850512469
+        "saddle_distance_m": 2.119397548954717
       },
       {
         "class_agreement": true,
-        "closed_boundary_symmetric_rms_m": null,
-        "comparison_failures": [
-          "missing_predicted_closed_boundary"
-        ],
+        "closed_boundary_symmetric_rms_m": 0.3324705370548362,
+        "comparison_failures": [],
         "converged": false,
         "finite": true,
         "identity": {
           "frame": 44,
           "shot": "d3d_shot_0003ff34e7.parquet"
         },
-        "saddle_distance_m": 2.612246340224187
+        "saddle_distance_m": 2.6217069152004004
       },
       {
         "class_agreement": true,
@@ -44,31 +42,35 @@
           "frame": 144,
           "shot": "d3d_shot_001554e054.parquet"
         },
-        "saddle_distance_m": 0.0491874554368486
+        "saddle_distance_m": 0.04476213133340076
       },
       {
-        "class_agreement": true,
-        "closed_boundary_symmetric_rms_m": 0.20693296684264334,
-        "comparison_failures": [],
+        "class_agreement": false,
+        "closed_boundary_symmetric_rms_m": null,
+        "comparison_failures": [
+          "missing_predicted_closed_boundary"
+        ],
         "converged": false,
         "finite": true,
         "identity": {
           "frame": 146,
           "shot": "d3d_shot_002495e835.parquet"
         },
-        "saddle_distance_m": 0.4266664023585057
+        "saddle_distance_m": 0.04684346997037447
       },
       {
         "class_agreement": true,
-        "closed_boundary_symmetric_rms_m": 0.2314487959281542,
-        "comparison_failures": [],
+        "closed_boundary_symmetric_rms_m": null,
+        "comparison_failures": [
+          "missing_predicted_closed_boundary"
+        ],
         "converged": false,
         "finite": true,
         "identity": {
           "frame": 137,
           "shot": "d3d_shot_0040ca9bdc.parquet"
         },
-        "saddle_distance_m": 0.4296210515340697
+        "saddle_distance_m": 0.05533128699382821
       }
     ]
   },
@@ -83,7 +85,7 @@
             "slice_index": 43
           },
           "reason": "eligible_converged_class_agreement",
-          "value": 0.029447466045738484
+          "value": 0.02916358539718806
         }
       ],
       "excluded_rows": [
@@ -114,7 +116,7 @@
             "shot": 21983,
             "slice_index": 35
           },
-          "reason": "non_converged",
+          "reason": "non_converged;comparison_operand_failure:missing_predicted_closed_boundary;closed_boundary_rms_unavailable",
           "value": null
         },
         {
@@ -144,7 +146,7 @@
             "shot": 21985,
             "slice_index": 51
           },
-          "reason": "non_converged;comparison_operand_failure:missing_predicted_closed_boundary;closed_boundary_rms_unavailable",
+          "reason": "comparison_operand_failure:missing_predicted_closed_boundary;closed_boundary_rms_unavailable",
           "value": null
         },
         {
@@ -203,7 +205,7 @@
             "machine": "DIII-D",
             "shot": "d3d_shot_00000c4a7b.parquet"
           },
-          "reason": "non_converged;non_finite_receipt;comparison_operand_failure:missing_predicted_closed_boundary;closed_boundary_rms_unavailable",
+          "reason": "non_converged;comparison_operand_failure:missing_predicted_closed_boundary;closed_boundary_rms_unavailable",
           "value": null
         },
         {
@@ -212,7 +214,7 @@
             "machine": "DIII-D",
             "shot": "d3d_shot_0003ff34e7.parquet"
           },
-          "reason": "non_converged;comparison_operand_failure:missing_predicted_closed_boundary;closed_boundary_rms_unavailable",
+          "reason": "non_converged",
           "value": null
         },
         {
@@ -230,7 +232,7 @@
             "machine": "DIII-D",
             "shot": "d3d_shot_002495e835.parquet"
           },
-          "reason": "non_converged",
+          "reason": "class_disagreement",
           "value": null
         },
         {
@@ -239,14 +241,14 @@
             "machine": "DIII-D",
             "shot": "d3d_shot_0040ca9bdc.parquet"
           },
-          "reason": "non_converged",
+          "reason": "non_converged;comparison_operand_failure:missing_predicted_closed_boundary;closed_boundary_rms_unavailable",
           "value": null
         }
       ],
       "measured": {
         "declared_denominator": 17,
         "eligible_row_count": 1,
-        "worst_closed_boundary_symmetric_rms_m": 0.029447466045738484
+        "worst_closed_boundary_symmetric_rms_m": 0.02916358539718806
       },
       "passes": false,
       "threshold": {
@@ -263,7 +265,7 @@
             "slice_index": 35
           },
           "reason": "finite_saddle_distance",
-          "value": 0.0043433645381540835
+          "value": 0.006032842895953866
         },
         {
           "identity": {
@@ -273,7 +275,7 @@
             "slice_index": 35
           },
           "reason": "finite_saddle_distance",
-          "value": 0.02995334546338346
+          "value": 0.029852614374362738
         },
         {
           "identity": {
@@ -283,7 +285,7 @@
             "slice_index": 35
           },
           "reason": "finite_saddle_distance",
-          "value": 0.012641732137253057
+          "value": 0.012121986310617214
         },
         {
           "identity": {
@@ -293,7 +295,7 @@
             "slice_index": 35
           },
           "reason": "finite_saddle_distance",
-          "value": 0.03866107162298942
+          "value": 0.03897701831761861
         },
         {
           "identity": {
@@ -303,7 +305,7 @@
             "slice_index": 51
           },
           "reason": "finite_saddle_distance",
-          "value": 0.008111714663847119
+          "value": 0.00807011899095141
         },
         {
           "identity": {
@@ -313,7 +315,7 @@
             "slice_index": 51
           },
           "reason": "finite_saddle_distance",
-          "value": 0.02240718374696622
+          "value": 0.03239355299341912
         },
         {
           "identity": {
@@ -323,7 +325,7 @@
             "slice_index": 46
           },
           "reason": "finite_saddle_distance",
-          "value": 0.009636757020171397
+          "value": 0.009847234022341814
         },
         {
           "identity": {
@@ -333,7 +335,7 @@
             "slice_index": 55
           },
           "reason": "finite_saddle_distance",
-          "value": 0.010800806966728055
+          "value": 0.010563216910727327
         },
         {
           "identity": {
@@ -343,7 +345,7 @@
             "slice_index": 55
           },
           "reason": "finite_saddle_distance",
-          "value": 0.030353697201806973
+          "value": 0.029889527877243655
         },
         {
           "identity": {
@@ -353,7 +355,7 @@
             "slice_index": 43
           },
           "reason": "finite_saddle_distance",
-          "value": 0.011062797623398
+          "value": 0.013422185381239606
         },
         {
           "identity": {
@@ -363,7 +365,7 @@
             "slice_index": 43
           },
           "reason": "finite_saddle_distance",
-          "value": 0.020558786247469613
+          "value": 0.030944211779809085
         },
         {
           "identity": {
@@ -372,7 +374,7 @@
             "shot": "d3d_shot_00000c4a7b.parquet"
           },
           "reason": "finite_saddle_distance",
-          "value": 1.5283189850512469
+          "value": 2.119397548954717
         },
         {
           "identity": {
@@ -381,7 +383,7 @@
             "shot": "d3d_shot_0003ff34e7.parquet"
           },
           "reason": "finite_saddle_distance",
-          "value": 2.612246340224187
+          "value": 2.6217069152004004
         },
         {
           "identity": {
@@ -390,7 +392,7 @@
             "shot": "d3d_shot_001554e054.parquet"
           },
           "reason": "finite_saddle_distance",
-          "value": 0.0491874554368486
+          "value": 0.04476213133340076
         },
         {
           "identity": {
@@ -399,7 +401,7 @@
             "shot": "d3d_shot_002495e835.parquet"
           },
           "reason": "finite_saddle_distance",
-          "value": 0.4266664023585057
+          "value": 0.04684346997037447
         },
         {
           "identity": {
@@ -408,7 +410,7 @@
             "shot": "d3d_shot_0040ca9bdc.parquet"
           },
           "reason": "finite_saddle_distance",
-          "value": 0.4296210515340697
+          "value": 0.05533128699382821
         }
       ],
       "excluded_rows": [
@@ -425,7 +427,7 @@
       ],
       "measured": {
         "declared_denominator": 17,
-        "worst_saddle_distance_m": 2.612246340224187
+        "worst_saddle_distance_m": 2.6217069152004004
       },
       "passes": false,
       "threshold": {
@@ -592,7 +594,7 @@
         }
       ],
       "path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
-      "sha256": "3f6afda791080bce66d473c56b079c93c0480f2de89e9d9b13cb2442c1b75ad9"
+      "sha256": "ea113fc898781411028ca6d031dd0a1de4f2bdfb4ae57849821545e79040b1f0"
     },
     "mast": {
       "declared_identities": [
@@ -658,7 +660,7 @@
         }
       ],
       "path": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
-      "sha256": "2420281423dcd7181f264ada0d13a087aa2213ebdfbc5f5ee9c1c1fa97d87725"
+      "sha256": "7a9cd3b971dedf84a8c1b7d00a97b2cef9e977ea4c4ec4feacd5b513028cb17c"
     }
   },
   "mast": {
@@ -676,11 +678,11 @@
           "shot": 21978,
           "slice_index": 35
         },
-        "saddle_distance_m": 0.0043433645381540835
+        "saddle_distance_m": 0.006032842895953866
       },
       {
         "class_agreement": true,
-        "closed_boundary_symmetric_rms_m": 0.0336656808773463,
+        "closed_boundary_symmetric_rms_m": 0.033670462327667725,
         "comparison_failures": [],
         "converged": false,
         "identity": {
@@ -688,19 +690,21 @@
           "shot": 21978,
           "slice_index": 35
         },
-        "saddle_distance_m": 0.02995334546338346
+        "saddle_distance_m": 0.029852614374362738
       },
       {
         "class_agreement": true,
-        "closed_boundary_symmetric_rms_m": 0.012418351862010178,
-        "comparison_failures": [],
+        "closed_boundary_symmetric_rms_m": null,
+        "comparison_failures": [
+          "missing_predicted_closed_boundary"
+        ],
         "converged": false,
         "identity": {
           "arm": "pure",
           "shot": 21983,
           "slice_index": 35
         },
-        "saddle_distance_m": 0.012641732137253057
+        "saddle_distance_m": 0.012121986310617214
       },
       {
         "class_agreement": true,
@@ -714,7 +718,7 @@
           "shot": 21983,
           "slice_index": 35
         },
-        "saddle_distance_m": 0.03866107162298942
+        "saddle_distance_m": 0.03897701831761861
       },
       {
         "class_agreement": true,
@@ -728,7 +732,7 @@
           "shot": 21985,
           "slice_index": 51
         },
-        "saddle_distance_m": 0.008111714663847119
+        "saddle_distance_m": 0.00807011899095141
       },
       {
         "class_agreement": true,
@@ -736,17 +740,17 @@
         "comparison_failures": [
           "missing_predicted_closed_boundary"
         ],
-        "converged": false,
+        "converged": true,
         "identity": {
           "arm": "mixed",
           "shot": 21985,
           "slice_index": 51
         },
-        "saddle_distance_m": 0.02240718374696622
+        "saddle_distance_m": 0.03239355299341912
       },
       {
         "class_agreement": false,
-        "closed_boundary_symmetric_rms_m": 0.1815060576558718,
+        "closed_boundary_symmetric_rms_m": 0.18142774529297903,
         "comparison_failures": [],
         "converged": false,
         "identity": {
@@ -754,7 +758,7 @@
           "shot": 21986,
           "slice_index": 46
         },
-        "saddle_distance_m": 0.009636757020171397
+        "saddle_distance_m": 0.009847234022341814
       },
       {
         "class_agreement": null,
@@ -782,11 +786,11 @@
           "shot": 21989,
           "slice_index": 55
         },
-        "saddle_distance_m": 0.010800806966728055
+        "saddle_distance_m": 0.010563216910727327
       },
       {
         "class_agreement": false,
-        "closed_boundary_symmetric_rms_m": 0.23624747036996224,
+        "closed_boundary_symmetric_rms_m": 0.23631132694242418,
         "comparison_failures": [],
         "converged": false,
         "identity": {
@@ -794,7 +798,7 @@
           "shot": 21989,
           "slice_index": 55
         },
-        "saddle_distance_m": 0.030353697201806973
+        "saddle_distance_m": 0.029889527877243655
       },
       {
         "class_agreement": true,
@@ -808,11 +812,11 @@
           "shot": 22086,
           "slice_index": 43
         },
-        "saddle_distance_m": 0.011062797623398
+        "saddle_distance_m": 0.013422185381239606
       },
       {
         "class_agreement": true,
-        "closed_boundary_symmetric_rms_m": 0.029447466045738484,
+        "closed_boundary_symmetric_rms_m": 0.02916358539718806,
         "comparison_failures": [],
         "converged": true,
         "identity": {
@@ -820,7 +824,7 @@
           "shot": 22086,
           "slice_index": 43
         },
-        "saddle_distance_m": 0.020558786247469613
+        "saddle_distance_m": 0.030944211779809085
       }
     ]
   },

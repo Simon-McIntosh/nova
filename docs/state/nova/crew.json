@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T20:28:44",
+  "updated": "2026-08-27T20:51:20",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -58878,9 +58878,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T175519690799-pod-long-ceiling-production-solve",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-long-ceiling-production-solve",
+        "node_definition": {
+          "done_when": "One SLURM job on a non-debug CPU partition admitting at least four hours, or on betelgeuse with 8 CPUs if none exists, runs the staged observer on current origin/main against 21978/35 pure at the production grid with the promotion ceiling raised to at least 3000 and ends EXIT_MARKER=0; a report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/long-ceiling-production-solve.md states whether the locked 1e-8 criterion was reached and at which promotion, the minimum relative-sup residual and its promotion beside the 650-ceiling values 2.6722e-4 strict and 3.0415e-4 windowed, the residual at promotions 650, 1000, 2000 and 3000 so the reader can see whether descent continues beyond the old ceiling, the accepted-promotion count and the terminal gradient norm, and the verdict CONVERGED, STILL-DESCENDING or GENUINELY-FLAT with the promotion count at which improvement last exceeded one percent; no repository file modified",
+          "estimated_hours": null,
+          "goal": "Whether the production floor is a genuine stall or simply where the 650-promotion ceiling stopped a slowly converging solve, measured by running the same production configuration on the full repaired stack with a far larger promotion ceiling",
+          "id": "pod-long-ceiling-production-solve",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T175519690799-pod-long-ceiling-production-solve/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/long-ceiling-production-solve.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T17:55:28Z",
+        "completed_at": "2026-08-27T18:50:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3299,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3299,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "50b9bf35384c68b43b5b89360a3e6e4b8e10ae0f",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "job 1258912 healthy and running at the worker fence with 7h07m of lane remaining; no atomic receipt yet",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T175519690799-pod-long-ceiling-production-solve/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T175519690799-pod-long-ceiling-production-solve/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 17391872,
+            "cached_input_tokens_cumulative": 23619968,
+            "input_tokens": 17484407,
+            "input_tokens_cumulative": 23887882,
+            "output_tokens": 1193,
+            "output_tokens_cumulative": 18834,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 4099
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1134
+    "_version": 1135
   }
 }

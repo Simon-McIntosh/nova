@@ -479,6 +479,57 @@ def test_newton_returns_the_best_observed_relative_sup_iterate():
         assert float(finite_trace[-1]) > float(result.residual)
 
 
+@pytest.mark.parametrize(
+    ("barrier_residual", "accepted"),
+    ((0.5, True), (0.7, False)),
+)
+def test_newton_compares_barriers_with_the_recent_merit_maximum(
+    barrier_residual,
+    accepted,
+):
+    def map_fn(state):
+        at_initial = state[0] == 1.0
+        at_current = state[0] == 2.5
+        at_full_step = jnp.abs(state[0] - 3.5) < 1.0e-5
+        current_model = 25.0 / 6.0 - (2.0 / 3.0) * (state - 2.5)
+        barrier_model = state / (1.0 - barrier_residual)
+        refused_model = state / (1.0 - 0.8)
+        return jnp.where(
+            at_initial,
+            jnp.full_like(state, 2.5),
+            jnp.where(
+                at_current,
+                current_model,
+                jnp.where(at_full_step, barrier_model, refused_model),
+            ),
+        )
+
+    def solve():
+        return newton_krylov(
+            map_fn,
+            jnp.ones(1),
+            newton_steps=1,
+            gmres_iterations=1,
+            warmup=1,
+            relaxation=1.0,
+        )
+
+    for result in (solve(), jax.jit(solve)()):
+        finite_trace = np.asarray(result.trace)[np.isfinite(result.trace)]
+        np.testing.assert_allclose(result.state, [2.5])
+        np.testing.assert_allclose(result.residual, 0.4)
+        assert int(result.accepted_newton_promotions) == int(accepted)
+        if accepted:
+            np.testing.assert_allclose(finite_trace, [0.6, 0.4, 0.5])
+            assert finite_trace[-1] > float(result.residual)
+        else:
+            np.testing.assert_allclose(finite_trace, [0.6, 0.4, 0.4])
+            assert (
+                int(result.termination_reason)
+                == FixedPointTerminationReason.SUFFICIENT_DECREASE_REFUSED
+            )
+
+
 def test_newton_does_not_try_descent_while_its_full_step_is_sufficient():
     def solve():
         return newton_krylov(

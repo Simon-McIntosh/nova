@@ -79,6 +79,7 @@ _MODEL_REBUILD_DAMPING_GROWTH = 10.0
 _MODEL_REBUILD_DAMPING_TRIPS = 6
 _STEEPEST_DESCENT_SCALES = (1.0e-4, 1.0e-5, 1.0e-6, 1.0e-7, 1.0e-8)
 _RELATIVE_SUP_MERIT_EXPONENT = 8
+_NONMONOTONE_MERIT_WINDOW = 6
 _PROJECTED_KRYLOV_CONDITION_RATIO_LIMIT = math.e
 _SUFFICIENT_DECREASE_SLOPE = 1.0e-4
 FIXED_POINT_RESIDUAL_TOLERANCE = 1.0e-8
@@ -265,6 +266,8 @@ class _NewtonIterationState(NamedTuple):
     residual: jax.Array
     best_state: jax.Array
     best_residual: jax.Array
+    recent_merits: jax.Array
+    merit_observations: jax.Array
     trace: jax.Array
     qualification: jax.Array
     amplification: _AmplificationState
@@ -518,15 +521,38 @@ def _smooth_relative_sup_merit(mapped: jax.Array, state: jax.Array) -> jax.Array
     ) / jnp.linalg.vector_norm(denominator_vector, ord=_RELATIVE_SUP_MERIT_EXPONENT)
 
 
+def _record_merit(
+    recent_merits: jax.Array,
+    observation_count: jax.Array,
+    merit: jax.Array,
+    record: jax.Array,
+) -> tuple[jax.Array, jax.Array]:
+    """Append one finite accepted merit to a fixed-shape recent window."""
+    should_record = record & jnp.isfinite(merit)
+    index = jnp.mod(observation_count, recent_merits.size)
+    recent_merits = recent_merits.at[index].set(
+        jnp.where(should_record, merit, recent_merits[index])
+    )
+    return recent_merits, observation_count + should_record.astype(jnp.int32)
+
+
+def _recent_merit_maximum(
+    recent_merits: jax.Array, current_merit: jax.Array
+) -> jax.Array:
+    """Return the finite nonmonotone reference including the current merit."""
+    return jnp.max(jnp.where(jnp.isfinite(recent_merits), recent_merits, current_merit))
+
+
 def _backtracked_promotion(
     map_fn: Callable[[jax.Array], jax.Array],
     state: jax.Array,
     step: jax.Array,
     continuation_step: jax.Array,
     current_residual: jax.Array,
+    reference_merit: jax.Array,
     recovery_radius: jax.Array,
 ) -> _BacktrackedPromotion:
-    """Select a decreasing Newton trial or adaptive continuation recovery."""
+    """Select a window-decreasing Newton trial or continuation recovery."""
 
     factors = jnp.asarray(_BACKTRACKING_FACTORS, dtype=state.dtype)
     candidates = state[None, :] + factors[:, None] * step[None, :]
@@ -539,15 +565,8 @@ def _backtracked_promotion(
         )
 
     merits, residuals = jax.lax.map(score, candidates)
-    current_mapped = map_fn(state)
-    current_merit = _smooth_relative_sup_merit(current_mapped, state)
-    required = current_merit * (1.0 - _SUFFICIENT_DECREASE_SLOPE * factors)
-    sufficient = (
-        jnp.isfinite(merits)
-        & jnp.isfinite(residuals)
-        & (merits <= required)
-        & (residuals <= current_residual)
-    )
+    required = reference_merit * (1.0 - _SUFFICIENT_DECREASE_SLOPE * factors)
+    sufficient = jnp.isfinite(merits) & jnp.isfinite(residuals) & (merits <= required)
     ladder_accepted = jnp.any(sufficient)
     ladder_selected = jnp.argmax(sufficient)
 
@@ -574,11 +593,15 @@ def _backtracked_promotion(
         def recovery_trial(_index, carry):
             selected_state, selected_residual, accepted, radius = carry
             candidate = state + radius * continuation_step
-            _candidate_merit, candidate_residual = score(candidate)
+            candidate_merit, candidate_residual = score(candidate)
+            required_merit = reference_merit * (
+                1.0 - _SUFFICIENT_DECREASE_SLOPE * radius
+            )
             select = (
                 ~accepted
+                & jnp.isfinite(candidate_merit)
                 & jnp.isfinite(candidate_residual)
-                & (candidate_residual < current_residual)
+                & (candidate_merit <= required_merit)
             )
             return (
                 jnp.where(select, candidate, selected_state),
@@ -638,11 +661,12 @@ def _rebuilt_model_promotion(
     map_fn: Callable[[jax.Array], jax.Array],
     state: jax.Array,
     current_residual: jax.Array,
+    reference_merit: jax.Array,
     *,
     gmres_iterations: int,
     maximum_step: jax.Array,
 ) -> _RebuiltModelPromotion:
-    """Re-linearize and seek a non-amplifying Levenberg-damped step."""
+    """Re-linearize and seek a window-decreasing Levenberg-damped step."""
     mapped, tangent = jax.linearize(map_fn, state)
     residual_vector = mapped - state
 
@@ -676,13 +700,16 @@ def _rebuilt_model_promotion(
             step,
         )
         candidate = state + bounded_step
-        candidate_residual = _relative_residual(map_fn(candidate), candidate)
+        candidate_mapped = map_fn(candidate)
+        candidate_merit = _smooth_relative_sup_merit(candidate_mapped, candidate)
+        candidate_residual = _relative_residual(candidate_mapped, candidate)
         select = (
             ~accepted
             & (jnp.asarray(info) == 0)
             & jnp.all(jnp.isfinite(step))
+            & jnp.isfinite(candidate_merit)
             & jnp.isfinite(candidate_residual)
-            & (candidate_residual < current_residual)
+            & (candidate_merit <= reference_merit * (1.0 - _SUFFICIENT_DECREASE_SLOPE))
         )
         return (
             jnp.where(select, candidate, selected_state),
@@ -720,13 +747,14 @@ def _steepest_descent_promotion(
     map_fn: Callable[[jax.Array], jax.Array],
     state: jax.Array,
     current_residual: jax.Array,
+    reference_merit: jax.Array,
 ) -> _SteepestDescentPromotion:
     """Seek Armijo decrease of the smooth relative-sup merit on a fixed ladder."""
 
     def merit(candidate):
         return _smooth_relative_sup_merit(map_fn(candidate), candidate)
 
-    current_merit, gradient = jax.value_and_grad(merit)(state)
+    _current_merit, gradient = jax.value_and_grad(merit)(state)
     gradient_norm = jnp.max(jnp.abs(gradient))
     finite_gradient = jnp.all(jnp.isfinite(gradient)) & jnp.isfinite(gradient_norm)
     direction = jnp.where(
@@ -746,7 +774,7 @@ def _steepest_descent_promotion(
 
     merits, residuals = jax.lax.map(score, candidates)
     directional_derivative = jnp.sum(gradient * direction)
-    required = current_merit + (
+    required = reference_merit + (
         _SUFFICIENT_DECREASE_SLOPE * scales * directional_derivative
     )
     sufficient = (
@@ -755,7 +783,6 @@ def _steepest_descent_promotion(
         & jnp.isfinite(merits)
         & jnp.isfinite(residuals)
         & (merits <= required)
-        & (residuals <= current_residual)
     )
     accepted = jnp.any(sufficient)
     selected = jnp.argmax(sufficient)
@@ -1503,13 +1530,14 @@ def newton_krylov(
     reductions, recovery activation, outcome, and radius trajectory.  Once the
     carried radius reaches its numerical floor, the recovery rebuilds the
     local linearization at the unchanged iterate and solves a fixed ladder of
-    Levenberg-damped normal models.  That fresh-model step is promoted only on
-    strict residual decrease; its activation and selected damping are retained
-    in the promotion receipts.  If both recovery models exhaust, a final fixed
-    ladder follows the negative gradient of the relative eighth-norm merit,
-    normalized to unit infinity norm.  Its Armijo test uses that same smooth
-    merit, while exact relative-sup non-amplification protects the unchanged
-    convergence criterion.  The
+    Levenberg-damped normal models.  That fresh-model step is tested against
+    the same bounded merit envelope; its activation and selected damping are
+    retained in the promotion receipts.  If both recovery models exhaust, a
+    final fixed ladder follows the negative gradient of the relative
+    eighth-norm merit, normalized to unit infinity norm.  Every promotion route
+    compares sufficient decrease with the maximum of the six most recently
+    accepted finite merits.  The exact relative-sup residual still selects the
+    best returned iterate and supplies the unchanged convergence criterion.  The
     trace retains its configured length and ``2 + gmres_iterations`` stride
     (one linearisation value, tangent slots, and one promotion read); unused
     iterations remain NaN padding.  Under ``vmap``, the batched while-loop runs
@@ -1579,13 +1607,22 @@ def newton_krylov(
             shadow_changes,
             best_state,
             best_residual,
+            recent_merits,
+            merit_observations,
         ) = carry
         mapped = mapped_with_shadow(state, previous_shadow)
         residual = _relative_residual(mapped, state)
+        merit = _smooth_relative_sup_merit(mapped, state)
         trace = trace.at[index].set(residual)
         is_best = jnp.isfinite(residual) & (residual < best_residual)
         best_state = jnp.where(is_best, state, best_state)
         best_residual = jnp.where(is_best, residual, best_residual)
+        recent_merits, merit_observations = _record_merit(
+            recent_merits,
+            merit_observations,
+            merit,
+            jnp.asarray(True),
+        )
         candidate = state + relaxation * (mapped - state)
         amplification = _observe_increment(amplification, state, candidate, True)
         current_shadow = promoted_shadow(candidate, previous_shadow)
@@ -1601,6 +1638,8 @@ def newton_krylov(
             shadow_changes,
             best_state,
             best_residual,
+            recent_merits,
+            merit_observations,
         )
 
     (
@@ -1611,6 +1650,8 @@ def newton_krylov(
         shadow_changes,
         best_state,
         best_residual,
+        recent_merits,
+        merit_observations,
     ) = jax.lax.fori_loop(
         0,
         warmup,
@@ -1623,6 +1664,8 @@ def newton_krylov(
             jnp.full(change_length, -1, dtype=jnp.int32),
             initial,
             jnp.asarray(jnp.inf, dtype=initial.dtype),
+            jnp.full(_NONMONOTONE_MERIT_WINDOW, jnp.nan, dtype=initial.dtype),
+            jnp.asarray(0, dtype=jnp.int32),
         ),
     )
 
@@ -1640,6 +1683,7 @@ def newton_krylov(
         mapped, tangent = jax.linearize(frozen_map, state)
         residual_vector = mapped - state
         nonlinear_residual = _relative_residual(mapped, state)
+        current_merit = _smooth_relative_sup_merit(mapped, state)
         base = warmup + carry.attempted * stride
         trace = carry.trace
         if newton_steps > 0:
@@ -1662,12 +1706,21 @@ def newton_krylov(
             ),
         )
         current_is_best = finite_residual & (nonlinear_residual < carry.best_residual)
+        recent_merits, merit_observations = _record_merit(
+            carry.recent_merits,
+            carry.merit_observations,
+            current_merit,
+            ~carry.current_measured,
+        )
+        reference_merit = _recent_merit_maximum(recent_merits, current_merit)
         measured = carry._replace(
             residual=nonlinear_residual,
             best_state=jnp.where(current_is_best, state, carry.best_state),
             best_residual=jnp.where(
                 current_is_best, nonlinear_residual, carry.best_residual
             ),
+            recent_merits=recent_merits,
+            merit_observations=merit_observations,
             trace=trace,
             converged=current_converged,
             termination_reason=jnp.asarray(stopped_reason, dtype=jnp.int32),
@@ -1713,6 +1766,7 @@ def newton_krylov(
                     step,
                     relaxation * residual_vector,
                     nonlinear_residual,
+                    reference_merit,
                     measured.recovery_radius,
                 )
                 minimum_radius = jnp.sqrt(jnp.finfo(state.dtype).eps)
@@ -1727,6 +1781,7 @@ def newton_krylov(
                         frozen_map,
                         state,
                         nonlinear_residual,
+                        reference_merit,
                         gmres_iterations=gmres_iterations,
                         maximum_step=cap,
                     )
@@ -1749,6 +1804,7 @@ def newton_krylov(
                         frozen_map,
                         state,
                         nonlinear_residual,
+                        reference_merit,
                     )
 
                 def skip_descent(_):
@@ -1877,6 +1933,15 @@ def newton_krylov(
                     & finite_candidate_residual
                     & (candidate_residual < measured.best_residual)
                 )
+                candidate_merit = _smooth_relative_sup_merit(
+                    frozen_map(candidate), candidate
+                )
+                recent_merits, merit_observations = _record_merit(
+                    measured.recent_merits,
+                    measured.merit_observations,
+                    candidate_merit,
+                    promotion_accepted,
+                )
                 return _NewtonIterationState(
                     candidate,
                     candidate_residual,
@@ -1886,6 +1951,8 @@ def newton_krylov(
                         candidate_residual,
                         measured.best_residual,
                     ),
+                    recent_merits,
+                    merit_observations,
                     updated_trace,
                     step_qualification,
                     amplification,
@@ -1917,6 +1984,8 @@ def newton_krylov(
                     nonlinear_residual,
                     measured.best_state,
                     measured.best_residual,
+                    measured.recent_merits,
+                    measured.merit_observations,
                     measured.trace,
                     step_qualification,
                     measured.amplification,
@@ -1969,6 +2038,8 @@ def newton_krylov(
             jnp.asarray(jnp.inf, dtype=initial.dtype),
             best_state,
             best_residual,
+            recent_merits,
+            merit_observations,
             trace,
             jnp.asarray(KrylovActionQualification.NOT_APPLICABLE, dtype=jnp.int32),
             amplification,

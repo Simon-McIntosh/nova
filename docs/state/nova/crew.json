@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T20:51:20",
+  "updated": "2026-08-27T20:55:19",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -58976,9 +58976,114 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T155514548846-sse-diiid-bank-resolve",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-diiid-bank-resolve",
+        "node_definition": {
+          "done_when": "A single SLURM CPU debug job (16 CPUs, 128 GiB, JAX_PLATFORMS=cpu, JAX_ENABLE_X64=true, at most one hour, EXIT_MARKER=0) runs python -m benchmarks.diiid_forward_gs_match --frames 5 on current origin/main with the transported wall payload reconstructed and its digests verified before compute; the receipt is strict JSON with exactly the five declared identities once each, non-finite values null, non-converged and exception frames retained as named FAIL rows; both figures render before the receipt; the manifest tables per-frame convergence and residual deltas against the previous receipt; the receipt and both PNGs are committed; the scheduler receipt appears in the manifest",
+          "estimated_hours": null,
+          "goal": "The DIII-D five-frame bank regenerated on the fully repaired solver stack, since the globalization and merit changes affect every solve and the current receipt predates them",
+          "id": "sse-diiid-bank-resolve",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T155514548846-sse-diiid-bank-resolve/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+            "docs/figures/diiid-forward-onboarding/forward-gs/frame_flux_comparison.png",
+            "docs/figures/diiid-forward-onboarding/forward-gs/cohort_match_summary.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T15:55:23Z",
+        "completed_at": "2026-08-27T18:55:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 10795,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "75372e6acfce6c6d82ad1b9ea0f1518260447b69",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "rigel/vega long-lane job 1258882 solved 5/5 frames then died with LLVM section-memory exhaustion at publication; EXIT_MARKER=134 after 02:00:41",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T155514548846-sse-diiid-bank-resolve/slurm-1258882-long.log",
+          "log_digest": null
+        },
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T155514548846-sse-diiid-bank-resolve/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e37-51e1-7ca1-aec1-49356e2c6453",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8359680,
+            "cached_input_tokens_cumulative": 14484736,
+            "input_tokens": 8423069,
+            "input_tokens_cumulative": 14694932,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 15497,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2730
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": {
+          "attempt": 5,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260827T031136511631-sse-diiid-bank-resolve",
+          "root_run_id": "r-20260826T211033978049-sse-diiid-bank-resolve"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 6,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1135
+    "_version": 1136
   }
 }

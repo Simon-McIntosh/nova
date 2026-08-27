@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T03:09:58",
+  "updated": "2026-08-27T03:23:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -53217,9 +53217,113 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T000828025764-mcg-h200-batched-solve-benchmark",
+        "plan": "mast-catalog-gpu-solve",
+        "section": "",
+        "node": "mcg-h200-batched-solve-benchmark",
+        "node_definition": {
+          "done_when": "One SLURM job on partition betelgeuse with --reservation=gpu_0003_grpA and one GPU runs benchmarks/two_branch_batch_cost.py exactly per the campaign map after a memory precheck that waits at least 60 seconds from allocation and records nvidia-smi per-GPU free memory in the log, refusing to start timing if any visible GPU reports less than 90 percent of its memory free; the tracked docs/figures/dual-branch-selection/two-branch-batch-cost.json is regenerated as strict JSON with the driver's device, host, reservation and x64 checks passing, 600 of 600 single-branch and 600 of 600 dual-branch slices, and the recorded source HEAD equal to the checked-out corrected main; the complete log ends EXIT_MARKER=0 with the full scheduler receipt in the manifest; only the receipt JSON is committed",
+          "estimated_hours": null,
+          "goal": "The H200 batched-solve benchmark regenerated on the corrected topology stack under exclusive-node timing discipline: the two-branch batch cost receipt measured on one H200 with verified-clean per-rank memory, so the tracked numbers describe corrected code on uncontended hardware",
+          "id": "mcg-h200-batched-solve-benchmark",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T000828025764-mcg-h200-batched-solve-benchmark/manifest.md",
+          "plan": "mast-catalog-gpu-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "docs/figures/dual-branch-selection/two-branch-batch-cost.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "throughput-budget",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T00:08:36Z",
+        "completed_at": "2026-08-27T01:22:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4457,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4457,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "bb8bc41ee01a1a148ea8d33e27b180c5439d84f2",
+        "commits": [
+          "b31c1ac9ad402636d3c5163bf3fe6a851dd6437c"
+        ],
+        "changed_lines": {
+          "added": 3239,
+          "removed": 3239,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "SLURM 1258440 COMPLETED 00:14:47 with all environment/occupancy/memory gates PASS; scientific gate complete_converged_solves_timed=false as measured",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T000828025764-mcg-h200-batched-solve-benchmark/final-audit-1258440.log",
+          "log_digest": null
+        },
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T000828025764-mcg-h200-batched-solve-benchmark/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03dca-50ca-7233-a120-2bf4dfb2e5e1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 1471744,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 1483476,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 4490,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 817
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 5,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1078
+    "_version": 1079
   }
 }

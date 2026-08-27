@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T14:00:29",
+  "updated": "2026-08-27T14:23:11",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -56772,9 +56772,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T120356384209-pod-continuous-anchor-h200-ladder",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-continuous-anchor-h200-ladder",
+        "node_definition": {
+          "done_when": "One SLURM job on betelgeuse with reservation gpu_0003_grpA requesting exactly one H200, 8 CPUs, 64 GiB and a one-hour walltime runs the staged observer a60efd9a byte-for-byte at its full 650 ceiling on current origin/main and ends EXIT_MARKER=0, with the scontrol reason recorded verbatim in the manifest if it pends instead; a report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/continuous-anchor-h200-ladder.md states whether the locked 1e-8 criterion was reached and at which promotion, the minimum residual beside the 8.0e4x five-strategy plateau and the 4.54e4x unguarded minimum, the terminal centered finite-difference versus JVP discrepancy beside the previous 172.9, backtrack recovery and rebuild activation counts, grid and wall flip counts, and the verdict CONVERGED, PLATEAU-BROKEN, or PLATEAU-UNCHANGED, cross-referencing the stall-characterization report it complements; no repository file modified",
+          "estimated_hours": null,
+          "goal": "The full 650-ceiling convergence ladder on the continuous declared anchor executed on the now-available H200, sized to share the node with an unrelated two-GPU allocation rather than displace it",
+          "id": "pod-continuous-anchor-h200-ladder",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T120356384209-pod-continuous-anchor-h200-ladder/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/continuous-anchor-h200-ladder.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "flood-performance",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T12:04:01Z",
+        "completed_at": "2026-08-27T12:22:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1121,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1121,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "f2a67f4d316f7271e046a9a9917aed90ad219679",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "full 650-ceiling H200 ladder with the staged observer a60efd9a unchanged; EXIT_MARKER=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T120356384209-pod-continuous-anchor-h200-ladder/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T120356384209-pod-continuous-anchor-h200-ladder/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f75-721b-73f1-bd97-eeffb0481cdc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1490944,
+            "cached_input_tokens_cumulative": 5874432,
+            "input_tokens": 1809622,
+            "input_tokens_cumulative": 6290466,
+            "output_tokens": 7990,
+            "output_tokens_cumulative": 14640,
+            "reasoning_output_tokens": 2158,
+            "reasoning_output_tokens_cumulative": 3263
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1114
+    "_version": 1115
   }
 }

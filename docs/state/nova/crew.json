@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T05:30:33",
+  "updated": "2026-08-28T05:39:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -59893,9 +59893,112 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T033051157974-pod-consistency-mechanism",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-consistency-mechanism",
+        "node_definition": {
+          "done_when": "One SLURM job (H200 sized to share or an all_debug CPU lane, at most two hours, EXIT_MARKER=0) reproduces the transferred production residual and a report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/consistency-mechanism.md decomposes that 0.2361 by component, reporting separately the contribution of grid-equation rows and of the 37 wall rows with their counts, maxima and shares of the total, computes the same decomposition for the coarse residual at the coarse solution as a control, states the grid-to-wall target ratio at both resolutions and how each family is weighted or normalised in the residual with file and line citations, and identifies whether the inconsistency is dominated by the wall family, the grid family, or a normalisation that changes with target count, naming the single leading mechanism with the evidence that distinguishes it from the alternatives or stating plainly that the decomposition does not separate them; no repository file modified",
+          "estimated_hours": null,
+          "goal": "Which element of the grid-dependent problem construction breaks consistency between resolutions, identified by decomposing the transferred residual of 0.2361 into its contributing components and testing the leading structural candidate that the wall target count stays fixed at 37 while grid targets scale with resolution",
+          "id": "pod-consistency-mechanism",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T033051157974-pod-consistency-mechanism/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/consistency-mechanism.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "connectivity-audit",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T03:31:02Z",
+        "completed_at": "2026-08-28T03:38:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 445,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 445,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "e97e6c5e6ce4dcccc93c52161a5a1f5e4172580e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "job 1259034 reproduced the transferred residual to 4.4e-16 and decomposed it by row family with a coarse control",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T033051157974-pod-consistency-mechanism/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T033051157974-pod-consistency-mechanism/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f75-0f36-7192-bb27-6710c52ac3e1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 4163328,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 4368257,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 15940,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3488
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260828T032024575929-pod-consistency-mechanism",
+          "root_run_id": "r-20260828T032024575929-pod-consistency-mechanism"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "redispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1144
+    "_version": 1145
   }
 }

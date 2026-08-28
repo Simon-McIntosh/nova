@@ -87,6 +87,23 @@ _SUFFICIENT_DECREASE_SLOPE = 1.0e-4
 FIXED_POINT_RESIDUAL_TOLERANCE = 1.0e-8
 
 
+def _print_active_set_trip(
+    active, trip_index, mask_difference, live_residual, inner_iterations
+) -> None:
+    """Print one device-reported active-set trip immediately on the host."""
+
+    if not bool(active):
+        return
+    print(
+        "active-set "
+        f"trip={int(trip_index)} "
+        f"mask_difference={int(mask_difference)} "
+        f"live_residual={float(live_residual):.17g} "
+        f"inner_iterations={int(inner_iterations)}",
+        flush=True,
+    )
+
+
 class AmplificationObservation(IntEnum):
     """Advisory shape of the increments along a qualified solve trajectory."""
 
@@ -2141,6 +2158,7 @@ def _active_set_newton_krylov(
     promoted_shadow_mask_fn: Callable[[jax.Array, jax.Array], jax.Array],
     shadowed_map_fn: Callable[[jax.Array, jax.Array], jax.Array],
     active_set_steps: int,
+    stream_active_set: bool,
     precision: Precision | str,
 ) -> FixedPointResult:
     """Reconcile bounded frozen-mask solves with their live active sets."""
@@ -2175,7 +2193,9 @@ def _active_set_newton_krylov(
         matches = jnp.all(mask_history == mask[None, :], axis=1)
         return jnp.any(populated & matches)
 
-    def reconcile(index, state, mask, mask_history, history_count, inner_result):
+    def reconcile(
+        index, state, mask, mask_history, history_count, inner_result, trip_active
+    ):
         solved_state = inner_result.state
         observed_mask = jnp.ravel(promoted_shadow_mask_fn(solved_state, mask))
         observed_difference = jnp.sum(observed_mask != mask, dtype=jnp.int32)
@@ -2206,6 +2226,16 @@ def _active_set_newton_krylov(
         selected_residual = jnp.where(repeated, damped_residual, observed_residual)
         selected_finite = jnp.where(repeated, damped_finite, observed_finite)
         selected_difference = jnp.sum(selected_mask != mask, dtype=jnp.int32)
+        if stream_active_set:
+            jax.debug.callback(
+                _print_active_set_trip,
+                trip_active,
+                jnp.asarray(index, dtype=jnp.int32),
+                selected_difference,
+                selected_residual,
+                jnp.asarray(inner_result.attempted_newton_promotions, dtype=jnp.int32),
+                ordered=True,
+            )
         can_continue = selected_finite & ~converged & ~cycle_detected
         record_mask = can_continue & (history_count < mask_history.shape[0])
         mask_history = mask_history.at[history_count].set(
@@ -2247,6 +2277,7 @@ def _active_set_newton_krylov(
         history,
         jnp.asarray(1, dtype=jnp.int32),
         first_result,
+        jnp.asarray(True),
     )
     outer = _ActiveSetIterationState(
         state=first_state,
@@ -2299,6 +2330,7 @@ def _active_set_newton_krylov(
                 carry.mask_history,
                 carry.mask_history_count,
                 inner_result,
+                carry.active,
             )
             return _ActiveSetIterationState(
                 state=state,
@@ -2380,6 +2412,7 @@ def newton_krylov(
     promoted_shadow_mask_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
     shadowed_map_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
     active_set_steps: int = _ACTIVE_SET_ITERATION_LIMIT,
+    stream_active_set: bool = False,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Run globalized Newton and reconcile state-dependent active sets.
@@ -2391,6 +2424,8 @@ def newton_krylov(
     requires both the registered residual tolerance and zero changed mask
     cells.  A repeated mask receives one midpoint-damped transition; another
     previously seen mask terminates with a named cycle result.
+    ``stream_active_set`` emits one flushed host line for every executed outer
+    trip; it is disabled by default and does not alter any solver carry.
     """
     if active_set_steps <= 0:
         raise ValueError("active_set_steps must be positive")
@@ -2433,6 +2468,7 @@ def newton_krylov(
         promoted_shadow_mask_fn=promoted_shadow_mask_fn,
         shadowed_map_fn=shadowed_map_fn,
         active_set_steps=active_set_steps,
+        stream_active_set=stream_active_set,
         precision=precision,
     )
 

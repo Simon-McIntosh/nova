@@ -55,9 +55,53 @@ OUTPUT_JSON = HERE / "efit-topology-corroboration.json"
 CACHE_PATH = HERE / ".efit-topology-corroboration-cache.npz"
 REACHABILITY_SCRIPT = HERE / "real_equilibria_reachability.py"
 SELECTION_COMMIT = "80706f89"
-CACHE_SCHEMA_REVISION = 3
+CACHE_SCHEMA_REVISION = 4
 RESAMPLE_POINTS = 2000
 CURVE_SAMPLES_PER_SEGMENT = 9
+
+
+class _ObservedProfile:
+    """Forward a profile while retaining the portfolio returned by its solve."""
+
+    def __init__(self, profile) -> None:
+        self._profile = profile
+        self.portfolio = None
+
+    def __getattr__(self, name: str):
+        return getattr(self._profile, name)
+
+    def solve_portfolio(self, *args, **kwargs):
+        kwargs["stream_active_set"] = True
+        self.portfolio = self._profile.solve_portfolio(*args, **kwargs)
+        return self.portfolio
+
+
+def _active_set_receipt(result: object | None) -> dict[str, Any]:
+    """Serialize executed active-set trips as strict finite-or-null leaves."""
+
+    if result is None:
+        return {
+            "active_set_iterations": 0,
+            "active_set_residuals": [],
+            "active_set_mask_differences": [],
+            "active_set_cycle_damping_activations": [],
+        }
+    iterations = int(np.asarray(getattr(result, "active_set_iterations")))
+    residuals = np.asarray(
+        getattr(result, "active_set_residuals"), dtype=float
+    ).reshape(-1)[:iterations]
+    mask_differences = np.asarray(
+        getattr(result, "active_set_mask_differences"), dtype=int
+    ).reshape(-1)[:iterations]
+    damping_activations = np.asarray(
+        getattr(result, "active_set_cycle_damping_activations"), dtype=int
+    ).reshape(-1)[:iterations]
+    return {
+        "active_set_iterations": iterations,
+        "active_set_residuals": [_strict_value(value) for value in residuals],
+        "active_set_mask_differences": mask_differences.tolist(),
+        "active_set_cycle_damping_activations": damping_activations.tolist(),
+    }
 
 
 def _reachability_module():
@@ -318,6 +362,7 @@ def _write_operand_cache(
             )
         }
         metadata_row["failure_exception_class"] = row.get("failure_exception_class")
+        metadata_row["active_set_iterations"] = int(row.get("active_set_iterations", 0))
         metadata_rows.append(metadata_row)
         for name in (
             "radius",
@@ -331,8 +376,13 @@ def _write_operand_cache(
             "class_margin",
             "efit_lcfs",
             "efit_x_points",
+            "active_set_residuals",
+            "active_set_mask_differences",
+            "active_set_cycle_damping_activations",
         ):
-            arrays[f"{prefix}_{name}"] = np.asarray(row[name])
+            arrays[f"{prefix}_{name}"] = np.asarray(
+                row.get(name, ()) if name.startswith("active_set_") else row[name]
+            )
     metadata = _cache_authority(carrier_evidence) | {
         "purpose": (
             "unbanked exact solve operands for reproducible plot-only regeneration"
@@ -381,6 +431,9 @@ def _read_operand_cache(
                 "class_margin",
                 "efit_lcfs",
                 "efit_x_points",
+                "active_set_residuals",
+                "active_set_mask_differences",
+                "active_set_cycle_damping_activations",
             ):
                 row[name] = np.array(stored[f"{prefix}_{name}"], copy=True)
             rows.append(row)
@@ -440,9 +493,20 @@ def _build_identity_operands(
     if policy["section_kernel_evaluations_this_shot"] != 0:
         raise RuntimeError("MAST reconstruction entered a direct response builder")
     target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
+    observed_profile = _ObservedProfile(profile)
     states = reachability._mast_states(
-        profile, jnp.asarray(passive_case["state"]), target_current
+        observed_profile, jnp.asarray(passive_case["state"]), target_current
     )
+    if observed_profile.portfolio is None:
+        raise RuntimeError("the MAST solve returned no observable branch portfolio")
+    pure_branch = jax.tree.map(
+        lambda value: value[int(reachability.TopologyClass.DIVERTED)],
+        observed_profile.portfolio.branches,
+    )
+    active_set_results = {
+        "pure": pure_branch.equilibrium.fixed_point,
+        "mixed": None,
+    }
     referee = read_efit_referee(shot, store=SHOT_STORE)
     referee_usable = bool(referee.usable[slice_index])
     efit_lcfs = np.asarray(referee.lcfs_m[slice_index], dtype=float)
@@ -467,6 +531,7 @@ def _build_identity_operands(
             efit_label=efit_label,
             efit_lcfs=efit_lcfs,
             efit_x_points=efit_x_points,
+            active_set_result=active_set_results[arm],
         )
         for arm, arm_result in states.items()
     ]
@@ -485,6 +550,7 @@ def _build_arm_operand(
     efit_label: str | None,
     efit_lcfs: np.ndarray,
     efit_x_points: np.ndarray,
+    active_set_result: object | None = None,
 ) -> dict[str, Any]:
     """Build one arm operand or retain its named host-side qualification failure."""
 
@@ -499,7 +565,7 @@ def _build_arm_operand(
         "efit_label": efit_label,
         "efit_lcfs": efit_lcfs,
         "efit_x_points": efit_x_points,
-    }
+    } | _active_set_receipt(active_set_result)
     try:
         geometry = reachability._grid_geometry(profile, state)
         _masks, topology = profile.operator.read(state)
@@ -675,11 +741,38 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
         and terminal_residual <= tolerance
         and termination_reason == "converged"
     )
+    active_set_iterations = int(operand.get("active_set_iterations", 0))
+    active_set_residuals = np.asarray(
+        operand.get("active_set_residuals", ()), dtype=float
+    ).reshape(-1)
+    active_set_mask_differences = np.asarray(
+        operand.get("active_set_mask_differences", ()), dtype=int
+    ).reshape(-1)
+    active_set_cycle_damping = np.asarray(
+        operand.get("active_set_cycle_damping_activations", ()), dtype=int
+    ).reshape(-1)
+    if any(
+        values.size != active_set_iterations
+        for values in (
+            active_set_residuals,
+            active_set_mask_differences,
+            active_set_cycle_damping,
+        )
+    ):
+        raise RuntimeError("active-set receipt arrays do not match the trip count")
+    active_set = {
+        "active_set_iterations": active_set_iterations,
+        "active_set_residuals": [
+            _strict_value(value) for value in active_set_residuals
+        ],
+        "active_set_mask_differences": active_set_mask_differences.tolist(),
+        "active_set_cycle_damping_activations": active_set_cycle_damping.tolist(),
+    }
     failure_exception_class = operand.get("failure_exception_class")
     if failure_exception_class is not None:
         if not isinstance(failure_exception_class, str) or not failure_exception_class:
             raise RuntimeError("a retained arm failure lacks an exception class")
-        return {
+        return active_set | {
             "identity": operand.get("identity"),
             "shot": operand.get("shot"),
             "slice_index": operand.get("slice_index"),
@@ -760,7 +853,7 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
         if comparison.reference_mode is not None
         else operand.get("efit_label")
     )
-    return {
+    return active_set | {
         "identity": operand.get("identity"),
         "shot": operand.get("shot"),
         "slice_index": operand.get("slice_index"),

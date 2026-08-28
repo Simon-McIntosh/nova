@@ -252,6 +252,10 @@ class FrameResult:
     residual_history: tuple[float, ...]
     metrics: MatchMetrics
     iterations: int = 0
+    active_set_iterations: int = 0
+    active_set_residuals: tuple[float | None, ...] = ()
+    active_set_mask_differences: tuple[int, ...] = ()
+    active_set_cycle_damping_activations: tuple[int, ...] = ()
     target_current_a: float = float("nan")
     achieved_current_a: float = float("nan")
     seed_identity_detected: bool = False
@@ -1204,6 +1208,7 @@ def _solve_registered(
         "warmup": REGISTERED_ACCELERATED_WARMUP,
         "relaxation": REGISTERED_ACCELERATED_RELAXATION,
         "step_cap": REGISTERED_ACCELERATED_STEP_CAP,
+        "stream_active_set": True,
     }
     count = int(row["efit_lcfs_n"][frame])
     contour = np.c_[
@@ -1455,6 +1460,7 @@ def solve_frame(
         solver_termination=solver_termination,
         residual_history=residual_history,
         iterations=iterations,
+        **_active_set_receipt(equilibrium.fixed_point),
         target_current_a=target_current_a,
         achieved_current_a=achieved_current_a,
         seed_identity_detected=seed_identity,
@@ -1667,6 +1673,31 @@ def _strict_json_value(value: Any) -> Any:
     return value
 
 
+def _active_set_receipt(result: object) -> dict[str, Any]:
+    """Serialize executed active-set trips as strict finite-or-null leaves."""
+
+    iterations = int(np.asarray(getattr(result, "active_set_iterations")))
+    residuals = np.asarray(
+        getattr(result, "active_set_residuals"), dtype=float
+    ).reshape(-1)[:iterations]
+    mask_differences = np.asarray(
+        getattr(result, "active_set_mask_differences"), dtype=int
+    ).reshape(-1)[:iterations]
+    damping_activations = np.asarray(
+        getattr(result, "active_set_cycle_damping_activations"), dtype=int
+    ).reshape(-1)[:iterations]
+    return {
+        "active_set_iterations": iterations,
+        "active_set_residuals": tuple(
+            float(value) if np.isfinite(value) else None for value in residuals
+        ),
+        "active_set_mask_differences": tuple(int(value) for value in mask_differences),
+        "active_set_cycle_damping_activations": tuple(
+            int(value) for value in damping_activations
+        ),
+    }
+
+
 def _publication_artifact_records(output: Path) -> dict[str, dict[str, str]]:
     """Separate rendered destinations from stable project publication identities."""
 
@@ -1716,6 +1747,12 @@ def summarize(
             ),
             "fixed_point_relative_residual": item.fixed_point_relative_residual,
             "converged": item.converged,
+            "active_set_iterations": item.active_set_iterations,
+            "active_set_residuals": item.active_set_residuals,
+            "active_set_mask_differences": item.active_set_mask_differences,
+            "active_set_cycle_damping_activations": (
+                item.active_set_cycle_damping_activations
+            ),
         }
         for item in sensitivity
     ]
@@ -1757,6 +1794,12 @@ def summarize(
                 "frame": item.frame,
                 "interior_r_squared": item.metrics.interior_r_squared,
                 "iterations": item.iterations,
+                "active_set_iterations": item.active_set_iterations,
+                "active_set_residuals": item.active_set_residuals,
+                "active_set_mask_differences": item.active_set_mask_differences,
+                "active_set_cycle_damping_activations": (
+                    item.active_set_cycle_damping_activations
+                ),
                 "achieved_topology_class": item.achieved_topology_class,
                 "topology_class_agreement": item.metrics.topology_class_agreement,
                 "boundary_comparison_failures": list(

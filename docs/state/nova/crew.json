@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T12:40:24",
+  "updated": "2026-08-28T12:52:40",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -61404,9 +61404,99 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T104111096023-sse-diiid-frame-checkpointing",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-diiid-frame-checkpointing",
+        "node_definition": {
+          "done_when": "A wall-clock truncation of the DIII-D bank degrades the measurement instead of erasing it. Today a four-hour job was cancelled having produced only its preregistration file, losing every frame it had solved, because the receipt is written once after the whole cohort returns. (1) benchmarks/diiid_forward_gs_match.py writes a partial receipt to the output directory after each frame completes, flushed to disk before the next frame starts, so a job killed mid-cohort leaves every completed frame readable. The partial file must be strict JSON at every instant a reader could open it: write to a temporary path in the same directory and atomically rename over the target, never leaving a half-written file at the published name. (2) The partial receipt carries the same per-frame row schema as the final one, including the per-frame active-set telemetry arrays, and states explicitly how many of the declared frames it contains, so a partial can never be mistaken for a complete cohort. Declared denominators are not shrunk: rows not yet attempted are absent rather than fabricated as nulls, and the count of attempted frames is recorded. (3) The final published receipt is unchanged in content and schema from what the driver produces today for a cohort that runs to completion, and a focused test proves this by comparing a complete run's final receipt against the pre-change schema for the same fixture. (4) A focused test proves the partial-write path itself: after the first frame of a multi-frame fixture, the partial file exists, parses as strict JSON, contains exactly one row, and reports its attempted count honestly. (5) The focused lane covering the touched module is green with the delta stated against the base revision rather than an absolute count. Do not submit any scheduler job, do not regenerate any bank, and do not modify any committed JSON or PNG artifact.",
+          "estimated_hours": null,
+          "goal": "Per-frame atomic partial receipts from the DIII-D driver, so a truncated cohort leaves every completed frame readable",
+          "id": "sse-diiid-frame-checkpointing",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T104111096023-sse-diiid-frame-checkpointing/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/diiid_forward_gs_match.py",
+            "tests/test_diiid_frame_checkpointing.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T10:41:21Z",
+        "completed_at": "2026-08-28T10:52:37Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 676,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 676,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "00c0ef286b6ec597dc0c8d6f93c8af24d1cd5287",
+        "commits": [
+          "71520d7973c1093a7ccc8b98c13c4f2518d9cf4d"
+        ],
+        "changed_lines": {
+          "added": 297,
+          "removed": 7,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused lane 7/7 at base then 9/9 final (+2, zero regression) in 35.86s; path-scoped ruff zero findings",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T104111096023-sse-diiid-frame-checkpointing/focused-pytest-final.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T104111096023-sse-diiid-frame-checkpointing/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e37-51e1-7ca1-aec1-49356e2c6453",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1159
+    "_version": 1160
   }
 }

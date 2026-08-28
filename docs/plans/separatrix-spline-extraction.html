@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-28">
-<meta name="plan-version" content="69">
+<meta name="plan-version" content="70">
 </head>
 <body>
   <main class="plan-doc">
@@ -310,6 +310,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260828T102310635464-sse-wall-height-eligibility-guard" data-who="xpoint-map" data-when="2026-08-28T10:39:58Z">
     <div class="r-comment-body"><p>Eligibility guard on two wall-span-relative fractions (0.01 same-side height separation, 0.25 minimum separatrix radius), so no device-specific metre threshold is baked in. Both wrong geometries now equal pure topology cell-for-cell: snowflake 39/45 to 45/45, coil null 81/96 to 96/96, and the alternate-primary case 13/96 to 96/96, dropping its churn from 68 bits to 0. Wrong removals of 6 and 15 cells fall to 0. Connected double null, limited and single null are unchanged at 70, 0 and 37 cells. An invariant test asserts no evaluated mask contains a cell outside pure topology</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260828T104111096023-sse-diiid-frame-checkpointing" data-who="diiid-forward-gs" data-when="2026-08-28T10:52:37Z">
+    <div class="r-comment-body"><p>The DIII-D driver now publishes forward_gs_partial_receipt.json after every completed frame: non-finite leaves normalized to null, strict JSON with allow_nan false written to a unique temporary path, flushed and fsynced, atomically renamed with os.replace, then the directory fsynced, so no reader can observe a half-written file. Each checkpoint carries receipt_kind=partial_frame_checkpoint, complete=false, the declared count of 5, the honest attempted and unattempted counts, no fabricated rows, and per-frame active-set telemetry from the same dataclass as the final receipt</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

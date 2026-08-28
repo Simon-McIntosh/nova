@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-28">
-<meta name="plan-version" content="67">
+<meta name="plan-version" content="68">
 </head>
 <body>
   <main class="plan-doc">
@@ -304,6 +304,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260828T095929917293-sse-wall-height-mask-safety" data-who="xpoint-map" data-when="2026-08-28T10:20:29Z">
     <div class="r-comment-body"><p>Wall-height exclusion measured over a 96-node wall against the pure topological shadow. It is strictly subtractive (the conjunction with private_wall_node_mask means it can only remove shadow cells, never add them), so it cannot flood shadow inside the separatrix. Two of five geometries are physically wrong: a snowflake with near-equal null heights under-shadows by 6 cells, and a far coil-null primary by 15, with an alternate-primary identity flipping 68 of 96 wall bits. Connected double null, limited, and single null all match pure topology exactly with zero churn. Recommendation: retain behind an unambiguous plasma-separatrix guard falling back to pure topology on same-side height ambiguity or far-radius coil-null eligibility</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260828T102123170213-sse-active-set-trip-measurement" data-who="domain-partition" data-when="2026-08-28T10:31:26Z">
+    <div class="r-comment-body"><p>Production MAST 22086/43 settles the active set in 12 of 16 trips at residual 6.08e-12, but non-monotonically: mask differences run 38,23,0,1,22,0,0,0,0,0,0,0, so the first zero at trip 2 is false and the mask still moves 22 cells at trip 4. Trips 0-1 cost 17.01 s each against 1.08 s for trips 2-11, later trips being 15.7x cheaper with compilation and warm-starting not separated. Cold-unit five-frame DIII-D scaling is 5 x 12 x 1455.959 s = 24.27 h, which is why a four-hour wall could never have held it</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

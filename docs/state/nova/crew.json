@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T12:22:24",
+  "updated": "2026-08-28T12:32:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -61201,9 +61201,109 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T102123170213-sse-active-set-trip-measurement",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-active-set-trip-measurement",
+        "node_definition": {
+          "done_when": "The per-trip active-set trajectory is measured at production resolution and reported as numbers. (1) Run the corroboration driver on exactly one MAST arm with the telemetry opt-in enabled, as a SLURM job on a non-debug lane. Do not self-cap the walltime below the work: vega has no partition limit, and a previous DIII-D attempt lost four hours of compute by requesting exactly four hours. Capture the complete log to the durable run directory, not the worktree. (2) Report the full per-trip trajectory: for every executed outer trip, the trip index, the mask difference against the previous trip, the live residual, the inner iteration count, and the wall-clock time that trip consumed. (3) State whether the mask difference reaches zero, and at which trip. If it reaches zero, give the trip index and the total trips consumed against the limit of 16. If it does not reach zero, give the observed sequence of mask differences and say whether it oscillates between repeating values or drifts. (4) Compute and state the implied wall-clock cost of a five-frame DIII-D bank, using the measured trips-to-settle and the recorded pre-active-set single-frame DIII-D solve time of 1455.959 s; state the arithmetic explicitly so it can be checked. (5) State the mean and maximum per-trip wall time, and whether later trips are cheaper than earlier ones through warm starting, since that changes the implied cost. Do not regenerate any bank, do not modify any committed JSON or PNG artifact, and make no claim about convergence quality beyond the residuals the run itself printed.",
+          "estimated_hours": null,
+          "goal": "The measured per-trip active-set trajectory for one production MAST arm, with the implied five-frame DIII-D cost derived from it",
+          "id": "sse-active-set-trip-measurement",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T102123170213-sse-active-set-trip-measurement/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/research/active-set-trip-trajectory.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T10:21:33Z",
+        "completed_at": "2026-08-28T10:31:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 593,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 593,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "9226a26e81fa3a31b0fad83030a6c352d8e8444b",
+        "commits": [
+          "34cdcd291744c6faa01616e27eab58bae21b0f50"
+        ],
+        "changed_lines": {
+          "added": 219,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "SLURM job 1259127 on uncapped vega COMPLETED 0:0 in 00:01:49, EXIT_MARKER=0; 12/12 callback rows cross-checked; reckon audit-doc passed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T102123170213-sse-active-set-trip-measurement/mast-arm-1259127.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T102123170213-sse-active-set-trip-measurement/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 3813120,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3994406,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 20818,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 5121
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1157
+    "_version": 1158
   }
 }

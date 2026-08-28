@@ -211,6 +211,15 @@ _WALL_REACHABILITY_SAMPLES = 420
 # exact grid points used by the cold sweep.
 _WARM_BRACKET_OFFSETS = (-2, -1, 0, 1, 2, 3)
 
+# Saddles separated by less than one percent of the vessel's poloidal span do
+# not define a stable vertical ordering, so neither may select a wall cut.
+_SAME_SIDE_HEIGHT_AMBIGUITY_WALL_SPAN_FRACTION = 0.01
+
+# A plasma-separatrix saddle must be radially clear of the symmetry-axis coil
+# region by at least one quarter of the vessel's poloidal span.  Scaling by the
+# vessel carries the eligibility test across machine sizes and aspect ratios.
+_MINIMUM_SEPARATRIX_RADIUS_WALL_SPAN_FRACTION = 0.25
+
 __all__ = [
     "ConnectivityBoundary",
     "wall_height_shadow_mask",
@@ -245,9 +254,11 @@ def wall_height_shadow_mask(
 
     The primary saddle must occur in ``qualified_x_points``.  At most one
     additional qualified saddle on the opposite side of the axis contributes
-    the other height limit.  A missing side retains its promoted wall bits,
-    while a finite side changes a bit only after crossing the declared height
-    band.  Connectivity-proven common wall nodes always participate.
+    the other height limit.  A side whose reference is vertically ambiguous or
+    lies in the symmetry-axis coil region uses the connectivity-private mask
+    directly.  A missing side retains its promoted wall bits, while an eligible
+    finite side changes a bit only after crossing the declared height band.
+    Connectivity-proven common wall nodes always participate.
     """
     wall_height = jnp.asarray(wall_height)
     primary_x_point = jnp.asarray(primary_x_point)
@@ -255,6 +266,11 @@ def wall_height_shadow_mask(
     private_wall = jnp.asarray(private_wall, dtype=bool)
     previous_shadow = jnp.asarray(previous_shadow, dtype=bool)
     band = jnp.asarray(hysteresis_height, dtype=wall_height.dtype)
+    wall_span = jnp.max(wall_height) - jnp.min(wall_height)
+    ambiguity_height = _SAME_SIDE_HEIGHT_AMBIGUITY_WALL_SPAN_FRACTION * wall_span
+    minimum_separatrix_radius = (
+        _MINIMUM_SEPARATRIX_RADIUS_WALL_SPAN_FRACTION * wall_span
+    )
 
     finite = jnp.all(jnp.isfinite(qualified_x_points[:, :2]), axis=1)
     primary_finite = jnp.all(jnp.isfinite(primary_x_point[:2]))
@@ -278,17 +294,40 @@ def wall_height_shadow_mask(
     )
     lower_values = jnp.where(opposite_lower, qualified_x_points[:, 1], -jnp.inf)
     upper_values = jnp.where(opposite_upper, qualified_x_points[:, 1], jnp.inf)
-    lower = jnp.where(primary_lower, primary_height, jnp.max(lower_values))
-    upper = jnp.where(primary_upper, primary_height, jnp.min(upper_values))
+    lower_opposite_index = jnp.argmax(lower_values)
+    upper_opposite_index = jnp.argmin(upper_values)
+    lower_index = jnp.where(primary_lower, primary_index, lower_opposite_index)
+    upper_index = jnp.where(primary_upper, primary_index, upper_opposite_index)
+    lower = qualified_x_points[lower_index, 1]
+    upper = qualified_x_points[upper_index, 1]
     lower_valid = primary_lower | jnp.any(opposite_lower)
     upper_valid = primary_upper | jnp.any(opposite_upper)
+
+    lower_side = finite & (qualified_x_points[:, 1] < axis_height - band)
+    upper_side = finite & (qualified_x_points[:, 1] > axis_height + band)
+    lower_near_reference = jnp.abs(qualified_x_points[:, 1] - lower) <= ambiguity_height
+    upper_near_reference = jnp.abs(qualified_x_points[:, 1] - upper) <= ambiguity_height
+    lower_ambiguous = jnp.sum(lower_side & lower_near_reference) > 1
+    upper_ambiguous = jnp.sum(upper_side & upper_near_reference) > 1
+    lower_radially_eligible = (
+        qualified_x_points[lower_index, 0] >= minimum_separatrix_radius
+    )
+    upper_radially_eligible = (
+        qualified_x_points[upper_index, 0] >= minimum_separatrix_radius
+    )
+    lower_eligible = lower_valid & ~lower_ambiguous & lower_radially_eligible
+    upper_eligible = upper_valid & ~upper_ambiguous & upper_radially_eligible
+    lower_fallback = lower_valid & ~lower_eligible & (wall_height < axis_height)
+    upper_fallback = upper_valid & ~upper_eligible & (wall_height > axis_height)
 
     lower_enter = wall_height < lower - band
     lower_stay = previous_shadow & (wall_height < lower + band)
     upper_enter = wall_height > upper + band
     upper_stay = previous_shadow & (wall_height > upper - band)
-    proposed = jnp.where(lower_valid, lower_enter | lower_stay, previous_shadow)
-    proposed = jnp.where(upper_valid, proposed | upper_enter | upper_stay, proposed)
+    proposed = jnp.where(lower_eligible, lower_enter | lower_stay, previous_shadow)
+    proposed = jnp.where(lower_fallback, True, proposed)
+    proposed = jnp.where(upper_eligible, proposed | upper_enter | upper_stay, proposed)
+    proposed = jnp.where(upper_fallback, True, proposed)
     return proposed & private_wall
 
 

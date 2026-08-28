@@ -444,6 +444,19 @@ def _finite_points(value: Any) -> np.ndarray:
     return points[np.all(np.isfinite(points), axis=1)]
 
 
+def _closed_separatrix_points(value: Any) -> np.ndarray:
+    array = np.asarray(value, dtype=float)
+    if array.size == 0:
+        return np.empty((0, 2), dtype=float)
+    try:
+        points = array.reshape((-1, 2))
+    except ValueError as error:
+        raise ValueError("closed separatrix is not an N-by-2 array") from error
+    if len(points) < 3 or not np.all(np.isfinite(points)):
+        raise ValueError("closed separatrix is not a finite closed N-by-2 array")
+    return points
+
+
 def _panel_filename(row: dict[str, Any], index: int, suffix: str) -> str:
     identity = row["identity"].replace("/", "-").replace(":", "-").replace(" ", "-")
     machine = row["machine"].lower().replace("-", "")
@@ -653,47 +666,158 @@ def _draw_row(row: dict[str, Any], path: Path) -> dict[str, Any]:
     }
 
 
+def _draw_retained_failure(
+    row: dict[str, Any],
+    path: Path,
+    failure_class: str,
+    failure_message: str,
+    total_shadow_cells: int,
+) -> dict[str, Any]:
+    figure, axis = plt.subplots(figsize=(7.4, 7.2), constrained_layout=True)
+    axis.set_facecolor("#fff1f1")
+    for spine in axis.spines.values():
+        spine.set_color("#b00020")
+        spine.set_linewidth(1.8)
+    axis.text(
+        0.5,
+        0.55,
+        failure_class,
+        transform=axis.transAxes,
+        ha="center",
+        va="center",
+        fontsize=20,
+        color="#b00020",
+        weight="bold",
+    )
+    axis.text(
+        0.5,
+        0.43,
+        textwrap.fill(failure_message, width=64),
+        transform=axis.transAxes,
+        ha="center",
+        va="center",
+        fontsize=9,
+        color="#5f0011",
+    )
+    axis.set_title(
+        f"{row['machine']} · {row['identity']} · RETAINED FAILURE",
+        fontsize=10,
+    )
+    axis.set_xticks([])
+    axis.set_yticks([])
+    axis.set_xlabel("Panel rendering failed; cohort position retained")
+    figure.savefig(path, dpi=180, bbox_inches="tight")
+    plt.close(figure)
+    return {
+        "private_flux_cells": total_shadow_cells,
+        "o_candidates": 0,
+        "x_candidates": 0,
+        "selected_o": 0,
+        "selected_x": 0,
+        "wall_point": 0,
+        "efit_axis": 0,
+        "efit_x": 0,
+        "efit_lcfs_vertices": 0,
+    }
+
+
 def _publish_row(row: dict[str, Any], index: int) -> dict[str, Any]:
     png_path = HERE / _panel_filename(row, index, "png")
     temporary_png = png_path.with_name(f".{png_path.stem}.tmp.png")
-    plot_record = _draw_row(row, temporary_png)
-    os.replace(temporary_png, png_path)
-
     cells = _finite_points(row["cell_rz"])
     labels = np.asarray(row["domain_labels"], dtype=int).reshape(-1)
-    boundary = _finite_points(row["nova_boundary"])
+    if len(cells) != len(labels):
+        raise RuntimeError(f"cell/label mismatch for {row['identity']}")
     shadow = labels == int(PlasmaDomain.PRIVATE_FLUX)
-    inside = (
-        MplPath(boundary, closed=True).contains_points(cells, radius=-1.0e-10)
-        if len(boundary) and len(cells)
-        else np.zeros(len(cells), dtype=bool)
+    total_shadow_cells = int(np.count_nonzero(shadow))
+    source_qualification = str(row["qualification"])
+    retained_failure_class = row.get("panel_failure_exception_class")
+    retained_failure_message = row.get("panel_failure_message")
+    try:
+        boundary = _closed_separatrix_points(row["nova_boundary"])
+    except ValueError as error:
+        retained_failure_class = type(error).__name__
+        retained_failure_message = str(error)
+        boundary = np.empty((0, 2), dtype=float)
+        row["nova_boundary"] = boundary
+        row["converged"] = False
+        row["qualification"] = retained_failure_class
+        row["panel_failure_exception_class"] = retained_failure_class
+        row["panel_failure_message"] = retained_failure_message
+    boundary_available = bool(len(boundary))
+    inside_count = (
+        int(
+            np.count_nonzero(
+                shadow
+                & MplPath(boundary, closed=True).contains_points(cells, radius=-1.0e-10)
+            )
+        )
+        if boundary_available
+        else None
     )
-    selected_x = _finite_points(row["selected_x"])
-    selected_o = _finite_points(row["selected_o"])
-    wall_point = _finite_points(row["wall_point"])
-    x_candidates = _finite_points(row["x_candidates"])
+
+    render_row = {**row, "nova_boundary": boundary}
+    if retained_failure_class is not None:
+        render_row["converged"] = False
+        render_row["qualification"] = retained_failure_class
+    render_failed = False
+    try:
+        plot_record = _draw_row(render_row, temporary_png)
+    except Exception as error:
+        plt.close("all")
+        render_failed = True
+        if retained_failure_class is None:
+            retained_failure_class = type(error).__name__
+            retained_failure_message = str(error)
+        row["converged"] = False
+        row["qualification"] = retained_failure_class
+        row["panel_failure_exception_class"] = retained_failure_class
+        row["panel_failure_message"] = retained_failure_message
+        plot_record = _draw_retained_failure(
+            row,
+            temporary_png,
+            retained_failure_class,
+            retained_failure_message,
+            total_shadow_cells,
+        )
+    os.replace(temporary_png, png_path)
+
+    if render_failed:
+        selected_x = np.empty((0, 2), dtype=float)
+        selected_o = np.empty((0, 2), dtype=float)
+        wall_point = np.empty((0, 2), dtype=float)
+        x_candidates = np.empty((0, 2), dtype=float)
+    else:
+        selected_x = _finite_points(row["selected_x"])
+        selected_o = _finite_points(row["selected_o"])
+        wall_point = _finite_points(row["wall_point"])
+        x_candidates = _finite_points(row["x_candidates"])
     selected_is_candidate = bool(
         len(selected_x)
         and len(x_candidates)
         and np.any(np.linalg.norm(x_candidates - selected_x[0], axis=1) <= 1.0e-8)
     )
-    inside_count = int(np.count_nonzero(shadow & inside))
     panel_record = {
         "panel_index": index,
         "machine": row["machine"],
         "identity": row["identity"],
-        "converged": bool(row["converged"]),
-        "qualification": str(row["qualification"]),
-        "closed_separatrix_available": bool(len(boundary)),
+        "converged": bool(row["converged"]) and retained_failure_class is None,
+        "qualification": retained_failure_class or str(row["qualification"]),
+        "source_qualification": source_qualification,
+        "retained_failure_exception_class": retained_failure_class,
+        "retained_failure_message": retained_failure_message,
+        "closed_separatrix_available": boundary_available,
         "shadow_cells_inside_lcfs": inside_count,
         "shadow_cells_inside_closed_separatrix": inside_count,
-        "total_shadow_cells": int(np.count_nonzero(shadow)),
+        "total_shadow_cells": total_shadow_cells,
         "selected_primary_x_point_rz_m": _point_or_none(selected_x),
         "selected_primary_o_point_rz_m": _point_or_none(selected_o),
         "other_qualified_x_point_count": len(x_candidates) - int(selected_is_candidate),
         "closest_plasma_wall_point_rz_m": _point_or_none(wall_point),
-        "converged_inside_lcfs_gate_pass": bool(
-            not row["converged"] or inside_count == 0
+        "converged_inside_lcfs_gate_pass": (
+            None
+            if retained_failure_class is not None or inside_count is None
+            else bool(not row["converged"] or inside_count == 0)
         ),
         "png_path": str(png_path.resolve()),
     }
@@ -702,7 +826,8 @@ def _publish_row(row: dict[str, Any], index: int) -> dict[str, Any]:
     _atomic_json(json_path, panel_record)
     print(
         f"PANEL_PUBLISHED {index:02d} {row['machine']} {row['identity']} "
-        f"shadow_inside_lcfs={inside_count} total_shadow={panel_record['total_shadow_cells']}",
+        f"shadow_inside_lcfs={inside_count} total_shadow={total_shadow_cells} "
+        f"retained_failure={retained_failure_class}",
         flush=True,
     )
     return {**plot_record, **panel_record}
@@ -712,18 +837,28 @@ def _write_evidence(rows: list[dict[str, Any]], records: list[dict[str, Any]]) -
     figure_rows = []
     for index, (row, record) in enumerate(zip(rows, records, strict=True), start=1):
         filename = f"{index:02d}-{row['machine'].lower().replace('-', '')}-{row['identity'].replace('/', '-').replace(':', '-').replace(' ', '-')}.png"
-        unavailable = len(row["cell_rz"]) == 0
+        unavailable = not record["closed_separatrix_available"]
+        retained_failure = record["retained_failure_exception_class"]
         status = (
-            "Converged."
-            if row["converged"]
+            f"RETAINED FAILURE — {escape(retained_failure)}."
+            + (
+                " Closed separatrix and containment counts are unavailable."
+                if unavailable
+                else " Closed-separatrix containment counts remain available."
+            )
+            if retained_failure is not None
             else (
-                f"NONCONVERGED — retained failure: "
-                f"{escape(str(row['qualification']))}."
-                + (
-                    " Nova partition and landmarks are unavailable; EFIT labels, "
-                    "LCFS, and governed first wall are retained."
-                    if unavailable
-                    else ""
+                "Converged."
+                if row["converged"]
+                else (
+                    f"NONCONVERGED — retained failure: "
+                    f"{escape(str(row['qualification']))}."
+                    + (
+                        " Nova partition and landmarks are unavailable; EFIT labels, "
+                        "LCFS, and governed first wall are retained."
+                        if len(row["cell_rz"]) == 0
+                        else ""
+                    )
                 )
             )
         )

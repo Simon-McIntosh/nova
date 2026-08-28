@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T12:52:40",
+  "updated": "2026-08-28T12:54:40",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -61494,9 +61494,109 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T104144198389-sse-height-rule-trip-contrast",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-height-rule-trip-contrast",
+        "node_definition": {
+          "done_when": "The question this answers is whether the wall-height exclusion reduces active-set trips on a real production geometry, because on all five synthetic geometries in docs/figures/wall-height-shadow-safety/metrics.json the guarded rule now equals pure topology exactly, so the suite no longer demonstrates that the height rule does anything at all. Read that file and docs/research/active-set-trip-trajectory.html first. (1) Run the same production MAST arm the trajectory document already measured, 22086/43 pure-diverted at 33x33, twice on a non-debug uncapped lane with per-trip telemetry enabled: once with the guarded wall-height exclusion active as it stands on main, and once with the height exclusion disabled so the shadow is pure topology. Use a single explicit switch for the contrast and state exactly what it toggles. Do not self-cap the walltime below the work. (2) Report both per-trip trajectories in full: trip index, mask difference, live residual, inner iterations, and per-trip wall time, for each arm of the contrast. (3) State the decisive comparison as numbers: trips consumed to a stable zero mask difference under each setting, total trips to completion, terminal residual under each, and total solve wall time under each. State whether the height rule fires at all on this geometry, measured as the count of wall cells it removes relative to pure topology; if it removes zero cells the contrast is a null result and must be reported as one rather than presented as a benefit. (4) Record whether either arm passes through a false zero, that is a trip whose mask difference is zero followed by a later nonzero trip, since the already-measured baseline does so at trip 2 before moving 22 cells at trip 4. (5) Extend docs/research/active-set-trip-trajectory.html with the contrast, keeping the existing measurement intact and adding the second arm beside it, and validate with the reckon doc-check tooling. State a plain verdict on whether the evidence supports the height exclusion reducing trips on production geometry, supports it having no effect, or is inconclusive, and name what would settle it if inconclusive. Do not regenerate any EFIT bank and do not modify any committed bank JSON or PNG.",
+          "estimated_hours": null,
+          "goal": "The measured trip count for one production MAST arm with the wall-height exclusion active against pure topology, deciding whether the height rule reduces active-set trips",
+          "id": "sse-height-rule-trip-contrast",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T104144198389-sse-height-rule-trip-contrast/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/research/active-set-trip-trajectory.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T10:41:55Z",
+        "completed_at": "2026-08-28T10:53:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 718,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 718,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "00c0ef286b6ec597dc0c8d6f93c8af24d1cd5287",
+        "commits": [
+          "cc32ba7bbe056bba04e619eae0838ef8aa3a4584"
+        ],
+        "changed_lines": {
+          "added": 138,
+          "removed": 1,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uncapped vega job 1259131, 201 s, both arms successful; 25/25 guarded evaluations removed 0 wall cells; audit-doc OK",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T104144198389-sse-height-rule-trip-contrast/height-contrast-1259131.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T104144198389-sse-height-rule-trip-contrast/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1696256,
+            "cached_input_tokens_cumulative": 5509376,
+            "input_tokens": 1732516,
+            "input_tokens_cumulative": 5726922,
+            "output_tokens": 1893,
+            "output_tokens_cumulative": 22711,
+            "reasoning_output_tokens": 935,
+            "reasoning_output_tokens_cumulative": 6056
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1160
+    "_version": 1161
   }
 }

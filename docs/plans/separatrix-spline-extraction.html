@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-28">
-<meta name="plan-version" content="70">
+<meta name="plan-version" content="72">
 </head>
 <body>
   <main class="plan-doc">
@@ -183,6 +183,16 @@
         differentiating through the while loop; the vmapped run-to-slowest-lane cost is measured on
         the reserved-H200 rung before any always-on default.</p>
     </div>
+<div class="r-dec" data-key="wall-height-retention" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Does the guarded wall-height exclusion stay in the shadow path now that it is measurably inert?</p>
+    <p class="r-dec-ctx">The lead proposed augmenting the topological private-flux shadow with a vertical rule excluding wall nodes above an upper or below a lower X-point, on the hypothesis that fewer binary mask changes would stabilise convergence. Assessment measured five geometries: the rule was physically wrong on two (a snowflake under-shadowing by 6 cells, a far coil-null primary by 15, with an alternate-primary identity flipping 68 of 96 wall bits). An eligibility guard on two wall-span-relative fractions repaired both, and all five geometries now equal pure topology cell-for-cell. A paired production measurement then found the guarded rule fires on zero cells in all 25 evaluations of MAST 22086/43: both arms trace identical mask differences 38,23,0,1,22,0,0,0,0,0,0,0 to an identical terminal residual of 6.08e-12, with solve times differing 0.88 percent, inside compilation variance. So the guard made the rule safe, and having made it safe the rule does nothing measurable on real geometry. One unresolved sub-question bears on the choice: on production geometry the rule may be inert because the guard disqualifies its reference, or because the topological shadow already covers every cell the height rule would remove. Those imply different answers.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="retain-guarded">keep the guarded rule as inert insurance</button>
+      <button class="r-opt" data-value="remove">remove the height path and keep pure topology</button>
+      <button class="r-opt" data-value="retain-pending-diiid">hold until the DIII-D bank reports whether the rule ever fires there</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -313,6 +323,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260828T104111096023-sse-diiid-frame-checkpointing" data-who="diiid-forward-gs" data-when="2026-08-28T10:52:37Z">
     <div class="r-comment-body"><p>The DIII-D driver now publishes forward_gs_partial_receipt.json after every completed frame: non-finite leaves normalized to null, strict JSON with allow_nan false written to a unique temporary path, flushed and fsynced, atomically renamed with os.replace, then the directory fsynced, so no reader can observe a half-written file. Each checkpoint carries receipt_kind=partial_frame_checkpoint, complete=false, the declared count of 5, the honest attempted and unattempted counts, no fabricated rows, and per-frame active-set telemetry from the same dataclass as the final receipt</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260828T104144198389-sse-height-rule-trip-contrast" data-who="domain-partition" data-when="2026-08-28T10:53:53Z">
+    <div class="r-comment-body"><p>NULL RESULT: the guarded wall-height exclusion has no measurable effect on production MAST geometry. It fired on 0 cells in all 25 evaluations; guarded and pure-topology arms produced identical mask differences 38,23,0,1,22,0,0,0,0,0,0,0, identical inner iterations, identical terminal residual 6.0797717128595031e-12, stable zero at trip 5 and the same false zero at trip 2. Solve times 59.287223 s guarded against 59.810792 s pure, a 0.88 percent ordering attributable to compilation variability since the masks were identical. The evidence does not support the height rule reducing active-set trips</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

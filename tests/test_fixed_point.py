@@ -278,6 +278,153 @@ def test_newton_refuses_when_backtracking_and_continuation_are_exhausted():
     )
 
 
+def test_newton_reconciles_the_frozen_solve_with_its_live_active_set():
+    def mask_fn(state):
+        return state >= 0.5
+
+    def shadowed_map(_state, mask):
+        return jnp.where(mask, 2.0, 1.0)
+
+    def solve():
+        return newton_krylov(
+            lambda state: shadowed_map(state, mask_fn(state)),
+            jnp.zeros(1),
+            newton_steps=1,
+            gmres_iterations=1,
+            warmup=0,
+            shadow_mask_fn=mask_fn,
+            promoted_shadow_mask_fn=lambda state, _previous: mask_fn(state),
+            shadowed_map_fn=shadowed_map,
+            active_set_steps=4,
+        )
+
+    for result in (solve(), jax.jit(solve)()):
+        np.testing.assert_allclose(result.state, [2.0])
+        np.testing.assert_allclose(result.residual, 0.0)
+        np.testing.assert_allclose(
+            result.active_set_residuals,
+            [0.5, 0.0, np.nan, np.nan],
+            equal_nan=True,
+        )
+        np.testing.assert_array_equal(
+            result.active_set_mask_differences, [1, 0, -1, -1]
+        )
+        assert int(result.active_set_iterations) == 2
+        assert bool(result.converged)
+        assert int(result.termination_reason) == FixedPointTerminationReason.CONVERGED
+
+
+def test_newton_damps_a_repeated_active_set_then_reports_the_cycle():
+    def mask_fn(state):
+        return state >= 0.5
+
+    def shadowed_map(_state, mask):
+        return jnp.where(mask, 0.25, 1.0)
+
+    def solve():
+        return newton_krylov(
+            lambda state: shadowed_map(state, mask_fn(state)),
+            jnp.zeros(1),
+            newton_steps=1,
+            gmres_iterations=1,
+            warmup=0,
+            shadow_mask_fn=mask_fn,
+            promoted_shadow_mask_fn=lambda state, _previous: mask_fn(state),
+            shadowed_map_fn=shadowed_map,
+            active_set_steps=6,
+        )
+
+    for result in (solve(), jax.jit(solve)()):
+        np.testing.assert_allclose(result.state, [0.625])
+        np.testing.assert_allclose(result.residual, 1.5)
+        np.testing.assert_array_equal(
+            result.active_set_mask_differences, [1, 0, -1, -1, -1, -1]
+        )
+        np.testing.assert_array_equal(
+            result.active_set_cycle_damping_activations, [0, 1, -1, -1, -1, -1]
+        )
+        assert int(result.active_set_iterations) == 2
+        assert not bool(result.converged)
+        assert (
+            int(result.termination_reason)
+            == FixedPointTerminationReason.ACTIVE_SET_CYCLE_DETECTED
+        )
+
+
+def test_newton_reports_active_set_exhaustion_with_live_receipts():
+    def mask_fn(state):
+        return jnp.stack((state[0] >= 0.5, state[0] >= 1.5))
+
+    def shadowed_map(state, mask):
+        target = 1.0 + jnp.sum(mask, dtype=state.dtype)
+        return jnp.full_like(state, target)
+
+    def solve():
+        return newton_krylov(
+            lambda state: shadowed_map(state, mask_fn(state)),
+            jnp.zeros(1),
+            newton_steps=1,
+            gmres_iterations=1,
+            warmup=0,
+            shadow_mask_fn=mask_fn,
+            promoted_shadow_mask_fn=lambda state, _previous: mask_fn(state),
+            shadowed_map_fn=shadowed_map,
+            active_set_steps=2,
+        )
+
+    for result in (solve(), jax.jit(solve)()):
+        np.testing.assert_allclose(result.state, [2.0])
+        np.testing.assert_allclose(result.residual, 1.0 / 3.0)
+        np.testing.assert_allclose(result.active_set_residuals, [0.5, 1.0 / 3.0])
+        np.testing.assert_array_equal(result.active_set_mask_differences, [1, 1])
+        assert int(result.active_set_iterations) == 2
+        assert not bool(result.converged)
+        assert (
+            int(result.termination_reason)
+            == FixedPointTerminationReason.ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED
+        )
+
+
+def test_newton_with_a_constant_active_set_preserves_the_smooth_solve():
+    def map_fn(state):
+        return 0.5 * state + 1.0
+
+    expected = newton_krylov(
+        map_fn,
+        jnp.zeros(1),
+        newton_steps=2,
+        gmres_iterations=1,
+        warmup=0,
+    )
+
+    def solve():
+        return newton_krylov(
+            map_fn,
+            jnp.zeros(1),
+            newton_steps=2,
+            gmres_iterations=1,
+            warmup=0,
+            shadow_mask_fn=lambda _state: jnp.zeros(1, dtype=bool),
+            promoted_shadow_mask_fn=lambda _state, previous: previous,
+            shadowed_map_fn=lambda state, _mask: map_fn(state),
+            active_set_steps=4,
+        )
+
+    for result in (solve(), jax.jit(solve)()):
+        np.testing.assert_array_equal(result.state, expected.state)
+        np.testing.assert_array_equal(result.residual, expected.residual)
+        np.testing.assert_array_equal(result.trace, expected.trace)
+        assert int(result.attempted_newton_promotions) == int(
+            expected.attempted_newton_promotions
+        )
+        assert int(result.accepted_newton_promotions) == int(
+            expected.accepted_newton_promotions
+        )
+        assert int(result.active_set_iterations) == 1
+        assert int(result.active_set_mask_differences[0]) == 0
+        assert int(result.termination_reason) == FixedPointTerminationReason.CONVERGED
+
+
 def test_newton_carries_a_smaller_recovery_radius_after_exhaustion():
     """A refused re-shape changes the radius used by the next promotion."""
 

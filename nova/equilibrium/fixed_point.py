@@ -80,6 +80,8 @@ _MODEL_REBUILD_DAMPING_TRIPS = 6
 _STEEPEST_DESCENT_SCALES = (1.0e-4, 1.0e-5, 1.0e-6, 1.0e-7, 1.0e-8)
 _RELATIVE_SUP_MERIT_EXPONENT = 8
 _NONMONOTONE_MERIT_WINDOW = 6
+_ACTIVE_SET_ITERATION_LIMIT = 16
+_ACTIVE_SET_CYCLE_DAMPING = 0.5
 _PROJECTED_KRYLOV_CONDITION_RATIO_LIMIT = math.e
 _SUFFICIENT_DECREASE_SLOPE = 1.0e-4
 FIXED_POINT_RESIDUAL_TOLERANCE = 1.0e-8
@@ -122,6 +124,8 @@ class FixedPointTerminationReason(IntEnum):
     KRYLOV_ACTION_REFUSED = 4
     MANIFOLD_ADVANCE_REFUSED = 5
     SUFFICIENT_DECREASE_REFUSED = 6
+    ACTIVE_SET_CYCLE_DETECTED = 7
+    ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED = 8
 
 
 class FixedPointResult(NamedTuple):
@@ -170,6 +174,10 @@ class FixedPointResult(NamedTuple):
     and the smooth relative-sup gradient ladder runs.  Its selected absolute step
     scale is recorded in ``promotion_descent_scales``, with zero for a refused
     ladder and NaN where the fallback was not evaluated.
+    ``active_set_iterations`` counts frozen-mask inner solves.  Their live
+    residuals and re-evaluated mask differences are recorded in the two
+    corresponding fixed-length arrays.  ``active_set_cycle_damping_activations``
+    marks the midpoint transition attempted when a mask repeats.
     """
 
     state: jax.Array
@@ -203,6 +211,10 @@ class FixedPointResult(NamedTuple):
     promotion_model_rebuild_damping: jax.Array | float = float("nan")
     promotion_descent_activations: jax.Array | int = -1
     promotion_descent_scales: jax.Array | float = float("nan")
+    active_set_iterations: jax.Array | int = 0
+    active_set_residuals: jax.Array | float = float("nan")
+    active_set_mask_differences: jax.Array | int = -1
+    active_set_cycle_damping_activations: jax.Array | int = -1
 
 
 class KinkAwareResult(NamedTuple):
@@ -291,6 +303,27 @@ class _NewtonIterationState(NamedTuple):
     promotion_model_rebuild_damping: jax.Array
     promotion_descent_activations: jax.Array
     promotion_descent_scales: jax.Array
+
+
+class _ActiveSetIterationState(NamedTuple):
+    """Carry for bounded frozen-mask solves and live-mask reconciliation."""
+
+    state: jax.Array
+    mask: jax.Array
+    mask_history: jax.Array
+    mask_history_count: jax.Array
+    result: FixedPointResult
+    live_residual: jax.Array
+    residuals: jax.Array
+    mask_differences: jax.Array
+    cycle_damping_activations: jax.Array
+    iterations: jax.Array
+    attempted_promotions: jax.Array
+    accepted_promotions: jax.Array
+    active: jax.Array
+    converged: jax.Array
+    cycle_detected: jax.Array
+    nonfinite: jax.Array
 
 
 class _BacktrackedPromotion(NamedTuple):
@@ -1476,7 +1509,7 @@ def _manifold_newton_krylov(
     )
 
 
-def newton_krylov(
+def _newton_krylov_inner(
     map_fn: Callable[[jax.Array], jax.Array],
     initial: jax.Array,
     *,
@@ -2091,6 +2124,316 @@ def newton_krylov(
         promotion_model_rebuild_damping=loop.promotion_model_rebuild_damping,
         promotion_descent_activations=loop.promotion_descent_activations,
         promotion_descent_scales=loop.promotion_descent_scales,
+    )
+
+
+def _active_set_newton_krylov(
+    initial: jax.Array,
+    *,
+    newton_steps: int,
+    gmres_iterations: int,
+    warmup: int,
+    relaxation: float,
+    step_cap: float,
+    krylov_condition_limit: float,
+    convergence_tolerance: float,
+    shadow_mask_fn: Callable[[jax.Array], jax.Array],
+    promoted_shadow_mask_fn: Callable[[jax.Array, jax.Array], jax.Array],
+    shadowed_map_fn: Callable[[jax.Array, jax.Array], jax.Array],
+    active_set_steps: int,
+    precision: Precision | str,
+) -> FixedPointResult:
+    """Reconcile bounded frozen-mask solves with their live active sets."""
+    initial = _solver_state(initial, precision)
+    initial_mask = jnp.ravel(jnp.asarray(shadow_mask_fn(initial), dtype=bool))
+    history = jnp.zeros((active_set_steps + 1, initial_mask.size), dtype=bool)
+    history = history.at[0].set(initial_mask)
+
+    def solve_frozen(state, mask):
+        def frozen_map(candidate):
+            return shadowed_map_fn(candidate, mask)
+
+        def frozen_mask(_candidate):
+            return mask
+
+        return _newton_krylov_inner(
+            frozen_map,
+            state,
+            newton_steps=newton_steps,
+            gmres_iterations=gmres_iterations,
+            warmup=warmup,
+            relaxation=relaxation,
+            step_cap=step_cap,
+            krylov_condition_limit=krylov_condition_limit,
+            convergence_tolerance=convergence_tolerance,
+            shadow_mask_fn=frozen_mask,
+            precision=precision,
+        )
+
+    def mask_seen(mask, mask_history, history_count):
+        populated = jnp.arange(mask_history.shape[0]) < history_count
+        matches = jnp.all(mask_history == mask[None, :], axis=1)
+        return jnp.any(populated & matches)
+
+    def reconcile(index, state, mask, mask_history, history_count, inner_result):
+        solved_state = inner_result.state
+        observed_mask = jnp.ravel(promoted_shadow_mask_fn(solved_state, mask))
+        observed_difference = jnp.sum(observed_mask != mask, dtype=jnp.int32)
+        observed_mapped = shadowed_map_fn(solved_state, observed_mask)
+        observed_residual = _relative_residual(observed_mapped, solved_state)
+        observed_finite = jnp.isfinite(observed_residual)
+        converged = (
+            observed_finite
+            & (observed_residual <= convergence_tolerance)
+            & (observed_difference == 0)
+        )
+        repeated = (
+            (observed_difference > 0)
+            & mask_seen(observed_mask, mask_history, history_count)
+            & ~converged
+        )
+
+        damped_state = state + _ACTIVE_SET_CYCLE_DAMPING * (solved_state - state)
+        damped_mask = jnp.ravel(promoted_shadow_mask_fn(damped_state, mask))
+        damped_mapped = shadowed_map_fn(damped_state, damped_mask)
+        damped_residual = _relative_residual(damped_mapped, damped_state)
+        damped_finite = jnp.isfinite(damped_residual)
+        damping_repeats = mask_seen(damped_mask, mask_history, history_count)
+        cycle_detected = repeated & damping_repeats
+
+        selected_state = jnp.where(repeated, damped_state, solved_state)
+        selected_mask = jnp.where(repeated, damped_mask, observed_mask)
+        selected_residual = jnp.where(repeated, damped_residual, observed_residual)
+        selected_finite = jnp.where(repeated, damped_finite, observed_finite)
+        selected_difference = jnp.sum(selected_mask != mask, dtype=jnp.int32)
+        can_continue = selected_finite & ~converged & ~cycle_detected
+        record_mask = can_continue & (history_count < mask_history.shape[0])
+        mask_history = mask_history.at[history_count].set(
+            jnp.where(record_mask, selected_mask, mask_history[history_count])
+        )
+        history_count = history_count + record_mask.astype(jnp.int32)
+        active = can_continue & ((index + 1) < active_set_steps)
+        return (
+            selected_state,
+            selected_mask,
+            mask_history,
+            history_count,
+            selected_residual,
+            selected_difference,
+            repeated,
+            active,
+            converged,
+            cycle_detected,
+            ~selected_finite,
+        )
+
+    first_result = solve_frozen(initial, initial_mask)
+    (
+        first_state,
+        first_mask,
+        history,
+        history_count,
+        first_residual,
+        first_difference,
+        first_damping,
+        first_active,
+        first_converged,
+        first_cycle,
+        first_nonfinite,
+    ) = reconcile(
+        0,
+        initial,
+        initial_mask,
+        history,
+        jnp.asarray(1, dtype=jnp.int32),
+        first_result,
+    )
+    outer = _ActiveSetIterationState(
+        state=first_state,
+        mask=first_mask,
+        mask_history=history,
+        mask_history_count=history_count,
+        result=first_result,
+        live_residual=first_residual,
+        residuals=jnp.full(active_set_steps, jnp.nan, dtype=initial.dtype)
+        .at[0]
+        .set(first_residual),
+        mask_differences=jnp.full(active_set_steps, -1, dtype=jnp.int32)
+        .at[0]
+        .set(first_difference),
+        cycle_damping_activations=jnp.full(active_set_steps, -1, dtype=jnp.int32)
+        .at[0]
+        .set(first_damping.astype(jnp.int32)),
+        iterations=jnp.asarray(1, dtype=jnp.int32),
+        attempted_promotions=jnp.asarray(
+            first_result.attempted_newton_promotions, dtype=jnp.int32
+        ),
+        accepted_promotions=jnp.asarray(
+            first_result.accepted_newton_promotions, dtype=jnp.int32
+        ),
+        active=first_active,
+        converged=first_converged,
+        cycle_detected=first_cycle,
+        nonfinite=first_nonfinite,
+    )
+
+    def outer_body(index, carry):
+        def solve_active(carry):
+            inner_result = solve_frozen(carry.state, carry.mask)
+            (
+                state,
+                mask,
+                mask_history,
+                history_count,
+                live_residual,
+                mask_difference,
+                damping_activated,
+                active,
+                converged,
+                cycle_detected,
+                nonfinite,
+            ) = reconcile(
+                index,
+                carry.state,
+                carry.mask,
+                carry.mask_history,
+                carry.mask_history_count,
+                inner_result,
+            )
+            return _ActiveSetIterationState(
+                state=state,
+                mask=mask,
+                mask_history=mask_history,
+                mask_history_count=history_count,
+                result=inner_result,
+                live_residual=live_residual,
+                residuals=carry.residuals.at[index].set(live_residual),
+                mask_differences=carry.mask_differences.at[index].set(mask_difference),
+                cycle_damping_activations=(
+                    carry.cycle_damping_activations.at[index].set(
+                        damping_activated.astype(jnp.int32)
+                    )
+                ),
+                iterations=carry.iterations + 1,
+                attempted_promotions=(
+                    carry.attempted_promotions
+                    + jnp.asarray(
+                        inner_result.attempted_newton_promotions, dtype=jnp.int32
+                    )
+                ),
+                accepted_promotions=(
+                    carry.accepted_promotions
+                    + jnp.asarray(
+                        inner_result.accepted_newton_promotions, dtype=jnp.int32
+                    )
+                ),
+                active=active,
+                converged=converged,
+                cycle_detected=cycle_detected,
+                nonfinite=nonfinite,
+            )
+
+        return jax.lax.cond(carry.active, solve_active, lambda value: value, carry)
+
+    outer = jax.lax.fori_loop(1, active_set_steps, outer_body, outer)
+    reason = jnp.where(
+        outer.converged,
+        FixedPointTerminationReason.CONVERGED,
+        jnp.where(
+            outer.cycle_detected,
+            FixedPointTerminationReason.ACTIVE_SET_CYCLE_DETECTED,
+            jnp.where(
+                outer.nonfinite,
+                FixedPointTerminationReason.NONFINITE_RESIDUAL,
+                FixedPointTerminationReason.ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED,
+            ),
+        ),
+    )
+    return outer.result._replace(
+        state=outer.state,
+        residual=outer.live_residual,
+        attempted_newton_promotions=outer.attempted_promotions,
+        accepted_newton_promotions=outer.accepted_promotions,
+        converged=outer.converged,
+        termination_reason=jnp.asarray(reason, dtype=jnp.int32),
+        active_set_iterations=outer.iterations,
+        active_set_residuals=outer.residuals,
+        active_set_mask_differences=outer.mask_differences,
+        active_set_cycle_damping_activations=outer.cycle_damping_activations,
+    )
+
+
+def newton_krylov(
+    map_fn: Callable[[jax.Array], jax.Array],
+    initial: jax.Array,
+    *,
+    newton_steps: int,
+    gmres_iterations: int = 8,
+    warmup: int = 8,
+    relaxation: float = 0.5,
+    step_cap: float = 10.0,
+    krylov_condition_limit: float = _PROJECTED_KRYLOV_CONDITION_RATIO_LIMIT,
+    convergence_tolerance: float = FIXED_POINT_RESIDUAL_TOLERANCE,
+    admissibility_fn: Callable[[jax.Array], jax.Array] | None = None,
+    previous_admitted_state: jax.Array | None = None,
+    shadow_mask_fn: Callable[[jax.Array], jax.Array] | None = None,
+    promoted_shadow_mask_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
+    shadowed_map_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
+    active_set_steps: int = _ACTIVE_SET_ITERATION_LIMIT,
+    precision: Precision | str = Precision.AUTOMATIC,
+) -> FixedPointResult:
+    """Run globalized Newton and reconcile state-dependent active sets.
+
+    Supplying the promoted-mask and shadowed-map callbacks wraps the existing
+    smooth Newton solve in a fixed-trip active-set iteration.  Each inner solve
+    holds its composed mask fixed, then the outer iteration re-evaluates that
+    mask at the inner solution and measures the live residual.  Convergence
+    requires both the registered residual tolerance and zero changed mask
+    cells.  A repeated mask receives one midpoint-damped transition; another
+    previously seen mask terminates with a named cycle result.
+    """
+    if active_set_steps <= 0:
+        raise ValueError("active_set_steps must be positive")
+    carry_shadows = promoted_shadow_mask_fn is not None
+    if carry_shadows != (shadowed_map_fn is not None):
+        raise ValueError("promoted shadow masks require a shadowed map")
+    if carry_shadows and shadow_mask_fn is None:
+        raise ValueError("promoted shadow masks require an initial shadow mask")
+    options = {
+        "newton_steps": newton_steps,
+        "gmres_iterations": gmres_iterations,
+        "warmup": warmup,
+        "relaxation": relaxation,
+        "step_cap": step_cap,
+        "krylov_condition_limit": krylov_condition_limit,
+        "convergence_tolerance": convergence_tolerance,
+        "admissibility_fn": admissibility_fn,
+        "previous_admitted_state": previous_admitted_state,
+        "precision": precision,
+    }
+    if not carry_shadows or admissibility_fn is not None:
+        return _newton_krylov_inner(
+            map_fn,
+            initial,
+            shadow_mask_fn=shadow_mask_fn,
+            promoted_shadow_mask_fn=promoted_shadow_mask_fn,
+            shadowed_map_fn=shadowed_map_fn,
+            **options,
+        )
+    return _active_set_newton_krylov(
+        initial,
+        newton_steps=newton_steps,
+        gmres_iterations=gmres_iterations,
+        warmup=warmup,
+        relaxation=relaxation,
+        step_cap=step_cap,
+        krylov_condition_limit=krylov_condition_limit,
+        convergence_tolerance=convergence_tolerance,
+        shadow_mask_fn=shadow_mask_fn,
+        promoted_shadow_mask_fn=promoted_shadow_mask_fn,
+        shadowed_map_fn=shadowed_map_fn,
+        active_set_steps=active_set_steps,
+        precision=precision,
     )
 
 

@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-28">
-<meta name="plan-version" content="91">
+<meta name="plan-version" content="92">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -510,6 +510,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260828T044846463293-pod-active-set-corrector-probe" data-who="flood-rca" data-when="2026-08-28T05:02:51Z">
     <div class="r-comment-body"><p>BREAKTHROUGH with a caveat: frozen-mask production solves reach 8.017e-9 at promotion 163 and 8.126e-9 at promotion 140, proving the 33x33 grid CAN meet the locked 1e-8 criterion and that the 3.0415e-4 floor is active-set oscillation rather than a discretisation, basis, carrier or budget limit; re-evaluation changes 21 cells (7 private-flux, 14 wall-height) and returns 6.633e-3, so INCONSISTENT-AT-REEVALUATION and a one-shot pin is invalid; 51 would-be flips over 11 promotions with a maximum of 11 in one</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260828T050318484040-pod-outer-active-set-loop" data-who="domain-partition" data-when="2026-08-28T05:23:59Z">
+    <div class="r-comment-body"><p>Outer active-set iteration landed: freeze, solve, re-evaluate, repeat under a bounded 16-trip cap, accepting only live residual at or below 1e-8 with zero mask difference, with cycle detection and unchanged behaviour when the mask never moves</p></div>
 </div>
 </section>
 </main>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T07:03:07",
+  "updated": "2026-08-28T07:24:38",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -60388,9 +60388,114 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T050318484040-pod-outer-active-set-loop",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-outer-active-set-loop",
+        "node_definition": {
+          "done_when": "nova/equilibrium/fixed_point.py gains an outer loop that freezes the composed participation and shadow mask, runs the existing inner globalized Newton on the resulting smooth subproblem, re-evaluates the mask at the inner solution, and repeats with the new mask, accepting only when the live relative-sup residual is at or below the locked 1e-8 criterion AND the re-evaluated mask differs in zero cells, with a bounded fixed outer trip count and no data-dependent while primitive; repeated active sets are detected and answered by a named damping or union strategy stated in the manifest rather than by looping, and exhaustion terminates with a named reason carrying the final residual and mask difference; JAX_PLATFORMS=cpu pytest tests/test_fixed_point.py passes with new cases proving the loop reaches simultaneous residual and mask agreement on a synthetic two-set problem, that a deliberately cycling synthetic case terminates by cycle detection rather than spinning, and that a problem whose mask never changes behaves exactly as before; the focused forward-operator, domain-continuity, wall-height, parity-slice and seven analytic geometry files pass eager and JIT with zero new failures vs current HEAD; the conservation acceptance test passes with unchanged envelopes; ruff reports zero findings on staged paths",
+          "estimated_hours": null,
+          "goal": "An outer active-set iteration around the existing solver so the production solve settles on a state that satisfies the live residual and its own mask simultaneously, rather than oscillating between active sets as the frozen-mask probe demonstrated",
+          "id": "pod-outer-active-set-loop",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T050318484040-pod-outer-active-set-loop/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_fixed_point.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T05:03:27Z",
+        "completed_at": "2026-08-28T05:23:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1232,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1232,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "00bec390c6506c9e372e05fca02410f16feb76ad",
+        "commits": [
+          "8166c89bd40ef6004f9bd4cb4e80ae0c89a7a2a5"
+        ],
+        "changed_lines": {
+          "added": 491,
+          "removed": 1,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/test_fixed_point.py 39/39 including simultaneous-agreement, cycle-detection and mask-never-changes regressions; coupled focused lane 62 passed eager+JIT; conservation unchanged",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T050318484040-pod-outer-active-set-loop/targeted-rerun.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T050318484040-pod-outer-active-set-loop/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5720064,
+            "cached_input_tokens_cumulative": 11930880,
+            "input_tokens": 5766024,
+            "input_tokens_cumulative": 12184944,
+            "output_tokens": 7555,
+            "output_tokens_cumulative": 24565,
+            "reasoning_output_tokens": 3232,
+            "reasoning_output_tokens_cumulative": 8496
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/test_fixed_point.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1149
+    "_version": 1150
   }
 }

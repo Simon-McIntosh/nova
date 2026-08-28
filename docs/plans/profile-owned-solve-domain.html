@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-28">
-<meta name="plan-version" content="88">
+<meta name="plan-version" content="89">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -501,6 +501,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260828T033919693468-pod-grid-operand-ablation" data-who="connectivity-audit" data-when="2026-08-28T03:48:18Z">
     <div class="r-comment-body"><p>NEITHER: both plasma-operand swaps retain 98.57% and 98.77% of the transferred residual with support-density, current-conservation and response shared-node errors all exactly zero; the ablation instead surfaced that the fine solve consumes the persisted 1126x101 fitted carrier while the converged coarse producer ran response_cache=None, making external-response representation the leading untested difference</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260828T034914163564-pod-external-response-representation" data-who="flood-rca" data-when="2026-08-28T04:15:18Z">
+    <div class="r-comment-body"><p>REPRESENTATION-EQUIVALENT: the carrier is an exact memoized polygon-Green section evaluation rather than a fitted approximation, so persisted and inline paths give identical residuals at both states with external-field and response-matrix differences of exactly 0.0; representation is eliminated and the carrier must not be rebuilt or removed</p></div>
 </div>
 </section>
 </main>

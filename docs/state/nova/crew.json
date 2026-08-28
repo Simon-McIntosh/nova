@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T01:18:59",
+  "updated": "2026-08-28T04:57:50",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -59599,9 +59599,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T020116890576-pod-long-ceiling-checkpointed",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-long-ceiling-checkpointed",
+        "node_definition": {
+          "done_when": "The staged observer in run directory r-20260827T175519690799 is copied and modified only to append each promotion's relative-sup residual and route to a durable checkpoint file as it goes, leaving the solve semantics byte-identical, with both hashes stated in the manifest; one SLURM job on betelgeuse with reservation gpu_0003_grpA requesting exactly one H200, 8 CPUs, 64 GiB and a three-hour ceiling runs it at a 3000 promotion ceiling on current origin/main; a report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/long-ceiling-checkpointed.md states whether the locked 1e-8 criterion was reached and at which promotion, the minimum relative-sup residual and its promotion beside the 650-ceiling values 2.6722e-4 strict and 3.0415e-4 windowed, the residual at promotions 650, 1000, 2000 and 3000, the promotion at which improvement last exceeded one percent, and the verdict CONVERGED, STILL-DESCENDING or GENUINELY-FLAT; if the job is truncated the report is written from the checkpoint file with the trajectory it reached and the verdict qualified accordingly rather than lost; no repository file modified",
+          "estimated_hours": null,
+          "goal": "The 3000-promotion production convergence measurement re-run on the H200 with incremental checkpointing, so a wall-clock truncation can no longer discard the whole trajectory as it did when an eight-hour CPU attempt timed out with no durable output",
+          "id": "pod-long-ceiling-checkpointed",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T020116890576-pod-long-ceiling-checkpointed/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/long-ceiling-checkpointed.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "flood-performance",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T02:01:29Z",
+        "completed_at": "2026-08-28T02:56:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3330,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3330,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "8dbec5e61c916488eaf4e3883d804be14d6eb003",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "checkpointed H200 ladder job 1258977, 2015 durable promotion rows harvested from the incremental checkpoint after deliberate stop",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T020116890576-pod-long-ceiling-checkpointed/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T020116890576-pod-long-ceiling-checkpointed/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f75-721b-73f1-bd97-eeffb0481cdc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 7972608,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 8325583,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 21401,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3318
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1141
+    "_version": 1142
   }
 }

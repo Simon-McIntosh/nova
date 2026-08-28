@@ -8,20 +8,23 @@ spatial operands behind those scores, including negative and nonconverged rows.
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 from html import escape
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
 import textwrap
 import types
-from typing import Any
+from typing import Any, Callable
 
 import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
+from matplotlib.path import Path as MplPath
 import numpy as np
 
 from benchmarks import mast_response_carrier_warm as response_carrier
@@ -68,6 +71,7 @@ NUMERIC_ARRAY_DTYPES = {
     "efit_x": np.float64,
     "efit_lcfs": np.float64,
 }
+PanelPublisher = Callable[[dict[str, Any], int], None]
 
 
 class StaleOperandCacheError(RuntimeError):
@@ -121,7 +125,7 @@ def _stationary_records(
     return positions[: len(source_o)], positions[len(source_o) :]
 
 
-def _mast_rows() -> list[dict[str, Any]]:
+def _mast_rows(publish: PanelPublisher | None = None) -> list[dict[str, Any]]:
     source_authority = _source_authority(MAST_AUTHORITY)
     authority = _load_path(MAST_AUTHORITY, "mast_visual_authority")
     reachability = authority._reachability_module()
@@ -213,20 +217,21 @@ def _mast_rows() -> list[dict[str, Any]]:
                     "converged": False,
                     "qualification": type(error).__name__,
                 }
-            rows.append(
-                {
-                    "machine": "MAST",
-                    "identity": f"{shot}/{slice_index} {arm}",
-                    "shot": shot,
-                    "frame": slice_index,
-                    "arm": arm,
-                    "time": float(referee.time_s[slice_index]),
-                    **visual,
-                    "efit_axis": np.asarray(referee.magnetic_axis_m[slice_index]),
-                    "efit_x": np.asarray(referee.x_points_m[slice_index]),
-                    "efit_lcfs": np.asarray(referee.lcfs_m[slice_index]),
-                }
-            )
+            row = {
+                "machine": "MAST",
+                "identity": f"{shot}/{slice_index} {arm}",
+                "shot": shot,
+                "frame": slice_index,
+                "arm": arm,
+                "time": float(referee.time_s[slice_index]),
+                **visual,
+                "efit_axis": np.asarray(referee.magnetic_axis_m[slice_index]),
+                "efit_x": np.asarray(referee.x_points_m[slice_index]),
+                "efit_lcfs": np.asarray(referee.lcfs_m[slice_index]),
+            }
+            rows.append(row)
+            if publish is not None:
+                publish(row, len(rows))
     if len(rows) != EXPECTED_MAST_ROWS:
         raise RuntimeError(f"expected {EXPECTED_MAST_ROWS} MAST rows, got {len(rows)}")
     _write_cache(
@@ -296,7 +301,7 @@ def _diiid_module():
     return namespace
 
 
-def _diiid_rows() -> list[dict[str, Any]]:
+def _diiid_rows(publish: PanelPublisher | None = None) -> list[dict[str, Any]]:
     source_authority = _source_authority(DIIID_AUTHORITY)
     module = _diiid_module()
     module["configure_dtypes"]()
@@ -336,36 +341,35 @@ def _diiid_rows() -> list[dict[str, Any]]:
         else:
             o_candidates = np.empty((0, 2), dtype=float)
             x_candidates = np.empty((0, 2), dtype=float)
-        rows.append(
-            {
-                "machine": "DIII-D",
-                "identity": f"{Path(result.shot).stem}:{result.frame}",
-                "shot": result.shot,
-                "frame": result.frame,
-                "arm": "demonstration",
-                "time": result.time_ms,
-                "cell_rz": np.asarray(fields["cell_rz"], dtype=float),
-                "domain_labels": np.asarray(fields["domain_labels"], dtype=np.int8),
-                "o_candidates": o_candidates,
-                "x_candidates": x_candidates,
-                "selected_o": np.asarray(fields["nova_selected_axis_rz"], dtype=float),
-                "selected_x": np.asarray(fields["nova_selected_x_rz"], dtype=float),
-                "wall_point": np.asarray(fields["nova_selected_wall_rz"], dtype=float),
-                "wall": np.asarray(fields["pseudo_wall"], dtype=float),
-                "nova_boundary": (
-                    np.asarray(fields["predicted_closed_boundary"], dtype=float)
-                    if visual_failure is None
-                    else np.empty((0, 2), dtype=float)
-                ),
-                "efit_axis": np.asarray(fields["efit_axis_rz"], dtype=float),
-                "efit_x": np.asarray(fields["efit_x_points_rz"], dtype=float),
-                "efit_lcfs": np.asarray(
-                    fields["labelled_closed_boundary"], dtype=float
-                ),
-                "converged": bool(result.converged) and visual_failure is None,
-                "qualification": visual_failure or result.solver_termination,
-            }
-        )
+        row = {
+            "machine": "DIII-D",
+            "identity": f"{Path(result.shot).stem}:{result.frame}",
+            "shot": result.shot,
+            "frame": result.frame,
+            "arm": "demonstration",
+            "time": result.time_ms,
+            "cell_rz": np.asarray(fields["cell_rz"], dtype=float),
+            "domain_labels": np.asarray(fields["domain_labels"], dtype=np.int8),
+            "o_candidates": o_candidates,
+            "x_candidates": x_candidates,
+            "selected_o": np.asarray(fields["nova_selected_axis_rz"], dtype=float),
+            "selected_x": np.asarray(fields["nova_selected_x_rz"], dtype=float),
+            "wall_point": np.asarray(fields["nova_selected_wall_rz"], dtype=float),
+            "wall": np.asarray(fields["pseudo_wall"], dtype=float),
+            "nova_boundary": (
+                np.asarray(fields["predicted_closed_boundary"], dtype=float)
+                if visual_failure is None
+                else np.empty((0, 2), dtype=float)
+            ),
+            "efit_axis": np.asarray(fields["efit_axis_rz"], dtype=float),
+            "efit_x": np.asarray(fields["efit_x_points_rz"], dtype=float),
+            "efit_lcfs": np.asarray(fields["labelled_closed_boundary"], dtype=float),
+            "converged": bool(result.converged) and visual_failure is None,
+            "qualification": visual_failure or result.solver_termination,
+        }
+        rows.append(row)
+        if publish is not None:
+            publish(row, EXPECTED_MAST_ROWS + len(rows))
     if len(rows) != EXPECTED_DIIID_ROWS:
         raise RuntimeError(
             f"expected {EXPECTED_DIIID_ROWS} DIII-D rows, got {len(rows)}"
@@ -438,6 +442,31 @@ def _read_cache(path: Path, source_identity: str) -> list[dict[str, Any]]:
 def _finite_points(value: Any) -> np.ndarray:
     points = np.asarray(value, dtype=float).reshape((-1, 2))
     return points[np.all(np.isfinite(points), axis=1)]
+
+
+def _panel_filename(row: dict[str, Any], index: int, suffix: str) -> str:
+    identity = row["identity"].replace("/", "-").replace(":", "-").replace(" ", "-")
+    machine = row["machine"].lower().replace("-", "")
+    return f"{index:02d}-{machine}-{identity}.{suffix}"
+
+
+def _point_or_none(points: np.ndarray) -> list[float] | None:
+    return points[0].tolist() if len(points) else None
+
+
+def _atomic_json(path: Path, payload: dict[str, Any]) -> None:
+    temporary = path.with_name(f".{path.name}.tmp")
+    with temporary.open("w") as stream:
+        json.dump(payload, stream, indent=2, sort_keys=True, allow_nan=False)
+        stream.write("\n")
+        stream.flush()
+        os.fsync(stream.fileno())
+    os.replace(temporary, path)
+    directory_fd = os.open(path.parent, os.O_DIRECTORY)
+    try:
+        os.fsync(directory_fd)
+    finally:
+        os.close(directory_fd)
 
 
 def _draw_row(row: dict[str, Any], path: Path) -> dict[str, Any]:
@@ -624,6 +653,61 @@ def _draw_row(row: dict[str, Any], path: Path) -> dict[str, Any]:
     }
 
 
+def _publish_row(row: dict[str, Any], index: int) -> dict[str, Any]:
+    png_path = HERE / _panel_filename(row, index, "png")
+    temporary_png = png_path.with_name(f".{png_path.stem}.tmp.png")
+    plot_record = _draw_row(row, temporary_png)
+    os.replace(temporary_png, png_path)
+
+    cells = _finite_points(row["cell_rz"])
+    labels = np.asarray(row["domain_labels"], dtype=int).reshape(-1)
+    boundary = _finite_points(row["nova_boundary"])
+    shadow = labels == int(PlasmaDomain.PRIVATE_FLUX)
+    inside = (
+        MplPath(boundary, closed=True).contains_points(cells, radius=-1.0e-10)
+        if len(boundary) and len(cells)
+        else np.zeros(len(cells), dtype=bool)
+    )
+    selected_x = _finite_points(row["selected_x"])
+    selected_o = _finite_points(row["selected_o"])
+    wall_point = _finite_points(row["wall_point"])
+    x_candidates = _finite_points(row["x_candidates"])
+    selected_is_candidate = bool(
+        len(selected_x)
+        and len(x_candidates)
+        and np.any(np.linalg.norm(x_candidates - selected_x[0], axis=1) <= 1.0e-8)
+    )
+    inside_count = int(np.count_nonzero(shadow & inside))
+    panel_record = {
+        "panel_index": index,
+        "machine": row["machine"],
+        "identity": row["identity"],
+        "converged": bool(row["converged"]),
+        "qualification": str(row["qualification"]),
+        "closed_separatrix_available": bool(len(boundary)),
+        "shadow_cells_inside_lcfs": inside_count,
+        "shadow_cells_inside_closed_separatrix": inside_count,
+        "total_shadow_cells": int(np.count_nonzero(shadow)),
+        "selected_primary_x_point_rz_m": _point_or_none(selected_x),
+        "selected_primary_o_point_rz_m": _point_or_none(selected_o),
+        "other_qualified_x_point_count": len(x_candidates) - int(selected_is_candidate),
+        "closest_plasma_wall_point_rz_m": _point_or_none(wall_point),
+        "converged_inside_lcfs_gate_pass": bool(
+            not row["converged"] or inside_count == 0
+        ),
+        "png_path": str(png_path.resolve()),
+    }
+    json_path = HERE / _panel_filename(row, index, "json")
+    panel_record["json_path"] = str(json_path.resolve())
+    _atomic_json(json_path, panel_record)
+    print(
+        f"PANEL_PUBLISHED {index:02d} {row['machine']} {row['identity']} "
+        f"shadow_inside_lcfs={inside_count} total_shadow={panel_record['total_shadow_cells']}",
+        flush=True,
+    )
+    return {**plot_record, **panel_record}
+
+
 def _write_evidence(rows: list[dict[str, Any]], records: list[dict[str, Any]]) -> None:
     figure_rows = []
     for index, (row, record) in enumerate(zip(rows, records, strict=True), start=1):
@@ -677,27 +761,53 @@ def _write_evidence(rows: list[dict[str, Any]], records: list[dict[str, Any]]) -
     EVIDENCE.write_text(html + "\n")
 
 
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Regenerate topology panels and machine-checkable panel records."
+    )
+    parser.add_argument(
+        "--output-directory",
+        type=Path,
+        default=HERE,
+        help="Durable directory for caches, panels, JSON records, and evidence HTML.",
+    )
+    return parser.parse_args()
+
+
 def main() -> None:
+    global HERE, EVIDENCE, MAST_CACHE, DIIID_CACHE
+
+    args = _parse_args()
+    HERE = args.output_directory.expanduser().resolve()
+    EVIDENCE = HERE / "topology-visual-corroboration.html"
+    MAST_CACHE = HERE / "mast-topology-operands.npz"
+    DIIID_CACHE = HERE / "diiid-topology-operands.npz"
     configure_dtypes()
     HERE.mkdir(parents=True, exist_ok=True)
+    published: dict[int, dict[str, Any]] = {}
+
+    def publish(row: dict[str, Any], index: int) -> None:
+        published[index] = _publish_row(row, index)
+
     mast_identity = _source_authority(MAST_AUTHORITY)["source_identity"]
     diiid_identity = _source_authority(DIIID_AUTHORITY)["source_identity"]
     mast = (
-        _read_cache(MAST_CACHE, mast_identity) if MAST_CACHE.exists() else _mast_rows()
+        _read_cache(MAST_CACHE, mast_identity)
+        if MAST_CACHE.exists()
+        else _mast_rows(publish)
     )
     diiid = (
         _read_cache(DIIID_CACHE, diiid_identity)
         if DIIID_CACHE.exists()
-        else _diiid_rows()
+        else _diiid_rows(publish)
     )
     rows = mast + diiid
     if len(rows) != EXPECTED_MAST_ROWS + EXPECTED_DIIID_ROWS:
         raise RuntimeError("demonstration-bank coverage is incomplete")
-    records = []
     for index, row in enumerate(rows, start=1):
-        filename = f"{index:02d}-{row['machine'].lower().replace('-', '')}-{row['identity'].replace('/', '-').replace(':', '-').replace(' ', '-')}.png"
-        records.append(_draw_row(row, HERE / filename))
-        print(f"RENDERED {index:02d}/{len(rows)} {row['machine']} {row['identity']}")
+        if index not in published:
+            publish(row, index)
+    records = [published[index] for index in range(1, len(rows) + 1)]
     _write_evidence(rows, records)
     digest = hashlib.sha256(EVIDENCE.read_bytes()).hexdigest()
     print(
@@ -706,6 +816,7 @@ def main() -> None:
                 "rows": len(rows),
                 "mast": len(mast),
                 "diiid": len(diiid),
+                "output_directory": str(HERE),
                 "evidence_sha256": digest,
             },
             sort_keys=True,

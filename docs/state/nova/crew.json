@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T12:32:04",
+  "updated": "2026-08-28T12:40:24",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -61301,9 +61301,112 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T102310635464-sse-wall-height-eligibility-guard",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-wall-height-eligibility-guard",
+        "node_definition": {
+          "done_when": "The two geometries this plan's own assessment measured as physically wrong now fall back to pure topology, and the three that already matched are unchanged cell-for-cell. The assessment and its numbers are docs/research/wall-height-shadow-safety.html and docs/figures/wall-height-shadow-safety/metrics.json in this worktree; read them first, they name the exact predicate and the failing cases. (1) Add an eligibility guard to wall_height_shadow_mask in nova/equilibrium/connectivity_boundary.py so a height reference is used only when it is unambiguous. Two named conditions disqualify it: same-side height ambiguity, where another qualified candidate on the same side sits within a stated height separation of the chosen reference, which is the snowflake case; and far-radius coil-null eligibility, where the chosen reference lies outside a stated radial neighbourhood of the plasma, which is the coil-null case. On disqualification that side falls back to the pure topological shadow, adding no height exclusion at all. (2) Both thresholds are declared named constants with the physical reasoning stated beside them in mechanism terms, and both are expressed relative to a machine-independent scale rather than an absolute metre value hard-coded for one device, so the guard carries from MAST to DIII-D without retuning. (3) The strictly-subtractive property is preserved and tested: the conjunction with private_wall_node_mask must continue to mean the height rule can only remove shadow cells and never add one, so no configuration can produce a shadow cell that the pure topological flood did not already mark. Add an explicit test asserting this over all five geometries. (4) Extend tests/test_wall_height_exclusion.py so every one of the five geometries asserts its post-guard cell count: snowflake and coil-null now equal their pure-topology counts, and connected double null, limited, and single null keep the counts the assessment already recorded. Assert the alternate-primary coil-null case no longer flips 68 of 96 wall bits, and state the post-guard figure. (5) Regenerate docs/figures/wall-height-shadow-safety/metrics.json and the five PNG overlays against the guarded rule, and update the verdict table and recommendation in docs/research/wall-height-shadow-safety.html to record post-guard numbers beside the pre-guard ones so the change is auditable. (6) The focused lane covering the touched modules is green with the delta against the base revision stated rather than an absolute count. Do not regenerate any EFIT bank and do not modify any committed bank JSON or PNG.",
+          "estimated_hours": null,
+          "goal": "A plasma-separatrix eligibility guard that falls the wall-height exclusion back to pure topology on the two geometries measured as physically wrong, leaving the three matching geometries unchanged",
+          "id": "sse-wall-height-eligibility-guard",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T102310635464-sse-wall-height-eligibility-guard/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/connectivity_boundary.py",
+            "tests/test_wall_height_exclusion.py",
+            "docs/research/wall-height-shadow-safety.html",
+            "docs/figures/wall-height-shadow-safety"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "xpoint-map",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T10:23:20Z",
+        "completed_at": "2026-08-28T10:39:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 998,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 998,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "7564ac2ebf870c6f8bad65e76310a3b21ad4dd1a",
+        "commits": [
+          "ce686206627a20b2797b70145859a6a42350c90c"
+        ],
+        "changed_lines": {
+          "added": 215,
+          "removed": 86,
+          "files": 9
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused lane 41 passed at base then 42 passed final (+1, 0 removed); wall-height module 14/14; audit-doc OK; path-scoped ruff clean",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T102310635464-sse-wall-height-eligibility-guard/logs/focused-final-cell-parity.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T102310635464-sse-wall-height-eligibility-guard/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a037ef-13e9-76a1-a117-d5aa565eb4b7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 4975104,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 5140249,
+            "output_tokens": 650,
+            "output_tokens_cumulative": 23595,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 6048
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1158
+    "_version": 1159
   }
 }

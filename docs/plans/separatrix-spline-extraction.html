@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-28">
-<meta name="plan-version" content="68">
+<meta name="plan-version" content="69">
 </head>
 <body>
   <main class="plan-doc">
@@ -307,6 +307,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260828T102123170213-sse-active-set-trip-measurement" data-who="domain-partition" data-when="2026-08-28T10:31:26Z">
     <div class="r-comment-body"><p>Production MAST 22086/43 settles the active set in 12 of 16 trips at residual 6.08e-12, but non-monotonically: mask differences run 38,23,0,1,22,0,0,0,0,0,0,0, so the first zero at trip 2 is false and the mask still moves 22 cells at trip 4. Trips 0-1 cost 17.01 s each against 1.08 s for trips 2-11, later trips being 15.7x cheaper with compilation and warm-starting not separated. Cold-unit five-frame DIII-D scaling is 5 x 12 x 1455.959 s = 24.27 h, which is why a four-hour wall could never have held it</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260828T102310635464-sse-wall-height-eligibility-guard" data-who="xpoint-map" data-when="2026-08-28T10:39:58Z">
+    <div class="r-comment-body"><p>Eligibility guard on two wall-span-relative fractions (0.01 same-side height separation, 0.25 minimum separatrix radius), so no device-specific metre threshold is baked in. Both wrong geometries now equal pure topology cell-for-cell: snowflake 39/45 to 45/45, coil null 81/96 to 96/96, and the alternate-primary case 13/96 to 96/96, dropping its churn from 68 bits to 0. Wrong removals of 6 and 15 cells fall to 0. Connected double null, limited and single null are unchanged at 70, 0 and 37 cells. An invariant test asserts no evaluated mask contains a cell outside pure topology</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

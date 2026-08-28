@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-28">
-<meta name="plan-version" content="84">
+<meta name="plan-version" content="85">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -489,6 +489,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260828T020116890576-pod-long-ceiling-checkpointed" data-who="flood-performance" data-when="2026-08-28T02:56:59Z">
     <div class="r-comment-body"><p>GENUINELY-FLAT, budget refuted: minimum 3.0415e-4 at promotion 476 with no improvement through 2015 and the last one-percent refinement before the 650 checkpoint; three times the old ceiling bought nothing, and the checkpoint design turned a truncation into a usable 2015-row trajectory where the prior eight-hour CPU attempt produced nothing</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260828T025811074531-pod-coarse-solution-transfer" data-who="flood-rca" data-when="2026-08-28T03:19:15Z">
+    <div class="r-comment-body"><p>DISCRETIZATION-DIFFERS: the exactly converged 17x17 solution transfers with zero interpolation error and scores 0.2361 on the production grid, 776x the production floor and 2.4e7 times the criterion, so the two grids do not discretize one problem consistently; coarse-to-fine prolongation is not a remedy and no larger promotion ceiling is indicated</p></div>
 </div>
 </section>
 </main>

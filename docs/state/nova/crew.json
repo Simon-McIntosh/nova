@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T04:57:50",
+  "updated": "2026-08-28T05:20:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -59697,9 +59697,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T025811074531-pod-coarse-solution-transfer",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-coarse-solution-transfer",
+        "node_definition": {
+          "done_when": "One SLURM job (H200 sized to share or an all_debug CPU lane, at most two hours, EXIT_MARKER=0) reconstructs the converged 17x17 state that reached 9.90891922230742e-9, interpolates it onto the production 33x33 grid by the natural bilinear or spline map stated explicitly in the report, evaluates the production residual there in the same locked relative-sup metric, and also evaluates the coarse residual at the coarse state as a control; a report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/coarse-solution-transfer.md gives those figures beside the production floor 3.0415e-4 and the locked criterion 1e-8, states the interpolation error introduced as measured by round-tripping the coarse state through the fine grid and back, and gives the verdict SOLUTION-EXISTS-UNREACHED if the transferred residual is far below the production floor, DISCRETIZATION-DIFFERS if it is comparable to or above it, or INCONCLUSIVE if interpolation error dominates, naming for each what it implies about whether the production grid can reach the locked criterion at all; no repository file modified",
+          "estimated_hours": null,
+          "goal": "Whether a fine-grid solution exists near the converged coarse one, decided by evaluating the production residual at the converged 17x17 state interpolated onto the 33x33 grid, which separates a solver reachability problem from a genuine discretization difference without running any solve",
+          "id": "pod-coarse-solution-transfer",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T025811074531-pod-coarse-solution-transfer/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/coarse-solution-transfer.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T02:58:23Z",
+        "completed_at": "2026-08-28T03:19:15Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1252,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1252,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "2781e0744adccb38381f980d70dbec82dd0947d8",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "coarse control reproduced to 3.4e-17, lossless tensor-product transfer with zero round-trip sup error, production residual evaluated at the transferred state",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T025811074531-pod-coarse-solution-transfer/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T025811074531-pod-coarse-solution-transfer/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 7208448,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 7412536,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 15467,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3272
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1142
+    "_version": 1143
   }
 }

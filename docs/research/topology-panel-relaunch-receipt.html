@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="topology-panel-relaunch-receipt">
+  <meta name="plan-title" content="Topology panel cohort relaunch receipt">
+  <meta name="plan-summary" content="Launch-only provenance and harvest handoff for the complete retained-failure topology cohort.">
+  <meta name="plan-informs" content="separatrix-spline-extraction">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-recorded-at" content="2026-08-28">
+  <meta name="plan-read" content="1">
+  <meta name="plan-tags" content="equilibrium,topology,slurm,provenance,retained-failures">
+  <title>Topology panel cohort relaunch receipt | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header class="plan-hero">
+      <p class="eyebrow">Research · launch receipt</p>
+      <h1>Complete topology cohort relaunched with failure retention</h1>
+      <p class="lede">SLURM job <code>1259311</code> was submitted exactly once to the uncapped <code>vega</code> partition and accepted a 36-hour limit. It regenerates all twelve MAST arms and five DIII-D frames from a clean frozen snapshot carrying the per-panel failure-retention change. Every completed panel publishes its PNG and strict JSON record immediately into durable run storage. This receipt proves only the launch and provenance contract; it makes no panel-completion, containment, convergence, or scientific claim.</p>
+    </header>
+
+    <section id="scheduler">
+      <h2>Scheduler contract</h2>
+      <table>
+        <tbody>
+          <tr><th scope="row">Job</th><td><code>1259311</code></td></tr>
+          <tr><th scope="row">State at handoff</th><td><code>PENDING (Resources)</code></td></tr>
+          <tr><th scope="row">Partition</th><td><code>vega</code></td></tr>
+          <tr><th scope="row">Partition maximum</th><td><code>MaxTime=UNLIMITED</code>, confirmed before submission with <code>scontrol show partition vega</code></td></tr>
+          <tr><th scope="row">Accepted time limit</th><td><code>1-12:00:00</code> (36 hours)</td></tr>
+          <tr><th scope="row">Resources</th><td>one node, 16 CPUs, 128 GiB</td></tr>
+          <tr><th scope="row">Cost basis</th><td>24.27-hour cold projection for the five DIII-D frames, leaving 11.73 hours of requested headroom</td></tr>
+          <tr><th scope="row">Prior interrupted job</th><td><code>1259160</code> published panels 01–04, then stopped at MAST 21985/51 when a size-one boundary raised <code>ValueError</code></td></tr>
+        </tbody>
+      </table>
+      <p>The earlier environment-resolution failure is also excluded from this submission: the batch script clears inherited <code>VIRTUAL_ENV</code>, exports <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv</code>, and invokes <code>/home/ITER/mcintos/Code/nova/.venv/bin/python</code> by absolute path. A login-node check through that exact interpreter imported JAX 0.11.0 and loaded Nova from the frozen source tree before the sole submission.</p>
+    </section>
+
+    <section id="source">
+      <h2>Frozen source and authority identities</h2>
+      <table>
+        <tbody>
+          <tr><th scope="row">Source commit</th><td><code>030b4e6acdb48aeeebe28626beb7dfecec040556</code>, current <code>main</code> at submission</td></tr>
+          <tr><th scope="row">Failure retention</th><td>Commit <code>420e880c926f3009219c8e2743e9d914309ba3a5</code> is an ancestor of the submitted source</td></tr>
+          <tr><th scope="row">Frozen source status</th><td>clean; zero bytes from <code>git status --porcelain=v1</code></td></tr>
+          <tr><th scope="row">Submitted script SHA-256</th><td><code>126c4877b5c55de18d540a525c123fdb16df7f1f67126956cacff5e98f52ea49</code></td></tr>
+          <tr><th scope="row">MAST authority</th><td><code>docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py</code>, <code>sha256:bd78d3ddaaaef75d32c51af00399337652303aaddcd8aa899a7ecebb54392bae</code></td></tr>
+          <tr><th scope="row">DIII-D authority</th><td><code>benchmarks/diiid_forward_gs_match.py</code>, <code>sha256:3fdab4736efee529d48e952997034f3b76c1bb186a1021853e0f3c0566c7979e</code></td></tr>
+          <tr><th scope="row">Machine artifact</th><td><code>sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e</code>; payload file SHA-256 <code>11a12df0c2bd70d6dd7a461d2da11181479b16c6cf89602f226ffa353b0879e0</code></td></tr>
+        </tbody>
+      </table>
+      <p>The two extraction authorities both request ordered per-trip active-set streaming. The job log will therefore carry the executed trip number, mask difference, live residual, and inner-iteration trajectory for each panel. Cache identity checks remain strict: an operand cache is accepted only when its recorded source identity matches the current authority content identity.</p>
+    </section>
+
+    <section id="publication">
+      <h2>Incremental publication and retention contract</h2>
+      <p>Each row occupies its declared index even when the closed boundary is degenerate or panel rendering fails. A retained failure publishes a named-failure PNG and JSON pair rather than aborting the cohort. When no closed separatrix exists, both containment counts are <code>null</code> and <code>closed_separatrix_available</code> is false; a null is never interpreted as a zero-cell pass. <code>total_shadow_cells</code> remains numeric in every record. Healthy rows report integer containment counts and availability true.</p>
+      <p>The absolute output directory is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145858461189-sse-topology-panel-relaunch/job-output</code>. The job log is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145858461189-sse-topology-panel-relaunch/slurm-1259311.log</code>. The machine-readable reconciliation ledger is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145858461189-sse-topology-panel-relaunch/expected-panel-paths.json</code>.</p>
+    </section>
+
+    <section id="expected-panels">
+      <h2>Expected seventeen-panel denominator</h2>
+      <table>
+        <thead><tr><th>#</th><th>Identity</th><th>Expected incremental outputs</th></tr></thead>
+        <tbody>
+          <tr><td>01</td><td>MAST 21978/35 pure</td><td><code>01-mast-21978-35-pure.png</code><br><code>01-mast-21978-35-pure.json</code></td></tr>
+          <tr><td>02</td><td>MAST 21978/35 mixed</td><td><code>02-mast-21978-35-mixed.png</code><br><code>02-mast-21978-35-mixed.json</code></td></tr>
+          <tr><td>03</td><td>MAST 21983/35 pure</td><td><code>03-mast-21983-35-pure.png</code><br><code>03-mast-21983-35-pure.json</code></td></tr>
+          <tr><td>04</td><td>MAST 21983/35 mixed</td><td><code>04-mast-21983-35-mixed.png</code><br><code>04-mast-21983-35-mixed.json</code></td></tr>
+          <tr><td>05</td><td>MAST 21985/51 pure</td><td><code>05-mast-21985-51-pure.png</code><br><code>05-mast-21985-51-pure.json</code></td></tr>
+          <tr><td>06</td><td>MAST 21985/51 mixed</td><td><code>06-mast-21985-51-mixed.png</code><br><code>06-mast-21985-51-mixed.json</code></td></tr>
+          <tr><td>07</td><td>MAST 21986/46 pure</td><td><code>07-mast-21986-46-pure.png</code><br><code>07-mast-21986-46-pure.json</code></td></tr>
+          <tr><td>08</td><td>MAST 21986/46 mixed</td><td><code>08-mast-21986-46-mixed.png</code><br><code>08-mast-21986-46-mixed.json</code></td></tr>
+          <tr><td>09</td><td>MAST 21989/55 pure</td><td><code>09-mast-21989-55-pure.png</code><br><code>09-mast-21989-55-pure.json</code></td></tr>
+          <tr><td>10</td><td>MAST 21989/55 mixed</td><td><code>10-mast-21989-55-mixed.png</code><br><code>10-mast-21989-55-mixed.json</code></td></tr>
+          <tr><td>11</td><td>MAST 22086/43 pure</td><td><code>11-mast-22086-43-pure.png</code><br><code>11-mast-22086-43-pure.json</code></td></tr>
+          <tr><td>12</td><td>MAST 22086/43 mixed</td><td><code>12-mast-22086-43-mixed.png</code><br><code>12-mast-22086-43-mixed.json</code></td></tr>
+          <tr><td>13</td><td>DIII-D d3d_shot_00000c4a7b:179</td><td><code>13-diiid-d3d_shot_00000c4a7b-179.png</code><br><code>13-diiid-d3d_shot_00000c4a7b-179.json</code></td></tr>
+          <tr><td>14</td><td>DIII-D d3d_shot_0003ff34e7:44</td><td><code>14-diiid-d3d_shot_0003ff34e7-44.png</code><br><code>14-diiid-d3d_shot_0003ff34e7-44.json</code></td></tr>
+          <tr><td>15</td><td>DIII-D d3d_shot_001554e054:144</td><td><code>15-diiid-d3d_shot_001554e054-144.png</code><br><code>15-diiid-d3d_shot_001554e054-144.json</code></td></tr>
+          <tr><td>16</td><td>DIII-D d3d_shot_002495e835:146</td><td><code>16-diiid-d3d_shot_002495e835-146.png</code><br><code>16-diiid-d3d_shot_002495e835-146.json</code></td></tr>
+          <tr><td>17</td><td>DIII-D d3d_shot_0040ca9bdc:137</td><td><code>17-diiid-d3d_shot_0040ca9bdc-137.png</code><br><code>17-diiid-d3d_shot_0040ca9bdc-137.json</code></td></tr>
+        </tbody>
+      </table>
+      <p>A separate harvest must reconcile all 34 expected files, the terminal scheduler state and <code>EXIT_MARKER</code>, every retained failure class, and every numeric or null containment field. No value from the running cohort is interpreted here.</p>
+    </section>
+  </main>
+</body>
+</html>

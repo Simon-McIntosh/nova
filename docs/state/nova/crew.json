@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T08:40:29",
+  "updated": "2026-08-28T09:45:48",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -60787,9 +60787,113 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T064851526484-sse-mast-bank-resolve",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-mast-bank-resolve",
+        "node_definition": {
+          "done_when": "Before submitting, every input the driver reads that is absent from the worktree is copied from the main checkout at /home/ITER/mcintos/Code/nova and listed in the manifest, since nova/catalog/mast_geometry.json is untracked and killed the previous attempt after 56 minutes; one SLURM job on a non-debug CPU partition admitting four hours at 16 CPUs and 64 GiB runs the exact campaign driver on current origin/main with no transient cache and ends EXIT_MARKER=0, with the precheck comparing only that benchmarks, nova and tests are byte-identical to origin/main rather than whole-revision equality; the tracked JSON carries exactly 12 declared arms once each with explicit per-arm convergence, terminal residual, tolerance and termination, retained named failures, class from class_margin, and the locked thresholds reported as measured; the PNG is redrawn and visually inspected; the manifest tables per-arm convergence and terminal-residual deltas against the 2-of-12 pre-active-set bank 7a9cd3b9 and states how many arms now converge; only the JSON and PNG are committed",
+          "estimated_hours": null,
+          "goal": "The twelve-arm MAST corroboration bank regenerated with the settled active set, since the outer reclassify loop takes the diagnostic arm from a 3.0415e-4 plateau to 2.583e-16 and every banked arm predates it",
+          "id": "sse-mast-bank-resolve",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T064851526484-sse-mast-bank-resolve/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "margin-remeasure",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T06:49:01Z",
+        "completed_at": "2026-08-28T07:45:01Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3360,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3360,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "e076ea1a589db3efa9b8f5ab26e081361ed11aa3",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "job 1259051 healthy at 50:09 with 3h09 of lane remaining when the 55-minute worker fence expired; worktree provisioning held",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T064851526484-sse-mast-bank-resolve/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T064851526484-sse-mast-bank-resolve/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03818-636e-7632-bc6e-05c3a7131c93",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5050112,
+            "cached_input_tokens_cumulative": 13593088,
+            "input_tokens": 4997784,
+            "input_tokens_cumulative": 13788132,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 17293,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3158
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": {
+          "attempt": 13,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260828T054245356520-sse-mast-bank-resolve",
+          "root_run_id": "r-20260826T211058255408-sse-mast-bank-resolve"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 13,
+        "attempt_kind": "redispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1153
+    "_version": 1154
   }
 }

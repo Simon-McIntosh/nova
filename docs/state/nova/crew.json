@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T07:24:38",
+  "updated": "2026-08-28T07:42:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -60493,9 +60493,107 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260828T052447288273-pod-active-set-convergence",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-active-set-convergence",
+        "node_definition": {
+          "done_when": "One SLURM job (betelgeuse with reservation gpu_0003_grpA requesting one H200, 8 CPUs, 64 GiB and a three-hour ceiling, or an all_debug CPU lane, whichever allocates first, EXIT_MARKER=0) runs the checkpointed observer against 21978/35 pure at the production grid on current origin/main; a report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/active-set-convergence.md states whether the live relative-sup residual reached the locked 1e-8 with zero re-evaluated mask difference and at which outer and inner iteration, the final residual beside the 3.0415e-4 live-mask floor and the 8.017e-9 frozen-mask probe, the number of outer reclassifications and the mask difference after each, whether cycle detection fired, and the verdict CONVERGED, IMPROVED-BUT-SHORT or UNCHANGED; no repository file modified",
+          "estimated_hours": null,
+          "goal": "Whether the outer active-set iteration lets the real production arm reach the locked criterion, measured on 21978/35 pure with the same observer that recorded every earlier floor",
+          "id": "pod-active-set-convergence",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T052447288273-pod-active-set-convergence/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/active-set-convergence.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "flood-performance",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T05:24:54Z",
+        "completed_at": "2026-08-28T05:42:02Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1028,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1028,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "82d3bfa3ca625e6787501402b671487dc6df6a1d",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "replacement H200 job with observer-only tolerance fix; solve semantics and resource identity byte-identical; EXIT_MARKER=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T052447288273-pod-active-set-convergence/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T052447288273-pod-active-set-convergence/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f75-721b-73f1-bd97-eeffb0481cdc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 5772032,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 6005697,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 21026,
+            "reasoning_output_tokens": 1770,
+            "reasoning_output_tokens_cumulative": 5088
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1150
+    "_version": 1151
   }
 }

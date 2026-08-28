@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-28">
-<meta name="plan-version" content="92">
+<meta name="plan-version" content="93">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -513,6 +513,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260828T050318484040-pod-outer-active-set-loop" data-who="domain-partition" data-when="2026-08-28T05:23:59Z">
     <div class="r-comment-body"><p>Outer active-set iteration landed: freeze, solve, re-evaluate, repeat under a bounded 16-trip cap, accepting only live residual at or below 1e-8 with zero mask difference, with cycle detection and unchanged behaviour when the mask never moves</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260828T052447288273-pod-active-set-convergence" data-who="flood-performance" data-when="2026-08-28T05:42:02Z">
+    <div class="r-comment-body"><p>CONVERGED at production resolution: outer residuals 6.633e-3, 5.920e-3, 2.583e-16, 2.583e-16 with mask differences 14, 26, 18, 0, simultaneous locked-criterion agreement at outer 4 after three reclassifications, terminal live residual eight orders below 1e-8, in a 1:36 solve against the previous 2015-promotion plateau at 3.0415e-4</p></div>
 </div>
 </section>
 </main>

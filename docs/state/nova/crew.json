@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T13:23:00",
+  "updated": "2026-08-28T16:58:21",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -62002,9 +62002,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T115605897670-sse-panel-failure-retention",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-panel-failure-retention",
+        "node_definition": {
+          "done_when": "A degenerate arm publishes a named failure panel instead of aborting the cohort. Job 1259160 produced panels 01 through 04 then died on MAST 21985/51 with ValueError: cannot reshape array of size 1 into shape (2), raised by _finite_points on row nova_boundary in docs/figures/topology-visual-corroboration/generate_topology_visuals.py; the same three campaign drivers already carry a per-arm exception-to-row retention contract and this generator never got one. (1) A row whose boundary cannot be interpreted as a finite N-by-2 array, and any row whose panel rendering raises, publishes its PNG and JSON record with the failure named rather than propagating the exception. The declared seventeen-panel denominator is never reduced: a failed arm occupies its panel index and says why it failed. Other exception types must still propagate; retention covers rendering and boundary degeneracy, not arbitrary faults. (2) The JSON record must distinguish absent from zero, because conflating them is what makes a containment gate pass vacuously. When no closed separatrix is available, shadow_cells_inside_lcfs and shadow_cells_inside_closed_separatrix are null and closed_separatrix_available is false; they are 0 only when a separatrix exists and genuinely contains no shadow cell. A null must never be read as a pass. (3) The record also carries total_shadow_cells in every case, including for retained failures, so a reader can tell a panel with no shadow from a panel with shadow correctly placed outside the boundary. (4) Add focused tests: one proving a row with a size-one boundary publishes a retained failure panel with null containment counts and false availability rather than raising, one proving the seventeen-panel denominator survives a mid-cohort failure, and one proving a healthy row still reports integer counts with availability true. (5) The focused lane covering the touched module is green with the delta stated against the base revision rather than an absolute count. Do not submit any scheduler job and do not modify any committed panel PNG or JSON; the relaunch belongs to a separate node.",
+          "estimated_hours": null,
+          "goal": "Per-panel failure retention in the topology visual generator, so a degenerate arm publishes a named failure panel with null containment counts instead of aborting the cohort",
+          "id": "sse-panel-failure-retention",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T115605897670-sse-panel-failure-retention/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/topology-visual-corroboration/generate_topology_visuals.py",
+            "tests/test_topology_visual_generator.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "topology-visuals",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T11:56:18Z",
+        "completed_at": "2026-08-28T12:06:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 640,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 640,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "1c125a5c89fba20b70c80a4b2bfb66bd929ed64b",
+        "commits": [
+          "420e880c926f3009219c8e2743e9d914309ba3a5"
+        ],
+        "changed_lines": {
+          "added": 293,
+          "removed": 37,
+          "files": 2
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused generator lane 1/1 at base then 5/5 final (+4, zero regressions) in 7.53s EXIT_MARKER=0; path-scoped ruff check and format PASS",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T115605897670-sse-panel-failure-retention/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T115605897670-sse-panel-failure-retention/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e97-9cbb-7f42-a9b6-77efed646626",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4471040,
+            "cached_input_tokens_cumulative": 5129728,
+            "input_tokens": 4559013,
+            "input_tokens_cumulative": 5294130,
+            "output_tokens": 14558,
+            "output_tokens_cumulative": 24093,
+            "reasoning_output_tokens": 9000,
+            "reasoning_output_tokens_cumulative": 10709
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1165
+    "_version": 1166
   }
 }

@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="h200-saturation-launch-receipt">
   <meta name="plan-title" content="H200 batched-solve saturation launch receipt">
-  <meta name="plan-summary" content="Launch failure receipt and exact relaunch boundary for the bounded saturation sweep">
+  <meta name="plan-summary" content="Direct-interpreter preflight and durable one-H200 saturation sweep handoff">
   <meta name="plan-status" content="reference">
   <meta name="plan-informs" content="separatrix-spline-extraction">
   <meta name="plan-source-quality" content="primary">
@@ -21,76 +21,86 @@
 <body>
   <main class="plan-doc">
     <header>
-      <p class="eyebrow">Launch receipt &middot; blocked before measurement</p>
-      <h1>The one authorised H200 job exited in its uv wrapper</h1>
+      <p class="eyebrow">Launch receipt &middot; no saturation result asserted</p>
+      <h1>The corrected one-H200 saturation sweep is running</h1>
       <p class="lead">
-        SLURM job <strong>1259312</strong> was submitted exactly once with the
-        required reservation and one H200. The scheduler accepted
-        <strong>TimeLimit=UNLIMITED</strong>, then the batch wrapper exited in one
-        second because uv rejected a duplicate <code>--no-sync</code> argument.
-        Python, JAX, and the benchmark never started. No throughput, saturation,
-        memory, residual, branch, or convergence result is asserted here.
+        Replacement SLURM job <strong>1259321</strong> is running on
+        <code>98dci4-gpu-0003</code> with one NVIDIA H200 NVL. The scheduler
+        accepted <strong>TimeLimit=UNLIMITED</strong>. Its stored command invokes
+        the Nova interpreter directly, with no uv process between SLURM and the
+        benchmark. A separate harvest must audit the terminal receipts before any
+        throughput, saturation, residual, branch, or convergence result is claimed.
       </p>
     </header>
 
     <aside>
       <p>
-        <strong>Hard boundary.</strong> SLURM refused updates to the completed
-        job's environment, command, and stored batch script. Requeueing the same
-        job would repeat the unchanged wrapper. A corrected launch must therefore
-        be a second submission, which this launch's exactly-one-job authority does
-        not permit.
+        <strong>Superseded launch retained.</strong> Job <code>1259312</code>
+        failed after one second because uv rejected a duplicate
+        <code>--no-sync</code> argument, before Python or JAX started. Renewed
+        authority permitted exactly one corrected replacement. Job
+        <code>1259321</code> is that replacement; both identities remain recorded.
       </p>
     </aside>
 
     <section id="scheduler">
       <h2>Scheduler receipt</h2>
       <table>
-        <caption>Accepted allocation and terminal state</caption>
+        <caption>Corrected replacement allocation at handoff</caption>
         <tbody>
-          <tr><th scope="row">Job</th><td><code>1259312</code></td></tr>
+          <tr><th scope="row">Job</th><td><code>1259321</code></td></tr>
+          <tr><th scope="row">State at handoff</th><td><code>RUNNING</code></td></tr>
           <tr><th scope="row">Partition</th><td><code>betelgeuse</code></td></tr>
           <tr><th scope="row">Reservation</th><td><code>gpu_0003_grpA</code></td></tr>
-          <tr><th scope="row">Allocation</th><td>1 NVIDIA H200, 4 CPUs, 32 GiB host memory</td></tr>
+          <tr><th scope="row">Node</th><td><code>98dci4-gpu-0003</code></td></tr>
+          <tr><th scope="row">Allocation</th><td>1 GPU, 4 CPUs, 32 GiB host memory</td></tr>
+          <tr><th scope="row">Resolved device</th><td>NVIDIA H200 NVL, 143,771 MiB, driver 595.58.03</td></tr>
           <tr><th scope="row">Accepted time limit</th><td><code>UNLIMITED</code></td></tr>
-          <tr><th scope="row">Submitted and started</th><td>2026-08-28 17:05:57 +02:00</td></tr>
-          <tr><th scope="row">Ended</th><td>2026-08-28 17:05:58 +02:00</td></tr>
+          <tr><th scope="row">Submitted</th><td>2026-08-28 18:32:50 +02:00</td></tr>
+          <tr><th scope="row">Started</th><td>2026-08-28 18:32:51 +02:00</td></tr>
+        </tbody>
+      </table>
+      <table>
+        <caption>Superseded wrapper failure</caption>
+        <tbody>
+          <tr><th scope="row">Job</th><td><code>1259312</code></td></tr>
           <tr><th scope="row">State</th><td><code>FAILED</code>, exit <code>2:0</code></td></tr>
-          <tr><th scope="row">Measured H200 time</th><td>0 s; execution never reached JAX</td></tr>
+          <tr><th scope="row">Elapsed</th><td>1 s; 0 s measured H200 execution</td></tr>
+          <tr><th scope="row">Cause</th><td>uv rejected duplicate <code>--no-sync</code> before Python</td></tr>
         </tbody>
       </table>
     </section>
 
     <section id="flow">
-      <h2>Observed launch boundary</h2>
+      <h2>Verified execution route</h2>
       <figure>
         <svg viewBox="0 0 920 220" role="img" aria-labelledby="flow-title flow-desc">
-          <title id="flow-title">H200 saturation launch stopped before Python</title>
-          <desc id="flow-desc">The scheduler accepted one unlimited H200 job. Its uv wrapper rejected a duplicate flag before Python, leaving the benchmark and both evidence files untouched.</desc>
+          <title id="flow-title">Direct Nova interpreter feeds the H200 saturation sweep</title>
+          <desc id="flow-desc">A direct-interpreter login preflight completed before one unlimited reserved H200 job began the production ladder. It writes a compact receipt and a separate detailed receipt for harvest.</desc>
           <defs>
             <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M 0 0 L 10 5 L 0 10 z" fill="#135d6a"/>
             </marker>
           </defs>
           <rect x="25" y="60" width="190" height="100" rx="8" fill="#eef6f7" stroke="#135d6a"/>
-          <text x="120" y="92" text-anchor="middle" font-size="15">SLURM accepted</text>
-          <text x="120" y="120" text-anchor="middle" font-size="12">1 H200 &middot; unlimited</text>
-          <text x="120" y="142" text-anchor="middle" font-size="12">job 1259312</text>
+          <text x="120" y="92" text-anchor="middle" font-size="15">Login preflight</text>
+          <text x="120" y="120" text-anchor="middle" font-size="12">direct Python &middot; exit 0</text>
+          <text x="120" y="142" text-anchor="middle" font-size="12">1 width &middot; strict receipts</text>
           <line x1="215" y1="110" x2="300" y2="110" stroke="#135d6a" stroke-width="3" marker-end="url(#arrow)"/>
-          <rect x="310" y="45" width="225" height="130" rx="8" fill="#fff0f0" stroke="#9b1c1c"/>
-          <text x="422" y="80" text-anchor="middle" font-size="15">uv wrapper refused</text>
-          <text x="422" y="108" text-anchor="middle" font-size="12">duplicate --no-sync</text>
-          <text x="422" y="133" text-anchor="middle" font-size="12">exit 2 after 1 second</text>
-          <text x="422" y="156" text-anchor="middle" font-size="12">no Python process</text>
-          <line x1="535" y1="110" x2="620" y2="110" stroke="#777" stroke-width="3" stroke-dasharray="7 6" marker-end="url(#arrow)"/>
-          <rect x="630" y="60" width="255" height="100" rx="8" fill="#f4f4f4" stroke="#777"/>
-          <text x="758" y="92" text-anchor="middle" font-size="15">Measurement not reached</text>
-          <text x="758" y="120" text-anchor="middle" font-size="12">no compact receipt</text>
-          <text x="758" y="142" text-anchor="middle" font-size="12">no member-detail file</text>
+          <rect x="310" y="45" width="225" height="130" rx="8" fill="#f5f0fa" stroke="#512b81"/>
+          <text x="422" y="80" text-anchor="middle" font-size="15">Reserved H200 sweep</text>
+          <text x="422" y="108" text-anchor="middle" font-size="12">job 1259321 &middot; unlimited</text>
+          <text x="422" y="133" text-anchor="middle" font-size="12">through 512, then double</text>
+          <text x="422" y="156" text-anchor="middle" font-size="12">plateau or actual OOM</text>
+          <line x1="535" y1="110" x2="620" y2="110" stroke="#135d6a" stroke-width="3" marker-end="url(#arrow)"/>
+          <rect x="630" y="60" width="255" height="100" rx="8" fill="#fff8e7" stroke="#9a6b00"/>
+          <text x="758" y="92" text-anchor="middle" font-size="15">Durable evidence</text>
+          <text x="758" y="120" text-anchor="middle" font-size="12">compact strict JSON &lt; 10 MB</text>
+          <text x="758" y="142" text-anchor="middle" font-size="12">hashed detailed arrays</text>
         </svg>
         <figcaption>
-          The dashed edge is work that did not execute. This receipt distinguishes
-          accepted scheduler capacity from a running scientific measurement.
+          The login preflight and production job use the same absolute interpreter
+          and module command. Only the preflight ladder is reduced to batch 1.
         </figcaption>
       </figure>
     </section>
@@ -98,8 +108,9 @@
     <section id="driver">
       <h2>Committed measurement contract</h2>
       <p>
-        Driver commit <code>cc7c6b69aabbeb1f2087428c852aba6e981bdc8e</code>
-        preserves the pilot solver semantics while replacing the oversized
+        Driver commits <code>cc7c6b69aabbeb1f2087428c852aba6e981bdc8e</code>
+        and <code>0ec7c63f43748ecad23641fb0e781ae1f74253b0</code>
+        preserve the pilot solver semantics while replacing the oversized
         monolithic receipt. It measures batches
         <code>1, 4, 8, 16, 32, 64, 128, 256, 512</code>, then doubles dynamically
         until a real stop. The plateau criterion is two consecutive wider widths
@@ -117,6 +128,29 @@
         SHA-256, and receipt count, and refuses publication at 10,000,000 bytes or
         above.
       </p>
+    </section>
+
+    <section id="preflight">
+      <h2>Direct-interpreter preflight</h2>
+      <p>
+        Before replacement submission, the exact production interpreter, module,
+        output arguments, float64 environment, three frames, ten repetitions, and
+        plateau parameters ran directly on the login node's NVIDIA L4. Only
+        <code>--batch-sizes</code> changed, from the production ladder to
+        <code>1</code>. It exited <strong>0</strong> after one real width, persisted
+        all <strong>10</strong> repetition latencies and <strong>30</strong> member
+        receipts, and closed both strict-JSON artifacts.
+      </p>
+      <table>
+        <caption>Independently checked preflight products</caption>
+        <tbody>
+          <tr><th scope="row">Compact receipt</th><td>11,374 bytes; strict JSON</td></tr>
+          <tr><th scope="row">Detailed receipt</th><td>1,704 bytes; 30 members</td></tr>
+          <tr><th scope="row">Detailed SHA-256</th><td><code>5dd4d955c4ff91cff8f68d0e0cef339bd279e1cf2112b453a4240d734fcd1229</code></td></tr>
+          <tr><th scope="row">Recorded metadata</th><td>path, byte size, SHA-256, and member count all matched independent reads</td></tr>
+          <tr><th scope="row">Device</th><td>NVIDIA L4; float64 active</td></tr>
+        </tbody>
+      </table>
     </section>
 
     <section id="qualification">
@@ -151,23 +185,27 @@
     </section>
 
     <section id="handoff">
-      <h2>Evidence and exact next action</h2>
+      <h2>Evidence and harvest handoff</h2>
       <table>
         <caption>Durable paths</caption>
         <tbody>
           <tr><th scope="row">Scheduler receipt</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/scheduler-receipt.log</code></td></tr>
           <tr><th scope="row">Failed job log</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/slurm-1259312.log</code></td></tr>
           <tr><th scope="row">Submitted batch script</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/submitted-batch-script.sh</code></td></tr>
-          <tr><th scope="row">Intended compact receipt</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/job-output/batched_throughput_budget.json</code></td></tr>
-          <tr><th scope="row">Intended detailed receipt</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/job-output/batched_throughput_member_details.json.gz</code></td></tr>
+          <tr><th scope="row">Replacement scheduler receipt</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/replacement-scheduler-receipt.log</code></td></tr>
+          <tr><th scope="row">Replacement job log</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/slurm-1259321.log</code></td></tr>
+          <tr><th scope="row">Replacement batch script</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/replacement-batch-script.sh</code></td></tr>
+          <tr><th scope="row">Login preflight log</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/login-direct-preflight.log</code></td></tr>
+          <tr><th scope="row">Production compact receipt</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/job-output/batched_throughput_budget.json</code></td></tr>
+          <tr><th scope="row">Production detailed receipt</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/job-output/batched_throughput_member_details.json.gz</code></td></tr>
         </tbody>
       </table>
       <p>
-        With renewed submission authority, rerun the same allocation and benchmark
-        command using <code>/home/ITER/mcintos/Code/nova/.venv/bin/python</code>
-        directly instead of nesting <code>uv run --no-sync</code>. No driver or
-        measurement parameter needs to change. A harvest must still validate the
-        completed files before any saturation conclusion or artifact promotion.
+        Harvest job <code>1259321</code> only after it reaches a terminal state.
+        Independently recompute every aggregate from the raw repetition latencies,
+        validate strict JSON and the detailed receipt digest, confirm that the stop
+        is a measured plateau or actual device OOM rather than configuration, and
+        verify the compact receipt is below 10,000,000 bytes before promotion.
       </p>
     </section>
   </main>

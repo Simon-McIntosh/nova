@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T13:18:00",
+  "updated": "2026-08-28T13:23:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -61899,9 +61899,112 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T110634662994-sse-topology-panel-launch",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-topology-panel-launch",
+        "node_definition": {
+          "done_when": "One durable SLURM job is submitted that regenerates all seventeen topology panels on current main and emits a machine-checkable record of the defect that motivated them, and this node claims no scientific result. (1) The defect the lead identified was private-flux shadow cells flooded INSIDE the LCFS on converged panels. That must stop being an eyeball judgement. Extend docs/figures/topology-visual-corroboration/generate_topology_visuals.py so that, per panel, it writes a JSON record carrying the panel identity, the count of shadow-marked cells whose centres lie inside the closed separatrix branch, the total shadow cell count, the selected primary X-point and O-point positions, the count of other qualified X-points, and the closest plasma-wall point. The inside-LCFS count is the gate: for a converged panel it must be zero, and the record must state it as a number so a harvest node can assert on it rather than inspect a picture. (2) Panels are written incrementally: each PNG and its JSON record land as that panel completes, so a truncated job leaves every finished panel usable. Write every output into the durable crew run directory, never the worktree. (3) Submit exactly one job on an uncapped non-debug lane. Confirm the partition MaxTime with scontrol and request a limit generous against the measured cost: a production arm consumed 12 of 16 active-set trips, and five DIII-D frames project to about 24 hours cold, so do not request a limit that truncates the DIII-D panels. State the accepted TimeLimit from the scheduler receipt. (4) Enable per-trip active-set telemetry so the job log carries the trip trajectory for each panel. (5) Pin and record the source commit, clean worktree status, submitted script SHA-256, the absolute output directory, and the expected per-panel PNG and JSON paths, so a harvest node reconciles without re-deriving any of it. Make no claim about whether any panel passes; the harvest node owns the audit and the commit.",
+          "estimated_hours": null,
+          "goal": "One durable long-lane job regenerating all seventeen topology panels, each emitting a numeric count of shadow cells inside the LCFS so the lead's defect is gated by assertion rather than inspection",
+          "id": "sse-topology-panel-launch",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T110634662994-sse-topology-panel-launch/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/figures/topology-visual-corroboration/generate_topology_visuals.py",
+            "docs/research/topology-panel-launch-receipt.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "topology-visuals",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T11:06:42Z",
+        "completed_at": "2026-08-28T11:22:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 966,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 966,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "4a061009dd6b5ea40d3759fdb6d4e3a7a62700b5",
+        "commits": [
+          "f055565d58e9b24ac0471c13b754df02c7b7468b",
+          "a0cbf15a6b6637b09c7c5d8c310a4f0f408a94c7",
+          "0407edcc9d4ed271cf54795b1756e9bb4ff80a04"
+        ],
+        "changed_lines": {
+          "added": 257,
+          "removed": 53,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "replacement job 1259160 submitted once and verified RUNNING on vega with accepted TimeLimit 1-12:00:00; login-node interpreter import check passed before submission",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T110634662994-sse-topology-panel-launch/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T110634662994-sse-topology-panel-launch/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e97-9cbb-7f42-a9b6-77efed646626",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 658688,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 735117,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 9535,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1709
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1164
+    "_version": 1165
   }
 }

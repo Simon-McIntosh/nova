@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-28">
-<meta name="plan-version" content="76">
+<meta name="plan-version" content="77">
 </head>
 <body>
   <main class="plan-doc">
@@ -338,6 +338,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260828T111830021582" data-who="reckon-d8-s16-landing" data-when="2026-08-28T11:20:00+00:00">
     <div class="r-comment-body"><p><strong>The height rule is inert by construction, not by redundancy, and the cause is a threshold this session introduced.</strong> The eligibility census on production MAST 22086/43 is unambiguous: 25 evaluations, 50 side decisions, <strong>0 admitted and 50 disqualified</strong>, every one by the minimum-separatrix-radius condition and none by same-side ambiguity (each side carried a single qualified saddle, so the separation was infinite).</p><p>The margin shows this is a calibration error rather than a borderline case. The wall span is 3.650000095 m, so the 0.25 fraction sets the radial threshold at 0.912500024 m. MAST's actual lower X-points sit at 0.572464282 to 0.586213160 m and the upper ones at 0.582507572 to 0.600799930 m, short by 0.31 to 0.34 m. The threshold was chosen so the synthetic coil nulls at R=0.35 m would be rejected; on a spherical tokamak it rejects the genuine divertor nulls as well.</p><p>Two consequences follow. The earlier null result does <em>not</em> establish that the height rule is redundant with the topological shadow, because no side was ever admitted for the question to be asked — that census is empty, not zero. And the radius criterion is measuring the wrong quantity: a candidate should be disqualified for not lying on the plasma separatrix, not for having a small major radius, which is a proxy for machine size and cannot carry from MAST to DIII-D without retuning — the exact machine-independence the guard was written to provide.</p><p>No replacement discriminator has been built, deliberately. Designing a better guard for a rule that may be deleted is waste, so the retention decision is put to the lead first with this evidence attached. Reporting is opt-in and default masking behaviour is unchanged, so nothing here alters the running banks.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260828T110634662994-sse-topology-panel-launch" data-who="topology-visuals" data-when="2026-08-28T11:22:48Z">
+    <div class="r-comment-body"><p>The generator now emits one JSON companion per panel carrying numeric shadow_cells_inside_lcfs and total shadow-cell counts beside the selected X and O points, the other-qualified-X count and the closest wall point, so the lead&#x27;s flooding defect is asserted on rather than inspected. Panels and records are written incrementally so a truncation leaves finished panels usable. Job 1259157 failed before extraction because bare python resolved to the Reckon environment without JAX; the authorised replacement 1259160 pins the Nova interpreter by absolute path, unsets the inherited VIRTUAL_ENV, and runs on vega with a 36-hour accepted limit. Both job identities are recorded</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

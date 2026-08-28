@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T12:54:40",
+  "updated": "2026-08-28T13:04:30",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -61594,9 +61594,114 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T105307708316-sse-diiid-bank-launch",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-diiid-bank-launch",
+        "node_definition": {
+          "done_when": "One durable SLURM job is submitted for the five-frame DIII-D bank on current main, and the node makes no scientific claim about its results. (1) Submit exactly one job on partition vega, whose MaxTime is UNLIMITED as confirmed by scontrol. Request at least 36 hours. This is not optional padding: the measured active-set trajectory consumed 12 of 16 trips, and cold-unit scaling against the recorded 1455.959 s single-frame solve gives 24.27 h for five frames, so the previous attempt's four-hour request guaranteed the loss of the whole run. Verify the accepted TimeLimit in the scheduler receipt after submission and state it. (2) Enable the per-trip active-set telemetry opt-in so the job's log carries the trip trajectory for every frame; this is what makes the run diagnosable if it is truncated or behaves unexpectedly. (3) Confirm before submitting that the per-frame checkpoint path is active, so forward_gs_partial_receipt.json accumulates completed frames as the cohort proceeds. Write every output, log, receipt and figure into the durable crew run directory, never into the worktree, which is removed when the node promotes. (4) Pin and record the source: the exact commit the job runs, its clean worktree status, the submitted script SHA-256, the preregistration SHA-256, the transported wall payload and decoded coordinate SHA-256, and the machine artifact cache and digest. Record the comparison basis explicitly as the previous receipt's converged-frame count out of five. (5) Record in the manifest the job id, partition, node, allocation, accepted time limit, and the absolute paths of the log, the partial receipt, the final receipt and both figures, so a later harvest node can reconcile the run without re-deriving any of it. Make no claim about convergence, residuals, gates or scientific outcome: this node launches and records only, and a harvest node owns the audit.",
+          "estimated_hours": null,
+          "goal": "One durable long-lane SLURM job submitted for the five-frame DIII-D bank on the guarded solver with per-trip telemetry and per-frame checkpointing active",
+          "id": "sse-diiid-bank-launch",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T105307708316-sse-diiid-bank-launch/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/research/diiid-bank-launch-receipt.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T10:53:17Z",
+        "completed_at": "2026-08-28T11:04:21Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 664,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 664,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "783ebfb6b6999671ceebaa74e78f17abc8cf5b85",
+        "commits": [
+          "7a4ca14cc5c8b042d1394ebf072e6780e07f565f"
+        ],
+        "changed_lines": {
+          "added": 151,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "one job submitted and verified RUNNING: 1259150 on vega, accepted TimeLimit 1-12:00:00, source pinned clean at 4a42139d, script and preregistration digests recorded",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T105307708316-sse-diiid-bank-launch/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T105307708316-sse-diiid-bank-launch/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e37-51e1-7ca1-aec1-49356e2c6453",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5088000,
+            "cached_input_tokens_cumulative": 5088000,
+            "input_tokens": 5216156,
+            "input_tokens_cumulative": 5216156,
+            "output_tokens": 26767,
+            "output_tokens_cumulative": 26767,
+            "reasoning_output_tokens": 5828,
+            "reasoning_output_tokens_cumulative": 5828
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": {
+          "attempt": 3,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260828T054255273109-sse-diiid-bank-launch",
+          "root_run_id": "r-20260827T192212160951-sse-diiid-bank-launch"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 3,
+        "attempt_kind": "redispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1161
+    "_version": 1162
   }
 }

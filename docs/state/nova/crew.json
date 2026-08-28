@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T10:07:33",
+  "updated": "2026-08-28T12:20:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -60996,9 +60996,112 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T095528266244-sse-active-set-trip-telemetry",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-active-set-trip-telemetry",
+        "node_definition": {
+          "done_when": "Every outer active-set trip becomes observable, with numerics provably unchanged. (1) nova/equilibrium/fixed_point.py emits one flushed host-visible line per outer active-set trip during the solve, carrying at minimum the trip index, the mask difference against the previous trip, the live residual, and the inner iteration count; use jax.debug.print or io_callback so it works inside the device fori_loop, and gate it behind an explicit opt-in so production paths are unaffected when the opt-in is off. (2) active_set_iterations, active_set_residuals, active_set_mask_differences and active_set_cycle_damping_activations are serialized into the receipts written by docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py and benchmarks/diiid_forward_gs_match.py, as finite-or-null JSON leaves under the existing strict-JSON contract, without shrinking any declared denominator. (3) A focused test proves the telemetry changes no numerics: the same fixture solved with the opt-in on and off returns bit-identical state and residual, and the test asserts the serialized arrays have the declared per-trip length. (4) The focused suite for the touched modules is green against the base revision, with the run captured to a log and the delta stated rather than an absolute count. Do not regenerate any bank, do not submit any scheduler job, and do not modify any committed JSON or PNG artifact.",
+          "estimated_hours": null,
+          "goal": "Every outer active-set trip is observable, streamed live during the solve and serialized into both EFIT receipts, with numerics proven unchanged",
+          "id": "sse-active-set-trip-telemetry",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T095528266244-sse-active-set-trip-telemetry/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py",
+            "benchmarks/diiid_forward_gs_match.py",
+            "tests/test_active_set_telemetry.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T09:55:38Z",
+        "completed_at": "2026-08-28T10:20:00Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1462,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1462,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "dcd920b61cb86f8c49816042cbb21e67668f5879",
+        "commits": [
+          "6f08fb19fa4790449d9ff2b652ea488f6ccf9d53"
+        ],
+        "changed_lines": {
+          "added": 323,
+          "removed": 7,
+          "files": 4
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused lane 56/56 at base then 59/59 final (+3 passing, +0 failures); imas lane 9/9; path-scoped ruff clean",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T095528266244-sse-active-set-trip-telemetry/final-focused-vmap.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T095528266244-sse-active-set-trip-telemetry/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1224704,
+            "cached_input_tokens_cumulative": 13155584,
+            "input_tokens": 1429888,
+            "input_tokens_cumulative": 13614832,
+            "output_tokens": 4197,
+            "output_tokens_cumulative": 28762,
+            "reasoning_output_tokens": 521,
+            "reasoning_output_tokens_cumulative": 9017
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1155
+    "_version": 1156
   }
 }

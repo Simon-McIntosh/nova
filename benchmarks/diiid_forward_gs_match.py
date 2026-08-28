@@ -26,7 +26,9 @@ import math
 import os
 import subprocess
 import sys
+import tempfile
 import time
+from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, NamedTuple
@@ -98,6 +100,7 @@ DEFAULT_DATA = Path("/work/projects/imas_gpu/sophelio/raw/data/diii_d_train")
 DEFAULT_OUTPUT = Path("docs/figures/diiid-forward-onboarding/forward-gs")
 PREREGISTRATION_NAME = "forward_gs_preregistration.json"
 RECEIPT_NAME = "forward_gs_receipt.json"
+PARTIAL_RECEIPT_NAME = "forward_gs_partial_receipt.json"
 FRAME_FIGURE_NAME = "frame_flux_comparison.png"
 COHORT_FIGURE_NAME = "cohort_match_summary.png"
 PUBLICATION_DIRECTORY = "/nova/figures/diiid-forward-onboarding/forward-gs"
@@ -1561,6 +1564,7 @@ def _solve_frame_retaining_failure(
 def _solve_selected_frames(
     selected,
     baseline_expansion: float,
+    on_frame_completed: Callable[[list[FrameResult]], None] | None = None,
 ) -> tuple[list[FrameResult], list[dict[str, Any]]]:
     """Solve declared frames while bounding each frame's compilation lifetime."""
 
@@ -1595,6 +1599,8 @@ def _solve_selected_frames(
             )
             results.append(result)
             fields.append(frame_fields)
+            if on_frame_completed is not None:
+                on_frame_completed(list(results))
             frame_passed = bool(
                 result.converged
                 and result.metrics.interior_r_squared
@@ -1671,6 +1677,97 @@ def _strict_json_value(value: Any) -> Any:
     if isinstance(value, list | tuple):
         return [_strict_json_value(item) for item in value]
     return value
+
+
+def _frame_checkpoint_receipt(
+    results: list[FrameResult],
+    declared_frame_count: int,
+    preregistration_hash: str,
+) -> dict[str, Any]:
+    """Describe attempted frames without shrinking the declared denominator."""
+
+    attempted_frame_count = len(results)
+    if not 0 < attempted_frame_count <= declared_frame_count:
+        raise ValueError("checkpoint rows must be a non-empty declared-cohort prefix")
+    return _strict_json_value(
+        {
+            "measurement": "circuit-driven current-pinned forward GS frame checkpoint",
+            "receipt_kind": "partial_frame_checkpoint",
+            "cohort_status": {
+                "complete": False,
+                "declared_frame_count": declared_frame_count,
+                "attempted_frame_count": attempted_frame_count,
+                "unattempted_frame_count": (
+                    declared_frame_count - attempted_frame_count
+                ),
+                "unattempted_row_policy": (
+                    "rows not yet attempted are absent rather than fabricated"
+                ),
+            },
+            "preregistration_sha256": preregistration_hash,
+            "frame_records": [asdict(item) for item in results],
+        }
+    )
+
+
+def _atomic_write_strict_json(path: Path, value: dict[str, Any]) -> None:
+    """Fsync strict JSON before atomically publishing it in the same directory."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as temporary:
+            temporary_path = Path(temporary.name)
+            json.dump(value, temporary, indent=2, sort_keys=True, allow_nan=False)
+            temporary.write("\n")
+            temporary.flush()
+            os.fsync(temporary.fileno())
+        os.replace(temporary_path, path)
+        temporary_path = None
+        directory = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
+    finally:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
+
+
+def _write_frame_checkpoint(
+    path: Path,
+    results: list[FrameResult],
+    declared_frame_count: int,
+    preregistration_hash: str,
+) -> None:
+    """Publish every completed frame as an atomic partial receipt."""
+
+    receipt = _frame_checkpoint_receipt(
+        results, declared_frame_count, preregistration_hash
+    )
+    _atomic_write_strict_json(path, receipt)
+
+
+def _worktree_status_without_checkpoint(checkpoint_path: Path) -> list[str]:
+    """Report caller-owned changes without treating the runtime checkpoint as one."""
+
+    status = subprocess.run(
+        ["git", "status", "--porcelain"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+    checkpoint_status_path = Path(
+        os.path.relpath(checkpoint_path.absolute(), Path.cwd())
+    ).as_posix()
+    return [line for line in status if line[3:] != checkpoint_status_path]
 
 
 def _active_set_receipt(result: object) -> dict[str, Any]:
@@ -3596,7 +3693,17 @@ def run(
     affected = polarity_population()
     selected = select_frames(paths, frames, affected)
     baseline_expansion = REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION
-    results, fields = _solve_selected_frames(selected, baseline_expansion)
+    partial_receipt_path = output / PARTIAL_RECEIPT_NAME
+    results, fields = _solve_selected_frames(
+        selected,
+        baseline_expansion,
+        on_frame_completed=lambda completed: _write_frame_checkpoint(
+            partial_receipt_path,
+            completed,
+            len(selected),
+            preregistration_hash,
+        ),
+    )
     first = selected[0]
     first_row = _read(
         first.path,
@@ -3646,12 +3753,7 @@ def run(
         capture_output=True,
         text=True,
     ).stdout.strip()
-    status = subprocess.run(
-        ["git", "status", "--porcelain"],
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.splitlines()
+    status = _worktree_status_without_checkpoint(partial_receipt_path)
     receipt = _strict_json_value(
         {
             "measurement": "circuit-driven current-pinned forward GS kill gate",

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T06:15:44",
+  "updated": "2026-08-28T06:48:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -60192,9 +60192,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T041555691688-pod-fine-map-fixed-point-existence",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-fine-map-fixed-point-existence",
+        "node_definition": {
+          "done_when": "One SLURM job (H200 sized to share or an all_debug CPU lane, at most two hours, EXIT_MARKER=0) computes at both the 17x17 and production 33x33 grids, at three matched states comprising the seed, a mid-trajectory iterate and the terminal, the dominant eigenvalue magnitude of the map differential estimated matrix-free, the smallest singular value and condition number of the identity minus that differential, and the Picard step contraction ratio actually observed between consecutive iterates; a report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/fine-map-fixed-point-existence.md tables those figures per grid and state, states whether the production differential has eigenvalues at or beyond unit magnitude where the coarse one does not, relates each finding to whether a fixed point is reachable by the production route, and gives the verdict FIXED-POINT-REACHABLE, FIXED-POINT-UNREACHABLE or INCONCLUSIVE with what each implies for whether the locked criterion can be met at production resolution without changing the discretisation; no repository file modified",
+          "estimated_hours": null,
+          "goal": "Whether the production fixed-point map admits a reachable fixed point at all, probed structurally by comparing the map's own contraction and conditioning properties at the coarse grid that converges against the production grid that floors",
+          "id": "pod-fine-map-fixed-point-existence",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T041555691688-pod-fine-map-fixed-point-existence/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/fine-map-fixed-point-existence.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T04:16:03Z",
+        "completed_at": "2026-08-28T04:47:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1915,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1915,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "5317e6c9e0d996b6070bff237dd5d796fceb98f2",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "matrix-free spectral and conditioning probe at three matched states on both grids with observed Picard ratios",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T041555691688-pod-fine-map-fixed-point-existence/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T041555691688-pod-fine-map-fixed-point-existence/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 11087360,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 11226581,
+            "output_tokens": 10507,
+            "output_tokens_cumulative": 24410,
+            "reasoning_output_tokens": 1367,
+            "reasoning_output_tokens_cumulative": 3644
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1147
+    "_version": 1148
   }
 }

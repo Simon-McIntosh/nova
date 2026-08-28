@@ -187,6 +187,27 @@ def test_healthy_boundary_reports_integer_counts_with_true_availability(tmp_path
     assert record["retained_failure_exception_class"] is None
 
 
+def test_panel_compilation_state_is_released_after_success_and_retained_failure(
+    tmp_path, monkeypatch
+):
+    generator = _generator()
+    generator.HERE = tmp_path
+    released = []
+    collected = []
+    monkeypatch.setattr(generator.jax, "clear_caches", lambda: released.append(True))
+    monkeypatch.setattr(generator.gc, "collect", lambda: collected.append(True))
+
+    healthy = generator._publish_row(_operand(), 1)
+    failed_operand = _operand()
+    failed_operand["nova_boundary"] = np.asarray((1.0,))
+    retained_failure = generator._publish_row(failed_operand, 2)
+
+    assert healthy["retained_failure_exception_class"] is None
+    assert retained_failure["retained_failure_exception_class"] == "ValueError"
+    assert released == [True, True]
+    assert collected == [True, True]
+
+
 def test_non_rendering_validation_error_still_propagates(tmp_path):
     generator = _generator()
     generator.HERE = tmp_path

@@ -7,10 +7,10 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="wall-height-shadow-safety">
   <meta name="plan-title" content="Wall-height shadow safety — binary-mask difference and null-position churn">
-  <meta name="plan-summary" content="Five failure geometries measure the wall-height exclusion against the connectivity-only private-flux shadow: two exact matches, one inert limited case, and two wrong reductions that motivate an ambiguity and plasma-proximity guard.">
+  <meta name="plan-summary" content="A vessel-scaled eligibility guard makes all five measured wall-height exclusions match the connectivity-only private-flux shadow, eliminating the snowflake and coil-null errors without changing the three controls.">
   <meta name="plan-informs" content="separatrix-spline-extraction">
   <meta name="plan-recorded-at" content="2026-08-28">
-  <meta name="plan-verdict" content="Retain the wall-height exclusion only behind an unambiguous plasma-separatrix guard. Connected double-null and conventional single-null cases are exact and stable, but a near-equal-height snowflake wrongly removes 6 of 45 topological-shadow wall nodes and a qualified coil-null selection removes 15 of 96, with an alternate primary changing 68 bits.">
+  <meta name="plan-verdict" content="Retain the guarded wall-height exclusion. Vessel-scaled ambiguity and radial-eligibility checks restore the snowflake and coil-null cases to pure topology, while connected double-null, limited, and conventional single-null masks remain cell-identical.">
   <title>Wall-height shadow safety | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -18,29 +18,30 @@
 <body>
 <main class="plan-doc">
   <header>
-    <span class="badge badge-blocked">conditional retention</span>
+    <span class="badge badge-shipped">guard validated</span>
     <h1>Wall-height shadow safety</h1>
-    <p>The wall-height rule is stable for the conventional connected double-null and single-null
-    geometries, and inert for a limited plasma. It is not a generally safe substitute for the
-    connectivity result: the near-equal-height snowflake removes 6 physically private wall nodes,
-    while a central-solenoid null admitted as primary removes 15 and makes 68 of 96 bits depend on
-    which far null is selected. The recommendation is therefore conditional retention with an
-    explicit ambiguity and plasma-proximity guard.</p>
+    <p>The guarded wall-height rule now matches the connectivity result in all five measured
+    geometries. Before the guard, the near-equal-height snowflake removed 6 physically private
+    wall nodes, while a central-solenoid null admitted as primary removed 15 and made 68 of 96
+    bits depend on which far null was selected. Vessel-scaled ambiguity and radial-eligibility
+    checks now fall those sides back to pure topology; the three already-correct controls remain
+    cell-identical.</p>
   </header>
 
   <section class="quick-status">
-    <div class="status-card"><strong>Exact matches</strong>
-      <span class="badge badge-shipped">3 of 5</span>
-      <p>Connected double null: 70/70; limited: 0/0; single null: 37/37.</p></div>
-    <div class="status-card"><strong>Wrong reductions</strong>
-      <span class="badge badge-blocked">2 of 5</span>
-      <p>Snowflake removes 6/45; coil-null selection removes 15/96.</p></div>
+    <div class="status-card"><strong>Post-guard exact matches</strong>
+      <span class="badge badge-shipped">5 of 5</span>
+      <p>Snowflake 45/45; double null 70/70; coil-null 96/96; limited 0/0;
+      single null 37/37.</p></div>
+    <div class="status-card"><strong>Wrong reductions repaired</strong>
+      <span class="badge badge-shipped">2 of 2</span>
+      <p>Snowflake removed 6 before and 0 after; coil-null removed 15 before and 0 after.</p></div>
     <div class="status-card"><strong>Small-perturbation churn</strong>
-      <span class="badge badge-active">0–2 nodes</span>
-      <p>Per geometry: 2, 0, 2, 0, 0 bits over a 96-node wall.</p></div>
+      <span class="badge badge-shipped">0 nodes</span>
+      <p>All five geometries have zero post-guard churn under the measured perturbation.</p></div>
     <div class="status-card"><strong>Primary identity risk</strong>
-      <span class="badge badge-blocked">68 nodes</span>
-      <p>Far coil-null primary swap: 81 → 13 shadow nodes.</p></div>
+      <span class="badge badge-shipped">0 nodes</span>
+      <p>Far coil-null primary swap: 68 bits before the guard, zero after it.</p></div>
   </section>
 
   <h2>What the shipped predicate does</h2>
@@ -72,39 +73,50 @@
   <code>added_to_pure_shadow</code> count is therefore zero by construction; safety depends on
   whether the removals are physically justified.</p>
 
+  <p>The shipped eligibility guard adds two vessel-scaled conditions in
+  <code>nova/equilibrium/connectivity_boundary.py</code>. A contributing side is ambiguous when
+  another qualified saddle on that side lies within 1% of the wall's poloidal span of the chosen
+  reference. A reference is radially ineligible when its major radius is less than 25% of that
+  same span, placing it in the symmetry-axis coil region rather than the plasma-separatrix
+  neighbourhood. No device-specific metre threshold is embedded. When either condition holds,
+  connectivity-private nodes on that poloidal side pass through unchanged instead of being cut by
+  height. The final <code>proposed &amp; private_wall</code> conjunction is unchanged, so the
+  guarded result remains a subset of pure topology for every input.</p>
+
   <h2>Measured scorecard</h2>
   <p>All rows use the production helper on the same 96-node D-shaped wall. “Pure” is the
-  connectivity-only private-wall mask. “Height” is the shipped height predicate after the private
-  conjunction. Perturbations move each null by 0.005–0.015 m; churn is the XOR count between the
-  baseline and perturbed height masks. The strict machine-readable record is
+  connectivity-only private-wall mask. “Pre” is the assessed predicate before eligibility was
+  imposed; “post” is the guarded predicate after the private conjunction. Perturbations move each
+  null by 0.005–0.015 m; churn is the XOR count between the baseline and perturbed masks. The
+  strict machine-readable record is
   <code>docs/figures/wall-height-shadow-safety/metrics.json</code>.</p>
   <table>
     <thead>
-      <tr><th>Failure geometry</th><th>Pure</th><th>Height</th><th>Difference</th>
-      <th>Perturbed</th><th>Churn</th><th>Verdict</th></tr>
+      <tr><th>Failure geometry</th><th>Pure</th><th>Pre → post</th><th>Removed pre → post</th>
+      <th>Perturbed pre → post</th><th>Churn pre → post</th><th>Verdict</th></tr>
     </thead>
     <tbody>
-      <tr><td>Snowflake, near-equal lower-null heights</td><td>45</td><td>39</td>
-      <td>0 added, 6 removed</td><td>41</td><td>2</td>
-      <td><strong>Wrong by 6 cells.</strong> Both lower nulls belong to the private-flux topology;
-      selecting one vertical cut discards connectivity-proven wall participation, and the cut moves
-      when their 0.015 m height ordering changes.</td></tr>
-      <tr><td>Connected double null, near-symmetric</td><td>70</td><td>70</td>
-      <td>0</td><td>70</td><td>0</td>
-      <td><strong>Matches the topological shadow.</strong> The lower and upper references bracket
+      <tr><td>Snowflake, near-equal lower-null heights</td><td>45</td><td>39 → 45</td>
+      <td>6 → 0</td><td>41 → 45</td><td>2 → 0</td>
+      <td><strong>Repaired to an exact match.</strong> The 0.015 m same-side split is below the
+      0.0236 m ambiguity threshold set by 1% of this wall's 2.36 m poloidal span, so the lower side
+      now uses all 45 connectivity-private nodes.</td></tr>
+      <tr><td>Connected double null, near-symmetric</td><td>70</td><td>70 → 70</td>
+      <td>0 → 0</td><td>70 → 70</td><td>0 → 0</td>
+      <td><strong>Unchanged, cell-for-cell.</strong> The lower and upper references bracket
       the private legs. Moving both by 0.005 m and swapping which one is primary changes no bit.</td></tr>
-      <tr><td>Central-solenoid coil-null extremes</td><td>96</td><td>81</td>
-      <td>0 added, 15 removed</td><td>79</td><td>2</td>
-      <td><strong>Wrong by 15 cells.</strong> A far-radius coil null is not a plasma separatrix
-      reference. Worse, selecting the other extreme leaves only 13 nodes and flips 68 bits: the
-      rule can exclude almost everything or almost nothing solely from primary identity.</td></tr>
-      <tr><td>Limited plasma, no qualifying X-point</td><td>0</td><td>0</td>
-      <td>0</td><td>0</td><td>0</td>
-      <td><strong>Matches the topological shadow.</strong> No candidate qualifies, so the initial
+      <tr><td>Central-solenoid coil-null extremes</td><td>96</td><td>81 → 96</td>
+      <td>15 → 0</td><td>79 → 96</td><td>2 → 0</td>
+      <td><strong>Repaired to an exact match.</strong> R=0.35 m is inside the 0.59 m radial
+      eligibility boundary set by 25% of the wall span. Both primary choices now retain 96 nodes,
+      so the alternate-primary change falls from 68 bits to 0.</td></tr>
+      <tr><td>Limited plasma, no qualifying X-point</td><td>0</td><td>0 → 0</td>
+      <td>0 → 0</td><td>0 → 0</td><td>0 → 0</td>
+      <td><strong>Unchanged, cell-for-cell.</strong> No candidate qualifies, so the initial
       zero promoted mask remains zero; the height rule is inert.</td></tr>
-      <tr><td>Single lower null with outboard low wall node</td><td>37</td><td>37</td>
-      <td>0</td><td>37</td><td>0</td>
-      <td><strong>Matches the topological shadow.</strong> All 37 lower private nodes survive,
+      <tr><td>Single lower null with outboard low wall node</td><td>37</td><td>37 → 37</td>
+      <td>0 → 0</td><td>37 → 37</td><td>0 → 0</td>
+      <td><strong>Unchanged, cell-for-cell.</strong> All 37 lower private nodes survive,
       including the largest-major-radius wall node below the lower null. A 0.01 m shift changes no
       bit.</td></tr>
     </tbody>
@@ -112,15 +124,15 @@
 
   <h2>Geometry overlays</h2>
   <p>Blue cells are the flood-connected core and orange cells the pure private-flux flood region.
-  Red wall markers survive the height predicate; hollow orange markers are connectivity-private
-  nodes removed by height. Black crosses are the qualified null census and the blue star marks the
+  Red wall markers survive the guarded height predicate; hollow orange markers would identify any
+  connectivity-private nodes removed after guarding. Black crosses are the qualified null census and the blue star marks the
   axis height used to classify upper and lower references.</p>
 
   <figure>
     <img src="/nova/figures/wall-height-shadow-safety/snowflake-near-equal-height.png"
          alt="Snowflake wall and flood regions with six topological shadow nodes removed by the height rule">
-    <figcaption>Snowflake: 45 pure-shadow nodes, 39 retained by height, 6 wrongly removed;
-    a small null-height reordering changes 2 bits.</figcaption>
+    <figcaption>Snowflake: the pre-guard 39/45 result and 2-bit perturbation churn become 45/45
+    and zero churn after the ambiguity fallback.</figcaption>
   </figure>
   <figure>
     <img src="/nova/figures/wall-height-shadow-safety/connected-double-null.png"
@@ -131,8 +143,8 @@
   <figure>
     <img src="/nova/figures/wall-height-shadow-safety/coil-null-extremes.png"
          alt="Coil-null geometry showing topological wall shadow nodes removed by an extreme height reference">
-    <figcaption>Coil-null failure: the baseline far null retains 81/96 nodes; the alternate far
-    primary retains 13/96, a 68-bit identity-dependent jump.</figcaption>
+    <figcaption>Coil-null geometry: the pre-guard primary choices retained 81/96 and 13/96 nodes;
+    both retain 96/96 after the radial fallback, eliminating the 68-bit jump.</figcaption>
   </figure>
   <figure>
     <img src="/nova/figures/wall-height-shadow-safety/limited-no-x-point.png"
@@ -154,19 +166,19 @@
   snowflake-minus partitions at 0.08 m and 0.16 m null separation over the same three resolutions.
   This assessment executes those tests unchanged, then adds one focused test in
   <code>tests/test_wall_height_exclusion.py</code> that passes their connectivity-private result
-  through the production height helper and pins all five difference and churn rows above. The
+  through the production height helper and pins all five difference and churn rows above. A
+  separate all-geometry invariant check proves every baseline, perturbed, and alternate-primary
+  guarded mask is a subset of its pure topological mask. The
   outboard-low-node assertion selects the largest R among lower private wall nodes and proves that
   it remains excluded from the residual.</p>
 
   <h2>Recommendation and falsifier</h2>
-  <p><strong>Retain conditionally with a named guard: the unambiguous plasma-separatrix guard.</strong>
-  Apply the height reduction only when the primary is a connectivity-qualified plasma saddle, each
-  contributing side has one unambiguous closest-to-axis saddle family, and the candidate lies in
-  the plasma flood-rejoin neighbourhood rather than merely being a typed field null. If two
-  same-side qualified saddles fall within the vertical hysteresis band, or if a far-radius coil
-  null can become primary, fall back to the pure topological private-wall mask. This preserves the
-  exact 70/70 connected-double-null and 37/37 single-null cases while refusing the measured 6-cell
-  snowflake error and 68-bit coil-primary discontinuity.</p>
+  <p><strong>Retain with the shipped unambiguous plasma-separatrix guard.</strong> Apply the height
+  reduction only when a contributing side has no second qualified saddle inside 1% of wall span
+  and its reference radius is at least 25% of wall span. The measured snowflake and coil-null
+  failures now fall back to pure topology, while the connected-double-null, limited, and
+  single-null controls are unchanged. The post-guard battery has zero wrong removals and zero
+  perturbation or alternate-primary churn over all five 96-node geometries.</p>
   <p>This recommendation would be overturned by either of two evidence results: a broader
   manufactured or real-machine cohort showing a physically valid height removal in an ambiguous
   case that the named guard rejects, or active-set telemetry showing that pure-shadow fallback

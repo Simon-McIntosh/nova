@@ -33,6 +33,15 @@ class HeightSafetyGeometry:
     alternate_primary_index: int | None = None
 
 
+_ASSESSMENT_HEIGHT_COUNTS = {
+    "snowflake-near-equal-height": (39, 41, 2, None, None),
+    "connected-double-null": (70, 70, 0, None, None),
+    "coil-null-extremes": (81, 79, 2, 13, 68),
+    "limited-no-x-point": (0, 0, 0, None, None),
+    "single-null-outboard-low-node": (37, 37, 0, None, None),
+}
+
+
 def _wall_coordinates(count: int = 96) -> np.ndarray:
     """Return a closed D-shaped wall with lower outboard coverage."""
     angle = np.linspace(0.0, 2.0 * np.pi, count, endpoint=False)
@@ -175,7 +184,7 @@ def _geometry_height_mask(
 
 
 def wall_height_safety_metrics() -> list[dict[str, int | str | None]]:
-    """Measure baseline difference and null-perturbation churn per geometry."""
+    """Measure guarded difference and retain the assessment baseline."""
     metrics = []
     for geometry in _safety_geometries():
         baseline = _geometry_height_mask(geometry)
@@ -187,11 +196,24 @@ def wall_height_safety_metrics() -> list[dict[str, int | str | None]]:
         )
         pure_count = int(np.count_nonzero(geometry.pure_shadow))
         baseline_count = int(np.count_nonzero(baseline))
+        (
+            assessment_count,
+            assessment_perturbed_count,
+            assessment_churn,
+            assessment_alternate_count,
+            assessment_alternate_churn,
+        ) = _ASSESSMENT_HEIGHT_COUNTS[geometry.name]
         metrics.append(
             {
                 "geometry": geometry.name,
                 "wall_nodes": int(geometry.pure_shadow.size),
                 "pure_shadow_nodes": pure_count,
+                "pre_guard_height_shadow_nodes": assessment_count,
+                "pre_guard_removed_from_pure_shadow": pure_count - assessment_count,
+                "pre_guard_perturbed_height_shadow_nodes": assessment_perturbed_count,
+                "pre_guard_perturbation_churn_nodes": assessment_churn,
+                "pre_guard_alternate_primary_shadow_nodes": assessment_alternate_count,
+                "pre_guard_alternate_primary_churn_nodes": assessment_alternate_churn,
                 "height_shadow_nodes": baseline_count,
                 "removed_from_pure_shadow": pure_count - baseline_count,
                 "added_to_pure_shadow": int(
@@ -213,12 +235,12 @@ def wall_height_safety_metrics() -> list[dict[str, int | str | None]]:
 
 
 def test_failure_geometry_masks_pin_difference_and_perturbation_churn() -> None:
-    """Every failure geometry banks its pure-shadow difference and churn."""
+    """Every geometry pins its guarded pure-shadow difference and churn."""
     metrics = {row["geometry"]: row for row in wall_height_safety_metrics()}
     expected = {
-        "snowflake-near-equal-height": (45, 39, 6, 41, 2),
+        "snowflake-near-equal-height": (45, 45, 0, 45, 0),
         "connected-double-null": (70, 70, 0, 70, 0),
-        "coil-null-extremes": (96, 81, 15, 79, 2),
+        "coil-null-extremes": (96, 96, 0, 96, 0),
         "limited-no-x-point": (0, 0, 0, 0, 0),
         "single-null-outboard-low-node": (37, 37, 0, 37, 0),
     }
@@ -234,8 +256,21 @@ def test_failure_geometry_masks_pin_difference_and_perturbation_churn() -> None:
         assert row["added_to_pure_shadow"] == 0
 
     coil = metrics["coil-null-extremes"]
-    assert coil["alternate_primary_shadow_nodes"] == 13
-    assert coil["alternate_primary_churn_nodes"] == 68
+    assert coil["alternate_primary_shadow_nodes"] == 96
+    assert coil["alternate_primary_churn_nodes"] == 0
+    assert coil["pre_guard_alternate_primary_churn_nodes"] == 68
+
+    for geometry in _safety_geometries():
+        np.testing.assert_array_equal(
+            _geometry_height_mask(geometry), geometry.pure_shadow
+        )
+        np.testing.assert_array_equal(
+            _geometry_height_mask(geometry, perturbed=True), geometry.pure_shadow
+        )
+        if geometry.alternate_primary_index is not None:
+            np.testing.assert_array_equal(
+                _geometry_height_mask(geometry, alternate=True), geometry.pure_shadow
+            )
 
     single = next(
         geometry
@@ -248,6 +283,19 @@ def test_failure_geometry_masks_pin_difference_and_perturbation_churn() -> None:
     )
     assert wall[outboard_private_index, 1] < single.qualified[0][1]
     assert _geometry_height_mask(single)[outboard_private_index]
+
+
+def test_guarded_height_mask_is_strictly_subtractive_for_all_geometries() -> None:
+    """The guarded rule cannot mark a cell outside the topological shadow."""
+    for geometry in _safety_geometries():
+        masks = [
+            _geometry_height_mask(geometry),
+            _geometry_height_mask(geometry, perturbed=True),
+        ]
+        if geometry.alternate_primary_index is not None:
+            masks.append(_geometry_height_mask(geometry, alternate=True))
+        for guarded in masks:
+            assert not np.any(guarded & ~geometry.pure_shadow), geometry.name
 
 
 def render_wall_height_safety_evidence(output: Path) -> None:
@@ -289,14 +337,14 @@ def render_wall_height_safety_evidence(output: Path) -> None:
             facecolors="none",
             edgecolors="#d97706",
             linewidths=1.3,
-            label="pure shadow removed by height",
+            label="pure shadow removed by guarded height",
         )
         axis.scatter(
             wall[retained, 0],
             wall[retained, 1],
             s=22,
             color="#b91c1c",
-            label="height-augmented shadow",
+            label="guarded height shadow",
         )
         if geometry.qualified:
             points = np.asarray(geometry.qualified)
@@ -320,12 +368,12 @@ def render_wall_height_safety_evidence(output: Path) -> None:
         axis.set(
             xlabel="R [m]",
             ylabel="Z [m]",
-            xlim=(0.70, 2.62),
-            ylim=(-1.25, 1.25),
+            xlim=(0.20, 2.62),
+            ylim=(-1.50, 1.25),
             aspect="equal",
             title=(
                 f"{geometry.name}: pure {metric['pure_shadow_nodes']}, "
-                f"height {metric['height_shadow_nodes']}, "
+                f"guarded {metric['height_shadow_nodes']}, "
                 f"churn {metric['perturbation_churn_nodes']}"
             ),
         )

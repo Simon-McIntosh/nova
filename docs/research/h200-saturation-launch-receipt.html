@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="h200-saturation-launch-receipt">
+  <meta name="plan-title" content="H200 batched-solve saturation launch receipt">
+  <meta name="plan-summary" content="Launch failure receipt and exact relaunch boundary for the bounded saturation sweep">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-informs" content="separatrix-spline-extraction">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-recorded-at" content="2026-08-28">
+  <meta name="plan-read" content="1">
+  <meta name="plan-tags" content="equilibrium,h200,slurm,throughput,saturation">
+  <title>H200 batched-solve saturation launch receipt | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Launch receipt &middot; blocked before measurement</p>
+      <h1>The one authorised H200 job exited in its uv wrapper</h1>
+      <p class="lead">
+        SLURM job <strong>1259312</strong> was submitted exactly once with the
+        required reservation and one H200. The scheduler accepted
+        <strong>TimeLimit=UNLIMITED</strong>, then the batch wrapper exited in one
+        second because uv rejected a duplicate <code>--no-sync</code> argument.
+        Python, JAX, and the benchmark never started. No throughput, saturation,
+        memory, residual, branch, or convergence result is asserted here.
+      </p>
+    </header>
+
+    <aside>
+      <p>
+        <strong>Hard boundary.</strong> SLURM refused updates to the completed
+        job's environment, command, and stored batch script. Requeueing the same
+        job would repeat the unchanged wrapper. A corrected launch must therefore
+        be a second submission, which this launch's exactly-one-job authority does
+        not permit.
+      </p>
+    </aside>
+
+    <section id="scheduler">
+      <h2>Scheduler receipt</h2>
+      <table>
+        <caption>Accepted allocation and terminal state</caption>
+        <tbody>
+          <tr><th scope="row">Job</th><td><code>1259312</code></td></tr>
+          <tr><th scope="row">Partition</th><td><code>betelgeuse</code></td></tr>
+          <tr><th scope="row">Reservation</th><td><code>gpu_0003_grpA</code></td></tr>
+          <tr><th scope="row">Allocation</th><td>1 NVIDIA H200, 4 CPUs, 32 GiB host memory</td></tr>
+          <tr><th scope="row">Accepted time limit</th><td><code>UNLIMITED</code></td></tr>
+          <tr><th scope="row">Submitted and started</th><td>2026-08-28 17:05:57 +02:00</td></tr>
+          <tr><th scope="row">Ended</th><td>2026-08-28 17:05:58 +02:00</td></tr>
+          <tr><th scope="row">State</th><td><code>FAILED</code>, exit <code>2:0</code></td></tr>
+          <tr><th scope="row">Measured H200 time</th><td>0 s; execution never reached JAX</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="flow">
+      <h2>Observed launch boundary</h2>
+      <figure>
+        <svg viewBox="0 0 920 220" role="img" aria-labelledby="flow-title flow-desc">
+          <title id="flow-title">H200 saturation launch stopped before Python</title>
+          <desc id="flow-desc">The scheduler accepted one unlimited H200 job. Its uv wrapper rejected a duplicate flag before Python, leaving the benchmark and both evidence files untouched.</desc>
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#135d6a"/>
+            </marker>
+          </defs>
+          <rect x="25" y="60" width="190" height="100" rx="8" fill="#eef6f7" stroke="#135d6a"/>
+          <text x="120" y="92" text-anchor="middle" font-size="15">SLURM accepted</text>
+          <text x="120" y="120" text-anchor="middle" font-size="12">1 H200 &middot; unlimited</text>
+          <text x="120" y="142" text-anchor="middle" font-size="12">job 1259312</text>
+          <line x1="215" y1="110" x2="300" y2="110" stroke="#135d6a" stroke-width="3" marker-end="url(#arrow)"/>
+          <rect x="310" y="45" width="225" height="130" rx="8" fill="#fff0f0" stroke="#9b1c1c"/>
+          <text x="422" y="80" text-anchor="middle" font-size="15">uv wrapper refused</text>
+          <text x="422" y="108" text-anchor="middle" font-size="12">duplicate --no-sync</text>
+          <text x="422" y="133" text-anchor="middle" font-size="12">exit 2 after 1 second</text>
+          <text x="422" y="156" text-anchor="middle" font-size="12">no Python process</text>
+          <line x1="535" y1="110" x2="620" y2="110" stroke="#777" stroke-width="3" stroke-dasharray="7 6" marker-end="url(#arrow)"/>
+          <rect x="630" y="60" width="255" height="100" rx="8" fill="#f4f4f4" stroke="#777"/>
+          <text x="758" y="92" text-anchor="middle" font-size="15">Measurement not reached</text>
+          <text x="758" y="120" text-anchor="middle" font-size="12">no compact receipt</text>
+          <text x="758" y="142" text-anchor="middle" font-size="12">no member-detail file</text>
+        </svg>
+        <figcaption>
+          The dashed edge is work that did not execute. This receipt distinguishes
+          accepted scheduler capacity from a running scientific measurement.
+        </figcaption>
+      </figure>
+    </section>
+
+    <section id="driver">
+      <h2>Committed measurement contract</h2>
+      <p>
+        Driver commit <code>cc7c6b69aabbeb1f2087428c852aba6e981bdc8e</code>
+        preserves the pilot solver semantics while replacing the oversized
+        monolithic receipt. It measures batches
+        <code>1, 4, 8, 16, 32, 64, 128, 256, 512</code>, then doubles dynamically
+        until a real stop. The plateau criterion is two consecutive wider widths
+        whose throughput gain is at most <strong>5%</strong>, evaluated only after
+        batch 512 is measured; accelerator out-of-memory is the alternative stop.
+        Ending at the initial ladder is not a valid result.
+      </p>
+      <p>
+        The compact strict-JSON receipt retains every repetition latency,
+        compile-and-first-execute cost, peak device memory, terminal residual
+        summary, branch identities, convergence policy, and counts needed to
+        recompute every aggregate. Full per-member residual traces and active-set
+        arrays stream to a separate gzip-compressed strict-JSON file. On successful
+        closure, the compact receipt records that file's absolute path, byte size,
+        SHA-256, and receipt count, and refuses publication at 10,000,000 bytes or
+        above.
+      </p>
+    </section>
+
+    <section id="qualification">
+      <h2>Scientific qualification carried forward</h2>
+      <p>
+        The pilot operand was the <code>limited_plasma</code> branch under a fixed
+        one-Newton-step budget. Its maximum relative residual was
+        <strong>0.0011089898293892464</strong> and it produced
+        <strong>zero stable conditioning receipts</strong>. Those facts make the
+        run fixed-budget cost evidence, not a convergence claim. The compact and
+        detailed receipts preserve that distinction beside every timing.
+      </p>
+      <table>
+        <caption>Pilot evidence motivating continuation beyond configuration</caption>
+        <thead>
+          <tr><th scope="col">Batch</th><th scope="col">Slices/s</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>0.09885820204447643</td></tr>
+          <tr><td>4</td><td>0.3019918258115519</td></tr>
+          <tr><td>8</td><td>0.4535645902260162</td></tr>
+          <tr><td>16</td><td>0.7488012031686813</td></tr>
+          <tr><td>32</td><td>1.1559453584127157</td></tr>
+        </tbody>
+      </table>
+      <p>
+        Batch 32 used 815,181,568 bytes of a 143,771 MiB card. The pilot stopped
+        by configuration, not saturation or memory, and its 186,212,257-byte
+        receipt exceeded the commit budget. Compile-and-first-execute costs ranged
+        from 188.1 to 204.5 seconds.
+      </p>
+    </section>
+
+    <section id="handoff">
+      <h2>Evidence and exact next action</h2>
+      <table>
+        <caption>Durable paths</caption>
+        <tbody>
+          <tr><th scope="row">Scheduler receipt</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/scheduler-receipt.log</code></td></tr>
+          <tr><th scope="row">Failed job log</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/slurm-1259312.log</code></td></tr>
+          <tr><th scope="row">Submitted batch script</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/submitted-batch-script.sh</code></td></tr>
+          <tr><th scope="row">Intended compact receipt</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/job-output/batched_throughput_budget.json</code></td></tr>
+          <tr><th scope="row">Intended detailed receipt</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/job-output/batched_throughput_member_details.json.gz</code></td></tr>
+        </tbody>
+      </table>
+      <p>
+        With renewed submission authority, rerun the same allocation and benchmark
+        command using <code>/home/ITER/mcintos/Code/nova/.venv/bin/python</code>
+        directly instead of nesting <code>uv run --no-sync</code>. No driver or
+        measurement parameter needs to change. A harvest must still validate the
+        completed files before any saturation conclusion or artifact promotion.
+      </p>
+    </section>
+  </main>
+</body>
+</html>

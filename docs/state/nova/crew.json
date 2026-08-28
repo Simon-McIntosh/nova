@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T12:20:34",
+  "updated": "2026-08-28T12:22:24",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -61099,9 +61099,111 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T095929917293-sse-wall-height-mask-safety",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-wall-height-mask-safety",
+        "node_definition": {
+          "done_when": "A research document at docs/research/wall-height-shadow-safety.html carries an evidence-backed safety assessment of the wall-height (vertical) exclusion that augments the topological private-flux shadow, with reckon-type=research and docs-project=nova, authored as HTML directly and validated with the reckon doc-check tooling. For every named geometry it must state one of three concrete verdicts \u2014 the mask matches the topological shadow, the mask differs by a stated cell count that is physically correct, or the mask differs by a stated cell count that is wrong \u2014 and show the counts behind the verdict. (1) State exactly what the shipped rule does, read from the code, naming the file and the predicate: which X-point supplies the upper and lower height references, how the reference is chosen when several nulls qualify, and what the rule does when no X-point qualifies at all. (2) Work through each failure geometry and state for each the verdict above and the cell counts, backing every verdict by exercising the existing hex-flood geometry tests: a snowflake configuration where two nulls sit at nearly equal height so the cut between them is ill-conditioned; a connected double null where upper and lower nulls are near-symmetric and a small perturbation swaps which is primary; central-solenoid coil nulls far from the plasma at extreme heights, where selecting one as the height reference excludes almost everything or almost nothing; a limited (non-diverted) plasma with no qualifying X-point; and a single null where a large-major-radius wall node sits below the lower null. Add a focused test for any geometry the suite does not already cover. (3) Quantify the stability claim rather than asserting it: for each geometry, report how many mask cells the height rule adds or removes relative to the pure topological shadow, and how that count moves under a small perturbation of the null position. The lead's design goal is as few binary mask changes as possible, so the deliverable is a churn measurement per geometry, including the pure-shadow baseline. (4) Include figures: per-geometry panels overlaying the wall, the flood-fill regions, the pure topological shadow, the height-augmented mask, and the null positions, so the difference between the two masks is visible. Save under docs/figures/wall-height-shadow-safety/ and embed with project-absolute src paths. (5) End with an explicit recommendation on whether the height augmentation should be retained, retained conditionally with a named guard, or removed, and state what evidence would overturn it. Do not change the shipped masking behaviour in this node; it assesses and measures.",
+          "estimated_hours": null,
+          "goal": "A research document measuring, per failure geometry, how many mask cells the wall-height exclusion changes against the pure topological shadow and how that count moves under a perturbed null position",
+          "id": "sse-wall-height-mask-safety",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T095929917293-sse-wall-height-mask-safety/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/research/wall-height-shadow-safety.html",
+            "docs/figures/wall-height-shadow-safety",
+            "tests/test_wall_height_exclusion.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "xpoint-map",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T09:59:41Z",
+        "completed_at": "2026-08-28T10:20:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1248,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1248,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "83f2ecd8497c568dd1947d1e09193e22235cb4ee",
+        "commits": [
+          "c991faecc9de1197f1502fb8894e3c95cf6a1280"
+        ],
+        "changed_lines": {
+          "added": 586,
+          "removed": 0,
+          "files": 8
+        },
+        "tests_added": 8,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused wall-height + hex-flood geometry lane 41 passed in 72.41s exit 0; reckon audit-doc OK",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T095929917293-sse-wall-height-mask-safety/focused-tests.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T095929917293-sse-wall-height-mask-safety/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a037ef-13e9-76a1-a117-d5aa565eb4b7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4178816,
+            "cached_input_tokens_cumulative": 5426048,
+            "input_tokens": 4084958,
+            "input_tokens_cumulative": 5624739,
+            "output_tokens": 14728,
+            "output_tokens_cumulative": 22945,
+            "reasoning_output_tokens": 5747,
+            "reasoning_output_tokens_cumulative": 7482
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1156
+    "_version": 1157
   }
 }

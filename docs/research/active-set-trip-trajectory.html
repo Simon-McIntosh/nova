@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="active-set-trip-trajectory">
   <meta name="plan-title" content="MAST active-set trip trajectory">
-  <meta name="plan-summary" content="Production-resolution timing and mask trajectory for one MAST pure-diverted solve, with the direct five-frame DIII-D cost implication">
+  <meta name="plan-summary" content="Production-resolution timing and mask trajectory for one MAST pure-diverted solve, including a guarded wall-height versus pure-topology contrast">
   <meta name="plan-status" content="reference">
   <meta name="plan-informs" content="separatrix-spline-extraction">
   <meta name="plan-source-quality" content="primary">
@@ -42,6 +42,17 @@
         DIII-D timing measurement. The MAST run shows that treating every trip as
         cold is conservative: its later compiled and warm-started trips were much
         cheaper than its first two.
+      </p>
+    </aside>
+
+    <aside>
+      <p>
+        <strong>Height-rule verdict: no effect on this geometry.</strong> A paired
+        production run returned the same wall shadow, active-set trajectory, and
+        terminal residual with the guarded wall-height rule active and with its
+        output replaced by pure topology. The guarded rule removed
+        <strong>zero wall cells in all 25 evaluations</strong>, so this run does
+        not support a trip-count benefit from the height exclusion.
       </p>
     </aside>
 
@@ -186,6 +197,124 @@
       </p>
     </section>
 
+    <section id="height-rule-contrast">
+      <h2>Guarded wall height versus pure topology</h2>
+      <p>
+        Vega job <code>1259131</code> ran the same MAST 22086/43 pure-diverted
+        33 &times; 33 arm twice, sequentially on CPU node
+        <code>98dci4-clu-4030</code>, with separate Python processes and separate
+        compilation caches. The job requested 16 CPUs, 64 GiB, and no wall-time
+        cap on the unlimited <code>vega</code> partition. It completed both arms
+        in 201 s with <code>ExitCode 0:0</code> and 2,081,848 KiB peak RSS.
+      </p>
+      <p>
+        The runner exposed one explicit <code>--height-rule</code> switch. In
+        <code>guarded</code> mode it returned the production
+        <code>wall_height_shadow_mask</code>. In <code>pure-topology</code> mode
+        it returned the flood-derived private-wall mask unchanged. Both modes
+        still evaluated the production guarded mask to count its difference from
+        pure topology; neither changed the saddle-aware interior flood. This
+        switch therefore toggled only the wall-height augmentation at the wall
+        shadow return seam.
+      </p>
+
+      <table>
+        <caption>Decisive paired outcomes</caption>
+        <thead>
+          <tr>
+            <th scope="col">Measure</th>
+            <th scope="col">Guarded height</th>
+            <th scope="col">Pure topology</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Height evaluations</th><td>25</td><td>25 diagnostic evaluations</td></tr>
+          <tr><th scope="row">Wall cells removed from pure topology</th><td>0 at every evaluation</td><td>0 by definition</td></tr>
+          <tr><th scope="row">First zero mask difference</th><td>trip 2</td><td>trip 2</td></tr>
+          <tr><th scope="row">Stable-zero run begins</th><td>trip 5; six trips consumed</td><td>trip 5; six trips consumed</td></tr>
+          <tr><th scope="row">Trips to completion</th><td>12 of 16</td><td>12 of 16</td></tr>
+          <tr><th scope="row">Terminal residual</th><td>6.0797717128595031&times;10<sup>&minus;12</sup></td><td>6.0797717128595031&times;10<sup>&minus;12</sup></td></tr>
+          <tr><th scope="row">Solve wall time</th><td>59.287223 s</td><td>59.810792 s</td></tr>
+          <tr><th scope="row">False zero</th><td>yes: trip 2, followed by 1 and 22 changed cells</td><td>yes: trip 2, followed by 1 and 22 changed cells</td></tr>
+        </tbody>
+      </table>
+
+      <figure>
+        <svg viewBox="0 0 760 250" role="img" aria-labelledby="contrast-title contrast-desc">
+          <title id="contrast-title">Identical active-set mask trajectories with and without the height rule</title>
+          <desc id="contrast-desc">The guarded-height and pure-topology lines coincide at mask differences 38, 23, 0, 1, 22, followed by seven zeros.</desc>
+          <rect x="0" y="0" width="760" height="250" fill="#ffffff"/>
+          <line x1="64" y1="202" x2="724" y2="202" stroke="#777" stroke-width="1"/>
+          <line x1="64" y1="30" x2="64" y2="202" stroke="#777" stroke-width="1"/>
+          <g font-size="11" fill="#232323">
+            <text x="16" y="36">40</text><text x="22" y="121">20</text><text x="29" y="206">0</text>
+            <text x="64" y="222">0</text><text x="124" y="222">1</text><text x="184" y="222">2</text>
+            <text x="244" y="222">3</text><text x="304" y="222">4</text><text x="364" y="222">5</text>
+            <text x="424" y="222">6</text><text x="484" y="222">7</text><text x="544" y="222">8</text>
+            <text x="604" y="222">9</text><text x="660" y="222">10</text><text x="716" y="222">11</text>
+          </g>
+          <polyline points="64,40 124,104 184,202 244,198 304,108 364,202 424,202 484,202 544,202 604,202 664,202 724,202" fill="none" stroke="#512b81" stroke-width="7" opacity="0.65"/>
+          <polyline points="64,40 124,104 184,202 244,198 304,108 364,202 424,202 484,202 544,202 604,202 664,202 724,202" fill="none" stroke="#1696a7" stroke-width="2"/>
+          <line x1="500" y1="28" x2="530" y2="28" stroke="#512b81" stroke-width="7" opacity="0.65"/>
+          <text x="538" y="32" font-size="12" fill="#232323">guarded height</text>
+          <line x1="500" y1="48" x2="530" y2="48" stroke="#1696a7" stroke-width="2"/>
+          <text x="538" y="52" font-size="12" fill="#232323">pure topology</text>
+          <text x="390" y="244" text-anchor="middle" font-size="12" fill="#232323">outer trip index</text>
+          <text x="8" y="18" font-size="12" fill="#232323">changed mask cells</text>
+        </svg>
+        <figcaption>
+          The two mask trajectories coincide exactly. The residual arrays also
+          coincide element-for-element, so the height rule changed neither the
+          active set nor the numerical path on this production geometry.
+        </figcaption>
+      </figure>
+
+      <table>
+        <caption>Full paired per-trip trajectory</caption>
+        <thead>
+          <tr>
+            <th rowspan="2" scope="col">Trip</th>
+            <th colspan="4" scope="colgroup">Guarded height</th>
+            <th colspan="4" scope="colgroup">Pure topology</th>
+          </tr>
+          <tr>
+            <th scope="col">Mask</th><th scope="col">Residual</th><th scope="col">Inner</th><th scope="col">Time (s)</th>
+            <th scope="col">Mask</th><th scope="col">Residual</th><th scope="col">Inner</th><th scope="col">Time (s)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">0</th><td>38</td><td>4.9764556897339413&times;10<sup>&minus;3</sup></td><td>12</td><td>15.783324</td><td>38</td><td>4.9764556897339413&times;10<sup>&minus;3</sup></td><td>12</td><td>15.885769</td></tr>
+          <tr><th scope="row">1</th><td>23</td><td>3.4925711304508405&times;10<sup>&minus;3</sup></td><td>12</td><td>18.057993</td><td>23</td><td>3.4925711304508405&times;10<sup>&minus;3</sup></td><td>12</td><td>18.550426</td></tr>
+          <tr><th scope="row">2</th><td>0</td><td>2.2267868462636765&times;10<sup>&minus;3</sup></td><td>12</td><td>1.104980</td><td>0</td><td>2.2267868462636765&times;10<sup>&minus;3</sup></td><td>12</td><td>1.122287</td></tr>
+          <tr><th scope="row">3</th><td>1</td><td>2.8245436710891813&times;10<sup>&minus;3</sup></td><td>12</td><td>1.101416</td><td>1</td><td>2.8245436710891813&times;10<sup>&minus;3</sup></td><td>12</td><td>1.109598</td></tr>
+          <tr><th scope="row">4</th><td>22</td><td>1.7686695998074880&times;10<sup>&minus;3</sup></td><td>12</td><td>1.102291</td><td>22</td><td>1.7686695998074880&times;10<sup>&minus;3</sup></td><td>12</td><td>1.103781</td></tr>
+          <tr><th scope="row">5</th><td>0</td><td>1.1202504574515501&times;10<sup>&minus;3</sup></td><td>12</td><td>1.095383</td><td>0</td><td>1.1202504574515501&times;10<sup>&minus;3</sup></td><td>12</td><td>1.108671</td></tr>
+          <tr><th scope="row">6</th><td>0</td><td>7.1585199786900248&times;10<sup>&minus;4</sup></td><td>12</td><td>1.111561</td><td>0</td><td>7.1585199786900248&times;10<sup>&minus;4</sup></td><td>12</td><td>1.100424</td></tr>
+          <tr><th scope="row">7</th><td>0</td><td>4.6228423444787386&times;10<sup>&minus;4</sup></td><td>12</td><td>1.106881</td><td>0</td><td>4.6228423444787386&times;10<sup>&minus;4</sup></td><td>12</td><td>1.107418</td></tr>
+          <tr><th scope="row">8</th><td>0</td><td>2.9898570793882934&times;10<sup>&minus;4</sup></td><td>12</td><td>1.101616</td><td>0</td><td>2.9898570793882934&times;10<sup>&minus;4</sup></td><td>12</td><td>1.108220</td></tr>
+          <tr><th scope="row">9</th><td>0</td><td>1.9330286566977728&times;10<sup>&minus;4</sup></td><td>12</td><td>1.090019</td><td>0</td><td>1.9330286566977728&times;10<sup>&minus;4</sup></td><td>12</td><td>1.097963</td></tr>
+          <tr><th scope="row">10</th><td>0</td><td>1.2525252154459219&times;10<sup>&minus;4</sup></td><td>12</td><td>1.105168</td><td>0</td><td>1.2525252154459219&times;10<sup>&minus;4</sup></td><td>12</td><td>1.094685</td></tr>
+          <tr><th scope="row">11</th><td>0</td><td>6.0797717128595031&times;10<sup>&minus;12</sup></td><td>3</td><td>0.931819</td><td>0</td><td>6.0797717128595031&times;10<sup>&minus;12</sup></td><td>3</td><td>0.935650</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        The guarded callbacks totalled 44.692451 s and the pure-topology
+        callbacks totalled 45.324892 s. End-to-end solve times differed by only
+        0.523569 s (pure topology was 0.883106% slower). Because the selected
+        wall masks and every residual are identical, this small timing ordering
+        is process and compilation variability, not evidence that the inactive
+        height rule accelerated the solve.
+      </p>
+      <p>
+        <strong>Verdict:</strong> this production contrast supports the height
+        exclusion having <strong>no effect</strong> on the measured geometry; it
+        does not support a reduction in active-set trips. A broader benefit would
+        require the same paired experiment on a production arm where the guarded
+        rule demonstrably removes at least one wall cell from pure topology.
+      </p>
+    </section>
+
     <section id="diiid-cost">
       <h2>Five-frame DIII-D arithmetic</h2>
       <p>
@@ -212,6 +341,14 @@ five frames:  5 &times; 17,471.508 s = 87,357.540 s = 24.265983 h</code></pre>
         marker:
         <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T102123170213-sse-active-set-trip-measurement/mast-arm-1259127.log</code>.
         The timestamp wrapper and one-arm runner are retained beside that log.
+      </p>
+      <p>
+        The complete paired contrast is in
+        <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T104144198389-sse-height-rule-trip-contrast/height-contrast-1259131.log</code>.
+        Its parsed invariants and exact deltas are in
+        <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T104144198389-sse-height-rule-trip-contrast/contrast-analysis.log</code>.
+        The measurement runner, timestamp wrapper, and uncapped Vega launch
+        script are retained beside those logs.
       </p>
     </section>
   </main>

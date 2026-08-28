@@ -239,7 +239,43 @@ __all__ = [
 # ---------------------------------------------------------------------------
 
 
-@jax.jit
+def _print_wall_height_eligibility(
+    side_code,
+    reference_valid,
+    admitted,
+    ambiguous,
+    radius_ineligible,
+    same_side_separation,
+    ambiguity_threshold,
+    reference_radius,
+    minimum_radius,
+    candidate_removed_wall_cells,
+) -> None:
+    """Print one device-reported wall-height eligibility decision."""
+
+    side = "lower" if int(side_code) == 0 else "upper"
+    if not bool(reference_valid):
+        status = "absent"
+    elif bool(admitted):
+        status = "admitted"
+    else:
+        status = "disqualified"
+    print(
+        "wall-height-eligibility "
+        f"side={side} "
+        f"status={status} "
+        f"same_side_ambiguity={int(ambiguous)} "
+        f"minimum_separatrix_radius={int(radius_ineligible)} "
+        f"same_side_height_separation={float(same_side_separation):.17g} "
+        f"ambiguity_threshold={float(ambiguity_threshold):.17g} "
+        f"reference_radius={float(reference_radius):.17g} "
+        f"minimum_radius={float(minimum_radius):.17g} "
+        f"candidate_removed_wall_cells={int(candidate_removed_wall_cells)}",
+        flush=True,
+    )
+
+
+@partial(jax.jit, static_argnames=("report_eligibility",))
 def wall_height_shadow_mask(
     wall_height,
     axis_height,
@@ -249,6 +285,8 @@ def wall_height_shadow_mask(
     previous_shadow,
     hysteresis_height,
     qualification_distance,
+    *,
+    report_eligibility: bool = False,
 ):
     """Return the hysteretic private-wall exclusion from qualified saddles.
 
@@ -328,6 +366,61 @@ def wall_height_shadow_mask(
     proposed = jnp.where(lower_fallback, True, proposed)
     proposed = jnp.where(upper_eligible, proposed | upper_enter | upper_stay, proposed)
     proposed = jnp.where(upper_fallback, True, proposed)
+
+    if report_eligibility:
+        indices = jnp.arange(qualified_x_points.shape[0])
+        lower_other = lower_side & (indices != lower_index)
+        upper_other = upper_side & (indices != upper_index)
+        lower_separation = jnp.min(
+            jnp.where(
+                lower_other,
+                jnp.abs(qualified_x_points[:, 1] - lower),
+                jnp.inf,
+            )
+        )
+        upper_separation = jnp.min(
+            jnp.where(
+                upper_other,
+                jnp.abs(qualified_x_points[:, 1] - upper),
+                jnp.inf,
+            )
+        )
+        lower_candidate_removed = jnp.sum(
+            private_wall & (wall_height < axis_height) & ~(lower_enter | lower_stay),
+            dtype=jnp.int32,
+        )
+        upper_candidate_removed = jnp.sum(
+            private_wall & (wall_height > axis_height) & ~(upper_enter | upper_stay),
+            dtype=jnp.int32,
+        )
+        jax.debug.callback(
+            _print_wall_height_eligibility,
+            jnp.asarray(0, dtype=jnp.int8),
+            lower_valid,
+            lower_eligible,
+            lower_valid & lower_ambiguous,
+            lower_valid & ~lower_radially_eligible,
+            lower_separation,
+            ambiguity_height,
+            qualified_x_points[lower_index, 0],
+            minimum_separatrix_radius,
+            lower_candidate_removed,
+            ordered=True,
+        )
+        jax.debug.callback(
+            _print_wall_height_eligibility,
+            jnp.asarray(1, dtype=jnp.int8),
+            upper_valid,
+            upper_eligible,
+            upper_valid & upper_ambiguous,
+            upper_valid & ~upper_radially_eligible,
+            upper_separation,
+            ambiguity_height,
+            qualified_x_points[upper_index, 0],
+            minimum_separatrix_radius,
+            upper_candidate_removed,
+            ordered=True,
+        )
     return proposed & private_wall
 
 

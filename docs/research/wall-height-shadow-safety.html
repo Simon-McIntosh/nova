@@ -7,10 +7,10 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="wall-height-shadow-safety">
   <meta name="plan-title" content="Wall-height shadow safety — binary-mask difference and null-position churn">
-  <meta name="plan-summary" content="A vessel-scaled eligibility guard makes all five measured wall-height exclusions match the connectivity-only private-flux shadow, eliminating the snowflake and coil-null errors without changing the three controls.">
+  <meta name="plan-summary" content="A vessel-scaled guard repairs two manufactured failures, but production MAST diagnosis finds zero admitted height references in 50 side decisions: the path is inert by radius disqualification, not proven redundant after admission.">
   <meta name="plan-informs" content="separatrix-spline-extraction">
   <meta name="plan-recorded-at" content="2026-08-28">
-  <meta name="plan-verdict" content="Retain the guarded wall-height exclusion. Vessel-scaled ambiguity and radial-eligibility checks restore the snowflake and coil-null cases to pure topology, while connected double-null, limited, and conventional single-null masks remain cell-identical.">
+  <meta name="plan-verdict" content="Hold the retention decision for DIII-D. MAST 22086/43 disqualifies both sides by minimum radius in all 25 evaluations, so it supplies no admitted production case from which redundancy or benefit can be measured.">
   <title>Wall-height shadow safety | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -18,14 +18,16 @@
 <body>
 <main class="plan-doc">
   <header>
-    <span class="badge badge-shipped">guard validated</span>
+    <span class="badge badge-active">hold for DIII-D</span>
     <h1>Wall-height shadow safety</h1>
     <p>The guarded wall-height rule now matches the connectivity result in all five measured
     geometries. Before the guard, the near-equal-height snowflake removed 6 physically private
     wall nodes, while a central-solenoid null admitted as primary removed 15 and made 68 of 96
     bits depend on which far null was selected. Vessel-scaled ambiguity and radial-eligibility
     checks now fall those sides back to pure topology; the three already-correct controls remain
-    cell-identical.</p>
+    cell-identical. Production MAST diagnosis then found that both references are radius-rejected
+    on every evaluation, so the observed zero removals are caused by guard disqualification rather
+    than demonstrated redundancy after admission.</p>
   </header>
 
   <section class="quick-status">
@@ -42,6 +44,9 @@
     <div class="status-card"><strong>Primary identity risk</strong>
       <span class="badge badge-shipped">0 nodes</span>
       <p>Far coil-null primary swap: 68 bits before the guard, zero after it.</p></div>
+    <div class="status-card"><strong>Production admission</strong>
+      <span class="badge badge-blocked">0 of 50 sides</span>
+      <p>MAST 22086/43: all 50 side decisions fail only the minimum-radius condition.</p></div>
   </section>
 
   <h2>What the shipped predicate does</h2>
@@ -122,6 +127,88 @@
     </tbody>
   </table>
 
+  <h2>Production discriminator: disqualification, not admitted redundancy</h2>
+  <p>Uncapped Vega job <code>1259154</code> reran the production MAST 22086/43
+  pure-diverted arm at 33 &times; 33 resolution from commit <code>ebb658bd</code>. The explicit
+  reporting option emitted one ordered lower-side and one ordered upper-side decision for each of
+  the same 25 wall-height evaluations measured by the paired contrast. The solve converged in 12
+  active-set trips at terminal residual
+  6.0797717128595031&times;10<sup>&minus;12</sup>; its mask differences remained
+  <code>38, 23, 0, 1, 22, 0, 0, 0, 0, 0, 0, 0</code>.</p>
+  <p><strong>The discriminator is guard disqualification.</strong> Zero of 25 evaluations admitted
+  either side: <strong>0 of 50 side decisions admitted and 50 of 50 were disqualified by the
+  minimum-separatrix-radius condition</strong>. Same-side ambiguity rejected 0 of 50. The set of
+  admitted evaluations is therefore empty, so there is no admitted-evaluation removal count to
+  report as zero. The earlier 0-cell difference in all 25 evaluations is inertness by construction,
+  not evidence that an admitted height half-plane was redundant with the topological shadow.</p>
+  <p>The wall span was 3.650000095 m. Its 1% ambiguity threshold was 0.036500001 m;
+  every side had only one qualified saddle, so the measured same-side separation was infinite and
+  the ambiguity margin was unbounded. The 25% radial threshold was 0.912500024 m. Lower reference
+  radii ranged from 0.572464282 to 0.586213160 m, short by 0.326286864 to 0.340035741 m. Upper
+  reference radii ranged from 0.582507572 to 0.600799930 m, short by 0.311700094 to 0.329992452 m.
+  The production geometry therefore misses the radial gate by at least 0.3117 m, not by a numerical
+  or geometric hair.</p>
+
+  <figure>
+    <svg viewBox="0 0 760 190" role="img" aria-labelledby="radius-title radius-desc">
+      <title id="radius-title">Production reference radii against the eligibility threshold</title>
+      <desc id="radius-desc">Lower and upper MAST reference-radius ranges lie between 0.57 and 0.60 metres, while the vessel-scaled eligibility threshold is 0.9125 metres.</desc>
+      <rect x="0" y="0" width="760" height="190" fill="#ffffff"/>
+      <line x1="70" y1="145" x2="720" y2="145" stroke="#777" stroke-width="1"/>
+      <g font-size="11" fill="#232323" text-anchor="middle">
+        <text x="70" y="165">0.0</text><text x="395" y="165">0.5</text>
+        <text x="720" y="165">1.0 m</text>
+      </g>
+      <line x1="663.1" y1="24" x2="663.1" y2="145" stroke="#b91c1c" stroke-width="3"/>
+      <text x="653" y="18" font-size="12" fill="#b91c1c" text-anchor="end">minimum 0.912500 m</text>
+      <line x1="442.1" y1="66" x2="451.0" y2="66" stroke="#512b81" stroke-width="10"/>
+      <circle cx="442.1" cy="66" r="5" fill="#512b81"/><circle cx="451.0" cy="66" r="5" fill="#512b81"/>
+      <text x="60" y="70" font-size="12" fill="#232323" text-anchor="end">lower</text>
+      <text x="459" y="70" font-size="11" fill="#512b81">0.572464–0.586213</text>
+      <line x1="448.6" y1="108" x2="460.5" y2="108" stroke="#1696a7" stroke-width="10"/>
+      <circle cx="448.6" cy="108" r="5" fill="#1696a7"/><circle cx="460.5" cy="108" r="5" fill="#1696a7"/>
+      <text x="60" y="112" font-size="12" fill="#232323" text-anchor="end">upper</text>
+      <text x="469" y="112" font-size="11" fill="#135d6a">0.582508–0.600800</text>
+    </svg>
+    <figcaption>All 50 reference radii lie at least 0.311700 m below the eligibility boundary.
+    The two measured bands are compact and far from the red threshold.</figcaption>
+  </figure>
+
+  <table>
+    <caption>Every production eligibility decision; R is the reported reference radius</caption>
+    <thead><tr><th>Evaluation</th><th>Lower side</th><th>Upper side</th><th>Admitted removal</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>disqualified: radius; R=0.586213</td><td>disqualified: radius; R=0.582508</td><td>not applicable</td></tr>
+      <tr><td>1</td><td>disqualified: radius; R=0.582221</td><td>disqualified: radius; R=0.585721</td><td>not applicable</td></tr>
+      <tr><td>2</td><td>disqualified: radius; R=0.584281</td><td>disqualified: radius; R=0.584269</td><td>not applicable</td></tr>
+      <tr><td>3</td><td>disqualified: radius; R=0.579137</td><td>disqualified: radius; R=0.600800</td><td>not applicable</td></tr>
+      <tr><td>4</td><td>disqualified: radius; R=0.580696</td><td>disqualified: radius; R=0.594331</td><td>not applicable</td></tr>
+      <tr><td>5</td><td>disqualified: radius; R=0.577244</td><td>disqualified: radius; R=0.597635</td><td>not applicable</td></tr>
+      <tr><td>6</td><td>disqualified: radius; R=0.578192</td><td>disqualified: radius; R=0.599331</td><td>not applicable</td></tr>
+      <tr><td>7</td><td>disqualified: radius; R=0.576047</td><td>disqualified: radius; R=0.595033</td><td>not applicable</td></tr>
+      <tr><td>8</td><td>disqualified: radius; R=0.576646</td><td>disqualified: radius; R=0.596386</td><td>not applicable</td></tr>
+      <tr><td>9</td><td>disqualified: radius; R=0.574815</td><td>disqualified: radius; R=0.593148</td><td>not applicable</td></tr>
+      <tr><td>10</td><td>disqualified: radius; R=0.575444</td><td>disqualified: radius; R=0.594109</td><td>not applicable</td></tr>
+      <tr><td>11</td><td>disqualified: radius; R=0.573996</td><td>disqualified: radius; R=0.591793</td><td>not applicable</td></tr>
+      <tr><td>12</td><td>disqualified: radius; R=0.574411</td><td>disqualified: radius; R=0.592478</td><td>not applicable</td></tr>
+      <tr><td>13</td><td>disqualified: radius; R=0.573461</td><td>disqualified: radius; R=0.590917</td><td>not applicable</td></tr>
+      <tr><td>14</td><td>disqualified: radius; R=0.573731</td><td>disqualified: radius; R=0.591357</td><td>not applicable</td></tr>
+      <tr><td>15</td><td>disqualified: radius; R=0.573114</td><td>disqualified: radius; R=0.590357</td><td>not applicable</td></tr>
+      <tr><td>16</td><td>disqualified: radius; R=0.573289</td><td>disqualified: radius; R=0.590638</td><td>not applicable</td></tr>
+      <tr><td>17</td><td>disqualified: radius; R=0.572887</td><td>disqualified: radius; R=0.589993</td><td>not applicable</td></tr>
+      <tr><td>18</td><td>disqualified: radius; R=0.573001</td><td>disqualified: radius; R=0.590175</td><td>not applicable</td></tr>
+      <tr><td>19</td><td>disqualified: radius; R=0.572739</td><td>disqualified: radius; R=0.589756</td><td>not applicable</td></tr>
+      <tr><td>20</td><td>disqualified: radius; R=0.572813</td><td>disqualified: radius; R=0.589875</td><td>not applicable</td></tr>
+      <tr><td>21</td><td>disqualified: radius; R=0.572643</td><td>disqualified: radius; R=0.589603</td><td>not applicable</td></tr>
+      <tr><td>22</td><td>disqualified: radius; R=0.572691</td><td>disqualified: radius; R=0.589680</td><td>not applicable</td></tr>
+      <tr><td>23</td><td>disqualified: radius; R=0.572464</td><td>disqualified: radius; R=0.589321</td><td>not applicable</td></tr>
+      <tr><td>24</td><td>disqualified: radius; R=0.572554</td><td>disqualified: radius; R=0.589463</td><td>not applicable</td></tr>
+    </tbody>
+  </table>
+  <p>The complete scheduler and callback log is
+  <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T105551630912-sse-height-guard-eligibility-diagnosis/height-eligibility-1259154.log</code>.
+  Its strict parsed census is <code>eligibility-analysis.json</code> beside that log.</p>
+
   <h2>Geometry overlays</h2>
   <p>Blue cells are the flood-connected core and orange cells the pure private-flux flood region.
   Red wall markers survive the guarded height predicate; hollow orange markers would identify any
@@ -173,19 +260,21 @@
   it remains excluded from the residual.</p>
 
   <h2>Recommendation and falsifier</h2>
-  <p><strong>Retain with the shipped unambiguous plasma-separatrix guard.</strong> Apply the height
-  reduction only when a contributing side has no second qualified saddle inside 1% of wall span
-  and its reference radius is at least 25% of wall span. The measured snowflake and coil-null
-  failures now fall back to pure topology, while the connected-double-null, limited, and
-  single-null controls are unchanged. The post-guard battery has zero wrong removals and zero
-  perturbation or alternate-primary churn over all five 96-node geometries.</p>
+  <p><strong>Hold for DIII-D.</strong> The manufactured battery proves that the guard repairs the
+  two known wrong reductions, but MAST supplies no admitted production reference: both sides are
+  radius-disqualified in all 25 evaluations. That result supports neither removing the height path
+  as redundant nor retaining it on demonstrated production benefit. The active DIII-D measurement
+  is the next discriminating geometry: retain the guarded implementation unchanged until it shows
+  whether any side is admitted and, if so, whether an admitted height cut removes a cell beyond
+  pure topology.</p>
   <p>This recommendation would be overturned by either of two evidence results: a broader
   manufactured or real-machine cohort showing a physically valid height removal in an ambiguous
   case that the named guard rejects, or active-set telemetry showing that pure-shadow fallback
   increases settled mask trips enough to outweigh the wrong-cell risk while the guarded height
   rule remains topology-correct. Conversely, any nonzero wrong-removal count in a guarded
   conventional single- or connected-double-null fixture is sufficient to remove the augmentation
-  entirely. No production masking behaviour is changed by this research node.</p>
+  entirely. This diagnosis changes no production masking behavior; eligibility reporting is
+  explicit opt-in and absent from the default compiled path.</p>
 
   <h2>Reproduction</h2>
   <p>Run the focused CPU suite:</p>

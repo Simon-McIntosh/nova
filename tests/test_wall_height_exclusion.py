@@ -157,6 +157,7 @@ def _geometry_height_mask(
     *,
     perturbed: bool = False,
     alternate: bool = False,
+    report_eligibility: bool = False,
 ) -> np.ndarray:
     """Evaluate the shipped wall-height predicate for one fixture state."""
     points = geometry.perturbed_qualified if perturbed else geometry.qualified
@@ -179,8 +180,11 @@ def _geometry_height_mask(
         jnp.zeros(geometry.pure_shadow.shape, dtype=bool),
         0.02,
         0.1,
+        report_eligibility=report_eligibility,
     )
-    return np.asarray(result, dtype=bool)
+    measured = np.asarray(result, dtype=bool)
+    jax.effects_barrier()
+    return measured
 
 
 def wall_height_safety_metrics() -> list[dict[str, int | str | None]]:
@@ -296,6 +300,46 @@ def test_guarded_height_mask_is_strictly_subtractive_for_all_geometries() -> Non
             masks.append(_geometry_height_mask(geometry, alternate=True))
         for guarded in masks:
             assert not np.any(guarded & ~geometry.pure_shadow), geometry.name
+
+
+def test_opt_in_eligibility_reporting_names_each_side_and_disqualifier(capsys) -> None:
+    """Reporting exposes guard causes without changing the selected mask."""
+    geometries = {geometry.name: geometry for geometry in _safety_geometries()}
+
+    snowflake = geometries["snowflake-near-equal-height"]
+    quiet = _geometry_height_mask(snowflake)
+    assert capsys.readouterr().out == ""
+    reported = _geometry_height_mask(snowflake, report_eligibility=True)
+    np.testing.assert_array_equal(reported, quiet)
+    snowflake_lines = capsys.readouterr().out.splitlines()
+    assert len(snowflake_lines) == 2
+    assert "side=lower status=disqualified" in snowflake_lines[0]
+    assert "same_side_ambiguity=1" in snowflake_lines[0]
+    assert "minimum_separatrix_radius=0" in snowflake_lines[0]
+    assert "same_side_height_separation=0.015" in snowflake_lines[0]
+    assert "ambiguity_threshold=0.023599999999999999" in snowflake_lines[0]
+    assert "side=upper status=absent" in snowflake_lines[1]
+
+    coil = geometries["coil-null-extremes"]
+    reported = _geometry_height_mask(coil, report_eligibility=True)
+    np.testing.assert_array_equal(reported, coil.pure_shadow)
+    coil_lines = capsys.readouterr().out.splitlines()
+    assert len(coil_lines) == 2
+    assert "side=lower status=absent" in coil_lines[0]
+    assert "side=upper status=disqualified" in coil_lines[1]
+    assert "same_side_ambiguity=0" in coil_lines[1]
+    assert "minimum_separatrix_radius=1" in coil_lines[1]
+    assert "reference_radius=0.34999999999999998" in coil_lines[1]
+    assert "minimum_radius=0.58999999999999997" in coil_lines[1]
+
+    connected = geometries["connected-double-null"]
+    reported = _geometry_height_mask(connected, report_eligibility=True)
+    np.testing.assert_array_equal(reported, connected.pure_shadow)
+    connected_lines = capsys.readouterr().out.splitlines()
+    assert len(connected_lines) == 2
+    assert "side=lower status=admitted" in connected_lines[0]
+    assert "side=upper status=admitted" in connected_lines[1]
+    assert all("candidate_removed_wall_cells=0" in line for line in connected_lines)
 
 
 def render_wall_height_safety_evidence(output: Path) -> None:

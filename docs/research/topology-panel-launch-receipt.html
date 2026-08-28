@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="topology-panel-launch-receipt">
   <meta name="plan-title" content="Topology panel regeneration launch receipt">
-  <meta name="plan-summary" content="Failed-launch receipt for a seventeen-panel topology regeneration with numeric shadow-containment records.">
+  <meta name="plan-summary" content="Launch receipt for a corrected seventeen-panel topology regeneration with numeric shadow-containment records.">
   <meta name="plan-informs" content="separatrix-spline-extraction">
   <title>Topology panel regeneration launch receipt | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
@@ -18,25 +18,25 @@
     <header class="plan-hero">
       <p class="eyebrow">Research · launch receipt</p>
       <h1>Topology panel regeneration launch receipt</h1>
-      <p class="lede">The single submitted job was configured to regenerate all twelve MAST and five DIII-D topology panels and publish a strict JSON record beside each PNG. It failed before extraction because the submitted script invoked an inherited Python environment without JAX. This receipt preserves the failed launch and makes no convergence, shadow-containment, panel-completion, or scientific claim.</p>
+      <p class="lede">Replacement job <code>1259160</code> supersedes failed job <code>1259157</code> and is configured to regenerate all twelve MAST and five DIII-D topology panels, publishing a strict JSON record beside each PNG. The replacement explicitly uses Nova's root interpreter after clearing the inherited environment. This receipt proves the launch contract only; it makes no convergence, shadow-containment, panel-completion, or scientific claim.</p>
     </header>
 
     <section>
-      <h2>Scheduler contract and terminal outcome</h2>
+      <h2>Scheduler contract and submission history</h2>
       <table>
         <tbody>
-          <tr><th>SLURM job</th><td><code>1259157</code></td></tr>
-          <tr><th>Terminal state</th><td><code>FAILED (NonZeroExitCode)</code>, exit <code>1:0</code> after two seconds</td></tr>
+          <tr><th>Replacement job</th><td><code>1259160</code>, accepted in <code>PENDING (Priority)</code> state</td></tr>
+          <tr><th>Superseded job</th><td><code>1259157</code>, <code>FAILED (NonZeroExitCode)</code> with exit <code>1:0</code> after two seconds</td></tr>
           <tr><th>Partition</th><td><code>vega</code></td></tr>
           <tr><th>Partition maximum</th><td><code>MaxTime=UNLIMITED</code>, confirmed with <code>scontrol show partition vega</code></td></tr>
           <tr><th>Accepted time limit</th><td><code>1-12:00:00</code> (36 hours)</td></tr>
           <tr><th>Resources</th><td>one node, 16 CPU cores, 128 GiB</td></tr>
           <tr><th>Cost basis</th><td>24.27-hour cold projection for five DIII-D frames; the request adds 11.73 hours of headroom and does not repeat the four-hour truncation.</td></tr>
-          <tr><th>Failure</th><td><code>ModuleNotFoundError: No module named 'jax'</code> before the first panel began</td></tr>
-          <tr><th>Submitted interpreter</th><td><code>/home/ITER/mcintos/Code/reckon/.venv/bin/python</code>, inherited through <code>PATH</code></td></tr>
+          <tr><th>Superseded failure</th><td><code>ModuleNotFoundError: No module named 'jax'</code> before the first panel began</td></tr>
+          <tr><th>Replacement interpreter</th><td><code>/home/ITER/mcintos/Code/nova/.venv/bin/python</code>, invoked by absolute path after <code>unset VIRTUAL_ENV</code></td></tr>
         </tbody>
       </table>
-      <p>The scheduler accepted the uncapped production partition and the requested 36-hour limit. The launch itself is not usable: the batch script exported the Nova environment location but invoked plain <code>python</code>, which resolved to the submitting Reckon environment. The exact-one-submission constraint prevents a corrected replacement from this node.</p>
+      <p>The scheduler accepted the uncapped production partition and the requested 36-hour limit for the replacement. The superseded batch invocation used plain <code>python</code>, which resolved through the inherited <code>PATH</code> to the Reckon environment. Before submitting the replacement, a login-node preflight through the absolute Nova interpreter imported JAX <code>0.11.0</code> and Nova successfully with <code>VIRTUAL_ENV</code> cleared.</p>
     </section>
 
     <section>
@@ -46,22 +46,24 @@
           <tr><th>Source commit</th><td><code>f055565d58e9b24ac0471c13b754df02c7b7468b</code></td></tr>
           <tr><th>Main base</th><td><code>4a061009dd6b5ea40d3759fdb6d4e3a7a62700b5</code></td></tr>
           <tr><th>Frozen source status</th><td>clean; zero bytes from <code>git status --porcelain</code></td></tr>
-          <tr><th>Submitted script SHA-256</th><td><code>56828bb00e5e58feccf064b4271b7fe048d73643264a2e91ef16cda69b734077</code></td></tr>
+          <tr><th>Replacement script SHA-256</th><td><code>6e5d802d0ce9e3a5fe75583d3b56f9367b5d505d81396d2dbf421c58df3a7a7f</code></td></tr>
+          <tr><th>Superseded script SHA-256</th><td><code>56828bb00e5e58feccf064b4271b7fe048d73643264a2e91ef16cda69b734077</code></td></tr>
           <tr><th>Output directory</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T110634662994-sse-topology-panel-launch/job-output</code></td></tr>
-          <tr><th>Job log</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T110634662994-sse-topology-panel-launch/slurm-1259157.log</code></td></tr>
+          <tr><th>Replacement job log</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T110634662994-sse-topology-panel-launch/slurm-1259160.log</code></td></tr>
+          <tr><th>Superseded job log</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T110634662994-sse-topology-panel-launch/slurm-1259157.log</code></td></tr>
         </tbody>
       </table>
-      <p>The submitted process was configured to read only the frozen source tree and write caches, evidence HTML, PNGs and JSON records into the durable crew run directory. Both the MAST and DIII-D authorities enable ordered per-trip active-set streaming. Because import failed before extraction, the job emitted no per-trip trajectory and no panel artifacts.</p>
+      <p>The replacement process reads only the frozen source tree and writes caches, evidence HTML, PNGs and JSON records into the durable crew run directory. Both the MAST and DIII-D authorities enable ordered per-trip active-set streaming, so the replacement log will carry trip, mask-difference, live-residual and inner-iteration trajectories as extraction proceeds. The superseded job emitted no trajectory and no panel artifact.</p>
     </section>
 
     <section>
       <h2>Machine-checkable panel record</h2>
-      <p>The committed generator defines each JSON record to carry the panel identity, convergence and qualification, numeric private-flux shadow count inside the Nova closed separatrix, total private-flux shadow count, selected primary X- and O-point coordinates, count of other qualified X-points, closest plasma-wall point, boundary availability, and a numeric converged-panel containment verdict. PNG and JSON are published atomically as each extracted row completes, so already published pairs remain usable if a corrected job is interrupted.</p>
-      <p>A later successful harvest must assert that <code>shadow_cells_inside_lcfs == 0</code> for every converged panel. This failed job produced no record values to interpret.</p>
+      <p>The committed generator defines each JSON record to carry the panel identity, convergence and qualification, numeric private-flux shadow count inside the Nova closed separatrix, total private-flux shadow count, selected primary X- and O-point coordinates, count of other qualified X-points, closest plasma-wall point, boundary availability, and a numeric converged-panel containment verdict. PNG and JSON are published atomically as each extracted row completes, so already published pairs remain usable if the replacement is interrupted.</p>
+      <p>A later harvest must assert that <code>shadow_cells_inside_lcfs == 0</code> for every converged panel. No replacement-job record value is interpreted here.</p>
     </section>
 
     <section>
-      <h2>Expected panel pairs for a corrected launch</h2>
+      <h2>Expected replacement-job panel pairs</h2>
       <table>
         <thead><tr><th>#</th><th>Panel identity</th><th>Expected durable files</th></tr></thead>
         <tbody>

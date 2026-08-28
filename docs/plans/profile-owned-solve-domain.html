@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-28">
-<meta name="plan-version" content="90">
+<meta name="plan-version" content="91">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -507,6 +507,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260828T041555691688-pod-fine-map-fixed-point-existence" data-who="flood-rca" data-when="2026-08-28T04:47:58Z">
     <div class="r-comment-body"><p>INCONCLUSIVE on existence but mechanism found: I-J is nonsingular on both grids and unit-plus eigenvalues are not production-only, yet fine late iterates carry SEVEN shadow-mask changes per step with expanding Picard ratios 1.990 and 1.841 against coarse zero changes and contracting 0.644; the active set never settles at fine resolution, and discretisation must not be changed on this evidence</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260828T044846463293-pod-active-set-corrector-probe" data-who="flood-rca" data-when="2026-08-28T05:02:51Z">
+    <div class="r-comment-body"><p>BREAKTHROUGH with a caveat: frozen-mask production solves reach 8.017e-9 at promotion 163 and 8.126e-9 at promotion 140, proving the 33x33 grid CAN meet the locked 1e-8 criterion and that the 3.0415e-4 floor is active-set oscillation rather than a discretisation, basis, carrier or budget limit; re-evaluation changes 21 cells (7 private-flux, 14 wall-height) and returns 6.633e-3, so INCONSISTENT-AT-REEVALUATION and a one-shot pin is invalid; 51 would-be flips over 11 promotions with a maximum of 11 in one</p></div>
 </div>
 </section>
 </main>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T06:48:34",
+  "updated": "2026-08-28T07:03:07",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -60290,9 +60290,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T044846463293-pod-active-set-corrector-probe",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-active-set-corrector-probe",
+        "node_definition": {
+          "done_when": "One SLURM job (H200 sized to share or an all_debug CPU lane, at most two hours, EXIT_MARKER=0) starts from the checkpointed fine midpoint and terminal states and, for each, runs a corrector in which the composed participation and shadow mask is held frozen at its state value while Newton iterates the resulting smooth subproblem, reporting per state the relative-sup residual trajectory, the residual reached, whether it crosses the locked 1e-8 criterion, and how many mask cells would have changed had the mask been live; a report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/active-set-corrector-probe.md tables those figures beside the live-mask floor 3.0415e-4 and the coarse converged 9.9089e-9, states whether a frozen-set solution satisfies the unfrozen residual when the mask is re-evaluated at that point, and gives the verdict ACTIVE-SET-STRATEGY-INDICATED, FROZEN-SET-INSUFFICIENT or INCONSISTENT-AT-REEVALUATION with what each implies for a production semismooth or active-set method; no repository file modified",
+          "estimated_hours": null,
+          "goal": "Whether freezing the active set turns the production problem smooth enough to reach the locked criterion, measured by running a frozen-participation corrector from the checkpointed fine midpoint and terminal states without changing production code",
+          "id": "pod-active-set-corrector-probe",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T044846463293-pod-active-set-corrector-probe/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/active-set-corrector-probe.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "flood-rca",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T04:48:54Z",
+        "completed_at": "2026-08-28T05:02:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 837,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 837,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "16aa7c49c66ccb730d2e0ca32b27f192ce528921",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "frozen-mask correctors from two checkpointed states with live-mask re-evaluation at each solution",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T044846463293-pod-active-set-corrector-probe/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T044846463293-pod-active-set-corrector-probe/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eee-f255-7522-9dd6-f2b59a1c4c30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2418176,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2764122,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 14985,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2665
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1148
+    "_version": 1149
   }
 }

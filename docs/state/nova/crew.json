@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T13:04:30",
+  "updated": "2026-08-28T13:06:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -61699,9 +61699,106 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T095641554180-sse-h200-batched-solve-throughput",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-h200-batched-solve-throughput",
+        "node_definition": {
+          "done_when": "One batched forward-solve throughput receipt exists, measured on the reserved H200 at the worktree's own base revision, with every raw sample persisted. (1) The run uses partition betelgeuse with --reservation=gpu_0003_grpA; that partition has no time limit, so do not request a short walltime that truncates the sweep, and request only the GPUs the sweep needs so the co-tenant job keeps its own. Confirm float64 is active via JAX_ENABLE_X64=true and record the resolved device. (2) The sweep covers a batch-size ladder wide enough to show where throughput saturates rather than only the default 1,4,8 \u2014 extend upward until either device memory or a measured plateau stops it, and say which stopped it. (3) The receipt persists every per-repetition raw latency sample and the complete per-member iteration and residual arrays, not only aggregates: a prior H200 receipt on this plan was refused at admission precisely because it discarded its raw samples and could not be independently recomputed. Strict JSON, no NaN or Infinity literals, non-finite numeric leaves mapped to null. (4) The receipt records, beside each timing, the terminal residual and branch qualification for every ensemble member, so a throughput number can never be read as a convergence claim. It also records the base commit SHA the measurement ran at and whether that revision contains the settled-active-set outer loop, because the outer loop multiplies solve cost and a receipt that does not say which semantics it measured cannot be compared with an earlier one. (5) The manifest states measured throughput per batch size, the saturation point, the device, the peak device memory, and the CPU reference point if one is cheaply available; it states plainly if any figure could not be measured rather than substituting an estimate. Do not modify any committed artifact other than the throughput receipt paths in the write scope.",
+          "estimated_hours": null,
+          "goal": "A batched forward-solve throughput receipt measured on one reserved H200 GPU, with every per-repetition raw sample persisted for independent recomputation",
+          "id": "sse-h200-batched-solve-throughput",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T095641554180-sse-h200-batched-solve-throughput/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/diiid_batched_throughput.py",
+            "docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.json",
+            "docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.csv",
+            "docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "h200-matrix",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T09:56:50Z",
+        "completed_at": "2026-08-28T10:53:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3374,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3374,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "dcd920b61cb86f8c49816042cbb21e67668f5879",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": {
+          "command": "job 1259122 still RUNNING on betelgeuse at the 60-minute worker fence; no measure published and none claimed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T095641554180-sse-h200-batched-solve-throughput/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T095641554180-sse-h200-batched-solve-throughput/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0358b-83fb-7493-b03c-93b69217d2d5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 23009536,
+            "cached_input_tokens_cumulative": 133264896,
+            "input_tokens": 23278170,
+            "input_tokens_cumulative": 135585921,
+            "output_tokens": 23862,
+            "output_tokens_cumulative": 218126,
+            "reasoning_output_tokens": 5868,
+            "reasoning_output_tokens_cumulative": 65803
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1162
+    "_version": 1163
   }
 }

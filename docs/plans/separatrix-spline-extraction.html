@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-28">
-<meta name="plan-version" content="73">
+<meta name="plan-version" content="74">
 </head>
 <body>
   <main class="plan-doc">
@@ -328,7 +328,10 @@
     <div class="r-comment-body"><p>NULL RESULT: the guarded wall-height exclusion has no measurable effect on production MAST geometry. It fired on 0 cells in all 25 evaluations; guarded and pure-topology arms produced identical mask differences 38,23,0,1,22,0,0,0,0,0,0,0, identical inner iterations, identical terminal residual 6.0797717128595031e-12, stable zero at trip 5 and the same false zero at trip 2. Solve times 59.287223 s guarded against 59.810792 s pure, a 0.88 percent ordering attributable to compilation variability since the masks were identical. The evidence does not support the height rule reducing active-set trips</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260828T105307708316-sse-diiid-bank-launch" data-who="diiid-forward-gs" data-when="2026-08-28T11:04:21Z">
-    <div class="r-comment-body"><p>DIII-D five-frame bank launched as job 1259150 on vega with a 36-hour accepted limit against a 24.27-hour cold-unit projection, so the four-hour truncation cannot repeat. Trip telemetry streams and per-frame atomic checkpoints accumulate, so a truncation now degrades rather than erases. The machine-artifact cache was relocated from per-node tmpfs to durable run-directory storage. Launch-only: no convergence, residual or gate claim is made, and a harvest node owns the audit against the previous receipt&#x27;s 0 of 5 converged frames</p></div>
+    <div class="r-comment-body"><p>DIII-D five-frame bank launched as job 1259150 on vega with a 36-hour accepted limit against a 24.27-hour cold-unit projection, so the four-hour truncation cannot repeat. Trip telemetry streams and per-frame atomic checkpoints accumulate, so a truncation now degrades rather than erases. The machine-artifact cache was relocated from per-node tmpfs to durable run-directory storage. Launch-only: no convergence, residual or gate claim is made, and a harvest node owns the audit against the previous receipt's 0 of 5 converged frames</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260828T095641554180-sse-h200-batched-solve-throughput" data-who="h200-matrix" data-when="2026-08-28T10:53:04Z">
+    <div class="r-comment-body"><p>Measure unmet, launch sound: the node submitted job 1259122 on betelgeuse with reservation gpu_0003_grpA, one H200 NVL (143771 MiB, driver 595.58.03, cc 9.0) resolved as CUDA device 0, 4 CPUs, 32 GB host, and no requested wall time, then handed back at its 60-minute fence with the job still RUNNING. It admitted no artifact and claimed no batch size, throughput, saturation point, memory, residual or convergence figure. Measurement base HEAD dcd920b6 has the settled-active-set loop as an ancestor. A harvest node owns the audit and commit once the job terminates</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T09:45:48",
+  "updated": "2026-08-28T10:07:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -60891,9 +60891,114 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T080152625384-sse-mast-bank-harvest",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-mast-bank-harvest",
+        "node_definition": {
+          "done_when": "The outputs of job 1259051 in run directory r-20260828T064851526484 are audited and, if admissible, copied into the worktree and committed, provisioning any absent untracked input from the main checkout first: the scheduler receipt shows COMPLETED with ExitCode 0:0 and the log ends EXIT_MARKER=0; the JSON is strict with exactly the twelve declared arm identities once each, no NaN or infinity, explicit per-arm convergence, terminal residual, tolerance and termination, and named failure rows retained; the PNG is redrawn and visually inspected at original resolution; the manifest states how many arms converge against the 2 of 12 in the preserved pre-active-set baseline, tables per-arm terminal-residual deltas, and quotes the three locked gate figures for class agreement, worst eligible symmetric RMS and worst declared-row saddle distance as measured; if any audit check fails nothing is committed and the failure is reported with the offending value",
+          "estimated_hours": null,
+          "goal": "The completed twelve-arm MAST regeneration on the settled-active-set solver reconciled into the repository after a strict audit, with its convergence delta against the pre-active-set bank made explicit",
+          "id": "sse-mast-bank-harvest",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T080152625384-sse-mast-bank-harvest/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+            "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "margin-remeasure",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T08:02:03Z",
+        "completed_at": "2026-08-28T08:06:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 277,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 277,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "75c40a4cf0a49483f00bc2945abe0a5c4f9fe8ba",
+        "commits": [
+          "d47f7cd1ce1c72138b6691c559bbf1be0bcd465e"
+        ],
+        "changed_lines": {
+          "added": 14112,
+          "removed": 6971,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "job 1259051 audited (COMPLETED 0:0, EXIT_MARKER=0, strict JSON, 12/12 unique arms, inputs byte-identical) then committed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T080152625384-sse-mast-bank-harvest/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T080152625384-sse-mast-bank-harvest/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03818-636e-7632-bc6e-05c3a7131c93",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2597888,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2645520,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 10376,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2350
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1154
+    "_version": 1155
   }
 }

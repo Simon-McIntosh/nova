@@ -1,0 +1,62 @@
+[
+  {
+    "geometry": "snowflake-near-equal-height",
+    "wall_nodes": 96,
+    "pure_shadow_nodes": 45,
+    "height_shadow_nodes": 39,
+    "removed_from_pure_shadow": 6,
+    "added_to_pure_shadow": 0,
+    "perturbed_height_shadow_nodes": 41,
+    "perturbation_churn_nodes": 2,
+    "alternate_primary_shadow_nodes": null,
+    "alternate_primary_churn_nodes": null
+  },
+  {
+    "geometry": "connected-double-null",
+    "wall_nodes": 96,
+    "pure_shadow_nodes": 70,
+    "height_shadow_nodes": 70,
+    "removed_from_pure_shadow": 0,
+    "added_to_pure_shadow": 0,
+    "perturbed_height_shadow_nodes": 70,
+    "perturbation_churn_nodes": 0,
+    "alternate_primary_shadow_nodes": null,
+    "alternate_primary_churn_nodes": null
+  },
+  {
+    "geometry": "coil-null-extremes",
+    "wall_nodes": 96,
+    "pure_shadow_nodes": 96,
+    "height_shadow_nodes": 81,
+    "removed_from_pure_shadow": 15,
+    "added_to_pure_shadow": 0,
+    "perturbed_height_shadow_nodes": 79,
+    "perturbation_churn_nodes": 2,
+    "alternate_primary_shadow_nodes": 13,
+    "alternate_primary_churn_nodes": 68
+  },
+  {
+    "geometry": "limited-no-x-point",
+    "wall_nodes": 96,
+    "pure_shadow_nodes": 0,
+    "height_shadow_nodes": 0,
+    "removed_from_pure_shadow": 0,
+    "added_to_pure_shadow": 0,
+    "perturbed_height_shadow_nodes": 0,
+    "perturbation_churn_nodes": 0,
+    "alternate_primary_shadow_nodes": null,
+    "alternate_primary_churn_nodes": null
+  },
+  {
+    "geometry": "single-null-outboard-low-node",
+    "wall_nodes": 96,
+    "pure_shadow_nodes": 37,
+    "height_shadow_nodes": 37,
+    "removed_from_pure_shadow": 0,
+    "added_to_pure_shadow": 0,
+    "perturbed_height_shadow_nodes": 37,
+    "perturbation_churn_nodes": 0,
+    "alternate_primary_shadow_nodes": null,
+    "alternate_primary_churn_nodes": null
+  }
+]

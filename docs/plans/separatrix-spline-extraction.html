@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-28">
-<meta name="plan-version" content="79">
+<meta name="plan-version" content="80">
 </head>
 <body>
   <main class="plan-doc">
@@ -347,6 +347,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260828T115605897670-sse-panel-failure-retention" data-who="topology-visuals" data-when="2026-08-28T12:06:58Z">
     <div class="r-comment-body"><p>The visual generator now carries the per-arm retention contract the three campaign drivers already had. A size-one boundary or an exception inside panel rendering publishes a named failure PNG/JSON pair, preserving all 17 panel indices; unrelated validation, cache and filesystem faults still propagate. Crucially for gate honesty, absent containment serializes as null with availability false and the gate null, never as zero, so a panel with no separatrix cannot be counted as passing; a healthy boundary reports integer 0 with availability true, and total_shadow_cells stays numeric in both cases</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260828T145858461189-sse-topology-panel-relaunch" data-who="topology-visuals" data-when="2026-08-28T15:08:38Z">
+    <div class="r-comment-body"><p>Launch contract met and the job then failed on a defect this node did not own. Job 1259311 published six panels, two more than the previous attempt, then died at panel 07 with jax.errors.JaxRuntimeError INTERNAL: Failed to materialize symbols in _margin_graded_newton_krylov. That is compiled-code accumulation, the same failure already repaired in the DIII-D, corroboration and pinned-branch drivers and never applied to this generator, which carries a finally block but releases no cache. The interpreter pinning worked, the retention contract held, and the six panels written incrementally survive</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

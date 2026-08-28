@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T16:58:21",
+  "updated": "2026-08-28T18:17:18",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -62103,9 +62103,109 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T145858461189-sse-topology-panel-relaunch",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-topology-panel-relaunch",
+        "node_definition": {
+          "done_when": "One durable SLURM job regenerates the full seventeen-panel cohort on the retention-carrying generator. Job 1259160 published panels 01 through 04 then died on MAST 21985/51; commit 420e880c now retains a degenerate boundary as a named failure panel, so the cohort can complete. (1) Submit exactly one job on an uncapped non-debug lane from current main. Pin the Nova interpreter by absolute path, /home/ITER/mcintos/Code/nova/.venv/bin/python, unset the inherited VIRTUAL_ENV and export UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv, because a prior submission failed before extraction when bare python resolved to the Reckon environment without JAX. Verify the interpreter with a one-line jax and nova import check on the login node before submitting and capture it to the run directory. State the accepted TimeLimit; request a limit generous against a cohort whose DIII-D panels project to roughly a day. (2) Enable per-trip active-set telemetry, and write every PNG and JSON incrementally into the durable crew run directory as each panel completes. (3) Do not stop at the first failure: the point of this run is a complete seventeen-panel denominator including retained failures. (4) Record the source commit, clean worktree status, submitted script SHA-256, absolute output directory, and the expected seventeen PNG and JSON paths. Make no claim about whether any panel passes containment; a harvest node owns the audit and the commit.",
+          "estimated_hours": null,
+          "goal": "One durable long-lane job regenerating the complete seventeen-panel cohort on the retention-carrying generator",
+          "id": "sse-topology-panel-relaunch",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145858461189-sse-topology-panel-relaunch/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/research/topology-panel-relaunch-receipt.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "topology-visuals",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T14:59:07Z",
+        "completed_at": "2026-08-28T15:08:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 571,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 571,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "030b4e6acdb48aeeebe28626beb7dfecec040556",
+        "commits": [
+          "a16b862355904f5bd512a98ad38aecad6de3b2f5"
+        ],
+        "changed_lines": {
+          "added": 96,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "one job submitted and accepted: 1259311 on vega, TimeLimit 1-12:00:00, interpreter pinned and import-checked, source frozen clean at 030b4e6a with retention 420e880c as ancestor",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145858461189-sse-topology-panel-relaunch/slurm-1259311.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145858461189-sse-topology-panel-relaunch/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e97-9cbb-7f42-a9b6-77efed646626",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 4289024,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 4640096,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 20954,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3050
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1166
+    "_version": 1167
   }
 }

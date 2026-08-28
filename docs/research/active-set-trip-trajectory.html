@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="active-set-trip-trajectory">
+  <meta name="plan-title" content="MAST active-set trip trajectory">
+  <meta name="plan-summary" content="Production-resolution timing and mask trajectory for one MAST pure-diverted solve, with the direct five-frame DIII-D cost implication">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-informs" content="separatrix-spline-extraction">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-recorded-at" content="2026-08-28">
+  <meta name="plan-read" content="1">
+  <meta name="plan-tags" content="equilibrium,mast,diii-d,active-set,timing">
+  <title>MAST active-set trip trajectory | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Research record &middot; measured production solve</p>
+      <h1>One MAST arm settles in 12 active-set trips</h1>
+      <p class="lead">
+        The production-resolution MAST 22086/43 pure-diverted arm executed
+        <strong>12 of the 16 allowed outer trips</strong>. Its mask difference
+        first reached zero at trip 2, changed again at trips 3 and 4, then stayed
+        zero from trip 5 through the terminal trip 11. The reported live residual
+        on trip 11 was <strong>6.079771712859503&times;10<sup>&minus;12</sup></strong>.
+      </p>
+    </header>
+
+    <aside>
+      <p>
+        <strong>Cost implication.</strong> Straight multiplication by the recorded
+        pre-active-set DIII-D single-frame solve time gives
+        <code>5 frames &times; 12 trips/frame &times; 1455.959 s/trip =
+        87,357.540 s</code>, or <strong>24.265983 h</strong>
+        (24 h 15 min 57.540 s). This is the requested direct scaling, not a new
+        DIII-D timing measurement. The MAST run shows that treating every trip as
+        cold is conservative: its later compiled and warm-started trips were much
+        cheaper than its first two.
+      </p>
+    </aside>
+
+    <section id="measurement-contract">
+      <h2>Measurement contract</h2>
+      <p>
+        One branch was run on Vega job <code>1259127</code>, on CPU node
+        <code>98dci4-clu-4030</code>, with 16 CPUs and 64 GiB requested. The job
+        used the unlimited <code>vega</code> partition and requested no wall-time
+        cap. It completed in 109 s with <code>ExitCode 0:0</code> and 2,081,440 KiB
+        peak RSS. No bank, JSON receipt, or PNG publication artifact was generated
+        or modified.
+      </p>
+      <table>
+        <caption>Exact solve operands and fixed solver settings</caption>
+        <tbody>
+          <tr><th scope="row">Arm</th><td>MAST 22086/43 pure-diverted</td></tr>
+          <tr><th scope="row">Grid</th><td>33 &times; 33 nodes; 1,089 nodes</td></tr>
+          <tr><th scope="row">Target current</th><td>933,034.875 A</td></tr>
+          <tr><th scope="row">Inner budget</th><td>12 Newton steps; 12 GMRES iterations; zero warmup sweeps</td></tr>
+          <tr><th scope="row">Step policy</th><td>relaxation 0.5; step cap 10.0</td></tr>
+          <tr><th scope="row">Registered criterion</th><td>1&times;10<sup>&minus;8</sup> relative-sup residual</td></tr>
+          <tr><th scope="row">Response carrier</th><td><code>1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994</code></td></tr>
+          <tr><th scope="row">Code revision</th><td><code>9226a26e81fa3a31b0fad83030a6c352d8e8444b</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="trajectory">
+      <h2>Full per-trip trajectory</h2>
+      <p>
+        Wall time is measured from timestamped host receipt of the streamed device
+        callback. Trip 0 is measured from the solve-start marker; every later row
+        is the difference from the preceding callback. Consequently, the first
+        trips include cold compilation, while later rows expose the compiled,
+        warm-started cost. The 12 callback intervals total
+        <strong>44.857482 s</strong>.
+      </p>
+
+      <figure>
+        <svg viewBox="0 0 760 330" role="img" aria-labelledby="trajectory-title trajectory-desc">
+          <title id="trajectory-title">Active-set mask difference and live residual by trip</title>
+          <desc id="trajectory-desc">Mask differences are 38, 23, 0, 1, 22, then zero through trip 11. The residual generally decreases from about five times ten to the minus three to six times ten to the minus twelve, with one increase at trip 3.</desc>
+          <rect x="0" y="0" width="760" height="330" fill="#ffffff"/>
+          <text x="58" y="24" font-size="14" fill="#232323">changed mask cells</text>
+          <line x1="58" y1="142" x2="724" y2="142" stroke="#777" stroke-width="1"/>
+          <g fill="#512b81">
+            <rect x="70" y="42" width="30" height="100"/><rect x="124" y="82" width="30" height="60"/>
+            <rect x="178" y="142" width="30" height="0"/><rect x="232" y="139" width="30" height="3"/>
+            <rect x="286" y="84" width="30" height="58"/><rect x="340" y="142" width="30" height="0"/>
+            <rect x="394" y="142" width="30" height="0"/><rect x="448" y="142" width="30" height="0"/>
+            <rect x="502" y="142" width="30" height="0"/><rect x="556" y="142" width="30" height="0"/>
+            <rect x="610" y="142" width="30" height="0"/><rect x="664" y="142" width="30" height="0"/>
+          </g>
+          <g font-size="11" text-anchor="middle" fill="#232323">
+            <text x="85" y="38">38</text><text x="139" y="78">23</text><text x="193" y="136">0</text>
+            <text x="247" y="135">1</text><text x="301" y="80">22</text><text x="355" y="136">0</text>
+            <text x="409" y="136">0</text><text x="463" y="136">0</text><text x="517" y="136">0</text>
+            <text x="571" y="136">0</text><text x="625" y="136">0</text><text x="679" y="136">0</text>
+          </g>
+          <text x="58" y="180" font-size="14" fill="#232323">live residual (log scale)</text>
+          <line x1="58" y1="292" x2="724" y2="292" stroke="#777" stroke-width="1"/>
+          <polyline points="85,202 139,204 193,207 247,205 301,210 355,213 409,216 463,218 517,221 571,223 625,226 679,283" fill="none" stroke="#135d6a" stroke-width="3"/>
+          <g fill="#135d6a">
+            <circle cx="85" cy="202" r="4"/><circle cx="139" cy="204" r="4"/><circle cx="193" cy="207" r="4"/>
+            <circle cx="247" cy="205" r="4"/><circle cx="301" cy="210" r="4"/><circle cx="355" cy="213" r="4"/>
+            <circle cx="409" cy="216" r="4"/><circle cx="463" cy="218" r="4"/><circle cx="517" cy="221" r="4"/>
+            <circle cx="571" cy="223" r="4"/><circle cx="625" cy="226" r="4"/><circle cx="679" cy="283" r="4"/>
+          </g>
+          <g font-size="11" text-anchor="middle" fill="#232323">
+            <text x="85" y="310">0</text><text x="139" y="310">1</text><text x="193" y="310">2</text>
+            <text x="247" y="310">3</text><text x="301" y="310">4</text><text x="355" y="310">5</text>
+            <text x="409" y="310">6</text><text x="463" y="310">7</text><text x="517" y="310">8</text>
+            <text x="571" y="310">9</text><text x="625" y="310">10</text><text x="679" y="310">11</text>
+          </g>
+          <text x="390" y="326" text-anchor="middle" font-size="12" fill="#232323">outer trip index</text>
+        </svg>
+        <figcaption>
+          The mask touches zero at trip 2 but does not yet settle: one and 22
+          cells change on trips 3 and 4. The stable zero-difference run begins at
+          trip 5 and continues through the terminal trip 11. No cycle-damping
+          activation was reported on any trip.
+        </figcaption>
+      </figure>
+
+      <table>
+        <caption>Timestamped active-set callback values</caption>
+        <thead>
+          <tr>
+            <th scope="col">Trip</th>
+            <th scope="col">Mask difference</th>
+            <th scope="col">Live residual</th>
+            <th scope="col">Inner iterations</th>
+            <th scope="col">Trip wall time (s)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">0</th><td>38</td><td>4.9764556897339413&times;10<sup>&minus;3</sup></td><td>12</td><td>15.724533</td></tr>
+          <tr><th scope="row">1</th><td>23</td><td>3.4925711304508405&times;10<sup>&minus;3</sup></td><td>12</td><td>18.303108</td></tr>
+          <tr><th scope="row">2</th><td>0</td><td>2.2267868462636765&times;10<sup>&minus;3</sup></td><td>12</td><td>1.105088</td></tr>
+          <tr><th scope="row">3</th><td>1</td><td>2.8245436710891813&times;10<sup>&minus;3</sup></td><td>12</td><td>1.095579</td></tr>
+          <tr><th scope="row">4</th><td>22</td><td>1.7686695998074880&times;10<sup>&minus;3</sup></td><td>12</td><td>1.095224</td></tr>
+          <tr><th scope="row">5</th><td>0</td><td>1.1202504574515501&times;10<sup>&minus;3</sup></td><td>12</td><td>1.090936</td></tr>
+          <tr><th scope="row">6</th><td>0</td><td>7.1585199786900248&times;10<sup>&minus;4</sup></td><td>12</td><td>1.095202</td></tr>
+          <tr><th scope="row">7</th><td>0</td><td>4.6228423444787386&times;10<sup>&minus;4</sup></td><td>12</td><td>1.102071</td></tr>
+          <tr><th scope="row">8</th><td>0</td><td>2.9898570793882934&times;10<sup>&minus;4</sup></td><td>12</td><td>1.101244</td></tr>
+          <tr><th scope="row">9</th><td>0</td><td>1.9330286566977728&times;10<sup>&minus;4</sup></td><td>12</td><td>1.108406</td></tr>
+          <tr><th scope="row">10</th><td>0</td><td>1.2525252154459219&times;10<sup>&minus;4</sup></td><td>12</td><td>1.109003</td></tr>
+          <tr><th scope="row">11</th><td>0</td><td>6.0797717128595031&times;10<sup>&minus;12</sup></td><td>3</td><td>0.927088</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="settling">
+      <h2>Settling and timing interpretation</h2>
+      <ul>
+        <li>
+          <strong>First zero mask difference:</strong> trip 2. This was transient,
+          because trips 3 and 4 changed 1 and 22 cells respectively.
+        </li>
+        <li>
+          <strong>Stable zero mask difference:</strong> trip 5 onward. The solve
+          completed on trip 11, consuming 12 trips against the limit of 16.
+        </li>
+        <li>
+          <strong>Mean and maximum:</strong> 3.738124 s mean over all trips;
+          18.303108 s maximum at trip 1.
+        </li>
+        <li>
+          <strong>Warm-cost observation:</strong> trips 0&ndash;1 averaged
+          17.013821 s, while trips 2&ndash;11 averaged 1.082984 s. The later group
+          was 6.37% of the early mean, or 15.7 times cheaper. This run combines
+          warm starting with one-time compilation, so it establishes the observed
+          cost drop but does not separate those two causes.
+        </li>
+      </ul>
+      <p>
+        The mask sequence does not oscillate indefinitely and does not drift:
+        after the transient <code>0, 1, 22</code> excursion, it becomes the fixed
+        value zero. The residual values above are reported exactly as printed by
+        the run; this record makes no additional claim about solution quality.
+      </p>
+    </section>
+
+    <section id="diiid-cost">
+      <h2>Five-frame DIII-D arithmetic</h2>
+      <p>
+        Using the measured 12 trips-to-settle as the multiplier and the recorded
+        pre-active-set DIII-D time as one full-solve unit:
+      </p>
+      <pre><code>single frame: 12 trips &times; 1455.959 s = 17,471.508 s = 4.853197 h
+five frames:  5 &times; 17,471.508 s = 87,357.540 s = 24.265983 h</code></pre>
+      <p>
+        This checkable projection is the implied cost if every DIII-D trip costs
+        the full recorded 1455.959 s. The MAST callback timings show that later
+        trips can be much cheaper once compiled and warm-started, so 24.265983 h
+        should not be presented as a measured five-frame runtime. A defensible
+        warm-adjusted DIII-D estimate requires per-trip DIII-D timestamps; this
+        one-arm MAST measurement does not provide them.
+      </p>
+    </section>
+
+    <section id="evidence">
+      <h2>Durable evidence</h2>
+      <p>
+        Complete combined stdout and stderr, including scheduler identity, exact
+        measurement contract, timestamped callbacks, terminal receipt, and exit
+        marker:
+        <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T102123170213-sse-active-set-trip-measurement/mast-arm-1259127.log</code>.
+        The timestamp wrapper and one-arm runner are retained beside that log.
+      </p>
+    </section>
+  </main>
+</body>
+</html>

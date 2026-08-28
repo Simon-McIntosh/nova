@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T05:39:08",
+  "updated": "2026-08-28T05:49:03",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -59996,9 +59996,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T033919693468-pod-grid-operand-ablation",
+        "plan": "profile-owned-solve-domain",
+        "section": "\u00a74",
+        "node": "pod-grid-operand-ablation",
+        "node_definition": {
+          "done_when": "One SLURM job (H200 sized to share or an all_debug CPU lane, at most two hours, EXIT_MARKER=0) evaluates the production residual at the transferred coarse solution three ways on current origin/main: unmodified fine construction reproducing 0.2361, a hybrid holding the coarse-derived support and current moments prolonged onto the fine grid while using the fine target response, and a hybrid using the fine support and current moments with the coarse-derived target response mapped onto the fine targets; a report at /home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/grid-operand-ablation.md tables the three relative-sup residuals beside the pure-coarse control 9.90891918803364e-9, states precisely how each operand was substituted with file and line citations and what interpolation each substitution required, reports the interpolation error introduced by each substitution so it cannot be mistaken for signal, and gives the verdict SUPPORT-MOMENTS-IMPLICATED, TARGET-RESPONSE-IMPLICATED, BOTH or NEITHER with the numbers that distinguish them; if a substitution proves infeasible the report says so plainly and states what it would take; no repository file modified",
+          "estimated_hours": null,
+          "goal": "Which of the two grid-internal operands carries the resolution inconsistency, separated by evaluating the production residual at the transferred state under two hybrid constructions that swap one operand at a time between the coarse and fine grids",
+          "id": "pod-grid-operand-ablation",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T033919693468-pod-grid-operand-ablation/manifest.md",
+          "plan": "profile-owned-solve-domain",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s16-landing-20260826/grid-operand-ablation.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "connectivity-audit",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T03:39:28Z",
+        "completed_at": "2026-08-28T03:48:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 530,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 530,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "b35040f6f6bd49251c19d26bd8c294beb997b0cb",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "three-way residual evaluation at the transferred state with per-substitution interpolation error reported; EXIT_MARKER=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T033919693468-pod-grid-operand-ablation/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T033919693468-pod-grid-operand-ablation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f75-0f36-7192-bb27-6710c52ac3e1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2279168,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2402038,
+            "output_tokens": 2957,
+            "output_tokens_cumulative": 18897,
+            "reasoning_output_tokens": 513,
+            "reasoning_output_tokens_cumulative": 4001
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1145
+    "_version": 1146
   }
 }

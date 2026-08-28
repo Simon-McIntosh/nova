@@ -423,13 +423,17 @@ def measure(
     """Run widths through the mandatory floor, then stop at a measured limit."""
 
     configure_dtypes()
+    login_preflight = os.environ.get("SLURM_JOB_ID") is None
     if jax.devices()[0].platform != "gpu":
         raise RuntimeError("the saturation measurement requires a JAX GPU device")
     if not jax.config.jax_enable_x64:
         raise RuntimeError("JAX float64 is not active")
-    if os.environ.get("SLURM_JOB_PARTITION") != "betelgeuse":
+    if not login_preflight and os.environ.get("SLURM_JOB_PARTITION") != "betelgeuse":
         raise RuntimeError("the saturation measurement requires partition betelgeuse")
-    if os.environ.get("SLURM_JOB_RESERVATION") != "gpu_0003_grpA":
+    if (
+        not login_preflight
+        and os.environ.get("SLURM_JOB_RESERVATION") != "gpu_0003_grpA"
+    ):
         raise RuntimeError("the saturation measurement requires gpu_0003_grpA")
 
     profile, seed = build_workload()
@@ -647,6 +651,15 @@ def measure(
         rows.append(row)
         checkpoint()
 
+        if login_preflight and not batch_sizes:
+            stop = {
+                "kind": "login_command_preflight_complete",
+                "deciding_number": batch_size,
+                "criterion": (
+                    "execute each explicitly supplied login width exactly once"
+                ),
+            }
+            break
         if (
             batch_size >= minimum_plateau_batch_size
             and plateau_run >= plateau_consecutive_widths
@@ -683,7 +696,7 @@ def measure(
     )
     result.update(
         {
-            "measurement_state": "complete",
+            "measurement_state": "preflight" if login_preflight else "complete",
             "sweep_stop": stop,
             "first_failed_width": failed_width,
             "detail_receipt": {**detail_record, "complete": True},
@@ -783,7 +796,9 @@ def main() -> None:
     parser.add_argument("--minimum-plateau-batch-size", type=int, default=512)
     arguments = parser.parse_args()
     batch_sizes = tuple(int(value) for value in arguments.batch_sizes.split(","))
-    if batch_sizes[0] != 1 or batch_sizes[-1] < arguments.minimum_plateau_batch_size:
+    if os.environ.get("SLURM_JOB_ID") is not None and (
+        batch_sizes[0] != 1 or batch_sizes[-1] < arguments.minimum_plateau_batch_size
+    ):
         raise ValueError("the initial batch ladder must start at 1 and reach 512")
     measure(
         batch_sizes,

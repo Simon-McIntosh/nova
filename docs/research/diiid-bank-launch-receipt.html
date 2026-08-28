@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="diiid-bank-launch-receipt">
+  <meta name="plan-title" content="DIII-D five-frame durable bank launch receipt">
+  <meta name="plan-summary" content="Launch-only identity and harvest handoff for the guarded five-frame DIII-D forward-GS bank">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-informs" content="separatrix-spline-extraction">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-recorded-at" content="2026-08-28">
+  <meta name="plan-read" content="1">
+  <meta name="plan-tags" content="equilibrium,diii-d,slurm,checkpointing,provenance">
+  <title>DIII-D five-frame durable bank launch receipt | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Launch receipt &middot; no scientific result asserted</p>
+      <h1>Five-frame DIII-D bank is running on the durable CPU lane</h1>
+      <p class="lead">
+        SLURM job <strong>1259150</strong> was submitted exactly once to
+        <code>vega</code> and accepted a <strong>36-hour</strong> limit. It runs a
+        clean snapshot of current main with per-trip active-set streaming and
+        atomic per-frame checkpointing enabled. A separate harvest must audit the
+        terminal products before any convergence, residual, gate, or scientific
+        claim is made.
+      </p>
+    </header>
+
+    <aside>
+      <p>
+        <strong>Why 36 hours.</strong> A measured active-set trajectory consumed
+        12 of 16 trips. Direct cold-unit multiplication of 12 trips by the
+        recorded 1455.959 s DIII-D single-frame solve and five frames is
+        87,357.540 s, or 24.265983 h. The accepted limit leaves 11.734017 h above
+        that conservative projection; it is not a scientific measurement.
+      </p>
+    </aside>
+
+    <section id="scheduler">
+      <h2>Scheduler receipt</h2>
+      <table>
+        <caption>Accepted allocation at launch handoff</caption>
+        <tbody>
+          <tr><th scope="row">Job</th><td><code>1259150</code></td></tr>
+          <tr><th scope="row">State at handoff</th><td>RUNNING</td></tr>
+          <tr><th scope="row">Partition</th><td><code>vega</code>; partition MaxTime is UNLIMITED</td></tr>
+          <tr><th scope="row">Compute node</th><td><code>98dci4-clu-4030</code></td></tr>
+          <tr><th scope="row">Allocation</th><td>1 node, 16 CPUs, 128 GiB</td></tr>
+          <tr><th scope="row">Accepted time limit</th><td><code>1-12:00:00</code> (36 hours)</td></tr>
+          <tr><th scope="row">Submitted</th><td>2026-08-28 12:59:16 +02:00</td></tr>
+          <tr><th scope="row">Started</th><td>2026-08-28 12:59:17 +02:00</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="flow">
+      <h2>Durable publication flow</h2>
+      <figure>
+        <svg viewBox="0 0 920 220" role="img" aria-labelledby="flow-title flow-desc">
+          <title id="flow-title">DIII-D durable execution and harvest flow</title>
+          <desc id="flow-desc">A pinned clean source and verified wall and machine artifact feed the five-frame solve. Each completed frame atomically replaces a partial receipt. Only after figures and the final receipt exist does a separate harvest audit them.</desc>
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#135d6a"/>
+            </marker>
+          </defs>
+          <rect x="20" y="55" width="190" height="105" rx="8" fill="#eef6f7" stroke="#135d6a"/>
+          <text x="115" y="83" text-anchor="middle" font-size="15" fill="#232323">Verified inputs</text>
+          <text x="115" y="110" text-anchor="middle" font-size="12" fill="#232323">clean main snapshot</text>
+          <text x="115" y="132" text-anchor="middle" font-size="12" fill="#232323">wall + machine artifact</text>
+          <line x1="210" y1="108" x2="282" y2="108" stroke="#135d6a" stroke-width="3" marker-end="url(#arrow)"/>
+          <rect x="290" y="35" width="210" height="145" rx="8" fill="#f5f0fa" stroke="#512b81"/>
+          <text x="395" y="65" text-anchor="middle" font-size="15" fill="#232323">Five-frame solve</text>
+          <text x="395" y="93" text-anchor="middle" font-size="12" fill="#232323">stream every active-set trip</text>
+          <text x="395" y="118" text-anchor="middle" font-size="12" fill="#232323">atomic partial after each frame</text>
+          <text x="395" y="143" text-anchor="middle" font-size="12" fill="#232323">figures before final receipt</text>
+          <line x1="500" y1="108" x2="572" y2="108" stroke="#135d6a" stroke-width="3" marker-end="url(#arrow)"/>
+          <rect x="580" y="55" width="150" height="105" rx="8" fill="#fff8e7" stroke="#9a6b00"/>
+          <text x="655" y="86" text-anchor="middle" font-size="15" fill="#232323">Durable outputs</text>
+          <text x="655" y="113" text-anchor="middle" font-size="12" fill="#232323">partial + final JSON</text>
+          <text x="655" y="135" text-anchor="middle" font-size="12" fill="#232323">two PNG figures</text>
+          <line x1="730" y1="108" x2="782" y2="108" stroke="#135d6a" stroke-width="3" marker-end="url(#arrow)"/>
+          <rect x="790" y="70" width="110" height="75" rx="8" fill="#f4f4f4" stroke="#555"/>
+          <text x="845" y="100" text-anchor="middle" font-size="15" fill="#232323">Harvest</text>
+          <text x="845" y="123" text-anchor="middle" font-size="12" fill="#232323">strict audit</text>
+        </svg>
+        <figcaption>
+          The checkpoint is flushed and atomically renamed before the next frame
+          starts. A scheduler truncation can therefore degrade the cohort without
+          erasing completed frames.
+        </figcaption>
+      </figure>
+    </section>
+
+    <section id="source-and-inputs">
+      <h2>Pinned source and input identities</h2>
+      <table>
+        <caption>Pre-submission provenance</caption>
+        <tbody>
+          <tr><th scope="row">Source HEAD</th><td><code>4a42139d49d58a8dc451bfbbf06963e9d2b9e0ea</code>; clean snapshot of current <code>origin/main</code></td></tr>
+          <tr><th scope="row">Submitted script SHA-256</th><td><code>96c92b7caf8dd479ceb924b56d5936eecccaa19860e0839100e173e85eb51165</code></td></tr>
+          <tr><th scope="row">Preregistration SHA-256</th><td><code>bf3d1cb3ef29d60ddb632454bfdda8914f397421a2a46e2fc16310653c1457f5</code></td></tr>
+          <tr><th scope="row">Wall transport SHA-256</th><td><code>ae63ee3840033eba861e7021f584c03e94882ece3b95ecdc00fb1b63d1cc602a</code></td></tr>
+          <tr><th scope="row">Decoded wall-coordinate SHA-256</th><td><code>a45135511161237ad38db8e6515b66bf79471b9eb719779281a37dbda9bfffd8</code>; 84 &times; 2, finite, closed</td></tr>
+          <tr><th scope="row">Machine-artifact cache</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T105307708316-sse-diiid-bank-launch/machine-artifact-cache</code></td></tr>
+          <tr><th scope="row">Machine-artifact digest</th><td><code>sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e</code></td></tr>
+          <tr><th scope="row">Artifact file SHA-256</th><td><code>11a12df0c2bd70d6dd7a461d2da11181479b16c6cf89602f226ffa353b0879e0</code></td></tr>
+        </tbody>
+      </table>
+      <p>
+        The job exports <code>JAX_PLATFORMS=cpu</code>,
+        <code>JAX_ENABLE_X64=true</code>, <code>TMPDIR=/tmp</code>, unbuffered
+        Python output, and durable writable XDG, Numba, and Matplotlib caches.
+        The driver passes <code>stream_active_set=True</code> and records the
+        residual, mask-difference, and cycle-damping arrays for every executed
+        active-set trip.
+      </p>
+    </section>
+
+    <section id="handoff-paths">
+      <h2>Harvest handoff</h2>
+      <table>
+        <caption>Absolute durable paths</caption>
+        <tbody>
+          <tr><th scope="row">Complete job log</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T105307708316-sse-diiid-bank-launch/slurm-1259150.log</code></td></tr>
+          <tr><th scope="row">Partial receipt</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T105307708316-sse-diiid-bank-launch/job-output/forward_gs_partial_receipt.json</code></td></tr>
+          <tr><th scope="row">Final receipt</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T105307708316-sse-diiid-bank-launch/job-output/forward_gs_receipt.json</code></td></tr>
+          <tr><th scope="row">Frame figure</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T105307708316-sse-diiid-bank-launch/job-output/frame_flux_comparison.png</code></td></tr>
+          <tr><th scope="row">Cohort figure</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T105307708316-sse-diiid-bank-launch/job-output/cohort_match_summary.png</code></td></tr>
+          <tr><th scope="row">Scheduler receipt</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T105307708316-sse-diiid-bank-launch/scheduler-receipt.log</code></td></tr>
+        </tbody>
+      </table>
+      <p>
+        The comparison basis is the tracked strict receipt at SHA-256
+        <code>ea113fc898781411028ca6d031dd0a1de4f2bdfb4ae57849821545e79040b1f0</code>:
+        exactly <strong>0 of 5</strong> frame rows were converged and its overall
+        verdict was FAIL. That statement identifies the baseline only. This
+        launch receipt makes no claim about the running job's convergence,
+        residuals, gates, figures, or scientific outcome.
+      </p>
+    </section>
+  </main>
+</body>
+</html>

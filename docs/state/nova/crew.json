@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T07:42:12",
+  "updated": "2026-08-28T07:46:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -60591,9 +60591,101 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T054255273109-sse-diiid-bank-launch",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-diiid-bank-launch",
+        "node_definition": {
+          "done_when": "One SLURM job is submitted on a non-debug CPU partition admitting four hours at 16 CPUs and 128 GiB running python -m benchmarks.diiid_forward_gs_match --frames 5 on current origin/main with the transported wall payload reconstructed and its digests verified before submission, writing its receipt and both figures into this run directory rather than the worktree; the manifest records the job id, partition, submitted script SHA-256, verified wall and preregistration digests, source HEAD and the absolute output paths, and notes that the previous receipt had 0 of 5 frames converged so the comparison basis is explicit; the node does not wait and makes no scientific claim; no repository file is modified",
+          "estimated_hours": null,
+          "goal": "The DIII-D five-frame regeneration launched as a durable long-lane job on the settled-active-set solver, recorded so a harvest node can reconcile it",
+          "id": "sse-diiid-bank-launch",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T054255273109-sse-diiid-bank-launch/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/runs/s16-diiid-launch-receipt-2.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T05:43:03Z",
+        "completed_at": "2026-08-28T05:46:16Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 193,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 193,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "510760e1342f989d6a8e6b4c587e683be5af1bb4",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "single submission recorded with job id, partition, script digest, verified payload digests, source HEAD and durable output paths",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T054255273109-sse-diiid-bank-launch/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T054255273109-sse-diiid-bank-launch/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e37-51e1-7ca1-aec1-49356e2c6453",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260827T192212160951-sse-diiid-bank-launch",
+          "root_run_id": "r-20260827T192212160951-sse-diiid-bank-launch"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "redispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1151
+    "_version": 1152
   }
 }

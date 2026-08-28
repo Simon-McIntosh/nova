@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-28">
-<meta name="plan-version" content="63">
+<meta name="plan-version" content="64">
 </head>
 <body>
   <main class="plan-doc">
@@ -292,6 +292,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260828T064851526484-sse-mast-bank-resolve" data-who="margin-remeasure" data-when="2026-08-28T07:45:01Z">
     <div class="r-comment-body"><p>Held for wall time with the provisioning fix in place: the twelve-arm regeneration on the settled-active-set solver runs as job 1259051 past the point where the previous attempt died at 56:49; a harvest node reconciles it on scheduler completion</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260828T080152625384-sse-mast-bank-harvest" data-who="margin-remeasure" data-when="2026-08-28T08:06:40Z">
+    <div class="r-comment-body"><p>MAST bank on the settled solver: 3/12 converged against the 2/12 baseline with 22086/43 pure newly converging; class agreement 8/12 PASS, worst eligible RMS 0.029164 m PASS; the active-set fix reaches the real cohort but converts only one further arm, so the saddle gate still rests on nine unconverged rows</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

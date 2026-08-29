@@ -9,6 +9,7 @@ spatial operands behind those scores, including negative and nonconverged rows.
 from __future__ import annotations
 
 import argparse
+import gc
 import hashlib
 from html import escape
 import importlib.util
@@ -721,7 +722,7 @@ def _draw_retained_failure(
     }
 
 
-def _publish_row(row: dict[str, Any], index: int) -> dict[str, Any]:
+def _publish_row_contents(row: dict[str, Any], index: int) -> dict[str, Any]:
     png_path = HERE / _panel_filename(row, index, "png")
     temporary_png = png_path.with_name(f".{png_path.stem}.tmp.png")
     cells = _finite_points(row["cell_rz"])
@@ -831,6 +832,14 @@ def _publish_row(row: dict[str, Any], index: int) -> dict[str, Any]:
         flush=True,
     )
     return {**plot_record, **panel_record}
+
+
+def _publish_row(row: dict[str, Any], index: int) -> dict[str, Any]:
+    try:
+        return _publish_row_contents(row, index)
+    finally:
+        jax.clear_caches()
+        gc.collect()
 
 
 def _write_evidence(rows: list[dict[str, Any]], records: list[dict[str, Any]]) -> None:

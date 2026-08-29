@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-29T20:29:50",
+  "updated": "2026-08-29T20:30:21",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -62405,9 +62405,113 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T145848644858-sse-h200-saturation-launch",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-h200-saturation-launch",
+        "node_definition": {
+          "done_when": "One durable H200 job is submitted that sweeps the batch ladder until a real limit stops it, writing a receipt small enough to commit. The pilot job 1259122 measured slices per second of 0.09885820204447643, 0.3019918258115519, 0.4535645902260162, 0.7488012031686813 and 1.1559453584127157 at batch 1, 4, 8, 16 and 32, and stopped at 32 by configuration while using 815181568 bytes of a 143771 MiB card, so it never found the saturation point that is the whole question. Its receipt was 186212257 bytes, which cannot be committed. (1) Submit exactly one job on partition betelgeuse with --reservation=gpu_0003_grpA, requesting only the GPUs the sweep needs so the co-tenant keeps its own. That partition has no time limit; do not self-cap below the work, and state the accepted TimeLimit from the scheduler receipt. (2) Sweep the ladder upward from 1 through at least 512, continuing until throughput plateaus by a stated criterion or device memory stops it, and name explicitly which of the two ended the sweep together with the number that decides it. A sweep that again ends by configuration is a failed measure and must be reported as one. (3) Bound the committed artifact. The committed receipt carries per-batch aggregates, the complete raw per-repetition latency samples, and enough per-width statistics to recompute every published aggregate independently; the bulky per-ensemble-member residual traces and active-set arrays are written to a separate durable file beside the run, whose absolute path, byte size and SHA-256 the committed receipt records. Keep the committed JSON under 10 MB and state its final size. Strict JSON throughout, no NaN or Infinity literals, non-finite numeric leaves mapped to null. (4) Record beside every timing the terminal residual, the branch identity and the convergence policy, so a throughput number can never be read as a convergence claim. The pilot's operand reported branch identity limited_plasma with maximum relative residual 0.0011089898293892464 and zero stable conditioning receipts under a fixed one-Newton-step budget; carry that caveat into the receipt explicitly rather than leaving a reader to infer it. (5) Record the base commit, the resolved device and driver, peak device memory per width, and compile-and-first-execute cost per width, which the pilot measured at 188.1 to 204.5 s. Make no scientific claim about saturation before the sweep completes; a harvest node owns the audit and the commit.",
+          "estimated_hours": null,
+          "goal": "One durable H200 job sweeping the batch ladder to a stated plateau or memory limit, with a committed receipt bounded under ten megabytes",
+          "id": "sse-h200-saturation-launch",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "benchmarks/diiid_batched_throughput.py",
+            "docs/research/h200-saturation-launch-receipt.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "h200-matrix",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T14:58:57Z",
+        "completed_at": "2026-08-28T16:37:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 5911,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "030b4e6acdb48aeeebe28626beb7dfecec040556",
+        "commits": [
+          "cc7c6b69aabbeb1f2087428c852aba6e981bdc8e",
+          "b6ed4ee29fe30e56f1b23237c6684f4c7f862a1c",
+          "0ec7c63f43748ecad23641fb0e781ae1f74253b0",
+          "b9585c1f63bcc72b2e4f5d5dd2f0e789f9579a7f"
+        ],
+        "changed_lines": {
+          "added": 669,
+          "removed": 101,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "login preflight PASS on the exact command line (batch 1, float64, 10/10 raw samples, detailed size and SHA-256 matched); replacement job 1259321 submitted once and verified RUNNING with no uv in the batch script",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0358b-83fb-7493-b03c-93b69217d2d5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8871168,
+            "cached_input_tokens_cumulative": 142136064,
+            "input_tokens": 9372601,
+            "input_tokens_cumulative": 144958522,
+            "output_tokens": 47720,
+            "output_tokens_cumulative": 265846,
+            "reasoning_output_tokens": 10046,
+            "reasoning_output_tokens_cumulative": 75849
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1169
+    "_version": 1170
   }
 }

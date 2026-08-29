@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-29">
-<meta name="plan-version" content="82">
+<meta name="plan-version" content="83">
 </head>
 <body>
   <main class="plan-doc">
@@ -356,6 +356,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260828T161806531652-sse-panel-compile-lifetime" data-who="adapter-seams" data-when="2026-08-28T16:22:38Z">
     <div class="r-comment-body"><p>The visual generator now releases compiled code per panel, following benchmarks/diiid_forward_gs_match.py at 05ae2224: jax.clear_caches() and gc.collect() in an unconditional finally around every publish attempt, so healthy panels, retained failures and propagating faults all release. A test observes exactly 2 of 2 releases and 2 of 2 collections across one healthy and one retained-failure panel, so a regression that silently stops releasing is caught by the suite rather than by a forty-minute job. Retention coverage stays green: 17 identities publish, the retained failure keeps availability false with null containment, and unrelated validation faults still propagate</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260828T145848644858-sse-h200-saturation-launch" data-who="h200-matrix" data-when="2026-08-28T16:37:28Z">
+    <div class="r-comment-body"><p>Saturation sweep launched as job 1259321 on one reserved H200 NVL with unlimited time, after job 1259312 died in one second because the uv wrapper rejected a duplicated flag before Python. The replacement removes the wrapper entirely, exec-ing the Nova interpreter by absolute path with VIRTUAL_ENV unset, and the exact command line was preflighted on the login node first so a bad invocation cost seconds rather than an allocation. The driver sweeps 1 through 512 then doubles until two consecutive gains are at most 5 percent or the device OOMs, streams bulky per-member arrays to gzip beside the run, and refuses a compact receipt of 10 MB or more. Both job ids are recorded. The job has since COMPLETED 0:0 in 08:17:51; a harvest owns the audit</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

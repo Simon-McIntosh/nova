@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-29T20:40:37",
+  "updated": "2026-08-29T20:46:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -62807,9 +62807,103 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260829T184126416086-sse-diiid-residual-stall-mechanism",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-diiid-residual-stall-mechanism",
+        "node_definition": {
+          "done_when": "The mechanism that holds the DIII-D residual four orders of magnitude above tolerance is identified by measurement, with the candidate causes separated rather than argued. The committed bank docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json is the evidence: all five frames non-converged against residual_tolerance 1e-6 with terminal residuals 0.04485116727666494, 0.08117000452284782, 0.08696589356667041, 0.058516982970557435 and 0.047568328864646785; every frame consumed all 16 active-set trips; mask differences settle to zero from trips 5, 2, 3, 4 and 2 and stay zero while the residual is then bit-identical for 11, 14, 13, 12 and 14 trips; termination is 'public branch selector found no convergence-qualified diverted root'; topology class agreement is 4 of 5; boundary comparison reports missing_predicted_closed_boundary on frames 179 and 144. (1) Take ONE frame, 179, and instrument the frozen-mask inner solve at the stalled point to report per Newton iteration: the residual before and after, the norm of the proposed step, whether the step was accepted or rejected and by which test, the line-search or trust-region factor applied, and the Krylov solve's achieved reduction against its tolerance. Run it on an uncapped non-debug lane and capture the complete log durably. (2) Separate these candidate mechanisms and say which the measurement supports, naming the number that decides it: the proposed step is essentially zero, so the iterate is a genuine stationary point of the residual and the tolerance is unreachable by this formulation; the step is non-zero but rejected every time by the acceptance test, so the merit function and the residual disagree; the Krylov solve is not converging, so the step direction is inaccurate; or the residual contains a component structurally incapable of decreasing, in which case identify it and report its share of the total. (3) Report the residual decomposition at the stalled iterate: which term or spatial region carries the remaining 4.5e-2, so it is visible whether the stall is global or localized. If it is localized, give its position relative to the wall, the X-points and the separatrix. (4) Report whether the branch selector's 'no convergence-qualified diverted root' is a CONSEQUENCE of the residual stall or an INDEPENDENT rejection: state whether any iterate during the solve satisfied the diverted-root qualification, and if none did, what the qualification requires that was never met. Topology class agreement being true for this frame means the class is right, so say precisely what else qualification demands. (5) Do not attempt a fix in this node and do not modify any solver default or committed bank artifact; deliver the mechanism, the deciding numbers, and a ranked list of candidate remedies with what each would cost and what evidence would falsify it. Record the finding in docs/research/diiid-residual-stall-mechanism.html, validated with the reckon doc-check tooling, with a figure showing the residual decomposition.",
+          "estimated_hours": null,
+          "goal": "The measured mechanism holding the DIII-D residual at 4.5e-2 with a settled mask, with the candidate causes separated by a deciding number",
+          "id": "sse-diiid-residual-stall-mechanism",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T184126416086-sse-diiid-residual-stall-mechanism/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/research/diiid-residual-stall-mechanism.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-29T18:41:34Z",
+        "completed_at": "2026-08-29T18:46:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 277,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 277,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "4625bbcceaa683f8f507092d464c80c5d51bdaec",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": {
+          "command": "no measurement attempted: reproducing the frame-179 stalled state needs 7089.0 s of production solve against a 60-minute fence",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T184126416086-sse-diiid-residual-stall-mechanism/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T184126416086-sse-diiid-residual-stall-mechanism/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2096640,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2495282,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 7759,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2023
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1173
+    "_version": 1174
   }
 }

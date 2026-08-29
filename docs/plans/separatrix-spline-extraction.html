@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-29">
-<meta name="plan-version" content="83">
+<meta name="plan-version" content="84">
 </head>
 <body>
   <main class="plan-doc">
@@ -359,6 +359,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260828T145848644858-sse-h200-saturation-launch" data-who="h200-matrix" data-when="2026-08-28T16:37:28Z">
     <div class="r-comment-body"><p>Saturation sweep launched as job 1259321 on one reserved H200 NVL with unlimited time, after job 1259312 died in one second because the uv wrapper rejected a duplicated flag before Python. The replacement removes the wrapper entirely, exec-ing the Nova interpreter by absolute path with VIRTUAL_ENV unset, and the exact command line was preflighted on the login node first so a bad invocation cost seconds rather than an allocation. The driver sweeps 1 through 512 then doubles until two consecutive gains are at most 5 percent or the device OOMs, streams bulky per-member arrays to gzip beside the run, and refuses a compact receipt of 10 MB or more. Both job ids are recorded. The job has since COMPLETED 0:0 in 08:17:51; a harvest owns the audit</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260829T183223007605-sse-topology-panel-final-launch" data-who="topology-visuals" data-when="2026-08-29T18:39:18Z">
+    <div class="r-comment-body"><p>Seventeen-panel cohort relaunched as job 1259453 from clean main 7045484b, with all three repairs reachable: retention 420e880c, per-panel compile-cache release 75f25227 and the active-set stagnation exit 420feb23. Both prior attempts died mid-cohort, at panel 05 on a degenerate boundary and at panel 07 on compiled-symbol exhaustion; each cause now has a landed fix and a focused test. Panels publish incrementally with per-trip telemetry</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-29T20:30:21",
+  "updated": "2026-08-29T20:39:30",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -62509,9 +62509,98 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260829T183223007605-sse-topology-panel-final-launch",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-topology-panel-final-launch",
+        "node_definition": {
+          "done_when": "One durable SLURM job regenerates the complete seventeen-panel cohort on a generator that now carries both missing contracts. Two prior attempts died mid-cohort: job 1259160 at panel 05 on a degenerate boundary, repaired by retention commit 420e880c, and job 1259311 at panel 07 with jax.errors.JaxRuntimeError INTERNAL Failed to materialize symbols, repaired by per-panel compile-cache release commit 75f25227. Current main also carries the active-set stagnation exit, which returns bit-identical state while skipping trips that change nothing, so panels should complete substantially faster than either prior attempt. (1) Submit exactly one job on an uncapped non-debug lane from current main. Invoke the Nova interpreter by absolute path, /home/ITER/mcintos/Code/nova/.venv/bin/python, with VIRTUAL_ENV unset and UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv exported, and no uv anywhere in the batch script: one earlier submission died in one second because a uv wrapper rejected a duplicate flag. Preflight the exact command line on the login node first and capture it. State the accepted TimeLimit and request one generous against a cohort whose DIII-D panels previously projected to roughly a day. (2) Enable per-trip active-set telemetry and write each PNG and JSON incrementally into the durable crew run directory as its panel completes. (3) Run to a complete seventeen-panel denominator: a retained failure occupies its index and is not a reason to stop. (4) Record the source commit, clean worktree status, submitted script SHA-256, the absolute output directory, and the expected seventeen PNG and JSON paths. Make no claim about whether any panel passes containment; a harvest node owns the audit and the commit.",
+          "estimated_hours": null,
+          "goal": "One durable job regenerating the complete seventeen-panel cohort on the generator carrying both retention and compile-lifetime repairs",
+          "id": "sse-topology-panel-final-launch",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T183223007605-sse-topology-panel-final-launch/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/research/topology-panel-final-launch-receipt.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "topology-visuals",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-29T18:32:33Z",
+        "completed_at": "2026-08-29T18:39:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 405,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 405,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "7045484b0c3ac4c49989725ea28d76b97016d4fd",
+        "commits": [
+          "d858fb436389c27c1190df20b5b014a8814b6f36"
+        ],
+        "changed_lines": {
+          "added": 94,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "one job submitted and verified RUNNING: 1259453 on vega, accepted TimeLimit 1-12:00:00, exact command preflighted through the absolute Nova interpreter with no uv in the batch script",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T183223007605-sse-topology-panel-final-launch/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T183223007605-sse-topology-panel-final-launch/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e97-9cbb-7f42-a9b6-77efed646626",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1170
+    "_version": 1171
   }
 }

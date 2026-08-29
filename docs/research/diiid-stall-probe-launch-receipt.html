@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="diiid-stall-probe-launch-receipt">
+  <meta name="plan-title" content="DIII-D stalled-state probe launch receipt">
+  <meta name="plan-summary" content="Launch-only identity and harvest handoff for two instrumented DIII-D forward-solve probes">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-informs" content="separatrix-spline-extraction">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-recorded-at" content="2026-08-29">
+  <meta name="plan-read" content="1">
+  <meta name="plan-tags" content="equilibrium,diii-d,slurm,checkpointing,telemetry">
+  <title>DIII-D stalled-state probe launch receipt | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Launch receipt &middot; no mechanism asserted</p>
+      <h1>Two DIII-D stalled-state probes are durably queued</h1>
+      <p class="lead">
+        SLURM job <strong>1259459</strong> was submitted exactly once to
+        <code>vega</code> and accepted a <strong>12-hour</strong> limit. It runs
+        frames <strong>179</strong> and <strong>44</strong> from a clean snapshot
+        of current main, streams every Newton iteration, and atomically persists
+        each non-converged terminal state with its digest. At this launch
+        handoff the job is PENDING for resources; a harvest owns every finding.
+      </p>
+    </header>
+
+    <aside>
+      <p>
+        <strong>Why 12 hours.</strong> Frame 179 has been measured at
+        7089.000750 s for six active-set trips, or 1.969167 h. Frame 44 settles
+        its mask at trip 2 and is expected to cost less. The accepted limit is
+        more than six times the measured frame-179 duration, leaving compile and
+        queue-independent execution headroom without turning the launch receipt
+        into a result claim.
+      </p>
+    </aside>
+
+    <section id="scheduler">
+      <h2>Scheduler receipt</h2>
+      <table>
+        <caption>Accepted allocation at launch handoff</caption>
+        <tbody>
+          <tr><th scope="row">Job</th><td><code>1259459</code></td></tr>
+          <tr><th scope="row">State at handoff</th><td>PENDING, reason Resources</td></tr>
+          <tr><th scope="row">Partition</th><td><code>vega</code>; partition MaxTime is UNLIMITED</td></tr>
+          <tr><th scope="row">Allocation</th><td>1 node, 16 CPUs, 128 GiB</td></tr>
+          <tr><th scope="row">Accepted time limit</th><td><code>12:00:00</code></td></tr>
+          <tr><th scope="row">Submitted</th><td>2026-08-29 21:07:32 +02:00</td></tr>
+          <tr><th scope="row">Compute node</th><td>unassigned while pending</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="flow">
+      <h2>Probe and harvest flow</h2>
+      <figure>
+        <svg viewBox="0 0 920 220" role="img" aria-labelledby="flow-title flow-desc">
+          <title id="flow-title">Two-frame instrumented probe and harvest flow</title>
+          <desc id="flow-desc">A pinned clean source and verified physical wall feed frames 179 and 44. Each solve streams Newton iterations and atomically writes a non-converged state plus digest. A separate harvest validates the durable outputs before analysis.</desc>
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#135d6a"/>
+            </marker>
+          </defs>
+          <rect x="20" y="55" width="190" height="105" rx="8" fill="#eef6f7" stroke="#135d6a"/>
+          <text x="115" y="83" text-anchor="middle" font-size="15" fill="#232323">Verified inputs</text>
+          <text x="115" y="110" text-anchor="middle" font-size="12" fill="#232323">clean main snapshot</text>
+          <text x="115" y="132" text-anchor="middle" font-size="12" fill="#232323">wall + machine artifact</text>
+          <line x1="210" y1="108" x2="282" y2="108" stroke="#135d6a" stroke-width="3" marker-end="url(#arrow)"/>
+          <rect x="290" y="35" width="210" height="145" rx="8" fill="#f5f0fa" stroke="#512b81"/>
+          <text x="395" y="65" text-anchor="middle" font-size="15" fill="#232323">Frames 179 and 44</text>
+          <text x="395" y="93" text-anchor="middle" font-size="12" fill="#232323">stream each Newton iteration</text>
+          <text x="395" y="118" text-anchor="middle" font-size="12" fill="#232323">retain terminal non-convergence</text>
+          <text x="395" y="143" text-anchor="middle" font-size="12" fill="#232323">release compile caches per frame</text>
+          <line x1="500" y1="108" x2="572" y2="108" stroke="#135d6a" stroke-width="3" marker-end="url(#arrow)"/>
+          <rect x="580" y="55" width="150" height="105" rx="8" fill="#fff8e7" stroke="#9a6b00"/>
+          <text x="655" y="86" text-anchor="middle" font-size="15" fill="#232323">Durable states</text>
+          <text x="655" y="113" text-anchor="middle" font-size="12" fill="#232323">two atomic NPZ files</text>
+          <text x="655" y="135" text-anchor="middle" font-size="12" fill="#232323">adjacent SHA-256 receipts</text>
+          <line x1="730" y1="108" x2="782" y2="108" stroke="#135d6a" stroke-width="3" marker-end="url(#arrow)"/>
+          <rect x="790" y="70" width="110" height="75" rx="8" fill="#f4f4f4" stroke="#555"/>
+          <text x="845" y="100" text-anchor="middle" font-size="15" fill="#232323">Harvest</text>
+          <text x="845" y="123" text-anchor="middle" font-size="12" fill="#232323">analysis owner</text>
+        </svg>
+        <figcaption>
+          The batch script refuses a successful exit unless both checkpoints are
+          present, non-empty, and pass their adjacent SHA-256 receipts. The log
+          ends with an explicit exit marker in both success and failure cases.
+        </figcaption>
+      </figure>
+    </section>
+
+    <section id="source-and-inputs">
+      <h2>Pinned source and input identities</h2>
+      <table>
+        <caption>Pre-submission provenance</caption>
+        <tbody>
+          <tr><th scope="row">Source HEAD</th><td><code>7e971b38dfc2b761baceaba9c216630b62e120c2</code>; clean snapshot of current <code>origin/main</code></td></tr>
+          <tr><th scope="row">Telemetry ancestry</th><td><code>7fc24f01</code> and <code>420feb23</code> are both ancestors</td></tr>
+          <tr><th scope="row">Submitted batch script SHA-256</th><td><code>d5a711c6ef86984c5a69d5ae58e83056d3878136a17b9dc162486426802710b5</code></td></tr>
+          <tr><th scope="row">Probe wrapper SHA-256</th><td><code>ffa72e20356b9e69382017c50d9741ec3f1fe1741e33ba8f16b8f9e0b82d25e5</code></td></tr>
+          <tr><th scope="row">Wall transport SHA-256</th><td><code>ae63ee3840033eba861e7021f584c03e94882ece3b95ecdc00fb1b63d1cc602a</code></td></tr>
+          <tr><th scope="row">Decoded coordinate identity</th><td><code>a45135511161237ad38db8e6515b66bf79471b9eb719779281a37dbda9bfffd8</code>; dtype- and shape-qualified 84 &times; 2 finite closed array</td></tr>
+          <tr><th scope="row">Machine-artifact digest</th><td><code>sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e</code></td></tr>
+          <tr><th scope="row">Artifact file SHA-256</th><td><code>11a12df0c2bd70d6dd7a461d2da11181479b16c6cf89602f226ffa353b0879e0</code></td></tr>
+        </tbody>
+      </table>
+      <p>
+        Login-node preflight resolved exactly the two declared frame identities
+        with the submitted Python command. The command invokes
+        <code>/home/ITER/mcintos/Code/nova/.venv/bin/python</code> directly,
+        with <code>VIRTUAL_ENV</code> absent,
+        <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv</code>,
+        and no package-runner command in the batch script. The job also pins CPU
+        execution, float64, <code>TMPDIR=/tmp</code>, and durable writable caches.
+      </p>
+    </section>
+
+    <section id="handoff-paths">
+      <h2>Harvest handoff</h2>
+      <table>
+        <caption>Absolute durable paths</caption>
+        <tbody>
+          <tr><th scope="row">Output directory</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch/job-output</code></td></tr>
+          <tr><th scope="row">Complete instrumented log</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch/slurm-1259459.log</code></td></tr>
+          <tr><th scope="row">Frame 179 state</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch/job-output/frame-179-stalled-state.npz</code></td></tr>
+          <tr><th scope="row">Frame 179 digest</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch/job-output/frame-179-stalled-state.npz.sha256</code></td></tr>
+          <tr><th scope="row">Frame 44 state</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch/job-output/frame-44-stalled-state.npz</code></td></tr>
+          <tr><th scope="row">Frame 44 digest</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch/job-output/frame-44-stalled-state.npz.sha256</code></td></tr>
+          <tr><th scope="row">Completion record</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch/job-output/probe_completion.json</code></td></tr>
+          <tr><th scope="row">Scheduler receipt</th><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch/scheduler-receipt.log</code></td></tr>
+        </tbody>
+      </table>
+      <p>
+        No frame has completed at this handoff, so no checkpoint digest exists
+        yet. This receipt makes no claim about the stall mechanism, residual
+        decomposition, branch qualification, convergence, or scientific
+        outcome. A harvest must first require scheduler success, terminal
+        <code>EXIT_MARKER=0</code>, both verified state files, and their recorded
+        digests.
+      </p>
+    </section>
+  </main>
+</body>
+</html>

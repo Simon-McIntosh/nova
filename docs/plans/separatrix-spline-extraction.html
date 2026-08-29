@@ -26,8 +26,8 @@
   <title>Separatrix Spline Extraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-28">
-<meta name="plan-version" content="80">
+<meta name="plan-modified" content="2026-08-29">
+<meta name="plan-version" content="82">
 </head>
 <body>
   <main class="plan-doc">
@@ -350,6 +350,12 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260828T145858461189-sse-topology-panel-relaunch" data-who="topology-visuals" data-when="2026-08-28T15:08:38Z">
     <div class="r-comment-body"><p>Launch contract met and the job then failed on a defect this node did not own. Job 1259311 published six panels, two more than the previous attempt, then died at panel 07 with jax.errors.JaxRuntimeError INTERNAL: Failed to materialize symbols in _margin_graded_newton_krylov. That is compiled-code accumulation, the same failure already repaired in the DIII-D, corroboration and pinned-branch drivers and never applied to this generator, which carries a finally block but releases no cache. The interpreter pinning worked, the retention contract held, and the six panels written incrementally survive</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260828T162003794957-sse-active-set-stagnation-exit" data-who="domain-partition" data-when="2026-08-28T16:29:14Z">
+    <div class="r-comment-body"><p>Stagnation exit landed as a distinct FixedPointTerminationReason.ACTIVE_SET_STAGNATED, ordered after convergence, cycle detection and non-finite residual and before budget exhaustion. It clears the active carry only when the mask difference is exactly zero and the live residual compares exactly equal to the preceding executed trip, with no tolerance parameter and no data-dependent loop, so the fixed-shape fori_loop is preserved. Correctness is proven rather than asserted: a 2-trip stopped solve against a 6-trip control returns bit-identical final state, relative-sup residual, derived mask and every common inner array in both eager and JIT, with skipped slots left NaN and -1 so a short run cannot read as a converged one; a strictly decreasing residual fixture is not stopped. Measured saving on frame 179 is 6 of 16 trips executed, 7089.000750 s against 18904.002 s, 62.5 percent; five-frame scaling is 9.845834 h against 26.255558 h</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260828T161806531652-sse-panel-compile-lifetime" data-who="adapter-seams" data-when="2026-08-28T16:22:38Z">
+    <div class="r-comment-body"><p>The visual generator now releases compiled code per panel, following benchmarks/diiid_forward_gs_match.py at 05ae2224: jax.clear_caches() and gc.collect() in an unconditional finally around every publish attempt, so healthy panels, retained failures and propagating faults all release. A test observes exactly 2 of 2 releases and 2 of 2 collections across one healthy and one retained-failure panel, so a regression that silently stops releasing is caught by the suite rather than by a forty-minute job. Retention coverage stays green: 17 identities publish, the retained failure keeps availability false with null containment, and unrelated validation faults still propagate</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

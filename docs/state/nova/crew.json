@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T18:17:18",
+  "updated": "2026-08-29T20:29:50",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -62203,9 +62203,211 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260828T162003794957-sse-active-set-stagnation-exit",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-active-set-stagnation-exit",
+        "node_definition": {
+          "done_when": "The outer active-set loop stops when it provably cannot make further progress, without changing any solve's final state. Live evidence from job 1259150 frame 179: active_set_mask_differences were 39,25,17,8,1 then zero for the remaining eleven trips, while active_set_residuals were 0.302088601874675, 0.28564102864166524, 0.25775839505153775, 0.20544794378829398, then exactly 0.04485116727666494 repeated for trips 5 through 15. Eleven trips changed neither the mask nor the residual, in a frame that cost 18904.002 s, so roughly two thirds of the frame was spent achieving nothing. (1) Add a stagnation exit to the outer loop in nova/equilibrium/fixed_point.py: when the mask difference is zero AND the live residual is unchanged from the previous trip, the loop stops and reports a distinct termination reason naming stagnation, separate from convergence, cycle detection, non-finite and budget exhaustion. Convergence and every existing terminal condition keep priority; stagnation is only reached when none of them fires. (2) Correctness is the binding constraint: the returned state, residual, mask and every reported array must be identical to what the unmodified loop returns for the same input, because the skipped trips demonstrably change nothing. Prove this, do not assert it \u2014 add a test that runs a stagnating fixture with and without the exit and asserts bit-identical returned state and residual, and asserts the telemetry arrays agree on every trip both executed. Padded entries for skipped trips must remain distinguishable from executed ones so no reader mistakes a short run for a converged one. (3) Compare exactly-equal residuals in a way that is safe under the fixed-shape device loop; do not introduce a tolerance parameter, since the observed repeat is bit-identical and a tolerance would risk stopping a slowly-progressing solve. State how you tested that a slowly-decreasing residual is NOT stopped. (4) Report the measured saving on the recorded frame: with the exit, how many of the 16 trips would frame 179 have executed, and what wall-clock does that imply against its measured 18904.002 s and the five-frame cohort. (5) The focused lane covering the touched module is green with the delta stated against the base revision rather than an absolute count. Do not submit any scheduler job, do not stop or disturb the running job 1259150, and do not modify any committed bank JSON or PNG.",
+          "estimated_hours": null,
+          "goal": "A stagnation exit for the outer active-set loop that stops trips which change neither mask nor residual, returning bit-identical state",
+          "id": "sse-active-set-stagnation-exit",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T162003794957-sse-active-set-stagnation-exit/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_active_set_stagnation.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T16:20:12Z",
+        "completed_at": "2026-08-28T16:29:14Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 542,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 542,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "3803f1e4e9938ac17f659f593d9a087f25889972",
+        "commits": [
+          "420feb23dc040ae1d0a2f874cff4e93c8f023030"
+        ],
+        "changed_lines": {
+          "added": 162,
+          "removed": 3,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused lane 42 at base then 44/44 in 85.05s (+2, zero new failures); path-scoped ruff clean",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T162003794957-sse-active-set-stagnation-exit/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T162003794957-sse-active-set-stagnation-exit/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 5197568,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 5426014,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 16989,
+            "reasoning_output_tokens": 901,
+            "reasoning_output_tokens_cumulative": 6957
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260828T161806531652-sse-panel-compile-lifetime",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-panel-compile-lifetime",
+        "node_definition": {
+          "done_when": "A full seventeen-panel cohort builds in one process without exhausting compiled-code storage. Job 1259311 published six panels then died at panel 07 with jax.errors.JaxRuntimeError INTERNAL: Failed to materialize symbols { (<xla_jit_dylib_13>, { dot.2063_kernel }) }, raised through _margin_graded_newton_krylov. This is the same compile-lifetime accumulation that already killed three campaign drivers this sprint and was repaired in each of them; commit 05ae2224 is the DIII-D instance and the corroboration and pinned-branch drivers carry equivalent repairs. The visual generator never received it: it has a finally block but releases no compiled-code cache. (1) Bound the compile lifetime per panel in docs/figures/topology-visual-corroboration/generate_topology_visuals.py, following the pattern the three precedent repairs established rather than inventing a new one: release the compiled-code cache and collect garbage in a finally boundary around each panel unit, so compiled sections from one panel cannot accumulate into the next. Read the precedent implementation before writing yours and say in the manifest which file you took it from. (2) The release must be unconditional per panel, including for a retained failure panel, since a panel that raised has still compiled. (3) Preserve the retention contract landed in 420e880c exactly: a degenerate boundary or a rendering fault still publishes a named failure panel with null containment counts and availability false, all seventeen indices survive, and unrelated faults still propagate. Prove this still holds with the existing focused tests. (4) Add a focused test that the per-panel release actually runs for both a healthy and a retained-failure panel, so a silent regression that stops releasing is caught by the suite rather than by a forty-minute job. (5) The focused lane covering the touched module is green with the delta stated against the base revision rather than an absolute count. (6) Report in the manifest any OTHER hardening contract the three campaign drivers carry that this generator still lacks, as a finding; the generator has now needed two contracts the drivers already had, so state whether a third gap exists rather than leaving it to be discovered by the next failed job. Do not submit any scheduler job; the relaunch belongs to a separate node.",
+          "estimated_hours": null,
+          "goal": "Bounded per-panel compile lifetime in the topology visual generator, so a full seventeen-panel cohort builds in one process",
+          "id": "sse-panel-compile-lifetime",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T161806531652-sse-panel-compile-lifetime/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/topology-visual-corroboration/generate_topology_visuals.py",
+            "tests/test_topology_visual_generator.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "adapter-seams",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-28T16:18:15Z",
+        "completed_at": "2026-08-28T16:22:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 263,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 263,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "3803f1e4e9938ac17f659f593d9a087f25889972",
+        "commits": [
+          "75f252271d648ea0d4cc1312421751cf8358784c"
+        ],
+        "changed_lines": {
+          "added": 31,
+          "removed": 1,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused generator lane 5/5 at base 3803f1e4 then 6/6 (+1, zero new failures); path-scoped ruff clean",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T161806531652-sse-panel-compile-lifetime/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T161806531652-sse-panel-compile-lifetime/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-e0cb-7cd1-8925-b9c7f01bcf20",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 864768,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 1181356,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 5577,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 851
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1167
+    "_version": 1169
   }
 }

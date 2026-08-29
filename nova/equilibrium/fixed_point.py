@@ -39,11 +39,15 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from enum import IntEnum
+import hashlib
 import math
+import os
+from pathlib import Path
 from typing import Literal, NamedTuple
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 
 from nova.jax.config import Precision, resolve_precision
 from nova.equilibrium.manifold_advance import (
@@ -57,6 +61,7 @@ __all__ = [
     "FIXED_POINT_RESIDUAL_TOLERANCE",
     "FixedPointResult",
     "FixedPointTerminationReason",
+    "InnerIterationDecision",
     "KinkAwareResult",
     "KrylovActionQualification",
     "ManifoldAdvanceQualification",
@@ -64,6 +69,7 @@ __all__ = [
     "anderson",
     "kink_aware_newton_krylov",
     "newton_krylov",
+    "load_fixed_point_checkpoint",
     "picard",
 ]
 
@@ -85,6 +91,38 @@ _ACTIVE_SET_CYCLE_DAMPING = 0.5
 _PROJECTED_KRYLOV_CONDITION_RATIO_LIMIT = math.e
 _SUFFICIENT_DECREASE_SLOPE = 1.0e-4
 FIXED_POINT_RESIDUAL_TOLERANCE = 1.0e-8
+_GMRES_RELATIVE_TOLERANCE = 1.0e-5
+
+
+def _print_inner_iteration(
+    iteration,
+    residual_before,
+    residual_after,
+    proposed_step_norm,
+    accepted,
+    decision,
+    krylov_qualification,
+    applied_factor,
+    krylov_reduction,
+    krylov_tolerance,
+) -> None:
+    """Print one device-reported Newton iteration immediately on the host."""
+
+    print(
+        "inner-newton "
+        f"iteration={int(iteration)} "
+        f"residual_before={float(residual_before):.17g} "
+        f"residual_after={float(residual_after):.17g} "
+        f"proposed_step_norm={float(proposed_step_norm):.17g} "
+        f"accepted={bool(accepted)} "
+        f"decision={InnerIterationDecision(int(decision)).name} "
+        f"krylov_qualification="
+        f"{KrylovActionQualification(int(krylov_qualification)).name} "
+        f"applied_factor={float(applied_factor):.17g} "
+        f"krylov_reduction={float(krylov_reduction):.17g} "
+        f"krylov_tolerance={float(krylov_tolerance):.17g}",
+        flush=True,
+    )
 
 
 def _print_active_set_trip(
@@ -101,6 +139,127 @@ def _print_active_set_trip(
         f"live_residual={float(live_residual):.17g} "
         f"inner_iterations={int(inner_iterations)}",
         flush=True,
+    )
+
+
+def _write_fixed_point_checkpoint(
+    path: Path,
+    nonconverged,
+    state,
+    residual,
+    termination_reason,
+    residuals_before,
+    residuals_after,
+    proposed_step_norms,
+    accepted,
+    decisions,
+    krylov_qualifications,
+    applied_factors,
+    krylov_reductions,
+    krylov_tolerances,
+) -> None:
+    """Atomically persist one resumable nonconverged host checkpoint."""
+
+    if not bool(nonconverged):
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    with temporary.open("wb") as stream:
+        np.savez_compressed(
+            stream,
+            state=np.asarray(state),
+            residual=np.asarray(residual),
+            termination_reason=np.asarray(termination_reason),
+            inner_iteration_residuals_before=np.asarray(residuals_before),
+            inner_iteration_residuals_after=np.asarray(residuals_after),
+            inner_iteration_proposed_step_norms=np.asarray(proposed_step_norms),
+            inner_iteration_accepted=np.asarray(accepted),
+            inner_iteration_decisions=np.asarray(decisions),
+            inner_iteration_krylov_qualifications=np.asarray(krylov_qualifications),
+            inner_iteration_applied_factors=np.asarray(applied_factors),
+            inner_iteration_krylov_reductions=np.asarray(krylov_reductions),
+            inner_iteration_krylov_tolerances=np.asarray(krylov_tolerances),
+        )
+        stream.flush()
+        os.fsync(stream.fileno())
+    digest = hashlib.sha256(temporary.read_bytes()).hexdigest()
+    os.replace(temporary, path)
+    digest_path = path.with_suffix(path.suffix + ".sha256")
+    digest_temporary = digest_path.with_name(f".{digest_path.name}.{os.getpid()}.tmp")
+    with digest_temporary.open("w", encoding="ascii") as stream:
+        stream.write(f"{digest}  {path.name}\n")
+        stream.flush()
+        os.fsync(stream.fileno())
+    os.replace(digest_temporary, digest_path)
+    directory = os.open(path.parent, os.O_RDONLY)
+    try:
+        os.fsync(directory)
+    finally:
+        os.close(directory)
+
+
+def load_fixed_point_checkpoint(path: str | Path) -> dict[str, np.ndarray]:
+    """Load a checkpoint after verifying its adjacent SHA-256 receipt."""
+
+    path = Path(path)
+    digest_path = path.with_suffix(path.suffix + ".sha256")
+    expected = digest_path.read_text(encoding="ascii").split()[0]
+    actual = hashlib.sha256(path.read_bytes()).hexdigest()
+    if actual != expected:
+        raise ValueError("fixed-point checkpoint digest mismatch")
+    with np.load(path, allow_pickle=False) as checkpoint:
+        return {
+            name: np.array(checkpoint[name], copy=True) for name in checkpoint.files
+        }
+
+
+def _empty_inner_trace(length: int, dtype) -> _InnerIterationTrace:
+    """Return a padded fixed-shape inner-iteration receipt."""
+
+    return _InnerIterationTrace(
+        residuals_before=jnp.full(length, jnp.nan, dtype=dtype),
+        residuals_after=jnp.full(length, jnp.nan, dtype=dtype),
+        proposed_step_norms=jnp.full(length, jnp.nan, dtype=dtype),
+        accepted=jnp.full(length, -1, dtype=jnp.int32),
+        decisions=jnp.full(
+            length, InnerIterationDecision.NOT_EXECUTED, dtype=jnp.int32
+        ),
+        krylov_qualifications=jnp.full(
+            length, KrylovActionQualification.NOT_APPLICABLE, dtype=jnp.int32
+        ),
+        applied_factors=jnp.full(length, jnp.nan, dtype=dtype),
+        krylov_reductions=jnp.full(length, jnp.nan, dtype=dtype),
+        krylov_tolerances=jnp.full(length, jnp.nan, dtype=dtype),
+    )
+
+
+def _record_inner_iteration(
+    trace: _InnerIterationTrace,
+    index,
+    residual_before,
+    residual_after,
+    proposed_step_norm,
+    accepted,
+    decision,
+    krylov_qualification,
+    applied_factor,
+    krylov_reduction,
+    krylov_tolerance,
+) -> _InnerIterationTrace:
+    """Fill one executed row without changing the receipt shape."""
+
+    return _InnerIterationTrace(
+        residuals_before=trace.residuals_before.at[index].set(residual_before),
+        residuals_after=trace.residuals_after.at[index].set(residual_after),
+        proposed_step_norms=trace.proposed_step_norms.at[index].set(proposed_step_norm),
+        accepted=trace.accepted.at[index].set(jnp.asarray(accepted, dtype=jnp.int32)),
+        decisions=trace.decisions.at[index].set(jnp.asarray(decision, dtype=jnp.int32)),
+        krylov_qualifications=trace.krylov_qualifications.at[index].set(
+            jnp.asarray(krylov_qualification, dtype=jnp.int32)
+        ),
+        applied_factors=trace.applied_factors.at[index].set(applied_factor),
+        krylov_reductions=trace.krylov_reductions.at[index].set(krylov_reduction),
+        krylov_tolerances=trace.krylov_tolerances.at[index].set(krylov_tolerance),
     )
 
 
@@ -129,6 +288,18 @@ class RecoveryOutcome(IntEnum):
     NOT_APPLICABLE = 0
     ACCEPTED = 1
     REFUSED = 2
+
+
+class InnerIterationDecision(IntEnum):
+    """Host-readable route that decided one Newton promotion."""
+
+    NOT_EXECUTED = -1
+    NEWTON_LADDER_ACCEPTED = 1
+    CONTINUATION_ACCEPTED = 2
+    REBUILT_MODEL_ACCEPTED = 3
+    STEEPEST_DESCENT_ACCEPTED = 4
+    SUFFICIENT_DECREASE_REFUSED = 5
+    KRYLOV_ACTION_REFUSED = 6
 
 
 class FixedPointTerminationReason(IntEnum):
@@ -196,6 +367,11 @@ class FixedPointResult(NamedTuple):
     residuals and re-evaluated mask differences are recorded in the two
     corresponding fixed-length arrays.  ``active_set_cycle_damping_activations``
     marks the midpoint transition attempted when a mask repeats.
+    The ``inner_iteration_*`` arrays retain one row per attempted Newton
+    promotion.  They record the nonlinear residual transition, bounded proposal
+    norm, acceptance route, exact Krylov qualification, applied damping or
+    line-search factor, and achieved linear-residual reduction against the
+    requested tolerance.  Unexecuted rows use NaN and -1 padding.
     """
 
     state: jax.Array
@@ -233,6 +409,17 @@ class FixedPointResult(NamedTuple):
     active_set_residuals: jax.Array | float = float("nan")
     active_set_mask_differences: jax.Array | int = -1
     active_set_cycle_damping_activations: jax.Array | int = -1
+    inner_iteration_residuals_before: jax.Array | float = float("nan")
+    inner_iteration_residuals_after: jax.Array | float = float("nan")
+    inner_iteration_proposed_step_norms: jax.Array | float = float("nan")
+    inner_iteration_accepted: jax.Array | int = -1
+    inner_iteration_decisions: jax.Array | int = InnerIterationDecision.NOT_EXECUTED
+    inner_iteration_krylov_qualifications: jax.Array | int = (
+        KrylovActionQualification.NOT_APPLICABLE
+    )
+    inner_iteration_applied_factors: jax.Array | float = float("nan")
+    inner_iteration_krylov_reductions: jax.Array | float = float("nan")
+    inner_iteration_krylov_tolerances: jax.Array | float = float("nan")
 
 
 class KinkAwareResult(NamedTuple):
@@ -278,6 +465,22 @@ class _QualifiedKrylovStep(NamedTuple):
     conditioning_applied: jax.Array
     condition_baseline: jax.Array
     unconditioned_step: jax.Array
+    achieved_reduction: jax.Array
+    requested_tolerance: jax.Array
+
+
+class _InnerIterationTrace(NamedTuple):
+    """Fixed-shape per-promotion diagnostics with explicit padding."""
+
+    residuals_before: jax.Array
+    residuals_after: jax.Array
+    proposed_step_norms: jax.Array
+    accepted: jax.Array
+    decisions: jax.Array
+    krylov_qualifications: jax.Array
+    applied_factors: jax.Array
+    krylov_reductions: jax.Array
+    krylov_tolerances: jax.Array
 
 
 class _AmplificationState(NamedTuple):
@@ -321,6 +524,7 @@ class _NewtonIterationState(NamedTuple):
     promotion_model_rebuild_damping: jax.Array
     promotion_descent_activations: jax.Array
     promotion_descent_scales: jax.Array
+    inner_trace: _InnerIterationTrace
 
 
 class _ActiveSetIterationState(NamedTuple):
@@ -356,6 +560,7 @@ class _BacktrackedPromotion(NamedTuple):
     recovery_radius: jax.Array
     recovery_radius_before: jax.Array
     recovery_outcome: jax.Array
+    applied_factor: jax.Array
 
 
 class _RebuiltModelPromotion(NamedTuple):
@@ -634,6 +839,7 @@ def _backtracked_promotion(
             recovery_outcome=jnp.asarray(
                 RecoveryOutcome.NOT_APPLICABLE, dtype=jnp.int32
             ),
+            applied_factor=factors[ladder_selected],
         )
 
     def recover_with_continuation(_):
@@ -699,6 +905,11 @@ def _backtracked_promotion(
                 RecoveryOutcome.ACCEPTED,
                 RecoveryOutcome.REFUSED,
             ).astype(jnp.int32),
+            applied_factor=jnp.where(
+                recovery_accepted,
+                trial_radius,
+                jnp.asarray(0.0, dtype=state.dtype),
+            ),
         )
 
     return jax.lax.cond(
@@ -882,12 +1093,16 @@ def _qualified_krylov_step(
     step, info = jax.scipy.sparse.linalg.gmres(
         linear_action,
         residual_vector,
+        tol=_GMRES_RELATIVE_TOLERANCE,
         maxiter=gmres_iterations,
         restart=gmres_iterations,
         solve_method="batched",
     )
     unconditioned_step = step
     achieved_linear_residual = residual_vector - linear_action(step)
+    achieved_reduction = jnp.linalg.norm(achieved_linear_residual) / jnp.maximum(
+        jnp.linalg.norm(residual_vector), jnp.finfo(residual_vector.dtype).tiny
+    )
     finite_achieved_residual = jnp.all(jnp.isfinite(step)) & jnp.all(
         jnp.isfinite(achieved_linear_residual)
     )
@@ -940,6 +1155,10 @@ def _qualified_krylov_step(
         conditioning_applied=conditioning_applied,
         condition_baseline=condition_baseline,
         unconditioned_step=unconditioned_step,
+        achieved_reduction=achieved_reduction,
+        requested_tolerance=jnp.asarray(
+            _GMRES_RELATIVE_TOLERANCE, dtype=residual_vector.dtype
+        ),
     )
 
 
@@ -1544,6 +1763,7 @@ def _newton_krylov_inner(
     shadow_mask_fn: Callable[[jax.Array], jax.Array] | None = None,
     promoted_shadow_mask_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
     shadowed_map_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
+    stream_inner_iterations: bool = False,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Exact-tangent Jacobian-free Newton–Krylov on the fixed-point residual.
@@ -1802,6 +2022,7 @@ def _newton_krylov_inner(
                 step * (cap / jnp.maximum(norm_step, 1.0e-300)),
                 step,
             )
+            bounded_step_norm = jnp.max(jnp.abs(step))
             attempted = measured.attempted + 1
             conditioning_count = measured.conditioning_count + jnp.asarray(
                 action_accepted & qualified_step.conditioning_applied,
@@ -1994,6 +2215,64 @@ def _newton_krylov_inner(
                     candidate_merit,
                     promotion_accepted,
                 )
+                decision = jnp.where(
+                    promotion.accepted,
+                    jnp.where(
+                        promotion.recovery_activated,
+                        InnerIterationDecision.CONTINUATION_ACCEPTED,
+                        InnerIterationDecision.NEWTON_LADDER_ACCEPTED,
+                    ),
+                    jnp.where(
+                        rebuilt.accepted,
+                        InnerIterationDecision.REBUILT_MODEL_ACCEPTED,
+                        jnp.where(
+                            descent.accepted,
+                            InnerIterationDecision.STEEPEST_DESCENT_ACCEPTED,
+                            InnerIterationDecision.SUFFICIENT_DECREASE_REFUSED,
+                        ),
+                    ),
+                ).astype(jnp.int32)
+                applied_factor = jnp.where(
+                    promotion.accepted,
+                    promotion.applied_factor,
+                    jnp.where(
+                        rebuilt.accepted,
+                        rebuilt.damping,
+                        jnp.where(
+                            descent.accepted,
+                            descent.scale,
+                            jnp.asarray(0.0, dtype=state.dtype),
+                        ),
+                    ),
+                )
+                inner_trace = _record_inner_iteration(
+                    measured.inner_trace,
+                    measured.attempted,
+                    nonlinear_residual,
+                    candidate_residual,
+                    bounded_step_norm,
+                    promotion_accepted,
+                    decision,
+                    step_qualification,
+                    applied_factor,
+                    qualified_step.achieved_reduction,
+                    qualified_step.requested_tolerance,
+                )
+                if stream_inner_iterations:
+                    jax.debug.callback(
+                        _print_inner_iteration,
+                        measured.attempted,
+                        nonlinear_residual,
+                        candidate_residual,
+                        bounded_step_norm,
+                        promotion_accepted,
+                        decision,
+                        step_qualification,
+                        applied_factor,
+                        qualified_step.achieved_reduction,
+                        qualified_step.requested_tolerance,
+                        ordered=True,
+                    )
                 return _NewtonIterationState(
                     candidate,
                     candidate_residual,
@@ -2028,9 +2307,42 @@ def _newton_krylov_inner(
                     rebuild_damping,
                     descent_activations,
                     descent_scales,
+                    inner_trace,
                 )
 
             def refused_state(_):
+                decision = jnp.asarray(
+                    InnerIterationDecision.KRYLOV_ACTION_REFUSED, dtype=jnp.int32
+                )
+                applied_factor = jnp.asarray(0.0, dtype=state.dtype)
+                inner_trace = _record_inner_iteration(
+                    measured.inner_trace,
+                    measured.attempted,
+                    nonlinear_residual,
+                    nonlinear_residual,
+                    bounded_step_norm,
+                    jnp.asarray(False),
+                    decision,
+                    step_qualification,
+                    applied_factor,
+                    qualified_step.achieved_reduction,
+                    qualified_step.requested_tolerance,
+                )
+                if stream_inner_iterations:
+                    jax.debug.callback(
+                        _print_inner_iteration,
+                        measured.attempted,
+                        nonlinear_residual,
+                        nonlinear_residual,
+                        bounded_step_norm,
+                        jnp.asarray(False),
+                        decision,
+                        step_qualification,
+                        applied_factor,
+                        qualified_step.achieved_reduction,
+                        qualified_step.requested_tolerance,
+                        ordered=True,
+                    )
                 return _NewtonIterationState(
                     state,
                     nonlinear_residual,
@@ -2074,6 +2386,7 @@ def _newton_krylov_inner(
                         0
                     ),
                     measured.promotion_descent_scales,
+                    inner_trace,
                 )
 
             return jax.lax.cond(
@@ -2118,6 +2431,7 @@ def _newton_krylov_inner(
             jnp.full(newton_steps, jnp.nan, dtype=initial.dtype),
             jnp.full(newton_steps, -1, dtype=jnp.int32),
             jnp.full(newton_steps, jnp.nan, dtype=initial.dtype),
+            _empty_inner_trace(newton_steps, initial.dtype),
         ),
     )
     return FixedPointResult(
@@ -2143,6 +2457,15 @@ def _newton_krylov_inner(
         promotion_model_rebuild_damping=loop.promotion_model_rebuild_damping,
         promotion_descent_activations=loop.promotion_descent_activations,
         promotion_descent_scales=loop.promotion_descent_scales,
+        inner_iteration_residuals_before=loop.inner_trace.residuals_before,
+        inner_iteration_residuals_after=loop.inner_trace.residuals_after,
+        inner_iteration_proposed_step_norms=loop.inner_trace.proposed_step_norms,
+        inner_iteration_accepted=loop.inner_trace.accepted,
+        inner_iteration_decisions=loop.inner_trace.decisions,
+        inner_iteration_krylov_qualifications=(loop.inner_trace.krylov_qualifications),
+        inner_iteration_applied_factors=loop.inner_trace.applied_factors,
+        inner_iteration_krylov_reductions=loop.inner_trace.krylov_reductions,
+        inner_iteration_krylov_tolerances=loop.inner_trace.krylov_tolerances,
     )
 
 
@@ -2161,6 +2484,7 @@ def _active_set_newton_krylov(
     shadowed_map_fn: Callable[[jax.Array, jax.Array], jax.Array],
     active_set_steps: int,
     stream_active_set: bool,
+    stream_inner_iterations: bool,
     stop_on_active_set_stagnation: bool,
     precision: Precision | str,
 ) -> FixedPointResult:
@@ -2188,6 +2512,7 @@ def _active_set_newton_krylov(
             krylov_condition_limit=krylov_condition_limit,
             convergence_tolerance=convergence_tolerance,
             shadow_mask_fn=frozen_mask,
+            stream_inner_iterations=stream_inner_iterations,
             precision=precision,
         )
 
@@ -2442,6 +2767,8 @@ def newton_krylov(
     shadowed_map_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
     active_set_steps: int = _ACTIVE_SET_ITERATION_LIMIT,
     stream_active_set: bool = False,
+    stream_inner_iterations: bool = False,
+    checkpoint_path: str | Path | None = None,
     stop_on_active_set_stagnation: bool = True,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
@@ -2460,6 +2787,10 @@ def newton_krylov(
     comparisons.
     ``stream_active_set`` emits one flushed host line for every executed outer
     trip; it is disabled by default and does not alter any solver carry.
+    ``stream_inner_iterations`` similarly emits the fixed-shape Newton receipt
+    one executed row at a time.  When ``checkpoint_path`` is supplied, a
+    nonconverged result and its receipt are written atomically at that path with
+    an adjacent SHA-256 digest after the device computation returns.
     """
     if active_set_steps <= 0:
         raise ValueError("active_set_steps must be positive")
@@ -2478,10 +2809,11 @@ def newton_krylov(
         "convergence_tolerance": convergence_tolerance,
         "admissibility_fn": admissibility_fn,
         "previous_admitted_state": previous_admitted_state,
+        "stream_inner_iterations": stream_inner_iterations,
         "precision": precision,
     }
     if not carry_shadows or admissibility_fn is not None:
-        return _newton_krylov_inner(
+        result = _newton_krylov_inner(
             map_fn,
             initial,
             shadow_mask_fn=shadow_mask_fn,
@@ -2489,23 +2821,45 @@ def newton_krylov(
             shadowed_map_fn=shadowed_map_fn,
             **options,
         )
-    return _active_set_newton_krylov(
-        initial,
-        newton_steps=newton_steps,
-        gmres_iterations=gmres_iterations,
-        warmup=warmup,
-        relaxation=relaxation,
-        step_cap=step_cap,
-        krylov_condition_limit=krylov_condition_limit,
-        convergence_tolerance=convergence_tolerance,
-        shadow_mask_fn=shadow_mask_fn,
-        promoted_shadow_mask_fn=promoted_shadow_mask_fn,
-        shadowed_map_fn=shadowed_map_fn,
-        active_set_steps=active_set_steps,
-        stream_active_set=stream_active_set,
-        stop_on_active_set_stagnation=stop_on_active_set_stagnation,
-        precision=precision,
-    )
+    else:
+        result = _active_set_newton_krylov(
+            initial,
+            newton_steps=newton_steps,
+            gmres_iterations=gmres_iterations,
+            warmup=warmup,
+            relaxation=relaxation,
+            step_cap=step_cap,
+            krylov_condition_limit=krylov_condition_limit,
+            convergence_tolerance=convergence_tolerance,
+            shadow_mask_fn=shadow_mask_fn,
+            promoted_shadow_mask_fn=promoted_shadow_mask_fn,
+            shadowed_map_fn=shadowed_map_fn,
+            active_set_steps=active_set_steps,
+            stream_active_set=stream_active_set,
+            stream_inner_iterations=stream_inner_iterations,
+            stop_on_active_set_stagnation=stop_on_active_set_stagnation,
+            precision=precision,
+        )
+    if checkpoint_path is not None:
+        checkpoint = Path(checkpoint_path)
+        jax.debug.callback(
+            lambda *values: _write_fixed_point_checkpoint(checkpoint, *values),
+            ~jnp.asarray(result.converged),
+            result.state,
+            result.residual,
+            result.termination_reason,
+            result.inner_iteration_residuals_before,
+            result.inner_iteration_residuals_after,
+            result.inner_iteration_proposed_step_norms,
+            result.inner_iteration_accepted,
+            result.inner_iteration_decisions,
+            result.inner_iteration_krylov_qualifications,
+            result.inner_iteration_applied_factors,
+            result.inner_iteration_krylov_reductions,
+            result.inner_iteration_krylov_tolerances,
+            ordered=True,
+        )
+    return result
 
 
 def kink_aware_newton_krylov(

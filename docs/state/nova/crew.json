@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-29T21:00:56",
+  "updated": "2026-08-29T21:12:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -63002,9 +63002,98 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260829T190123164633-sse-diiid-stall-probe-launch",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-diiid-stall-probe-launch",
+        "node_definition": {
+          "done_when": "One durable SLURM job reproduces two stalled DIII-D frames with full per-Newton-iteration instrumentation and persists their stalled states, and this node claims no mechanism. (1) Submit exactly one job on an uncapped non-debug lane from current main, which carries the inner-iteration telemetry and checkpointing at commit 7fc24f01 and the active-set stagnation exit at 420feb23. Invoke the Nova interpreter by absolute path with VIRTUAL_ENV unset and UV_PROJECT_ENVIRONMENT pinned, with no uv anywhere in the batch script, and preflight the exact command line on the login node first. State the accepted TimeLimit and request one generous against the cost: frame 179 needs six active-set trips measured at 7089.000750 s under the stagnation exit, and frame 44 settles at trip 2 so it should cost less. (2) Run exactly two frames, 179 and 44, chosen because 179 is the frame whose stall is already documented in the committed receipt and 44 settles its mask fastest, so a mechanism common to both is unlikely to be an artefact of one geometry. Enable per-Newton-iteration reporting and non-converged state checkpointing for both. (3) Write the complete instrumented log, both persisted stalled-state checkpoints and their digests into the durable crew run directory, never the worktree. The checkpoints are the durable asset: they are what lets every later analysis resume in minutes rather than re-solving for hours, so verify after the run that each exists, is non-empty, and records its digest. (4) Record the source commit, clean worktree status, submitted script SHA-256, the absolute output directory, and the expected artifact paths, so a harvest node reconciles without re-deriving any of it. (5) Make no claim about the stall mechanism, the residual decomposition, or the branch qualification; a harvest node owns the analysis. Report only what was submitted, what completed, and where the artifacts are.",
+          "estimated_hours": null,
+          "goal": "One durable job reproducing DIII-D frames 179 and 44 with per-iteration instrumentation and persisted stalled-state checkpoints",
+          "id": "sse-diiid-stall-probe-launch",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/research/diiid-stall-probe-launch-receipt.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-29T19:01:31Z",
+        "completed_at": "2026-08-29T19:11:54Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 623,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 623,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "10c476e3b7c2caec1c8efde616edffce6829143b",
+        "commits": [
+          "7f5d75bde4cb03ae87af3d3dcf0dd65361778846"
+        ],
+        "changed_lines": {
+          "added": 154,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "one job submitted: 1259459 on vega, accepted TimeLimit 12:00:00 against frame 179's measured 7089.0 s, source clean at 7e971b38 with telemetry 7fc24f01 and stagnation exit 420feb23 as ancestors, direct interpreter with no uv",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e37-51e1-7ca1-aec1-49356e2c6453",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1175
+    "_version": 1176
   }
 }

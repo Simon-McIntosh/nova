@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-29T20:46:49",
+  "updated": "2026-08-29T21:00:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -62901,9 +62901,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260829T184716941101-sse-inner-iteration-telemetry",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-inner-iteration-telemetry",
+        "node_definition": {
+          "done_when": "Every Newton iteration of the frozen-mask inner solve is observable, so a stalled solve can be attributed without guesswork, and a stalled state can be resumed instead of re-solved. The DIII-D bank stalls at residuals between 0.045 and 0.087 against a 1e-6 tolerance with the mask fully settled, and diagnosing it currently costs a two-hour re-solve because nothing about the inner iterations is recorded. (1) Extend the inner solve in nova/equilibrium/fixed_point.py with an opt-in per-Newton-iteration report, following the ordered host-callback pattern already used for the trip telemetry so it works inside the device loop and is inert when off. Each record carries at minimum: the residual before and after the iteration, the norm of the proposed step, whether the step was accepted or rejected and which test decided it, the damping or line-search factor applied, and the Krylov solve's achieved reduction against its requested tolerance. (2) Add an opt-in state checkpoint: when the solve terminates without converging, persist enough state to resume the identical iterate later, written atomically beside the run rather than into the worktree, with its own digest. This is what stops the next diagnosis costing another two hours. Persisting must not alter numerics. (3) Prove the instrumentation changes nothing: a fixture solved with reporting and checkpointing both on and both off must return bit-identical state and residual, in eager and JIT. Prove resumption too: a solve resumed from a persisted checkpoint must continue to the same iterate the uninterrupted solve reached. (4) Keep the arrays fixed-shape and the skipped entries distinguishable from executed ones, exactly as the trip telemetry does, so a short run cannot read as a complete one. (5) The focused lane covering the touched module is green with the delta stated against the base revision rather than an absolute count. Do not submit any scheduler job and do not modify any committed bank artifact; the probe run belongs to a separate node.",
+          "estimated_hours": null,
+          "goal": "Per-Newton-iteration observability and resumable non-converged state in the inner solve, so a stall is attributable without a two-hour re-solve",
+          "id": "sse-inner-iteration-telemetry",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T184716941101-sse-inner-iteration-telemetry/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_inner_iteration_telemetry.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-29T18:47:25Z",
+        "completed_at": "2026-08-29T19:00:45Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 800,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 800,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "fcda262cdf3e29748e6d4ab17d6860a3f5719c65",
+        "commits": [
+          "7fc24f01064d37633ed3424f9850aa763ad38f1b"
+        ],
+        "changed_lines": {
+          "added": 507,
+          "removed": 18,
+          "files": 2
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused lane 44 at base then 49/49 in 92.42s (+5, zero new failures); path-scoped ruff check and format clean; all four naming scans zero findings",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T184716941101-sse-inner-iteration-telemetry/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T184716941101-sse-inner-iteration-telemetry/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3690752,
+            "cached_input_tokens_cumulative": 5787392,
+            "input_tokens": 3492503,
+            "input_tokens_cumulative": 5987785,
+            "output_tokens": 12000,
+            "output_tokens_cumulative": 19759,
+            "reasoning_output_tokens": 2503,
+            "reasoning_output_tokens_cumulative": 4526
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1174
+    "_version": 1175
   }
 }

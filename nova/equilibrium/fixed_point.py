@@ -143,6 +143,7 @@ class FixedPointTerminationReason(IntEnum):
     SUFFICIENT_DECREASE_REFUSED = 6
     ACTIVE_SET_CYCLE_DETECTED = 7
     ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED = 8
+    ACTIVE_SET_STAGNATED = 9
 
 
 class FixedPointResult(NamedTuple):
@@ -341,6 +342,7 @@ class _ActiveSetIterationState(NamedTuple):
     converged: jax.Array
     cycle_detected: jax.Array
     nonfinite: jax.Array
+    stagnated: jax.Array
 
 
 class _BacktrackedPromotion(NamedTuple):
@@ -2159,6 +2161,7 @@ def _active_set_newton_krylov(
     shadowed_map_fn: Callable[[jax.Array, jax.Array], jax.Array],
     active_set_steps: int,
     stream_active_set: bool,
+    stop_on_active_set_stagnation: bool,
     precision: Precision | str,
 ) -> FixedPointResult:
     """Reconcile bounded frozen-mask solves with their live active sets."""
@@ -2194,7 +2197,14 @@ def _active_set_newton_krylov(
         return jnp.any(populated & matches)
 
     def reconcile(
-        index, state, mask, mask_history, history_count, inner_result, trip_active
+        index,
+        state,
+        mask,
+        mask_history,
+        history_count,
+        inner_result,
+        trip_active,
+        previous_live_residual,
     ):
         solved_state = inner_result.state
         observed_mask = jnp.ravel(promoted_shadow_mask_fn(solved_state, mask))
@@ -2226,6 +2236,14 @@ def _active_set_newton_krylov(
         selected_residual = jnp.where(repeated, damped_residual, observed_residual)
         selected_finite = jnp.where(repeated, damped_finite, observed_finite)
         selected_difference = jnp.sum(selected_mask != mask, dtype=jnp.int32)
+        stagnated = (
+            stop_on_active_set_stagnation
+            & selected_finite
+            & ~converged
+            & ~cycle_detected
+            & (selected_difference == 0)
+            & (selected_residual == previous_live_residual)
+        )
         if stream_active_set:
             jax.debug.callback(
                 _print_active_set_trip,
@@ -2236,7 +2254,7 @@ def _active_set_newton_krylov(
                 jnp.asarray(inner_result.attempted_newton_promotions, dtype=jnp.int32),
                 ordered=True,
             )
-        can_continue = selected_finite & ~converged & ~cycle_detected
+        can_continue = selected_finite & ~converged & ~cycle_detected & ~stagnated
         record_mask = can_continue & (history_count < mask_history.shape[0])
         mask_history = mask_history.at[history_count].set(
             jnp.where(record_mask, selected_mask, mask_history[history_count])
@@ -2255,6 +2273,7 @@ def _active_set_newton_krylov(
             converged,
             cycle_detected,
             ~selected_finite,
+            stagnated,
         )
 
     first_result = solve_frozen(initial, initial_mask)
@@ -2270,6 +2289,7 @@ def _active_set_newton_krylov(
         first_converged,
         first_cycle,
         first_nonfinite,
+        first_stagnated,
     ) = reconcile(
         0,
         initial,
@@ -2278,6 +2298,7 @@ def _active_set_newton_krylov(
         jnp.asarray(1, dtype=jnp.int32),
         first_result,
         jnp.asarray(True),
+        jnp.asarray(jnp.nan, dtype=initial.dtype),
     )
     outer = _ActiveSetIterationState(
         state=first_state,
@@ -2306,6 +2327,7 @@ def _active_set_newton_krylov(
         converged=first_converged,
         cycle_detected=first_cycle,
         nonfinite=first_nonfinite,
+        stagnated=first_stagnated,
     )
 
     def outer_body(index, carry):
@@ -2323,6 +2345,7 @@ def _active_set_newton_krylov(
                 converged,
                 cycle_detected,
                 nonfinite,
+                stagnated,
             ) = reconcile(
                 index,
                 carry.state,
@@ -2331,6 +2354,7 @@ def _active_set_newton_krylov(
                 carry.mask_history_count,
                 inner_result,
                 carry.active,
+                carry.live_residual,
             )
             return _ActiveSetIterationState(
                 state=state,
@@ -2363,6 +2387,7 @@ def _active_set_newton_krylov(
                 converged=converged,
                 cycle_detected=cycle_detected,
                 nonfinite=nonfinite,
+                stagnated=stagnated,
             )
 
         return jax.lax.cond(carry.active, solve_active, lambda value: value, carry)
@@ -2377,7 +2402,11 @@ def _active_set_newton_krylov(
             jnp.where(
                 outer.nonfinite,
                 FixedPointTerminationReason.NONFINITE_RESIDUAL,
-                FixedPointTerminationReason.ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED,
+                jnp.where(
+                    outer.stagnated,
+                    FixedPointTerminationReason.ACTIVE_SET_STAGNATED,
+                    FixedPointTerminationReason.ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED,
+                ),
             ),
         ),
     )
@@ -2413,6 +2442,7 @@ def newton_krylov(
     shadowed_map_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
     active_set_steps: int = _ACTIVE_SET_ITERATION_LIMIT,
     stream_active_set: bool = False,
+    stop_on_active_set_stagnation: bool = True,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Run globalized Newton and reconcile state-dependent active sets.
@@ -2424,6 +2454,10 @@ def newton_krylov(
     requires both the registered residual tolerance and zero changed mask
     cells.  A repeated mask receives one midpoint-damped transition; another
     previously seen mask terminates with a named cycle result.
+    ``stop_on_active_set_stagnation`` ends the outer iteration when consecutive
+    trips have bit-identical live residuals and the later trip changes no mask
+    cells.  It can be disabled to reproduce the full bounded loop for diagnostic
+    comparisons.
     ``stream_active_set`` emits one flushed host line for every executed outer
     trip; it is disabled by default and does not alter any solver carry.
     """
@@ -2469,6 +2503,7 @@ def newton_krylov(
         shadowed_map_fn=shadowed_map_fn,
         active_set_steps=active_set_steps,
         stream_active_set=stream_active_set,
+        stop_on_active_set_stagnation=stop_on_active_set_stagnation,
         precision=precision,
     )
 

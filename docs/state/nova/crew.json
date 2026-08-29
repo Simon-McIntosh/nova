@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-29T20:39:30",
+  "updated": "2026-08-29T20:40:37",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -62598,9 +62598,218 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260829T183212292363-sse-h200-throughput-harvest",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-h200-throughput-harvest",
+        "node_definition": {
+          "done_when": "The completed H200 saturation sweep is audited and committed with a bounded receipt. Job 1259321 COMPLETED 0:0 in 08:17:51 and wrote batched_throughput_budget.json (90661 bytes) and batched_throughput_member_details.json.gz (656219 bytes) into /home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/job-output. (1) Audit before copying: strict JSON with no NaN or Infinity literals; every measured width carries its complete raw per-repetition latency samples; every published aggregate recomputes exactly from those raw samples, and you must recompute them independently rather than trusting the file; the detail receipt's recorded byte size and SHA-256 b8221a2e7fe26c11f0c9ec4010f93b850fb62cddd73a3bcf6655509ac9a341d7 match the file on disk; the compact receipt is under 10 MB. If any check fails, commit nothing and report the offending value. (2) Regenerate the CSV and HTML companions from the audited JSON so all three committed paths agree, and commit them. The bulky detail file stays out of the repository; the committed receipt's recorded path, size and digest are what make it recoverable. (3) State the measured ladder in the manifest: slices per second of 0.09983, 0.30391, 0.45346, 0.75422, 1.15434, 1.62341, 1.96389, 2.22955, 2.58763 and 2.67513 at widths 1 through 1024, peak device memory rising from 0.202 to 26.267 GB, and compile-and-first-execute from 194.8 to 590.4 s. State the end-to-end gain from width 1 to the saturating width. (4) Name what stopped the sweep and the number that decides it: an actual device out-of-memory at width 2048 attempting 49.94 GiB against a 112585605120-byte limit, with the last measured width gaining only 3.38 percent over its predecessor. This satisfies the plateau-or-memory requirement; say which of the two ended it. (5) Carry the qualification into the committed record verbatim rather than leaving it to inference: the operand is a limited_plasma branch under a fixed one-Newton-step budget with the pilot's maximum relative residual of 0.0011089898293892464 and zero stable conditioning receipts, so no figure here is a convergence claim and none of it exercises an X-point or shadow path.",
+          "estimated_hours": null,
+          "goal": "The completed H200 saturation sweep audited and committed as a bounded receipt naming the out-of-memory width that ended it",
+          "id": "sse-h200-throughput-harvest",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T183212292363-sse-h200-throughput-harvest/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.json",
+            "docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.csv",
+            "docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "h200-matrix",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-29T18:32:21Z",
+        "completed_at": "2026-08-29T18:39:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 431,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 431,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "7045484b0c3ac4c49989725ea28d76b97016d4fd",
+        "commits": [
+          "945f479ba32500c6b20c8c9424fda233f2dcc8d5"
+        ],
+        "changed_lines": {
+          "added": 2035,
+          "removed": 29929,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "job 1259321 COMPLETED 0:0 in 08:17:51; independent recomputation of every aggregate from raw samples matched exactly; 61350-member cartesian census complete; detail size and SHA-256 matched; audit-doc PASS",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T183212292363-sse-h200-throughput-harvest/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T183212292363-sse-h200-throughput-harvest/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0358b-83fb-7493-b03c-93b69217d2d5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2981632,
+            "cached_input_tokens_cumulative": 145117696,
+            "input_tokens": 3187712,
+            "input_tokens_cumulative": 148146234,
+            "output_tokens": 19551,
+            "output_tokens_cumulative": 285397,
+            "reasoning_output_tokens": 3624,
+            "reasoning_output_tokens_cumulative": 79473
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260829T183126907948-sse-diiid-bank-harvest",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-diiid-bank-harvest",
+        "node_definition": {
+          "done_when": "The completed DIII-D bank is audited and reconciled into the repository, with its scientific verdict stated honestly. Job 1259150 COMPLETED 0:0 in 1-07:27:39 and wrote forward_gs_receipt.json, frame_flux_comparison.png and cohort_match_summary.png into /home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T105307708316-sse-diiid-bank-launch/job-output. (1) Audit before copying anything: the scheduler receipt shows COMPLETED with ExitCode 0:0 and the log ends EXIT_MARKER=0; the JSON is strict with exactly the five declared frame identities once each, no NaN or Infinity literals, explicit per-frame convergence, terminal residual, tolerance and termination, and named failure rows retained without shrinking the five-frame denominator; both PNGs are present and were written before the receipt. If any check fails, commit nothing and report the offending value. (2) Copy the receipt and both figures to their publication paths and commit them. (3) The manifest must state the bank's result plainly rather than softening it. Every frame is non-converged: residuals are 0.04485117, 0.08117, 0.08696589, 0.05851698 and 0.04756833 against a tolerance the receipt names, every frame consumed all 16 active-set trips, and the overall result is passed=false. Topology class agreement is true for four of five frames. State the comparison against the previous receipt, whose converged count was 0 of 5, so a reader can see whether the settled-active-set solver changed the scientific outcome on DIII-D. (4) State the mask evidence explicitly, because it reframes the blocker: per-frame mask differences settle to zero at trip 5, 2, 3, 4 and 2 respectively and stay zero, while the residual then repeats bit-identically for the remaining 11, 14, 13, 12 and 14 trips. That is 64 of 80 trips making no progress, and it means DIII-D non-convergence is not caused by mask churn. Say so in the manifest as a finding. (5) Recompute the endpoint-relevant figures the demonstration scorer consumes from these rows and report them, including the worst declared-row saddle-to-EFIT-X distance, so it is visible whether the DIII-D rows still carry the failing saddle gate. Do not run the scorer itself and do not modify any other bank.",
+          "estimated_hours": null,
+          "goal": "The completed five-frame DIII-D bank audited and committed with its non-convergence and settled-mask evidence stated plainly",
+          "id": "sse-diiid-bank-harvest",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T183126907948-sse-diiid-bank-harvest/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+            "docs/figures/diiid-forward-onboarding/forward-gs/frame_flux_comparison.png",
+            "docs/figures/diiid-forward-onboarding/forward-gs/cohort_match_summary.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-29T18:31:36Z",
+        "completed_at": "2026-08-29T18:40:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 521,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 521,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "7045484b0c3ac4c49989725ea28d76b97016d4fd",
+        "commits": [
+          "028b1ee7ffc079d3cf4c55f6a417310c379a047c"
+        ],
+        "changed_lines": {
+          "added": 960,
+          "removed": 416,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "job 1259150 COMPLETED 0:0 in 1-07:27:39, 760-line log ending EXIT_MARKER=0; strict audit proved five identities once each, every leaf finite, telemetry arrays and mask plateaus valid, both PNGs predating the receipt; cmp proved copies byte-identical",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T183126907948-sse-diiid-bank-harvest/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T183126907948-sse-diiid-bank-harvest/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e37-51e1-7ca1-aec1-49356e2c6453",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 3603712,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3826459,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 16683,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2985
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260827T215300942906-sse-diiid-bank-harvest",
+          "root_run_id": "r-20260827T215300942906-sse-diiid-bank-harvest"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "redispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1171
+    "_version": 1173
   }
 }

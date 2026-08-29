@@ -1,1 +1,78 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Batched forward-solve compute budget</title></head><body><h1>Batched forward-solve compute budget</h1><p>throughput is a fixed-budget compute measurement; residual and branch receipts are reported and are not converted into a convergence claim</p><table><thead><tr><th>Device</th><th>Batch</th><th>Precision</th><th>Policy</th><th>Slices/s</th><th>Maximum residual</th><th>Branch</th><th>conditioning receipts</th></tr></thead><tbody><tr><td>NVIDIA H200 NVL</td><td>1</td><td>float64</td><td>fixed 2 relaxed warmup + 1 Newton steps x 4 GMRES iterations; no residual early exit</td><td>127.288</td><td>0.268354</td><td>limited_plasma</td><td>100</td></tr><tr><td>NVIDIA H200 NVL</td><td>4</td><td>float64</td><td>fixed 2 relaxed warmup + 1 Newton steps x 4 GMRES iterations; no residual early exit</td><td>340.032</td><td>0.268354</td><td>limited_plasma</td><td>400</td></tr><tr><td>NVIDIA H200 NVL</td><td>8</td><td>float64</td><td>fixed 2 relaxed warmup + 1 Newton steps x 4 GMRES iterations; no residual early exit</td><td>470.561</td><td>0.268354</td><td>limited_plasma</td><td>800</td></tr></tbody></table></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="h200-batched-forward-solve-saturation-receipt">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-title" content="H200 batched forward-solve saturation receipt">
+  <meta name="plan-summary" content="Audited float64 H200 batch ladder stopped by device-memory exhaustion">
+  <title>H200 batched forward-solve saturation receipt</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<header>
+  <p class="eyebrow">Audited H200 measurement &middot; job 1259321</p>
+  <h1>Batched throughput reached 2.67513387 slices/s before width 2048 exhausted device memory</h1>
+  <p class="lead">Ten measured widths from 1 through 1024 increased throughput by <strong>26.79691976&times;</strong>. The sweep ended by <strong>actual device memory exhaustion</strong>, not the plateau criterion: width 2048 attempted a 49.94 GiB allocation against a 112,585,605,120-byte device limit. The last measured width gained 3.381708% over width 512.</p>
+</header>
+<aside>
+  <p><strong>Qualification, verbatim:</strong> the operand is a limited_plasma branch under a fixed one-Newton-step budget with the pilot's maximum relative residual of 0.0011089898293892464 and zero stable conditioning receipts, so no figure here is a convergence claim and none of it exercises an X-point or shadow path.</p>
+</aside>
+<section id="audit">
+  <h2>Admission audit</h2>
+  <ul>
+    <li>Job 1259321: COMPLETED 0:0 in 08:17:51 on one NVIDIA H200 NVL at float64.</li>
+    <li>Compact source: 90,661 bytes, strict JSON, below the 10,000,000-byte bound.</li>
+    <li>Every width carries 10 of 10 raw repetition latencies; all published elapsed times, per-repeat rates, aggregate rates, gains, counts, residual maxima and branch identities recomputed independently.</li>
+    <li>Detailed receipt: 656,219 bytes, 61,350 complete member coordinates, SHA-256 <code>b8221a2e7fe26c11f0c9ec4010f93b850fb62cddd73a3bcf6655509ac9a341d7</code>.</li>
+  </ul>
+</section>
+<section id="curves">
+  <h2>Throughput and device-memory climb</h2>
+  <figure>
+    <svg viewBox="0 0 920 320" role="img" aria-labelledby="chart-title chart-desc">
+      <title id="chart-title">Throughput and peak device memory by batch width</title>
+      <desc id="chart-desc">Throughput rises from 0.09983 to 2.67513 slices per second while peak device memory rises from 0.202 to 26.267 gigabytes across batch widths 1 through 1024.</desc>
+      <line x1="70" y1="270" x2="870" y2="270" stroke="#444"/>
+      <line x1="70" y1="30" x2="70" y2="270" stroke="#444"/>
+      <polyline points="70.0,261.0 230.0,242.7 310.0,229.3 390.0,202.3 470.0,166.4 550.0,124.4 630.0,93.8 710.0,70.0 790.0,37.9 870.0,30.0" fill="none" stroke="#135d6a" stroke-width="4"/>
+      <polyline points="70.0,268.2 230.0,266.7 310.0,266.4 390.0,266.1 470.0,262.6 550.0,255.2 630.0,241.0 710.0,212.5 790.0,155.1 870.0,30.0" fill="none" stroke="#9a6b00" stroke-width="4"/>
+      <circle cx="70.0" cy="261.0" r="4" fill="#135d6a"><title>batch 1: 0.099830 slices/s</title></circle><circle cx="70.0" cy="268.2" r="4" fill="#9a6b00"><title>batch 1: 0.202024 GB</title></circle><circle cx="230.0" cy="242.7" r="4" fill="#135d6a"><title>batch 4: 0.303906 slices/s</title></circle><circle cx="230.0" cy="266.7" r="4" fill="#9a6b00"><title>batch 4: 0.362703 GB</title></circle><circle cx="310.0" cy="229.3" r="4" fill="#135d6a"><title>batch 8: 0.453464 slices/s</title></circle><circle cx="310.0" cy="266.4" r="4" fill="#9a6b00"><title>batch 8: 0.392749 GB</title></circle><circle cx="390.0" cy="202.3" r="4" fill="#135d6a"><title>batch 16: 0.754223 slices/s</title></circle><circle cx="390.0" cy="266.1" r="4" fill="#9a6b00"><title>batch 16: 0.432082 GB</title></circle><circle cx="470.0" cy="166.4" r="4" fill="#135d6a"><title>batch 32: 1.154342 slices/s</title></circle><circle cx="470.0" cy="262.6" r="4" fill="#9a6b00"><title>batch 32: 0.815122 GB</title></circle><circle cx="550.0" cy="124.4" r="4" fill="#135d6a"><title>batch 64: 1.623410 slices/s</title></circle><circle cx="550.0" cy="255.2" r="4" fill="#9a6b00"><title>batch 64: 1.619811 GB</title></circle><circle cx="630.0" cy="93.8" r="4" fill="#135d6a"><title>batch 128: 1.963893 slices/s</title></circle><circle cx="630.0" cy="241.0" r="4" fill="#9a6b00"><title>batch 128: 3.177892 GB</title></circle><circle cx="710.0" cy="70.0" r="4" fill="#135d6a"><title>batch 256: 2.229553 slices/s</title></circle><circle cx="710.0" cy="212.5" r="4" fill="#9a6b00"><title>batch 256: 6.290129 GB</title></circle><circle cx="790.0" cy="37.9" r="4" fill="#135d6a"><title>batch 512: 2.587628 slices/s</title></circle><circle cx="790.0" cy="155.1" r="4" fill="#9a6b00"><title>batch 512: 12.574191 GB</title></circle><circle cx="870.0" cy="30.0" r="4" fill="#135d6a"><title>batch 1024: 2.675134 slices/s</title></circle><circle cx="870.0" cy="30.0" r="4" fill="#9a6b00"><title>batch 1024: 26.267126 GB</title></circle><text x="70.0" y="292" text-anchor="middle" font-size="11">1</text><text x="230.0" y="292" text-anchor="middle" font-size="11">4</text><text x="310.0" y="292" text-anchor="middle" font-size="11">8</text><text x="390.0" y="292" text-anchor="middle" font-size="11">16</text><text x="470.0" y="292" text-anchor="middle" font-size="11">32</text><text x="550.0" y="292" text-anchor="middle" font-size="11">64</text><text x="630.0" y="292" text-anchor="middle" font-size="11">128</text><text x="710.0" y="292" text-anchor="middle" font-size="11">256</text><text x="790.0" y="292" text-anchor="middle" font-size="11">512</text><text x="870.0" y="292" text-anchor="middle" font-size="11">1024</text>
+      <text x="470" y="314" text-anchor="middle">Batch width</text>
+      <text x="85" y="48" fill="#135d6a">Throughput, normalized to 2.67513 slices/s</text>
+      <text x="535" y="48" fill="#9a6b00">Peak memory, normalized to 26.267 GB</text>
+    </svg>
+    <figcaption>Both series use their own measured maximum as the vertical scale. The 2048 attempt is excluded because allocation failed before a timing row could be measured.</figcaption>
+  </figure>
+</section>
+<section id="measurements">
+  <h2>Audited measured ladder</h2>
+  <table>
+    <thead><tr><th>Batch</th><th>Slices/s</th><th>Gain</th><th>Compile + first execute (s)</th><th>Peak bytes</th><th>Peak GB</th><th>Maximum residual</th><th>Branch</th><th>Converged</th></tr></thead>
+    <tbody><tr><td>1</td><td>0.09982990</td><td>—</td><td>194.826</td><td>202024448</td><td>0.202024</td><td>0.001108989829389043</td><td>limited_plasma</td><td>0/30</td></tr><tr><td>4</td><td>0.30390555</td><td>204.4234%</td><td>197.521</td><td>362703360</td><td>0.362703</td><td>0.001108989829388229</td><td>limited_plasma</td><td>0/120</td></tr><tr><td>8</td><td>0.45346443</td><td>49.2123%</td><td>201.972</td><td>392749056</td><td>0.392749</td><td>0.001108989829388636</td><td>limited_plasma</td><td>0/240</td></tr><tr><td>16</td><td>0.75422283</td><td>66.3246%</td><td>202.280</td><td>432082432</td><td>0.432082</td><td>0.001108989829388636</td><td>limited_plasma</td><td>0/480</td></tr><tr><td>32</td><td>1.15434243</td><td>53.0506%</td><td>211.848</td><td>815121664</td><td>0.815122</td><td>0.001108989829389043</td><td>limited_plasma</td><td>0/960</td></tr><tr><td>64</td><td>1.62340960</td><td>40.6350%</td><td>223.638</td><td>1619811328</td><td>1.619811</td><td>0.001108989829388636</td><td>limited_plasma</td><td>0/1920</td></tr><tr><td>128</td><td>1.96389279</td><td>20.9733%</td><td>248.263</td><td>3177892352</td><td>3.177892</td><td>0.001108989829388433</td><td>limited_plasma</td><td>0/3840</td></tr><tr><td>256</td><td>2.22955317</td><td>13.5272%</td><td>300.391</td><td>6290129152</td><td>6.290129</td><td>0.00110898982938884</td><td>limited_plasma</td><td>0/7680</td></tr><tr><td>512</td><td>2.58762785</td><td>16.0604%</td><td>386.282</td><td>12574191104</td><td>12.574191</td><td>0.001108989829388636</td><td>limited_plasma</td><td>0/15360</td></tr><tr><td>1024</td><td>2.67513387</td><td>3.3817%</td><td>590.420</td><td>26267125504</td><td>26.267126</td><td>0.001108989829388636</td><td>limited_plasma</td><td>0/30720</td></tr></tbody>
+  </table>
+</section>
+<section id="raw">
+  <h2>Complete raw repetition latencies</h2>
+  <p>Seconds, in execution order. The committed JSON retains these samples with their per-repeat terminal qualification.</p>
+  <table><thead><tr><th>Batch</th><th>Ten latency samples (s)</th></tr></thead><tbody><tr><th scope="row">1</th><td><code>[30.077761293000002,30.038449008,30.062758865,30.075888734000003,30.045737263,30.048666454,30.010407664,30.054468814,30.053089373,30.043936632]</code></td></tr><tr><th scope="row">4</th><td><code>[39.505074379,39.484552583,39.522250354,39.457616692,39.501237613,39.493100747,39.470539099,39.467602113000005,39.480626306,39.476926997999996]</code></td></tr><tr><th scope="row">8</th><td><code>[52.945998906,52.913615692,52.926446169,52.925886721,52.929529411999994,52.928603162,52.929166085,52.92052614199999,52.918891470999995,52.92004642399999]</code></td></tr><tr><th scope="row">16</th><td><code>[63.636238409,63.62556660600001,63.641219965999994,63.682929937,63.681055421,63.66084492,63.666496375,63.620230372,63.606415655999996,63.595697372]</code></td></tr><tr><th scope="row">32</th><td><code>[83.308053113,83.17520451,83.133735005,83.126300831,83.134775098,83.145505579,83.155376198,83.13726314499999,83.144123858,83.181971893]</code></td></tr><tr><th scope="row">64</th><td><code>[118.269591797,118.11296040799999,118.171096033,118.336494354,118.244715154,118.308142488,118.292916362,118.35646973600001,118.27533889,118.32825183]</code></td></tr><tr><th scope="row">128</th><td><code>[195.32457152600003,195.51627369,195.53102370399998,195.54725480300002,195.53025099299998,195.545710875,195.55355154900002,195.579887274,195.58777171599996,195.583922069]</code></td></tr><tr><th scope="row">256</th><td><code>[344.47610100199995,344.55296655300003,344.626826548,344.42817215,344.465021285,344.424187309,344.463161534,344.260283324,344.502558489,344.437112765]</code></td></tr><tr><th scope="row">512</th><td><code>[593.429529332,593.554696827,593.605041966,593.662338467,593.547694281,593.5762636239999,593.6246535309999,593.6967717079999,593.607050934,593.63454776]</code></td></tr><tr><th scope="row">1024</th><td><code>[1148.2828863290001,1148.3336817089998,1148.439807691,1148.320293426,1148.440675121,1148.295237303,1148.4442897239999,1148.306279173,1148.327137874,1148.34717748]</code></td></tr></tbody></table>
+</section>
+<section id="provenance">
+  <h2>Recoverable evidence</h2>
+  <dl>
+    <dt>Detailed receipt</dt><dd><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260828T145848644858-sse-h200-saturation-launch/job-output/batched_throughput_member_details.json.gz</code></dd>
+    <dt>Detailed size</dt><dd>656219 bytes</dd>
+    <dt>Detailed SHA-256</dt><dd><code>b8221a2e7fe26c11f0c9ec4010f93b850fb62cddd73a3bcf6655509ac9a341d7</code></dd>
+    <dt>Compact source SHA-256</dt><dd><code>a4593e4d715f1f144b1b68e74a92c2abf7aa441b68318eebf65252e91ac49309</code></dd>
+    <dt>Measurement source revision</dt><dd><code>b9585c1f63bcc72b2e4f5d5dd2f0e789f9579a7f</code></dd>
+    <dt>Driver SHA-256</dt><dd><code>83dc730f1dfc5dd51171ae8c68cba5985d88b2b69d9a9410a5725da9b8d53d54</code></dd>
+  </dl>
+</section>
+</main>
+</body>
+</html>

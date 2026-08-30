@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-30T12:48:53",
+  "updated": "2026-08-30T13:12:24",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -63801,9 +63801,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260830T104938950186-sse-descent-barrier-characterisation",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-descent-barrier-characterisation",
+        "node_definition": {
+          "done_when": "The barrier that halts descent is characterised at the exact states where it appears, and this closes the investigation rather than opening another carry variation. The chain in docs/research/diiid-residual-stall-mechanism.html halts in all four arms with terminal contraction exactly 1: frame 179 production halts at 0.04070191086569353 with first refusal at link 4, its damping-searched arm at 0.02439092079766208 with first refusal at link 5, frame 44 production at 0.08108364266773609 refusing from link 2, and its damping-searched arm at 0.07403979201423325 refusing from link 5. (1) At each of those four halt states, on its own promoted mask, census the candidate directions exactly as the earlier retained-state census did: residual and merit, gradient L2 and infinity norms, directional derivative along every candidate, each candidate's step norm, predicted and actual merit change, acceptance threshold and named decision, and the resulting live residual. Use the same candidate family so the two censuses are comparable, and say explicitly whether they are. (2) Answer one question with numbers: is the halt a LOCAL MINIMUM of the merit, meaning no candidate has a materially negative directional derivative, or a MODEL FAILURE, meaning descent directions exist but every candidate's actual merit change contradicts its prediction, or a STEP-LENGTH FLOOR, meaning descent directions exist with actual merit change matching prediction to within an order of magnitude, but every admissible step length changes the residual by less than one part in 1e12. Give the counts and magnitudes that decide it, and compare the gradient norm at the halt against the gradient norm at the original retained state to show whether the gradient collapsed or stayed comparable. (3) Report the four halt states separately. The frames already differ by an order of magnitude and the production and damping-searched arms halt at different residuals, so a single verdict covering all four must be justified rather than assumed. (4) State the consequence plainly for the demonstration gate: whether the unchanged 1e-6 tolerance is reachable by ANY method that stays within this residual formulation and fixed-shape solve, or whether reaching it requires changing the formulation, the discretisation, or the tolerance itself. Name what evidence would overturn your answer. Do not recommend relaxing the tolerance; state the finding and let the lead decide. (5) Attempt no fix, change no solver default and regenerate no bank. Record the barrier characterisation in docs/research/diiid-residual-stall-mechanism.html with a figure comparing gradient norm and best available descent at the retained state against each halt state, validated with the reckon doc-check tooling. Close the document with a plain-language summary a reader can act on without reading the whole investigation.",
+          "estimated_hours": null,
+          "goal": "The nature of the barrier at all four halt states, decided between a local minimum, a model failure and a step-length floor by their counts and magnitudes",
+          "id": "sse-descent-barrier-characterisation",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T104938950186-sse-descent-barrier-characterisation/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/research/diiid-residual-stall-mechanism.html",
+            "docs/figures/diiid-residual-stall"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-30T10:49:48Z",
+        "completed_at": "2026-08-30T11:11:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1331,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1331,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "a1ac7ac777fabb100bce95a7143e8cc30225597e",
+        "commits": [
+          "a939976078f3359867c8b0c0e4de807e381d8f18"
+        ],
+        "changed_lines": {
+          "added": 193,
+          "removed": 21,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "92 candidates censused across four promoted-mask halt states using the same 23-candidate family and thresholds as the retained-state census, so the counts are directly comparable; figure and record validated",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T104938950186-sse-descent-barrier-characterisation/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T104938950186-sse-descent-barrier-characterisation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1439744,
+            "cached_input_tokens_cumulative": 12123648,
+            "input_tokens": 1355377,
+            "input_tokens_cumulative": 12261315,
+            "output_tokens": 1894,
+            "output_tokens_cumulative": 26924,
+            "reasoning_output_tokens": 1443,
+            "reasoning_output_tokens_cumulative": 5236
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1183
+    "_version": 1184
   }
 }

@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="diiid-residual-stall-mechanism">
   <meta name="plan-title" content="DIII-D residual stall mechanism">
-  <meta name="plan-summary" content="Per-iteration evidence identifies a real settled-domain optimisation stall; direct cross-mask re-evaluation reproduces both carried residuals exactly, ruling out an incomparable-domain artifact">
+  <meta name="plan-summary" content="Per-iteration evidence identifies a real settled-domain optimisation stall; three continuation remedies leave both settled outer rates exactly one">
   <meta name="plan-status" content="reference">
   <meta name="plan-evidence-for" content="separatrix-spline-extraction">
   <meta name="plan-source-quality" content="primary">
@@ -65,6 +65,13 @@
         difference. Both masks are fixed under the promoted-mask update. The
         carried targets are genuinely reachable on the settled domains; the flat
         outer residual is not an artefact of comparing different masks.
+      </p>
+      <p>
+        <strong>Full-state falsifier.</strong> Carrying the merit window, recovery
+        radius, Levenberg damping, Krylov spectral baseline, amplification state,
+        and best fallback with the terminal iterate also leaves both frames
+        unchanged for six trips. Both outer rates are
+        <em>q</em> = 1.0000000000000000. The third continuation remedy is refuted.
       </p>
     </aside>
 
@@ -388,6 +395,78 @@
       </p>
     </section>
 
+    <section id="globalization-state-continuation-measurement">
+      <h2>Full globalization continuation is refuted</h2>
+      <p>
+        The fixed-shape outer carry now preserves the inner quantities that can
+        influence a later promotion: the six-entry nonmonotone merit history and
+        observation count, adaptive recovery radius, persistent Levenberg
+        damping, preceding Krylov spectral baseline, and best-state fallback. It
+        also carries the advisory amplification observation so the complete inner
+        state remains continuous. The nonlinear tangent remains correctly rebuilt
+        at each Newton iterate because it is a function of that iterate rather
+        than reusable solver state. A changed mask selects the original reset
+        values and warmup path with masked fixed-shape control.
+      </p>
+      <table>
+        <caption>Six-trip full-state continuation from the persisted stalls</caption>
+        <thead>
+          <tr>
+            <th scope="col">Frame</th>
+            <th scope="col">Incoming residual</th>
+            <th scope="col">Residual after trips 1&ndash;6</th>
+            <th scope="col">Mask differences</th>
+            <th scope="col">Geometric outer <em>q</em></th>
+            <th scope="col">Terminal trajectory</th>
+            <th scope="col">Measured wall time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">179</th>
+            <td>0.04485116727666494</td>
+            <td>0.04485116727666494 repeated 6 times</td>
+            <td>0, 0, 0, 0, 0, 0</td>
+            <td>1.0000000000000000</td>
+            <td>0.2020132915380862</td>
+            <td>902.455 s; 150.409 s/trip</td>
+          </tr>
+          <tr>
+            <th scope="row">44</th>
+            <td>0.08117000452284782</td>
+            <td>0.08117000452284782 repeated 6 times</td>
+            <td>0, 0, 0, 0, 0, 0</td>
+            <td>1.0000000000000000</td>
+            <td>0.11386768047084875</td>
+            <td>1093.400 s; 182.233 s/trip</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        This is a direct refutation, not partial progress. At the measured outer
+        rate neither frame reaches 1&times;10<sup>&minus;6</sup> at any finite trip
+        budget. Best-value retention, terminal-iterate continuation, and now full
+        globalization-state continuation all preserve different parts of the
+        outer boundary and all return exactly zero improvement. Together with the
+        exact settled-mask re-evaluation, the three results establish that descent
+        is not being discarded merely by an outer-boundary reset. The contracting
+        iterations observed after degrading warmup follow a trajectory whose
+        endpoint remains above the independently valid retained state; none of
+        the carried state makes that trajectory descend through the retained
+        value.
+      </p>
+      <p>
+        No fourth carry variation is supported. The single next discriminating
+        measurement is a one-promotion census linearized directly at each retained
+        best state on its settled mask: report the merit gradient and directional
+        derivative, Newton and recovery candidates, every acceptance threshold,
+        and each candidate's live relative-sup residual. A genuine decreasing
+        candidate that is refused would identify an acceptance mismatch; no
+        decreasing candidate would instead identify a local barrier or basin
+        problem at the state that the outer solver must improve.
+      </p>
+    </section>
+
     <section id="cross-mask-residual-comparability">
       <h2>The carried residuals are valid on the settled masks</h2>
       <p>
@@ -562,11 +641,11 @@
         </li>
         <li>
           <strong>Carry the full globalization state across unchanged masks.</strong>
-          Preserve the merit window, adaptive radius, damping, and current local
-          model with the terminal iterate instead of constructing a fresh inner
-          solve. Cost: high because these fixed-shape carries must cross the outer
-          boundary and enter checkpoint identity. Falsifying evidence: a full-carry
-          continuation still returns outer <em>q</em> = 1 or its live mask changes.
+          Implemented for the merit window, adaptive radius, damping, Krylov
+          baseline, amplification state, and best fallback, and <strong>refuted as
+          the stall remedy</strong>. Both frames retain zero mask differences and
+          outer <em>q</em> = 1.0000000000000000 across six measured trips. Do not
+          pursue another variation of cross-trip state carry.
         </li>
         <li>
           <strong>Rebuild the warmup objective so it shares the promoted merit and
@@ -604,6 +683,7 @@
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T072458160660-sse-outer-best-iterate-retention/checkpoint-resumption.json</code> &mdash; four guarded settled trips per persisted frame, including residuals, mask differences, and outer rates.</li>
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T075138868344-sse-newton-trajectory-continuation/trajectory-resumption.json</code> &mdash; six terminal-state continuation trips per persisted frame, including residual sequences, mask differences, local endpoints, and outer rates.</li>
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T090349299149-sse-cross-mask-residual-comparability/cross-mask-residual-comparability.json</code> &mdash; explicit settled-mask residual re-evaluation, mask stability, component counts, and mask digests for both persisted states.</li>
+        <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T091221649529-sse-globalization-state-continuation/globalization-resumption.json</code> &mdash; six full-globalization continuation trips per frame, with exact residual sequences, mask differences, wall times, and outer rates.</li>
       </ul>
     </section>
   </main>

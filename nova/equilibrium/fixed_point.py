@@ -526,11 +526,25 @@ class _NewtonIterationState(NamedTuple):
     recovery_radius: jax.Array
     promotion_recovery_radii: jax.Array
     promotion_recovery_outcomes: jax.Array
+    model_rebuild_damping: jax.Array
     promotion_model_rebuild_activations: jax.Array
     promotion_model_rebuild_damping: jax.Array
     promotion_descent_activations: jax.Array
     promotion_descent_scales: jax.Array
     inner_trace: _InnerIterationTrace
+
+
+class _NewtonGlobalizationState(NamedTuple):
+    """Decision-bearing state retained between compatible frozen-mask solves."""
+
+    best_state: jax.Array
+    best_residual: jax.Array
+    recent_merits: jax.Array
+    merit_observations: jax.Array
+    amplification: _AmplificationState
+    condition_baseline: jax.Array
+    recovery_radius: jax.Array
+    model_rebuild_damping: jax.Array
 
 
 class _ActiveSetIterationState(NamedTuple):
@@ -543,6 +557,8 @@ class _ActiveSetIterationState(NamedTuple):
     result: FixedPointResult
     trajectory_state: jax.Array
     continue_trajectory: jax.Array
+    globalization_state: _NewtonGlobalizationState
+    continue_globalization: jax.Array
     live_residual: jax.Array
     residuals: jax.Array
     mask_differences: jax.Array
@@ -578,6 +594,7 @@ class _RebuiltModelPromotion(NamedTuple):
     residual: jax.Array
     accepted: jax.Array
     damping: jax.Array
+    next_damping: jax.Array
 
 
 class _SteepestDescentPromotion(NamedTuple):
@@ -936,6 +953,7 @@ def _rebuilt_model_promotion(
     *,
     gmres_iterations: int,
     maximum_step: jax.Array,
+    initial_damping: jax.Array,
 ) -> _RebuiltModelPromotion:
     """Re-linearize and seek a window-decreasing Levenberg-damped step."""
     mapped, tangent = jax.linearize(map_fn, state)
@@ -994,7 +1012,7 @@ def _rebuilt_model_promotion(
             jnp.where(select | ~accepted, damping, recorded),
         )
 
-    candidate, residual, accepted, _next_damping, recorded_damping = jax.lax.fori_loop(
+    candidate, residual, accepted, next_damping, recorded_damping = jax.lax.fori_loop(
         0,
         _MODEL_REBUILD_DAMPING_TRIPS,
         damping_trial,
@@ -1002,7 +1020,7 @@ def _rebuilt_model_promotion(
             state,
             current_residual,
             jnp.asarray(False),
-            jnp.asarray(_MODEL_REBUILD_DAMPING_INITIAL, dtype=state.dtype),
+            jnp.asarray(initial_damping, dtype=state.dtype),
             jnp.asarray(jnp.nan, dtype=state.dtype),
         ),
     )
@@ -1011,6 +1029,14 @@ def _rebuilt_model_promotion(
         residual=residual,
         accepted=accepted,
         damping=recorded_damping,
+        next_damping=jnp.where(
+            accepted,
+            jnp.maximum(
+                recorded_damping / _MODEL_REBUILD_DAMPING_GROWTH,
+                jnp.asarray(_MODEL_REBUILD_DAMPING_INITIAL, dtype=state.dtype),
+            ),
+            next_damping,
+        ),
     )
 
 
@@ -1773,8 +1799,11 @@ def _newton_krylov_inner(
     shadowed_map_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
     stream_inner_iterations: bool = False,
     run_warmup: jax.Array | bool = True,
+    globalization_state: _NewtonGlobalizationState | None = None,
+    resume_globalization: jax.Array | bool = False,
+    return_globalization_state: bool = False,
     precision: Precision | str = Precision.AUTOMATIC,
-) -> FixedPointResult:
+) -> FixedPointResult | tuple[FixedPointResult, _NewtonGlobalizationState]:
     """Exact-tangent Jacobian-free Newton–Krylov on the fixed-point residual.
 
     After ``warmup`` relaxed Picard sweeps, each Newton attempt linearises the
@@ -1952,6 +1981,40 @@ def _newton_krylov_inner(
             jnp.asarray(0, dtype=jnp.int32),
         ),
     )
+    if globalization_state is None:
+        globalization_state = _NewtonGlobalizationState(
+            best_state=initial,
+            best_residual=jnp.asarray(jnp.inf, dtype=initial.dtype),
+            recent_merits=jnp.full(
+                _NONMONOTONE_MERIT_WINDOW, jnp.nan, dtype=initial.dtype
+            ),
+            merit_observations=jnp.asarray(0, dtype=jnp.int32),
+            amplification=_initial_amplification_state(initial.dtype),
+            condition_baseline=jnp.asarray(jnp.nan, dtype=initial.dtype),
+            recovery_radius=jnp.asarray(_RECOVERY_RADIUS_INITIAL, dtype=initial.dtype),
+            model_rebuild_damping=jnp.asarray(
+                _MODEL_REBUILD_DAMPING_INITIAL, dtype=initial.dtype
+            ),
+        )
+    best_state = jnp.where(
+        resume_globalization, globalization_state.best_state, best_state
+    )
+    best_residual = jnp.where(
+        resume_globalization, globalization_state.best_residual, best_residual
+    )
+    recent_merits = jnp.where(
+        resume_globalization, globalization_state.recent_merits, recent_merits
+    )
+    merit_observations = jnp.where(
+        resume_globalization,
+        globalization_state.merit_observations,
+        merit_observations,
+    )
+    amplification = jax.tree.map(
+        lambda resumed, reset: jnp.where(resume_globalization, resumed, reset),
+        globalization_state.amplification,
+        amplification,
+    )
 
     def continue_newton(carry):
         first_measurement = ~carry.current_measured
@@ -2069,6 +2132,7 @@ def _newton_krylov_inner(
                         reference_merit,
                         gmres_iterations=gmres_iterations,
                         maximum_step=cap,
+                        initial_damping=measured.model_rebuild_damping,
                     )
 
                 def skip_rebuild(_):
@@ -2077,6 +2141,7 @@ def _newton_krylov_inner(
                         residual=nonlinear_residual,
                         accepted=jnp.asarray(False),
                         damping=jnp.asarray(jnp.nan, dtype=state.dtype),
+                        next_damping=measured.model_rebuild_damping,
                     )
 
                 rebuilt = jax.lax.cond(
@@ -2315,6 +2380,11 @@ def _newton_krylov_inner(
                     promotion.recovery_radius,
                     recovery_radii,
                     recovery_outcomes,
+                    jnp.where(
+                        rebuild_activated,
+                        rebuilt.next_damping,
+                        measured.model_rebuild_damping,
+                    ),
                     rebuild_activations,
                     rebuild_damping,
                     descent_activations,
@@ -2390,6 +2460,7 @@ def _newton_krylov_inner(
                     measured.promotion_recovery_outcomes.at[measured.attempted].set(
                         RecoveryOutcome.NOT_APPLICABLE
                     ),
+                    measured.model_rebuild_damping,
                     measured.promotion_model_rebuild_activations.at[
                         measured.attempted
                     ].set(0),
@@ -2422,7 +2493,11 @@ def _newton_krylov_inner(
             amplification,
             jnp.asarray(0, dtype=jnp.int32),
             jnp.asarray(0.0, dtype=initial.dtype),
-            jnp.asarray(jnp.nan, dtype=initial.dtype),
+            jnp.where(
+                resume_globalization,
+                globalization_state.condition_baseline,
+                jnp.asarray(jnp.nan, dtype=initial.dtype),
+            ),
             jnp.asarray(0, dtype=jnp.int32),
             jnp.asarray(0, dtype=jnp.int32),
             jnp.asarray(False),
@@ -2436,9 +2511,18 @@ def _newton_krylov_inner(
             shadow_changes,
             jnp.full(newton_steps, -1, dtype=jnp.int32),
             jnp.full(newton_steps, -1, dtype=jnp.int32),
-            jnp.asarray(_RECOVERY_RADIUS_INITIAL, dtype=initial.dtype),
+            jnp.where(
+                resume_globalization,
+                globalization_state.recovery_radius,
+                jnp.asarray(_RECOVERY_RADIUS_INITIAL, dtype=initial.dtype),
+            ),
             jnp.full((newton_steps, 2), jnp.nan, dtype=initial.dtype),
             jnp.full(newton_steps, -1, dtype=jnp.int32),
+            jnp.where(
+                resume_globalization,
+                globalization_state.model_rebuild_damping,
+                jnp.asarray(_MODEL_REBUILD_DAMPING_INITIAL, dtype=initial.dtype),
+            ),
             jnp.full(newton_steps, -1, dtype=jnp.int32),
             jnp.full(newton_steps, jnp.nan, dtype=initial.dtype),
             jnp.full(newton_steps, -1, dtype=jnp.int32),
@@ -2446,7 +2530,7 @@ def _newton_krylov_inner(
             _empty_inner_trace(newton_steps, initial.dtype),
         ),
     )
-    return FixedPointResult(
+    result = FixedPointResult(
         state=loop.best_state,
         residual=loop.best_residual,
         trace=loop.trace,
@@ -2481,6 +2565,19 @@ def _newton_krylov_inner(
         trajectory_state=loop.state,
         trajectory_residual=loop.residual,
     )
+    continued_globalization = _NewtonGlobalizationState(
+        best_state=loop.best_state,
+        best_residual=loop.best_residual,
+        recent_merits=loop.recent_merits,
+        merit_observations=loop.merit_observations,
+        amplification=loop.amplification,
+        condition_baseline=loop.condition_baseline,
+        recovery_radius=loop.recovery_radius,
+        model_rebuild_damping=loop.model_rebuild_damping,
+    )
+    if return_globalization_state:
+        return result, continued_globalization
+    return result
 
 
 def _active_set_newton_krylov(
@@ -2502,6 +2599,7 @@ def _active_set_newton_krylov(
     stop_on_active_set_stagnation: bool,
     retain_outer_best_iterate: bool,
     continue_newton_trajectory: bool,
+    continue_globalization_state: bool,
     precision: Precision | str,
 ) -> FixedPointResult:
     """Reconcile bounded frozen-mask solves with their live active sets."""
@@ -2510,7 +2608,9 @@ def _active_set_newton_krylov(
     history = jnp.zeros((active_set_steps + 1, initial_mask.size), dtype=bool)
     history = history.at[0].set(initial_mask)
 
-    def solve_frozen(state, mask, run_warmup):
+    def solve_frozen(
+        state, mask, run_warmup, globalization_state=None, resume_globalization=False
+    ):
         def frozen_map(candidate):
             return shadowed_map_fn(candidate, mask)
 
@@ -2530,6 +2630,9 @@ def _active_set_newton_krylov(
             shadow_mask_fn=frozen_mask,
             stream_inner_iterations=stream_inner_iterations,
             run_warmup=run_warmup,
+            globalization_state=globalization_state,
+            resume_globalization=resume_globalization,
+            return_globalization_state=True,
             precision=precision,
         )
 
@@ -2545,6 +2648,7 @@ def _active_set_newton_krylov(
         mask_history,
         history_count,
         inner_result,
+        inner_globalization,
         trip_active,
         previous_live_residual,
     ):
@@ -2611,6 +2715,7 @@ def _active_set_newton_krylov(
             & jnp.all(trajectory_mask == mask)
             & (inner_result.accepted_newton_promotions > 0)
         )
+        continue_globalization = continue_trajectory & continue_globalization_state
         converged = (
             selected_finite
             & (selected_residual <= convergence_tolerance)
@@ -2657,9 +2762,13 @@ def _active_set_newton_krylov(
             stagnated,
             trajectory_state,
             continue_trajectory,
+            inner_globalization,
+            continue_globalization,
         )
 
-    first_result = solve_frozen(initial, initial_mask, jnp.asarray(True))
+    first_result, first_globalization = solve_frozen(
+        initial, initial_mask, jnp.asarray(True)
+    )
     (
         first_state,
         first_mask,
@@ -2675,6 +2784,8 @@ def _active_set_newton_krylov(
         first_stagnated,
         first_trajectory_state,
         first_continue_trajectory,
+        first_globalization,
+        first_continue_globalization,
     ) = reconcile(
         0,
         initial,
@@ -2682,6 +2793,7 @@ def _active_set_newton_krylov(
         history,
         jnp.asarray(1, dtype=jnp.int32),
         first_result,
+        first_globalization,
         jnp.asarray(True),
         jnp.asarray(jnp.nan, dtype=initial.dtype),
     )
@@ -2693,6 +2805,8 @@ def _active_set_newton_krylov(
         result=first_result,
         trajectory_state=first_trajectory_state,
         continue_trajectory=first_continue_trajectory,
+        globalization_state=first_globalization,
+        continue_globalization=first_continue_globalization,
         live_residual=first_residual,
         residuals=jnp.full(active_set_steps, jnp.nan, dtype=initial.dtype)
         .at[0]
@@ -2722,8 +2836,12 @@ def _active_set_newton_krylov(
             solve_state = jnp.where(
                 carry.continue_trajectory, carry.trajectory_state, carry.state
             )
-            inner_result = solve_frozen(
-                solve_state, carry.mask, ~carry.continue_trajectory
+            inner_result, inner_globalization = solve_frozen(
+                solve_state,
+                carry.mask,
+                ~carry.continue_trajectory,
+                carry.globalization_state,
+                carry.continue_globalization,
             )
             (
                 state,
@@ -2740,6 +2858,8 @@ def _active_set_newton_krylov(
                 stagnated,
                 trajectory_state,
                 continue_trajectory,
+                globalization_state,
+                continue_globalization,
             ) = reconcile(
                 index,
                 carry.state,
@@ -2747,6 +2867,7 @@ def _active_set_newton_krylov(
                 carry.mask_history,
                 carry.mask_history_count,
                 inner_result,
+                inner_globalization,
                 carry.active,
                 carry.live_residual,
             )
@@ -2758,6 +2879,8 @@ def _active_set_newton_krylov(
                 result=inner_result,
                 trajectory_state=trajectory_state,
                 continue_trajectory=continue_trajectory,
+                globalization_state=globalization_state,
+                continue_globalization=continue_globalization,
                 live_residual=live_residual,
                 residuals=carry.residuals.at[index].set(live_residual),
                 mask_differences=carry.mask_differences.at[index].set(mask_difference),
@@ -2843,6 +2966,7 @@ def newton_krylov(
     stop_on_active_set_stagnation: bool = True,
     retain_outer_best_iterate: bool = True,
     continue_newton_trajectory: bool = True,
+    continue_globalization_state: bool = True,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Run globalized Newton and reconcile state-dependent active sets.
@@ -2866,6 +2990,9 @@ def newton_krylov(
     unchanged active set.  Subsequent fixed-shape trips resume that endpoint
     with their warmup sweeps masked off.  A changed mask invalidates the local
     trajectory and keeps the configured warmup unchanged.
+    ``continue_globalization_state`` additionally preserves the compatible
+    merit window, recovery radius, Levenberg damping, and Krylov spectral
+    baseline.  A changed mask resets all of them with the trajectory.
     ``stream_active_set`` emits one flushed host line for every executed outer
     trip; it is disabled by default and does not alter any solver carry.
     ``stream_inner_iterations`` similarly emits the fixed-shape Newton receipt
@@ -2921,6 +3048,7 @@ def newton_krylov(
             stop_on_active_set_stagnation=stop_on_active_set_stagnation,
             retain_outer_best_iterate=retain_outer_best_iterate,
             continue_newton_trajectory=continue_newton_trajectory,
+            continue_globalization_state=continue_globalization_state,
             precision=precision,
         )
     if checkpoint_path is not None:

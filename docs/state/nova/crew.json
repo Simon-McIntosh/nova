@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-30T13:12:24",
+  "updated": "2026-08-30T14:12:02",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -63902,9 +63902,111 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260830T111255201829-sse-model-trust-candidate-selection",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-model-trust-candidate-selection",
+        "node_definition": {
+          "done_when": "The promotion prefers candidates whose local model is borne out, and the resulting chain is measured against the reachability criterion the investigation named. The barrier census in docs/research/diiid-residual-stall-mechanism.html established that at every halt state descent exists, the gradient has not collapsed, and no step-length floor is present; what fails is family-selective. At frame 179's production halt all six Newton and all six continuation candidates predict a decrease that the actual merit contradicts, while five Levenberg and five steepest candidates match within an order of magnitude and Levenberg damping 0.01 lowers 0.04070191087 to 0.02624234223. At frame 44's halt all eighteen Newton, continuation and Levenberg candidates mispredict while all five steepest match and pass. (1) Add model-trust-based candidate selection to the promotion in nova/equilibrium/fixed_point.py: when a candidate's actual merit change contradicts its predicted change beyond a declared factor, that candidate family is distrusted for the current promotion and selection falls through to a family whose prediction matched. Declare the trust factor as a named constant with its reasoning in mechanism terms beside it. Keep the fixed-shape device loop and add no data-dependent control flow. (2) The change must be inert where the current family already works: prove with a test that a solve whose Newton predictions match returns bit-identical state and residual with trust selection on and off, in eager and JIT. Prove separately that a constructed mispredicting candidate is passed over in favour of a matching one. (3) MEASURE THE CONSEQUENCE, which is the point of the node. From both persisted checkpoints at /home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch, run a self-consistent fixed-shape chain of at least 40 promotions per frame with trust selection active, on the settled mask, and report the full residual sequence, the family selected at each link, and the empirical contraction. Self-consistent means the promoted mask is re-derived at each link and reported, so an endpoint is a real solve state and not a frozen-mask counterfactual; the earlier damping arm failed exactly this test when its 0.02439092080 endpoint re-evaluated to 0.11620059087 on its own mask. (4) State whether the chain reaches the unchanged 1e-6 tolerance. If it does, give the link count and wall-clock. If it halts, give the halt residual, the link index, and whether the halt is again family-selective or something new. Do not present a lower halt residual as success: the criterion the investigation set is a self-consistent chain reaching 1e-6. (5) Relax no tolerance and no gate threshold, regenerate no bank, and keep the focused lane green with the delta stated against the base revision rather than an absolute count.",
+          "estimated_hours": null,
+          "goal": "Model-trust candidate selection in the promotion, with a self-consistent forty-link chain measured against the 1e-6 reachability criterion",
+          "id": "sse-model-trust-candidate-selection",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T111255201829-sse-model-trust-candidate-selection/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_model_trust_selection.py",
+            "docs/research/diiid-residual-stall-mechanism.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-30T11:13:04Z",
+        "completed_at": "2026-08-30T12:11:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3512,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3512,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "39312ab7d7f1aa7e2fccaf379efeee809cd2d5c5",
+        "commits": [
+          "565a8c8eec80a0e0d5fb8c0122c0180de4f2c3ed"
+        ],
+        "changed_lines": {
+          "added": 277,
+          "removed": 16,
+          "files": 3
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "trust regressions 4/4 eager and JIT; combined lane rerun after compatibility repair PASS 4/4 with zero remaining failures and zero delta versus base; ruff clean; no added while primitives; audit-doc PASS",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T111255201829-sse-model-trust-candidate-selection/model-trusted-chain-corrected.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T111255201829-sse-model-trust-candidate-selection/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8220672,
+            "cached_input_tokens_cumulative": 20344320,
+            "input_tokens": 8532902,
+            "input_tokens_cumulative": 20794217,
+            "output_tokens": 5292,
+            "output_tokens_cumulative": 32216,
+            "reasoning_output_tokens": 2022,
+            "reasoning_output_tokens_cumulative": 7258
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1184
+    "_version": 1185
   }
 }

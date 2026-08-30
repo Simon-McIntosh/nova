@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-30T12:03:40",
+  "updated": "2026-08-30T12:17:55",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -63599,9 +63599,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260830T100408843197-sse-retained-state-promotion-census",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-retained-state-promotion-census",
+        "node_definition": {
+          "done_when": "One promotion is measured directly at the retained best state on its settled mask, and the three surviving explanations are separated by that measurement. The record in docs/research/diiid-residual-stall-mechanism.html holds the eliminations: carrying the best value, the terminal iterate, and the full globalization state each leave outer q at exactly 1.0000000000000000, and the carried best is proven bit-identically valid on its settled mask. The joint finding is that the contracting post-warmup trajectory never crosses the retained state, so the question is what happens when a promotion starts AT that state rather than above it. (1) Using the persisted checkpoints at /home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch, linearize one promotion at each frame's retained best state on its settled mask, with no warmup, and record: the residual and the promotion merit at that state; the gradient and the directional derivative along each proposed direction; every Newton and recovery candidate generated, with its step norm; each candidate's predicted and actual merit change; the acceptance threshold each was tested against and the named decision returned; and the live relative-sup residual after each candidate. (2) Separate three explanations and name the deciding numbers. ACCEPTANCE MISMATCH: at least one candidate genuinely reduces the live residual but is refused by the merit or threshold test, meaning the acceptance criterion and the reported residual disagree. LOCAL BARRIER: the directional derivative is essentially zero or non-negative along every candidate, meaning the retained state is a local minimum of the merit and no descent direction exists there. BASIN OR MODEL ERROR: candidates predict a decrease that the actual evaluation does not deliver, meaning the local model does not represent the true residual near this state. State which holds for each frame and whether the two frames agree. (3) Report the magnitude, not just the sign: the best achievable single-step reduction in the live residual from the retained state, and what that implies for reaching the unchanged 1e-6 tolerance. (4) If the two frames disagree, say so and do not average them. If the evidence supports none of the three cleanly, say that plainly rather than forcing a verdict, and state what distinguishes the remainder. (5) Attempt no fix, change no solver default, relax no tolerance and regenerate no bank. Record the census in docs/research/diiid-residual-stall-mechanism.html beside the three refutations, validated with the reckon doc-check tooling, with a figure showing candidate predicted against actual merit change.",
+          "estimated_hours": null,
+          "goal": "One promotion censused at the retained best state, separating acceptance mismatch from a local barrier and from a model error by their deciding numbers",
+          "id": "sse-retained-state-promotion-census",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T100408843197-sse-retained-state-promotion-census/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/research/diiid-residual-stall-mechanism.html",
+            "docs/figures/diiid-residual-stall"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-30T10:04:18Z",
+        "completed_at": "2026-08-30T10:17:30Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 792,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 792,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "bbf2423ed4e70595cc4e272f4a2b62d4477c0867",
+        "commits": [
+          "e328ffb3d1fcca1acb2c5f1ffc12495ec544d878"
+        ],
+        "changed_lines": {
+          "added": 156,
+          "removed": 1,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "46 candidates censused, 23 per frame, with complete predicted and actual merit, thresholds, decisions, step norms and live residuals; figure and research record validated by audit-doc",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T100408843197-sse-retained-state-promotion-census/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T100408843197-sse-retained-state-promotion-census/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 6699392,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 6917313,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 22401,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3385
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1181
+    "_version": 1182
   }
 }

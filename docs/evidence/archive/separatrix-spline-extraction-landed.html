@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="separatrix-spline-extraction-landed">
   <meta name="plan-evidence-for" content="separatrix-spline-extraction">
   <meta name="plan-title" content="Separatrix Spline Extraction — execution record">
-  <meta name="plan-summary" content="Cumulative execution evidence: the seedable fixed-slot spline-Newton stationary polish.">
+  <meta name="plan-summary" content="Cumulative execution evidence for the spline topology stack, both comparison banks, H200 scaling, the seventeen-panel visual gate, and the measured DIII-D convergence negatives.">
   <meta name="plan-owner" content="Simon McIntosh">
   <title>Separatrix Spline Extraction — execution record | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
@@ -21,7 +21,8 @@
 
     <p>Execution evidence for
     <a href="/nova/separatrix-spline-extraction">separatrix-spline-extraction</a>. One anchor per
-    material result.</p>
+    material result. Positive geometry evidence and negative convergence evidence are reported as
+    separate results; neither is allowed to stand in for the other.</p>
 
     <h2 id="polish">§2 — the stationary polish kernel</h2>
 
@@ -83,7 +84,8 @@
     peak is 0.3586% of the 12,801,015,808-byte JAX pool, or <strong>278.84× measured memory
     headroom</strong>. A 200-repetition P100 run is extrapolated at about 52.34 s including the
     observed compile component; it was not executed and is not reported as a measurement. The
-    H200 capacity and performance gate remains open.</p>
+    This rehearsal did not close an H200 capacity or performance gate; the separate measured H200
+    batch-width ladder is recorded below.</p>
 
     <h2 id="polish-tracking-verification">§2b — tolerance exit and stationary tracking verification</h2>
 
@@ -106,8 +108,208 @@
     <code>a8927be3</code> is reachable through merge commit <code>90c06d90</code>. The global
     spline now owns retained stationary positions and values after the stencil census, with
     tolerance exit, implicit differentiation, and fail-closed Hessian-type admission in the
-    production boundary consumers. The branch assembler, shared comparator, and authoritative
-    H200 cost receipt remain open.</p>
+    production boundary consumers. The branch assembler and shared comparator subsequently landed
+    and supply the two bank records below; the later H200 result is reported separately with its
+    fixed-one-step qualification.</p>
+
+    <h2 id="solver-observability">Solver observability and resumable failures</h2>
+
+    <p><strong>Landed.</strong> The fixed-point route now records every outer active-set trip and
+    every Newton iteration. Trip records retain the mask difference, live residual, inner count,
+    and cycle-damping activation; Newton records retain residual before and after, proposed-step
+    norm, acceptance decision and test, applied damping, and Krylov reduction. Non-converged
+    terminal states can be written atomically with a digest and resumed from the identical iterate.
+    Reporting and checkpointing were proven numerically inert: state and residual are
+    <strong>bit-identical with instrumentation on and off in eager and JIT</strong>, and resumed
+    execution reaches the uninterrupted iterate.</p>
+
+    <h2 id="active-set-stagnation">Active-set stagnation exit</h2>
+
+    <p><strong>Landed, measured saving 62.5% on frame 179.</strong> The outer loop now terminates
+    distinctly when both the mask difference and residual repeat exactly, after convergence and
+    the other terminal conditions have had priority. Frame 179 would execute 6 of its 16 declared
+    trips: the last 10 are skipped, hence <strong>10/16 = 62.5%</strong>. State and residual remain
+    bit-identical to the full-budget route, executed telemetry agrees exactly, skipped fixed-shape
+    slots remain distinguishable, and a slowly decreasing residual does not trigger the exit.</p>
+
+    <h2 id="atomic-frame-receipts">Atomic per-frame DIII-D receipts</h2>
+
+    <p><strong>Landed.</strong> After every completed DIII-D frame, the driver atomically replaces a
+    strict-JSON partial receipt that declares the attempted count and contains the complete
+    per-frame schema, including active-set telemetry. A truncation therefore retains every
+    completed frame without fabricating the unattempted identities or shrinking the declared
+    five-frame denominator. A complete run still publishes the same final receipt schema.</p>
+
+    <h2 id="panel-resilience">Retained panels and bounded compilation lifetime</h2>
+
+    <p><strong>Landed.</strong> A degenerate boundary or rendering fault becomes a named retained
+    panel with unavailable geometry and null containment counts; unrelated validation faults still
+    propagate. All seventeen indices survive a retained failure. Each panel attempt, successful or
+    retained, now unconditionally releases JAX compilation caches and collects unreachable objects
+    before the next panel. This closed the two independent failure modes that had stopped earlier
+    full-cohort attempts: a degenerate panel and accumulated compiled-code sections.</p>
+
+    <h2 id="wall-height-eligibility">Wall-height eligibility guard</h2>
+
+    <p><strong>Landed with a measured qualification.</strong> The guard repaired the unsafe
+    synthetic cases, including the six-cell snowflake and fifteen-cell far-coil-null
+    under-shadowing. On production MAST 22086/43, however, all 50 side decisions across 25
+    evaluations were disqualified by the minimum-radius criterion; the guarded rule removed
+    <strong>zero cells</strong>, and the guarded and pure-topology routes shared the same mask
+    differences and terminal residual <strong>6.08&times;10<sup>&minus;12</sup></strong>. The guard is
+    safe on this evidence but inert on that spherical-tokamak trajectory; this is not evidence of a
+    convergence benefit.</p>
+
+    <h2 id="mast-bank">MAST twelve-arm bank</h2>
+
+    <p><strong>All three locked gates pass without denominator loss.</strong> The bank retains all
+    twelve arms. Topology-class agreement is <strong>8 of 12</strong>, passing the 7-of-12 gate.
+    The worst convergence-qualified symmetric boundary RMS is
+    <strong>0.029164 m</strong>, below 0.55 m. The worst declared-row saddle distance is
+    <strong>0.038977 m</strong>, below 0.04 m. Non-converged and unavailable rows remain in the
+    twelve-arm census and are not silently promoted into RMS eligibility.</p>
+
+    <figure>
+      <img src="/nova/figures/primary-xpoint-evidence/efit-topology-corroboration.png"
+           alt="Twelve MAST topology comparison panels with Nova and EFIT boundaries and stationary points.">
+      <figcaption>The complete MAST bank: 8/12 class agreement, worst eligible symmetric RMS
+      0.029164 m, and worst declared-row saddle distance 0.038977 m.</figcaption>
+    </figure>
+
+    <h2 id="diiid-bank">DIII-D five-frame bank</h2>
+
+    <p><strong>Overall FAIL: 0 of 5 frames converged.</strong> Against the unchanged
+    <strong>1&times;10<sup>&minus;6</sup></strong> tolerance, terminal residuals are:</p>
+
+    <table>
+      <caption>Retained DIII-D terminal results</caption>
+      <thead><tr><th scope="col">Frame</th><th scope="col">Terminal residual</th><th scope="col">Converged</th></tr></thead>
+      <tbody>
+        <tr><td>179</td><td>0.04485116727666494</td><td>No</td></tr>
+        <tr><td>44</td><td>0.08117000452284782</td><td>No</td></tr>
+        <tr><td>144</td><td>0.08696589356667041</td><td>No</td></tr>
+        <tr><td>146</td><td>0.058516982970557435</td><td>No</td></tr>
+        <tr><td>137</td><td>0.047568328864646785</td><td>No</td></tr>
+      </tbody>
+    </table>
+
+    <p>Topology-class agreement is <strong>4 of 5</strong>, but class agreement is not convergence.
+    The masks settle and the residuals then repeat: 64 of the measured 80 active-set trips make no
+    further progress. Every failed identity remains explicit in the receipt.</p>
+
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/forward-gs/frame_flux_comparison.png"
+           alt="Five retained DIII-D frame comparisons showing Nova and EFIT flux geometry.">
+      <figcaption>All five declared frames are shown. The cohort verdict is FAIL despite 4/5
+      topology-class agreement because every terminal residual remains above 1e-6.</figcaption>
+    </figure>
+
+    <h2 id="h200-throughput">H200 batch-width ladder</h2>
+
+    <p><strong>Measured throughput rises from 0.09983 to 2.67513 slices/s</strong> from width 1 to
+    1024, a <strong>26.797-fold gain</strong>. The measured sequence is 0.09983, 0.30391,
+    0.45346, 0.75422, 1.15434, 1.62341, 1.96389, 2.22955, 2.58763, and 2.67513 slices/s. The last
+    step gains only <strong>3.38%</strong> over width 512, but the sweep ended by actual device
+    memory exhaustion rather than the plateau criterion: width 2048 attempted
+    <strong>49.94 GiB</strong>.</p>
+
+    <svg role="img" aria-labelledby="h200-title h200-desc" viewBox="0 0 760 250">
+      <title id="h200-title">H200 throughput by batch width</title>
+      <desc id="h200-desc">Throughput increases from 0.09983 slices per second at width one to 2.67513 at width 1024; width 2048 ends in device out of memory.</desc>
+      <line x1="55" y1="205" x2="710" y2="205" stroke="currentColor"/>
+      <line x1="55" y1="25" x2="55" y2="205" stroke="currentColor"/>
+      <polyline fill="none" stroke="#135d6a" stroke-width="4"
+        points="65,198 135,185 205,175 275,155 345,128 415,96 485,73 555,56 625,32 695,26"/>
+      <g fill="#135d6a">
+        <circle cx="65" cy="198" r="5"/><circle cx="135" cy="185" r="5"/>
+        <circle cx="205" cy="175" r="5"/><circle cx="275" cy="155" r="5"/>
+        <circle cx="345" cy="128" r="5"/><circle cx="415" cy="96" r="5"/>
+        <circle cx="485" cy="73" r="5"/><circle cx="555" cy="56" r="5"/>
+        <circle cx="625" cy="32" r="5"/><circle cx="695" cy="26" r="5"/>
+      </g>
+      <text x="55" y="225">1</text><text x="680" y="225">1024</text>
+      <text x="65" y="190">0.09983</text><text x="585" y="20">2.67513 slices/s</text>
+    </svg>
+
+    <p><strong>Qualification:</strong> the operand is the <code>limited_plasma</code> branch under a
+    fixed one-Newton-step budget. Its pilot maximum relative residual is
+    0.0011089898293892464 and it has zero stable-conditioning receipts. This ladder is a throughput
+    and memory result, <strong>not a convergence claim</strong>, and it exercises neither an
+    X-point nor a private-flux shadow path.</p>
+
+    <h2 id="visual-gate">Seventeen-panel visual containment gate</h2>
+
+    <p><strong>17 of 17 panels retained; 2 of 17 converged.</strong> The strong criterion binds
+    wherever a panel has both nonzero shadow cells and an available closed separatrix. It binds on
+    <strong>4 panels and passes 4 of 4</strong>. The populations remain separate:</p>
+
+    <ul>
+      <li><strong>4 binding panels:</strong> shadow present, separatrix available, zero shadow cells inside.</li>
+      <li><strong>6 trivial panels:</strong> separatrix available but zero shadow cells.</li>
+      <li><strong>7 unavailable panels:</strong> no closed separatrix; containment is null and never counted as a pass.</li>
+    </ul>
+
+    <p>The strongest direct evidence is in the two converged panels, MAST 22086/43 pure and mixed:
+    they carry <strong>43 and 42 shadow cells</strong>, respectively, with <strong>zero inside the
+    closed separatrix</strong>.</p>
+
+    <figure>
+      <img src="/nova/figures/topology-visual-corroboration/11-mast-22086-43-pure.png"
+           alt="Converged MAST 22086 frame 43 pure panel with 43 private-flux shadow cells outside the closed separatrix.">
+      <figcaption>Converged pure arm: 43 shadow cells, zero inside the closed separatrix.</figcaption>
+    </figure>
+
+    <h2 id="continuation-negatives">Continuation hypotheses refuted</h2>
+
+    <p>Three expensive continuation hypotheses were tested against falsifiers fixed before their
+    measurements and each returned an outer contraction of <strong>exactly 1.0</strong>:</p>
+
+    <ul>
+      <li>retain the best iterate across outer trips;</li>
+      <li>continue from the terminal Newton iterate;</li>
+      <li>continue the full globalization state, including nonmonotone history and damping state.</li>
+    </ul>
+
+    <p>These are refuted routes, not unfinished implementation work. None converts the locally
+    contracting inner trajectory into an improving outer promotion.</p>
+
+    <h2 id="cross-mask-negative">Cross-mask comparability refuted as the cause</h2>
+
+    <p>Re-evaluating the retained states on reconstructed settled masks and applying the production
+    promoted-mask rule changed the mask by <strong>exactly zero nodes</strong>. The cross-mask
+    comparability hypothesis is therefore refuted for the measured endpoints: it does not explain
+    why the outer residual remains unchanged.</p>
+
+    <h2 id="descent-barrier">Candidate-family-selective model failure</h2>
+
+    <p>The measured barrier is <strong>candidate-family-selective model failure</strong>. It is not
+    a local minimum: descent exists outside the selected family. It is not gradient collapse: the
+    gradients remain nonzero. It is not a step-length floor: the ladders include smaller finite
+    steps. Frozen-mask trust can select a candidate that worsens when evaluated on the mask it
+    induces, so candidate acceptance now compares every candidate on its own promoted mask.</p>
+
+    <h2 id="own-mask-acceptance">Own-mask acceptance: sounder, still non-converged</h2>
+
+    <p><strong>Landed and measured negative against the convergence criterion.</strong> Own-mask
+    acceptance removes the unsound promoted-mask jump and improves frame 179 from the earlier
+    model-trusted chain's terminal <strong>0.06399704757132339</strong> to
+    <strong>0.023196268180508767</strong>. It still does not reach 1e-6; the final contraction is
+    1.0. Frame 44 remains at 0.08100291897825324. In unchanged-mask cases the route is bit-identical
+    with the own-mask comparison on and off in eager and JIT.</p>
+
+    <h2 id="lead-summary">Actionable conclusion</h2>
+
+    <p><strong>The DIII-D convergence gate does not pass.</strong> The MAST geometry gates, H200
+    throughput ladder, and strong visual containment criterion are positive results, but none
+    changes the five-frame convergence verdict. The evidence <strong>does not establish a residual
+    floor</strong>: it establishes only that the tested bounded candidate families halt above
+    tolerance for reasons other than a local minimum, gradient collapse, or step-length floor.</p>
+
+    <p>The single named remaining direction is an <strong>own-mask-aware adaptive descent
+    model</strong> that can search beyond the bounded Newton and Levenberg candidate families. It is
+    high cost because each candidate must be promoted, have its mask rebuilt, and be rescored on
+    that own mask throughout a long DIII-D chain. No tolerance relaxation is supported by this
+    record.</p>
 
   </main>
 </body>

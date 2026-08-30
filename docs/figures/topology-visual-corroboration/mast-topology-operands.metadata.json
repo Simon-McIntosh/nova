@@ -1,7 +1,7 @@
 {
   "authority": {
     "carrier": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
-    "source_identity": "sha256:7285bd6b0472eeb71328ab7aecc7b55f068c91bf8f2f7a4fd58b7156f02ea9bf",
+    "source_identity": "sha256:bd78d3ddaaaef75d32c51af00399337652303aaddcd8aa899a7ecebb54392bae",
     "source_path": "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py"
   },
   "rows": [
@@ -11,7 +11,7 @@
       "frame": 35,
       "identity": "21978/35 pure",
       "machine": "MAST",
-      "qualification": "iteration_budget_exhausted",
+      "qualification": "active_set_cycle_detected",
       "shot": 21978,
       "time": 0.1899999976158142
     },
@@ -31,7 +31,7 @@
       "frame": 35,
       "identity": "21983/35 pure",
       "machine": "MAST",
-      "qualification": "iteration_budget_exhausted",
+      "qualification": "active_set_iteration_budget_exhausted",
       "shot": 21983,
       "time": 0.1899999976158142
     },
@@ -51,17 +51,21 @@
       "frame": 51,
       "identity": "21985/51 pure",
       "machine": "MAST",
-      "qualification": "iteration_budget_exhausted",
+      "panel_failure_exception_class": "ValueError",
+      "panel_failure_message": "closed separatrix is not an N-by-2 array",
+      "qualification": "ValueError",
       "shot": 21985,
       "time": 0.2750000059604645
     },
     {
       "arm": "mixed",
-      "converged": true,
+      "converged": false,
       "frame": 51,
       "identity": "21985/51 mixed",
       "machine": "MAST",
-      "qualification": "converged",
+      "panel_failure_exception_class": "ValueError",
+      "panel_failure_message": "closed separatrix is not an N-by-2 array",
+      "qualification": "ValueError",
       "shot": 21985,
       "time": 0.2750000059604645
     },
@@ -71,7 +75,7 @@
       "frame": 46,
       "identity": "21986/46 pure",
       "machine": "MAST",
-      "qualification": "iteration_budget_exhausted",
+      "qualification": "active_set_iteration_budget_exhausted",
       "shot": 21986,
       "time": 0.25
     },
@@ -91,7 +95,7 @@
       "frame": 55,
       "identity": "21989/55 pure",
       "machine": "MAST",
-      "qualification": "iteration_budget_exhausted",
+      "qualification": "active_set_iteration_budget_exhausted",
       "shot": 21989,
       "time": 0.29499998688697815
     },
@@ -107,11 +111,11 @@
     },
     {
       "arm": "pure",
-      "converged": false,
+      "converged": true,
       "frame": 43,
       "identity": "22086/43 pure",
       "machine": "MAST",
-      "qualification": "iteration_budget_exhausted",
+      "qualification": "converged",
       "shot": 22086,
       "time": 0.22999998927116394
     },

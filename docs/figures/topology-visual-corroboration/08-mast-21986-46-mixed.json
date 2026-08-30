@@ -1,0 +1,21 @@
+{
+  "closed_separatrix_available": false,
+  "closest_plasma_wall_point_rz_m": null,
+  "converged": false,
+  "converged_inside_lcfs_gate_pass": null,
+  "identity": "21986/46 mixed",
+  "json_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T183223007605-sse-topology-panel-final-launch/job-output/08-mast-21986-46-mixed.json",
+  "machine": "MAST",
+  "other_qualified_x_point_count": 0,
+  "panel_index": 8,
+  "png_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T183223007605-sse-topology-panel-final-launch/job-output/08-mast-21986-46-mixed.png",
+  "qualification": "NoQualifiedAxisError",
+  "retained_failure_exception_class": null,
+  "retained_failure_message": null,
+  "selected_primary_o_point_rz_m": null,
+  "selected_primary_x_point_rz_m": null,
+  "shadow_cells_inside_closed_separatrix": null,
+  "shadow_cells_inside_lcfs": null,
+  "source_qualification": "NoQualifiedAxisError",
+  "total_shadow_cells": 0
+}

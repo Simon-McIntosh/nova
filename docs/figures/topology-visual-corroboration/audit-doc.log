@@ -1,2 +1,4 @@
-/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d8-s16-landing/ebd-panels-repaired-stack/docs/evidence/topology-visual-corroboration.html: OK
+docs/evidence/topology-visual-corroboration.html: warn (0 error, 2 warn, 0 info)
+  ! [dangling-slug-ref] <meta name="plan-evidence-for"> references unknown slug "efit-baseline-demonstration"
+  ! [dangling-slug-ref] <meta name="plan-verifies"> references unknown slug "efit-baseline-demonstration#s2"
 EXIT_MARKER=0

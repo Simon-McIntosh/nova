@@ -1,0 +1,30 @@
+{
+  "closed_separatrix_available": false,
+  "closest_plasma_wall_point_rz_m": [
+    0.5649306774139404,
+    1.7932542789784223
+  ],
+  "converged": false,
+  "converged_inside_lcfs_gate_pass": null,
+  "identity": "21985/51 pure",
+  "json_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T183223007605-sse-topology-panel-final-launch/job-output/05-mast-21985-51-pure.json",
+  "machine": "MAST",
+  "other_qualified_x_point_count": 5,
+  "panel_index": 5,
+  "png_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T183223007605-sse-topology-panel-final-launch/job-output/05-mast-21985-51-pure.png",
+  "qualification": "ValueError",
+  "retained_failure_exception_class": "ValueError",
+  "retained_failure_message": "closed separatrix is not an N-by-2 array",
+  "selected_primary_o_point_rz_m": [
+    0.36626597682950957,
+    -1.932135898814253
+  ],
+  "selected_primary_x_point_rz_m": [
+    0.3674408588694998,
+    1.9065617668326345
+  ],
+  "shadow_cells_inside_closed_separatrix": null,
+  "shadow_cells_inside_lcfs": null,
+  "source_qualification": "active_set_cycle_detected",
+  "total_shadow_cells": 0
+}

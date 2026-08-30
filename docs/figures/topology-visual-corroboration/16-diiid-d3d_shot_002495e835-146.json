@@ -1,0 +1,30 @@
+{
+  "closed_separatrix_available": true,
+  "closest_plasma_wall_point_rz_m": [
+    1.3985249522800964,
+    -1.245354050504199
+  ],
+  "converged": false,
+  "converged_inside_lcfs_gate_pass": true,
+  "identity": "d3d_shot_002495e835:146",
+  "json_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T183223007605-sse-topology-panel-final-launch/job-output/16-diiid-d3d_shot_002495e835-146.json",
+  "machine": "DIII-D",
+  "other_qualified_x_point_count": 3,
+  "panel_index": 16,
+  "png_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T183223007605-sse-topology-panel-final-launch/job-output/16-diiid-d3d_shot_002495e835-146.png",
+  "qualification": "public branch selector found no convergence-qualified diverted root",
+  "retained_failure_exception_class": null,
+  "retained_failure_message": null,
+  "selected_primary_o_point_rz_m": [
+    1.7523395950730194,
+    -0.23888522244876254
+  ],
+  "selected_primary_x_point_rz_m": [
+    1.0604529218605367,
+    -1.5478899891876263
+  ],
+  "shadow_cells_inside_closed_separatrix": 0,
+  "shadow_cells_inside_lcfs": 0,
+  "source_qualification": "public branch selector found no convergence-qualified diverted root",
+  "total_shadow_cells": 0
+}

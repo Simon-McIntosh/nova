@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-30T11:03:18",
+  "updated": "2026-08-30T11:11:52",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -63396,9 +63396,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260830T090349299149-sse-cross-mask-residual-comparability",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-cross-mask-residual-comparability",
+        "node_definition": {
+          "done_when": "Whether the carried best residual is a valid target under the settled mask is established by direct measurement, because two remedies have now been refuted while assuming it is. The record in docs/research/diiid-residual-stall-mechanism.html gives the trip sequences: frame 179 ran 0.302088601874675, 0.28564102864166524, 0.25775839505153775, 0.20544794378829398, then 0.04485116727666494 held from trip 4 onward, with mask differences 39, 25, 17, 8, 1, 0, 0 and beyond. The large drop to 0.04485 coincides with the LAST trip whose mask still changed, and every settled trip since terminates near 0.202, four and a half times worse. A residual is defined over the masked domain, so a value measured under one mask is not necessarily comparable with one measured under another. (1) Re-evaluate the stored carried-best state under the CURRENT settled mask and report the resulting residual, for both frames, using the persisted checkpoints at /home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch. Report the stored value and the re-evaluated value side by side. (2) State the verdict this decides. If the re-evaluated residual is close to the stored 0.04485 and 0.08117, the carried best is genuinely reachable under the settled mask and the stall is a real optimisation failure. If instead it is near the 0.202 and 0.1139 the settled trips reach, then the carried best was an artefact of a different masked domain, the solver is not stalled at all but is contracting normally from a correctly-measured starting point, and the reported outer q of exactly 1.0 is an artefact of comparing residuals across incomparable domains. Name which holds and the numbers that decide it. (3) If the second verdict holds, state the consequence for the convergence gate as a number: starting from the settled-mask residual and the measured local contraction of q=0.9799176816 on frame 179 and q=0.9887441697 on frame 44, how many further Newton iterations reach the unchanged 1e-6 tolerance, and what wall-clock that implies given the measured per-trip costs. Also state plainly whether the promotion merit comparing across mask changes is itself a defect, since best-iterate retention would then be preserving an unreachable value and blocking progress rather than protecting it. (4) Do not change any solver default, do not relax any tolerance, and do not regenerate any bank; this node establishes the comparison and its consequence. Record the finding in docs/research/diiid-residual-stall-mechanism.html beside the two refuted remedies, validated with the reckon doc-check tooling.",
+          "estimated_hours": null,
+          "goal": "Whether the carried best residual is reachable under the settled mask, decided by re-evaluating the stored state on the current masked domain",
+          "id": "sse-cross-mask-residual-comparability",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T090349299149-sse-cross-mask-residual-comparability/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/research/diiid-residual-stall-mechanism.html",
+            "docs/figures/diiid-residual-stall"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-30T09:03:59Z",
+        "completed_at": "2026-08-30T09:11:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 456,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 456,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "66f9b4d03c4c28f12fea7d19acca4585e26af1ab",
+        "commits": [
+          "bd38fc25c955b0642a8dd1778af189fe5fc9430a"
+        ],
+        "changed_lines": {
+          "added": 91,
+          "removed": 5,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "both stored states re-evaluated on reconstructed settled masks; production promoted-mask rule applied and changed zero nodes; per-frame JSON digests recorded",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T090349299149-sse-cross-mask-residual-comparability/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T090349299149-sse-cross-mask-residual-comparability/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 6326272,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 6443652,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 13169,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3268
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1179
+    "_version": 1180
   }
 }

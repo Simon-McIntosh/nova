@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-29T21:12:00",
+  "updated": "2026-08-30T09:24:28",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -63091,9 +63091,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260830T065805044012-sse-diiid-stall-mechanism-harvest",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-diiid-stall-mechanism-harvest",
+        "node_definition": {
+          "done_when": "The mechanism holding the DIII-D residual four orders above tolerance is decided from the probe's per-iteration evidence, and the two competing prior claims are adjudicated. Evidence is the 3098-line log and artifacts in /home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch: slurm-1259459.log, frame-179-stalled-state.npz, frame-44-stalled-state.npz, their .sha256 sidecars and probe_completion.json. (1) First establish whether the run is admissible, because the scheduler reports FAILED with EXIT_MARKER=1 while the log ends PROBE_COMPLETE 2/2 and both checkpoints exist on disk. The apparent cause is a sha256sum step that could not open frame-179-stalled-state.npz by the path it used, after the science had finished. VERIFY this rather than accept it: confirm both frames ran to their recorded termination, both checkpoints load without error, are non-empty, and their computed SHA-256 equals the digest in the sidecar, and no scientific step was skipped. If the failure is anything more than a post-run verification path error, say so and treat the probe as unusable. (2) Analyse the complete per-iteration record for BOTH frames, not the tail. Report, per frame: the distribution of acceptance decisions by name and count; the proposed step norm distribution; and for accepted iterations the achieved residual change, as an absolute delta and as a relative rate per accepted iteration. (3) Adjudicate three candidate mechanisms against those numbers and name the deciding figure for the one you select. A: a genuine stationary point, which requires the proposed step norm to be effectively zero. B: a healthy but slow contraction, which requires accepted iterations to reduce the residual at a consistent geometric rate; if so, state the measured rate and the number of iterations implied to reach 1e-6. C: a search-direction or acceptance failure, in which steps of non-trivial norm are proposed but predominantly refused, or accepted with negligible effect. State the observed counts that separate them. (4) Adjudicate the recorded prior verdict explicitly. The open followup f-ebd-solver-rate on efit-baseline-demonstration states a tail contraction of q~0.970 per promotion needing ~425 further promotions to 1e-8. Compare that against your measured per-iteration rate, state whether the two are consistent, and if they are not, quantify the discrepancy in orders of magnitude. Also reconcile with the committed bank's bit-identical residual across settled trips: explain how the outer trip view and the inner iteration view can differ, since that reconciliation is the crux. (5) Report which residual component or spatial region carries the remaining magnitude at the stalled iterate, using the checkpoints, and whether the stall is global or localized relative to the wall, the X-points and the separatrix. (6) Record the finding in docs/research/diiid-residual-stall-mechanism.html, validated with the reckon doc-check tooling, with a figure showing acceptance decisions and residual movement per iteration. Deliver a ranked remedy list with the cost and the falsifying evidence for each. Attempt no fix and change no solver default.",
+          "estimated_hours": null,
+          "goal": "The adjudicated mechanism of the DIII-D residual stall, decided from per-iteration evidence against the three candidate causes and the recorded prior verdict",
+          "id": "sse-diiid-stall-mechanism-harvest",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T065805044012-sse-diiid-stall-mechanism-harvest/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/research/diiid-residual-stall-mechanism.html",
+            "docs/figures/diiid-residual-stall"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-30T06:58:15Z",
+        "completed_at": "2026-08-30T07:24:09Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1554,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1554,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "de0d9887198550632c74707b3f504431f436c33b",
+        "commits": [
+          "c50b4b9d319b76d4e3e5e15c38edb7eecc245422"
+        ],
+        "changed_lines": {
+          "added": 395,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "probe admissibility verified (PROBE_COMPLETE 2/2 before a post-science sha256sum path error; both checkpoints load and their computed digests match sidecars and probe_completion.json); audit-doc and doccheck PASS; naming and commit checks PASS",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T065805044012-sse-diiid-stall-mechanism-harvest/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T065805044012-sse-diiid-stall-mechanism-harvest/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 104448,
+            "cached_input_tokens_cumulative": 5891840,
+            "input_tokens": 266182,
+            "input_tokens_cumulative": 6253967,
+            "output_tokens": 3966,
+            "output_tokens_cumulative": 23725,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2553
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1176
+    "_version": 1177
   }
 }

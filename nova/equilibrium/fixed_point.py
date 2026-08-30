@@ -372,6 +372,10 @@ class FixedPointResult(NamedTuple):
     norm, acceptance route, exact Krylov qualification, applied damping or
     line-search factor, and achieved linear-residual reduction against the
     requested tolerance.  Unexecuted rows use NaN and -1 padding.
+    ``trajectory_state`` and ``trajectory_residual`` retain the terminal local
+    Newton iterate separately from the best reported fallback.  An active-set
+    solve may continue that local trajectory while still returning the best
+    live iterate it has observed.
     """
 
     state: jax.Array
@@ -420,6 +424,8 @@ class FixedPointResult(NamedTuple):
     inner_iteration_applied_factors: jax.Array | float = float("nan")
     inner_iteration_krylov_reductions: jax.Array | float = float("nan")
     inner_iteration_krylov_tolerances: jax.Array | float = float("nan")
+    trajectory_state: jax.Array | float = float("nan")
+    trajectory_residual: jax.Array | float = float("nan")
 
 
 class KinkAwareResult(NamedTuple):
@@ -535,6 +541,8 @@ class _ActiveSetIterationState(NamedTuple):
     mask_history: jax.Array
     mask_history_count: jax.Array
     result: FixedPointResult
+    trajectory_state: jax.Array
+    continue_trajectory: jax.Array
     live_residual: jax.Array
     residuals: jax.Array
     mask_differences: jax.Array
@@ -1764,6 +1772,7 @@ def _newton_krylov_inner(
     promoted_shadow_mask_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
     shadowed_map_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
     stream_inner_iterations: bool = False,
+    run_warmup: jax.Array | bool = True,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Exact-tangent Jacobian-free Newton–Krylov on the fixed-point residual.
@@ -1871,48 +1880,51 @@ def _newton_krylov_inner(
         return shadow_mask(state)
 
     def warm_body(index, carry):
-        (
-            state,
-            trace,
-            amplification,
-            previous_shadow,
-            shadow_changes,
-            best_state,
-            best_residual,
-            recent_merits,
-            merit_observations,
-        ) = carry
-        mapped = mapped_with_shadow(state, previous_shadow)
-        residual = _relative_residual(mapped, state)
-        merit = _smooth_relative_sup_merit(mapped, state)
-        trace = trace.at[index].set(residual)
-        is_best = jnp.isfinite(residual) & (residual < best_residual)
-        best_state = jnp.where(is_best, state, best_state)
-        best_residual = jnp.where(is_best, residual, best_residual)
-        recent_merits, merit_observations = _record_merit(
-            recent_merits,
-            merit_observations,
-            merit,
-            jnp.asarray(True),
-        )
-        candidate = state + relaxation * (mapped - state)
-        amplification = _observe_increment(amplification, state, candidate, True)
-        current_shadow = promoted_shadow(candidate, previous_shadow)
-        changed = jnp.sum(current_shadow != previous_shadow, dtype=jnp.int32)
-        shadow_changes = shadow_changes.at[index].set(
-            jnp.where(observe_shadows, changed, -1)
-        )
-        return (
-            candidate,
-            trace,
-            amplification,
-            current_shadow,
-            shadow_changes,
-            best_state,
-            best_residual,
-            recent_merits,
-            merit_observations,
-        )
+        def advance(carry):
+            (
+                state,
+                trace,
+                amplification,
+                previous_shadow,
+                shadow_changes,
+                best_state,
+                best_residual,
+                recent_merits,
+                merit_observations,
+            ) = carry
+            mapped = mapped_with_shadow(state, previous_shadow)
+            residual = _relative_residual(mapped, state)
+            merit = _smooth_relative_sup_merit(mapped, state)
+            trace = trace.at[index].set(residual)
+            is_best = jnp.isfinite(residual) & (residual < best_residual)
+            best_state = jnp.where(is_best, state, best_state)
+            best_residual = jnp.where(is_best, residual, best_residual)
+            recent_merits, merit_observations = _record_merit(
+                recent_merits,
+                merit_observations,
+                merit,
+                jnp.asarray(True),
+            )
+            candidate = state + relaxation * (mapped - state)
+            amplification = _observe_increment(amplification, state, candidate, True)
+            current_shadow = promoted_shadow(candidate, previous_shadow)
+            changed = jnp.sum(current_shadow != previous_shadow, dtype=jnp.int32)
+            shadow_changes = shadow_changes.at[index].set(
+                jnp.where(observe_shadows, changed, -1)
+            )
+            return (
+                candidate,
+                trace,
+                amplification,
+                current_shadow,
+                shadow_changes,
+                best_state,
+                best_residual,
+                recent_merits,
+                merit_observations,
+            )
+
+        return jax.lax.cond(run_warmup, advance, lambda value: value, carry)
 
     (
         state,
@@ -2466,6 +2478,8 @@ def _newton_krylov_inner(
         inner_iteration_applied_factors=loop.inner_trace.applied_factors,
         inner_iteration_krylov_reductions=loop.inner_trace.krylov_reductions,
         inner_iteration_krylov_tolerances=loop.inner_trace.krylov_tolerances,
+        trajectory_state=loop.state,
+        trajectory_residual=loop.residual,
     )
 
 
@@ -2487,6 +2501,7 @@ def _active_set_newton_krylov(
     stream_inner_iterations: bool,
     stop_on_active_set_stagnation: bool,
     retain_outer_best_iterate: bool,
+    continue_newton_trajectory: bool,
     precision: Precision | str,
 ) -> FixedPointResult:
     """Reconcile bounded frozen-mask solves with their live active sets."""
@@ -2495,7 +2510,7 @@ def _active_set_newton_krylov(
     history = jnp.zeros((active_set_steps + 1, initial_mask.size), dtype=bool)
     history = history.at[0].set(initial_mask)
 
-    def solve_frozen(state, mask):
+    def solve_frozen(state, mask, run_warmup):
         def frozen_map(candidate):
             return shadowed_map_fn(candidate, mask)
 
@@ -2514,6 +2529,7 @@ def _active_set_newton_krylov(
             convergence_tolerance=convergence_tolerance,
             shadow_mask_fn=frozen_mask,
             stream_inner_iterations=stream_inner_iterations,
+            run_warmup=run_warmup,
             precision=precision,
         )
 
@@ -2575,6 +2591,11 @@ def _active_set_newton_krylov(
             & jnp.isfinite(incoming_merit)
             & (~jnp.isfinite(selected_merit) | (selected_merit > incoming_merit))
         )
+        trajectory_state = inner_result.trajectory_state
+        trajectory_mask = jnp.ravel(promoted_shadow_mask_fn(trajectory_state, mask))
+        trajectory_finite = jnp.all(jnp.isfinite(trajectory_state)) & jnp.isfinite(
+            inner_result.trajectory_residual
+        )
         selected_state = jnp.where(retain_incoming, state, selected_state)
         selected_mask = jnp.where(retain_incoming, mask, selected_mask)
         selected_residual = jnp.where(
@@ -2582,6 +2603,14 @@ def _active_set_newton_krylov(
         )
         selected_finite = jnp.where(retain_incoming, True, selected_finite)
         selected_difference = jnp.where(retain_incoming, 0, selected_difference)
+        continue_trajectory = (
+            continue_newton_trajectory
+            & (selected_difference == 0)
+            & ~repeated
+            & trajectory_finite
+            & jnp.all(trajectory_mask == mask)
+            & (inner_result.accepted_newton_promotions > 0)
+        )
         converged = (
             selected_finite
             & (selected_residual <= convergence_tolerance)
@@ -2592,6 +2621,7 @@ def _active_set_newton_krylov(
             & selected_finite
             & ~converged
             & ~cycle_detected
+            & ~continue_trajectory
             & (selected_difference == 0)
             & (selected_residual == previous_live_residual)
         )
@@ -2625,9 +2655,11 @@ def _active_set_newton_krylov(
             cycle_detected,
             ~selected_finite,
             stagnated,
+            trajectory_state,
+            continue_trajectory,
         )
 
-    first_result = solve_frozen(initial, initial_mask)
+    first_result = solve_frozen(initial, initial_mask, jnp.asarray(True))
     (
         first_state,
         first_mask,
@@ -2641,6 +2673,8 @@ def _active_set_newton_krylov(
         first_cycle,
         first_nonfinite,
         first_stagnated,
+        first_trajectory_state,
+        first_continue_trajectory,
     ) = reconcile(
         0,
         initial,
@@ -2657,6 +2691,8 @@ def _active_set_newton_krylov(
         mask_history=history,
         mask_history_count=history_count,
         result=first_result,
+        trajectory_state=first_trajectory_state,
+        continue_trajectory=first_continue_trajectory,
         live_residual=first_residual,
         residuals=jnp.full(active_set_steps, jnp.nan, dtype=initial.dtype)
         .at[0]
@@ -2683,7 +2719,12 @@ def _active_set_newton_krylov(
 
     def outer_body(index, carry):
         def solve_active(carry):
-            inner_result = solve_frozen(carry.state, carry.mask)
+            solve_state = jnp.where(
+                carry.continue_trajectory, carry.trajectory_state, carry.state
+            )
+            inner_result = solve_frozen(
+                solve_state, carry.mask, ~carry.continue_trajectory
+            )
             (
                 state,
                 mask,
@@ -2697,6 +2738,8 @@ def _active_set_newton_krylov(
                 cycle_detected,
                 nonfinite,
                 stagnated,
+                trajectory_state,
+                continue_trajectory,
             ) = reconcile(
                 index,
                 carry.state,
@@ -2713,6 +2756,8 @@ def _active_set_newton_krylov(
                 mask_history=mask_history,
                 mask_history_count=history_count,
                 result=inner_result,
+                trajectory_state=trajectory_state,
+                continue_trajectory=continue_trajectory,
                 live_residual=live_residual,
                 residuals=carry.residuals.at[index].set(live_residual),
                 mask_differences=carry.mask_differences.at[index].set(mask_difference),
@@ -2797,6 +2842,7 @@ def newton_krylov(
     checkpoint_path: str | Path | None = None,
     stop_on_active_set_stagnation: bool = True,
     retain_outer_best_iterate: bool = True,
+    continue_newton_trajectory: bool = True,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Run globalized Newton and reconcile state-dependent active sets.
@@ -2816,6 +2862,10 @@ def newton_krylov(
     replacing its incoming state with a candidate that is worse in the smooth
     relative-sup promotion merit.  Active-set changes still advance normally
     because their live objectives are different.
+    ``continue_newton_trajectory`` preserves a local Newton endpoint across an
+    unchanged active set.  Subsequent fixed-shape trips resume that endpoint
+    with their warmup sweeps masked off.  A changed mask invalidates the local
+    trajectory and keeps the configured warmup unchanged.
     ``stream_active_set`` emits one flushed host line for every executed outer
     trip; it is disabled by default and does not alter any solver carry.
     ``stream_inner_iterations`` similarly emits the fixed-shape Newton receipt
@@ -2870,6 +2920,7 @@ def newton_krylov(
             stream_inner_iterations=stream_inner_iterations,
             stop_on_active_set_stagnation=stop_on_active_set_stagnation,
             retain_outer_best_iterate=retain_outer_best_iterate,
+            continue_newton_trajectory=continue_newton_trajectory,
             precision=precision,
         )
     if checkpoint_path is not None:

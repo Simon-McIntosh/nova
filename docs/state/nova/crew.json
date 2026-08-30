@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-30T23:49:54",
+  "updated": "2026-08-30T23:55:29",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -64208,9 +64208,109 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260830T215032453613-sse-evidence-consolidation",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-evidence-consolidation",
+        "node_definition": {
+          "done_when": "The plan's cumulative execution record is brought up to date so a reader learns what this sprint established without re-reading twenty run manifests. Update docs/evidence/archive/separatrix-spline-extraction-landed.html, carrying reckon-type=evidence and plan-evidence-for=separatrix-spline-extraction, with one stable anchor per material result. Read the committed ledger docs/state/nova/crew.json and the research records docs/research/diiid-residual-stall-mechanism.html, docs/research/wall-height-shadow-safety.html and docs/research/active-set-trip-trajectory.html for the numbers; do not invent any figure and do not restate a number you cannot find in a committed artifact. (1) Record what LANDED, each with its measured result: per-trip and per-Newton-iteration solver telemetry with non-converged state checkpointing, all proven bit-identical on and off in eager and JIT; the active-set stagnation exit, worth 62.5 percent on a measured frame; per-frame atomic partial receipts for the DIII-D driver; per-panel retention and bounded compile lifetime in the visual generator; the wall-height eligibility guard; own-mask acceptance in the promotion. (2) Record the BANKS: the MAST twelve-arm bank with class agreement 8 of 12, worst eligible symmetric RMS 0.029164 m and worst declared-row saddle 0.038977 m, all passing their thresholds; and the DIII-D five-frame bank, all five non-converged against a 1e-6 tolerance at terminal residuals 0.04485116727666494, 0.08117000452284782, 0.08696589356667041, 0.058516982970557435 and 0.047568328864646785, overall FAIL, topology class agreement 4 of 5. (3) Record the H200 result: throughput 0.09983 to 2.67513 slices per second across widths 1 to 1024, a 26.797-fold gain, saturating at 3.38 percent over width 512, ended by an actual device out-of-memory at width 2048 attempting 49.94 GiB, with the limited_plasma fixed-one-Newton-step qualification carried so no figure reads as a convergence claim. (4) Record the SEVENTEEN-PANEL visual gate: the strong criterion binds on 4 panels and passes 4 of 4, the two converged panels carry 43 and 42 shadow cells with zero inside the closed separatrix, and the three populations are stated separately with only 2 of 17 converging. (5) Record the NEGATIVE results as first-class, because they are the most expensive knowledge here: best-iterate retention, terminal-iterate continuation and full globalization-state continuation each measured outer contraction exactly 1.0 and were refuted against falsifiers fixed in advance; the cross-mask comparability hypothesis was refuted with a difference of exactly zero; the barrier is candidate-family-selective model failure with no local minimum, no gradient collapse and no step-length floor; and own-mask acceptance improved frame 179 from 0.06399704757132339 to 0.023196268180508767 without reaching tolerance. (6) State plainly, in a closing summary a lead can act on, that the DIII-D convergence gate does not pass, that the evidence does not establish a residual floor, and that the single named remaining direction is an own-mask-aware adaptive descent model at high cost. Validate with the reckon doc-check tooling and use project-absolute figure paths.",
+          "estimated_hours": null,
+          "goal": "The plan's cumulative evidence record brought current, with every landed result, both banks, the H200 ladder, the visual gate and the negative results carried as measured figures",
+          "id": "sse-evidence-consolidation",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T215032453613-sse-evidence-consolidation/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/evidence/archive/separatrix-spline-extraction-landed.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "adapter-seams",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-30T21:50:40Z",
+        "completed_at": "2026-08-30T21:55:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 284,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 284,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "f9baa2b4ddf0c2a8c19c87f141fcd9e56a785a34",
+        "commits": [
+          "4dcde773e6455f63d90e5a3613ea366b4d139c92"
+        ],
+        "changed_lines": {
+          "added": 207,
+          "removed": 5,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "audit-doc PASS with zero document errors; git diff --check PASS; naming review classified all 25 hits as section labels, physics identifiers, hex colours or mechanism prose",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T215032453613-sse-evidence-consolidation/logs/audit-doc-final.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T215032453613-sse-evidence-consolidation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-e0cb-7cd1-8925-b9c7f01bcf20",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1979136,
+            "cached_input_tokens_cumulative": 2843904,
+            "input_tokens": 1856107,
+            "input_tokens_cumulative": 3037463,
+            "output_tokens": 7255,
+            "output_tokens_cumulative": 12832,
+            "reasoning_output_tokens": 1831,
+            "reasoning_output_tokens_cumulative": 2682
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1187
+    "_version": 1188
   }
 }

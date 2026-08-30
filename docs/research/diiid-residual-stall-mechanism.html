@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="diiid-residual-stall-mechanism">
   <meta name="plan-title" content="DIII-D residual stall mechanism">
-  <meta name="plan-summary" content="A retained-state promotion census finds accepted Newton descent in both frames; the outer search never starts that promotion even after three continuation remedies">
+  <meta name="plan-summary" content="Thirty-link no-warmup chains show retained-state descent is finite in both frames: production halts by link four and a broader damping search by link five">
   <meta name="plan-status" content="reference">
   <meta name="plan-evidence-for" content="separatrix-spline-extraction">
   <meta name="plan-source-quality" content="primary">
@@ -81,6 +81,16 @@
         and accepts the 1/16 step on frame 44, reducing 0.0811700045 to
         0.0810836427. The remaining defect is therefore reachability: the outer
         search never launches this admissible promotion from the state it reports.
+      </p>
+      <p>
+        <strong>Descent-chain verdict.</strong> The admissible step does not become
+        a convergent sequence. On frame 179, production accepts three links and
+        halts at link 4 on residual 0.04070191086569353; frame 44 accepts one and
+        halts at link 2 on 0.08108364266773609. Searching Newton and Levenberg
+        candidates extends both chains only through link 4, then halts at link 5
+        on 0.02439092079766208 and 0.07403979201423325. Neither frame can reach
+        1&times;10<sup>&minus;6</sup> at any finite promotion count under either
+        measured chain.
       </p>
     </aside>
 
@@ -622,6 +632,140 @@
       </p>
     </section>
 
+    <section id="retained-state-descent-chain">
+      <h2>Retained-state descent is finite in both frames</h2>
+      <p>
+        Each chain starts at the persisted retained-best state, freezes its
+        reconstructed settled mask, omits all warmup sweeps, and launches each
+        link from the state accepted by the preceding link. Every arm executes
+        exactly 30 fixed-shape links. The production arm uses the solver's Newton
+        ladder and precedence. The diagnostic arm evaluates the six Newton
+        factors and six Levenberg dampings at every link, applies the production
+        sufficient-decrease threshold, requires a strict live-residual decrease,
+        and selects the admissible candidate with the lowest live relative-sup
+        residual. Compilation time is excluded from the measured per-link cost.
+      </p>
+      <figure>
+        <img
+          src="/nova/figures/diiid-residual-stall/retained-state-descent-chain.png"
+          alt="Live relative-sup residual across thirty no-warmup promotion links for production and diagnostic damping chains on DIII-D frames 179 and 44. All four chains flatten far above tolerance by link five."
+          style="max-width: 100%; height: auto;"
+        >
+        <figcaption>
+          The cross marks the first refused link. Production descent lasts three
+          links on frame 179 and one on frame 44. The broader damping search adds
+          at most three accepted links; both diagnostic chains are flat from link
+          5 through link 30. The dashed line is the unchanged
+          1&times;10<sup>&minus;6</sup> gate.
+        </figcaption>
+      </figure>
+      <table>
+        <caption>Thirty-link chain outcomes, reported separately by frame</caption>
+        <thead>
+          <tr>
+            <th scope="col">Frame and selection</th>
+            <th scope="col">Accepted links / first refusal</th>
+            <th scope="col">Terminal residual</th>
+            <th scope="col">Geometric <em>q</em> over accepted links</th>
+            <th scope="col">Mean execution per link</th>
+            <th scope="col">Cost to tolerance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">179 production</th><td>3 / 4</td>
+            <td>0.04070191086569353</td><td>0.9681597338483857</td>
+            <td>7.865519294 s</td><td>unreachable; halted</td>
+          </tr>
+          <tr>
+            <th scope="row">179 diagnostic damping</th><td>4 / 5</td>
+            <td>0.02439092079766208</td><td>0.8587437938313449</td>
+            <td>8.807964085 s</td><td>unreachable; halted</td>
+          </tr>
+          <tr>
+            <th scope="row">44 production</th><td>1 / 2</td>
+            <td>0.08108364266773609</td><td>0.9989360373253715</td>
+            <td>8.149345300 s</td><td>unreachable; halted</td>
+          </tr>
+          <tr>
+            <th scope="row">44 diagnostic damping</th><td>4 / 5</td>
+            <td>0.07403979201423325</td><td>0.9772763859458984</td>
+            <td>8.835773846 s</td><td>unreachable; halted</td>
+          </tr>
+        </tbody>
+      </table>
+      <h3>Frame 179: full chain</h3>
+      <table>
+        <caption>Frame 179 residual, empirical contraction, and selected scale at every link</caption>
+        <thead>
+          <tr><th scope="col">Arm</th><th scope="col">Link</th><th scope="col">Residual after</th><th scope="col"><em>q</em></th><th scope="col">Route and scale</th><th scope="col">Promoted-mask difference</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row" rowspan="4">Production</th><td>0</td><td>0.04485116727666494</td><td>&mdash;</td><td>seed</td><td>0</td></tr>
+          <tr><td>1</td><td>0.04243436112560362</td><td>0.9461149776514572</td><td>Newton factor 1</td><td>0</td></tr>
+          <tr><td>2</td><td>0.04126217357531822</td><td>0.9723764534402692</td><td>Newton factor 0.5</td><td>0</td></tr>
+          <tr><td>3</td><td>0.04070191086569353</td><td>0.9864218808395470</td><td>Newton factor 0.25</td><td>0</td></tr>
+          <tr><th scope="row">Production</th><td>4&ndash;30</td><td>0.04070191086569353 at every link</td><td>1 at every link</td><td>none accepted; factor 0</td><td>0 at every link</td></tr>
+          <tr><th scope="row" rowspan="5">Diagnostic</th><td>0</td><td>0.04485116727666494</td><td>&mdash;</td><td>seed</td><td>0</td></tr>
+          <tr><td>1</td><td>0.02508993635426251</td><td>0.5594043115866963</td><td>Levenberg damping 0.001</td><td>2</td></tr>
+          <tr><td>2</td><td>0.02468166306504118</td><td>0.9837276076169889</td><td>Levenberg damping 10</td><td>2</td></tr>
+          <tr><td>3</td><td>0.02448693746305617</td><td>0.9921105153460799</td><td>Newton factor 0.125</td><td>2</td></tr>
+          <tr><td>4</td><td>0.02439092079766208</td><td>0.9960788618201460</td><td>Newton factor 0.0625</td><td>2</td></tr>
+          <tr><th scope="row">Diagnostic</th><td>5&ndash;30</td><td>0.02439092079766222 at every link</td><td>1 at every link</td><td>none accepted; scale 0</td><td>2 at every link</td></tr>
+        </tbody>
+      </table>
+      <p>
+        Frame 179 therefore <strong>decays and halts</strong>, rather than
+        sustaining its 44.06% opening reduction. Production achieves a 9.25%
+        cumulative decrease and stops at link 4. The diagnostic search achieves
+        45.62% cumulatively but stops at link 5. Its first candidate changes two
+        cells in the re-evaluated promoted mask, and those two differences persist;
+        its lower residual is a valid frozen-mask counterfactual, not evidence of
+        a simultaneously settled active-set solution.
+      </p>
+      <h3>Frame 44: full chain</h3>
+      <table>
+        <caption>Frame 44 residual, empirical contraction, and selected scale at every link</caption>
+        <thead>
+          <tr><th scope="col">Arm</th><th scope="col">Link</th><th scope="col">Residual after</th><th scope="col"><em>q</em></th><th scope="col">Route and scale</th><th scope="col">Promoted-mask difference</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row" rowspan="2">Production</th><td>0</td><td>0.08117000452284782</td><td>&mdash;</td><td>seed</td><td>0</td></tr>
+          <tr><td>1</td><td>0.08108364266773609</td><td>0.9989360373253714</td><td>Newton factor 0.0625</td><td>0</td></tr>
+          <tr><th scope="row">Production</th><td>2&ndash;30</td><td>0.08108364266773609 at every link</td><td>1 at every link</td><td>none accepted; factor 0</td><td>0 at every link</td></tr>
+          <tr><th scope="row" rowspan="5">Diagnostic</th><td>0</td><td>0.08117000452284782</td><td>&mdash;</td><td>seed</td><td>0</td></tr>
+          <tr><td>1</td><td>0.08037864636452266</td><td>0.9902506084239232</td><td>Levenberg damping 100</td><td>3</td></tr>
+          <tr><td>2</td><td>0.07435112919185186</td><td>0.9250109644129163</td><td>Newton factor 1</td><td>2</td></tr>
+          <tr><td>3</td><td>0.07407513524839286</td><td>0.9962879656777393</td><td>Newton factor 0.25</td><td>2</td></tr>
+          <tr><td>4</td><td>0.07403979201423325</td><td>0.9995228731740940</td><td>Newton factor 0.03125</td><td>2</td></tr>
+          <tr><th scope="row">Diagnostic</th><td>5&ndash;30</td><td>0.07403979201423326 at every link</td><td>1 at every link</td><td>none accepted; scale 0</td><td>2 at every link</td></tr>
+        </tbody>
+      </table>
+      <p>
+        Frame 44 also <strong>decays and halts</strong>, but more sharply exposes
+        the production limitation: production accepts only the opening 0.1064%
+        decrease and stops at link 2. Diagnostic damping reaches an 8.7848%
+        cumulative decrease through four links, then stops at link 5. It changes
+        three promoted-mask cells at link 1 and carries two differences thereafter,
+        so it too is a frozen-mask counterfactual rather than a settled solution.
+      </p>
+      <h3>Consequence for tolerance and remedy direction</h3>
+      <p>
+        The observed terminal contraction is exactly one after the stated halt
+        in all four arms. Consequently the unchanged
+        1&times;10<sup>&minus;6</sup> tolerance is unreachable at any finite number
+        of promotions: extrapolating the geometric mean of only the accepted
+        prefix would contradict the measured chain. The 30 production links cost
+        235.966 s and 244.480 s after compilation for frames 179 and 44; the
+        diagnostic chains cost 264.239 s and 265.073 s. More of the same links
+        purchases no further residual reduction. The census proved that one
+        useful promotion exists; this chain proves that neither production
+        selection nor the tested per-link damping family supplies a sustained
+        route to tolerance. The next measurement must identify a direction after
+        the link-4/link-5 barrier rather than extend the existing promotion budget.
+      </p>
+    </section>
+
     <section id="cross-mask-residual-comparability">
       <h2>The carried residuals are valid on the settled masks</h2>
       <p>
@@ -839,6 +983,7 @@
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T075138868344-sse-newton-trajectory-continuation/trajectory-resumption.json</code> &mdash; six terminal-state continuation trips per persisted frame, including residual sequences, mask differences, local endpoints, and outer rates.</li>
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T090349299149-sse-cross-mask-residual-comparability/cross-mask-residual-comparability.json</code> &mdash; explicit settled-mask residual re-evaluation, mask stability, component counts, and mask digests for both persisted states.</li>
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T091221649529-sse-globalization-state-continuation/globalization-resumption.json</code> &mdash; six full-globalization continuation trips per frame, with exact residual sequences, mask differences, wall times, and outer rates.</li>
+        <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T101824700290-sse-retained-state-descent-chain/retained-state-descent-chain.json</code> &mdash; all 120 fixed-shape link records, including residuals, empirical contractions, selected factors or dampings, Krylov reductions, step norms, and promoted-mask differences.</li>
       </ul>
     </section>
   </main>

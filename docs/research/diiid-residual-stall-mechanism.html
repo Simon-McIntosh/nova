@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="diiid-residual-stall-mechanism">
   <meta name="plan-title" content="DIII-D residual stall mechanism">
-  <meta name="plan-summary" content="Thirty-link no-warmup chains show retained-state descent is finite in both frames: production halts by link four and a broader damping search by link five">
+  <meta name="plan-summary" content="All four descent halts retain substantial gradients and useful candidate steps; the barrier is selective model and search failure, not a local minimum or numerical step floor">
   <meta name="plan-status" content="reference">
   <meta name="plan-evidence-for" content="separatrix-spline-extraction">
   <meta name="plan-source-quality" content="primary">
@@ -91,6 +91,17 @@
         on 0.02439092079766208 and 0.07403979201423325. Neither frame can reach
         1&times;10<sup>&minus;6</sup> at any finite promotion count under either
         measured chain.
+      </p>
+      <p>
+        <strong>Barrier verdict.</strong> None of the four halt states is a local
+        minimum or a step-length floor. All 23 candidates at every state have a
+        materially negative directional derivative; halt gradients retain
+        0.77&times; to 2.43&times; the retained-state L2 norm; and 5 to 17 candidates
+        remain admissible, with best relative residual reductions between
+        1.33&times;10<sup>&minus;4</sup> and 0.355. The current Newton/recovery model
+        fails selectively while alternate descent remains. Frame 179's diagnostic
+        endpoint additionally changes its own mask, where its live residual is
+        0.1162006 rather than the frozen-mask 0.0243909.
       </p>
     </aside>
 
@@ -352,9 +363,8 @@
         no finite number of outer trips reaches the unchanged 1&times;10<sup>&minus;6</sup>
         tolerance. The result narrows the mechanism further: the solver already
         protects the carried optimum, but it discards the locally contracting
-        endpoint. The next experiment must continue that frozen-mask trajectory
-        across trip boundaries without replaying warmup, while retaining the
-        carried optimum as the reported fallback.
+        endpoint. The subsequent terminal-state continuation measurement below
+        tests and refutes endpoint carry as a sufficient remedy.
       </p>
     </section>
 
@@ -475,14 +485,9 @@
         value.
       </p>
       <p>
-        No fourth carry variation is supported. The single next discriminating
-        measurement is a one-promotion census linearized directly at each retained
-        best state on its settled mask: report the merit gradient and directional
-        derivative, Newton and recovery candidates, every acceptance threshold,
-        and each candidate's live relative-sup residual. A genuine decreasing
-        candidate that is refused would identify an acceptance mismatch; no
-        decreasing candidate would instead identify a local barrier or basin
-        problem at the state that the outer solver must improve.
+        No fourth carry variation is supported. The retained-state census below
+        supplies the discriminator: materially decreasing candidates exist at
+        both retained states and are accepted by the merit guard.
       </p>
     </section>
 
@@ -626,9 +631,8 @@
         Levenberg ratios imply 19 and 1,154. These are conditional projections,
         not convergence claims from one step. What the census establishes is
         reachability: the tolerance is not excluded by a stationary retained
-        state or by the acceptance gate. The next distinguishing measurement is
-        whether repeated no-warmup promotions launched from each newly accepted
-        retained state preserve descent or enter a new basin barrier.
+        state or by the acceptance gate. The thirty-link chain below performs the
+        required continuation test and finds that descent halts by link five.
       </p>
     </section>
 
@@ -761,8 +765,159 @@
         purchases no further residual reduction. The census proved that one
         useful promotion exists; this chain proves that neither production
         selection nor the tested per-link damping family supplies a sustained
-        route to tolerance. The next measurement must identify a direction after
-        the link-4/link-5 barrier rather than extend the existing promotion budget.
+        route to tolerance. The barrier census below identifies the directions
+        still available at the link-4/link-5 halt states.
+      </p>
+    </section>
+
+    <section id="descent-barrier-characterisation">
+      <h2>The halt is selective model and search failure, not a numerical floor</h2>
+      <p>
+        Each exact halt state was reconstructed by replaying the accepted prefix
+        and first refusal. Its mask was then promoted from the retained mask and
+        frozen for one census. The candidate family and thresholds are exactly
+        comparable with the retained-state census: six Newton factors, six
+        continuation radii, six Levenberg dampings, and five steepest-descent
+        scales, for 23 candidates per state. For every candidate the record banks
+        its directional derivative, infinity-norm step, predicted and actual
+        merit change, acceptance threshold, named decision, and resulting live
+        relative-sup residual.
+      </p>
+      <figure>
+        <img
+          src="/nova/figures/diiid-residual-stall/descent-barrier-characterisation.png"
+          alt="Gradient L2 norms and best one-step relative residual reductions at the retained, production-halt, and damping-halt states for DIII-D frames 179 and 44. All reductions remain far above the one-part-in-one-trillion step-floor definition."
+          style="max-width: 100%; height: auto;"
+        >
+        <figcaption>
+          Neither gradient collapses. Every halt still offers a residual decrease
+          at least 1.33&times;10<sup>&minus;4</sup> relative, eight orders above the
+          one-part-in-10<sup>12</sup> step-floor definition. The frame-179
+          damping endpoint is evaluated on its promoted mask, which exposes a
+          residual of 0.1162006 rather than its frozen-mask score of 0.0243909.
+        </figcaption>
+      </figure>
+      <table>
+        <caption>Counts and magnitudes deciding the barrier at each halt state</caption>
+        <thead>
+          <tr>
+            <th scope="col">Frame and halt</th>
+            <th scope="col">Own-mask residual</th>
+            <th scope="col">Gradient L2 / ratio to retained</th>
+            <th scope="col">Predicted descent / contradicted / order-matched</th>
+            <th scope="col">Admissible / tiny</th>
+            <th scope="col">Best relative residual reduction</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">179 production</th>
+            <td>0.04070191086569353</td>
+            <td>0.04166674541 / 0.9886972</td>
+            <td>23 / 13 / 10</td><td>10 / 0</td><td>0.3552552774</td>
+          </tr>
+          <tr>
+            <th scope="row">179 damping search</th>
+            <td>0.11620059087315744</td>
+            <td>0.1023048903 / 2.427561</td>
+            <td>23 / 6 / 17</td><td>17 / 0</td><td>0.1230490366</td>
+          </tr>
+          <tr>
+            <th scope="row">44 production</th>
+            <td>0.08108364266773609</td>
+            <td>0.06392013724 / 0.8478787</td>
+            <td>23 / 18 / 5</td><td>5 / 0</td><td>0.0001328888374</td>
+          </tr>
+          <tr>
+            <th scope="row">44 damping search</th>
+            <td>0.07403979201423326</td>
+            <td>0.05831497075 / 0.7735280</td>
+            <td>23 / 17 / 5</td><td>5 / 0</td><td>0.0001782105942</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        “Tiny” means an admissible candidate changes the live residual by less
+        than one part in 10<sup>12</sup>. The count is zero in all four censuses.
+        The directional-derivative ranges are also materially separated from
+        zero: &minus;0.03117 to &minus;6.38&times;10<sup>&minus;10</sup>,
+        &minus;0.07425 to &minus;1.03&times;10<sup>&minus;9</sup>,
+        &minus;0.03796 to &minus;8.99&times;10<sup>&minus;10</sup>, and
+        &minus;0.05920 to &minus;6.58&times;10<sup>&minus;10</sup>, respectively,
+        against a materiality cutoff of 1&times;10<sup>&minus;12</sup>. A local
+        minimum and a step-length floor are therefore ruled out independently
+        at every state.
+      </p>
+      <h3>Frame 179 production halt</h3>
+      <p>
+        The gradient is essentially unchanged from the retained state: L2 norm
+        0.0416667 versus 0.0421431, and infinity norm 0.0272025 versus 0.0271597.
+        All six Newton and all six continuation candidates predict descent but
+        increase actual merit; five of six Levenberg candidates and all five
+        steepest candidates match the predicted sign and magnitude and satisfy
+        sufficient decrease. Levenberg damping 0.01 is best, reducing the live
+        residual by 0.01445956863 to 0.02624234223, or 35.53%. This halt is a
+        model failure for the production-selected direction plus a search-
+        precedence failure: useful fixed-shape alternatives exist and are not
+        reached by the production arm.
+      </p>
+      <h3>Frame 179 damping-search halt</h3>
+      <p>
+        This is not a halt on its own live problem. Promoting the endpoint changes
+        two mask cells, and the same state then has residual 0.1162005909 rather
+        than its frozen-mask 0.0243909208. Its gradient grows to L2 norm 0.102305,
+        2.43&times; the retained value. Seventeen candidates match prediction and
+        pass sufficient decrease; six contradict it. Continuation radius 0.25
+        is best, lowering the own-mask residual by 0.01429837076, or 12.30%.
+        The apparent chain barrier is therefore an active-set discontinuity
+        composed with selective model error, not a minimum or a floor.
+      </p>
+      <h3>Frame 44 production halt</h3>
+      <p>
+        The gradient remains comparable: L2 norm 0.0639201, 0.848&times; retained,
+        and infinity norm 0.0454405, 0.668&times; retained. All 18 Newton,
+        continuation, and Levenberg candidates predict descent but raise actual
+        merit. All five steepest candidates match their prediction and pass;
+        scale 1&times;10<sup>&minus;4</sup> reduces the live residual by
+        1.0775111&times;10<sup>&minus;5</sup>, or 1.32889&times;10<sup>&minus;4</sup>
+        relative. This is selective model failure in every model-based direction,
+        with a valid gradient fallback that the measured production promotion
+        does not select.
+      </p>
+      <h3>Frame 44 damping-search halt</h3>
+      <p>
+        The gradient again stays substantial: L2 norm 0.0583150, 0.774&times;
+        retained, and infinity norm 0.0517031, 0.760&times; retained. Seventeen of
+        23 candidates predict a decrease but increase merit: all six Newton, all
+        six continuation, and five Levenberg candidates. The five steepest scales
+        remain order-consistent and admissible. Scale 1&times;10<sup>&minus;4</sup>
+        lowers the live residual by 1.3194675&times;10<sup>&minus;5</sup>, or
+        1.78211&times;10<sup>&minus;4</sup> relative. Two promoted-mask cells differ
+        from the retained mask, but the relative-sup value happens to remain
+        0.0740397920. This arm agrees with frame 44 production: the model-based
+        candidates fail while a non-tiny gradient step remains available.
+      </p>
+      <h3>Consequence for the demonstration gate</h3>
+      <p>
+        The existing production and damping-search chains cannot reach
+        1&times;10<sup>&minus;6</sup>; that negative result remains exact. The new
+        evidence does <strong>not</strong> show that the tolerance is unreachable
+        by every method within the current residual formulation, discretisation,
+        and fixed-shape execution model. Quite the opposite: every halt retains
+        admissible, materially useful descent. The evidence therefore points to
+        globalization model and candidate-selection coverage, not to a positive
+        residual floor requiring a changed formulation, grid, or tolerance.
+        Reaching the gate remains unproven, but relaxing it is not supported by
+        this census.
+      </p>
+      <p>
+        Two observations would overturn that conclusion. A fixed-shape chain
+        that follows the available accepted directions to
+        1&times;10<sup>&minus;6</sup> would positively establish reachability. In
+        the other direction, an exhaustive self-consistent-mask optimization
+        showing gradient collapse and a positive minimum above tolerance would
+        establish a formulation or discretisation floor. Neither observation is
+        present here.
       </p>
     </section>
 
@@ -833,9 +988,9 @@
         iteration-count and wall-clock projection for an unreachable cross-mask
         target does not apply. Nor does this evidence convict the promotion merit
         merely for spanning a mask change: in these two cases retention protects
-        a value independently proven valid on the settled domain. The next remedy
-        remains continuation of the full globalization state, not removal of the
-        retained reachable target.
+        a value independently proven valid on the settled domain. The subsequent
+        full-globalization continuation is refuted above, and the barrier census
+        now isolates candidate-model coverage as the remaining mechanism.
       </p>
     </section>
 
@@ -918,7 +1073,7 @@
     </section>
 
     <section id="remedies">
-      <h2>Ranked remedies to evaluate</h2>
+      <h2>Evaluated remedies and remaining engineering direction</h2>
       <ol>
         <li>
           <strong>Carry the best-observed iterate across outer trips and do not
@@ -984,7 +1139,24 @@
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T090349299149-sse-cross-mask-residual-comparability/cross-mask-residual-comparability.json</code> &mdash; explicit settled-mask residual re-evaluation, mask stability, component counts, and mask digests for both persisted states.</li>
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T091221649529-sse-globalization-state-continuation/globalization-resumption.json</code> &mdash; six full-globalization continuation trips per frame, with exact residual sequences, mask differences, wall times, and outer rates.</li>
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T101824700290-sse-retained-state-descent-chain/retained-state-descent-chain.json</code> &mdash; all 120 fixed-shape link records, including residuals, empirical contractions, selected factors or dampings, Krylov reductions, step norms, and promoted-mask differences.</li>
+        <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T104938950186-sse-descent-barrier-characterisation/descent-barrier-census.json</code> &mdash; 92 candidate records over the four exact halt states, including promoted-mask residuals, gradients, directional derivatives, predicted and actual changes, thresholds, decisions, and live residuals.</li>
       </ul>
+    </section>
+
+    <section id="plain-language-conclusion">
+      <h2>What this investigation establishes</h2>
+      <p>
+        The solver is not stuck because the equations have become locally flat,
+        and it is not taking steps too small to matter. It is stuck because the
+        Newton-style model increasingly predicts improvement where the real
+        nonlinear residual gets worse, while usable alternative directions remain
+        outside the path each measured arm follows. One diagnostic trajectory also
+        crossed into a different active set, making its attractive frozen-mask
+        number inapplicable to its live problem. The actionable conclusion is to
+        correct model/candidate selection and preserve active-set consistency.
+        Changing the physics residual, grid, or tolerance is not justified by the
+        evidence, and repeating more of the same promotions is already falsified.
+      </p>
     </section>
   </main>
 </body>

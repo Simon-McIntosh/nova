@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-30T14:12:02",
+  "updated": "2026-08-30T15:23:39",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -64004,9 +64004,112 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260830T121243098285-sse-own-mask-acceptance",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-own-mask-acceptance",
+        "node_definition": {
+          "done_when": "Model trust is made active-set-aware and the reachability criterion is tested once more; this is the final remedy attempt in this investigation and its outcome is reported either way. The record in docs/research/diiid-residual-stall-mechanism.html names the decisive defect: trust measured on a frozen mask is unsound, because at frame 179 link 4 a trusted Levenberg damping of 0.001 changed two mask cells and re-evaluated on its own mask at 0.08368091815180548, worse than the 0.04070199248460991 it started from by a factor of 2.05594. Frame 44 separately exhausts the steepest scale ladder at 0.08100291897825324. (1) Make the acceptance test evaluate a candidate on the mask that candidate itself induces, not on the frozen mask it was proposed under: a candidate is admissible only when its live residual on its OWN promoted mask improves on the incumbent's live residual on the incumbent's own mask. Declare the comparison explicitly so no reader can mistake which mask each term is measured on. Keep the fixed-shape device loop and add no data-dependent control flow. (2) Prove inertness where it does not bite: a solve in which no candidate changes the active set must return bit-identical state and residual with the own-mask comparison on and off, in eager and JIT. Prove separately that the frame-179 link-4 candidate, which improves on the frozen mask and worsens by 2.05594 times on its own, is now refused. (3) Run the same self-consistent chain of at least 40 promotions per frame from both persisted checkpoints at /home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch, re-deriving and reporting the promoted mask at every link, and report the residual sequence, the family selected per link, and the empirical contraction. (4) State whether the chain reaches the unchanged 1e-6 tolerance. A lower halt residual is NOT success; the criterion is a self-consistent chain reaching tolerance. If it halts, give the halt residual, the link index, and whether the halt is a local minimum, a model failure, a step-length floor or something not covered by those three. (5) This is the last remedy in the sequence, so close the research document with a plain-language statement a lead can act on: whether 1e-6 is reachable within this formulation on the evidence gathered, what the single most promising remaining direction is, and what it would cost. Recommend nothing about relaxing the tolerance; state the evidence and leave the choice open. (6) Relax no tolerance or gate threshold, regenerate no bank, and keep the focused lane green with the delta stated against the base revision rather than an absolute count.",
+          "estimated_hours": null,
+          "goal": "Acceptance evaluated on each candidate's own induced mask, with the self-consistent chain retested against the 1e-6 criterion as the final remedy attempt",
+          "id": "sse-own-mask-acceptance",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T121243098285-sse-own-mask-acceptance/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_own_mask_acceptance.py",
+            "docs/research/diiid-residual-stall-mechanism.html",
+            "tests/test_fixed_point.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-30T12:12:52Z",
+        "completed_at": "2026-08-30T13:21:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4119,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4119,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "0ee938b5c5034cb7e62e97c52e3a63bbe8275f54",
+        "commits": [
+          "a2e65fda4c860edd261fee6a0c7af8f7083e4a7b"
+        ],
+        "changed_lines": {
+          "added": 344,
+          "removed": 40,
+          "files": 4
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused lane across fixed_point, own-mask and model-trust suites passed with zero new failures versus base plus four new eager/JIT own-mask cases; audit-doc, ruff check and ruff format clean",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T121243098285-sse-own-mask-acceptance/measure-own-mask-chain-rerun.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T121243098285-sse-own-mask-acceptance/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 4239872,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 4425889,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 10797,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1745
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1185
+    "_version": 1186
   }
 }

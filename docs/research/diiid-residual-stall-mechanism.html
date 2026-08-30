@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="diiid-residual-stall-mechanism">
+  <meta name="plan-title" content="DIII-D residual stall mechanism">
+  <meta name="plan-summary" content="Per-iteration evidence identifies an outer-trip search reset, not a stationary point or inaccurate Krylov direction, as the DIII-D residual stall">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-evidence-for" content="separatrix-spline-extraction">
+  <meta name="plan-source-quality" content="primary">
+  <meta name="plan-recorded-at" content="2026-08-30">
+  <meta name="plan-read" content="1">
+  <meta name="plan-tags" content="equilibrium,diii-d,active-set,convergence">
+  <title>DIII-D residual stall mechanism | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Research record &middot; measured solver mechanism</p>
+      <h1>The outer-trip search reset discards contracting Newton work</h1>
+      <p class="lead">
+        The settled-mask inner solve is neither stationary nor limited by its
+        Krylov direction. It contracts locally, but every outer trip first runs
+        eight warmup sweeps that raise the residual above the best state already
+        carried by the solve. The Newton endpoint remains worse than that carried
+        best, so the outer solve returns exactly zero improvement and repeats.
+      </p>
+    </header>
+
+    <aside>
+      <p>
+        <strong>Deciding result.</strong> Frame 179 accepts all 24 settled-trip
+        steps at local <em>q</em> = 0.9799177, yet warmup raises 0.0448512 to
+        0.327281 and the Newton endpoint 0.201127 is still 4.48432&times; worse.
+        Frame 44 accepts 22 steps and refuses two for sufficient decrease at
+        local <em>q</em> = 0.9887442, yet warmup raises 0.0811700 to 0.146068 and
+        the endpoint 0.113868 is still 1.40283&times; worse. Both outer trips return
+        exactly zero improvement, making the settled outer contraction
+        <strong><em>q</em> = 1.0</strong>.
+      </p>
+    </aside>
+
+    <section id="probe-admissibility">
+      <h2>Probe admissibility</h2>
+      <p>
+        The science output is admissible despite the scheduler reporting a failed
+        job. The 3,098-line log ends with <code>PROBE_COMPLETE 2/2</code> after
+        both frame solves and both checkpoint writes. Each checkpoint is non-empty,
+        loads through <code>load_fixed_point_checkpoint</code>, and hashes to the
+        digest in both its sidecar and <code>probe_completion.json</code>.
+      </p>
+      <table>
+        <caption>Independent checkpoint integrity verification</caption>
+        <thead>
+          <tr>
+            <th scope="col">Frame</th>
+            <th scope="col">Bytes</th>
+            <th scope="col">Computed and recorded SHA-256</th>
+            <th scope="col">Load</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">179</th>
+            <td>12,934</td>
+            <td><code>3fcee784f0e242bc03cefa18b7cfff1d2726f7d953f76840ac070e9eea2fb2d0</code></td>
+            <td>successful</td>
+          </tr>
+          <tr>
+            <th scope="row">44</th>
+            <td>12,948</td>
+            <td><code>22458017c39426affb817bcb1f4fc4d435f7a5bf5d5fd6d281dc462720b3069b</code></td>
+            <td>successful</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        The nonzero job exit is a post-science path error. The launcher changes
+        directory into its pinned source tree, then asks <code>sha256sum -c</code>
+        to read a sidecar whose payload names only the checkpoint basename. The
+        verifier therefore looks in the source directory rather than the
+        <code>job-output</code> directory where the checkpoint was successfully
+        written. No solver, telemetry, checkpoint, or completion step was skipped.
+      </p>
+    </section>
+
+    <section id="measurement-method">
+      <h2>Measurement method and callback qualification</h2>
+      <p>
+        The analysis used the complete log and both terminal checkpoints, not a
+        tail sample. The fixed-shape solve emits both mapped branch lanes and JAX
+        stages callbacks from both sides of a transformed conditional. This yields
+        1,536 raw <code>inner-newton</code> lines per frame, including 768
+        speculative refusal lines whose own Krylov qualification says accepted.
+        Those impossible combinations are callback staging artifacts, not selected
+        nonlinear decisions. Semantic records were selected from the actual diverted
+        lane and its selected conditional branch: 144 records across six executed
+        trips for frame 179 and 72 across three trips for frame 44. The last executed
+        trip is the settled-mask trip reported below.
+      </p>
+      <p>
+        Residual localization re-evaluated the pinned driver at the checkpoint
+        state, taking the governed wall from <code>ProfileBuild.wall</code>. The
+        reconstructed relative-sup residual equals the stored scalar bit for bit
+        for both frames. Grid locations came from
+        <code>FluxLattice.coordinate</code>; wall distances used the built wall
+        coordinates; X-point, axis, boundary flux, and normalized flux came from
+        the terminal topology.
+      </p>
+    </section>
+
+    <section id="iteration-evidence">
+      <h2>Per-iteration evidence</h2>
+      <figure>
+        <img
+          src="/nova/figures/diiid-residual-stall/inner-iteration-mechanism.png"
+          alt="Settled-trip residual traces and proposed step norms for DIII-D frames 179 and 44. Both inner solves contract but stay above the carried best residual; frame 44 has two sufficient-decrease refusals."
+          style="max-width: 100%; height: auto;"
+        >
+        <figcaption>
+          The upper panels show residual movement within the settled-mask Newton
+          trip and the best residual already carried by the outer solve. The lower
+          panels show that proposed directions have nontrivial norm; colour names
+          the selected action and hatching marks the two refused frame-44 steps.
+          Local contraction never crosses the carried-best line, so the outer state
+          is returned unchanged.
+        </figcaption>
+      </figure>
+
+      <table>
+        <caption>Complete semantic decision census and proposed step norms</caption>
+        <thead>
+          <tr>
+            <th scope="col">Measure</th>
+            <th scope="col">Frame 179</th>
+            <th scope="col">Frame 44</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">All executed semantic iterations</th>
+            <td>144 over 6 outer trips</td>
+            <td>72 over 3 outer trips</td>
+          </tr>
+          <tr>
+            <th scope="row">All-trip decisions</th>
+            <td>117 Newton accepted; 24 continuation accepted; 1 rebuilt model accepted; 2 sufficient-decrease refused</td>
+            <td>55 Newton accepted; 13 continuation accepted; 4 sufficient-decrease refused</td>
+          </tr>
+          <tr>
+            <th scope="row">All-trip step norm, min / median / max</th>
+            <td>0.0128812 / 0.0480835 / 0.200061</td>
+            <td>0.0502328 / 0.0824816 / 0.134083</td>
+          </tr>
+          <tr>
+            <th scope="row">Settled-trip decisions</th>
+            <td>24 Newton accepted; 0 refused</td>
+            <td>16 Newton accepted; 6 continuation accepted; 2 sufficient-decrease refused</td>
+          </tr>
+          <tr>
+            <th scope="row">Settled-trip step norm, min / median / max</th>
+            <td>0.0148284 / 0.0331842 / 0.159481</td>
+            <td>0.0502328 / 0.0690388 / 0.115784</td>
+          </tr>
+          <tr>
+            <th scope="row">Accepted absolute residual change, min / median / max</th>
+            <td>0.000259983 / 0.00271382 / 0.0165930</td>
+            <td>7.62766&times;10<sup>&minus;8</sup> / 0.000814606 / 0.0257010</td>
+          </tr>
+          <tr>
+            <th scope="row">Settled-trip geometric contraction</th>
+            <td><em>q</em> = 0.9799176816</td>
+            <td><em>q</em> = 0.9887441697</td>
+          </tr>
+          <tr>
+            <th scope="row">Worst achieved Krylov reduction / requested tolerance</th>
+            <td>6.55&times;10<sup>&minus;14</sup> / 1&times;10<sup>&minus;5</sup></td>
+            <td>3.73&times;10<sup>&minus;12</sup> / 1&times;10<sup>&minus;5</sup></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="mechanism-adjudication">
+      <h2>Mechanism adjudication</h2>
+      <table>
+        <caption>Candidate causes separated by deciding measurements</caption>
+        <thead>
+          <tr>
+            <th scope="col">Candidate</th>
+            <th scope="col">Decision</th>
+            <th scope="col">Deciding number</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">A &mdash; genuine stationary point</th>
+            <td>Ruled out</td>
+            <td>Settled-trip median proposed step norms are 0.0331842 and 0.0690388, not effectively zero.</td>
+          </tr>
+          <tr>
+            <th scope="row">B &mdash; healthy but slow contraction</th>
+            <td>True only inside one Newton trip; false for the solve</td>
+            <td>Local <em>q</em> is 0.9799177 and 0.9887442, but settled outer <em>q</em> is exactly 1.0 in both frames.</td>
+          </tr>
+          <tr>
+            <th scope="row">C &mdash; search-direction or acceptance failure</th>
+            <td>Supported at the solve-level search seam</td>
+            <td>Warmup makes the starting residual 7.29704&times; and 1.79953&times; the carried best; the locally contracted endpoints remain 4.48432&times; and 1.40283&times; worse, returning zero improvement.</td>
+          </tr>
+          <tr>
+            <th scope="row">Inaccurate Krylov direction</th>
+            <td>Ruled out</td>
+            <td>Worst settled-trip achieved reductions are 6.55&times;10<sup>&minus;14</sup> and 3.73&times;10<sup>&minus;12</sup>, both far inside the requested 1&times;10<sup>&minus;5</sup>.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        The mechanism is therefore the <strong>solve-level search reset</strong>:
+        the inner Newton model finds usable directions and contracts, but the
+        next outer trip replays a degrading warmup from a state above the retained
+        optimum. Newton does not recover the carried best within its 24 iterations,
+        so best-observed selection correctly returns the old state. The settled
+        mask then launches the same ineffective search again.
+      </p>
+    </section>
+
+    <section id="prior-rate-adjudication">
+      <h2>The local rate and settled outer rate reconcile the prior views</h2>
+      <p>
+        The previously recorded tail-contraction estimate of approximately
+        <em>q</em> = 0.970 per promotion is broadly consistent with the
+        <em>local Newton</em> rates. Relative to a contraction deficit of 0.030,
+        frame 179's deficit of 0.0200823 is 1.49&times; smaller (0.17 orders of
+        magnitude) and frame 44's deficit of 0.0112558 is 2.67&times; smaller
+        (0.43 orders). These are slower, but not orders-of-magnitude contradictory.
+      </p>
+      <p>
+        The committed bank sees a different level of the algorithm. Its settled
+        <em>outer</em> residual is bit-identical because the warmup reset discards
+        the carried best at the start of every trip and the local Newton endpoint
+        never earns promotion over it. The actual outer contraction is therefore
+        exactly <em>q</em> = 1.0. The recorded projection of about 425 further
+        promotions to 1&times;10<sup>&minus;8</sup> consequently does not hold at any
+        budget: repeating an outer action with <em>q</em> = 1.0 never reaches the
+        criterion. Even the counterfactual local rates would require 755 and 1,406
+        uninterrupted Newton iterations from the carried residuals to reach
+        1&times;10<sup>&minus;8</sup>; the present outer loop interrupts that
+        contraction every 24 iterations.
+      </p>
+    </section>
+
+    <section id="residual-localization">
+      <h2>Residual decomposition and spatial localization</h2>
+      <p>
+        Re-evaluation reproduces each stored relative-sup residual exactly. The
+        unresolved component is grid-dominated in both frames, but it occupies
+        different physical regions. This rules out a single shared wall, X-point,
+        or separatrix component as the cause of the common solve-level stall.
+      </p>
+      <table>
+        <caption>Residual location at the persisted best state</caption>
+        <thead>
+          <tr>
+            <th scope="col">Measure</th>
+            <th scope="col">Frame 179</th>
+            <th scope="col">Frame 44</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Reconstructed / stored relative sup</th>
+            <td>0.04485116727666494 / 0.04485116727666494</td>
+            <td>0.08117000452284782 / 0.08117000452284782</td>
+          </tr>
+          <tr>
+            <th scope="row">Maximum residual region and coordinate (R, Z)</th>
+            <td>grid at (1.583750, &minus;1.500000) m</td>
+            <td>grid at (1.743125, 0.200000) m</td>
+          </tr>
+          <tr>
+            <th scope="row">Normalized flux at maximum</th>
+            <td>0.985871 &mdash; immediately inside the separatrix</td>
+            <td>0.650041 &mdash; closed interior</td>
+          </tr>
+          <tr>
+            <th scope="row">Distance to wall / selected X-point / axis</th>
+            <td>0.166030 / 0.203677 / 0.225721 m</td>
+            <td>0.832303 / 1.822216 / 0.537599 m</td>
+          </tr>
+          <tr>
+            <th scope="row">Grid / wall share of squared residual</th>
+            <td>85.7549% / 14.2451%</td>
+            <td>97.0461% / 2.9539%</td>
+          </tr>
+          <tr>
+            <th scope="row">Grid / wall relative sup</th>
+            <td>0.0448512 / 0.0263847</td>
+            <td>0.0811700 / 0.0300353</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        Frame 179 is localized along the lower grid edge around the separatrix
+        and lower X-point: one of the twelve largest entries is only 0.0512 m
+        from the X-point and has normalized flux 1.03288. Frame 44 is instead an
+        upper closed-interior band around R = 1.64&ndash;1.85 m and Z =
+        0.10&ndash;0.30 m, far from both the wall and selected X-point. The common
+        mechanism is therefore algorithmic reset, while the residual content it
+        prevents from being reduced is frame-specific and spatially localized.
+      </p>
+    </section>
+
+    <section id="branch-selector">
+      <h2>The public branch-selector rejection is a consequence</h2>
+      <p>
+        For both measured frames, the committed receipt reports finite results,
+        diverted achieved topology, topology-class agreement, current agreement
+        at floating-point precision, and no seed-identity rejection. Its public
+        qualification additionally requires the fixed-point relative residual to
+        be at or below 1&times;10<sup>&minus;6</sup>. The measured values 0.0448512
+        and 0.0811700 fail that condition, so
+        <code>public branch selector found no convergence-qualified diverted root</code>
+        is a consequence of the residual stall rather than an independent
+        topology-class refusal.
+      </p>
+    </section>
+
+    <section id="remedies">
+      <h2>Ranked remedies to evaluate</h2>
+      <ol>
+        <li>
+          <strong>Carry the best-observed iterate across outer trips and do not
+          degrade it during warmup.</strong> Guard each warmup sweep against the
+          carried live merit, or bypass warmup once the mask is settled. This is
+          the narrowest intervention at the measured reset seam. Cost: moderate
+          solver-state and fixed-shape acceptance work plus eager/JIT regression
+          coverage. Falsifying evidence: a guarded or zero-warmup settled trip
+          still returns the same residual and outer <em>q</em> = 1.0.
+        </li>
+        <li>
+          <strong>Resume the frozen-mask Newton trajectory across outer trips.</strong>
+          Preserve the locally contracting terminal candidate and continue its
+          model without replaying the eight-sweep reset until it beats the carried
+          best, while still returning the best live iterate. Cost: moderate to
+          high because checkpoint, active-set, and globalization state acquire a
+          continuation contract. Falsifying evidence: uninterrupted continuation
+          ceases to contract geometrically or reaches a live-mask state that cannot
+          be admitted.
+        </li>
+        <li>
+          <strong>Rebuild the warmup objective so it shares the promoted merit and
+          mask.</strong> This is broader than guarding warmup but may be necessary
+          if the warmup state serves a physical constraint absent from the global
+          merit. Cost: high, requiring residual/JVP and conservation revalidation.
+          Falsifying evidence: decomposition shows the warmup increase is required
+          to satisfy a distinct constraint whose violation would make the carried
+          best inadmissible.
+        </li>
+        <li>
+          <strong>Increase the Newton budget only after the reset is removed.</strong>
+          At the measured local rates, reaching 1&times;10<sup>&minus;6</sup> from
+          the carried residual would take approximately 528 and 999 uninterrupted
+          accepted iterations. Cost: very high compute. Falsifying evidence:
+          measured contraction degrades before crossing the carried best. Merely
+          adding outer trips is already falsified because their measured rate is
+          exactly one.
+        </li>
+      </ol>
+      <p>
+        Krylov retuning is not ranked as a primary remedy: reductions already sit
+        seven to nine orders of magnitude inside the requested tolerance. A
+        preconditioner change would become relevant only if a guarded,
+        uninterrupted nonlinear trajectory exposed a materially worse linear
+        reduction or a direction-quality failure not present here.
+      </p>
+    </section>
+
+    <section id="evidence-record">
+      <h2>Evidence record</h2>
+      <ul>
+        <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch/slurm-1259459.log</code> &mdash; complete 3,098-line device and host telemetry.</li>
+        <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch/job-output/frame-179-stalled-state.npz</code> and frame-44 counterpart &mdash; persisted terminal states and settled-trip arrays.</li>
+        <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T065805044012-sse-diiid-stall-mechanism-harvest/iteration-analysis.json</code> &mdash; semantic decision census and rate statistics.</li>
+        <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T065805044012-sse-diiid-stall-mechanism-harvest/decomposition.json</code> &mdash; exact residual reconstruction and spatial measures.</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

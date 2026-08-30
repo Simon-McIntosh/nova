@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-30T11:11:52",
+  "updated": "2026-08-30T12:03:40",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -63497,9 +63497,111 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260830T091221649529-sse-globalization-state-continuation",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-globalization-state-continuation",
+        "node_definition": {
+          "done_when": "The third and last ranked remedy is implemented and measured against the same persisted checkpoints, with its falsifier honoured. Two remedies are already refuted and one hypothesis eliminated, and the record in docs/research/diiid-residual-stall-mechanism.html holds all of it. Carrying the terminal iterate across unchanged-mask trips left outer q at exactly 1.0, and its own finding named the reason: the within-trip contraction depends on globalization and model state beyond the iterate, which is rebuilt at every outer boundary. The carried best is proven genuinely reachable under the settled mask, so the stall is a real optimisation failure and not a measurement artefact. (1) Carry the full fixed-shape inner globalization state across trips whose active set is unchanged: merit history, adaptive radius, damping, recovery state and any model state the inner solve rebuilds at entry. Keep the fixed-shape device loop, add no data-dependent control flow, and keep best-iterate retention active. (2) A trip whose active set CHANGED must reset that state exactly as it does today, because the objective moved; prove with a test that a mask-changing trip is bit-identical with the carry on and off, in eager and JIT. (3) Prove a healthy monotone solve is unaffected, bit-identical with the carry on and off. (4) Measure from both persisted checkpoints at /home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch for at least six further outer trips, and report the per-trip residual sequence and the outer q to enough digits to distinguish 1.0 from 0.98. (5) Honour the falsifier: if outer q remains exactly 1.0, this remedy is refuted, and you must say so plainly. In that event do not propose a fourth variation of the same idea. Instead state, as the deliverable, what the three refutations JOINTLY establish about where the descent is lost, since carrying the iterate, carrying the best value, and carrying the globalization state will then all have failed, and say which single measurement would next distinguish the remaining possibilities. (6) If instead the outer q drops below 1, state how many further trips reach the unchanged 1e-6 tolerance and the wall-clock that implies at the measured per-trip cost. Do not relax any tolerance or gate threshold and do not regenerate any bank. Keep the focused lane green with the delta stated against the base revision rather than an absolute count, and update the research record with the outcome either way.",
+          "estimated_hours": null,
+          "goal": "Full inner globalization state carried across unchanged-mask trips, with the resulting outer contraction measured against its falsifier",
+          "id": "sse-globalization-state-continuation",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T091221649529-sse-globalization-state-continuation/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "tests/test_globalization_state_continuation.py",
+            "docs/research/diiid-residual-stall-mechanism.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-30T09:12:30Z",
+        "completed_at": "2026-08-30T10:03:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3048,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3048,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "dfa6f2cd243411112456bd60b07ec0d21462741f",
+        "commits": [
+          "9c3c518fdddbe9f00d1c0d350cd2b475b60ff8b8"
+        ],
+        "changed_lines": {
+          "added": 332,
+          "removed": 16,
+          "files": 3
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused lane 46 at base then 49 (+3, failure delta 0); 6 targeted continuation-compatibility tests including eager and JIT changed-mask reset identity and healthy monotone identity; ruff clean; audit-doc 0 errors",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T091221649529-sse-globalization-state-continuation/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T091221649529-sse-globalization-state-continuation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15070976,
+            "cached_input_tokens_cumulative": 21397248,
+            "input_tokens": 15275631,
+            "input_tokens_cumulative": 21719283,
+            "output_tokens": 24543,
+            "output_tokens_cumulative": 37712,
+            "reasoning_output_tokens": 4232,
+            "reasoning_output_tokens_cumulative": 7500
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1180
+    "_version": 1181
   }
 }

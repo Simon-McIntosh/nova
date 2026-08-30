@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-30T15:23:39",
+  "updated": "2026-08-30T23:49:54",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -64107,9 +64107,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260830T213946776568-sse-topology-panel-harvest",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-topology-panel-harvest",
+        "node_definition": {
+          "done_when": "The complete seventeen-panel cohort is audited and committed, with the containment gate reported in a form that cannot pass vacuously. Job 1259453 COMPLETED 0:0 in 1-02:59:20 and wrote 17 PNGs, 17 panel JSONs and 2 operand-metadata JSONs into /home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T183223007605-sse-topology-panel-final-launch/job-output. (1) Audit before copying: the scheduler receipt shows COMPLETED with ExitCode 0:0 and the log ends EXIT_MARKER=0; exactly seventeen panel indices are present once each with no denominator loss; every JSON is strict with no NaN or Infinity literals; each PNG is non-empty and opens at its stated dimensions. If any check fails, commit nothing and report the offending value. (2) Assert the containment gate in its STRONG form, not the converged-only form: for every panel with total_shadow_cells greater than zero AND closed_separatrix_available true, both shadow_cells_inside_lcfs and shadow_cells_inside_closed_separatrix must be exactly zero. Report the count of panels in that population. A converged-only gate would bind on almost nothing here, since only two panels converge, so it must not be the reported criterion. (3) Report the three populations separately and do not conflate them: panels with shadow and an available separatrix, where the gate genuinely binds; panels with an available separatrix and zero shadow cells, where zero-inside is trivially true and must be labelled as such; and panels with no available separatrix, whose containment counts are null and which must never be counted as passes. Give the counts and name the panels in each. (4) State the strongest single piece of evidence explicitly: the converged panels 11 and 12, MAST 22086/43 pure and mixed, carry 43 and 42 shadow cells with zero inside the closed separatrix. That is a converged equilibrium with substantial private-flux shadow entirely outside the boundary, which is the direct refutation of the reported defect. (5) Copy the seventeen PNGs and their JSON records to their publication paths and update docs/evidence/topology-visual-corroboration.html so each panel displays with its numeric containment record beside it, using project-absolute figure paths. Validate the document with the reckon doc-check tooling. (6) State in the manifest how many panels converged, so no reader can mistake a gate that rarely binds for a fully converged cohort, and retain every named failure panel with its exception class.",
+          "estimated_hours": null,
+          "goal": "The complete seventeen-panel cohort audited and committed with the containment gate asserted in its strong non-vacuous form",
+          "id": "sse-topology-panel-harvest",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T213946776568-sse-topology-panel-harvest/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/topology-visual-corroboration",
+            "docs/evidence/topology-visual-corroboration.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "topology-visuals",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-30T21:39:57Z",
+        "completed_at": "2026-08-30T21:49:52Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 595,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 595,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "48ce87142962a04901c3f9fc2b98806abd2a0a9b",
+        "commits": [
+          "a4bec44f5cbf80ad5e210c01c984ac8d02a89de9"
+        ],
+        "changed_lines": {
+          "added": 789,
+          "removed": 60,
+          "files": 37
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "job 1259453 COMPLETED 0:0 in 1-02:59:20 with EXIT_MARKER=0; cohort audit over durable source and publication copy found 17 unique indices, 19 strict JSON, 17 decodable PNGs, correct nullability and a 4/4 strong containment pass; 38 artifacts byte-identical; audit-doc 0 errors; original-resolution inspection of panels 05, 08, 11, 12",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T213946776568-sse-topology-panel-harvest/publication-audit.json",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T213946776568-sse-topology-panel-harvest/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e97-9cbb-7f42-a9b6-77efed646626",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3034752,
+            "cached_input_tokens_cumulative": 3034752,
+            "input_tokens": 3372476,
+            "input_tokens_cumulative": 3372476,
+            "output_tokens": 25606,
+            "output_tokens_cumulative": 25606,
+            "reasoning_output_tokens": 5341,
+            "reasoning_output_tokens_cumulative": 5341
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1186
+    "_version": 1187
   }
 }

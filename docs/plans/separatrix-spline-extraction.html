@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-30">
-<meta name="plan-version" content="100">
+<meta name="plan-version" content="101">
 </head>
 <body>
   <main class="plan-doc">
@@ -410,6 +410,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260830T121243098285-sse-own-mask-acceptance" data-who="domain-partition" data-when="2026-08-30T13:21:31Z">
     <div class="r-comment-body"><p>FINAL REMEDY: a real improvement that still does not reach tolerance. Acceptance proposes and predicts on the frozen mask but scores the candidate live residual and sufficient-decrease merit on the mask that candidate induces, against the incumbent on its own. The 2.05594-times frame-179 regression is refused, and a replacement Levenberg damping of 0.1 changes 13 cells and self-consistently lowers 0.04070199248460991 to 0.032447648342267814. Frame 179 halts at 0.023196268180508767 against 0.06399704757132339 under frozen-mask trust, a near threefold improvement; frame 44 is unmoved at 0.08100291897825324. Neither reaches 1e-6 and terminal contraction is 1.0. Scope was widened by orchestrator grant to one cycle fixture whose expectation encoded the unsound comparison; it now pins refusal of an equal own-mask residual at state 0.49908237904310226 rather than 0.625. The remaining direction is an own-mask-aware adaptive descent model preceded by a census at both halt states, at high cost</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260830T213946776568-sse-topology-panel-harvest" data-who="topology-visuals" data-when="2026-08-30T21:49:52Z">
+    <div class="r-comment-body"><p>THE REPORTED DEFECT IS REFUTED ON THE POPULATION WHERE IT WAS SEEN. The strong gate — shadow present AND a closed separatrix available implies zero cells inside both the LCFS and the closed separatrix — binds on 4 panels and passes 4 of 4: MAST 21978/35 pure and mixed, 22086/43 pure and mixed. The decisive rows are the only two converged panels, 22086/43 pure and mixed, carrying 43 and 42 shadow cells with both inside counts zero, so a converged equilibrium now shows substantial private-flux shadow entirely outside its boundary. Populations are reported separately and never conflated: 4 binding, 6 with a separatrix but zero shadow where zero-inside is trivial, and 7 with no separatrix whose containment is null and is not a pass. Only 2 of 17 converge, so a converged-only gate would have bound on almost nothing. All 15 nonconverged rows keep their qualification and named exceptions are retained: panels 05 and 06 ValueError, panel 08 NoQualifiedAxisError. Visual inspection at original resolution confirmed no private-flux cell inside either converged closed boundary</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

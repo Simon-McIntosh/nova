@@ -103,6 +103,15 @@
         endpoint additionally changes its own mask, where its live residual is
         0.1162006 rather than the frozen-mask 0.0243909.
       </p>
+      <p>
+        <strong>Final own-mask verdict.</strong> Scoring every candidate and the
+        incumbent on their separately induced masks prevents the 2.05594&times;
+        frame-179 regression, but it does not establish reachability. The two
+        forty-link chains halt at 0.023196268180508767 and
+        0.08100291897825324, respectively, without reaching
+        1&times;10<sup>&minus;6</sup>. This is the final remedy attempt in this
+        investigation.
+      </p>
     </aside>
 
     <section id="probe-admissibility">
@@ -982,6 +991,61 @@
       </details>
     </section>
 
+    <section id="own-mask-acceptance">
+      <h2>Own-mask acceptance removes the unsound jump but still halts</h2>
+      <p>
+        The final comparison is deliberately cross-state but not cross-domain:
+        a candidate is admissible only when its live relative-sup residual on
+        the mask it induces is lower than the incumbent&rsquo;s live relative-sup
+        residual on the mask the incumbent induces. The sufficient-decrease
+        merit uses those same two evaluations. The frozen mask remains the
+        proposal and linear-model domain; it is not used to certify the actual
+        candidate.
+      </p>
+      <table>
+        <caption>Final self-consistent forty-link reachability test</caption>
+        <thead><tr><th scope="col">Measure</th><th scope="col">Frame 179</th><th scope="col">Frame 44</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Stored residual</th><td>0.04485116727666494</td><td>0.08117000452284782</td></tr>
+          <tr><th scope="row">Accepted / refused</th><td>38 / 2</td><td>25 / 15</td></tr>
+          <tr><th scope="row">Selected families</th><td>12 Newton, 1 continuation, 1 Levenberg, 24 steepest</td><td>1 Newton, 24 steepest</td></tr>
+          <tr><th scope="row">Promoted-mask changes</th><td>13 cells at link 4; zero thereafter</td><td>zero at all links</td></tr>
+          <tr><th scope="row">Terminal residual / contraction</th><td>0.023196268180508767 / 1.0000000000000000</td><td>0.08100291897825324 / 1.0000000000000002</td></tr>
+          <tr><th scope="row">Reached 1&times;10<sup>&minus;6</sup></th><td>No</td><td>No</td></tr>
+          <tr><th scope="row">Compile / execute</th><td>192.634 / 1042.620 s</td><td>167.691 / 1335.924 s</td></tr>
+        </tbody>
+      </table>
+      <p>
+        Frame 179&rsquo;s first three Newton links again reach
+        0.04070199248460991. The previously trusted damping 0.001, whose own-mask
+        residual was 0.08368091815180548, is no longer admissible. Selection
+        instead reaches a damping 0.1 candidate at link 4; it changes 13 mask
+        cells but genuinely lowers its own-mask residual to
+        0.032447648342267814. The next self-consistent links lower it to
+        0.023196268180508767 before two refusals. Frame 44 is unchanged because
+        none of its candidates changes the active set: one Newton link and 24
+        steepest links reach 0.08100291897825324, followed by 15 refusals.
+      </p>
+      <details>
+        <summary>Full link-by-link residual and family record</summary>
+        <p><strong>Frame 179 residuals, links 1&ndash;40:</strong> 0.042434422303536494, 0.041262250993527191, 0.040701992484609907, 0.032447648342267814, 0.03063336039045399, 0.028972663972801394, 0.027156212931865431, 0.027049830974351624, 0.026996873611412158, 0.023832999173396222, 0.023496082407763373, 0.02332998623295069, 0.023247522627084599, 0.023206436186030521, 0.02320495481126959, 0.0232034734438233, 0.023201992083695912, 0.023200510730894117, 0.023199029385422742, 0.023197548047288616, 0.023197399914275683, 0.023197251781336668, 0.023197103648470864, 0.023196955515678404, 0.023196807382959012, 0.023196659250313684, 0.023196511117741701, 0.023196362985243496, 0.023196348172001471, 0.023196333358760295, 0.023196318545520123, 0.023196303732280231, 0.023196288919041477, 0.023196274105803584, 0.023196272624479698, 0.023196271143156245, 0.023196269661832219, 0.023196268180508767, 0.023196268180508767, 0.023196268180508767.</p>
+        <p><strong>Frame 179 families:</strong> Newton links 1&ndash;3; Levenberg link 4; Newton links 5&ndash;9; continuation link 10; Newton links 11&ndash;14; steepest links 15&ndash;38; refused links 39&ndash;40. Only link 4 changes the mask.</p>
+        <p><strong>Frame 44 residuals, links 1&ndash;40:</strong> 0.081083642667736086, 0.081072867556726658, 0.081060771182406732, 0.08105166970832707, 0.081050293081428193, 0.081040321740505045, 0.081029599572701755, 0.08101724010772185, 0.081007074294387416, 0.081006101654241477, 0.081005129145929985, 0.081004156692995488, 0.081003184241623116, 0.0810030870746999, 0.081002989906377776, 0.081002980190240936, 0.081002970474088581, 0.081002960757921849, 0.081002951041739116, 0.081002941325541644, 0.08100293160932924, 0.081002921893101626, 0.081002920921485533, 0.081002919949869051, 0.081002918978253236, then 0.081002918978253236 for links 26&ndash;40.</p>
+        <p><strong>Frame 44 families:</strong> Newton link 1; steepest links 2&ndash;25; refused links 26&ndash;40. No link changes the mask.</p>
+      </details>
+      <p>
+        Both halts are best described as <strong>bounded candidate-ladder
+        exhaustion</strong>, outside the earlier three-way census: the available
+        steepest scales reach 1&times;10<sup>&minus;8</sup>, deliver final absolute
+        improvements of 1.48&times;10<sup>&minus;9</sup> and
+        9.72&times;10<sup>&minus;10</sup>, and then expose no admissible candidate.
+        The experiment did not repeat the gradient/model census at these new
+        endpoints, so it does not relabel them as local minima, model failures,
+        or mathematical step-length floors. It establishes only that this fixed
+        candidate family cannot reach tolerance.
+      </p>
+    </section>
+
     <section id="cross-mask-residual-comparability">
       <h2>The carried residuals are valid on the settled masks</h2>
       <p>
@@ -1137,6 +1201,14 @@
       <h2>Evaluated remedies and remaining engineering direction</h2>
       <ol>
         <li>
+          <strong>Evaluate candidates on their own promoted masks.</strong>
+          Implemented and retained as a correctness rule: it refuses the measured
+          2.05594&times; regression and preserves bit-identical numerics when the
+          mask does not change. As a reachability remedy it is
+          <strong>negative</strong>: the final chains halt at 0.0231962682 and
+          0.0810029190 rather than 1&times;10<sup>&minus;6</sup>.
+        </li>
+        <li>
           <strong>Carry the best-observed iterate across outer trips and do not
           degrade it during warmup.</strong> Implemented as a fixed-shape promoted-
           merit guard and <strong>refuted as the stall remedy</strong>: both frames
@@ -1163,11 +1235,17 @@
           pursue another variation of cross-trip state carry.
         </li>
         <li>
-          <strong>Rebuild the warmup objective so it shares the promoted merit and
-          mask.</strong> Cost: high, requiring residual/JVP and conservation
-          revalidation. Falsifying evidence: the warmup increase is required to
-          satisfy a distinct constraint whose violation makes the carried best
-          inadmissible.
+          <strong>Replace the bounded candidate ladder with an own-mask-aware
+          adaptive descent model.</strong> This is the single remaining direction
+          most directly supported by the evidence: both final arms consume the
+          steepest scale floor and then refuse every offered candidate. Cost is
+          high: a fresh endpoint census, fixed-shape adaptive-scale design, full
+          residual/JVP and conservation revalidation, and another production
+          two-frame chain. The present two-frame measurement alone cost 360.325 s
+          to compile and 2378.544 s to execute. It is falsified if a census at
+          both final endpoints finds no own-mask descent direction, or if an
+          adaptive chain again reaches terminal contraction one above
+          1&times;10<sup>&minus;6</sup>.
         </li>
         <li>
           <strong>Increase the Newton budget only after the reset is removed.</strong>
@@ -1202,22 +1280,25 @@
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T101824700290-sse-retained-state-descent-chain/retained-state-descent-chain.json</code> &mdash; all 120 fixed-shape link records, including residuals, empirical contractions, selected factors or dampings, Krylov reductions, step norms, and promoted-mask differences.</li>
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T104938950186-sse-descent-barrier-characterisation/descent-barrier-census.json</code> &mdash; 92 candidate records over the four exact halt states, including promoted-mask residuals, gradients, directional derivatives, predicted and actual changes, thresholds, decisions, and live residuals.</li>
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T111255201829-sse-model-trust-candidate-selection/model-trusted-chain.json</code> &mdash; 80 self-consistent fixed-shape promotion records with own-mask residuals, selected families, factors, mask changes, and wall times.</li>
+        <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T121243098285-sse-own-mask-acceptance/own-mask-chain.json</code> &mdash; the final 80-link candidate-own-mask record, including every residual, selected family, factor, mask change, contraction, and timing.</li>
       </ul>
     </section>
 
     <section id="plain-language-conclusion">
       <h2>What this investigation establishes</h2>
       <p>
-        The solver is not stuck because the equations have become locally flat,
-        and it is not taking steps too small to matter. It is stuck because the
-        Newton-style model increasingly predicts improvement where the real
-        nonlinear residual gets worse, while usable alternative directions remain
-        outside the path each measured arm follows. One diagnostic trajectory also
-        crossed into a different active set, making its attractive frozen-mask
-        number inapplicable to its live problem. The actionable conclusion is to
-        correct model/candidate selection and preserve active-set consistency.
-        Changing the physics residual, grid, or tolerance is not justified by the
-        evidence, and repeating more of the same promotions is already falsified.
+        The final repair makes acceptance honest: a candidate cannot win using a
+        residual measured on a mask it will not own. That removes the known
+        2.05594&times; regression and lowers frame 179 substantially, but neither
+        production frame reaches 1&times;10<sup>&minus;6</sup>; both exhaust the
+        bounded candidate ladder with terminal contraction one. On the evidence
+        gathered, the unchanged tolerance is therefore <strong>not reachable by
+        this formulation&rsquo;s current fixed candidate family</strong>. The evidence
+        does not prove that no fixed-shape method can reach it. The one remaining
+        direction worth measuring is an own-mask-aware adaptive descent model,
+        beginning with a fresh census at the two new halt states and carrying the
+        high validation and compute cost stated above. No conclusion here depends
+        on relaxing the tolerance; that policy choice remains open for the lead.
       </p>
     </section>
   </main>

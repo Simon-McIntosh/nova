@@ -834,11 +834,14 @@ def _recent_merit_maximum(
 def _model_decrease_is_trusted(
     predicted_merit: jax.Array,
     actual_merit: jax.Array,
-    current_merit: jax.Array,
+    actual_current_merit: jax.Array,
+    predicted_current_merit: jax.Array | None = None,
 ) -> jax.Array:
     """Require realized merit decrease to substantiate the local prediction."""
-    predicted_decrease = current_merit - predicted_merit
-    actual_decrease = current_merit - actual_merit
+    if predicted_current_merit is None:
+        predicted_current_merit = actual_current_merit
+    predicted_decrease = predicted_current_merit - predicted_merit
+    actual_decrease = actual_current_merit - actual_merit
     return (
         jnp.isfinite(predicted_decrease)
         & jnp.isfinite(actual_decrease)
@@ -857,32 +860,44 @@ def _backtracked_promotion(
     reference_merit: jax.Array,
     recovery_radius: jax.Array,
     model_trust_selection: jax.Array | bool,
+    *,
+    acceptance_map_fn: Callable[[jax.Array], jax.Array] | None = None,
+    own_mask_acceptance: jax.Array | bool = False,
 ) -> _BacktrackedPromotion:
     """Select a window-decreasing Newton trial or continuation recovery."""
 
+    acceptance_map_fn = map_fn if acceptance_map_fn is None else acceptance_map_fn
     factors = jnp.asarray(_BACKTRACKING_FACTORS, dtype=state.dtype)
     candidates = state[None, :] + factors[:, None] * step[None, :]
 
     def score(candidate):
-        mapped = map_fn(candidate)
+        mapped = acceptance_map_fn(candidate)
         return (
             _smooth_relative_sup_merit(mapped, candidate),
             _relative_residual(mapped, candidate),
         )
 
     merits, residuals = jax.lax.map(score, candidates)
+    incumbent_mapped = acceptance_map_fn(state)
+    incumbent_merit = _smooth_relative_sup_merit(incumbent_mapped, state)
+    incumbent_residual = _relative_residual(incumbent_mapped, state)
+    acceptance_reference = jnp.where(
+        own_mask_acceptance, incumbent_merit, reference_merit
+    )
     predicted_merits = jax.lax.map(
         lambda candidate: _smooth_relative_sup_merit(
             model_map_fn(candidate), candidate
         ),
         candidates,
     )
-    required = reference_merit * (1.0 - _SUFFICIENT_DECREASE_SLOPE * factors)
+    required = acceptance_reference * (1.0 - _SUFFICIENT_DECREASE_SLOPE * factors)
     sufficient = jnp.isfinite(merits) & jnp.isfinite(residuals) & (merits <= required)
+    sufficient &= ~jnp.asarray(own_mask_acceptance) | (residuals < incumbent_residual)
     ladder_selected = jnp.argmax(sufficient)
     ladder_trusted = _model_decrease_is_trusted(
         predicted_merits[ladder_selected],
         merits[ladder_selected],
+        incumbent_merit,
         _smooth_relative_sup_merit(model_map_fn(state), state),
     )
     ladder_accepted = jnp.any(sufficient) & (
@@ -890,8 +905,13 @@ def _backtracked_promotion(
     )
     predicted_current_merit = _smooth_relative_sup_merit(model_map_fn(state), state)
     ladder_mispredicted = (predicted_merits < predicted_current_merit) & ~jax.vmap(
-        _model_decrease_is_trusted, in_axes=(0, 0, None)
-    )(predicted_merits, merits, predicted_current_merit)
+        lambda predicted, actual: _model_decrease_is_trusted(
+            predicted,
+            actual,
+            incumbent_merit,
+            predicted_current_merit,
+        )
+    )(predicted_merits, merits)
     ladder_distrusted = jnp.asarray(model_trust_selection) & jnp.any(
         ladder_mispredicted
     )
@@ -928,9 +948,10 @@ def _backtracked_promotion(
             trusted = _model_decrease_is_trusted(
                 predicted_merit,
                 candidate_merit,
+                incumbent_merit,
                 _smooth_relative_sup_merit(model_map_fn(state), state),
             )
-            required_merit = reference_merit * (
+            required_merit = acceptance_reference * (
                 1.0 - _SUFFICIENT_DECREASE_SLOPE * radius
             )
             select = (
@@ -938,6 +959,10 @@ def _backtracked_promotion(
                 & jnp.isfinite(candidate_merit)
                 & jnp.isfinite(candidate_residual)
                 & (candidate_merit <= required_merit)
+                & (
+                    ~jnp.asarray(own_mask_acceptance)
+                    | (candidate_residual < incumbent_residual)
+                )
                 & (~jnp.asarray(model_trust_selection) | trusted)
             )
             candidate_distrusted = (
@@ -973,7 +998,7 @@ def _backtracked_promotion(
             recovery_trial,
             (
                 state,
-                current_residual,
+                jnp.where(own_mask_acceptance, incumbent_residual, current_residual),
                 jnp.asarray(False),
                 initial_radius,
                 ladder_distrusted,
@@ -1025,10 +1050,19 @@ def _rebuilt_model_promotion(
     maximum_step: jax.Array,
     initial_damping: jax.Array,
     model_trust_selection: jax.Array | bool,
+    acceptance_map_fn: Callable[[jax.Array], jax.Array] | None = None,
+    own_mask_acceptance: jax.Array | bool = False,
 ) -> _RebuiltModelPromotion:
     """Re-linearize and seek a window-decreasing Levenberg-damped step."""
+    acceptance_map_fn = map_fn if acceptance_map_fn is None else acceptance_map_fn
     mapped, tangent = jax.linearize(map_fn, state)
     residual_vector = mapped - state
+    incumbent_mapped = acceptance_map_fn(state)
+    incumbent_merit = _smooth_relative_sup_merit(incumbent_mapped, state)
+    incumbent_residual = _relative_residual(incumbent_mapped, state)
+    acceptance_reference = jnp.where(
+        own_mask_acceptance, incumbent_merit, reference_merit
+    )
 
     def linear_action(vector):
         return vector - tangent(vector)
@@ -1060,14 +1094,16 @@ def _rebuilt_model_promotion(
             step,
         )
         candidate = state + bounded_step
-        candidate_mapped = map_fn(candidate)
+        candidate_mapped = acceptance_map_fn(candidate)
         candidate_merit = _smooth_relative_sup_merit(candidate_mapped, candidate)
         candidate_residual = _relative_residual(candidate_mapped, candidate)
         predicted_mapped = mapped + tangent(candidate - state)
         predicted_merit = _smooth_relative_sup_merit(predicted_mapped, candidate)
-        current_merit = _smooth_relative_sup_merit(mapped, state)
         trusted = _model_decrease_is_trusted(
-            predicted_merit, candidate_merit, current_merit
+            predicted_merit,
+            candidate_merit,
+            incumbent_merit,
+            _smooth_relative_sup_merit(mapped, state),
         )
         select = (
             ~accepted
@@ -1075,8 +1111,15 @@ def _rebuilt_model_promotion(
             & jnp.all(jnp.isfinite(step))
             & jnp.isfinite(candidate_merit)
             & jnp.isfinite(candidate_residual)
-            & (candidate_merit <= reference_merit * (1.0 - _SUFFICIENT_DECREASE_SLOPE))
+            & (
+                candidate_merit
+                <= acceptance_reference * (1.0 - _SUFFICIENT_DECREASE_SLOPE)
+            )
             & (~jnp.asarray(model_trust_selection) | trusted)
+            & (
+                ~jnp.asarray(own_mask_acceptance)
+                | (candidate_residual < incumbent_residual)
+            )
         )
         return (
             jnp.where(select, candidate, selected_state),
@@ -1124,8 +1167,12 @@ def _steepest_descent_promotion(
     current_residual: jax.Array,
     reference_merit: jax.Array,
     model_trust_selection: jax.Array | bool,
+    acceptance_map_fn: Callable[[jax.Array], jax.Array] | None = None,
+    own_mask_acceptance: jax.Array | bool = False,
 ) -> _SteepestDescentPromotion:
     """Seek Armijo decrease of the smooth relative-sup merit on a fixed ladder."""
+
+    acceptance_map_fn = map_fn if acceptance_map_fn is None else acceptance_map_fn
 
     def merit(candidate):
         return _smooth_relative_sup_merit(map_fn(candidate), candidate)
@@ -1142,19 +1189,27 @@ def _steepest_descent_promotion(
     candidates = state[None, :] + scales[:, None] * direction[None, :]
 
     def score(candidate):
-        mapped = map_fn(candidate)
+        mapped = acceptance_map_fn(candidate)
         return (
             _smooth_relative_sup_merit(mapped, candidate),
             _relative_residual(mapped, candidate),
         )
 
     merits, residuals = jax.lax.map(score, candidates)
+    incumbent_mapped = acceptance_map_fn(state)
+    incumbent_merit = _smooth_relative_sup_merit(incumbent_mapped, state)
+    incumbent_residual = _relative_residual(incumbent_mapped, state)
+    acceptance_reference = jnp.where(
+        own_mask_acceptance, incumbent_merit, reference_merit
+    )
     directional_derivative = jnp.sum(gradient * direction)
-    required = reference_merit + (
+    required = acceptance_reference + (
         _SUFFICIENT_DECREASE_SLOPE * scales * directional_derivative
     )
     predicted_merits = _current_merit + scales * directional_derivative
-    trusted = _model_decrease_is_trusted(predicted_merits, merits, _current_merit)
+    trusted = _model_decrease_is_trusted(
+        predicted_merits, merits, incumbent_merit, _current_merit
+    )
     sufficient = (
         finite_gradient
         & (gradient_norm > 0.0)
@@ -1162,6 +1217,7 @@ def _steepest_descent_promotion(
         & jnp.isfinite(residuals)
         & (merits <= required)
         & (~jnp.asarray(model_trust_selection) | trusted)
+        & (~jnp.asarray(own_mask_acceptance) | (residuals < incumbent_residual))
     )
     accepted = jnp.any(sufficient)
     selected = jnp.argmax(sufficient)
@@ -1885,6 +1941,13 @@ def _newton_krylov_inner(
     resume_globalization: jax.Array | bool = False,
     return_globalization_state: bool = False,
     model_trust_selection: bool = True,
+    acceptance_shadow_mask_fn: (
+        Callable[[jax.Array, jax.Array], jax.Array] | None
+    ) = None,
+    acceptance_shadowed_map_fn: (
+        Callable[[jax.Array, jax.Array], jax.Array] | None
+    ) = None,
+    own_mask_acceptance: bool = False,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult | tuple[FixedPointResult, _NewtonGlobalizationState]:
     """Exact-tangent Jacobian-free Newton–Krylov on the fixed-point residual.
@@ -1975,6 +2038,10 @@ def _newton_krylov_inner(
         raise ValueError("promoted shadow masks require a shadowed map")
     if carry_shadows and not observe_shadows:
         raise ValueError("promoted shadow masks require an initial shadow mask")
+    if (acceptance_shadow_mask_fn is None) != (acceptance_shadowed_map_fn is None):
+        raise ValueError("own-mask acceptance requires both mask and map callbacks")
+    if own_mask_acceptance and acceptance_shadow_mask_fn is None:
+        raise ValueError("own-mask acceptance requires candidate mask callbacks")
 
     def shadow_mask(state):
         if observe_shadows:
@@ -2110,6 +2177,14 @@ def _newton_krylov_inner(
         def frozen_map(candidate):
             return mapped_with_shadow(candidate, carry.shadow_mask)
 
+        def acceptance_map(candidate):
+            if acceptance_shadow_mask_fn is None or not own_mask_acceptance:
+                return frozen_map(candidate)
+            candidate_shadow = jnp.ravel(
+                acceptance_shadow_mask_fn(candidate, carry.shadow_mask)
+            )
+            return acceptance_shadowed_map_fn(candidate, candidate_shadow)
+
         mapped, tangent = jax.linearize(frozen_map, state)
         residual_vector = mapped - state
         nonlinear_residual = _relative_residual(mapped, state)
@@ -2204,6 +2279,8 @@ def _newton_krylov_inner(
                     reference_merit,
                     measured.recovery_radius,
                     model_trust_selection,
+                    acceptance_map_fn=acceptance_map,
+                    own_mask_acceptance=own_mask_acceptance,
                 )
                 minimum_radius = jnp.sqrt(jnp.finfo(state.dtype).eps)
                 rebuild_activated = (
@@ -2225,6 +2302,8 @@ def _newton_krylov_inner(
                         maximum_step=cap,
                         initial_damping=measured.model_rebuild_damping,
                         model_trust_selection=model_trust_selection,
+                        acceptance_map_fn=acceptance_map,
+                        own_mask_acceptance=own_mask_acceptance,
                     )
 
                 def skip_rebuild(_):
@@ -2248,6 +2327,8 @@ def _newton_krylov_inner(
                         nonlinear_residual,
                         reference_merit,
                         model_trust_selection,
+                        acceptance_map_fn=acceptance_map,
+                        own_mask_acceptance=own_mask_acceptance,
                     )
 
                 def skip_descent(_):
@@ -2694,6 +2775,7 @@ def _active_set_newton_krylov(
     continue_newton_trajectory: bool,
     continue_globalization_state: bool,
     model_trust_selection: bool,
+    own_mask_acceptance: bool,
     precision: Precision | str,
 ) -> FixedPointResult:
     """Reconcile bounded frozen-mask solves with their live active sets."""
@@ -2728,6 +2810,9 @@ def _active_set_newton_krylov(
             resume_globalization=resume_globalization,
             return_globalization_state=True,
             model_trust_selection=model_trust_selection,
+            acceptance_shadow_mask_fn=promoted_shadow_mask_fn,
+            acceptance_shadowed_map_fn=shadowed_map_fn,
+            own_mask_acceptance=own_mask_acceptance,
             precision=precision,
         )
 
@@ -3063,6 +3148,7 @@ def newton_krylov(
     continue_newton_trajectory: bool = True,
     continue_globalization_state: bool = True,
     model_trust_selection: bool | None = None,
+    own_mask_acceptance: bool | None = None,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Run globalized Newton and reconcile state-dependent active sets.
@@ -3094,6 +3180,11 @@ def newton_krylov(
     through to later fixed-shape candidate families.  Its default is enabled
     for state-dependent active-set solves and disabled for smooth maps without
     promoted masks; either path can override it explicitly.
+    ``own_mask_acceptance`` evaluates each proposed candidate on the active set
+    that candidate induces.  Admission then requires the candidate's live
+    residual on its own mask to improve on the incumbent's live residual on
+    the incumbent's own mask.  Its default follows ``model_trust_selection``:
+    enabled for state-dependent active-set solves and disabled for smooth maps.
     ``stream_active_set`` emits one flushed host line for every executed outer
     trip; it is disabled by default and does not alter any solver carry.
     ``stream_inner_iterations`` similarly emits the fixed-shape Newton receipt
@@ -3111,6 +3202,15 @@ def newton_krylov(
     use_model_trust = (
         carry_shadows if model_trust_selection is None else bool(model_trust_selection)
     )
+    use_own_mask_acceptance = (
+        carry_shadows and admissibility_fn is None
+        if own_mask_acceptance is None
+        else bool(own_mask_acceptance)
+    )
+    if use_own_mask_acceptance and not carry_shadows:
+        raise ValueError("own-mask acceptance requires promoted shadow masks")
+    if use_own_mask_acceptance and admissibility_fn is not None:
+        raise ValueError("own-mask acceptance is unavailable for manifold advance")
     options = {
         "newton_steps": newton_steps,
         "gmres_iterations": gmres_iterations,
@@ -3155,6 +3255,7 @@ def newton_krylov(
             continue_newton_trajectory=continue_newton_trajectory,
             continue_globalization_state=continue_globalization_state,
             model_trust_selection=use_model_trust,
+            own_mask_acceptance=use_own_mask_acceptance,
             precision=precision,
         )
     if checkpoint_path is not None:

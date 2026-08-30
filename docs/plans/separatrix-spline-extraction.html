@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-30">
-<meta name="plan-version" content="91">
+<meta name="plan-version" content="92">
 </head>
 <body>
   <main class="plan-doc">
@@ -383,6 +383,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260830T065805044012-sse-diiid-stall-mechanism-harvest" data-who="domain-partition" data-when="2026-08-30T07:24:09Z">
     <div class="r-comment-body"><p>MECHANISM IDENTIFIED: a solve-level search reset, not a stationary point and not a bad direction. Frame 179 accepted 24 of 24 steps at local q=0.9799176816 with step norms 0.0148 to 0.1595 and worst Krylov reduction 6.55e-14 against a requested 1e-5; eight warmup sweeps then raised the carried residual 0.0448512 to 0.327281 and Newton ended at 0.201127, still 4.48432 times worse, so returned improvement was exactly zero. Frame 44 accepted 22 of 24 at local q=0.9887441697 with worst Krylov reduction 3.73e-12; warmup raised 0.0811700 to 0.146068 and the endpoint 0.113868 stayed 1.40283 times worse, again zero returned improvement. This reconciles the two prior views and overturns the projection a live plan steers by: local contraction is broadly consistent with the recorded q approximately 0.970, but settled OUTER q is exactly 1.0, so about 425 further promotions to 1e-8 cannot hold at any budget. Ranked remedy: carry the best-observed iterate across trips and stop warmup degrading it, falsified if guarded or zero-warmup trips still return outer q=1.0</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260830T072458160660-sse-outer-best-iterate-retention" data-who="domain-partition" data-when="2026-08-30T07:50:41Z">
+    <div class="r-comment-body"><p>REMEDY REFUTED, and the falsifier was honoured rather than explained away. Best-iterate retention now keeps the incoming state whenever the active set is unchanged and the candidate is worse in the p=8 promotion merit, proven bit-identical on a monotone solve with retention on and off in eager and JIT. Resuming both persisted production checkpoints for four further outer trips gives frame 179 the sequence 0.04485116727666494 repeated four times and frame 44 0.08117000452284738 repeated four times, mask differences 0,0,0,0 in both, and outer q=1.0000000000000000 in both. So the 1e-6 tolerance stays unreachable at any finite outer-trip count and this is not the fix. The guarantee is still worth keeping. The measurement cost minutes because the stalled states were persisted, against a ten-hour re-solve. Next candidate: continue the frozen-mask Newton trajectory across trips without replaying warmup, since local contraction at q~0.98 does accumulate if it is not reset</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

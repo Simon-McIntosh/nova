@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-30">
-<meta name="plan-version" content="96">
+<meta name="plan-version" content="97">
 </head>
 <body>
   <main class="plan-doc">
@@ -398,6 +398,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260830T100408843197-sse-retained-state-promotion-census" data-who="domain-partition" data-when="2026-08-30T10:17:30Z">
     <div class="r-comment-body"><p>DESCENT EXISTS AT THE RETAINED STATE, in both frames, which locates the stall. Acceptance mismatch is ruled out: zero candidates reduce the live residual while failing the merit threshold. Local barrier is ruled out: directional derivatives are materially negative (-0.0018561464436329252 and -0.0019766294204355663) with 20 of 23 and 9 of 23 candidates decreasing the residual. Model error is present but not terminal at 3 of 23 and 14 of 23 predicted-decrease/actual-increase, since backtracking still finds accepted Newton descent. Frame 179 accepts the full Newton step for a live residual of 0.04243436095347994, and a diagnostic Levenberg damping of 0.001 reaches 0.025089936354262512, a 44.06 percent reduction in ONE step. Frame 44 is far weaker: four factors refused on rising merit, factor 0.0625 accepted for a 0.0000863618 reduction, best diagnostic 0.97 percent. Krylov reductions are 4.16e-15 and 3.51e-14 against a requested 1e-5. So the outer loop stalls because it never promotes FROM the retained best: it warms up first, degrading to 0.327 and 0.146, and the trajectory never returns. The frames agree descent exists and differ in model fidelity</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260830T101824700290-sse-retained-state-descent-chain" data-who="domain-partition" data-when="2026-08-30T10:48:25Z">
+    <div class="r-comment-body"><p>DESCENT DOES NOT PERSIST: it decays and halts in all four chains, so the single 44 percent step was real but is not a convergent sequence. Frame 179 production runs 0.04485116727666494, 0.04243436112560362, 0.04126217357531822, 0.04070191086569353 then exactly that value through link 30, three links accepted with first refusal at link 4. Its damping-searched arm reaches 0.02508993635426251, 0.02468166306504118, 0.02448693746305617, 0.02439092079766208 then halts, four accepted, first refusal link 5. Frame 44 production accepts one link to 0.08108364266773609 then halts; its damping-searched arm reaches 0.07403979201423325 by link 4 then halts. TERMINAL q IS EXACTLY 1 IN ALL FOUR, so the unchanged 1e-6 tolerance is unreachable at any finite promotion count and extrapolating the accepted-prefix q of 0.968 or 0.859 is invalid. Caveat that matters: the damping-searched endpoints are frozen-mask counterfactuals rather than settled active-set solutions, because their promoted masks differ by two and three nodes. Cost was about 8 s per link. The barrier at links 4 and 5 is now the only open question</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

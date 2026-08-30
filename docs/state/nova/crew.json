@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-30T12:17:55",
+  "updated": "2026-08-30T12:48:53",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -63700,9 +63700,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260830T101824700290-sse-retained-state-descent-chain",
+        "plan": "separatrix-spline-extraction",
+        "section": "",
+        "node": "sse-retained-state-descent-chain",
+        "node_definition": {
+          "done_when": "Whether descent from the retained state PERSISTS is measured, because a single admissible step does not establish a convergent sequence. The census in docs/research/diiid-residual-stall-mechanism.html found an admissible promotion at each retained best state: frame 179 accepts the full Newton step to a live residual of 0.04243436095347994 with a diagnostic Levenberg damping of 0.001 reaching 0.025089936354262512, a 44.06 percent single-step reduction, while frame 44 accepts factor 0.0625 for a reduction of only 0.0000863618 with a best diagnostic of 0.97 percent. Acceptance mismatch and local barrier are both ruled out; model error is present at 3 of 23 and 14 of 23 predicted-decrease/actual-increase but is not terminal. (1) From each frame's persisted checkpoint at /home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch, run a chain of at least 30 successive no-warmup promotions, each launched from the state the previous promotion accepted, on the settled mask. Report the full residual sequence, the accepted step factor and damping at each link, and the empirical contraction between successive links. (2) State whether descent persists, decays, or halts, and name the link index where behaviour changes if it does. A single 44 percent step followed by stagnation is a different finding from sustained contraction and must not be reported as the same thing. (3) Report the two frames separately and do not average them: frame 179 and frame 44 already differ by more than an order of magnitude in single-step reduction, and a remedy that works for one and not the other is a partial result that must be stated as such. (4) State the consequence as a number: at the measured sustained contraction, how many further promotions reach the unchanged 1e-6 tolerance from each frame's retained residual, and what wall-clock that implies at the measured per-promotion cost. If a frame halts before reaching tolerance, give the residual it halts at and the link index. (5) Include the diagnostic damping candidates in the chain search rather than only the production selection, since the census showed the production choice was far from the best available on frame 179; report whether a per-link damping search sustains descent that the production selection does not. (6) Attempt no fix, change no solver default, relax no tolerance and regenerate no bank. This node measures whether a fix is possible and at what cost. Record the chain in docs/research/diiid-residual-stall-mechanism.html with a figure of residual against promotion index for both frames, validated with the reckon doc-check tooling.",
+          "estimated_hours": null,
+          "goal": "Whether descent from the retained state persists over a chain of no-warmup promotions, measured separately per frame with the implied cost to tolerance",
+          "id": "sse-retained-state-descent-chain",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T101824700290-sse-retained-state-descent-chain/manifest.md",
+          "plan": "separatrix-spline-extraction",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/research/diiid-residual-stall-mechanism.html",
+            "docs/figures/diiid-residual-stall"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "domain-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-30T10:18:34Z",
+        "completed_at": "2026-08-30T10:48:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1791,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1791,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "c82851d2c28682451d0b218c040fa8c076814d08",
+        "commits": [
+          "123029fc217f1183020b8bf458f157600fc7dba2"
+        ],
+        "changed_lines": {
+          "added": 146,
+          "removed": 1,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "120 fixed-shape link records across two frames and two arms, digests recorded; figure and research record validated by audit-doc",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T101824700290-sse-retained-state-descent-chain/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T101824700290-sse-retained-state-descent-chain/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f62-b592-7320-95c3-b79eb01ce28a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3984512,
+            "cached_input_tokens_cumulative": 10683904,
+            "input_tokens": 3988625,
+            "input_tokens_cumulative": 10905938,
+            "output_tokens": 2629,
+            "output_tokens_cumulative": 25030,
+            "reasoning_output_tokens": 408,
+            "reasoning_output_tokens_cumulative": 3793
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1182
+    "_version": 1183
   }
 }

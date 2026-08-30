@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="diiid-residual-stall-mechanism">
   <meta name="plan-title" content="DIII-D residual stall mechanism">
-  <meta name="plan-summary" content="All four descent halts retain substantial gradients and useful candidate steps; the barrier is selective model and search failure, not a local minimum or numerical step floor">
+  <meta name="plan-summary" content="Model-trust selection exposes alternative descent but does not reach tolerance: both self-consistent forty-link chains end at contraction one">
   <meta name="plan-status" content="reference">
   <meta name="plan-evidence-for" content="separatrix-spline-extraction">
   <meta name="plan-source-quality" content="primary">
@@ -921,6 +921,67 @@
       </p>
     </section>
 
+    <section id="model-trust-chain">
+      <h2>Model-trust selection exposes descent but does not reach tolerance</h2>
+      <p>
+        Promotion now checks whether the selected family&rsquo;s local prediction is
+        borne out before preferring it. A predicted decrease is trusted when the
+        realized decrease is at least one tenth of the predicted magnitude;
+        stronger realized decrease is also trusted. A weaker decrease or an
+        actual increase distrusts that family for the current promotion and the
+        fixed-shape search falls through from Newton to continuation, Levenberg,
+        and steepest descent. The factor 10 is the same one-order-of-magnitude
+        fidelity distinction used by the barrier census.
+      </p>
+      <p>
+        The required reachability result is <strong>negative</strong>. Neither
+        forty-link chain reaches 1&times;10<sup>&minus;6</sup>, and both terminate
+        with empirical contraction exactly one. This is not presented as a
+        partial success merely because alternative families lower some local
+        objectives.
+      </p>
+      <table>
+        <caption>Self-consistent forty-link outcome</caption>
+        <thead>
+          <tr>
+            <th scope="col">Measure</th>
+            <th scope="col">Frame 179</th>
+            <th scope="col">Frame 44</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Stored residual</th><td>0.04485116727666494</td><td>0.08117000452284782</td></tr>
+          <tr><th scope="row">Accepted / refused links</th><td>38 / 2</td><td>25 / 15</td></tr>
+          <tr><th scope="row">Selected families</th><td>11 Newton, 1 Levenberg, 26 steepest</td><td>1 Newton, 24 steepest</td></tr>
+          <tr><th scope="row">Live-mask changes</th><td>2 cells at link 4</td><td>0 cells</td></tr>
+          <tr><th scope="row">Terminal residual</th><td>0.06399704757132339</td><td>0.08100291897825324</td></tr>
+          <tr><th scope="row">Terminal contraction</th><td>1.0000000000000000</td><td>1.0000000000000002</td></tr>
+          <tr><th scope="row">Reached 1&times;10<sup>&minus;6</sup></th><td>No</td><td>No</td></tr>
+          <tr><th scope="row">Compile / execute</th><td>61.464 / 567.296 s</td><td>62.796 / 689.553 s</td></tr>
+        </tbody>
+      </table>
+      <p>
+        Frame 179 explains why frozen-mask improvement is insufficient. The
+        first three Newton links reach 0.04070199248460991. At link 4, trusted
+        Levenberg damping 0.001 changes two cells in the promoted mask, and the
+        candidate&rsquo;s residual on that own mask is 0.08368091815180548 rather
+        than its attractive frozen-mask value. Subsequent Newton and steepest
+        links lower that live residual only to 0.06399704757132339; links 39 and
+        40 are refused. Frame 44 never changes its 14-cell mask, but its 24
+        steepest links consume the scale ladder from 1&times;10<sup>&minus;4</sup>
+        through 1&times;10<sup>&minus;8</sup> and halt at 0.08100291897825324.
+        The halt is therefore again a step-family/active-set limitation, not a
+        demonstrated route to the convergence gate.
+      </p>
+      <details>
+        <summary>Full per-link residual and selected-family record</summary>
+        <p><strong>Frame 179 residuals, stored state then links 1&ndash;40:</strong> 0.04485116727666494, 0.042434422303536494, 0.04126225099352719, 0.04070199248460991, 0.08368091815180548, 0.07874809577234015, 0.07759557692704819, 0.0727540316058699, 0.07044339384645863, 0.06578595711926886, 0.06470423322552757, 0.06417124379072231, 0.06403896613664173, 0.06402269155108548, 0.064006416915592, 0.0640047894469055, 0.06400316197771841, 0.06400153450803026, 0.06399990703784121, 0.06399827956715141, 0.0639981168200306, 0.06399795407290548, 0.06399779132577492, 0.06399762857863946, 0.06399746583149885, 0.06399730308435335, 0.0639971403372028, 0.06399712406248755, 0.06399710778777158, 0.06399709151305605, 0.06399707523834035, 0.06399705896362466, 0.06399705733615312, 0.06399705570868129, 0.06399705408120973, 0.06399705245373818, 0.06399705082626678, 0.06399704919879494, 0.06399704757132339, 0.06399704757132339, 0.06399704757132339.</p>
+        <p><strong>Frame 179 families:</strong> Newton &times;3, Levenberg, Newton &times;8, steepest &times;26, refused &times;2.</p>
+        <p><strong>Frame 44 residuals, stored state then links 1&ndash;40:</strong> 0.08117000452284782, 0.08108364266773609, 0.08107286755672666, 0.08106077118240673, 0.08105166970832707, 0.08105029308142819, 0.08104032174050504, 0.08102959957270175, 0.08101724010772185, 0.08100707429438742, 0.08100610165424148, 0.08100512914592999, 0.08100415669299549, 0.08100318424162312, 0.0810030870746999, 0.08100298990637778, 0.08100298019024094, 0.08100297047408858, 0.08100296075792185, 0.08100295104173912, 0.08100294132554164, 0.08100293160932924, 0.08100292189310163, 0.08100292092148553, 0.08100291994986905, 0.08100291897825324, then 0.08100291897825324 for links 26&ndash;40.</p>
+        <p><strong>Frame 44 families:</strong> Newton, steepest &times;24, refused &times;15.</p>
+      </details>
+    </section>
+
     <section id="cross-mask-residual-comparability">
       <h2>The carried residuals are valid on the settled masks</h2>
       <p>
@@ -1140,6 +1201,7 @@
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T091221649529-sse-globalization-state-continuation/globalization-resumption.json</code> &mdash; six full-globalization continuation trips per frame, with exact residual sequences, mask differences, wall times, and outer rates.</li>
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T101824700290-sse-retained-state-descent-chain/retained-state-descent-chain.json</code> &mdash; all 120 fixed-shape link records, including residuals, empirical contractions, selected factors or dampings, Krylov reductions, step norms, and promoted-mask differences.</li>
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T104938950186-sse-descent-barrier-characterisation/descent-barrier-census.json</code> &mdash; 92 candidate records over the four exact halt states, including promoted-mask residuals, gradients, directional derivatives, predicted and actual changes, thresholds, decisions, and live residuals.</li>
+        <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T111255201829-sse-model-trust-candidate-selection/model-trusted-chain.json</code> &mdash; 80 self-consistent fixed-shape promotion records with own-mask residuals, selected families, factors, mask changes, and wall times.</li>
       </ul>
     </section>
 

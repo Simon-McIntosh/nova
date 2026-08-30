@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="diiid-residual-stall-mechanism">
   <meta name="plan-title" content="DIII-D residual stall mechanism">
-  <meta name="plan-summary" content="Per-iteration evidence identifies an outer-trip search reset; guarded best-iterate retention is correct but leaves the measured settled outer contraction exactly one">
+  <meta name="plan-summary" content="Per-iteration evidence identifies an outer-trip search reset; best retention and terminal-state Newton continuation both leave measured settled outer contraction exactly one">
   <meta name="plan-status" content="reference">
   <meta name="plan-evidence-for" content="separatrix-spline-extraction">
   <meta name="plan-source-quality" content="primary">
@@ -50,6 +50,13 @@
         per-trip <em>q</em> is 1.0000000000000000. Retention prevents regression,
         but it does not preserve the locally contracting endpoint needed to make
         progress.
+      </p>
+      <p>
+        <strong>Continuation falsifier.</strong> Resuming each unchanged-mask trip
+        from the preceding terminal Newton state, with warmup masked off, also
+        leaves both persisted stalls unchanged for six trips. Every measured
+        outer <em>q</em> remains 1.0000000000000000, so terminal-state continuation
+        is refuted as a route to the unchanged 1&times;10<sup>&minus;6</sup> tolerance.
       </p>
     </aside>
 
@@ -317,6 +324,62 @@
       </p>
     </section>
 
+    <section id="newton-trajectory-continuation-measurement">
+      <h2>Terminal-state Newton continuation is also refuted</h2>
+      <p>
+        The fixed-shape outer loop now retains the terminal local Newton state
+        separately from its best reported fallback. When the promoted active set
+        remains identical, the next trip starts from that terminal state and
+        masks all eight warmup sweeps; an active-set change invalidates the
+        continuation and executes the original warmup path. The reported result
+        still selects the best promoted merit across trips.
+      </p>
+      <table>
+        <caption>Six-trip terminal-state continuation from the persisted stalls</caption>
+        <thead>
+          <tr>
+            <th scope="col">Frame</th>
+            <th scope="col">Incoming residual</th>
+            <th scope="col">Residual after trips 1&ndash;6</th>
+            <th scope="col">Mask differences</th>
+            <th scope="col">Geometric outer <em>q</em></th>
+            <th scope="col">Final local endpoint</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">179</th>
+            <td>0.04485116727666494</td>
+            <td>0.04485116727666494 repeated 6 times</td>
+            <td>0, 0, 0, 0, 0, 0</td>
+            <td>1.0000000000000000</td>
+            <td>0.2020132915380862</td>
+          </tr>
+          <tr>
+            <th scope="row">44</th>
+            <td>0.08117000452284782</td>
+            <td>0.08117000452284782 repeated 6 times</td>
+            <td>0, 0, 0, 0, 0, 0</td>
+            <td>1.0000000000000000</td>
+            <td>0.11386768047084875</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        This honours the continuation remedy's falsifier: neither frame moves,
+        and no finite number of trips reaches 1&times;10<sup>&minus;6</sup> at measured
+        outer <em>q</em> = 1. The earlier local rates described contraction inside
+        one warm-started nonlinear solve; carrying its endpoint alone does not
+        reproduce that rate after the globalization model, merit history, trust
+        radius, and damping state are reinitialized. Frame 179 finishes the six
+        continued segments at a local endpoint 4.50408&times; above its carried best;
+        frame 44 remains 1.40283&times; above. The result rules out both replayed
+        warmup and endpoint loss as sufficient explanations of the settled stall:
+        the contraction also depends on within-solve globalization state that is
+        still reset at the outer boundary.
+      </p>
+    </section>
+
     <section id="residual-localization">
       <h2>Residual decomposition and spatial localization</h2>
       <p>
@@ -406,22 +469,26 @@
         </li>
         <li>
           <strong>Resume the frozen-mask Newton trajectory across outer trips.</strong>
-          Preserve the locally contracting terminal candidate and continue its
-          model without replaying the eight-sweep reset until it beats the carried
-          best, while still returning the best live iterate. Cost: moderate to
-          high because checkpoint, active-set, and globalization state acquire a
-          continuation contract. Falsifying evidence: uninterrupted continuation
-          ceases to contract geometrically or reaches a live-mask state that cannot
-          be admitted.
+          Implemented by carrying the terminal state and masking warmup, and
+          <strong>refuted as the stall remedy</strong>: both frames remain at outer
+          <em>q</em> = 1.0000000000000000 for six trips. The local endpoints remain
+          worse than the retained states, so neither frame can reach tolerance at
+          any finite trip budget.
+        </li>
+        <li>
+          <strong>Carry the full globalization state across unchanged masks.</strong>
+          Preserve the merit window, adaptive radius, damping, and current local
+          model with the terminal iterate instead of constructing a fresh inner
+          solve. Cost: high because these fixed-shape carries must cross the outer
+          boundary and enter checkpoint identity. Falsifying evidence: a full-carry
+          continuation still returns outer <em>q</em> = 1 or its live mask changes.
         </li>
         <li>
           <strong>Rebuild the warmup objective so it shares the promoted merit and
-          mask.</strong> This is broader than guarding warmup but may be necessary
-          if the warmup state serves a physical constraint absent from the global
-          merit. Cost: high, requiring residual/JVP and conservation revalidation.
-          Falsifying evidence: decomposition shows the warmup increase is required
-          to satisfy a distinct constraint whose violation would make the carried
-          best inadmissible.
+          mask.</strong> Cost: high, requiring residual/JVP and conservation
+          revalidation. Falsifying evidence: the warmup increase is required to
+          satisfy a distinct constraint whose violation makes the carried best
+          inadmissible.
         </li>
         <li>
           <strong>Increase the Newton budget only after the reset is removed.</strong>
@@ -450,6 +517,7 @@
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T065805044012-sse-diiid-stall-mechanism-harvest/iteration-analysis.json</code> &mdash; semantic decision census and rate statistics.</li>
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T065805044012-sse-diiid-stall-mechanism-harvest/decomposition.json</code> &mdash; exact residual reconstruction and spatial measures.</li>
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T072458160660-sse-outer-best-iterate-retention/checkpoint-resumption.json</code> &mdash; four guarded settled trips per persisted frame, including residuals, mask differences, and outer rates.</li>
+        <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T075138868344-sse-newton-trajectory-continuation/trajectory-resumption.json</code> &mdash; six terminal-state continuation trips per persisted frame, including residual sequences, mask differences, local endpoints, and outer rates.</li>
       </ul>
     </section>
   </main>

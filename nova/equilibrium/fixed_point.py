@@ -2486,6 +2486,7 @@ def _active_set_newton_krylov(
     stream_active_set: bool,
     stream_inner_iterations: bool,
     stop_on_active_set_stagnation: bool,
+    retain_outer_best_iterate: bool,
     precision: Precision | str,
 ) -> FixedPointResult:
     """Reconcile bounded frozen-mask solves with their live active sets."""
@@ -2561,6 +2562,31 @@ def _active_set_newton_krylov(
         selected_residual = jnp.where(repeated, damped_residual, observed_residual)
         selected_finite = jnp.where(repeated, damped_finite, observed_finite)
         selected_difference = jnp.sum(selected_mask != mask, dtype=jnp.int32)
+        incoming_mapped = shadowed_map_fn(state, mask)
+        incoming_residual = _relative_residual(incoming_mapped, state)
+        incoming_merit = _smooth_relative_sup_merit(incoming_mapped, state)
+        selected_merit = _smooth_relative_sup_merit(
+            shadowed_map_fn(selected_state, selected_mask), selected_state
+        )
+        retain_incoming = (
+            retain_outer_best_iterate
+            & (selected_difference == 0)
+            & jnp.isfinite(incoming_residual)
+            & jnp.isfinite(incoming_merit)
+            & (~jnp.isfinite(selected_merit) | (selected_merit > incoming_merit))
+        )
+        selected_state = jnp.where(retain_incoming, state, selected_state)
+        selected_mask = jnp.where(retain_incoming, mask, selected_mask)
+        selected_residual = jnp.where(
+            retain_incoming, incoming_residual, selected_residual
+        )
+        selected_finite = jnp.where(retain_incoming, True, selected_finite)
+        selected_difference = jnp.where(retain_incoming, 0, selected_difference)
+        converged = (
+            selected_finite
+            & (selected_residual <= convergence_tolerance)
+            & (selected_difference == 0)
+        )
         stagnated = (
             stop_on_active_set_stagnation
             & selected_finite
@@ -2770,6 +2796,7 @@ def newton_krylov(
     stream_inner_iterations: bool = False,
     checkpoint_path: str | Path | None = None,
     stop_on_active_set_stagnation: bool = True,
+    retain_outer_best_iterate: bool = True,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Run globalized Newton and reconcile state-dependent active sets.
@@ -2785,6 +2812,10 @@ def newton_krylov(
     trips have bit-identical live residuals and the later trip changes no mask
     cells.  It can be disabled to reproduce the full bounded loop for diagnostic
     comparisons.
+    ``retain_outer_best_iterate`` prevents an unchanged active set from
+    replacing its incoming state with a candidate that is worse in the smooth
+    relative-sup promotion merit.  Active-set changes still advance normally
+    because their live objectives are different.
     ``stream_active_set`` emits one flushed host line for every executed outer
     trip; it is disabled by default and does not alter any solver carry.
     ``stream_inner_iterations`` similarly emits the fixed-shape Newton receipt
@@ -2838,6 +2869,7 @@ def newton_krylov(
             stream_active_set=stream_active_set,
             stream_inner_iterations=stream_inner_iterations,
             stop_on_active_set_stagnation=stop_on_active_set_stagnation,
+            retain_outer_best_iterate=retain_outer_best_iterate,
             precision=precision,
         )
     if checkpoint_path is not None:

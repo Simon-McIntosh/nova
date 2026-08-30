@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="diiid-residual-stall-mechanism">
   <meta name="plan-title" content="DIII-D residual stall mechanism">
-  <meta name="plan-summary" content="Per-iteration evidence identifies an outer-trip search reset, not a stationary point or inaccurate Krylov direction, as the DIII-D residual stall">
+  <meta name="plan-summary" content="Per-iteration evidence identifies an outer-trip search reset; guarded best-iterate retention is correct but leaves the measured settled outer contraction exactly one">
   <meta name="plan-status" content="reference">
   <meta name="plan-evidence-for" content="separatrix-spline-extraction">
   <meta name="plan-source-quality" content="primary">
@@ -42,6 +42,14 @@
         the endpoint 0.113868 is still 1.40283&times; worse. Both outer trips return
         exactly zero improvement, making the settled outer contraction
         <strong><em>q</em> = 1.0</strong>.
+      </p>
+      <p>
+        <strong>Remedy falsifier.</strong> Retaining the incoming state whenever
+        an unchanged active set proposes a worse promotion merit leaves both
+        persisted stalls unchanged over four resumed trips. Every measured
+        per-trip <em>q</em> is 1.0000000000000000. Retention prevents regression,
+        but it does not preserve the locally contracting endpoint needed to make
+        progress.
       </p>
     </aside>
 
@@ -255,6 +263,60 @@
       </p>
     </section>
 
+    <section id="best-iterate-retention-measurement">
+      <h2>Best-iterate retention is correct but refuted as the stall remedy</h2>
+      <p>
+        The outer solver now compares an unchanged-active-set candidate with its
+        incoming state in the same smooth relative-sup promotion merit. A worse
+        candidate cannot replace the incoming state; a changed active set still
+        advances because the two live objectives are not directly comparable.
+        The comparison is scalar and masked inside the existing fixed-trip device
+        loop. A monotone affine solve is bit-identical with the guard on and off
+        in eager and compiled execution, while a constructed warmup that improves
+        the exact sup residual but worsens the promoted merit correctly retains
+        the incoming state.
+      </p>
+      <table>
+        <caption>Four-trip resumption from the persisted stalled states</caption>
+        <thead>
+          <tr>
+            <th scope="col">Frame</th>
+            <th scope="col">Incoming residual</th>
+            <th scope="col">Residual after trips 1, 2, 3, 4</th>
+            <th scope="col">Mask differences</th>
+            <th scope="col">Geometric outer <em>q</em></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">179</th>
+            <td>0.04485116727666494</td>
+            <td>0.04485116727666494, 0.04485116727666494,<br>0.04485116727666494, 0.04485116727666494</td>
+            <td>0, 0, 0, 0</td>
+            <td>1.0000000000000000</td>
+          </tr>
+          <tr>
+            <th scope="row">44</th>
+            <td>0.08117000452284738</td>
+            <td>0.08117000452284738, 0.08117000452284738,<br>0.08117000452284738, 0.08117000452284738</td>
+            <td>0, 0, 0, 0</td>
+            <td>1.0000000000000000</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        This honours the recorded falsifier: guarded trips still return outer
+        <em>q</em> = 1.0, so best-iterate retention alone is <strong>refuted as a
+        remedy</strong>. Neither residual moves at all. With <em>q</em> exactly one,
+        no finite number of outer trips reaches the unchanged 1&times;10<sup>&minus;6</sup>
+        tolerance. The result narrows the mechanism further: the solver already
+        protects the carried optimum, but it discards the locally contracting
+        endpoint. The next experiment must continue that frozen-mask trajectory
+        across trip boundaries without replaying warmup, while retaining the
+        carried optimum as the reported fallback.
+      </p>
+    </section>
+
     <section id="residual-localization">
       <h2>Residual decomposition and spatial localization</h2>
       <p>
@@ -336,12 +398,11 @@
       <ol>
         <li>
           <strong>Carry the best-observed iterate across outer trips and do not
-          degrade it during warmup.</strong> Guard each warmup sweep against the
-          carried live merit, or bypass warmup once the mask is settled. This is
-          the narrowest intervention at the measured reset seam. Cost: moderate
-          solver-state and fixed-shape acceptance work plus eager/JIT regression
-          coverage. Falsifying evidence: a guarded or zero-warmup settled trip
-          still returns the same residual and outer <em>q</em> = 1.0.
+          degrade it during warmup.</strong> Implemented as a fixed-shape promoted-
+          merit guard and <strong>refuted as the stall remedy</strong>: both frames
+          remain at outer <em>q</em> = 1.0000000000000000 for four guarded trips.
+          Keep the guard as a no-regression invariant, but do not project
+          convergence from it.
         </li>
         <li>
           <strong>Resume the frozen-mask Newton trajectory across outer trips.</strong>
@@ -388,6 +449,7 @@
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T190123164633-sse-diiid-stall-probe-launch/job-output/frame-179-stalled-state.npz</code> and frame-44 counterpart &mdash; persisted terminal states and settled-trip arrays.</li>
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T065805044012-sse-diiid-stall-mechanism-harvest/iteration-analysis.json</code> &mdash; semantic decision census and rate statistics.</li>
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T065805044012-sse-diiid-stall-mechanism-harvest/decomposition.json</code> &mdash; exact residual reconstruction and spatial measures.</li>
+        <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T072458160660-sse-outer-best-iterate-retention/checkpoint-resumption.json</code> &mdash; four guarded settled trips per persisted frame, including residuals, mask differences, and outer rates.</li>
       </ul>
     </section>
   </main>

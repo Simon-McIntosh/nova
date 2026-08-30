@@ -20,14 +20,14 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,topology,efit,mast,diii-d">
   <meta name="plan-blocks" content="efit-baseline-demonstration">
-  <meta name="plan-impl" content="0.8">
+  <meta name="plan-impl" content="0.95">
   <meta name="plan-commits" content="74f95e41,a8927be3a0fc5fc387a2e64dfc97c6621ce1eb56,e3784a3127d1ca1bc6f07057fb5252d574af3732,130d84e3322a114d7c25f9d675ac23619cf9a640,b5666c5422fb9e708496993a4fe7f2f7e2e31036">
   <meta name="plan-artifacts" content="nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,docs/evidence/archive/separatrix-spline-extraction-landed.html,benchmarks/stationary_point_polish.py,nova/equilibrium/boundary_comparison.py,tests/test_boundary_comparison.py,benchmarks/diiid_forward_gs_match.py,tests/imas/test_diiid_forward_gs_match.py,docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py,tests/test_efit_topology_corroboration.py">
   <title>Separatrix Spline Extraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-30">
-<meta name="plan-version" content="102">
+<meta name="plan-version" content="103">
 </head>
 <body>
   <main class="plan-doc">
@@ -197,17 +197,23 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-sse-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship separatrix-spline-extraction" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sse-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship separatrix-spline-extraction" data-resolved-at="2026-08-30T21:56:07+00:00" data-resolved-by="reckon-d8-s16-landing">
     <h4 class="r-fu-title">Implement the polish, the branch assembler, and the shared comparator</h4>
     <div class="r-fu-body">Dependency order per the reuse map: factor the stationary polish and
         gate it on analytic saddles; assemble closed/open branches over traced_spline_contour and
         pin fixed-shape behaviour; wire the closed branch into both EFIT harnesses through one
         sup/RMS/X metric implementation; regenerate both banks.</div>
     <pre class="r-fu-prompt">/reckon-ship separatrix-spline-extraction</pre>
+    <p class="r-fu-outcome">Landed. The polish, branch assembler and shared comparator were already in place; this run completed the remaining scope and regenerated both banks on a corrected solver. MAST twelve-arm bank passes all three of its thresholds: class agreement 8 of 12, worst eligible symmetric RMS 0.029164 m, worst declared-row saddle 0.038977 m. DIII-D five-frame bank is retained at 0 of 5 converged with overall FAIL, terminal residuals 0.04485116727666494, 0.08117000452284782, 0.08696589356667041, 0.058516982970557435 and 0.047568328864646785 against a 1e-6 tolerance, and topology class agreement 4 of 5 which does not override non-convergence. The seventeen-panel visual gate binds on 4 panels and passes 4 of 4, with the two converged panels carrying 43 and 42 shadow cells and zero inside the closed separatrix. H200 batched throughput runs 0.09983 to 2.67513 slices per second across widths 1 to 1024, a 26.797-fold gain saturating at 3.38 percent, ended by an actual out-of-memory at width 2048. Full record with 14 anchors in docs/evidence/archive/separatrix-spline-extraction-landed.html.</p>
     </article>
 <article class="r-fu" data-id="f-sse-dissent-polish-termination" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-d8-s16-veracity-review" data-written-at="2026-08-26T15:20:00+00:00" data-recommends-skill="/reckon-edit separatrix-spline-extraction --reopen polish-termination" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Adjudicate the fixed-cap reversal of the locked polish-termination decision</h4>
     <div class="r-fu-body">Dissent-reopen (§07): the locked choice was tolerance-exit while_loop with an eight-trip safety cap. Changed evidence: commit a251914a (profile-owned-solve-domain substrate work) replaced the integrated polish with literal fixed-cap masked fori_loop execution to guarantee JIT/vmap-safe fixed trip counts; its independent verifier proved 19/19 numerical identity but the reversal was never adjudicated against this plan's locked authority, and both H200 performance receipts measured the new semantics under the old labels. Adjudicate via /reckon-edit separatrix-spline-extraction --reopen polish-termination: either restore tolerance-exit as the locked authority (re-landing the substrate work behind it), or re-lock to fixed-cap masked execution with an explicit performance/scientific rationale and relabel/rerun the P100+H200 measurements from one reachable commit. Do not keep both descriptions.</div>
+    <pre class="r-fu-prompt">/reckon-ship separatrix-spline-extraction</pre>
+    </article>
+<article class="r-fu" data-id="f-sse-diiid-descent-direction" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-d8-s16-landing" data-written-at="2026-08-30" data-recommends-skill="/reckon-ship separatrix-spline-extraction" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Decide whether to fund an own-mask-aware adaptive descent model for DIII-D convergence</h4>
+    <div class="r-fu-body">The DIII-D convergence gate does not pass and the reason is characterised across nine measurements, each against a falsifier fixed in advance. Ruled out at every halt state: a local minimum (all 23 candidates carry materially negative directional derivatives), gradient collapse (ratios 0.99, 2.43, 0.85, 0.77 against the retained state), a step-length floor (no admissible step below one part in 1e12), and a residual floor (useful descent exists at every halt). Refuted remedies, each measuring outer contraction of exactly 1.0: best-iterate retention, terminal-iterate continuation and full globalization-state continuation. A cross-mask comparability hypothesis was refuted with a difference of exactly zero. Own-mask acceptance, which scores each candidate on the mask it induces, is a real improvement and landed: frame 179 halts at 0.023196268180508767 against 0.06399704757132339, while frame 44 is unmoved at 0.08100291897825324. Neither reaches 1e-6. What remains is one named direction: an own-mask-aware adaptive descent model, preceded by a gradient and model census at both new halt states. Its cost is high, requiring fixed-shape candidate design plus residual/JVP and conservation revalidation, and the two-frame measurement alone consumed 360.325 s compilation and 2378.544 s execution. It is falsified if both endpoint censuses find no own-mask descent, or if another adaptive chain terminates at contraction 1 above 1e-6. This is a lead funding decision rather than an implementation task: the sprint scope is complete, and the persisted stalled-state checkpoints mean any successor resumes in minutes rather than re-solving for ten hours.</div>
     <pre class="r-fu-prompt">/reckon-ship separatrix-spline-extraction</pre>
     </article>
 </section>

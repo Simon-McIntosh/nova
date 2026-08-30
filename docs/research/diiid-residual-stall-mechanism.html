@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="diiid-residual-stall-mechanism">
   <meta name="plan-title" content="DIII-D residual stall mechanism">
-  <meta name="plan-summary" content="Per-iteration evidence identifies an outer-trip search reset; best retention and terminal-state Newton continuation both leave measured settled outer contraction exactly one">
+  <meta name="plan-summary" content="Per-iteration evidence identifies a real settled-domain optimisation stall; direct cross-mask re-evaluation reproduces both carried residuals exactly, ruling out an incomparable-domain artifact">
   <meta name="plan-status" content="reference">
   <meta name="plan-evidence-for" content="separatrix-spline-extraction">
   <meta name="plan-source-quality" content="primary">
@@ -57,6 +57,14 @@
         leaves both persisted stalls unchanged for six trips. Every measured
         outer <em>q</em> remains 1.0000000000000000, so terminal-state continuation
         is refuted as a route to the unchanged 1&times;10<sup>&minus;6</sup> tolerance.
+      </p>
+      <p>
+        <strong>Domain-comparability verdict.</strong> Re-evaluating each carried
+        state on its reconstructed settled mask reproduces both stored residuals
+        exactly: 0.04485116727666494 and 0.08117000452284782, with zero absolute
+        difference. Both masks are fixed under the promoted-mask update. The
+        carried targets are genuinely reachable on the settled domains; the flat
+        outer residual is not an artefact of comparing different masks.
       </p>
     </aside>
 
@@ -380,13 +388,88 @@
       </p>
     </section>
 
+    <section id="cross-mask-residual-comparability">
+      <h2>The carried residuals are valid on the settled masks</h2>
+      <p>
+        The checkpoint stores the carried state and scalar residual rather than
+        an explicit mask. The production profile was therefore rebuilt for each
+        frame, the composed flood-and-height mask was derived from the stored
+        state, and that mask was passed explicitly to
+        <code>flux_map_with_shadow</code>. Applying the promoted-mask rule once
+        more changed zero nodes in both frames. Together with the six subsequent
+        zero-difference trips, this establishes that the reconstructed masks are
+        the settled domains rather than transient state-derived alternatives.
+      </p>
+      <table>
+        <caption>Stored states re-evaluated on their current settled domains</caption>
+        <thead>
+          <tr>
+            <th scope="col">Measure</th>
+            <th scope="col">Frame 179</th>
+            <th scope="col">Frame 44</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Stored relative-sup residual</th>
+            <td>0.04485116727666494</td>
+            <td>0.08117000452284782</td>
+          </tr>
+          <tr>
+            <th scope="row">Settled-mask re-evaluation</th>
+            <td>0.04485116727666494</td>
+            <td>0.08117000452284782</td>
+          </tr>
+          <tr>
+            <th scope="row">Absolute / relative difference</th>
+            <td>0 / 0</td>
+            <td>0 / 0</td>
+          </tr>
+          <tr>
+            <th scope="row">Residual numerator / denominator</th>
+            <td>0.28007046124781043 / 6.244440853014875</td>
+            <td>0.2364685901707928 / 2.9132509177602834</td>
+          </tr>
+          <tr>
+            <th scope="row">Excluded nodes, flood + height-wall / 1,221</th>
+            <td>11 = 11 + 0</td>
+            <td>14 = 10 + 4</td>
+          </tr>
+          <tr>
+            <th scope="row">Promoted-mask difference</th>
+            <td>0 nodes</td>
+            <td>0 nodes</td>
+          </tr>
+          <tr>
+            <th scope="row">Settled-mask SHA-256</th>
+            <td><code>e06af9b57c23d5599bc6dc9aa731d3d61a1d0615720d536e46a9737b95ec31ce</code></td>
+            <td><code>5747d88de15fe70447eec62d023d1ceef17875efbe377d6a159fcac1e567eb1a</code></td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        The first verdict holds: the carried best is a valid and strictly better
+        state under the same mask on which the later inner solves terminate near
+        0.202 and 0.1139. The stall is therefore a real optimisation failure, not
+        normal contraction hidden by an incomparable residual. The conditional
+        iteration-count and wall-clock projection for an unreachable cross-mask
+        target does not apply. Nor does this evidence convict the promotion merit
+        merely for spanning a mask change: in these two cases retention protects
+        a value independently proven valid on the settled domain. The next remedy
+        remains continuation of the full globalization state, not removal of the
+        retained reachable target.
+      </p>
+    </section>
+
     <section id="residual-localization">
       <h2>Residual decomposition and spatial localization</h2>
       <p>
-        Re-evaluation reproduces each stored relative-sup residual exactly. The
-        unresolved component is grid-dominated in both frames, but it occupies
-        different physical regions. This rules out a single shared wall, X-point,
-        or separatrix component as the cause of the common solve-level stall.
+        Settled-mask re-evaluation reproduces each stored relative-sup residual
+        exactly, and each composed mask is fixed under promotion. The unresolved
+        component is grid-dominated in both frames, but it occupies different
+        physical regions. This rules out both a cross-mask scoring artefact and a
+        single shared wall, X-point, or separatrix component as the cause of the
+        common solve-level stall.
       </p>
       <table>
         <caption>Residual location at the persisted best state</caption>
@@ -464,6 +547,8 @@
           degrade it during warmup.</strong> Implemented as a fixed-shape promoted-
           merit guard and <strong>refuted as the stall remedy</strong>: both frames
           remain at outer <em>q</em> = 1.0000000000000000 for four guarded trips.
+          Direct settled-mask re-evaluation now proves the protected residuals
+          are reachable under the current domains with exactly zero difference.
           Keep the guard as a no-regression invariant, but do not project
           convergence from it.
         </li>
@@ -518,6 +603,7 @@
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T065805044012-sse-diiid-stall-mechanism-harvest/decomposition.json</code> &mdash; exact residual reconstruction and spatial measures.</li>
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T072458160660-sse-outer-best-iterate-retention/checkpoint-resumption.json</code> &mdash; four guarded settled trips per persisted frame, including residuals, mask differences, and outer rates.</li>
         <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T075138868344-sse-newton-trajectory-continuation/trajectory-resumption.json</code> &mdash; six terminal-state continuation trips per persisted frame, including residual sequences, mask differences, local endpoints, and outer rates.</li>
+        <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260830T090349299149-sse-cross-mask-residual-comparability/cross-mask-residual-comparability.json</code> &mdash; explicit settled-mask residual re-evaluation, mask stability, component counts, and mask digests for both persisted states.</li>
       </ul>
     </section>
   </main>

@@ -314,7 +314,7 @@ def test_newton_reconciles_the_frozen_solve_with_its_live_active_set():
         assert int(result.termination_reason) == FixedPointTerminationReason.CONVERGED
 
 
-def test_newton_damps_a_repeated_active_set_then_reports_the_cycle():
+def test_newton_refuses_equal_own_mask_residual_and_keeps_settled_mask():
     def mask_fn(state):
         return state >= 0.5
 
@@ -335,19 +335,20 @@ def test_newton_damps_a_repeated_active_set_then_reports_the_cycle():
         )
 
     for result in (solve(), jax.jit(solve)()):
-        np.testing.assert_allclose(result.state, [0.625])
-        np.testing.assert_allclose(result.residual, 1.5)
+        # Each candidate is judged on the mask it induces against the incumbent
+        # on its own induced mask, so an equal live residual is refused rather
+        # than treated as an improvement.
+        np.testing.assert_allclose(result.state, [0.49908237904310226])
+        np.testing.assert_allclose(result.residual, 0.5009176209568978)
+        np.testing.assert_array_equal(result.active_set_mask_differences, [0] * 6)
         np.testing.assert_array_equal(
-            result.active_set_mask_differences, [1, 0, -1, -1, -1, -1]
+            result.active_set_cycle_damping_activations, [0] * 6
         )
-        np.testing.assert_array_equal(
-            result.active_set_cycle_damping_activations, [0, 1, -1, -1, -1, -1]
-        )
-        assert int(result.active_set_iterations) == 2
+        assert int(result.active_set_iterations) == 6
         assert not bool(result.converged)
         assert (
             int(result.termination_reason)
-            == FixedPointTerminationReason.ACTIVE_SET_CYCLE_DETECTED
+            == FixedPointTerminationReason.ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED
         )
 
 

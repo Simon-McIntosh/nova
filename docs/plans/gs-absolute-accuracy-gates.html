@@ -23,6 +23,9 @@
 <title>GS absolute accuracy gates | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-01">
+<meta name="plan-version" content="2">
+<meta name="plan-artifacts" content="docs/research/forward-accuracy-reuse-map.html">
 </head>
 <body>
 <main class="plan-doc">
@@ -38,17 +41,20 @@
 <h2 id="s3">§3 — The certificate artifact and its pin</h2>
 <p>One evidence document assembles §1 and §2 into the per-machine accuracy certificate — figure-heavy per the standing mandate, one page a reader can trust without re-running anything — and a focused regression lane pins the certified numbers so drift fires a test rather than a memory. Done-when: the certificate lives under <code>docs/evidence/</code>, the pinning tests are green in the default lane, and the plan records what an accuracy re-certification costs (wall time and lanes) so it can be repeated per release.</p>
 
-<section data-reckon="decisions" id="decisions" class="r-decisions">
-<h2><span class="sec">§</span> Decisions</h2>
-</section>
+
 
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-gaa-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s18" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship gs-absolute-accuracy-gates" data-resolved-at="" data-resolved-by="">
-<h4 class="r-fu-title">Build the accuracy certificate</h4>
-<div class="r-fu-body">Preregister the norms, run the Solov'ev certificate across resolutions, score the EFIT reproduction with the two-source error split, and pin the certificate with regression tests. Blocked on the backend-margin forensics landing first.</div>
-<pre class="r-fu-prompt">/reckon-ship gs-absolute-accuracy-gates</pre>
-</article>
+    <h4 class="r-fu-title">Build the accuracy certificate</h4>
+    <div class="r-fu-body">Preregister the norms, run the Solov'ev certificate across resolutions, score the EFIT reproduction with the two-source error split, and pin the certificate with regression tests. Blocked on the backend-margin forensics landing first.</div>
+    <pre class="r-fu-prompt">/reckon-ship gs-absolute-accuracy-gates</pre>
+    </article>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260901T192933908171-accuracy-reuse-scout" data-who="accuracy-scout" data-when="2026-09-01T19:35:31Z">
+    <div class="r-comment-body"><p>reuse-map-landed:45-row-inventory-across-nova-ambix-reckon,audit-doc-0-errors</p></div>
+</div>
 </section>
 </main>
 </body>

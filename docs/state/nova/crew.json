@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T21:35:21",
+  "updated": "2026-09-01T21:36:52",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -8,9 +8,11 @@
         "id": "accuracy-scout",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05e72-e37a-7ef2-9d7b-b28c6d08a1d4",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05e72-e37a-7ef2-9d7b-b28c6d08a1d4"
+        },
         "created": "2026-09-01"
       },
       {
@@ -1503,9 +1505,11 @@
         "id": "sto-evidence",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05e73-b521-7390-93d2-3df0e88c6ec2",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05e73-b521-7390-93d2-3df0e88c6ec2"
+        },
         "created": "2026-09-01"
       },
       {
@@ -68082,6 +68086,6 @@
       }
     ],
     "holds": [],
-    "_version": 1243
+    "_version": 1245
   }
 }

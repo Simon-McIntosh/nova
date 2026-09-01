@@ -23,7 +23,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility">
 <meta name="plan-impl" content="0.5">
 </head>
@@ -64,6 +64,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20260901T1015-basis-landed" data-who="reckon-ship-s18" data-when="2026-09-01T10:15:00+00:00">
     <div class="r-comment-body">ssb-basis-module landed — commit dc45408f; gate focused-suite PASSED (10 passed, 54.85 s: tests/test_split_spline.py + tests/test_tensor_spline.py). nova/linalg/split_spline.py: conditioned interior/exterior coefficient system (prototype-lattice condition number 8.93e5), curved level-set interface with value/gradient gaps below 1e-8 and minimum normal-curvature jump above 1.0, custom normal-equation VJP within 3e-6 of central finite differences with no fit-loop differentiation, eager/JIT/vmap parity at fixed shapes with exact-zero inactive padding (fit_executed=false, sample_count=0), boundary-band Hessian RMS 6.30e-9 vs frozen global 2.67e-1 on the prototype Solovev field (4.24e7 advantage; docs/figures/hex-cell-single-grid/metrics.json untouched). Sections s1+s2 delivered; s3 production-lattice conditioning (33x33/65x65 both machines) and s4 measured-map validation remain — NOTE the hex-grid-derisk-gates s2 falsifier has FIRED on both measured maps, which bears directly on what s4 must now adjudicate.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260901T102230182888-ssb-parity-gpu-tolerance" data-who="ssb-basis" data-when="2026-09-01T10:27:55Z">
+    <div class="r-comment-body"><p>Cross-backend parity bound 1e-9 with stated rationale (8.55x margin over the observed 1.17e-10 CUDA reduction-order delta); 4/4 green on both pinned CPU and unpinned CUDA lanes</p></div>
 </div>
 </section>
 </main>

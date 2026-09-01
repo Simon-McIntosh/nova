@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-artifacts" content="docs/research/forward-accuracy-reuse-map.html">
 </head>
 <body>
@@ -54,6 +54,9 @@
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260901T192933908171-accuracy-reuse-scout" data-who="accuracy-scout" data-when="2026-09-01T19:35:31Z">
     <div class="r-comment-body"><p>reuse-map-landed:45-row-inventory-across-nova-ambix-reckon,audit-doc-0-errors</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20260901T2155-currency-audit" data-who="reckon-ship-s19" data-when="2026-09-01T21:55:00+00:00">
+    <div class="r-comment-body">CURRENCY AUDIT before dispatch, correcting the lede's instrument list. (1) A converged production solve on an exact closed-form equilibrium ALREADY EXISTS and is test-pinned: the solovev-exact-recovery recovery gates (tests/test_solovev_recovery_gates.py, scripts/analytic_oracle_fixtures/measure.py + reduced_oracle.py, scripts/oracle_rebaseline/gates.py) cold-build a reduced 136-cell closed-form oracle and pin 14 LOCKED_RECOVERY_BOUNDS (fixed-point residual 1e-12, flux sup/rms 1e-12 of span, axis position 5.25 mm, GS relative 1.01e-3, div B 2.3e-3, plasma current 1.1%, ...) with a two-tier lane (default 35 s cold, slow lane 6 tests on warm coarse/fine carriers). The certificate extends THAT path to the three static references plus the diverted jump-bearing target across no fewer than three resolutions, rather than the basis-fit instruments the lede names. (2) The rotating analytic case is a KNOWN NEGATIVE: docs/figures/discrete-operator-analytic-error/operator-refinement-ladder.json records one exact map application reproducing the closed-form field to binary64 roundoff at every resolution while the production moment-seeded Newton-Krylov solve terminates unqualified at relative residual 1.25-1.30 (verdict solver_or_root_selection_unresolved). The certificate must therefore report every norm WITH its convergence qualification and never average an unqualified terminal state into a certified number; an unqualified case is itself a certificate row. (3) Reuse map: docs/research/forward-accuracy-reuse-map.html - use benchmarks/analytic_operator_ladder.py's regional norms and log-space order fit as the aggregation skeleton, RotatingEquilibrium (tests/rotating_equilibrium_references.py) for exact values, gradients and delta-star, split_fit_jump_field.py only for the jump-bearing target construction. (4) Dependency reading: the forensics on solver-convergence-regression has excluded backend divergence (paired CPU/GPU states inside float64 reduction-order noise at every staged sub-stage; pinned CPU also stagnates), so the certificate's marginal-arm caveat is now a solver-basin caveat, not a backend one; s2 inherits that verdict and s1 (exact references) never depended on it.</div>
 </div>
 </section>
 </main>

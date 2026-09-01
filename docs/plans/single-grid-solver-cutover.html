@@ -25,7 +25,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,efit-fixed-input-reproduction,diiid-residual-stall-mechanism">
 </head>
 <body>
@@ -56,6 +56,14 @@
 <div class="r-comment" data-section="s2" data-id="c-20260901T0905-carrier-cost-decomposed" data-who="reckon-ship-s18" data-when="2026-09-01T09:05:00+00:00">
     <div class="r-comment-body">SUPERSEDES c-20260901T0830-carrier-cost, decomposed with the S16 measurement session from the probe's own script: 5768 s was one timer around the FULL cold case construction at native 65x65 on a rigel CPU node (JAX_PLATFORMS=cpu, 16 CPUs) — shot-store load, mesh and operand construction, profile assembly AND the prescribed-response build together (receipt key response_and_profile_build_seconds), with the response assembled host-side per circuit through the exact analytic polygon route (polygon_greens over 101 circuits at 4262 targets, NumPy column_stack), NOT the optimized conductor-coupling kernels, never on a GPU. Treat it strictly as the measured cold-CPU-exact upper bound. The optimized-kernel H200 build at this shape is UNMEASURED and is a number this section owes before budgeting. Unchanged: the durable digest-pinned cache is mandatory on first build, and any cold rebuild runs in a launch-plus-harvest lane, not inside a worker fence.</div>
 </div>
+</section>
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="response-build-route" data-choice="exact-urankar-through-device-kernels" data-by="Simon McIntosh" data-when="2026-09-01T09:30:00+00:00">
+    <p class="r-dec-q">response-build-route</p>
+    <p class="r-dec-ctx">The 5768 s cold-construction figure decomposed to the host-side exact polygon route on a CPU node (see s2 comments). The shipped device-kernel-build plan landed exact Urankar Green matrices on device: Urankar-exact everywhere including the far field, seconds-to-tens-of-seconds class on the H200 with provenance-keyed caches and compiled geometry gradients.</p>
+    <p class="r-dec-rat">Lead decision 2026-09-01: fast does not mean inaccurate. The carrier on the new support is built from the exact Urankar integrals evaluated through the device-kernel fast path (device-kernel-build), not the host-side polygon assembly; the host exact polygon route remains available as the equivalence referee. Expected H200 build cost is seconds-class, so the 5768 s cold-CPU bound is not the budget. The digest-pinned durable cache and launch-plus-harvest discipline stand unchanged.</p>
+    </div>
 </section>
 </main>
 </body>

@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="Split-spline production basis — interior/exterior C2 with a free curvature jump at the boundary">
 <meta name="plan-summary" content="Harden the prototype&#x27;s boundary-split field representation into a conditioned, tested production module with implicit derivatives and fixed-shape batching.">
-<meta name="plan-status" content="pending">
+<meta name="plan-status" content="shipped">
 <meta name="plan-roi" content="high">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-owner" content="Simon McIntosh">
@@ -23,22 +23,26 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="12">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility">
-<meta name="plan-impl" content="0.75">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
 <main class="plan-doc">
 <header><h1>Split-spline production basis</h1>
 <p class="lede">Harden the prototype's boundary-split representation into a production module. The physics: the current-density step at the separatrix makes ψ's curvature discontinuous there, so the field is represented as an interior patch and an exterior patch, each C2 within its region, ψ and ∇ψ continuous at the interface, second derivative free to jump. A single global C2 fit smooths across that jump — the error class MAST's edge-concentrated zero-iteration residual exhibits (0.0116 at stride 1, peak 6.7 cm from the LCFS, halving with resolution).</p></header>
-<section id="s1"><h2>§1 The basis module</h2>
-<p>Promote the representation from <code>benchmarks/hex_cell_field_feasibility.py</code> into <code>nova/</code>: fitting on the half-offset structured lattice (a rectangular (n_x, n_z) index array with alternate rows offset half a cell — fitting and evaluation stay fixed-shape), the curved interface following the boundary through cells via the level set, evaluation serving null polish and contour extraction. The prototype's interface mechanism — continuous ψ and gradient enforced via a squared level-set exterior term — is the starting point, not a constraint; if a constrained formulation conditions better, take it and record why.</p></section>
-<section id="s2"><h2>§2 Differentiability</h2>
-<p>Implicit differentiation of fitted coefficients at the normal equations — never reverse-mode through the fit loop — matching the standing polish-termination constraint on separatrix-spline-extraction. Eager/JIT/vmap parity proven, skipped-slot padding distinguishable from executed work, exactly as the solver telemetry contracts require.</p></section>
-<section id="s3"><h2>§3 Conditioning</h2>
-<p>The cutover estimate's 80-hour lower bound excludes a conditioning redesign and its 140-hour upper bound includes one. Measure the fit conditioning on the production lattices (33×33 and 65×65, both machines) and report which bound the measurement demands, as a number a reader can check.</p></section>
-<section id="s4"><h2>§4 Validation</h2>
-<p>Green against the Solov'ev references (<code>tests/rotating_equilibrium_references.py</code>) — noting the recorded ring-reconstruction truncation for quartic radial terms is exactly the error class this representation must beat — and against at least one committed measured map with the boundary-band advantage stated. Focused lane delta against base, no committed bank artifact modified.</p></section>
+<section id="s1" class="section-landed">
+<header><span class="badge badge-shipped">✓ landed 2026-09-01</span><h2>§1–§2 The basis module and its derivative</h2></header>
+<p class="landed-summary">Built <code>nova/linalg/split_spline.py</code> (commits <code>dc45408f</code>, <code>da6bfe10</code>): conditioned interior/exterior fit, curved level-set interface (gaps &lt;1e-8, curvature jump &gt;1.0), custom normal-equation VJP within 3e-6 of finite differences with no fit-loop differentiation, JIT/vmap parity with a justified 1e-9 cross-backend bound. Suite green on CPU and CUDA lanes. Full record: <a href="/nova/evidence/archive/split-spline-production-basis-landed#s1">§1–§2 landed</a>.</p>
+</section>
+<section id="s3" class="section-landed">
+<header><span class="badge badge-shipped">✓ landed 2026-09-01</span><h2>§3 Conditioning</h2></header>
+<p class="landed-summary">Measured (commit <code>3c4ab482</code>): worst production condition number 2.411e6 (MAST 65×65), κ·ε₆₄ = 5.35e-10, 18.7× under the 1e-8 allowance — <strong>no conditioning redesign; the cutover takes its 80-hour lower bound</strong>. The matched-capacity patch sweep recorded an advantage reversal above 16 dof, carried to §4. Full record: <a href="/nova/evidence/archive/split-spline-production-basis-landed#s3">§3 landed</a>.</p>
+</section>
+<section id="s4" class="section-landed">
+<header><span class="badge badge-shipped">✓ landed 2026-09-01</span><h2>§4 Validation</h2></header>
+<p class="landed-summary">Validated (commit <code>27dbe79d</code>): the patch reversal is <strong>overturned at production capacity</strong> — full locally-supported tensor basis retains a 1.849×/2.110× boundary-band advantage on 33×33/65×65, stable to 8 digits under tolerance controls; all three Solov'ev references below 2e-8. Watch item for the cutover: sparse solves reached the 10,000-iteration cap without a convergence claim. Full record: <a href="/nova/evidence/archive/split-spline-production-basis-landed#s4">§4 landed</a>.</p>
+</section>
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="single-grid-design" data-choice="sign-change-primary-spline-polish-boundary-split" data-by="Simon McIntosh" data-when="2026-09-01T00:00:00+00:00">
@@ -49,10 +53,11 @@
 </section>
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-ssb-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-d8-cutover-authoring" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship split-spline-production-basis" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ssb-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-d8-cutover-authoring" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship split-spline-production-basis" data-resolved-at="2026-09-01T11:40:39+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Build the production basis from the prototype</h4>
     <div class="r-fu-body">Promote benchmarks/hex_cell_field_feasibility.py's split representation into a production module under nova/: conditioned fitting on the half-offset structured lattice, the curved interface following the boundary through cells with psi and gradient matched and curvature free, implicit differentiation of fitted coefficients (never through the fit loop), fixed-shape evaluation and fitting that compile once and vmap, an evaluation API serving null polish and contour extraction, and validation on the Solov'ev references plus at least one committed measured map. Conditioning is in scope: the 80-hour lower bound of the cutover estimate excludes a conditioning redesign and the 140-hour upper bound includes one, so this plan reports which bound the measured conditioning demands.</div>
     <pre class="r-fu-prompt">/reckon-ship split-spline-production-basis</pre>
+    <p class="r-fu-outcome">done — no followup. Shipped 2026-09-01 in four promoted nodes (commits dc45408f, da6bfe10, 3c4ab482, 27dbe79d, all merged): production module nova/linalg/split_spline.py with the implicit normal-equation derivative; conditioning verdict 80-hour bound (worst kappa*eps64 5.35e-10, 18.7x under allowance); full-capacity validation retains the split boundary-band advantage 1.849x/2.110x on 33x33/65x65 and all Solovev references pass. Cumulative record: docs/evidence/archive/split-spline-production-basis-landed.html. The chain continues through the dependency graph, not a followup here: plasma-cell-topology-authority and single-grid-solver-cutover declare this plan in depends_on and their own open followups carry the next invocations; the sparse-solve iteration-cap watch item is recorded in the evidence record for the cutover's consumer work.</p>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
@@ -73,6 +78,12 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260901T1112-conditioning" data-who="reckon-ship-s18" data-when="2026-09-01T11:12:00+00:00">
     <div class="r-comment-body">ssb-conditioning landed — commit 3c4ab482; gate s3-conditioning PASSED. Production regularized normal-system condition numbers: MAST 2.166e6 (33x33) / 2.411e6 (65x65), DIII-D 5.14e4 / 5.83e4; worst kappa*eps64 = 5.35e-10, 18.7x below the authored 1e-8 numerical allowance. VERDICT: no conditioning redesign is demanded — the cutover estimate takes the 80-hour LOWER bound. Receipt docs/figures/hex-cell-single-grid/conditioning-report.json + .png. ADVERSE CAPACITY FINDING carried to s4, not absorbed: on the jump-bearing Solovev forward field the matched-capacity boundary-band advantage is 1.0115x at 16 coefficients (reproducing the gates s2 number to 1.5e-11), 0.981x at 25, and 0.217x at 36 — the split advantage exists only at starved capacity in the patch comparison, and the global fit wins nearly 5x at 36 dof. Whether this survives at TRUE production capacity (the full tensor Bernstein lattice basis, hundreds of locally-supported coefficients, not a 16-36 dof window patch) is exactly what s4 validation must now measure before any design re-adjudication.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260901T111133930833-ssb-validation" data-who="ssb-basis" data-when="2026-09-01T11:38:46Z">
+    <div class="r-comment-body"><p>S4 validation PASSED and the s3 patch reversal is OVERTURNED at production capacity: full-lattice boundary-band advantage 1.849x (33x33) and 2.110x (65x65), verdict stable to 8 decimal digits under tolerance controls; all three Solovev references below 2e-8; interface gaps &lt;= 5.3e-10 value / 1.8e-8 gradient</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260901T1140-validation" data-who="reckon-ship-s18" data-when="2026-09-01T11:40:00+00:00">
+    <div class="r-comment-body">ssb-validation landed — commit 27dbe79d; gate s4-validation PASSED and the s3 patch reversal is OVERTURNED at production capacity: full locally-supported tensor basis boundary-band advantage 1.848665413x at 33x33 (global 96.47 vs split 52.19 Hessian RMS) and 2.109503094x at 65x65 (84.95 vs 40.27), verdict stable to 8 decimal digits under tolerance controls; all three Solovev references below 2e-8; interface gaps &lt;= 5.3e-10 value / 1.8e-8 gradient. Watch item for the cutover: sparse split solves reached the 10,000-iteration cap (code 7, residual norms 9.2e-4/2.0e-4) without a convergence claim — confirm fit convergence at production scale in the consumer work. Receipt docs/figures/hex-cell-single-grid/production-validation.json + .png; full record docs/evidence/archive/split-spline-production-basis-landed.html.</div>
 </div>
 </section>
 </main>

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="split-spline-production-basis-landed">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="split-spline-production-basis">
+<meta name="plan-title" content="Split-spline production basis — landed record">
+<meta name="plan-summary" content="Cumulative execution evidence: the conditioned boundary-split field module, its implicit derivative, conditioning verdict, and full-capacity validation.">
+<meta name="plan-recorded-at" content="2026-09-01">
+<title>split-spline-production-basis — landed</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<header><h1>Split-spline production basis — landed record</h1>
+<p class="lede">Four nodes, one member session, all promoted 2026-09-01. The production module extends the TensorBSpline evaluation contract per the reuse map; the one genuinely new capability was the conditioned interior/exterior coefficient system with an authored implicit normal-equation derivative.</p></header>
+
+<section id="s1"><h2>§1–§2 The basis module and its derivative</h2>
+<p>Commit <code>dc45408f</code> (node ssb-basis-module): <code>nova/linalg/split_spline.py</code> — conditioned interior/exterior fit (prototype-lattice condition number 8.93e5), curved level-set interface with value/gradient gaps below 1e-8 and minimum normal-curvature jump above 1.0, custom normal-equation VJP within 3e-6 of central finite differences with no fit-loop differentiation, eager/JIT/vmap parity at fixed shapes with exact-zero inactive padding. Boundary-band Hessian RMS 6.30e-9 against the frozen global 2.67e-1 on the prototype Solov'ev field. Focused suite 10 passed in 54.85 s. Repair commit <code>da6bfe10</code> (node ssb-parity-gpu-tolerance): cross-backend parity bound 1e-9 with stated rationale (8.55× margin over the observed 1.17e-10 CUDA reduction-order delta), suite green on pinned-CPU and unpinned-CUDA lanes.</p></section>
+
+<section id="s3"><h2>§3 Conditioning</h2>
+<p>Commit <code>3c4ab482</code> (node ssb-conditioning): production regularized normal-system condition numbers MAST 2.166e6 / 2.411e6 (33×33 / 65×65), DIII-D 5.14e4 / 5.83e4; worst κ·ε₆₄ = 5.35e-10, 18.7× below the 1e-8 allowance. <strong>Verdict: no conditioning redesign — the cutover estimate takes its 80-hour lower bound.</strong> Receipt <code>docs/figures/hex-cell-single-grid/conditioning-report.json</code>. The same receipt recorded the matched-capacity patch sweep on the jump-bearing field: 1.0115× at 16 coefficients, 0.981× at 25, 0.217× at 36 — carried to §4 rather than absorbed.</p></section>
+
+<section id="s4"><h2>§4 Validation, and the capacity adjudication</h2>
+<p>Commit <code>27dbe79d</code> (node ssb-validation): <strong>the coefficient-starved patch reversal is overturned at true production capacity.</strong> On the full locally-supported tensor basis the split representation retains a boundary-band Hessian-RMS advantage of <strong>1.848665413×</strong> at 33×33 (global 96.47 vs split 52.19; 256 vs 512 local coefficients) and <strong>2.109503094×</strong> at 65×65 (84.95 vs 40.27; 1,024 vs 2,048), with the greater-than-one adjudication stable to eight decimal digits under a strict-versus-loose tolerance control. All three static Solov'ev references pass with normalized Hessian RMS 1.2e-10 / 1.6e-9 / 9.4e-9, below the 2e-8 bound; interface projection gaps at most 5.3e-10 (value) and 1.8e-8 /m (gradient). Receipt <code>docs/figures/hex-cell-single-grid/production-validation.json</code> + <code>.png</code>.</p>
+<p><strong>Watch item carried to the cutover:</strong> the sparse split solves reached their fixed 10,000-iteration cap (termination code 7) with normal residual norms 9.20e-4 / 1.99e-4 rather than claiming convergence; the advantage verdict moved by under 1e-8 under tolerance controls, but the cutover's consumer work should confirm fit convergence behaviour at production scale.</p></section>
+
+<section id="context"><h2>Related gate evidence</h2>
+<p>The hex-grid-derisk-gates plan carries the falsifier receipts this module was measured against: the H200 batch ladder (<code>h200-split-batch.json</code>, clear at 8.50× width-1024 gain), the fired-then-readjudicated measured-map arm (<code>measured-map-advantage.json</code>, ruled confounded — EFIT ψ is globally smooth), and the re-specified jump-field gate (<code>jump-field-advantage.json</code>, clear at 1.0115× at matched 16-dof capacity).</p></section>
+</main>
+</body>
+</html>

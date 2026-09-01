@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T13:10:38",
+  "updated": "2026-09-01T13:39:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -66265,9 +66265,115 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260901T111133930833-ssb-validation",
+        "plan": "split-spline-production-basis",
+        "section": "\u00a74",
+        "node": "ssb-validation",
+        "node_definition": {
+          "done_when": "docs/figures/hex-cell-single-grid/production-validation.json records per-lattice full-capacity boundary-band advantage factors with the s3 reversal explicitly adjudicated (does the split basis retain any boundary-band advantage at production capacity, stated as a number either way), Solovev-reference validation results, and uv run pytest tests/test_split_spline.py tests/test_tensor_spline.py stays green",
+          "estimated_hours": 6.0,
+          "goal": "The \u00a74 validation verdict for the production split basis: green against the Solovev references (tests/rotating_equilibrium_references.py, where the recorded ring-reconstruction truncation for quartic radial terms is the error class to beat) together with the decisive full-lattice capacity measurement that adjudicates the s3 patch-sweep reversal \u2014 split versus global at TRUE production capacity, meaning the full tensor Bernstein lattice basis on the 33x33 and 65x65 half-offset lattices with its hundreds of locally-supported coefficients rather than a 16-36 dof window patch, fitted on the jump-bearing diverted Solovev forward field (reuse benchmarks/split_fit_jump_field.py target machinery), boundary-band second-derivative advantage stated per lattice with the analytic curvature reference",
+          "id": "ssb-validation",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T111133930833-ssb-validation/manifest.md",
+          "plan": "split-spline-production-basis",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/split_fit_production_validation.py",
+            "docs/figures/hex-cell-single-grid/production-validation.json",
+            "docs/figures/hex-cell-single-grid/production-validation.png"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "ssb-basis",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T11:11:43Z",
+        "completed_at": "2026-09-01T11:38:46Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1623,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1623,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "9da6d13e8382adfd6d4fa0a771a1e21d4c5a200e",
+        "commits": [
+          "27dbe79d4a16f2dc5c50eaaf6e6e512082bbc1cd"
+        ],
+        "changed_lines": {
+          "added": 899,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run python benchmarks/split_fit_production_validation.py + pytest tests/test_split_spline.py tests/test_tensor_spline.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T111133930833-ssb-validation/logs/production-validation-final.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T111133930833-ssb-validation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05c04-501c-76e2-8ed2-95d1d01bd032",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8984192,
+            "cached_input_tokens_cumulative": 12617344,
+            "input_tokens": 8825032,
+            "input_tokens_cumulative": 12773861,
+            "output_tokens": 10627,
+            "output_tokens_cumulative": 31281,
+            "reasoning_output_tokens": 6001,
+            "reasoning_output_tokens_cumulative": 12986
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest tests/test_split_spline.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1216
+    "_version": 1217
   }
 }

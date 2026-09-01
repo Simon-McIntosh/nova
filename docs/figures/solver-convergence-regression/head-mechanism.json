@@ -1,0 +1,648 @@
+{
+  "allocation": {
+    "allocated_cpus": 4,
+    "allocated_gpus": 1,
+    "gpu": "NVIDIA H200 NVL, GPU-e58a61a8-1d7c-88f1-49a9-0f516dd162d3",
+    "jax_cpu_devices": [
+      "cpu:0"
+    ],
+    "jax_cuda_devices": [
+      "cuda:0"
+    ],
+    "jax_platforms": [
+      "cuda",
+      "cpu"
+    ],
+    "job_id": 1260917,
+    "job_name": "stagnation-mechanism",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA",
+    "tmpdir": "/tmp"
+  },
+  "bank_attribution": {
+    "banked_anomalous_arms": [
+      {
+        "active_set_iterations": 7,
+        "active_set_mask_differences": [
+          38,
+          23,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "active_set_residuals": [
+          0.004976455689734301,
+          0.003131474610324068,
+          0.001951270366567566,
+          0.0006652842022510338,
+          0.0004808521116038811,
+          0.00048023353539180234,
+          0.00048023353539180234
+        ],
+        "arm": "pure",
+        "converged": false,
+        "identity": "22086/43",
+        "qualified_terminal": false,
+        "terminal_residual": 0.00048023353539180234,
+        "termination_reason": "active_set_stagnated",
+        "tolerance": 1e-08
+      },
+      {
+        "active_set_iterations": 4,
+        "active_set_mask_differences": [
+          31,
+          29,
+          0,
+          2
+        ],
+        "active_set_residuals": [
+          0.004554852568867868,
+          0.0033463831584595507,
+          0.0026746362723459927,
+          0.002450918725801937
+        ],
+        "arm": "pure",
+        "converged": false,
+        "identity": "21978/35",
+        "qualified_terminal": false,
+        "terminal_residual": 0.002450918725801937,
+        "termination_reason": "active_set_cycle_detected",
+        "tolerance": 1e-08
+      }
+    ],
+    "criterion_attribution": {
+      "arm": "pure",
+      "first_settled_residual": 0.001951270366567566,
+      "first_settled_residual_over_tolerance": 195127.0366567566,
+      "first_settled_trip_one_based": 3,
+      "identity": "22086/43",
+      "mask_settled_through_terminal": true,
+      "qualified_terminal": false,
+      "registered_tolerance": 1e-08,
+      "solver_converged": false,
+      "terminal_plateau_exactly_repeated": true,
+      "terminal_residual": 0.00048023353539180234,
+      "terminal_residual_over_tolerance": 48023.353539180236,
+      "termination_reason": "active_set_stagnated"
+    },
+    "criterion_definition": "max(abs(F(x)-x)) / max(abs(F(x))) <= tolerance",
+    "excluded_alternatives": {
+      "own_mask_acceptance": "candidate admission is upstream of the terminal conjunction; the retained terminal has an unchanged mask but a residual above the registered tolerance",
+      "qualification_seam": "qualified_terminal is a downstream conjunction requiring the solver to report convergence, the same residual threshold, and the converged termination reason; it does not independently refuse this terminal"
+    },
+    "refusing_criterion": "fixed_point_relative_sup_residual_threshold",
+    "source": {
+      "path": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "regeneration_revision": "2b594ac88c2e6058d3c9e76e161045004690b9f8",
+      "sha256": "f5836282ee82c8aee4b66fdf73c04e603cccf2bb9651bc8176dc7f443d6ea053"
+    }
+  },
+  "execution_contract": {
+    "direct_green_operator_builder_entries": 0,
+    "persisted_response_carrier": {
+      "carrier": {
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "frozen_reference_count": 6,
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "size_bytes": 645864,
+        "stored_circuit_count": 101,
+        "warm_load_seconds": 0.0059049092233181
+      },
+      "loaded_from_persisted_carrier": true,
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/scr-mechanism/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "direct_green_operator_builder_entries": 0,
+        "passes": true,
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.018045 direct_builders=0 verdict=PASS"
+      }
+    },
+    "perturbation_relative_amplitudes": [
+      1e-06,
+      1e-05,
+      0.0001,
+      0.001,
+      0.01
+    ],
+    "same_arm": "22086/43 pure production diverted portfolio branch",
+    "solver": {
+      "fixed_point_tolerance": 1e-08,
+      "gmres_iterations": 12,
+      "newton_steps": 12,
+      "relaxation": 0.5,
+      "step_cap": 10.0,
+      "warmup_sweeps": 0
+    },
+    "solver_source_modified": false,
+    "telemetry_toggle": "stream_active_set is a static Python branch, with compilation caches cleared between the compiled-out and compiled-in solves"
+  },
+  "perturbed_seed_outcomes": [
+    {
+      "arm": "pure",
+      "probe": {
+        "direction": "production map residual F(seed)-seed",
+        "relative_amplitudes": [
+          1e-06,
+          1e-05,
+          0.0001,
+          0.001,
+          0.01
+        ],
+        "rows": [
+          {
+            "achieved_branch": "diverted",
+            "active_set_iterations": 8,
+            "active_set_mask_differences": [
+              38,
+              23,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "active_set_residuals": [
+              0.004976258144489969,
+              0.0031314627595047883,
+              0.001951260898922666,
+              0.0006652798982678113,
+              0.00048085074073164633,
+              0.0004803422217190123,
+              0.0004803149332681824,
+              0.0004803149332681824
+            ],
+            "branch_qualified_converged": false,
+            "initial_residual": 0.008139202768813256,
+            "relative_amplitude": 1e-06,
+            "solver_converged": false,
+            "terminal_relative_distance_from_label": 0.01445944712400226,
+            "terminal_residual": 0.0004803149332681824,
+            "terminal_residual_nonfinite": false,
+            "terminal_state_sha256": "39c88975020c93a766239a4ac81adf24e4bec32dbabb6df1dddbe8f3ee6be503",
+            "termination_reason": "active_set_stagnated",
+            "topology_consistent": true
+          },
+          {
+            "achieved_branch": "diverted",
+            "active_set_iterations": 8,
+            "active_set_mask_differences": [
+              38,
+              23,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "active_set_residuals": [
+              0.004974618855478258,
+              0.00313126746169157,
+              0.0019509534805281093,
+              0.0006642240666129614,
+              0.00047201870933280576,
+              0.00047045620529138427,
+              0.00047045052149763167,
+              0.00047045052149763167
+            ],
+            "branch_qualified_converged": false,
+            "initial_residual": 0.00813640193058283,
+            "relative_amplitude": 1e-05,
+            "solver_converged": false,
+            "terminal_relative_distance_from_label": 0.014462126018788178,
+            "terminal_residual": 0.00047045052149763167,
+            "terminal_residual_nonfinite": false,
+            "terminal_state_sha256": "506a530f396824e4cad3cfe89976adb0c76adeec2a6a5bcdb4f5b9a75c08b3e9",
+            "termination_reason": "active_set_stagnated",
+            "topology_consistent": true
+          },
+          {
+            "achieved_branch": "diverted",
+            "active_set_iterations": 8,
+            "active_set_mask_differences": [
+              38,
+              23,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "active_set_residuals": [
+              0.004955579691876749,
+              0.003130358183455549,
+              0.001950300107131223,
+              0.0005976575994063656,
+              0.0004804981901598176,
+              0.0004799954027553597,
+              0.0004799792128265018,
+              0.0004799792128265018
+            ],
+            "branch_qualified_converged": false,
+            "initial_residual": 0.008108393840166829,
+            "relative_amplitude": 0.0001,
+            "solver_converged": false,
+            "terminal_relative_distance_from_label": 0.01445180119769512,
+            "terminal_residual": 0.0004799792128265018,
+            "terminal_residual_nonfinite": false,
+            "terminal_state_sha256": "cf1c6e94889443bebdc0c8f2cc266337d103c61a67f22cac774d8c7c0474b996",
+            "termination_reason": "active_set_stagnated",
+            "topology_consistent": true
+          },
+          {
+            "achieved_branch": "diverted",
+            "active_set_iterations": 7,
+            "active_set_mask_differences": [
+              38,
+              23,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "active_set_residuals": [
+              0.0047710297300514425,
+              0.0031226713948464603,
+              0.0019433764865628368,
+              0.000672746881134895,
+              0.00047740169628052935,
+              0.00047739033552480283,
+              0.00047739033552480283
+            ],
+            "branch_qualified_converged": false,
+            "initial_residual": 0.007828342128441272,
+            "relative_amplitude": 0.001,
+            "solver_converged": false,
+            "terminal_relative_distance_from_label": 0.014390977859897392,
+            "terminal_residual": 0.00047739033552480283,
+            "terminal_residual_nonfinite": false,
+            "terminal_state_sha256": "a81f9c73bd154bf257ecaf300c4e3bb4d9f32b5f4ceb820486fdd77624718199",
+            "termination_reason": "active_set_stagnated",
+            "topology_consistent": true
+          },
+          {
+            "achieved_branch": "diverted",
+            "active_set_iterations": 6,
+            "active_set_mask_differences": [
+              60,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "active_set_residuals": [
+              0.002983712063914025,
+              0.0018577273902041869,
+              0.0011664815720625404,
+              0.0006335743329727466,
+              0.0005410319688909452,
+              0.0005410319688909452
+            ],
+            "branch_qualified_converged": false,
+            "initial_residual": 0.005033394162268493,
+            "relative_amplitude": 0.01,
+            "solver_converged": false,
+            "terminal_relative_distance_from_label": 0.013911608628615632,
+            "terminal_residual": 0.0005410319688909452,
+            "terminal_residual_nonfinite": false,
+            "terminal_state_sha256": "4359edd643531daf2093d027470aba37101c60ff3050d7895ba5d259cffa3da7",
+            "termination_reason": "active_set_stagnated",
+            "topology_consistent": true
+          }
+        ],
+        "summary": {
+          "achieved_branches": [
+            "diverted"
+          ],
+          "basin_sensitive": true,
+          "categorically_basin_sensitive": false,
+          "convergence_outcomes": [
+            false
+          ],
+          "distinct_terminal_reason_count": 1,
+          "distinct_terminal_state_count": 5,
+          "diverted_terminal_count": 5,
+          "finite_terminal_residual_count": 5,
+          "nonfinite_terminal_residual_count": 0,
+          "qualified_converged_count": 0,
+          "seed_count": 5,
+          "solver_converged_count": 0,
+          "terminal_reasons": [
+            "active_set_stagnated"
+          ],
+          "terminal_residual_max": 0.0005410319688909452,
+          "terminal_residual_min": 0.00047045052149763167
+        },
+        "wall_seconds_including_compilation": 743.314725857228
+      },
+      "reference": {
+        "seed_sha256": "7a16450eb97cec321c71155aaa8477163220561eb192f41543225ba915114e3e",
+        "shot": 22086,
+        "slice_index": 43,
+        "time_s": 0.22999998927116394
+      }
+    },
+    {
+      "arm": "pure",
+      "probe": {
+        "direction": "production map residual F(seed)-seed",
+        "relative_amplitudes": [
+          1e-06,
+          1e-05,
+          0.0001,
+          0.001,
+          0.01
+        ],
+        "rows": [
+          {
+            "achieved_branch": "diverted",
+            "active_set_iterations": 4,
+            "active_set_mask_differences": [
+              31,
+              29,
+              0,
+              2
+            ],
+            "active_set_residuals": [
+              0.004554610463094188,
+              0.0033461832252556834,
+              0.0026744754581080428,
+              0.002450771097163909
+            ],
+            "branch_qualified_converged": false,
+            "initial_residual": 0.006698693427967452,
+            "relative_amplitude": 1e-06,
+            "solver_converged": false,
+            "terminal_relative_distance_from_label": 0.010974571827594861,
+            "terminal_residual": 0.002450771097163909,
+            "terminal_residual_nonfinite": false,
+            "terminal_state_sha256": "32fef091c49eeb179581f73812f4c18d1a21ee0a2d8250f6d12e4eb71ae05544",
+            "termination_reason": "active_set_cycle_detected",
+            "topology_consistent": true
+          },
+          {
+            "achieved_branch": "diverted",
+            "active_set_iterations": 4,
+            "active_set_mask_differences": [
+              31,
+              29,
+              0,
+              2
+            ],
+            "active_set_residuals": [
+              0.004552431965921709,
+              0.0033443841533932453,
+              0.0026730282930158525,
+              0.0024494425927187504
+            ],
+            "branch_qualified_converged": false,
+            "initial_residual": 0.006695741706661091,
+            "relative_amplitude": 1e-05,
+            "solver_converged": false,
+            "terminal_relative_distance_from_label": 0.01097507289034003,
+            "terminal_residual": 0.0024494425927187504,
+            "terminal_residual_nonfinite": false,
+            "terminal_state_sha256": "38b57bd5702bd95e3a8b7e6d227bb6c0806f63c6ffea88c9ffbe165a2debb4a4",
+            "termination_reason": "active_set_cycle_detected",
+            "topology_consistent": true
+          },
+          {
+            "achieved_branch": "diverted",
+            "active_set_iterations": 4,
+            "active_set_mask_differences": [
+              31,
+              29,
+              0,
+              2
+            ],
+            "active_set_residuals": [
+              0.00452939473837986,
+              0.003325577660685607,
+              0.002658016043329401,
+              0.0024356736389562193
+            ],
+            "branch_qualified_converged": false,
+            "initial_residual": 0.006666226583744256,
+            "relative_amplitude": 0.0001,
+            "solver_converged": false,
+            "terminal_relative_distance_from_label": 0.010980967919519854,
+            "terminal_residual": 0.0024356736389562193,
+            "terminal_residual_nonfinite": false,
+            "terminal_state_sha256": "644e8aa188ef8d8470729eafb6da9694ac01b4730527cc03436bc34c11e7bb7c",
+            "termination_reason": "active_set_cycle_detected",
+            "topology_consistent": true
+          },
+          {
+            "achieved_branch": "diverted",
+            "active_set_iterations": 4,
+            "active_set_mask_differences": [
+              31,
+              29,
+              0,
+              2
+            ],
+            "active_set_residuals": [
+              0.004311182350096914,
+              0.0031470507920883777,
+              0.002512290957432664,
+              0.0023014908558177125
+            ],
+            "branch_qualified_converged": false,
+            "initial_residual": 0.006371100476078083,
+            "relative_amplitude": 0.001,
+            "solver_converged": false,
+            "terminal_relative_distance_from_label": 0.011020078948844552,
+            "terminal_residual": 0.0023014908558177125,
+            "terminal_residual_nonfinite": false,
+            "terminal_state_sha256": "e490e9b2ee1c362eeaf9e2780f6b7318762de6e70875494cb77326c7d414e0cc",
+            "termination_reason": "active_set_cycle_detected",
+            "topology_consistent": true
+          },
+          {
+            "achieved_branch": "diverted",
+            "active_set_iterations": 10,
+            "active_set_mask_differences": [
+              31,
+              29,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "active_set_residuals": [
+              0.0022459908396470314,
+              0.001604695488223529,
+              0.0012582408199562026,
+              0.0006702947473322476,
+              0.0006270005096976055,
+              0.0006263151620498844,
+              0.000583185018892554,
+              0.000547696577157215,
+              0.0005475514479383713,
+              0.0005475514479383713
+            ],
+            "branch_qualified_converged": false,
+            "initial_residual": 0.003420895148444602,
+            "relative_amplitude": 0.01,
+            "solver_converged": false,
+            "terminal_relative_distance_from_label": 0.010720382980538823,
+            "terminal_residual": 0.0005475514479383713,
+            "terminal_residual_nonfinite": false,
+            "terminal_state_sha256": "e4d69abce317644c218a2355dc48ef038eec4b9d206213db48dfb3d46219ac1c",
+            "termination_reason": "active_set_stagnated",
+            "topology_consistent": true
+          }
+        ],
+        "summary": {
+          "achieved_branches": [
+            "diverted"
+          ],
+          "basin_sensitive": true,
+          "categorically_basin_sensitive": true,
+          "convergence_outcomes": [
+            false
+          ],
+          "distinct_terminal_reason_count": 2,
+          "distinct_terminal_state_count": 5,
+          "diverted_terminal_count": 5,
+          "finite_terminal_residual_count": 5,
+          "nonfinite_terminal_residual_count": 0,
+          "qualified_converged_count": 0,
+          "seed_count": 5,
+          "solver_converged_count": 0,
+          "terminal_reasons": [
+            "active_set_cycle_detected",
+            "active_set_stagnated"
+          ],
+          "terminal_residual_max": 0.002450771097163909,
+          "terminal_residual_min": 0.0005475514479383713
+        },
+        "wall_seconds_including_compilation": 732.543665532954
+      },
+      "reference": {
+        "seed_sha256": "9f89192d4f2b48ea63ed1d95680c4cc7c7dd4b8137c171f12a566ae3df036c5a",
+        "shot": 21978,
+        "slice_index": 35,
+        "time_s": 0.1899999976158142
+      }
+    }
+  ],
+  "receipt": "MAST pure-arm stagnation mechanism probe",
+  "source_revision": "e5e7d2823d6175b8a3dba416965ee0ddfea001b0",
+  "telemetry_discriminator": {
+    "arm": "pure",
+    "compiled_in": {
+      "active_set_cycle_damping_activations": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "active_set_iterations": 7,
+      "active_set_mask_differences": [
+        38,
+        23,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "active_set_residuals": [
+        0.004976455689734122,
+        0.0031314746103240677,
+        0.001951270366567521,
+        0.0006652842022510225,
+        0.0004808521116038136,
+        0.0004802335353917348,
+        0.0004802335353917348
+      ],
+      "branch_qualified_converged": false,
+      "finite_state": true,
+      "solver_converged": false,
+      "telemetry_compiled_in": true,
+      "terminal_residual": 0.0004802335353917348,
+      "terminal_state_sha256": "cc60d7a6c75e837ac027ffeaf791fd3827b6113ba7db7ad1a54df1b500a8f566",
+      "termination_reason": "active_set_stagnated",
+      "topology_consistent": true,
+      "wall_seconds_including_compilation": 628.726249050349
+    },
+    "compiled_out": {
+      "active_set_cycle_damping_activations": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "active_set_iterations": 7,
+      "active_set_mask_differences": [
+        38,
+        23,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "active_set_residuals": [
+        0.004976455689734122,
+        0.0031314746103240677,
+        0.001951270366567521,
+        0.0006652842022510225,
+        0.0004808521116038136,
+        0.0004802335353917348,
+        0.0004802335353917348
+      ],
+      "branch_qualified_converged": false,
+      "finite_state": true,
+      "solver_converged": false,
+      "telemetry_compiled_in": false,
+      "terminal_residual": 0.0004802335353917348,
+      "terminal_state_sha256": "cc60d7a6c75e837ac027ffeaf791fd3827b6113ba7db7ad1a54df1b500a8f566",
+      "termination_reason": "active_set_stagnated",
+      "topology_consistent": true,
+      "wall_seconds_including_compilation": 633.3585007824004
+    },
+    "numeric_differences": {},
+    "numeric_receipts_equal": true,
+    "reference": {
+      "seed_sha256": "7a16450eb97cec321c71155aaa8477163220561eb192f41543225ba915114e3e",
+      "shot": 22086,
+      "slice_index": 43,
+      "time_s": 0.22999998927116394
+    },
+    "telemetry_effect": "no_numeric_effect",
+    "telemetry_out_restores_convergence": false
+  }
+}

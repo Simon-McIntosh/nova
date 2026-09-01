@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T17:35:38",
+  "updated": "2026-09-01T18:08:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1485,9 +1485,11 @@
         "id": "sto-trips",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05d4e-fe16-7e62-b7ce-b05a1c69266d",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05d4e-fe16-7e62-b7ce-b05a1c69266d"
+        },
         "created": "2026-09-01"
       },
       {
@@ -67178,9 +67180,170 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260901T143942750055-sto-mast-bank-telemetry-relaunch",
+        "plan": "solver-trip-orchestration",
+        "section": "\u00a73",
+        "node": "sto-mast-bank-telemetry-relaunch",
+        "node_definition": {
+          "done_when": "After EXIT_MARKER=0: docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json carries 12/12 unique rows each with active_set_iterations plus equal-length active_set_mask_differences and active_set_residuals, strict finite-or-null JSON, an explicit per-row semantic diff against the HEAD-before-regeneration bank (SHA-256 43fb5edb...), scheduler device/reservation/exit-0 receipt, original-resolution PNG inspection, transient-cache removal, and a local commit of only assigned paths",
+          "estimated_hours": 4.0,
+          "goal": "The twelve-arm MAST bank with active-set trip telemetry, produced by the corrective launch the failed node prescribed: the same hardened one-H200 job with JAX_PLATFORMS=cuda,cpu (the prior failure was jax.debug.callback finding no local CPU device with backends [cuda] only) and /home/ITER/mcintos/Code/nova/.venv/bin/python -u, 4 CPUs, avoiding the duplicate-venv wrap defect its first attempt recorded",
+          "id": "sto-mast-bank-telemetry-relaunch",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T143942750055-sto-mast-bank-telemetry-relaunch/manifest.md",
+          "plan": "solver-trip-orchestration",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/figures/primary-xpoint-evidence/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "sto-bank",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T14:39:51Z",
+        "completed_at": "2026-09-01T16:08:10Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 5299,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 5299,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "2b594ac88c2e6058d3c9e76e161045004690b9f8",
+        "commits": [
+          "9a6caa4dace15a54143658ad6b2e77c88ca9a063"
+        ],
+        "changed_lines": {
+          "added": 4512,
+          "removed": 6441,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "SLURM 1260804 (1:15:43, exit 0) + strict artifact audit + pytest tests/test_active_set_telemetry.py tests/test_efit_topology_corroboration.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T143942750055-sto-mast-bank-telemetry-relaunch/logs/artifact-audit.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T143942750055-sto-mast-bank-telemetry-relaunch/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05d55-53f3-7271-a866-ca59e431e5b2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2925056,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2992666,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 21390,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 6915
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 5859,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: corrected non-debug regeneration job 1260726 did not reach MAST_STATES_READY or atomically emit schema-4 operands before the 60 min worker fence; the job remains running for later harvest; so the cache-only replay gate count and fresh-bank focused-suite result cannot yet be produced",
+              "elapsed_seconds": 9459,
+              "log_age_seconds": 6108,
+              "log_fresh": false,
+              "manifest_commits": [
+                "33e55954"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080826950119-hdg-cache-replay/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T080826950119-hdg-cache-replay/manifest.md; resolve the blocker before resuming the run",
+              "node": "hdg-cache-replay",
+              "phase": "working",
+              "plan": "hex-grid-derisk-gates",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260901T080826950119-hdg-cache-replay",
+              "session": "s18-hexgrid",
+              "terminal_age_seconds": 6136,
+              "terminal_at": "2026-09-01T12:57:30Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-cache-replay"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The committed MAST twelve-arm bank contains no per-trip mask-difference records or retained per-iteration histories; and regenerating that bank requires writes outside this node's fence. Without those 12 trajectories; the required per-machine settlement histogram cannot be produced honestly.",
+              "elapsed_seconds": 1735,
+              "log_age_seconds": 1450,
+              "log_fresh": false,
+              "manifest_commits": [],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141038002434-sto-trip-census/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "reckon crew resume --run r-20260901T141038002434-sto-trip-census --advice <answer>",
+              "node": "sto-trip-census",
+              "phase": "starting",
+              "plan": "solver-trip-orchestration",
+              "process_alive": false,
+              "project": "nova",
+              "run_id": "r-20260901T141038002434-sto-trip-census",
+              "session": "s18-hexgrid",
+              "terminal_age_seconds": 1476,
+              "terminal_at": "2026-09-01T14:15:10Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/sto-trip-census"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1230
+    "_version": 1232
   }
 }

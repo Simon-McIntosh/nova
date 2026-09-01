@@ -37,6 +37,22 @@
 <p><strong>Carrier verdict.</strong> Same physical carrier and vector order: yes — <code>machine.node</code> feeds <code>FluxTarget</code>, <code>Null2D</code>, <code>StencilMesh</code> and <code>MomentGeometry</code> alike. Same tensor-product structured lattice: no — the production hex tiling is half-offset and wall-trimmed, so the raster adapter is a second interpretation that happens to return labels in the same order.</p>
 <p><strong>Schema-4 operand cache (read-only, unmerged worktree <code>hdg-cache-replay</code> at 20a377a7).</strong> MAST 22086/43 mixed: 1,089 cells, 5 X candidates (selected index 1, position residual 2.88 mm, private counts [0, 42, 0, 0, 0]), 42 private cells, symmetric difference 0, 1,156 atomic nodes; polygon-centroid mean equals cached <code>cell_rz</code> to 0.0. This row is a 33×33 rectangular replay carrier with four-vertex cells: bitwise parity evidence for the incumbent labels, not evidence that the hex carrier is tensor-product.</p>
 </section>
+
+<section id="s1-partition"><h2 id="s1-partition-h">§1 — Cell partition geometry</h2>
+<p>Nodes <code>pta-cell-partition-geometry</code> (commit <code>1eae7e18</code>, gate <em>failed</em>: work rejected by independent review) and <code>pta-cell-partition-geometry-repair</code> (commit <code>09305b38</code>, gate passed), merged to <code>main</code> as <code>c712c98a</code>.</p>
+<table>
+<thead><tr><th>Measure</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Ring contract</td><td>Rings <code>(n, 7)</code> centre-first in <code>HEX_RING</code> angular order; <code>PlasmaGrid.loop_neighbour_vertices</code> now maps Delaunay neighbours to <code>HEX_RING</code>-derived slots, and <code>cell_partition_geometry</code> normalises defensively through the same helper. Test oracle derives the expected indices from <code>HEX_RING</code> independently of the input stencil.</td></tr>
+<tr><td>Shared edges</td><td>Reciprocal canonical endpoint pairs from the physical polygon edge each neighbour pair shares; endpoint agreement to 1e-12 m; both directed links address identical arrays.</td></tr>
+<tr><td>Missing neighbours</td><td>Self-padded; <code>missing_link_mask(rings)</code> is false at slot zero and true exactly where a slot repeats the centre (rim fixture: one slot). The topology-read node must AND its inverse into <code>link_admissible</code>.</td></tr>
+<tr><td>Raster carrier</td><td>A tensor-product centroid lattice routes to <code>_raster_hex_partition_geometry</code>; arrays exactly equal.</td></tr>
+<tr><td>Tests</td><td>68 passed in 397 s: 4 partition, 13 hexstencil, 15 stencil-null, 36 hex-flood (four files). Log: <code>~/.config/reckon/crew/runs/r-20260901T201949573558-pta-cell-partition-geometry-repair/pytest.log</code>.</td></tr>
+<tr><td>Review</td><td>First review FAIL: rings kept the carrier's descending-angle order (180°, 120°, 60°, 0°, −60°, −120°) against <code>HEX_RING</code>'s (180°, −120°, −60°, 0°, 60°, 120°), caught only because the test echoed its input; self-padding was graph-inert but not provably inadmissible. Re-review PASS; caller audit of <code>tessellate</code>, <code>loop_neighbour_vertices</code>, <code>FieldNull.categorize</code>, <code>Null2D</code> construction and <code>StencilMesh</code> ring fits found every consumer slot-permutation invariant.</td></tr>
+</tbody>
+</table>
+<p><strong>Finding banked.</strong> The hexstencil docstring's claim that <code>tessellate</code> packs rings "identically" to <code>hex_stencil</code> was false before this landing; it is true now.</p>
+</section>
 </main>
 </body>
 </html>

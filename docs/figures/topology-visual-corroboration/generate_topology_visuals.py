@@ -25,6 +25,9 @@ from typing import Any, Callable
 import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection, PolyCollection
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 from matplotlib.path import Path as MplPath
 import numpy as np
 
@@ -36,6 +39,10 @@ from benchmarks.efit_forward_parity_slice import (
     select_slices_by_shot,
 )
 from benchmarks.label_seed_residual_field import _persisted_response_cache
+from nova.equilibrium.connectivity_boundary import (
+    _points_inside_polygon,
+    _raster_hex_partition_geometry,
+)
 from nova.equilibrium.domain import PlasmaDomain
 from nova.equilibrium.flux_surface_connectivity import (
     fit_tensor_spline,
@@ -483,6 +490,133 @@ def _atomic_json(path: Path, payload: dict[str, Any]) -> None:
         os.close(directory_fd)
 
 
+def _artifact_record_path(path: Path) -> str:
+    """Return a stable publication identity or a durable external path."""
+    publication_directory = Path(__file__).resolve().parent
+    if HERE == publication_directory:
+        return f"/nova/figures/topology-visual-corroboration/{path.name}"
+    return str(path.resolve())
+
+
+def _line_intersection(first: np.ndarray, second: np.ndarray) -> np.ndarray:
+    """Intersect two production shared-edge support lines."""
+    first_origin, first_end = first
+    second_origin, second_end = second
+    first_direction = first_end - first_origin
+    second_direction = second_end - second_origin
+    denominator = (
+        first_direction[0] * second_direction[1]
+        - first_direction[1] * second_direction[0]
+    )
+    if np.isclose(denominator, 0.0):
+        raise ValueError("production hex shared edges do not enclose a polygon")
+    offset = second_origin - first_origin
+    distance = (
+        offset[0] * second_direction[1] - offset[1] * second_direction[0]
+    ) / denominator
+    return first_origin + distance * first_direction
+
+
+def _production_cell_geometry(
+    cells: np.ndarray, wall: np.ndarray
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Recover physical cells, admissible links, and centre wall membership."""
+    if not len(cells):
+        return (
+            np.empty((0, 4, 2), dtype=float),
+            np.empty((0, 2, 2), dtype=float),
+            np.empty(0, dtype=bool),
+        )
+
+    rg = np.unique(cells[:, 0])
+    zg = np.unique(cells[:, 1])
+    if len(rg) < 3 or len(zg) < 3 or len(rg) * len(zg) != len(cells):
+        return (
+            np.empty((0, 4, 2), dtype=float),
+            np.empty((0, 2, 2), dtype=float),
+            np.empty(0, dtype=bool),
+        )
+    expected = np.stack(np.meshgrid(rg, zg, indexing="ij"), axis=-1).reshape((-1, 2))
+    if not np.allclose(cells, expected, rtol=0.0, atol=1.0e-12):
+        raise ValueError("cached cells do not follow the production tensor-grid order")
+    if not (
+        np.allclose(np.diff(rg), np.diff(rg)[0], rtol=1.0e-10, atol=1.0e-12)
+        and np.allclose(np.diff(zg), np.diff(zg)[0], rtol=1.0e-10, atol=1.0e-12)
+    ):
+        raise ValueError("production polygon rendering requires regular grid axes")
+
+    rings, shared_edges = _raster_hex_partition_geometry(
+        jnp.asarray(rg), jnp.asarray(zg)
+    )
+    rings = np.asarray(rings)
+    shared_edges = np.asarray(shared_edges)
+    if not len(rings):
+        raise ValueError("production hex geometry has no interior ring")
+    production_centres = np.stack(np.meshgrid(rg, zg), axis=-1).reshape((-1, 2))
+    centre = production_centres[rings[0, 0]]
+    support_lines = shared_edges[0, 1:]
+    prototype = np.stack(
+        [
+            _line_intersection(support_lines[index], support_lines[(index + 1) % 6])
+            for index in range(6)
+        ]
+    )
+    unique_vertices: list[np.ndarray] = []
+    for vertex in prototype:
+        if not any(
+            np.allclose(vertex, existing, rtol=0.0, atol=1.0e-9)
+            for existing in unique_vertices
+        ):
+            unique_vertices.append(vertex)
+    if len(unique_vertices) != 4:
+        raise ValueError(
+            "production tensor-grid support lines do not define four cell vertices"
+        )
+    rectangle = np.stack(unique_vertices)
+    polygons = cells[:, None, :] + (rectangle - centre)[None, :, :]
+
+    if len(wall):
+        centre_inside_wall = np.asarray(
+            _points_inside_polygon(
+                cells[:, 0],
+                cells[:, 1],
+                wall[:, 0],
+                wall[:, 1],
+            ),
+            dtype=bool,
+        )
+        production_inside_wall = np.asarray(
+            _points_inside_polygon(
+                production_centres[:, 0],
+                production_centres[:, 1],
+                wall[:, 0],
+                wall[:, 1],
+            ),
+            dtype=bool,
+        )
+    else:
+        centre_inside_wall = np.zeros(len(cells), dtype=bool)
+        production_inside_wall = np.zeros(len(production_centres), dtype=bool)
+
+    neighbour_indices = rings[:, 1:]
+    centre_indices = np.broadcast_to(rings[:, :1], neighbour_indices.shape)
+    link_admissible = (
+        production_inside_wall[centre_indices]
+        & production_inside_wall[neighbour_indices]
+    )
+    directed_segments = shared_edges[:, 1:][link_admissible]
+    directed_pairs = np.sort(
+        np.stack((centre_indices, neighbour_indices), axis=-1)[link_admissible],
+        axis=1,
+    )
+    if len(directed_pairs):
+        _, first_occurrence = np.unique(directed_pairs, axis=0, return_index=True)
+        adjacency_segments = directed_segments[np.sort(first_occurrence)]
+    else:
+        adjacency_segments = np.empty((0, 2, 2), dtype=float)
+    return polygons, adjacency_segments, centre_inside_wall
+
+
 def _draw_row(row: dict[str, Any], path: Path) -> dict[str, Any]:
     figure, axis = plt.subplots(figsize=(7.4, 7.2), constrained_layout=True)
     cells = np.asarray(row["cell_rz"], dtype=float)
@@ -495,27 +629,73 @@ def _draw_row(row: dict[str, Any], path: Path) -> dict[str, Any]:
         int(PlasmaDomain.COMMON_SOL): "#d8e2dc",
         int(PlasmaDomain.PRIVATE_FLUX): "#8e5ea2",
     }
-    for domain, colour in colours.items():
-        selected = labels == domain
-        if np.any(selected):
-            axis.scatter(
-                cells[selected, 0],
-                cells[selected, 1],
-                marker="h",
-                s=22,
-                color=colour,
-                edgecolors="none",
-                rasterized=True,
-                label=(
-                    "private-flux shadow"
-                    if domain == int(PlasmaDomain.PRIVATE_FLUX)
-                    else None
-                ),
-            )
+    geometry_handles: list[Any] = []
     wall = _finite_points(row["wall"])
+    polygons, adjacency_segments, centre_inside_wall = _production_cell_geometry(
+        cells, wall
+    )
+    wall_membership_mismatch_cells = 0
+    if len(polygons):
+        expected_inside = labels != int(PlasmaDomain.EXCLUDED_MATERIAL)
+        wall_membership_mismatch_cells = int(
+            np.count_nonzero(centre_inside_wall != expected_inside)
+        )
+        axis.add_collection(
+            PolyCollection(
+                polygons,
+                facecolors=[colours[int(label)] for label in labels],
+                edgecolors="#ffffff",
+                linewidths=0.12,
+                rasterized=True,
+                zorder=1,
+            )
+        )
+        if len(adjacency_segments):
+            axis.add_collection(
+                LineCollection(
+                    adjacency_segments,
+                    colors="#264653",
+                    linewidths=0.42,
+                    alpha=0.38,
+                    rasterized=True,
+                    zorder=2,
+                )
+            )
+            geometry_handles.append(
+                Line2D(
+                    [],
+                    [],
+                    color="#264653",
+                    linewidth=0.8,
+                    alpha=0.65,
+                    label="six-neighbour adjacency",
+                )
+            )
+        axis.autoscale_view()
+        legend_names = {
+            int(PlasmaDomain.EXCLUDED_MATERIAL): "excluded material",
+            int(PlasmaDomain.CORE): "axis-connected core",
+            int(PlasmaDomain.COMMON_SOL): "common SOL",
+            int(PlasmaDomain.PRIVATE_FLUX): "private-flux shadow",
+        }
+        for domain, label in legend_names.items():
+            if np.any(labels == domain):
+                geometry_handles.append(
+                    Patch(
+                        facecolor=colours[domain],
+                        edgecolor="#d9d9d9",
+                        linewidth=0.4,
+                        label=label,
+                    )
+                )
     if len(wall):
         axis.plot(
-            wall[:, 0], wall[:, 1], color="0.45", linewidth=1.0, label="governed wall"
+            wall[:, 0],
+            wall[:, 1],
+            color="0.28",
+            linewidth=1.2,
+            label="governed wall",
+            zorder=6,
         )
     boundary = _finite_points(row["nova_boundary"])
     if len(boundary):
@@ -631,7 +811,23 @@ def _draw_row(row: dict[str, Any], path: Path) -> dict[str, Any]:
     axis.set_ylabel("Z [m]")
     axis.set_aspect("equal", adjustable="box")
     axis.grid(alpha=0.12)
+    axis.text(
+        0.01,
+        0.01,
+        "Tensor-grid Voronoi rectangles · six-neighbour adjacency · "
+        "wall test at centres · no clipping",
+        transform=axis.transAxes,
+        fontsize=6.5,
+        color="#333333",
+        bbox={"facecolor": "white", "edgecolor": "0.75", "alpha": 0.86},
+        zorder=10,
+    )
     handles, labels_text = axis.get_legend_handles_labels()
+    handles = [*geometry_handles, *handles]
+    labels_text = [
+        *(handle.get_label() for handle in geometry_handles),
+        *labels_text,
+    ]
     unique: dict[str, Any] = {}
     for handle, label in zip(handles, labels_text, strict=True):
         if label and label not in unique:
@@ -664,6 +860,9 @@ def _draw_row(row: dict[str, Any], path: Path) -> dict[str, Any]:
         "efit_axis": len(efit_axis),
         "efit_x": len(efit_x),
         "efit_lcfs_vertices": len(lcfs),
+        "voronoi_cells": len(polygons),
+        "wall_admissible_adjacency_links": len(adjacency_segments),
+        "wall_membership_mismatch_cells": wall_membership_mismatch_cells,
     }
 
 
@@ -719,6 +918,9 @@ def _draw_retained_failure(
         "efit_axis": 0,
         "efit_x": 0,
         "efit_lcfs_vertices": 0,
+        "voronoi_cells": 0,
+        "wall_admissible_adjacency_links": 0,
+        "wall_membership_mismatch_cells": 0,
     }
 
 
@@ -820,10 +1022,10 @@ def _publish_row_contents(row: dict[str, Any], index: int) -> dict[str, Any]:
             if retained_failure_class is not None or inside_count is None
             else bool(not row["converged"] or inside_count == 0)
         ),
-        "png_path": str(png_path.resolve()),
+        "png_path": _artifact_record_path(png_path),
     }
     json_path = HERE / _panel_filename(row, index, "json")
-    panel_record["json_path"] = str(json_path.resolve())
+    panel_record["json_path"] = _artifact_record_path(json_path)
     _atomic_json(json_path, panel_record)
     print(
         f"PANEL_PUBLISHED {index:02d} {row['machine']} {row['identity']} "
@@ -843,13 +1045,48 @@ def _publish_row(row: dict[str, Any], index: int) -> dict[str, Any]:
 
 
 def _write_evidence(rows: list[dict[str, Any]], records: list[dict[str, Any]]) -> None:
+    populated_records = [record for record in records if record["voronoi_cells"]]
+    membership_mismatch_records = [
+        record for record in records if record["wall_membership_mismatch_cells"] > 0
+    ]
+    binding = [
+        record
+        for record in records
+        if record["total_shadow_cells"] > 0 and record["closed_separatrix_available"]
+    ]
+    trivial = [
+        record
+        for record in records
+        if record["total_shadow_cells"] == 0 and record["closed_separatrix_available"]
+    ]
+    unavailable_records = [
+        record for record in records if not record["closed_separatrix_available"]
+    ]
+    failed_gate = [
+        record
+        for record in binding
+        if record["shadow_cells_inside_lcfs"] != 0
+        or record["shadow_cells_inside_closed_separatrix"] != 0
+    ]
+    if failed_gate:
+        identities = ", ".join(record["identity"] for record in failed_gate)
+        raise RuntimeError(f"strong containment gate failed for {identities}")
+
+    def record_names(selected: list[dict[str, Any]]) -> str:
+        return ", ".join(
+            f"{record['machine']} {record['identity']}" for record in selected
+        )
+
     figure_rows = []
     for index, (row, record) in enumerate(zip(rows, records, strict=True), start=1):
         filename = f"{index:02d}-{row['machine'].lower().replace('-', '')}-{row['identity'].replace('/', '-').replace(':', '-').replace(' ', '-')}.png"
         unavailable = not record["closed_separatrix_available"]
         retained_failure = record["retained_failure_exception_class"]
+        retained_message = record["retained_failure_message"]
         status = (
-            f"RETAINED FAILURE — {escape(retained_failure)}."
+            f"RETAINED FAILURE — {escape(retained_failure)}"
+            + (f": {escape(retained_message)}" if retained_message else "")
+            + "."
             + (
                 " Closed separatrix and containment counts are unavailable."
                 if unavailable
@@ -871,10 +1108,26 @@ def _write_evidence(rows: list[dict[str, Any]], records: list[dict[str, Any]]) -
                 )
             )
         )
+        containment = (
+            f"available=true; total={record['total_shadow_cells']}; "
+            f"inside LCFS={record['shadow_cells_inside_lcfs']}; "
+            f"inside closed separatrix="
+            f"{record['shadow_cells_inside_closed_separatrix']}"
+            + (
+                " (trivial zero-shadow population)"
+                if record["total_shadow_cells"] == 0
+                else ""
+            )
+            if not unavailable
+            else (
+                f"available=false; total={record['total_shadow_cells']}; "
+                "inside LCFS=null; inside closed separatrix=null (not a pass)"
+            )
+        )
         figure_rows.append(
             f"""<article class="figure-row" id="geometry-{index:02d}">
   <h3>{index:02d}. {row["machine"]} — {row["identity"]}</h3>
-  <figure><img src="/nova/figures/topology-visual-corroboration/{filename}" alt="Topology evidence for {row["machine"]} {row["identity"]}: hex flood-fill domains, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>{record["private_flux_cells"]} private-flux shadow cells; {record["o_candidates"]} plotted O candidates; {record["x_candidates"]} plotted X candidates; selected O/X/wall markers {record["selected_o"]}/{record["selected_x"]}/{record["wall_point"]}; EFIT axis/X/LCFS vertices {record["efit_axis"]}/{record["efit_x"]}/{record["efit_lcfs_vertices"]}. <strong>{status}</strong></figcaption></figure>
+  <figure><img src="/nova/figures/topology-visual-corroboration/{filename}" alt="Topology evidence for {row["machine"]} {row["identity"]}: rectangular tensor-grid Voronoi cells carrying flood-fill domains, production six-neighbour adjacency segments, all Nova O and X candidates, selected primary O and X, wall point, and EFIT axis, X labels and LCFS overlay."><figcaption>{record["voronoi_cells"]} rectangular Voronoi cells; {record["wall_admissible_adjacency_links"]} wall-admissible six-neighbour adjacency segments; {record["private_flux_cells"]} private-flux shadow cells; {record["o_candidates"]} plotted O candidates; {record["x_candidates"]} plotted X candidates; selected O/X/wall markers {record["selected_o"]}/{record["selected_x"]}/{record["wall_point"]}; EFIT axis/X/LCFS vertices {record["efit_axis"]}/{record["efit_x"]}/{record["efit_lcfs_vertices"]}. <strong>Containment record:</strong> {containment}. These are tensor-grid rectangles, not hexagonal areas: the production half-offset stencil supplies six-neighbour hex connectivity, drawn from its physical shared-edge segments. The centre-in-polygon wall test admits or excludes each whole rectangle; the solver computes neither partial clipping nor polygon-wall intersections, so excluded cells that straddle the wall remain visible at full extent. Production centre/label wall-check mismatches: {record["wall_membership_mismatch_cells"]}. <strong>{status}</strong></figcaption></figure>
 </article>"""
         )
     head = subprocess.run(
@@ -895,11 +1148,16 @@ def _write_evidence(rows: list[dict[str, Any]], records: list[dict[str, Any]]) -
 <title>Topology visual corroboration | nova</title><link rel="stylesheet" href="/_shared/foundation.css"><link rel="stylesheet" href="/_shared/dashboard.css">
 </head>
 <body><main class="plan"><header class="plan-hero"><p class="eyebrow">Evidence · visual topology audit</p><h1>Topology visual corroboration</h1>
-<p class="lede">All {EXPECTED_MAST_ROWS} MAST arms and all {EXPECTED_DIIID_ROWS} DIII-D demonstration frames are shown exactly once. Every panel exposes the hex-cell flood-fill domains, the complete finite O/X candidate census, selected primary O and X, selected wall point, and EFIT axis/X/LCFS labels.</p></header>
+<p class="lede">All {EXPECTED_MAST_ROWS} MAST arms and all {EXPECTED_DIIID_ROWS} DIII-D demonstration frames are shown exactly once. Every populated panel exposes the physical rectangular Voronoi cells carrying the flood-fill domains, the production six-neighbour adjacency that makes the connectivity graph hexagonal, the complete finite O/X candidate census, selected primary O and X, selected wall point, and EFIT axis/X/LCFS labels.</p></header>
 <section><h2>Authority and interpretation</h2><p>This is corroboration of committed extraction state, not a new score. EFIT is an independent magnetics-fitted reconstruction, not physical truth. MAST operands use the persisted response carrier and current source <code>{mast_source["source_path"]}</code> at content identity <code>{mast_source["source_identity"]}</code>. DIII-D operands use the current integrated benchmark source <code>{diiid_source["source_path"]}</code> at content identity <code>{diiid_source["source_identity"]}</code>. Every nonconverged row remains visibly qualified by its recorded termination name. Generated from repository head <code>{head}</code>.</p>
+<p>The requested “hex cells with clipping” contained two premises that the production geometry corrects. On these tensor axes, the six shared-edge support-line intersections from <code>_raster_hex_partition_geometry</code> collapse pairwise to four unique vertices, so each physical Voronoi cell is a rectangle. The hexagonal structure belongs to the six-neighbour half-offset adjacency graph, not to an area tessellation; every panel therefore overlays the wall-admissible production shared-edge segments that make that connectivity visible. Hulling those segment endpoints would invent six-sided areas that overlap neighbours by 49.093 mm radially and 23.810 mm vertically, so no hexagon-shaped fill is drawn.</p>
+<p>The governed material decision is reproduced by the production <code>_points_inside_polygon</code> symbol at cell centres and checked against the cached labels. The solver performs no partial-cell clipping: it admits or excludes each whole rectangle according to its centre. The wall is therefore drawn over full rectangles, including excluded-material cells that visibly straddle it; no polygon-wall intersections are invented. The centre/label wall check is exact for {len(populated_records) - len(membership_mismatch_records)} of {len(populated_records)} populated rows. {len(membership_mismatch_records)} retained-failure rows carry a mismatch, named per row in the figure ledger: {record_names(membership_mismatch_records)}.</p>
 <p>The purple cells are the exact <code>PRIVATE_FLUX</code> labels from Nova's domain partition: closed-flux cells disconnected from the primary O-point by the X-point flood-fill cut. Pale blue is axis-connected core, grey-green is common SOL, and pale grey is excluded material. The selected wall marker is Nova's governed closest plasma-wall candidate; it is shown even when the topology class is diverted and it does not bind the LCFS.</p></section>
-<section><h2>Coverage</h2><p><strong>{len(rows)} of {EXPECTED_MAST_ROWS + EXPECTED_DIIID_ROWS} declared geometries rendered.</strong> {sum(row["machine"] == "MAST" for row in rows)} MAST and {sum(row["machine"] == "DIII-D" for row in rows)} DIII-D; {sum(not row["converged"] for row in rows)} nonconverged rows retained. Figure rows below are the quantitative completeness ledger.</p></section>
+<section><h2>Coverage and non-vacuous containment gate</h2><p><strong>{len(rows)} of {EXPECTED_MAST_ROWS + EXPECTED_DIIID_ROWS} declared geometries rendered.</strong> {sum(row["machine"] == "MAST" for row in rows)} MAST and {sum(row["machine"] == "DIII-D" for row in rows)} DIII-D; {sum(row["converged"] for row in rows)} converged and {sum(not row["converged"] for row in rows)} nonconverged rows retained. The strong gate applies wherever <code>total_shadow_cells &gt; 0</code> and <code>closed_separatrix_available = true</code>, irrespective of convergence: both numeric inside counts must equal zero. It binds on <strong>{len(binding)} panels and passes {len(binding)} of {len(binding)}</strong>: {record_names(binding)}.</p>
+<p>{len(trivial)} panels have an available separatrix but zero shadow cells, so their zero-inside result is trivial: {record_names(trivial)}. {len(unavailable_records)} panels have no available closed separatrix and are not passes; their containment counts are null: {record_names(unavailable_records)}.</p>
+<p><strong>Direct defect refutation:</strong> the converged MAST 22086/43 pure and mixed panels carry 43 and 42 private-flux shadow cells respectively, with zero inside the LCFS and zero inside the closed separatrix in both cases. This is substantial private-flux shadow entirely outside the converged closed boundary.</p></section>
 <section><h2>Per-geometry corroboration</h2>{"".join(figure_rows)}</section>
+<section><h2>Deferred primary-selection variants</h2><p>Primary-versus-alternate domain variants require cache fields that are not present: <code>per_cell_flux_values</code> and <code>per_candidate_domain_labels</code>. Adding them is a cache-schema migration followed by a full seventeen-row bank regeneration, measured at roughly one day of lane time, so it is deferred to the next scheduled bank regeneration rather than triggering a solve campaign here. The existing synthetic-geometry sensitivity measurements remain available at <code>docs/figures/wall-height-shadow-safety/metrics.json</code>.</p></section>
 <section><h2>Reproduction</h2><p>Run <code>UV_PROJECT_ENVIRONMENT=~/Code/nova/.venv PYTHONPATH="$PWD" uv run --no-sync python docs/figures/topology-visual-corroboration/generate_topology_visuals.py</code>. The committed <code>generation.log</code> records the successful run and ends with <code>EXIT_MARKER=0</code>. The scoped NPZ files retain the exact plotted operands so ordinary regeneration does not repeat the expensive solves; delete them only when intentionally refreshing from a newly committed extraction state.</p></section>
 </main></body></html>"""
     EVIDENCE.write_text(html + "\n")
@@ -923,7 +1181,12 @@ def main() -> None:
 
     args = _parse_args()
     HERE = args.output_directory.expanduser().resolve()
-    EVIDENCE = HERE / "topology-visual-corroboration.html"
+    publication_directory = Path(__file__).resolve().parent
+    EVIDENCE = (
+        ROOT / "docs/evidence/topology-visual-corroboration.html"
+        if HERE == publication_directory
+        else HERE / "topology-visual-corroboration.html"
+    )
     MAST_CACHE = HERE / "mast-topology-operands.npz"
     DIIID_CACHE = HERE / "diiid-topology-operands.npz"
     configure_dtypes()

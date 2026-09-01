@@ -1,79 +1,19 @@
-slurmstepd: error: Unable to create TMPDIR [/run/user/39486]: Permission denied
-slurmstepd: error: Setting TMPDIR to /tmp
-MAST_OPERANDS 21978/35
 PANEL_PUBLISHED 01 MAST 21978/35 pure shadow_inside_lcfs=0 total_shadow=38 retained_failure=None
 PANEL_PUBLISHED 02 MAST 21978/35 mixed shadow_inside_lcfs=0 total_shadow=36 retained_failure=None
-MAST_OPERANDS 21983/35
 PANEL_PUBLISHED 03 MAST 21983/35 pure shadow_inside_lcfs=0 total_shadow=0 retained_failure=None
 PANEL_PUBLISHED 04 MAST 21983/35 mixed shadow_inside_lcfs=0 total_shadow=0 retained_failure=None
-MAST_OPERANDS 21985/51
 PANEL_PUBLISHED 05 MAST 21985/51 pure shadow_inside_lcfs=None total_shadow=0 retained_failure=ValueError
 PANEL_PUBLISHED 06 MAST 21985/51 mixed shadow_inside_lcfs=None total_shadow=104 retained_failure=ValueError
-MAST_OPERANDS 21986/46
 PANEL_PUBLISHED 07 MAST 21986/46 pure shadow_inside_lcfs=0 total_shadow=0 retained_failure=None
 PANEL_PUBLISHED 08 MAST 21986/46 mixed shadow_inside_lcfs=None total_shadow=0 retained_failure=None
-MAST_OPERANDS 21989/55
 PANEL_PUBLISHED 09 MAST 21989/55 pure shadow_inside_lcfs=0 total_shadow=0 retained_failure=None
 PANEL_PUBLISHED 10 MAST 21989/55 mixed shadow_inside_lcfs=0 total_shadow=0 retained_failure=None
-MAST_OPERANDS 22086/43
 PANEL_PUBLISHED 11 MAST 22086/43 pure shadow_inside_lcfs=0 total_shadow=43 retained_failure=None
 PANEL_PUBLISHED 12 MAST 22086/43 mixed shadow_inside_lcfs=0 total_shadow=42 retained_failure=None
-DIIID_OPERANDS 1/5 d3d_shot_00000c4a7b.parquet:179
-21:43:00 INFO     Parsing data dictionary version 3.41.0 [90m@dd_zip.py:89[0m
-INFO:imas.dd_zip:Parsing data dictionary version 3.41.0
-active-set trip=0 mask_difference=0 live_residual=0.016978129815696748 inner_iterations=24
-active-set trip=0 mask_difference=16 live_residual=0.33736796244470013 inner_iterations=0
-active-set trip=1 mask_difference=0 live_residual=0.016978129815696946 inner_iterations=24
-active-set trip=1 mask_difference=9 live_residual=0.26172349862922067 inner_iterations=24
-active-set trip=2 mask_difference=0 live_residual=0.016978129815696946 inner_iterations=24
-active-set trip=2 mask_difference=0 live_residual=0.085089880127569226 inner_iterations=24
-active-set trip=3 mask_difference=26 live_residual=0.025137204508012895 inner_iterations=24
-active-set trip=4 mask_difference=0 live_residual=0.025137204508012895 inner_iterations=24
 PANEL_PUBLISHED 13 DIII-D d3d_shot_00000c4a7b:179 shadow_inside_lcfs=None total_shadow=0 retained_failure=None
-DIIID_OPERANDS 2/5 d3d_shot_0003ff34e7.parquet:44
-active-set trip=0 mask_difference=0 live_residual=0.024676534373616374 inner_iterations=24
-active-set trip=0 mask_difference=0 live_residual=0.074814605404398465 inner_iterations=24
-active-set trip=1 mask_difference=0 live_residual=0.0087329112810811804 inner_iterations=24
-active-set trip=1 mask_difference=16 live_residual=0.043313689265082035 inner_iterations=24
-active-set trip=2 mask_difference=0 live_residual=0.0020223705712349156 inner_iterations=24
-active-set trip=2 mask_difference=11 live_residual=0.039481396048126408 inner_iterations=24
-active-set trip=3 mask_difference=0 live_residual=0.0010583508459576475 inner_iterations=24
-active-set trip=3 mask_difference=0 live_residual=0.039481396048126408 inner_iterations=24
-active-set trip=4 mask_difference=0 live_residual=0.00088867380889730036 inner_iterations=24
-active-set trip=5 mask_difference=0 live_residual=0.00087002588598187041 inner_iterations=24
-active-set trip=6 mask_difference=0 live_residual=0.00086689021963123349 inner_iterations=24
-active-set trip=7 mask_difference=0 live_residual=0.00086643565890901376 inner_iterations=24
-active-set trip=8 mask_difference=0 live_residual=0.00086630088892948479 inner_iterations=24
-active-set trip=9 mask_difference=0 live_residual=0.00086628909002185771 inner_iterations=24
-active-set trip=10 mask_difference=0 live_residual=0.00086625368036149706 inner_iterations=24
-active-set trip=11 mask_difference=0 live_residual=0.00086621601582200403 inner_iterations=24
-active-set trip=12 mask_difference=0 live_residual=0.00086621601582200403 inner_iterations=24
 PANEL_PUBLISHED 14 DIII-D d3d_shot_0003ff34e7:44 shadow_inside_lcfs=None total_shadow=5 retained_failure=None
-DIIID_OPERANDS 3/5 d3d_shot_001554e054.parquet:144
-active-set trip=0 mask_difference=0 live_residual=0.007341781608163323 inner_iterations=24
-active-set trip=0 mask_difference=15 live_residual=0.028437897915433857 inner_iterations=24
-active-set trip=1 mask_difference=0 live_residual=0.0058103190784059167 inner_iterations=24
-active-set trip=1 mask_difference=2 live_residual=0.028346212003493135 inner_iterations=24
-active-set trip=2 mask_difference=0 live_residual=0.0058103190784059167 inner_iterations=24
-active-set trip=2 mask_difference=4 live_residual=0.026944395688431867 inner_iterations=24
-active-set trip=3 mask_difference=0 live_residual=0.026944395688431867 inner_iterations=24
 PANEL_PUBLISHED 15 DIII-D d3d_shot_001554e054:144 shadow_inside_lcfs=None total_shadow=5 retained_failure=None
-DIIID_OPERANDS 4/5 d3d_shot_002495e835.parquet:146
-active-set trip=0 mask_difference=1 live_residual=0.01412534409923428 inner_iterations=24
-active-set trip=0 mask_difference=4 live_residual=0.10387270072123395 inner_iterations=24
-active-set trip=1 mask_difference=0 live_residual=0.014125344099234062 inner_iterations=24
-active-set trip=1 mask_difference=0 live_residual=0.034192722685434496 inner_iterations=24
-active-set trip=2 mask_difference=0 live_residual=0.014125344099234062 inner_iterations=24
-active-set trip=2 mask_difference=0 live_residual=0.03234944550955933 inner_iterations=24
-active-set trip=3 mask_difference=0 live_residual=0.03234944550955933 inner_iterations=24
 PANEL_PUBLISHED 16 DIII-D d3d_shot_002495e835:146 shadow_inside_lcfs=0 total_shadow=0 retained_failure=None
-DIIID_OPERANDS 5/5 d3d_shot_0040ca9bdc.parquet:137
-active-set trip=0 mask_difference=0 live_residual=0.014882191311228619 inner_iterations=24
-active-set trip=0 mask_difference=0 live_residual=0.030974686016898227 inner_iterations=24
-active-set trip=1 mask_difference=0 live_residual=0.014653768253197847 inner_iterations=24
-active-set trip=1 mask_difference=0 live_residual=0.03097468601689872 inner_iterations=24
-active-set trip=2 mask_difference=0 live_residual=0.014653768253197847 inner_iterations=24
-active-set trip=2 mask_difference=0 live_residual=0.03097468601689872 inner_iterations=24
 PANEL_PUBLISHED 17 DIII-D d3d_shot_0040ca9bdc:137 shadow_inside_lcfs=None total_shadow=0 retained_failure=None
-{"diiid": 5, "evidence_sha256": "cd250a3f472cd0eb7fdd8ee6fa8aa726dbf598bb7b0570468f1cdefa28025b23", "mast": 12, "output_directory": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260829T183223007605-sse-topology-panel-final-launch/job-output", "rows": 17}
+{"diiid": 5, "evidence_sha256": "52a1b0df327244d7a4a35f9ced78ba57ead62f59317a510283073054f1ee9815", "mast": 12, "output_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s16-lead-review/sse-hex-cell-clipped-rendering/docs/figures/topology-visual-corroboration", "rows": 17}
 EXIT_MARKER=0

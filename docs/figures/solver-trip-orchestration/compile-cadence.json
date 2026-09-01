@@ -1,0 +1,490 @@
+{
+  "cache_key_stability": {
+    "code_change": {
+      "cache_hits": 43,
+      "compile_seconds_saved": 1.4177903784438968,
+      "main_program_cache_hit": false,
+      "main_program_cache_key": null,
+      "stablehlo_identical": false,
+      "verdict": "changed traced StableHLO requires a distinct executable"
+    },
+    "pure_data_change": {
+      "cache_hits": 44,
+      "compile_seconds_saved": 307.6820968259126,
+      "main_program_cache_hit": true,
+      "main_program_cache_key": "jit_solve-ba3376e23aa3e4c456f27e8bf53adc52ee1c05fc18790a7f617a597003c24ef9",
+      "stablehlo_identical": true,
+      "verdict": "stable key: changed values with unchanged shapes reuse the executable"
+    },
+    "version_scope": "the key also includes backend/compiler options, device topology, jaxlib/XLA build and serialized computation; a jaxlib/XLA change must be treated as invalidating even if Python source is unchanged"
+  },
+  "compilation_time_breakdown": {
+    "interpretation": "phase and pass events are nested and GPU codegen may run in parallel; aggregate event durations are diagnostic workload, not additive shares of wall clock",
+    "phase_events": [
+      {
+        "aggregate_duration_seconds": 361.498616074,
+        "event": "backend_compile_and_load",
+        "event_count": 1,
+        "maximum_single_event_seconds": 361.498616074
+      },
+      {
+        "aggregate_duration_seconds": 361.477706608,
+        "event": "PjRtCApiClient::CompileAndLoad",
+        "event_count": 1,
+        "maximum_single_event_seconds": 361.477706608
+      },
+      {
+        "aggregate_duration_seconds": 360.99090096000003,
+        "event": "PJRT_Client_Compile",
+        "event_count": 2,
+        "maximum_single_event_seconds": 360.990900022
+      },
+      {
+        "aggregate_duration_seconds": 359.44336673400005,
+        "event": "PjRtStreamExecutorClient::CompileInternal",
+        "event_count": 1,
+        "maximum_single_event_seconds": 359.44336673400005
+      },
+      {
+        "aggregate_duration_seconds": 263.061108882,
+        "event": "OptimizeHloModule",
+        "event_count": 1,
+        "maximum_single_event_seconds": 263.061108882
+      }
+    ],
+    "raw_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141023513818-sto-compile-cadence/h200-campaign/cold.log",
+    "raw_trace": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141023513818-sto-compile-cadence/h200-campaign/compile-trace",
+    "source": "JAX_LOG_COMPILES plus JAX/XLA profiler trace around lowered.compile()",
+    "top_pass_and_pipeline_events": [
+      {
+        "aggregate_duration_seconds": 67.662069574,
+        "event_count": 1,
+        "maximum_single_event_seconds": 67.662069574,
+        "pass_or_pipeline": "fusion (jit_solve)"
+      },
+      {
+        "aggregate_duration_seconds": 56.515930592000004,
+        "event_count": 86,
+        "maximum_single_event_seconds": 56.494465769,
+        "pass_or_pipeline": "priority-fusion"
+      },
+      {
+        "aggregate_duration_seconds": 42.829789422,
+        "event_count": 1,
+        "maximum_single_event_seconds": 42.829789422,
+        "pass_or_pipeline": "simplification"
+      },
+      {
+        "aggregate_duration_seconds": 41.871162522000006,
+        "event_count": 11,
+        "maximum_single_event_seconds": 24.071716033,
+        "pass_or_pipeline": "simplification (jit_solve)"
+      },
+      {
+        "aggregate_duration_seconds": 10.043055933999998,
+        "event_count": 11,
+        "maximum_single_event_seconds": 6.443474602,
+        "pass_or_pipeline": "simplify-while-loops"
+      },
+      {
+        "aggregate_duration_seconds": 5.396371498,
+        "event_count": 1,
+        "maximum_single_event_seconds": 5.396371498,
+        "pass_or_pipeline": "dynamic-dimension-simplifier"
+      },
+      {
+        "aggregate_duration_seconds": 3.8261591009999996,
+        "event_count": 183,
+        "maximum_single_event_seconds": 2.4012218250000004,
+        "pass_or_pipeline": "cse"
+      },
+      {
+        "aggregate_duration_seconds": 2.194215432,
+        "event_count": 13,
+        "maximum_single_event_seconds": 0.9308752830000001,
+        "pass_or_pipeline": "tuple-simplifier"
+      },
+      {
+        "aggregate_duration_seconds": 1.415745966,
+        "event_count": 11,
+        "maximum_single_event_seconds": 0.9639068630000001,
+        "pass_or_pipeline": "simplify-conditional"
+      },
+      {
+        "aggregate_duration_seconds": 1.3699977140000004,
+        "event_count": 185,
+        "maximum_single_event_seconds": 0.819062622,
+        "pass_or_pipeline": "dce"
+      },
+      {
+        "aggregate_duration_seconds": 1.2405514630000003,
+        "event_count": 11,
+        "maximum_single_event_seconds": 0.6771452530000001,
+        "pass_or_pipeline": "scatter-slice-simplifier"
+      },
+      {
+        "aggregate_duration_seconds": 1.2283304339999999,
+        "event_count": 1,
+        "maximum_single_event_seconds": 1.2283304339999999,
+        "pass_or_pipeline": "collective-pipeliner-forward"
+      },
+      {
+        "aggregate_duration_seconds": 1.189083455,
+        "event_count": 1,
+        "maximum_single_event_seconds": 1.189083455,
+        "pass_or_pipeline": "all-reduce-simplifier"
+      },
+      {
+        "aggregate_duration_seconds": 1.007109341,
+        "event_count": 1,
+        "maximum_single_event_seconds": 1.007109341,
+        "pass_or_pipeline": "simplification-2"
+      },
+      {
+        "aggregate_duration_seconds": 0.9249682250000002,
+        "event_count": 11,
+        "maximum_single_event_seconds": 0.5808750570000001,
+        "pass_or_pipeline": "gather_simplifier"
+      },
+      {
+        "aggregate_duration_seconds": 0.8479734950000001,
+        "event_count": 14,
+        "maximum_single_event_seconds": 0.443224138,
+        "pass_or_pipeline": "scatter_simplifier"
+      },
+      {
+        "aggregate_duration_seconds": 0.55903448,
+        "event_count": 3,
+        "maximum_single_event_seconds": 0.206643379,
+        "pass_or_pipeline": "simplification-2 (jit_solve)"
+      },
+      {
+        "aggregate_duration_seconds": 0.319685231,
+        "event_count": 1,
+        "maximum_single_event_seconds": 0.319685231,
+        "pass_or_pipeline": "permutation_sort_simplifier"
+      },
+      {
+        "aggregate_duration_seconds": 0.29686112400000003,
+        "event_count": 1,
+        "maximum_single_event_seconds": 0.29686112400000003,
+        "pass_or_pipeline": "simplify_after_conv_canonicalization"
+      },
+      {
+        "aggregate_duration_seconds": 0.294906463,
+        "event_count": 2,
+        "maximum_single_event_seconds": 0.147596971,
+        "pass_or_pipeline": "simplify_after_conv_canonicalization (jit_solve)"
+      }
+    ]
+  },
+  "configuration": {
+    "policy": {
+      "gmres_iterations": 4,
+      "newton_steps": 1,
+      "relaxation": 0.5,
+      "step_cap": 0.25,
+      "warmup": 1
+    },
+    "width": 1024
+  },
+  "device": {
+    "host": "98dci4-gpu-0003.iter.org",
+    "id": 0,
+    "jax_version": "0.11.0",
+    "jaxlib_version": "0.11.0",
+    "kind": "NVIDIA H200 NVL",
+    "platform": "gpu",
+    "x64_enabled": true
+  },
+  "driver": {
+    "path": "benchmarks/solve_compile_cadence.py",
+    "sha256": "62ad1ce0e413bac3805aa222056e40397219908cb3e0d0801e75fbb3f8eadeca"
+  },
+  "dual_branch_stacking": {
+    "device": "NVIDIA H200 NVL",
+    "ratio_summary": {
+      "maximum": 1.658322365782477,
+      "median": 1.6214475945527105,
+      "minimum": 1.5630718754671147
+    },
+    "rows": [
+      {
+        "batch_width": 4,
+        "dual_branch_compile_seconds": 37.29636924806982,
+        "dual_over_single_ratio": 1.5876546899550001,
+        "seed_cohort": "nearest_neighbour",
+        "single_pinned_compile_seconds": 23.491486835293472
+      },
+      {
+        "batch_width": 4,
+        "dual_branch_compile_seconds": 37.323229126632214,
+        "dual_over_single_ratio": 1.658322365782477,
+        "seed_cohort": "close_neighbour",
+        "single_pinned_compile_seconds": 22.506618674844503
+      },
+      {
+        "batch_width": 4,
+        "dual_branch_compile_seconds": 37.4564908510074,
+        "dual_over_single_ratio": 1.632390620344111,
+        "seed_cohort": "outer_qualified_neighbour",
+        "single_pinned_compile_seconds": 22.94578906800598
+      },
+      {
+        "batch_width": 16,
+        "dual_branch_compile_seconds": 37.64811335131526,
+        "dual_over_single_ratio": 1.5630718754671147,
+        "seed_cohort": "nearest_neighbour",
+        "single_pinned_compile_seconds": 24.08597707003355
+      },
+      {
+        "batch_width": 16,
+        "dual_branch_compile_seconds": 37.19718004390597,
+        "dual_over_single_ratio": 1.6437018540320405,
+        "seed_cohort": "close_neighbour",
+        "single_pinned_compile_seconds": 22.630125988274813
+      },
+      {
+        "batch_width": 16,
+        "dual_branch_compile_seconds": 37.02003864198923,
+        "dual_over_single_ratio": 1.61050456876131,
+        "seed_cohort": "outer_qualified_neighbour",
+        "single_pinned_compile_seconds": 22.986608892679214
+      }
+    ],
+    "source_job": "1258440",
+    "source_receipt": "docs/figures/dual-branch-selection/two-branch-batch-cost.json",
+    "source_receipt_sha256": "63b5ad7240b7d123554737c75dc4732e0ae29d3a9dce80b2bb4c6383e0173f7d",
+    "verdict": "stacking both pinned branches costs about 1.6x, not 2x, at the measured widths 4 and 16; it does not explain the width-1024 settled-loop compile by itself"
+  },
+  "evidence_inputs": {
+    "banked_baseline": {
+      "path": "docs/figures/single-grid-solver-cutover/h200-solve-profile.json",
+      "sha256": "82875def9b5e5056bdf0b4616912651b2e02bcc5c98cdc77a39ca075cd85431d"
+    },
+    "merged_stderr_logs": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141023513818-sto-compile-cadence/h200-campaign/cold.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141023513818-sto-compile-cadence/h200-campaign/data_change.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141023513818-sto-compile-cadence/h200-campaign/code_change.log"
+    ],
+    "raw_directory": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141023513818-sto-compile-cadence/h200-campaign/raw"
+  },
+  "headline": {
+    "banked_compile_and_first_execute_seconds": 800.5615774514154,
+    "cache_warm_restart_jaxpr_to_mlir_seconds": 1.652136564,
+    "cache_warm_restart_total_compile_seconds": 63.720444202,
+    "cache_warm_restart_trace_seconds": 7.217599392,
+    "cache_warm_restart_xla_cache_load_seconds": 54.850708246,
+    "cache_warm_total_speedup": 6.018074385770898,
+    "cold_jaxpr_to_mlir_seconds": 1.665171385,
+    "cold_total_compile_seconds": 383.47437310199996,
+    "cold_trace_seconds": 7.214823484,
+    "cold_xla_compile_seconds": 374.594378233,
+    "profiler_export_overhead_seconds": 65.69712903625583
+  },
+  "lane_cadence": {
+    "payments": [
+      {
+        "lane": "bank regeneration",
+        "payment": "one compile per distinct batch-width/program-shape bucket per invocation; a restarted bank pays again",
+        "persistent_cache_enabled": false,
+        "process_cadence": "one fresh Python process per benchmark invocation; a driver that regenerates multiple frames reuses only executables whose program shape remains identical inside that invocation"
+      },
+      {
+        "lane": "small and focused benchmark lanes",
+        "payment": "once per distinct shape in each invocation, even when a prior small lane compiled the same program",
+        "persistent_cache_enabled": false,
+        "process_cadence": "each CLI invocation starts a fresh Python process"
+      },
+      {
+        "lane": "pytest",
+        "payment": "focused and full-suite commands repay independently, as do separately scheduled test shards",
+        "persistent_cache_enabled": false,
+        "process_cadence": "one fresh process per pytest command; identical keys can share the in-memory executable only within that test session"
+      }
+    ],
+    "persistent_cache_recipe_census": {
+      "forward_solve_launch_recipes_enabling_cache": [],
+      "interpretation": "persistent caching exists for tiled Biot and explicit benchmark probes, but no forward-solve bank, small-lane, or pytest launch recipe enables jax_compilation_cache_dir",
+      "repository_matches": [
+        "nova/biot/tiledassembly.py",
+        "benchmarks/tiled_backend.py",
+        "benchmarks/forward_solve_throughput.py",
+        "benchmarks/observable_batch_acceptance.py"
+      ]
+    }
+  },
+  "measurement_state": "complete",
+  "measurements": [
+    {
+      "cache": {
+        "bytes": 37039139,
+        "compile_seconds_saved": 0.0,
+        "directory": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141023513818-sto-compile-cadence/h200-campaign/persistent-cache",
+        "entry_count": 1745,
+        "hits": 0
+      },
+      "compile_trace_directory": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141023513818-sto-compile-cadence/h200-campaign/compile-trace",
+      "device": {
+        "host": "98dci4-gpu-0003.iter.org",
+        "id": 0,
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0",
+        "kind": "NVIDIA H200 NVL",
+        "platform": "gpu",
+        "x64_enabled": true
+      },
+      "driver_sha256": "d052af770556686bf366a84077367e3e5fc69f1c82866ce415223c3eb6052111",
+      "jax_log_compile": {
+        "jaxpr_to_mlir_seconds": 1.665171385,
+        "main_program_cache_hit": false,
+        "main_program_cache_key": null,
+        "trace_seconds": 7.214823484,
+        "xla_compile_or_cache_load_seconds": 374.594378233
+      },
+      "policy": {
+        "gmres_iterations": 4,
+        "newton_steps": 1,
+        "relaxation": 0.5,
+        "step_cap": 0.25,
+        "warmup": 1
+      },
+      "scheduler": {
+        "accepted_time_limit": "UNLIMITED",
+        "job_id": "1260790",
+        "job_name": "nova-solve-compile-cadence",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA"
+      },
+      "setup_seconds": 8.882000902667642,
+      "source_revision": "88b0fb610f05a38f63be9dde7764ca76ad751259",
+      "stablehlo_sha256": "8ab0f9631ab579ac347123b6b5e8bd2658db58e93f224c8f618cdbf6621a639b",
+      "trace_and_lower_seconds": 9.12166365236044,
+      "variant": "cold",
+      "width": 1024,
+      "xla_compile_or_cache_load_seconds": 440.2915072692558
+    },
+    {
+      "cache": {
+        "bytes": 37042964,
+        "compile_seconds_saved": 307.6820968259126,
+        "directory": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141023513818-sto-compile-cadence/h200-campaign/persistent-cache",
+        "entry_count": 1747,
+        "hits": 44
+      },
+      "compile_trace_directory": null,
+      "device": {
+        "host": "98dci4-gpu-0003.iter.org",
+        "id": 0,
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0",
+        "kind": "NVIDIA H200 NVL",
+        "platform": "gpu",
+        "x64_enabled": true
+      },
+      "driver_sha256": "d052af770556686bf366a84077367e3e5fc69f1c82866ce415223c3eb6052111",
+      "jax_log_compile": {
+        "jaxpr_to_mlir_seconds": 1.652136564,
+        "main_program_cache_hit": true,
+        "main_program_cache_key": "jit_solve-ba3376e23aa3e4c456f27e8bf53adc52ee1c05fc18790a7f617a597003c24ef9",
+        "trace_seconds": 7.217599392,
+        "xla_compile_or_cache_load_seconds": 54.850708246
+      },
+      "policy": {
+        "gmres_iterations": 4,
+        "newton_steps": 1,
+        "relaxation": 0.5,
+        "step_cap": 0.25,
+        "warmup": 1
+      },
+      "scheduler": {
+        "accepted_time_limit": "UNLIMITED",
+        "job_id": "1260790",
+        "job_name": "nova-solve-compile-cadence",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA"
+      },
+      "setup_seconds": 5.691768456250429,
+      "source_revision": "88b0fb610f05a38f63be9dde7764ca76ad751259",
+      "stablehlo_sha256": "8ab0f9631ab579ac347123b6b5e8bd2658db58e93f224c8f618cdbf6621a639b",
+      "trace_and_lower_seconds": 9.07421793229878,
+      "variant": "data_change",
+      "width": 1024,
+      "xla_compile_or_cache_load_seconds": 54.85219547338784
+    },
+    {
+      "cache": {
+        "bytes": 73068745,
+        "compile_seconds_saved": 1.4177903784438968,
+        "directory": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141023513818-sto-compile-cadence/h200-campaign/persistent-cache",
+        "entry_count": 1749,
+        "hits": 43
+      },
+      "compile_trace_directory": null,
+      "device": {
+        "host": "98dci4-gpu-0003.iter.org",
+        "id": 0,
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0",
+        "kind": "NVIDIA H200 NVL",
+        "platform": "gpu",
+        "x64_enabled": true
+      },
+      "driver_sha256": "d052af770556686bf366a84077367e3e5fc69f1c82866ce415223c3eb6052111",
+      "jax_log_compile": {
+        "jaxpr_to_mlir_seconds": 1.639295101,
+        "main_program_cache_hit": false,
+        "main_program_cache_key": null,
+        "trace_seconds": 7.215089798,
+        "xla_compile_or_cache_load_seconds": 343.48003459
+      },
+      "policy": {
+        "gmres_iterations": 4,
+        "newton_steps": 1,
+        "relaxation": 0.5,
+        "step_cap": 0.25,
+        "warmup": 1
+      },
+      "scheduler": {
+        "accepted_time_limit": "UNLIMITED",
+        "job_id": "1260790",
+        "job_name": "nova-solve-compile-cadence",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA"
+      },
+      "setup_seconds": 5.116410245187581,
+      "source_revision": "88b0fb610f05a38f63be9dde7764ca76ad751259",
+      "stablehlo_sha256": "3c403f3e0036d8df4c6e28f8d93986d1fdece5fe73b4862d084f2ba85afec45e",
+      "trace_and_lower_seconds": 9.08336126152426,
+      "variant": "code_change",
+      "width": 1024,
+      "xla_compile_or_cache_load_seconds": 343.5096974503249
+    }
+  ],
+  "recommendations": [
+    {
+      "basis": "the measured warm-restart total replaces the measured cold trace/lower plus XLA compile on every stable key",
+      "number": 1,
+      "recommendation": "enable one versioned persistent compilation-cache directory for bank regeneration and scheduled test lanes"
+    },
+    {
+      "basis": "each width is a distinct program shape and therefore a distinct cache entry even after persistent caching is enabled",
+      "number": 2,
+      "recommendation": "bucket work by batch width and keep each bucket resident; do not mix widths in fresh workers"
+    },
+    {
+      "basis": "the independent H200 portfolio receipt measures a median 1.621x dual-over-single compile ratio",
+      "number": 3,
+      "recommendation": "prioritize splitting or shrinking the settled-loop executable only after persistent caching; dual-branch stacking alone is not a twofold compile multiplier"
+    }
+  ],
+  "scheduler": {
+    "accepted_time_limit": "UNLIMITED",
+    "job_id": "1260790",
+    "job_name": "nova-solve-compile-cadence",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA"
+  },
+  "schema": "nova.solve_compile_cadence",
+  "source_revision": "88b0fb610f05a38f63be9dde7764ca76ad751259"
+}
